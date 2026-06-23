@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useGenshinStore } from '../../stores/genshin'
 import BaseTable, { TableLabel, PaginationMeta } from '../../components/BaseTable.vue'
+import { getArtifactIconUrl, onImageFallback } from '../../utils/assets'
 
 const authStore = useAuthStore()
 const genshinStore = useGenshinStore()
@@ -86,7 +87,7 @@ const formatStatName = (key: string) => {
 
 const tableLabels: TableLabel[] = [
   { key: 'id', title: 'ID' },
-  { key: 'setKey', title: 'Set' },
+  { key: 'setKey', title: 'Set', slot: true },
   { key: 'slotKey', title: 'Slot', slot: true },
   { key: 'level', title: 'Level', slot: true },
   { key: 'mainStat', title: 'Main Stat', slot: true },
@@ -146,6 +147,19 @@ const tableLabels: TableLabel[] = [
         @page-change="fetchArtifacts"
         @limit-change="(l) => { meta.limit = l; fetchArtifacts(1) }"
       >
+        <template #setKey="{ item }">
+          <div class="flex items-center gap-2">
+            <img 
+              v-if="getArtifactIconUrl(item.setKey, item.slotKey)"
+              :src="getArtifactIconUrl(item.setKey, item.slotKey)" 
+              @error="onImageFallback"
+              :alt="item.setKey"
+              class="w-8 h-8 object-contain rounded bg-slate-100 dark:bg-slate-800"
+              loading="lazy"
+            />
+            <span class="font-medium">{{ item.setKey.replace(/([A-Z])/g, ' $1').trim() }}</span>
+          </div>
+        </template>
         <template #slotKey="{ item }">
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ item.slotKey }}</span>
         </template>

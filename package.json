@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "format": "prettier --write --experimental-cli src/"
+    "format": "prettier --write --experimental-cli src/",
+    "generate": "node scripts/generate-assets.js",
+    "optimize": "node scripts/optimize-assets.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.1",
@@ -30,6 +32,7 @@
     "@vue/tsconfig": "^0.9.1",
     "npm-run-all2": "^9.0.2",
     "prettier": "3.8.4",
+    "sharp": "^0.35.2",
     "typescript": "~6.0.0",
     "vite": "^8.0.16",
     "vite-plugin-vue-devtools": "^8.1.2",

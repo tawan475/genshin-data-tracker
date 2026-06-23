@@ -76,12 +76,21 @@ const isDragging = ref(false)
 const showModal = ref(false)
 const selectedFiles = ref<ImportFile[]>([])
 let fileIdCounter = 0
+const importProgress = ref<{ processed: number, total: number, filename: string, status: string, message?: string } | null>(null)
 const isImporting = ref(false)
 const importError = ref('')
 
 const handleDragOver = (e: DragEvent) => {
-  e.preventDefault()
-  isDragging.value = true
+  e.preventDefault() // Always prevent default so the browser doesn't navigate to dropped images
+  
+  if (e.dataTransfer?.items) {
+    const hasJson = Array.from(e.dataTransfer.items).some(
+      item => item.kind === 'file' && (item.type === 'application/json' || item.type === '')
+    )
+    if (hasJson) {
+      isDragging.value = true
+    }
+  }
 }
 
 const handleDragLeave = (e: DragEvent) => {
@@ -93,7 +102,11 @@ const handleDrop = (e: DragEvent) => {
   e.preventDefault()
   isDragging.value = false
   if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
-    Array.from(e.dataTransfer.files).forEach(processFile)
+    // Only process valid JSON files on drop to silently ignore accidental image drops
+    const validFiles = Array.from(e.dataTransfer.files).filter(
+      f => f.type === 'application/json' || f.name.endsWith('.json')
+    )
+    validFiles.forEach(processFile)
   }
 }
 
@@ -167,6 +180,7 @@ const cancelImport = () => {
   showModal.value = false
   selectedFiles.value = []
   importError.value = ''
+  importProgress.value = null
   if (fileInput.value) fileInput.value.value = ''
 }
 
@@ -192,7 +206,7 @@ const confirmImport = async () => {
   formData.append('timestamps', JSON.stringify(timestamps))
 
   try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/import-bulk`, {
+    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/import-bulk-stream`, {
       method: 'POST',
       body: formData
     })
@@ -202,8 +216,37 @@ const confirmImport = async () => {
       throw new Error(data.message || 'Failed to import files')
     }
 
-    const json = await res.json()
-    const results = json.data.results || []
+    if (!res.body) throw new Error('Readable stream not supported')
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder('utf-8')
+    let results: any[] = []
+
+    let done = false
+    let buffer = ''
+    while (!done) {
+      const { value, done: readerDone } = await reader.read()
+      done = readerDone
+      if (value) {
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || '' // keep the last partial line in buffer
+
+        for (const line of lines) {
+          if (!line.trim()) continue
+          try {
+            const data = JSON.parse(line)
+            if (data.type === 'progress') {
+              importProgress.value = data
+            } else if (data.type === 'complete') {
+              results = data.results || []
+            }
+          } catch (e) {
+            console.error('Failed to parse NDJSON line', line)
+          }
+        }
+      }
+    }
 
     const successCount = results.filter((r: any) => r.status === 'success').length
     const errors = results.filter((r: any) => r.status === 'error')
@@ -220,9 +263,11 @@ const confirmImport = async () => {
         errors.some((e: any) => e.filename === f.file.name)
       )
       importError.value = errors.map((e: any) => `[${e.filename}]: ${e.message}`).join('\n')
+      importProgress.value = null
     }
   } catch (err: any) {
     importError.value = err.message || 'Import failed'
+    importProgress.value = null
   } finally {
     isImporting.value = false
   }
@@ -430,6 +475,24 @@ onUnmounted(() => {
           <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">You are about to import {{ selectedFiles.length }} file(s).</p>
           <div v-if="importError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm rounded-md whitespace-pre-wrap transition-colors">
             {{ importError }}
+          </div>
+
+          <div v-if="importProgress && isImporting" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-blue-900 dark:text-blue-100">Importing Data...</span>
+              <span class="text-sm font-medium text-blue-700 dark:text-blue-300">
+                {{ importProgress.processed }} / {{ importProgress.total }}
+              </span>
+            </div>
+            <div class="w-full bg-blue-200 dark:bg-blue-900/50 rounded-full h-2.5 mb-2 overflow-hidden">
+              <div 
+                class="bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-300" 
+                :style="{ width: `${(importProgress.processed / importProgress.total) * 100}%` }"
+              ></div>
+            </div>
+            <p class="text-xs text-blue-600 dark:text-blue-400 truncate" :title="importProgress.filename">
+              Processing: <span class="font-medium">{{ importProgress.filename }}</span>
+            </p>
           </div>
 
           <div class="space-y-4">

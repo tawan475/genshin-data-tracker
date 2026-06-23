@@ -37,3 +37,8 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Generated Assets
+public/assets/gi/*
+src/utils/AssetsData_gen.json
+.env
