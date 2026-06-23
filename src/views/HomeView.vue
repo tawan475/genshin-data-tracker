@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Home logic
+import BaseButton from '../components/BaseButton.vue'
 </script>
 
 <template>
@@ -17,7 +17,7 @@
       </p>
       <div class="flex flex-col sm:flex-row gap-4 mb-16">
         <router-link to="/register" class="btn-primary">Get Started Free</router-link>
-        <button class="btn-secondary">View Demo</button>
+        <BaseButton variant="secondary" size="lg" class="!rounded-full px-8 font-semibold">View Demo</BaseButton>
       </div>
       
       <!-- Stats summary floating below -->

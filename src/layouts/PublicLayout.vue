@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
+import BaseButton from '../components/BaseButton.vue';
 
 const isLoaded = ref(false);
 const authStore = useAuthStore();
@@ -38,7 +39,13 @@ onMounted(() => {
             <router-link to="/dashboard" class="text-gray-400 hover:text-white font-medium transition">Dashboard</router-link>
             <div class="flex items-center gap-4 ml-4">
               <span class="text-paimon font-semibold">{{ authStore.user.username }}</span>
-              <button @click="handleLogout" class="px-6 py-2 rounded-full border border-white/10 text-white font-semibold hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50 transition">Log Out</button>
+              <BaseButton 
+                variant="danger-outline" 
+                @click="handleLogout"
+                class="!rounded-full border-white/10 text-white hover:text-red-400"
+              >
+                Log Out
+              </BaseButton>
             </div>
           </template>
           

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --color-paimon: #F59E0B;
@@ -8,7 +10,11 @@
 
 @layer base {
   body {
-    @apply antialiased overflow-x-hidden;
+    @apply antialiased overflow-x-hidden bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-500 ease-in-out;
+  }
+  
+  *, *::before, *::after {
+    @apply transition-colors duration-500 ease-in-out;
   }
 }
 

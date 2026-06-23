@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import BaseButton from '../../components/BaseButton.vue'
 import { useAuthStore } from '../../stores/auth'
 import { useGenshinStore } from '../../stores/genshin'
+import { swalToast } from '../../utils/swal'
 
 const authStore = useAuthStore()
 const genshinStore = useGenshinStore()
@@ -105,7 +107,7 @@ const generateKey = async (accountId: number) => {
 
 const copyToClipboard = async (text: string) => {
   await navigator.clipboard.writeText(text)
-  alert('Import key copied to clipboard!')
+  swalToast('Import key copied to clipboard!', 'success')
 }
 
 // Editing
@@ -178,72 +180,73 @@ onMounted(() => {
   <div class="max-w-4xl mx-auto space-y-8 pb-12">
     
     <!-- Add New Account Form -->
-    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-      <h2 class="text-lg font-semibold text-slate-900 mb-4">Add Genshin Account</h2>
+    <section class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 transition-colors">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 transition-colors">Add Genshin Account</h2>
       <form @submit.prevent="handleCreateAccount" class="flex flex-col md:flex-row gap-4 items-end">
         <div class="flex-1 w-full">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Account Nickname *</label>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Account Nickname *</label>
           <input 
             v-model="newAccountName" 
             type="text" 
             required
-            class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 text-sm"
+            class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
             placeholder="e.g. Main Account"
           >
         </div>
         <div class="w-full md:w-32">
-          <label class="block text-sm font-medium text-slate-700 mb-1">UID (Optional)</label>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">UID (Optional)</label>
           <input 
             v-model="newAccountUid" 
             type="text" 
-            class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 text-sm"
+            class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
             placeholder="800000000"
           >
         </div>
         <div class="w-full md:w-48">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Server</label>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Server</label>
           <select 
             v-model="newAccountServer" 
-            class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 text-sm bg-white"
+            class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
           >
             <option v-for="(displayValue, key) in serverOptions" :key="key" :value="key">
               {{ displayValue }}
             </option>
           </select>
         </div>
-        <button 
-          type="submit" 
-          :disabled="creating"
-          class="w-full md:w-auto px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors disabled:opacity-50"
+        <BaseButton 
+          type="submit"
+          :loading="creating"
+          :disabled="!newAccountName.trim() || !newAccountUid.trim()"
+          class="w-full sm:w-auto"
         >
-          {{ creating ? 'Adding...' : 'Add Account' }}
-        </button>
+          Add Account
+        </BaseButton>
       </form>
     </section>
 
     <!-- Accounts List -->
-    <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-        <h2 class="text-base font-semibold text-slate-900">Your Accounts</h2>
+    <section class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+      <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 transition-colors">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-white transition-colors">Your Accounts</h2>
       </div>
       
-      <div v-if="isLoading" class="p-6 text-center text-slate-500">
+      <div v-if="isLoading" class="p-6 text-center text-slate-500 dark:text-slate-400 transition-colors">
         Loading accounts...
       </div>
       
-      <div v-else-if="accounts.length === 0" class="p-8 text-center text-slate-500">
+      <div v-else-if="accounts.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400 transition-colors">
         You haven't added any Genshin accounts yet.
       </div>
       
-      <ul v-else class="divide-y divide-slate-200">
-        <li v-for="acc in accounts" :key="acc.id" class="p-6 hover:bg-slate-50 transition-colors">
+      <ul v-else class="divide-y divide-slate-200 dark:divide-slate-700 transition-colors">
+        <li v-for="acc in accounts" :key="acc.id" class="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
           
           <!-- View Mode -->
           <div v-if="editingId !== acc.id && deletingId !== acc.id" class="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
             <div>
-              <h3 class="text-sm font-bold text-slate-900">{{ acc.accountName }}</h3>
-              <div class="mt-1 flex items-center gap-3 text-xs text-slate-500">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white transition-colors">{{ acc.accountName }}</h3>
+              <div class="mt-1 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 transition-colors">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300 transition-colors">
                   {{ serverOptions[acc.server] || acc.server }}
                 </span>
                 <span>UID: {{ acc.uid || 'Not set' }}</span>
@@ -252,36 +255,37 @@ onMounted(() => {
             
             <div class="flex flex-col items-end gap-2 w-full sm:w-auto">
               <template v-if="generatedKey?.accountId === acc.id">
-                <div class="flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 px-3 py-2 rounded-md text-sm w-full">
+                <div class="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-400 px-3 py-2 rounded-md text-sm w-full transition-colors">
                   <code class="font-mono flex-1 select-all break-all">{{ generatedKey?.key }}</code>
-                  <button @click="copyToClipboard(generatedKey?.key || '')" class="text-green-600 hover:text-green-800 font-medium">Copy</button>
+                  <BaseButton variant="ghost" size="xs" @click="copyToClipboard(generatedKey?.key || '')" class="!text-emerald-600 dark:!text-emerald-500 hover:!bg-emerald-50 dark:hover:!bg-emerald-900/20">Copy</BaseButton>
                 </div>
-                <p class="text-xs text-amber-600">This key will only be shown once!</p>
+                <p class="text-xs text-amber-600 dark:text-amber-500 transition-colors">This key will only be shown once!</p>
               </template>
               <template v-else>
                 <div class="flex items-center gap-2">
                   <button 
                     v-if="genshinStore.selectedAccountId === acc.id"
-                    class="px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded cursor-default"
+                    class="px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded cursor-default transition-colors"
                   >
                     Selected
                   </button>
                   <button 
                     v-else
                     @click="genshinStore.selectAccount(acc.id, acc.accountName)"
-                    class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded hover:bg-slate-200 transition-colors"
+                    class="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   >
                     Select
                   </button>
-                  
-                  <button @click="startEdit(acc)" class="px-3 py-1.5 text-xs font-medium text-slate-600 border border-slate-300 rounded hover:bg-slate-100">Edit</button>
-                  <button @click="startDelete(acc.id)" class="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded hover:bg-red-50">Delete</button>
-                  <button 
-                    @click="generateKey(acc.id)"
-                    class="px-4 py-1.5 bg-white border border-slate-300 rounded-md shadow-sm text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors"
+
+                  <BaseButton variant="outline" size="xs" @click="startEdit(acc)">Edit</BaseButton>
+                  <BaseButton variant="danger-outline" size="xs" @click="startDelete(acc.id)">Delete</BaseButton>
+                  <BaseButton 
+                    variant="primary"
+                    size="xs"
+                    @click="generateKey(acc.id)" 
                   >
                     {{ acc.importKeyHash ? 'Regenerate Key' : 'Generate Key' }}
-                  </button>
+                  </BaseButton>
                 </div>
               </template>
             </div>
@@ -289,44 +293,44 @@ onMounted(() => {
 
           <!-- Edit Mode -->
           <div v-else-if="editingId === acc.id" class="flex flex-col gap-4">
-            <h3 class="text-sm font-bold text-slate-900 mb-2">Edit Account</h3>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white transition-colors">Edit Account</h3>
             <div class="flex flex-col sm:flex-row gap-4 items-start">
               <div class="flex-1 w-full">
-                <label class="block text-xs text-slate-500 mb-1">Nickname</label>
-                <input v-model="editForm.accountName" type="text" class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-sm">
+                <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1 transition-colors">Nickname</label>
+                <input v-model="editForm.accountName" type="text" class="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm transition-colors">
               </div>
               <div class="w-full sm:w-32">
-                <label class="block text-xs text-slate-500 mb-1">UID</label>
-                <input v-model="editForm.uid" type="text" class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-sm">
+                <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1 transition-colors">UID</label>
+                <input v-model="editForm.uid" type="text" class="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm transition-colors">
               </div>
               <div class="w-full sm:w-48">
-                <label class="block text-xs text-slate-500 mb-1">Server</label>
-                <select v-model="editForm.server" class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-sm bg-white">
+                <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1 transition-colors">Server</label>
+                <select v-model="editForm.server" class="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm transition-colors">
                   <option v-for="(displayValue, key) in serverOptions" :key="key" :value="key">{{ displayValue }}</option>
                 </select>
               </div>
             </div>
-            <div class="flex justify-end gap-2 mt-2">
-              <button @click="cancelEdit" class="px-4 py-1.5 text-sm border border-slate-300 rounded-md hover:bg-slate-100">Cancel</button>
-              <button @click="saveEdit(acc.id)" class="px-4 py-1.5 text-sm bg-slate-900 text-white rounded-md hover:bg-slate-800">Save Changes</button>
+            <div class="mt-4 flex justify-end gap-3">
+              <BaseButton variant="outline" @click="cancelEdit">Cancel</BaseButton>
+              <BaseButton @click="saveEdit(acc.id)">Save Changes</BaseButton>
             </div>
           </div>
 
           <!-- Delete Mode -->
-          <div v-else-if="deletingId === acc.id" class="flex flex-col gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <h3 class="text-sm font-bold text-red-800">Delete Account?</h3>
-            <p class="text-sm text-red-700">This action cannot be undone. To verify, type <strong>{{ acc.accountName }}</strong> below:</p>
-            <input v-model="deleteConfirmName" type="text" placeholder="Type nickname here" class="px-3 py-2 border border-red-300 rounded-md text-sm focus:ring-red-500 focus:border-red-500 w-full max-w-sm">
-            <p v-if="deleteError" class="text-xs text-red-600 font-bold">{{ deleteError }}</p>
-            <div class="flex items-center gap-2 mt-2">
-              <button @click="cancelDelete" class="px-4 py-1.5 text-sm border border-slate-300 bg-white rounded-md hover:bg-slate-50">Cancel</button>
-              <button 
-                @click="confirmDelete(acc.id)" 
+          <div v-else-if="deletingId === acc.id" class="flex flex-col gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg transition-colors">
+            <h3 class="text-sm font-bold text-red-800 dark:text-red-400 transition-colors">Delete Account?</h3>
+            <p class="text-sm text-red-700 dark:text-red-300 transition-colors">This action cannot be undone. To verify, type <strong>{{ acc.accountName }}</strong> below:</p>
+            <input v-model="deleteConfirmName" type="text" placeholder="Type nickname here" class="px-3 py-2 border border-red-300 dark:border-red-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm focus:ring-red-500 dark:focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500 w-full max-w-sm transition-colors">
+            <p v-if="deleteError" class="text-xs text-red-600 dark:text-red-400 font-bold transition-colors">{{ deleteError }}</p>
+            <div class="mt-6 flex justify-end gap-3">
+              <BaseButton variant="outline" @click="cancelDelete">Cancel</BaseButton>
+              <BaseButton 
+                variant="danger"
                 :disabled="deleteConfirmName !== acc.accountName"
-                class="px-4 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                @click="confirmDelete(acc.id)" 
               >
                 Permanently Delete
-              </button>
+              </BaseButton>
             </div>
           </div>
 

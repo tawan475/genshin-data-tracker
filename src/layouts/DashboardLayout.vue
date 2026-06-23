@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { useAuthStore } from '../stores/auth'
 import { useGenshinStore } from '../stores/genshin'
+import { useSettingsStore } from '../stores/settings'
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted, onUnmounted } from 'vue'
+import { swalError, swalSuccess } from '../utils/swal'
+import { Icon } from '@iconify/vue'
+import BaseButton from '../components/BaseButton.vue'
 
 const authStore = useAuthStore()
 const genshinStore = useGenshinStore()
+const settingsStore = useSettingsStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -97,7 +102,7 @@ const triggerFileInput = () => {
 
 const processFile = (file: File) => {
   if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
-    alert(`File ${file.name} is not a valid JSON file.`)
+    swalError('Invalid File', `File ${file.name} is not a valid JSON file.`)
     return
   }
 
@@ -198,7 +203,7 @@ const confirmImport = async () => {
     }
 
     if (errors.length === 0) {
-      alert('Import successful!')
+      swalSuccess('Success', 'Import successful!')
       cancelImport()
     } else {
       selectedFiles.value = selectedFiles.value.filter(f => 
@@ -228,24 +233,27 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 flex text-slate-900">
+  <div class="h-screen w-full bg-slate-50 dark:bg-slate-900 flex text-slate-900 dark:text-slate-100 overflow-hidden">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col">
-      <div class="h-16 flex items-center px-6 border-b border-slate-200">
-        <span class="text-xl font-bold text-slate-900 tracking-tight">GDT</span>
+    <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
+      <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700">
+        <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">GDT</span>
       </div>
       
-      <div class="flex-1 overflow-y-auto py-6">
+      <div class="flex-1 overflow-y-auto py-6 flex flex-col">
         <!-- USER SECTION -->
         <div class="px-4 mb-8">
-          <h3 class="px-3 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">User</h3>
+          <div class="flex items-center gap-3 mb-3">
+            <h3 class="text-[0.65rem] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">User</h3>
+            <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+          </div>
           <nav class="space-y-1">
             <router-link 
               v-for="item in navigationUser" 
               :key="item.name" 
               :to="item.path"
               class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
-              :class="route.path === item.path ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+              :class="route.path === item.path ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200'"
             >
               {{ item.name }}
             </router-link>
@@ -254,9 +262,10 @@ onUnmounted(() => {
 
         <!-- ACCOUNT SECTION -->
         <div class="px-4">
-          <h3 class="px-3 mb-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Account
-          </h3>
+          <div class="flex items-center gap-3 mb-4">
+            <h3 class="text-[0.65rem] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">Account</h3>
+            <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+          </div>
           
           <div class="px-3 mb-4">
             <select 
@@ -267,14 +276,14 @@ onUnmounted(() => {
                 const acc = myAccounts.find(a => a.id === id)
                 if (acc) genshinStore.selectAccount(acc.id, acc.accountName)
               }"
-              class="w-full bg-slate-100 border border-slate-200 text-slate-800 text-sm rounded-md focus:ring-slate-900 focus:border-slate-900 block p-2 outline-none"
+              class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-sm rounded-md focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 block p-2 outline-none transition-colors"
             >
               <option disabled value="">Select Account</option>
               <option v-for="acc in myAccounts" :key="acc.id" :value="acc.id">
                 {{ acc.accountName }}
               </option>
             </select>
-            <div v-else class="text-xs text-slate-400 italic">No accounts found</div>
+            <div v-else class="text-xs text-slate-400 dark:text-slate-500 italic">No accounts found</div>
           </div>
 
           <nav class="space-y-1">
@@ -283,13 +292,13 @@ onUnmounted(() => {
                 v-if="genshinStore.selectedAccountId"
                 :to="item.path"
                 class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
-                :class="route.path === item.path ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
+                :class="route.path === item.path ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200'"
               >
                 {{ item.name }}
               </router-link>
               <div 
                 v-else
-                class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-400 cursor-not-allowed opacity-60"
+                class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
                 title="Select an account first"
               >
                 {{ item.name }}
@@ -297,37 +306,63 @@ onUnmounted(() => {
             </template>
           </nav>
         </div>
+
+        <!-- SETTINGS SECTION (Bottom) -->
+        <div class="px-4 mt-auto pt-8">
+          <div class="flex items-center gap-3 mb-3">
+            <h3 class="text-[0.65rem] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em]">System</h3>
+            <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+          </div>
+          <div class="flex items-center rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm transition-colors">
+            <router-link 
+              to="/dashboard/settings"
+              class="w-[80%] flex items-center px-3 py-2 text-sm font-medium transition-colors"
+              :class="route.path === '/dashboard/settings' ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
+            >
+              Settings
+            </router-link>
+            <BaseButton 
+              variant="ghost"
+              @click="settingsStore.toggleTheme"
+              class="w-[20%] !rounded-none !border-l border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 h-full"
+              title="Toggle Theme"
+            >
+              <Icon :icon="settingsStore.theme === 'dark' ? 'mdi:weather-night' : 'mdi:weather-sunny'" class="w-4 h-4 text-slate-600 dark:text-slate-300" />
+            </BaseButton>
+          </div>
+        </div>
       </div>
       
-      <div class="p-4 border-t border-slate-200">
+      <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors">
         <div class="flex items-center gap-3 mb-4 px-2">
-          <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold">
+          <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold transition-colors">
             {{ authStore.user?.username.charAt(0).toUpperCase() }}
           </div>
           <div class="flex flex-col">
-            <span class="text-sm font-semibold text-slate-900">{{ authStore.user?.username }}</span>
-            <span class="text-xs text-slate-500">Admin</span>
+            <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ authStore.user?.username }}</span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Admin</span>
           </div>
         </div>
-        <button 
+        <BaseButton 
+          variant="outline"
+          block
           @click="handleLogout"
-          class="w-full flex justify-center items-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
         >
           Sign Out
-        </button>
+        </BaseButton>
       </div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col overflow-hidden relative">
+    <main class="flex-1 flex flex-col overflow-hidden relative bg-slate-50 dark:bg-slate-900 transition-colors">
       <!-- Drop Overlay -->
       <div 
         v-if="isDragging" 
-        class="absolute inset-0 z-50 bg-slate-900/10 backdrop-blur-[2px] border-4 border-dashed border-slate-400 flex items-center justify-center pointer-events-none"
+        class="absolute inset-0 z-50 bg-slate-900/10 dark:bg-slate-900/40 backdrop-blur-[2px] border-4 border-dashed border-slate-400 dark:border-slate-600 flex items-center justify-center pointer-events-none transition-colors"
       >
-        <div class="bg-white px-8 py-4 rounded-xl shadow-xl flex flex-col items-center">
-          <svg class="w-12 h-12 text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-          <p class="text-xl font-bold text-slate-700">Drop JSON file to import</p>
+        <div class="bg-white dark:bg-slate-800 px-8 py-4 rounded-xl shadow-xl flex flex-col items-center transition-colors">
+          <svg class="w-12 h-12 text-slate-500 dark:text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <p class="text-xl font-bold text-slate-700 dark:text-slate-200">Drop JSON file to import</p>
         </div>
       </div>
 
@@ -341,25 +376,25 @@ onUnmounted(() => {
         @change="handleFileSelect" 
       />
 
-      <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm z-10 shrink-0">
+      <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-8 shadow-sm z-10 shrink-0 transition-colors">
         <div class="flex items-center gap-4">
-          <h1 class="text-lg font-semibold text-slate-900 capitalize">
+          <h1 class="text-lg font-semibold text-slate-900 dark:text-white capitalize">
             {{ route.name?.toString().replace('-', ' ') || 'Dashboard' }}
           </h1>
-          <div v-if="genshinStore.selectedAccountId" class="h-4 w-px bg-slate-300"></div>
-          <div v-if="genshinStore.selectedAccountId" class="text-sm text-slate-500 font-medium flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+          <div v-if="genshinStore.selectedAccountId" class="h-4 w-px bg-slate-300 dark:bg-slate-600 transition-colors"></div>
+          <div v-if="genshinStore.selectedAccountId" class="text-sm text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400"></span>
             {{ genshinStore.selectedAccountName }}
           </div>
         </div>
         
-        <button 
+        <BaseButton 
           v-if="genshinStore.selectedAccountId"
+          variant="primary"
           @click="triggerFileInput"
-          class="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-md shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-colors"
         >
           Import Data
-        </button>
+        </BaseButton>
       </header>
       
       <div class="flex-1 overflow-auto p-8 relative">
@@ -372,15 +407,15 @@ onUnmounted(() => {
     </main>
 
     <!-- Import Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div class="p-6 border-b border-slate-100 shrink-0">
-          <h3 class="text-xl font-bold text-slate-900 mb-1">Confirm Import</h3>
-          <p class="text-sm text-slate-500">You are about to import {{ selectedFiles.length }} file(s).</p>
+    <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-colors">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden transition-colors">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-700 shrink-0 transition-colors">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Confirm Import</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400">You are about to import {{ selectedFiles.length }} file(s).</p>
         </div>
 
         <div class="p-6 overflow-y-auto flex-1">
-          <div v-if="importError" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md whitespace-pre-wrap">
+          <div v-if="importError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm rounded-md whitespace-pre-wrap transition-colors">
             {{ importError }}
           </div>
 
@@ -388,10 +423,10 @@ onUnmounted(() => {
             <div 
               v-for="fileObj in selectedFiles" 
               :key="fileObj.id"
-              class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg"
+              class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
             >
               <div class="flex-1 truncate w-full">
-                <p class="text-sm font-medium text-slate-800 truncate" :title="fileObj.file.name">
+                <p class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate" :title="fileObj.file.name">
                   {{ fileObj.file.name }}
                 </p>
               </div>
@@ -399,51 +434,56 @@ onUnmounted(() => {
                 <input 
                   v-model="fileObj.timestamp" 
                   type="datetime-local" 
-                  class="px-2 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  class="px-2 py-1.5 border border-slate-300 dark:border-slate-600 rounded text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors"
                 />
-                <button 
+                <BaseButton 
+                  variant="outline"
+                  size="xs"
                   @click="clearTimestamp(fileObj.id)"
-                  class="p-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-100 transition-colors"
                   title="Clear Timestamp"
                 >
                   Clear
-                </button>
-                <button 
+                </BaseButton>
+                <BaseButton 
+                  variant="danger-outline"
+                  size="xs"
                   @click="removeFile(fileObj.id)"
-                  class="p-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50 transition-colors"
                   title="Remove File"
                 >
                   Remove
-                </button>
+                </BaseButton>
               </div>
             </div>
           </div>
           
-          <button 
+          <BaseButton 
+            variant="outline"
+            block
             @click="triggerFileInput"
-            class="mt-4 w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors flex items-center justify-center gap-2"
+            class="mt-4 py-3 !border-dashed border-2"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <template #icon>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </template>
             Add More Files
-          </button>
+          </BaseButton>
         </div>
 
-        <div class="p-6 border-t border-slate-100 shrink-0 flex justify-end gap-3">
-          <button 
+        <div class="p-6 border-t border-slate-100 dark:border-slate-700 shrink-0 flex justify-end gap-3 transition-colors">
+          <BaseButton 
+            variant="outline"
             @click="cancelImport"
-            class="px-4 py-2 text-sm font-medium text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50"
             :disabled="isImporting"
           >
             Cancel
-          </button>
-          <button 
+          </BaseButton>
+          <BaseButton 
+            variant="primary"
             @click="confirmImport"
-            class="px-4 py-2 text-sm font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2"
-            :disabled="isImporting"
+            :loading="isImporting"
           >
-            <span v-if="isImporting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            {{ isImporting ? 'Importing...' : 'Submit' }}
-          </button>
+            Submit
+          </BaseButton>
         </div>
       </div>
     </div>

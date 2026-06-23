@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import BaseButton from '../components/BaseButton.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
@@ -104,10 +105,16 @@ const handleRegister = async () => {
           />
         </div>
         
-        <button type="submit" class="btn-primary w-full mt-4 rounded-xl" :disabled="isLoading">
-          <span v-if="!isLoading">Sign Up</span>
-          <span v-else class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-        </button>
+        <BaseButton 
+          type="submit" 
+          variant="primary" 
+          block 
+          size="lg" 
+          :loading="isLoading" 
+          class="mt-4 rounded-xl"
+        >
+          {{ isLoading ? 'Creating account...' : 'Create Account' }}
+        </BaseButton>
       </form>
       
       <div class="mt-8 text-center text-gray-400 text-sm">
