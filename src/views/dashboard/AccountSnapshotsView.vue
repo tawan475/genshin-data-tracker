@@ -5,7 +5,7 @@ import { useGenshinStore } from '../../stores/genshin'
 import { useSettingsStore } from '../../stores/settings'
 import BaseTable, { type TableLabel } from '../../components/BaseTable.vue'
 import BaseButton from '../../components/BaseButton.vue'
-import { swalInfo, swalConfirm, swalSuccess, swalError } from '../../utils/swal'
+import { swalInfo, swalConfirm, swalSuccess, swalError, swalToast, swalPrompt } from '../../utils/swal'
 
 const authStore = useAuthStore()
 const genshinStore = useGenshinStore()
@@ -68,15 +68,51 @@ const handleBulkDelete = async () => {
   )
   
   if (!confirmed) return
+
+  if (selectAll.value) {
+    const doubleConfirmed = await swalPrompt(
+      'Mass Deletion Warning',
+      'You have selected ALL snapshots across ALL pages. Type "DELETE" to confirm you want to wipe everything.',
+      'DELETE',
+      { confirmText: 'I understand, DELETE ALL!', isDanger: true }
+    )
+    if (!doubleConfirmed) return
+  }
   
-  // Implementation will be handled by the backend API later
-  swalSuccess('Prepared', `Bulk delete prepared for ${selectedCount.value} item(s).\nselectAll: ${selectAll.value}\nselectedIds: ${selectedIds.value.join(', ')}`)
+  try {
+    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/snapshots/bulk-delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        snapshotIds: selectedIds.value,
+        selectAll: selectAll.value
+      })
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      swalToast(data.message || 'Deleted successfully', 'success')
+      selectAll.value = false
+      selectedIds.value = []
+      fetchSnapshots(1)
+      fetchStorageStats()
+      genshinStore.triggerAccountsRefetch()
+    } else {
+      const errorData = await res.json()
+      swalError('Error', errorData.message || 'Failed to delete snapshots')
+    }
+  } catch (error: any) {
+    swalError('Error', error.message || 'An unexpected error occurred')
+  }
 }
 
 const tableLabels: TableLabel[] = [
   { key: 'select', title: '', slot: true, headerSlot: true },
+  { key: 'id', title: 'ID' },
   { key: 'createdAt', title: 'Date', slot: true },
-  { key: 'version', title: 'Format', slot: true },
+  // { key: 'version', title: 'Format', slot: true },
   { key: 'source', title: 'Source' },
   { key: 'fileSize', title: 'Raw Size', slot: true },
   { key: 'compressedFileSize', title: 'Stored Size', slot: true },
@@ -293,7 +329,15 @@ const formatBytes = (bytes: number) => {
         <h2 class="text-xl font-bold text-slate-900 dark:text-white transition-colors">Import History</h2>
       </div>
 
-      <BaseTable ref="baseTableRef" :labels="tableLabels" :data="snapshots" :isLoading="isLoading">
+      <BaseTable 
+        ref="baseTableRef" 
+        :labels="tableLabels" 
+        :data="snapshots" 
+        :is-loading="isLoading"
+        :meta="meta"
+        @page-change="(p) => fetchSnapshots(p)"
+        @limit-change="(l) => { meta.limit = l; fetchSnapshots(1) }"
+      >
         <template #header-select>
           <div 
             class="flex items-center justify-center cursor-pointer -m-4 p-4"
@@ -323,11 +367,11 @@ const formatBytes = (bytes: number) => {
         <template #createdAt="{ item }">
           <span class="font-medium whitespace-nowrap">{{ formatDate(item.createdAt) }}</span>
         </template>
-        <template #version="{ item }">
+        <!-- <template #version="{ item }">
           <span class="px-2 py-0.5 text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-full transition-colors">
             v{{ item.version }}
           </span>
-        </template>
+        </template> -->
         <template #fileSize="{ item }">
           <span class="text-slate-500 dark:text-slate-400 font-medium">{{ item.fileSize ? (item.fileSize / 1024).toFixed(1) + ' KB' : '0 KB' }}</span>
         </template>
@@ -381,64 +425,6 @@ const formatBytes = (bytes: number) => {
         </template>
       </BaseTable>
 
-      <!-- Pagination -->
-      <div v-if="meta.totalPages > 1 || snapshots.length > 0" class="flex flex-wrap justify-between items-center gap-4 mt-6">
-        <!-- Left: Per Page Selector -->
-        <div class="flex items-center gap-2">
-          <label class="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Per page:</label>
-          <select 
-            v-model="meta.limit" 
-            @change="onLimitChange"
-            class="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition-colors"
-          >
-            <option :value="10">10</option>
-            <option :value="20">20</option>
-            <option :value="50">50</option>
-            <option :value="100">100</option>
-          </select>
-        </div>
-
-        <!-- Center: Controls -->
-        <div class="flex items-center gap-4">
-          <BaseButton 
-            variant="outline"
-            size="sm"
-            @click="() => { fetchSnapshots(meta.page - 1); baseTableRef?.scrollToTop() }"
-            :disabled="meta.page <= 1"
-          >
-            Previous
-          </BaseButton>
-          <span class="text-sm text-slate-600 dark:text-slate-400 font-medium transition-colors">Page {{ meta.page }} of {{ meta.totalPages }}</span>
-          <BaseButton 
-            variant="outline"
-            size="sm"
-            @click="() => { fetchSnapshots(meta.page + 1); baseTableRef?.scrollToTop() }"
-            :disabled="meta.page >= meta.totalPages"
-          >
-            Next
-          </BaseButton>
-        </div>
-
-        <!-- Right: Go to Page -->
-        <div class="flex items-center gap-2">
-          <label class="text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors">Go to:</label>
-          <input 
-            type="number" 
-            v-model="pageInput" 
-            @keyup.enter="goToPage"
-            min="1" 
-            :max="meta.totalPages"
-            class="w-16 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition-colors"
-          />
-          <BaseButton 
-            variant="primary"
-            size="sm"
-            @click="goToPage"
-          >
-            Go
-          </BaseButton>
-        </div>
-      </div>
     </div>
   </div>
 </template>

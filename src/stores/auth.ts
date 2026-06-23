@@ -27,31 +27,55 @@ export const useAuthStore = defineStore('auth', () => {
     router.push('/login')
   }
 
+  const isTokenExpired = (t: string) => {
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1]))
+      return payload.exp * 1000 < Date.now()
+    } catch {
+      return true
+    }
+  }
+
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const headers = new Headers(options.headers || {})
+    let isExpired = false
     if (token.value) {
-      headers.set('Authorization', `Bearer ${token.value}`)
+      isExpired = isTokenExpired(token.value)
     }
 
-    let res = await fetch(url, {
-      ...options,
-      headers
-    })
+    let res: Response | undefined
 
-    if (res.status === 401) {
+    if (!isExpired) {
+      const headers = new Headers(options.headers || {})
+      if (token.value) {
+        headers.set('Authorization', `Bearer ${token.value}`)
+      }
+      try {
+        res = await fetch(url, { ...options, headers })
+      } catch (err) {
+        throw err
+      }
+    }
+
+    if (isExpired || (res && res.status === 401)) {
       const currentRefreshToken = localStorage.getItem('refreshToken')
       if (!currentRefreshToken) {
         logout()
-        return res
+        return res || new Response(null, { status: 401 })
       }
 
-      const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: currentRefreshToken })
-      })
+      let refreshRes
+      try {
+        refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: currentRefreshToken })
+        })
+      } catch (e) {
+        logout()
+        return res || new Response(null, { status: 401 })
+      }
 
-      if (refreshRes.ok) {
+      if (refreshRes && refreshRes.ok) {
         const data = await refreshRes.json()
         setAuthData(data.data.accessToken, data.data.refreshToken, user.value?.username)
         
@@ -68,7 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
     }
 
-    return res
+    return res || new Response(null, { status: 401 })
   }
 
   // Load user from local storage on init

@@ -69,3 +69,71 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* SweetAlert2 Dark Mode Overrides */
+.dark .swal2-popup {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+}
+.dark .swal2-title, .dark .swal2-html-container {
+  color: #f8fafc !important;
+}
+.dark .swal2-icon.swal2-success {
+  border-color: #34d399 !important;
+  color: #34d399 !important;
+}
+.dark .swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #34d399 !important;
+}
+.dark .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+.dark .swal2-icon.swal2-error {
+  border-color: #f87171 !important;
+  color: #f87171 !important;
+}
+.dark .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+  background-color: #f87171 !important;
+}
+.dark .swal2-icon.swal2-warning {
+  border-color: #fbbf24 !important;
+  color: #fbbf24 !important;
+}
+.dark .swal2-icon.swal2-info {
+  border-color: #60a5fa !important;
+  color: #60a5fa !important;
+}
+.dark .swal2-icon.swal2-question {
+  border-color: #a78bfa !important;
+  color: #a78bfa !important;
+}
+

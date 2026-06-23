@@ -3,6 +3,7 @@ import { useAuthStore } from '../stores/auth'
 import { useGenshinStore } from '../stores/genshin'
 import { useSettingsStore } from '../stores/settings'
 import { useRouter, useRoute } from 'vue-router'
+import BaseModal from "../components/BaseModal.vue"
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { swalError, swalSuccess } from '../utils/swal'
 import { Icon } from '@iconify/vue'
@@ -423,14 +424,10 @@ onUnmounted(() => {
     </main>
 
     <!-- Import Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-colors">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden transition-colors">
-        <div class="p-6 border-b border-slate-100 dark:border-slate-700 shrink-0 transition-colors">
-          <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Confirm Import</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">You are about to import {{ selectedFiles.length }} file(s).</p>
-        </div>
-
+    <BaseModal v-model="showModal" title="Confirm Import">
+      <div class="flex flex-col max-h-[80vh]">
         <div class="p-6 overflow-y-auto flex-1">
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">You are about to import {{ selectedFiles.length }} file(s).</p>
           <div v-if="importError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm rounded-md whitespace-pre-wrap transition-colors">
             {{ importError }}
           </div>
@@ -502,7 +499,7 @@ onUnmounted(() => {
           </BaseButton>
         </div>
       </div>
-    </div>
+    </BaseModal>
   </div>
 </template>
 

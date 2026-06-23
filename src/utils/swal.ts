@@ -40,6 +40,38 @@ export const swalConfirm = async (
   return result.isConfirmed
 }
 
+export const swalPrompt = async (
+  title: string,
+  text: string,
+  expectedInput: string,
+  options?: {
+    confirmText?: string,
+    cancelText?: string,
+    isDanger?: boolean
+  }
+): Promise<boolean> => {
+  const result = await Swal.fire({
+    title,
+    text,
+    icon: 'warning',
+    input: 'text',
+    inputPlaceholder: `Type "${expectedInput}" to confirm`,
+    showCancelButton: true,
+    confirmButtonColor: options?.isDanger ? dangerConfirmColor : defaultConfirmColor,
+    cancelButtonColor: cancelColor,
+    confirmButtonText: options?.confirmText || 'Confirm',
+    cancelButtonText: options?.cancelText || 'Cancel',
+    preConfirm: (inputValue) => {
+      if (inputValue !== expectedInput) {
+        Swal.showValidationMessage(`You must type "${expectedInput}"`)
+        return false
+      }
+      return true
+    }
+  })
+  return result.isConfirmed
+}
+
 export const swalToast = (title: string, icon: SweetAlertIcon = 'success', timer = 2000) => {
   return Swal.fire({
     toast: true,

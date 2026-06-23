@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
+import BaseModal from '../../components/BaseModal.vue'
+import BaseTable from '../../components/BaseTable.vue'
+import type { TableLabel } from '../../components/BaseTable.vue'
 import { useAuthStore } from '../../stores/auth'
 import { useGenshinStore } from '../../stores/genshin'
 import { swalToast } from '../../utils/swal'
+import Swal from 'sweetalert2'
 
 const authStore = useAuthStore()
 const genshinStore = useGenshinStore()
 const accounts = ref<any[]>([])
 const isLoading = ref(true)
+const meta = ref({ page: 1, limit: 10, totalPages: 1, total: 0 })
 const newAccountName = ref('')
 const newAccountUid = ref('')
 const newAccountServer = ref('ASIA')
@@ -20,30 +25,34 @@ const serverOptions = ref<Record<string, string>>({
   SAR: 'TW/HK/MO'
 })
 
-// For displaying the newly generated key
-const generatedKey = ref<{ accountId: number, key: string } | null>(null)
+const showAddModal = ref(false)
 
 // Edit state
+const showEditModal = ref(false)
 const editingId = ref<number | null>(null)
-const editForm = ref({ accountName: '', uid: '', server: '' })
+const isSaving = ref(false)
+const generatingKeyFor = ref<number | null>(null)
+const editForm = ref({ accountName: '', uid: '', server: '', isGlobalArtifactRankingOptIn: false })
 
-// Delete state
-const deletingId = ref<number | null>(null)
-const deleteConfirmName = ref('')
-const deleteError = ref('')
+const tableLabels: TableLabel[] = [
+  { key: 'id', title: 'ID' },
+  { key: 'accountName', title: 'Nickname' },
+  { key: 'uid', title: 'UID', slot: true },
+  { key: 'server', title: 'Server', slot: true },
+  { key: 'globalRanking', title: 'Global Ranking', slot: true },
+  { key: 'status', title: 'Status', slot: true },
+  { key: 'actions', title: 'Actions', slot: true }
+]
 
-const fetchAccounts = async () => {
+const fetchAccounts = async (page = 1) => {
   isLoading.value = true
   try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts`)
-    
-    if (res.status === 401) {
-      return
-    }
-
+    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts?page=${page}&limit=${meta.value.limit}`)
+    if (res.status === 401) return
     const data = await res.json()
     if (res.ok) {
       accounts.value = data.data.edges || []
+      meta.value = data.data.meta || { page: 1, limit: meta.value.limit, totalPages: 1, total: 0 }
       if (data.data.enum?.servers) {
         serverOptions.value = data.data.enum.servers
       }
@@ -61,23 +70,18 @@ const handleCreateAccount = async () => {
   try {
     const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts`, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         accountName: newAccountName.value,
         uid: newAccountUid.value,
         server: newAccountServer.value
       })
     })
-    
-    if (res.status === 401) {
-      return
-    }
-    
+    if (res.status === 401) return
     if (res.ok) {
       newAccountName.value = ''
       newAccountUid.value = ''
+      showAddModal.value = false
       await fetchAccounts()
       genshinStore.triggerAccountsRefetch()
     }
@@ -87,90 +91,124 @@ const handleCreateAccount = async () => {
 }
 
 const generateKey = async (accountId: number) => {
+  generatingKeyFor.value = accountId
   try {
     const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${accountId}/import-key`, {
       method: 'POST'
     })
-    
-    if (res.status === 401) {
-      return
-    }
-
+    if (res.status === 401) return
     const data = await res.json()
     if (res.ok) {
-      generatedKey.value = { accountId, key: data.data.importKey }
-      await fetchAccounts() // Refresh to update hasImportKey status
+      await fetchAccounts()
+      const generatedKey = data.data.importKey
+      Swal.fire({
+        title: 'Import Key Generated',
+        html: `
+          <div class="mb-2">Your new import key is:</div>
+          <code class="font-mono bg-slate-100 dark:bg-slate-700 p-2 rounded block select-all break-all text-slate-900 dark:text-slate-100">${generatedKey}</code>
+          <div class="text-xs text-amber-500 mt-2">This key will only be shown once!</div>
+        `,
+        icon: 'success',
+        confirmButtonText: 'Copy to Clipboard'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          copyToClipboard(generatedKey)
+        }
+      })
     }
   } catch (err) {
     console.error(err)
+  } finally {
+    generatingKeyFor.value = null
   }
 }
 
 const copyToClipboard = async (text: string) => {
   await navigator.clipboard.writeText(text)
-  swalToast('Import key copied to clipboard!', 'success')
+  swalToast('Copied to clipboard!', 'success')
 }
 
 // Editing
 const startEdit = (acc: any) => {
   editingId.value = acc.id
-  editForm.value = { accountName: acc.accountName, uid: acc.uid || '', server: acc.server }
+  editForm.value = { 
+    accountName: acc.accountName, 
+    uid: acc.uid || '', 
+    server: acc.server, 
+    isGlobalArtifactRankingOptIn: acc.isGlobalArtifactRankingOptIn || false 
+  }
+  showEditModal.value = true
 }
 
-const cancelEdit = () => {
-  editingId.value = null
-}
-
-const saveEdit = async (id: number) => {
+const saveEdit = async () => {
+  if (!editingId.value) return
+  isSaving.value = true
   try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${id}`, {
+    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${editingId.value}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         accountName: editForm.value.accountName,
         uid: editForm.value.uid,
-        server: editForm.value.server
+        server: editForm.value.server,
+        isGlobalArtifactRankingOptIn: editForm.value.isGlobalArtifactRankingOptIn
       })
     })
     if (res.ok) {
+      showEditModal.value = false
       editingId.value = null
       await fetchAccounts()
       genshinStore.triggerAccountsRefetch()
+      swalToast('Account updated', 'success')
     }
   } catch (err) {
     console.error(err)
+  } finally {
+    isSaving.value = false
   }
 }
 
 // Deleting
-const startDelete = (id: number) => {
-  deletingId.value = id
-  deleteConfirmName.value = ''
-  deleteError.value = ''
-}
+const startDelete = async (acc: any) => {
+  const result = await Swal.fire({
+    title: 'Delete Account?',
+    html: `This action cannot be undone. To verify, type <strong>${acc.accountName}</strong> below:`,
+    input: 'text',
+    inputPlaceholder: acc.accountName,
+    showCancelButton: true,
+    confirmButtonText: 'Permanently Delete',
+    confirmButtonColor: '#ef4444',
+    showLoaderOnConfirm: true,
+    preConfirm: async (inputValue) => {
+      if (inputValue !== acc.accountName) {
+        Swal.showValidationMessage('Account nickname does not match')
+        return false
+      }
+      try {
+        const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${acc.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accountName: inputValue })
+        })
+        if (res.ok) {
+          await fetchAccounts()
+          genshinStore.triggerAccountsRefetch()
+          return true
+        } else {
+          const data = await res.json()
+          Swal.showValidationMessage(data.message || 'Failed to delete account')
+          return false
+        }
+      } catch (err: any) {
+        Swal.showValidationMessage(`Request failed: ${err.message}`)
+        return false
+      }
+    },
+    allowOutsideClick: () => !Swal.isLoading()
+  })
 
-const cancelDelete = () => {
-  deletingId.value = null
-}
-
-const confirmDelete = async (id: number) => {
-  deleteError.value = ''
-  try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accountName: deleteConfirmName.value })
-    })
-    if (res.ok) {
-      deletingId.value = null
-      await fetchAccounts()
-      genshinStore.triggerAccountsRefetch()
-    } else {
-      const data = await res.json()
-      deleteError.value = data.message || 'Nickname mismatch.'
-    }
-  } catch (err) {
-    console.error(err)
+  if (result.isConfirmed) {
+    swalToast('Account deleted', 'success')
   }
 }
 
@@ -180,14 +218,78 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto space-y-8 pb-12">
-    
-    <!-- Add New Account Form -->
-    <section class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 transition-colors">
-      <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 transition-colors">Add Genshin Account</h2>
-      <form @submit.prevent="handleCreateAccount" class="flex flex-col md:flex-row gap-4 items-end">
-        <div class="flex-1 w-full">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Account Nickname *</label>
+  <div class="max-w-6xl mx-auto space-y-8 pb-12">
+    <!-- Accounts Header -->
+    <div class="flex justify-between items-center bg-transparent transition-colors mb-4">
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white transition-colors">Your Accounts</h2>
+      <BaseButton @click="showAddModal = true" variant="primary" size="sm">Add Account</BaseButton>
+    </div>
+
+    <!-- Accounts List -->
+    <BaseTable :labels="tableLabels" :data="accounts" :is-loading="isLoading" :meta="meta" @page-change="fetchAccounts">
+          <!-- UID Slot -->
+          <template #uid="{ item }">
+            {{ item.uid || 'Not set' }}
+          </template>
+
+          <!-- Server Slot -->
+          <template #server="{ item }">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300 transition-colors">
+              {{ serverOptions[item.server] || item.server }}
+            </span>
+          </template>
+
+          <!-- Global Ranking Slot -->
+          <template #globalRanking="{ item }">
+            <span v-if="item.isGlobalArtifactRankingOptIn" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 transition-colors">
+              Opted In
+            </span>
+            <span v-else class="text-slate-400 text-xs">Not Opted In</span>
+          </template>
+
+          <!-- Status Slot -->
+          <template #status="{ item }">
+            <button 
+              v-if="genshinStore.selectedAccountId === item.id"
+              class="px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded cursor-default transition-colors"
+            >
+              Selected
+            </button>
+            <button 
+              v-else
+              @click="genshinStore.selectAccount(item.id, item.accountName)"
+              class="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            >
+              Select
+            </button>
+          </template>
+
+          <!-- Actions Slot -->
+          <template #actions="{ item }">
+            <div class="flex items-center gap-2">
+              <BaseButton variant="outline" size="xs" @click="startEdit(item)">Edit</BaseButton>
+              <BaseButton variant="danger-outline" size="xs" @click="startDelete(item)">Delete</BaseButton>
+              <BaseButton 
+                variant="primary"
+                size="xs"
+                :loading="generatingKeyFor === item.id"
+                @click="generateKey(item.id)" 
+              >
+                {{ item.importKeyHash ? 'Regen Key' : 'Gen Key' }}
+              </BaseButton>
+            </div>
+          </template>
+
+          <template #empty>
+            You haven't added any Genshin accounts yet.
+          </template>
+        </BaseTable>
+
+    <!-- Add Account Modal -->
+    <BaseModal v-model="showAddModal" title="Add Genshin Account">
+      <form @submit.prevent="handleCreateAccount" class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Account Nickname *</label>
           <input 
             v-model="newAccountName" 
             type="text" 
@@ -196,8 +298,8 @@ onMounted(() => {
             placeholder="e.g. Main Account"
           >
         </div>
-        <div class="w-full md:w-32">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">UID (Optional)</label>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">UID (Optional)</label>
           <input 
             v-model="newAccountUid" 
             type="text" 
@@ -205,8 +307,8 @@ onMounted(() => {
             placeholder="800000000"
           >
         </div>
-        <div class="w-full md:w-48">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Server</label>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Server</label>
           <select 
             v-model="newAccountServer" 
             class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
@@ -216,130 +318,69 @@ onMounted(() => {
             </option>
           </select>
         </div>
-        <BaseButton 
-          type="submit"
-          :loading="creating"
-          :disabled="!newAccountName.trim()"
-          class="w-full sm:w-auto"
-        >
-          Add Account
-        </BaseButton>
+        <div class="pt-4 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 mt-6">
+          <BaseButton variant="outline" @click="showAddModal = false" type="button">Cancel</BaseButton>
+          <BaseButton 
+            type="submit"
+            :loading="creating"
+            :disabled="!newAccountName.trim()"
+          >
+            Add Account
+          </BaseButton>
+        </div>
       </form>
-    </section>
+    </BaseModal>
 
-    <!-- Accounts List -->
-    <section class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
-      <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 transition-colors">
-        <h2 class="text-base font-semibold text-slate-900 dark:text-white transition-colors">Your Accounts</h2>
-      </div>
-      
-      <div v-if="isLoading" class="p-6 text-center text-slate-500 dark:text-slate-400 transition-colors">
-        Loading accounts...
-      </div>
-      
-      <div v-else-if="accounts.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400 transition-colors">
-        You haven't added any Genshin accounts yet.
-      </div>
-      
-      <ul v-else class="divide-y divide-slate-200 dark:divide-slate-700 transition-colors">
-        <li v-for="acc in accounts" :key="acc.id" class="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-          
-          <!-- View Mode -->
-          <div v-if="editingId !== acc.id && deletingId !== acc.id" class="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
-            <div>
-              <h3 class="text-sm font-bold text-slate-900 dark:text-white transition-colors">{{ acc.accountName }}</h3>
-              <div class="mt-1 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 transition-colors">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300 transition-colors">
-                  {{ serverOptions[acc.server] || acc.server }}
-                </span>
-                <span>UID: {{ acc.uid || 'Not set' }}</span>
-              </div>
-            </div>
-            
-            <div class="flex flex-col items-end gap-2 w-full sm:w-auto">
-              <template v-if="generatedKey?.accountId === acc.id">
-                <div class="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-400 px-3 py-2 rounded-md text-sm w-full transition-colors">
-                  <code class="font-mono flex-1 select-all break-all">{{ generatedKey?.key }}</code>
-                  <BaseButton variant="ghost" size="xs" @click="copyToClipboard(generatedKey?.key || '')" class="!text-emerald-600 dark:!text-emerald-500 hover:!bg-emerald-50 dark:hover:!bg-emerald-900/20">Copy</BaseButton>
-                </div>
-                <p class="text-xs text-amber-600 dark:text-amber-500 transition-colors">This key will only be shown once!</p>
-              </template>
-              <template v-else>
-                <div class="flex items-center gap-2">
-                  <button 
-                    v-if="genshinStore.selectedAccountId === acc.id"
-                    class="px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded cursor-default transition-colors"
-                  >
-                    Selected
-                  </button>
-                  <button 
-                    v-else
-                    @click="genshinStore.selectAccount(acc.id, acc.accountName)"
-                    class="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                  >
-                    Select
-                  </button>
-
-                  <BaseButton variant="outline" size="xs" @click="startEdit(acc)">Edit</BaseButton>
-                  <BaseButton variant="danger-outline" size="xs" @click="startDelete(acc.id)">Delete</BaseButton>
-                  <BaseButton 
-                    variant="primary"
-                    size="xs"
-                    @click="generateKey(acc.id)" 
-                  >
-                    {{ acc.importKeyHash ? 'Regenerate Key' : 'Generate Key' }}
-                  </BaseButton>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- Edit Mode -->
-          <div v-else-if="editingId === acc.id" class="flex flex-col gap-4">
-            <h3 class="text-sm font-bold text-slate-900 dark:text-white transition-colors">Edit Account</h3>
-            <div class="flex flex-col sm:flex-row gap-4 items-start">
-              <div class="flex-1 w-full">
-                <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1 transition-colors">Nickname</label>
-                <input v-model="editForm.accountName" type="text" class="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm transition-colors">
-              </div>
-              <div class="w-full sm:w-32">
-                <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1 transition-colors">UID</label>
-                <input v-model="editForm.uid" type="text" class="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm transition-colors">
-              </div>
-              <div class="w-full sm:w-48">
-                <label class="block text-xs text-slate-500 dark:text-slate-400 mb-1 transition-colors">Server</label>
-                <select v-model="editForm.server" class="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm transition-colors">
-                  <option v-for="(displayValue, key) in serverOptions" :key="key" :value="key">{{ displayValue }}</option>
-                </select>
-              </div>
-            </div>
-            <div class="mt-4 flex justify-end gap-3">
-              <BaseButton variant="outline" @click="cancelEdit">Cancel</BaseButton>
-              <BaseButton @click="saveEdit(acc.id)">Save Changes</BaseButton>
-            </div>
-          </div>
-
-          <!-- Delete Mode -->
-          <div v-else-if="deletingId === acc.id" class="flex flex-col gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-lg transition-colors">
-            <h3 class="text-sm font-bold text-red-800 dark:text-red-400 transition-colors">Delete Account?</h3>
-            <p class="text-sm text-red-700 dark:text-red-300 transition-colors">This action cannot be undone. To verify, type <strong>{{ acc.accountName }}</strong> below:</p>
-            <input v-model="deleteConfirmName" type="text" placeholder="Type nickname here" class="px-3 py-2 border border-red-300 dark:border-red-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-md text-sm focus:ring-red-500 dark:focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500 w-full max-w-sm transition-colors">
-            <p v-if="deleteError" class="text-xs text-red-600 dark:text-red-400 font-bold transition-colors">{{ deleteError }}</p>
-            <div class="mt-6 flex justify-end gap-3">
-              <BaseButton variant="outline" @click="cancelDelete">Cancel</BaseButton>
-              <BaseButton 
-                variant="danger"
-                :disabled="deleteConfirmName !== acc.accountName"
-                @click="confirmDelete(acc.id)" 
-              >
-                Permanently Delete
-              </BaseButton>
-            </div>
-          </div>
-
-        </li>
-      </ul>
-    </section>
+    <!-- Edit Account Modal -->
+    <BaseModal v-model="showEditModal" title="Edit Account">
+      <form @submit.prevent="saveEdit" class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nickname *</label>
+          <input 
+            v-model="editForm.accountName" 
+            type="text" 
+            required
+            class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">UID (Optional)</label>
+          <input 
+            v-model="editForm.uid" 
+            type="text" 
+            class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Server</label>
+          <select 
+            v-model="editForm.server" 
+            class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 focus:border-slate-900 dark:focus:border-slate-500 text-sm transition-colors"
+          >
+            <option v-for="(displayValue, key) in serverOptions" :key="key" :value="key">
+              {{ displayValue }}
+            </option>
+          </select>
+        </div>
+        <div class="flex items-center mt-2">
+          <input 
+            id="optin-checkbox-edit"
+            v-model="editForm.isGlobalArtifactRankingOptIn" 
+            type="checkbox" 
+            class="w-4 h-4 text-slate-900 bg-slate-100 border-slate-300 rounded focus:ring-slate-900 dark:focus:ring-slate-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
+          >
+          <label for="optin-checkbox-edit" class="ml-2 text-sm font-medium text-slate-900 dark:text-slate-300">
+            Participate in Global Artifact Leaderboard
+          </label>
+        </div>
+        <div class="pt-4 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 mt-6">
+          <BaseButton variant="outline" @click="showEditModal = false" type="button" :disabled="isSaving">Cancel</BaseButton>
+          <BaseButton type="submit" :loading="isSaving">
+            Save Changes
+          </BaseButton>
+        </div>
+      </form>
+    </BaseModal>
 
   </div>
 </template>

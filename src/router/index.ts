@@ -61,6 +61,16 @@ const router = createRouter({
           component: () => import('../views/dashboard/ExportView.vue')
         },
         {
+          path: 'artifacts',
+          name: 'artifacts',
+          component: () => import('../views/dashboard/MyArtifactsView.vue')
+        },
+        {
+          path: 'global-ranking',
+          name: 'global-ranking',
+          component: () => import('../views/dashboard/GlobalArtifactsView.vue')
+        },
+        {
           path: 'settings',
           name: 'settings',
           component: () => import('../views/dashboard/SettingsView.vue')
