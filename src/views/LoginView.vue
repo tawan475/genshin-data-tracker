@@ -33,7 +33,7 @@ const handleLogin = async () => {
     }
 
     authStore.setAuthData(data.data.accessToken, data.data.refreshToken, username.value)
-    router.push('/')
+    router.push('/dashboard')
   } catch (err: any) {
     errorMsg.value = err.message
   } finally {

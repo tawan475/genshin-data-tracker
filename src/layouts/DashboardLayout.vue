@@ -3,7 +3,7 @@ import { useAuthStore } from '../stores/auth'
 import { useGenshinStore } from '../stores/genshin'
 import { useSettingsStore } from '../stores/settings'
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { swalError, swalSuccess } from '../utils/swal'
 import { Icon } from '@iconify/vue'
 import BaseButton from '../components/BaseButton.vue'
@@ -16,8 +16,11 @@ const route = useRoute()
 
 const myAccounts = ref<any[]>([])
 
+const isLoadingNav = ref(true)
+
 const fetchMyAccounts = async () => {
   if (!authStore.token) return
+  isLoadingNav.value = true
   try {
     const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts`)
     if (res.ok) {
@@ -31,8 +34,14 @@ const fetchMyAccounts = async () => {
     }
   } catch (err) {
     console.error(err)
+  } finally {
+    isLoadingNav.value = false
   }
 }
+
+watch(() => genshinStore.accountsRefetchTrigger, () => {
+  fetchMyAccounts()
+})
 
 
 
@@ -233,7 +242,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-screen w-full bg-slate-50 dark:bg-slate-900 flex text-slate-900 dark:text-slate-100 overflow-hidden">
+  <div class="h-screen w-full bg-slate-50 dark:bg-slate-900 flex text-slate-900 dark:text-slate-100 overflow-hidden relative">
+    
+    <!-- Page-wide loading screen -->
+    <div v-if="isLoadingNav" class="absolute inset-0 z-[200] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center transition-colors">
+      <span class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin mb-4"></span>
+      <p class="text-sm font-medium text-slate-600 dark:text-slate-400">Loading your profile...</p>
+    </div>
+
     <!-- Sidebar -->
     <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
       <div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700">

@@ -7,6 +7,8 @@ export const useGenshinStore = defineStore('genshin', () => {
 
   const refetchTrigger = ref(0)
 
+  const accountsRefetchTrigger = ref(0)
+
   const selectAccount = (id: number, name: string) => {
     selectedAccountId.value = id
     selectedAccountName.value = name
@@ -21,12 +23,18 @@ export const useGenshinStore = defineStore('genshin', () => {
     refetchTrigger.value++
   }
 
+  const triggerAccountsRefetch = () => {
+    accountsRefetchTrigger.value++
+  }
+
   return {
     selectedAccountId,
     selectedAccountName,
     refetchTrigger,
+    accountsRefetchTrigger,
     selectAccount,
     clearSelection,
-    triggerRefetch
+    triggerRefetch,
+    triggerAccountsRefetch
   }
 })

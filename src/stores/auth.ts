@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import router from '../router'
 
 const API_URL = 'http://localhost:3000'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('accessToken') || null)
   const user = ref<{ username: string } | null>(null)
-  const router = useRouter()
 
   const setAuthData = (accessToken: string, refreshToken: string, username?: string) => {
     token.value = accessToken

@@ -66,7 +66,7 @@ const handleCreateAccount = async () => {
       },
       body: JSON.stringify({
         accountName: newAccountName.value,
-        uid: newAccountUid.value || undefined,
+        uid: newAccountUid.value,
         server: newAccountServer.value
       })
     })
@@ -79,6 +79,7 @@ const handleCreateAccount = async () => {
       newAccountName.value = ''
       newAccountUid.value = ''
       await fetchAccounts()
+      genshinStore.triggerAccountsRefetch()
     }
   } finally {
     creating.value = false
@@ -127,13 +128,14 @@ const saveEdit = async (id: number) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         accountName: editForm.value.accountName,
-        uid: editForm.value.uid || undefined,
+        uid: editForm.value.uid,
         server: editForm.value.server
       })
     })
     if (res.ok) {
       editingId.value = null
       await fetchAccounts()
+      genshinStore.triggerAccountsRefetch()
     }
   } catch (err) {
     console.error(err)
@@ -162,6 +164,7 @@ const confirmDelete = async (id: number) => {
     if (res.ok) {
       deletingId.value = null
       await fetchAccounts()
+      genshinStore.triggerAccountsRefetch()
     } else {
       const data = await res.json()
       deleteError.value = data.message || 'Nickname mismatch.'
@@ -216,7 +219,7 @@ onMounted(() => {
         <BaseButton 
           type="submit"
           :loading="creating"
-          :disabled="!newAccountName.trim() || !newAccountUid.trim()"
+          :disabled="!newAccountName.trim()"
           class="w-full sm:w-auto"
         >
           Add Account

@@ -16,7 +16,10 @@ const isLoading = ref(true)
 const meta = ref({ page: 1, limit: 20, totalPages: 1, total: 0 })
 const pageInput = ref(1)
 
+const baseTableRef = ref<InstanceType<typeof BaseTable> | null>(null)
+
 const storageStats = ref<{ totalSnapshots: number, totalFileSize: number, totalCompressedFileSize: number } | null>(null)
+const isStorageLoading = ref(true)
 
 const selectAll = ref(false)
 const selectedIds = ref<number[]>([])
@@ -108,8 +111,9 @@ const fetchSnapshots = async (page = 1) => {
 
 const fetchStorageStats = async () => {
   if (!genshinStore.selectedAccountId) return
+  isStorageLoading.value = true
   try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/overview?groupBy=day&limit=1`)
+    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/storage-stats`)
     if (res.ok) {
       const parsed = await res.json()
       const storage = parsed.data?.storage || parsed.storage
@@ -119,6 +123,8 @@ const fetchStorageStats = async () => {
     }
   } catch (err) {
     console.error(err)
+  } finally {
+    isStorageLoading.value = false
   }
 }
 
@@ -196,6 +202,7 @@ const formatDate = (d: string) => new Date(d).toLocaleString(undefined, { hour12
 
 const onLimitChange = () => {
   fetchSnapshots(1)
+  baseTableRef.value?.scrollToTop()
 }
 
 const goToPage = () => {
@@ -204,6 +211,7 @@ const goToPage = () => {
   if (p > meta.value.totalPages) p = meta.value.totalPages
   pageInput.value = p
   fetchSnapshots(p)
+  baseTableRef.value?.scrollToTop()
 }
 
 const formatBytes = (bytes: number) => {
@@ -223,8 +231,21 @@ const formatBytes = (bytes: number) => {
     </div>
 
     <div v-else class="space-y-6">
+      <!-- Storage Stats Loading Skeleton -->
+      <div v-if="isStorageLoading" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 mb-8 transition-colors animate-pulse">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+          <div class="flex flex-wrap items-center gap-6">
+            <div class="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            <div class="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            <div class="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            <div class="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Storage Stats -->
-      <div v-if="storageStats" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 mb-8 transition-colors">
+      <div v-else-if="storageStats" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 mb-8 transition-colors">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Storage</h3>
           <div class="flex flex-wrap items-center gap-6 text-sm">
@@ -272,7 +293,7 @@ const formatBytes = (bytes: number) => {
         <h2 class="text-xl font-bold text-slate-900 dark:text-white transition-colors">Import History</h2>
       </div>
 
-      <BaseTable :labels="tableLabels" :data="snapshots" :isLoading="isLoading">
+      <BaseTable ref="baseTableRef" :labels="tableLabels" :data="snapshots" :isLoading="isLoading">
         <template #header-select>
           <div 
             class="flex items-center justify-center cursor-pointer -m-4 p-4"
@@ -382,7 +403,7 @@ const formatBytes = (bytes: number) => {
           <BaseButton 
             variant="outline"
             size="sm"
-            @click="fetchSnapshots(meta.page - 1)" 
+            @click="() => { fetchSnapshots(meta.page - 1); baseTableRef?.scrollToTop() }"
             :disabled="meta.page <= 1"
           >
             Previous
@@ -391,7 +412,7 @@ const formatBytes = (bytes: number) => {
           <BaseButton 
             variant="outline"
             size="sm"
-            @click="fetchSnapshots(meta.page + 1)" 
+            @click="() => { fetchSnapshots(meta.page + 1); baseTableRef?.scrollToTop() }"
             :disabled="meta.page >= meta.totalPages"
           >
             Next
