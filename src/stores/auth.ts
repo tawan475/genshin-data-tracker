@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import router from '../router'
+import { clearAllLocalSettings } from '../utils/local-settings'
 
 const API_URL = 'http://localhost:3000'
 
@@ -24,6 +25,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('username')
+    clearAllLocalSettings()
+    document.documentElement.classList.remove('dark')
     router.push('/login')
   }
 

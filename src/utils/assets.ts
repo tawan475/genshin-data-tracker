@@ -1,4 +1,5 @@
 import assetData from './data/AssetsData_gen.json'
+import materialIcons from './MaterialIcons_gen.json'
 
 // Use VITE_ASSET_BASE_URL from env, or default to enka if missing. 
 // Can be changed to '/assets/gi' for local hosting.
@@ -71,4 +72,25 @@ export const getWeaponAwakenIconUrl = (weaponKey: string): string => {
   const weaponInfo = (assetData.weapons as any)[weaponKey]
   if (!weaponInfo) return ''
   return buildUrl(weaponInfo.awakenIcon, 'weapons', weaponKey)
+}
+
+const KNOWN_MATERIAL_IMAGES: Record<string, string> = {
+  Mora: '/img/Item_Mora.webp',
+  Primogem: '/img/Item_Primogem.webp',
+  SanctifyingEssence: '/img/Item_Sanctifying_Essence.webp',
+  SanctifyingUnction: '/img/Item_Sanctifying_Unction.webp',
+}
+
+export const getMaterialIconUrl = (materialKey: string): string => {
+  if (KNOWN_MATERIAL_IMAGES[materialKey]) {
+    return KNOWN_MATERIAL_IMAGES[materialKey]
+  }
+
+  const icon = (materialIcons as Record<string, string>)[materialKey]
+  if (!icon) return ''
+
+  if (BASE_URL.startsWith('http')) {
+    return `${BASE_URL}/${icon}.png`
+  }
+  return `${BASE_URL}/materials/${materialKey}/${icon}.webp`
 }

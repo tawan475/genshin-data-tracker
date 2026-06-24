@@ -61,6 +61,7 @@ const navigationAccount = [
   { name: 'Snapshots', path: '/dashboard/account-snapshots' },
   { name: 'Characters', path: '/dashboard/characters' },
   { name: 'Artifacts', path: '/dashboard/artifacts' },
+  { name: 'Materials', path: '/dashboard/materials' },
   { name: 'Export', path: '/dashboard/export' },
 ]
 
@@ -291,7 +292,7 @@ onUnmounted(() => {
   <div class="h-screen w-full bg-slate-50 dark:bg-slate-900 flex text-slate-900 dark:text-slate-100 overflow-hidden relative">
     
     <!-- Page-wide loading screen -->
-    <div v-if="isLoadingNav" class="absolute inset-0 z-[200] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center transition-colors">
+    <div v-if="isLoadingNav" class="absolute inset-0 z-[200] bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center">
       <span class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin mb-4"></span>
       <p class="text-sm font-medium text-slate-600 dark:text-slate-400">Loading your profile...</p>
     </div>

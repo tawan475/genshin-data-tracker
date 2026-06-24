@@ -3,13 +3,20 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useGenshinStore } from '../../stores/genshin'
 import { useSettingsStore } from '../../stores/settings'
+import { useSnapshotSelection } from '../../composables/useSnapshotSelection'
+import { useBulkExport } from '../../composables/useBulkExport'
+import { useActiveExport } from '../../composables/useActiveExport'
 import BaseTable, { type TableLabel } from '../../components/BaseTable.vue'
 import BaseButton from '../../components/BaseButton.vue'
-import { swalInfo, swalConfirm, swalSuccess, swalError, swalToast, swalPrompt } from '../../utils/swal'
+import { swalConfirm, swalError, swalToast, swalPrompt } from '../../utils/swal'
+import { downloadFromResponse, formatGdtTimestamp } from '../../utils/export'
+import { formatBytes } from '../../utils/format'
 
 const authStore = useAuthStore()
 const genshinStore = useGenshinStore()
 const settingsStore = useSettingsStore()
+const { isExporting, bulkExport } = useBulkExport()
+const { inProgress: hasActiveExport, fetchActiveExport } = useActiveExport()
 
 const snapshots = ref<any[]>([])
 const isLoading = ref(true)
@@ -21,41 +28,40 @@ const baseTableRef = ref<InstanceType<typeof BaseTable> | null>(null)
 const storageStats = ref<{ totalSnapshots: number, totalFileSize: number, totalCompressedFileSize: number } | null>(null)
 const isStorageLoading = ref(true)
 
-const selectAll = ref(false)
-const selectedIds = ref<number[]>([])
+const totalCount = computed(() => meta.value.total)
+const {
+  selectAll,
+  selectedIds,
+  toggleSelectAll,
+  toggleSelection,
+  isSelected,
+  selectedCount,
+  resetSelection,
+} = useSnapshotSelection(snapshots, totalCount)
 
-const toggleSelectAll = () => {
-  selectAll.value = !selectAll.value
-  if (!selectAll.value) {
-    selectedIds.value = []
+const handleBulkDownload = async () => {
+  if (!genshinStore.selectedAccountId) return
+  if (hasActiveExport.value) {
+    swalError(
+      'Export in progress',
+      'You already have a bulk export running. Check the Export page.',
+    )
+    return
   }
-}
 
-const toggleSelection = (id: number) => {
-  if (selectAll.value) {
-    selectAll.value = false
-    selectedIds.value = snapshots.value.filter(s => s.id !== id).map(s => s.id)
-  } else {
-    if (selectedIds.value.includes(id)) {
-      selectedIds.value = selectedIds.value.filter(i => i !== id)
-    } else {
-      selectedIds.value = [...selectedIds.value, id]
-    }
+  try {
+    await bulkExport(
+      genshinStore.selectedAccountId,
+      {
+        snapshotIds: selectedIds.value,
+        selectAll: selectAll.value,
+      },
+      { redirectAfter: true },
+    )
+    resetSelection()
+  } catch {
+    // swal handled in composable
   }
-}
-
-const isSelected = (id: number) => {
-  if (selectAll.value) return true
-  return selectedIds.value.includes(id)
-}
-
-const selectedCount = computed(() => {
-  if (selectAll.value) return meta.value.total
-  return selectedIds.value.length
-})
-
-const handleBulkDownload = () => {
-  swalInfo('Coming Soon', 'Bulk download functionality will be implemented later.')
 }
 
 const handleBulkDelete = async () => {
@@ -93,9 +99,8 @@ const handleBulkDelete = async () => {
 
     if (res.ok) {
       const data = await res.json()
-      swalToast(data.message || 'Deleted successfully', 'success')
-      selectAll.value = false
-      selectedIds.value = []
+      swalToast(data.message || data.data?.message || 'Deleted successfully', 'success')
+      resetSelection()
       fetchSnapshots(1)
       fetchStorageStats()
       genshinStore.triggerAccountsRefetch()
@@ -174,6 +179,7 @@ watch(() => genshinStore.refetchTrigger, () => {
 })
 
 onMounted(() => {
+  fetchActiveExport()
   if (genshinStore.selectedAccountId) {
     fetchSnapshots(1)
     fetchStorageStats()
@@ -183,20 +189,14 @@ onMounted(() => {
 const downloadSnapshot = async (snapshot: any) => {
   if (!genshinStore.selectedAccountId) return
   try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/snapshots/${snapshot.id}/export`)
+    const res = await authStore.fetchWithAuth(
+      `${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/snapshots/${snapshot.id}/export?attachment=1`,
+    )
     if (res.ok) {
-      const json = await res.json()
-      const goodData = json.data || json
-      const blob = new Blob([JSON.stringify(goodData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      const dateStr = new Date(snapshot.createdAt).toISOString().replace(/[:.]/g, '-').slice(0, 19)
-      a.download = `genshin_export_${dateStr}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      await downloadFromResponse(
+        res,
+        `GDT_export-${formatGdtTimestamp(snapshot.createdAt)}.json`,
+      )
     } else {
       swalError('Error', 'Failed to download snapshot')
     }
@@ -248,14 +248,6 @@ const goToPage = () => {
   pageInput.value = p
   fetchSnapshots(p)
   baseTableRef.value?.scrollToTop()
-}
-
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 </script>
 
@@ -313,7 +305,13 @@ const formatBytes = (bytes: number) => {
           <div v-if="selectedCount > 0" class="absolute w-full flex items-center justify-between bg-slate-800 dark:bg-slate-700 rounded-lg p-3 shadow-md z-20 transition-colors">
             <span class="text-sm font-semibold text-white ml-2">{{ selectedCount }} selected out of {{ meta.total }}</span>
             <div class="flex items-center gap-3">
-              <BaseButton variant="secondary" size="sm" @click="handleBulkDownload">
+              <BaseButton
+                variant="secondary"
+                size="sm"
+                :loading="isExporting"
+                :disabled="hasActiveExport"
+                @click="handleBulkDownload"
+              >
                 Download
               </BaseButton>
               <BaseButton variant="danger" size="sm" @click="handleBulkDelete">

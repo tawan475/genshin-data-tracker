@@ -2,6 +2,23 @@
 <html lang="">
   <head>
     <meta charset="UTF-8">
+    <script>
+      (function () {
+        try {
+          if (!localStorage.getItem('accessToken')) return;
+          var t = localStorage.getItem('gdt:user:theme') || localStorage.getItem('theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch (_) {}
+      })();
+    </script>
+    <style>
+      html { background-color: #f8fafc; color-scheme: light; }
+      html.dark { background-color: #0f172a; color-scheme: dark; }
+      body { background-color: inherit; margin: 0; }
+    </style>
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vite App</title>

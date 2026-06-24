@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import BaseButton from '../components/BaseButton.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { adoptUserSettingsOnLogin } from '../utils/user-settings-sync'
 
 const username = ref('')
 const password = ref('')
@@ -43,7 +44,9 @@ const handleRegister = async () => {
       throw new Error(data.message || 'Registration failed')
     }
 
-    authStore.setAuthData(data.data.accessToken, data.data.refreshToken, username.value)
+    const { accessToken, refreshToken } = data.data
+    await adoptUserSettingsOnLogin(authStore.API_URL, accessToken)
+    authStore.setAuthData(accessToken, refreshToken, username.value)
     router.push('/')
   } catch (err: any) {
     errorMsg.value = err.message
