@@ -62,7 +62,7 @@ async function optimizeAssets() {
       const origSize = fs.statSync(pngPath).size;
       
       await sharp(pngPath)
-        .webp({ quality: 80, effort: 6 })
+        .webp({ quality: 60, effort: 6 })
         .toFile(webpPath);
         
       const newSize = fs.statSync(webpPath).size;

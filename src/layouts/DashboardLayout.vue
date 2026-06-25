@@ -3,9 +3,9 @@ import { useAuthStore } from '../stores/auth'
 import { useGenshinStore } from '../stores/genshin'
 import { useSettingsStore } from '../stores/settings'
 import { useRouter, useRoute } from 'vue-router'
-import BaseModal from "../components/BaseModal.vue"
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { swalError, swalSuccess } from '../utils/swal'
+import ImportModal from '../components/ImportModal.vue'
+import { ref, onMounted, onUnmounted, watch, provide } from 'vue'
+import { IMPORT_FLOW_KEY, useImportFlow } from '../composables/useImportFlow'
 import { Icon } from '@iconify/vue'
 import BaseButton from '../components/BaseButton.vue'
 
@@ -65,25 +65,14 @@ const navigationAccount = [
   { name: 'Export', path: '/dashboard/export' },
 ]
 
-// ─── Import Logic ───
-interface ImportFile {
-  id: number;
-  file: File;
-  timestamp: string;
-}
+const importFlow = useImportFlow()
+provide(IMPORT_FLOW_KEY, importFlow)
 
-const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
-const showModal = ref(false)
-const selectedFiles = ref<ImportFile[]>([])
-let fileIdCounter = 0
-const importProgress = ref<{ processed: number, total: number, filename: string, status: string, message?: string } | null>(null)
-const isImporting = ref(false)
-const importError = ref('')
 
 const handleDragOver = (e: DragEvent) => {
-  e.preventDefault() // Always prevent default so the browser doesn't navigate to dropped images
-  
+  e.preventDefault()
+
   if (e.dataTransfer?.items) {
     const hasJson = Array.from(e.dataTransfer.items).some(
       item => item.kind === 'file' && (item.type === 'application/json' || item.type === '')
@@ -103,174 +92,14 @@ const handleDrop = (e: DragEvent) => {
   e.preventDefault()
   isDragging.value = false
   if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
-    // Only process valid JSON files on drop to silently ignore accidental image drops
     const validFiles = Array.from(e.dataTransfer.files).filter(
       f => f.type === 'application/json' || f.name.endsWith('.json')
     )
-    validFiles.forEach(processFile)
-  }
-}
-
-const handleFileSelect = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  if (target.files && target.files.length > 0) {
-    Array.from(target.files).forEach(processFile)
-  }
-  // Reset so selecting the same file again triggers change event
-  if (fileInput.value) fileInput.value.value = ''
-}
-
-const triggerFileInput = () => {
-  fileInput.value?.click()
-}
-
-const processFile = (file: File) => {
-  if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
-    swalError('Invalid File', `File ${file.name} is not a valid JSON file.`)
-    return
-  }
-
-  const importFile: ImportFile = {
-    id: fileIdCounter++,
-    file,
-    timestamp: ''
-  }
-  
-  const match = file.name.match(/genshin_export_(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2}-\d{2})/)
-  if (match && match[1] && match[2]) {
-    importFile.timestamp = `${match[1]}T${match[2].replace(/-/g, ':')}`
-  }
-  
-  selectedFiles.value.push(importFile)
-  
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    if (importFile.timestamp) return // Prioritize filename timestamp
-    try {
-      const json = JSON.parse(e.target?.result as string)
-      if (json.timestamp) {
-        const ts = new Date(isNaN(Number(json.timestamp)) ? json.timestamp : Number(json.timestamp))
-        if (!isNaN(ts.getTime())) {
-          const offset = ts.getTimezoneOffset() * 60000
-          const localISOTime = (new Date(ts.getTime() - offset)).toISOString().slice(0, 16)
-          importFile.timestamp = localISOTime
-        }
+    validFiles.forEach((f) => {
+      if (importFlow.addFileToQueue(f)) {
+        importFlow.showModal.value = true
       }
-    } catch (err) {
-      console.warn(`Could not parse JSON to find timestamp for ${file.name}`)
-    }
-  }
-  reader.readAsText(file)
-
-  showModal.value = true
-}
-
-const removeFile = (id: number) => {
-  selectedFiles.value = selectedFiles.value.filter(f => f.id !== id)
-  if (selectedFiles.value.length === 0) {
-    cancelImport()
-  }
-}
-
-const clearTimestamp = (id: number) => {
-  const f = selectedFiles.value.find(f => f.id === id)
-  if (f) f.timestamp = ''
-}
-
-const cancelImport = () => {
-  showModal.value = false
-  selectedFiles.value = []
-  importError.value = ''
-  importProgress.value = null
-  if (fileInput.value) fileInput.value.value = ''
-}
-
-const confirmImport = async () => {
-  if (selectedFiles.value.length === 0 || !genshinStore.selectedAccountId) return
-  
-  isImporting.value = true
-  importError.value = ''
-
-  const formData = new FormData()
-  const timestamps: (string | undefined)[] = []
-
-  for (const importFile of selectedFiles.value) {
-    formData.append('files', importFile.file)
-    if (importFile.timestamp) {
-      const localDate = new Date(importFile.timestamp)
-      timestamps.push(localDate.toISOString())
-    } else {
-      timestamps.push(undefined)
-    }
-  }
-
-  formData.append('timestamps', JSON.stringify(timestamps))
-
-  try {
-    const res = await authStore.fetchWithAuth(`${authStore.API_URL}/genshin-accounts/${genshinStore.selectedAccountId}/import-bulk-stream`, {
-      method: 'POST',
-      body: formData
     })
-
-    if (!res.ok) {
-      const data = await res.json()
-      throw new Error(data.message || 'Failed to import files')
-    }
-
-    if (!res.body) throw new Error('Readable stream not supported')
-
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder('utf-8')
-    let results: any[] = []
-
-    let done = false
-    let buffer = ''
-    while (!done) {
-      const { value, done: readerDone } = await reader.read()
-      done = readerDone
-      if (value) {
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || '' // keep the last partial line in buffer
-
-        for (const line of lines) {
-          if (!line.trim()) continue
-          try {
-            const data = JSON.parse(line)
-            if (data.type === 'progress') {
-              importProgress.value = data
-            } else if (data.type === 'complete') {
-              results = data.results || []
-            }
-          } catch (e) {
-            console.error('Failed to parse NDJSON line', line)
-          }
-        }
-      }
-    }
-
-    const successCount = results.filter((r: any) => r.status === 'success').length
-    const errors = results.filter((r: any) => r.status === 'error')
-
-    if (successCount > 0) {
-      genshinStore.triggerRefetch()
-    }
-
-    if (errors.length === 0) {
-      swalSuccess('Success', 'Import successful!')
-      cancelImport()
-    } else {
-      selectedFiles.value = selectedFiles.value.filter(f => 
-        errors.some((e: any) => e.filename === f.file.name)
-      )
-      importError.value = errors.map((e: any) => `[${e.filename}]: ${e.message}`).join('\n')
-      importProgress.value = null
-    }
-  } catch (err: any) {
-    importError.value = err.message || 'Import failed'
-    importProgress.value = null
-  } finally {
-    isImporting.value = false
   }
 }
 
@@ -279,12 +108,14 @@ onMounted(() => {
   window.addEventListener('dragover', handleDragOver)
   window.addEventListener('drop', handleDrop)
   window.addEventListener('dragleave', handleDragLeave)
+  window.addEventListener('paste', importFlow.handleGlobalPaste)
 })
 
 onUnmounted(() => {
   window.removeEventListener('dragover', handleDragOver)
   window.removeEventListener('drop', handleDrop)
   window.removeEventListener('dragleave', handleDragLeave)
+  window.removeEventListener('paste', importFlow.handleGlobalPaste)
 })
 </script>
 
@@ -429,15 +260,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Hidden File Input -->
-      <input 
-        type="file" 
-        ref="fileInput" 
-        accept=".json,application/json" 
-        class="hidden" 
-        multiple
-        @change="handleFileSelect" 
-      />
+      <!-- Hidden File Input removed — import via ImportModal -->
 
       <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-8 shadow-sm z-10 shrink-0 transition-colors">
         <div class="flex items-center gap-4">
@@ -454,7 +277,7 @@ onUnmounted(() => {
         <BaseButton 
           v-if="genshinStore.selectedAccountId"
           variant="primary"
-          @click="triggerFileInput"
+          @click="importFlow.openImportModal()"
         >
           Import Data
         </BaseButton>
@@ -469,101 +292,7 @@ onUnmounted(() => {
       </div>
     </main>
 
-    <!-- Import Modal -->
-    <BaseModal v-model="showModal" title="Confirm Import">
-      <div class="flex flex-col max-h-[80vh]">
-        <div class="p-6 overflow-y-auto flex-1">
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">You are about to import {{ selectedFiles.length }} file(s).</p>
-          <div v-if="importError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-sm rounded-md whitespace-pre-wrap transition-colors">
-            {{ importError }}
-          </div>
-
-          <div v-if="importProgress && isImporting" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-semibold text-blue-900 dark:text-blue-100">Importing Data...</span>
-              <span class="text-sm font-medium text-blue-700 dark:text-blue-300">
-                {{ importProgress.processed }} / {{ importProgress.total }}
-              </span>
-            </div>
-            <div class="w-full bg-blue-200 dark:bg-blue-900/50 rounded-full h-2.5 mb-2 overflow-hidden">
-              <div 
-                class="bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-300" 
-                :style="{ width: `${(importProgress.processed / importProgress.total) * 100}%` }"
-              ></div>
-            </div>
-            <p class="text-xs text-blue-600 dark:text-blue-400 truncate" :title="importProgress.filename">
-              Processing: <span class="font-medium">{{ importProgress.filename }}</span>
-            </p>
-          </div>
-
-          <div class="space-y-4">
-            <div 
-              v-for="fileObj in selectedFiles" 
-              :key="fileObj.id"
-              class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
-            >
-              <div class="flex-1 truncate w-full">
-                <p class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate" :title="fileObj.file.name">
-                  {{ fileObj.file.name }}
-                </p>
-              </div>
-              <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-                <input 
-                  v-model="fileObj.timestamp" 
-                  type="datetime-local" 
-                  class="px-2 py-1.5 border border-slate-300 dark:border-slate-600 rounded text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors"
-                />
-                <BaseButton 
-                  variant="outline"
-                  size="xs"
-                  @click="clearTimestamp(fileObj.id)"
-                  title="Clear Timestamp"
-                >
-                  Clear
-                </BaseButton>
-                <BaseButton 
-                  variant="danger-outline"
-                  size="xs"
-                  @click="removeFile(fileObj.id)"
-                  title="Remove File"
-                >
-                  Remove
-                </BaseButton>
-              </div>
-            </div>
-          </div>
-          
-          <BaseButton 
-            variant="outline"
-            block
-            @click="triggerFileInput"
-            class="mt-4 py-3 !border-dashed border-2"
-          >
-            <template #icon>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            </template>
-            Add More Files
-          </BaseButton>
-        </div>
-
-        <div class="p-6 border-t border-slate-100 dark:border-slate-700 shrink-0 flex justify-end gap-3 transition-colors">
-          <BaseButton 
-            variant="outline"
-            @click="cancelImport"
-            :disabled="isImporting"
-          >
-            Cancel
-          </BaseButton>
-          <BaseButton 
-            variant="primary"
-            @click="confirmImport"
-            :loading="isImporting"
-          >
-            Submit
-          </BaseButton>
-        </div>
-      </div>
-    </BaseModal>
+    <ImportModal :account-name="genshinStore.selectedAccountName" />
   </div>
 </template>
 

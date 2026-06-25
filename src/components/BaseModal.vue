@@ -1,10 +1,23 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 
-const props = defineProps<{
-  modelValue: boolean
-  title?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    title?: string
+    size?: 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl'
+  }>(),
+  { size: 'md' },
+)
+
+const sizeClass: Record<NonNullable<typeof props.size>, string> = {
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+  '3xl': 'max-w-3xl',
+  '4xl': 'max-w-4xl',
+}
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -33,7 +46,8 @@ onUnmounted(() => {
   <Transition name="modal">
     <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" @click="close">
       <div 
-        class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700 transition-colors"
+        class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full overflow-hidden border border-slate-200 dark:border-slate-700 transition-colors"
+        :class="sizeClass[props.size]"
         @click.stop
       >
         <div v-if="title" class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center transition-colors">
