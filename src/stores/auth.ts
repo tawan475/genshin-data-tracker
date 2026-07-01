@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import router from '../router'
 import { clearAllLocalSettings } from '../utils/local-settings'
 
-const API_URL = 'http://localhost:3000'
+const API_URL = 'http://localhost:49000'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('accessToken') || null)
