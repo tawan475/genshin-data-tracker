@@ -1,3 +1,6 @@
-export const MAX_IMPORT_FILES = 250
-export const MAX_IMPORT_FILE_SIZE_MB = 50
-export const MAX_IMPORT_FILE_SIZE_BYTES = MAX_IMPORT_FILE_SIZE_MB * 1024 * 1024
+// Import limits are shared with the Worker, which enforces them.
+export {
+  MAX_IMPORT_FILES,
+  MAX_IMPORT_FILE_SIZE_BYTES,
+  MAX_IMPORT_FILE_SIZE_MB,
+} from '@gdt/shared/import'
