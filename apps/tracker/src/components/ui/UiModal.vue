@@ -29,13 +29,13 @@ function onBackdrop(event: MouseEvent) {
 <template>
   <dialog
     ref="dialog"
-    class="m-auto w-[calc(100%-2rem)] rounded-2xl border border-border-default bg-surface-raised p-0 text-text-primary shadow-overlay backdrop:bg-black/60"
+    class="m-auto w-[calc(100%-2rem)] rounded-xl border border-border-default bg-surface-raised p-0 text-text-primary shadow-overlay backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     :class="wide ? 'max-w-3xl' : 'max-w-lg'"
     @cancel.prevent="emit('close')"
     @click="onBackdrop"
   >
-    <div class="flex items-start justify-between gap-4 border-b border-border-subtle px-5 py-4">
-      <h2 class="font-display text-xl font-bold">{{ title }}</h2>
+    <div class="flex items-start justify-between gap-4 border-b border-border-default px-5 py-3.5">
+      <h2 class="text-lg font-semibold">{{ title }}</h2>
       <button
         type="button"
         class="-mt-1 -mr-2 inline-flex size-10 items-center justify-center rounded-md text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
@@ -50,7 +50,7 @@ function onBackdrop(event: MouseEvent) {
     </div>
     <div
       v-if="$slots.footer"
-      class="flex flex-wrap justify-end gap-2 border-t border-border-subtle px-5 py-4"
+      class="flex flex-wrap justify-end gap-2 border-t border-border-default bg-surface-overlay/40 px-5 py-3"
     >
       <slot name="footer" />
     </div>

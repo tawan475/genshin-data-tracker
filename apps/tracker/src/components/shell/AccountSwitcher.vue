@@ -5,7 +5,6 @@ import { onClickOutside } from '@vueuse/core'
 import { Check, ChevronsUpDown, Plus } from 'lucide-vue-next'
 import { useAccounts } from '@/stores/accounts'
 
-/** Shows the current Genshin account and switches between them. */
 const props = defineProps<{ currentId: number | null }>()
 const accounts = useAccounts()
 const route = useRoute()
@@ -29,25 +28,20 @@ function targetFor(id: number) {
   <div ref="root" class="relative">
     <button
       type="button"
-      class="flex min-h-12 w-full items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-left hover:bg-surface-overlay"
+      class="flex min-h-10 w-full items-center gap-2 rounded-md border border-border-default bg-surface-overlay px-3 text-left text-sm shadow-sm hover:border-border-strong"
       :aria-expanded="open"
       aria-haspopup="listbox"
       @click="open = !open"
     >
-      <span class="flex min-w-0 flex-1 flex-col">
-        <span class="truncate font-medium">
-          {{ current ? accounts.displayName(current) : 'Choose an account' }}
-        </span>
-        <span v-if="current?.uid" class="truncate font-mono text-sm text-text-muted">{{
-          current.uid
-        }}</span>
+      <span class="min-w-0 flex-1 truncate font-medium">
+        {{ current ? accounts.displayName(current) : 'Select account' }}
       </span>
       <ChevronsUpDown class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
     </button>
 
     <div
       v-if="open"
-      class="absolute inset-x-0 top-full z-30 mt-2 overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-overlay"
+      class="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-border-default bg-surface-raised py-1 shadow-overlay"
       role="listbox"
     >
       <RouterLink
@@ -56,20 +50,16 @@ function targetFor(id: number) {
         :to="targetFor(account.id)"
         role="option"
         :aria-selected="account.id === currentId"
-        class="flex min-h-11 items-center gap-3 px-3 py-2 hover:bg-surface-overlay"
+        class="flex min-h-9 items-center gap-2 px-3 text-sm hover:bg-surface-overlay"
+        :title="account.uid ?? undefined"
         @click="open = false"
       >
-        <span class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate">{{ accounts.displayName(account) }}</span>
-          <span class="truncate font-mono text-sm text-text-muted">
-            {{ account.uid ?? 'No UID' }} · {{ account.snapshotCount }} snapshots
-          </span>
-        </span>
+        <span class="min-w-0 flex-1 truncate">{{ accounts.displayName(account) }}</span>
         <Check v-if="account.id === currentId" class="size-4 text-accent-text" aria-hidden="true" />
       </RouterLink>
       <RouterLink
         :to="{ name: 'account-new' }"
-        class="flex min-h-11 items-center gap-2 border-t border-border-subtle px-3 text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
+        class="flex min-h-9 items-center gap-2 border-t border-border-default px-3 text-sm text-text-secondary hover:bg-surface-overlay"
         @click="open = false"
       >
         <Plus class="size-4" aria-hidden="true" />

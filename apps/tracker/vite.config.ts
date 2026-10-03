@@ -58,6 +58,23 @@ function serviceWorker(): Plugin {
 // builds the SPA plus the Worker together for `wrangler deploy`.
 export default defineConfig({
   plugins: [vue(), vueDevTools(), tailwindcss(), cloudflare(), serviceWorker()],
+  // Pre-bundle every client dependency up front. Discovering one at runtime
+  // makes Vite re-optimise and invalidate loaded modules, which shows up as
+  // "Failed to fetch dynamically imported module" in an open tab.
+  optimizeDeps: {
+    include: [
+      'vue',
+      'vue-router',
+      'pinia',
+      'lucide-vue-next',
+      'zod',
+      'fflate',
+      'chart.js',
+      '@vueuse/core',
+    ],
+  },
+  // JSON imports are used whole; per-key named exports doubled the icon map's size.
+  json: { namedExports: false },
   define: {
     __BUILD__: JSON.stringify(build),
     __MIGRATIONS__: JSON.stringify(migrations),

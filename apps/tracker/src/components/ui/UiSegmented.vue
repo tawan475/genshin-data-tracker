@@ -6,7 +6,7 @@ const model = defineModel<T>({ required: true })
 
 <template>
   <div
-    class="inline-flex rounded-lg border border-border-default bg-surface-sunken p-0.5"
+    class="inline-flex rounded-lg bg-surface-overlay p-1"
     role="radiogroup"
     :aria-label="label"
   >
@@ -16,10 +16,10 @@ const model = defineModel<T>({ required: true })
       type="button"
       role="radio"
       :aria-checked="model === option.value"
-      class="min-h-9 rounded-md px-3 text-sm font-medium transition-colors"
+      class="min-h-8 rounded-md px-3 text-sm font-medium transition-colors"
       :class="
         model === option.value
-          ? 'bg-surface-raised text-text-primary shadow-card'
+          ? 'bg-surface-raised text-text-primary shadow-sm'
           : 'text-text-secondary hover:text-text-primary'
       "
       @click="model = option.value"

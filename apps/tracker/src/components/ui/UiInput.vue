@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/** Text input; pair with UiField for its label. */
 defineProps<{ invalid?: boolean; mono?: boolean }>()
 const model = defineModel<string>({ default: '' })
 </script>
@@ -7,8 +6,8 @@ const model = defineModel<string>({ default: '' })
 <template>
   <input
     v-model="model"
-    class="min-h-11 w-full rounded-xl border bg-surface-raised px-3.5 text-base text-text-primary placeholder:text-text-muted transition-colors focus:border-accent focus:outline-none disabled:opacity-60"
-    :class="[invalid ? 'border-danger-border' : 'border-border-default', mono ? 'font-mono' : '']"
+    class="min-h-10 w-full rounded-md border bg-surface-raised px-3 text-sm text-text-primary shadow-sm transition-colors placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-60"
+    :class="[invalid ? 'border-danger' : 'border-border-strong', mono ? 'font-code' : '']"
     :aria-invalid="invalid || undefined"
   />
 </template>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/** Small label. Tones are for status; rarity colours come from RarityStars. */
 withDefaults(defineProps<{ tone?: 'neutral' | 'accent' | 'success' | 'danger' | 'warning' }>(), {
   tone: 'neutral',
 })
@@ -7,14 +6,14 @@ withDefaults(defineProps<{ tone?: 'neutral' | 'accent' | 'success' | 'danger' | 
 
 <template>
   <span
-    class="inline-flex items-center gap-1 rounded-sm border px-1.5 text-sm leading-6 font-medium whitespace-nowrap"
+    class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium whitespace-nowrap"
     :class="
       {
-        neutral: 'border-border-default text-text-secondary',
-        accent: 'border-transparent bg-accent text-accent-ink',
-        success: 'border-border-default text-success-text',
-        danger: 'border-danger-border bg-danger-surface text-danger-text',
-        warning: 'border-border-default text-warning-text',
+        neutral: 'bg-surface-overlay text-text-secondary',
+        accent: 'bg-accent/15 text-accent-text',
+        success: 'bg-emerald-500/15 text-success-text',
+        danger: 'bg-danger-surface text-danger-text',
+        warning: 'bg-amber-500/15 text-warning-text',
       }[tone]
     "
   >
