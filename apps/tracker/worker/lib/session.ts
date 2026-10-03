@@ -26,6 +26,12 @@ import { ApiError } from './http'
 
 const ACCESS_COOKIE = 'gdt_at'
 const REFRESH_COOKIE = 'gdt_rt'
+/**
+ * Not a credential: a readable "this browser has a session" flag, so the app
+ * can skip asking /api/auth/me (and refreshing) for visitors who never signed
+ * in. Its absence only means "don't bother asking"; the server never trusts it.
+ */
+const HINT_COOKIE = 'gdt_s'
 const ACCESS_TTL_S = 15 * 60
 const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000
 const ROTATION_GRACE_MS = 60 * 1000
@@ -60,11 +66,18 @@ function setRefreshCookie(c: Context<AppEnv>, token: string): void {
     sameSite: 'Strict',
     maxAge: REFRESH_TTL_MS / 1000,
   })
+  setCookie(c, HINT_COOKIE, '1', {
+    path: '/',
+    secure: true,
+    sameSite: 'Lax',
+    maxAge: REFRESH_TTL_MS / 1000,
+  })
 }
 
 export function clearSessionCookies(c: Context<AppEnv>): void {
   deleteCookie(c, ACCESS_COOKIE, { path: '/api', secure: true })
   deleteCookie(c, REFRESH_COOKIE, { path: '/api/auth', secure: true })
+  deleteCookie(c, HINT_COOKIE, { path: '/', secure: true })
 }
 
 /** Signs a user in on this device. */
