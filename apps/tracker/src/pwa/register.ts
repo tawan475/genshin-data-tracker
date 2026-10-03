@@ -50,15 +50,20 @@ export function registerServiceWorker(): void {
     }
   })
 
-  let reloading = false
+  // Only reload for an update the user accepted. A first visit also fires
+  // controllerchange (the new worker claims the page) and must not reload.
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading) return
+    if (!updateAccepted || reloading) return
     reloading = true
     window.location.reload()
   })
 }
 
+let updateAccepted = false
+let reloading = false
+
 /** Switches to the waiting build; the page reloads when it takes over. */
 export function applyUpdate(): void {
+  updateAccepted = true
   waiting?.postMessage('SKIP_WAITING')
 }
