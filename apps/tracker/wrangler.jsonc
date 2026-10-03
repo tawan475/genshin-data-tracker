@@ -39,5 +39,8 @@
   // Secrets (wrangler secret put): JWT_SECRET, PASSWORD_PEPPER — each at least
   // 32 random characters. Local dev reads them from .dev.vars.
 
+  // Daily housekeeping (worker/services/maintenance.ts), 02:23 in Bangkok.
+  "triggers": { "crons": ["23 19 * * *"] },
+
   "observability": { "enabled": true },
 }
