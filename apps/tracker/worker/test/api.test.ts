@@ -127,7 +127,9 @@ describe('auth', () => {
     })
     expect(tab.status).toBe(204)
 
+    expect(client.cookie('gdt_s')).toBe('1')
     expect((await client.fetch('/api/auth/logout', { method: 'POST' })).status).toBe(204)
+    expect(client.cookie('gdt_s')).toBeUndefined()
     expect((await client.fetch('/api/auth/me')).status).toBe(401)
     const replay = await SELF.fetch(`${ORIGIN}/api/auth/refresh`, {
       method: 'POST',

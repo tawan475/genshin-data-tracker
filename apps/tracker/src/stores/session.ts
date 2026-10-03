@@ -14,6 +14,14 @@ import { applyTheme } from '@/lib/theme'
 
 type Status = 'unknown' | 'signed-in' | 'signed-out'
 
+function hasSessionHint(): boolean {
+  try {
+    return document.cookie.split('; ').some((c) => c.startsWith('gdt_s='))
+  } catch {
+    return true
+  }
+}
+
 /**
  * Who is signed in. The password never leaves the browser: it is stretched
  * with PBKDF2 under the account's salt and only the derived key is sent.
@@ -36,12 +44,18 @@ export const useSession = defineStore('session', () => {
 
   onSignedOut(() => adopt(null))
 
-  /** Resolves the session once; later calls reuse the same answer. */
+  /**
+   * Resolves the session once; later calls reuse the same answer. Without the
+   * server's `gdt_s` hint cookie there is no session to find, so a signed-out
+   * visitor costs no requests at all.
+   */
   function ensureLoaded(): Promise<void> {
-    loading ??= api
-      .me()
-      .then(adopt)
-      .catch(() => adopt(null))
+    loading ??= hasSessionHint()
+      ? api
+          .me()
+          .then(adopt)
+          .catch(() => adopt(null))
+      : Promise.resolve(adopt(null))
     return loading
   }
 
