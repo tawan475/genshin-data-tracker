@@ -83,6 +83,6 @@ function substatTuple(s: GoodSubstat): [string, number, number | null] {
   return [s.key, s.value, s.initialValue ?? null]
 }
 
-export function hashArtifactIdentity(identity: ArtifactIdentity): Promise<string> {
+export function hashArtifactIdentity(identity: ArtifactIdentity): string {
   return sha256Hex128(artifactIdentityText(identity))
 }

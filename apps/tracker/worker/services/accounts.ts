@@ -61,9 +61,10 @@ export async function listAccounts(
 }
 
 /**
- * Bumps the account's data version and recomputes everything derived from its
- * snapshots from the source rows. Run in the same batch as any snapshot write:
- * recomputing (rather than incrementing) cannot drift, and writes are rare.
+ * Bumps the account's data version and re-points its latest snapshot. Run in
+ * the same batch as any snapshot write. The counters (snapshot_count,
+ * raw_bytes, stored_bytes) are kept by triggers (migration 0002), and the
+ * latest-snapshot lookup reads one index row.
  */
 export function recomputeAccount(d1: D1Database, accountId: number): D1PreparedStatement {
   return d1
@@ -71,11 +72,7 @@ export function recomputeAccount(d1: D1Database, accountId: number): D1PreparedS
       `UPDATE genshin_accounts SET
          data_version = data_version + 1,
          latest_snapshot_id = (SELECT id FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
-                               ORDER BY taken_at DESC, id DESC LIMIT 1),
-         snapshot_count = (SELECT count(*) FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL),
-         raw_bytes = (SELECT coalesce(sum(raw_size), 0) FROM snapshots
-                      WHERE account_id = ?1 AND deleted_at IS NULL),
-         stored_bytes = (SELECT coalesce(sum(length(data)), 0) FROM blobs WHERE account_id = ?1)
+                               ORDER BY taken_at DESC, id DESC LIMIT 1)
        WHERE id = ?1`,
     )
     .bind(accountId)

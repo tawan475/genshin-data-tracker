@@ -45,11 +45,9 @@ export interface PreparedSnapshot {
 }
 
 /** Step 1 of an import: validate and hash. Needs no database. */
-export async function prepareSnapshot(input: unknown): Promise<PreparedSnapshot> {
+export function prepareSnapshot(input: unknown): PreparedSnapshot {
   const good = normalizeGood(input)
-  const artifactHashes = await Promise.all(
-    good.artifacts.map((a) => hashArtifactIdentity(a.identity)),
-  )
+  const artifactHashes = good.artifacts.map((a) => hashArtifactIdentity(a.identity))
   return { good, artifactHashes, summary: summarize(good) }
 }
 
@@ -88,17 +86,45 @@ export interface EncodedSnapshot {
   contentHash: string
 }
 
+/** The sections that do not depend on catalog ids, materials in full. */
+export interface StaticSections {
+  characters: Section
+  weapons: Section
+  materials: Section
+  achievements: Section | null
+}
+
 /**
- * Step 2, once the catalog has assigned ids: build the stored sections, with
- * materials as a full keyframe. The content hash is final at this point, so a
- * caller can detect an unchanged inventory before loading any keyframe; call
- * {@link withMaterialsKeyframe} only when the snapshot will be stored.
+ * Step 2a: everything that needs no catalog ids. A server can compute these
+ * hashes before its first query and ask which sections already exist in the
+ * same round trip as the catalog lookup.
  */
-export async function encodeSnapshot(
+export function encodeStaticSections(
+  prepared: PreparedSnapshot,
+  materialsDictionary: KeyDictionary,
+): StaticSections {
+  const { good } = prepared
+  return {
+    characters: makeSection('characters', encodeCharacters(good.characters)),
+    weapons: makeSection('weapons', encodeWeapons(good.weapons)),
+    materials: makeSection('materials', encodeMaterialsFull(good.materials, materialsDictionary)),
+    achievements: good.achievements
+      ? makeSection('achievements', encodeAchievements(good.achievements))
+      : null,
+  }
+}
+
+/**
+ * Step 2b, once the catalog has assigned ids: the artifacts section and the
+ * content hash. Materials are still a full keyframe; the content hash is final
+ * here, so an unchanged inventory is detected before any keyframe is loaded.
+ * Call {@link withMaterialsKeyframe} only when the snapshot will be stored.
+ */
+export function completeSnapshot(
+  sections: StaticSections,
   prepared: PreparedSnapshot,
   artifactIds: ReadonlyMap<string, number>,
-  materialsDictionary: KeyDictionary,
-): Promise<EncodedSnapshot> {
+): EncodedSnapshot {
   const { good, artifactHashes } = prepared
   const refs = good.artifacts.map((artifact, index) => {
     const hash = artifactHashes[index]!
@@ -106,34 +132,30 @@ export async function encodeSnapshot(
     if (id === undefined) throw new Error(`No catalog id for artifact ${hash}`)
     return { id, state: artifact.state }
   })
-
-  const [characters, weapons, artifacts, fullMaterials, achievements] = await Promise.all([
-    makeSection('characters', encodeCharacters(good.characters)),
-    makeSection('weapons', encodeWeapons(good.weapons)),
-    makeSection('artifacts', encodeArtifacts(refs)),
-    makeSection('materials', encodeMaterialsFull(good.materials, materialsDictionary)),
-    good.achievements ? makeSection('achievements', encodeAchievements(good.achievements)) : null,
-  ])
-
-  const contentHash = await sha256Hex128(
+  const artifacts = makeSection('artifacts', encodeArtifacts(refs))
+  const contentHash = sha256Hex128(
     [
-      characters.hash,
-      weapons.hash,
+      sections.characters.hash,
+      sections.weapons.hash,
       artifacts.hash,
-      fullMaterials.hash,
-      achievements?.hash ?? '',
+      sections.materials.hash,
+      sections.achievements?.hash ?? '',
     ].join(':'),
   )
+  return { ...sections, artifacts, materialsIsKeyframe: true, contentHash }
+}
 
-  return {
-    characters,
-    weapons,
-    artifacts,
-    materials: fullMaterials,
-    achievements,
-    materialsIsKeyframe: true,
-    contentHash,
-  }
+/** Steps 2a and 2b together. */
+export function encodeSnapshot(
+  prepared: PreparedSnapshot,
+  artifactIds: ReadonlyMap<string, number>,
+  materialsDictionary: KeyDictionary,
+): EncodedSnapshot {
+  return completeSnapshot(
+    encodeStaticSections(prepared, materialsDictionary),
+    prepared,
+    artifactIds,
+  )
 }
 
 /**
@@ -141,20 +163,16 @@ export async function encodeSnapshot(
  * account's latest snapshot uses) when the delta is small enough; otherwise
  * the snapshot keeps its own full keyframe. The content hash is unaffected.
  */
-export async function withMaterialsKeyframe(
+export function withMaterialsKeyframe(
   encoded: EncodedSnapshot,
   prepared: PreparedSnapshot,
   materialsDictionary: KeyDictionary,
   keyframe: MaterialsKeyframe | null,
-): Promise<EncodedSnapshot> {
+): EncodedSnapshot {
   if (!keyframe) return encoded
   const stored = encodeMaterials(prepared.good.materials, materialsDictionary, keyframe)
   if (stored.b === undefined) return encoded
-  return {
-    ...encoded,
-    materials: await makeSection('materials', stored),
-    materialsIsKeyframe: false,
-  }
+  return { ...encoded, materials: makeSection('materials', stored), materialsIsKeyframe: false }
 }
 
 /** A snapshot as read back from storage, sections already inflated to JSON text. */

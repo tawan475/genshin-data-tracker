@@ -12,6 +12,7 @@ import { getDb } from '../db/client'
 import { genshinAccounts } from '../db/schema'
 import type { AppEnv } from '../env'
 import { ApiError, clientIp, rateLimit } from '../lib/http'
+import { D1Meter } from '../lib/meter'
 import { readUpload } from '../lib/upload'
 import { hashImportKey } from '../services/accounts'
 import { importSnapshot } from '../services/import'
@@ -51,6 +52,8 @@ export const publicImport = new Hono<AppEnv>()
 
   .post('/import-by-key', async (c) => {
     const account = await accountForKey(c)
-    const result = await importSnapshot(c.env.DB, account.id, await readUpload(c))
+    const meter = new D1Meter()
+    const result = await importSnapshot(c.env.DB, account.id, await readUpload(c), meter)
+    meter.report(c)
     return c.json(result, result.status === 'created' ? 201 : 200)
   })
