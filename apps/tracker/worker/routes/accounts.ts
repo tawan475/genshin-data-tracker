@@ -162,11 +162,12 @@ export const accounts = new Hono<AppEnv>()
     const [deleted] = await c.env.DB.batch([
       c.env.DB.prepare(
         `UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND deleted_at IS NULL
-         AND id IN (SELECT value FROM json_each(?2))`,
+         AND id IN (SELECT value FROM json_each(?2)) RETURNING id`,
       ).bind(id, JSON.stringify(ids), Date.now()),
       recomputeAccount(c.env.DB, id),
     ])
-    return c.json({ deleted: deleted!.meta.changes })
+    // meta.changes would also count the counter trigger's updates.
+    return c.json({ deleted: deleted!.results.length })
   })
 
   .delete('/:id/snapshots/:snapshotId', async (c) => {

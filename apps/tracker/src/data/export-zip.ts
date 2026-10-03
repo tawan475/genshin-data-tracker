@@ -1,0 +1,142 @@
+/**
+ * Building a zip of GOOD files from a GDT1 bundle. Pure (no DOM, no fetch):
+ * the export worker drives it, and it can be exercised from Node.
+ *
+ * Snapshots are decoded and deflated one at a time and the archive leaves as
+ * a stream of chunks, so memory holds one GOOD file plus the compressed
+ * output, never the ~1 MB-per-snapshot JSON of the whole selection.
+ */
+
+import { Zip, ZipDeflate } from 'fflate'
+import {
+  decodeSnapshot,
+  type ArtifactIdentity,
+  type BundleSnapshot,
+  type Good,
+  type KeyDictionary,
+} from '@gdt/shared'
+
+/** "GDT_export-2026-06-20T14-05-43": the server's name for a GOOD download, minus `.json`. */
+export function goodFileStem(takenAt: number): string {
+  return `GDT_export-${new Date(takenAt)
+    .toISOString()
+    .replace(/:/g, '-')
+    .replace(/\.\d+Z$/, '')}`
+}
+
+export function goodFileName(takenAt: number): string {
+  return `${goodFileStem(takenAt)}.json`
+}
+
+/**
+ * A file name per snapshot, unique within one archive. Names have one-second
+ * resolution, so captures that share a second all get their id appended
+ * (`…T14-05-43_151.json`); every other name matches the single-file download.
+ */
+export function zipEntryNames(
+  snapshots: readonly Pick<BundleSnapshot, 'id' | 'takenAt'>[],
+): Map<number, string> {
+  const stems = new Map<number, string>()
+  const uses = new Map<string, number>()
+  for (const { id, takenAt } of snapshots) {
+    const stem = goodFileStem(takenAt)
+    stems.set(id, stem)
+    uses.set(stem, (uses.get(stem) ?? 0) + 1)
+  }
+  const names = new Map<number, string>()
+  for (const [id, stem] of stems) {
+    names.set(id, uses.get(stem)! > 1 ? `${stem}_${id}.json` : `${stem}.json`)
+  }
+  return names
+}
+
+/** Rebuilds one snapshot's GOOD file from inflated bundle sections. */
+export function decodeFromSections(
+  snapshot: BundleSnapshot,
+  texts: ReadonlyMap<string, string>,
+  catalog: ReadonlyMap<number, ArtifactIdentity>,
+  materials: KeyDictionary,
+): Good {
+  const text = (hash: string) => {
+    const value = texts.get(hash)
+    if (value === undefined) throw new Error(`Snapshot ${snapshot.id} is missing section ${hash}`)
+    return value
+  }
+  return decodeSnapshot(
+    {
+      format: snapshot.format,
+      version: snapshot.version,
+      source: snapshot.source,
+      takenAt: snapshot.takenAt,
+      characters: text(snapshot.characters),
+      weapons: text(snapshot.weapons),
+      artifacts: text(snapshot.artifacts),
+      materials: text(snapshot.materials),
+      materialsKeyframe:
+        snapshot.materialsKeyframe === snapshot.materials ? null : text(snapshot.materialsKeyframe),
+      achievements: snapshot.achievements ? text(snapshot.achievements) : null,
+    },
+    catalog,
+    materials,
+  )
+}
+
+export interface ZipProgress {
+  /** Snapshots decoded and added to the archive. */
+  done: number
+  total: number
+  /** GOOD JSON produced so far (what the files hold once unzipped). */
+  jsonBytes: number
+  /** Archive bytes emitted so far. */
+  zipBytes: number
+}
+
+export interface GoodZipOptions {
+  snapshots: readonly BundleSnapshot[]
+  decode: (snapshot: BundleSnapshot) => Good
+  /** Receives the archive in order; chunks are not reused after the call. */
+  onChunk: (chunk: Uint8Array) => void
+  onProgress?: (progress: ZipProgress) => void
+  /** DEFLATE level, 0-9. */
+  level?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+}
+
+// DOS timestamps in a zip cover 1980-2099; outside that fflate throws.
+const DOS_MIN = Date.UTC(1980, 0, 2)
+const DOS_MAX = Date.UTC(2099, 11, 30)
+
+/** Writes one GOOD file per snapshot into a zip, streaming. Returns the totals. */
+export function writeGoodZip(options: GoodZipOptions): ZipProgress {
+  const { snapshots, decode, onChunk, onProgress, level = 6 } = options
+  const progress: ZipProgress = { done: 0, total: snapshots.length, jsonBytes: 0, zipBytes: 0 }
+  const names = zipEntryNames(snapshots)
+  const encoder = new TextEncoder()
+  // fflate reports through the callback; checked after each synchronous step.
+  const state: { failure: Error | null; finished: boolean } = { failure: null, finished: false }
+
+  const zip = new Zip((error, chunk, final) => {
+    if (error) {
+      state.failure = error
+      return
+    }
+    progress.zipBytes += chunk.length
+    onChunk(chunk)
+    if (final) state.finished = true
+  })
+
+  for (const snapshot of snapshots) {
+    const bytes = encoder.encode(JSON.stringify(decode(snapshot)))
+    const file = new ZipDeflate(names.get(snapshot.id)!, { level })
+    if (snapshot.takenAt >= DOS_MIN && snapshot.takenAt <= DOS_MAX) file.mtime = snapshot.takenAt
+    zip.add(file)
+    file.push(bytes, true)
+    if (state.failure) throw state.failure
+    progress.done++
+    progress.jsonBytes += bytes.length
+    onProgress?.({ ...progress })
+  }
+  zip.end()
+  if (state.failure) throw state.failure
+  if (!state.finished) throw new Error('The zip did not finish')
+  return progress
+}
