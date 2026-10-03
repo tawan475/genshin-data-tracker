@@ -33,25 +33,35 @@ const session = useSession()
           </template>
         </div>
 
-        <div class="glass-panel inline-flex flex-wrap items-center gap-6 px-8 py-5 sm:gap-8">
+        <div class="glass-panel inline-flex items-center gap-5 px-5 py-5 sm:gap-8 sm:px-8">
           <div class="flex flex-col gap-1">
-            <span class="text-3xl font-bold text-white">~1 KB</span>
-            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">Per snapshot</span>
+            <span class="text-2xl font-bold text-white sm:text-3xl">~1 KB</span>
+            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase"
+              >Per snapshot</span
+            >
           </div>
-          <div class="h-10 w-px bg-white/10" />
+          <div class="h-10 w-px shrink-0 bg-white/10" />
           <div class="flex flex-col gap-1">
-            <span class="text-3xl font-bold text-white">Auto</span>
-            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">GOOD sync</span>
+            <span class="text-2xl font-bold text-white sm:text-3xl">Auto</span>
+            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase"
+              >GOOD sync</span
+            >
           </div>
-          <div class="h-10 w-px bg-white/10" />
+          <div class="h-10 w-px shrink-0 bg-white/10" />
           <div class="flex flex-col gap-1">
-            <span class="text-3xl font-bold text-white">Offline</span>
-            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">Installable</span>
+            <span class="text-2xl font-bold text-white sm:text-3xl">Offline</span>
+            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase"
+              >Installable</span
+            >
           </div>
         </div>
       </div>
 
-      <div class="animate-fade-up relative h-[380px] lg:h-[480px]" style="animation-delay: 300ms" aria-hidden="true">
+      <div
+        class="animate-fade-up relative h-[380px] lg:h-[480px]"
+        style="animation-delay: 300ms"
+        aria-hidden="true"
+      >
         <div
           class="glass-panel animate-float absolute top-[8%] left-1/2 w-[280px] -translate-x-1/2 p-6 lg:left-[8%] lg:translate-x-0"
         >
