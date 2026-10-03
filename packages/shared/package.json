@@ -19,6 +19,7 @@
     "vitest": "^4.1.0"
   },
   "dependencies": {
+    "@noble/hashes": "^2.4.0",
     "zod": "^4.6.5"
   }
 }

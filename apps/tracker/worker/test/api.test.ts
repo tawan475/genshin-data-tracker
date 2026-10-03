@@ -332,3 +332,66 @@ describe('accounts and imports', () => {
     expect(settings.materialsGraph).toEqual({ selectedKeys: [], groupBy: 'month', limit: 365 })
   })
 })
+
+describe('D1 cost', () => {
+  const DIAG = 'test-diag-key-test-diag-key-test-diag-key'
+
+  async function costedImport(key: string, good: unknown, timestamp: number) {
+    const response = await SELF.fetch(`${ORIGIN}/api/genshin-accounts-public/import-by-key`, {
+      method: 'POST',
+      headers: { 'x-import-key': key, 'x-diag-key': DIAG },
+      body: irminsulForm(good, timestamp),
+    })
+    const header = response.headers.get('x-gdt-d1') ?? ''
+    const cost = Object.fromEntries(
+      header.split(';').map((part) => {
+        const [k, v] = part.trim().split('=')
+        return [k, Number(v)]
+      }),
+    )
+    return { status: response.status, cost }
+  }
+
+  // A large catalog makes a scan show up: 1,500 stored artifacts, then an
+  // upload that holds only 2 of them must not read the other 1,498.
+  it('probes the catalog by index instead of scanning it', async () => {
+    const { client } = await signUp()
+    const { importKey } = await createAccount(client)
+    const many = Array.from({ length: 1500 }, (_, i) => ({
+      ...sampleGood().artifacts[1]!,
+      substats: [{ key: 'hp', value: i + 1 }],
+    }))
+    await costedImport(importKey, sampleGood({ artifacts: many }), 1_000)
+
+    const small = await costedImport(importKey, sampleGood(), 2_000)
+    expect(small.status).toBe(201)
+    expect(small.cost['round-trips']).toBeLessThanOrEqual(3)
+    expect(small.cost['rows-read']).toBeLessThan(100)
+  })
+
+  it('answers an unchanged re-upload in one round trip', async () => {
+    const { client } = await signUp()
+    const { importKey } = await createAccount(client)
+    await costedImport(importKey, sampleGood(), 1_000)
+    const again = await costedImport(importKey, sampleGood(), 1_000)
+    expect(again.status).toBe(200)
+    expect(again.cost['round-trips']).toBe(1)
+    expect(again.cost['rows-written']).toBe(0)
+  })
+
+  it('keeps the account counters exact through imports and deletes', async () => {
+    const { client } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    const a = await importByKey(importKey, sampleGood(), 1_000)
+    await importByKey(importKey, sampleGood({ materials: { Mora: 1 } }), 2_000)
+    const before = await client.json<AccountResponse>(`/api/accounts/${account.id}`)
+    expect(before.snapshotCount).toBe(2)
+    const { snapshotId } = (await a.json()) as ImportResponse
+    await client.fetch(`/api/accounts/${account.id}/snapshots/${snapshotId}`, { method: 'DELETE' })
+    const after = await client.json<AccountResponse>(`/api/accounts/${account.id}`)
+    expect(after.snapshotCount).toBe(1)
+    expect(after.rawBytes).toBeLessThan(before.rawBytes)
+    // Stored sections are shared and kept, so deleting a snapshot frees none.
+    expect(after.storedBytes).toBe(before.storedBytes)
+  })
+})

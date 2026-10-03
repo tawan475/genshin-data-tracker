@@ -1,25 +1,34 @@
 /**
  * The import pipeline: one GOOD file in, one snapshot (or nothing) out.
  *
- * Round trips to D1, typical case:
- *   1. batch: latest snapshot, same-capture-time snapshot, catalog ids
- *   2. batch: insert new artifacts + read their ids      (only if any are new)
- *   3. batch: materials keyframe + which sections exist  (only if storing)
- *   4. batch: new sections, the snapshot row, account recompute (atomic)
- * An unchanged re-upload stops after step 1 plus one small update.
+ * D1 round trips, typical case (the Worker runs at the edge, D1 in APAC, so
+ * each round trip is tens of milliseconds and dominates an import):
+ *   1. one batch: latest snapshot, same-capture-time snapshot, catalog ids for
+ *      the upload's artifacts, the latest materials keyframe, and which of the
+ *      id-independent sections already exist
+ *   2. only if some artifacts are new: insert them and read their ids
+ *   3. one batch: new sections, the snapshot row, account update (atomic)
+ * An unchanged re-upload stops after 1 (plus a one-row update when it is a
+ * later capture of the same inventory).
+ *
+ * Lookups by hash are driven from json_each with CROSS JOIN, which makes
+ * SQLite probe the unique index once per hash instead of scanning the
+ * account's whole catalog: D1 bills, and waits on, every row read.
  */
 
 import {
   GoodFormatError,
   compactSubstats,
+  completeSnapshot,
   decodeMaterials,
   deflateRaw,
-  encodeSnapshot,
+  encodeStaticSections,
   inflateRaw,
   prepareSnapshot,
   resolveImportTimestamp,
   withMaterialsKeyframe,
   type ArtifactIdentity,
+  type EncodedSnapshot,
   type ImportResponse,
   type MaterialsKeyframe,
   type MaterialsSection,
@@ -28,6 +37,7 @@ import {
 } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { ApiError, isUniqueViolation } from '../lib/http'
+import { D1Meter } from '../lib/meter'
 import { recomputeAccount } from './accounts'
 
 export interface Upload {
@@ -41,19 +51,26 @@ interface LatestRow {
   id: number
   taken_at: number
   content_hash: string
+  artifacts_hash: string
   materials_keyframe_hash: string
 }
 
 /** Artifacts per INSERT statement; keeps each bound JSON parameter well under D1's limits. */
 const ARTIFACT_INSERT_CHUNK = 400
 
+const LATEST_SQL = `SELECT id, taken_at, content_hash, artifacts_hash, materials_keyframe_hash
+  FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+  ORDER BY taken_at DESC, id DESC LIMIT 1`
+
 export async function importSnapshot(
   d1: D1Database,
   accountId: number,
   upload: Upload,
+  meter = new D1Meter(),
 ): Promise<ImportResponse> {
-  const prepared = await parseUpload(upload.text)
+  const prepared = parseUpload(upload.text)
   const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
+  const sections = encodeStaticSections(prepared, MATERIALS)
 
   // Catalog entry for each distinct artifact identity in this upload.
   const identities = new Map<string, ArtifactIdentity>()
@@ -61,36 +78,54 @@ export async function importSnapshot(
     if (!identities.has(hash)) identities.set(hash, prepared.good.artifacts[i]!.identity)
   })
   const hashes = [...identities.keys()]
+  const staticHashes = [
+    sections.characters,
+    sections.weapons,
+    sections.materials,
+    sections.achievements,
+  ]
+    .filter((s): s is Section => s !== null)
+    .map((s) => s.hash)
 
   // 1.
-  const [latestResult, sameTimeResult, idsResult] = await d1.batch<Record<string, unknown>>([
-    d1
-      .prepare(
-        `SELECT id, taken_at, content_hash, materials_keyframe_hash FROM snapshots
-         WHERE account_id = ?1 AND deleted_at IS NULL ORDER BY taken_at DESC, id DESC LIMIT 1`,
-      )
-      .bind(accountId),
-    d1
-      .prepare(
-        `SELECT id, content_hash FROM snapshots
-         WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
-      )
-      .bind(accountId, takenAt),
-    selectArtifactIds(d1, accountId, hashes),
-  ])
+  const [latestResult, sameTimeResult, idsResult, keyframeResult, existingResult] =
+    await meter.batch(d1, 'lookup', [
+      d1.prepare(LATEST_SQL).bind(accountId),
+      d1
+        .prepare(
+          `SELECT id, content_hash FROM snapshots
+           WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
+        )
+        .bind(accountId, takenAt),
+      selectArtifactIds(d1, accountId, hashes),
+      d1
+        .prepare(
+          `SELECT hash, data FROM blobs WHERE account_id = ?1 AND hash = (
+             SELECT materials_keyframe_hash FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+             ORDER BY taken_at DESC, id DESC LIMIT 1)`,
+        )
+        .bind(accountId),
+      d1
+        .prepare(
+          `SELECT b.hash FROM json_each(?2) AS j
+           CROSS JOIN blobs AS b ON b.account_id = ?1 AND b.hash = j.value`,
+        )
+        .bind(accountId, JSON.stringify(staticHashes)),
+    ])
   const latest = (latestResult!.results[0] as LatestRow | undefined) ?? null
   const sameTime = sameTimeResult!.results[0] as { id: number; content_hash: string } | undefined
   const artifactIds = idMap(idsResult!.results)
+  const existing = new Set(existingResult!.results.map((row) => row.hash as string))
 
   // 2.
   const missing = hashes.filter((hash) => !artifactIds.has(hash))
   if (missing.length > 0) {
-    for (const [hash, id] of await insertArtifacts(d1, accountId, missing, identities)) {
+    for (const [hash, id] of await insertArtifacts(d1, meter, accountId, missing, identities)) {
       artifactIds.set(hash, id)
     }
   }
 
-  let encoded = await encodeSnapshot(prepared, artifactIds, MATERIALS)
+  let encoded = completeSnapshot(sections, prepared, artifactIds)
   const response = (status: ImportResponse['status'], snapshotId: number, storedSize = 0) => ({
     status,
     snapshotId,
@@ -112,7 +147,7 @@ export async function importSnapshot(
   if (latest && latest.content_hash === encoded.contentHash && takenAt > latest.taken_at) {
     // Same inventory captured again later: remember when it was last seen
     // instead of storing a duplicate snapshot.
-    await d1.batch([
+    await meter.batch(d1, 'seen', [
       d1
         .prepare('UPDATE snapshots SET last_seen_at = max(last_seen_at, ?1) WHERE id = ?2')
         .bind(takenAt, latest.id),
@@ -123,27 +158,18 @@ export async function importSnapshot(
     return response('unchanged', latest.id)
   }
 
-  // 3.
-  const fullSections = sectionsOf(encoded)
-  const [keyframeResult, existingResult] = await d1.batch<Record<string, unknown>>([
-    d1
-      .prepare('SELECT data FROM blobs WHERE account_id = ?1 AND hash = ?2')
-      .bind(accountId, latest?.materials_keyframe_hash ?? ''),
-    d1
-      .prepare(
-        `SELECT hash FROM blobs WHERE account_id = ?1
-         AND hash IN (SELECT value FROM json_each(?2))`,
-      )
-      .bind(accountId, JSON.stringify(fullSections.map((s) => s.hash))),
-  ])
-  const keyframe = await readKeyframe(latest?.materials_keyframe_hash, keyframeResult!.results[0])
-  encoded = await withMaterialsKeyframe(encoded, prepared, MATERIALS, keyframe)
-  const existing = new Set(existingResult!.results.map((row) => row.hash as string))
-  const toStore = sectionsOf(encoded).filter((section) => !existing.has(section.hash))
+  const keyframe = await readKeyframe(keyframeResult!.results[0])
+  encoded = withMaterialsKeyframe(encoded, prepared, MATERIALS, keyframe)
+
+  // Sections already stored cost nothing. The artifacts section usually
+  // matches the latest snapshot's; a materials delta is almost always new.
+  const toStore = sectionsOf(encoded).filter(
+    (s) => !existing.has(s.hash) && s.hash !== latest?.artifacts_hash,
+  )
   const compressed = await Promise.all(toStore.map((section) => deflateRaw(section.json)))
   const storedSize = compressed.reduce((sum, bytes) => sum + bytes.length, 0)
 
-  // 4.
+  // 3.
   const materialsKeyframeHash = encoded.materialsIsKeyframe
     ? encoded.materials.hash
     : keyframe!.hash
@@ -187,19 +213,17 @@ export async function importSnapshot(
 
   let results: D1Result<Record<string, unknown>>[]
   try {
-    results = await d1.batch<Record<string, unknown>>(statements)
+    results = await meter.batch(d1, 'store', statements)
   } catch (error) {
     // Lost a race with a concurrent upload of the same capture time.
     if (isUniqueViolation(error, 'snapshots')) {
-      const [row] = (
-        await d1
-          .prepare(
-            `SELECT id, content_hash FROM snapshots
-             WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
-          )
-          .bind(accountId, takenAt)
-          .all<{ id: number; content_hash: string }>()
-      ).results
+      const row = await d1
+        .prepare(
+          `SELECT id, content_hash FROM snapshots
+           WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
+        )
+        .bind(accountId, takenAt)
+        .first<{ id: number; content_hash: string }>()
       if (row?.content_hash === encoded.contentHash) return response('unchanged', row.id)
       throw new ApiError(
         409,
@@ -213,7 +237,7 @@ export async function importSnapshot(
   return response('created', snapshotId, storedSize)
 }
 
-async function parseUpload(text: string): Promise<PreparedSnapshot> {
+function parseUpload(text: string): PreparedSnapshot {
   let input: unknown
   try {
     input = JSON.parse(text)
@@ -221,14 +245,14 @@ async function parseUpload(text: string): Promise<PreparedSnapshot> {
     throw new ApiError(400, 'invalid_json', 'The file is not valid JSON')
   }
   try {
-    return await prepareSnapshot(input)
+    return prepareSnapshot(input)
   } catch (error) {
     if (error instanceof GoodFormatError) throw new ApiError(400, 'invalid_good', error.message)
     throw error
   }
 }
 
-function sectionsOf(encoded: Awaited<ReturnType<typeof encodeSnapshot>>): Section[] {
+function sectionsOf(encoded: EncodedSnapshot): Section[] {
   const sections = [encoded.characters, encoded.weapons, encoded.artifacts, encoded.materials]
   if (encoded.achievements) sections.push(encoded.achievements)
   return sections
@@ -241,8 +265,8 @@ function selectArtifactIds(
 ): D1PreparedStatement {
   return d1
     .prepare(
-      `SELECT id, hash FROM artifacts WHERE account_id = ?1
-       AND hash IN (SELECT value FROM json_each(?2))`,
+      `SELECT a.id, a.hash FROM json_each(?2) AS j
+       CROSS JOIN artifacts AS a ON a.account_id = ?1 AND a.hash = j.value`,
     )
     .bind(accountId, JSON.stringify(hashes))
 }
@@ -254,6 +278,7 @@ function idMap(rows: Record<string, unknown>[]): Map<string, number> {
 /** Inserts catalog rows (idempotently) and returns the ids of `hashes`. */
 async function insertArtifacts(
   d1: D1Database,
+  meter: D1Meter,
   accountId: number,
   hashes: string[],
   identities: ReadonlyMap<string, ArtifactIdentity>,
@@ -290,15 +315,14 @@ async function insertArtifacts(
     )
   }
   statements.push(selectArtifactIds(d1, accountId, hashes))
-  const results = await d1.batch<Record<string, unknown>>(statements)
+  const results = await meter.batch(d1, 'catalog', statements)
   return idMap(results[results.length - 1]!.results)
 }
 
 async function readKeyframe(
-  hash: string | undefined,
   row: Record<string, unknown> | undefined,
 ): Promise<MaterialsKeyframe | null> {
-  if (!hash || !row) return null
+  if (!row) return null
   const data = row.data
   const bytes =
     data instanceof Uint8Array
@@ -308,5 +332,5 @@ async function readKeyframe(
         : new Uint8Array(data as ArrayBuffer)
   const section: MaterialsSection = JSON.parse(await inflateRaw(bytes))
   if (section.b !== undefined) return null
-  return { hash, materials: decodeMaterials(section, MATERIALS, null) }
+  return { hash: row.hash as string, materials: decodeMaterials(section, MATERIALS, null) }
 }

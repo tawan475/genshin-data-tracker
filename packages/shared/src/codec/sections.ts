@@ -23,9 +23,9 @@ export interface Section {
   json: string
 }
 
-export async function makeSection(kind: SectionKind, value: unknown): Promise<Section> {
+export function makeSection(kind: SectionKind, value: unknown): Section {
   const json = JSON.stringify(value)
-  return { kind, json, hash: await sha256Hex128(`${kind}:${json}`) }
+  return { kind, json, hash: sha256Hex128(`${kind}:${json}`) }
 }
 
 const n = (value: KeyRef | undefined, fallback: number): number =>

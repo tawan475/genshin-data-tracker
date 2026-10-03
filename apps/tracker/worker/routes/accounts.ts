@@ -15,6 +15,7 @@ import { genshinAccounts } from '../db/schema'
 import type { AppEnv } from '../env'
 import { accountEtag, checkEtag } from '../lib/etag'
 import { ApiError, idParam, notFound, parseJson, rateLimit } from '../lib/http'
+import { D1Meter } from '../lib/meter'
 import { requireUser } from '../lib/session'
 import { readUpload } from '../lib/upload'
 import {
@@ -124,7 +125,9 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
-    const result = await importSnapshot(c.env.DB, id, await readUpload(c))
+    const meter = new D1Meter()
+    const result = await importSnapshot(c.env.DB, id, await readUpload(c), meter)
+    meter.report(c)
     return c.json(result, result.status === 'created' ? 201 : 200)
   })
 
