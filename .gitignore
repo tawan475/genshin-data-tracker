@@ -13,3 +13,6 @@ coverage
 # Local env
 .env
 *.local
+
+# Diagnostics key for /api/health (x-diag-key); see apps/tracker/README
+.diag-key

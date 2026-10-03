@@ -61,7 +61,7 @@ describe('worker', () => {
   it('answers /api/health', async () => {
     const response = await SELF.fetch('https://genshin-tracker.475.dev/api/health')
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ ok: true })
+    expect(await response.json()).toMatchObject({ status: 'ok', db: 'ok' })
   })
 
   it('returns JSON 404s under /api', async () => {
