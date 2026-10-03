@@ -45,11 +45,63 @@ append-only dictionary in `packages/shared/src/dictionary`. Add new keys with
 lists by hand; a test pins them). Keys the dictionary lacks are stored as
 strings, so imports never fail on new game content.
 
-## First deploy
+Reads are built for the browser to do the work: `/api/accounts/:id/catalog`
+(every artifact, compact rows), `/api/accounts/:id/bundle` (stored sections,
+untouched, in the binary GDT1 format of `packages/shared/src/codec/bundle.ts`)
+and `/api/accounts/:id/snapshots` (summaries). Each revalidates with an ETag on
+the account's `data_version`, so a reload costs one indexed read. Bulk export
+zips are built in the browser; the server only rebuilds single GOOD files.
+
+## API notes
+
+- **Auth.** Email + username + password, but the password never leaves the
+  browser: it is stretched with PBKDF2 (600k iterations, per-user salt) and only
+  the derived key is sent; D1 stores `HMAC(PASSWORD_PEPPER, key)`. Sessions are
+  HttpOnly cookies: a 15-minute JWT plus a rotating refresh token (60 s grace
+  for concurrent tabs). Cookie-authed writes need `x-gdt-csrf: 1`.
+- **Irminsul contract** (`irminsul/src/monitor.rs`): `POST
+  /api/genshin-accounts-public/import-by-key` (multipart `file` + optional
+  `timestamp`, header `x-import-key`) and `GET .../verify-key`. Any 2xx is
+  success; 401/403 makes irminsul re-verify. Re-uploading a capture is a no-op.
+  Import keys are stored as SHA-256 and shown once.
+- **Imports** take two D1 round trips in the usual case; an identical later
+  capture only moves `last_seen_at`. Uploads may be gzipped.
+- **Diagnostics.** `GET /api/health` is public (status, build, D1, migrations).
+  With `x-diag-key: <DIAG_KEY>` it adds the private tier — every secret with its
+  value, bindings, error detail — and imports add `Server-Timing` and
+  `x-gdt-d1` (round trips, rows read/written, SQL time). A session never opens
+  it. The key lives in the gitignored `apps/tracker/.diag-key`:
+  `curl -H "x-diag-key: $(cat apps/tracker/.diag-key)" https://genshin-tracker.475.dev/api/health`.
+- **Maintenance** runs daily (cron): expired sessions are removed, snapshots
+  deleted more than 30 days ago are purged, unreferenced sections are collected.
+  Account counters are kept exact by triggers (migration 0002).
+
+## Scripts
+
+```bash
+# Replay a folder of GOOD files through irminsul's upload path (import old exports / load test)
+GDT_IMPORT_KEY=gdt_ik_... [GDT_DIAG_KEY=...] node apps/tracker/scripts/upload-goods.mjs <dir>   --url https://genshin-tracker.475.dev --gzip [--limit N]
+pnpm --filter @gdt/tracker icons     # regenerate PWA icons + manifest
+```
+
+## PWA
+
+`src/pwa/sw-template.js` is emitted as `/sw.js` by a Vite plugin with the
+build's precache list: one cache per build, network-first navigation with the
+app shell offline, `/api` never cached, Enka images cache-first. A new build
+waits until the user accepts the "new version" banner. `public/_headers` keeps
+`sw.js` and the manifest uncached.
+
+## Deploying
 
 ```bash
 pnpm exec wrangler login
-pnpm exec wrangler d1 create gdt --location apac   # put the printed id in wrangler.jsonc
+pnpm exec wrangler d1 create gdt --location apac        # once; put the id in wrangler.jsonc
+pnpm exec wrangler secret bulk secrets.json             # once: JWT_SECRET, PASSWORD_PEPPER, DIAG_KEY
 pnpm --filter @gdt/tracker db:migrate:remote
-pnpm --filter @gdt/tracker deploy
+pnpm --filter @gdt/tracker deploy                        # type-check + build + wrangler deploy
 ```
+
+Static assets are served from the edge; `/api` runs with Smart Placement (next
+to D1). Measured from Bangkok: ~5 ms of SQL per import, ~120 ms per D1 round
+trip without placement.
