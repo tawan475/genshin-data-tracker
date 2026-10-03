@@ -68,9 +68,9 @@ export async function importSnapshot(
   upload: Upload,
   meter = new D1Meter(),
 ): Promise<ImportResponse> {
-  const prepared = parseUpload(upload.text)
+  const prepared = await parseUpload(upload.text)
   const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
-  const sections = encodeStaticSections(prepared, MATERIALS)
+  const sections = await encodeStaticSections(prepared, MATERIALS)
 
   // Catalog entry for each distinct artifact identity in this upload.
   const identities = new Map<string, ArtifactIdentity>()
@@ -125,7 +125,7 @@ export async function importSnapshot(
     }
   }
 
-  let encoded = completeSnapshot(sections, prepared, artifactIds)
+  let encoded = await completeSnapshot(sections, prepared, artifactIds)
   const response = (status: ImportResponse['status'], snapshotId: number, storedSize = 0) => ({
     status,
     snapshotId,
@@ -159,7 +159,7 @@ export async function importSnapshot(
   }
 
   const keyframe = await readKeyframe(keyframeResult!.results[0])
-  encoded = withMaterialsKeyframe(encoded, prepared, MATERIALS, keyframe)
+  encoded = await withMaterialsKeyframe(encoded, prepared, MATERIALS, keyframe)
 
   // Sections already stored cost nothing. The artifacts section usually
   // matches the latest snapshot's; a materials delta is almost always new.
@@ -237,7 +237,7 @@ export async function importSnapshot(
   return response('created', snapshotId, storedSize)
 }
 
-function parseUpload(text: string): PreparedSnapshot {
+async function parseUpload(text: string): Promise<PreparedSnapshot> {
   let input: unknown
   try {
     input = JSON.parse(text)
@@ -245,7 +245,7 @@ function parseUpload(text: string): PreparedSnapshot {
     throw new ApiError(400, 'invalid_json', 'The file is not valid JSON')
   }
   try {
-    return prepareSnapshot(input)
+    return await prepareSnapshot(input)
   } catch (error) {
     if (error instanceof GoodFormatError) throw new ApiError(400, 'invalid_good', error.message)
     throw error
