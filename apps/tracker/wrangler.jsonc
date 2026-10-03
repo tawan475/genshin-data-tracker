@@ -6,6 +6,12 @@
   "routes": [{ "pattern": "genshin-tracker.475.dev", "custom_domain": true }],
   "workers_dev": false,
 
+  // Run the Worker next to D1 rather than at the visitor's edge. Measured from
+  // Bangkok, each D1 round trip cost ~120 ms of network while SQL took ~5 ms,
+  // and an import makes 2-3 of them. Static assets are still served from the
+  // edge; only /api requests run in the placed Worker.
+  "placement": { "mode": "smart" },
+
   // The Vue app is served as static assets; only /api/* reaches the Worker.
   // Unknown paths fall back to index.html for client-side routing.
   "assets": {

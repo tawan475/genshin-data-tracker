@@ -11,6 +11,8 @@ export class D1Meter {
   roundTrips = 0
   rowsRead = 0
   rowsWritten = 0
+  /** Time D1 itself spent executing SQL; the rest of a round trip is network. */
+  sqlMs = 0
   private readonly timings: string[] = []
 
   async batch<T = Record<string, unknown>>(
@@ -24,6 +26,7 @@ export class D1Meter {
     for (const result of results) {
       this.rowsRead += result.meta.rows_read ?? 0
       this.rowsWritten += result.meta.rows_written ?? 0
+      this.sqlMs += result.meta.duration ?? 0
     }
     this.timings.push(`${label};dur=${Date.now() - started}`)
     return results
@@ -38,7 +41,8 @@ export class D1Meter {
     c.header('Server-Timing', this.timings.join(', '))
     c.header(
       'x-gdt-d1',
-      `round-trips=${this.roundTrips}; rows-read=${this.rowsRead}; rows-written=${this.rowsWritten}`,
+      `round-trips=${this.roundTrips}; rows-read=${this.rowsRead}; rows-written=${this.rowsWritten}; ` +
+        `sql-ms=${this.sqlMs.toFixed(1)}`,
     )
   }
 }

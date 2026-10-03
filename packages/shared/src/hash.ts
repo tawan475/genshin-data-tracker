@@ -1,5 +1,3 @@
-import { sha256 } from '@noble/hashes/sha2.js'
-
 const encoder = new TextEncoder()
 
 /**
@@ -7,12 +5,12 @@ const encoder = new TextEncoder()
  * for artifacts and snapshot sections, which are only ever compared within one
  * account, so 128 bits leaves collisions out of reach while halving index size.
  *
- * Synchronous on purpose: an import hashes ~2,000 small artifact texts, and a
- * pure-JS SHA-256 beats ~2,000 async WebCrypto calls, whose per-call overhead
- * dwarfs the hashing itself. The output is plain SHA-256 either way.
+ * Native WebCrypto on purpose: measured in production, a pure-JS SHA-256
+ * (@noble/hashes) took ~2.5x the CPU of ~2,000 parallel WebCrypto calls in
+ * workerd, although it is faster in Node.
  */
-export function sha256Hex128(text: string): string {
-  const digest = sha256(encoder.encode(text))
+export async function sha256Hex128(text: string): Promise<string> {
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(text)))
   let hex = ''
   for (let i = 0; i < 16; i++) hex += digest[i]!.toString(16).padStart(2, '0')
   return hex
