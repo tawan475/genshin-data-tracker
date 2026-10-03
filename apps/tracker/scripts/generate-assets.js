@@ -5,14 +5,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Assumes genshin-optimizer is cloned next to genshin-data-tracker
-const OPTIMIZER_DIR = path.resolve(__dirname, '../../genshin-optimizer');
+// genshin-optimizer is expected next to the monorepo (override with GENSHIN_OPTIMIZER_DIR).
+const OPTIMIZER_DIR = process.env.GENSHIN_OPTIMIZER_DIR || path.resolve(__dirname, '../../../../genshin-optimizer');
 const ASSETS_GEN_DIR = path.join(OPTIMIZER_DIR, 'libs/gi/assets/src/gen');
 const ASSETS_DATA_FILE = path.join(OPTIMIZER_DIR, 'libs/gi/assets-data/src/AssetsData_gen.json');
 
 const FRONTEND_DIR = path.resolve(__dirname, '..');
 const TARGET_ASSETS_DIR = path.join(FRONTEND_DIR, 'public/assets/gi');
-const TARGET_DATA_FILE = path.join(FRONTEND_DIR, 'src/utils/AssetsData_gen.json');
+const TARGET_DATA_FILE = path.join(FRONTEND_DIR, 'src/utils/data/AssetsData_gen.json');
 
 async function generateAssets() {
   console.log('Generating local assets from Genshin Optimizer...');
@@ -37,7 +37,7 @@ async function generateAssets() {
   fs.cpSync(ASSETS_GEN_DIR, TARGET_ASSETS_DIR, { recursive: true });
 
   // 2. Copy AssetsData_gen.json
-  console.log('Copying AssetsData_gen.json to src/utils/ ...');
+  console.log('Copying AssetsData_gen.json to src/utils/data/ ...');
   if (!fs.existsSync(ASSETS_DATA_FILE)) {
     console.error(`Error: Could not find ${ASSETS_DATA_FILE}`);
     process.exit(1);

@@ -1,0 +1,14 @@
+{
+  "character": {
+    "count": 127,
+    "sha256": "409dcebf7706533027723193c6a36014bf417172829cefd2bcba1bb327ae7869"
+  },
+  "weapon": {
+    "count": 234,
+    "sha256": "e5e6ed821eeb604b050c49cbd048de4bb6a72254eb9a59fddb8c831a44de1548"
+  },
+  "material": {
+    "count": 7631,
+    "sha256": "9552744abbcad126a4a2e06a807fa2a800a5623839cfaad538fc58ea6534d2fc"
+  }
+}

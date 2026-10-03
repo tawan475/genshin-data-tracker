@@ -40,5 +40,4 @@ __screenshots__/
 
 # Generated Assets
 public/assets/gi/*
-src/utils/AssetsData_gen.json
 .env
