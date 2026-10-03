@@ -83,6 +83,7 @@ function config(): ChartConfiguration<'line'> {
       scales: {
         x: {
           type: 'linear',
+          bounds: 'data',
           grid: { color: grid },
           border: { color: grid },
           ticks: {

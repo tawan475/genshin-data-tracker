@@ -1,17 +1,18 @@
 <script setup lang="ts" generic="T extends string | number | null">
 import { ChevronDown } from 'lucide-vue-next'
 
-/** Native select (best on mobile), styled like UiInput. */
+defineOptions({ inheritAttrs: false })
 defineProps<{ options: { value: T; label: string }[]; invalid?: boolean }>()
 const model = defineModel<T>({ required: true })
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative" :class="$attrs.class">
     <select
+      v-bind="{ ...$attrs, class: undefined }"
       v-model="model"
-      class="min-h-11 w-full appearance-none rounded-xl border bg-surface-raised py-2 pr-10 pl-3.5 text-base text-text-primary transition-colors focus:border-accent focus:outline-none"
-      :class="invalid ? 'border-danger-border' : 'border-border-default'"
+      class="min-h-10 w-full appearance-none rounded-md border bg-surface-raised py-2 pr-9 pl-3 text-sm text-text-primary shadow-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
+      :class="invalid ? 'border-danger' : 'border-border-strong'"
     >
       <option v-for="option in options" :key="String(option.value)" :value="option.value">
         {{ option.label }}

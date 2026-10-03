@@ -27,5 +27,5 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-materials', label: 'Materials', icon: Package, primary: true },
   { name: 'account-snapshots', label: 'Snapshots', icon: History },
   { name: 'account-import', label: 'Import', icon: Upload },
-  { name: 'account-settings', label: 'Account settings', icon: Settings },
+  { name: 'account-settings', label: 'Manage', icon: Settings },
 ]

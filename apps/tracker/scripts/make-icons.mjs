@@ -9,8 +9,8 @@
 import { writeFileSync } from 'node:fs'
 import sharp from 'sharp'
 
-const BG = '#0e1012'
-const ACCENT = '#c7f751'
+const BG = '#0f131f'
+const ACCENT = '#f59e0b'
 const out = new URL('../public/', import.meta.url)
 
 // A four-point sparkle (primogem-like) on the dark ground.

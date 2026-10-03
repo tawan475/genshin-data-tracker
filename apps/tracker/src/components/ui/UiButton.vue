@@ -3,11 +3,6 @@ import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import UiSpinner from './UiSpinner.vue'
 
-/**
- * primary: the one main action on a screen (accent fill, accent-ink text).
- * secondary: everything else that is a button. ghost: low-emphasis, in toolbars.
- * danger: destructive confirmation only.
- */
 const props = withDefaults(
   defineProps<{
     variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
@@ -23,16 +18,16 @@ const props = withDefaults(
 )
 
 const classes = computed(() => [
-  'inline-flex items-center justify-center gap-2 font-medium whitespace-nowrap transition-colors select-none',
-  'disabled:opacity-50 aria-disabled:opacity-50 aria-disabled:pointer-events-none',
-  props.size === 'md' ? 'min-h-11 px-4 text-base rounded-xl' : 'min-h-9 px-3 text-sm rounded-lg',
+  'inline-flex items-center justify-center gap-1.5 rounded-lg font-medium whitespace-nowrap transition-colors select-none',
+  'disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50',
+  props.size === 'md' ? 'min-h-10 px-4 text-sm' : 'min-h-8 px-3 text-sm',
   props.block ? 'w-full' : '',
   {
-    primary: 'bg-accent text-accent-ink hover:bg-accent-hover',
+    primary: 'bg-accent text-accent-ink shadow-sm shadow-accent/30 hover:bg-accent-hover',
     secondary:
-      'border border-border-default bg-surface-raised text-text-primary hover:bg-surface-overlay',
+      'border border-border-strong bg-surface-overlay text-text-secondary shadow-sm hover:bg-surface-sunken hover:text-text-primary',
     ghost: 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary',
-    danger: 'bg-danger text-surface-base hover:brightness-110',
+    danger: 'bg-danger text-white shadow-sm hover:brightness-110',
   }[props.variant],
 ])
 </script>

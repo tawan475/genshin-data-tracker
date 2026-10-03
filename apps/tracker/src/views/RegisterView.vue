@@ -2,9 +2,7 @@
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, emailSchema, usernameSchema } from '@gdt/shared'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import UiButton from '@/components/ui/UiButton.vue'
-import UiField from '@/components/ui/UiField.vue'
-import UiInput from '@/components/ui/UiInput.vue'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
@@ -20,27 +18,20 @@ const touched = ref(false)
 const serverError = ref('')
 const busy = ref(false)
 
-// The same schemas the server validates with, so messages match.
-const usernameError = computed(() => {
-  const result = usernameSchema.safeParse(username.value)
-  return result.success ? '' : (result.error.issues[0]?.message ?? 'Invalid username')
-})
-const emailError = computed(() =>
-  emailSchema.safeParse(email.value).success ? '' : 'Enter a valid email',
-)
-const passwordError = computed(() =>
-  password.value.length < MIN_PASSWORD_LENGTH
-    ? `At least ${MIN_PASSWORD_LENGTH} characters`
-    : password.value.length > MAX_PASSWORD_LENGTH
-      ? `At most ${MAX_PASSWORD_LENGTH} characters`
-      : '',
-)
-const confirmError = computed(() =>
-  confirm.value !== password.value ? 'Passwords do not match' : '',
-)
-const valid = computed(
-  () => !usernameError.value && !emailError.value && !passwordError.value && !confirmError.value,
-)
+// The same schemas the server validates with.
+const errors = computed(() => ({
+  username: usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _',
+  email: emailSchema.safeParse(email.value).success ? '' : 'Invalid email',
+  password:
+    password.value.length < MIN_PASSWORD_LENGTH
+      ? `Min ${MIN_PASSWORD_LENGTH} characters`
+      : password.value.length > MAX_PASSWORD_LENGTH
+        ? `Max ${MAX_PASSWORD_LENGTH} characters`
+        : '',
+  confirm: confirm.value !== password.value ? 'Does not match' : '',
+}))
+const valid = computed(() => Object.values(errors.value).every((e) => !e))
+const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
 
 async function submit() {
   touched.value = true
@@ -53,10 +44,10 @@ async function submit() {
   } catch (cause) {
     serverError.value =
       cause instanceof ApiRequestError && cause.code === 'taken'
-        ? 'That username or email is already registered.'
+        ? 'Username or email taken'
         : cause instanceof Error
           ? cause.message
-          : 'Could not create the account.'
+          : 'Sign-up failed'
   } finally {
     busy.value = false
   }
@@ -64,78 +55,70 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame title="Create an account" subtitle="Then link Irminsul or import GOOD files.">
+  <AuthFrame title="Create account">
+    <p
+      v-if="serverError"
+      class="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300"
+      role="alert"
+    >
+      {{ serverError }}
+    </p>
     <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
-      <UiField
-        v-slot="{ id, describedBy }"
-        label="Username"
-        hint="3–32 letters, digits, dot, dash or underscore"
-        :error="touched ? usernameError : ''"
-      >
-        <UiInput
-          :id="id"
+      <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium text-gray-400">Username</span>
+        <input
           v-model="username"
-          :aria-describedby="describedBy"
-          :invalid="touched && !!usernameError"
+          class="glass-input"
+          :aria-invalid="!!show('username') || undefined"
           autocomplete="username"
           autocapitalize="none"
           spellcheck="false"
         />
-      </UiField>
-      <UiField
-        v-slot="{ id, describedBy }"
-        label="Email"
-        hint="Used to connect Google or Discord sign-in later"
-        :error="touched ? emailError : ''"
-      >
-        <UiInput
-          :id="id"
+        <span v-if="show('username')" class="text-sm text-red-300">{{ show('username') }}</span>
+      </label>
+      <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium text-gray-400">Email</span>
+        <input
           v-model="email"
+          class="glass-input"
           type="email"
-          :aria-describedby="describedBy"
-          :invalid="touched && !!emailError"
+          :aria-invalid="!!show('email') || undefined"
           autocomplete="email"
         />
-      </UiField>
-      <UiField
-        v-slot="{ id, describedBy }"
-        label="Password"
-        :hint="`At least ${MIN_PASSWORD_LENGTH} characters`"
-        :error="touched ? passwordError : ''"
-      >
-        <UiInput
-          :id="id"
+        <span v-if="show('email')" class="text-sm text-red-300">{{ show('email') }}</span>
+      </label>
+      <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium text-gray-400">Password</span>
+        <input
           v-model="password"
+          class="glass-input"
           type="password"
-          :aria-describedby="describedBy"
-          :invalid="touched && !!passwordError"
+          :aria-invalid="!!show('password') || undefined"
           autocomplete="new-password"
         />
-      </UiField>
-      <UiField
-        v-slot="{ id, describedBy }"
-        label="Confirm password"
-        :error="touched ? confirmError : ''"
-      >
-        <UiInput
-          :id="id"
+        <span v-if="show('password')" class="text-sm text-red-300">{{ show('password') }}</span>
+      </label>
+      <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium text-gray-400">Confirm password</span>
+        <input
           v-model="confirm"
+          class="glass-input"
           type="password"
-          :aria-describedby="describedBy"
-          :invalid="touched && !!confirmError"
+          :aria-invalid="!!show('confirm') || undefined"
           autocomplete="new-password"
         />
-      </UiField>
-      <p v-if="serverError" class="text-sm text-danger-text" role="alert">{{ serverError }}</p>
-      <UiButton type="submit" variant="primary" block :loading="busy">
-        {{ busy ? 'Creating account…' : 'Create account' }}
-      </UiButton>
+        <span v-if="show('confirm')" class="text-sm text-red-300">{{ show('confirm') }}</span>
+      </label>
+      <button type="submit" class="btn-glow mt-2 w-full rounded-xl" :disabled="busy">
+        <UiSpinner v-if="busy" class="size-4" />
+        Create account
+      </button>
     </form>
     <template #footer>
-      Already have an account?
-      <RouterLink :to="{ name: 'login' }" class="font-medium text-accent-text hover:underline"
-        >Sign in</RouterLink
-      >
+      Have an account?
+      <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">
+        Sign in
+      </RouterLink>
     </template>
   </AuthFrame>
 </template>

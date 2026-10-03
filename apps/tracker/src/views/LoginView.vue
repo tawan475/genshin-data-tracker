@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import UiButton from '@/components/ui/UiButton.vue'
-import UiField from '@/components/ui/UiField.vue'
-import UiInput from '@/components/ui/UiInput.vue'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
@@ -30,10 +28,10 @@ async function submit() {
   } catch (cause) {
     error.value =
       cause instanceof ApiRequestError && cause.code === 'invalid_credentials'
-        ? 'That username, email or password is not right.'
+        ? 'Wrong username or password'
         : cause instanceof Error
           ? cause.message
-          : 'Could not sign in.'
+          : 'Sign-in failed'
   } finally {
     busy.value = false
   }
@@ -41,46 +39,52 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame title="Sign in" subtitle="Your snapshots, artifacts and materials over time.">
-    <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
-      <UiField v-slot="{ id }" label="Username or email">
-        <UiInput
-          :id="id"
+  <AuthFrame title="Welcome back">
+    <p
+      v-if="error"
+      class="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300"
+      role="alert"
+    >
+      {{ error }}
+    </p>
+    <form class="flex flex-col gap-5" @submit.prevent="submit">
+      <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium text-gray-400">Username or email</span>
+        <input
           v-model="login"
+          class="glass-input"
           autocomplete="username"
           autocapitalize="none"
           spellcheck="false"
+          placeholder="Aether"
           required
         />
-      </UiField>
-      <UiField v-slot="{ id }" label="Password">
-        <UiInput
-          :id="id"
+      </label>
+      <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium text-gray-400">Password</span>
+        <input
           v-model="password"
+          class="glass-input"
           type="password"
           autocomplete="current-password"
+          placeholder="••••••••"
           required
         />
-      </UiField>
-      <p v-if="error" class="text-sm text-danger-text" role="alert">{{ error }}</p>
-      <UiButton
+      </label>
+      <button
         type="submit"
-        variant="primary"
-        block
-        :loading="busy"
-        :disabled="!login || !password"
+        class="btn-glow mt-2 w-full rounded-xl"
+        :disabled="busy || !login || !password"
       >
-        {{ busy ? 'Signing in…' : 'Sign in' }}
-      </UiButton>
-      <p class="text-sm text-text-muted">
-        Your password is stretched on this device before anything is sent; the server never sees it.
-      </p>
+        <UiSpinner v-if="busy" class="size-4" />
+        Sign in
+      </button>
     </form>
     <template #footer>
-      New here?
-      <RouterLink :to="{ name: 'register' }" class="font-medium text-accent-text hover:underline"
-        >Create an account</RouterLink
-      >
+      New?
+      <RouterLink :to="{ name: 'register' }" class="font-semibold text-paimon hover:underline">
+        Create an account
+      </RouterLink>
     </template>
   </AuthFrame>
 </template>
