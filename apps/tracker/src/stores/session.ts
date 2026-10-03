@@ -76,9 +76,16 @@ export const useSession = defineStore('session', () => {
     await api.changePassword({ currentKey, salt, iterations: PASSWORD_ITERATIONS, key })
   }
 
+  /** Applies the change at once and rolls it back if the server refuses it. */
   async function updateSettings(patch: Partial<UserSettings>) {
-    if (me.value) adopt({ ...me.value, settings: { ...me.value.settings, ...patch } })
-    adopt(await api.updateUserSettings(patch))
+    const before = me.value
+    if (before) adopt({ ...before, settings: { ...before.settings, ...patch } })
+    try {
+      adopt(await api.updateUserSettings(patch))
+    } catch (error) {
+      if (before && me.value) adopt({ ...me.value, settings: before.settings })
+      throw error
+    }
   }
 
   return {

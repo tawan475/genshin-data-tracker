@@ -28,7 +28,7 @@ export interface AccountSettingsPatch {
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
-  theme: 'light',
+  theme: 'dark',
   use24Hour: false,
 }
 
