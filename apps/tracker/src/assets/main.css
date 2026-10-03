@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --color-paimon: #F59E0B;
+  --color-paimon-glow: rgba(245, 158, 11, 0.4);
+}
+
+@layer base {
+  body {
+    @apply antialiased overflow-x-hidden bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+  }
+}
+
+html.theme-transitions body,
+html.theme-transitions body * {
+  @apply transition-colors duration-200 ease-in-out;
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-br from-white to-paimon bg-clip-text text-transparent;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-3.5 bg-gradient-to-br from-amber-500 to-amber-600 text-white font-semibold rounded-full transition-all duration-300 shadow-[0_4px_15px_var(--color-paimon-glow)] hover:-translate-y-0.5 hover:shadow-[0_8px_25px_var(--color-paimon-glow)] relative overflow-hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500;
+  }
+
+  .btn-primary:hover::before {
+    @apply translate-x-full;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-8 py-3.5 bg-white/5 backdrop-blur-md text-white font-semibold rounded-full border border-white/10 transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5;
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-float-delayed {
+    animation: float 6s ease-in-out 3s infinite;
+  }
+  .animate-fade-up {
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-spin-slow {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* SweetAlert2 Dark Mode Overrides */
+.dark .swal2-popup {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+}
+.dark .swal2-title, .dark .swal2-html-container {
+  color: #f8fafc !important;
+}
+.dark .swal2-icon.swal2-success {
+  border-color: #34d399 !important;
+  color: #34d399 !important;
+}
+.dark .swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #34d399 !important;
+}
+.dark .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+.dark .swal2-icon.swal2-error {
+  border-color: #f87171 !important;
+  color: #f87171 !important;
+}
+.dark .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+  background-color: #f87171 !important;
+}
+.dark .swal2-icon.swal2-warning {
+  border-color: #fbbf24 !important;
+  color: #fbbf24 !important;
+}
+.dark .swal2-icon.swal2-info {
+  border-color: #60a5fa !important;
+  color: #60a5fa !important;
+}
+.dark .swal2-icon.swal2-question {
+  border-color: #a78bfa !important;
+  color: #a78bfa !important;
+}
+
