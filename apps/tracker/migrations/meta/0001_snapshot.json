@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "76016a34-99f9-4331-a339-f802e932691d",
+  "id": "3874ce06-2b7c-4abf-b0e6-8fbe6184a0b9",
   "prevId": "49877f9f-9e77-4527-944f-8cb221fe8615",
   "tables": {
     "artifacts": {
@@ -87,20 +87,6 @@
         "elixer_crafted": {
           "name": "elixer_crafted",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "cv": {
-          "name": "cv",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "rv": {
-          "name": "rv",
-          "type": "real",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
