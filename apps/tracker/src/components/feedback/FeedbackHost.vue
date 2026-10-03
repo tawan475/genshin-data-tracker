@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { CircleAlert, CircleCheck, Info, X } from 'lucide-vue-next'
-import { useFeedback } from '@/stores/feedback'
+import { useFeedback, type Toast } from '@/stores/feedback'
 import UiButton from '../ui/UiButton.vue'
 import UiModal from '../ui/UiModal.vue'
 
 /** Renders toasts and the confirm dialog for the whole app. */
 const feedback = useFeedback()
+
+function runAction(toast: Toast) {
+  toast.action?.run()
+  feedback.dismiss(toast.id)
+}
 </script>
 
 <template>
@@ -38,10 +43,7 @@ const feedback = useFeedback()
           v-if="toast.action"
           type="button"
           class="mt-1 text-sm font-medium text-accent-text hover:underline"
-          @click="
-            toast.action.run()
-            feedback.dismiss(toast.id)
-          "
+          @click="runAction(toast)"
         >
           {{ toast.action.label }}
         </button>
