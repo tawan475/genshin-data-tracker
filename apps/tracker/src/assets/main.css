@@ -1,140 +1,209 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * Design tokens: the 475.dev design system (Tailwind v4), plus Genshin data
+ * colours. Dark is the designed theme; light carries a value for every token.
+ * Themes switch on <html data-theme="dark|light">, set before first paint by
+ * the inline script in index.html.
+ *
+ * Rules carried over from 475.dev:
+ * - Nothing below text-sm (14px).
+ * - Borders separate; shadows barely exist (only dialogs and menus float).
+ * - One accent, spent on: the primary action, the current selection,
+ *   progress, and identifiers. Text on an accent fill is text-accent-ink.
+ * - Numbers a person compares are font-mono.
+ */
 
-@theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --color-paimon: #F59E0B;
-  --color-paimon-glow: rgba(245, 158, 11, 0.4);
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --surface-base: #0e1012;
+  --surface-nav: #121417;
+  --surface-raised: #16191c;
+  --surface-overlay: #1e2226;
+  --surface-sunken: #0b0d0f;
+  --border-subtle: #21262b;
+  --border-default: #2c3136;
+  --border-strong: #3a4148;
+  --text-primary: #eceff1;
+  --text-secondary: #9aa3ab;
+  --text-muted: #858f98;
+  --accent: #c7f751;
+  --accent-hover: #d9fa83;
+  --accent-ink: #12160a;
+  --accent-text: #c7f751;
+  --danger: #ff7a6b;
+  --danger-text: #ff9a8d;
+  --danger-surface: #1b1614;
+  --danger-border: #5a3430;
+  --success-text: #7ee2a8;
+  --warning-text: #f5c26b;
+  --focus-ring: #c7f751;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+  /* Genshin data colours: tell rarities and elements apart, never accents. */
+  --rarity-5: #f2b84b;
+  --rarity-4: #b897f2;
+  --rarity-3: #6fb1ef;
+  --rarity-2: #7fcf8f;
+  --rarity-1: #a0a8b0;
+  --element-pyro: #ff8a65;
+  --element-hydro: #4fb5ff;
+  --element-anemo: #5fe0c0;
+  --element-electro: #c58cff;
+  --element-dendro: #9bd84f;
+  --element-cryo: #9fe3ff;
+  --element-geo: #f3c35a;
+  --element-physical: #c9ced3;
+  --chart-1: #c7f751;
+  --chart-2: #4fb5ff;
+  --chart-3: #f2b84b;
+  --chart-4: #c58cff;
+  --chart-5: #ff8a65;
+  --chart-6: #5fe0c0;
+  --chart-grid: #21262b;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --surface-base: #faf9f7;
+  --surface-nav: #f5f5f3;
+  --surface-raised: #ffffff;
+  --surface-overlay: #f1f2f3;
+  --surface-sunken: #eceeef;
+  --border-subtle: #e6e8ea;
+  --border-default: #d7dade;
+  --border-strong: #b9bfc5;
+  --text-primary: #14171a;
+  --text-secondary: #4b545c;
+  --text-muted: #667079;
+  --accent: #c7f751;
+  --accent-hover: #b4e63a;
+  --accent-ink: #12160a;
+  /* The fill is lime in both themes; as text on white it needs to be darker. */
+  --accent-text: #4d6b00;
+  --danger: #d93a26;
+  --danger-text: #b32d1b;
+  --danger-surface: #fdf2f0;
+  --danger-border: #f0c5be;
+  --success-text: #1d7a45;
+  --warning-text: #8a5a00;
+  --focus-ring: #7ba30a;
+  --shadow-card: 0 1px 2px rgba(16, 20, 24, 0.06);
+  --shadow-overlay: 0 12px 32px rgba(16, 20, 24, 0.12);
+
+  --rarity-5: #a8690a;
+  --rarity-4: #7a4fc4;
+  --rarity-3: #2f6fb0;
+  --rarity-2: #2f7d43;
+  --rarity-1: #5f6870;
+  --element-pyro: #c2410c;
+  --element-hydro: #0369a1;
+  --element-anemo: #0f766e;
+  --element-electro: #7e22ce;
+  --element-dendro: #4d7c0f;
+  --element-cryo: #0e7490;
+  --element-geo: #a16207;
+  --element-physical: #52525b;
+  --chart-1: #5f8f00;
+  --chart-2: #0369a1;
+  --chart-3: #b7791f;
+  --chart-4: #7e22ce;
+  --chart-5: #c2410c;
+  --chart-6: #0f766e;
+  --chart-grid: #e6e8ea;
+}
+
+@theme inline {
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-surface-base: var(--surface-base);
+  --color-surface-nav: var(--surface-nav);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-danger: var(--danger);
+  --color-danger-text: var(--danger-text);
+  --color-danger-surface: var(--danger-surface);
+  --color-danger-border: var(--danger-border);
+  --color-success-text: var(--success-text);
+  --color-warning-text: var(--warning-text);
+  --color-focus-ring: var(--focus-ring);
+  --color-rarity-5: var(--rarity-5);
+  --color-rarity-4: var(--rarity-4);
+  --color-rarity-3: var(--rarity-3);
+  --color-rarity-2: var(--rarity-2);
+  --color-rarity-1: var(--rarity-1);
+  --color-pyro: var(--element-pyro);
+  --color-hydro: var(--element-hydro);
+  --color-anemo: var(--element-anemo);
+  --color-electro: var(--element-electro);
+  --color-dendro: var(--element-dendro);
+  --color-cryo: var(--element-cryo);
+  --color-geo: var(--element-geo);
+  --color-physical: var(--element-physical);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-overlay: var(--shadow-overlay);
 }
 
 @layer base {
+  html {
+    background-color: var(--surface-base);
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply antialiased overflow-x-hidden bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+    @apply bg-surface-base font-sans text-base text-text-primary antialiased;
+    min-height: 100dvh;
+  }
+
+  /* Visible keyboard focus everywhere, never removed. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Numbers line up in tables and stat tiles. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-html.theme-transitions body,
-html.theme-transitions body * {
-  @apply transition-colors duration-200 ease-in-out;
-}
-
-@layer components {
-  .glass-panel {
-    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl;
-  }
-  
-  .text-gradient {
-    @apply bg-gradient-to-br from-white to-paimon bg-clip-text text-transparent;
-  }
-  
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-8 py-3.5 bg-gradient-to-br from-amber-500 to-amber-600 text-white font-semibold rounded-full transition-all duration-300 shadow-[0_4px_15px_var(--color-paimon-glow)] hover:-translate-y-0.5 hover:shadow-[0_8px_25px_var(--color-paimon-glow)] relative overflow-hidden;
-  }
-
-  .btn-primary::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-500;
-  }
-
-  .btn-primary:hover::before {
-    @apply translate-x-full;
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-8 py-3.5 bg-white/5 backdrop-blur-md text-white font-semibold rounded-full border border-white/10 transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
-
-@layer utilities {
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  .animate-float-delayed {
-    animation: float 6s ease-in-out 3s infinite;
-  }
-  .animate-fade-up {
-    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  .animate-spin-slow {
-    animation: spin 1s linear infinite;
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* SweetAlert2 Dark Mode Overrides */
-.dark .swal2-popup {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
-  border: 1px solid #334155;
-  border-radius: 1rem;
-}
-.dark .swal2-title, .dark .swal2-html-container {
-  color: #f8fafc !important;
-}
-.dark .swal2-icon.swal2-success {
-  border-color: #34d399 !important;
-  color: #34d399 !important;
-}
-.dark .swal2-icon.swal2-success [class^='swal2-success-line'] {
-  background-color: #34d399 !important;
-}
-.dark .swal2-icon.swal2-success .swal2-success-ring {
-  border-color: rgba(52, 211, 153, 0.3) !important;
-}
-.dark .swal2-icon.swal2-error {
-  border-color: #f87171 !important;
-  color: #f87171 !important;
-}
-.dark .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
-  background-color: #f87171 !important;
-}
-.dark .swal2-icon.swal2-warning {
-  border-color: #fbbf24 !important;
-  color: #fbbf24 !important;
-}
-.dark .swal2-icon.swal2-info {
-  border-color: #60a5fa !important;
-  color: #60a5fa !important;
-}
-.dark .swal2-icon.swal2-question {
-  border-color: #a78bfa !important;
-  color: #a78bfa !important;
-}
-

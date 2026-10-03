@@ -51,27 +51,24 @@ export function getMaxRollTier(key: string, rarity = 5): number {
 }
 
 /** Decompose substat total into individual roll values (GO-style). */
-export function inferSubstatRolls(
-  key: string,
-  value: number,
-  rarity = 5,
-): number[] {
+export function inferSubstatRolls(key: string, value: number, rarity = 5): number[] {
   const tiers = getRollTiers(key, rarity)
   if (!tiers.length || value <= 0) return []
 
   const target = roundSubstatValue(key, value)
   const tolerance = isPercentStat(key) ? 0.2 : 2
-  let best: number[] | null = null
+  const found: { best: number[] | null } = { best: null }
 
   const search = (remaining: number, rolls: number[]) => {
     if (Math.abs(remaining) <= tolerance) {
+      const best = found.best
       if (
         !best ||
         rolls.length < best.length ||
         (rolls.length === best.length &&
           rolls.reduce((a, b) => a + b, 0) > best.reduce((a, b) => a + b, 0))
       ) {
-        best = [...rolls]
+        found.best = [...rolls]
       }
       return
     }
@@ -85,24 +82,20 @@ export function inferSubstatRolls(
   }
 
   search(target, [])
-  if (best?.length) {
-    return [...best].sort((a, b) => a - b)
+  if (found.best?.length) {
+    return [...found.best].sort((a, b) => a - b)
   }
   return [target]
 }
 
-export function getRollColorIndex(
-  rollValue: number,
-  key: string,
-  rarity = 5,
-): number {
+export function getRollColorIndex(rollValue: number, key: string, rarity = 5): number {
   const tiers = getRollTiers(key, rarity)
   if (!tiers.length) return 1
 
   let closestIdx = 0
   let closestDiff = Infinity
   for (let i = 0; i < tiers.length; i++) {
-    const diff = Math.abs(tiers[i] - rollValue)
+    const diff = Math.abs(tiers[i]! - rollValue)
     if (diff < closestDiff) {
       closestDiff = diff
       closestIdx = i
@@ -122,18 +115,12 @@ export const ROLL_TEXT_COLORS: Record<number, string> = {
   6: 'text-red-600 dark:text-red-400',
 }
 
-export function getRollTextColorClass(
-  rollCount: number,
-): string {
+export function getRollTextColorClass(rollCount: number): string {
   const idx = Math.min(6, Math.max(1, rollCount))
-  return ROLL_TEXT_COLORS[idx]
+  return ROLL_TEXT_COLORS[idx] ?? ''
 }
 
-export function rollFillPercent(
-  rollValue: number,
-  key: string,
-  rarity = 5,
-): number {
+export function rollFillPercent(rollValue: number, key: string, rarity = 5): number {
   const max = getMaxRollTier(key, rarity)
   return Math.min(100, Math.max(8, (rollValue / max) * 100))
 }
