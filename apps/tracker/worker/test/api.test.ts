@@ -290,6 +290,14 @@ describe('accounts and imports', () => {
     })
     expect(response.status).toBe(400)
     expect(await response.json()).toMatchObject({ error: { code: 'invalid_json' } })
+
+    const notGood = await SELF.fetch(`${ORIGIN}/api/genshin-accounts-public/import-by-key`, {
+      method: 'POST',
+      headers: { 'x-import-key': importKey },
+      body: irminsulForm({ hello: 'world' }),
+    })
+    expect(notGood.status).toBe(400)
+    expect(await notGood.json()).toMatchObject({ error: { code: 'invalid_good' } })
   })
 
   it('soft-deletes snapshots and recomputes the account', async () => {

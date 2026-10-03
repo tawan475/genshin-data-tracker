@@ -35,7 +35,7 @@ async function signOut() {
 </script>
 
 <template>
-  <PageHeader title="Settings" description="Your profile, appearance, password and this device." />
+  <PageHeader title="Settings" />
 
   <div class="flex max-w-3xl flex-col gap-6">
     <ProfilePanel />
@@ -45,9 +45,6 @@ async function signOut() {
 
     <UiPanel title="Session">
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <p class="max-w-md text-text-secondary">
-          Signs out this browser only. To sign out every device, change your password.
-        </p>
         <UiButton :loading="signingOut" @click="signOut">
           <LogOut v-if="!signingOut" class="size-5" aria-hidden="true" />
           Sign out

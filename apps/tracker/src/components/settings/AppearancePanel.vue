@@ -62,18 +62,14 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
 </script>
 
 <template>
-  <UiPanel title="Appearance" description="Saved to your profile, so every device matches.">
+  <UiPanel title="Appearance">
     <div class="flex flex-col divide-y divide-border-subtle">
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-3">
         <span class="text-base">Theme</span>
         <UiSegmented v-model="theme" :options="themes" label="Theme" />
       </div>
       <div class="pt-1">
-        <UiSwitch
-          v-model="use24Hour"
-          label="24-hour clock"
-          description="Show times as 21:30 instead of 9:30 PM."
-        />
+        <UiSwitch v-model="use24Hour" label="24-hour clock" />
       </div>
     </div>
   </UiPanel>
