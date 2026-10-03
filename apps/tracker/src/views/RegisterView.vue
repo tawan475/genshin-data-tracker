@@ -1,129 +1,141 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import BaseButton from '../components/BaseButton.vue'
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, emailSchema, usernameSchema } from '@gdt/shared'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import { adoptUserSettingsOnLogin } from '../utils/user-settings-sync'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiField from '@/components/ui/UiField.vue'
+import UiInput from '@/components/ui/UiInput.vue'
+import { ApiRequestError } from '@/api'
+import { useSession } from '@/stores/session'
+import AuthFrame from './AuthFrame.vue'
+
+const session = useSession()
+const router = useRouter()
 
 const username = ref('')
+const email = ref('')
 const password = ref('')
-const confirmPassword = ref('')
-const isLoading = ref(false)
-const errorMsg = ref('')
+const confirm = ref('')
+const touched = ref(false)
+const serverError = ref('')
+const busy = ref(false)
 
-const router = useRouter()
-const authStore = useAuthStore()
+// The same schemas the server validates with, so messages match.
+const usernameError = computed(() => {
+  const result = usernameSchema.safeParse(username.value)
+  return result.success ? '' : (result.error.issues[0]?.message ?? 'Invalid username')
+})
+const emailError = computed(() =>
+  emailSchema.safeParse(email.value).success ? '' : 'Enter a valid email',
+)
+const passwordError = computed(() =>
+  password.value.length < MIN_PASSWORD_LENGTH
+    ? `At least ${MIN_PASSWORD_LENGTH} characters`
+    : password.value.length > MAX_PASSWORD_LENGTH
+      ? `At most ${MAX_PASSWORD_LENGTH} characters`
+      : '',
+)
+const confirmError = computed(() =>
+  confirm.value !== password.value ? 'Passwords do not match' : '',
+)
+const valid = computed(
+  () => !usernameError.value && !emailError.value && !passwordError.value && !confirmError.value,
+)
 
-const handleRegister = async () => {
-  if (password.value !== confirmPassword.value) {
-    errorMsg.value = "Passwords do not match."
-    return
-  }
-  
-  if (password.value.length < 6) {
-    errorMsg.value = "Password must be at least 6 characters long."
-    return
-  }
-
-  errorMsg.value = ''
-  isLoading.value = true
-
+async function submit() {
+  touched.value = true
+  serverError.value = ''
+  if (!valid.value) return
+  busy.value = true
   try {
-    const response = await fetch(`${authStore.API_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value
-      })
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Registration failed')
-    }
-
-    const { accessToken, refreshToken } = data.data
-    await adoptUserSettingsOnLogin(authStore.API_URL, accessToken)
-    authStore.setAuthData(accessToken, refreshToken, username.value)
-    router.push('/')
-  } catch (err: any) {
-    errorMsg.value = err.message
+    await session.register(username.value.trim(), email.value.trim(), password.value)
+    await router.replace({ name: 'account-new' })
+  } catch (cause) {
+    serverError.value =
+      cause instanceof ApiRequestError && cause.code === 'taken'
+        ? 'That username or email is already registered.'
+        : cause instanceof Error
+          ? cause.message
+          : 'Could not create the account.'
   } finally {
-    isLoading.value = false
+    busy.value = false
   }
 }
 </script>
 
 <template>
-  <div class="flex-1 flex items-center justify-center p-6 relative z-10 opacity-0 animate-fade-up">
-    <div class="glass-panel w-full max-w-md p-10 bg-slate-900/80">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold mb-2">Create Account</h2>
-        <p class="text-gray-400">Join to start tracking your Genshin progress.</p>
-      </div>
-      
-      <div v-if="errorMsg" class="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-sm">
-        {{ errorMsg }}
-      </div>
-
-      <form @submit.prevent="handleRegister" class="flex flex-col gap-5">
-        <div class="flex flex-col gap-2">
-          <label for="username" class="text-sm font-medium text-gray-400">Username</label>
-          <input 
-            type="text" 
-            id="username" 
-            v-model="username" 
-            placeholder="Aether"
-            class="bg-black/20 border border-white/10 text-white px-4 py-3.5 rounded-xl text-base focus:outline-none focus:border-paimon focus:bg-black/30 focus:shadow-[0_0_0_3px_var(--color-paimon-glow)] transition-all"
-            required
-            minlength="3"
-          />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label for="password" class="text-sm font-medium text-gray-400">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            placeholder="••••••••"
-            class="bg-black/20 border border-white/10 text-white px-4 py-3.5 rounded-xl text-base focus:outline-none focus:border-paimon focus:bg-black/30 focus:shadow-[0_0_0_3px_var(--color-paimon-glow)] transition-all"
-            required
-            minlength="6"
-          />
-        </div>
-        
-        <div class="flex flex-col gap-2">
-          <label for="confirmPassword" class="text-sm font-medium text-gray-400">Confirm Password</label>
-          <input 
-            type="password" 
-            id="confirmPassword" 
-            v-model="confirmPassword" 
-            placeholder="••••••••"
-            class="bg-black/20 border border-white/10 text-white px-4 py-3.5 rounded-xl text-base focus:outline-none focus:border-paimon focus:bg-black/30 focus:shadow-[0_0_0_3px_var(--color-paimon-glow)] transition-all"
-            required
-            minlength="6"
-          />
-        </div>
-        
-        <BaseButton 
-          type="submit" 
-          variant="primary" 
-          block 
-          size="lg" 
-          :loading="isLoading" 
-          class="mt-4 rounded-xl"
-        >
-          {{ isLoading ? 'Creating account...' : 'Create Account' }}
-        </BaseButton>
-      </form>
-      
-      <div class="mt-8 text-center text-gray-400 text-sm">
-        Already have an account? 
-        <router-link to="/login" class="text-paimon font-semibold hover:drop-shadow-[0_0_8px_var(--color-paimon-glow)] transition-all">Sign in</router-link>
-      </div>
-    </div>
-  </div>
+  <AuthFrame title="Create an account" subtitle="Then link Irminsul or import GOOD files.">
+    <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
+      <UiField
+        v-slot="{ id, describedBy }"
+        label="Username"
+        hint="3–32 letters, digits, dot, dash or underscore"
+        :error="touched ? usernameError : ''"
+      >
+        <UiInput
+          :id="id"
+          v-model="username"
+          :aria-describedby="describedBy"
+          :invalid="touched && !!usernameError"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+        />
+      </UiField>
+      <UiField
+        v-slot="{ id, describedBy }"
+        label="Email"
+        hint="Used to connect Google or Discord sign-in later"
+        :error="touched ? emailError : ''"
+      >
+        <UiInput
+          :id="id"
+          v-model="email"
+          type="email"
+          :aria-describedby="describedBy"
+          :invalid="touched && !!emailError"
+          autocomplete="email"
+        />
+      </UiField>
+      <UiField
+        v-slot="{ id, describedBy }"
+        label="Password"
+        :hint="`At least ${MIN_PASSWORD_LENGTH} characters`"
+        :error="touched ? passwordError : ''"
+      >
+        <UiInput
+          :id="id"
+          v-model="password"
+          type="password"
+          :aria-describedby="describedBy"
+          :invalid="touched && !!passwordError"
+          autocomplete="new-password"
+        />
+      </UiField>
+      <UiField
+        v-slot="{ id, describedBy }"
+        label="Confirm password"
+        :error="touched ? confirmError : ''"
+      >
+        <UiInput
+          :id="id"
+          v-model="confirm"
+          type="password"
+          :aria-describedby="describedBy"
+          :invalid="touched && !!confirmError"
+          autocomplete="new-password"
+        />
+      </UiField>
+      <p v-if="serverError" class="text-sm text-danger-text" role="alert">{{ serverError }}</p>
+      <UiButton type="submit" variant="primary" block :loading="busy">
+        {{ busy ? 'Creating account…' : 'Create account' }}
+      </UiButton>
+    </form>
+    <template #footer>
+      Already have an account?
+      <RouterLink :to="{ name: 'login' }" class="font-medium text-accent-text hover:underline"
+        >Sign in</RouterLink
+      >
+    </template>
+  </AuthFrame>
 </template>

@@ -1,107 +1,86 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import BaseButton from '../components/BaseButton.vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import { adoptUserSettingsOnLogin } from '../utils/user-settings-sync'
+import { useRoute, useRouter } from 'vue-router'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiField from '@/components/ui/UiField.vue'
+import UiInput from '@/components/ui/UiInput.vue'
+import { ApiRequestError } from '@/api'
+import { useSession } from '@/stores/session'
+import AuthFrame from './AuthFrame.vue'
 
-const username = ref('')
-const password = ref('')
-const isLoading = ref(false)
-const errorMsg = ref('')
-
+const session = useSession()
 const router = useRouter()
-const authStore = useAuthStore()
+const route = useRoute()
 
-const handleLogin = async () => {
-  errorMsg.value = ''
-  isLoading.value = true
+const login = ref('')
+const password = ref('')
+const error = ref('')
+const busy = ref(false)
 
+async function submit() {
+  error.value = ''
+  busy.value = true
   try {
-    const response = await fetch(`${authStore.API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value
-      })
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed')
-    }
-
-    const { accessToken, refreshToken } = data.data
-    await adoptUserSettingsOnLogin(authStore.API_URL, accessToken)
-    authStore.setAuthData(accessToken, refreshToken, username.value)
-    router.push('/dashboard')
-  } catch (err: any) {
-    errorMsg.value = err.message
+    await session.login(login.value.trim(), password.value)
+    const next =
+      typeof route.query.next === 'string' && route.query.next.startsWith('/app')
+        ? route.query.next
+        : '/app'
+    await router.replace(next)
+  } catch (cause) {
+    error.value =
+      cause instanceof ApiRequestError && cause.code === 'invalid_credentials'
+        ? 'That username, email or password is not right.'
+        : cause instanceof Error
+          ? cause.message
+          : 'Could not sign in.'
   } finally {
-    isLoading.value = false
+    busy.value = false
   }
 }
 </script>
 
 <template>
-  <div class="flex-1 flex items-center justify-center p-6 relative z-10 opacity-0 animate-fade-up">
-    <div class="glass-panel w-full max-w-md p-10 bg-slate-900/80">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold mb-2">Welcome Back</h2>
-        <p class="text-gray-400">Enter your details to access your dashboard.</p>
-      </div>
-
-      <div v-if="errorMsg" class="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-sm">
-        {{ errorMsg }}
-      </div>
-      
-      <form @submit.prevent="handleLogin" class="flex flex-col gap-5">
-        <div class="flex flex-col gap-2">
-          <label for="username" class="text-sm font-medium text-gray-400">Username</label>
-          <input 
-            type="text" 
-            id="username" 
-            v-model="username" 
-            placeholder="Aether"
-            class="bg-black/20 border border-white/10 text-white px-4 py-3.5 rounded-xl text-base focus:outline-none focus:border-paimon focus:bg-black/30 focus:shadow-[0_0_0_3px_var(--color-paimon-glow)] transition-all"
-            required
-          />
-        </div>
-        
-        <div class="flex flex-col gap-2">
-          <label for="password" class="text-sm font-medium text-gray-400">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="password" 
-            placeholder="••••••••"
-            class="bg-black/20 border border-white/10 text-white px-4 py-3.5 rounded-xl text-base focus:outline-none focus:border-paimon focus:bg-black/30 focus:shadow-[0_0_0_3px_var(--color-paimon-glow)] transition-all"
-            required
-          />
-        </div>
-        
-        <div class="flex justify-end">
-          <a href="#" class="text-paimon text-sm font-medium hover:drop-shadow-[0_0_8px_var(--color-paimon-glow)] transition-all">Forgot password?</a>
-        </div>
-        
-        <BaseButton 
-          type="submit" 
-          variant="primary" 
-          block 
-          size="lg" 
-          :loading="isLoading" 
-          class="mt-2 rounded-xl"
-        >
-          {{ isLoading ? 'Signing in...' : 'Sign In' }}
-        </BaseButton>
-      </form>
-      
-      <div class="mt-8 text-center text-gray-400 text-sm">
-        Don't have an account? 
-        <router-link to="/register" class="text-paimon font-semibold hover:drop-shadow-[0_0_8px_var(--color-paimon-glow)] transition-all">Sign up</router-link>
-      </div>
-    </div>
-  </div>
+  <AuthFrame title="Sign in" subtitle="Your snapshots, artifacts and materials over time.">
+    <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
+      <UiField v-slot="{ id }" label="Username or email">
+        <UiInput
+          :id="id"
+          v-model="login"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          required
+        />
+      </UiField>
+      <UiField v-slot="{ id }" label="Password">
+        <UiInput
+          :id="id"
+          v-model="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+      </UiField>
+      <p v-if="error" class="text-sm text-danger-text" role="alert">{{ error }}</p>
+      <UiButton
+        type="submit"
+        variant="primary"
+        block
+        :loading="busy"
+        :disabled="!login || !password"
+      >
+        {{ busy ? 'Signing in…' : 'Sign in' }}
+      </UiButton>
+      <p class="text-sm text-text-muted">
+        Your password is stretched on this device before anything is sent; the server never sees it.
+      </p>
+    </form>
+    <template #footer>
+      New here?
+      <RouterLink :to="{ name: 'register' }" class="font-medium text-accent-text hover:underline"
+        >Create an account</RouterLink
+      >
+    </template>
+  </AuthFrame>
 </template>

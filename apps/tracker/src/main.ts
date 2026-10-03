@@ -1,17 +1,13 @@
-import './bootstrap-theme'
 import './assets/main.css'
-import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import router from './router'
+import { createApp } from 'vue'
 import App from './App.vue'
-import { useSettingsStore } from './stores/settings'
+import { registerServiceWorker } from './pwa/register'
+import router from './router'
 
 const app = createApp(App)
-
-const pinia = createPinia()
-app.use(pinia)
-useSettingsStore(pinia)
-
+app.use(createPinia())
 app.use(router)
-
 app.mount('#app')
+
+registerServiceWorker()
