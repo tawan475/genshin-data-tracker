@@ -7,7 +7,7 @@ import { computed, ref, watch } from 'vue'
  * icon never leaves a broken-image glyph.
  */
 const props = withDefaults(
-  defineProps<{ src: string; name: string; rarity?: number; size?: 'sm' | 'md' | 'lg' }>(),
+  defineProps<{ src: string; name: string; rarity?: number; size?: 'xs' | 'sm' | 'md' | 'lg' }>(),
   { size: 'md' },
 )
 const failed = ref(false)
@@ -39,7 +39,7 @@ const initials = computed(() =>
   <span
     class="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-lg"
     :class="[
-      { sm: 'size-9', md: 'size-12', lg: 'size-16' }[size],
+      { xs: 'size-7', sm: 'size-9', md: 'size-12', lg: 'size-16' }[size],
       rarity ? backdrop[rarity] : 'bg-surface-sunken',
     ]"
   >

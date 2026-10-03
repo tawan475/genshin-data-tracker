@@ -50,22 +50,18 @@ async function install() {
 </script>
 
 <template>
-  <UiPanel title="App" description="Install the tracker and see what the server is running.">
+  <UiPanel title="App">
     <div class="flex flex-col gap-6">
       <div>
         <h3 class="font-display text-lg font-bold">Install</h3>
-        <p class="mt-1 text-text-secondary">
-          Opens in its own window, straight to your accounts. The app shell loads offline; your data
-          needs a connection.
-        </p>
 
         <p v-if="standalone" class="mt-3 flex items-center gap-2 text-success-text">
           <CircleCheck class="size-5 shrink-0" aria-hidden="true" />
-          Installed. You are using the app now.
+          Installed
         </p>
         <p v-else-if="installedNow" class="mt-3 flex items-center gap-2 text-success-text">
           <CircleCheck class="size-5 shrink-0" aria-hidden="true" />
-          Installed. Open GI Tracker from your home screen or app list.
+          Installed
         </p>
         <div v-else-if="installPrompt" class="mt-3">
           <UiButton :loading="installing" @click="install">
@@ -77,7 +73,7 @@ async function install() {
           <li class="flex gap-3">
             <span class="tabular font-mono text-sm leading-6 text-text-muted">1</span>
             <span>
-              Open this page in Safari and tap
+              Tap
               <Share class="inline size-5 align-text-bottom text-text-primary" aria-hidden="true" />
               <span class="font-medium text-text-primary">Share</span>.
             </span>
@@ -85,7 +81,7 @@ async function install() {
           <li class="flex gap-3">
             <span class="tabular font-mono text-sm leading-6 text-text-muted">2</span>
             <span>
-              Choose
+              then
               <SquarePlus
                 class="inline size-5 align-text-bottom text-text-primary"
                 aria-hidden="true"
@@ -94,10 +90,12 @@ async function install() {
             </span>
           </li>
         </ol>
-        <p v-else class="mt-3 text-sm text-text-muted">
-          Your browser has not offered to install it. In Chrome or Edge, use the install icon in the
-          address bar or “Install” in the menu. Browsers without installation work the same in a
-          tab.
+        <p
+          v-else
+          class="mt-3 text-sm text-text-muted"
+          title="Chrome or Edge: install icon in the address bar"
+        >
+          Use your browser's install option
         </p>
       </div>
 

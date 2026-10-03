@@ -254,6 +254,11 @@ describe('snapshot codec', () => {
     expect(second.encoded.materialsIsKeyframe).toBe(true)
   })
 
+  it('rejects JSON that is not a GOOD file', async () => {
+    await expect(prepareSnapshot({ hello: 'world' })).rejects.toThrow(/Not a GOOD file/)
+    await expect(prepareSnapshot([])).rejects.toThrow(/JSON object/)
+  })
+
   it('summarizes the figures the dashboard reads', async () => {
     const { prepared } = await roundTrip(sample)
     expect(prepared.summary).toEqual({

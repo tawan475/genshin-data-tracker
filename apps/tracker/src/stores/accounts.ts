@@ -58,7 +58,7 @@ export const useAccounts = defineStore('accounts', () => {
   async function remove(id: number) {
     await api.deleteAccount(id)
     list.value = list.value.filter((a) => a.id !== id)
-    if (lastAccountId() === id) writeStorage('last-account', null)
+    if (lastAccountId() === id) rememberLast(null)
   }
 
   function displayName(account: Pick<AccountResponse, 'name' | 'uid' | 'id'>): string {
@@ -86,12 +86,20 @@ export const useAccounts = defineStore('accounts', () => {
   }
 })
 
-/** The account the user last opened on this device, to land on next time. */
-export function lastAccountId(): number | null {
+function storedLast(): number | null {
   const value = Number(readStorage('last-account'))
   return Number.isSafeInteger(value) && value > 0 ? value : null
 }
 
-export function rememberLast(id: number): void {
-  writeStorage('last-account', String(id))
+// Reactive, so anything showing "the current account" updates the moment it changes.
+const lastId = ref<number | null>(storedLast())
+
+/** The account the user last opened on this device, to land on next time. */
+export function lastAccountId(): number | null {
+  return lastId.value
+}
+
+export function rememberLast(id: number | null): void {
+  lastId.value = id
+  writeStorage('last-account', id === null ? null : String(id))
 }

@@ -37,6 +37,10 @@ type Json = Record<string, unknown>
  */
 export function normalizeGood(input: unknown): NormalizedGood {
   if (!isObject(input)) throw new GoodFormatError('GOOD payload must be a JSON object')
+  // Every GOOD exporter writes this marker; without it, arbitrary JSON would be
+  // stored as an empty snapshot.
+  if (input.format !== 'GOOD')
+    throw new GoodFormatError('Not a GOOD file (missing "format": "GOOD")')
 
   const achievementsRaw = Array.isArray(input.gi_achievements)
     ? input.gi_achievements
@@ -45,7 +49,7 @@ export function normalizeGood(input: unknown): NormalizedGood {
       : null
 
   return {
-    format: str(input.format) || 'GOOD',
+    format: 'GOOD',
     version: num(input.version, 1),
     source: str(input.source) || 'Unknown',
     timestamp: input.timestamp,

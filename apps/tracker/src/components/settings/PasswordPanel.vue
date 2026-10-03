@@ -85,10 +85,7 @@ async function submit() {
 </script>
 
 <template>
-  <UiPanel
-    title="Password"
-    description="Changing it signs out every other device. This one stays signed in."
-  >
+  <UiPanel title="Password">
     <form ref="form" class="flex max-w-md flex-col gap-4" novalidate @submit.prevent="submit">
       <!-- Lets password managers file the new password under the right login. -->
       <input
@@ -156,9 +153,6 @@ async function submit() {
         <UiButton type="submit" variant="primary" :loading="busy">
           {{ busy ? 'Securing…' : 'Change password' }}
         </UiButton>
-        <p class="text-sm text-text-muted" role="status">
-          {{ busy ? 'Stretching both passwords on this device. This takes a second or two.' : '' }}
-        </p>
       </div>
     </form>
   </UiPanel>
