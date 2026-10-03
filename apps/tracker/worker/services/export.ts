@@ -6,6 +6,7 @@
 
 import {
   decodeSnapshot,
+  expandSubstats,
   deltaDecode,
   inflateRaw,
   writeBundle,
@@ -192,10 +193,10 @@ async function loadCatalogEntries(
         level: r.level as number,
         rarity: r.rarity as number,
         mainStatKey: r.main_stat_key as string,
-        substats: JSON.parse(r.substats as string),
+        substats: expandSubstats(JSON.parse(r.substats as string)),
         totalRolls: r.total_rolls as number,
         elixerCrafted: r.elixer_crafted === 1,
-        unactivatedSubstats: JSON.parse(r.unactivated_substats as string),
+        unactivatedSubstats: expandSubstats(JSON.parse(r.unactivated_substats as string)),
       },
     ]),
   )
@@ -210,30 +211,15 @@ export async function catalogJson(d1: D1Database, accountId: number): Promise<st
   const rows = await d1
     .prepare(
       `SELECT id, set_key, slot_key, level, rarity, main_stat_key, substats, total_rolls,
-         elixer_crafted, unactivated_substats, cv, rv
+         elixer_crafted, unactivated_substats
        FROM artifacts WHERE account_id = ?1 ORDER BY id`,
     )
     .bind(accountId)
-    .raw<
-      [
-        number,
-        string,
-        string,
-        number,
-        number,
-        string,
-        string,
-        number,
-        number,
-        string,
-        number,
-        number,
-      ]
-    >()
+    .raw<[number, string, string, number, number, string, string, number, number, string]>()
   const parts = rows.map(
     (r) =>
       `[${r[0]},${JSON.stringify(r[1])},${JSON.stringify(r[2])},${r[3]},${r[4]},${JSON.stringify(r[5])},` +
-      `${r[6]},${r[7]},${r[8]},${r[9]},${r[10]},${r[11]}]`,
+      `${r[6]},${r[7]},${r[8]},${r[9]}]`,
   )
   return `[${parts.join(',')}]`
 }

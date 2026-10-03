@@ -1,6 +1,6 @@
 import type {
   AccountSettingsPatch,
-  GoodSubstat,
+  CompactSubstat,
   SectionKind,
   SnapshotSummary,
   UserSettingsPatch,
@@ -11,7 +11,6 @@ import {
   index,
   integer,
   primaryKey,
-  real,
   sqliteTable,
   text,
   uniqueIndex,
@@ -183,14 +182,13 @@ export const artifacts = sqliteTable(
     level: integer('level').notNull(),
     rarity: integer('rarity').notNull(),
     mainStatKey: text('main_stat_key').notNull(),
-    substats: text('substats', { mode: 'json' }).$type<GoodSubstat[]>().notNull(),
+    /** Compact tuples (see CompactSubstat): the catalog is most of an account's storage. */
+    substats: text('substats', { mode: 'json' }).$type<CompactSubstat[]>().notNull(),
     unactivatedSubstats: text('unactivated_substats', { mode: 'json' })
-      .$type<GoodSubstat[]>()
+      .$type<CompactSubstat[]>()
       .notNull(),
     totalRolls: integer('total_rolls').notNull(),
     elixerCrafted: integer('elixer_crafted', { mode: 'boolean' }).notNull(),
-    cv: real('cv').notNull(),
-    rv: real('rv').notNull(),
     createdAt: timestamp('created_at'),
   },
   (t) => [uniqueIndex('artifacts_account_hash_unique').on(t.accountId, t.hash)],

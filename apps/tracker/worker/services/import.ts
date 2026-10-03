@@ -11,8 +11,7 @@
 
 import {
   GoodFormatError,
-  calculateCV,
-  calculateRV,
+  compactSubstats,
   decodeMaterials,
   deflateRaw,
   encodeSnapshot,
@@ -271,21 +270,19 @@ async function insertArtifacts(
         a.level,
         a.rarity,
         a.mainStatKey,
-        a.substats,
-        a.unactivatedSubstats,
+        compactSubstats(a.substats),
+        compactSubstats(a.unactivatedSubstats),
         a.totalRolls,
         a.elixerCrafted ? 1 : 0,
-        calculateCV(a.substats),
-        calculateRV(a.substats),
       ]
     })
     statements.push(
       d1
         .prepare(
           `INSERT INTO artifacts (account_id, hash, set_key, slot_key, level, rarity, main_stat_key,
-             substats, unactivated_substats, total_rolls, elixer_crafted, cv, rv, created_at)
+             substats, unactivated_substats, total_rolls, elixer_crafted, created_at)
            SELECT ?1, value->>0, value->>1, value->>2, value->>3, value->>4, value->>5,
-             value->6, value->7, value->>8, value->>9, value->>10, value->>11, ?3
+             value->6, value->7, value->>8, value->>9, ?3
            FROM json_each(?2) WHERE true
            ON CONFLICT (account_id, hash) DO NOTHING`,
         )
