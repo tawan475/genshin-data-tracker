@@ -1,14 +1,26 @@
 import { Hono } from 'hono'
-
-export type AppEnv = { Bindings: Env }
+import type { AppEnv } from './env'
+import { ApiError, errorBody } from './lib/http'
+import { accounts } from './routes/accounts'
+import { auth } from './routes/auth'
+import { health } from './routes/health'
+import { me } from './routes/me'
+import { publicImport } from './routes/public'
 
 const app = new Hono<AppEnv>().basePath('/api')
 
-app.get('/health', async (c) => {
-  await c.env.DB.prepare('select 1').first()
-  return c.json({ ok: true })
-})
+app.route('/health', health)
+app.route('/auth', auth)
+app.route('/me', me)
+app.route('/accounts', accounts)
+app.route('/genshin-accounts-public', publicImport)
 
-app.notFound((c) => c.json({ status: 404, message: 'Not found' }, 404))
+app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
+
+app.onError((error, c) => {
+  if (error instanceof ApiError) return c.json(errorBody(error), error.status)
+  console.error(error)
+  return c.json(errorBody(new ApiError(500, 'internal', 'Something went wrong')), 500)
+})
 
 export default app

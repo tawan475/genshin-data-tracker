@@ -89,15 +89,15 @@ export interface EncodedSnapshot {
 }
 
 /**
- * Step 2, once the catalog has assigned ids: build the stored sections.
- * `keyframe` is the materials keyframe the account's latest snapshot uses, if
- * any; the result stores a delta against it when that is small enough.
+ * Step 2, once the catalog has assigned ids: build the stored sections, with
+ * materials as a full keyframe. The content hash is final at this point, so a
+ * caller can detect an unchanged inventory before loading any keyframe; call
+ * {@link withMaterialsKeyframe} only when the snapshot will be stored.
  */
 export async function encodeSnapshot(
   prepared: PreparedSnapshot,
   artifactIds: ReadonlyMap<string, number>,
   materialsDictionary: KeyDictionary,
-  keyframe: MaterialsKeyframe | null,
 ): Promise<EncodedSnapshot> {
   const { good, artifactHashes } = prepared
   const refs = good.artifacts.map((artifact, index) => {
@@ -115,10 +115,6 @@ export async function encodeSnapshot(
     good.achievements ? makeSection('achievements', encodeAchievements(good.achievements)) : null,
   ])
 
-  const stored = encodeMaterials(good.materials, materialsDictionary, keyframe)
-  const materialsIsKeyframe = stored.b === undefined
-  const materials = materialsIsKeyframe ? fullMaterials : await makeSection('materials', stored)
-
   const contentHash = await sha256Hex128(
     [
       characters.hash,
@@ -133,10 +129,31 @@ export async function encodeSnapshot(
     characters,
     weapons,
     artifacts,
-    materials,
+    materials: fullMaterials,
     achievements,
-    materialsIsKeyframe,
+    materialsIsKeyframe: true,
     contentHash,
+  }
+}
+
+/**
+ * Re-expresses materials as a delta against `keyframe` (the keyframe the
+ * account's latest snapshot uses) when the delta is small enough; otherwise
+ * the snapshot keeps its own full keyframe. The content hash is unaffected.
+ */
+export async function withMaterialsKeyframe(
+  encoded: EncodedSnapshot,
+  prepared: PreparedSnapshot,
+  materialsDictionary: KeyDictionary,
+  keyframe: MaterialsKeyframe | null,
+): Promise<EncodedSnapshot> {
+  if (!keyframe) return encoded
+  const stored = encodeMaterials(prepared.good.materials, materialsDictionary, keyframe)
+  if (stored.b === undefined) return encoded
+  return {
+    ...encoded,
+    materials: await makeSection('materials', stored),
+    materialsIsKeyframe: false,
   }
 }
 

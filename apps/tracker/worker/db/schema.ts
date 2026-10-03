@@ -68,8 +68,15 @@ export const sessions = sqliteTable(
     createdAt: timestamp('created_at'),
     lastUsedAt: timestamp('last_used_at'),
     expiresAt: integer('expires_at').notNull(),
+    /** Hash of the refresh token this one replaced; honoured briefly so concurrent tabs survive a rotation. */
+    previousId: text('previous_id'),
+    rotatedAt: integer('rotated_at'),
   },
-  (t) => [index('sessions_user_idx').on(t.userId), index('sessions_expires_idx').on(t.expiresAt)],
+  (t) => [
+    index('sessions_user_idx').on(t.userId),
+    index('sessions_expires_idx').on(t.expiresAt),
+    index('sessions_previous_idx').on(t.previousId),
+  ],
 )
 
 export const genshinAccounts = sqliteTable(
@@ -94,6 +101,11 @@ export const genshinAccounts = sqliteTable(
      */
     dataVersion: integer('data_version').notNull().default(0),
     latestSnapshotId: integer('latest_snapshot_id'),
+    // Recomputed from the source rows by every write (see recomputeAccount), so
+    // dashboards read one row instead of scanning snapshots.
+    snapshotCount: integer('snapshot_count').notNull().default(0),
+    rawBytes: integer('raw_bytes').notNull().default(0),
+    storedBytes: integer('stored_bytes').notNull().default(0),
     createdAt: timestamp('created_at'),
   },
   (t) => [index('genshin_accounts_user_idx').on(t.userId)],

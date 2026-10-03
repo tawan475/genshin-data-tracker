@@ -6,6 +6,7 @@ import {
   decodeSnapshot,
   deflateRaw,
   encodeSnapshot,
+  withMaterialsKeyframe,
   inflateRaw,
   normalizeGood,
   prepareSnapshot,
@@ -39,7 +40,12 @@ async function roundTrip(
 ) {
   const prepared = await prepareSnapshot(input)
   catalog.add(prepared)
-  const encoded = await encodeSnapshot(prepared, catalog.ids, MATERIALS, keyframe)
+  const encoded = await withMaterialsKeyframe(
+    await encodeSnapshot(prepared, catalog.ids, MATERIALS),
+    prepared,
+    MATERIALS,
+    keyframe,
+  )
   const decoded = decodeSnapshot(
     {
       format: prepared.good.format,
