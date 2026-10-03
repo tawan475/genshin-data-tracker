@@ -1,107 +1,111 @@
-const STAT_NAME_MAP: Record<string, string> = {
+/**
+ * Names and number formats for artifact stats, slots and sets (GOOD keys).
+ */
+
+import { keyToName } from '@/lib/format'
+import { ARTIFACT_SET_NAMES } from '@/data/artifacts-sets'
+
+const STAT_NAMES: Readonly<Record<string, string>> = {
   hp: 'HP',
   hp_: 'HP%',
   atk: 'ATK',
   atk_: 'ATK%',
   def: 'DEF',
   def_: 'DEF%',
-  eleMas: 'EM',
-  enerRech_: 'ER%',
+  eleMas: 'Elemental Mastery',
+  enerRech_: 'Energy Recharge',
   critRate_: 'CRIT Rate',
   critDMG_: 'CRIT DMG',
   heal_: 'Healing Bonus',
-  hydro_dmg_: 'Hydro DMG',
-  pyro_dmg_: 'Pyro DMG',
-  cryo_dmg_: 'Cryo DMG',
-  electro_dmg_: 'Electro DMG',
-  anemo_dmg_: 'Anemo DMG',
-  geo_dmg_: 'Geo DMG',
-  dendro_dmg_: 'Dendro DMG',
-  physical_dmg_: 'Physical DMG',
+  pyro_dmg_: 'Pyro DMG Bonus',
+  hydro_dmg_: 'Hydro DMG Bonus',
+  electro_dmg_: 'Electro DMG Bonus',
+  cryo_dmg_: 'Cryo DMG Bonus',
+  anemo_dmg_: 'Anemo DMG Bonus',
+  geo_dmg_: 'Geo DMG Bonus',
+  dendro_dmg_: 'Dendro DMG Bonus',
+  physical_dmg_: 'Physical DMG Bonus',
 }
 
-export interface ArtifactSubstat {
-  key: string
-  value: number
-}
+/** Main stats in the game's order, for menus. */
+export const MAIN_STAT_ORDER: readonly string[] = [
+  'hp',
+  'atk',
+  'hp_',
+  'atk_',
+  'def_',
+  'eleMas',
+  'enerRech_',
+  'critRate_',
+  'critDMG_',
+  'heal_',
+  'pyro_dmg_',
+  'hydro_dmg_',
+  'electro_dmg_',
+  'cryo_dmg_',
+  'anemo_dmg_',
+  'geo_dmg_',
+  'dendro_dmg_',
+  'physical_dmg_',
+]
 
-export interface ArtifactCardData {
-  id?: number
-  setKey: string
-  slotKey: string
-  level: number
-  rarity?: number
-  mainStatKey: string
-  substats: ArtifactSubstat[]
-  cv: number
-  rv: number
-  lock?: boolean
-  location?: string
-  genshinAccount?: { accountName?: string | null }
+const STAT_SHORT: Readonly<Record<string, string>> = {
+  eleMas: 'EM',
+  enerRech_: 'ER',
+  heal_: 'Healing',
+  pyro_dmg_: 'Pyro',
+  hydro_dmg_: 'Hydro',
+  electro_dmg_: 'Electro',
+  cryo_dmg_: 'Cryo',
+  anemo_dmg_: 'Anemo',
+  geo_dmg_: 'Geo',
+  dendro_dmg_: 'Dendro',
+  physical_dmg_: 'Physical',
 }
 
 export function formatStatName(key: string): string {
-  return STAT_NAME_MAP[key] ?? key
+  return STAT_NAMES[key] ?? keyToName(key)
 }
 
-export function formatStatValue(key: string, val: number): string {
-  if (key.endsWith('_')) return `${val.toFixed(1)}%`
-  return Math.round(val).toString()
+/** Compact label for cards: "EM", "ER", "Pyro", else the full name. */
+export function formatStatShort(key: string): string {
+  return STAT_SHORT[key] ?? formatStatName(key)
 }
 
-export function getSubstatColorClass(key: string): string {
-  if (key.includes('critRate') || key.includes('critDMG')) {
-    return 'text-red-500 dark:text-red-400'
-  }
-  if (key.includes('atk')) return 'text-orange-500 dark:text-orange-400'
-  if (key.includes('enerRech')) return 'text-purple-500 dark:text-purple-400'
-  if (key.includes('eleMas')) return 'text-emerald-500 dark:text-emerald-400'
-  return 'text-slate-600 dark:text-slate-400'
+/** "7.8%" for percentages, "299" for flat stats, as the game shows them. */
+export function formatStatValue(key: string, value: number): string {
+  if (key.endsWith('_')) return `${value.toFixed(1)}%`
+  return Math.round(value).toString()
 }
 
-/** "GladiatorsFinale" → "Gladiators Finale" */
+/** A single roll keeps its second decimal: "3.89%", "19.45". */
+export function formatRollValue(key: string, value: number): string {
+  return key.endsWith('_') ? `${value.toFixed(2)}%` : value.toFixed(2)
+}
+
+/** "GladiatorsFinale" -> "Gladiator's Finale"; unknown sets are spaced out. */
 export function formatSetName(setKey: string): string {
-  return setKey.replace(/([A-Z])/g, ' $1').trim()
+  return ARTIFACT_SET_NAMES[setKey] ?? keyToName(setKey)
 }
 
-export function formatRarityStars(rarity?: number): string {
-  if (!rarity || rarity < 1) return ''
-  return '⭐'.repeat(Math.min(rarity, 5))
+export const SLOT_NAMES: Readonly<Record<string, string>> = {
+  flower: 'Flower of Life',
+  plume: 'Plume of Death',
+  sands: 'Sands of Eon',
+  goblet: 'Goblet of Eonothem',
+  circlet: 'Circlet of Logos',
 }
 
+/** "Flower", "Plume", … (short, for cards and pills). */
 export function formatSlotName(slotKey: string): string {
-  const map: Record<string, string> = {
-    flower: 'Flower',
-    plume: 'Plume',
-    sands: 'Sands',
-    goblet: 'Goblet',
-    circlet: 'Circlet',
-  }
-  return map[slotKey] ?? slotKey
+  return slotKey ? slotKey.charAt(0).toUpperCase() + slotKey.slice(1) : slotKey
 }
 
-export function rarityBorderClass(rarity?: number): string {
-  switch (rarity) {
-    case 5:
-      return 'border-amber-400/60 dark:border-amber-500/50'
-    case 4:
-      return 'border-purple-400/60 dark:border-purple-500/50'
-    case 3:
-      return 'border-blue-400/60 dark:border-blue-500/50'
-    case 2:
-      return 'border-emerald-400/60 dark:border-emerald-500/50'
-    default:
-      return 'border-slate-200 dark:border-slate-700'
-  }
+export function formatSlotFullName(slotKey: string): string {
+  return SLOT_NAMES[slotKey] ?? formatSlotName(slotKey)
 }
 
-export function rarityGlowClass(rarity?: number): string {
-  switch (rarity) {
-    case 5:
-      return 'from-amber-500/15 to-orange-500/5'
-    case 4:
-      return 'from-purple-500/15 to-indigo-500/5'
-    default:
-      return 'from-indigo-500/10 to-purple-500/5'
-  }
+/** Crit value with one decimal: "32.6". */
+export function formatCv(cv: number): string {
+  return cv.toFixed(1)
 }
