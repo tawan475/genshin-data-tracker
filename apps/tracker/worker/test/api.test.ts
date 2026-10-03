@@ -319,6 +319,12 @@ describe('accounts and imports', () => {
     expect(response.status).toBe(204)
     const after = await client.json<AccountResponse>(`/api/accounts/${account.id}`)
     expect(after).toMatchObject({ snapshotCount: 1, latest: { id: a.snapshotId } })
+
+    const bulk = await client.json<{ deleted: number }>(
+      `/api/accounts/${account.id}/snapshots/delete`,
+      { method: 'POST', json: { ids: [a.snapshotId, 999_999] } },
+    )
+    expect(bulk.deleted).toBe(1)
   })
 
   it('keeps accounts private to their owner', async () => {
