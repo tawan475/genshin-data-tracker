@@ -14,7 +14,15 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
 import { formatCompact, formatDate, formatDateTime, formatNumber } from '@/lib/format'
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler)
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Tooltip,
+  Filler,
+)
 
 export interface TimelineSeries {
   label: string
@@ -38,7 +46,7 @@ const props = withDefaults(
     stepped?: boolean
     fill?: boolean
   }>(),
-  { height: 260 },
+  { height: 260, fill: undefined },
 )
 
 const canvas = ref<HTMLCanvasElement>()
@@ -93,7 +101,15 @@ function config(): ChartConfiguration<'line'> {
             callback: (value) => formatDate(Number(value)),
           },
           // Under two days, label ticks with times rather than repeating the date.
-          ...(span < 2 * 86400_000 ? { ticks: { color: muted, maxTicksLimit: 6, callback: (v) => formatDateTime(Number(v)) } } : {}),
+          ...(span < 2 * 86400_000
+            ? {
+                ticks: {
+                  color: muted,
+                  maxTicksLimit: 6,
+                  callback: (v) => formatDateTime(Number(v)),
+                },
+              }
+            : {}),
         },
         y: {
           grid: { color: grid },

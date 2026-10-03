@@ -223,20 +223,20 @@ const navClass = (active: boolean) =>
         v-for="section in primary"
         :key="section.name"
         :to="section.to"
-        class="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium"
+        class="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium"
         :class="isActive(section.name) ? 'text-accent-text' : 'text-text-muted'"
         :aria-current="isActive(section.name) ? 'page' : undefined"
       >
-        <component :is="section.icon" class="size-5" aria-hidden="true" />
-        {{ section.label }}
+        <component :is="section.icon" class="size-5 shrink-0" aria-hidden="true" />
+        <span class="max-w-full truncate">{{ section.label }}</span>
       </RouterLink>
       <button
         type="button"
-        class="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium text-text-muted"
+        class="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium text-text-muted"
         @click="drawer = true"
       >
-        <MoreHorizontal class="size-5" aria-hidden="true" />
-        More
+        <MoreHorizontal class="size-5 shrink-0" aria-hidden="true" />
+        <span class="max-w-full truncate">More</span>
       </button>
     </nav>
   </div>
