@@ -25,7 +25,7 @@ const classes = computed(() => [
   {
     primary: 'bg-accent text-accent-ink shadow-sm shadow-accent/30 hover:bg-accent-hover',
     secondary:
-      'border border-border-strong bg-surface-overlay text-text-secondary shadow-sm hover:bg-surface-sunken hover:text-text-primary',
+      'border border-border-strong bg-surface-overlay text-text-secondary shadow-sm hover:bg-surface-raised hover:text-text-primary',
     ghost: 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary',
     danger: 'bg-danger text-white shadow-sm hover:brightness-110',
   }[props.variant],

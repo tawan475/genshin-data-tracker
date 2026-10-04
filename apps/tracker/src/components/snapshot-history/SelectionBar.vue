@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { X } from 'lucide-vue-next'
-import BaseButton from '@/components/legacy/BaseButton.vue'
+import UiButton from '@/components/ui/UiButton.vue'
 import type { ExportJob } from '@/data/export'
 import { formatBytes, formatNumber } from '@/lib/format'
 
 /**
  * The old sticky selection toolbar. It overlays the "Import History" heading
  * (below the 4rem top bar) while rows are selected or a zip export of this
- * account runs, and shows that export's progress.
+ * account runs, and shows that export's progress. The bar is deliberately
+ * inverse (dark slate in both themes), which no surface token covers.
  */
 const props = defineProps<{
   selected: number
@@ -76,7 +77,7 @@ const progress = computed(() => {
         </div>
 
         <div class="flex shrink-0 items-center gap-3">
-          <BaseButton
+          <UiButton
             v-if="job"
             variant="secondary"
             size="sm"
@@ -84,9 +85,9 @@ const progress = computed(() => {
             @click="emit('cancel')"
           >
             Cancel
-          </BaseButton>
+          </UiButton>
           <template v-else>
-            <BaseButton
+            <UiButton
               variant="secondary"
               size="sm"
               :disabled="blocked || deleting"
@@ -94,10 +95,10 @@ const progress = computed(() => {
               @click="emit('download')"
             >
               Download
-            </BaseButton>
-            <BaseButton variant="danger" size="sm" :loading="deleting" @click="emit('delete')">
+            </UiButton>
+            <UiButton variant="danger" size="sm" :loading="deleting" @click="emit('delete')">
               Delete
-            </BaseButton>
+            </UiButton>
           </template>
         </div>
       </div>

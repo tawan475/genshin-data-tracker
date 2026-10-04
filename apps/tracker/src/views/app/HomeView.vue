@@ -62,7 +62,7 @@ const totals = computed(() => {
   <PageHeader title="Accounts">
     <template v-if="accounts.list.length" #actions>
       <UiButton variant="primary" :to="{ name: 'account-new' }">
-        <Plus class="size-5" aria-hidden="true" />
+        <Plus class="size-4" aria-hidden="true" />
         Add account
       </UiButton>
     </template>
@@ -72,7 +72,7 @@ const totals = computed(() => {
     <UiEmpty title="No accounts yet">
       <template #icon><Users aria-hidden="true" /></template>
       <UiButton variant="primary" :to="{ name: 'account-new' }">
-        <Plus class="size-5" aria-hidden="true" />
+        <Plus class="size-4" aria-hidden="true" />
         Add account
       </UiButton>
     </UiEmpty>

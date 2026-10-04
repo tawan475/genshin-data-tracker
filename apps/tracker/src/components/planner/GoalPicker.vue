@@ -141,7 +141,7 @@ const MODES = [
 </script>
 
 <template>
-  <UiModal :open="open" title="Add goal" wide @close="emit('close')">
+  <UiModal :open="open" title="Add goal" size="wide" @close="emit('close')">
     <div class="flex flex-col gap-3">
       <div class="flex flex-wrap items-center gap-2">
         <UiSegmented v-model="mode" :options="MODES" label="Kind" />

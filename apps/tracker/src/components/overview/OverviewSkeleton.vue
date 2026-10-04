@@ -7,7 +7,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 <template>
   <div class="flex flex-col gap-6" role="status">
     <span class="sr-only">Loading snapshot history</span>
-    <section class="rounded-2xl border border-border-default bg-surface-raised">
+    <section class="rounded-xl border border-border-default bg-surface-raised shadow-sm">
       <div
         class="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-5 py-4"
       >
@@ -29,7 +29,9 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
     </section>
 
     <div class="grid gap-6 xl:grid-cols-3">
-      <section class="rounded-2xl border border-border-default bg-surface-raised xl:col-span-2">
+      <section
+        class="rounded-xl border border-border-default bg-surface-raised shadow-sm xl:col-span-2"
+      >
         <div class="border-b border-border-subtle px-5 py-4">
           <UiSkeleton class="h-6 w-44" />
         </div>
@@ -40,7 +42,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
           <UiSkeleton v-for="n in 6" :key="n" class="h-10 w-full" />
         </div>
       </section>
-      <section class="rounded-2xl border border-border-default bg-surface-raised">
+      <section class="rounded-xl border border-border-default bg-surface-raised shadow-sm">
         <div class="border-b border-border-subtle px-5 py-4">
           <UiSkeleton class="h-6 w-40" />
         </div>

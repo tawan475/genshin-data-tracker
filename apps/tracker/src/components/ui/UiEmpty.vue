@@ -8,7 +8,7 @@ defineProps<{ title: string; body?: string }>()
     <div v-if="$slots.icon" class="text-text-muted [&_svg]:size-8">
       <slot name="icon" />
     </div>
-    <h3 class="text-base font-semibold">{{ title }}</h3>
+    <h3 class="text-base font-semibold text-text-primary">{{ title }}</h3>
     <p v-if="body" class="max-w-md text-sm text-text-muted">{{ body }}</p>
     <div v-if="$slots.default" class="mt-2 flex flex-wrap justify-center gap-2">
       <slot />

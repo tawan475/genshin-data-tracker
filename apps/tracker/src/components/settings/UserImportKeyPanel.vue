@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { Info } from 'lucide-vue-next'
 import CopyField from '@/components/import/CopyField.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -90,8 +91,12 @@ async function revoke() {
           <span v-else-if="!active" class="text-sm text-text-muted">None</span>
         </div>
       </div>
-      <p class="text-sm text-text-muted">
-        Uploads go to the account with the capture's UID; a new UID gets a new account.
+      <p
+        class="flex items-center gap-1.5 self-start text-sm text-text-muted"
+        title="Uploads go to the account with the capture's UID; a new UID gets a new account."
+      >
+        <Info class="size-4 shrink-0" aria-hidden="true" />
+        Routed by UID
       </p>
     </div>
   </UiPanel>

@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { Search } from 'lucide-vue-next'
+import { LayoutGrid, List, Search } from 'lucide-vue-next'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import UiToolbar from '@/components/ui/UiToolbar.vue'
 import {
   BUILD_OPTIONS,
   ELEMENTS,
@@ -17,9 +20,7 @@ import {
   type SortOption,
 } from '@/data/characters'
 import { formatNumber } from '@/lib/format'
-import FilterChip from './FilterChip.vue'
 import SortControl from './SortControl.vue'
-import ViewToggle from './ViewToggle.vue'
 import { ELEMENT_FILL } from './tokens'
 
 /**
@@ -47,6 +48,10 @@ const weaponOptions = [
   ...WEAPON_TYPES.map((w) => ({ value: w, label: WEAPON_TYPE_LABELS[w] })),
 ]
 const RARITIES = [5, 4] as const
+const VIEWS: SegmentedOption<'grid' | 'list'>[] = [
+  { value: 'grid', label: 'Cards', icon: LayoutGrid },
+  { value: 'list', label: 'List', icon: List },
+]
 
 function toggleElement(e: Element) {
   filters.value.element = filters.value.element === e ? 'all' : e
@@ -57,11 +62,7 @@ function toggleRarity(r: 5 | 4) {
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
-    role="search"
-    aria-label="Filter characters"
-  >
+  <UiToolbar label="Filter characters">
     <div class="flex flex-wrap items-center gap-2">
       <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
         <span class="sr-only">Search</span>
@@ -84,11 +85,11 @@ function toggleRarity(r: 5 | 4) {
         class="min-w-0 flex-1 sm:w-48 sm:flex-none"
         :options="sorts"
       />
-      <ViewToggle v-model="view" />
+      <UiSegmented v-model="view" :options="VIEWS" label="View" icon-only />
     </div>
 
     <div
-      class="-mx-3 flex gap-2 overflow-x-auto px-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
       aria-label="Element and rarity"
     >
@@ -114,7 +115,7 @@ function toggleRarity(r: 5 | 4) {
       </FilterChip>
     </div>
 
-    <div class="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
+    <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
       <label class="min-w-0 sm:w-36">
         <span class="sr-only">Weapon type</span>
         <UiSelect v-model="filters.weaponType" :options="weaponOptions" />
@@ -127,13 +128,13 @@ function toggleRarity(r: 5 | 4) {
           title="Ready: Lv 90, weapon Lv 90, five maxed artifacts, a full set bonus"
         />
       </label>
-      <label class="min-w-0 sm:w-36">
+      <label class="col-span-2 min-w-0 sm:w-36">
         <span class="sr-only">Talents</span>
         <UiSelect v-model="filters.talents" :options="TALENT_OPTIONS" />
       </label>
       <div
         v-if="filtered"
-        class="col-span-3 flex items-center justify-between gap-2 sm:ml-auto sm:justify-end"
+        class="col-span-2 flex items-center justify-between gap-2 sm:ml-auto sm:justify-end"
       >
         <span class="tabular font-mono text-sm text-text-secondary" aria-live="polite"
           >{{ formatNumber(shown) }} / {{ formatNumber(total) }}</span
@@ -141,5 +142,5 @@ function toggleRarity(r: 5 | 4) {
         <UiButton variant="ghost" size="sm" @click="$emit('clear')">Clear</UiButton>
       </div>
     </div>
-  </div>
+  </UiToolbar>
 </template>

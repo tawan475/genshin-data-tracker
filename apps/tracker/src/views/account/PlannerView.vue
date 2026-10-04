@@ -14,7 +14,7 @@ import {
 import type { PlannerTarget } from '@gdt/shared'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Clock, FileInput, Plus, Settings2, Target, Upload } from 'lucide-vue-next'
+import { Clock, FileInput, Plus, SearchX, Settings2, Target, Upload } from 'lucide-vue-next'
 import ExtraItems from '@/components/planner/ExtraItems.vue'
 import FarmPanel from '@/components/planner/FarmPanel.vue'
 import GoalCard from '@/components/planner/GoalCard.vue'
@@ -589,7 +589,7 @@ const itemEditorShown = computed(
     <UiEmpty title="No snapshots yet">
       <template #icon><Target aria-hidden="true" /></template>
       <UiButton variant="primary" :to="importTo">
-        <Upload class="size-5" aria-hidden="true" />
+        <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>
     </UiEmpty>
@@ -607,11 +607,11 @@ const itemEditorShown = computed(
       <UiEmpty title="No goals">
         <template #icon><Target aria-hidden="true" /></template>
         <UiButton variant="primary" @click="openPicker()">
-          <Plus class="size-5" aria-hidden="true" />
+          <Plus class="size-4" aria-hidden="true" />
           Add goal
         </UiButton>
         <UiButton @click="importOpen = true">
-          <FileInput class="size-5" aria-hidden="true" />
+          <FileInput class="size-4" aria-hidden="true" />
           Import from Seelie
         </UiButton>
       </UiEmpty>
@@ -645,12 +645,12 @@ const itemEditorShown = computed(
         @clear="clearFilters"
       />
 
-      <p
-        v-if="matching.length === 0 && shownItems.length === 0"
-        class="py-8 text-center text-text-secondary"
-      >
-        No matches
-      </p>
+      <UiPanel v-if="matching.length === 0 && shownItems.length === 0" flush>
+        <UiEmpty title="No matches">
+          <template #icon><SearchX aria-hidden="true" /></template>
+          <UiButton @click="clearFilters">Clear</UiButton>
+        </UiEmpty>
+      </UiPanel>
 
       <ul
         v-if="pendingEntries.length"

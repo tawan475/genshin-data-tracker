@@ -3,17 +3,18 @@ import type { SnapshotResponse } from '@gdt/shared'
 import { computed, shallowRef, watch } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { Clock, Eye, History, Upload } from 'lucide-vue-next'
+import ChangeValue from '@/components/overview/ChangeValue.vue'
 import LowRarityStat from '@/components/overview/LowRarityStat.vue'
 import HistoryCharts from '@/components/overview/HistoryCharts.vue'
 import MonthlyAnalysis from '@/components/overview/MonthlyAnalysis.vue'
 import OverviewSkeleton from '@/components/overview/OverviewSkeleton.vue'
 import RecentSnapshots from '@/components/overview/RecentSnapshots.vue'
-import StatTile from '@/components/overview/StatTile.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import UiStat from '@/components/ui/UiStat.vue'
 import { loadSnapshots } from '@/data/account-data'
 import { buildHistory, currencyMissing, latestDelta, serverLabel } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
@@ -178,7 +179,7 @@ const importRoute = computed(() => ({
     <UiEmpty title="No snapshots yet">
       <template #icon><History aria-hidden="true" /></template>
       <UiButton variant="primary" :to="importRoute">
-        <Upload class="size-5" aria-hidden="true" />
+        <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>
     </UiEmpty>
@@ -186,14 +187,21 @@ const importRoute = computed(() => ({
 
   <template v-else>
     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      <StatTile
+      <UiStat
         v-for="tile in tiles"
         :key="tile.label"
         :label="tile.label"
         :value="tile.value"
-        :delta="tile.delta"
         :detail="tile.detail"
-      />
+      >
+        <span class="min-h-5 text-sm leading-5">
+          <ChangeValue
+            v-if="tile.delta !== undefined && tile.delta !== null"
+            :value="tile.delta"
+            hint="since previous snapshot"
+          />
+        </span>
+      </UiStat>
       <LowRarityStat
         v-if="lowRarity"
         :artifact4="lowRarity.artifact4"

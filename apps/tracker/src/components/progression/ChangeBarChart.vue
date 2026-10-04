@@ -11,11 +11,10 @@ import {
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
 import { formatSignedExact } from '@/data/overview'
+import { CHART_FONT as FONT } from '@/lib/chart-defaults'
 import { formatSigned } from '@/lib/format'
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip)
-
-const FONT = 'Outfit, ui-sans-serif, system-ui, sans-serif'
 
 export interface ChangeBar {
   /** Axis label. */
@@ -110,7 +109,6 @@ function config(): ChartConfiguration<'bar'> {
           titleColor: token('--text-primary'),
           bodyColor: token('--text-secondary'),
           footerColor: muted,
-          // The app's font, as in TimelineChart's tooltip.
           titleFont: { family: FONT, size: 14, weight: 'bold' },
           bodyFont: { family: FONT, size: 14 },
           footerFont: { family: FONT, size: 13, weight: 'normal' },

@@ -7,13 +7,16 @@ import {
   Gem,
   Search,
   SlidersHorizontal,
-  Star,
   Trophy,
   X,
 } from 'lucide-vue-next'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
+import UiInput from '@/components/ui/UiInput.vue'
+import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import UiToolbar from '@/components/ui/UiToolbar.vue'
 import {
   BEST_PER_SLOT,
   LEVEL_MAX,
@@ -37,8 +40,6 @@ import { formatNumber } from '@/lib/format'
 import { readJson, writeJson } from '@/lib/storage'
 import { formatSetName, formatSlotName, formatStatName } from '@/utils/artifact-stats'
 import ArtifactSetPicker from './ArtifactSetPicker.vue'
-import ChoiceGroup from './ChoiceGroup.vue'
-import FilterPill from './FilterPill.vue'
 import { SLOT_ICONS } from './styles'
 
 /**
@@ -68,7 +69,6 @@ function toggled<T>(list: readonly T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
 }
 
-const searchId = useId()
 const moreId = useId()
 
 const search = computed({
@@ -111,6 +111,22 @@ const RARITY_TEXT: Record<number, string> = {
   2: 'text-rarity-2',
   1: 'text-rarity-1',
 }
+
+const LOCK_OPTIONS: { value: LockFilter; label: string }[] = [
+  { value: 'any', label: 'All' },
+  { value: 'locked', label: 'Locked' },
+  { value: 'unlocked', label: 'Unlocked' },
+]
+const EQUIP_OPTIONS: { value: EquipFilter; label: string }[] = [
+  { value: 'any', label: 'All' },
+  { value: 'equipped', label: 'Equipped' },
+  { value: 'inventory', label: 'Unequipped' },
+]
+const ASTRAL_OPTIONS: { value: AstralFilter; label: string }[] = [
+  { value: 'any', label: 'All' },
+  { value: 'marked', label: 'Yes' },
+  { value: 'unmarked', label: 'No' },
+]
 
 const levelOptions = Array.from({ length: LEVEL_MAX - LEVEL_MIN + 1 }, (_, i) => ({
   value: LEVEL_MIN + i,
@@ -238,45 +254,40 @@ function clearAll() {
 </script>
 
 <template>
-  <section
-    class="flex flex-col gap-3 rounded-2xl border border-border-default bg-surface-raised p-3 shadow-card sm:p-4"
-    aria-label="Filters"
-  >
+  <UiToolbar label="Filter artifacts">
     <div class="flex flex-wrap gap-2">
-      <div class="relative min-w-0 flex-auto basis-56">
-        <label :for="searchId" class="sr-only">Search sets or characters</label>
+      <label class="relative min-w-0 flex-auto basis-56">
+        <span class="sr-only">Search sets or characters</span>
         <Search
-          class="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-text-muted"
+          class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
         />
-        <input
-          :id="searchId"
+        <UiInput
           v-model="search"
           type="search"
+          class="pl-9"
           autocomplete="off"
           enterkeyhint="search"
           placeholder="Search"
           title="Set or character"
-          class="min-h-11 w-full rounded-xl border border-border-default bg-surface-raised pr-3.5 pl-10 text-base text-text-primary transition-colors placeholder:text-text-muted focus:border-accent"
         />
-      </div>
+      </label>
 
       <div class="flex min-w-0 flex-auto gap-2 sm:flex-none">
-        <button
-          type="button"
-          class="inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border bg-surface-raised px-3.5 text-base transition-colors hover:bg-surface-overlay sm:flex-none"
-          :class="filters.sets.length ? 'border-accent-text' : 'border-border-default'"
+        <UiButton
+          class="min-w-0 flex-1 sm:flex-none"
+          :class="filters.sets.length ? 'border-accent-text!' : ''"
           :title="setsTitle"
           aria-haspopup="dialog"
           @click="pickerOpen = true"
         >
-          <Gem class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
+          <Gem class="size-4 shrink-0" aria-hidden="true" />
           Sets
           <span v-if="filters.sets.length" class="tabular font-mono text-accent-text">
             {{ filters.sets.length }}
           </span>
           <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
-        </button>
+        </UiButton>
         <label class="shrink-0" title="Sort">
           <span class="sr-only">Sort by</span>
           <UiSelect v-model="sort" :options="SORT_OPTIONS" class="w-28" />
@@ -292,43 +303,34 @@ function clearAll() {
     </div>
 
     <div
-      class="-mx-3 flex items-center gap-2 overflow-x-auto px-3 py-0.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      class="scroll-hide scroll-fade-x -mx-3 flex items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
     >
       <div role="group" aria-label="Slot" class="flex gap-2 sm:flex-wrap">
-        <FilterPill
+        <FilterChip
           v-for="slot in SLOT_KEYS"
           :key="slot"
           :pressed="filters.slots.includes(slot)"
+          :count="slotCounts.get(slot) ?? 0"
           :title="formatSlotName(slot)"
           @toggle="patch({ slots: toggled(filters.slots, slot) })"
         >
           <component :is="SLOT_ICONS[slot]" class="size-4 shrink-0" aria-hidden="true" />
           <span class="sr-only">{{ formatSlotName(slot) }}</span>
-          <span class="tabular font-mono text-text-muted">
-            {{ formatNumber(slotCounts.get(slot) ?? 0) }}
-          </span>
-        </FilterPill>
+        </FilterChip>
       </div>
 
       <span class="h-6 w-px shrink-0 bg-border-default" aria-hidden="true" />
 
       <div role="group" aria-label="Rarity" class="flex gap-2 sm:flex-wrap">
-        <FilterPill
+        <FilterChip
           v-for="rarity in rarities"
           :key="rarity"
           :pressed="filters.rarities.includes(rarity)"
-          :title="`${rarity}-star`"
+          :count="rarityCounts.get(rarity) ?? 0"
           @toggle="patch({ rarities: toggled(filters.rarities, rarity) })"
         >
-          <span class="flex items-center gap-0.5">
-            <span class="tabular font-mono">{{ rarity }}</span>
-            <Star class="size-3.5 fill-current" :class="RARITY_TEXT[rarity]" aria-hidden="true" />
-            <span class="sr-only">-star</span>
-          </span>
-          <span class="tabular font-mono text-text-muted">
-            {{ formatNumber(rarityCounts.get(rarity) ?? 0) }}
-          </span>
-        </FilterPill>
+          <span :class="RARITY_TEXT[rarity]">{{ rarity }}★</span>
+        </FilterChip>
       </div>
     </div>
 
@@ -336,41 +338,45 @@ function clearAll() {
       <div
         role="group"
         aria-label="Presets"
-        class="-ml-3 flex items-center gap-2 overflow-x-auto pl-3 py-0.5 [scrollbar-width:none] sm:ml-0 sm:flex-wrap sm:overflow-visible sm:pl-0 min-w-0 flex-1"
+        class="scroll-hide scroll-fade-x -ml-3 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pl-3 sm:ml-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:pl-0"
       >
-        <FilterPill
+        <FilterChip
           :pressed="filters.best"
           :title="`Top ${BEST_PER_SLOT} per slot, by the current sort`"
           @toggle="patch({ best: !filters.best })"
         >
           <Trophy class="size-4 shrink-0" aria-hidden="true" />
           Best
-        </FilterPill>
-        <FilterPill
+        </FilterChip>
+        <FilterChip
           :pressed="feedable"
+          :count="feedableCount"
           title="Unlocked, unequipped 4★ and 3★"
           @toggle="filters = toggleFeedablePreset(filters)"
         >
           4★/3★ Artifact
-          <span class="tabular font-mono text-text-muted">{{ formatNumber(feedableCount) }}</span>
-        </FilterPill>
-        <FilterPill
+        </FilterChip>
+        <FilterChip
           :pressed="spare"
+          :count="spareCount"
           title="Unequipped 5★"
           @toggle="filters = toggleSparePreset(filters)"
         >
           Spare 5★
-          <span class="tabular font-mono text-text-muted">{{ formatNumber(spareCount) }}</span>
-        </FilterPill>
-        <FilterPill :pressed="maxOnly" title="Level +20 only" @toggle="toggleMaxOnly">
+        </FilterChip>
+        <FilterChip
+          :pressed="maxOnly"
+          :count="maxedCount"
+          title="Level +20 only"
+          @toggle="toggleMaxOnly"
+        >
           <span class="tabular font-mono">+20</span>
-          <span class="tabular font-mono text-text-muted">{{ formatNumber(maxedCount) }}</span>
-        </FilterPill>
+        </FilterChip>
       </div>
 
-      <button
-        type="button"
-        class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
+      <UiButton
+        variant="ghost"
+        class="shrink-0 px-3"
         :aria-expanded="moreOpen"
         :aria-controls="moreId"
         title="Main stat, level, lock, location, astral mark"
@@ -379,7 +385,7 @@ function clearAll() {
         <SlidersHorizontal class="size-4" aria-hidden="true" />
         <span class="sr-only sm:not-sr-only">More</span>
         <span v-if="moreCount" class="tabular font-mono text-accent-text">{{ moreCount }}</span>
-      </button>
+      </UiButton>
     </div>
 
     <div
@@ -401,33 +407,18 @@ function clearAll() {
           <UiSelect v-model="levelMax" :options="levelOptions" />
         </label>
       </div>
-      <ChoiceGroup
-        v-model="lock"
-        label="Lock"
-        :options="[
-          { value: 'any', label: 'All' },
-          { value: 'locked', label: 'Locked' },
-          { value: 'unlocked', label: 'Unlocked' },
-        ]"
-      />
-      <ChoiceGroup
-        v-model="equipped"
-        label="Location"
-        :options="[
-          { value: 'any', label: 'All' },
-          { value: 'equipped', label: 'Equipped' },
-          { value: 'inventory', label: 'Unequipped' },
-        ]"
-      />
-      <ChoiceGroup
-        v-model="astral"
-        label="Astral mark"
-        :options="[
-          { value: 'any', label: 'All' },
-          { value: 'marked', label: 'Yes' },
-          { value: 'unmarked', label: 'No' },
-        ]"
-      />
+      <div class="flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Lock</span>
+        <UiSegmented v-model="lock" :options="LOCK_OPTIONS" label="Lock" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Location</span>
+        <UiSegmented v-model="equipped" :options="EQUIP_OPTIONS" label="Location" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Astral mark</span>
+        <UiSegmented v-model="astral" :options="ASTRAL_OPTIONS" label="Astral mark" />
+      </div>
     </div>
 
     <div
@@ -438,15 +429,15 @@ function clearAll() {
         v-for="pill in pills"
         :key="pill.id"
         type="button"
-        class="inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-lg border border-border-default bg-surface-overlay px-3 text-sm transition-colors hover:border-border-strong"
+        class="inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
         :aria-label="`Remove ${pill.label}`"
         :title="`Remove ${pill.label}`"
         @click="pill.remove()"
       >
         <span class="truncate">{{ pill.label }}</span>
-        <X class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
+        <X class="size-4 shrink-0" aria-hidden="true" />
       </button>
-      <UiButton variant="ghost" @click="clearAll">Clear</UiButton>
+      <UiButton variant="ghost" size="sm" @click="clearAll">Clear</UiButton>
     </div>
 
     <ArtifactSetPicker
@@ -455,5 +446,5 @@ function clearAll() {
       :options="sets"
       @close="pickerOpen = false"
     />
-  </section>
+  </UiToolbar>
 </template>

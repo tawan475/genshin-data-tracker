@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ArrowUp, Search } from 'lucide-vue-next'
-import FilterChip from '@/components/characters/FilterChip.vue'
+import { ArrowUp, LayoutGrid, List, Search } from 'lucide-vue-next'
 import SortControl from '@/components/characters/SortControl.vue'
-import ViewToggle from '@/components/characters/ViewToggle.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import UiToolbar from '@/components/ui/UiToolbar.vue'
 import {
   LEVEL_OPTIONS,
   WEAPON_SORTS,
@@ -44,6 +45,10 @@ const RARITIES: { value: Exclude<RarityFilter, 'all'>; label: string; tone: stri
   { value: 3, label: '3★', tone: 'text-rarity-3' },
   { value: 'low', label: '1–2★', tone: 'text-rarity-2' },
 ]
+const VIEWS: SegmentedOption<'grid' | 'list'>[] = [
+  { value: 'grid', label: 'Cards', icon: LayoutGrid },
+  { value: 'list', label: 'List', icon: List },
+]
 const statusOptions = [
   { value: 'all' as const, label: 'Status' },
   { value: 'equipped' as const, label: 'Equipped' },
@@ -64,11 +69,7 @@ function toggleRarity(r: Exclude<RarityFilter, 'all'>) {
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
-    role="search"
-    aria-label="Filter weapons"
-  >
+  <UiToolbar label="Filter weapons">
     <div class="flex flex-wrap items-center gap-2">
       <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
         <span class="sr-only">Search</span>
@@ -91,11 +92,11 @@ function toggleRarity(r: Exclude<RarityFilter, 'all'>) {
         class="min-w-0 flex-1 sm:w-48 sm:flex-none"
         :options="WEAPON_SORTS"
       />
-      <ViewToggle v-model="view" />
+      <UiSegmented v-model="view" :options="VIEWS" label="View" icon-only />
     </div>
 
     <div
-      class="-mx-3 flex gap-2 overflow-x-auto px-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
       aria-label="Type, rarity and refinement"
     >
@@ -153,5 +154,5 @@ function toggleRarity(r: Exclude<RarityFilter, 'all'>) {
         <UiButton variant="ghost" size="sm" @click="$emit('clear')">Clear</UiButton>
       </div>
     </div>
-  </div>
+  </UiToolbar>
 </template>

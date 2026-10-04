@@ -15,13 +15,13 @@ const title = computed(
     <span
       v-for="(level, index) in levels"
       :key="index"
-      class="tabular inline-flex h-6 min-w-7 items-center justify-center rounded-md px-1 font-mono text-sm leading-none"
+      class="tabular inline-flex h-6 min-w-7 items-center justify-center rounded-md bg-surface-overlay px-1 font-mono text-sm leading-none"
       :class="
         level >= 10
-          ? 'bg-rarity-5/15 font-semibold text-rarity-5'
+          ? 'font-semibold text-rarity-5'
           : level >= 9
-            ? 'bg-surface-overlay text-text-primary'
-            : 'bg-surface-overlay text-text-muted'
+            ? 'font-medium text-text-primary'
+            : 'text-text-secondary'
       "
       >{{ level }}</span
     >

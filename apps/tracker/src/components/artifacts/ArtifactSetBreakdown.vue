@@ -7,8 +7,8 @@ import { formatNumber } from '@/lib/format'
 
 /**
  * The biggest sets among the current matches as icon + count chips (name in
- * the tooltip); picking one filters to it. One row that scrolls sideways when
- * it does not fit.
+ * the tooltip); picking one filters to it. On phones one row that scrolls
+ * sideways (the clipped edge fades); from sm the chips wrap.
  */
 const props = withDefaults(
   defineProps<{ sets: SetOption[]; selected: readonly string[]; limit?: number }>(),
@@ -22,7 +22,7 @@ const rest = computed(() => props.sets.length - top.value.length)
 
 <template>
   <div
-    class="-my-1 flex min-w-0 items-center gap-2 overflow-x-auto px-0.5 py-1 [scrollbar-width:none]"
+    class="scroll-hide scroll-fade-x -my-1 flex min-w-0 items-center gap-2 overflow-x-auto px-0.5 py-1 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible"
     role="group"
     aria-label="Top sets"
   >
@@ -31,7 +31,11 @@ const rest = computed(() => props.sets.length - top.value.length)
       :key="set.key"
       type="button"
       class="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border py-1 pr-2.5 pl-1 text-sm transition-colors hover:bg-surface-overlay"
-      :class="selected.includes(set.key) ? 'border-accent-text' : 'border-border-default'"
+      :class="
+        selected.includes(set.key)
+          ? 'border-accent-text bg-surface-overlay'
+          : 'border-border-default'
+      "
       :aria-pressed="selected.includes(set.key)"
       :aria-label="`${set.name}, ${set.count}`"
       :title="set.name"

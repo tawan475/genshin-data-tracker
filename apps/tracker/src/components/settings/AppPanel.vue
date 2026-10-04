@@ -65,7 +65,7 @@ async function install() {
         </p>
         <div v-else-if="installPrompt" class="mt-3">
           <UiButton :loading="installing" @click="install">
-            <Download v-if="!installing" class="size-5" aria-hidden="true" />
+            <Download v-if="!installing" class="size-4" aria-hidden="true" />
             Install app
           </UiButton>
         </div>

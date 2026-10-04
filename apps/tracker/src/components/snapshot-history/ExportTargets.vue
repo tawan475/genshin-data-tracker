@@ -19,11 +19,13 @@ const { text, fetchLatest } = useLatestGood(toRef(props, 'account'))
 interface Target {
   site: string
   url: string
+  /** The old export page's per-site button colour (kept on purpose). */
   variant: string
 }
 interface Card {
   title: string
   icon: Component
+  /** The icon tile's tint: a chart series colour per card. */
   chip: string
   targets: Target[]
 }
@@ -32,7 +34,7 @@ const CARDS: Card[] = [
   {
     title: 'Optimizer',
     icon: Calculator,
-    chip: 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400',
+    chip: 'bg-chart-4/15 text-chart-4',
     targets: [
       {
         site: 'Genshin Optimizer',
@@ -44,13 +46,13 @@ const CARDS: Card[] = [
   {
     title: 'Planner',
     icon: CalendarCheck,
-    chip: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400',
+    chip: 'bg-chart-3/15 text-chart-3',
     targets: [{ site: 'Seelie.me', url: 'https://seelie.me/inventory', variant: 'emerald' }],
   },
   {
     title: 'Achievement',
     icon: Trophy,
-    chip: 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400',
+    chip: 'bg-chart-6/15 text-chart-6',
     targets: [
       { site: 'Stardb.gg', url: 'https://stardb.gg/en/import', variant: 'purple' },
       { site: 'Seelie.me', url: 'https://seelie.me/achievements', variant: 'secondary' },
@@ -103,15 +105,13 @@ async function exportTo(target: Target) {
     <div
       v-for="card in CARDS"
       :key="card.title"
-      class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3 sm:p-4 flex items-center gap-3 sm:flex-col sm:items-stretch transition-colors"
+      class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm transition-colors sm:flex-col sm:items-stretch sm:p-4"
     >
       <div class="flex min-w-0 flex-1 items-center gap-3">
-        <div class="p-2 rounded-lg transition-colors" :class="card.chip">
-          <component :is="card.icon" class="w-5 h-5" aria-hidden="true" />
+        <div class="rounded-lg p-2 transition-colors" :class="card.chip">
+          <component :is="card.icon" class="size-5" aria-hidden="true" />
         </div>
-        <h2
-          class="truncate text-sm sm:text-base font-bold text-slate-800 dark:text-white transition-colors"
-        >
+        <h2 class="truncate text-sm font-semibold sm:text-base">
           {{ card.title }}
         </h2>
       </div>

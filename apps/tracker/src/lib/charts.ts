@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from 'chart.js'
 import zoomPlugin from 'chartjs-plugin-zoom'
+import './chart-defaults'
 
 Chart.register(
   CategoryScale,

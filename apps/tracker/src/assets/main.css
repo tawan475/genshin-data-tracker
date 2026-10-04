@@ -43,7 +43,8 @@
   --focus-ring: #6366f1;
   --paimon: #f59e0b;
   --paimon-glow: rgba(245, 158, 11, 0.4);
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06);
+  /* The public pages' night sky under hero-bg.webp, in both themes. */
+  --public-ground: #0f131f;
   --shadow-overlay: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
 
   --rarity-5: #b45309;
@@ -60,9 +61,10 @@
   --element-geo: #ca8a04;
   --element-physical: #52525b;
   --chart-1: #4f46e5;
-  --chart-2: #f59e0b;
-  --chart-3: #10b981;
-  --chart-4: #0ea5e9;
+  /* 600 shades: 3:1+ on white for lines and bars. */
+  --chart-2: #d97706;
+  --chart-3: #059669;
+  --chart-4: #0284c7;
   --chart-5: #ec4899;
   --chart-6: #8b5cf6;
   --chart-grid: #e2e8f0;
@@ -83,18 +85,18 @@
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  --accent: #6366f1; /* indigo-500 */
-  --accent-hover: #818cf8;
+  --accent: #6366f1; /* indigo-500; white on it is 4.47:1 */
+  /* Hover goes darker, not lighter: white on #818cf8 was 2.98:1. */
+  --accent-hover: #4f46e5;
   --accent-ink: #ffffff;
   --accent-text: #a5b4fc;
-  --danger: #ef4444;
+  --danger: #dc2626; /* white on it 4.83:1 (#ef4444 was 3.76:1) */
   --danger-text: #fca5a5;
   --danger-surface: rgba(127, 29, 29, 0.25);
   --danger-border: rgba(127, 29, 29, 0.6);
   --success-text: #6ee7b7;
   --warning-text: #fcd34d;
   --focus-ring: #818cf8;
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-overlay: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   --rarity-5: #fbbf24;
@@ -155,6 +157,7 @@
   --color-chart-5: var(--chart-5);
   --color-chart-6: var(--chart-6);
   --color-paimon: var(--paimon);
+  --color-public-ground: var(--public-ground);
   --color-paimon-glow: var(--paimon-glow);
   --color-rarity-5: var(--rarity-5);
   --color-rarity-4: var(--rarity-4);
@@ -170,7 +173,6 @@
   --color-geo: var(--element-geo);
   --color-physical: var(--element-physical);
 
-  --shadow-card: var(--shadow-card);
   --shadow-overlay: var(--shadow-overlay);
 }
 
@@ -241,6 +243,14 @@
   }
   html:has(dialog[open]) {
     overflow: hidden;
+    /* The reserved gutter shows the canvas: dim it like the dialogs'
+       backdrop (slate-900 at 60%, UiModal's backdrop:bg-slate-900/60). */
+    background-color: color-mix(in srgb, #0f172a 60%, var(--surface-base));
+  }
+  /* Public pages (landing, sign-in, sign-up) are always dark: the canvas,
+     overscroll and the page scrollbar too (see setPublicPage in lib/theme). */
+  html[data-public] {
+    background-color: var(--public-ground);
   }
 
   :focus-visible {
@@ -269,6 +279,66 @@ html.theme-transitions body * {
     background-color 200ms ease,
     border-color 200ms ease,
     color 200ms ease;
+}
+
+/* Rows that scroll sideways by design (chip rows, stat strips, wide old
+   tables on phones): no scrollbar (scroll-hide), and the clipped edges fade
+   (scroll-fade-x) so the overflow shows. Where scroll-driven animations
+   exist, a fade appears only on a side that has more to scroll to; elsewhere
+   the right edge always fades. Drop it where the row wraps
+   (sm:scroll-fade-none). */
+@property --fade-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@keyframes scroll-fade-x {
+  0% {
+    --fade-start: 0px;
+    --fade-end: 2rem;
+  }
+  8% {
+    --fade-start: 1rem;
+  }
+  92% {
+    --fade-end: 2rem;
+  }
+  100% {
+    --fade-start: 1rem;
+    --fade-end: 0px;
+  }
+}
+@utility scroll-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+@utility scroll-fade-x {
+  --fade-start: 0px;
+  --fade-end: 2rem;
+  /* Tailwind's build adds the -webkit- prefix. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent
+  );
+  @supports (animation-timeline: scroll()) {
+    --fade-end: 0px;
+    animation: scroll-fade-x linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+@utility scroll-fade-none {
+  mask-image: none;
+  animation: none;
 }
 
 @layer utilities {

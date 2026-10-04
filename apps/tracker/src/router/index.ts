@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { setPublicPage } from '@/lib/theme'
 import { useAccounts } from '@/stores/accounts'
 import { useSession } from '@/stores/session'
 
@@ -8,6 +9,8 @@ declare module 'vue-router' {
     auth?: boolean
     /** Only for signed-out visitors (login, register). */
     guest?: boolean
+    /** A public page (PublicFrame): the whole document is dark while it shows. */
+    public?: boolean
     title?: string
   }
 }
@@ -23,18 +26,23 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior: (to, from, saved) => saved ?? (to.path !== from.path ? { top: 0 } : undefined),
   routes: [
-    { path: '/', name: 'landing', component: () => import('@/views/LandingView.vue') },
+    {
+      path: '/',
+      name: 'landing',
+      component: () => import('@/views/LandingView.vue'),
+      meta: { public: true },
+    },
     {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
-      meta: { guest: true, title: 'Sign in' },
+      meta: { guest: true, public: true, title: 'Sign in' },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('@/views/RegisterView.vue'),
-      meta: { guest: true, title: 'Create account' },
+      meta: { guest: true, public: true, title: 'Create account' },
     },
     {
       path: '/app',
@@ -158,6 +166,7 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach((to) => {
+  setPublicPage(to.meta.public === true)
   document.title = to.meta.title ? `${to.meta.title} · GI Tracker` : 'GI Tracker'
 })
 

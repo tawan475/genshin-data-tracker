@@ -1,14 +1,23 @@
 <script setup lang="ts">
 import { useSession } from '@/stores/session'
 
-/** The original public look: hero art under a dark gradient, glowing brand mark. */
+/**
+ * The original public look: hero art under a dark gradient, glowing brand
+ * mark. Always dark: routes using it carry `meta.public`, which paints the
+ * whole document dark too (canvas, scrollbar, theme-color; lib/theme.ts).
+ */
 const session = useSession()
 </script>
 
 <template>
-  <div class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-[#0f131f] text-gray-100" data-theme="dark">
+  <div
+    class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-public-ground text-gray-100"
+    data-theme="dark"
+  >
     <div class="absolute inset-0 -z-20 bg-[url('/hero-bg.webp')] bg-cover bg-center" />
-    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#0f131f]/40 to-[#0f131f]/95" />
+    <div
+      class="absolute inset-0 -z-10 bg-gradient-to-b from-public-ground/40 to-public-ground/95"
+    />
 
     <nav class="animate-fade-up relative z-10 px-6 py-6 md:px-12">
       <div class="mx-auto flex max-w-7xl items-center justify-between">
