@@ -45,14 +45,10 @@ const router = createRouter({
           path: '',
           name: 'home',
           component: () => import('@/views/app/HomeView.vue'),
-          meta: { auth: true, title: 'Overview' },
+          meta: { auth: true, title: 'Accounts' },
         },
-        {
-          path: 'accounts',
-          name: 'accounts',
-          component: () => import('@/views/app/AccountsView.vue'),
-          meta: { auth: true, title: 'Accounts & Keys' },
-        },
+        // Pages that existed briefly; old links land on their replacements.
+        { path: 'accounts', redirect: { name: 'home' } },
         {
           path: 'accounts/new',
           name: 'account-new',
@@ -73,13 +69,13 @@ const router = createRouter({
             account(
               '',
               'account-overview',
-              'Account Overview',
+              'Overview',
               () => import('@/views/account/OverviewView.vue'),
             ),
             account(
               'progression',
               'account-progression',
-              'Detailed Progression',
+              'Progression',
               () => import('@/views/account/ProgressionView.vue'),
             ),
             account(
@@ -112,12 +108,7 @@ const router = createRouter({
               'Snapshots',
               () => import('@/views/account/SnapshotsView.vue'),
             ),
-            account(
-              'export',
-              'account-export',
-              'Export',
-              () => import('@/views/account/ExportView.vue'),
-            ),
+            { path: 'export', redirect: { name: 'account-snapshots' } },
             account(
               'import',
               'account-import',

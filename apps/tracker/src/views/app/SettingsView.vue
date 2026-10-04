@@ -6,6 +6,7 @@ import AppPanel from '@/components/settings/AppPanel.vue'
 import AppearancePanel from '@/components/settings/AppearancePanel.vue'
 import PasswordPanel from '@/components/settings/PasswordPanel.vue'
 import ProfilePanel from '@/components/settings/ProfilePanel.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { useAccounts } from '@/stores/accounts'
@@ -47,15 +48,12 @@ async function signOutEverywhere() {
 </script>
 
 <template>
-  <h1
-    class="mb-8 text-3xl font-bold tracking-tight text-slate-900 transition-colors dark:text-white"
-  >
-    Settings
-  </h1>
+  <PageHeader title="Settings" />
 
-  <div class="flex max-w-3xl flex-col gap-6">
-    <AppearancePanel />
+  <!-- Tiles: cards flow into columns so short ones don't leave the width empty. -->
+  <div class="columns-1 gap-6 md:columns-2 2xl:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid">
     <ProfilePanel />
+    <AppearancePanel />
     <PasswordPanel />
     <AppPanel />
 

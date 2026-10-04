@@ -1,310 +1,291 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { refDebounced } from '@vueuse/core'
-import ArtifactListCard from '@/components/artifact-list/ArtifactListCard.vue'
-import { getSubstatColorClass, hideBrokenImage } from '@/components/artifact-list/styles'
-import BasePagination, { type PaginationMeta } from '@/components/legacy/BasePagination.vue'
-import BaseTable, { type TableLabel } from '@/components/legacy/BaseTable.vue'
+import { ChevronLeft, ChevronRight, Gem, SearchX } from 'lucide-vue-next'
+import ArtifactCard from '@/components/artifacts/ArtifactCard.vue'
+import ArtifactDetail from '@/components/artifacts/ArtifactDetail.vue'
+import ArtifactSetBreakdown from '@/components/artifacts/ArtifactSetBreakdown.vue'
+import ArtifactToolbar from '@/components/artifacts/ArtifactToolbar.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
+import UiModal from '@/components/ui/UiModal.vue'
+import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
-import { buildArtifactRows, sortRows, type ArtifactRow } from '@/data/artifacts'
+import { MAIN_STAT_ORDER, formatSetName } from '@/utils/artifact-stats'
+import {
+  activeFilterCount,
+  buildArtifactRows,
+  clearedFilters,
+  compileFilter,
+  facetCounts,
+  loadFilters,
+  saveFilters,
+  sortRows,
+  type ArtifactFilters,
+  type ArtifactRow,
+  type SetOption,
+} from '@/data/artifacts'
 import { useResource } from '@/data/use-resource'
-import { artifactIcon } from '@/lib/assets'
-import { useAccounts } from '@/stores/accounts'
-import { formatStatName, formatStatValue } from '@/utils/artifact-stats'
+import { formatNumber } from '@/lib/format'
 import { useAccount } from './context'
 
-/**
- * "My Artifacts" from the original dashboard: every artifact in the newest
- * snapshot, sorted by crit or roll value, as cards or a table. The old API
- * paged and searched on the server; here the decoded snapshot is filtered
- * and paged in the browser.
- */
-type SortBy = 'cv' | 'rv'
-
-const sortByOptions: Record<SortBy, string> = { cv: 'Crit Value', rv: 'Roll Value' }
-const cardLimitOptions = [12, 24, 48, 96]
+const PAGE_SIZE = 120
 
 const account = useAccount()
-const accounts = useAccounts()
 const inventory = useResource(
   () => account.value,
   (a) => loadLatestInventory(a),
 )
 
-const sortBy = ref<SortBy>('cv')
-const search = ref('')
-const viewMode = ref<'cards' | 'table'>('cards')
-const page = ref(1)
-const limit = ref(24)
-const cardsAnchor = ref<HTMLElement | null>(null)
-const tableAnchor = ref<HTMLElement | null>(null)
-
-const debouncedSearch = refDebounced(search, 300)
-
-/** `undefined` until the first load; `null` inventory means no snapshot yet. */
-const loaded = computed(() => inventory.data.value !== undefined)
-const isLoading = computed(() => inventory.loading.value)
-const accountName = computed(() => accounts.displayName(account.value))
-
+/** Derived once per inventory (CV, RV, rolls, search text); cached by the data module. */
 const rows = computed<ArtifactRow[]>(() =>
   inventory.data.value ? buildArtifactRows(inventory.data.value.good.artifacts) : [],
 )
-const sorted = computed(() => sortRows(rows.value, sortBy.value, true))
-/** Set name or GOOD set key, case-insensitive (the old API matched the key). */
-const matches = computed(() => {
-  const query = debouncedSearch.value.trim().toLowerCase()
-  if (!query) return sorted.value
-  return sorted.value.filter(
-    (row) =>
-      row.setName.toLowerCase().includes(query) ||
-      row.artifact.setKey.toLowerCase().includes(query),
-  )
+
+// ------------------------------------------------------------- filter state
+// Per account, remembered on this device. Always replaced, never mutated, so
+// a plain watch sees every change.
+const filters = shallowRef<ArtifactFilters>(loadFilters(account.value.id))
+watch(
+  () => account.value.id,
+  (id) => (filters.value = loadFilters(id)),
+)
+watch(filters, (value) => saveFilters(account.value.id, value))
+
+// Typing should not re-filter 2,000 artifacts on every key.
+const debouncedSearch = refDebounced(
+  computed(() => filters.value.search),
+  150,
+)
+const applied = computed<ArtifactFilters>(() => ({
+  ...filters.value,
+  search: debouncedSearch.value,
+}))
+
+// Filtering a sorted list keeps its order, so sorting only reruns on a sort change.
+const sorted = computed(() => sortRows(rows.value, filters.value.sort, filters.value.descending))
+const matches = computed(() => sorted.value.filter(compileFilter(applied.value)))
+
+// ------------------------------------------------------------------ counts
+const fodderTotal = computed(() => rows.value.reduce((n, row) => n + Number(row.fodder), 0))
+
+const inventorySets = computed(() => {
+  const keys = new Set<string>()
+  for (const row of rows.value) keys.add(row.artifact.setKey)
+  return keys
+})
+const setOptions = computed<SetOption[]>(() => {
+  const counts = facetCounts(rows.value, applied.value, 'sets', (r) => r.artifact.setKey)
+  const keys = new Set([...inventorySets.value, ...filters.value.sets])
+  return [...keys].map((key) => ({ key, name: formatSetName(key), count: counts.get(key) ?? 0 }))
+})
+const slotCounts = computed(() =>
+  facetCounts(rows.value, applied.value, 'slots', (r) => r.artifact.slotKey),
+)
+const rarityCounts = computed(() =>
+  facetCounts(rows.value, applied.value, 'rarities', (r) => r.artifact.rarity),
+)
+const rarities = computed(() => {
+  const present = new Set<number>(filters.value.rarities)
+  for (const row of rows.value) present.add(row.artifact.rarity)
+  return [...present].sort((a, b) => b - a)
+})
+const mainStats = computed(() => {
+  const counts = facetCounts(rows.value, applied.value, 'mainStat', (r) => r.artifact.mainStatKey)
+  const keys = new Set<string>()
+  for (const row of rows.value) keys.add(row.artifact.mainStatKey)
+  if (filters.value.mainStat) keys.add(filters.value.mainStat)
+  const rank = (key: string) => {
+    const index = MAIN_STAT_ORDER.indexOf(key)
+    return index === -1 ? MAIN_STAT_ORDER.length : index
+  }
+  return [...keys]
+    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
+    .map((key) => ({ key, count: counts.get(key) ?? 0 }))
 })
 
-const meta = computed<PaginationMeta>(() => ({
-  page: page.value,
-  limit: limit.value,
-  total: matches.value.length,
-  totalPages: Math.max(1, Math.ceil(matches.value.length / limit.value)),
-}))
-const artifacts = computed(() =>
-  matches.value.slice((page.value - 1) * limit.value, page.value * limit.value),
-)
+/** Sets among the current matches, biggest first. */
+const matchSets = computed<SetOption[]>(() => {
+  const counts = new Map<string, number>()
+  for (const row of matches.value) {
+    counts.set(row.artifact.setKey, (counts.get(row.artifact.setKey) ?? 0) + 1)
+  }
+  return [...counts]
+    .map(([key, count]) => ({ key, name: formatSetName(key), count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+})
 
-watch([sortBy, debouncedSearch, () => account.value.id], () => (page.value = 1))
-watch(
-  () => meta.value.totalPages,
-  (pages) => {
-    if (page.value > pages) page.value = pages
-  },
-)
+const filtering = computed(() => activeFilterCount(applied.value) > 0)
 
-function setPage(value: number) {
-  page.value = value
+function toggleSet(key: string) {
+  const sets = filters.value.sets
+  filters.value = {
+    ...filters.value,
+    sets: sets.includes(key) ? sets.filter((k) => k !== key) : [...sets, key],
+  }
 }
 
-function setLimit(value: number) {
-  limit.value = value
-  page.value = 1
+function clearFilters() {
+  filters.value = clearedFilters(filters.value)
 }
 
-const tableLabels: TableLabel[] = [
-  { key: 'id', title: 'ID', slot: true },
-  { key: 'setKey', title: 'Set', slot: true },
-  { key: 'slotKey', title: 'Slot', slot: true },
-  { key: 'level', title: 'Level', slot: true },
-  { key: 'mainStat', title: 'Main Stat', slot: true },
-  { key: 'substats', title: 'Substats', slot: true },
-  { key: 'cv', title: 'CV', slot: true },
-  { key: 'rv', title: 'RV', slot: true },
-]
+// ---------------------------------------------------------------- windowing
+const limit = ref(PAGE_SIZE)
+watch(matches, () => (limit.value = PAGE_SIZE))
+const shown = computed(() => matches.value.slice(0, limit.value))
+const remaining = computed(() => matches.value.length - shown.value.length)
+
+// ------------------------------------------------------------------- detail
+const openId = ref<number | null>(null)
+watch(rows, () => (openId.value = null))
+const openRow = computed(() => (openId.value === null ? null : (rows.value[openId.value] ?? null)))
+const openIndex = computed(() => (openRow.value ? matches.value.indexOf(openRow.value) : -1))
+
+function step(delta: number) {
+  const next = matches.value[openIndex.value + delta]
+  if (!next) return
+  openId.value = next.id
+  // Keep the card on the page behind the dialog.
+  if (openIndex.value >= limit.value) limit.value = openIndex.value + 1
+}
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto space-y-6 pb-12">
-    <div
-      class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 dark:border-slate-700"
-    >
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          My Artifacts
-        </h1>
-        <p class="text-slate-500 dark:text-slate-400 mt-1">
-          Found {{ meta.total }} artifacts for {{ accountName }}
-        </p>
-      </div>
+  <PageHeader title="Artifacts" />
 
-      <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-        <div class="relative w-full sm:w-64">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              class="h-5 w-5 text-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-          <input
-            v-model="search"
-            type="text"
-            placeholder="Search artifacts..."
-            aria-label="Search artifacts"
-            class="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
-          />
-        </div>
+  <UiEmpty v-if="!account.latest" title="No snapshot yet">
+    <template #icon><Gem aria-hidden="true" /></template>
+    <UiButton variant="primary" :to="{ name: 'account-import' }">Import</UiButton>
+  </UiEmpty>
 
-        <select
-          v-model="sortBy"
-          aria-label="Sort by"
-          class="block w-full sm:w-40 pl-3 pr-10 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
-        >
-          <option v-for="(label, value) in sortByOptions" :key="value" :value="value">
-            {{ label }}
-          </option>
-        </select>
+  <UiError
+    v-else-if="inventory.error.value && !inventory.data.value"
+    title="Could not load artifacts"
+    :error="inventory.error.value"
+    @retry="inventory.reload()"
+  />
 
+  <div v-else-if="!inventory.data.value" class="flex flex-col gap-4" aria-busy="true">
+    <span class="sr-only" role="status">Loading artifacts</span>
+    <UiSkeleton class="h-28" />
+    <UiSkeleton class="h-11 w-64" />
+    <div class="@container">
+      <div class="grid grid-cols-1 gap-3 @xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4">
         <div
-          class="flex rounded-lg border border-slate-300 dark:border-slate-600 overflow-hidden shrink-0"
+          v-for="n in 8"
+          :key="n"
+          class="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-raised p-3"
         >
-          <button
-            type="button"
-            :aria-pressed="viewMode === 'cards'"
-            :class="[
-              'flex-1 sm:flex-none px-3 py-2 text-sm font-medium transition-colors',
-              viewMode === 'cards'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800',
-            ]"
-            @click="viewMode = 'cards'"
-          >
-            Cards
-          </button>
-          <button
-            type="button"
-            :aria-pressed="viewMode === 'table'"
-            :class="[
-              'flex-1 sm:flex-none px-3 py-2 text-sm font-medium transition-colors border-l border-slate-300 dark:border-slate-600',
-              viewMode === 'table'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800',
-            ]"
-            @click="viewMode = 'table'"
-          >
-            Table
-          </button>
+          <div class="flex gap-3">
+            <UiSkeleton class="size-12 shrink-0" />
+            <div class="flex flex-1 flex-col gap-2">
+              <UiSkeleton class="h-5 w-2/3" />
+              <UiSkeleton class="h-4 w-1/2" />
+            </div>
+          </div>
+          <UiSkeleton v-for="line in 4" :key="line" class="h-4" />
+          <UiSkeleton class="h-9" />
         </div>
       </div>
     </div>
+  </div>
 
+  <UiEmpty v-else-if="rows.length === 0" title="No artifacts">
+    <template #icon><Gem aria-hidden="true" /></template>
+    <UiButton variant="primary" :to="{ name: 'account-import' }">Import</UiButton>
+  </UiEmpty>
+
+  <div v-else class="flex flex-col gap-4">
     <UiError
       v-if="inventory.error.value"
-      title="Could not load artifacts"
+      title="Could not refresh"
       :error="inventory.error.value"
       @retry="inventory.reload()"
     />
 
-    <div v-if="!loaded" class="flex justify-center p-12">
-      <span
-        v-if="isLoading"
-        class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin"
+    <ArtifactToolbar
+      v-model="filters"
+      :sets="setOptions"
+      :slot-counts="slotCounts"
+      :rarities="rarities"
+      :rarity-counts="rarityCounts"
+      :main-stats="mainStats"
+      :fodder-count="fodderTotal"
+    />
+
+    <div class="flex min-w-0 items-center gap-3">
+      <p
+        class="tabular shrink-0 font-mono text-lg"
+        role="status"
+        :title="filtering ? 'Matches / artifacts' : 'Artifacts'"
+      >
+        <template v-if="filtering">
+          {{ formatNumber(matches.length)
+          }}<span class="text-text-muted"> / {{ formatNumber(rows.length) }}</span>
+        </template>
+        <template v-else>{{ formatNumber(rows.length) }}</template>
+        <span class="sr-only">artifacts</span>
+      </p>
+      <ArtifactSetBreakdown
+        v-if="matchSets.length > 1 || filters.sets.length"
+        class="flex-1"
+        :sets="matchSets"
+        :selected="filters.sets"
+        @toggle="toggleSet"
       />
     </div>
 
-    <template v-else-if="viewMode === 'cards'">
-      <div
-        v-if="artifacts.length === 0"
-        class="text-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700"
-      >
-        <p class="text-slate-500 dark:text-slate-400">No artifacts found.</p>
-      </div>
-      <div v-else ref="cardsAnchor" class="relative">
-        <div
-          v-if="isLoading"
-          class="absolute inset-0 z-10 flex justify-center items-start pt-12 bg-white/40 dark:bg-slate-900/40 backdrop-blur-[1px] rounded-lg"
-        >
-          <span
-            class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin"
-          />
-        </div>
-        <div
-          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3"
-        >
-          <ArtifactListCard v-for="row in artifacts" :key="row.id" :row="row" />
-        </div>
-      </div>
-
-      <BasePagination
-        v-if="artifacts.length > 0"
-        :meta="meta"
-        :is-loading="isLoading"
-        :scroll-anchor="cardsAnchor"
-        :limit-options="cardLimitOptions"
-        @page-change="setPage"
-        @limit-change="setLimit"
-      />
-    </template>
+    <UiEmpty v-if="matches.length === 0" title="No matches">
+      <template #icon><SearchX aria-hidden="true" /></template>
+      <UiButton variant="primary" @click="clearFilters">Clear filters</UiButton>
+    </UiEmpty>
 
     <template v-else>
-      <div ref="tableAnchor">
-        <BaseTable :labels="tableLabels" :data="artifacts" :is-loading="isLoading">
-          <template #id="{ item }">
-            <span class="tabular-nums">{{ item.id + 1 }}</span>
-          </template>
-          <template #setKey="{ item }">
-            <div class="flex items-center gap-2">
-              <img
-                v-if="artifactIcon(item.artifact.setKey, item.artifact.slotKey)"
-                :src="artifactIcon(item.artifact.setKey, item.artifact.slotKey)"
-                :alt="item.setName"
-                class="w-8 h-8 object-contain rounded bg-slate-100 dark:bg-slate-800"
-                loading="lazy"
-                @error="hideBrokenImage"
-              />
-              <span class="font-medium">{{ item.setName }}</span>
-            </div>
-          </template>
-          <template #slotKey="{ item }">
-            <span
-              class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-            >
-              {{ item.artifact.slotKey }}
-            </span>
-          </template>
-          <template #level="{ item }">
-            <span
-              class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-            >
-              +{{ item.artifact.level }}
-            </span>
-          </template>
-          <template #mainStat="{ item }">
-            <span class="font-semibold text-slate-900 dark:text-white whitespace-nowrap">
-              {{ formatStatName(item.artifact.mainStatKey) }}
-            </span>
-          </template>
-          <template #substats="{ item }">
-            <div class="flex flex-col gap-1 min-w-[150px] py-2">
-              <div
-                v-for="sub in item.artifact.substats"
-                :key="sub.key"
-                class="flex justify-between items-center gap-3 text-xs"
-              >
-                <span class="text-slate-600 dark:text-slate-300 whitespace-nowrap">{{
-                  formatStatName(sub.key)
-                }}</span>
-                <span :class="['font-bold', getSubstatColorClass(sub.key)]">
-                  +{{ formatStatValue(sub.key, sub.value) }}
-                </span>
-              </div>
-            </div>
-          </template>
-          <template #cv="{ item }">
-            <span class="font-bold text-slate-900 dark:text-white">{{ item.cv.toFixed(1) }}</span>
-          </template>
-          <template #rv="{ item }">
-            <span class="font-bold text-slate-900 dark:text-white">{{ item.rv }}%</span>
-          </template>
-        </BaseTable>
+      <div class="@container">
+        <ul class="grid grid-cols-1 gap-3 @xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4">
+          <li v-for="row in shown" :key="row.id" class="flex">
+            <ArtifactCard :row="row" class="flex-1" @open="openId = $event" />
+          </li>
+        </ul>
       </div>
 
-      <BasePagination
-        v-if="artifacts.length > 0"
-        :meta="meta"
-        :is-loading="isLoading"
-        :scroll-anchor="tableAnchor"
-        :limit-options="cardLimitOptions"
-        @page-change="setPage"
-        @limit-change="setLimit"
-      />
+      <div v-if="remaining > 0" class="flex items-center justify-center gap-3">
+        <span class="tabular font-mono text-sm text-text-muted">
+          {{ formatNumber(shown.length) }} / {{ formatNumber(matches.length) }}
+        </span>
+        <UiButton @click="limit += PAGE_SIZE">Show more</UiButton>
+      </div>
     </template>
   </div>
+
+  <UiModal :open="openRow !== null" :title="openRow?.setName ?? ''" wide @close="openId = null">
+    <ArtifactDetail v-if="openRow" :row="openRow" />
+    <template #footer>
+      <span
+        v-if="openIndex >= 0"
+        class="tabular mr-auto self-center font-mono text-sm text-text-muted"
+      >
+        {{ formatNumber(openIndex + 1) }} / {{ formatNumber(matches.length) }}
+      </span>
+      <UiIconButton
+        label="Previous"
+        class="disabled:opacity-40"
+        :disabled="openIndex <= 0"
+        @click="step(-1)"
+      >
+        <ChevronLeft class="size-5" aria-hidden="true" />
+      </UiIconButton>
+      <UiIconButton
+        label="Next"
+        class="disabled:opacity-40"
+        :disabled="openIndex < 0 || openIndex >= matches.length - 1"
+        @click="step(1)"
+      >
+        <ChevronRight class="size-5" aria-hidden="true" />
+      </UiIconButton>
+    </template>
+  </UiModal>
 </template>
