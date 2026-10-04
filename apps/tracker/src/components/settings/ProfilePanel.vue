@@ -1,15 +1,107 @@
 <script setup lang="ts">
+import { emailSchema, usernameSchema } from '@gdt/shared'
+import { computed, nextTick, ref } from 'vue'
+import { Pencil } from 'lucide-vue-next'
 import UiBadge from '@/components/ui/UiBadge.vue'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiField from '@/components/ui/UiField.vue'
+import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import { ApiRequestError } from '@/api'
+import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
+/**
+ * Who you are: user id, username, email. Username and email are both login
+ * names, so changing either asks for the current password.
+ */
 const session = useSession()
+const feedback = useFeedback()
+
+const editing = ref(false)
+const username = ref('')
+const email = ref('')
+const password = ref('')
+const touched = ref(false)
+const busy = ref(false)
+const serverErrors = ref<{ username?: string; email?: string; password?: string }>({})
+const form = ref<HTMLFormElement>()
+
+function startEdit() {
+  username.value = session.me?.username ?? ''
+  email.value = session.me?.email ?? ''
+  password.value = ''
+  touched.value = false
+  serverErrors.value = {}
+  editing.value = true
+  void nextTick(() => form.value?.querySelector('input')?.focus())
+}
+
+const usernameChanged = computed(() => username.value.trim() !== session.me?.username)
+const emailChanged = computed(
+  () => (email.value.trim().toLowerCase() || null) !== (session.me?.email ?? null),
+)
+
+const errors = computed(() => ({
+  username:
+    serverErrors.value.username ??
+    (usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _'),
+  email:
+    serverErrors.value.email ??
+    (!email.value.trim() || emailSchema.safeParse(email.value).success ? '' : 'Invalid email'),
+  password: serverErrors.value.password ?? (password.value ? '' : 'Required'),
+}))
+const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
+const valid = computed(() => Object.values(errors.value).every((e) => !e))
+
+async function save() {
+  touched.value = true
+  serverErrors.value = {}
+  if (!valid.value || (!usernameChanged.value && !emailChanged.value)) return
+  busy.value = true
+  try {
+    await session.updateProfile({
+      currentPassword: password.value,
+      ...(usernameChanged.value ? { username: username.value.trim() } : {}),
+      ...(emailChanged.value ? { email: email.value.trim() || null } : {}),
+    })
+    editing.value = false
+    feedback.toast({ tone: 'success', title: 'Profile updated' })
+  } catch (cause) {
+    const code = cause instanceof ApiRequestError ? cause.code : ''
+    if (code === 'username_taken') serverErrors.value = { username: 'Taken' }
+    else if (code === 'email_taken') serverErrors.value = { email: 'Taken' }
+    else if (code === 'invalid_credentials') serverErrors.value = { password: 'Wrong password' }
+    else feedback.error('Profile not saved', cause)
+  } finally {
+    busy.value = false
+  }
+}
+
+const fields = { username, email, password }
+
+/** Typing in a field clears the server's complaint about it. */
+function edit(field: keyof typeof fields, value: string) {
+  fields[field].value = value
+  if (serverErrors.value[field]) serverErrors.value = { ...serverErrors.value, [field]: undefined }
+}
 </script>
 
 <template>
   <UiPanel title="Profile">
-    <dl v-if="session.me" class="flex flex-col divide-y divide-border-subtle">
+    <template v-if="session.me && !editing" #actions>
+      <UiButton size="sm" variant="secondary" @click="startEdit">
+        <Pencil class="size-4" aria-hidden="true" />
+        Edit
+      </UiButton>
+    </template>
+
+    <dl v-if="session.me && !editing" class="flex flex-col divide-y divide-border-subtle">
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-3">
+        <dt class="text-text-secondary">User ID</dt>
+        <dd class="font-mono select-all">{{ session.me.id }}</dd>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
         <dt class="text-text-secondary">Username</dt>
         <dd class="min-w-0 truncate font-mono">{{ session.me.username }}</dd>
       </div>
@@ -24,5 +116,62 @@ const session = useSession()
         <dd v-else class="text-text-muted">—</dd>
       </div>
     </dl>
+
+    <form
+      v-else-if="session.me"
+      ref="form"
+      class="flex flex-col gap-4"
+      novalidate
+      @submit.prevent="save"
+    >
+      <UiField v-slot="{ id, describedBy }" label="Username" :error="show('username')">
+        <UiInput
+          :id="id"
+          :model-value="username"
+          :aria-describedby="describedBy"
+          :invalid="!!show('username')"
+          :disabled="busy"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          @update:model-value="edit('username', $event)"
+        />
+      </UiField>
+      <UiField v-slot="{ id, describedBy }" label="Email" optional :error="show('email')">
+        <UiInput
+          :id="id"
+          :model-value="email"
+          type="email"
+          :aria-describedby="describedBy"
+          :invalid="!!show('email')"
+          :disabled="busy"
+          autocomplete="email"
+          @update:model-value="edit('email', $event)"
+        />
+      </UiField>
+      <UiField v-slot="{ id, describedBy }" label="Current password" :error="show('password')">
+        <UiInput
+          :id="id"
+          :model-value="password"
+          type="password"
+          :aria-describedby="describedBy"
+          :invalid="!!show('password')"
+          :disabled="busy"
+          autocomplete="current-password"
+          @update:model-value="edit('password', $event)"
+        />
+      </UiField>
+      <div class="flex flex-wrap items-center gap-3">
+        <UiButton
+          type="submit"
+          variant="primary"
+          :loading="busy"
+          :disabled="!usernameChanged && !emailChanged"
+        >
+          Save
+        </UiButton>
+        <UiButton variant="ghost" :disabled="busy" @click="editing = false">Cancel</UiButton>
+      </div>
+    </form>
   </UiPanel>
 </template>

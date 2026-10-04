@@ -42,6 +42,20 @@ export const changePasswordRequest = z.object({
   newPassword: passwordSchema,
 })
 
+/**
+ * Changes the login names. Omitted fields stay as they are; an empty or null
+ * email removes it.
+ */
+export const updateProfileRequest = z
+  .object({
+    currentPassword: anyPassword,
+    username: usernameSchema.optional(),
+    email: emailSchema.nullish().or(z.literal('').transform(() => null)),
+  })
+  .refine((body) => body.username !== undefined || body.email !== undefined, {
+    message: 'Nothing to change',
+  })
+
 export const GENSHIN_SERVERS = ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] as const
 export type GenshinServer = (typeof GENSHIN_SERVERS)[number]
 
