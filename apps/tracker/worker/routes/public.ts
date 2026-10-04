@@ -47,6 +47,8 @@ export const publicImport = new Hono<AppEnv>()
       accountName: account.name,
       uid: account.uid,
       server: account.server,
+      // Same origin the request came in on, so it is right for any deployment.
+      dashboardUrl: new URL(`/app/a/${account.id}`, c.req.url).href,
     })
   })
 

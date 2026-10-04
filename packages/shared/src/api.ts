@@ -156,6 +156,8 @@ export interface VerifyKeyResponse {
   accountName: string | null
   uid: string | null
   server: GenshinServer | null
+  /** This account's page in the web app; irminsul's "Open dashboard" button opens it. */
+  dashboardUrl: string
 }
 
 export interface AccountSettingsResponse {

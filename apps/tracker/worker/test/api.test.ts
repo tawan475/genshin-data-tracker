@@ -287,6 +287,7 @@ describe('accounts and imports', () => {
       accountName: 'Main',
       uid: '812345678',
       server: 'ASIA',
+      dashboardUrl: `${ORIGIN}/app/a/${account.id}`,
     })
     const bad = await SELF.fetch(`${ORIGIN}/api/genshin-accounts-public/verify-key`, {
       headers: { 'x-import-key': 'gdt_ik_wrong' },
