@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Eye, EyeOff } from 'lucide-vue-next'
 import type { ProgressCount } from '@gdt/game-data/achievement-progress'
 import { formatNumber } from '@/lib/format'
 import CategoryIcon from './CategoryIcon.vue'
@@ -13,9 +14,18 @@ export interface CategoryItem {
   count: ProgressCount
 }
 
-/** The category list beside the achievements on wide screens: icon, name, done / total. */
-const props = defineProps<{ categories: CategoryItem[]; total: ProgressCount }>()
+/**
+ * The category ("series") list beside the achievements on wide screens:
+ * icon, name, done / total. Completed series are left out unless shown.
+ */
+const props = defineProps<{
+  categories: CategoryItem[]
+  total: ProgressCount
+  /** Completed series, listed or not. */
+  doneCount: number
+}>()
 const selected = defineModel<number | null>({ required: true })
+const showDone = defineModel<boolean>('showDone', { required: true })
 
 const items = computed<CategoryItem[]>(() => [
   { id: null, name: 'All', icon: '', count: props.total },
@@ -66,5 +76,19 @@ const title = (c: ProgressCount) =>
         </button>
       </li>
     </ul>
+    <button
+      v-if="doneCount > 0"
+      type="button"
+      class="mt-1 flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-overlay/60 hover:text-text-primary"
+      :aria-pressed="showDone"
+      :title="showDone ? 'Hide completed series' : 'Show completed series'"
+      @click="showDone = !showDone"
+    >
+      <span class="flex size-8 shrink-0 items-center justify-center">
+        <component :is="showDone ? EyeOff : Eye" class="size-4" aria-hidden="true" />
+      </span>
+      <span class="flex-1 text-left">Completed</span>
+      <span class="tabular font-mono text-xs">{{ doneCount }}</span>
+    </button>
   </nav>
 </template>
