@@ -142,6 +142,20 @@ export type FamilyRow = [
   weekdays: number[],
 ]
 
+/**
+ * `avatars.json`: icon names (Enka `/ui/<name>.png`) for every planner
+ * character and weapon, and the Traveler's portraits by gender (its GOOD keys
+ * don't say which twin it is).
+ */
+export interface AvatarsFile {
+  columns: { characters: ['icon', 'side']; weapons: ['icon', 'awaken'] }
+  /** GOOD key -> [portrait, side icon]; no Traveler keys. */
+  characters: Record<string, [string, string]>
+  traveler: Record<'F' | 'M', [string, string]>
+  /** GOOD key -> [icon, ascended icon (the base icon when there is none)]. */
+  weapons: Record<string, [string, string]>
+}
+
 export interface PlannerFile {
   columns: {
     characters: string[]

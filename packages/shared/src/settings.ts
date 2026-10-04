@@ -14,6 +14,8 @@ export interface MaterialsGraphSettings {
 
 export interface AccountSettings {
   materialsGraph: MaterialsGraphSettings
+  /** Which twin the Traveler is (GOOD doesn't say): portraits only. */
+  traveler: 'F' | 'M'
 }
 
 export interface UserSettings {
@@ -26,6 +28,7 @@ export interface UserSettings {
 export type UserSettingsPatch = Partial<UserSettings>
 export interface AccountSettingsPatch {
   materialsGraph?: Partial<MaterialsGraphSettings>
+  traveler?: AccountSettings['traveler']
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
@@ -42,6 +45,7 @@ export const MATERIALS_GRAPH_DEFAULTS: MaterialsGraphSettings = {
 
 export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   materialsGraph: MATERIALS_GRAPH_DEFAULTS,
+  traveler: 'F',
 }
 
 /**

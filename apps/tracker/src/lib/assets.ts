@@ -1,12 +1,21 @@
 /**
  * Game images. Characters, weapons and artifacts come from the Enka Network
  * CDN (flat `/ui/<name>.png`), with icon names from Genshin Optimizer's asset
- * table (AssetsData_gen.json) keyed by GOOD keys. Material and achievement
+ * table (AssetsData_gen.json) keyed by GOOD keys, or from our own game data
+ * (@gdt/game-data/avatars) for what that table doesn't have yet; the
+ * Traveler's portrait follows the account's twin setting. Material and achievement
  * icons are self-hosted under /gi (packages/game-data `icons`), because Enka
  * lacks about half of them; Enka is only their fallback. Anything unknown
  * returns '' and GameIcon shows initials.
  */
 
+import {
+  characterIconNames,
+  travelerIconNames,
+  weaponIconNames,
+  type TravelerGender,
+} from '@gdt/game-data/avatars'
+import { shallowRef } from 'vue'
 import {
   loadIconManifest,
   loadMaterialIndex,
@@ -36,15 +45,27 @@ const artifacts = assetData.artifacts as Record<string, ArtifactAssets>
 
 const url = (name: string | undefined) => (name ? `${ENKA}/${name}.png` : '')
 
-/** Square character portrait. Traveler variants fall back to the base key. */
+/**
+ * Which twin the current account's Traveler is (an account setting, since
+ * GOOD doesn't say). Reactive, so portraits follow a change at once.
+ */
+const traveler = shallowRef<TravelerGender>('F')
+
+export function setTravelerGender(gender: TravelerGender): void {
+  traveler.value = gender
+}
+
+const isTraveler = (key: string) => key.startsWith('Traveler')
+
+/** Square character portrait. */
 export function characterIcon(key: string): string {
-  return url(
-    (chars[key] ?? chars[key.replace(/(Anemo|Geo|Electro|Dendro|Hydro|Pyro|Cryo)$/, '')])?.icon,
-  )
+  if (isTraveler(key)) return url(travelerIconNames(traveler.value)[0])
+  return url(chars[key]?.icon ?? characterIconNames(key)?.[0])
 }
 
 export function characterSideIcon(key: string): string {
-  return url(chars[key]?.iconSide)
+  if (isTraveler(key)) return url(travelerIconNames(traveler.value)[1])
+  return url(chars[key]?.iconSide ?? characterIconNames(key)?.[1])
 }
 
 export function characterBanner(key: string): string {
@@ -54,7 +75,9 @@ export function characterBanner(key: string): string {
 /** Weapon icon; ascended weapons (ascension >= 2) use the awakened art, as in game. */
 export function weaponIcon(key: string, ascension = 0): string {
   const info = weapons[key]
-  return url(ascension >= 2 ? (info?.awakenIcon ?? info?.icon) : info?.icon)
+  if (info?.icon) return url(ascension >= 2 ? (info.awakenIcon ?? info.icon) : info.icon)
+  const names = weaponIconNames(key)
+  return url(names && (ascension >= 2 ? names[1] : names[0]))
 }
 
 export function artifactIcon(setKey: string, slotKey: string): string {
@@ -104,5 +127,5 @@ export function materialIcon(key: string): string {
 }
 
 export function knownCharacter(key: string): boolean {
-  return key in chars
+  return key in chars || isTraveler(key) || characterIconNames(key) !== undefined
 }
