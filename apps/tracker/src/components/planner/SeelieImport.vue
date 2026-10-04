@@ -10,7 +10,15 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { formatNumber } from '@/lib/format'
-import { characterGoalId, targetId, weaponGoalId } from './model'
+import {
+  characterGoalId,
+  itemGoalId,
+  refOf,
+  targetId,
+  validCharacterTarget,
+  weaponGoalId,
+} from './model'
+import { mapSeelieItems, type SeelieItems } from './seelie-items'
 import { remove, upsert } from './use-planner-targets'
 
 type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
@@ -18,7 +26,8 @@ type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
 /**
  * Goals from a Seelie export: pick or drop the file, see what it maps to
  * (new / changed / same, and what could not be mapped), then apply it as
- * one request. "Replace" also removes goals the file does not have.
+ * one request. Extra item needs (`custom_items`) come along. "Replace" also
+ * removes goals the file does not have.
  */
 const props = defineProps<{
   open: boolean
@@ -34,6 +43,7 @@ const dragging = ref(false)
 const fileName = ref('')
 const failure = ref('')
 const result = shallowRef<SeelieImport | null>(null)
+const extra = shallowRef<SeelieItems | null>(null)
 const replace = ref(false)
 
 watch(
@@ -43,6 +53,7 @@ watch(
     fileName.value = ''
     failure.value = ''
     result.value = null
+    extra.value = null
     replace.value = false
   },
 )
@@ -52,13 +63,23 @@ async function read(file: File | undefined) {
   fileName.value = file.name
   failure.value = ''
   result.value = null
+  extra.value = null
   try {
     const json: unknown = JSON.parse(await file.text())
     if (!isSeelieExport(json)) throw new Error('Not a Seelie export')
-    result.value = mapSeelieGoals(json, props.planner, {
+    const mapped = mapSeelieGoals(json, props.planner, {
       character: (key) => findCharacterState(props.good.characters, key).state,
       refinement: (key, owner) => findWeaponState(props.good.weapons, key, owner).state.refinement,
     })
+    // Seelie allows talents its ascension can't reach; raise the ascension for them.
+    result.value = {
+      ...mapped,
+      characters: mapped.characters.map((c) => {
+        const phases = props.planner.characters.get(c.key)?.ascension
+        return phases ? { ...c, target: validCharacterTarget(phases, c.target).target } : c
+      }),
+    }
+    extra.value = mapSeelieItems(json, props.planner)
   } catch (cause) {
     failure.value =
       cause instanceof SyntaxError ? 'Not a JSON file' : String((cause as Error).message)
@@ -87,9 +108,40 @@ const canon = (value: unknown) =>
   )
 const same = (a: unknown, b: unknown) => canon(a) === canon(b)
 
-const preview = computed(() => {
+/**
+ * What the import writes. Notes, favorites and priorities are the tracker's
+ * own, and an item need keeps its note and on/off state: those stay as stored.
+ */
+const plan = computed(() => {
   const r = result.value
   if (!r) return null
+  const at = (id: string) => existing.value.get(id)
+  const characters = r.characters.map((c) => {
+    const now = at(characterGoalId(c.key))
+    const keep = now?.kind === 'character' ? now.target : null
+    const own = { note: keep?.note, favorite: keep?.favorite, priority: keep?.priority }
+    return { key: c.key, target: { ...c.target, ...own } }
+  })
+  const weapons = r.weapons.map((w) => {
+    const now = at(weaponGoalId(w.key, w.owner))
+    const note = now?.kind === 'weapon' ? now.target.note : undefined
+    return { key: w.key, owner: w.owner, target: { ...w.target, note } }
+  })
+  const items = (extra.value?.items ?? []).map((i) => {
+    const now = at(itemGoalId(i.key))
+    const keep = now?.kind === 'item' ? now.target : null
+    return {
+      key: i.key,
+      target: { count: i.count, active: keep?.active ?? true, note: keep?.note },
+    }
+  })
+  return { characters, weapons, items }
+})
+
+const preview = computed(() => {
+  const r = result.value
+  const x = plan.value
+  if (!r || !x) return null
   const count = (ids: { id: string; target: unknown }[]) => {
     let added = 0
     let changed = 0
@@ -100,23 +152,29 @@ const preview = computed(() => {
     }
     return { total: ids.length, added, changed, same: ids.length - added - changed }
   }
-  const characters = count(
-    r.characters.map((c) => ({ id: characterGoalId(c.key), target: c.target })),
-  )
-  const weapons = count(
-    r.weapons.map((w) => ({ id: weaponGoalId(w.key, w.owner), target: w.target })),
-  )
-  const incoming = new Set([
-    ...r.characters.map((c) => characterGoalId(c.key)),
-    ...r.weapons.map((w) => weaponGoalId(w.key, w.owner)),
-  ])
-  const dropped = props.targets.filter((t) => !incoming.has(targetId(t)))
+  const characters = x.characters.map((c) => ({ id: characterGoalId(c.key), target: c.target }))
+  const weapons = x.weapons.map((w) => ({ id: weaponGoalId(w.key, w.owner), target: w.target }))
+  const items = x.items.map((i) => ({ id: itemGoalId(i.key), target: i.target }))
+  const incoming = new Set([...characters, ...weapons, ...items].map((t) => t.id))
   return {
-    characters,
-    weapons,
-    dropped,
-    unmapped: [...r.unmapped.characters, ...r.unmapped.weapons],
+    characters: count(characters),
+    weapons: count(weapons),
+    items: count(items),
+    dropped: props.targets.filter((t) => !incoming.has(targetId(t))),
+    unmapped: [...r.unmapped.characters, ...r.unmapped.weapons, ...(extra.value?.unmapped ?? [])],
   }
+})
+
+/** The preview tiles; Items only when the file has extra item needs. */
+const rows = computed(() => {
+  const p = preview.value
+  if (!p) return []
+  const list = [
+    { label: 'Characters', data: p.characters },
+    { label: 'Weapons', data: p.weapons },
+  ]
+  if (p.items.total > 0) list.push({ label: 'Items', data: p.items })
+  return list
 })
 
 /** "12 new · 3 changed", zeros left out. */
@@ -135,31 +193,21 @@ function breakdown(data: { added: number; changed: number; same: number }) {
 const canApply = computed(() => {
   const p = preview.value
   if (!p) return false
-  const changes = p.characters.added + p.characters.changed + p.weapons.added + p.weapons.changed
+  const changes = [p.characters, p.weapons, p.items].reduce((n, x) => n + x.added + x.changed, 0)
   return changes > 0 || (replace.value && p.dropped.length > 0)
 })
 
 function apply() {
-  const r = result.value
+  const x = plan.value
   const p = preview.value
-  if (!r || !p) return
+  if (!x || !p) return
   const ops: Op[] = []
   if (replace.value) {
-    for (const t of p.dropped) {
-      ops.push(
-        remove(
-          t.kind === 'character'
-            ? { kind: 'character', key: t.key }
-            : { kind: 'weapon', key: t.key, owner: t.owner },
-        ),
-      )
-    }
+    for (const t of p.dropped) ops.push(remove(refOf(t)))
   }
-  for (const c of r.characters)
-    ops.push(upsert({ kind: 'character', key: c.key, target: c.target }))
-  for (const w of r.weapons) {
-    ops.push(upsert({ kind: 'weapon', key: w.key, owner: w.owner, target: w.target }))
-  }
+  for (const c of x.characters) ops.push(upsert({ kind: 'character', ...c }))
+  for (const w of x.weapons) ops.push(upsert({ kind: 'weapon', ...w }))
+  for (const i of x.items) ops.push(upsert({ kind: 'item', ...i }))
   emit('apply', ops)
 }
 </script>
@@ -197,12 +245,9 @@ function apply() {
       </p>
 
       <template v-if="preview">
-        <dl class="grid grid-cols-2 gap-2">
+        <dl class="grid grid-cols-2 gap-2" :class="rows.length > 2 ? 'sm:grid-cols-3' : ''">
           <div
-            v-for="row in [
-              { label: 'Characters', data: preview.characters },
-              { label: 'Weapons', data: preview.weapons },
-            ]"
+            v-for="row in rows"
             :key="row.label"
             class="rounded-lg border border-border-default p-3"
           >

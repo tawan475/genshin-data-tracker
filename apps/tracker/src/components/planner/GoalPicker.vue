@@ -1,36 +1,52 @@
 <script setup lang="ts">
-import type { PlannerData } from '@gdt/game-data'
+import type { MaterialKind, PlannerData } from '@gdt/game-data'
 import type { Good, GoodWeapon } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import { Search } from 'lucide-vue-next'
+import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
+import { RARITY_SOFT } from '@/components/characters/tokens'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { normalizeSearch } from '@/data/characters'
-import { characterIcon, weaponIcon } from '@/lib/assets'
-import type { EditorSubject } from './GoalEditor.vue'
-import { characterGoalId, characterName, weaponGoalId, weaponName } from './model'
+import { characterIcon, gameIcon, materialIcon, weaponIcon } from '@/lib/assets'
+import { formatCompact } from '@/lib/format'
+import {
+  characterGoalId,
+  characterName,
+  itemGoalId,
+  weaponGoalId,
+  weaponName,
+  type EditorSubject,
+} from './model'
+
+type Mode = 'character' | 'weapon' | 'item'
 
 /**
- * Picks what to plan: a character (owned first; others start at level 1)
- * or an owned weapon. Ones that already have a goal are left out.
+ * Picks what to plan: a character (owned first; others start at level 1),
+ * an owned weapon, or a material for an extra need. Ones that already have
+ * a goal are left out.
  */
 const props = defineProps<{
   open: boolean
   planner: PlannerData
   good: Good
-  /** Goal ids that exist (`character:Key`, `weapon:Key:Owner`). */
+  /** Goal ids that exist (`character:Key`, `weapon:Key:Owner`, `item:Key`). */
   taken: ReadonlySet<string>
+  /** The tab it opens on (else the last one used). */
+  start?: Mode | null
 }>()
 const emit = defineEmits<{ close: []; pick: [subject: EditorSubject] }>()
 
-const mode = ref<'character' | 'weapon'>('character')
+const mode = ref<Mode>('character')
 const query = ref('')
 watch(
   () => props.open,
   (open) => {
-    if (open) query.value = ''
+    if (!open) return
+    query.value = ''
+    if (props.start) mode.value = props.start
   },
 )
 
@@ -84,9 +100,42 @@ const weapons = computed(() => {
     .slice(0, 300)
 })
 
+/** Domain drops first, then bosses, local specialties, enemies, the rest. */
+const KIND_ORDER: MaterialKind[] = [
+  'book',
+  'weapon',
+  'gem',
+  'boss',
+  'weekly',
+  'local',
+  'common',
+  'elite',
+  'crown',
+  'exp',
+  'ore',
+  'mora',
+]
+
+const materials = computed(() =>
+  [...props.planner.materialsByKey.values()]
+    .filter((m) => !props.taken.has(itemGoalId(m.key)) && matches(m.name))
+    .sort(
+      (a, b) =>
+        KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
+        (a.family?.key ?? a.key).localeCompare(b.family?.key ?? b.key) ||
+        a.tier - b.tier,
+    )
+    .map((m) => ({
+      material: m,
+      icon: m.key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(m.icon),
+      have: props.good.materials[m.key] ?? 0,
+    })),
+)
+
 const MODES = [
   { value: 'character' as const, label: 'Characters' },
   { value: 'weapon' as const, label: 'Weapons' },
+  { value: 'item' as const, label: 'Items' },
 ]
 </script>
 
@@ -95,7 +144,7 @@ const MODES = [
     <div class="flex flex-col gap-3">
       <div class="flex flex-wrap items-center gap-2">
         <UiSegmented v-model="mode" :options="MODES" label="Kind" />
-        <label class="relative min-w-0 flex-1">
+        <label class="relative min-w-0 flex-1 basis-48">
           <span class="sr-only">Search</span>
           <Search
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
@@ -120,6 +169,32 @@ const MODES = [
           >
             <GameIcon :src="characterIcon(c.key)" :name="c.name" :rarity="c.rarity" size="lg" />
             <span class="line-clamp-2 text-xs leading-tight">{{ c.name }}</span>
+          </button>
+        </li>
+      </ul>
+
+      <ul
+        v-else-if="mode === 'item'"
+        class="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-1.5"
+        aria-label="Items"
+      >
+        <li v-for="m in materials" :key="m.material.key">
+          <button
+            type="button"
+            class="flex w-full flex-col items-center gap-1 rounded-lg p-1.5 text-center transition-colors hover:bg-surface-overlay"
+            :title="m.material.name"
+            @click="emit('pick', { kind: 'item', key: m.material.key })"
+          >
+            <span
+              class="size-12 overflow-hidden rounded-lg text-xs"
+              :class="RARITY_SOFT[m.material.rarity] ?? 'bg-surface-sunken'"
+            >
+              <MaterialIcon :src="m.icon" :name="m.material.name" />
+            </span>
+            <span class="line-clamp-2 text-xs leading-tight">{{ m.material.name }}</span>
+            <span class="tabular font-mono text-[0.6875rem] text-text-muted">{{
+              formatCompact(m.have)
+            }}</span>
           </button>
         </li>
       </ul>

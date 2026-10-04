@@ -3,14 +3,19 @@ import type { PlannerData } from '@gdt/game-data'
 import {
   findCharacterState,
   findWeaponState,
-  type MaterialLine,
+  normalizeLevel,
+  talentCap,
+  TALENTS,
+  type PlanGoal,
   type Requirement,
+  type TalentName,
 } from '@gdt/game-data/planner-math'
 import type { CharacterTarget, Good, WeaponTarget } from '@gdt/shared'
 import { computed, reactive, ref, watch } from 'vue'
-import { ArrowRight, Plus, Trash2, X } from 'lucide-vue-next'
+import { ArrowRight, CircleAlert, Plus, Trash2, X } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
+import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
@@ -18,20 +23,20 @@ import { characterIcon, weaponIcon } from '@/lib/assets'
 import CostList from './CostList.vue'
 import LevelSelect from './LevelSelect.vue'
 import {
+  arForAscension,
+  ascensionForTalent,
   characterName,
   defaultCharacterTarget,
   defaultWeaponTarget,
   levelLabel,
   weaponGoalId,
   weaponName,
+  type EditorSubject,
   type RequirementCache,
   type WeaponGoalView,
 } from './model'
+import NoteInput from './NoteInput.vue'
 import { remove, upsert } from './use-planner-targets'
-
-export type EditorSubject =
-  | { kind: 'character'; key: string }
-  | { kind: 'weapon'; key: string; owner: string }
 
 type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
 
@@ -39,19 +44,25 @@ type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
  * Edits one goal: a character's target level and talents with the weapon
  * goals it holds, or a weapon goal on its own. Changes stay in a draft until
  * Save, which sends them as one request; the cost updates as you edit.
+ * Talents and ascension stay a pair the game allows: a talent above the
+ * target ascension's cap raises the ascension, a lower ascension caps them.
  */
 const props = defineProps<{
   open: boolean
-  subject: EditorSubject | null
+  subject: Exclude<EditorSubject, { kind: 'item' }> | null
   planner: PlannerData
   good: Good
   cache: RequirementCache
-  /** The stored goal, or null for a new one. */
+  /** The stored goal (made valid), or null for a new one. */
   characterTarget: CharacterTarget | null
+  /** Ascension the stored goal was raised to for its talents. */
+  raised: number | null
   /** Stored weapon goals of this subject (the character's, or the weapon itself). */
   weaponGoals: WeaponGoalView[]
-  lines: ReadonlyMap<string, MaterialLine>
-  short: { characterExp: boolean; weaponExp: boolean; mora: boolean }
+  /** Every other goal, for the cost colours. */
+  others: readonly PlanGoal[]
+  /** The account's Adventure Rank, when set. */
+  ar: number | null
   saving: boolean
 }>()
 const emit = defineEmits<{ close: []; save: [ops: Op[]]; remove: [ops: Op[]] }>()
@@ -67,6 +78,12 @@ const draft = reactive<{ character: CharacterTarget | null; weapons: WeaponDraft
   weapons: [],
 })
 const isNew = ref(false)
+const note = ref('')
+const priority = ref('')
+/** Why the target level or talents were changed for you, for the tooltip. */
+const adjusted = ref('')
+const raisedText = (ascension: number) =>
+  `Raised to A${ascension} for talent ${talentCap(ascension - 1) + 1}+`
 
 const characterKey = computed(() =>
   props.subject?.kind === 'character' ? props.subject.key : null,
@@ -83,6 +100,7 @@ watch(
   ([open]) => {
     if (!open || !props.subject) return
     const s = props.subject
+    adjusted.value = ''
     if (s.kind === 'character') {
       isNew.value = props.characterTarget === null
       const now = findCharacterState(props.good.characters, s.key).state
@@ -90,9 +108,14 @@ watch(
       draft.character = stored
         ? { ...stored, talents: { ...stored.talents } }
         : defaultCharacterTarget(now)
+      note.value = stored?.note ?? ''
+      priority.value = stored?.priority === undefined ? '' : String(stored.priority)
+      if (props.raised !== null) adjusted.value = raisedText(props.raised)
     } else {
       draft.character = null
       isNew.value = props.weaponGoals.length === 0
+      note.value = props.weaponGoals[0]?.target.note ?? ''
+      priority.value = ''
     }
     draft.weapons = props.weaponGoals.map((w) => ({
       key: w.key,
@@ -117,17 +140,52 @@ const title = computed(() => {
   return s.kind === 'character' ? characterName(s.key) : weaponName(s.key)
 })
 
-const TALENTS = [
-  { key: 'auto', label: 'Attack' },
-  { key: 'skill', label: 'Skill' },
-  { key: 'burst', label: 'Burst' },
-] as const
+const TALENT_LABELS: Record<TalentName, string> = { auto: 'Attack', skill: 'Skill', burst: 'Burst' }
 const talentOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: String(i + 1) }))
 const refineOptions = [1, 2, 3, 4, 5].map((r) => ({ value: r, label: `R${r}` }))
 
 function weaponState(w: WeaponDraft) {
   return findWeaponState(props.good.weapons, w.key, w.owner)
 }
+
+// ------------------------------------------------------- valid level pairs
+
+/** A talent above the target ascension's cap raises the ascension (and the level with it). */
+function setTalent(name: TalentName, level: number) {
+  const c = draft.character
+  const phases = characterData.value?.ascension
+  if (!c || !phases) return
+  c.talents[name] = level
+  const need = ascensionForTalent(level)
+  if (need <= c.ascension) return
+  const lv = normalizeLevel(phases, c.level, need)
+  c.level = lv.level
+  c.ascension = lv.ascension
+  adjusted.value = raisedText(need)
+}
+
+/** A lower target ascension caps the talents at what it allows. */
+function setAscension(ascension: number) {
+  const c = draft.character
+  if (!c) return
+  c.ascension = ascension
+  const cap = talentCap(ascension)
+  const over = TALENTS.filter((t) => c.talents[t] > cap)
+  for (const t of over) c.talents[t] = cap
+  adjusted.value = over.length ? `Talents capped at ${cap} by A${ascension}` : ''
+}
+
+/** "AR 40" when the target ascension needs more than the account's AR. */
+function arHint(currentAscension: number, targetAscension: number): string {
+  const need = targetAscension > currentAscension ? arForAscension(targetAscension) : 0
+  return props.ar !== null && need > props.ar ? `AR ${need}` : ''
+}
+
+const characterAr = computed(() =>
+  draft.character && current.value
+    ? arHint(current.value.state.ascension, draft.character.ascension)
+    : '',
+)
 
 // ------------------------------------------------------------ add a weapon
 
@@ -182,20 +240,36 @@ const requirements = computed<Requirement[]>(() => {
 
 // ------------------------------------------------------------------- save
 
+const priorityValue = computed(() => {
+  const text = String(priority.value ?? '').trim()
+  if (text === '') return undefined
+  const n = Number(text)
+  return Number.isInteger(n) && n >= 0 && n <= 100_000 ? n : null
+})
+const noteValue = () => note.value.trim() || undefined
+
 function save() {
   const ops: Op[] = []
   const s = props.subject
-  if (!s) return
+  if (!s || priorityValue.value === null) return
   if (s.kind === 'character' && draft.character) {
-    ops.push(upsert({ kind: 'character', key: s.key, target: { ...draft.character } }))
+    const target: CharacterTarget = {
+      ...draft.character,
+      note: noteValue(),
+      priority: priorityValue.value,
+    }
+    ops.push(upsert({ kind: 'character', key: s.key, target }))
   }
   const kept = new Set(draft.weapons.map((w) => weaponGoalId(w.key, w.owner)))
   for (const w of props.weaponGoals) {
     if (!kept.has(w.id)) ops.push(remove({ kind: 'weapon', key: w.key, owner: w.owner }))
   }
-  for (const w of draft.weapons) {
-    ops.push(upsert({ kind: 'weapon', key: w.key, owner: w.owner, target: { ...w.target } }))
-  }
+  draft.weapons.forEach((w, index) => {
+    const target = { ...w.target }
+    // A weapon-only goal's note is the dialog's note.
+    if (s.kind === 'weapon' && index === 0) target.note = noteValue()
+    ops.push(upsert({ kind: 'weapon', key: w.key, owner: w.owner, target }))
+  })
   emit('save', ops)
 }
 
@@ -232,32 +306,44 @@ const currentLevel = computed(() => {
           size="lg"
         />
         <div class="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
-          <label class="flex min-w-0 flex-col gap-1">
+          <div class="flex min-w-0 flex-col gap-1">
             <span class="flex items-center gap-1 text-sm text-text-secondary"
               >Level
+              <span v-if="adjusted" class="text-warning-text" :title="adjusted">
+                <CircleAlert class="size-3.5" aria-hidden="true" />
+                <span class="sr-only">{{ adjusted }}</span>
+              </span>
               <span class="tabular ml-auto font-mono text-text-muted">{{ currentLevel }}</span>
               <ArrowRight class="size-3.5 text-text-muted" aria-hidden="true"
             /></span>
             <LevelSelect
               v-if="characterData"
               v-model:level="draft.character.level"
-              v-model:ascension="draft.character.ascension"
+              :ascension="draft.character.ascension"
               :phases="characterData.ascension"
               label="Target level"
+              @update:ascension="setAscension"
             />
-          </label>
-          <label v-for="t in TALENTS" :key="t.key" class="flex min-w-0 flex-col gap-1">
+            <span
+              v-if="characterAr"
+              class="tabular font-mono text-xs text-warning-text"
+              :title="`A${draft.character.ascension} needs ${characterAr}`"
+              >{{ characterAr }}</span
+            >
+          </div>
+          <label v-for="t in TALENTS" :key="t" class="flex min-w-0 flex-col gap-1">
             <span class="flex items-center gap-1 text-sm text-text-secondary"
-              >{{ t.label }}
+              >{{ TALENT_LABELS[t] }}
               <span class="tabular ml-auto font-mono text-text-muted">{{
-                current?.state.talents[t.key]
+                current?.state.talents[t]
               }}</span>
               <ArrowRight class="size-3.5 text-text-muted" aria-hidden="true"
             /></span>
             <UiSelect
-              v-model="draft.character.talents[t.key]"
+              :model-value="draft.character.talents[t]"
               :options="talentOptions"
-              :aria-label="`Target ${t.label}`"
+              :aria-label="`Target ${TALENT_LABELS[t]}`"
+              @update:model-value="setTalent(t, $event)"
             />
           </label>
         </div>
@@ -293,6 +379,12 @@ const currentLevel = computed(() => {
                 · R{{ weaponState(w).state.refinement }}</template
               >
               <template v-else>–</template>
+              <span
+                v-if="arHint(weaponState(w).state.ascension, w.target.ascension)"
+                class="ml-1.5 text-warning-text"
+                :title="`A${w.target.ascension} needs ${arHint(weaponState(w).state.ascension, w.target.ascension)}`"
+                >{{ arHint(weaponState(w).state.ascension, w.target.ascension) }}</span
+              >
             </span>
           </span>
           <div class="ml-auto flex items-center gap-2">
@@ -333,17 +425,43 @@ const currentLevel = computed(() => {
         </div>
       </section>
 
-      <!-- Active and cost -->
-      <UiSwitch v-if="draft.character" v-model="draft.character.active" label="Counted" />
-      <UiSwitch
-        v-else-if="draft.weapons[0]"
-        v-model="draft.weapons[0].target.active"
-        label="Counted"
-      />
+      <!-- Note, priority, counted -->
+      <section class="flex flex-col gap-3" aria-label="Details">
+        <div class="flex flex-wrap items-start gap-3">
+          <NoteInput v-model="note" class="min-w-0 flex-1 basis-60" />
+          <label
+            v-if="draft.character"
+            class="flex w-24 flex-col gap-1"
+            title="Lower first; empty goes last"
+          >
+            <span class="text-sm text-text-secondary">Priority</span>
+            <UiInput
+              v-model="priority"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="100000"
+              placeholder="–"
+              :invalid="priorityValue === null"
+            />
+          </label>
+        </div>
+        <UiSwitch v-if="draft.character" v-model="draft.character.active" label="Counted" />
+        <UiSwitch
+          v-else-if="draft.weapons[0]"
+          v-model="draft.weapons[0].target.active"
+          label="Counted"
+        />
+      </section>
 
       <section class="flex flex-col gap-2" aria-label="Cost">
         <h3 class="text-sm font-semibold text-text-secondary">Cost</h3>
-        <CostList :planner="planner" :requirements="requirements" :lines="lines" :short="short" />
+        <CostList
+          :planner="planner"
+          :requirements="requirements"
+          :others="others"
+          :inventory="good.materials"
+        />
       </section>
     </div>
 
@@ -353,7 +471,12 @@ const currentLevel = computed(() => {
         Remove
       </UiButton>
       <UiButton @click="emit('close')">Cancel</UiButton>
-      <UiButton variant="primary" :loading="saving" @click="save">
+      <UiButton
+        variant="primary"
+        :loading="saving"
+        :disabled="priorityValue === null"
+        @click="save"
+      >
         {{ isNew ? 'Add' : 'Save' }}
       </UiButton>
     </template>
