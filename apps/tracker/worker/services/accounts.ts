@@ -22,6 +22,19 @@ export async function loadOwnedAccount(
   return account
 }
 
+/**
+ * Ownership check that reads one column, for routes that don't need the row
+ * (`loadOwnedAccount` selects all of it, settings JSON included).
+ */
+export async function assertOwnsAccount(db: Db, userId: number, accountId: number): Promise<void> {
+  const [row] = await db
+    .select({ id: genshinAccounts.id })
+    .from(genshinAccounts)
+    .where(and(eq(genshinAccounts.id, accountId), eq(genshinAccounts.userId, userId)))
+    .limit(1)
+  if (!row) throw notFound('Account')
+}
+
 /** Accounts with their latest snapshot, in one query. */
 export async function listAccounts(
   db: Db,

@@ -546,3 +546,92 @@ describe('D1 cost', () => {
     expect(after.storedBytes).toBe(before.storedBytes)
   })
 })
+
+describe('progress set by hand', () => {
+  it('marks achievements done and undone, idempotently, for the owner only', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const marks = `/api/accounts/${account.id}/achievement-marks`
+    const patch = (json: object) => client.fetch(marks, { method: 'PATCH', json })
+
+    expect(await client.json(marks)).toEqual({ done: [] })
+    const first = await patch({ done: [81003, 81001, 81002] })
+    expect(await first.json()).toEqual({ done: [81001, 81002, 81003] })
+    // Re-marking is harmless; an id in both lists ends up unmarked.
+    const second = await patch({ done: [81001, 81004], undone: [81002, 81004] })
+    expect(await second.json()).toEqual({ done: [81001, 81003] })
+    expect(await client.json(marks)).toEqual({ done: [81001, 81003] })
+
+    expect((await patch({})).status).toBe(400)
+    expect((await patch({ done: [0] })).status).toBe(400)
+    expect((await patch({ done: ['81001'] })).status).toBe(400)
+
+    const stranger = await signUp()
+    expect((await stranger.client.fetch(marks)).status).toBe(404)
+    const sneaky = await stranger.client.fetch(marks, { method: 'PATCH', json: { done: [1] } })
+    expect(sneaky.status).toBe(404)
+    expect(await client.json(marks)).toEqual({ done: [81001, 81003] })
+  })
+
+  it('stores planner goals for characters and weapons, and replaces or moves them', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const url = `/api/accounts/${account.id}/planner-targets`
+    const patch = (json: object) => client.fetch(url, { method: 'PATCH', json })
+    const furina = { level: 90, ascension: 6, talents: { auto: 6, skill: 9, burst: 10 } }
+    const sword = { level: 90, ascension: 6, refinement: 1 }
+
+    const created = await patch({
+      upsert: [
+        { kind: 'character', key: 'Furina', target: furina },
+        { kind: 'weapon', key: 'SplendorOfTranquilWaters', owner: 'Furina', target: sword },
+        { kind: 'weapon', key: 'FavoniusSword', owner: '', target: { ...sword, active: false } },
+      ],
+    })
+    expect(created.status).toBe(200)
+    const { targets } = (await created.json()) as { targets: Record<string, unknown>[] }
+    expect(targets.map(({ updatedAt: _, ...t }) => t)).toEqual([
+      { kind: 'character', key: 'Furina', owner: '', target: { ...furina, active: true } },
+      { kind: 'weapon', key: 'FavoniusSword', owner: '', target: { ...sword, active: false } },
+      {
+        kind: 'weapon',
+        key: 'SplendorOfTranquilWaters',
+        owner: 'Furina',
+        target: { ...sword, active: true },
+      },
+    ])
+
+    // Same ref replaces; a remove + upsert in one request moves a weapon goal.
+    const moved = await patch({
+      remove: [{ kind: 'weapon', key: 'SplendorOfTranquilWaters', owner: 'Furina' }],
+      upsert: [
+        { kind: 'character', key: 'Furina', target: { ...furina, level: 80, ascension: 5 } },
+        { kind: 'weapon', key: 'SplendorOfTranquilWaters', owner: 'Neuvillette', target: sword },
+      ],
+    })
+    const after = (
+      (await moved.json()) as {
+        targets: { key: string; owner: string; target: { level: number } }[]
+      }
+    ).targets
+    expect(after.map((t) => `${t.key}:${t.owner}`)).toEqual([
+      'Furina:',
+      'FavoniusSword:',
+      'SplendorOfTranquilWaters:Neuvillette',
+    ])
+    expect(after[0]!.target.level).toBe(80)
+
+    for (const bad of [
+      { upsert: [{ kind: 'character', key: 'Furina', target: { ...furina, level: 91 } }] },
+      { upsert: [{ kind: 'character', key: 'Furi na', target: furina }] },
+      { upsert: [{ kind: 'weapon', key: 'FavoniusSword', target: sword }] },
+      { remove: [{ kind: 'artifact', key: 'X' }] },
+      {},
+    ]) {
+      expect((await patch(bad)).status, JSON.stringify(bad)).toBe(400)
+    }
+
+    const stranger = await signUp()
+    expect((await stranger.client.fetch(url)).status).toBe(404)
+  })
+})
