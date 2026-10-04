@@ -80,6 +80,13 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `x-gdt-d1` (round trips, rows read/written, SQL time). A session never opens
   it. The key lives in the gitignored `apps/tracker/.diag-key`:
   `curl -H "x-diag-key: $(cat apps/tracker/.diag-key)" https://genshin-tracker.475.dev/api/health`.
+- **Progress** (cookie auth, account owner only):
+  `GET/PATCH /api/accounts/:id/achievement-marks` (`{done, undone}` id lists;
+  marks by hand, on top of what snapshots captured) and
+  `GET/PATCH /api/accounts/:id/planner-targets` (`{upsert, remove}`; character
+  and weapon goals, weapons keyed by owner). Neither bumps the account's
+  `dataVersion`. Account settings also hold `traveler` (`F`/`M`), which picks
+  the Traveler's portrait.
 - **Maintenance** runs daily (cron): snapshots deleted more than 30 days ago
   are purged, unreferenced sections are collected.
   Account counters are kept exact by triggers (migration 0002).
