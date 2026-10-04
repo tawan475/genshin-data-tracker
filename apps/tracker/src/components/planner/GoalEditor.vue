@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
+import type { DropRates } from '@gdt/game-data/drops'
+import { goalEstimate } from '@gdt/game-data/planner-estimate'
+import { clampTalents } from '@gdt/game-data/planner-goals'
 import {
+  ascensionForTalent,
+  boostedTalents,
   findCharacterState,
   findWeaponState,
   normalizeLevel,
   talentCap,
   TALENTS,
   type PlanGoal,
+  type PlanOptions,
   type Requirement,
   type TalentName,
 } from '@gdt/game-data/planner-math'
@@ -20,17 +26,18 @@ import UiModal from '@/components/ui/UiModal.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { characterIcon, weaponIcon } from '@/lib/assets'
+import { formatCompact, formatNumber } from '@/lib/format'
 import CostList from './CostList.vue'
 import LevelSelect from './LevelSelect.vue'
 import {
-  arForAscension,
-  ascensionForTalent,
   characterName,
   defaultCharacterTarget,
   defaultWeaponTarget,
   levelLabel,
+  mergeRequirements,
   weaponGoalId,
   weaponName,
+  withoutPassives,
   type EditorSubject,
   type RequirementCache,
   type WeaponGoalView,
@@ -61,8 +68,13 @@ const props = defineProps<{
   weaponGoals: WeaponGoalView[]
   /** Every other goal, for the cost colours. */
   others: readonly PlanGoal[]
-  /** The account's Adventure Rank, when set. */
+  /** The totals' options (conversions, passives, forging). */
+  options: PlanOptions
+  /** Drop rates for the estimate (null until loaded). */
+  drops: DropRates | null
+  /** The account's Adventure Rank and World Level, when set. */
   ar: number | null
+  wl: number | null
   saving: boolean
 }>()
 const emit = defineEmits<{ close: []; save: [ops: Op[]]; remove: [ops: Op[]] }>()
@@ -156,7 +168,7 @@ function setTalent(name: TalentName, level: number) {
   const phases = characterData.value?.ascension
   if (!c || !phases) return
   c.talents[name] = level
-  const need = ascensionForTalent(level)
+  const need = Math.min(phases.length - 1, ascensionForTalent(level, props.planner.talentAscension))
   if (need <= c.ascension) return
   const lv = normalizeLevel(phases, c.level, need)
   c.level = lv.level
@@ -169,23 +181,38 @@ function setAscension(ascension: number) {
   const c = draft.character
   if (!c) return
   c.ascension = ascension
-  const cap = talentCap(ascension)
-  const over = TALENTS.filter((t) => c.talents[t] > cap)
-  for (const t of over) c.talents[t] = cap
-  adjusted.value = over.length ? `Talents capped at ${cap} by A${ascension}` : ''
+  const { target, clamped } = clampTalents(c, props.planner.talentAscension)
+  c.talents = { ...target.talents }
+  // A clamped talent sits at the cap, so the highest one is the cap.
+  const cap = Math.max(target.talents.auto, target.talents.skill, target.talents.burst)
+  adjusted.value = clamped ? `Talents capped at ${cap} by A${ascension}` : ''
 }
 
-/** "AR 40" when the target ascension needs more than the account's AR. */
-function arHint(currentAscension: number, targetAscension: number): string {
-  const need = targetAscension > currentAscension ? arForAscension(targetAscension) : 0
+/** "AR 40" when the ascensions a requirement does need more than the account's AR. */
+function arHint(requirement: Requirement | null | undefined): string {
+  const need = requirement?.ar ?? 0
   return props.ar !== null && need > props.ar ? `AR ${need}` : ''
 }
 
-const characterAr = computed(() =>
-  draft.character && current.value
-    ? arHint(current.value.state.ascension, draft.character.ascension)
-    : '',
-)
+const characterRequirement = computed(() => {
+  const key = characterKey.value
+  return key && draft.character && current.value
+    ? props.cache.character(key, current.value.state, draft.character)
+    : null
+})
+const characterAr = computed(() => arHint(characterRequirement.value))
+const weaponAr = (w: WeaponDraft) =>
+  arHint(props.cache.weapon(w.key, weaponState(w).state, w.target))
+
+/** Current talents and, with C3/C5, the levels the game shows ("9 (12)"). */
+const talentNow = computed(() => {
+  const c = current.value
+  const key = characterKey.value
+  if (!c || !key) return null
+  const constellation = props.good.characters.find((x) => x.key === key)?.constellation ?? 0
+  const boosted = boostedTalents(props.planner, key, c.state.talents, constellation)
+  return { base: c.state.talents, boosted, constellation }
+})
 
 // ------------------------------------------------------------ add a weapon
 
@@ -226,16 +253,39 @@ watch(weaponChoice, (key) => {
 
 const requirements = computed<Requirement[]>(() => {
   const list: Requirement[] = []
-  const key = characterKey.value
-  if (key && draft.character && current.value) {
-    const r = props.cache.character(key, current.value.state, draft.character)
-    if (r) list.push(r)
-  }
+  if (characterRequirement.value) list.push(characterRequirement.value)
   for (const w of draft.weapons) {
     const r = props.cache.weapon(w.key, weaponState(w).state, w.target)
     if (r) list.push(r)
   }
   return list
+})
+
+/** This goal on its own: resin and days (domains, bosses, ley lines), weekly weeks. */
+const estimate = computed(() => {
+  if (requirements.value.length === 0) return null
+  const owned = props.options.passives ? new Set<string>(props.options.passives) : null
+  const requirement = mergeRequirements(props.planner, requirements.value, owned)
+  const plan = goalEstimate(
+    props.planner,
+    { id: 'self', requirement },
+    props.good.materials,
+    props.drops,
+    { ...withoutPassives(props.options), ar: props.ar, wl: props.wl },
+  )
+  const t = plan.total
+  const weeks = plan.weeklyTotal.weeks
+  if (t.resin === 0 && weeks === 0) return null
+  const parts = [`~${formatCompact(t.resin)}${t.partial ? '+' : ''} · ${formatNumber(t.days)}d`]
+  if (weeks > 0) parts.push(`${formatNumber(weeks)}w`)
+  const title = [
+    `${formatNumber(t.runs)} runs · ${formatNumber(t.resin)} resin (${formatNumber(t.condensed)} condensed) · ${formatNumber(t.days)} days`,
+    weeks > 0 ? `weekly bosses: ${formatNumber(weeks)} weeks` : '',
+    t.gems.runs > 0 ? `gems: ${formatNumber(t.gems.runs)} runs` : '',
+    t.partial ? 'some sources have no drop rate' : '',
+    plan.assumed.ar || plan.assumed.wl ? 'AR/WL not set: top bracket assumed' : '',
+  ]
+  return { text: parts.join(' · '), title: title.filter(Boolean).join(' · ') }
 })
 
 // ------------------------------------------------------------------- save
@@ -334,9 +384,18 @@ const currentLevel = computed(() => {
           <label v-for="t in TALENTS" :key="t" class="flex min-w-0 flex-col gap-1">
             <span class="flex items-center gap-1 text-sm text-text-secondary"
               >{{ TALENT_LABELS[t] }}
-              <span class="tabular ml-auto font-mono text-text-muted">{{
-                current?.state.talents[t]
-              }}</span>
+              <span
+                class="tabular ml-auto font-mono text-text-muted"
+                :title="
+                  talentNow && talentNow.boosted[t] !== talentNow.base[t]
+                    ? `${talentNow.base[t]}, shown as ${talentNow.boosted[t]} at C${talentNow.constellation}`
+                    : undefined
+                "
+                >{{ talentNow?.base[t]
+                }}<template v-if="talentNow && talentNow.boosted[t] !== talentNow.base[t]">
+                  ({{ talentNow.boosted[t] }})</template
+                ></span
+              >
               <ArrowRight class="size-3.5 text-text-muted" aria-hidden="true"
             /></span>
             <UiSelect
@@ -380,10 +439,10 @@ const currentLevel = computed(() => {
               >
               <template v-else>–</template>
               <span
-                v-if="arHint(weaponState(w).state.ascension, w.target.ascension)"
+                v-if="weaponAr(w)"
                 class="ml-1.5 text-warning-text"
-                :title="`A${w.target.ascension} needs ${arHint(weaponState(w).state.ascension, w.target.ascension)}`"
-                >{{ arHint(weaponState(w).state.ascension, w.target.ascension) }}</span
+                :title="`A${w.target.ascension} needs ${weaponAr(w)}`"
+                >{{ weaponAr(w) }}</span
               >
             </span>
           </span>
@@ -461,15 +520,22 @@ const currentLevel = computed(() => {
           :requirements="requirements"
           :others="others"
           :inventory="good.materials"
+          :options="options"
         />
       </section>
     </div>
 
     <template #footer>
-      <UiButton v-if="!isNew" variant="ghost" class="mr-auto text-danger-text" @click="removeAll">
+      <UiButton v-if="!isNew" variant="ghost" class="text-danger-text" @click="removeAll">
         <Trash2 class="size-4" aria-hidden="true" />
         Remove
       </UiButton>
+      <span
+        class="tabular mr-auto flex items-center font-mono text-sm text-text-secondary"
+        :title="estimate?.title"
+        >{{ estimate?.text
+        }}<span v-if="estimate" class="sr-only"> ({{ estimate.title }})</span></span
+      >
       <UiButton @click="emit('close')">Cancel</UiButton>
       <UiButton
         variant="primary"

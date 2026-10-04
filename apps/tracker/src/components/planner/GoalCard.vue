@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
 import { computed } from 'vue'
-import { ArrowRight, Check, Eye, EyeOff, PackageCheck, Star } from 'lucide-vue-next'
+import { ArrowRight, CircleArrowUp, Check, Eye, EyeOff, PackageCheck, Star } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import { ELEMENT_FILL } from '@/components/characters/tokens'
 import { characterIcon, weaponIcon } from '@/lib/assets'
-import { levelLabel, type GoalEntry, type WeaponGoalView } from './model'
+import { levelLabel, type GoalEntry, type NextHint, type WeaponGoalView } from './model'
 
 /**
  * One goal on the Goals tab: a character (level and talents, current ->
- * target) with its weapon goals, or a weapon on its own, plus its note. The
- * card opens the editor; the star marks a favorite (characters), the eye
- * counts it in the totals or not.
+ * target; with C3/C5 the level the game shows in brackets) with its weapon
+ * goals, or a weapon on its own, plus what can be levelled now and its
+ * note. The card opens the editor; the star marks a favorite (characters),
+ * the eye counts it in the totals or not.
  */
 const props = defineProps<{
   entry: GoalEntry
@@ -20,6 +21,8 @@ const props = defineProps<{
   ready: boolean
   /** The account's Adventure Rank, when set. */
   ar: number | null
+  /** What can be levelled now, when only part of the goal can. */
+  hint: NextHint | null
 }>()
 const emit = defineEmits<{ open: []; toggle: []; favorite: [] }>()
 
@@ -34,11 +37,22 @@ const TALENT_NAMES = { auto: 'Attack', skill: 'Skill', burst: 'Burst' } as const
 const talents = computed(() => {
   const ch = c.value
   if (!ch) return []
-  return (['auto', 'skill', 'burst'] as const).map((t) => ({
-    name: TALENT_NAMES[t],
-    from: ch.current.talents[t],
-    to: ch.target.talents[t],
-  }))
+  return (['auto', 'skill', 'burst'] as const).map((t) => {
+    const from = ch.current.talents[t]
+    const to = ch.target.talents[t]
+    const up = to > from
+    // The constellation's +3, on the level shown (the target when levelling).
+    const boosted = up ? ch.boosted.target[t] : ch.boosted.current[t]
+    const plus = boosted - (up ? to : from)
+    return {
+      name: TALENT_NAMES[t],
+      from,
+      to,
+      up,
+      boosted: plus > 0 ? boosted : null,
+      title: `${TALENT_NAMES[t]} ${from} → ${to}${plus > 0 ? ` (${boosted} at C${ch.constellation})` : ''}`,
+    }
+  })
 })
 
 const characterLevel = computed(() => {
@@ -145,9 +159,9 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               v-for="t in talents"
               :key="t.name"
               class="tabular inline-flex h-6 items-center gap-0.5 rounded-md bg-surface-overlay px-1.5 font-mono text-sm leading-none"
-              :title="`${t.name} ${t.from} → ${t.to}`"
+              :title="t.title"
             >
-              <template v-if="t.to > t.from">
+              <template v-if="t.up">
                 <span class="text-text-muted">{{ t.from }}</span>
                 <ArrowRight class="size-3 text-text-muted" aria-hidden="true" />
                 <span class="font-semibold text-warning-text">{{ t.to }}</span>
@@ -155,6 +169,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               <span v-else :class="t.from >= 10 ? 'font-semibold text-rarity-5' : ''">{{
                 t.from
               }}</span>
+              <span v-if="t.boosted" class="text-xs text-text-muted">({{ t.boosted }})</span>
             </span>
           </span>
 
@@ -185,6 +200,16 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               >
             </span>
           </template>
+
+          <span
+            v-if="hint"
+            class="tabular flex items-center gap-1 font-mono text-xs text-success-text"
+            :title="hint.title"
+          >
+            <CircleArrowUp class="size-3.5 shrink-0" aria-hidden="true" />
+            <span class="truncate">{{ hint.text }}</span>
+            <span class="sr-only">: {{ hint.title }}</span>
+          </span>
 
           <span
             v-if="entry.note"

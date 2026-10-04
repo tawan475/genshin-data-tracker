@@ -1,25 +1,34 @@
 /**
  * The Planner page's model: stored targets joined with the newest snapshot
  * (current levels, talents, weapons) and the planner data, each goal's cost
- * memoised (`createRequirementCache`), plus the totals and farming groups
- * from `@gdt/game-data/planner-math`. Pure functions; the view keeps them in
- * computed()s.
+ * memoised (`createRequirementCache`). Costs, totals, conversions and
+ * estimates come from `@gdt/game-data` (planner-math, planner-goals,
+ * planner-estimate); this file only shapes them for the page. Pure
+ * functions; the view keeps them in computed()s.
  */
 
-import type { AscensionPhase, PlannerData, PlannerMaterial, WeaponType } from '@gdt/game-data'
+import type { PlannerData, PlannerMaterial, WeaponType } from '@gdt/game-data'
 import {
+  nextCharacterStep,
+  nextWeaponStep,
+  raiseForTalents,
+  type NextStep,
+} from '@gdt/game-data/planner-goals'
+import {
+  boostedTalents,
   createRequirementCache,
   emptyRequirement,
   findCharacterState,
   findWeaponState,
   isDone,
-  normalizeLevel,
+  itemGoal,
+  passiveDiscount,
   planTotals,
-  talentCap,
-  TALENTS,
   type CharacterState,
   type PlanGoal,
+  type PlanOptions,
   type Requirement,
+  type Talents,
   type WeaponState,
 } from '@gdt/game-data/planner-math'
 import type {
@@ -34,7 +43,7 @@ import type {
 import type { z } from 'zod'
 import type { Element } from '@/data/characters-meta'
 import { itemName } from '@/data/weapons'
-import { keyToName } from '@/lib/format'
+import { formatNumber, keyToName } from '@/lib/format'
 
 export type TargetInput = z.input<typeof plannerTargetInput>
 export type TargetsPatch = z.input<typeof plannerTargetsPatch>
@@ -72,37 +81,6 @@ export function inputOf(t: PlannerTarget): TargetInput {
 
 export type RequirementCache = ReturnType<typeof createRequirementCache>
 
-// ------------------------------------------------------------ valid goals
-
-/** Adventure Rank each ascension phase needs (characters and weapons alike). */
-const AR_BY_ASCENSION = [0, 15, 25, 30, 35, 40, 50] as const
-
-export function arForAscension(ascension: number): number {
-  return AR_BY_ASCENSION[Math.max(0, Math.min(6, ascension))] ?? 0
-}
-
-/** The lowest ascension whose talent cap allows talent `level`. */
-export function ascensionForTalent(level: number): number {
-  for (let a = 0; a < 6; a++) if (talentCap(a) >= level) return a
-  return 6
-}
-
-/**
- * A character target the game allows: the ascension raised to what its
- * talents need (and the level with it, to that phase's starting cap).
- * `raised` is the ascension it took, or null when it was already valid.
- */
-export function validCharacterTarget(
-  phases: readonly AscensionPhase[],
-  target: CharacterTarget,
-): { target: CharacterTarget; raised: number | null } {
-  const top = Math.max(...TALENTS.map((t) => target.talents[t]))
-  const need = ascensionForTalent(top)
-  if (need <= target.ascension || need >= phases.length) return { target, raised: null }
-  const lv = normalizeLevel(phases, Math.max(target.level, phases[need - 1]!.cap), need)
-  return { target: { ...target, ...lv }, raised: need }
-}
-
 // ------------------------------------------------------------ goal views
 
 export interface WeaponGoalView {
@@ -130,7 +108,11 @@ export interface CharacterGoalView {
   weapon: WeaponType | null
   owned: boolean
   current: CharacterState
-  /** The stored target, made valid (`validCharacterTarget`). */
+  /** Constellation now (0 when not owned). */
+  constellation: number
+  /** Talent levels as the game shows them with C3/C5 (current and target). */
+  boosted: { current: Talents; target: Talents }
+  /** The stored target, made valid (`raiseForTalents`). */
   target: CharacterTarget
   /** Ascension the stored target was raised to for its talents, else null. */
   raised: number | null
@@ -208,9 +190,10 @@ export function characterGoalView(
   const data = planner.characters.get(key)
   const { state, owned } = findCharacterState(good.characters, key)
   const { target, raised } = data
-    ? validCharacterTarget(data.ascension, stored)
+    ? raiseForTalents(data.ascension, stored, planner.talentAscension)
     : { target: stored, raised: null }
   const requirement = cache.character(key, state, target)
+  const constellation = good.characters.find((c) => c.key === key)?.constellation ?? 0
   return {
     id: characterGoalId(key),
     key,
@@ -220,6 +203,11 @@ export function characterGoalView(
     weapon: data?.weapon ?? null,
     owned,
     current: state,
+    constellation,
+    boosted: {
+      current: boostedTalents(planner, key, state.talents, constellation),
+      target: boostedTalents(planner, key, target.talents, constellation),
+    },
     target,
     raised,
     requirement,
@@ -253,29 +241,6 @@ export function weaponGoalView(
   }
 }
 
-/**
- * What an extra item need costs, as a requirement `planTotals` already
- * counts: Mora and EXP items as Mora and EXP points, anything else as the
- * item. Remove once planTotals takes item needs itself.
- */
-export function itemRequirement(planner: PlannerData, key: string, count: number): Requirement {
-  const r = emptyRequirement()
-  if (key === planner.mora.key) {
-    r.mora = count
-    return r
-  }
-  const book = planner.expItems.character.find((i) => i.material.key === key)
-  const ore = planner.expItems.weapon.find((i) => i.material.key === key)
-  if (book) r.characterExp = book.exp * count
-  else if (ore) r.weaponExp = ore.exp * count
-  else r.items.set(key, count)
-  return r
-}
-
-/** AR the pending ascensions need: the target's, when it is above the current one. */
-const arNeeded = (current: { ascension: number }, target: { ascension: number }) =>
-  target.ascension > current.ascension ? arForAscension(target.ascension) : 0
-
 /** Joins the targets with the inventory; characters by name, done ones last. */
 export function buildBoard(
   planner: PlannerData,
@@ -306,6 +271,8 @@ export function buildBoard(
   }
   items.sort((a, b) => a.name.localeCompare(b.name))
 
+  const pendingAr = (x: { done: boolean; requirement: Requirement | null }) =>
+    x.done ? 0 : (x.requirement?.ar ?? 0)
   const entries: GoalEntry[] = []
   const byOwner = new Map<string, WeaponGoalView[]>()
   for (const w of weaponGoals.values()) {
@@ -328,7 +295,7 @@ export function buildBoard(
         element: null,
         weaponType: w.type,
         rarity: w.rarity,
-        ar: arNeeded(w.current, w.target),
+        ar: pendingAr(w),
       })
     }
   }
@@ -348,10 +315,7 @@ export function buildBoard(
       element: c.element,
       weaponType: c.weapon,
       rarity: c.rarity,
-      ar: Math.max(
-        c.done ? 0 : arNeeded(c.current, c.target),
-        ...weapons.map((w) => (w.done ? 0 : arNeeded(w.current, w.target))),
-      ),
+      ar: Math.max(pendingAr(c), ...weapons.map(pendingAr)),
     })
   }
   entries.sort(
@@ -368,68 +332,138 @@ export function buildBoard(
   for (const w of weaponGoals.values()) {
     if (w.requirement) goals.push({ id: w.id, requirement: w.requirement, active: w.target.active })
   }
-  for (const i of items) {
-    if (!i.material) continue
-    const requirement = itemRequirement(planner, i.key, i.target.count)
-    goals.push({ id: i.id, requirement, active: i.target.active })
-  }
+  for (const i of items) goals.push(itemGoal(planner, i.key, i.target))
   return { entries, items, goals, characterGoals, weaponGoals }
 }
 
-// ------------------------------------------------------------ cost status
+// ------------------------------------------------------------ whole subjects
 
 /**
- * Seelie's three states for a goal's cost: the bag covers it with every
- * other goal counted (`all`), only on its own (`alone`), or not even that.
+ * Several requirements as one (a character with its weapons): summed, with
+ * each weapon's Mora passive already taken off (`owned`: the characters
+ * whose passives apply), since the merged one has no weapon type.
  */
-export type CostStatus = 'all' | 'alone' | 'short'
-
-export interface CostState {
-  status: CostStatus
-  /** Missing for this goal alone. */
-  missing: number
-  /** Missing with every counted goal. */
-  missingAll: number
-  /** Crafted from lower tiers to get there (with every goal when that is enough, else alone). */
-  crafted: number
-}
-
-export interface CostCheck {
-  item(key: string): CostState
-  characterExp: CostState
-  weaponExp: CostState
-  mora: CostState
-}
-
-function costState(
-  alone: { missing: number; crafted?: number } | undefined,
-  all: { missing: number; crafted?: number } | undefined,
-): CostState {
-  const missing = alone?.missing ?? 0
-  const missingAll = all?.missing ?? 0
-  return {
-    status: missingAll === 0 ? 'all' : missing === 0 ? 'alone' : 'short',
-    missing,
-    missingAll,
-    crafted: (missingAll === 0 ? all?.crafted : alone?.crafted) ?? 0,
-  }
-}
-
-/** Checks `mine` against the inventory alone and on top of the `others` (crafting included). */
-export function costCheck(
+export function mergeRequirements(
   planner: PlannerData,
-  mine: readonly Requirement[],
-  others: readonly PlanGoal[],
+  list: readonly Requirement[],
+  owned: ReadonlySet<string> | null,
+): Requirement {
+  const merged = emptyRequirement()
+  merged.ar = 0
+  for (const r of list) {
+    for (const [key, count] of r.items) merged.items.set(key, (merged.items.get(key) ?? 0) + count)
+    merged.mora += r.mora - (owned ? passiveDiscount(planner, r, owned).mora : 0)
+    merged.characterExp += r.characterExp
+    merged.weaponExp += r.weaponExp
+    merged.ar = Math.max(merged.ar, r.ar ?? 0)
+  }
+  return merged
+}
+
+/** Planner options without the passives (for a merged requirement, see mergeRequirements). */
+export function withoutPassives(options: PlanOptions): PlanOptions {
+  return { ...options, passives: null }
+}
+
+/** A goal card's requirements as one goal (id = the entry's). */
+export function entryGoal(
+  planner: PlannerData,
+  entry: GoalEntry,
+  owned: ReadonlySet<string> | null,
+): PlanGoal | null {
+  const list = [entry.character, ...entry.weapons].flatMap((x) =>
+    x?.requirement ? [x.requirement] : [],
+  )
+  if (list.length === 0) return null
+  return { id: entry.id, requirement: mergeRequirements(planner, list, owned) }
+}
+
+/**
+ * How many things (materials, EXP, Mora) the stock is short of for one goal
+ * on its own, crafting and conversions included: 0 means it can be done now.
+ */
+export function shortCount(
+  planner: PlannerData,
+  goal: PlanGoal,
   inventory: Readonly<Record<string, number>>,
-): CostCheck {
-  const goals = mine.map((requirement, index) => ({ id: `self:${index}`, requirement }))
-  const alone = planTotals(planner, goals, inventory)
-  const all = planTotals(planner, [...others, ...goals], inventory)
+  options: PlanOptions,
+): number {
+  const alone = planTotals(planner, [{ ...goal, active: true }], inventory, options)
+  let short = [...alone.lines.values()].filter((l) => l.missing > 0 && l.need > 0).length
+  if (alone.mora.missing > 0) short++
+  if (alone.characterExp.missing > 0) short++
+  if (alone.weaponExp.missing > 0) short++
+  return short
+}
+
+// ------------------------------------------------------------ next step
+
+export interface NextHint {
+  /** "Lv 70+ · 6/8/8", "Lv 80" */
+  text: string
+  title: string
+}
+
+/**
+ * What a goal card can level right now (`nextCharacterStep` /
+ * `nextWeaponStep`), when that is part of the goal but not all of it; null
+ * when nothing is affordable yet or all of it is (the card shows "In stock").
+ */
+export function nextHint(
+  planner: PlannerData,
+  entry: GoalEntry,
+  inventory: Readonly<Record<string, number>>,
+  options: PlanOptions & { ar?: number | null },
+): NextHint | null {
+  if (entry.done) return null
+  const parts: string[] = []
+  const details: string[] = []
+  const stops = new Set<'stock' | 'ar'>()
+  let full = true
+  const note = <S>(step: NextStep<S> | null) => {
+    if (!step) {
+      full = false
+      return false
+    }
+    if (!step.full) full = false
+    if (step.stop) stops.add(step.stop)
+    return true
+  }
+
+  const c = entry.character
+  if (c && !c.done) {
+    const step = nextCharacterStep(planner, c.key, c.current, c.target, inventory, options)
+    if (note(step) && step) {
+      const s = step.state
+      const levelUp = s.level > c.current.level || s.ascension > c.current.ascension
+      const talentsUp = (['auto', 'skill', 'burst'] as const).some(
+        (t) => s.talents[t] > c.current.talents[t],
+      )
+      if (levelUp) parts.push(`Lv ${levelLabel(planner, 'character', c.key, s.level, s.ascension)}`)
+      if (talentsUp) parts.push(`${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`)
+      details.push(
+        `${c.name}: Lv ${s.level} (A${s.ascension}), talents ${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`,
+      )
+    }
+  }
+  for (const w of entry.weapons) {
+    if (w.done) continue
+    const step = nextWeaponStep(planner, w.key, w.current, w.target, inventory, options)
+    if (note(step) && step) {
+      const label = levelLabel(planner, 'weapon', w.key, step.state.level, step.state.ascension)
+      if (!c) parts.push(`Lv ${label}`)
+      details.push(`${w.name}: Lv ${step.state.level} (A${step.state.ascension})`)
+    }
+  }
+  if (details.length === 0 || full) return null
+  const then = stops.has('ar')
+    ? `then AR ${formatNumber(entry.ar)}`
+    : stops.has('stock')
+      ? 'then short of materials'
+      : ''
   return {
-    item: (key) => costState(alone.lines.get(key), all.lines.get(key)),
-    characterExp: costState(alone.characterExp, all.characterExp),
-    weaponExp: costState(alone.weaponExp, all.weaponExp),
-    mora: costState(alone.mora, all.mora),
+    text: parts.length ? parts.join(' · ') : 'Weapon',
+    title: ['Can level now', ...details, then].filter(Boolean).join(' · '),
   }
 }
 

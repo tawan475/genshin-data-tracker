@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
-import type { PlanGoal } from '@gdt/game-data/planner-math'
+import { itemRequirement, type PlanGoal, type PlanOptions } from '@gdt/game-data/planner-math'
 import type { Good, ItemTarget } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
@@ -13,7 +13,6 @@ import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 import CostList from './CostList.vue'
-import { itemRequirement } from './model'
 import NoteInput from './NoteInput.vue'
 import { remove, upsert } from './use-planner-targets'
 
@@ -32,6 +31,7 @@ const props = defineProps<{
   target: ItemTarget | null
   /** Every other goal, for the cost colour. */
   others: readonly PlanGoal[]
+  options: PlanOptions
   saving: boolean
 }>()
 const emit = defineEmits<{ close: []; save: [ops: Op[]]; remove: [ops: Op[]] }>()
@@ -123,6 +123,7 @@ function removeItem() {
           :requirements="requirements"
           :others="others"
           :inventory="good.materials"
+          :options="options"
         />
       </section>
     </div>

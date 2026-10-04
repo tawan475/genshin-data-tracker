@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
+import { raiseForTalents } from '@gdt/game-data/planner-goals'
 import { findCharacterState, findWeaponState } from '@gdt/game-data/planner-math'
 import { isSeelieExport, mapSeelieGoals, type SeelieImport } from '@gdt/game-data/seelie'
 import type { Good, PlannerTarget } from '@gdt/shared'
@@ -10,14 +11,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { formatNumber } from '@/lib/format'
-import {
-  characterGoalId,
-  itemGoalId,
-  refOf,
-  targetId,
-  validCharacterTarget,
-  weaponGoalId,
-} from './model'
+import { characterGoalId, itemGoalId, refOf, targetId, weaponGoalId } from './model'
 import { mapSeelieItems, type SeelieItems } from './seelie-items'
 import { remove, upsert } from './use-planner-targets'
 
@@ -76,7 +70,12 @@ async function read(file: File | undefined) {
       ...mapped,
       characters: mapped.characters.map((c) => {
         const phases = props.planner.characters.get(c.key)?.ascension
-        return phases ? { ...c, target: validCharacterTarget(phases, c.target).target } : c
+        return phases
+          ? {
+              ...c,
+              target: raiseForTalents(phases, c.target, props.planner.talentAscension).target,
+            }
+          : c
       }),
     }
     extra.value = mapSeelieItems(json, props.planner)

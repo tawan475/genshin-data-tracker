@@ -111,6 +111,7 @@ const KIND_ORDER: MaterialKind[] = [
   'common',
   'elite',
   'crown',
+  'currency',
   'exp',
   'ore',
   'mora',
