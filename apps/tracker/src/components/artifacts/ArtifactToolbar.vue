@@ -22,7 +22,9 @@ import {
   SORT_OPTIONS,
   clearedFilters,
   defaultDescending,
+  isFodderPreset,
   isSparePreset,
+  toggleFodderPreset,
   toggleSparePreset,
   type ArtifactFilters,
   type ArtifactSort,
@@ -47,6 +49,7 @@ import { SLOT_ICONS } from './styles'
 const props = defineProps<{
   sets: SetOption[]
   /** Preset sizes over the whole inventory. */
+  fodderCount: number
   spareCount: number
   maxedCount: number
   slotCounts: ReadonlyMap<string, number>
@@ -126,6 +129,7 @@ function toggleMaxOnly() {
   patch(maxOnly.value ? { levelMin: LEVEL_MIN } : { levelMin: LEVEL_MAX, levelMax: LEVEL_MAX })
 }
 
+const fodder = computed(() => isFodderPreset(filters.value))
 const spare = computed(() => isSparePreset(filters.value))
 
 // "More filters" stays open or closed per device; it opens by itself when
@@ -341,6 +345,14 @@ function clearAll() {
         >
           <Trophy class="size-4 shrink-0" aria-hidden="true" />
           Best
+        </FilterPill>
+        <FilterPill
+          :pressed="fodder"
+          title="Unlocked, unequipped 4★ and 3★"
+          @toggle="filters = toggleFodderPreset(filters)"
+        >
+          4★/3★ Artifact
+          <span class="tabular font-mono text-text-muted">{{ formatNumber(fodderCount) }}</span>
         </FilterPill>
         <FilterPill
           :pressed="spare"

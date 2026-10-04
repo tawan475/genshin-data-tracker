@@ -25,7 +25,7 @@ const rows = computed(() => [
   <div
     class="flex min-w-0 flex-col gap-1 rounded-xl border border-border-default bg-surface-raised p-4"
   >
-    <span class="text-sm text-text-secondary" title="Unlocked, unequipped artifacts">Fodder</span>
+    <span class="text-sm text-text-secondary" title="Unlocked, unequipped">4★ / 3★ Artifact</span>
     <dl class="flex flex-col">
       <div v-for="row in rows" :key="row.rarity" class="flex items-baseline gap-2">
         <dt

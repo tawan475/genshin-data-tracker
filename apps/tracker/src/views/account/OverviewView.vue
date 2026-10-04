@@ -3,6 +3,7 @@ import type { SnapshotResponse } from '@gdt/shared'
 import { computed, shallowRef, watch } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { Clock, Eye, History, Upload } from 'lucide-vue-next'
+import FodderStat from '@/components/overview/FodderStat.vue'
 import HistoryCharts from '@/components/overview/HistoryCharts.vue'
 import MonthlyAnalysis from '@/components/overview/MonthlyAnalysis.vue'
 import OverviewSkeleton from '@/components/overview/OverviewSkeleton.vue'
@@ -93,6 +94,17 @@ const tiles = computed(() => {
     { label: 'Artifacts', value: summary.artifacts, delta: d?.artifacts },
   ]
 })
+const fodder = computed(() => {
+  const summary = account.value.latest?.summary
+  if (!summary) return null
+  const d = delta.value
+  return {
+    fodder4: summary.fodder4,
+    fodder3: summary.fodder3,
+    delta4: d?.fodder4,
+    delta3: d?.fodder3,
+  }
+})
 
 interface MetaItem {
   key: string
@@ -181,6 +193,13 @@ const importRoute = computed(() => ({
         :value="tile.value"
         :delta="tile.delta"
         :detail="tile.detail"
+      />
+      <FodderStat
+        v-if="fodder"
+        :fodder4="fodder.fodder4"
+        :fodder3="fodder.fodder3"
+        :delta4="fodder.delta4"
+        :delta3="fodder.delta3"
       />
     </div>
 
