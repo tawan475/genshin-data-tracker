@@ -5,8 +5,9 @@
  *
  * Differences from the old backend, both on purpose:
  * - Months and days are local calendar time; the old backend used UTC.
- * - Fodder counts come from each snapshot's own lock/location (its summary),
- *   where the old backend applied today's lock/location to every past day.
+ * - 4★/3★ artifact counts come from each snapshot's own lock/location (its
+ *   summary), where the old backend applied today's lock/location to every
+ *   past day.
  * - A capture that missed the currency packet keeps the previous mora and
  *   primogems (see buildHistory) instead of reading 0.
  */
@@ -15,7 +16,7 @@ import type { SnapshotResponse, SnapshotSummary } from '@gdt/shared'
 import { indexAtOrBefore, valueAt, type MaterialsHistory } from './materials-history'
 import { buildHistory, dayKey } from './overview'
 
-/** Mora a level-0 artifact is worth as enhancement fodder (its base EXP). */
+/** Mora a level-0 artifact is worth as enhancement material (its base EXP). */
 export const ARTIFACT_WORTH = { 4: 2520, 3: 1260 } as const
 /** Artifact EXP per extraction material. */
 export const EXTRACT_EXP = { SanctifyingEssence: 10_000, SanctifyingUnction: 2_500 } as const
@@ -73,8 +74,8 @@ interface Stats {
 function statsOf(summary: SnapshotSummary, materials: MaterialsHistory, index: number): Stats {
   const ext4 = valueAt(materials.series.get('SanctifyingEssence'), index)
   const ext3 = valueAt(materials.series.get('SanctifyingUnction'), index)
-  const art4 = summary.fodder4
-  const art3 = summary.fodder3
+  const art4 = summary.artifact4
+  const art3 = summary.artifact3
   return {
     mora: summary.mora,
     primogem: summary.primogem,
@@ -125,10 +126,10 @@ function captureIndices(
 }
 
 /**
- * Day-by-day mora / primogem / fodder / extraction movement for one local
- * calendar month. `month` is 1–12. Each row is diffed against the row before
- * it; the first against the last capture before the month (or against zero
- * when there is none). Days without a capture get no row.
+ * Day-by-day mora / primogem / 4★–3★ artifact / extraction movement for one
+ * local calendar month. `month` is 1–12. Each row is diffed against the row
+ * before it; the first against the last capture before the month (or against
+ * zero when there is none). Days without a capture get no row.
  */
 export function monthlyAnalysis(
   snapshots: readonly SnapshotResponse[],

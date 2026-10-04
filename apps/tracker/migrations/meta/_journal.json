@@ -57,6 +57,13 @@
       "when": 1791143337105,
       "tag": "0007_user_import_key",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1791146076873,
+      "tag": "0008_rename_summary_artifact_counts",
+      "breakpoints": true
     }
   ]
 }

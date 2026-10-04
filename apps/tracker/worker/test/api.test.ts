@@ -336,7 +336,7 @@ describe('accounts and imports', () => {
     const snapshots = await client.json<SnapshotResponse[]>(`/api/accounts/${account.id}/snapshots`)
     expect(snapshots.map((s) => s.id)).toEqual([second.snapshotId, created.snapshotId])
     expect(snapshots[1]!.lastSeenAt).toBe(1_780_000_100_000)
-    expect(snapshots[0]!.summary).toMatchObject({ mora: 2_000_000, primogem: 16_000, fodder3: 1 })
+    expect(snapshots[0]!.summary).toMatchObject({ mora: 2_000_000, primogem: 16_000, artifact3: 1 })
 
     const summary = await client.json<AccountResponse>(`/api/accounts/${account.id}`)
     expect(summary).toMatchObject({ snapshotCount: 2, latest: { id: second.snapshotId } })
@@ -480,6 +480,13 @@ describe('accounts and imports', () => {
       headers: { 'if-none-match': etag },
     })
     expect(again.status).toBe(304)
+    // A list cached in the pre-0008 shape (ETag without the format) is sent again.
+    const oldShape = etag.replace(/\.snapshots\.\d+"$/, '.snapshots"')
+    expect(oldShape).not.toBe(etag)
+    const refetched = await client.fetch(`/api/accounts/${account.id}/snapshots`, {
+      headers: { 'if-none-match': oldShape },
+    })
+    expect(refetched.status).toBe(200)
     await importByKey(importKey, sampleGood())
     const after = await client.fetch(`/api/accounts/${account.id}/snapshots`, {
       headers: { 'if-none-match': etag },

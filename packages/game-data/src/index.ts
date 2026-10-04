@@ -325,7 +325,10 @@ export interface PlannerData {
   azoth: { dust: readonly number[]; families: ReadonlySet<string> }
   /** Weapon EXP ore recipes (one input each). */
   forge: ForgeRecipe[]
-  /** Weapon EXP a weapon gives as fodder, by rarity (index rarity-1), before its own levels. */
+  /**
+   * Weapon EXP a weapon gives when used as enhancement material, by rarity
+   * (index rarity-1), before its own levels.
+   */
   weaponBaseExp: readonly number[]
   resin: {
     /** GOOD key of Original Resin. */

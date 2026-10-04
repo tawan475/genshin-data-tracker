@@ -8,16 +8,16 @@ import ChangeValue from './ChangeValue.vue'
  * previous snapshot. Sits in a row of StatTile.
  */
 const props = defineProps<{
-  fodder4: number
-  fodder3: number
+  artifact4: number
+  artifact3: number
   /** undefined while loading, null when not measurable. */
   delta4?: number | null
   delta3?: number | null
 }>()
 
 const rows = computed(() => [
-  { rarity: 4, value: formatNumber(props.fodder4), delta: props.delta4 },
-  { rarity: 3, value: formatNumber(props.fodder3), delta: props.delta3 },
+  { rarity: 4, value: formatNumber(props.artifact4), delta: props.delta4 },
+  { rarity: 3, value: formatNumber(props.artifact3), delta: props.delta3 },
 ])
 </script>
 

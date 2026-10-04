@@ -38,8 +38,8 @@ const summary = {
   materials: 0,
   mora: 0,
   primogem: 0,
-  fodder3: 0,
-  fodder4: 0,
+  artifact3: 0,
+  artifact4: 0,
 }
 
 function snapshotRow(accountId: number, takenAt: number) {

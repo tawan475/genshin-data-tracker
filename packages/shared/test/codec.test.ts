@@ -174,7 +174,7 @@ const sample: Good = {
       ],
       unactivatedSubstats: [],
     },
-    // Two stat-identical fodder pieces in different states: one catalog row,
+    // Two stat-identical 3★ pieces in different states: one catalog row,
     // two snapshot entries, each keeping its own state.
     {
       setKey: 'Adventurer',
@@ -286,8 +286,8 @@ describe('snapshot codec', () => {
       materials: 3,
       mora: 1_234_567,
       primogem: 16_000,
-      fodder3: 1,
-      fodder4: 0,
+      artifact3: 1,
+      artifact4: 0,
     })
   })
 })

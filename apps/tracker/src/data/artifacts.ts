@@ -28,7 +28,7 @@ export interface ArtifactRow {
   rollCount: number
   equipped: boolean
   /** Unlocked, unequipped 3★ or 4★: what the game lets you feed to others. */
-  fodder: boolean
+  feedable: boolean
   maxed: boolean
   /** Lower-case text the search box matches against. */
   haystack: string
@@ -36,7 +36,7 @@ export interface ArtifactRow {
 
 const rowCache = new WeakMap<readonly GoodArtifact[], ArtifactRow[]>()
 
-export function isFodder(artifact: GoodArtifact): boolean {
+export function isFeedable(artifact: GoodArtifact): boolean {
   return (
     !artifact.lock && artifact.location === '' && (artifact.rarity === 3 || artifact.rarity === 4)
   )
@@ -61,7 +61,7 @@ export function buildArtifactRows(artifacts: readonly GoodArtifact[]): ArtifactR
       rolls,
       rollCount: artifact.totalRolls && artifact.totalRolls > 0 ? artifact.totalRolls : inferred,
       equipped: artifact.location !== '',
-      fodder: isFodder(artifact),
+      feedable: isFeedable(artifact),
       maxed: artifact.level >= maxLevel(artifact.rarity),
       haystack: [
         setName,
@@ -130,11 +130,11 @@ export function clearedFilters(current: ArtifactFilters): ArtifactFilters {
 }
 
 /**
- * The "Fodder" preset: unlocked, unequipped 3★–4★ (the same rule as the
- * snapshot summary's fodder count). It combines with the other filters, so
- * "fodder of this set" works.
+ * The "4★/3★ Artifact" preset: unlocked, unequipped 3★–4★ (the same rule as
+ * the snapshot summary's artifact3/artifact4 counts). It combines with the
+ * other filters, so "4★/3★ of this set" works.
  */
-export function isFodderPreset(f: ArtifactFilters): boolean {
+export function isFeedablePreset(f: ArtifactFilters): boolean {
   return (
     f.lock === 'unlocked' &&
     f.equipped === 'inventory' &&
@@ -145,8 +145,8 @@ export function isFodderPreset(f: ArtifactFilters): boolean {
 }
 
 /** Turns the preset on, or off again (back to any lock, location and rarity). */
-export function toggleFodderPreset(f: ArtifactFilters): ArtifactFilters {
-  return isFodderPreset(f)
+export function toggleFeedablePreset(f: ArtifactFilters): ArtifactFilters {
+  return isFeedablePreset(f)
     ? { ...f, lock: 'any', equipped: 'any', rarities: [] }
     : { ...f, lock: 'unlocked', equipped: 'inventory', rarities: [4, 3] }
 }
@@ -158,7 +158,7 @@ export function isSparePreset(f: ArtifactFilters): boolean {
   )
 }
 
-/** Turns the preset on (replacing the fodder preset's fields), or off again. */
+/** Turns the preset on (replacing the 4★/3★ preset's fields), or off again. */
 export function toggleSparePreset(f: ArtifactFilters): ArtifactFilters {
   return isSparePreset(f)
     ? { ...f, lock: 'any', equipped: 'any', rarities: [] }

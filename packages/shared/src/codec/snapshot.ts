@@ -37,9 +37,12 @@ export interface SnapshotSummary {
   materials: number
   mora: number
   primogem: number
-  /** Unlocked, unequipped 3★ / 4★ artifacts as of this snapshot. */
-  fodder3: number
-  fodder4: number
+  /**
+   * Unlocked, unequipped 3★ / 4★ artifacts as of this snapshot (named this way
+   * since migration 0008, which renamed the keys in stored rows).
+   */
+  artifact3: number
+  artifact4: number
 }
 
 export interface PreparedSnapshot {
@@ -59,12 +62,12 @@ export async function prepareSnapshot(input: unknown): Promise<PreparedSnapshot>
 }
 
 function summarize(good: NormalizedGood): SnapshotSummary {
-  let fodder3 = 0
-  let fodder4 = 0
+  let artifact3 = 0
+  let artifact4 = 0
   for (const { identity, state } of good.artifacts) {
     if (state.lock || state.location !== '') continue
-    if (identity.rarity === 3) fodder3++
-    else if (identity.rarity === 4) fodder4++
+    if (identity.rarity === 3) artifact3++
+    else if (identity.rarity === 4) artifact4++
   }
   return {
     characters: good.characters.length,
@@ -73,8 +76,8 @@ function summarize(good: NormalizedGood): SnapshotSummary {
     materials: good.materials.size,
     mora: good.materials.get('Mora') ?? 0,
     primogem: good.materials.get('Primogem') ?? 0,
-    fodder3,
-    fodder4,
+    artifact3,
+    artifact4,
   }
 }
 
