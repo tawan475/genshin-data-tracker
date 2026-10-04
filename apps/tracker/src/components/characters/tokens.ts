@@ -20,3 +20,30 @@ export const ELEMENT_FILL: Record<Element, string> = {
   cryo: 'bg-cryo',
   geo: 'bg-geo',
 }
+
+/** A faint wash of the element colour, for backdrops behind glyphs. */
+export const ELEMENT_SOFT: Record<Element, string> = {
+  pyro: 'bg-pyro/15',
+  hydro: 'bg-hydro/15',
+  anemo: 'bg-anemo/15',
+  electro: 'bg-electro/15',
+  dendro: 'bg-dendro/15',
+  cryo: 'bg-cryo/15',
+  geo: 'bg-geo/15',
+}
+
+export const RARITY_TEXT: Record<number, string> = {
+  5: 'text-rarity-5',
+  4: 'text-rarity-4',
+  3: 'text-rarity-3',
+  2: 'text-rarity-2',
+  1: 'text-rarity-1',
+}
+
+export const RARITY_SOFT: Record<number, string> = {
+  5: 'bg-rarity-5/20',
+  4: 'bg-rarity-4/20',
+  3: 'bg-rarity-3/20',
+  2: 'bg-rarity-2/20',
+  1: 'bg-rarity-1/20',
+}

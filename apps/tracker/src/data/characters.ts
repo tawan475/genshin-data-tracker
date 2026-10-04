@@ -2,12 +2,19 @@
  * The Characters page's model: one pass over a GOOD inventory joins every
  * character with the weapon and artifacts it wears, adds rarity / element /
  * weapon type from the static tables, and derives what the cards show (set
- * bonuses, total crit value). Pure functions; the view only filters and sorts
- * the result.
+ * bonuses, crit value, what is left to build). Pure functions; the view only
+ * filters and sorts the result.
  */
 
-import { calculateCV, type Good, type GoodArtifact, type GoodWeapon } from '@gdt/shared'
+import {
+  calculateCV,
+  calculateRV,
+  type Good,
+  type GoodArtifact,
+  type GoodWeapon,
+} from '@gdt/shared'
 import { keyToName } from '@/lib/format'
+import { maxLevel } from '@/utils/artifact-rolls'
 import {
   ARTIFACT_MAIN_STATS,
   ARTIFACT_SET_THRESHOLDS,
@@ -16,7 +23,7 @@ import {
   type WeaponType,
 } from './characters-meta'
 import { WEAPON_META } from './weapons-meta'
-import { itemName } from './weapons'
+import { WEAPON_TYPE_LABELS, itemName } from './weapons'
 
 export { WEAPON_TYPES, WEAPON_TYPE_LABELS, itemName } from './weapons'
 
@@ -54,6 +61,9 @@ export const ELEMENT_LABELS: Record<Element, string> = {
   geo: 'Geo',
 }
 
+/** The level every build aims for (95 and 100 are extras). */
+export const TARGET_LEVEL = 90
+
 export interface EquippedWeapon extends GoodWeapon {
   name: string
   rarity: number | null
@@ -65,6 +75,8 @@ export interface EquippedArtifact extends GoodArtifact {
   /** Main stat at this level and rarity; null when the table has no value. */
   mainStatValue: number | null
   cv: number
+  rv: number
+  maxed: boolean
 }
 
 export interface SetCount {
@@ -75,6 +87,15 @@ export interface SetCount {
   thresholds: readonly number[]
   /** The thresholds this character reaches. */
   active: number[]
+}
+
+/** Something left to do on a build. */
+export type GapKind = 'level' | 'weapon' | 'artifacts' | 'set'
+
+export interface Gap {
+  kind: GapKind
+  /** Short, for a tooltip: "Lv 80", "Weapon Lv 70", "3/5 artifacts". */
+  text: string
 }
 
 export interface CharacterView {
@@ -88,6 +109,8 @@ export interface CharacterView {
   constellation: number
   talent: { auto: number; skill: number; burst: number }
   talentTotal: number
+  /** Talents at 10 (each took a Crown of Insight). */
+  crowns: number
   weapon: EquippedWeapon | null
   /** One entry per slot, in SLOT_ORDER; null for an empty slot. */
   artifacts: (EquippedArtifact | null)[]
@@ -96,10 +119,16 @@ export interface CharacterView {
   sets: SetCount[]
   /** Sets that grant at least one bonus. */
   activeSets: SetCount[]
+  /** Set bonuses granted: 2 for a 4-piece or 2 + 2. */
+  bonusCount: number
   hasFourPiece: boolean
   /** Crit value summed over the equipped artifacts' substats. */
   cv: number
-  /** Normalised name, weapon and set names, for search. */
+  /** Crit rate and crit damage from artifacts (main stats included). */
+  critRate: number
+  critDmg: number
+  gaps: Gap[]
+  /** Normalised name, element, weapon and set names, for search. */
   haystack: string
 }
 
@@ -109,6 +138,10 @@ export interface Roster {
   c6: number
   /** Characters at level 90 or above. */
   level90: number
+  /** Talents at 10, over the whole roster. */
+  crowns: number
+  /** Characters with nothing left to build. */
+  ready: number
 }
 
 const DEFAULT_THRESHOLDS = [2, 4] as const
@@ -147,6 +180,31 @@ function countSets(pieces: readonly EquippedArtifact[]): SetCount[] {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
 }
 
+function findGaps(
+  level: number,
+  weapon: EquippedWeapon | null,
+  equipped: readonly EquippedArtifact[],
+  bonusCount: number,
+): Gap[] {
+  const gaps: Gap[] = []
+  if (level < TARGET_LEVEL) gaps.push({ kind: 'level', text: `Lv ${level}` })
+  if (!weapon) gaps.push({ kind: 'weapon', text: 'No weapon' })
+  else if (weapon.level < TARGET_LEVEL) {
+    gaps.push({ kind: 'weapon', text: `Weapon Lv ${weapon.level}` })
+  }
+  const unlevelled = equipped.filter((p) => !p.maxed).length
+  if (equipped.length < SLOT_ORDER.length) {
+    gaps.push({ kind: 'artifacts', text: `${equipped.length}/5 artifacts` })
+  } else if (unlevelled > 0) {
+    gaps.push({
+      kind: 'artifacts',
+      text: `${unlevelled} artifact${unlevelled > 1 ? 's' : ''} below max`,
+    })
+  }
+  if (equipped.length > 0 && bonusCount < 2) gaps.push({ kind: 'set', text: 'No full set bonus' })
+  return gaps
+}
+
 /** Joins characters with what they wear. Run once per inventory. */
 export function buildRoster(good: Good): Roster {
   const weapons = new Map<string, GoodWeapon>()
@@ -165,6 +223,8 @@ export function buildRoster(good: Good): Roster {
       slotKey: artifact.slotKey,
       mainStatValue: mainStatValue(artifact),
       cv: calculateCV(artifact.substats),
+      rv: calculateRV(artifact.substats),
+      maxed: artifact.level >= maxLevel(artifact.rarity),
     })
   }
 
@@ -179,27 +239,53 @@ export function buildRoster(good: Good): Roster {
     const equipped = pieces.filter((p): p is EquippedArtifact => p !== null)
     const sets = countSets(equipped)
     const activeSets = sets.filter((s) => s.active.length > 0)
+    const bonusCount = activeSets.reduce((sum, s) => sum + s.active.length, 0)
     const name = keyToName(c.key)
+    const element = meta?.[1] ?? null
+    const weaponType = meta?.[2] ?? weapon?.type ?? null
+    let critRate = 0
+    let critDmg = 0
+    for (const piece of equipped) {
+      if (piece.mainStatKey === 'critRate_') critRate += piece.mainStatValue ?? 0
+      if (piece.mainStatKey === 'critDMG_') critDmg += piece.mainStatValue ?? 0
+      for (const sub of piece.substats) {
+        if (sub.key === 'critRate_') critRate += sub.value
+        if (sub.key === 'critDMG_') critDmg += sub.value
+      }
+    }
+    const talent = { ...c.talent }
     return {
       key: c.key,
       name,
       rarity: meta?.[0] ?? null,
-      element: meta?.[1] ?? null,
-      weaponType: meta?.[2] ?? weapon?.type ?? null,
+      element,
+      weaponType,
       level: c.level,
       ascension: c.ascension,
       constellation: c.constellation,
-      talent: { ...c.talent },
-      talentTotal: c.talent.auto + c.talent.skill + c.talent.burst,
+      talent,
+      talentTotal: talent.auto + talent.skill + talent.burst,
+      crowns: [talent.auto, talent.skill, talent.burst].filter((t) => t >= 10).length,
       weapon,
       artifacts: pieces,
       artifactCount: equipped.length,
       sets,
       activeSets,
+      bonusCount,
       hasFourPiece: sets.some((s) => s.count >= 4),
       cv: Number(equipped.reduce((sum, p) => sum + p.cv, 0).toFixed(1)),
+      critRate: Number(critRate.toFixed(1)),
+      critDmg: Number(critDmg.toFixed(1)),
+      gaps: findGaps(c.level, weapon, equipped, bonusCount),
       haystack: normalizeSearch(
-        [name, c.key, weapon?.name ?? '', ...activeSets.map((s) => s.name)].join(' '),
+        [
+          name,
+          c.key,
+          element ? ELEMENT_LABELS[element] : '',
+          weaponType ? WEAPON_TYPE_LABELS[weaponType] : '',
+          weapon?.name ?? '',
+          ...activeSets.map((s) => s.name),
+        ].join(' '),
       ),
     }
   })
@@ -208,7 +294,9 @@ export function buildRoster(good: Good): Roster {
     characters,
     total: characters.length,
     c6: characters.filter((c) => c.constellation >= 6).length,
-    level90: characters.filter((c) => c.level >= 90).length,
+    level90: characters.filter((c) => c.level >= TARGET_LEVEL).length,
+    crowns: characters.reduce((sum, c) => sum + c.crowns, 0),
+    ready: characters.filter((c) => c.gaps.length === 0).length,
   }
 }
 
@@ -269,13 +357,33 @@ export const CHARACTER_SORTS: { value: CharacterSort; label: string; natural: So
   { value: 'name', label: 'Name', natural: 'asc' },
 ]
 
+export type BuildFilter = 'all' | 'ready' | 'needs' | GapKind
+export type TalentFilter = 'all' | 'nine' | 'crowned' | 'below'
+
+export const BUILD_OPTIONS: { value: BuildFilter; label: string }[] = [
+  { value: 'all', label: 'Build' },
+  { value: 'ready', label: 'Ready' },
+  { value: 'needs', label: 'Needs work' },
+  { value: 'level', label: 'Lv < 90' },
+  { value: 'weapon', label: 'Weapon < 90' },
+  { value: 'artifacts', label: 'Artifacts < max' },
+  { value: 'set', label: 'No set bonus' },
+]
+
+export const TALENT_OPTIONS: { value: TalentFilter; label: string }[] = [
+  { value: 'all', label: 'Talents' },
+  { value: 'nine', label: 'All 9+' },
+  { value: 'crowned', label: 'Crowned' },
+  { value: 'below', label: 'Any < 9' },
+]
+
 export interface CharacterFilters {
   query: string
   element: Element | 'all'
   rarity: 'all' | 5 | 4
   weaponType: WeaponType | 'all'
-  fourPiece: boolean
-  talents9: boolean
+  build: BuildFilter
+  talents: TalentFilter
 }
 
 export const NO_CHARACTER_FILTERS: CharacterFilters = {
@@ -283,8 +391,8 @@ export const NO_CHARACTER_FILTERS: CharacterFilters = {
   element: 'all',
   rarity: 'all',
   weaponType: 'all',
-  fourPiece: false,
-  talents9: false,
+  build: 'all',
+  talents: 'all',
 }
 
 export function hasCharacterFilters(f: CharacterFilters): boolean {
@@ -293,25 +401,60 @@ export function hasCharacterFilters(f: CharacterFilters): boolean {
     f.element !== 'all' ||
     f.rarity !== 'all' ||
     f.weaponType !== 'all' ||
-    f.fourPiece ||
-    f.talents9
+    f.build !== 'all' ||
+    f.talents !== 'all'
   )
 }
+
+function buildMatches(c: CharacterView, build: BuildFilter): boolean {
+  if (build === 'all') return true
+  if (build === 'ready') return c.gaps.length === 0
+  if (build === 'needs') return c.gaps.length > 0
+  return c.gaps.some((g) => g.kind === build)
+}
+
+function talentsMatch(c: CharacterView, talents: TalentFilter): boolean {
+  const { auto, skill, burst } = c.talent
+  const lowest = Math.min(auto, skill, burst)
+  if (talents === 'nine') return lowest >= 9
+  if (talents === 'crowned') return c.crowns > 0
+  if (talents === 'below') return lowest < 9
+  return true
+}
+
+/** Facets whose chips show "matches if you pick this" counts. */
+export type CharacterFacet = 'element' | 'rarity'
 
 export function filterCharacters(
   list: readonly CharacterView[],
   f: CharacterFilters,
+  except?: CharacterFacet,
 ): CharacterView[] {
   const words = normalizeSearch(f.query).split(' ').filter(Boolean)
   return list.filter(
     (c) =>
-      (f.element === 'all' || c.element === f.element) &&
-      (f.rarity === 'all' || c.rarity === f.rarity) &&
+      (except === 'element' || f.element === 'all' || c.element === f.element) &&
+      (except === 'rarity' || f.rarity === 'all' || c.rarity === f.rarity) &&
       (f.weaponType === 'all' || c.weaponType === f.weaponType) &&
-      (!f.fourPiece || c.hasFourPiece) &&
-      (!f.talents9 || (c.talent.auto >= 9 && c.talent.skill >= 9 && c.talent.burst >= 9)) &&
+      buildMatches(c, f.build) &&
+      talentsMatch(c, f.talents) &&
       words.every((w) => c.haystack.includes(w)),
   )
+}
+
+/** Per-value counts of one facet, with every other filter applied. */
+export function facetCounts<K>(
+  list: readonly CharacterView[],
+  f: CharacterFilters,
+  facet: CharacterFacet,
+  value: (c: CharacterView) => K,
+): Map<K, number> {
+  const counts = new Map<K, number>()
+  for (const c of filterCharacters(list, f, facet)) {
+    const k = value(c)
+    counts.set(k, (counts.get(k) ?? 0) + 1)
+  }
+  return counts
 }
 
 const elementRank = (e: Element | null) => (e ? ELEMENTS.indexOf(e) : ELEMENTS.length)

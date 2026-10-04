@@ -16,6 +16,8 @@ const props = defineProps<{
   data: any[]
   isLoading?: boolean
   meta?: PaginationMeta
+  /** Extra classes for a row, e.g. to tint selected rows. */
+  rowClass?: (item: any) => string | undefined
 }>()
 
 const emit = defineEmits<{
@@ -78,6 +80,7 @@ defineExpose({ scrollToTop })
             v-for="(item, index) in data"
             :key="index"
             class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors divide-x divide-slate-100 dark:divide-slate-700/50"
+            :class="rowClass?.(item)"
           >
             <td v-for="label in labels" :key="label.key" class="p-4 relative">
               <template v-if="label.slot">

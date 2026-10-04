@@ -11,7 +11,7 @@ const emit = defineEmits<{ toggle: [] }>()
   <button
     type="button"
     :aria-pressed="pressed"
-    class="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors"
+    class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium whitespace-nowrap transition-colors"
     :class="
       pressed
         ? 'border-accent-text bg-surface-overlay text-accent-text'

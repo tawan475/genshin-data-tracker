@@ -34,7 +34,8 @@ export const USER_SETTINGS_DEFAULTS: UserSettings = {
 }
 
 export const MATERIALS_GRAPH_DEFAULTS: MaterialsGraphSettings = {
-  selectedKeys: [],
+  // A saved empty list means the user cleared it, so the default lives here.
+  selectedKeys: ['Mora', 'Primogem'],
   groupBy: 'day',
   limit: 365,
 }

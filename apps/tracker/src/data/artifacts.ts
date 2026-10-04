@@ -97,6 +97,8 @@ export interface ArtifactFilters {
   lock: LockFilter
   equipped: EquipFilter
   astral: AstralFilter
+  /** Keep only the top {@link BEST_PER_SLOT} of each slot (by the sort), grouped by slot. */
+  best: boolean
   sort: ArtifactSort
   descending: boolean
 }
@@ -116,6 +118,7 @@ export function defaultFilters(): ArtifactFilters {
     lock: 'any',
     equipped: 'any',
     astral: 'any',
+    best: false,
     sort: 'cv',
     descending: true,
   }
@@ -148,6 +151,43 @@ export function toggleFodderPreset(f: ArtifactFilters): ArtifactFilters {
     : { ...f, lock: 'unlocked', equipped: 'inventory', rarities: [4, 3] }
 }
 
+/** The "Spare 5★" preset: unequipped 5★, locked or not. */
+export function isSparePreset(f: ArtifactFilters): boolean {
+  return (
+    f.lock === 'any' && f.equipped === 'inventory' && f.rarities.length === 1 && f.rarities[0] === 5
+  )
+}
+
+/** Turns the preset on (replacing the fodder preset's fields), or off again. */
+export function toggleSparePreset(f: ArtifactFilters): ArtifactFilters {
+  return isSparePreset(f)
+    ? { ...f, lock: 'any', equipped: 'any', rarities: [] }
+    : { ...f, lock: 'any', equipped: 'inventory', rarities: [5] }
+}
+
+export function isSpare(row: ArtifactRow): boolean {
+  return !row.equipped && row.artifact.rarity === 5
+}
+
+/** Pieces per slot the "Best" preset keeps. */
+export const BEST_PER_SLOT = 8
+
+/**
+ * The first `perSlot` rows of each slot, slot by slot (flower first). The
+ * input is already sorted, so each slot keeps its best by the current sort.
+ */
+export function bestPerSlot(
+  sorted: readonly ArtifactRow[],
+  perSlot = BEST_PER_SLOT,
+): ArtifactRow[] {
+  const buckets: ArtifactRow[][] = Array.from({ length: SLOT_KEYS.length + 1 }, () => [])
+  for (const row of sorted) {
+    const bucket = buckets[row.slotIndex]!
+    if (bucket.length < perSlot) bucket.push(row)
+  }
+  return buckets.flat()
+}
+
 export type Facet =
   | 'search'
   | 'sets'
@@ -171,6 +211,7 @@ export function activeFilterCount(f: ArtifactFilters): number {
   if (f.lock !== 'any') count++
   if (f.equipped !== 'any') count++
   if (f.astral !== 'any') count++
+  if (f.best) count++
   return count
 }
 
@@ -282,6 +323,87 @@ export function sortRows(
   })
 }
 
+// ------------------------------------------------------------- set summary
+
+/** One set across the current matches: how many pieces, and the best per slot. */
+export interface SetSummary {
+  key: string
+  name: string
+  count: number
+  /** Pieces per slot, in SLOT_KEYS order. */
+  slotCounts: number[]
+  /** Highest-CV piece per slot (ties by RV), null where the set has none. */
+  best: (ArtifactRow | null)[]
+  /** The best pieces' CV added up: roughly "how good a full set could be". */
+  score: number
+}
+
+/** Sets in `rows`, best score first. */
+export function summarizeSets(rows: readonly ArtifactRow[]): SetSummary[] {
+  const bySet = new Map<string, SetSummary>()
+  for (const row of rows) {
+    const key = row.artifact.setKey
+    let summary = bySet.get(key)
+    if (!summary) {
+      summary = {
+        key,
+        name: row.setName,
+        count: 0,
+        slotCounts: SLOT_KEYS.map(() => 0),
+        best: SLOT_KEYS.map(() => null),
+        score: 0,
+      }
+      bySet.set(key, summary)
+    }
+    summary.count++
+    if (row.slotIndex >= SLOT_KEYS.length) continue
+    summary.slotCounts[row.slotIndex]!++
+    const current = summary.best[row.slotIndex]
+    if (!current || row.cv > current.cv || (row.cv === current.cv && row.rv > current.rv)) {
+      summary.best[row.slotIndex] = row
+    }
+  }
+  const list = [...bySet.values()]
+  for (const summary of list) {
+    summary.score = Number(summary.best.reduce((sum, row) => sum + (row?.cv ?? 0), 0).toFixed(1))
+  }
+  return list.sort((a, b) => b.score - a.score || b.count - a.count || a.name.localeCompare(b.name))
+}
+
+/**
+ * Crit value bands: 0 none, 1 below 30, 2 from 30, 3 from 40 (the usual
+ * "good" and "great" lines for a levelled 5★ piece).
+ */
+export const CV_GOOD = 30
+export const CV_GREAT = 40
+
+export function cvBand(cv: number): 0 | 1 | 2 | 3 {
+  if (cv >= CV_GREAT) return 3
+  if (cv >= CV_GOOD) return 2
+  return cv > 0 ? 1 : 0
+}
+
+/** Position by CV among pieces of the same slot and rarity (1 = highest). */
+export function cvRank(
+  rows: readonly ArtifactRow[],
+  row: ArtifactRow,
+): { position: number; of: number } {
+  let higher = 0
+  let of = 0
+  const { slotKey, rarity } = row.artifact
+  for (const other of rows) {
+    if (other.artifact.slotKey !== slotKey || other.artifact.rarity !== rarity) continue
+    of++
+    if (other.cv > row.cv) higher++
+  }
+  return { position: higher + 1, of }
+}
+
+/** Upgrades still to come: one substat roll per four levels until max. */
+export function upgradesLeft(artifact: GoodArtifact): number {
+  return Math.max(0, Math.floor(maxLevel(artifact.rarity) / 4) - Math.floor(artifact.level / 4))
+}
+
 // ------------------------------------------------------------------ storage
 
 const ARTIFACT_SORTS: readonly ArtifactSort[] = ['cv', 'rv', 'level', 'rarity', 'set']
@@ -324,6 +446,7 @@ export function sanitizeFilters(value: unknown): ArtifactFilters {
     lock: oneOf(v.lock, ['any', 'locked', 'unlocked'] as const, 'any'),
     equipped: oneOf(v.equipped, ['any', 'equipped', 'inventory'] as const, 'any'),
     astral: oneOf(v.astral, ['any', 'marked', 'unmarked'] as const, 'any'),
+    best: v.best === true,
     sort,
     descending: typeof v.descending === 'boolean' ? v.descending : defaultDescending(sort),
   }
@@ -337,4 +460,15 @@ export function loadFilters(accountId: number): ArtifactFilters {
 
 export function saveFilters(accountId: number, filters: ArtifactFilters): void {
   writeJson(storageKey(accountId), filters)
+}
+
+export type ArtifactView = 'cards' | 'table' | 'sets'
+const ARTIFACT_VIEWS: readonly ArtifactView[] = ['cards', 'table', 'sets']
+
+export function loadView(): ArtifactView {
+  return oneOf(readJson<unknown>('artifacts:view', null), ARTIFACT_VIEWS, 'cards')
+}
+
+export function saveView(view: ArtifactView): void {
+  writeJson('artifacts:view', view)
 }

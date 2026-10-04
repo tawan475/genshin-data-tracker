@@ -1,27 +1,39 @@
 <script setup lang="ts">
 import type { SnapshotResponse } from '@gdt/shared'
-import { computed, ref, shallowRef, watch } from 'vue'
+import { useElementSize } from '@vueuse/core'
+import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { Download, Repeat2, Trash2 } from 'lucide-vue-next'
 import { api } from '@/api'
 import BaseButton from '@/components/legacy/BaseButton.vue'
-import type { PaginationMeta } from '@/components/legacy/BasePagination.vue'
+import BasePagination, { type PaginationMeta } from '@/components/legacy/BasePagination.vue'
 import BaseTable, { type TableLabel } from '@/components/legacy/BaseTable.vue'
-import ItemDisplay from '@/components/legacy/ItemDisplay.vue'
-import MoraDisplay from '@/components/legacy/MoraDisplay.vue'
 import ConfirmDialog from '@/components/snapshot-history/ConfirmDialog.vue'
+import ExportTargets from '@/components/snapshot-history/ExportTargets.vue'
+import FigureCell from '@/components/snapshot-history/FigureCell.vue'
+import LegacyCheckbox from '@/components/snapshot-history/LegacyCheckbox.vue'
+import RangeFilter from '@/components/snapshot-history/RangeFilter.vue'
+import SelectionBar from '@/components/snapshot-history/SelectionBar.vue'
+import SnapshotCards from '@/components/snapshot-history/SnapshotCards.vue'
 import StorageStrip from '@/components/snapshot-history/StorageStrip.vue'
+import { inDayRange, snapshotChanges } from '@/components/snapshot-history/snapshot-figures'
 import UiError from '@/components/ui/UiError.vue'
 import { useSnapshotSelection } from '@/composables/useSnapshotSelection'
 import { loadSnapshots } from '@/data/account-data'
-import { downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
+import { cancelExport, downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
 import { currencyMissing, dayKey } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { formatBytes, formatFullDateTime, formatNumber } from '@/lib/format'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useAccount } from './context'
 
 /** The bulk delete endpoint takes at most this many ids per request. */
 const DELETE_BATCH = 1000
+/** Content widths (px) that fit every column, and every column but Source and Raw Size. */
+const FULL_TABLE = 1100
+const COMPACT_TABLE = 940
+const PER_PAGE_KEY = 'snapshot-history:per-page'
 
 const account = useAccount()
 const accounts = useAccounts()
@@ -37,52 +49,47 @@ const {
   (value) => loadSnapshots(value),
 )
 
-/** Every snapshot, newest first; the table pages through it in the browser. */
+/** Every snapshot, newest first. */
 const list = computed<readonly SnapshotResponse[]>(() => snapshots.value ?? [])
+const changes = computed(() => snapshotChanges(list.value))
+
+// ----------------------------------------------------------------- date filter
+
+const from = ref('')
+const to = ref('')
+const filtering = computed(() => from.value !== '' || to.value !== '')
+const filtered = computed(() => inDayRange(list.value, from.value, to.value))
+const firstDay = computed(() => {
+  const oldest = list.value[list.value.length - 1]
+  return oldest ? dayKey(oldest.takenAt) : ''
+})
+const lastDay = computed(() => (list.value[0] ? dayKey(list.value[0].takenAt) : ''))
+
+// ------------------------------------------------------------------ pagination
+
 const page = ref(1)
-const limit = ref(20)
+const storedLimit = Number(readStorage(PER_PAGE_KEY))
+const limit = ref([10, 20, 24, 50, 100].includes(storedLimit) ? storedLimit : 20)
 
 const meta = computed<PaginationMeta>(() => {
-  const total = list.value.length
+  const total = filtered.value.length
   const totalPages = Math.max(1, Math.ceil(total / limit.value))
   return { page: Math.min(page.value, totalPages), limit: limit.value, totalPages, total }
 })
 const rows = computed(() => {
   const start = (meta.value.page - 1) * meta.value.limit
-  return list.value.slice(start, start + meta.value.limit)
+  return filtered.value.slice(start, start + meta.value.limit)
 })
+
+watch([from, to], () => (page.value = 1))
+
+function clearDates() {
+  from.value = ''
+  to.value = ''
+}
 
 const baseTableRef = ref<InstanceType<typeof BaseTable> | null>(null)
 const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
-
-const totalCount = computed(() => meta.value.total)
-const {
-  selectAll,
-  toggleSelectAll,
-  toggleSelection,
-  isSelected,
-  selectedCount,
-  selectedIdList,
-  retain,
-  resetSelection,
-} = useSnapshotSelection(list, totalCount)
-
-// The view is reused when switching accounts: start over.
-watch(
-  () => account.value.id,
-  () => {
-    page.value = 1
-    resetSelection()
-  },
-)
-
-// Snapshots deleted here or elsewhere leave the selection.
-watch(list, (live) => retain(new Set(live.map((s) => s.id))))
-
-/** The header checkbox; nothing to select in an empty list. */
-const onHeaderToggle = () => {
-  if (list.value.length > 0 || selectAll.value) toggleSelectAll()
-}
 
 const onPageChange = (p: number) => {
   page.value = p
@@ -91,15 +98,43 @@ const onPageChange = (p: number) => {
 const onLimitChange = (l: number) => {
   limit.value = l
   page.value = 1
+  writeStorage(PER_PAGE_KEY, String(l))
   baseTableRef.value?.scrollToTop()
 }
 
-const tableLabels: TableLabel[] = [
+// --------------------------------------------------------------------- layout
+
+/** The table where its columns fit, cards below that (phones, tablets). */
+const host = useTemplateRef<HTMLElement>('host')
+const { width } = useElementSize(
+  host,
+  {
+    // A first guess from the window (minus the sidebar and gutters) so wide
+    // screens don't flash the cards before the observer reports.
+    width: Math.min(
+      1152,
+      window.innerWidth -
+        (window.innerWidth >= 1024 ? 256 : 0) -
+        (window.innerWidth >= 640 ? 64 : 32),
+    ),
+    height: 0,
+  },
+  { box: 'border-box' },
+)
+const layout = computed(() =>
+  width.value >= FULL_TABLE ? 'full' : width.value >= COMPACT_TABLE ? 'compact' : 'cards',
+)
+
+const tableLabels = computed<TableLabel[]>(() => [
   { key: 'select', title: '', slot: true, headerSlot: true },
   { key: 'id', title: 'ID' },
   { key: 'takenAt', title: 'Date', slot: true },
-  { key: 'source', title: 'Source' },
-  { key: 'rawSize', title: 'Raw Size', slot: true },
+  ...(layout.value === 'full'
+    ? [
+        { key: 'source', title: 'Source' },
+        { key: 'rawSize', title: 'Raw Size', slot: true },
+      ]
+    : []),
   { key: 'storedSize', title: 'Stored Size', slot: true },
   { key: 'characters', title: 'Characters', slot: true },
   { key: 'artifacts', title: 'Artifacts', slot: true },
@@ -107,9 +142,52 @@ const tableLabels: TableLabel[] = [
   { key: 'mora', title: 'Mora', slot: true },
   { key: 'primogem', title: 'Primogems', slot: true },
   { key: 'actions', title: 'Actions', slot: true },
-]
+])
 
 const formatKb = (bytes: number) => (bytes ? (bytes / 1024).toFixed(1) + ' KB' : '0 KB')
+
+// ------------------------------------------------------------------ selection
+
+const {
+  selectedCount,
+  allSelected,
+  isSelected,
+  toggle,
+  coverage,
+  toggleView,
+  selectOnly,
+  selectedIdList,
+  retain,
+  resetSelection,
+} = useSnapshotSelection(list)
+
+const viewCoverage = computed(() => coverage(filtered.value))
+/** Selected snapshots outside the date filter. */
+const hiddenSelected = computed(() => {
+  if (!filtering.value) return 0
+  let shown = 0
+  for (const { id } of filtered.value) if (isSelected(id)) shown++
+  return selectedCount.value - shown
+})
+
+const onToggle = (id: number, event: MouseEvent | KeyboardEvent) =>
+  toggle(id, filtered.value, event.shiftKey)
+const onToggleAll = () => toggleView(filtered.value)
+const selectRange = () => selectOnly(filtered.value)
+
+// The view is reused when switching accounts: start over.
+watch(
+  () => account.value.id,
+  () => {
+    page.value = 1
+    from.value = ''
+    to.value = ''
+    resetSelection()
+  },
+)
+
+// Snapshots deleted here or elsewhere leave the selection.
+watch(list, (live) => retain(new Set(live.map((s) => s.id))))
 
 // ------------------------------------------------------------------- download
 
@@ -133,17 +211,7 @@ const downloadSnapshot = async (snapshot: SnapshotResponse) => {
 const job = computed(() =>
   exportJob.value && exportJob.value.accountId === account.value.id ? exportJob.value : null,
 )
-const hasActiveExport = computed(() => exportJob.value !== null)
-const exportTitle = computed(() => {
-  const current = job.value
-  if (!current) return hasActiveExport.value ? 'Another export is running' : undefined
-  if (current.phase === 'fetching') {
-    return current.fetchTotal
-      ? `Downloading ${formatBytes(current.fetched)} / ${formatBytes(current.fetchTotal)}`
-      : `Downloading ${formatBytes(current.fetched)}`
-  }
-  return `Zipping ${formatNumber(current.done)} / ${formatNumber(current.total)}`
-})
+const exportBlocked = computed(() => exportJob.value !== null && job.value === null)
 
 function zipFileName(items: readonly SnapshotResponse[]): string {
   const name =
@@ -164,7 +232,7 @@ function zipFileName(items: readonly SnapshotResponse[]): string {
 
 /** Runs from a click: the save picker inside needs the gesture, so nothing awaits first. */
 const handleBulkDownload = async () => {
-  if (hasActiveExport.value) return
+  if (exportJob.value) return
   const ids = new Set(selectedIdList())
   const items = list.value.filter((s) => ids.has(s.id))
   if (items.length === 0) return
@@ -268,7 +336,7 @@ const handleBulkDelete = async () => {
   })
   if (!confirmed) return
 
-  if (selectAll.value) {
+  if (allSelected.value) {
     const doubleConfirmed = await confirmDialog.value?.ask({
       title: 'Mass Deletion Warning',
       text: 'You have selected ALL snapshots across ALL pages. Type "DELETE" to confirm you want to wipe everything.',
@@ -285,123 +353,147 @@ const handleBulkDelete = async () => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto space-y-8 min-h-[60vh] relative">
-    <div class="space-y-6">
-      <StorageStrip
-        :snapshots="account.snapshotCount"
-        :raw-bytes="account.rawBytes"
-        :stored-bytes="account.storedBytes"
-        :loading="!snapshots && !error"
+  <div class="max-w-6xl mx-auto space-y-6 min-h-[60vh] relative">
+    <ExportTargets :account="account" />
+
+    <StorageStrip
+      :snapshots="account.snapshotCount"
+      :raw-bytes="account.rawBytes"
+      :stored-bytes="account.storedBytes"
+      :loading="!snapshots && !error"
+    />
+
+    <div ref="host" class="space-y-3">
+      <!-- Sticks within this block (the whole table), so not wrapped with the heading. -->
+      <SelectionBar
+        class="mb-0"
+        :selected="selectedCount"
+        :total="list.length"
+        :hidden="hiddenSelected"
+        :job="job"
+        :blocked="exportBlocked"
+        :deleting="deleting"
+        @download="handleBulkDownload"
+        @delete="handleBulkDelete"
+        @clear="resetSelection"
+        @cancel="cancelExport"
       />
 
-      <!-- Sticky Toolbar Overlay (below the 4rem top bar) -->
-      <div class="sticky top-16 z-40 w-full h-0">
-        <transition name="slide-down">
-          <div
-            v-if="selectedCount > 0"
-            class="absolute w-full flex items-center justify-between gap-2 bg-slate-800 dark:bg-slate-700 rounded-lg p-3 shadow-md z-20 transition-colors"
-          >
-            <span class="text-sm font-semibold text-white ml-2"
-              >{{ selectedCount }} selected out of {{ meta.total }}</span
-            >
-            <div class="flex items-center gap-3">
-              <BaseButton
-                variant="secondary"
-                size="sm"
-                :loading="job !== null"
-                :disabled="hasActiveExport"
-                :title="exportTitle"
-                @click="handleBulkDownload"
-              >
-                Download
-              </BaseButton>
-              <BaseButton variant="danger" size="sm" :loading="deleting" @click="handleBulkDelete">
-                Delete
-              </BaseButton>
-            </div>
-          </div>
-        </transition>
-      </div>
+      <!-- Normal Flow Heading; the selection toolbar covers it. -->
+      <h2
+        class="flex h-[3.25rem] items-center text-xl font-bold text-slate-900 dark:text-white transition-colors"
+      >
+        Import History
+      </h2>
 
-      <!-- Normal Flow Heading -->
-      <div class="flex items-center justify-between mb-4 h-[3.25rem]">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white transition-colors">
-          Import History
-        </h2>
-      </div>
+      <RangeFilter
+        v-if="list.length > 0"
+        v-model:from="from"
+        v-model:to="to"
+        :first-day="firstDay"
+        :last-day="lastDay"
+        :matched="filtered.length"
+        @select="selectRange"
+      />
 
       <UiError v-if="error && snapshots" :error="error" title="Load failed" @retry="reload" />
 
+      <template v-if="layout === 'cards'">
+        <div
+          v-if="isLoading && rows.length === 0"
+          class="flex justify-center rounded-xl border border-slate-200 bg-white p-12 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        >
+          <span
+            class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin"
+          />
+        </div>
+        <template v-else>
+          <SnapshotCards
+            :rows="rows"
+            :changes="changes"
+            :is-selected="isSelected"
+            :coverage="viewCoverage"
+            :downloading="downloading"
+            :deleting="deleting"
+            :format-kb="formatKb"
+            @toggle="onToggle"
+            @toggle-all="onToggleAll"
+            @download="downloadSnapshot"
+            @delete="deleteSnapshot"
+          >
+            <template #empty>
+              <div v-if="error" class="flex justify-center text-left">
+                <UiError :error="error" title="Load failed" @retry="reload" />
+              </div>
+              <div v-else-if="filtering" class="flex flex-col items-center gap-3">
+                <p class="font-medium text-slate-700 dark:text-slate-200">No snapshots in range</p>
+                <BaseButton variant="outline" size="sm" @click="clearDates">Clear dates</BaseButton>
+              </div>
+              <div v-else class="flex flex-col items-center gap-3">
+                <p class="font-medium text-slate-700 dark:text-slate-200">No snapshots</p>
+                <RouterLink
+                  :to="{ name: 'account-import', params: { accountId: account.id } }"
+                  class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  >Import</RouterLink
+                >
+              </div>
+            </template>
+          </SnapshotCards>
+          <BasePagination
+            v-if="rows.length > 0"
+            :meta="meta"
+            :is-loading="isLoading"
+            :scroll-anchor="host"
+            @page-change="onPageChange"
+            @limit-change="onLimitChange"
+          />
+        </template>
+      </template>
+
       <BaseTable
+        v-else
         ref="baseTableRef"
         class="history-table"
         :labels="tableLabels"
         :data="rows"
+        :row-class="
+          (row) => (isSelected(row.id) ? 'bg-indigo-50/70 dark:bg-indigo-500/10' : undefined)
+        "
         :is-loading="isLoading"
         :meta="meta"
         @page-change="onPageChange"
         @limit-change="onLimitChange"
       >
         <template #header-select>
-          <div
-            class="flex items-center justify-center cursor-pointer -mx-2.5 -my-4 px-2.5 py-4"
-            role="checkbox"
-            :aria-checked="selectAll"
-            aria-label="Select all snapshots"
-            tabindex="0"
-            @click="onHeaderToggle"
-            @keydown.space.prevent="onHeaderToggle"
-          >
-            <div
-              class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
-              :class="
-                selectAll
-                  ? 'bg-indigo-600 border-indigo-600 text-white dark:bg-indigo-500 dark:border-indigo-500'
-                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-transparent'
-              "
-            >
-              <svg class="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="3"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-          </div>
+          <LegacyCheckbox
+            class="-mx-2.5 -my-4 px-2.5 py-4"
+            :checked="viewCoverage === 'all'"
+            :mixed="viewCoverage === 'some'"
+            :label="filtering ? 'Select all in range' : 'Select all snapshots'"
+            @toggle="onToggleAll"
+          />
         </template>
         <template #select="{ item }">
-          <div
-            class="flex items-center justify-center cursor-pointer -mx-2.5 -my-4 px-2.5 py-4"
-            role="checkbox"
-            :aria-checked="isSelected(item.id)"
-            :aria-label="`Select snapshot ${item.id}`"
-            tabindex="0"
-            @click="toggleSelection(item.id)"
-            @keydown.space.prevent="toggleSelection(item.id)"
-          >
-            <div
-              class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
-              :class="
-                isSelected(item.id)
-                  ? 'bg-indigo-600 border-indigo-600 text-white dark:bg-indigo-500 dark:border-indigo-500'
-                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-transparent'
-              "
-            >
-              <svg class="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="3"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-          </div>
+          <LegacyCheckbox
+            class="-mx-2.5 -my-4 px-2.5 py-4"
+            :checked="isSelected(item.id)"
+            :label="`Select snapshot ${item.id}`"
+            title="Shift-click to select a range"
+            @toggle="(event) => onToggle(item.id, event)"
+          />
         </template>
         <template #takenAt="{ item }">
-          <span class="font-medium whitespace-nowrap">{{ formatFullDateTime(item.takenAt) }}</span>
+          <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+            {{ formatFullDateTime(item.takenAt) }}
+            <span
+              v-if="item.lastSeenAt > item.takenAt"
+              class="text-slate-400 dark:text-slate-500"
+              :title="`Unchanged until ${formatFullDateTime(item.lastSeenAt)}`"
+            >
+              <Repeat2 class="size-3.5" aria-hidden="true" />
+              <span class="sr-only">Unchanged until {{ formatFullDateTime(item.lastSeenAt) }}</span>
+            </span>
+          </span>
         </template>
         <template #rawSize="{ item }">
           <span class="text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">{{
@@ -409,51 +501,49 @@ const handleBulkDelete = async () => {
           }}</span>
         </template>
         <template #storedSize="{ item }">
-          <span class="text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap">{{
-            formatKb(item.storedSize)
-          }}</span>
+          <span
+            class="text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap"
+            :title="`${item.source} · ${formatKb(item.rawSize)} → ${formatKb(item.storedSize)}`"
+            >{{ formatKb(item.storedSize) }}</span
+          >
         </template>
         <template #characters="{ item }">
-          <span class="font-medium text-slate-700 dark:text-slate-300">{{
-            item.summary.characters
-          }}</span>
+          <FigureCell
+            class="-my-1.5"
+            :value="item.summary.characters"
+            :change="changes.get(item.id)?.characters"
+          />
         </template>
         <template #artifacts="{ item }">
-          <span class="font-medium text-slate-700 dark:text-slate-300">{{
-            item.summary.artifacts
-          }}</span>
+          <FigureCell
+            class="-my-1.5"
+            :value="item.summary.artifacts"
+            :change="changes.get(item.id)?.artifacts"
+          />
         </template>
         <template #weapons="{ item }">
-          <span class="font-medium text-slate-700 dark:text-slate-300">{{
-            item.summary.weapons
-          }}</span>
+          <FigureCell
+            class="-my-1.5"
+            :value="item.summary.weapons"
+            :change="changes.get(item.id)?.weapons"
+          />
         </template>
         <template #mora="{ item }">
-          <span
-            v-if="currencyMissing(item.summary)"
-            class="font-medium text-slate-400 dark:text-slate-500"
-            title="No currency in this snapshot"
-            >—</span
-          >
-          <MoraDisplay
-            v-else
-            :amount="item.summary.mora"
-            class="font-medium text-slate-700 dark:text-slate-300"
+          <FigureCell
+            class="-my-1.5"
+            kind="mora"
+            :value="item.summary.mora"
+            :change="changes.get(item.id)?.mora"
+            :missing="currencyMissing(item.summary)"
           />
         </template>
         <template #primogem="{ item }">
-          <span
-            v-if="currencyMissing(item.summary)"
-            class="font-medium text-slate-400 dark:text-slate-500"
-            title="No currency in this snapshot"
-            >—</span
-          >
-          <ItemDisplay
-            v-else
-            :amount="item.summary.primogem"
-            image="/img/Item_Primogem.webp"
-            name="primogem"
-            class="font-medium text-slate-700 dark:text-slate-300"
+          <FigureCell
+            class="-my-1.5"
+            kind="primogem"
+            :value="item.summary.primogem"
+            :change="changes.get(item.id)?.primogem"
+            :missing="currencyMissing(item.summary)"
           />
         </template>
         <template #actions="{ item }">
@@ -466,14 +556,7 @@ const handleBulkDelete = async () => {
               title="Download GOOD"
             >
               <template #icon>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  ></path>
-                </svg>
+                <Download class="w-3.5 h-3.5" aria-hidden="true" />
               </template>
               DL
             </BaseButton>
@@ -485,14 +568,7 @@ const handleBulkDelete = async () => {
               title="Delete Snapshot"
             >
               <template #icon>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
+                <Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
               </template>
               Del
             </BaseButton>
@@ -503,13 +579,19 @@ const handleBulkDelete = async () => {
           <div v-if="error" class="py-4 flex justify-center text-left">
             <UiError :error="error" title="Load failed" @retry="reload" />
           </div>
-          <div v-else class="py-8">
-            <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">
-              No Snapshots Found
-            </h3>
-            <p class="text-slate-500 dark:text-slate-400">
-              Import your first GOOD JSON file to see your snapshots here.
+          <div v-else-if="filtering" class="py-8 flex flex-col items-center gap-3">
+            <p class="text-lg font-bold text-slate-700 dark:text-slate-200">
+              No snapshots in range
             </p>
+            <BaseButton variant="outline" size="sm" @click="clearDates">Clear dates</BaseButton>
+          </div>
+          <div v-else class="py-8 flex flex-col items-center gap-3">
+            <p class="text-lg font-bold text-slate-700 dark:text-slate-200">No snapshots</p>
+            <RouterLink
+              :to="{ name: 'account-import', params: { accountId: account.id } }"
+              class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              >Import</RouterLink
+            >
           </div>
         </template>
       </BaseTable>
@@ -520,17 +602,6 @@ const handleBulkDelete = async () => {
 </template>
 
 <style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
 /*
  * Twelve columns (Mora and Primogems replace the old Achievements) do not fit
  * the page with BaseTable's p-4 cells; narrower side padding lets the table

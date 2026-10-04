@@ -1,308 +1,193 @@
 <script setup lang="ts">
 import type { TimelineGroupBy } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
-import { Line } from 'vue-chartjs'
-import { loadSnapshots } from '@/data/account-data'
-import { GROUP_BY_OPTIONS, periodLabel, progressionTimeline } from '@/data/progression'
-import { useResource } from '@/data/use-resource'
-import { abbreviateTick } from '@/lib/charts'
-import { isDark } from '@/lib/theme'
-import { useFeedback } from '@/stores/feedback'
-import { useAccount } from '@/views/account/context'
+import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
+import ChangeValue from '@/components/overview/ChangeValue.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSegmented from '@/components/ui/UiSegmented.vue'
+import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import type { Capture } from '@/data/overview'
+import { GROUP_BY_OPTIONS } from '@/data/progression'
+import { clock24, formatDate, formatNumber } from '@/lib/format'
+import { readStorage, writeStorage } from '@/lib/storage'
+import type { ChangeBar } from './ChangeBarChart.vue'
+import ChangeBarChart from './ChangeBarChart.vue'
+import {
+  buildProgression,
+  MAX_PERIODS,
+  periodTick,
+  periodTitle,
+  periodTotals,
+  PROGRESSION_RANGES,
+  type CurrencyKey,
+  type ProgressionRange,
+} from './progression-series'
 
-const account = useAccount()
-const feedback = useFeedback()
+/**
+ * Mora and primogems per period: the closing value as a stepped line and the
+ * gain or loss of each period as columns. Group-by and range are remembered
+ * on this device. `captures` is undefined while the history loads.
+ */
+const props = defineProps<{ captures: Capture[] | undefined }>()
 
-// Detail Data
-const detailGroupBy = ref<TimelineGroupBy>('day')
-const detailLimit = ref(365)
+const CHARTS: { key: CurrencyKey; title: string; color: TimelineSeries['color'] }[] = [
+  { key: 'mora', title: 'Mora', color: 2 },
+  { key: 'primogem', title: 'Primogems', color: 4 },
+]
 
-const snapshots = useResource(
-  () => account.value,
-  async (a) => ({ accountId: a.id, list: await loadSnapshots(a) }),
+const PER: Record<TimelineGroupBy, { label: string; one: string; many: string }> = {
+  hour: { label: 'Per hour', one: 'hour', many: 'hours' },
+  day: { label: 'Per day', one: 'day', many: 'days' },
+  month: { label: 'Per month', one: 'month', many: 'months' },
+  year: { label: 'Per year', one: 'year', many: 'years' },
+}
+
+function stored<T extends string>(key: string, options: { value: T }[], fallback: T): T {
+  const value = readStorage(key)
+  return options.some((o) => o.value === value) ? (value as T) : fallback
+}
+
+const GROUP_KEY = 'progression-group-by'
+const RANGE_KEY = 'progression-range'
+const groupBy = ref<TimelineGroupBy>(stored(GROUP_KEY, GROUP_BY_OPTIONS, 'day'))
+const range = ref<ProgressionRange>(stored(RANGE_KEY, PROGRESSION_RANGES, '90d'))
+watch(groupBy, (value) => writeStorage(GROUP_KEY, value))
+watch(range, (value) => writeStorage(RANGE_KEY, value))
+
+const progression = computed(() =>
+  props.captures ? buildProgression(props.captures, groupBy.value, range.value) : null,
 )
-watch(snapshots.error, (error) => {
-  if (error) feedback.error('Could not load progression', error)
+
+interface ChartView {
+  key: CurrencyKey
+  title: string
+  value: string
+  net: number
+  gained: number
+  spent: number
+  series: TimelineSeries[]
+  lineLabel: string
+  bars: ChangeBar[]
+  barsLabel: string
+}
+
+// Labels for the periods are shared by both charts.
+const periodLabels = computed(() => {
+  const p = progression.value
+  if (!p) return []
+  const hour12 = !clock24()
+  return p.periods.map((period) => ({
+    tick: periodTick(period.start, groupBy.value, hour12),
+    title: periodTitle(period.start, groupBy.value, hour12),
+    captures:
+      period.captures === 0
+        ? 'No captures'
+        : `${formatNumber(period.captures)} ${period.captures === 1 ? 'capture' : 'captures'}`,
+  }))
 })
 
-/** Spinner on first load and while switching accounts, not on a refresh. */
-const isLoadingDetailData = computed(
-  () =>
-    snapshots.loading.value &&
-    (!snapshots.data.value || snapshots.data.value.accountId !== account.value.id),
-)
-
-const detailTimelineData = computed(() =>
-  snapshots.data.value
-    ? progressionTimeline(snapshots.data.value.list, detailGroupBy.value, detailLimit.value)
-    : [],
-)
-
-// ─── Detail chart config (larger) ───
-const detailChartOptions = computed(() => {
-  const textColor = isDark.value ? '#94a3b8' : '#64748b' // slate-400 : slate-500
-  const gridColor = isDark.value ? '#334155' : '#f1f5f9' // slate-700 : slate-100
-
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx: { parsed: { y: number | null } }) => ctx.parsed.y?.toLocaleString() ?? '',
-        },
-      },
-      zoom: {
-        pan: {
-          enabled: true,
-          mode: 'x' as const,
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: 'x' as const,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: { color: gridColor },
-        ticks: { color: textColor, callback: abbreviateTick },
-      },
-      x: {
-        grid: { color: isDark.value ? '#1e293b' : '#f8fafc' }, // slate-800 : slate-50
-        ticks: { color: textColor, maxRotation: 45 },
-      },
-    },
-    elements: { point: { radius: 3 } },
-  }
+const span = computed(() => {
+  const p = progression.value
+  const first = p?.periods[0]
+  const lastLine = p?.lines.mora[p.lines.mora.length - 1]
+  return first && lastLine ? `${formatDate(first.start)} – ${formatDate(lastLine.x)}` : ''
 })
 
-const detailDiffChartOptions = computed(() => {
-  const base = detailChartOptions.value
-  return {
-    ...base,
-    scales: {
-      ...base.scales,
-      y: {
-        ...base.scales.y,
-        beginAtZero: false,
-      },
-    },
-  }
+const per = computed(() => PER[groupBy.value])
+
+/** Tooltip on the "Per day" label; says so when older periods were left out. */
+const perDetail = computed(() => {
+  const detail = `Change against the previous ${per.value.one}`
+  return progression.value?.truncated
+    ? `${detail} · newest ${formatNumber(MAX_PERIODS)} ${per.value.many}`
+    : detail
 })
 
-// ─── Detail computed ───
-const detailLabels = computed(() =>
-  detailTimelineData.value.map((t) => periodLabel(t.timestamp, detailGroupBy.value)),
-)
-
-const detailMoraChart = computed(() => ({
-  labels: detailLabels.value,
-  datasets: [
-    {
-      label: 'Mora',
-      data: detailTimelineData.value.map((t) => t.mora),
-      borderColor: isDark.value ? '#facc15' : '#eab308', // yellow-400 : yellow-500
-      backgroundColor: 'rgba(234, 179, 8, 0.08)',
-      fill: true,
-      tension: 0.3,
-      borderWidth: 2,
-    },
-  ],
-}))
-
-const detailPrimogemChart = computed(() => ({
-  labels: detailLabels.value,
-  datasets: [
-    {
-      label: 'Primogems',
-      data: detailTimelineData.value.map((t) => t.primogem),
-      borderColor: isDark.value ? '#38bdf8' : '#0ea5e9', // sky-400 : sky-500
-      backgroundColor: 'rgba(14, 165, 233, 0.08)',
-      fill: true,
-      tension: 0.3,
-      borderWidth: 2,
-    },
-  ],
-}))
-
-const detailMoraDiffChart = computed(() => {
-  const data = detailTimelineData.value.map((t, i, arr) => {
-    if (i === 0) return 0
-    return t.mora - arr[i - 1]!.mora
+const charts = computed<ChartView[]>(() => {
+  const p = progression.value
+  if (!p) return []
+  const labels = periodLabels.value
+  return CHARTS.map((def) => {
+    const totals = periodTotals(p, def.key)
+    const value = formatNumber(totals.last)
+    return {
+      key: def.key,
+      title: def.title,
+      value,
+      net: totals.net,
+      gained: totals.gained,
+      spent: totals.spent,
+      series: [{ label: def.title, color: def.color, points: p.lines[def.key] }],
+      lineLabel: `${def.title} over time, ${span.value}. Latest ${value}.`,
+      bars: p.periods.map((period, i) => ({
+        tick: labels[i]!.tick,
+        title: labels[i]!.title,
+        value: period.change[def.key],
+        detail: [`Total ${formatNumber(period.close[def.key])}`, labels[i]!.captures],
+      })),
+      barsLabel: `${def.title} change ${per.value.label.toLowerCase()}, ${span.value}: gained ${formatNumber(
+        totals.gained,
+      )}, spent ${formatNumber(totals.spent)}.`,
+    }
   })
-  return {
-    labels: detailLabels.value,
-    datasets: [
-      {
-        label: 'Mora Diff',
-        data,
-        borderColor: isDark.value ? '#facc15' : '#ca8a04', // yellow-400 : yellow-600
-        backgroundColor: 'rgba(202, 138, 4, 0.08)',
-        fill: true,
-        tension: 0.3,
-        borderWidth: 2,
-      },
-    ],
-  }
 })
-
-const detailPrimogemDiffChart = computed(() => {
-  const data = detailTimelineData.value.map((t, i, arr) => {
-    if (i === 0) return 0
-    return t.primogem - arr[i - 1]!.primogem
-  })
-  return {
-    labels: detailLabels.value,
-    datasets: [
-      {
-        label: 'Primogem Diff',
-        data,
-        borderColor: isDark.value ? '#38bdf8' : '#0284c7', // sky-400 : sky-600
-        backgroundColor: 'rgba(2, 132, 199, 0.08)',
-        fill: true,
-        tension: 0.3,
-        borderWidth: 2,
-      },
-    ],
-  }
-})
-
-const latestPoint = computed(() => detailTimelineData.value[detailTimelineData.value.length - 1])
 </script>
 
 <template>
-  <!-- Detailed Progression Section -->
-  <div
-    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 relative z-10 transition-colors"
-  >
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-      <h3 class="text-lg font-bold text-slate-900 dark:text-white transition-colors">
-        Detailed Progression
-      </h3>
+  <UiPanel title="Detailed progression">
+    <template #actions>
+      <UiSegmented v-model="groupBy" :options="GROUP_BY_OPTIONS" label="Group by" />
+      <UiSegmented v-model="range" :options="PROGRESSION_RANGES" label="Time range" />
+    </template>
 
-      <div class="flex flex-wrap items-center gap-4">
-        <!-- Group By -->
-        <div class="flex items-center gap-2">
-          <label
-            for="detail-group-by"
-            class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider transition-colors"
-            >Group by</label
-          >
-          <select
-            id="detail-group-by"
-            v-model="detailGroupBy"
-            class="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition-colors"
-          >
-            <option v-for="option in GROUP_BY_OPTIONS" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+    <div v-if="!captures" class="grid gap-8 lg:grid-cols-2" role="status">
+      <span class="sr-only">Loading progression</span>
+      <div v-for="n in 2" :key="n" class="flex flex-col gap-3">
+        <div class="flex justify-between gap-4">
+          <UiSkeleton class="h-6 w-24" />
+          <UiSkeleton class="h-6 w-32" />
         </div>
-
-        <!-- Zoom Instructions -->
-        <div class="flex items-center gap-3">
-          <span
-            class="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded flex items-center gap-2 transition-colors"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-              ></path>
-            </svg>
-            Scroll to zoom, drag to pan
-          </span>
-        </div>
+        <UiSkeleton class="h-[220px] w-full" />
+        <UiSkeleton class="mt-2 h-[150px] w-full" />
       </div>
     </div>
 
-    <div v-if="isLoadingDetailData" class="flex justify-center p-8">
-      <span
-        class="w-6 h-6 border-3 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin transition-colors"
-      ></span>
-    </div>
-    <div
-      v-else-if="detailTimelineData.length === 0"
-      class="text-center py-8 text-slate-400 dark:text-slate-500 transition-colors"
-    >
-      No data for the selected range.
-    </div>
-    <div v-else class="space-y-6">
-      <!-- Mora Charts -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="min-w-0">
-          <h4
-            class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between transition-colors"
-          >
-            Mora Total
-            <span
-              class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-500 px-2 py-1 rounded font-bold transition-colors"
-            >
-              {{ latestPoint?.mora?.toLocaleString() }}
-            </span>
-          </h4>
-          <div class="h-72">
-            <Line :data="detailMoraChart" :options="detailChartOptions" />
-          </div>
-        </div>
-        <div class="min-w-0">
-          <h4
-            class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between transition-colors"
-          >
-            Mora Gain/Loss
-          </h4>
-          <div class="h-72">
-            <Line :data="detailMoraDiffChart" :options="detailDiffChartOptions" />
-          </div>
-        </div>
-      </div>
+    <p v-else-if="!progression" class="py-6 text-center text-text-secondary">No currency data</p>
 
-      <!-- Primogem Charts -->
-      <div
-        class="pt-4 border-t border-slate-100 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-6 transition-colors"
+    <div v-else class="grid gap-8 lg:grid-cols-2">
+      <section
+        v-for="chart in charts"
+        :key="chart.key"
+        class="min-w-0"
+        :aria-labelledby="`progression-${chart.key}`"
       >
-        <div class="min-w-0">
-          <h4
-            class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between transition-colors"
-          >
-            Primogems Total
-            <span
-              class="text-xs bg-sky-100 dark:bg-sky-900/40 text-sky-800 dark:text-sky-400 px-2 py-1 rounded font-bold transition-colors"
-            >
-              {{ latestPoint?.primogem?.toLocaleString() }}
-            </span>
-          </h4>
-          <div class="h-72">
-            <Line :data="detailPrimogemChart" :options="detailChartOptions" />
-          </div>
+        <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h3 :id="`progression-${chart.key}`" class="font-display text-lg font-bold">
+            {{ chart.title }}
+          </h3>
+          <p class="flex items-baseline gap-2">
+            <span class="tabular font-mono font-medium">{{ chart.value }}</span>
+            <ChangeValue :value="chart.net" hint="in this range" class="text-sm" />
+          </p>
         </div>
-        <div class="min-w-0">
-          <h4
-            class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between transition-colors"
-          >
-            Primogems Gain/Loss
+        <TimelineChart :series="chart.series" :label="chart.lineLabel" :height="220" fill stepped />
+
+        <div class="mt-5 mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h4 class="text-sm font-medium text-text-secondary" :title="perDetail">
+            {{ per.label }}
           </h4>
-          <div class="h-72">
-            <Line :data="detailPrimogemDiffChart" :options="detailDiffChartOptions" />
-          </div>
+          <p class="flex items-baseline gap-3 text-sm">
+            <ChangeValue :value="chart.gained" hint="gained in this range" />
+            <ChangeValue :value="-chart.spent" hint="spent in this range" />
+          </p>
         </div>
-      </div>
+        <ChangeBarChart
+          :bars="chart.bars"
+          :name="chart.title"
+          :label="chart.barsLabel"
+          :height="150"
+        />
+      </section>
     </div>
-  </div>
+  </UiPanel>
 </template>

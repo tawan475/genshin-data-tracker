@@ -430,7 +430,11 @@ describe('accounts and imports', () => {
       `/api/accounts/${account.id}/settings`,
       { method: 'PATCH', json: { materialsGraph: { groupBy: 'month' } } },
     )
-    expect(settings.materialsGraph).toEqual({ selectedKeys: [], groupBy: 'month', limit: 365 })
+    expect(settings.materialsGraph).toEqual({
+      selectedKeys: ['Mora', 'Primogem'],
+      groupBy: 'month',
+      limit: 365,
+    })
   })
 })
 

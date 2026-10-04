@@ -109,3 +109,15 @@ export function formatSlotFullName(slotKey: string): string {
 export function formatCv(cv: number): string {
   return cv.toFixed(1)
 }
+
+const STAT_TINY: Readonly<Record<string, string>> = {
+  critRate_: 'CR',
+  critDMG_: 'CD',
+  enerRech_: 'ER',
+  eleMas: 'EM',
+}
+
+/** Tightest label, for table cells: "CR", "CD", "ER", "EM", "ATK%", "HP". */
+export function formatStatTiny(key: string): string {
+  return STAT_TINY[key] ?? formatStatShort(key)
+}

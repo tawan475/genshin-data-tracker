@@ -27,7 +27,7 @@ const saved = computed(() =>
   <!-- Storage Stats Loading Skeleton -->
   <div
     v-if="loading"
-    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 mb-8 transition-colors animate-pulse"
+    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 transition-colors animate-pulse"
   >
     <div class="flex flex-wrap items-center justify-between gap-4">
       <div class="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
@@ -43,13 +43,15 @@ const saved = computed(() =>
   <!-- Storage Stats -->
   <div
     v-else
-    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 mb-8 transition-colors"
+    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 relative z-10 transition-colors"
   >
     <div class="flex flex-wrap items-center justify-between gap-4">
       <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
         Storage
       </h3>
-      <div class="flex flex-wrap items-center gap-6 text-sm">
+      <div
+        class="grid w-full grid-cols-2 gap-x-6 gap-y-2 text-sm sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-6"
+      >
         <div class="flex items-center gap-2">
           <span class="text-slate-500 dark:text-slate-400">Snapshots:</span>
           <span class="font-semibold text-slate-900 dark:text-slate-100">{{ snapshots }}</span>
