@@ -4,6 +4,7 @@ import {
   deepMerge,
   loginRequest,
   registerRequest,
+  updateProfileRequest,
   type MeResponse,
 } from '@gdt/shared'
 import { eq, or } from 'drizzle-orm'
@@ -122,6 +123,45 @@ export const auth = new Hono<AppEnv>()
       .where(eq(users.id, c.get('userId')))
     if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
     return c.json(toMe(user))
+  })
+
+  /** Changes the username and/or email; both are login names, so the password is required. */
+  .patch('/profile', requireUser, async (c) => {
+    const userId = c.get('userId')
+    await rateLimit(c.env.AUTH_LIMITER, `profile:${userId}`)
+    const body = await parseJson(c, updateProfileRequest)
+    const db = getDb(c.env.DB)
+    const [user] = await db.select().from(users).where(eq(users.id, userId))
+    if (!user || !verifyPassword(body.currentPassword, user.passwordHash, pepper(c)).ok) {
+      throw invalidCredentials()
+    }
+    const changes: Partial<typeof users.$inferInsert> = {}
+    if (body.username !== undefined && body.username !== user.username) {
+      changes.username = body.username
+      changes.usernameKey = body.username.toLowerCase()
+    }
+    if (body.email !== undefined && body.email !== user.email) {
+      changes.email = body.email
+      // Verification belongs to the address, not the account.
+      changes.emailVerified = false
+    }
+    if (Object.keys(changes).length === 0) return c.json(toMe(user))
+    try {
+      const [updated] = (await db
+        .update(users)
+        .set(changes)
+        .where(eq(users.id, userId))
+        .returning()) as [User]
+      return c.json(toMe(updated))
+    } catch (error) {
+      if (isUniqueViolation(error, 'users.username_key')) {
+        throw new ApiError(409, 'username_taken', 'That username is taken')
+      }
+      if (isUniqueViolation(error, 'users.email')) {
+        throw new ApiError(409, 'email_taken', 'That email is already registered')
+      }
+      throw error
+    }
   })
 
   /** Changing the password signs every other device out; this one stays signed in. */

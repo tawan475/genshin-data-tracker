@@ -73,6 +73,15 @@ export const useSession = defineStore('session', () => {
     adopt(null)
   }
 
+  /** Username and/or email; omitted fields stay as they are. */
+  async function updateProfile(body: {
+    currentPassword: string
+    username?: string
+    email?: string | null
+  }) {
+    adopt(await api.updateProfile(body))
+  }
+
   async function changePassword(currentPassword: string, newPassword: string) {
     await api.changePassword({ currentPassword, newPassword })
   }
@@ -98,6 +107,7 @@ export const useSession = defineStore('session', () => {
     register,
     logout,
     logoutAll,
+    updateProfile,
     changePassword,
     updateSettings,
   }

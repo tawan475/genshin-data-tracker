@@ -146,6 +146,57 @@ describe('auth', () => {
     expect(await stored()).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/)
   })
 
+  it('changes the username and email with the current password', async () => {
+    const { client, username, password } = await signUp()
+    const update = (json: object) => client.fetch('/api/auth/profile', { method: 'PATCH', json })
+    const code = async (response: Response) =>
+      ((await response.json()) as { error: { code: string } }).error.code
+    const tag = crypto.randomUUID().slice(0, 8)
+
+    expect(
+      (await update({ currentPassword: 'wrong wrong wrong', username: `x${tag}` })).status,
+    ).toBe(401)
+    expect((await update({ currentPassword: password })).status).toBe(400)
+
+    const renamed = await update({
+      currentPassword: password,
+      username: `Renamed${tag}`,
+      email: `New${tag}@Example.com`,
+    })
+    expect(renamed.status).toBe(200)
+    expect(await renamed.json()).toMatchObject({
+      username: `Renamed${tag}`,
+      email: `new${tag}@example.com`,
+      emailVerified: false,
+    })
+
+    // The new names log in; the old username no longer does.
+    const login = (name: string) =>
+      new Client().fetch('/api/auth/login', { method: 'POST', json: { login: name, password } })
+    expect((await login(username)).status).toBe(401)
+    expect((await login(`renamed${tag}`)).status).toBe(200)
+    expect((await login(`new${tag}@example.com`)).status).toBe(200)
+
+    // An empty email removes it.
+    const cleared = await update({ currentPassword: password, email: '' })
+    expect(((await cleared.json()) as { email: string | null }).email).toBeNull()
+
+    // Someone else's names are refused, saying which one.
+    const other = await signUp()
+    const takenName = await update({
+      currentPassword: password,
+      username: other.username.toUpperCase(),
+    })
+    expect(takenName.status).toBe(409)
+    expect(await code(takenName)).toBe('username_taken')
+    const takenEmail = await update({
+      currentPassword: password,
+      email: `${other.username}@example.com`,
+    })
+    expect(takenEmail.status).toBe(409)
+    expect(await code(takenEmail)).toBe('email_taken')
+  })
+
   it('requires the CSRF header on state-changing requests', async () => {
     const { client } = await signUp()
     const response = await SELF.fetch(`${ORIGIN}/api/accounts`, {
