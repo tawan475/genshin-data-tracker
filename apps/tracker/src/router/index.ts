@@ -103,6 +103,18 @@ const router = createRouter({
               () => import('@/views/account/MaterialsView.vue'),
             ),
             account(
+              'planner',
+              'account-planner',
+              'Planner',
+              () => import('@/views/account/PlannerView.vue'),
+            ),
+            account(
+              'achievements',
+              'account-achievements',
+              'Achievements',
+              () => import('@/views/account/AchievementsView.vue'),
+            ),
+            account(
               'snapshots',
               'account-snapshots',
               'Snapshots',
