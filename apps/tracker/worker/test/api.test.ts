@@ -1,8 +1,6 @@
 import {
-  MIN_PASSWORD_ITERATIONS,
   catalogFromRows,
   decodeSnapshot,
-  derivePasswordKey,
   inflateBundle,
   readBundle,
   type AccountCreatedResponse,
@@ -10,13 +8,16 @@ import {
   type CatalogRow,
   type Good,
   type ImportResponse,
-  type PreloginResponse,
   type SnapshotResponse,
   type VerifyKeyResponse,
 } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
-import { SELF } from 'cloudflare:test'
+import { env, SELF } from 'cloudflare:test'
+import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
+import { getDb } from '../db/client'
+import { users } from '../db/schema'
+import { hashPassword } from '../lib/password'
 import { Client, ORIGIN, irminsulForm, sampleGood, signUp } from './client'
 
 async function createAccount(client: Client) {
@@ -64,31 +65,17 @@ describe('auth', () => {
 
     const again = await new Client().fetch('/api/auth/register', {
       method: 'POST',
-      json: {
-        username: username.toUpperCase(),
-        email: 'other@example.com',
-        salt: btoa('0123456789abcdef'),
-        iterations: MIN_PASSWORD_ITERATIONS,
-        key: btoa('0123456789abcdef0123456789abcdef'),
-      },
+      json: { username: username.toUpperCase(), password: 'another long password' },
     })
     expect(again.status).toBe(409)
   })
 
   it('registers without an email, keeps email unique when given, and logs in by email', async () => {
-    // Its own client IP, so these sign-ups do not spend the other tests' rate limit.
-    const headers = { 'cf-connecting-ip': '192.0.2.1' }
+    const password = 'correct horse battery staple'
     const register = (username: string, email?: string | null) =>
       new Client().fetch('/api/auth/register', {
         method: 'POST',
-        headers,
-        json: {
-          username,
-          ...(email === undefined ? {} : { email }),
-          salt: btoa('0123456789abcdef'),
-          iterations: MIN_PASSWORD_ITERATIONS,
-          key: btoa('0123456789abcdef0123456789abcdef'),
-        },
+        json: { username, ...(email === undefined ? {} : { email }), password },
       })
     const tag = crypto.randomUUID().slice(0, 8)
 
@@ -108,49 +95,55 @@ describe('auth', () => {
     expect((await register(`mail-b${tag}`, email.toLowerCase())).status).toBe(409)
     expect((await register(`mail-c${tag}`, 'not-an-email')).status).toBe(400)
 
-    const client = new Client()
-    const { salt } = await client.json<PreloginResponse>('/api/auth/prelogin', {
+    const login = await new Client().fetch('/api/auth/login', {
       method: 'POST',
-      headers,
-      json: { login: email },
-    })
-    expect(salt).toBe(btoa('0123456789abcdef'))
-    const login = await client.fetch('/api/auth/login', {
-      method: 'POST',
-      headers,
-      json: { login: email, key: btoa('0123456789abcdef0123456789abcdef') },
+      json: { login: email, password },
     })
     expect(login.status).toBe(200)
     expect(((await login.json()) as { username: string }).username).toBe(`mail-a${tag}`)
   })
 
-  it('logs in with the browser-derived key and rejects a wrong password', async () => {
-    const { username, password } = await signUp()
+  it('stores an Argon2id hash and refuses wrong and unknown logins alike', async () => {
+    const { username, password, me } = await signUp()
+    const [row] = await getDb(env.DB)
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.id, me.id))
+    expect(row!.passwordHash).toMatch(
+      /^\$argon2id\$v=19\$m=19456,t=2,p=1\$[A-Za-z0-9+/]{22}\$[A-Za-z0-9+/]{43}$/,
+    )
+
     const client = new Client()
-    const { salt, iterations } = await client.json<PreloginResponse>('/api/auth/prelogin', {
-      method: 'POST',
-      json: { login: username },
-    })
-    const wrong = await client.fetch('/api/auth/login', {
-      method: 'POST',
-      json: { login: username, key: await derivePasswordKey('nope nope nope', salt, iterations) },
-    })
+    const attempt = (login: string, pass: string) =>
+      client.fetch('/api/auth/login', { method: 'POST', json: { login, password: pass } })
+    const wrong = await attempt(username, 'nope nope nope')
+    const unknown = await attempt(`nobody-${crypto.randomUUID()}`, password)
     expect(wrong.status).toBe(401)
-    const right = await client.fetch('/api/auth/login', {
-      method: 'POST',
-      json: { login: username, key: await derivePasswordKey(password, salt, iterations) },
-    })
-    expect(right.status).toBe(200)
+    expect(unknown.status).toBe(401)
+    expect(await unknown.json()).toEqual(await wrong.json())
+
+    expect((await attempt(username.toUpperCase(), password)).status).toBe(200)
     expect((await client.fetch('/api/auth/me')).status).toBe(200)
   })
 
-  it('gives unknown logins a stable fake salt', async () => {
-    const client = new Client()
-    const ask = (login: string) =>
-      client.json<PreloginResponse>('/api/auth/prelogin', { method: 'POST', json: { login } })
-    const a = await ask('nobody-here')
-    expect(await ask('nobody-here')).toEqual(a)
-    expect((await ask('someone-else')).salt).not.toBe(a.salt)
+  it('upgrades a hash made under older Argon2 parameters at login', async () => {
+    const { username, password, me } = await signUp()
+    const db = getDb(env.DB)
+    const stored = async () =>
+      (await db.select({ hash: users.passwordHash }).from(users).where(eq(users.id, me.id)))[0]!
+        .hash
+    await db
+      .update(users)
+      .set({ passwordHash: hashPassword(password, env.PASSWORD_PEPPER, { m: 1024, t: 1, p: 1 }) })
+      .where(eq(users.id, me.id))
+    expect(await stored()).toMatch(/^\$argon2id\$v=19\$m=1024,t=1,p=1\$/)
+
+    const login = await new Client().fetch('/api/auth/login', {
+      method: 'POST',
+      json: { login: username, password },
+    })
+    expect(login.status).toBe(200)
+    expect(await stored()).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/)
   })
 
   it('requires the CSRF header on state-changing requests', async () => {
@@ -163,26 +156,69 @@ describe('auth', () => {
     expect(response.status).toBe(403)
   })
 
-  it('rotates the refresh token, tolerates a concurrent tab, and ends on logout', async () => {
+  it('refreshes with JWTs that cannot stand in for each other', async () => {
     const { client } = await signUp()
-    const first = client.cookie('gdt_rt')
+    const access = client.cookie('gdt_at')!
+    const refresh = client.cookie('gdt_rt')!
+    expect(access.split('.')).toHaveLength(3)
+    expect(refresh.split('.')).toHaveLength(3)
+
     expect((await client.fetch('/api/auth/refresh', { method: 'POST' })).status).toBe(204)
-    expect(client.cookie('gdt_rt')).not.toBe(first)
+    expect((await client.fetch('/api/auth/me')).status).toBe(200)
 
-    // A second tab still holding the pre-rotation cookie, inside the grace window.
-    const tab = await SELF.fetch(`${ORIGIN}/api/auth/refresh`, {
-      method: 'POST',
-      headers: { cookie: `gdt_rt=${first}` },
-    })
-    expect(tab.status).toBe(204)
+    const send = (path: string, cookie: string) =>
+      SELF.fetch(`${ORIGIN}${path}`, {
+        method: path.endsWith('/me') ? 'GET' : 'POST',
+        headers: { cookie, 'x-gdt-csrf': '1' },
+      })
+    expect((await send('/api/auth/me', `gdt_at=${refresh}`)).status).toBe(401)
+    expect((await send('/api/auth/refresh', `gdt_rt=${access}`)).status).toBe(401)
+    const forged = refresh.replace(/[^.]+$/, 'A'.repeat(43))
+    expect((await send('/api/auth/refresh', `gdt_rt=${forged}`)).status).toBe(401)
+  })
 
-    expect(client.cookie('gdt_s')).toBe('1')
-    expect((await client.fetch('/api/auth/logout', { method: 'POST' })).status).toBe(204)
-    expect(client.cookie('gdt_s')).toBeUndefined()
-    expect((await client.fetch('/api/auth/me')).status).toBe(401)
+  it('signs out one device, revokes others on a password change, and signs out everywhere', async () => {
+    const { client: phone, username, password } = await signUp()
+    const signIn = async (pass = password) => {
+      const device = new Client()
+      const response = await device.fetch('/api/auth/login', {
+        method: 'POST',
+        json: { login: username, password: pass },
+      })
+      return { device, status: response.status }
+    }
+    const refresh = (device: Client) =>
+      device.fetch('/api/auth/refresh', { method: 'POST' }).then((r) => r.status)
+    const { device: laptop } = await signIn()
+
+    // Signing the phone out leaves the laptop signed in.
+    expect((await phone.fetch('/api/auth/logout', { method: 'POST' })).status).toBe(204)
+    expect(phone.cookie('gdt_s')).toBeUndefined()
+    expect((await phone.fetch('/api/auth/me')).status).toBe(401)
+    expect(await refresh(laptop)).toBe(204)
+
+    // A password change ends every other device; this one stays signed in.
+    const { device: tablet } = await signIn()
+    const newPassword = 'a brand new passphrase'
+    const change = (currentPassword: string) =>
+      laptop.fetch('/api/auth/password', {
+        method: 'POST',
+        json: { currentPassword, newPassword },
+      })
+    expect((await change('wrong wrong wrong')).status).toBe(401)
+    expect((await change(password)).status).toBe(204)
+    expect(await refresh(tablet)).toBe(401)
+    expect(await refresh(laptop)).toBe(204)
+    expect((await signIn()).status).toBe(401)
+    expect((await signIn(newPassword)).status).toBe(200)
+
+    // Signing out everywhere also kills copies of a refresh token.
+    const copied = laptop.cookie('gdt_rt')!
+    expect((await laptop.fetch('/api/auth/logout-all', { method: 'POST' })).status).toBe(204)
+    expect(laptop.cookie('gdt_rt')).toBeUndefined()
     const replay = await SELF.fetch(`${ORIGIN}/api/auth/refresh`, {
       method: 'POST',
-      headers: { cookie: `gdt_rt=${first}` },
+      headers: { cookie: `gdt_rt=${copied}` },
     })
     expect(replay.status).toBe(401)
   })

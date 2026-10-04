@@ -46,40 +46,19 @@ export const users = sqliteTable('users', {
    */
   email: text('email').unique(),
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
-  // The browser derives a key from the password (PBKDF2 with this salt and
-  // iteration count); the server stores only HMAC(pepper, key). See auth.
-  passwordSalt: text('password_salt').notNull(),
-  passwordIterations: integer('password_iterations').notNull(),
-  passwordVerifier: text('password_verifier').notNull(),
+  /** Argon2id PHC string (see lib/password). Empty: no password set, cannot sign in. */
+  passwordHash: text('password_hash').notNull(),
+  /**
+   * Carried by every refresh token; bumping it (password change, "sign out
+   * everywhere") invalidates all of them at once. See lib/session.
+   */
+  tokenVersion: integer('token_version').notNull().default(0),
   settings: text('settings', { mode: 'json' })
     .$type<UserSettingsPatch>()
     .notNull()
     .$defaultFn(() => ({})),
   createdAt: timestamp('created_at'),
 })
-
-/** One row per signed-in device; the id is the SHA-256 of its refresh token. */
-export const sessions = sqliteTable(
-  'sessions',
-  {
-    id: text('id').primaryKey(),
-    userId: integer('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    userAgent: text('user_agent'),
-    createdAt: timestamp('created_at'),
-    lastUsedAt: timestamp('last_used_at'),
-    expiresAt: integer('expires_at').notNull(),
-    /** Hash of the refresh token this one replaced; honoured briefly so concurrent tabs survive a rotation. */
-    previousId: text('previous_id'),
-    rotatedAt: integer('rotated_at'),
-  },
-  (t) => [
-    index('sessions_user_idx').on(t.userId),
-    index('sessions_expires_idx').on(t.expiresAt),
-    index('sessions_previous_idx').on(t.previousId),
-  ],
-)
 
 export const genshinAccounts = sqliteTable(
   'genshin_accounts',

@@ -14,9 +14,7 @@ async function seedAccount() {
       username: name,
       usernameKey: name,
       email: `${name}@example.com`,
-      passwordSalt: 'salt',
-      passwordIterations: 600_000,
-      passwordVerifier: 'verifier',
+      passwordHash: '',
     })
     .returning()
   const [account] = await db

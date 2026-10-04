@@ -29,6 +29,13 @@
       "when": 1791087725612,
       "tag": "0003_email_optional",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1791088857279,
+      "tag": "0004_argon2_jwt_refresh",
+      "breakpoints": true
     }
   ]
 }

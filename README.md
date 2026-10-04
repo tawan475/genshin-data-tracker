@@ -54,11 +54,18 @@ zips are built in the browser; the server only rebuilds single GOOD files.
 
 ## API notes
 
-- **Auth.** Email + username + password, but the password never leaves the
-  browser: it is stretched with PBKDF2 (600k iterations, per-user salt) and only
-  the derived key is sent; D1 stores `HMAC(PASSWORD_PEPPER, key)`. Sessions are
-  HttpOnly cookies: a 15-minute JWT plus a rotating refresh token (60 s grace
-  for concurrent tabs). Cookie-authed writes need `x-gdt-csrf: 1`.
+- **Auth.** Username + password, email optional (unique when set, also a login
+  name). The password is sent over HTTPS and hashed by the Worker with Argon2id
+  (19 MiB, 2 passes; `PASSWORD_PEPPER` is Argon2's secret input), stored as a
+  PHC string; a login under older parameters rehashes. About 200 ms CPU per
+  sign-in on Workers. Unknown logins still spend a full hash.
+- **Sessions.** Two HS256 JWTs in HttpOnly cookies, told apart by a `typ`
+  claim: access `gdt_at` (15 min, path `/api`, verified without D1) and refresh
+  `gdt_rt` (30 days, path `/api/auth`, SameSite Strict) carrying
+  `users.token_version`. A refresh reads that one column and reissues both, so
+  there is no sessions table. Password change and `POST /api/auth/logout-all`
+  bump the version, killing every refresh token; plain logout only clears this
+  device's cookies. Cookie-authed writes need `x-gdt-csrf: 1`.
 - **Irminsul contract** (`irminsul/src/monitor.rs`): `POST
   /api/genshin-accounts-public/import-by-key` (multipart `file` + optional
   `timestamp`, header `x-import-key`) and `GET .../verify-key`. Any 2xx is
@@ -72,8 +79,8 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `x-gdt-d1` (round trips, rows read/written, SQL time). A session never opens
   it. The key lives in the gitignored `apps/tracker/.diag-key`:
   `curl -H "x-diag-key: $(cat apps/tracker/.diag-key)" https://genshin-tracker.475.dev/api/health`.
-- **Maintenance** runs daily (cron): expired sessions are removed, snapshots
-  deleted more than 30 days ago are purged, unreferenced sections are collected.
+- **Maintenance** runs daily (cron): snapshots deleted more than 30 days ago
+  are purged, unreferenced sections are collected.
   Account counters are kept exact by triggers (migration 0002).
 
 ## Scripts

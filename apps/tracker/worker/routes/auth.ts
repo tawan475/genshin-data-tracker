@@ -1,34 +1,29 @@
 import {
-  PASSWORD_ITERATIONS,
-  PASSWORD_SALT_BYTES,
   USER_SETTINGS_DEFAULTS,
   changePasswordRequest,
   deepMerge,
-  fromBase64,
   loginRequest,
-  preloginRequest,
   registerRequest,
-  toBase64,
   type MeResponse,
-  type PreloginResponse,
 } from '@gdt/shared'
 import { eq, or } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import type { AppEnv } from '../env'
-import { hmac, hmacBase64, safeEqual } from '../lib/crypto'
 import { ApiError, clientIp, isUniqueViolation, parseJson, rateLimit } from '../lib/http'
+import { hashPassword, verifyPassword } from '../lib/password'
 import {
-  endAllSessions,
-  endSession,
+  clearSessionCookies,
   refreshSession,
   requireUser,
+  revokeAllSessions,
   startSession,
 } from '../lib/session'
 
 type User = typeof users.$inferSelect
 
+/** Argon2's secret input; see lib/password. */
 function pepper(c: Context<AppEnv>): string {
   const secret = c.env.PASSWORD_PEPPER
   if (!secret || secret.length < 32) {
@@ -37,18 +32,12 @@ function pepper(c: Context<AppEnv>): string {
   return secret
 }
 
-/** What is stored for a browser-derived password key. */
-function verifierFor(c: Context<AppEnv>, key: string): Promise<string> {
-  return hmacBase64(pepper(c), fromBase64(key)!)
-}
-
 export function toMe(user: User): MeResponse {
   return {
     id: user.id,
     username: user.username,
     email: user.email,
     emailVerified: user.emailVerified,
-    passwordIterations: user.passwordIterations,
     settings: deepMerge(USER_SETTINGS_DEFAULTS, user.settings),
   }
 }
@@ -69,7 +58,6 @@ export const auth = new Hono<AppEnv>()
   .post('/register', async (c) => {
     await rateLimit(c.env.AUTH_LIMITER, `register:${clientIp(c)}`)
     const body = await parseJson(c, registerRequest)
-    const verifier = await verifierFor(c, body.key)
     let user: User
     try {
       ;[user] = (await getDb(c.env.DB)
@@ -78,9 +66,7 @@ export const auth = new Hono<AppEnv>()
           username: body.username,
           usernameKey: body.username.toLowerCase(),
           email: body.email ?? null,
-          passwordSalt: body.salt,
-          passwordIterations: body.iterations,
-          passwordVerifier: verifier,
+          passwordHash: hashPassword(body.password, pepper(c)),
         })
         .returning()) as [User]
     } catch (error) {
@@ -89,24 +75,8 @@ export const auth = new Hono<AppEnv>()
       }
       throw error
     }
-    await startSession(c, user.id)
+    await startSession(c, user)
     return c.json(toMe(user), 201)
-  })
-
-  .post('/prelogin', async (c) => {
-    await rateLimit(c.env.AUTH_LIMITER, `prelogin:${clientIp(c)}`)
-    const { login } = await parseJson(c, preloginRequest)
-    const user = await findByLogin(c, login)
-    if (user) {
-      return c.json<PreloginResponse>({
-        salt: user.passwordSalt,
-        iterations: user.passwordIterations,
-      })
-    }
-    // Unknown logins get a salt that is stable per name, so this endpoint does
-    // not reveal which accounts exist.
-    const fake = (await hmac(pepper(c), `salt:${login}`)).slice(0, PASSWORD_SALT_BYTES)
-    return c.json<PreloginResponse>({ salt: toBase64(fake), iterations: PASSWORD_ITERATIONS })
   })
 
   .post('/login', async (c) => {
@@ -114,9 +84,16 @@ export const auth = new Hono<AppEnv>()
     await rateLimit(c.env.AUTH_LIMITER, `login:${clientIp(c)}`)
     await rateLimit(c.env.AUTH_LIMITER, `login:${body.login}`)
     const user = await findByLogin(c, body.login)
-    const verifier = await verifierFor(c, body.key)
-    if (!user || !safeEqual(verifier, user.passwordVerifier)) throw invalidCredentials()
-    await startSession(c, user.id)
+    const check = verifyPassword(body.password, user?.passwordHash, pepper(c))
+    if (!user || !check.ok) throw invalidCredentials()
+    if (check.rehash) {
+      // Hashed under older Argon2 parameters: upgrade while the password is at hand.
+      await getDb(c.env.DB)
+        .update(users)
+        .set({ passwordHash: hashPassword(body.password, pepper(c)) })
+        .where(eq(users.id, user.id))
+    }
+    await startSession(c, user)
     return c.json(toMe(user))
   })
 
@@ -125,8 +102,16 @@ export const auth = new Hono<AppEnv>()
     return c.body(null, 204)
   })
 
-  .post('/logout', async (c) => {
-    await endSession(c)
+  /** Signs this device out. */
+  .post('/logout', (c) => {
+    clearSessionCookies(c)
+    return c.body(null, 204)
+  })
+
+  /** Signs every device out, this one included. */
+  .post('/logout-all', requireUser, async (c) => {
+    await revokeAllSessions(c, c.get('userId'))
+    clearSessionCookies(c)
     return c.body(null, 204)
   })
 
@@ -139,24 +124,18 @@ export const auth = new Hono<AppEnv>()
     return c.json(toMe(user))
   })
 
-  /** Changing the password ends every session, then signs this device back in. */
+  /** Changing the password signs every other device out; this one stays signed in. */
   .post('/password', requireUser, async (c) => {
-    const body = await parseJson(c, changePasswordRequest)
-    const db = getDb(c.env.DB)
     const userId = c.get('userId')
-    const [user] = await db.select().from(users).where(eq(users.id, userId))
-    if (!user || !safeEqual(await verifierFor(c, body.currentKey), user.passwordVerifier)) {
+    await rateLimit(c.env.AUTH_LIMITER, `password:${userId}`)
+    const body = await parseJson(c, changePasswordRequest)
+    const [user] = await getDb(c.env.DB).select().from(users).where(eq(users.id, userId))
+    if (!user || !verifyPassword(body.currentPassword, user.passwordHash, pepper(c)).ok) {
       throw invalidCredentials()
     }
-    await db
-      .update(users)
-      .set({
-        passwordSalt: body.salt,
-        passwordIterations: body.iterations,
-        passwordVerifier: await verifierFor(c, body.key),
-      })
-      .where(eq(users.id, userId))
-    await endAllSessions(c, userId)
-    await startSession(c, userId)
+    const updated = await revokeAllSessions(c, userId, {
+      passwordHash: hashPassword(body.newPassword, pepper(c)),
+    })
+    await startSession(c, updated)
     return c.body(null, 204)
   })

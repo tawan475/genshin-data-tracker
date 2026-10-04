@@ -13,7 +13,6 @@ import type {
   Good,
   ImportResponse,
   MeResponse,
-  PreloginResponse,
   SnapshotResponse,
   UserSettingsPatch,
 } from '@gdt/shared'
@@ -29,29 +28,18 @@ export interface AccountInput {
 
 export const api = {
   // ------------------------------------------------------------------ auth
-  prelogin: (login: string) =>
-    requestJson<PreloginResponse>('/api/auth/prelogin', {
-      method: 'POST',
-      json: { login },
-      noRefresh: true,
-    }),
-  login: (login: string, key: string) =>
+  login: (login: string, password: string) =>
     requestJson<MeResponse>('/api/auth/login', {
       method: 'POST',
-      json: { login, key },
+      json: { login, password },
       noRefresh: true,
     }),
-  register: (body: {
-    username: string
-    email: string | null
-    salt: string
-    iterations: number
-    key: string
-  }) =>
+  register: (body: { username: string; email: string | null; password: string }) =>
     requestJson<MeResponse>('/api/auth/register', { method: 'POST', json: body, noRefresh: true }),
   logout: () => requestJson<void>('/api/auth/logout', { method: 'POST', noRefresh: true }),
+  logoutAll: () => requestJson<void>('/api/auth/logout-all', { method: 'POST' }),
   me: () => requestJson<MeResponse>('/api/auth/me'),
-  changePassword: (body: { currentKey: string; salt: string; iterations: number; key: string }) =>
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
     requestJson<void>('/api/auth/password', { method: 'POST', json: body }),
   updateUserSettings: (patch: UserSettingsPatch) =>
     requestJson<MeResponse>('/api/me/settings', { method: 'PATCH', json: patch }),
