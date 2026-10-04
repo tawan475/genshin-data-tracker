@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { loadPlanner } from '@gdt/game-data'
+import { NO_PLAYER } from '@gdt/game-data/account-player'
 import { loadDropRates } from '@gdt/game-data/drops'
 import { craftingSteps } from '@gdt/game-data/planner-convert'
 import { domainSchedule, farmPlan, resinNow, todayPlan } from '@gdt/game-data/planner-estimate'
@@ -60,7 +61,7 @@ import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import { loadLatestInventory } from '@/data/account-data'
+import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
 import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons, loadMaterialIcons } from '@/lib/assets'
@@ -87,16 +88,20 @@ const accountId = computed(() => account.value.id)
 const resource = useResource(
   () => account.value,
   async (a) => {
-    if (!a.latest) return { accountId: a.id, inventory: null, planner: null, drops: null }
-    const [inventory, planner, drops] = await Promise.all([
+    if (!a.latest) {
+      return { accountId: a.id, inventory: null, planner: null, drops: null, player: NO_PLAYER }
+    }
+    const [inventory, planner, drops, player] = await Promise.all([
       loadLatestInventory(a),
       loadPlanner(),
       // No rates means no estimates, not a broken page.
       loadDropRates().catch(() => null),
+      // Nice to have: without it the settings (or the top bracket) decide.
+      loadAccountPlayer(a).catch(() => NO_PLAYER),
       loadGameIcons(),
       loadMaterialIcons(),
     ])
-    return { accountId: a.id, inventory, planner, drops }
+    return { accountId: a.id, inventory, planner, drops, player }
   },
 )
 const data = computed(() => {
@@ -112,6 +117,10 @@ onBeforeUnmount(() => void store.flush())
 
 const { settings, save: saveSettings } = usePlannerSettings(accountId)
 const settingsOpen = ref(false)
+/** What irminsul read at the newest login; an AR/WL setting wins over it. */
+const player = computed(() => data.value?.player ?? NO_PLAYER)
+const ar = computed(() => settings.value.ar ?? player.value.ar)
+const wl = computed(() => settings.value.wl ?? player.value.wl)
 
 /** Count the Mystic ore the chunks held can be forged into (this device's choice). */
 const forge = ref(readStorage('planner:forge') === '1')
@@ -149,8 +158,8 @@ const totals = computed(() =>
 const plan = computed(() =>
   planner.value && totals.value
     ? farmPlan(planner.value, totals.value, drops.value, {
-        ar: settings.value.ar,
-        wl: settings.value.wl,
+        ar: ar.value,
+        wl: wl.value,
       })
     : null,
 )
@@ -169,7 +178,7 @@ const today = computed(() =>
 const resin = computed(() => {
   const at = account.value.latest?.takenAt
   return planner.value && good.value && at !== undefined
-    ? resinNow(planner.value, good.value.materials, at, now.value)
+    ? resinNow(planner.value, good.value.materials, at, now.value, player.value.resin)
     : null
 })
 /** Weapon EXP still short (after forging, when that is on). */
@@ -219,7 +228,7 @@ const hints = computed(() => {
   const g = good.value
   if (!board.value || !p || !g) return result
   const o = planOptions.value
-  const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, settings.value.ar])
+  const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, ar.value])
   if (hintMemo.inventory !== g.materials || hintMemo.options !== optionsKey) {
     hintMemo = { inventory: g.materials, options: optionsKey, map: new Map() }
   }
@@ -233,7 +242,7 @@ const hints = computed(() => {
     ])
     let hint = hintMemo.map.get(key)
     if (hint === undefined) {
-      hint = nextHint(p, entry, g.materials, { ...o, ar: settings.value.ar })
+      hint = nextHint(p, entry, g.materials, { ...o, ar: ar.value })
       hintMemo.map.set(key, hint)
     }
     result.set(entry.id, hint)
@@ -528,10 +537,9 @@ const hasGoals = computed(
   () => (board.value?.entries.length ?? 0) + (board.value?.items.length ?? 0) > 0,
 )
 const settingsLabel = computed(() => {
-  const s = settings.value
   const parts = ['Planner settings']
-  if (s.ar !== null) parts.push(`AR ${s.ar}`)
-  if (s.wl !== null) parts.push(`WL ${s.wl}`)
+  if (ar.value !== null) parts.push(`AR ${ar.value}`)
+  if (wl.value !== null) parts.push(`WL ${wl.value}`)
   return parts.join(' · ')
 })
 /** Open once the data is in, and only for something the planner data knows (a stale link does nothing). */
@@ -654,7 +662,7 @@ const itemEditorShown = computed(
             :entry="entry"
             :planner="planner"
             :ready="ready.has(entry.id)"
-            :ar="settings.ar"
+            :ar="ar"
             :hint="hints.get(entry.id) ?? null"
             @open="openEntry(entry)"
             @toggle="toggleActive(entry)"
@@ -698,7 +706,7 @@ const itemEditorShown = computed(
               :entry="entry"
               :planner="planner"
               :ready="false"
-              :ar="settings.ar"
+              :ar="ar"
               :hint="null"
               @open="openEntry(entry)"
               @toggle="toggleActive(entry)"
@@ -721,8 +729,8 @@ const itemEditorShown = computed(
       :others="editorOthers"
       :options="planOptions"
       :drops="drops"
-      :ar="settings.ar"
-      :wl="settings.wl"
+      :ar="ar"
+      :wl="wl"
       :saving="store.saving.value"
       @close="closeEditor"
       @save="save"
@@ -774,6 +782,7 @@ const itemEditorShown = computed(
   <PlannerSettings
     :open="settingsOpen"
     :settings="settings"
+    :player="player"
     @close="settingsOpen = false"
     @change="(patch) => void saveSettings(patch)"
   />

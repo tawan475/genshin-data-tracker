@@ -1,5 +1,5 @@
 import type { ArtifactIdentity, ArtifactState } from '../artifact'
-import type { GoodCharacter, GoodSubstat, GoodWeapon } from '../good'
+import type { GiCharacter, GiPlayer, GoodCharacter, GoodSubstat, GoodWeapon } from '../good'
 
 export interface ArtifactOccurrence {
   identity: ArtifactIdentity
@@ -19,6 +19,14 @@ export interface NormalizedGood {
   materials: Map<string, number>
   /** Sorted, de-duplicated; `null` when the file carried none, so export omits the field. */
   achievements: number[] | null
+  // irminsul's own keys. Each is `null` when the file had none (or nothing in
+  // it passed the checks), so export omits it.
+  /** `gi_player`, fields that pass their range check only, in a fixed order. */
+  player: GiPlayer | null
+  /** `gi_achievement_times`: [achievement id, unix seconds], sorted by id. */
+  achievementTimes: [number, number][] | null
+  /** `gi_characters`: GOOD key -> values that pass their check, sorted by key. */
+  characterExtras: Map<string, GiCharacter> | null
 }
 
 export class GoodFormatError extends Error {
@@ -58,6 +66,9 @@ export function normalizeGood(input: unknown): NormalizedGood {
     artifacts: objects(input.artifacts).map(toArtifact),
     materials: toMaterials(input.materials),
     achievements: achievementsRaw && toAchievements(achievementsRaw),
+    player: toPlayer(input.gi_player),
+    achievementTimes: toAchievementTimes(input.gi_achievement_times),
+    characterExtras: toCharacterExtras(input.gi_characters),
   }
 }
 
@@ -142,6 +153,76 @@ function toMaterials(raw: unknown): Map<string, number> {
 function toAchievements(raw: unknown[]): number[] {
   const ids = raw.filter((v): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0)
   return [...new Set(ids)].sort((a, b) => a - b)
+}
+
+// ------------------------------------------------------------ irminsul's keys
+// irminsul range-checks these before sending; they are checked again because
+// any client can upload, and a value outside its range is dropped (the field,
+// not the file).
+
+/** 2020-09-15 UTC, two weeks before the game launched (irminsul's bound too). */
+const EARLIEST_GAME_TIME = 1_600_128_000
+/** Unix seconds as irminsul sends them: an unsigned 32-bit number. */
+const LATEST_GAME_TIME = 0xffff_ffff
+
+/**
+ * Each `gi_player` field and its valid range, in the order a stored player
+ * section lists them. Append only: the order is part of the stored form.
+ */
+const PLAYER_FIELDS: readonly [keyof GiPlayer, number, number][] = [
+  ['uid', 100_000_000, 9_999_999_999], // 9 or 10 digits, like an account's UID
+  ['ar', 1, 60],
+  ['arExp', 0, 10_000_000],
+  ['wl', 0, 9],
+  ['wlLimit', 0, 9],
+  ['resin', 0, 2_000], // refills can take it past the natural cap
+  ['storyKeys', 0, 1_000],
+  ['maxStamina', 1, 100_000],
+]
+
+function toPlayer(raw: unknown): GiPlayer | null {
+  if (!isObject(raw)) return null
+  const player: Record<string, number | string> = {}
+  for (const [field, min, max] of PLAYER_FIELDS) {
+    const value = raw[field]
+    if (isIntIn(value, min, max)) player[field] = value
+  }
+  if (typeof raw.gameData === 'string' && /^[0-9a-f]{1,64}$/.test(raw.gameData)) {
+    player.gameData = raw.gameData
+  }
+  // A key that only names the game data says nothing about the account.
+  const known = Object.keys(player).filter((key) => key !== 'gameData')
+  return known.length > 0 ? (player as GiPlayer) : null
+}
+
+function toAchievementTimes(raw: unknown): [number, number][] | null {
+  if (!isObject(raw)) return null
+  const times: [number, number][] = []
+  for (const [key, value] of Object.entries(raw)) {
+    if (!/^[1-9]\d{0,8}$/.test(key)) continue
+    if (isIntIn(value, EARLIEST_GAME_TIME, LATEST_GAME_TIME)) times.push([Number(key), value])
+  }
+  return times.length > 0 ? times.sort((a, b) => a[0] - b[0]) : null
+}
+
+function toCharacterExtras(raw: unknown): Map<string, GiCharacter> | null {
+  if (!isObject(raw)) return null
+  const extras = new Map<string, GiCharacter>()
+  for (const key of Object.keys(raw).sort()) {
+    const value = raw[key]
+    if (!key || !isObject(value)) continue
+    const extra: GiCharacter = {}
+    if (isIntIn(value.friendship, 1, 10)) extra.friendship = value.friendship
+    if (isIntIn(value.obtainedAt, EARLIEST_GAME_TIME, LATEST_GAME_TIME)) {
+      extra.obtainedAt = value.obtainedAt
+    }
+    if (extra.friendship !== undefined || extra.obtainedAt !== undefined) extras.set(key, extra)
+  }
+  return extras.size > 0 ? extras : null
+}
+
+function isIntIn(value: unknown, min: number, max: number): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max
 }
 
 function isObject(value: unknown): value is Json {

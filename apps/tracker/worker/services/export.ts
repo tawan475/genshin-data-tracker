@@ -9,6 +9,7 @@ import {
   expandSubstats,
   deltaDecode,
   inflateRaw,
+  storedSnapshotOf,
   writeBundle,
   type ArtifactIdentity,
   type ArtifactsSection,
@@ -24,6 +25,9 @@ export const SECTION_NAMES = [
   'artifacts',
   'materials',
   'achievements',
+  'player',
+  'achievementTimes',
+  'characterExtras',
 ] as const
 export type SectionName = (typeof SECTION_NAMES)[number]
 
@@ -43,10 +47,14 @@ interface SnapshotRow {
   materials_hash: string
   materials_keyframe_hash: string
   achievements_hash: string | null
+  player_hash: string | null
+  achievement_times_hash: string | null
+  character_extras_hash: string | null
 }
 
 const SNAPSHOT_COLUMNS = `id, taken_at, last_seen_at, format, version, source, characters_hash,
-  weapons_hash, artifacts_hash, materials_hash, materials_keyframe_hash, achievements_hash`
+  weapons_hash, artifacts_hash, materials_hash, materials_keyframe_hash, achievements_hash,
+  player_hash, achievement_times_hash, character_extras_hash`
 
 function toBundleSnapshot(row: SnapshotRow): BundleSnapshot {
   return {
@@ -62,6 +70,9 @@ function toBundleSnapshot(row: SnapshotRow): BundleSnapshot {
     materials: row.materials_hash,
     materialsKeyframe: row.materials_keyframe_hash,
     achievements: row.achievements_hash,
+    player: row.player_hash,
+    achievementTimes: row.achievement_times_hash,
+    characterExtras: row.character_extras_hash,
   }
 }
 
@@ -72,6 +83,13 @@ function blobHashes(row: SnapshotRow, sections: ReadonlySet<SectionName>): strin
   if (sections.has('artifacts')) hashes.push(row.artifacts_hash)
   if (sections.has('materials')) hashes.push(row.materials_hash, row.materials_keyframe_hash)
   if (sections.has('achievements') && row.achievements_hash) hashes.push(row.achievements_hash)
+  if (sections.has('player') && row.player_hash) hashes.push(row.player_hash)
+  if (sections.has('achievementTimes') && row.achievement_times_hash) {
+    hashes.push(row.achievement_times_hash)
+  }
+  if (sections.has('characterExtras') && row.character_extras_hash) {
+    hashes.push(row.character_extras_hash)
+  }
   return hashes
 }
 
@@ -132,43 +150,25 @@ export async function buildGood(
     .first<SnapshotRow>()
   if (!row) throw notFound('Snapshot')
 
-  const all = new Set(SECTION_NAMES)
-  const blobs = await loadBlobs(d1, accountId, blobHashes(row, all))
-  const text = async (hash: string | null) => {
-    if (hash === null) return null
-    const data = blobs.get(hash)
-    if (!data) throw new Error(`Snapshot ${row.id} is missing section ${hash}`)
-    return inflateRaw(data)
-  }
-  const [characters, weapons, artifacts, materials, keyframe, achievements] = await Promise.all([
-    text(row.characters_hash),
-    text(row.weapons_hash),
-    text(row.artifacts_hash),
-    text(row.materials_hash),
-    row.materials_keyframe_hash === row.materials_hash ? null : text(row.materials_keyframe_hash),
-    text(row.achievements_hash),
-  ])
+  const hashes = blobHashes(row, new Set(SECTION_NAMES))
+  const blobs = await loadBlobs(d1, accountId, hashes)
+  const texts = new Map(
+    await Promise.all(
+      [...new Set(hashes)].map(async (hash) => {
+        const data = blobs.get(hash)
+        if (!data) throw new Error(`Snapshot ${row.id} is missing section ${hash}`)
+        return [hash, await inflateRaw(data)] as const
+      }),
+    ),
+  )
+  const stored = storedSnapshotOf(toBundleSnapshot(row), (hash) => texts.get(hash)!)
 
-  const artifactIds = [...new Set(deltaDecode((JSON.parse(artifacts!) as ArtifactsSection).i))]
+  const artifactIds = [
+    ...new Set(deltaDecode((JSON.parse(stored.artifacts) as ArtifactsSection).i)),
+  ]
   const catalog = await loadCatalogEntries(d1, accountId, artifactIds)
 
-  const good = decodeSnapshot(
-    {
-      format: row.format,
-      version: row.version,
-      source: row.source,
-      takenAt: row.taken_at,
-      characters: characters!,
-      weapons: weapons!,
-      artifacts: artifacts!,
-      materials: materials!,
-      materialsKeyframe: keyframe,
-      achievements,
-    },
-    catalog,
-    MATERIALS,
-  )
-  return { good, takenAt: row.taken_at }
+  return { good: decodeSnapshot(stored, catalog, MATERIALS), takenAt: row.taken_at }
 }
 
 async function loadCatalogEntries(

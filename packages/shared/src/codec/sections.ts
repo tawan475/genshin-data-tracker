@@ -10,11 +10,22 @@
 
 import type { ArtifactIdentity, ArtifactState } from '../artifact'
 import { CHARACTERS, WEAPONS, fromRef, toRef, type KeyDictionary, type KeyRef } from '../dictionary'
-import type { GoodArtifact, GoodCharacter, GoodWeapon } from '../good'
+import type { GiCharacter, GiPlayer, GoodArtifact, GoodCharacter, GoodWeapon } from '../good'
 import { sha256Hex128 } from '../hash'
 import { compareTuples, deltaDecode, deltaEncode, trimDefaults } from './order'
 
-export type SectionKind = 'characters' | 'weapons' | 'artifacts' | 'materials' | 'achievements'
+export type SectionKind =
+  | 'characters'
+  | 'weapons'
+  | 'artifacts'
+  | 'materials'
+  | 'achievements'
+  // irminsul's own keys, each its own section: they change at different
+  // rates (the player values on every login, the others rarely), so each
+  // deduplicates on its own.
+  | 'player'
+  | 'achievementTimes'
+  | 'characterExtras'
 
 export interface Section {
   kind: SectionKind
@@ -244,4 +255,65 @@ export function encodeAchievements(ids: readonly number[]): number[] {
 
 export function decodeAchievements(deltas: readonly number[]): number[] {
   return deltaDecode(deltas)
+}
+
+// -------------------------------------------------------------------- player
+// irminsul's `gi_player`, stored as normalizeGood leaves it: an object of the
+// fields that passed their checks, keys in a fixed order (normalize's
+// PLAYER_FIELDS) so equal values give equal bytes. A few dozen bytes; a new
+// field is a new key.
+
+export function decodePlayer(section: GiPlayer): GiPlayer {
+  return { ...section }
+}
+
+// ---------------------------------------------------------- achievementTimes
+// irminsul's `gi_achievement_times`: `i` = delta-encoded sorted achievement
+// ids, `t` = each one's finish time in unix seconds.
+
+export interface AchievementTimesSection {
+  i: number[]
+  t: number[]
+}
+
+export function encodeAchievementTimes(
+  times: readonly (readonly [number, number])[],
+): AchievementTimesSection {
+  const sorted = [...times].sort((a, b) => a[0] - b[0])
+  return { i: deltaEncode(sorted.map((t) => t[0])), t: sorted.map((t) => t[1]) }
+}
+
+/** Achievement id -> unix seconds, ascending by id. */
+export function decodeAchievementTimes(section: AchievementTimesSection): [number, number][] {
+  return deltaDecode(section.i).map((id, index) => [id, section.t[index] ?? 0])
+}
+
+// ----------------------------------------------------------- characterExtras
+// irminsul's `gi_characters`. Row: [character, friendship, obtained at (unix
+// seconds)], 0 where unknown, trailing zeros trimmed.
+
+const CHARACTER_EXTRA_DEFAULTS: readonly KeyRef[] = [0, 0, 0]
+
+export function encodeCharacterExtras(extras: ReadonlyMap<string, GiCharacter>): KeyRef[][] {
+  return [...extras]
+    .map(([key, extra]) =>
+      trimDefaults(
+        [toRef(CHARACTERS, key), extra.friendship ?? 0, extra.obtainedAt ?? 0],
+        CHARACTER_EXTRA_DEFAULTS,
+      ),
+    )
+    .sort(compareTuples)
+}
+
+export function decodeCharacterExtras(rows: readonly KeyRef[][]): Map<string, GiCharacter> {
+  const extras = new Map<string, GiCharacter>()
+  for (const row of rows) {
+    const extra: GiCharacter = {}
+    const friendship = n(row[1], 0)
+    const obtainedAt = n(row[2], 0)
+    if (friendship > 0) extra.friendship = friendship
+    if (obtainedAt > 0) extra.obtainedAt = obtainedAt
+    extras.set(fromRef(CHARACTERS, row[0]!), extra)
+  }
+  return extras
 }

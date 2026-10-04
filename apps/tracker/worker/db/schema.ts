@@ -124,6 +124,11 @@ export const snapshots = sqliteTable(
     achievementsHash: text('achievements_hash'),
     summary: text('summary', { mode: 'json' }).$type<SnapshotSummary>().notNull(),
     deletedAt: integer('deleted_at'),
+    // irminsul's own keys (gi_player, gi_achievement_times, gi_characters),
+    // one section each; NULL when the upload had none. Added in 0006.
+    playerHash: text('player_hash'),
+    achievementTimesHash: text('achievement_times_hash'),
+    characterExtrasHash: text('character_extras_hash'),
   },
   (t) => [
     index('snapshots_account_taken_idx').on(t.accountId, t.takenAt),

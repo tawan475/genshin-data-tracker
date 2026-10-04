@@ -2,8 +2,9 @@
 import { ArrowDown, ArrowUp } from 'lucide-vue-next'
 
 /**
- * A sortable column header's button: the label plus an arrow while this
- * column is the sort. The <th> around it carries aria-sort.
+ * A sortable column header's button: the label (or the slot, e.g. an icon)
+ * plus an arrow while this column is the sort. The <th> around it carries
+ * aria-sort.
  */
 defineProps<{ label: string; active: boolean; direction: 'asc' | 'desc'; title?: string }>()
 defineEmits<{ sort: [] }>()
@@ -17,7 +18,7 @@ defineEmits<{ sort: [] }>()
     :title="title"
     @click="$emit('sort')"
   >
-    {{ label }}
+    <slot>{{ label }}</slot>
     <component
       :is="direction === 'asc' ? ArrowUp : ArrowDown"
       v-if="active"

@@ -5,6 +5,7 @@ import {
   achievementVersions,
   captureAchievements,
   compareVersions,
+  completedOn,
   countAchievements,
   doneSource,
   filterAchievements,
@@ -133,6 +134,69 @@ describe('captureAchievements', () => {
     expect(captured.ids.size).toBe(0)
     expect(captured.takenAt).toBeNull()
     expect(captured.firstTakenAt).toBeNull()
+    expect(captured.completedAt.size).toBe(0)
+  })
+
+  it("takes each id's finish time from the newest snapshot that has one", () => {
+    const times: Record<string, [number, number][]> = {
+      old: [
+        [10, 1_600_200_000],
+        [11, 1_600_300_000],
+      ],
+      // A later capture with a corrected time for 11 and a new one for 20.
+      new: [
+        [11, 1_600_400_000],
+        [20, 1_650_000_000],
+      ],
+    }
+    const decodedTimes: string[] = []
+    const captured = captureAchievements(
+      [
+        { takenAt: 100, key: 'a', timesKey: 'old' },
+        { takenAt: 200, key: 'b', timesKey: 'new' },
+        { takenAt: 300, key: 'b', timesKey: null },
+        { takenAt: 50, key: 'a', timesKey: 'old' },
+        { takenAt: 400, key: 'c' },
+      ],
+      decode,
+      (key) => {
+        decodedTimes.push(key)
+        return times[key]!
+      },
+    )
+    expect(Object.fromEntries(captured.completedAt)).toEqual({
+      10: 1_600_200_000_000,
+      11: 1_600_400_000_000,
+      20: 1_650_000_000_000,
+    })
+    expect(decodedTimes.sort()).toEqual(['new', 'old'])
+  })
+})
+
+describe('completedOn', () => {
+  const captured = {
+    firstTakenAt: 100,
+    firstSeen: new Map([
+      [10, 100],
+      [11, 100],
+      [20, 200],
+    ]),
+    completedAt: new Map([[11, 1_600_400_000_000]]),
+  }
+
+  it('prefers the real finish time, then the first snapshot that had the id', () => {
+    expect(completedOn(captured, 11)).toEqual({ at: 1_600_400_000_000, kind: 'exact' })
+    // Already done when achievements were first captured: only "by then".
+    expect(completedOn(captured, 10)).toEqual({ at: 100, kind: 'by' })
+    expect(completedOn(captured, 20)).toEqual({ at: 200, kind: 'seen' })
+    expect(completedOn(captured, 99)).toBeNull()
+  })
+
+  it('knows a finish time even for an id no list has yet', () => {
+    expect(completedOn({ ...captured, completedAt: new Map([[99, 5]]) }, 99)).toEqual({
+      at: 5,
+      kind: 'exact',
+    })
   })
 })
 

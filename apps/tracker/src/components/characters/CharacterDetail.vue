@@ -17,10 +17,12 @@ import {
 import { loadCharacterHistory } from '@/data/characters-history'
 import { useResource } from '@/data/use-resource'
 import { artifactSetIcon, characterBanner, characterIcon, weaponIcon } from '@/lib/assets'
+import { formatDate, formatFullDateTime } from '@/lib/format'
 import { formatStatName, formatStatValue } from '@/utils/artifact-stats'
 import ArtifactPiece from './ArtifactPiece.vue'
 import CharacterTimeline from './CharacterTimeline.vue'
 import ConstellationPips from './ConstellationPips.vue'
+import FriendshipBadge from './FriendshipBadge.vue'
 import TalentGlyph from './TalentGlyph.vue'
 import { constellationIcons, talentIcons } from './talent-icons'
 import { ELEMENT_FILL, ELEMENT_SOFT, ELEMENT_TEXT } from './tokens'
@@ -110,6 +112,13 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
                 <span :class="ELEMENT_TEXT[c.element]">{{ ELEMENT_LABELS[c.element] }}</span>
               </span>
               <span v-if="c.weaponType">{{ WEAPON_TYPE_LABELS[c.weaponType] }}</span>
+              <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" />
+              <time
+                v-if="c.obtainedAt !== null"
+                :datetime="new Date(c.obtainedAt).toISOString()"
+                :title="`Obtained ${formatFullDateTime(c.obtainedAt)}`"
+                >Obtained {{ formatDate(c.obtainedAt) }}</time
+              >
             </p>
             <p class="tabular font-mono text-2xl font-semibold" :title="`Ascension ${c.ascension}`">
               Lv

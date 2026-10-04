@@ -231,6 +231,17 @@ export interface ImportResponse {
   takenAt: number
   rawSize: number
   storedSize: number
+  /** Present only when there is something to say; the import itself went through. */
+  warnings?: ImportWarning[]
+}
+
+/**
+ * `uid_mismatch`: the file's `gi_player.uid` is not the account's UID (the
+ * capture may be another account's). Stored anyway, as asked.
+ */
+export interface ImportWarning {
+  code: 'uid_mismatch'
+  message: string
 }
 
 export interface VerifyKeyResponse {

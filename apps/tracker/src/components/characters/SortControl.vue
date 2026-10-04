@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T extends string">
+import { computed } from 'vue'
 import { ArrowDownWideNarrow, ArrowUpNarrowWide } from 'lucide-vue-next'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
@@ -13,7 +14,7 @@ const props = defineProps<{
 const sort = defineModel<T>('sort', { required: true })
 const direction = defineModel<'asc' | 'desc'>('direction', { required: true })
 
-const selectOptions = props.options.map((o) => ({ value: o.value, label: o.label }))
+const selectOptions = computed(() => props.options.map((o) => ({ value: o.value, label: o.label })))
 
 function pick(value: T) {
   sort.value = value

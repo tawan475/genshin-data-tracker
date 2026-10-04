@@ -128,6 +128,10 @@ export interface CharacterView {
   critRate: number
   critDmg: number
   gaps: Gap[]
+  /** Friendship level 1-10, from irminsul's `gi_characters`; null when unknown. */
+  friendship: number | null
+  /** When the character joined the account (epoch ms), from `gi_characters`; null when unknown. */
+  obtainedAt: number | null
   /** Normalised name, element, weapon and set names, for search. */
   haystack: string
 }
@@ -142,6 +146,9 @@ export interface Roster {
   crowns: number
   /** Characters with nothing left to build. */
   ready: number
+  /** Whether the snapshot knows any friendship level / obtained date (irminsul's extras). */
+  hasFriendship: boolean
+  hasObtained: boolean
 }
 
 const DEFAULT_THRESHOLDS = [2, 4] as const
@@ -254,6 +261,7 @@ export function buildRoster(good: Good): Roster {
       }
     }
     const talent = { ...c.talent }
+    const extra = good.gi_characters?.[c.key]
     return {
       key: c.key,
       name,
@@ -277,6 +285,8 @@ export function buildRoster(good: Good): Roster {
       critRate: Number(critRate.toFixed(1)),
       critDmg: Number(critDmg.toFixed(1)),
       gaps: findGaps(c.level, weapon, equipped, bonusCount),
+      friendship: extra?.friendship ?? null,
+      obtainedAt: extra?.obtainedAt !== undefined ? extra.obtainedAt * 1000 : null,
       haystack: normalizeSearch(
         [
           name,
@@ -297,6 +307,8 @@ export function buildRoster(good: Good): Roster {
     level90: characters.filter((c) => c.level >= TARGET_LEVEL).length,
     crowns: characters.reduce((sum, c) => sum + c.crowns, 0),
     ready: characters.filter((c) => c.gaps.length === 0).length,
+    hasFriendship: characters.some((c) => c.friendship !== null),
+    hasObtained: characters.some((c) => c.obtainedAt !== null),
   }
 }
 
@@ -345,9 +357,17 @@ export type CharacterSort =
   | 'rarity'
   | 'element'
   | 'name'
+  | 'friendship'
+  | 'obtained'
 export type SortDirection = 'asc' | 'desc'
 
-export const CHARACTER_SORTS: { value: CharacterSort; label: string; natural: SortDirection }[] = [
+export interface SortOption {
+  value: CharacterSort
+  label: string
+  natural: SortDirection
+}
+
+export const CHARACTER_SORTS: SortOption[] = [
   { value: 'level', label: 'Level', natural: 'desc' },
   { value: 'constellation', label: 'Constellation', natural: 'desc' },
   { value: 'talents', label: 'Talents', natural: 'desc' },
@@ -355,7 +375,20 @@ export const CHARACTER_SORTS: { value: CharacterSort; label: string; natural: So
   { value: 'rarity', label: 'Rarity', natural: 'desc' },
   { value: 'element', label: 'Element', natural: 'asc' },
   { value: 'name', label: 'Name', natural: 'asc' },
+  { value: 'friendship', label: 'Friendship', natural: 'desc' },
+  { value: 'obtained', label: 'Obtained', natural: 'desc' },
 ]
+
+/** The sorts this roster can use: friendship and obtained only when a snapshot knows them. */
+export function characterSorts(
+  roster: Pick<Roster, 'hasFriendship' | 'hasObtained'>,
+): SortOption[] {
+  return CHARACTER_SORTS.filter(
+    (s) =>
+      (s.value !== 'friendship' || roster.hasFriendship) &&
+      (s.value !== 'obtained' || roster.hasObtained),
+  )
+}
 
 export type BuildFilter = 'all' | 'ready' | 'needs' | GapKind
 export type TalentFilter = 'all' | 'nine' | 'crowned' | 'below'
@@ -468,6 +501,14 @@ const compareBy: Record<CharacterSort, (a: CharacterView, b: CharacterView) => n
   // Ascending follows the game's element order.
   element: (a, b) => elementRank(a.element) - elementRank(b.element),
   name: (a, b) => a.name.localeCompare(b.name),
+  friendship: (a, b) => (a.friendship ?? 0) - (b.friendship ?? 0),
+  obtained: (a, b) => (a.obtainedAt ?? 0) - (b.obtainedAt ?? 0),
+}
+
+/** Sorts on a value a character may lack; those characters go last either way. */
+const unknownFor: Partial<Record<CharacterSort, (c: CharacterView) => boolean>> = {
+  friendship: (c) => c.friendship === null,
+  obtained: (c) => c.obtainedAt === null,
 }
 
 /**
@@ -481,8 +522,10 @@ export function sortCharacters(
 ): CharacterView[] {
   const sign = direction === 'asc' ? 1 : -1
   const primary = compareBy[sort]
+  const unknown = unknownFor[sort]
   return [...list].sort(
     (a, b) =>
+      (unknown ? Number(unknown(a)) - Number(unknown(b)) : 0) ||
       sign * primary(a, b) ||
       compareBy.level(b, a) ||
       compareBy.rarity(b, a) ||

@@ -27,7 +27,8 @@ export async function runMaintenance(d1: D1Database, now = Date.now()): Promise<
       `DELETE FROM blobs WHERE NOT EXISTS (
          SELECT 1 FROM snapshots s WHERE s.account_id = blobs.account_id AND blobs.hash IN (
            s.characters_hash, s.weapons_hash, s.artifacts_hash, s.materials_hash,
-           s.materials_keyframe_hash, s.achievements_hash)
+           s.materials_keyframe_hash, s.achievements_hash, s.player_hash,
+           s.achievement_times_hash, s.character_extras_hash)
        )`,
     ),
   ])

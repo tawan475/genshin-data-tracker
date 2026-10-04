@@ -3,7 +3,8 @@
  * Genshin Optimizer and irminsul.
  *
  * The field set mirrors what irminsul emits (`irminsul/src/good.rs`); that file
- * is the wire contract. Fields other scanners add are not stored.
+ * is the wire contract. Fields other scanners add are not stored, nor are
+ * fields inside irminsul's `gi_*` keys that this file does not list.
  */
 
 export interface GoodSubstat {
@@ -44,6 +45,38 @@ export interface GoodCharacter {
   talent: { auto: number; skill: number; burst: number }
 }
 
+/**
+ * irminsul's `gi_player`: account values GOOD has no place for. The game sends
+ * them at login, so they describe the login, not the capture (resin keeps
+ * regenerating after it). Every field is optional.
+ */
+export interface GiPlayer {
+  uid?: number
+  /** Adventure Rank, 1-60. */
+  ar?: number
+  /** Adventure EXP toward the next rank. */
+  arExp?: number
+  /** World Level, 0-9. */
+  wl?: number
+  /** The highest World Level the account may choose. */
+  wlLimit?: number
+  /** Original Resin. */
+  resin?: number
+  storyKeys?: number
+  /** In the game's units: 24000 is the 240 it shows. */
+  maxStamina?: number
+  /** The game-data dump commit the exporting irminsul build carries. */
+  gameData?: string
+}
+
+/** One character's entry in irminsul's `gi_characters`. */
+export interface GiCharacter {
+  /** Friendship level, 1-10. */
+  friendship?: number
+  /** When the character joined the account, unix seconds. */
+  obtainedAt?: number
+}
+
 export interface Good {
   format: string
   version: number
@@ -55,6 +88,12 @@ export interface Good {
   gi_achievements?: number[]
   /** Epoch milliseconds of the capture; irminsul always sets it. */
   timestamp?: number
+  // irminsul's own top-level additions (not GOOD); each is optional.
+  gi_player?: GiPlayer
+  /** Finish time of achievements, unix seconds, keyed by achievement id. */
+  gi_achievement_times?: Record<string, number>
+  /** Keyed by the character's GOOD key (Traveler with its element). */
+  gi_characters?: Record<string, GiCharacter>
 }
 
 /**

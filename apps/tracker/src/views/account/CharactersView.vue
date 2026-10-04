@@ -18,6 +18,7 @@ import {
   CHARACTER_SORTS,
   NO_CHARACTER_FILTERS,
   buildRoster,
+  characterSorts,
   facetCounts,
   filterCharacters,
   hasCharacterFilters,
@@ -53,6 +54,16 @@ const direction = ref<SortDirection>(saved.direction === 'asc' ? 'asc' : 'desc')
 const view = ref<'grid' | 'list'>(saved.view === 'list' ? 'list' : 'grid')
 watch([sort, direction, view], () =>
   writeJson('characters:sort', { sort: sort.value, direction: direction.value, view: view.value }),
+)
+
+/** Friendship and obtained date only when this roster knows them. */
+const sorts = computed(() => (roster.value ? characterSorts(roster.value) : CHARACTER_SORTS))
+watch(
+  sorts,
+  (list) => {
+    if (roster.value && !list.some((s) => s.value === sort.value)) sort.value = 'level'
+  },
+  { immediate: true },
 )
 
 const all = computed(() => roster.value?.characters ?? [])
@@ -202,6 +213,7 @@ function step(delta: -1 | 1) {
         v-model:direction="direction"
         v-model:view="view"
         class="mb-4"
+        :sorts="sorts"
         :element-counts="elementCounts"
         :rarity-counts="rarityCounts"
         :shown="shown.length"
@@ -230,6 +242,7 @@ function step(delta: -1 | 1) {
         v-model:sort="sort"
         v-model:direction="direction"
         :characters="shown"
+        :friendship="roster.hasFriendship"
         @open="open"
       />
     </template>

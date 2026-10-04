@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { AchievementTexts } from '@gdt/game-data'
-import type { AchievementEntry, DoneState } from '@gdt/game-data/achievement-progress'
+import type {
+  AchievementEntry,
+  CapturedAchievements,
+  DoneState,
+} from '@gdt/game-data/achievement-progress'
 import { formatNumber } from '@/lib/format'
 import type { CategoryItem } from './AchievementCategories.vue'
 import AchievementRow from './AchievementRow.vue'
@@ -12,8 +16,7 @@ defineProps<{
   entries: AchievementEntry[]
   text: AchievementTexts
   state: DoneState
-  firstSeen: ReadonlyMap<number, number>
-  firstTakenAt: number | null
+  capture: CapturedAchievements
 }>()
 defineEmits<{ mark: [ids: number[]]; unmark: [ids: number[]] }>()
 </script>
@@ -44,8 +47,7 @@ defineEmits<{ mark: [ids: number[]]; unmark: [ids: number[]] }>()
         :entry="entry"
         :text="text"
         :state="state"
-        :first-seen="firstSeen"
-        :first-taken-at="firstTakenAt"
+        :capture="capture"
         @mark="$emit('mark', $event)"
         @unmark="$emit('unmark', $event)"
       />

@@ -10,6 +10,7 @@
 import { Zip, ZipDeflate } from 'fflate'
 import {
   decodeSnapshot,
+  storedSnapshotOf,
   type ArtifactIdentity,
   type BundleSnapshot,
   type Good,
@@ -62,23 +63,7 @@ export function decodeFromSections(
     if (value === undefined) throw new Error(`Snapshot ${snapshot.id} is missing section ${hash}`)
     return value
   }
-  return decodeSnapshot(
-    {
-      format: snapshot.format,
-      version: snapshot.version,
-      source: snapshot.source,
-      takenAt: snapshot.takenAt,
-      characters: text(snapshot.characters),
-      weapons: text(snapshot.weapons),
-      artifacts: text(snapshot.artifacts),
-      materials: text(snapshot.materials),
-      materialsKeyframe:
-        snapshot.materialsKeyframe === snapshot.materials ? null : text(snapshot.materialsKeyframe),
-      achievements: snapshot.achievements ? text(snapshot.achievements) : null,
-    },
-    catalog,
-    materials,
-  )
+  return decodeSnapshot(storedSnapshotOf(snapshot, text), catalog, materials)
 }
 
 export interface ZipProgress {

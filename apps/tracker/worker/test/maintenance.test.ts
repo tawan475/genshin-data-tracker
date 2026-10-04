@@ -2,7 +2,7 @@ import { env, SELF } from 'cloudflare:test'
 import type { AccountResponse, ImportResponse } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import { TRASH_DAYS, runMaintenance } from '../services/maintenance'
-import { ORIGIN, irminsulForm, sampleGood, signUp } from './client'
+import { ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 describe('maintenance', () => {
   it('purges old trash and the sections only it referenced, keeping shared ones', async () => {
@@ -19,7 +19,7 @@ describe('maintenance', () => {
           body: irminsulForm(good, at),
         })
       ).json()) as ImportResponse
-    const kept = await upload(sampleGood(), 1_000)
+    const kept = await upload(sampleGood(sampleExtras()), 1_000)
     const gone = await upload(sampleGood({ characters: [], materials: { Mora: 7 } }), 2_000)
     await client.fetch(`/api/accounts/${account.id}/snapshots/${gone.snapshotId}`, {
       method: 'DELETE',
@@ -40,6 +40,7 @@ describe('maintenance', () => {
     // The surviving snapshot still decodes: its sections were not collected.
     const good = await client.fetch(`/api/accounts/${account.id}/snapshots/${kept.snapshotId}/good`)
     expect(good.status).toBe(200)
+    expect(await good.json()).toMatchObject(sampleExtras())
   })
 })
 

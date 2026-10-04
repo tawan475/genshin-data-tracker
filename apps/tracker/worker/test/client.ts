@@ -140,6 +140,20 @@ export function sampleGood(overrides: Partial<Good> = {}): Good {
   }
 }
 
+/** irminsul's own top-level keys, as it writes them (uid as a number, times in unix seconds). */
+export function sampleExtras(
+  uid = 812345678,
+): Pick<Good, 'gi_player' | 'gi_achievement_times' | 'gi_characters'> {
+  return {
+    gi_player: { uid, ar: 60, arExp: 0, wl: 8, wlLimit: 9, resin: 124, maxStamina: 24000 },
+    gi_achievement_times: { '81001': 1_650_000_000, '81002': 1_700_000_000 },
+    gi_characters: {
+      Furina: { friendship: 10, obtainedAt: 1_694_000_000 },
+      Bennett: { friendship: 7 },
+    },
+  }
+}
+
 /** irminsul's upload: multipart with an optional `timestamp` field and a `file` part. */
 export function irminsulForm(good: unknown, timestamp?: number): FormData {
   const form = new FormData()
