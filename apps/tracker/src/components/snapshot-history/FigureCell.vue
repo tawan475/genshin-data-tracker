@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import ItemDisplay from '@/components/legacy/ItemDisplay.vue'
 import MoraDisplay from '@/components/legacy/MoraDisplay.vue'
+import { materialIcon } from '@/lib/assets'
 import { formatSigned } from '@/lib/format'
 import { figureTitle, type Change } from './snapshot-figures'
 
@@ -37,7 +38,7 @@ const title = computed(() => figureTitle(props.value, props.change))
     <ItemDisplay
       v-else-if="kind === 'primogem'"
       :amount="value"
-      image="/img/Item_Primogem.webp"
+      :image="materialIcon('Primogem')"
       name="primogem"
       class="font-medium text-slate-700 dark:text-slate-300"
     />

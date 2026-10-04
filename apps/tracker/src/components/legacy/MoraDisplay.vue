@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { materialIcon } from '@/lib/assets'
+
 defineProps<{
   amount: number
 }>()
+
+const mora = materialIcon('Mora')
 </script>
 
 <template>
@@ -10,7 +14,7 @@ defineProps<{
     <!-- Visually hidden text so copying works -->
     <span class="sr-only">&nbsp;mora</span>
     <img
-      src="/img/Item_Mora.webp"
+      :src="mora"
       alt=""
       class="w-4 h-4 max-w-none shrink-0 select-none pointer-events-none object-contain"
       aria-hidden="true"

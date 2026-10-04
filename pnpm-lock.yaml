@@ -117,9 +117,6 @@ importers:
       '@types/node':
         specifier: ^24.13.2
         version: 24.19.1
-      sharp:
-        specifier: ^0.35.2
-        version: 0.35.5(@types/node@24.19.1)
       typescript:
         specifier: ~6.0.0
         version: 6.0.3

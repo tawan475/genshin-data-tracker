@@ -6,8 +6,8 @@
 
 import type {
   AchievementsFile,
-  AvatarsFile,
   GoalsFile,
+  ImagesFile,
   MaterialIndexFile,
   MetaFile,
   PlannerFile,
@@ -23,7 +23,7 @@ export interface DataSet {
   text?: TextFile
   planner?: PlannerFile
   materials?: MaterialIndexFile
-  avatars?: AvatarsFile
+  images?: ImagesFile
 }
 
 const missingFrom = <T>(before: Iterable<T>, after: Set<T>) =>
@@ -81,6 +81,14 @@ export function checkAppendOnly(
     'weapon keys',
     missingFrom(keys(previous.planner?.weapons), weapons).filter((k) => !removed.weapons.has(k)),
     'weapons',
+  )
+  const sets = new Set(Object.keys(next.images?.artifacts ?? {}))
+  report(
+    'artifact set keys',
+    missingFrom(Object.keys(previous.images?.artifacts ?? {}), sets).filter(
+      (k) => !removed.artifacts.has(k),
+    ),
+    'artifacts',
   )
   const materials = new Set(ids(next.planner?.materials))
   const goneMaterials = missingFrom(ids(previous.planner?.materials), materials)
@@ -304,5 +312,31 @@ export function describeChanges(previous: DataSet, next: DataSet): string[] {
   lines.push(`  material index: ${Object.keys(m1).length} keys`)
   lines.push(...list('new keys', newKeys))
   lines.push(...list('keys with a new item id or icon', movedKeys))
+
+  // Image names
+  const i0 = previous.images
+  const i1 = next.images
+  if (i1) {
+    lines.push(
+      `  images: ${Object.keys(i1.characters).length} characters, ${Object.keys(i1.weapons).length} weapons, ` +
+        `${Object.keys(i1.artifacts).length} artifact sets`,
+    )
+    for (const section of ['characters', 'weapons', 'artifacts', 'items'] as const) {
+      const before: Record<string, unknown> = i0?.[section] ?? {}
+      const after: Record<string, unknown> = i1[section]
+      lines.push(
+        ...list(
+          `new ${section === 'artifacts' ? 'artifact sets' : section} with images`,
+          Object.keys(after).filter((k) => !(k in before)),
+        ),
+        ...list(
+          `${section === 'artifacts' ? 'artifact sets' : section} with changed image names`,
+          Object.keys(after).filter(
+            (k) => k in before && JSON.stringify(before[k]) !== JSON.stringify(after[k]),
+          ),
+        ),
+      )
+    }
+  }
   return lines
 }

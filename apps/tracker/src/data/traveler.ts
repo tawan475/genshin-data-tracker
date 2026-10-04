@@ -1,4 +1,4 @@
-import type { TravelerGender } from '@gdt/game-data/avatars'
+import type { TravelerGender } from '@gdt/game-data/images'
 import { ACCOUNT_SETTINGS_DEFAULTS } from '@gdt/shared'
 import { shallowRef } from 'vue'
 import { api } from '@/api'

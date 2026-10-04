@@ -119,7 +119,7 @@ const WEAPON_TYPES: Record<string, WeaponType> = {
   WEAPON_BOW: 'bow',
 }
 /** A burst's `costElemType` -> element. */
-const ELEMENTS: Record<string, Element> = {
+export const ELEMENTS: Record<string, Element> = {
   Wind: 'Anemo',
   Rock: 'Geo',
   Electric: 'Electro',

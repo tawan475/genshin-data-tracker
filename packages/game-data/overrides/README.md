@@ -1,6 +1,6 @@
 # overrides
 
-Hand-kept inputs to `pnpm --filter @gdt/game-data build` (and `icons`). The
+Hand-kept inputs to `pnpm --filter @gdt/game-data build`. The
 build validates them and fails on mistakes. In every JSON file, keys starting
 with `$` are comments. Rerun the build after editing and read its summary.
 
@@ -51,16 +51,16 @@ move the id to the right list.
 
 GOOD key fixes and exclusions, by game id (the ids in the dump's Excel files).
 
-| Section              | What                                                                                                                                                                                              |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `characters.exclude` | `{ "<avatar id>": "why" }`: avatars that pass the playable filter but are not real characters (placeholders)                                                                                      |
-| `characters.key`     | `{ "<avatar id>": "GoodKey" }`: when irminsul's key differs from the name's `toGoodKey`                                                                                                           |
-| `weapons.include`    | `{ "<weapon id>": "why" }`: weapons without a lore entry that are still owned (quest weapons); weapons without one are skipped by default                                                         |
-| `weapons.exclude`    | `{ "<weapon id>": "why" }`: weapons to leave out                                                                                                                                                  |
-| `weapons.key`        | `{ "<weapon id>": "GoodKey" }`                                                                                                                                                                    |
-| `materials.key`      | `{ "<item id>": "GoodKey" }`                                                                                                                                                                      |
-| `materials.prefer`   | `{ "GoodKey": <item id> }`: which item stands for a key several items share (for its icon and item id)                                                                                            |
-| `removed`            | `{ "achievements": [ids], "goals": [ids], "characters": [keys], "weapons": [keys] }`: entries the game really removed. Without this the build fails, because stored marks and goals point at them |
+| Section              | What                                                                                                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `characters.exclude` | `{ "<avatar id>": "why" }`: avatars that pass the playable filter but are not real characters (placeholders)                                                                                                                          |
+| `characters.key`     | `{ "<avatar id>": "GoodKey" }`: when irminsul's key differs from the name's `toGoodKey`                                                                                                                                               |
+| `weapons.include`    | `{ "<weapon id>": "why" }`: weapons without a lore entry that are still owned (quest weapons); weapons without one are skipped by default                                                                                             |
+| `weapons.exclude`    | `{ "<weapon id>": "why" }`: weapons to leave out                                                                                                                                                                                      |
+| `weapons.key`        | `{ "<weapon id>": "GoodKey" }`                                                                                                                                                                                                        |
+| `materials.key`      | `{ "<item id>": "GoodKey" }`                                                                                                                                                                                                          |
+| `materials.prefer`   | `{ "GoodKey": <item id> }`: which item stands for a key several items share (for its icon and item id)                                                                                                                                |
+| `removed`            | `{ "achievements": [ids], "goals": [ids], "characters": [keys], "weapons": [keys], "artifacts": [set keys] }`: entries the game really removed. Without this the build fails, because stored marks, goals and snapshots point at them |
 
 Write the reason in the value: the next maintainer will want to know.
 
@@ -114,10 +114,3 @@ the raw tables:
 `https://genshin-impact.fandom.com/api.php?action=parse&page=<Page>&prop=wikitext|revid&format=json`.
 The parser is `src/drops.ts`; the build checks the file with it
 (`scripts/lib/drops.ts`) and fails on anything malformed.
-
-## icons/
-
-Images for icons no source has, or to replace a bad one: `icons/<icon name>.png`
-(or `.webp`, `.jpg`), e.g. `icons/UI_ItemIcon_100004.png`. They win over every
-source. Then run `pnpm --filter @gdt/game-data icons`. The icon names to use are
-in the `icons` report and in `data/icons.json` `missing`.

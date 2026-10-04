@@ -1,9 +1,9 @@
 <script lang="ts">
 /**
- * Icon URLs that failed this session (Enka lacks about a quarter of the
- * material icons). Remembered so a tile scrolled back into view, or the same
- * material in another place, goes straight to its letters instead of asking
- * the CDN again.
+ * Icon URLs that failed this session (an icon the image host gained or lost
+ * since its last check). Remembered so a tile scrolled back into view, or the
+ * same material in another place, goes straight to its letters instead of
+ * asking the host again.
  */
 const failedUrls = new Set<string>()
 </script>

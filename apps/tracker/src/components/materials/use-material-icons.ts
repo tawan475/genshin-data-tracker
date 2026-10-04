@@ -7,8 +7,8 @@ let loading: Promise<void> | null = null
 
 /**
  * Starts loading the material index and returns a reactive lookup: ''
- * (GameIcon shows initials) until it is in, then the self-hosted /gi URL, or
- * Enka's for the few icons we do not host.
+ * (GameIcon shows initials) until it is in, then the image URL ('' for icons
+ * the image host lacks).
  */
 export function useMaterialIcons(): (key: string) => string {
   loading ??= loadMaterialIcons().then(

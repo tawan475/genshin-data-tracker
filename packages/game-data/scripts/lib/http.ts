@@ -25,10 +25,12 @@ export interface GetOptions {
   timeoutMs?: number
   /** Extra request headers. */
   headers?: Record<string, string>
+  /** HEAD only asks whether the URL exists (default GET). */
+  method?: 'GET' | 'HEAD'
 }
 
 /**
- * GET a URL. Returns null on 404; retries network errors, 429 and 5xx
+ * GET (or HEAD) a URL. Returns null on 404; retries network errors, 429 and 5xx
  * (honouring Retry-After) with 1 s, 2 s, 4 s… backoff; throws HttpError on any
  * other status or when the tries run out.
  */
@@ -40,6 +42,7 @@ export async function get(url: string, options: GetOptions = {}): Promise<Respon
     let wait = delay
     try {
       const response = await fetch(url, {
+        method: options.method ?? 'GET',
         headers: { 'user-agent': USER_AGENT, ...options.headers },
         signal: AbortSignal.timeout(timeoutMs),
       })

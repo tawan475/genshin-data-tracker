@@ -1,7 +1,7 @@
 /**
  * Shapes of the compiled files in `data/`.
  *
- * `scripts/build.ts` and `scripts/icons.ts` write them, the loaders in
+ * `scripts/build.ts` and `scripts/images.ts` write them, the loaders in
  * `./index.ts` read them. Rows are tuples so the files, and the app chunks
  * Vite makes from them, stay small; each file names its tuple columns in
  * `columns` so it can be read without this file.
@@ -195,18 +195,62 @@ export type WeeklyBossRow = [
 /** Weapon EXP ore forging: [ore GOOD key, input GOOD key, inputs per ore, Mora per ore, seconds per ore]. */
 export type ForgeRow = [ore: string, input: string, count: number, mora: number, seconds: number]
 
+/** Artifact slots in GOOD's order (`slotKey`). */
+export type ArtifactSlot = 'flower' | 'plume' | 'sands' | 'goblet' | 'circlet'
+
 /**
- * `avatars.json`: icon names (Enka `/ui/<name>.png`) for every planner
- * character and weapon, and the Traveler's portraits by gender (its GOOD keys
- * don't say which twin it is).
+ * A character's image names: [portrait, namecard banner, normal attack,
+ * elemental skill, elemental burst, constellations C1-C6]. '' where the game
+ * has none: the Traveler's portrait (see `traveler`), the namecard of the
+ * Traveler and Manekin(a).
  */
-export interface AvatarsFile {
-  columns: { characters: ['icon', 'side']; weapons: ['icon', 'awaken'] }
-  /** GOOD key -> [portrait, side icon]; no Traveler keys. */
-  characters: Record<string, [string, string]>
-  traveler: Record<'F' | 'M', [string, string]>
+export type CharacterImagesRow = [
+  icon: string,
+  namecard: string,
+  attack: string,
+  skill: string,
+  burst: string,
+  constellations: string[],
+]
+
+/**
+ * `images.json`: the game's own names for every image the tracker shows
+ * beyond materials and achievement categories, all from the dump. The app
+ * loads `https://static.nanoka.cc/assets/gi/<name>.webp` for each.
+ */
+export interface ImagesFile {
+  columns: {
+    characters: string[]
+    weapons: ['icon', 'awaken']
+    artifacts: ArtifactSlot[]
+  }
+  /** GOOD key -> names; one entry per Traveler element. */
+  characters: Record<string, CharacterImagesRow>
+  /** The Traveler's portrait by twin (its GOOD keys don't say which twin it is). */
+  traveler: Record<'F' | 'M', string>
   /** GOOD key -> [icon, ascended icon (the base icon when there is none)]. */
-  weapons: Record<string, [string, string]>
+  weapons: Record<string, [icon: string, awaken: string]>
+  /** GOOD set key -> piece icon per slot ('' for slots the set lacks, as the Prayers sets). */
+  artifacts: Record<string, [string, string, string, string, string]>
+  /** GOOD key -> icon of the few items the app shows without the material index (Mora, Primogem…). */
+  items: Record<string, string>
+}
+
+/**
+ * `missing-images.json` (written by `pnpm --filter @gdt/game-data images`):
+ * the image names static.nanoka.cc did not serve when last checked. The app
+ * shows initials for them instead of asking. `names` and `hash` identify the
+ * checked set, so a test can tell when a build added names nobody checked.
+ */
+export interface MissingImagesFile {
+  /** URL prefix the names were checked against. */
+  source: string
+  /** How many names were checked. */
+  names: number
+  /** sha256 (hex, first 16) of the sorted checked names joined by "
+". */
+  hash: string
+  missing: string[]
 }
 
 export interface PlannerFile {
@@ -309,15 +353,4 @@ export type MaterialIndexEntry = number | [id: number, icon: number | string]
 
 export interface MaterialIndexFile {
   materials: Record<string, MaterialIndexEntry>
-}
-
-export type IconSource = 'override' | 'enka' | 'yatta' | 'nanoka'
-
-/**
- * Icons self-hosted at `/gi/<name>.webp` (apps/tracker/public/gi), grouped by
- * where they came from, and the ones no source had.
- */
-export interface IconsFile {
-  sources: Record<IconSource, string[]>
-  missing: string[]
 }

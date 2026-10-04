@@ -6,8 +6,8 @@ text, categories, primogems and the version they were added in), planner costs
 families and domain days), where and how materials are farmed (domains and
 their tiers, weekly bosses, Dream Solvent and Dust of Azoth conversions, ore
 forging, resin items, passives), hand-kept drop rates for the planner's
-estimates, a material index for icons, and self-hosted material and
-achievement icons.
+estimates, a material index, and the name of every game image the tracker
+shows (the images themselves load from static.nanoka.cc).
 
 Everything is compiled from the game's own tables in Dimbreath's dump, checked
 in under `data/`, and refreshed by a maintainer once per game patch. The app
@@ -15,17 +15,16 @@ never talks to the dump.
 
 ## What is in it
 
-| File                                  | What                                                                                                                                                                                                                                                            | Size (min / gzip)    |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `data/meta.json`                      | Game version, dump repo, commit sha and title, when it was built                                                                                                                                                                                                | tiny                 |
-| `data/achievements.json`              | Every achievement: id, category, order, hidden, previous tier, primogems, progress target, version, disused                                                                                                                                                     | 64 KB / 13 KB        |
-| `data/achievement-goals.json`         | Achievement categories: id, order, icon                                                                                                                                                                                                                         | 3 KB                 |
-| `data/text/en.json`                   | Achievement titles and descriptions, category names                                                                                                                                                                                                             | 190 KB / 58 KB       |
-| `data/planner.json`                   | Characters (with the talent C3/C5 raise), weapons, ascension and talent tables (AR per phase, ascension per talent level), EXP curves, EXP items, planner materials, material families, domains and tiers, weekly bosses, conversions, forging, resin, passives | 234 KB / 42 KB       |
-| `data/materials.json`                 | Every GOOD material key the tracker can show -> item id and icon                                                                                                                                                                                                | 235 KB / 78 KB       |
-| `data/icons.json`                     | Which icons are self-hosted (by source) and which no source has                                                                                                                                                                                                 | 57 KB / 8 KB         |
-| `data/avatars.json`                   | Portrait / side-icon names per character, icon / ascended-icon names per weapon, the Traveler's by twin (Enka hosts these; the app uses them where Genshin Optimizer's asset table has no entry)                                                                | 32 KB / 5 KB         |
-| `../../apps/tracker/public/gi/*.webp` | The icons, 128 px WebP                                                                                                                                                                                                                                          | ~2,600 files, ~12 MB |
+| File                          | What                                                                                                                                                                                                                                                            | Size (min / gzip) |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `data/meta.json`              | Game version, dump repo, commit sha and title, when it was built                                                                                                                                                                                                | tiny              |
+| `data/achievements.json`      | Every achievement: id, category, order, hidden, previous tier, primogems, progress target, version, disused                                                                                                                                                     | 64 KB / 13 KB     |
+| `data/achievement-goals.json` | Achievement categories: id, order, icon                                                                                                                                                                                                                         | 3 KB              |
+| `data/text/en.json`           | Achievement titles and descriptions, category names                                                                                                                                                                                                             | 190 KB / 58 KB    |
+| `data/planner.json`           | Characters (with the talent C3/C5 raise), weapons, ascension and talent tables (AR per phase, ascension per talent level), EXP curves, EXP items, planner materials, material families, domains and tiers, weekly bosses, conversions, forging, resin, passives | 234 KB / 42 KB    |
+| `data/materials.json`         | Every GOOD material key the tracker can show -> item id and icon                                                                                                                                                                                                | 235 KB / 78 KB    |
+| `data/images.json`            | Image names per character (portrait, namecard, normal attack, skill, burst, C1-C6; the Traveler's portrait by twin), per weapon (icon, ascended), per artifact set (each slot's piece) and for a few items                                                      | 65 KB / 12 KB     |
+| `data/missing-images.json`    | The names static.nanoka.cc lacked at the last `images` check (the app shows initials for them)                                                                                                                                                                  | 39 KB / 5 KB      |
 
 Rows are tuples; each file names its columns. `src/format.ts` documents every
 shape. The app uses the typed loaders in `src/index.ts`, which dynamic-import
@@ -37,7 +36,7 @@ import {
   achievementText,
   loadPlanner,
   loadMaterialIndex,
-  loadIconManifest,
+  loadMissingImages,
   GAME_DATA,
 } from '@gdt/game-data'
 
@@ -58,9 +57,10 @@ all synchronous over `loadPlanner()` data and tested in Node:
 | `drops`            | `overrides/drops.json` (wiki drop rates): `loadDropRates()`, `parseDropRates()`                                                                       |
 | `seelie`           | Goals from a Seelie export                                                                                                                            |
 
-Material and achievement icons are served from `/gi/<icon>.webp`; see
-`gameIcon()` and `materialIcon()` in `apps/tracker/src/lib/assets.ts`.
-Characters, weapons and artifacts still come from Enka (it has all of them).
+`@gdt/game-data/images` resolves image names synchronously (`characterImages`,
+`weaponImages`, `artifactImage`, `itemImage`, `travelerIcon`); the app turns
+every name into `https://static.nanoka.cc/assets/gi/<name>.webp` in
+`apps/tracker/src/lib/assets.ts`.
 
 ## Refreshing after a game patch
 
@@ -74,10 +74,10 @@ pnpm --filter @gdt/game-data build --ref latest
 #    families, and anything whose costs changed. Fix every ERROR (see below) and
 #    rerun; warnings are worth a look too. Nothing is written while errors remain.
 
-# 3. Fetch icons for anything new (only new icons are downloaded).
-pnpm --filter @gdt/game-data icons
+# 3. Check the image names on static.nanoka.cc (only new and missing ones are asked).
+pnpm --filter @gdt/game-data images
 
-# 4. Test, then commit data/, overrides/ and apps/tracker/public/gi/ together.
+# 4. Test, then commit data/ and overrides/ together.
 pnpm test
 ```
 
@@ -92,18 +92,19 @@ version.
 
 Every error says what to change. The usual ones:
 
-| Error                                                  | Cause                                                      | Fix                                                                                                                                                 |
-| ------------------------------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `field "x" is in 0 of N rows`                          | The game renamed or obfuscated a field this version        | Find the field's new name in the raw JSON under `.cache/dump/<sha>/` and update the compiler in `scripts/compile/` (the spec next to `checkFields`) |
-| `family X has no domain days`                          | A new region's talent books or weapon materials            | Add the family to `overrides/weekdays.json`; the error suggests the days from the game's domain list                                                |
-| `GOOD key "X" comes from ids a, b with different data` | Two game entries make the same key (a quest or trial copy) | Exclude the wrong id in `overrides/keys.json`                                                                                                       |
-| `N achievement ids compiled before are gone`           | The game removed achievements (or the build is wrong)      | If the game really removed them, list them in `overrides/keys.json` `removed.achievements`                                                          |
-| `unknown weaponType` / `qualityType`                   | A new kind of character or weapon                          | Add it to the maps at the top of `scripts/compile/planner.ts`, or exclude the entry                                                                 |
-| `family X is in no domain entry`                       | The domain reward list changed shape                       | Check `DungeonEntryExcelConfigData.descriptionCycleRewardList` and `compileDomains` in `scripts/compile/farming.ts`                                 |
-| `Weekly material X is in no Dream Solvent trio`        | A new weekly material outside every trio (a quest reward)  | Confirm it in game; add it to `overrides/planner.json` `unfarmable` with the reason                                                                 |
-| `Weekly trio … has no boss name`                       | A weekly boss outside domains                              | Add its name to `overrides/planner.json` `weeklyBossNames`                                                                                          |
-| `overrides/drops.json: …`                              | A malformed drop rate entry                                | Fix the entry; see `overrides/README.md`                                                                                                            |
-| `Planner materials X and Y share the GOOD key`         | Two cost items have the same name                          | Give one a key in `overrides/keys.json` `materials.key` (match what irminsul exports)                                                               |
+| Error                                                  | Cause                                                           | Fix                                                                                                                                                 |
+| ------------------------------------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `field "x" is in 0 of N rows`                          | The game renamed or obfuscated a field this version             | Find the field's new name in the raw JSON under `.cache/dump/<sha>/` and update the compiler in `scripts/compile/` (the spec next to `checkFields`) |
+| `family X has no domain days`                          | A new region's talent books or weapon materials                 | Add the family to `overrides/weekdays.json`; the error suggests the days from the game's domain list                                                |
+| `GOOD key "X" comes from ids a, b with different data` | Two game entries make the same key (a quest or trial copy)      | Exclude the wrong id in `overrides/keys.json`                                                                                                       |
+| `N achievement ids compiled before are gone`           | The game removed achievements (or the build is wrong)           | If the game really removed them, list them in `overrides/keys.json` `removed.achievements`                                                          |
+| `unknown weaponType` / `qualityType`                   | A new kind of character or weapon                               | Add it to the maps at the top of `scripts/compile/planner.ts`, or exclude the entry                                                                 |
+| `family X is in no domain entry`                       | The domain reward list changed shape                            | Check `DungeonEntryExcelConfigData.descriptionCycleRewardList` and `compileDomains` in `scripts/compile/farming.ts`                                 |
+| `Weekly material X is in no Dream Solvent trio`        | A new weekly material outside every trio (a quest reward)       | Confirm it in game; add it to `overrides/planner.json` `unfarmable` with the reason                                                                 |
+| `Weekly trio … has no boss name`                       | A weekly boss outside domains                                   | Add its name to `overrides/planner.json` `weeklyBossNames`                                                                                          |
+| `overrides/drops.json: …`                              | A malformed drop rate entry                                     | Fix the entry; see `overrides/README.md`                                                                                                            |
+| `Planner materials X and Y share the GOOD key`         | Two cost items have the same name                               | Give one a key in `overrides/keys.json` `materials.key` (match what irminsul exports)                                                               |
+| `Character X: …icon…`, `Artifact set X: …`             | An image table changed shape (a new kind of skill depot or set) | Read the raw rows and adjust `scripts/compile/images.ts`; `pnpm --filter @gdt/game-data test` compares the names with Genshin Optimizer's           |
 
 GOOD keys are made exactly as irminsul makes them: the name from
 `TextMap_MediumEN` through `toGoodKey` (`packages/shared/src/good.ts`). The
@@ -123,24 +124,33 @@ The game data lacks a few things, and a few entries need a human decision.
 - `drops.json`: average drops per run from the Genshin Impact Wiki, every
   section citing a page revision; the planner estimates only what it has.
   Re-check it after a patch (the build compares it with the game's previews).
-- `icons/`: images for icons no source has; they win over every source.
 
-## Icons
+## Images
 
-`pnpm --filter @gdt/game-data icons` builds the set from `data/materials.json`
-and `data/achievement-goals.json`, takes each icon from the first of
-`overrides/icons/`, Enka, gi.yatta.moe and static.nanoka.cc that has it,
-scales it to fit 128 px, writes WebP to `apps/tracker/public/gi/` and records
-the result in `data/icons.json`. Requests carry a `gdt-game-data` User-Agent,
-run 4 at a time and back off on errors; downloads and misses are cached in
-`.cache/icons/`. Flags: `--retry-missing` (ask the sources again for icons none
-had), `--refresh` (re-fetch and re-convert everything), `--prune` (delete files
-no longer in the set).
+Every game image the tracker shows comes from one host,
+`https://static.nanoka.cc/assets/gi/<name>.webp` (WebP, CORS open, behind
+Cloudflare), and every name comes from the dump: the material index, the
+achievement categories and `data/images.json` (see
+`scripts/compile/images.ts` for where each name is read). Nothing is
+mirrored into the repo.
 
-Left out on purpose: TCG card faces and backs (large card art none of the
-sources host). The report lists the ~95 icons no source has; drop a PNG into
-`overrides/icons/<name>.png` to fill one. If you replace an icon file that
-clients may already have, bump `GI_IMAGES` in `apps/tracker/src/pwa/sw-template.js`.
+`pnpm --filter @gdt/game-data images` sends one HEAD request per name
+(`gdt-game-data` User-Agent, 4 at a time, backing off on errors), caches the
+names found in `.cache/images/`, and writes the ones the host lacks to
+`data/missing-images.json`; `--all` asks about every name again. Its report
+groups the missing names by kind and lists any outside materials. Run it
+after every `build`: a test fails while the build has names it never checked.
+
+Known gaps (7.1): about 170 material icons (old event and quest items, TCG
+icons) and almost all TCG card art; the app shows initials for them. Bursts
+use the dump's own `skillIcon` (64 px); the `_HD` variant other tools use is
+the same art at 128 px, which the host lacks for 17 newer characters.
+
+If the host goes away, any CDN or a self-hosted copy with the same
+`<name>.webp` layout works: change `IMAGE_BASE` in
+`apps/tracker/src/lib/assets.ts`, `IMAGE_HOST` here
+(`scripts/lib/image-names.ts`) and in `apps/tracker/src/pwa/sw-template.js`,
+and the preconnect in `apps/tracker/index.html`.
 
 ## Tests
 
@@ -151,12 +161,15 @@ clients may already have, bump `GI_IMAGES` in `apps/tracker/src/pwa/sw-template.
   `allCharacterMats_gen.json`), plus the Traveler and Manekin special cases;
 - achievement count, primogems, hidden flags and category sizes agree with a
   stardb summary (`test/fixtures/stardb-achievements.json`);
-- weekday coverage, families, EXP curves, the material index, the icon
-  manifest against the files in `public/gi`;
+- weekday coverage, families, EXP curves, the material index;
+- every image name equals Genshin Optimizer's asset table where GO names it
+  (`test/fixtures/go-assets.json`, 1,971 names: portraits, namecards, skills,
+  bursts, constellations, weapons, artifact pieces), and
+  `data/missing-images.json` was refreshed after the last build;
 - the build's own checks (field presence, version precedence, append-only,
   key choice) on small made-up inputs.
 
-`node scripts/make-test-fixtures.ts` refreshes both fixtures from GO and
+`node scripts/make-test-fixtures.ts` refreshes the fixtures from GO and
 stardb when they have caught up with a new version.
 
 ## Known limits
@@ -183,6 +196,6 @@ Game data, text and images © HoYoverse. The data comes from Dimbreath's dump
 (https://gitlab.com/Dimbreath/animegamedata2), which asks to be credited.
 Achievement versions were seeded from stardb.gg. Drop rates come from the
 Genshin Impact Wiki (genshin-impact.fandom.com, CC BY-SA), each cited by page
-revision in `overrides/drops.json`. Icons are mirrored from
-Enka.Network, gi.yatta.moe and static.nanoka.cc. Genshin
-Optimizer (MIT) is used only as a test oracle for costs.
+revision in `overrides/drops.json`. Images are loaded from static.nanoka.cc
+(Hakushin's image host); their names come from the dump. Genshin Optimizer
+(MIT) is used only as a test oracle for costs and image names.

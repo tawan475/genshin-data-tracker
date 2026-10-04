@@ -1,49 +1,38 @@
 /**
- * Game images. Characters, weapons and artifacts come from the Enka Network
- * CDN (flat `/ui/<name>.png`), with icon names from Genshin Optimizer's asset
- * table (AssetsData_gen.json) keyed by GOOD keys, or from our own game data
- * (@gdt/game-data/avatars) for what that table doesn't have yet; the
- * Traveler's portrait follows the account's twin setting. Material and achievement
- * icons are self-hosted under /gi (packages/game-data `icons`), because Enka
- * lacks about half of them; Enka is only their fallback. Anything unknown
- * returns '' and GameIcon shows initials.
+ * Game images. Every one loads from static.nanoka.cc (`<name>.webp`, CORS
+ * open, behind Cloudflare); the service worker keeps them cache-first. The
+ * names come only from our own game data (@gdt/game-data, compiled from the
+ * game's tables): `images` for characters, weapons, artifacts and a few
+ * items, the material index for materials, achievement categories for
+ * theirs. The Traveler's portrait follows the account's twin setting. Names
+ * the host lacks (data/missing-images.json, see `pnpm --filter
+ * @gdt/game-data images`) and anything unknown return '', so GameIcon shows
+ * initials.
  */
 
 import {
-  characterIconNames,
-  travelerIconNames,
-  weaponIconNames,
+  artifactImage,
+  artifactSetImage,
+  characterImages,
+  itemImage,
+  travelerIcon,
+  weaponImages,
+  type ArtifactSlot,
   type TravelerGender,
-} from '@gdt/game-data/avatars'
+} from '@gdt/game-data/images'
 import { shallowRef } from 'vue'
-import {
-  loadIconManifest,
-  loadMaterialIndex,
-  type IconManifest,
-  type MaterialIndex,
-} from '@gdt/game-data'
-import assetData from '@/utils/data/AssetsData_gen.json'
+import { loadMaterialIndex, loadMissingImages, type MaterialIndex } from '@gdt/game-data'
 
-const ENKA = 'https://enka.network/ui'
-/** Self-hosted game icons: apps/tracker/public/gi/<name>.webp. */
-const GI = '/gi'
+/** The image host (also in the service worker and index.html's preconnect). */
+export const IMAGE_BASE = 'https://static.nanoka.cc/assets/gi/'
 
-interface CharacterAssets {
-  icon?: string
-  iconSide?: string
-  banner?: string
+/** Names the host lacks; null until loadGameIcons resolves. */
+let missing: ReadonlySet<string> | null = null
+
+/** URL of a game image by name: '' without a name or for one the host lacks. */
+export function imageUrl(name: string | undefined): string {
+  return name && !missing?.has(name) ? `${IMAGE_BASE}${name}.webp` : ''
 }
-interface WeaponAssets {
-  icon?: string
-  awakenIcon?: string
-}
-type ArtifactAssets = Partial<Record<'flower' | 'plume' | 'sands' | 'goblet' | 'circlet', string>>
-
-const chars = assetData.chars as Record<string, CharacterAssets>
-const weapons = assetData.weapons as Record<string, WeaponAssets>
-const artifacts = assetData.artifacts as Record<string, ArtifactAssets>
-
-const url = (name: string | undefined) => (name ? `${ENKA}/${name}.png` : '')
 
 /**
  * Which twin the current account's Traveler is (an account setting, since
@@ -59,60 +48,44 @@ const isTraveler = (key: string) => key.startsWith('Traveler')
 
 /** Square character portrait. */
 export function characterIcon(key: string): string {
-  if (isTraveler(key)) return url(travelerIconNames(traveler.value)[0])
-  return url(chars[key]?.icon ?? characterIconNames(key)?.[0])
+  if (isTraveler(key)) return imageUrl(travelerIcon(traveler.value))
+  return imageUrl(characterImages(key)?.icon)
 }
 
-export function characterSideIcon(key: string): string {
-  if (isTraveler(key)) return url(travelerIconNames(traveler.value)[1])
-  return url(chars[key]?.iconSide ?? characterIconNames(key)?.[1])
-}
-
+/** The character's namecard picture ('' for the Traveler and Manekin). */
 export function characterBanner(key: string): string {
-  return url(chars[key]?.banner)
+  return imageUrl(characterImages(key)?.namecard)
 }
 
 /** Weapon icon; ascended weapons (ascension >= 2) use the awakened art, as in game. */
 export function weaponIcon(key: string, ascension = 0): string {
-  const info = weapons[key]
-  if (info?.icon) return url(ascension >= 2 ? (info.awakenIcon ?? info.icon) : info.icon)
-  const names = weaponIconNames(key)
-  return url(names && (ascension >= 2 ? names[1] : names[0]))
+  const names = weaponImages(key)
+  return imageUrl(names && (ascension >= 2 ? names[1] : names[0]))
 }
 
 export function artifactIcon(setKey: string, slotKey: string): string {
-  return url(artifacts[setKey]?.[slotKey as keyof ArtifactAssets])
+  return imageUrl(artifactImage(setKey, slotKey as ArtifactSlot))
 }
 
 /** Any artifact piece of a set, for set-level badges. */
 export function artifactSetIcon(setKey: string): string {
-  const set = artifacts[setKey]
-  return url(set?.flower ?? set?.plume ?? set?.circlet)
+  return imageUrl(artifactSetImage(setKey))
 }
 
-const LOCAL_MATERIALS: Record<string, string> = {
-  Mora: '/img/Item_Mora.webp',
-  Primogem: '/img/Item_Primogem.webp',
-  SanctifyingEssence: '/img/Item_Sanctifying_Essence.webp',
-  SanctifyingUnction: '/img/Item_Sanctifying_Unction.webp',
-}
-
-let icons: IconManifest | null = null
 let materialIndex: MaterialIndex | null = null
 
-/** Loads the list of self-hosted icons (small); call before gameIcon. */
+/** Loads the list of names the host lacks (small); call before gameIcon. */
 export async function loadGameIcons(): Promise<void> {
-  icons ??= await loadIconManifest()
+  missing ??= await loadMissingImages()
 }
 
 /**
  * A game icon by its name (`UI_ItemIcon_104013`, `UI_AchievementIcon_A001`):
- * self-hosted when we have it, '' when no source has it, else Enka (icons
- * newer than the last `icons` run). '' until loadGameIcons resolves.
+ * '' when the host lacks it, and '' until loadGameIcons resolves (so a
+ * missing icon is never requested).
  */
 export function gameIcon(name: string): string {
-  if (!icons || !name || icons.missing.has(name)) return ''
-  return icons.hosted.has(name) ? `${GI}/${name}.webp` : url(name)
+  return missing ? imageUrl(name) : ''
 }
 
 /** Loaded lazily (large); call before rendering material icons. */
@@ -122,10 +95,8 @@ export async function loadMaterialIcons(): Promise<void> {
   materialIndex = index
 }
 
+/** A material's icon by GOOD key; Mora, Primogem and the Sanctifying items work without loading. */
 export function materialIcon(key: string): string {
-  return LOCAL_MATERIALS[key] ?? gameIcon(materialIndex?.icon(key) ?? '')
-}
-
-export function knownCharacter(key: string): boolean {
-  return key in chars || isTraveler(key) || characterIconNames(key) !== undefined
+  const item = itemImage(key)
+  return item ? imageUrl(item) : gameIcon(materialIndex?.icon(key) ?? '')
 }
