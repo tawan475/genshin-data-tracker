@@ -36,6 +36,14 @@ import {
 } from '../services/export'
 import { importSnapshot } from '../services/import'
 
+/**
+ * Part of the snapshot list's ETag. Bump it whenever the list's JSON changes
+ * shape without the data changing, so a browser revalidating a body cached in
+ * the old shape gets the new one instead of a 304. 2: the summary's
+ * unlocked, unequipped artifact counts are artifact3 / artifact4 (migration 0008).
+ */
+const SNAPSHOT_LIST_FORMAT = 2
+
 export const accounts = new Hono<AppEnv>()
   .use(requireUser)
 
@@ -136,7 +144,7 @@ export const accounts = new Hono<AppEnv>()
 
   .get('/:id/snapshots', async (c) => {
     const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
-    const cached = checkEtag(c, accountEtag(account, 'snapshots'))
+    const cached = checkEtag(c, accountEtag(account, `snapshots.${SNAPSHOT_LIST_FORMAT}`))
     if (cached) return cached
     const { results } = await c.env.DB.prepare(
       `SELECT id, taken_at, last_seen_at, created_at, source, raw_size, stored_size, summary

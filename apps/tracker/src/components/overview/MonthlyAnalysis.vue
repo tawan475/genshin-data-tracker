@@ -5,8 +5,8 @@ import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { formatNumber } from '@/lib/format'
 import {
+  ARTIFACT_LEVEL0_EXP,
   compareMonths,
-  FODDER_EXP,
   formatSignedExact,
   monthLabel,
   monthlyAnalysis,
@@ -21,16 +21,17 @@ import {
 import ChangeValue from './ChangeValue.vue'
 
 /**
- * Day-by-day movement of primogems, mora and fodder for one month, computed
- * in the browser from snapshot summaries (the last capture of each day).
+ * Day-by-day movement of primogems, mora and 4★/3★ artifacts for one month,
+ * computed in the browser from snapshot summaries (the last capture of each
+ * day).
  */
 const props = defineProps<{ days: DayClose[] }>()
 
 const COLUMNS: Record<MonthlyKey, { label: string; up: string; down: string }> = {
   primogem: { label: 'Primogems', up: 'gained', down: 'spent' },
   mora: { label: 'Mora', up: 'gained', down: 'spent' },
-  fodder4: { label: '4★ Artifact', up: 'added', down: 'used' },
-  fodder3: { label: '3★ Artifact', up: 'added', down: 'used' },
+  artifact4: { label: '4★ Artifact', up: 'added', down: 'used' },
+  artifact3: { label: '3★ Artifact', up: 'added', down: 'used' },
 }
 
 const firstMonth = computed(() => {
@@ -123,8 +124,8 @@ const totals = computed(() => {
     const c = COLUMNS[key]
     const detail = [`${c.up} ${formatNumber(t.gained)}`, `${c.down} ${formatNumber(t.spent)}`]
     if (t.closing !== null) detail.push(`closing ${formatNumber(t.closing)}`)
-    if ((key === 'fodder4' || key === 'fodder3') && t.net !== null) {
-      detail.push(`${formatSignedExact(t.net * FODDER_EXP[key])} artifact EXP at level 0`)
+    if ((key === 'artifact4' || key === 'artifact3') && t.net !== null) {
+      detail.push(`${formatSignedExact(t.net * ARTIFACT_LEVEL0_EXP[key])} artifact EXP at level 0`)
     }
     return { key, label: c.label, net: t.net, detail: detail.join(' · ') }
   })

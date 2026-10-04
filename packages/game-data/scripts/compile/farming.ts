@@ -493,7 +493,7 @@ function compileConversions(
   }
 }
 
-// --- Forging, weapon fodder, resin ---------------------------------------------------
+// --- Forging, weapon EXP, resin ------------------------------------------------------
 
 function compileForge(inputs: FarmingInputs, context: FarmingContext): ForgeRow[] {
   const { problems } = context

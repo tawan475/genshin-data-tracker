@@ -1,6 +1,6 @@
 /**
  * The Weapons page's model. An account holds 1,000+ weapons, most of them
- * identical fodder, so copies are handled at two levels:
+ * identical low-rarity copies, so copies are handled at two levels:
  *
  * - rows: unequipped copies with the same key, level, ascension, refinement
  *   and lock state collapse into one row with a count; an equipped weapon

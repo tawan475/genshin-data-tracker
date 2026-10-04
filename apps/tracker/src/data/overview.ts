@@ -67,8 +67,8 @@ const SUMMARY_KEYS: SummaryKey[] = [
   'materials',
   'mora',
   'primogem',
-  'fodder3',
-  'fodder4',
+  'artifact3',
+  'artifact4',
 ]
 
 const CURRENCY_KEYS: ReadonlySet<SummaryKey> = new Set(['mora', 'primogem'])
@@ -275,7 +275,7 @@ export function monthLabel(ref: MonthRef): string {
 }
 
 /** The figures the monthly table follows. */
-export const MONTHLY_KEYS = ['primogem', 'mora', 'fodder4', 'fodder3'] as const
+export const MONTHLY_KEYS = ['primogem', 'mora', 'artifact4', 'artifact3'] as const
 export type MonthlyKey = (typeof MONTHLY_KEYS)[number]
 
 export interface DayFigure {
@@ -450,8 +450,8 @@ export function monthRows(days: readonly MonthDay[]): MonthRow[] {
   return rows
 }
 
-/** Base artifact EXP a level-0 piece gives when used as fodder. */
-export const FODDER_EXP = { fodder4: 2520, fodder3: 1260 } as const
+/** Base artifact EXP a level-0 piece gives when used to enhance another. */
+export const ARTIFACT_LEVEL0_EXP = { artifact4: 2520, artifact3: 1260 } as const
 
 // ---------------------------------------------------------- recent snapshots
 
@@ -478,8 +478,8 @@ const CHANGE_LABELS: [SummaryKey, string][] = [
   ['characters', 'Characters'],
   ['weapons', 'Weapons'],
   ['artifacts', 'Artifacts'],
-  ['fodder4', '4★ fodder'],
-  ['fodder3', '3★ fodder'],
+  ['artifact4', '4★ Artifact'],
+  ['artifact3', '3★ Artifact'],
 ]
 
 /** The newest `count` snapshots with what changed in each. Input is newest first. */

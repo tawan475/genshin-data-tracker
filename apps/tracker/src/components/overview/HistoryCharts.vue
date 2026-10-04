@@ -18,8 +18,9 @@ import {
 import ChangeValue from './ChangeValue.vue'
 
 /**
- * Mora, primogems, artifacts and fodder over time, one chart per scale. One
- * range control above all four filters every chart the same way.
+ * Mora, primogems, artifacts and unlocked 4★/3★ artifacts over time, one
+ * chart per scale. One range control above all four filters every chart the
+ * same way.
  */
 const props = defineProps<{ captures: Capture[] }>()
 
@@ -31,7 +32,7 @@ interface ChartDef {
   series: { key: SummaryKey; label: string; color: TimelineSeries['color'] }[]
 }
 
-// Fodder 4★/3★ use chart-6 (violet) and chart-3 (green): a pair that stays
+// The 4★/3★ series use chart-6 (violet) and chart-3 (green): a pair that stays
 // apart under colour-vision deficiency in both themes; violet/sky does not.
 const CHARTS: ChartDef[] = [
   { id: 'mora', title: 'Mora', series: [{ key: 'mora', label: 'Mora', color: 2 }] },
@@ -46,12 +47,12 @@ const CHARTS: ChartDef[] = [
     series: [{ key: 'artifacts', label: 'Artifacts', color: 5 }],
   },
   {
-    id: 'fodder',
+    id: 'low-rarity',
     title: '4★ / 3★ Artifact',
     detail: 'Unlocked, unequipped artifacts',
     series: [
-      { key: 'fodder4', label: '4★ Artifact', color: 6 },
-      { key: 'fodder3', label: '3★ Artifact', color: 3 },
+      { key: 'artifact4', label: '4★ Artifact', color: 6 },
+      { key: 'artifact3', label: '3★ Artifact', color: 3 },
     ],
   },
 ]
