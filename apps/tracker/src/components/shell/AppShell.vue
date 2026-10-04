@@ -113,11 +113,11 @@ const navClass = (active: boolean) =>
               v-for="section in sections"
               :key="section.name"
               :to="section.to"
-              class="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors"
+              class="flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium transition-colors"
               :class="navClass(isActive(section.name))"
               :aria-current="isActive(section.name) ? 'page' : undefined"
             >
-              <component :is="section.icon" class="size-4" aria-hidden="true" />
+              <component :is="section.icon" class="size-5" aria-hidden="true" />
               {{ section.label }}
             </RouterLink>
           </nav>
@@ -128,19 +128,19 @@ const navClass = (active: boolean) =>
           <nav class="space-y-0.5">
             <RouterLink
               :to="{ name: 'home' }"
-              class="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium"
+              class="flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium"
               :class="navClass(isActive('home'))"
             >
-              <LayoutGrid class="size-4" aria-hidden="true" />
+              <LayoutGrid class="size-5" aria-hidden="true" />
               Accounts
             </RouterLink>
             <div class="flex items-center gap-1">
               <RouterLink
                 :to="{ name: 'settings' }"
-                class="flex flex-1 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium"
+                class="flex flex-1 items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium"
                 :class="navClass(isActive('settings'))"
               >
-                <Settings class="size-4" aria-hidden="true" />
+                <Settings class="size-5" aria-hidden="true" />
                 Settings
               </RouterLink>
               <button
