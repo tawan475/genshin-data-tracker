@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 /**
- * Refreshes the two test oracles in test/fixtures/ (small, trimmed copies):
+ * Refreshes the test oracles in test/fixtures/ (small, trimmed copies):
  *
  * - go-character-costs.json: character ascension and talent costs from
  *   Genshin Optimizer's allCharacterMats_gen.json (MIT), with item keys
  *   interned. Our compiled costs must equal GO's for every key both have.
+ * - go-assets.json: image names (portraits, namecards, skills, bursts,
+ *   constellations, weapons, artifact pieces) from GO's AssetsData_gen.json.
+ *   Our data/images.json must name the same images.
  * - stardb-achievements.json: stardb.gg's achievement ids, hidden ids,
  *   per-category counts and primogem total. Our data must cover them.
  *
@@ -21,6 +24,8 @@ import { PACKAGE_DIR } from './lib/paths.ts'
 
 const GO_URL =
   'https://raw.githubusercontent.com/frzyc/genshin-optimizer/master/libs/gi/mats/src/allCharacterMats_gen.json'
+const GO_ASSETS_URL =
+  'https://raw.githubusercontent.com/frzyc/genshin-optimizer/master/libs/gi/assets-data/src/AssetsData_gen.json'
 const STARDB_URL = 'https://stardb.gg/api/gi/achievements?lang=en'
 const FIXTURES = join(PACKAGE_DIR, 'test', 'fixtures')
 
@@ -85,6 +90,32 @@ const goFixture = {
   characters,
 }
 
+// --- Genshin Optimizer image names ---------------------------------------------
+type GoAssets = Record<'chars' | 'weapons' | 'artifacts', Record<string, Record<string, string>>>
+const goAssets = await getJson<GoAssets>(GO_ASSETS_URL)
+/** The fields of each entry, in order; '' where GO has none. Empty entries (unreleased) are left out. */
+const pick = (table: Record<string, Record<string, string>>, fields: string[]) =>
+  Object.fromEntries(
+    Object.keys(table)
+      .sort()
+      .map((key) => [key, fields.map((f) => table[key]![f] ?? '')] as const)
+      .filter(([, values]) => values.some(Boolean)),
+  )
+const assetsFixture = {
+  $source: `${GO_ASSETS_URL} (Genshin Optimizer, MIT), trimmed by scripts/make-test-fixtures.ts`,
+  $format:
+    'chars: [icon, banner, skill, burst, constellation1..6]; weapons: [icon, awakenIcon]; artifacts: [flower, plume, sands, goblet, circlet]',
+  chars: pick(goAssets.chars, [
+    'icon',
+    'banner',
+    'skill',
+    'burst',
+    ...[1, 2, 3, 4, 5, 6].map((n) => `constellation${n}`),
+  ]),
+  weapons: pick(goAssets.weapons, ['icon', 'awakenIcon']),
+  artifacts: pick(goAssets.artifacts, ['flower', 'plume', 'sands', 'goblet', 'circlet']),
+}
+
 // --- stardb ------------------------------------------------------------------
 interface StardbAchievement {
   id: number
@@ -110,6 +141,7 @@ const stardbFixture = {
 
 for (const [file, value, expand] of [
   ['go-character-costs.json', goFixture, 2],
+  ['go-assets.json', assetsFixture, 2],
   ['stardb-achievements.json', stardbFixture, 1],
 ] as const) {
   const changed = writeIfChanged(join(FIXTURES, file), formatJson(value, expand))

@@ -21,7 +21,7 @@ import { formatStatName, formatStatValue } from '@/utils/artifact-stats'
 import ArtifactPiece from './ArtifactPiece.vue'
 import CharacterTimeline from './CharacterTimeline.vue'
 import ConstellationPips from './ConstellationPips.vue'
-import EnkaGlyph from './EnkaGlyph.vue'
+import TalentGlyph from './TalentGlyph.vue'
 import { constellationIcons, talentIcons } from './talent-icons'
 import { ELEMENT_FILL, ELEMENT_SOFT, ELEMENT_TEXT } from './tokens'
 
@@ -31,7 +31,7 @@ const props = defineProps<{ character: CharacterView; account: AccountRef }>()
 const c = computed(() => props.character)
 const totals = computed(() => artifactTotals(c.value))
 
-const glyphs = computed(() => talentIcons(c.value.key, c.value.weaponType))
+const glyphs = computed(() => talentIcons(c.value.key))
 const talents = computed(() => [
   {
     key: 'auto',
@@ -130,7 +130,7 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
                 "
                 :title="`C${index + 1}${index < c.constellation ? '' : ' (locked)'}`"
               >
-                <EnkaGlyph :src="icon" class="size-5" />
+                <TalentGlyph :src="icon" class="size-5" />
               </li>
             </ul>
             <ConstellationPips v-else :value="c.constellation" :element="c.element" />
@@ -150,7 +150,7 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
               class="hidden size-8 shrink-0 items-center justify-center rounded-full min-[400px]:inline-flex"
               :class="glyphTone"
             >
-              <EnkaGlyph :src="t.icon" class="size-6" />
+              <TalentGlyph :src="t.icon" class="size-6" />
             </span>
             <div class="min-w-0">
               <dt class="truncate text-xs text-text-secondary">{{ t.label }}</dt>

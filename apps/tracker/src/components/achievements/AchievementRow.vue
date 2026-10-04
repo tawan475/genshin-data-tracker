@@ -11,6 +11,7 @@ import {
   type DoneSource,
   type DoneState,
 } from '@gdt/game-data/achievement-progress'
+import { materialIcon } from '@/lib/assets'
 import { formatDate, formatNumber } from '@/lib/format'
 
 /**
@@ -27,6 +28,8 @@ const props = defineProps<{
   firstTakenAt: number | null
 }>()
 const emit = defineEmits<{ mark: [ids: number[]]; unmark: [ids: number[]] }>()
+
+const primogem = materialIcon('Primogem')
 
 const tiers = computed(() =>
   props.entry.tiers.map((tier) => ({ tier, source: doneSource(props.state, tier.id) })),
@@ -139,7 +142,7 @@ const FILL: Record<DoneSource, string> = {
           :class="complete ? 'text-text-muted' : 'text-text-primary'"
           :title="rewardTitle"
         >
-          <img src="/img/Item_Primogem.webp" alt="" class="size-5" loading="lazy" />
+          <img :src="primogem" alt="" class="size-5" loading="lazy" />
           {{ formatNumber(entry.primogems) }}
           <span class="sr-only">primogems</span>
         </span>

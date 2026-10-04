@@ -26,6 +26,8 @@ export interface KeysOverride {
     goals: Set<number>
     characters: Set<string>
     weapons: Set<string>
+    /** Artifact set GOOD keys (data/images.json). */
+    artifacts: Set<string>
   }
 }
 
@@ -133,6 +135,7 @@ function loadKeys(problems: Problems): KeysOverride {
     'goals',
     'characters',
     'weapons',
+    'artifacts',
   ])
 
   const prefer = new Map<string, number>()
@@ -156,6 +159,7 @@ function loadKeys(problems: Problems): KeysOverride {
       goals: new Set(idList(problems, `${file} removed.goals`, removed.goals)),
       characters: new Set(stringList(problems, `${file} removed.characters`, removed.characters)),
       weapons: new Set(stringList(problems, `${file} removed.weapons`, removed.weapons)),
+      artifacts: new Set(stringList(problems, `${file} removed.artifacts`, removed.artifacts)),
     },
   }
 }

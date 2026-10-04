@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import type { ProgressSummary } from '@gdt/game-data/achievement-progress'
 import UiProgress from '@/components/ui/UiProgress.vue'
+import { materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
+
+const primogem = materialIcon('Primogem')
 
 /** Done / total, percent, primogems, and a "Missing" tile that filters to what is left. */
 const props = defineProps<{ summary: ProgressSummary; missingOnly: boolean }>()
@@ -48,7 +51,7 @@ const missing = computed(() => props.summary.total - props.summary.done)
       title="Primogems collected / on offer"
     >
       <span class="flex items-center gap-1 text-xs text-text-secondary sm:text-sm">
-        <img src="/img/Item_Primogem.webp" alt="" class="size-4" />
+        <img :src="primogem" alt="" class="size-4" />
         Primogems
       </span>
       <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">

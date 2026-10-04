@@ -1,14 +1,22 @@
-import { existsSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import iconsJson from '../data/icons.json'
+import goalsJson from '../data/achievement-goals.json'
+import imagesJson from '../data/images.json'
 import materialsJson from '../data/materials.json'
+import missingJson from '../data/missing-images.json'
 import plannerJson from '../data/planner.json'
-import { GAME_DATA, entryIcon, loadIconManifest, loadMaterialIndex } from '../src'
-import type { IconsFile, MaterialIndexFile, PlannerFile } from '../src/format'
-import { TRACKER_ICON_DIR } from '../scripts/lib/paths.ts'
+import { GAME_DATA, loadMaterialIndex, loadMissingImages } from '../src'
+import type {
+  GoalsFile,
+  ImagesFile,
+  MaterialIndexFile,
+  MissingImagesFile,
+  PlannerFile,
+} from '../src/format'
+import { IMAGE_HOST, imageNames, nameSetHash } from '../scripts/lib/image-names.ts'
 
-const icons = iconsJson as unknown as IconsFile
+const goals = goalsJson as unknown as GoalsFile
+const images = imagesJson as unknown as ImagesFile
+const missingImages = missingJson as unknown as MissingImagesFile
 const materials = (materialsJson as unknown as MaterialIndexFile).materials
 const planner = plannerJson as unknown as PlannerFile
 
@@ -43,41 +51,28 @@ describe('material index', () => {
   })
 })
 
-describe('self-hosted icons', () => {
-  const hosted = Object.values(icons.sources).flat()
+describe('image coverage (data/missing-images.json)', () => {
+  const names = imageNames()
 
-  it('lists each icon once, sorted', () => {
-    expect(new Set([...hosted, ...icons.missing]).size).toBe(hosted.length + icons.missing.length)
-    for (const list of [...Object.values(icons.sources), icons.missing]) {
-      expect(list).toEqual([...list].sort())
-    }
+  it('was checked after the last build (run `images` after `build`)', () => {
+    expect([missingImages.names, missingImages.hash]).toEqual([
+      names.size,
+      nameSetHash(names.keys()),
+    ])
+    expect(missingImages.source).toBe(`${IMAGE_HOST}<name>.webp`)
   })
 
-  it('has a file in apps/tracker/public/gi for every hosted icon, and no others', () => {
-    const files = new Set(readdirSync(TRACKER_ICON_DIR).filter((f) => f.endsWith('.webp')))
-    for (const icon of hosted) expect(files.has(`${icon}.webp`), icon).toBe(true)
-    expect(files.size).toBe(hosted.length)
+  it('lists known names once, sorted', () => {
+    expect(missingImages.missing).toEqual([...new Set(missingImages.missing)].sort())
+    for (const name of missingImages.missing) expect(names.has(name), name).toBe(true)
   })
 
-  it('covers every planner material and achievement category', async () => {
-    const { hosted: set, missing } = await loadIconManifest()
-    expect(missing.size).toBe(icons.missing.length)
-    for (const [, key, , , , icon] of planner.materials) expect(set.has(icon), key).toBe(true)
-    const goals = (await import('../data/achievement-goals.json')).default.rows as [
-      number,
-      number,
-      string,
-    ][]
-    for (const [, , icon] of goals) expect(set.has(icon), icon).toBe(true)
-  })
-
-  it('was refreshed after the last build (run `icons` after `build`)', () => {
-    // Every icon the index uses is hosted, known missing, or deliberately skipped (TCG card art).
-    const known = new Set([...hosted, ...icons.missing])
-    const unknown = Object.values(materials)
-      .map(entryIcon)
-      .filter((icon) => !known.has(icon) && !/^UI_Gcg_Card(Face|Back)_/.test(icon))
-    expect(unknown).toEqual([])
-    expect(existsSync(join(TRACKER_ICON_DIR, 'UI_ItemIcon_202.webp'))).toBe(true)
+  it('has every item, achievement category and planner material shown outside the bag', async () => {
+    const missing = await loadMissingImages()
+    expect(missing.size).toBe(missingImages.missing.length)
+    for (const [key, name] of Object.entries(images.items))
+      expect(missing.has(name), key).toBe(false)
+    for (const [id, , icon] of goals.rows) expect(missing.has(icon), String(id)).toBe(false)
+    for (const [, key, , , , icon] of planner.materials) expect(missing.has(icon), key).toBe(false)
   })
 })

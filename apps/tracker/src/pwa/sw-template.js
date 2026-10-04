@@ -8,21 +8,20 @@
  *   back to the cached app shell offline.
  * - /api is never cached: account data on a shared device is readable by the
  *   next person who opens it.
- * - Game images from the Enka CDN never change for a given URL, so they are
- *   kept cache-first in their own bounded cache across builds. Self-hosted
- *   game icons (/gi/, ~4 KB each, see packages/game-data) get the same
- *   treatment in a larger cache; bump its version when existing icon files
- *   are replaced so clients fetch them again.
+ * - Game images come from static.nanoka.cc (src/lib/assets.ts) and are kept
+ *   cache-first in their own bounded cache across builds. They are fetched in
+ *   CORS mode (the host allows any origin), so only real image responses are
+ *   kept, never an error page or an opaque response (which would also count
+ *   megabytes against the storage quota). Bump IMAGES' version to drop them.
  */
 
 const BUILD = '__BUILD__'
 const PRECACHE = __PRECACHE__
 const CACHE = `gdt-${BUILD}`
-const IMAGES = 'gdt-enka'
-const MAX_IMAGES = 800
-const GI_IMAGES = 'gdt-gi-v1'
-const MAX_GI_IMAGES = 2500
-const KEEP = [IMAGES, GI_IMAGES]
+const IMAGE_HOST = 'static.nanoka.cc'
+const IMAGES = 'gdt-images-v2'
+const MAX_IMAGES = 2500
+const KEEP = [IMAGES]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)))
@@ -54,18 +53,30 @@ async function trim(cacheName, max) {
   for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i])
 }
 
-const LIMITS = { [IMAGES]: MAX_IMAGES, [GI_IMAGES]: MAX_GI_IMAGES }
-
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName)
   const hit = await cache.match(request)
   if (hit) return hit
   const response = await fetch(request)
-  // An unknown /gi/ path gets the SPA's index.html with a 200: never keep that.
-  const isImage = (response.headers.get('content-type') ?? '').startsWith('image/')
-  if ((response.ok && (cacheName !== GI_IMAGES || isImage)) || response.type === 'opaque') {
-    await cache.put(request, response.clone())
-    if (LIMITS[cacheName]) trim(cacheName, LIMITS[cacheName])
+  if (response.ok) await cache.put(request, response.clone())
+  return response
+}
+
+/** Game images: cache-first by URL, keeping only `image/*` answers, at most MAX_IMAGES. */
+async function cacheImage(request) {
+  const cache = await caches.open(IMAGES)
+  const hit = await cache.match(request.url)
+  if (hit) return hit
+  let response
+  try {
+    response = await fetch(request.url, { mode: 'cors', credentials: 'omit' })
+  } catch {
+    // Offline, or the host stopped allowing CORS: pass the page's own request through.
+    return fetch(request)
+  }
+  if (response.ok && (response.headers.get('content-type') ?? '').startsWith('image/')) {
+    await cache.put(request.url, response.clone())
+    trim(IMAGES, MAX_IMAGES)
   }
   return response
 }
@@ -77,7 +88,9 @@ async function navigate(event) {
     return await fetch(event.request)
   } catch {
     const shell = await caches.match('/', { ignoreSearch: true })
-    return shell ?? new Response('Offline', { status: 503, headers: { 'content-type': 'text/plain' } })
+    return (
+      shell ?? new Response('Offline', { status: 503, headers: { 'content-type': 'text/plain' } })
+    )
   }
 }
 
@@ -86,16 +99,12 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   const url = new URL(request.url)
 
-  if (url.hostname === 'enka.network' && url.pathname.startsWith('/ui/')) {
-    event.respondWith(cacheFirst(request, IMAGES))
+  if (url.hostname === IMAGE_HOST) {
+    event.respondWith(cacheImage(request))
     return
   }
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
-  if (url.pathname.startsWith('/gi/')) {
-    event.respondWith(cacheFirst(request, GI_IMAGES))
-    return
-  }
 
   if (request.mode === 'navigate') {
     event.respondWith(navigate(event))

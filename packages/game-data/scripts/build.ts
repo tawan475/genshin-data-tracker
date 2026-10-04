@@ -19,6 +19,7 @@ import { toGoodKey } from '../../shared/src/good.ts'
 import type {
   AchievementsFile,
   GoalsFile,
+  ImagesFile,
   MaterialIndexFile,
   MetaFile,
   PlannerFile,
@@ -27,7 +28,7 @@ import type {
 import { checkAppendOnly, describeChanges, type DataSet } from './lib/changes.ts'
 import { checkDrops } from './lib/drops.ts'
 import { ACHIEVEMENT_FILES, compileAchievements } from './compile/achievements.ts'
-import { compileAvatarIcons } from './compile/avatars.ts'
+import { compileImages, IMAGE_FILES } from './compile/images.ts'
 import { compileMaterialIndex } from './compile/materials.ts'
 import { compilePlanner, PLANNER_FILES, type PlannerInputs } from './compile/planner.ts'
 import {
@@ -59,7 +60,7 @@ const OUTPUT = {
   text: ['text/en.json', 2],
   planner: ['planner.json', 2],
   materials: ['materials.json', 2],
-  avatars: ['avatars.json', 2],
+  images: ['images.json', 2],
 } as const
 
 const { values: args } = parseArgs({
@@ -119,6 +120,7 @@ function readPrevious(): DataSet {
     text: read<TextFile>('text'),
     planner: read<PlannerFile>('planner'),
     materials: read<MaterialIndexFile>('materials'),
+    images: read<ImagesFile>('images'),
   }
 }
 
@@ -152,6 +154,7 @@ async function main(): Promise<number> {
     ...new Set<string>([
       ...Object.values(ACHIEVEMENT_FILES),
       ...Object.values(PLANNER_FILES),
+      ...Object.values(IMAGE_FILES),
       ...Object.values(TEXT_FILES),
     ]),
   ]
@@ -201,7 +204,18 @@ async function main(): Promise<number> {
     problems,
   })
 
-  const avatars = compileAvatarIcons(plannerInputs, planner.planner, problems)
+  const images = compileImages(
+    {
+      ...plannerInputs,
+      rewards: rows(ACHIEVEMENT_FILES.rewards),
+      fetterCards: rows(IMAGE_FILES.fetterCards),
+      reliquaries: rows(IMAGE_FILES.reliquaries),
+      reliquarySets: rows(IMAGE_FILES.reliquarySets),
+      equipAffixes: rows(IMAGE_FILES.equipAffixes),
+      names,
+    },
+    { planner: planner.planner, materials, toGoodKey: goodKey, problems },
+  )
 
   for (const [name, [ours, theirs]] of keyMismatches) {
     problems.warn(`"${name}": toGoodKey gives ${ours}, irminsul would export ${theirs}`)
@@ -222,7 +236,7 @@ async function main(): Promise<number> {
     text: achievements.text,
     planner: planner.planner,
     materials,
-    avatars,
+    images,
   }
   checkAppendOnly(previous, next, overrides.keys.removed, problems)
 
@@ -240,14 +254,7 @@ async function main(): Promise<number> {
   }
 
   const written: string[] = []
-  for (const name of [
-    'achievements',
-    'goals',
-    'text',
-    'planner',
-    'materials',
-    'avatars',
-  ] as const) {
+  for (const name of ['achievements', 'goals', 'text', 'planner', 'materials', 'images'] as const) {
     const [file, expand] = OUTPUT[name]
     if (writeIfChanged(join(DATA_DIR, file), formatJson(next[name], expand))) written.push(file)
   }
@@ -259,7 +266,7 @@ async function main(): Promise<number> {
   }
   console.log(
     written.length
-      ? `\nWrote data/${written.join(', data/')}. Next: pnpm --filter @gdt/game-data icons`
+      ? `\nWrote data/${written.join(', data/')}. Next: pnpm --filter @gdt/game-data images`
       : '\nNothing changed.',
   )
   return 0

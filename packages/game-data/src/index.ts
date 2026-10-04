@@ -11,8 +11,8 @@ import type {
   DomainKind,
   Element,
   GoalsFile,
-  IconsFile,
   MaterialIndexFile,
+  MissingImagesFile,
   MaterialKind,
   MetaFile,
   PlannerFile,
@@ -61,7 +61,7 @@ export interface Achievement {
 export interface AchievementGoal {
   id: number
   order: number
-  /** Icon name; self-hosted at /gi/<icon>.webp. */
+  /** Icon name (`UI_AchievementIcon_A001`). */
   icon: string
 }
 
@@ -521,7 +521,7 @@ export function decodePlanner(file: PlannerFile): PlannerData {
   }
 }
 
-// --- Material index and self-hosted icons -----------------------------------
+// --- Material index and image coverage ----------------------------------------
 
 export interface MaterialIndex {
   /** Every GOOD material key the index knows. */
@@ -551,14 +551,12 @@ export const loadMaterialIndex = once(async (): Promise<MaterialIndex> => {
   }
 })
 
-export interface IconManifest {
-  /** Icon names self-hosted at `/gi/<name>.webp` (apps/tracker/public/gi). */
-  hosted: ReadonlySet<string>
-  /** Icons no source had when `icons` last ran (Enka included): show a placeholder. */
-  missing: ReadonlySet<string>
-}
-
-export const loadIconManifest = once(async (): Promise<IconManifest> => {
-  const file = (await import('../data/icons.json')).default as unknown as IconsFile
-  return { hosted: new Set(Object.values(file.sources).flat()), missing: new Set(file.missing) }
+/**
+ * Image names static.nanoka.cc did not serve when `pnpm --filter
+ * @gdt/game-data images` last checked (data/missing-images.json): the app
+ * shows initials for them instead of asking.
+ */
+export const loadMissingImages = once(async (): Promise<ReadonlySet<string>> => {
+  const file = (await import('../data/missing-images.json')).default as unknown as MissingImagesFile
+  return new Set(file.missing)
 })

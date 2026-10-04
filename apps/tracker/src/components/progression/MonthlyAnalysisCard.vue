@@ -10,6 +10,7 @@ import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { loadMaterialsHistory } from '@/data/materials'
+import { materialIcon } from '@/lib/assets'
 import { capturedMonths, monthlyAnalysis, type CalendarMonth } from '@/data/monthly-analysis'
 import { monthLabel } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
@@ -237,7 +238,7 @@ const jumps = computed(() => {
                 <ItemDisplay
                   :amount="row.primogem.total"
                   name="primogem"
-                  image="/img/Item_Primogem.webp"
+                  :image="materialIcon('Primogem')"
                   class="font-semibold text-sky-600 dark:text-sky-400 transition-colors"
                 />
                 <span
@@ -358,13 +359,13 @@ const jumps = computed(() => {
                 <span class="flex items-center gap-1">
                   <ItemDisplay
                     :amount="row.extract.total4"
-                    image="/img/Item_Sanctifying_Essence.webp"
+                    :image="materialIcon('SanctifyingEssence')"
                     name="Sanctifying Essence"
                     class="text-purple-600 dark:text-purple-400 font-medium transition-colors"
                   />,
                   <ItemDisplay
                     :amount="row.extract.total3"
-                    image="/img/Item_Sanctifying_Unction.webp"
+                    :image="materialIcon('SanctifyingUnction')"
                     name="Sanctifying Unction"
                     class="text-blue-600 dark:text-blue-400 font-medium transition-colors"
                   />
@@ -373,7 +374,7 @@ const jumps = computed(() => {
                   (
                   <ItemDisplay
                     :amount="(row.extract.diff4 >= 0 ? '+' : '') + row.extract.diff4"
-                    image="/img/Item_Sanctifying_Essence.webp"
+                    :image="materialIcon('SanctifyingEssence')"
                     name="Sanctifying Essence"
                     :class="
                       row.extract.diff4 >= 0
@@ -384,7 +385,7 @@ const jumps = computed(() => {
                   />,
                   <ItemDisplay
                     :amount="(row.extract.diff3 >= 0 ? '+' : '') + row.extract.diff3"
-                    image="/img/Item_Sanctifying_Unction.webp"
+                    :image="materialIcon('SanctifyingUnction')"
                     name="Sanctifying Unction"
                     :class="
                       row.extract.diff3 >= 0

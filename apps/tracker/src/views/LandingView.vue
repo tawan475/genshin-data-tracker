@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PublicFrame from '@/components/public/PublicFrame.vue'
+import { characterIcon } from '@/lib/assets'
 import { useSession } from '@/stores/session'
 
 const session = useSession()
@@ -67,7 +68,7 @@ const session = useSession()
         >
           <div class="mb-5 flex items-center gap-4">
             <img
-              src="https://enka.network/ui/UI_AvatarIcon_Furina.png"
+              :src="characterIcon('Furina')"
               alt=""
               class="size-14 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 object-cover shadow-[0_0_15px_var(--paimon-glow)]"
             />

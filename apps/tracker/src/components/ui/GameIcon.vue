@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 
 /**
- * A game image from the Enka CDN with a rarity-tinted backdrop. Falls back to
+ * A game image (see `@/lib/assets`) with a rarity-tinted backdrop. Falls back to
  * the item's initials when there is no URL or the image fails, so a missing
  * icon never leaves a broken-image glyph.
  */

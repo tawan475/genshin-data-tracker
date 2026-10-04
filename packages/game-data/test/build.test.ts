@@ -20,7 +20,13 @@ const noKeys = (): KeysOverride => ({
   characters: { exclude: new Map(), key: new Map() },
   weapons: { include: new Map(), exclude: new Map(), key: new Map() },
   materials: { key: new Map(), prefer: new Map() },
-  removed: { achievements: new Set(), goals: new Set(), characters: new Set(), weapons: new Set() },
+  removed: {
+    achievements: new Set(),
+    goals: new Set(),
+    characters: new Set(),
+    weapons: new Set(),
+    artifacts: new Set(),
+  },
 })
 
 describe('excel rows', () => {

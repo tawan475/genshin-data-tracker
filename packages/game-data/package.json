@@ -8,14 +8,13 @@
   },
   "scripts": {
     "build": "node scripts/build.ts",
-    "icons": "node scripts/icons.ts",
+    "images": "node scripts/images.ts",
     "seed-achievement-versions": "node scripts/seed-achievement-versions.ts",
     "test": "vitest run",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
-    "sharp": "^0.35.2",
     "typescript": "~6.0.0",
     "vitest": "^4.1.0"
   }
