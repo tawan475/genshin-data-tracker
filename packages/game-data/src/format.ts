@@ -14,6 +14,9 @@ export type Element = 'Anemo' | 'Geo' | 'Electro' | 'Dendro' | 'Hydro' | 'Pyro' 
 
 export type WeaponType = 'sword' | 'claymore' | 'polearm' | 'catalyst' | 'bow'
 
+/** A character's three talents, as GOOD names them. */
+export type TalentSlot = 'auto' | 'skill' | 'burst'
+
 /**
  * What a planner material is for, from the cost slot the game puts it in.
  *
@@ -22,6 +25,8 @@ export type WeaponType = 'sword' | 'claymore' | 'polearm' | 'catalyst' | 'bow'
  *   `common` common enemy drops (character ascension, talents, weapons)
  * - `book` talent books, `weekly` weekly boss drops, `crown` Crown of Insight
  * - `weapon` weapon domain materials, `elite` elite enemy drops (weapons)
+ * - `currency` what conversions spend (Dream Solvent, Dust of Azoth); no cost
+ *   table uses it
  */
 export type MaterialKind =
   | 'mora'
@@ -36,6 +41,7 @@ export type MaterialKind =
   | 'crown'
   | 'weapon'
   | 'elite'
+  | 'currency'
 
 export interface MetaFile {
   /** "7.1", from the dump commit's title. */
@@ -95,7 +101,11 @@ export type AscensionPhaseRow = [cap: number, mora: number, items: Cost[]]
 /** The cost of reaching one talent level. Index L-1 is level L; index 0 (level 1) is free. */
 export type TalentLevelRow = [mora: number, items: Cost[]]
 
-/** [key, id, rarity, element, weapon, ascension, normal, skill, burst] — the last four name tables. */
+/**
+ * [key, id, rarity, element, weapon, ascension, normal, skill, burst, c3, c5]
+ * — ascension..burst name tables; c3/c5 are the talent each of those
+ * constellations raises by 3 ('' when it raises none: Aloy, Manekin).
+ */
 export type CharacterRow = [
   key: string,
   id: number,
@@ -106,6 +116,8 @@ export type CharacterRow = [
   normal: string,
   skill: string,
   burst: string,
+  c3: TalentSlot | '',
+  c5: TalentSlot | '',
 ]
 
 /** [key, id, rarity, type, ascension] */
@@ -142,6 +154,47 @@ export type FamilyRow = [
   weekdays: number[],
 ]
 
+/** Domain of Mastery (`talent` books) or Domain of Forgery (`weapon` materials). */
+export type DomainKind = 'talent' | 'weapon'
+
+/**
+ * One tier (I, II, …) of a domain: the Adventure Rank it needs, the Original
+ * Resin and Mora of a run, and the game's own preview of the lowest-tier
+ * material's average per run (0 when it shows none). That preview counts only
+ * the first of two rolls, so it is a cross-check for `overrides/drops.json`,
+ * not the rate.
+ */
+export type DomainTierRow = [ar: number, resin: number, mora: number, preview: number]
+
+/**
+ * A talent book or weapon material domain entrance (`DungeonEntry`):
+ * [entry id, kind, entrance name, family keys in the game's day order
+ * (Mon/Thu, Tue/Fri, Wed/Sat; all three on Sunday), tiers lowest first].
+ */
+export type DomainRow = [
+  entry: number,
+  kind: DomainKind,
+  name: string,
+  families: string[],
+  tiers: DomainTierRow[],
+]
+
+/**
+ * A weekly boss: [its three materials (any of them converts into another for
+ * Dream Solvent), Dream Solvent per conversion, boss name, the boss levels
+ * that drop them as [Adventure Rank, boss level] (empty when the boss is not
+ * a domain: Andrius scales with World Level)].
+ */
+export type WeeklyBossRow = [
+  items: number[],
+  solvent: number,
+  name: string,
+  tiers: [ar: number, level: number][],
+]
+
+/** Weapon EXP ore forging: [ore GOOD key, input GOOD key, inputs per ore, Mora per ore, seconds per ore]. */
+export type ForgeRow = [ore: string, input: string, count: number, mora: number, seconds: number]
+
 /**
  * `avatars.json`: icon names (Enka `/ui/<name>.png`) for every planner
  * character and weapon, and the Traveler's portraits by gender (its GOOD keys
@@ -162,6 +215,9 @@ export interface PlannerFile {
     weapons: string[]
     materials: string[]
     families: string[]
+    domains: string[]
+    weeklyBosses: string[]
+    forge: string[]
   }
   /** Highest level the planner plans to (levels 95/100 are not in the data). */
   levelCap: number
@@ -183,6 +239,65 @@ export interface PlannerFile {
   weapons: WeaponRow[]
   materials: MaterialRow[]
   families: FamilyRow[]
+
+  // Planner v2 (appended; the loader treats them as empty when missing).
+
+  /**
+   * Adventure Rank each ascension phase needs (`requiredPlayerLevel`), index =
+   * phase. Every table agrees, so there is one list per kind; 1-2 star weapons
+   * stop earlier and use the start of `weapon`.
+   */
+  promoteAR: { character: number[]; weapon: number[] }
+  /** talentAscension[L-1]: the ascension phase talent level L needs (ProudSkill `breakLevel`). */
+  talentAscension: number[]
+  /** Talent book and weapon material domains. Every book/weapon family is in exactly one. */
+  domains: DomainRow[]
+  /** Weekly bosses, each with its Dream Solvent trio. */
+  weeklyBosses: WeeklyBossRow[]
+  /** Weekly materials no boss drops and no Dream Solvent recipe makes (GOOD keys). */
+  unfarmable: string[]
+  /** Billet trios that Dream Solvent converts: [item ids, solvent per conversion]. Not planner materials. */
+  billets: [items: number[], solvent: number][]
+  /** GOOD keys of the conversion currencies. */
+  items: { dreamSolvent: string; dustOfAzoth: string }
+  /**
+   * Dust of Azoth gem conversion: dust per converted gem by tier (lowest
+   * first), and the gem families that convert into each other (all but
+   * Brilliant Diamond).
+   */
+  azoth: { dust: number[]; families: string[] }
+  /** Weapon EXP ore recipes at the blacksmith (single-input ones). */
+  forge: ForgeRow[]
+  /** Weapon EXP a weapon gives when fed to another, by rarity (index rarity-1), before its own levels. */
+  weaponBaseExp: number[]
+  /**
+   * Original Resin: its GOOD key, the items that hold resin as [GOOD key,
+   * resin each], Condensed Resin as [GOOD key, most held], and the resin a
+   * Ley Line Outcrop takes.
+   */
+  resin: {
+    original: string
+    items: [key: string, resin: number][]
+    condensed: [key: string, max: number]
+    leyLine: number
+  }
+  /** Utility passives that change what goals cost. */
+  passives: {
+    /** Weapon ascension Mora: [character key, weapon types, share saved (0.5)]. */
+    ascensionMora: [character: string, types: WeaponType[], saved: number][]
+    /**
+     * Crafting: [character key, family kind crafted, 'double' (the product) or
+     * 'refund' (of the inputs), chance, share (1 = one more product; 0.33 =
+     * a third of the inputs)].
+     */
+    crafting: [
+      character: string,
+      kind: MaterialKind,
+      effect: 'double' | 'refund',
+      chance: number,
+      share: number,
+    ][]
+  }
 }
 
 /**

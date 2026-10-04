@@ -1,3 +1,139 @@
 {
-  "$comment": "Placeholder for Phase 5: approximate drops per run (domain, boss) used for the planner's run, resin and day estimates. Community data, so it is hand-kept and shown as an estimate. Empty until then; see README.md in this folder for the intended format."
+  "$comment": "Average drops per run for the planner's run, resin and day estimates, from the Genshin Impact Wiki only (genshin-impact.fandom.com). Every section cites entries in `sources` (page, revision, date read). A value the wiki doesn't give is left out: the planner then shows no estimate for it. Domain AR brackets, resin per domain/ley line run and domain mora come from the game data, not from here. See README.md in this folder before editing.",
+  "sources": {
+    "mastery": {
+      "page": "Template:Domain Levels/Mastery",
+      "url": "https://genshin-impact.fandom.com/wiki/Template:Domain_Levels/Mastery?oldid=1681616",
+      "revid": 1681616,
+      "read": "2026-10-04",
+      "note": "Talent book averages per domain level I-IV (Avg. columns). Shown on every Domain of Mastery page, e.g. Forsaken Rift. Ranges sourced by the wiki from the Genshin Data Gathering team."
+    },
+    "forgery": {
+      "page": "Template:Domain Levels/Forgery",
+      "url": "https://genshin-impact.fandom.com/wiki/Template:Domain_Levels/Forgery?oldid=1677250",
+      "revid": 1677250,
+      "read": "2026-10-04",
+      "note": "Weapon material averages per domain level I-IV (Avg. columns). Shown on every Domain of Forgery page, e.g. Cecilia Garden."
+    },
+    "lootDistribution": {
+      "page": "Loot System/Material Drop Distribution",
+      "url": "https://genshin-impact.fandom.com/wiki/Loot_System/Material_Drop_Distribution?oldid=1159004",
+      "revid": 1159004,
+      "read": "2026-10-04",
+      "note": "Community-derived. Its '2-Star Roll' means per domain level are what the in-game reward preview shows (firstRoll below; the build compares them with the game data). Its overall tables repeat the templates' averages."
+    },
+    "worldBossRewards": {
+      "page": "Template:World Boss Rewards",
+      "url": "https://genshin-impact.fandom.com/wiki/Template:World_Boss_Rewards?oldid=1895728",
+      "revid": 1895728,
+      "read": "2026-10-04",
+      "note": "Normal boss: boss material per World Level ('1 + 61.85%' = 1.6185 on average) and Ascension Gems (Avg. columns) for WL 0-8. Weekly branch (Andrius): talent material per World Level. WL 9 is not in the table."
+    },
+    "normalBoss": {
+      "page": "Normal Boss",
+      "url": "https://genshin-impact.fandom.com/wiki/Normal_Boss?oldid=2179225",
+      "revid": 2179225,
+      "read": "2026-10-04",
+      "note": "\"players can use Original Resin x40 to open them to claim their rewards\"."
+    },
+    "weeklyBoss": {
+      "page": "Weekly Boss",
+      "url": "https://genshin-impact.fandom.com/wiki/Weekly_Boss?oldid=2157520",
+      "revid": 2157520,
+      "read": "2026-10-04",
+      "note": "\"Original Resin x30 to claim the rewards from the first three weekly bosses of their choice, and then Original Resin x60 subsequently\"; rewards and discounts reset weekly; \"a fixed 33% chance to drop a Dream Solvent\"."
+    },
+    "weeklyBossRewards": {
+      "page": "Template:Weekly Boss Rewards",
+      "url": "https://genshin-impact.fandom.com/wiki/Template:Weekly_Boss_Rewards?oldid=2100292",
+      "revid": 2100292,
+      "read": "2026-10-04",
+      "note": "Talent material per boss level: 70 -> 1, 80 -> '1 + 55%', 90 -> '2 + 10%'; Dream Solvent 33% at every level. No talent material below level 70."
+    },
+    "dreamSolvent": {
+      "page": "Dream Solvent",
+      "url": "https://genshin-impact.fandom.com/wiki/Dream_Solvent?oldid=1736381",
+      "revid": 1736381,
+      "read": "2026-10-04",
+      "note": "\"Claim Trounce Blossom from Weekly Bosses with Original Resin for a 33% chance to drop.\""
+    },
+    "leyLineOutcrop": {
+      "page": "Ley Line Outcrop",
+      "url": "https://genshin-impact.fandom.com/wiki/Ley_Line_Outcrop?oldid=2160570",
+      "revid": 2160570,
+      "read": "2026-10-04",
+      "note": "Rewards and Scaling: 'Average Character EXP' (the middle of each book range) and Mora per World Level; WL 6-9 share one row."
+    }
+  },
+  "domains": {
+    "talent": {
+      "sources": ["mastery", "lootDistribution"],
+      "tiers": [
+        { "tier": 1, "perRun": [3.2], "firstRoll": 2.2 },
+        { "tier": 2, "perRun": [2.5, 1], "firstRoll": 2.5 },
+        { "tier": 3, "perRun": [1.8, 2], "firstRoll": 1.8 },
+        { "tier": 4, "perRun": [2.2, 1.98, 0.22], "firstRoll": 2.2 }
+      ]
+    },
+    "weapon": {
+      "sources": ["forgery", "lootDistribution"],
+      "tiers": [
+        { "tier": 1, "perRun": [4.7], "firstRoll": 2.2 },
+        { "tier": 2, "perRun": [2.7, 2], "firstRoll": 2.7 },
+        { "tier": 3, "perRun": [2.26, 2.76, 0.24], "firstRoll": 2.26 },
+        { "tier": 4, "perRun": [2.2, 2.418, 0.62, 0.062], "firstRoll": 2.2 }
+      ]
+    }
+  },
+  "bosses": {
+    "resin": 40,
+    "sources": ["worldBossRewards", "normalBoss", "lootDistribution"],
+    "byWorldLevel": [
+      { "wl": 0, "boss": 1.6185, "gems": [2.1057] },
+      { "wl": 1, "boss": 1.6185, "gems": [2.1057] },
+      { "wl": 2, "boss": 1.7037, "gems": [1.0323, 1.2954] },
+      { "wl": 3, "boss": 1.8741, "gems": [1.2579, 1.3554] },
+      { "wl": 4, "boss": 2.0445, "gems": [1.4835, 1.4157, 0.099] },
+      { "wl": 5, "boss": 2.2149, "gems": [1.7091, 1.4757, 0.114] },
+      { "wl": 6, "boss": 2.3852, "gems": [1.9354, 1.5358, 0.1287, 0.0129] },
+      { "wl": 7, "boss": 2.5556, "gems": [2.1607, 1.5961, 0.144, 0.0141] },
+      { "wl": 8, "boss": 2.5556, "gems": [2.1607, 1.5961, 0.144, 0.0141] }
+    ]
+  },
+  "weekly": {
+    "resin": 60,
+    "discountResin": 30,
+    "discounts": 3,
+    "solvent": 0.33,
+    "sources": ["weeklyBoss", "weeklyBossRewards", "dreamSolvent", "worldBossRewards"],
+    "byLevel": [
+      { "level": 70, "perRun": 1 },
+      { "level": 80, "perRun": 1.55 },
+      { "level": 90, "perRun": 2.1 }
+    ],
+    "byWorldLevel": {
+      "$comment": "Weekly bosses outside domains (Andrius), keyed by the lowest-id material of their trio; per World Level.",
+      "TailOfBoreas": [
+        { "wl": 5, "perRun": 1 },
+        { "wl": 6, "perRun": 1.55 },
+        { "wl": 7, "perRun": 2.1 },
+        { "wl": 8, "perRun": 2.4 }
+      ]
+    }
+  },
+  "leyLines": {
+    "sources": ["leyLineOutcrop"],
+    "byWorldLevel": [
+      { "wl": 0, "exp": 25000, "mora": 12000 },
+      { "wl": 1, "exp": 38500, "mora": 20000 },
+      { "wl": 2, "exp": 52500, "mora": 28000 },
+      { "wl": 3, "exp": 67500, "mora": 36000 },
+      { "wl": 4, "exp": 82500, "mora": 44000 },
+      { "wl": 5, "exp": 102500, "mora": 52000 },
+      { "wl": 6, "exp": 122500, "mora": 60000 },
+      { "wl": 7, "exp": 122500, "mora": 60000 },
+      { "wl": 8, "exp": 122500, "mora": 60000 },
+      { "wl": 9, "exp": 122500, "mora": 60000 }
+    ]
+  }
 }

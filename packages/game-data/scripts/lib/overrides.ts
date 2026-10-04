@@ -34,12 +34,24 @@ export interface WeekdaysOverride {
   weaponMaterials: Map<string, WeekdaySet>
 }
 
+/** overrides/planner.json: names and decisions the game tables don't link. */
+export interface PlannerOverride {
+  /** Mon/Thu family key of a domain entrance -> its name. */
+  domainNames: Map<string, string>
+  /** Lowest-id material key of a weekly trio -> boss name. */
+  weeklyBossNames: Map<string, string>
+  /** Weekly material key -> why no boss drops it and no solvent recipe makes it. */
+  unfarmable: Map<string, string>
+}
+
 export interface Overrides {
   keys: KeysOverride
   weekdays: WeekdaysOverride
   /** achievement id -> version it was added in */
   versions: Map<number, string>
+  /** Raw overrides/drops.json; the build validates it with src/drops.ts. */
   drops: Record<string, unknown>
+  planner: PlannerOverride
 }
 
 type Json = Record<string, unknown>
@@ -187,11 +199,34 @@ function loadVersions(problems: Problems): Map<number, string> {
   return versions
 }
 
+function loadPlanner(problems: Problems): PlannerOverride {
+  const file = 'planner.json'
+  const json = load(problems, file)
+  checkSections(problems, file, json, ['domainNames', 'weeklyBossNames', 'unfarmable'])
+  const names = (section: string) => {
+    const map = new Map<string, string>()
+    for (const [key, value] of entries(json[section])) {
+      if (!/^[A-Za-z0-9]+$/.test(key) || typeof value !== 'string' || value.trim() === '') {
+        problems.error(`${file} ${section}.${key} must map a GOOD key to a non-empty string`)
+        continue
+      }
+      map.set(key, value.trim())
+    }
+    return map
+  }
+  return {
+    domainNames: names('domainNames'),
+    weeklyBossNames: names('weeklyBossNames'),
+    unfarmable: names('unfarmable'),
+  }
+}
+
 export function loadOverrides(problems: Problems): Overrides {
   return {
     keys: loadKeys(problems),
     weekdays: loadWeekdays(problems),
     versions: loadVersions(problems),
     drops: load(problems, 'drops.json'),
+    planner: loadPlanner(problems),
   }
 }
