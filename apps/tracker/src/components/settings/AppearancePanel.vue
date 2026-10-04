@@ -5,7 +5,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { setClockPreference } from '@/lib/format'
-import { applyTheme, type Theme } from '@/lib/theme'
+import { applyTheme, type ThemePreference } from '@/lib/theme'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
@@ -17,12 +17,13 @@ import { useSession } from '@/stores/session'
 const session = useSession()
 const feedback = useFeedback()
 
-const themes: { value: Theme; label: string }[] = [
-  { value: 'dark', label: 'Dark' },
+const themes: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
 ]
 
-const theme = computed<Theme>({
+const theme = computed<ThemePreference>({
   get: () => session.settings.theme,
   set: (value) => void save({ theme: value }, 'Could not save the theme'),
 })

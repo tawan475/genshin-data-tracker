@@ -70,6 +70,8 @@ export default defineConfig({
       'zod',
       'fflate',
       'chart.js',
+      'chartjs-plugin-zoom',
+      'vue-chartjs',
       '@vueuse/core',
     ],
   },

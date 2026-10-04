@@ -39,6 +39,15 @@ export function setClockPreference(twentyFourHour: boolean): void {
   use24Hour = twentyFourHour
 }
 
+export function clock24(): boolean {
+  return use24Hour
+}
+
+/** The original tracker's date-time: the browser's full locale format, with seconds. */
+export function formatFullDateTime(ms: number | string | Date): string {
+  return new Date(ms).toLocaleString(undefined, { hour12: !use24Hour })
+}
+
 export function formatDateTime(ms: number): string {
   return new Date(ms).toLocaleString(undefined, {
     year: 'numeric',
