@@ -66,7 +66,7 @@ export const useSession = defineStore('session', () => {
     loading = Promise.resolve()
   }
 
-  async function register(username: string, email: string, password: string) {
+  async function register(username: string, email: string | null, password: string) {
     const salt = randomSalt()
     const key = await derivePasswordKey(password, salt, PASSWORD_ITERATIONS)
     adopt(await api.register({ username, email, salt, iterations: PASSWORD_ITERATIONS, key }))

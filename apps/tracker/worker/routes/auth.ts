@@ -77,7 +77,7 @@ export const auth = new Hono<AppEnv>()
         .values({
           username: body.username,
           usernameKey: body.username.toLowerCase(),
-          email: body.email,
+          email: body.email ?? null,
           passwordSalt: body.salt,
           passwordIterations: body.iterations,
           passwordVerifier: verifier,

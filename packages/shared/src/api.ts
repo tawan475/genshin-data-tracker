@@ -29,7 +29,8 @@ export const emailSchema = z.string().trim().toLowerCase().max(254).pipe(z.email
 
 export const registerRequest = z.object({
   username: usernameSchema,
-  email: emailSchema,
+  /** Optional; empty means none. */
+  email: emailSchema.nullish().or(z.literal('').transform(() => null)),
   salt: base64Bytes(PASSWORD_SALT_BYTES),
   iterations: z.number().int().min(MIN_PASSWORD_ITERATIONS).max(MAX_PASSWORD_ITERATIONS),
   key: base64Bytes(PASSWORD_KEY_BYTES),
@@ -101,7 +102,7 @@ export interface PreloginResponse {
 export interface MeResponse {
   id: number
   username: string
-  email: string
+  email: string | null
   emailVerified: boolean
   /** Iteration count the stored password key was derived with. */
   passwordIterations: number

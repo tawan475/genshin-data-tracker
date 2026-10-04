@@ -15,12 +15,13 @@ const session = useSession()
       </div>
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-3">
         <dt class="text-text-secondary">Email</dt>
-        <dd class="flex min-w-0 items-center gap-2">
+        <dd v-if="session.me.email" class="flex min-w-0 items-center gap-2">
           <span class="min-w-0 truncate">{{ session.me.email }}</span>
           <UiBadge :tone="session.me.emailVerified ? 'success' : 'warning'">
             {{ session.me.emailVerified ? 'Verified' : 'Unverified' }}
           </UiBadge>
         </dd>
+        <dd v-else class="text-text-muted">—</dd>
       </div>
     </dl>
   </UiPanel>
