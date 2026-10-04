@@ -16,7 +16,12 @@
  *   EXP curves; Material `itemUse`: what EXP books and ores give.
  * - Combine: which materials are tiers of one family (3 -> 1 crafting).
  * - MaterialSourceData -> Dungeon: the domain of talent books and weapon
- *   materials. Domain weekdays come from overrides/weekdays.json.
+ *   materials. Domain weekdays come from overrides/weekdays.json, else from
+ *   the game's domain reward list (DungeonEntry `descriptionCycleRewardList`).
+ * - `requiredPlayerLevel` (ascension) and ProudSkill `breakLevel` (talents):
+ *   the Adventure Rank and ascension each step needs.
+ * - Domains, weekly bosses, conversions, forging, resin and passives:
+ *   scripts/compile/farming.ts.
  *
  * Each cost slot has a fixed meaning, which gives every material its kind:
  * character ascension = gem, boss, local specialty, common drop; talents =
@@ -37,6 +42,7 @@ import type {
   MaterialRow,
   PlannerFile,
   TalentLevelRow,
+  TalentSlot,
   WeaponRow,
   WeaponType,
 } from '../../src/format.ts'
@@ -45,10 +51,18 @@ import { compareKeys, sortedObject } from '../lib/json.ts'
 import {
   WEEKDAY_SETS,
   type KeysOverride,
+  type PlannerOverride,
   type WeekdaysOverride,
   type WeekdaySet,
 } from '../lib/overrides.ts'
 import type { Problems } from '../lib/problems.ts'
+import {
+  compileFarming,
+  DREAM_SOLVENT,
+  DUST_OF_AZOTH,
+  FARMING_FILES,
+  type CompiledFarming,
+} from './farming.ts'
 
 export const PLANNER_FILES = {
   avatars: 'ExcelBinOutput/AvatarExcelConfigData.json',
@@ -65,6 +79,8 @@ export const PLANNER_FILES = {
   dungeons: 'ExcelBinOutput/DungeonExcelConfigData.json',
   dungeonEntries: 'ExcelBinOutput/DungeonEntryExcelConfigData.json',
   combines: 'ExcelBinOutput/CombineExcelConfigData.json',
+  avatarTalents: 'ExcelBinOutput/AvatarTalentExcelConfigData.json',
+  ...FARMING_FILES,
 } as const
 
 export type PlannerInputs = { [K in keyof typeof PLANNER_FILES]: Row[] } & {
@@ -77,6 +93,8 @@ export type PlannerInputs = { [K in keyof typeof PLANNER_FILES]: Row[] } & {
 export interface PlannerContext {
   keys: KeysOverride
   weekdays: WeekdaysOverride
+  /** overrides/planner.json */
+  planner: PlannerOverride
   toGoodKey: (name: string) => string
   problems: Problems
 }
@@ -134,10 +152,21 @@ export const CHARACTER_COLUMNS = [
   'normal',
   'skill',
   'burst',
+  'c3',
+  'c5',
 ]
 export const WEAPON_COLUMNS = ['key', 'id', 'rarity', 'type', 'ascension']
 export const MATERIAL_COLUMNS = ['id', 'key', 'name', 'rarity', 'kind', 'icon']
 export const FAMILY_COLUMNS = ['key', 'kind', 'members', 'craft', 'domain', 'weekdays']
+export const DOMAIN_COLUMNS = [
+  'entry',
+  'kind',
+  'name',
+  'families',
+  'tiers [ar, resin, mora, preview]',
+]
+export const WEEKLY_COLUMNS = ['items', 'solvent', 'name', 'tiers [ar, level]']
+export const FORGE_COLUMNS = ['ore', 'input', 'count', 'mora', 'seconds']
 
 function groupBy(rows: Row[], field: string): Map<number, Row[]> {
   const map = new Map<number, Row[]>()
@@ -196,6 +225,8 @@ export interface CompiledPlanner {
   planner: PlannerFile
   /** Planner material id -> GOOD key (the material index must agree). */
   materialKeys: Map<number, string>
+  /** Game values the build compares with overrides/drops.json. */
+  checks: CompiledFarming['checks']
 }
 
 export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): CompiledPlanner {
@@ -204,6 +235,27 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
 
   const materials = new Map(inputs.materials.map((m) => [num(m, 'id'), m]))
   const skills = new Map(inputs.skills.map((s) => [num(s, 'id'), s]))
+  const constellations = new Map(inputs.avatarTalents.map((t) => [num(t, 'talentId'), t]))
+  /**
+   * The talent a constellation raises by 3: its text names the talent
+   * ("Increases the Level of <talent> by 3"; Neuvillette's C3 is his Normal
+   * Attack). The longest talent name found wins; '' when it names none.
+   */
+  const boostOf = (depot: Row, index: number, names: string[], what: string): TalentSlot | '' => {
+    const talent = constellations.get(list<number>(depot, 'talents')[index] ?? 0)
+    const text = (inputs.text.get(talent?.descTextMapHash) ?? '').replace(/<[^>]+>/g, '')
+    const slots: TalentSlot[] = ['auto', 'skill', 'burst']
+    const hits = names
+      .map((name, i) => ({ name, slot: slots[i]! }))
+      .filter((n) => n.name && text.includes(n.name))
+      .sort((a, b) => b.name.length - a.name.length)
+    if (hits.length === 0 && /by 3\b/.test(text)) {
+      problems.warn(
+        `${what}: C${index + 1} raises a talent its text doesn't name ("${text.slice(0, 80)}")`,
+      )
+    }
+    return hits[0]?.slot ?? ''
+  }
   const depots = new Map(inputs.depots.map((d) => [num(d, 'id'), d]))
   const avatarPromotes = groupBy(inputs.avatarPromotes, 'avatarPromoteId')
   const weaponPromotes = groupBy(inputs.weaponPromotes, 'weaponPromoteId')
@@ -221,8 +273,13 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
 
   const ascensions = new TableSet<AscensionPhaseRow[]>()
   const talents = new TableSet<TalentLevelRow[]>()
+  /** Ascension table key -> Adventure Rank per phase. */
+  const promoteAR = new Map<string, number[]>()
+  /** Talent group -> ascension needed per level (ProudSkill breakLevel). */
+  const talentBreaks = new Map<number, number[]>()
 
   const ascension = (
+    table: string,
     rows: Row[] | undefined,
     slots: MaterialKind[],
     moraField: string,
@@ -255,6 +312,10 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
       }
       phases.push([num(row, 'unlockMaxLevel'), num(row, moraField), items])
     }
+    promoteAR.set(
+      table,
+      sorted.map((row) => num(row, 'requiredPlayerLevel')),
+    )
     for (const sequence of bySlot.values()) {
       for (const id of sequence) if (!slotSequences.has(id)) slotSequences.set(id, sequence)
     }
@@ -264,12 +325,14 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
   const talent = (group: number, what: string): TalentLevelRow[] | null => {
     const byLevel = new Map((proudSkills.get(group) ?? []).map((r) => [num(r, 'level'), r]))
     const table: TalentLevelRow[] = []
+    const breaks: number[] = []
     for (let level = 1; level <= 10; level++) {
       const row = byLevel.get(level)
       if (!row) {
         problems.error(`${what}: talent group ${group} has no level ${level}`)
         return null
       }
+      breaks.push(num(row, 'breakLevel'))
       const items: Cost[] = []
       for (const cost of costs(row, 'costItems')) {
         const kind = TALENT_SLOTS[cost.slot]
@@ -288,6 +351,7 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
       }
       table.push([mora, items])
     }
+    talentBreaks.set(group, breaks)
     return table
   }
 
@@ -316,13 +380,23 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
       )
     }
     const promoteId = num(avatar, 'avatarPromoteId')
-    const asc = ascension(avatarPromotes.get(promoteId), AVATAR_PROMOTE_SLOTS, 'scoinCost', what)
+    const asc = ascension(
+      `c${promoteId}`,
+      avatarPromotes.get(promoteId),
+      AVATAR_PROMOTE_SLOTS,
+      'scoinCost',
+      what,
+    )
     if (!rarity || !weapon || !asc) continue
     ascensions.set(`c${promoteId}`, asc)
 
     const depotIds = list<number>(avatar, 'candSkillDepotIds').filter((d) => d > 0)
     if (depotIds.length === 0) depotIds.push(num(avatar, 'skillDepotId'))
-    const variants: { element: Element; groups: [number, number, number] }[] = []
+    const variants: {
+      element: Element
+      groups: [number, number, number]
+      boosts: [TalentSlot | '', TalentSlot | '']
+    }[] = []
     for (const depotId of depotIds) {
       const depot = depots.get(depotId)
       if (!depot) {
@@ -353,7 +427,16 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
         if (table) talents.set(String(group), table)
         else complete = false
       }
-      if (complete) variants.push({ element, groups: groups as [number, number, number] })
+      const names = ids.map(
+        (skillId) => inputs.text.get(skills.get(skillId)?.nameTextMapHash) ?? '',
+      )
+      if (complete) {
+        variants.push({
+          element,
+          groups: groups as [number, number, number],
+          boosts: [boostOf(depot, 2, names, what), boostOf(depot, 4, names, what)],
+        })
+      }
     }
     if (variants.length === 0) {
       problems.error(`${what}: no skill depot with a full talent set`)
@@ -364,6 +447,7 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
       key: string,
       element: Element | '',
       groups: [number, number, number],
+      boosts: [TalentSlot | '', TalentSlot | ''],
     ): Candidate<CharacterRow> => ({
       key,
       id,
@@ -375,15 +459,16 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
         weapon,
         `c${promoteId}`,
         ...(groups.map(String) as [string, string, string]),
+        ...boosts,
       ],
     })
     if (baseKey === 'Traveler') {
       // irminsul suffixes the Traveler's key with the current element.
       for (const v of variants)
-        characterCandidates.push(row(`Traveler${v.element}`, v.element, v.groups))
+        characterCandidates.push(row(`Traveler${v.element}`, v.element, v.groups, v.boosts))
     } else if (variants.length === 1) {
       const [v] = variants as [(typeof variants)[number]]
-      characterCandidates.push(row(baseKey, v.element, v.groups))
+      characterCandidates.push(row(baseKey, v.element, v.groups, v.boosts))
     } else {
       // One key for every element (Manekin, Manekina): the talents must cost the same.
       const tablesOf = (v: (typeof variants)[number]) =>
@@ -396,7 +481,15 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
         )
         continue
       }
-      characterCandidates.push(row(baseKey, '', variants[0]!.groups))
+      const boosts = variants[0]!.boosts
+      characterCandidates.push(
+        row(
+          baseKey,
+          '',
+          variants[0]!.groups,
+          variants.every((v) => v.boosts.join() === boosts.join()) ? boosts : ['', ''],
+        ),
+      )
     }
   }
 
@@ -421,7 +514,13 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
     if (rarity < 1 || rarity > 5) problems.error(`${what}: rarity ${rarity}`)
     if (!type) problems.error(`${what}: unknown weaponType "${str(weapon, 'weaponType')}"`)
     const promoteId = num(weapon, 'weaponPromoteId')
-    const asc = ascension(weaponPromotes.get(promoteId), WEAPON_PROMOTE_SLOTS, 'coinCost', what)
+    const asc = ascension(
+      `w${promoteId}`,
+      weaponPromotes.get(promoteId),
+      WEAPON_PROMOTE_SLOTS,
+      'coinCost',
+      what,
+    )
     if (rarity < 1 || rarity > 5 || !type || !asc) continue
     ascensions.set(`w${promoteId}`, asc)
     weaponCandidates.push({ key, id, row: [key, id, rarity, type, `w${promoteId}`] })
@@ -448,6 +547,8 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
           canonicalTalent(r[6]),
           canonicalTalent(r[7]),
           canonicalTalent(r[8]),
+          r[9],
+          r[10],
         ] as CharacterRow,
       }
     }),
@@ -476,6 +577,47 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
     const caps = (ascensionOut[r[5]] ?? []).map((p) => p[0]).join(',')
     if (caps !== '20,40,50,60,70,80,90')
       problems.error(`Character ${r[0]}: unusual level caps ${caps}`)
+  }
+
+  // --- Adventure Rank per ascension, ascension per talent level -------------
+  const keptCharacters = new Set(characters.map((r) => r[0]))
+  const keptWeapons = new Set(weapons.map((r) => r[0]))
+  const characterAR = commonList(
+    'Character ascension AR (requiredPlayerLevel)',
+    characterCandidates
+      .filter((c) => keptCharacters.has(c.key))
+      .map((c) => [c.key, promoteAR.get(c.row[5]) ?? []] as const),
+    problems,
+  )
+  const weaponAR = commonList(
+    'Weapon ascension AR (requiredPlayerLevel)',
+    weaponCandidates
+      .filter((c) => keptWeapons.has(c.key))
+      .map((c) => [c.key, promoteAR.get(c.row[4]) ?? []] as const),
+    problems,
+  )
+  if (characterAR.length > 0 && !characterAR.slice(1).every((ar) => ar > 0)) {
+    problems.error(
+      `Character ascension AR ${characterAR.join(',')} has phases without an AR (requiredPlayerLevel renamed?)`,
+    )
+  }
+  const talentAscension = commonList(
+    'Talent ascension (ProudSkill breakLevel)',
+    characterCandidates
+      .filter((c) => keptCharacters.has(c.key))
+      .flatMap((c) =>
+        [c.row[6], c.row[7], c.row[8]].map(
+          (group) =>
+            [`${c.key} talent group ${group}`, talentBreaks.get(Number(group)) ?? []] as const,
+        ),
+      ),
+    problems,
+    true,
+  )
+  if (talentAscension.length !== 10 || talentAscension[9] === 0) {
+    problems.error(
+      `Talent ascension per level is ${talentAscension.join(',')}; expected 10 levels ending at phase 6 (breakLevel renamed?)`,
+    )
   }
 
   // --- EXP ---------------------------------------------------------------
@@ -517,6 +659,9 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
     problems.error('No character EXP books or weapon ores found (Material itemUse changed?)')
   }
   use(MORA, 'mora')
+  // The conversion currencies: planner materials so item goals and tiles can name them.
+  use(DREAM_SOLVENT, 'currency')
+  use(DUST_OF_AZOTH, 'currency')
 
   // --- materials and families ---------------------------------------------
   const materialKeys = new Map<number, string>()
@@ -551,6 +696,23 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
 
   const families = compileFamilies(inputs, context, materialRows, slotSequences, addMaterial)
 
+  const itemKey = (id: number): string => {
+    const known = materialKeys.get(id) ?? keys.materials.key.get(id)
+    if (known) return known
+    const name = inputs.names.get(materials.get(id)?.nameTextMapHash)
+    return name ? context.toGoodKey(name) : ''
+  }
+  const farming = compileFarming(inputs, {
+    problems,
+    planner: context.planner,
+    materialRows,
+    families,
+    characters,
+    weapons,
+    weaponOres: expItems.weapon.map(([id]) => id),
+    itemKey,
+  })
+
   // Every planner material key must be unique: inventories are keyed by it.
   const byKey = new Map<string, number>()
   for (const [id, row] of materialRows) {
@@ -569,6 +731,9 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
       weapons: WEAPON_COLUMNS,
       materials: MATERIAL_COLUMNS,
       families: FAMILY_COLUMNS,
+      domains: DOMAIN_COLUMNS,
+      weeklyBosses: WEEKLY_COLUMNS,
+      forge: FORGE_COLUMNS,
     },
     levelCap: LEVEL_CAP,
     mora: MORA,
@@ -582,8 +747,37 @@ export function compilePlanner(inputs: PlannerInputs, context: PlannerContext): 
     weapons: weapons.sort((a, b) => compareKeys(a[0], b[0])),
     materials: [...materialRows.values()].sort((a, b) => a[0] - b[0]),
     families,
+    promoteAR: { character: characterAR, weapon: weaponAR },
+    talentAscension,
+    ...farming.data,
   }
-  return { planner, materialKeys }
+  return { planner, materialKeys, checks: farming.checks }
+}
+
+/**
+ * The one list every entry should share (AR per ascension phase, ascension
+ * per talent level). Shorter lists must be its start (1-2 star weapons have
+ * fewer phases) unless `exact`; anything else is an error naming an example.
+ */
+function commonList(
+  what: string,
+  lists: readonly (readonly [string, readonly number[]])[],
+  problems: Problems,
+  exact = false,
+): number[] {
+  let longest: readonly number[] = []
+  for (const [, list] of lists) if (list.length > longest.length) longest = list
+  const odd = lists.filter(
+    ([, list]) =>
+      (exact && list.length !== longest.length) || list.some((value, i) => value !== longest[i]),
+  )
+  if (odd.length > 0) {
+    problems.error(
+      `${what} differs between entries (${odd.length}, e.g. ${odd[0]![0]}: ${odd[0]![1].join(',')} vs ${longest.join(',')}); ` +
+        'store it per table in planner.json instead of one list',
+    )
+  }
+  return [...longest]
 }
 
 function sortedTables<T>(tables: Record<string, T>): Record<string, T> {
@@ -704,20 +898,28 @@ function compileFamilies(
       if (!domain)
         problems.warn(`Family ${familyKey}: no domain name found (MaterialSourceData -> Dungeon)`)
 
+      // overrides/weekdays.json wins (checked in game); else the game's own
+      // domain reward list; the two are compared whenever both exist.
       const section = kind === 'book' ? 'talentBooks' : 'weaponMaterials'
       const set = weekdays[section].get(familyKey)
       const hint = members.map((m) => suggested.get(m)).find(Boolean)
-      if (!set) {
+      const chosen = set ?? hint
+      if (!chosen) {
         problems.error(
-          `${kind === 'book' ? 'Talent book' : 'Weapon material'} family ${familyKey} has no domain days: add ` +
-            `"${familyKey}": "${hint ?? 'mon-thu | tue-fri | wed-sat'}" to overrides/weekdays.json ${section}` +
-            (hint ? " (suggested from the game's domain reward list; check it in game)" : ''),
+          `${kind === 'book' ? 'Talent book' : 'Weapon material'} family ${familyKey} has no domain days ` +
+            "(not in overrides/weekdays.json, not in the game's domain reward list): add " +
+            `"${familyKey}": "mon-thu | tue-fri | wed-sat" to overrides/weekdays.json ${section}`,
         )
       } else {
-        days = [...WEEKDAY_SETS[set]]
-        if (hint && hint !== set) {
+        days = [...WEEKDAY_SETS[chosen]]
+        if (!set) {
           problems.warn(
-            `Family ${familyKey}: weekdays.json says ${set}, the game's domain reward list says ${hint}`,
+            `Family ${familyKey}: domain days ${hint} taken from the game's domain reward list; ` +
+              `confirm them in game and add "${familyKey}": "${hint}" to overrides/weekdays.json ${section}`,
+          )
+        } else if (hint && hint !== set) {
+          problems.warn(
+            `Family ${familyKey}: weekdays.json says ${set}, the game's domain reward list says ${hint} (weekdays.json wins)`,
           )
         }
       }
@@ -834,12 +1036,21 @@ function checkInputs(inputs: PlannerInputs, problems: Problems): void {
     materialItems: 0.9,
     scoinCost: 0.2,
   })
-  // Only feeds the weekday hint, so a rename is not fatal.
-  checkFields(
-    problems,
-    'DungeonEntryExcelConfigData',
-    inputs.dungeonEntries,
-    { descriptionCycleRewardList: 10 },
-    'warn',
-  )
+  // The domain entries (farming.ts) are built from it.
+  checkFields(problems, 'DungeonEntryExcelConfigData', inputs.dungeonEntries, {
+    id: 0.99,
+    type: 0.9,
+    descriptionCycleRewardList: 10,
+  })
+  checkFields(problems, 'AvatarPromoteExcelConfigData', inputs.avatarPromotes, {
+    requiredPlayerLevel: 0.5,
+  })
+  checkFields(problems, 'WeaponPromoteExcelConfigData', inputs.weaponPromotes, {
+    requiredPlayerLevel: 0.5,
+  })
+  checkFields(problems, 'ProudSkillExcelConfigData', inputs.proudSkills, {
+    breakLevel: 1000,
+    lifeEffectType: 20,
+    lifeEffectParams: 0.5,
+  })
 }

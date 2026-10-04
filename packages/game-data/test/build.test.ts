@@ -6,10 +6,11 @@
 
 import { describe, expect, it } from 'vitest'
 import { toGoodKey } from '../../shared/src/good'
-import type { AchievementsFile } from '../src/format'
+import type { AchievementsFile, PlannerFile } from '../src/format'
 import { compileAchievements } from '../scripts/compile/achievements.ts'
 import { compileMaterialIndex } from '../scripts/compile/materials.ts'
 import { checkAppendOnly } from '../scripts/lib/changes.ts'
+import { checkDrops } from '../scripts/lib/drops.ts'
 import { checkFields, costs, num, str, TextMap, type Row } from '../scripts/lib/excel.ts'
 import { formatJson } from '../scripts/lib/json.ts'
 import type { KeysOverride } from '../scripts/lib/overrides.ts'
@@ -233,5 +234,60 @@ describe('material index', () => {
     const { out, problems } = run({ OldThing: 100999 })
     expect(out.OldThing).toBe(100999)
     expect(problems.warnings[0]).toMatch(/kept from the previous build/)
+  })
+})
+
+describe('drop rate checks', () => {
+  const planner = {
+    domains: [
+      [
+        10,
+        'talent',
+        'X',
+        ['TeachingsOfX'],
+        [
+          [25, 20, 1575, 2.2],
+          [28, 20, 1800, 2.5],
+        ],
+      ],
+    ],
+    families: [['TeachingsOfX', 'book', [1, 2, 3], [175, 550], '', [1, 4, 0]]],
+    materials: [[113006, 'TailOfBoreas', 'Tail of Boreas', 5, 'weekly', '']],
+    weeklyBosses: [[[113006], 1, 'Andrius', []]],
+  } as unknown as PlannerFile
+  const source = { page: 'P', url: 'https://w/P?oldid=1', revid: 1, read: '2026-10-04' }
+
+  it('warns when the wiki and the game disagree, or a bracket has no rate', () => {
+    const problems = new Problems()
+    checkDrops(
+      {
+        sources: { s: source },
+        domains: {
+          talent: { sources: ['s'], tiers: [{ tier: 1, perRun: [3.2], firstRoll: 2.5 }] },
+        },
+        weekly: { solvent: 0.5, sources: ['s'], byWorldLevel: { Nope: [{ wl: 8, perRun: 2 }] } },
+      },
+      planner,
+      { solventPerRun: [0.33] },
+      problems,
+    )
+    expect(problems.errors).toEqual([
+      "overrides/drops.json weekly.byWorldLevel.Nope is no weekly trio's first material",
+    ])
+    expect(problems.warnings).toEqual([
+      "overrides/drops.json domains.talent tier 1: the wiki's first roll is 2.5, the game previews 2.2 — the drop rates may have changed; re-check the wiki",
+      'overrides/drops.json has no talent domain tier 2 (AR 28): no estimate at that AR',
+      'overrides/drops.json weekly.byWorldLevel has no "TailOfBoreas" (Andrius): no estimate for it',
+      'overrides/drops.json weekly.solvent is 0.5, the game previews 0.33 Dream Solvent per claim',
+    ])
+  })
+
+  it('fails on a malformed file', () => {
+    const problems = new Problems()
+    checkDrops({ domains: { talent: { tiers: 'x' } } }, planner, { solventPerRun: [] }, problems)
+    expect(problems.errors).toEqual([
+      'overrides/drops.json: domains.talent.sources must list source ids',
+      'overrides/drops.json: domains.talent.tiers must be a list of objects',
+    ])
   })
 })

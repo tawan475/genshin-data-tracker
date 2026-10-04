@@ -214,7 +214,8 @@ export function describeChanges(previous: DataSet, next: DataSet): string[] {
       JSON.stringify([r.slice(1, 4), planner?.ascensions[r[4]]])
     lines.push(
       `  planner: ${p1.characters.length} characters, ${p1.weapons.length} weapons, ` +
-        `${p1.materials.length} materials, ${p1.families.length} families`,
+        `${p1.materials.length} materials, ${p1.families.length} families, ` +
+        `${p1.domains?.length ?? 0} domains, ${p1.weeklyBosses?.length ?? 0} weekly bosses`,
     )
     lines.push(
       ...describe(
@@ -248,12 +249,45 @@ export function describeChanges(previous: DataSet, next: DataSet): string[] {
           .map((f) => f[0]),
       ),
     )
+    // Planner v2 sections: domains and weekly bosses by their first family/material.
+    const rowsBy = <R>(rows: R[] | undefined, id: (r: R) => string) =>
+      new Map((rows ?? []).map((r) => [id(r), JSON.stringify(r)]))
+    for (const [label, before, after] of [
+      [
+        'domains',
+        rowsBy(p0?.domains, (d) => `${d[2] || d[0]} (${d[3].join(', ')})`),
+        rowsBy(p1.domains, (d) => `${d[2] || d[0]} (${d[3].join(', ')})`),
+      ],
+      [
+        'weekly bosses',
+        rowsBy(p0?.weeklyBosses, (b) => `${b[2]} (${b[0].join(', ')})`),
+        rowsBy(p1.weeklyBosses, (b) => `${b[2]} (${b[0].join(', ')})`),
+      ],
+    ] as const) {
+      lines.push(
+        ...list(
+          `new ${label}`,
+          [...after.keys()].filter((k) => !before.has(k)),
+        ),
+        ...list(
+          `changed ${label}`,
+          [...after.keys()].filter((k) => before.has(k) && before.get(k) !== after.get(k)),
+        ),
+      )
+    }
     for (const key of [
       'characterExp',
       'weaponExp',
       'expItems',
       'moraPerExp',
       'levelCap',
+      'promoteAR',
+      'talentAscension',
+      'unfarmable',
+      'azoth',
+      'forge',
+      'resin',
+      'passives',
     ] as const) {
       if (p0 && JSON.stringify(p0[key]) !== JSON.stringify(p1[key]))
         lines.push(`    ${key} changed`)

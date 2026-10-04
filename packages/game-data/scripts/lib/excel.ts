@@ -125,4 +125,9 @@ export class TextMap {
     }
     return undefined
   }
+
+  /** Every text in every map (for "is this name in the game at all" checks). */
+  *values(): IterableIterator<string> {
+    for (const map of this.maps) yield* Object.values(map)
+  }
 }

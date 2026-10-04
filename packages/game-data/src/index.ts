@@ -8,6 +8,7 @@
 import meta from '../data/meta.json'
 import type {
   AchievementsFile,
+  DomainKind,
   Element,
   GoalsFile,
   IconsFile,
@@ -15,12 +16,13 @@ import type {
   MaterialKind,
   MetaFile,
   PlannerFile,
+  TalentSlot,
   TextFile,
   WeaponType,
 } from './format'
 import { entryIcon, entryId } from './icons'
 
-export type { Element, MaterialKind, MetaFile, WeaponType } from './format'
+export type { DomainKind, Element, MaterialKind, MetaFile, TalentSlot, WeaponType } from './format'
 export { entryIcon, entryId } from './icons'
 
 /** Game version and dump commit the data was compiled from. */
@@ -181,6 +183,8 @@ export interface AscensionPhase {
   cap: number
   mora: number
   items: ItemCost[]
+  /** Adventure Rank this phase needs (0: none). */
+  ar: number
 }
 
 export interface TalentLevel {
@@ -199,6 +203,8 @@ export interface PlannerCharacter {
   ascension: AscensionPhase[]
   /** talents.x[L-1]: reaching level L (index 0 is level 1, free). */
   talents: { normal: TalentLevel[]; skill: TalentLevel[]; burst: TalentLevel[] }
+  /** The talent (GOOD name) constellations 3 and 5 raise by 3; null when none (Aloy, Manekin). */
+  constellation: { c3: TalentSlot | null; c5: TalentSlot | null }
 }
 
 export interface PlannerWeapon {
@@ -214,6 +220,72 @@ export interface PlannerWeapon {
 export interface ExpItem {
   material: PlannerMaterial
   exp: number
+}
+
+export interface DomainTier {
+  /** 1 = I. */
+  tier: number
+  /** Adventure Rank to enter. */
+  ar: number
+  /** Original Resin per run. */
+  resin: number
+  /** Mora per run. */
+  mora: number
+  /** The game's preview of the lowest-tier material per run (first roll only; 0 when none). */
+  preview: number
+}
+
+/** A talent book or weapon material domain entrance. */
+export interface DomainEntry {
+  /** DungeonEntry id. */
+  entry: number
+  kind: DomainKind
+  /** Entrance name ("Forsaken Rift"); '' when overrides/planner.json has none. */
+  name: string
+  /** In the game's day order: Mon/Thu, Tue/Fri, Wed/Sat (each family's `weekdays` says the days). */
+  families: MaterialFamily[]
+  /** Lowest first; higher tiers drop more and need a higher Adventure Rank. */
+  tiers: DomainTier[]
+}
+
+/** A weekly boss and its three materials (Dream Solvent converts any into another). */
+export interface WeeklyBoss {
+  /** GOOD key of its lowest-id material: a stable id. */
+  key: string
+  name: string
+  items: PlannerMaterial[]
+  /** Dream Solvent per conversion. */
+  solvent: number
+  /** Boss levels that drop the materials and the Adventure Rank each needs; empty outside domains (Andrius). */
+  tiers: { ar: number; level: number }[]
+}
+
+export interface ForgeRecipe {
+  /** GOOD key of the ore made. */
+  ore: string
+  /** GOOD key of the one input. */
+  input: string
+  /** Inputs per ore. */
+  count: number
+  mora: number
+  seconds: number
+}
+
+export interface AscensionMoraPassive {
+  character: string
+  types: WeaponType[]
+  /** Share of the weapon ascension Mora saved (0.5). */
+  saved: number
+}
+
+export interface CraftingPassive {
+  character: string
+  /** Family kind it applies to when crafting. */
+  kind: MaterialKind
+  /** `double`: a chance of one more product; `refund`: a chance to get `share` of the inputs back. */
+  effect: 'double' | 'refund'
+  chance: number
+  share: number
 }
 
 export interface PlannerData {
@@ -233,6 +305,39 @@ export interface PlannerData {
   families: MaterialFamily[]
   characters: ReadonlyMap<string, PlannerCharacter>
   weapons: ReadonlyMap<string, PlannerWeapon>
+
+  /** talentAscension[L-1]: the ascension phase talent level L needs. */
+  talentAscension: readonly number[]
+  /** Talent book and weapon material domains, by entry id order. */
+  domains: DomainEntry[]
+  /** Family key -> its domain entrance. */
+  domainOf: ReadonlyMap<string, DomainEntry>
+  weeklyBosses: WeeklyBoss[]
+  /** Weekly material key -> its boss. */
+  weeklyBossOf: ReadonlyMap<string, WeeklyBoss>
+  /** Weekly materials no boss drops and no Dream Solvent makes (quest rewards). */
+  unfarmable: ReadonlySet<string>
+  /** Billet trios Dream Solvent converts (item ids; not planner materials). */
+  billets: { items: readonly number[]; solvent: number }[]
+  /** GOOD keys of the conversion currencies. */
+  items: { dreamSolvent: string; dustOfAzoth: string }
+  /** Dust of Azoth per converted gem by tier (lowest first), and the gem families that convert. */
+  azoth: { dust: readonly number[]; families: ReadonlySet<string> }
+  /** Weapon EXP ore recipes (one input each). */
+  forge: ForgeRecipe[]
+  /** Weapon EXP a weapon gives as fodder, by rarity (index rarity-1), before its own levels. */
+  weaponBaseExp: readonly number[]
+  resin: {
+    /** GOOD key of Original Resin. */
+    original: string
+    /** Items that hold resin: GOOD key and resin each (Fragile, Transient, Condensed). */
+    items: { key: string; resin: number }[]
+    /** Condensed Resin: GOOD key and most held. */
+    condensed: { key: string; max: number }
+    /** Original Resin per Ley Line Outcrop. */
+    leyLine: number
+  }
+  passives: { ascensionMora: AscensionMoraPassive[]; crafting: CraftingPassive[] }
 }
 
 export const loadPlanner = once(async (): Promise<PlannerData> => {
@@ -263,11 +368,22 @@ export function decodePlanner(file: PlannerFile): PlannerData {
   })
   const items = (costs: [number, number][]) =>
     costs.map(([id, count]): ItemCost => ({ material: material(id), count }))
+  const promoteAR = file.promoteAR ?? { character: [], weapon: [] }
   const ascensions = new Map(
-    Object.entries(file.ascensions).map(([key, phases]) => [
-      key,
-      phases.map(([cap, mora, costs]): AscensionPhase => ({ cap, mora, items: items(costs) })),
-    ]),
+    Object.entries(file.ascensions).map(([key, phases]) => {
+      const ar = key.startsWith('w') ? promoteAR.weapon : promoteAR.character
+      return [
+        key,
+        phases.map(
+          ([cap, mora, costs], phase): AscensionPhase => ({
+            cap,
+            mora,
+            items: items(costs),
+            ar: ar[phase] ?? 0,
+          }),
+        ),
+      ]
+    }),
   )
   const talents = new Map(
     Object.entries(file.talents).map(([key, levels]) => [
@@ -282,7 +398,19 @@ export function decodePlanner(file: PlannerFile): PlannerData {
   }
 
   const characters = new Map<string, PlannerCharacter>()
-  for (const [key, id, rarity, element, weapon, asc, normal, skill, burst] of file.characters) {
+  for (const [
+    key,
+    id,
+    rarity,
+    element,
+    weapon,
+    asc,
+    normal,
+    skill,
+    burst,
+    c3,
+    c5,
+  ] of file.characters) {
     characters.set(key, {
       key,
       id,
@@ -295,6 +423,7 @@ export function decodePlanner(file: PlannerFile): PlannerData {
         skill: table(talents, skill),
         burst: table(talents, burst),
       },
+      constellation: { c3: c3 || null, c5: c5 || null },
     })
   }
   const weapons = new Map<string, PlannerWeapon>()
@@ -304,6 +433,38 @@ export function decodePlanner(file: PlannerFile): PlannerData {
   }
   const expItems = (list: [number, number][]) =>
     list.map(([id, exp]): ExpItem => ({ material: material(id), exp }))
+
+  const familyByKey = new Map(families.map((f) => [f.key, f]))
+  const domains = (file.domains ?? []).map(
+    ([entry, kind, name, keys, tiers]): DomainEntry => ({
+      entry,
+      kind,
+      name,
+      families: keys.map((key) => {
+        const family = familyByKey.get(key)
+        if (!family) throw new Error(`planner.json: domain ${entry} names unknown family ${key}`)
+        return family
+      }),
+      tiers: tiers.map(([ar, resin, mora, preview], i) => ({
+        tier: i + 1,
+        ar,
+        resin,
+        mora,
+        preview,
+      })),
+    }),
+  )
+  const weeklyBosses = (file.weeklyBosses ?? []).map(
+    ([ids, solvent, name, tiers]): WeeklyBoss => ({
+      key: material(ids[0]!).key,
+      name,
+      items: ids.map(material),
+      solvent,
+      tiers: tiers.map(([ar, level]) => ({ ar, level })),
+    }),
+  )
+  const resin = file.resin ?? { original: '', items: [], condensed: ['', 0], leyLine: 0 }
+  const passives = file.passives ?? { ascensionMora: [], crafting: [] }
 
   return {
     levelCap: file.levelCap,
@@ -320,6 +481,43 @@ export function decodePlanner(file: PlannerFile): PlannerData {
     families,
     characters,
     weapons,
+    talentAscension: file.talentAscension ?? [],
+    domains,
+    domainOf: new Map(domains.flatMap((d) => d.families.map((f) => [f.key, d] as const))),
+    weeklyBosses,
+    weeklyBossOf: new Map(weeklyBosses.flatMap((b) => b.items.map((m) => [m.key, b] as const))),
+    unfarmable: new Set(file.unfarmable ?? []),
+    billets: (file.billets ?? []).map(([ids, solvent]) => ({ items: ids, solvent })),
+    items: file.items ?? { dreamSolvent: '', dustOfAzoth: '' },
+    azoth: { dust: file.azoth?.dust ?? [], families: new Set(file.azoth?.families ?? []) },
+    forge: (file.forge ?? []).map(([ore, input, count, mora, seconds]) => ({
+      ore,
+      input,
+      count,
+      mora,
+      seconds,
+    })),
+    weaponBaseExp: file.weaponBaseExp ?? [],
+    resin: {
+      original: resin.original,
+      items: resin.items.map(([key, amount]) => ({ key, resin: amount })),
+      condensed: { key: resin.condensed[0], max: resin.condensed[1] },
+      leyLine: resin.leyLine,
+    },
+    passives: {
+      ascensionMora: passives.ascensionMora.map(([character, types, saved]) => ({
+        character,
+        types,
+        saved,
+      })),
+      crafting: passives.crafting.map(([character, kind, effect, chance, share]) => ({
+        character,
+        kind,
+        effect,
+        chance,
+        share,
+      })),
+    },
   }
 }
 

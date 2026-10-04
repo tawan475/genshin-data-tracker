@@ -8,14 +8,19 @@
  * - what all goals cost together against an inventory, using spare lower
  *   tiers of a craftable family (3 -> 1, plus the crafting mora) before
  *   calling anything missing (`planTotals`);
- * - where the missing materials are farmed (`sourceGroups`), with domain days
- *   on the account's server (`serverWeekday`) and runs/resin only when
- *   `overrides/drops.json` has a rate for the source (`loadDrops`). Nothing
- *   is estimated without one.
+ * - after crafting, what conversions cover (`PlanOptions`: Dream Solvent
+ *   within a weekly boss, Dust of Azoth between gems, Mystic ore forged from
+ *   chunks, owned characters' Mora passives; see planner-convert.ts);
+ * - where the missing materials are farmed (`sourceGroups`, the older flat
+ *   view; planner-estimate.ts has runs, resin and days per domain, boss and
+ *   ley line from `overrides/drops.json`), with domain days on the account's
+ *   server (`serverWeekday`).
  *
  * Levels follow the game's phases: ascension phase P allows levels up to
- * phase P's cap and needs the cap of phase P-1 first. EXP is counted in
- * points; the books and ores it takes are a separate step (`expItemMix`).
+ * phase P's cap and needs the cap of phase P-1 first, and talent levels need
+ * an ascension (`ascensionForTalent`): a goal's talents raise the ascension
+ * it is costed at. EXP is counted in points; the books and ores it takes are
+ * a separate step (`expItemMix`).
  */
 
 import type {
@@ -25,7 +30,19 @@ import type {
   MaterialKind,
   PlannerData,
   PlannerMaterial,
+  WeaponType,
 } from './index'
+import {
+  convertGems,
+  convertWeekly,
+  craftFamily,
+  forgeOre,
+  type AzothTotal,
+  type ForgeTotal,
+  type SolventTotal,
+} from './planner-convert'
+
+export { craftFamily } from './planner-convert'
 
 // --- States and goals ----------------------------------------------------------
 
@@ -60,11 +77,29 @@ export interface WeaponGoal extends WeaponState {
 export const TALENTS = ['auto', 'skill', 'burst'] as const
 export type TalentName = (typeof TALENTS)[number]
 
-/** Talent level cap per ascension phase. */
-const TALENT_CAPS = [1, 1, 2, 4, 6, 8, 10] as const
+/** Talent level cap per ascension phase (the game data's `talentAscension` agrees; a test checks). */
+export const TALENT_CAPS = [1, 1, 2, 4, 6, 8, 10] as const
 
 export function talentCap(ascension: number): number {
   return TALENT_CAPS[Math.max(0, Math.min(6, Math.trunc(ascension)))] ?? 1
+}
+
+/**
+ * The ascension phase a talent level needs: `table` is the game's
+ * `planner.talentAscension` (index L-1); without it, the inverse of
+ * TALENT_CAPS. Level 1 needs nothing.
+ */
+export function ascensionForTalent(level: number, table?: readonly number[]): number {
+  const lv = Math.max(1, Math.min(10, Math.trunc(Number.isFinite(level) ? level : 1)))
+  const fromTable = table?.[lv - 1]
+  if (fromTable !== undefined && table!.length >= 10) return fromTable
+  const index = TALENT_CAPS.findIndex((cap) => cap >= lv)
+  return index < 0 ? 6 : index
+}
+
+/** The ascension phase three talent levels need together. */
+export function ascensionForTalents(talents: Talents, table?: readonly number[]): number {
+  return Math.max(...TALENTS.map((t) => ascensionForTalent(talents[t], table)))
 }
 
 export const NEW_CHARACTER: CharacterState = {
@@ -124,6 +159,14 @@ export interface Requirement {
   characterExp: number
   /** EXP points to level a weapon. */
   weaponExp: number
+  /** Part of `mora` spent on ascensions (what weapon ascension passives halve). */
+  ascensionMora?: number
+  /** Weapon goals: the weapon's type (for the ascension Mora passives). */
+  weaponType?: WeaponType
+  /** Adventure Rank the ascensions to do need (0 when none is pending). */
+  ar?: number
+  /** The ascension phase the goal is costed to: the target's, raised to what its talents need. */
+  ascension?: number
 }
 
 export function emptyRequirement(): Requirement {
@@ -158,30 +201,61 @@ function expMora(exp: number, rate: number): number {
   return Math.ceil(Math.round(exp * rate * 1000) / 1000)
 }
 
+export interface RequirementOptions {
+  /**
+   * Raise the target ascension to what its talent levels need, so the cost
+   * includes those phases (default true; the game won't level a talent past
+   * its ascension's cap).
+   */
+  talentCaps?: boolean
+}
+
+/** Ascension phases from `from` to `to`, into `result` (Mora, items, the AR they need). */
+function addPhases(
+  result: Requirement,
+  phases: readonly AscensionPhase[],
+  from: number,
+  to: number,
+): void {
+  result.ascensionMora ??= 0
+  result.ar ??= 0
+  for (let phase = from + 1; phase <= to; phase++) {
+    const step = phases[phase]!
+    result.mora += step.mora
+    result.ascensionMora += step.mora
+    result.ar = Math.max(result.ar, step.ar ?? 0)
+    addItems(result.items, step.items)
+  }
+}
+
 /**
  * The cost of taking a character from `current` to `target`; null when the
  * planner data has no such character (the element-less Traveler, a character
  * newer than the data). Talents use the character's own tables (per element
- * for the Traveler: pass `TravelerGeo`, …).
+ * for the Traveler: pass `TravelerGeo`, …). The target ascension is raised to
+ * what its talents need (`options.talentCaps`); `ascension` on the result
+ * says which phase was costed and `ar` the Adventure Rank it needs.
  */
 export function characterRequirement(
   planner: PlannerData,
   key: string,
   current: CharacterState,
   target: CharacterState,
+  options: RequirementOptions = {},
 ): Requirement | null {
   const character = planner.characters.get(key)
   if (!character) return null
   const phases = character.ascension
   const from = normalizeLevel(phases, current.level, current.ascension)
-  const to = normalizeLevel(phases, target.level, target.ascension)
+  const talentAscension =
+    options.talentCaps === false
+      ? 0
+      : Math.min(phases.length - 1, ascensionForTalents(target.talents, planner.talentAscension))
+  const to = normalizeLevel(phases, target.level, Math.max(target.ascension, talentAscension))
   const result = emptyRequirement()
+  result.ascension = Math.max(from.ascension, to.ascension)
 
-  for (let phase = from.ascension + 1; phase <= to.ascension; phase++) {
-    const step = phases[phase]!
-    result.mora += step.mora
-    addItems(result.items, step.items)
-  }
+  addPhases(result, phases, from.ascension, to.ascension)
   if (to.level > from.level) {
     result.characterExp = levelExp(planner.characterExp, from.level, to.level)
     result.mora += expMora(result.characterExp, planner.moraPerExp.character)
@@ -217,17 +291,98 @@ export function weaponRequirement(
   const from = normalizeLevel(phases, current.level, current.ascension)
   const to = normalizeLevel(phases, target.level, target.ascension)
   const result = emptyRequirement()
-  for (let phase = from.ascension + 1; phase <= to.ascension; phase++) {
-    const step = phases[phase]!
-    result.mora += step.mora
-    addItems(result.items, step.items)
-  }
+  result.weaponType = weapon.type
+  result.ascension = Math.max(from.ascension, to.ascension)
+  addPhases(result, phases, from.ascension, to.ascension)
   if (to.level > from.level) {
     const curve = planner.weaponExp[weapon.rarity - 1] ?? []
     result.weaponExp = levelExp(curve, from.level, to.level)
     result.mora += expMora(result.weaponExp, planner.moraPerExp.weapon)
   }
   return result
+}
+
+/**
+ * An extra need for one material (an item goal, Seelie's custom items), as
+ * a requirement `planTotals` counts: Mora as Mora, EXP books and ores as EXP
+ * points, anything else as the item (materials outside the planner data
+ * included: Dream Solvent, chunks…).
+ */
+export function itemRequirement(planner: PlannerData, key: string, count: number): Requirement {
+  const r = emptyRequirement()
+  const n = Math.max(0, Math.trunc(Number.isFinite(count) ? count : 0))
+  if (n === 0) return r
+  if (key === planner.mora.key) {
+    r.mora = n
+    return r
+  }
+  const book = planner.expItems.character.find((i) => i.material.key === key)
+  const ore = planner.expItems.weapon.find((i) => i.material.key === key)
+  if (book) r.characterExp = book.exp * n
+  else if (ore) r.weaponExp = ore.exp * n
+  else r.items.set(key, n)
+  return r
+}
+
+/** An item goal as `planTotals` takes it (id `item:<key>`, as the Planner page names them). */
+export function itemGoal(
+  planner: PlannerData,
+  key: string,
+  target: { count: number; active?: boolean },
+): PlanGoal {
+  return {
+    id: `item:${key}`,
+    requirement: itemRequirement(planner, key, target.count),
+    active: target.active !== false,
+  }
+}
+
+/** The talents a character's 3rd and 5th constellations raise by 3 (null: none). */
+export function constellationBoosts(
+  planner: PlannerData,
+  key: string,
+): { c3: TalentName | null; c5: TalentName | null } {
+  return planner.characters.get(key)?.constellation ?? { c3: null, c5: null }
+}
+
+/**
+ * Talent levels as the game shows them with constellations: +3 on the talent
+ * C3 raises from constellation 3, on the one C5 raises from 5. Goals and
+ * costs stay on base levels (GOOD stores base levels).
+ */
+export function boostedTalents(
+  planner: PlannerData,
+  key: string,
+  talents: Talents,
+  constellation: number,
+): Talents {
+  const { c3, c5 } = constellationBoosts(planner, key)
+  const boosted = { ...talents }
+  if (c3 && constellation >= 3) boosted[c3] += 3
+  if (c5 && constellation >= 5) boosted[c5] += 3
+  return boosted
+}
+
+/**
+ * Weapon ascension Mora an owned character's passive saves on this
+ * requirement (Raiden Shogun: swords and polearms, Wanderer: bows and
+ * catalysts, half each), with who saves it; 0 and null when none applies.
+ */
+export function passiveDiscount(
+  planner: PlannerData,
+  requirement: Requirement,
+  owned: ReadonlySet<string>,
+): { mora: number; character: string | null } {
+  const type = requirement.weaponType
+  const mora = requirement.ascensionMora ?? 0
+  if (!type || mora <= 0) return { mora: 0, character: null }
+  let best = { mora: 0, character: null as string | null }
+  for (const passive of planner.passives.ascensionMora) {
+    if (!owned.has(passive.character) || !passive.types.includes(type)) continue
+    const saved = Math.floor(mora * passive.saved)
+    if (saved > best.mora) best = { mora: saved, character: passive.character }
+  }
+  return best
 }
 
 /**
@@ -374,10 +529,14 @@ export interface MaterialLine {
   crafted: number
   /** Spent crafting the tier above. */
   spent: number
-  /** Still missing after crafting. */
+  /** Still missing after crafting and conversions. */
   missing: number
   /** Goals needing this material, in goal order. */
   goals: string[]
+  /** Received by converting other materials (Dream Solvent, Dust of Azoth). */
+  converted?: number
+  /** Given away: converted into other materials. */
+  convertedAway?: number
 }
 
 export interface ExpTotal {
@@ -392,24 +551,53 @@ export interface ExpTotal {
 }
 
 export interface MoraTotal {
-  /** Goals plus crafting. */
+  /** Goals plus crafting and forging, less passives. */
   need: number
   have: number
   missing: number
-  /** Part of `need` spent crafting. */
+  /** Part of `need` spent crafting (conversions' crafting included). */
   crafting: number
+  /** Part of `need` spent forging ore. */
+  forging: number
+  /** Saved by owned characters' passives (already taken off `need`). */
+  saved: number
   goals: string[]
+}
+
+export interface PassiveTotal {
+  /** Weapon ascension Mora saved, by the character whose passive saves it. */
+  saved: { character: string; mora: number; goals: string[] }[]
 }
 
 export interface PlanTotals {
   /**
    * Every material the goals need, by GOOD key, plus the other tiers of each
-   * needed family (their spares may be crafted up), lowest tier first.
+   * needed family (their spares may be crafted up) and the materials
+   * conversions draw on, lowest tier first.
    */
   lines: Map<string, MaterialLine>
   characterExp: ExpTotal
   weaponExp: ExpTotal
   mora: MoraTotal
+  /** Dream Solvent conversions; null when `options.solvent` is false. */
+  solvent: SolventTotal | null
+  /** Dust of Azoth conversions; null unless `options.azoth`. */
+  azoth: AzothTotal | null
+  /** Ore forged from chunks; null unless `options.forge` (or nothing missing). */
+  forge: ForgeTotal | null
+  /** Mora passives applied; null unless `options.passives`. */
+  passives: PassiveTotal | null
+}
+
+export interface PlanOptions {
+  /** Convert weekly boss materials with Dream Solvent (default true). */
+  solvent?: boolean
+  /** Convert spare gems of other elements with Dust of Azoth (default false: dust is scarce). */
+  azoth?: boolean
+  /** Count the Mystic ore the chunks held can be forged into (default false). */
+  forge?: boolean
+  /** Owned character keys whose Mora passives apply (Raiden Shogun, Wanderer); null = none. */
+  passives?: Iterable<string> | null
 }
 
 /**
@@ -417,11 +605,14 @@ export interface PlanTotals {
  * In a craftable family each tier first uses its own stock, then crafts from
  * the spare stock below it (spares climb tier by tier), and crafting costs
  * the family's mora per item. Lower tiers cannot be made from higher ones.
+ * Then, by `options`: Dream Solvent within each weekly boss, Dust of Azoth
+ * between gem elements, Mystic ore from chunks, and Mora passives.
  */
 export function planTotals(
   planner: PlannerData,
   goals: readonly PlanGoal[],
   inventory: Readonly<Record<string, number>>,
+  options: PlanOptions = {},
 ): PlanTotals {
   const held = (key: string) => Math.max(0, Math.trunc(inventory[key] ?? 0))
   const need = new Map<string, number>()
@@ -430,10 +621,22 @@ export function planTotals(
   const expGoals = { character: [] as string[], weapon: [] as string[] }
   let goalMora = 0
   const moraGoals: string[] = []
+  const owned = options.passives ? new Set(options.passives) : null
+  const saved = new Map<string, { mora: number; goals: string[] }>()
 
   for (const goal of goals) {
     if (goal.active === false) continue
     const r = goal.requirement
+    if (owned) {
+      const discount = passiveDiscount(planner, r, owned)
+      if (discount.character && discount.mora > 0) {
+        const entry = saved.get(discount.character) ?? { mora: 0, goals: [] }
+        entry.mora += discount.mora
+        entry.goals.push(goal.id)
+        saved.set(discount.character, entry)
+        goalMora -= discount.mora
+      }
+    }
     for (const [key, count] of r.items) {
       need.set(key, (need.get(key) ?? 0) + count)
       const list = who.get(key)
@@ -511,6 +714,10 @@ export function planTotals(
     }
   }
 
+  const solvent = options.solvent === false ? null : convertWeekly(planner, lines, inventory)
+  const azoth = options.azoth ? convertGems(planner, lines, inventory) : null
+  if (azoth) craftingMora += azoth.mora
+
   const expTotal = (kind: 'character' | 'weapon'): ExpTotal => {
     const items = planner.expItems[kind]
     const have = expHeld(items, inventory)
@@ -523,58 +730,38 @@ export function planTotals(
       goals: expGoals[kind],
     }
   }
+  const characterExp = expTotal('character')
+  const weaponExp = expTotal('weapon')
+  const forge = options.forge ? forgeOre(planner, weaponExp, inventory) : null
+  if (forge && forge.exp > 0) {
+    weaponExp.missing = Math.max(0, weaponExp.missing - forge.exp)
+    weaponExp.missingItems = expItemMix(weaponExp.missing, planner.expItems.weapon)
+  }
 
-  const moraNeed = goalMora + craftingMora
+  const forging = forge?.mora ?? 0
+  const moraNeed = Math.max(0, goalMora + craftingMora + forging)
   const moraHave = held(planner.mora.key)
+  const passiveTotal: PassiveTotal | null = owned
+    ? { saved: [...saved].map(([character, s]) => ({ character, ...s })) }
+    : null
   return {
     lines,
-    characterExp: expTotal('character'),
-    weaponExp: expTotal('weapon'),
+    characterExp,
+    weaponExp,
     mora: {
       need: moraNeed,
       have: moraHave,
       missing: Math.max(0, moraNeed - moraHave),
       crafting: craftingMora,
+      forging,
+      saved: passiveTotal?.saved.reduce((sum, s) => sum + s.mora, 0) ?? 0,
       goals: moraGoals,
     },
+    solvent,
+    azoth,
+    forge,
+    passives: passiveTotal,
   }
-}
-
-/**
- * Fills `crafted`, `spent` and `missing` on one family's tiers (lowest
- * first) and returns the crafting mora. Pass 1 finds how many of each tier
- * the spares below could make; pass 2 walks down from the top, crafting only
- * what a tier is short of, so a craft is only counted (and paid) when used.
- * `craftMora` empty means the family cannot be crafted.
- */
-export function craftFamily(tiers: MaterialLine[], craftMora: readonly number[]): number {
-  const n = tiers.length
-  const craftable = craftMora.length >= n - 1 && n > 1
-  // Pass 1: the most each tier could receive from below.
-  const canCraft = new Array<number>(n).fill(0)
-  if (craftable) {
-    for (let t = 1; t < n; t++) {
-      const below = tiers[t - 1]!
-      const spare = Math.max(0, below.have + canCraft[t - 1]! - below.need)
-      canCraft[t] = Math.floor(spare / 3)
-    }
-  }
-  // Pass 2: from the top, craft only what is short.
-  let mora = 0
-  let demand = tiers[n - 1]?.need ?? 0
-  for (let t = n - 1; t >= 0; t--) {
-    const tier = tiers[t]!
-    const short = Math.max(0, demand - tier.have)
-    const crafted = Math.min(short, canCraft[t]!)
-    tier.crafted = crafted
-    tier.missing = short - crafted
-    if (crafted > 0) {
-      mora += crafted * (craftMora[t - 1] ?? 0)
-      tiers[t - 1]!.spent = crafted * 3
-    }
-    demand = t > 0 ? tiers[t - 1]!.need + crafted * 3 : 0
-  }
-  return mora
 }
 
 // --- Where to farm ---------------------------------------------------------
@@ -615,6 +802,7 @@ const SOURCE_OF: Record<MaterialKind, SourceKind | null> = {
   common: 'enemy',
   elite: 'enemy',
   crown: 'crown',
+  currency: null,
   mora: null,
   exp: null,
   ore: null,

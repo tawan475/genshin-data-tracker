@@ -25,6 +25,7 @@ import type {
   TextFile,
 } from '../src/format.ts'
 import { checkAppendOnly, describeChanges, type DataSet } from './lib/changes.ts'
+import { checkDrops } from './lib/drops.ts'
 import { ACHIEVEMENT_FILES, compileAchievements } from './compile/achievements.ts'
 import { compileAvatarIcons } from './compile/avatars.ts'
 import { compileMaterialIndex } from './compile/materials.ts'
@@ -183,8 +184,15 @@ async function main(): Promise<number> {
   ) as Omit<PlannerInputs, 'names' | 'text'>
   const planner = compilePlanner(
     { ...plannerInputs, names, text },
-    { keys: overrides.keys, weekdays: overrides.weekdays, toGoodKey: goodKey, problems },
+    {
+      keys: overrides.keys,
+      weekdays: overrides.weekdays,
+      planner: overrides.planner,
+      toGoodKey: goodKey,
+      problems,
+    },
   )
+  checkDrops(overrides.drops, planner.planner, planner.checks, problems)
   const materials = compileMaterialIndex(plannerInputs.materials, names, {
     plannerKeys: planner.materialKeys,
     keys: overrides.keys,
