@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { loadPlanner } from '@gdt/game-data'
+import { loadDropRates } from '@gdt/game-data/drops'
+import { craftingSteps } from '@gdt/game-data/planner-convert'
+import { domainSchedule, farmPlan, resinNow, todayPlan } from '@gdt/game-data/planner-estimate'
 import {
   createRequirementCache,
-  loadDrops,
-  msUntilReset,
-  planEstimate,
+  itemGoal,
   planTotals,
-  serverWeekday,
-  sourceGroups,
   type PlanGoal,
+  type PlanOptions,
 } from '@gdt/game-data/planner-math'
 import type { PlannerTarget } from '@gdt/shared'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
@@ -37,14 +37,18 @@ import {
 import {
   buildBoard,
   characterGoalId,
+  entryGoal,
   inputOf,
   itemGoalId,
-  itemRequirement,
+  nextHint,
+  shortCount,
   targetId,
   weaponGoalId,
+  withoutPassives,
   type EditorSubject,
   type GoalEntry,
   type ItemGoalView,
+  type NextHint,
   type RequirementCache,
 } from '@/components/planner/model'
 import { upsert, usePlannerTargets } from '@/components/planner/use-planner-targets'
@@ -59,7 +63,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
 import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
-import { loadGameIcons } from '@/lib/assets'
+import { loadGameIcons, loadMaterialIcons } from '@/lib/assets'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
@@ -68,9 +72,11 @@ import { useAccount } from './context'
 /**
  * Planner: goals per character (level, ascension, talents) and weapon, extra
  * item needs, what they cost from the newest snapshot's state, and what is
- * still missing against its inventory, grouped by where it is farmed.
- * Targets and the planner settings live on the server; everything else is
- * computed here from @gdt/game-data.
+ * still missing against its inventory (crafting, Dream Solvent, optionally
+ * Dust of Azoth and forging, Mora passives), with runs, resin and days per
+ * source from the account's AR and World Level. Targets and the planner
+ * settings live on the server; everything else is computed here from
+ * @gdt/game-data.
  */
 const account = useAccount()
 const feedback = useFeedback()
@@ -85,8 +91,10 @@ const resource = useResource(
     const [inventory, planner, drops] = await Promise.all([
       loadLatestInventory(a),
       loadPlanner(),
-      loadDrops(),
+      // No rates means no estimates, not a broken page.
+      loadDropRates().catch(() => null),
       loadGameIcons(),
+      loadMaterialIcons(),
     ])
     return { accountId: a.id, inventory, planner, drops }
   },
@@ -97,12 +105,28 @@ const data = computed(() => {
 })
 const planner = computed(() => data.value?.planner ?? null)
 const good = computed(() => data.value?.inventory?.good ?? null)
+const drops = computed(() => data.value?.drops ?? null)
 
 const store = usePlannerTargets(accountId)
 onBeforeUnmount(() => void store.flush())
 
 const { settings, save: saveSettings } = usePlannerSettings(accountId)
 const settingsOpen = ref(false)
+
+/** Count the Mystic ore the chunks held can be forged into (this device's choice). */
+const forge = ref(readStorage('planner:forge') === '1')
+watch(forge, (value) => writeStorage('planner:forge', value ? '1' : '0'))
+
+/** Characters in the snapshot, for the Mora passives (Raiden Shogun, Wanderer). */
+const ownedCharacters = computed(() => new Set((good.value?.characters ?? []).map((c) => c.key)))
+const passiveOwners = computed(() =>
+  settings.value.planner.passives ? ownedCharacters.value : null,
+)
+const planOptions = computed<PlanOptions>(() => ({
+  azoth: settings.value.planner.azoth,
+  passives: passiveOwners.value,
+  forge: forge.value,
+}))
 
 // One per planner data (it never changes): each goal's cost is computed once per state.
 let cache: RequirementCache | null = null
@@ -119,34 +143,53 @@ const board = computed(() => {
 })
 const totals = computed(() =>
   planner.value && good.value && board.value
-    ? planTotals(planner.value, board.value.goals, good.value.materials)
+    ? planTotals(planner.value, board.value.goals, good.value.materials, planOptions.value)
     : null,
 )
-const groups = computed(() => (totals.value ? sourceGroups(totals.value, data.value?.drops) : []))
-const estimate = computed(() => planEstimate(groups.value))
+const plan = computed(() =>
+  planner.value && totals.value
+    ? farmPlan(planner.value, totals.value, drops.value, {
+        ar: settings.value.ar,
+        wl: settings.value.wl,
+      })
+    : null,
+)
+const steps = computed(() =>
+  planner.value && totals.value ? craftingSteps(planner.value, totals.value) : [],
+)
+const schedule = computed(() => (plan.value ? domainSchedule(plan.value) : []))
+
+// A clock for today's domains, the reset countdown and the resin estimate.
+const now = ref(Date.now())
+const clock = setInterval(() => (now.value = Date.now()), 30_000)
+onBeforeUnmount(() => clearInterval(clock))
+const today = computed(() =>
+  plan.value ? todayPlan(plan.value, now.value, account.value.server) : null,
+)
+const resin = computed(() => {
+  const at = account.value.latest?.takenAt
+  return planner.value && good.value && at !== undefined
+    ? resinNow(planner.value, good.value.materials, at, now.value)
+    : null
+})
+/** Weapon EXP still short (after forging, when that is on). */
+const oreShort = computed(() => (totals.value?.weaponExp.missing ?? 0) > 0)
 
 /**
- * Per goal card, how many things (materials, EXP, Mora) the inventory is
- * short of for that goal alone, crafting included; 0 means it can be
- * levelled right now. Done goals are left out.
+ * Per goal card, how many things (materials, EXP, Mora) the stock is short
+ * of for that goal alone (crafting and conversions included); 0 means it
+ * can be done right now. Done goals are left out.
  */
 const missing = computed(() => {
   const map = new Map<string, number>()
   const p = planner.value
   const g = good.value
   if (!board.value || !p || !g) return map
+  const options = withoutPassives(planOptions.value)
   for (const entry of board.value.entries) {
     if (entry.done) continue
-    const goals = [entry.character, ...entry.weapons].flatMap((x) =>
-      x?.requirement ? [{ id: x.id, requirement: x.requirement }] : [],
-    )
-    if (goals.length === 0) continue
-    const alone = planTotals(p, goals, g.materials)
-    let short = [...alone.lines.values()].filter((l) => l.missing > 0).length
-    if (alone.mora.missing > 0) short++
-    if (alone.characterExp.missing > 0) short++
-    if (alone.weaponExp.missing > 0) short++
-    map.set(entry.id, short)
+    const goal = entryGoal(p, entry, passiveOwners.value)
+    if (goal) map.set(entry.id, shortCount(p, goal, g.materials, options))
   }
   return map
 })
@@ -160,6 +203,44 @@ const ready = computed(() => {
   return set
 })
 
+/**
+ * What each card can level now, when that is only part of its goal. Kept per
+ * goal state for one inventory and set of options, so a favorite toggle
+ * doesn't recompute them all.
+ */
+let hintMemo = {
+  inventory: null as object | null,
+  options: '',
+  map: new Map<string, NextHint | null>(),
+}
+const hints = computed(() => {
+  const result = new Map<string, NextHint | null>()
+  const p = planner.value
+  const g = good.value
+  if (!board.value || !p || !g) return result
+  const o = planOptions.value
+  const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, settings.value.ar])
+  if (hintMemo.inventory !== g.materials || hintMemo.options !== optionsKey) {
+    hintMemo = { inventory: g.materials, options: optionsKey, map: new Map() }
+  }
+  for (const entry of board.value.entries) {
+    if (entry.done || missing.value.get(entry.id) === 0) continue
+    const c = entry.character
+    const key = JSON.stringify([
+      entry.id,
+      c ? [c.current, c.target.level, c.target.ascension, c.target.talents] : null,
+      entry.weapons.map((w) => [w.key, w.owner, w.current, w.target.level, w.target.ascension]),
+    ])
+    let hint = hintMemo.map.get(key)
+    if (hint === undefined) {
+      hint = nextHint(p, entry, g.materials, { ...o, ar: settings.value.ar })
+      hintMemo.map.set(key, hint)
+    }
+    result.set(entry.id, hint)
+  }
+  return result
+})
+
 /** Extra item needs the inventory covers on their own. */
 const itemsInStock = computed(() => {
   const set = new Set<string>()
@@ -167,36 +248,11 @@ const itemsInStock = computed(() => {
   const g = good.value
   if (!p || !g) return set
   for (const item of board.value?.items ?? []) {
-    if (!item.material) continue
-    const r = itemRequirement(p, item.key, item.target.count)
-    const alone = planTotals(p, [{ id: item.id, requirement: r }], g.materials)
-    const short =
-      alone.mora.missing > 0 ||
-      alone.characterExp.missing > 0 ||
-      alone.weaponExp.missing > 0 ||
-      [...alone.lines.values()].some((l) => l.missing > 0)
-    if (!short) set.add(item.id)
+    const goal = itemGoal(p, item.key, item.target)
+    if (shortCount(p, goal, g.materials, planOptions.value) === 0) set.add(item.id)
   }
   return set
 })
-
-// ------------------------------------------------------------- server day
-
-const now = ref(Date.now())
-let dayTimer: ReturnType<typeof setTimeout> | undefined
-function armDayTimer() {
-  clearTimeout(dayTimer)
-  dayTimer = setTimeout(
-    () => {
-      now.value = Date.now()
-      armDayTimer()
-    },
-    msUntilReset(Date.now(), account.value.server) + 1000,
-  )
-}
-watch(() => account.value.server, armDayTimer, { immediate: true })
-onBeforeUnmount(() => clearTimeout(dayTimer))
-const today = computed(() => serverWeekday(now.value, account.value.server))
 
 // ------------------------------------------------------------------ tabs
 
@@ -210,6 +266,13 @@ watch(tab, (value) => writeStorage('planner:tab', value))
 
 const missingOnly = ref(readStorage('planner:missing') !== '0')
 watch(missingOnly, (value) => writeStorage('planner:missing', value ? '1' : '0'))
+
+type FarmView = 'sources' | 'schedule' | 'craft'
+const savedFarmView = readStorage('planner:farm')
+const farmView = ref<FarmView>(
+  savedFarmView === 'schedule' || savedFarmView === 'craft' ? savedFarmView : 'sources',
+)
+watch(farmView, (value) => writeStorage('planner:farm', value))
 
 // ------------------------------------------------------------------ goals
 
@@ -503,9 +566,9 @@ const itemEditorShown = computed(
           <FileInput class="size-4" aria-hidden="true" />
           <span class="hidden sm:inline">Seelie</span>
         </UiButton>
-        <UiButton variant="primary" @click="openPicker()">
+        <UiButton variant="primary" title="Add goal" aria-label="Add goal" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
-          Add
+          <span class="hidden sm:inline">Add</span>
         </UiButton>
       </template>
       <UiIconButton :label="settingsLabel" @click="settingsOpen = true">
@@ -531,7 +594,7 @@ const itemEditorShown = computed(
     @retry="resource.error.value ? resource.reload() : store.reload()"
   />
 
-  <template v-else-if="board && planner && good && totals && requirementCache">
+  <template v-else-if="board && planner && good && totals && plan && today && requirementCache">
     <UiPanel v-if="!hasGoals" flush>
       <UiEmpty title="No goals">
         <template #icon><Target aria-hidden="true" /></template>
@@ -549,11 +612,17 @@ const itemEditorShown = computed(
     <FarmPanel
       v-else-if="tab === 'farm'"
       v-model:missing-only="missingOnly"
+      v-model:view="farmView"
+      v-model:forge="forge"
       :planner="planner"
       :totals="totals"
-      :groups="groups"
+      :plan="plan"
+      :steps="steps"
+      :schedule="schedule"
       :today="today"
-      :estimate="estimate"
+      :resin="resin"
+      :ore-short="oreShort"
+      @settings="settingsOpen = true"
     />
 
     <div v-else class="flex flex-col gap-4">
@@ -586,6 +655,7 @@ const itemEditorShown = computed(
             :planner="planner"
             :ready="ready.has(entry.id)"
             :ar="settings.ar"
+            :hint="hints.get(entry.id) ?? null"
             @open="openEntry(entry)"
             @toggle="toggleActive(entry)"
             @favorite="toggleFavorite(entry)"
@@ -598,7 +668,9 @@ const itemEditorShown = computed(
         :items="shownItems"
         :planner="planner"
         :goals="board.goals"
+        :totals="totals"
         :inventory="good.materials"
+        :options="planOptions"
         @open="(key) => openEditor({ kind: 'item', key })"
         @toggle="toggleItem"
         @add="openPicker('item')"
@@ -627,6 +699,7 @@ const itemEditorShown = computed(
               :planner="planner"
               :ready="false"
               :ar="settings.ar"
+              :hint="null"
               @open="openEntry(entry)"
               @toggle="toggleActive(entry)"
               @favorite="toggleFavorite(entry)"
@@ -646,7 +719,10 @@ const itemEditorShown = computed(
       :raised="editorCharacter?.raised ?? null"
       :weapon-goals="editorWeapons"
       :others="editorOthers"
+      :options="planOptions"
+      :drops="drops"
       :ar="settings.ar"
+      :wl="settings.wl"
       :saving="store.saving.value"
       @close="closeEditor"
       @save="save"
@@ -659,6 +735,7 @@ const itemEditorShown = computed(
       :good="good"
       :target="editorItem"
       :others="editorOthers"
+      :options="planOptions"
       :saving="store.saving.value"
       @close="closeEditor"
       @save="save"

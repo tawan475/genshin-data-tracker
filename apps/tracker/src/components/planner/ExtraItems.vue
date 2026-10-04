@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
-import type { PlanGoal } from '@gdt/game-data/planner-math'
+import { goalStatus, type StockStatus } from '@gdt/game-data/planner-goals'
+import {
+  itemGoal,
+  type PlanGoal,
+  type PlanOptions,
+  type PlanTotals,
+} from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
 import { Eye, EyeOff, Plus } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { RARITY_SOFT } from '@/components/characters/tokens'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
-import {
-  costCheck,
-  itemRequirement,
-  type CostState,
-  type CostStatus,
-  type ItemGoalView,
-} from './model'
+import { STOCK_MEANING, STOCK_TONE } from './farm-format'
+import type { ItemGoalView } from './model'
 
 /**
  * Extra item needs on the Goals tab: one compact row each (count coloured
@@ -23,49 +24,42 @@ import {
 const props = defineProps<{
   items: readonly ItemGoalView[]
   planner: PlannerData
-  /** Every goal of the board, item needs included. */
+  /** Every goal of the board, item needs included, and their totals. */
   goals: readonly PlanGoal[]
+  totals: PlanTotals
   inventory: Readonly<Record<string, number>>
+  options: PlanOptions
 }>()
 const emit = defineEmits<{ open: [key: string]; toggle: [item: ItemGoalView]; add: [] }>()
 
-const TONE: Record<CostStatus, string> = {
-  all: 'text-success-text',
-  alone: 'text-warning-text',
-  short: 'text-danger-text',
-}
-const MEANING: Record<CostStatus, string> = {
-  all: 'enough for all goals',
-  alone: 'enough for this need alone',
-  short: 'short',
-}
-
-/** The item's cost state: as Mora or EXP when that is what it adds up to. */
-function itemState(item: ItemGoalView): CostState | null {
-  if (!item.material) return null
-  const r = itemRequirement(props.planner, item.key, item.target.count)
-  const others = props.goals.filter((g) => g.id !== item.id)
-  const check = costCheck(props.planner, [r], others, props.inventory)
-  if (r.mora) return check.mora
-  if (r.characterExp) return check.characterExp
-  if (r.weaponExp) return check.weaponExp
-  return check.item(item.key)
+/** The item's stock state: as Mora or EXP when that is what it adds up to. */
+function itemStatus(item: ItemGoalView): StockStatus {
+  const goal = itemGoal(props.planner, item.key, item.target)
+  const status = goalStatus(props.planner, goal, props.inventory, {
+    ...props.options,
+    all: props.totals,
+    goals: props.goals,
+  })
+  return status.overall
 }
 
 const rows = computed(() =>
   props.items.map((item) => {
-    const state = itemState(item)
+    const status = itemStatus(item)
     const icon =
       item.key === props.planner.mora.key
         ? materialIcon('Mora')
-        : gameIcon(item.material?.icon ?? '')
+        : item.material
+          ? gameIcon(item.material.icon)
+          : materialIcon(item.key)
+    const crafted = props.totals.lines.get(item.key)?.crafted ?? 0
     const parts = [
       `${item.name} ×${formatNumber(item.target.count)}`,
       `have ${formatNumber(item.have)}`,
+      crafted && item.target.active ? `craft ${formatNumber(crafted)}` : '',
+      STOCK_MEANING[status],
     ]
-    if (state?.crafted) parts.push(`craft ${formatNumber(state.crafted)}`)
-    parts.push(state ? MEANING[state.status] : 'not in the planner data')
-    return { item, icon, status: state?.status ?? null, title: parts.join(' · ') }
+    return { item, icon, status, title: parts.filter(Boolean).join(' · ') }
   }),
 )
 </script>
@@ -112,11 +106,9 @@ const rows = computed(() =>
             }}</span>
           </span>
           <span class="tabular flex shrink-0 flex-col items-end font-mono leading-tight">
-            <span
-              class="text-sm font-semibold"
-              :class="row.status ? TONE[row.status] : 'text-text-muted'"
-              >{{ formatCompact(row.item.target.count) }}</span
-            >
+            <span class="text-sm font-semibold" :class="STOCK_TONE[row.status]">{{
+              formatCompact(row.item.target.count)
+            }}</span>
             <span class="text-xs text-text-muted">{{ formatCompact(row.item.have) }}</span>
           </span>
           <span class="sr-only">{{ row.title }}</span>

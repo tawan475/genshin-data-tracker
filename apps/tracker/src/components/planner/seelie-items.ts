@@ -21,7 +21,7 @@ const KINDS: Readonly<Record<string, readonly MaterialKind[]>> = {
   element_2: ['boss'],
   boss: ['weekly'],
   local: ['local'],
-  special: ['crown'],
+  special: ['crown', 'currency'],
   xp: ['exp'],
   wep_xp: ['ore'],
   mora: ['mora'],
