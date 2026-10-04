@@ -94,6 +94,18 @@ export const useSession = defineStore('session', () => {
     }
   }
 
+  /** A new all-accounts Irminsul key (the old one stops working); returns it once. */
+  async function newImportKey(): Promise<string> {
+    const { importKey } = await api.newUserImportKey()
+    if (me.value) me.value = { ...me.value, hasImportKey: true }
+    return importKey
+  }
+
+  async function revokeImportKey() {
+    await api.revokeUserImportKey()
+    if (me.value) me.value = { ...me.value, hasImportKey: false }
+  }
+
   return {
     me,
     status,
@@ -106,5 +118,7 @@ export const useSession = defineStore('session', () => {
     updateProfile,
     changePassword,
     updateSettings,
+    newImportKey,
+    revokeImportKey,
   }
 })

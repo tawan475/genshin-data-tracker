@@ -12,6 +12,7 @@ import type {
   CatalogRow,
   GenshinServer,
   Good,
+  ImportKeyResponse,
   ImportResponse,
   MeResponse,
   PlannerTargetsResponse,
@@ -49,6 +50,9 @@ export const api = {
     requestJson<void>('/api/auth/password', { method: 'POST', json: body }),
   updateUserSettings: (patch: UserSettingsPatch) =>
     requestJson<MeResponse>('/api/me/settings', { method: 'PATCH', json: patch }),
+  /** The user's Irminsul key for all accounts; replaces any old one. */
+  newUserImportKey: () => requestJson<ImportKeyResponse>('/api/me/import-key', { method: 'POST' }),
+  revokeUserImportKey: () => requestJson<void>('/api/me/import-key', { method: 'DELETE' }),
 
   // -------------------------------------------------------------- accounts
   accounts: () => requestJson<AccountResponse[]>('/api/accounts'),
@@ -59,7 +63,7 @@ export const api = {
     requestJson<AccountResponse>(`/api/accounts/${id}`, { method: 'PATCH', json: input }),
   deleteAccount: (id: number) => requestJson<void>(`/api/accounts/${id}`, { method: 'DELETE' }),
   rotateImportKey: (id: number) =>
-    requestJson<{ importKey: string }>(`/api/accounts/${id}/import-key`, { method: 'POST' }),
+    requestJson<ImportKeyResponse>(`/api/accounts/${id}/import-key`, { method: 'POST' }),
   accountSettings: (id: number) =>
     requestJson<AccountSettingsResponse>(`/api/accounts/${id}/settings`),
   updateAccountSettings: (id: number, patch: AccountSettingsPatch) =>

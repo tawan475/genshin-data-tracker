@@ -36,31 +36,44 @@ const timestamp = (name: string) =>
     .notNull()
     .$defaultFn(() => Date.now())
 
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  /** As typed by the user, for display. */
-  username: text('username').notNull(),
-  /** Lowercased `username`; what uniqueness and login lookups use. */
-  usernameKey: text('username_key').notNull().unique(),
-  /**
-   * Optional, lowercased; unique when set (SQLite allows many NULLs).
-   * Unverified until an email flow exists: never link accounts by it.
-   */
-  email: text('email').unique(),
-  emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
-  /** Argon2id PHC string (see lib/password). Empty: no password set, cannot sign in. */
-  passwordHash: text('password_hash').notNull(),
-  /**
-   * Carried by every refresh token; bumping it (password change, "sign out
-   * everywhere") invalidates all of them at once. See lib/session.
-   */
-  tokenVersion: integer('token_version').notNull().default(0),
-  settings: text('settings', { mode: 'json' })
-    .$type<UserSettingsPatch>()
-    .notNull()
-    .$defaultFn(() => ({})),
-  createdAt: timestamp('created_at'),
-})
+export const users = sqliteTable(
+  'users',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    /** As typed by the user, for display. */
+    username: text('username').notNull(),
+    /** Lowercased `username`; what uniqueness and login lookups use. */
+    usernameKey: text('username_key').notNull().unique(),
+    /**
+     * Optional, lowercased; unique when set (SQLite allows many NULLs).
+     * Unverified until an email flow exists: never link accounts by it.
+     */
+    email: text('email').unique(),
+    emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
+    /** Argon2id PHC string (see lib/password). Empty: no password set, cannot sign in. */
+    passwordHash: text('password_hash').notNull(),
+    /**
+     * Carried by every refresh token; bumping it (password change, "sign out
+     * everywhere") invalidates all of them at once. See lib/session.
+     */
+    tokenVersion: integer('token_version').notNull().default(0),
+    settings: text('settings', { mode: 'json' })
+      .$type<UserSettingsPatch>()
+      .notNull()
+      .$defaultFn(() => ({})),
+    createdAt: timestamp('created_at'),
+    /**
+     * SHA-256 of the user's Irminsul key, which uploads to every account of
+     * theirs (routed by the capture's UID). NULL: none. Added in 0007.
+     */
+    importKeyHash: text('import_key_hash'),
+  },
+  (t) => [
+    uniqueIndex('users_import_key_hash_unique')
+      .on(t.importKeyHash)
+      .where(sql`${t.importKeyHash} is not null`),
+  ],
+)
 
 export const genshinAccounts = sqliteTable(
   'genshin_accounts',
@@ -91,7 +104,14 @@ export const genshinAccounts = sqliteTable(
     storedBytes: integer('stored_bytes').notNull().default(0),
     createdAt: timestamp('created_at'),
   },
-  (t) => [index('genshin_accounts_user_idx').on(t.userId)],
+  (t) => [
+    index('genshin_accounts_user_idx').on(t.userId),
+    // One account per UID per user, so a user key's upload has one place to
+    // go. Added in 0007; UIDs are trimmed on every write.
+    uniqueIndex('genshin_accounts_user_uid_unique')
+      .on(t.userId, t.uid)
+      .where(sql`${t.uid} is not null and ${t.uid} <> ''`),
+  ],
 )
 
 export const snapshots = sqliteTable(

@@ -1,14 +1,10 @@
 <script setup lang="ts">
+import { serverFromUid } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
-import {
-  SERVER_OPTIONS,
-  serverFromUid,
-  type AccountFormErrors,
-  type AccountFormValues,
-} from '@/data/import-setup'
+import { SERVER_OPTIONS, type AccountFormErrors, type AccountFormValues } from '@/data/import-setup'
 
 /**
  * Name, UID and server of a Genshin account, for "Add account" and account

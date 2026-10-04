@@ -50,6 +50,13 @@
       "when": 1791137469333,
       "tag": "0006_snapshot_extras",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1791143337105,
+      "tag": "0007_user_import_key",
+      "breakpoints": true
     }
   ]
 }

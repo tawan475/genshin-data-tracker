@@ -66,6 +66,13 @@ async function rotate() {
           <span class="text-sm text-text-muted">Hidden</span>
         </div>
       </div>
+      <RouterLink
+        :to="{ name: 'settings' }"
+        class="self-start text-sm font-medium text-accent-text hover:underline"
+        title="One key for every account: uploads go to the account with the capture's UID"
+      >
+        Key for all accounts
+      </RouterLink>
       <details class="group">
         <summary
           class="-mx-2 flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden"

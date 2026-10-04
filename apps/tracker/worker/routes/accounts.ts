@@ -14,7 +14,7 @@ import { getDb } from '../db/client'
 import { genshinAccounts } from '../db/schema'
 import type { AppEnv } from '../env'
 import { accountEtag, checkEtag } from '../lib/etag'
-import { ApiError, idParam, notFound, parseJson, rateLimit } from '../lib/http'
+import { ApiError, idParam, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { requireUser } from '../lib/session'
 import { readUpload } from '../lib/upload'
@@ -23,6 +23,7 @@ import {
   loadOwnedAccount,
   newImportKey,
   recomputeAccount,
+  uidTaken,
 } from '../services/accounts'
 import {
   MAX_BUNDLE_SNAPSHOTS,
@@ -54,6 +55,7 @@ export const accounts = new Hono<AppEnv>()
         importKeyHash: hash,
       })
       .returning({ id: genshinAccounts.id })
+      .catch(rethrowUidTaken)
     const [account] = await listAccounts(db, c.get('userId'), row!.id)
     return c.json<AccountCreatedResponse>({ account: account!, importKey: key }, 201)
   })
@@ -77,6 +79,7 @@ export const accounts = new Hono<AppEnv>()
         ...(body.server !== undefined ? { server: body.server } : {}),
       })
       .where(eq(genshinAccounts.id, id))
+      .catch(rethrowUidTaken)
     const [account] = await listAccounts(db, c.get('userId'), id)
     return c.json(account!)
   })
@@ -228,6 +231,12 @@ export const accounts = new Hono<AppEnv>()
     c.header('Content-Disposition', `attachment; filename="${goodFileName(takenAt)}"`)
     return c.json(good)
   })
+
+/** The (user_id, uid) unique index: one account per UID per user (see migration 0007). */
+function rethrowUidTaken(error: unknown): never {
+  if (isUniqueViolation(error, 'genshin_accounts.user_id')) throw uidTaken()
+  throw error
+}
 
 function parseIds(raw: string | undefined): number[] | null {
   if (!raw) return null

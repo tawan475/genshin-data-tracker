@@ -8,7 +8,9 @@ import {
   type AccountResponse,
   type CatalogRow,
   type Good,
+  type ImportKeyResponse,
   type ImportResponse,
+  type MeResponse,
   type SnapshotResponse,
   type VerifyKeyResponse,
 } from '@gdt/shared'
@@ -17,8 +19,11 @@ import { env, SELF } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { getDb } from '../db/client'
-import { users } from '../db/schema'
+import { genshinAccounts, users } from '../db/schema'
+import { ApiError } from '../lib/http'
+import { D1Meter } from '../lib/meter'
 import { hashPassword } from '../lib/password'
+import { accountForUid } from '../services/accounts'
 import { Client, ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 async function createAccount(client: Client) {
@@ -283,6 +288,7 @@ describe('accounts and imports', () => {
       uid: '812345678',
       server: 'ASIA',
       dashboardUrl: `${ORIGIN}/app/a/${account.id}`,
+      scope: 'account',
     })
     const bad = await SELF.fetch(`${ORIGIN}/api/genshin-accounts-public/verify-key`, {
       headers: { 'x-import-key': 'gdt_ik_wrong' },
@@ -589,6 +595,255 @@ describe('accounts and imports', () => {
     expect(after.settings.materialsGraph).toBeTruthy()
     const bad = await client.fetch(path, { method: 'PATCH', json: { traveler: 'X' } })
     expect(bad.status).toBe(400)
+  })
+})
+
+describe('user import key', () => {
+  async function newUserKey(client: Client) {
+    return (await client.json<ImportKeyResponse>('/api/me/import-key', { method: 'POST' }))
+      .importKey
+  }
+
+  function verify(key: string) {
+    return SELF.fetch(`${ORIGIN}/api/genshin-accounts-public/verify-key`, {
+      headers: { 'x-import-key': key },
+    })
+  }
+
+  /** A capture of `uid`, as irminsul ≥ d7c2bda uploads it. */
+  const capture = (uid: number, overrides: Partial<Good> = {}) =>
+    sampleGood({ ...sampleExtras(uid), ...overrides })
+
+  async function upload(key: string, good: unknown, timestamp: number) {
+    const response = await importByKey(key, good, timestamp)
+    return { status: response.status, body: (await response.json()) as ImportResponse }
+  }
+
+  it('is made, replaced and revoked by its user, and verifies as all accounts', async () => {
+    const { client, username } = await signUp()
+    expect((await client.json<MeResponse>('/api/auth/me')).hasImportKey).toBe(false)
+
+    const first = await newUserKey(client)
+    expect(first).toMatch(/^gdt_uk_/)
+    expect((await client.json<MeResponse>('/api/auth/me')).hasImportKey).toBe(true)
+    expect(await (await verify(first)).json()).toEqual<VerifyKeyResponse>({
+      accountId: null,
+      accountName: `${username} · all accounts`,
+      uid: null,
+      server: null,
+      dashboardUrl: `${ORIGIN}/app`,
+      scope: 'user',
+    })
+
+    // A new key replaces the old one at once.
+    const second = await newUserKey(client)
+    expect(second).not.toBe(first)
+    expect((await verify(first)).status).toBe(401)
+    expect((await verify(second)).status).toBe(200)
+
+    const revoked = await client.fetch('/api/me/import-key', { method: 'DELETE' })
+    expect(revoked.status).toBe(204)
+    expect((await verify(second)).status).toBe(401)
+    expect((await importByKey(second, capture(812345678), 1_000)).status).toBe(401)
+    expect((await client.json<MeResponse>('/api/auth/me')).hasImportKey).toBe(false)
+
+    // Only a signed-in user has one.
+    const anonymous = await new Client().fetch('/api/me/import-key', { method: 'POST' })
+    expect(anonymous.status).toBe(401)
+  })
+
+  it("routes each upload to the account with the capture's UID, making new ones", async () => {
+    const { client } = await signUp()
+    const { account: main } = await createAccount(client) // UID 812345678, ASIA
+    const key = await newUserKey(client)
+
+    const own = await upload(key, capture(812345678), 1_000)
+    expect(own.status).toBe(201)
+    expect(own.body).toMatchObject({
+      status: 'created',
+      account: { id: main.id, name: 'Main', uid: '812345678', created: false },
+    })
+    expect(own.body).not.toHaveProperty('warnings')
+
+    // A UID the user has no account for: a new account, named by nothing.
+    const europe = await upload(key, capture(712345678), 1_000)
+    expect(europe.status).toBe(201)
+    expect(europe.body.account).toMatchObject({ name: null, uid: '712345678', created: true })
+    const again = await upload(key, capture(712345678, { materials: { Mora: 1 } }), 2_000)
+    expect(again.body.account).toEqual({ ...europe.body.account, created: false })
+
+    // The server is read off the UID: ten digits put it second; China is unknown.
+    await upload(key, capture(1812345678), 1_000)
+    await upload(key, capture(112345678), 1_000)
+
+    const list = await client.json<AccountResponse[]>('/api/accounts')
+    expect(list.map((a) => [a.uid, a.name, a.server, a.snapshotCount])).toEqual([
+      ['812345678', 'Main', 'ASIA', 1],
+      ['712345678', null, 'EUROPE', 2],
+      ['1812345678', null, 'ASIA', 1],
+      ['112345678', null, null, 1],
+    ])
+    expect(list[1]!.id).toBe(europe.body.account!.id)
+
+    // The made account is an ordinary one, with a key of its own to rotate.
+    const rotated = await client.json<ImportKeyResponse>(
+      `/api/accounts/${europe.body.account!.id}/import-key`,
+      { method: 'POST' },
+    )
+    expect(await (await verify(rotated.importKey)).json()).toMatchObject({
+      accountId: europe.body.account!.id,
+      uid: '712345678',
+      scope: 'account',
+    })
+  })
+
+  it("never reaches another user's accounts", async () => {
+    const other = await signUp()
+    const { account: theirs } = await createAccount(other.client) // UID 812345678
+    const { client } = await signUp()
+    const key = await newUserKey(client)
+
+    const result = await upload(key, capture(812345678), 1_000)
+    expect(result.body.account).toMatchObject({ uid: '812345678', created: true })
+    expect(result.body.account!.id).not.toBe(theirs.id)
+    const untouched = await other.client.json<AccountResponse>(`/api/accounts/${theirs.id}`)
+    expect(untouched.snapshotCount).toBe(0)
+  })
+
+  it('needs a UID in the file, and makes nothing without one', async () => {
+    const { client } = await signUp()
+    const key = await newUserKey(client)
+    const response = await importByKey(key, sampleGood(), 1_000)
+    expect(response.status).toBe(422)
+    expect(await response.json()).toMatchObject({
+      error: { code: 'uid_required', message: expect.stringContaining("account's own import key") },
+    })
+    expect(await client.json<AccountResponse[]>('/api/accounts')).toEqual([])
+  })
+
+  it('stops making accounts at the limit, but still routes to existing ones', async () => {
+    const { client } = await signUp()
+    const key = await newUserKey(client)
+    for (let n = 0; n < 20; n++) {
+      expect((await upload(key, capture(800_000_000 + n), 1_000)).status).toBe(201)
+    }
+    const refused = await importByKey(key, capture(899_999_999), 1_000)
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toMatchObject({ error: { code: 'account_limit' } })
+    expect(await client.json<AccountResponse[]>('/api/accounts')).toHaveLength(20)
+    const existing = await upload(key, capture(800_000_005, { materials: { Mora: 1 } }), 2_000)
+    expect(existing.body.account).toMatchObject({ uid: '800000005', created: false })
+  })
+
+  it('makes one account when two first uploads of a UID race', async () => {
+    const { client } = await signUp()
+    const key = await newUserKey(client)
+    const results = await Promise.all([
+      upload(key, capture(912345678), 1_000),
+      upload(key, capture(912345678, { materials: { Mora: 1 } }), 2_000),
+    ])
+    expect(results.map((r) => r.status)).toEqual([201, 201])
+    expect(new Set(results.map((r) => r.body.account!.id)).size).toBe(1)
+    expect(results.filter((r) => r.body.account!.created)).toHaveLength(1)
+    const list = await client.json<AccountResponse[]>('/api/accounts')
+    expect(list).toHaveLength(1)
+    expect(list[0]).toMatchObject({ uid: '912345678', server: 'SAR', snapshotCount: 2 })
+
+    // The losing side of the race, for certain: both callers saw no account.
+    const { me } = await signUp()
+    const make = () => accountForUid(env.DB, new D1Meter(), me.id, '612345678', [])
+    const [a, b] = await Promise.all([make(), make()])
+    expect(a.account.id).toBe(b.account.id)
+    expect([a.created, b.created].sort()).toEqual([false, true])
+    expect((await make()).created).toBe(false)
+  })
+
+  it('refuses to guess between accounts that share a UID', async () => {
+    // The unique index rules this out; the route still never picks one.
+    const { me } = await signUp()
+    const twins = [
+      { id: 1, name: 'A', uid: '812345678', server: null },
+      { id: 2, name: 'B', uid: ' 812345678 ', server: null },
+    ]
+    const attempt = accountForUid(env.DB, new D1Meter(), me.id, '812345678', twins)
+    await expect(attempt).rejects.toBeInstanceOf(ApiError)
+    await expect(attempt).rejects.toMatchObject({ status: 409, code: 'ambiguous_uid' })
+  })
+
+  it("leaves account keys as they were: the key's account, whatever the UID", async () => {
+    const { client } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    await newUserKey(client)
+    const result = await upload(importKey, capture(712345678), 1_000)
+    expect(result.status).toBe(201)
+    expect(result.body.account).toEqual({
+      id: account.id,
+      name: 'Main',
+      uid: '812345678',
+      created: false,
+    })
+    expect(result.body.warnings).toEqual([expect.objectContaining({ code: 'uid_mismatch' })])
+    // A file without a UID is fine on an account key.
+    expect((await upload(importKey, sampleGood(), 2_000)).status).toBe(201)
+    expect(await client.json<AccountResponse[]>('/api/accounts')).toHaveLength(1)
+  })
+
+  it('keeps one account per UID per user', async () => {
+    const { client, me } = await signUp()
+    const { account: main } = await createAccount(client) // UID 812345678
+    const dupe = await client.fetch('/api/accounts', {
+      method: 'POST',
+      json: { name: 'Again', uid: ' 812345678 ' },
+    })
+    expect(dupe.status).toBe(409)
+    expect(await dupe.json()).toMatchObject({
+      error: { code: 'uid_taken', issues: [{ path: 'uid' }] },
+    })
+
+    const alt = await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: { name: 'Alt', uid: '712345678' },
+    })
+    const clash = await client.fetch(`/api/accounts/${alt.account.id}`, {
+      method: 'PATCH',
+      json: { uid: '812345678' },
+    })
+    expect(clash.status).toBe(409)
+    expect(await clash.json()).toMatchObject({ error: { code: 'uid_taken' } })
+
+    // Saving an account's own UID again, or clearing UIDs, is fine.
+    const same = await client.fetch(`/api/accounts/${main.id}`, {
+      method: 'PATCH',
+      json: { name: 'Main', uid: '812345678' },
+    })
+    expect(same.status).toBe(200)
+    for (const uid of [null, '']) {
+      const cleared = await client.fetch(`/api/accounts/${alt.account.id}`, {
+        method: 'PATCH',
+        json: { uid },
+      })
+      expect(cleared.status).toBe(200)
+    }
+    for (const name of ['No UID', 'No UID either']) {
+      const noUid = await client.fetch('/api/accounts', { method: 'POST', json: { name } })
+      expect(noUid.status).toBe(201)
+    }
+
+    // Another user may have the same UID.
+    expect((await createAccount((await signUp()).client)).account.uid).toBe('812345678')
+
+    // The index itself, under the API.
+    const db = getDb(env.DB)
+    const row = { userId: me.id, uid: '812345678' }
+    await expect(
+      db.insert(genshinAccounts).values({ ...row, importKeyHash: crypto.randomUUID() }),
+    ).rejects.toThrow()
+    await expect(
+      db
+        .insert(genshinAccounts)
+        .values({ ...row, uid: '', importKeyHash: crypto.randomUUID() })
+        .returning(),
+    ).resolves.toHaveLength(1)
   })
 })
 

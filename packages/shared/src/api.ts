@@ -58,6 +58,24 @@ export const updateProfileRequest = z
 export const GENSHIN_SERVERS = ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] as const
 export type GenshinServer = (typeof GENSHIN_SERVERS)[number]
 
+const REGION_DIGIT: Record<string, GenshinServer> = {
+  '6': 'AMERICA',
+  '7': 'EUROPE',
+  '8': 'ASIA',
+  '9': 'SAR',
+}
+
+/**
+ * The server a UID belongs to. Nine-digit UIDs lead with the region digit;
+ * ten-digit ones (a region that ran out of nine) are 1 and then it, so
+ * 18xxxxxxxx is Asia. China's (1, 2, 5) and anything else: null.
+ */
+export function serverFromUid(uid: string): GenshinServer | null {
+  if (!/^\d{9,10}$/.test(uid)) return null
+  const digit = uid.length === 10 ? (uid[0] === '1' ? uid[1]! : '') : uid[0]!
+  return REGION_DIGIT[digit] ?? null
+}
+
 export const accountInput = z.object({
   name: z.string().trim().max(64).nullable().optional(),
   uid: z
@@ -188,6 +206,8 @@ export interface MeResponse {
   email: string | null
   emailVerified: boolean
   settings: UserSettings
+  /** Whether the user has an Irminsul key for all their accounts (the key itself is shown once). */
+  hasImportKey: boolean
 }
 
 export interface AccountResponse {
@@ -233,6 +253,19 @@ export interface ImportResponse {
   storedSize: number
   /** Present only when there is something to say; the import itself went through. */
   warnings?: ImportWarning[]
+  /**
+   * Where an import key's upload went (`import-by-key` only). With a user key
+   * that is the account with the capture's UID, `created` when this upload
+   * made it.
+   */
+  account?: ImportedAccount
+}
+
+export interface ImportedAccount {
+  id: number
+  name: string | null
+  uid: string | null
+  created: boolean
 }
 
 /**
@@ -244,13 +277,26 @@ export interface ImportWarning {
   message: string
 }
 
+/**
+ * An account key names its account. A user key (`scope: "user"`) uploads to
+ * every account of the user, so it names none: `accountId`, `uid` and
+ * `server` are null and `dashboardUrl` is the account list.
+ */
 export interface VerifyKeyResponse {
-  accountId: number
+  accountId: number | null
   accountName: string | null
   uid: string | null
   server: GenshinServer | null
   /** This account's page in the web app; irminsul's "Open dashboard" button opens it. */
   dashboardUrl: string
+  scope: ImportKeyScope
+}
+
+export type ImportKeyScope = 'account' | 'user'
+
+/** A new import key; shown once, only its hash is stored. */
+export interface ImportKeyResponse {
+  importKey: string
 }
 
 export interface AccountSettingsResponse {

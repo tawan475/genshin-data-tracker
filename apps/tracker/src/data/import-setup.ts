@@ -27,23 +27,6 @@ export const SERVER_OPTIONS: { value: GenshinServer | null; label: string }[] = 
   ...GENSHIN_SERVERS.map((value) => ({ value, label: SERVER_LABELS[value] })),
 ]
 
-const REGION_DIGIT: Record<string, GenshinServer> = {
-  '6': 'AMERICA',
-  '7': 'EUROPE',
-  '8': 'ASIA',
-  '9': 'SAR',
-}
-
-/**
- * The server a UID belongs to. Nine-digit UIDs lead with the region digit;
- * ten-digit ones put it second (18xxxxxxxx is Asia).
- */
-export function serverFromUid(uid: string): GenshinServer | null {
-  if (!/^\d{9,10}$/.test(uid)) return null
-  const digit = uid.length === 10 ? uid[1] : uid[0]
-  return digit ? (REGION_DIGIT[digit] ?? null) : null
-}
-
 export interface AccountFormValues {
   name: string
   uid: string
