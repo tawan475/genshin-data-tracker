@@ -18,6 +18,7 @@
     "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
+    "@gdt/game-data": "workspace:*",
     "@gdt/shared": "workspace:*",
     "@noble/hashes": "^2.4.0",
     "@tailwindcss/vite": "^4.3.1",

@@ -1,0 +1,27 @@
+{
+  "$comment": "GOOD key fixes and exclusions by game id. See README.md in this folder.",
+  "characters": {
+    "exclude": {
+      "10000134": "Placeholder avatar named \"Traveler\" (crossbow, empty skill depot), not playable",
+      "10000135": "Placeholder avatar named \"Traveler\" (crossbow, empty skill depot), not playable"
+    },
+    "key": {}
+  },
+  "weapons": {
+    "include": {
+      "11419": "Prized Isshin Blade: a quest weapon without a lore entry. Its three forms (11419-11421) cost the same; this one stands for the key"
+    },
+    "exclude": {},
+    "key": {}
+  },
+  "materials": {
+    "key": {},
+    "prefer": {}
+  },
+  "removed": {
+    "achievements": [],
+    "goals": [],
+    "characters": [],
+    "weapons": []
+  }
+}

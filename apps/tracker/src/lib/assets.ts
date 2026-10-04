@@ -1,12 +1,23 @@
 /**
- * Game images, all from the Enka Network CDN (flat `/ui/<name>.png`).
- * Icon names come from Genshin Optimizer's asset table (AssetsData_gen.json),
- * keyed by GOOD keys. Anything unknown returns '' and GameIcon shows initials.
+ * Game images. Characters, weapons and artifacts come from the Enka Network
+ * CDN (flat `/ui/<name>.png`), with icon names from Genshin Optimizer's asset
+ * table (AssetsData_gen.json) keyed by GOOD keys. Material and achievement
+ * icons are self-hosted under /gi (packages/game-data `icons`), because Enka
+ * lacks about half of them; Enka is only their fallback. Anything unknown
+ * returns '' and GameIcon shows initials.
  */
 
+import {
+  loadIconManifest,
+  loadMaterialIndex,
+  type IconManifest,
+  type MaterialIndex,
+} from '@gdt/game-data'
 import assetData from '@/utils/data/AssetsData_gen.json'
 
 const ENKA = 'https://enka.network/ui'
+/** Self-hosted game icons: apps/tracker/public/gi/<name>.webp. */
+const GI = '/gi'
 
 interface CharacterAssets {
   icon?: string
@@ -63,17 +74,33 @@ const LOCAL_MATERIALS: Record<string, string> = {
   SanctifyingUnction: '/img/Item_Sanctifying_Unction.webp',
 }
 
-let materialIcons: Record<string, string> = {}
+let icons: IconManifest | null = null
+let materialIndex: MaterialIndex | null = null
+
+/** Loads the list of self-hosted icons (small); call before gameIcon. */
+export async function loadGameIcons(): Promise<void> {
+  icons ??= await loadIconManifest()
+}
+
+/**
+ * A game icon by its name (`UI_ItemIcon_104013`, `UI_AchievementIcon_A001`):
+ * self-hosted when we have it, '' when no source has it, else Enka (icons
+ * newer than the last `icons` run). '' until loadGameIcons resolves.
+ */
+export function gameIcon(name: string): string {
+  if (!icons || !name || icons.missing.has(name)) return ''
+  return icons.hosted.has(name) ? `${GI}/${name}.webp` : url(name)
+}
 
 /** Loaded lazily (large); call before rendering material icons. */
 export async function loadMaterialIcons(): Promise<void> {
-  if (Object.keys(materialIcons).length > 0) return
-  const module = await import('@/utils/data/MaterialIcons_gen.json')
-  materialIcons = module.default as Record<string, string>
+  if (materialIndex) return
+  const [index] = await Promise.all([loadMaterialIndex(), loadGameIcons()])
+  materialIndex = index
 }
 
 export function materialIcon(key: string): string {
-  return LOCAL_MATERIALS[key] ?? url(materialIcons[key])
+  return LOCAL_MATERIALS[key] ?? gameIcon(materialIndex?.icon(key) ?? '')
 }
 
 export function knownCharacter(key: string): boolean {
