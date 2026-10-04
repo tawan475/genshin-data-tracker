@@ -28,12 +28,14 @@ Chart.register(
   zoomPlugin,
 )
 
-/** The original y-axis ticks: 1.2M, 35K, else the plain number. */
+/**
+ * The original y-axis ticks (72.2M, 35K), with two fixes: 2,500 reads 2.5K
+ * rather than repeating 3K, and losses are abbreviated like gains.
+ */
 export function abbreviateTick(value: string | number): string | number {
   const v = Number(value)
-  return v >= 1_000_000
-    ? `${(v / 1_000_000).toFixed(1)}M`
-    : v >= 1_000
-      ? `${(v / 1_000).toFixed(0)}K`
-      : v
+  const size = Math.abs(v)
+  if (size >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
+  if (size >= 1_000) return `${Number((v / 1_000).toFixed(1))}K`
+  return v
 }

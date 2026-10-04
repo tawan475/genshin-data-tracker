@@ -12,7 +12,7 @@ defineProps<{
     <img
       src="/img/Item_Mora.webp"
       alt=""
-      class="w-4 h-4 select-none pointer-events-none object-contain"
+      class="w-4 h-4 max-w-none shrink-0 select-none pointer-events-none object-contain"
       aria-hidden="true"
     />
   </span>
