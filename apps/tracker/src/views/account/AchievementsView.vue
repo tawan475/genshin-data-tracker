@@ -137,6 +137,48 @@ const categories = computed<CategoryItem[]>(() => {
     }))
 })
 const categoryById = computed(() => new Map(categories.value.map((c) => [c.id, c])))
+
+// --------------------------------------------------------- completed series
+
+const SHOW_DONE_KEY = 'gdt:achievements:show-done-series'
+function readShowDone(): boolean {
+  try {
+    return localStorage.getItem(SHOW_DONE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+/** Completed series are out of the way unless the viewer asks for them. */
+const showDoneSeries = ref(readShowDone())
+watch(showDoneSeries, (show) => {
+  try {
+    if (show) localStorage.setItem(SHOW_DONE_KEY, '1')
+    else localStorage.removeItem(SHOW_DONE_KEY)
+  } catch {
+    // Private mode: the choice lasts for this visit.
+  }
+})
+/** Series finished while on the page stay until the filters change. */
+const keptSeries = shallowRef<ReadonlySet<number>>(new Set())
+const doneSeries = computed(
+  () =>
+    new Set(
+      categories.value
+        .filter((c) => c.count.total > 0 && c.count.done >= c.count.total)
+        .map((c) => c.id),
+    ),
+)
+const hiddenSeries = computed(() => {
+  if (showDoneSeries.value) return new Set<number | null>()
+  const hidden = new Set<number | null>()
+  for (const id of doneSeries.value)
+    if (id !== filters.goal && !keptSeries.value.has(id as number)) hidden.add(id)
+  return hidden
+})
+/** The rail and the category select. */
+const listedCategories = computed(() =>
+  categories.value.filter((c) => !hiddenSeries.value.has(c.id)),
+)
 const versions = computed(() => achievementVersions(entries.value))
 
 const newestCapture = computed(() => {
@@ -150,6 +192,10 @@ const newestCapture = computed(() => {
 
 const filters = reactive<AchievementFilters>({ ...NO_ACHIEVEMENT_FILTERS })
 const filtered = computed(() => hasAchievementFilters(filters))
+/** A search or the Done filter is looking for done ones: don't hide them. */
+const hideSeriesEntries = computed(
+  () => filters.query.trim() === '' && filters.completion !== 'done',
+)
 
 /**
  * Entries toggled since the filters last changed stay in view, so marking
@@ -162,6 +208,13 @@ const entryOfTier = computed(() => {
   return map
 })
 function keep(ids: number[]) {
+  const series = new Set(keptSeries.value)
+  const goalOf = new Map(entries.value.map((e) => [e.id, e.goal]))
+  for (const id of ids) {
+    const goal = goalOf.get(entryOfTier.value.get(id) ?? -1)
+    if (goal !== undefined) series.add(goal)
+  }
+  keptSeries.value = series
   if (filters.completion === 'all') return
   const next = new Set(kept.value)
   for (const id of ids) {
@@ -181,7 +234,8 @@ const shown = computed<AchievementEntry[]>(() => {
     g.text,
   ).filter(
     (entry) =>
-      kept.value.has(entry.id) || matchesCompletion(entry, filters.completion, state.value),
+      (kept.value.has(entry.id) || matchesCompletion(entry, filters.completion, state.value)) &&
+      (!hideSeriesEntries.value || !hiddenSeries.value.has(entry.goal)),
   )
 })
 
@@ -212,6 +266,7 @@ const limit = ref(PAGE)
 watch([filters, () => account.value.id], () => {
   limit.value = PAGE
   kept.value = new Set()
+  keptSeries.value = new Set()
 })
 
 const groups = computed(() => {
@@ -365,8 +420,10 @@ async function importIds(ids: number[]): Promise<boolean> {
           >
             <AchievementCategories
               v-model="filters.goal"
-              :categories="categories"
+              v-model:show-done="showDoneSeries"
+              :categories="listedCategories"
               :total="summary"
+              :done-count="doneSeries.size"
             />
           </div>
         </aside>
@@ -374,7 +431,9 @@ async function importIds(ids: number[]): Promise<boolean> {
         <div ref="listTop" class="flex min-w-0 scroll-mt-20 flex-col gap-4">
           <AchievementToolbar
             v-model:filters="filters"
-            :categories="categories"
+            v-model:show-done-series="showDoneSeries"
+            :categories="listedCategories"
+            :done-series="doneSeries.size"
             :versions="versions"
             :shown="shownCount"
             :total="summary.total"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ListChecks, ListX, Search } from 'lucide-vue-next'
+import { Eye, EyeOff, ListChecks, ListX, Search } from 'lucide-vue-next'
 import type {
   AchievementFilters,
   Completion,
@@ -28,8 +28,11 @@ const props = defineProps<{
   /** Achievements the bulk buttons would change. */
   toMark: number
   toUnmark: number
+  /** Completed series (left out of `categories` unless shown). */
+  doneSeries: number
 }>()
 const filters = defineModel<AchievementFilters>('filters', { required: true })
+const showDoneSeries = defineModel<boolean>('showDoneSeries', { required: true })
 defineEmits<{ clear: []; markAll: []; unmarkAll: [] }>()
 
 const COMPLETION: { value: Completion; label: string }[] = [
@@ -81,10 +84,21 @@ const versionOptions = computed(() => [
     </div>
 
     <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
-      <label class="col-span-2 min-w-0 sm:w-64 lg:hidden">
-        <span class="sr-only">Category</span>
-        <UiSelect v-model="filters.goal" :options="categoryOptions" />
-      </label>
+      <div class="col-span-2 flex min-w-0 gap-2 sm:w-auto lg:hidden">
+        <label class="min-w-0 flex-1 sm:w-64 sm:flex-none">
+          <span class="sr-only">Category</span>
+          <UiSelect v-model="filters.goal" :options="categoryOptions" />
+        </label>
+        <UiButton
+          v-if="doneSeries > 0"
+          :aria-pressed="showDoneSeries"
+          :title="showDoneSeries ? 'Hide completed series' : 'Show completed series'"
+          @click="showDoneSeries = !showDoneSeries"
+        >
+          <component :is="showDoneSeries ? EyeOff : Eye" class="size-4" aria-hidden="true" />
+          <span class="tabular font-mono">{{ doneSeries }}</span>
+        </UiButton>
+      </div>
       <label class="min-w-0 sm:w-32">
         <span class="sr-only">Version</span>
         <UiSelect v-model="filters.version" :options="versionOptions" title="Added in" />
