@@ -1,14 +1,15 @@
 /**
  * What kind of material a key is, and where it sits in the game's order.
  *
- * Both come from the item id inside the material's icon name
- * (`UI_ItemIcon_104303` → 104303) in the Genshin Optimizer icon table. The
- * game numbers items in blocks, and only blocks that hold a single kind are
- * named here (checked against a real 1,469-material inventory); anything
- * else, or a key without an icon, is "other". Sorting by the id keeps tiers
- * together (Sliver, Fragment, Chunk, Gemstone), as the in-game bag does.
+ * Both come from the material's item id in the game data's material index
+ * (@gdt/game-data). The game numbers items in blocks, and only blocks that
+ * hold a single kind are named here (checked against a real 1,469-material
+ * inventory); anything else, or a key the index lacks, is "other". Sorting by
+ * the id keeps tiers together (Sliver, Fragment, Chunk, Gemstone), as the
+ * in-game bag does.
  */
 
+import { loadMaterialIndex, type MaterialIndex } from '@gdt/game-data'
 import type { Component } from 'vue'
 import {
   BookOpen,
@@ -136,26 +137,16 @@ export interface MaterialMeta {
 const LAST = Number.MAX_SAFE_INTEGER
 const OTHER: MaterialMeta = { kind: 'other', order: LAST }
 
-let table: Map<string, MaterialMeta> | null = null
+let index: MaterialIndex | null = null
 let loading: Promise<void> | null = null
+const metas = new Map<string, MaterialMeta>()
 
-/** Loads the icon table (the same lazy chunk lib/assets uses). */
+/** Loads the material index (the same lazy chunk lib/assets uses). */
 export function loadMaterialMeta(): Promise<void> {
-  loading ??= import('@/utils/data/MaterialIcons_gen.json').then(
-    (module) => {
-      const icons = module.default as Record<string, string>
-      const map = new Map<string, MaterialMeta>()
-      for (const [key, icon] of Object.entries(icons)) {
-        const id = /^UI_ItemIcon_(\d+)$/.exec(icon)
-        if (id) {
-          const n = Number(id[1])
-          map.set(key, { kind: kindOfId(n), order: n < 100_000 ? n + 1_000_000 : n })
-          continue
-        }
-        // Dishes from recipes use a recipe icon; keep them after the other dishes.
-        if (icon.startsWith('UI_ItemIcon_Recipe_')) map.set(key, { kind: 'food', order: 108_999.5 })
-      }
-      table = map
+  loading ??= loadMaterialIndex().then(
+    (loaded) => {
+      index = loaded
+      metas.clear()
     },
     (error) => {
       loading = null
@@ -165,6 +156,23 @@ export function loadMaterialMeta(): Promise<void> {
   return loading
 }
 
+function metaOf(id: number, icon: string): MaterialMeta {
+  const kind = kindOfId(id)
+  // Dishes outside the dish block (Fragrant dishes, quest specials) use a
+  // recipe icon; keep them after the other dishes.
+  if (kind === 'other' && icon.startsWith('UI_ItemIcon_Recipe_')) {
+    return { kind: 'food', order: 108_999.5 }
+  }
+  return { kind, order: id < 100_000 ? id + 1_000_000 : id }
+}
+
 export function materialMeta(key: string): MaterialMeta {
-  return table?.get(key) ?? OTHER
+  if (!index) return OTHER
+  let meta = metas.get(key)
+  if (!meta) {
+    const id = index.id(key)
+    meta = id === undefined ? OTHER : metaOf(id, index.icon(key) ?? '')
+    metas.set(key, meta)
+  }
+  return meta
 }

@@ -14,6 +14,9 @@ importers:
 
   apps/tracker:
     dependencies:
+      '@gdt/game-data':
+        specifier: workspace:*
+        version: link:../../packages/game-data
       '@gdt/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -108,6 +111,21 @@ importers:
       wrangler:
         specifier: ^4.147.0
         version: 4.147.0(@types/node@24.19.1)
+
+  packages/game-data:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.13.2
+        version: 24.19.1
+      sharp:
+        specifier: ^0.35.2
+        version: 0.35.5(@types/node@24.19.1)
+      typescript:
+        specifier: ~6.0.0
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.11(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
   packages/shared:
     dependencies:

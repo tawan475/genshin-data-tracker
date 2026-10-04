@@ -9,7 +9,10 @@
  * - /api is never cached: account data on a shared device is readable by the
  *   next person who opens it.
  * - Game images from the Enka CDN never change for a given URL, so they are
- *   kept cache-first in their own bounded cache across builds.
+ *   kept cache-first in their own bounded cache across builds. Self-hosted
+ *   game icons (/gi/, ~4 KB each, see packages/game-data) get the same
+ *   treatment in a larger cache; bump its version when existing icon files
+ *   are replaced so clients fetch them again.
  */
 
 const BUILD = '__BUILD__'
@@ -17,6 +20,9 @@ const PRECACHE = __PRECACHE__
 const CACHE = `gdt-${BUILD}`
 const IMAGES = 'gdt-enka'
 const MAX_IMAGES = 800
+const GI_IMAGES = 'gdt-gi-v1'
+const MAX_GI_IMAGES = 2500
+const KEEP = [IMAGES, GI_IMAGES]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)))
@@ -27,7 +33,9 @@ self.addEventListener('activate', (event) => {
     (async () => {
       const keys = await caches.keys()
       await Promise.all(
-        keys.filter((key) => key.startsWith('gdt-') && key !== CACHE && key !== IMAGES).map((key) => caches.delete(key)),
+        keys
+          .filter((key) => key.startsWith('gdt-') && key !== CACHE && !KEEP.includes(key))
+          .map((key) => caches.delete(key)),
       )
       await self.registration.navigationPreload?.enable()
       await self.clients.claim()
@@ -39,20 +47,25 @@ self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting()
 })
 
-async function trimImages() {
-  const cache = await caches.open(IMAGES)
+/** Drops the oldest entries beyond `max` (keys come back in insertion order). */
+async function trim(cacheName, max) {
+  const cache = await caches.open(cacheName)
   const keys = await cache.keys()
-  for (let i = 0; i < keys.length - MAX_IMAGES; i++) await cache.delete(keys[i])
+  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i])
 }
+
+const LIMITS = { [IMAGES]: MAX_IMAGES, [GI_IMAGES]: MAX_GI_IMAGES }
 
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName)
   const hit = await cache.match(request)
   if (hit) return hit
   const response = await fetch(request)
-  if (response.ok || response.type === 'opaque') {
+  // An unknown /gi/ path gets the SPA's index.html with a 200: never keep that.
+  const isImage = (response.headers.get('content-type') ?? '').startsWith('image/')
+  if ((response.ok && (cacheName !== GI_IMAGES || isImage)) || response.type === 'opaque') {
     await cache.put(request, response.clone())
-    if (cacheName === IMAGES) trimImages()
+    if (LIMITS[cacheName]) trim(cacheName, LIMITS[cacheName])
   }
   return response
 }
@@ -79,6 +92,10 @@ self.addEventListener('fetch', (event) => {
   }
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
+  if (url.pathname.startsWith('/gi/')) {
+    event.respondWith(cacheFirst(request, GI_IMAGES))
+    return
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(navigate(event))
