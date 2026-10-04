@@ -88,6 +88,19 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   stored anyway and answers with `warnings: [{code: "uid_mismatch", …}]` (also
   logged); an account's UID is never set from a file. Import keys are stored as
   SHA-256 and shown once.
+- **Import keys, two kinds.** An account key (`gdt_ik_…`, `POST
+  /api/accounts/:id/import-key`) always uploads to its account. A user key
+  (`gdt_uk_…`, one per user: `POST /api/me/import-key` makes or replaces it,
+  `DELETE` revokes; `hasImportKey` on `/auth/me`) uploads to the user's account
+  whose UID is the file's `gi_player.uid` (irminsul ≥ develop d7c2bda), and a
+  new UID makes a new account (no name, server read off the UID). A file
+  without that UID is a 422 `uid_required`. A key is looked up among accounts,
+  then users, in one round trip. Imports by key answer with the `account`
+  they went to (`{id, name, uid, created}`); `verify-key` adds `scope`
+  (`"account"` | `"user"`), and a user key answers `accountId`, `uid` and
+  `server` as null with `dashboardUrl` the account list. A user's accounts
+  have distinct UIDs (unique index, migration 0007): a duplicate is a 409
+  `uid_taken`.
 - **Imports** take two D1 round trips in the usual case; an identical later
   capture only moves `last_seen_at`. Uploads may be gzipped.
 - **Diagnostics.** `GET /api/health` is public (status, build, D1, migrations).

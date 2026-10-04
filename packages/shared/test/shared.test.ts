@@ -10,6 +10,7 @@ import {
   deepMerge,
   fromRef,
   resolveImportTimestamp,
+  serverFromUid,
   toGoodKey,
   toRef,
 } from '../src'
@@ -91,5 +92,24 @@ describe('resolveImportTimestamp', () => {
     expect(resolveImportTimestamp('not a date', { nope: 1 }, now)).toBe(now)
     expect(resolveImportTimestamp('   ', true, now)).toBe(now)
     expect(resolveImportTimestamp(Number.NaN, Infinity, now)).toBe(now)
+  })
+})
+
+describe('serverFromUid', () => {
+  it('reads the region digit, second in ten-digit UIDs', () => {
+    expect(serverFromUid('612345678')).toBe('AMERICA')
+    expect(serverFromUid('712345678')).toBe('EUROPE')
+    expect(serverFromUid('812345678')).toBe('ASIA')
+    expect(serverFromUid('1812345678')).toBe('ASIA')
+    expect(serverFromUid('912345678')).toBe('SAR')
+  })
+
+  it('knows nothing of China, malformed UIDs or ten digits without the leading 1', () => {
+    for (const uid of ['112345678', '212345678', '512345678', '1012345678', '8123456789']) {
+      expect(serverFromUid(uid), uid).toBeNull()
+    }
+    for (const uid of ['', '81234567', '81234567890', ' 812345678', '8123x5678']) {
+      expect(serverFromUid(uid), uid).toBeNull()
+    }
   })
 })

@@ -6,6 +6,7 @@ import AppPanel from '@/components/settings/AppPanel.vue'
 import AppearancePanel from '@/components/settings/AppearancePanel.vue'
 import PasswordPanel from '@/components/settings/PasswordPanel.vue'
 import ProfilePanel from '@/components/settings/ProfilePanel.vue'
+import UserImportKeyPanel from '@/components/settings/UserImportKeyPanel.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
@@ -53,6 +54,7 @@ async function signOutEverywhere() {
   <!-- Tiles: cards flow into columns so short ones don't leave the width empty. -->
   <div class="columns-1 gap-6 md:columns-2 2xl:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid">
     <ProfilePanel />
+    <UserImportKeyPanel />
     <AppearancePanel />
     <PasswordPanel />
     <AppPanel />

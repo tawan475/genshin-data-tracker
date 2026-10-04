@@ -1,9 +1,10 @@
-import type { AccountResponse } from '@gdt/shared'
+import { serverFromUid, type AccountResponse, type GenshinServer } from '@gdt/shared'
 import { and, eq } from 'drizzle-orm'
 import type { Db } from '../db/client'
 import { genshinAccounts, snapshots } from '../db/schema'
 import { randomToken, sha256Hex } from '../lib/crypto'
-import { notFound } from '../lib/http'
+import { ApiError, notFound } from '../lib/http'
+import type { D1Meter } from '../lib/meter'
 
 export type AccountRow = typeof genshinAccounts.$inferSelect
 
@@ -91,14 +92,135 @@ export function recomputeAccount(d1: D1Database, accountId: number): D1PreparedS
     .bind(accountId)
 }
 
-const IMPORT_KEY_PREFIX = 'gdt_ik_'
+/** An account's own key: uploads always go to that account. */
+const ACCOUNT_KEY_PREFIX = 'gdt_ik_'
+/** A user's key: uploads go to their account with the capture's UID. */
+const USER_KEY_PREFIX = 'gdt_uk_'
 
-/** A fresh import key and the hash that is stored for it. */
-export async function newImportKey(): Promise<{ key: string; hash: string }> {
-  const key = IMPORT_KEY_PREFIX + randomToken(32)
+/**
+ * A fresh import key and the hash that is stored for it. The prefix only
+ * tells people (and logs) the two kinds apart; lookups go by hash.
+ */
+export async function newImportKey(
+  scope: 'account' | 'user' = 'account',
+): Promise<{ key: string; hash: string }> {
+  const key = (scope === 'user' ? USER_KEY_PREFIX : ACCOUNT_KEY_PREFIX) + randomToken(32)
   return { key, hash: await sha256Hex(key) }
 }
 
 export function hashImportKey(key: string): Promise<string> {
   return sha256Hex(key.trim())
 }
+
+/** What an import key upload needs to know about an account. */
+export interface KeyAccount {
+  id: number
+  name: string | null
+  uid: string | null
+  server: GenshinServer | null
+}
+
+export type ImportKeyOwner =
+  | { scope: 'account'; account: KeyAccount }
+  | {
+      scope: 'user'
+      user: { id: number; username: string }
+      /** All of the user's accounts: few rows, and read in the same round trip. */
+      accounts: KeyAccount[]
+    }
+
+/**
+ * Who an import key (by hash) belongs to: an account first, then a user. One
+ * D1 round trip either way.
+ */
+export async function findImportKeyOwner(
+  d1: D1Database,
+  hash: string,
+): Promise<ImportKeyOwner | null> {
+  const [account, user, accounts] = await d1.batch<Record<string, unknown>>([
+    d1
+      .prepare('SELECT id, name, uid, server FROM genshin_accounts WHERE import_key_hash = ?1')
+      .bind(hash),
+    d1.prepare('SELECT id, username FROM users WHERE import_key_hash = ?1').bind(hash),
+    d1
+      .prepare(
+        `SELECT a.id, a.name, a.uid, a.server FROM users AS u
+         JOIN genshin_accounts AS a ON a.user_id = u.id
+         WHERE u.import_key_hash = ?1 ORDER BY a.id`,
+      )
+      .bind(hash),
+  ])
+  const ownAccount = account!.results[0]
+  if (ownAccount) return { scope: 'account', account: ownAccount as unknown as KeyAccount }
+  const owner = user!.results[0] as { id: number; username: string } | undefined
+  if (!owner) return null
+  return {
+    scope: 'user',
+    user: { id: owner.id, username: owner.username },
+    accounts: accounts!.results as unknown as KeyAccount[],
+  }
+}
+
+/**
+ * The user's account with this UID, made when there is none (no name, so the
+ * app shows the UID; the server read off the UID). Two first uploads at once
+ * cannot make two: the (user_id, uid) unique index lets one INSERT through and
+ * both read the row back in the same batch.
+ */
+export async function accountForUid(
+  d1: D1Database,
+  meter: D1Meter,
+  userId: number,
+  uid: string,
+  accounts: readonly KeyAccount[],
+): Promise<{ account: KeyAccount; created: boolean }> {
+  const matches = accounts.filter((a) => a.uid?.trim() === uid)
+  if (matches.length === 1) return { account: matches[0]!, created: false }
+  if (matches.length > 1) throw ambiguousUid(uid)
+  // A leaked user key must not mint accounts without end (the import rate
+  // limit alone allows 60 a minute). Accounts made by hand are not capped.
+  if (accounts.length >= AUTO_ACCOUNT_LIMIT) {
+    throw new ApiError(
+      409,
+      'account_limit',
+      `You already have ${accounts.length} accounts, so a new one for UID ${uid} was not made. Create it yourself, or use its account key.`,
+    )
+  }
+
+  // The account still gets a key of its own (the column is required); nobody
+  // sees this one, and rotating it in account settings shows a new one.
+  const { hash } = await newImportKey()
+  const [inserted, found] = await meter.batch(d1, 'account', [
+    d1
+      .prepare(
+        `INSERT INTO genshin_accounts (user_id, name, uid, server, import_key_hash, settings, created_at)
+         VALUES (?1, NULL, ?2, ?3, ?4, '{}', ?5)
+         ON CONFLICT DO NOTHING RETURNING id`,
+      )
+      .bind(userId, uid, serverFromUid(uid), hash, Date.now()),
+    d1
+      .prepare('SELECT id, name, uid, server FROM genshin_accounts WHERE user_id = ?1 AND uid = ?2')
+      .bind(userId, uid),
+  ])
+  const rows = found!.results as unknown as KeyAccount[]
+  if (rows.length > 1) throw ambiguousUid(uid)
+  // Only a clash of the random key hash could ignore the INSERT and leave none.
+  if (rows.length === 0) throw new Error(`No account for UID ${uid} after inserting one`)
+  return { account: rows[0]!, created: inserted!.results.length > 0 }
+}
+
+/** Accounts a user may have before a user-key upload stops making new ones. */
+export const AUTO_ACCOUNT_LIMIT = 20
+
+const ambiguousUid = (uid: string) =>
+  new ApiError(
+    409,
+    'ambiguous_uid',
+    `More than one of your accounts has UID ${uid}. Give each a different UID, or use the account's own key.`,
+  )
+
+/** Account create/update that would give two of a user's accounts one UID. */
+export const uidTaken = () =>
+  new ApiError(409, 'uid_taken', 'Another of your accounts already has this UID', [
+    { path: 'uid', message: 'Another account has this UID' },
+  ])

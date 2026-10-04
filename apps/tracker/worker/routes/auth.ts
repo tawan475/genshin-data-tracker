@@ -40,6 +40,7 @@ export function toMe(user: User): MeResponse {
     email: user.email,
     emailVerified: user.emailVerified,
     settings: deepMerge(USER_SETTINGS_DEFAULTS, user.settings),
+    hasImportKey: user.importKeyHash !== null,
   }
 }
 

@@ -70,14 +70,20 @@ export interface ImportTarget {
   uid: string | null
 }
 
+/**
+ * Stores `upload` in `account`. `parsed` is the upload already parsed by
+ * `parseUpload`, for a caller that had to read it first (a user key routes by
+ * the file's UID).
+ */
 export async function importSnapshot(
   d1: D1Database,
   account: ImportTarget,
   upload: Upload,
   meter = new D1Meter(),
+  parsed?: PreparedSnapshot,
 ): Promise<ImportResponse> {
   const accountId = account.id
-  const prepared = await parseUpload(upload.text)
+  const prepared = parsed ?? (await parseUpload(upload.text))
   const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
   const sections = await encodeStaticSections(prepared, MATERIALS)
   const warnings = uidWarnings(account, prepared)
@@ -262,7 +268,8 @@ export async function importSnapshot(
   return response('created', snapshotId, storedSize)
 }
 
-async function parseUpload(text: string): Promise<PreparedSnapshot> {
+/** Parses and normalises a GOOD file; malformed input is a 400. */
+export async function parseUpload(text: string): Promise<PreparedSnapshot> {
   let input: unknown
   try {
     input = JSON.parse(text)
