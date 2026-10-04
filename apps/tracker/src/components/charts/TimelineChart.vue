@@ -124,8 +124,8 @@ function config(): ChartConfiguration<'line'> {
           borderWidth: 1,
           titleColor: token('--text-primary'),
           bodyColor: token('--text-secondary'),
-          titleFont: { family: 'Instrument Sans', size: 14 },
-          bodyFont: { family: 'JetBrains Mono', size: 14 },
+          titleFont: { family: 'Outfit, ui-sans-serif, system-ui, sans-serif', size: 14 },
+          bodyFont: { family: 'Outfit, ui-sans-serif, system-ui, sans-serif', size: 14 },
           padding: 10,
           callbacks: {
             title: (items) => (items[0] ? formatDateTime(Number(items[0].parsed.x)) : ''),

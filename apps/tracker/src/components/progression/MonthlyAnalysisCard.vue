@@ -1,143 +1,183 @@
 <script setup lang="ts">
+import type { SnapshotResponse } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
-import BaseButton from '@/components/legacy/BaseButton.vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import ItemDisplay from '@/components/legacy/ItemDisplay.vue'
 import MoraDisplay from '@/components/legacy/MoraDisplay.vue'
-import { loadSnapshots } from '@/data/account-data'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiError from '@/components/ui/UiError.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { loadMaterialsHistory } from '@/data/materials'
-import { monthlyAnalysis } from '@/data/monthly-analysis'
+import { capturedMonths, monthlyAnalysis, type CalendarMonth } from '@/data/monthly-analysis'
+import { monthLabel } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
-import { useFeedback } from '@/stores/feedback'
 import { useAccount } from '@/views/account/context'
 
+/**
+ * The original tracker's Monthly Analysis table, unchanged, in a panel with
+ * the new month controls. Opens on the newest month with captures; months
+ * step one at a time between the first and the newest captured month.
+ * `snapshots` is undefined while they load.
+ */
+const props = defineProps<{ snapshots: SnapshotResponse[] | undefined }>()
+
 const account = useAccount()
-const feedback = useFeedback()
 
-const source = useResource(
+// Extraction counts come from the materials history (decoded in the browser).
+const {
+  data: materialsData,
+  error: materialsError,
+  reload: reloadMaterials,
+} = useResource(
   () => account.value,
-  async (a) => {
-    if (!a.latest) return { accountId: a.id, snapshots: [], materials: null }
-    const [snapshots, materials] = await Promise.all([loadSnapshots(a), loadMaterialsHistory(a)])
-    return { accountId: a.id, snapshots, materials }
+  async (a) => ({ accountId: a.id, history: a.latest ? await loadMaterialsHistory(a) : null }),
+)
+/** Undefined while loading and while switching accounts. */
+const materials = computed(() => {
+  const value = materialsData.value
+  return value && value.accountId === account.value.id ? value : undefined
+})
+
+const months = computed(() => (props.snapshots ? capturedMonths(props.snapshots) : []))
+const firstMonth = computed(() => months.value[0] ?? null)
+const latestMonth = computed(() => months.value[months.value.length - 1] ?? null)
+
+function order(m: CalendarMonth): number {
+  return m.year * 12 + m.month - 1
+}
+
+function label(m: CalendarMonth): string {
+  return monthLabel({ year: m.year, month: m.month - 1 })
+}
+
+function shift(m: CalendarMonth, by: number): CalendarMonth {
+  const d = new Date(m.year, m.month - 1 + by, 1)
+  return { year: d.getFullYear(), month: d.getMonth() + 1 }
+}
+
+// Opens on the newest captured month (the current month is often empty);
+// stays where the user put it unless new data moves the bounds past it.
+const selected = ref<CalendarMonth | null>(null)
+watch(
+  [firstMonth, latestMonth],
+  ([first, latest]) => {
+    if (!first || !latest) {
+      selected.value = null
+      return
+    }
+    const current = selected.value
+    if (!current || order(current) < order(first) || order(current) > order(latest)) {
+      selected.value = latest
+    }
   },
-)
-watch(source.error, (error) => {
-  if (error) feedback.error('Could not load monthly analysis', error)
-})
-
-/** Spinner on first load and while switching accounts, not on a refresh. */
-const isFetchingMonthly = computed(
-  () =>
-    source.loading.value &&
-    (!source.data.value || source.data.value.accountId !== account.value.id),
+  { immediate: true },
 )
 
-const now = new Date()
-const analysisMonth = ref(now.getMonth() + 1)
-const analysisYear = ref(now.getFullYear())
-
-const monthlyAnalysisData = computed(() => {
-  const data = source.data.value
-  if (!data) return null
-  if (!data.materials) return { month: analysisMonth.value, year: analysisYear.value, rows: [] }
-  return monthlyAnalysis(data.snapshots, data.materials, analysisYear.value, analysisMonth.value)
-})
+const canPrev = computed(
+  () => !!selected.value && !!firstMonth.value && order(selected.value) > order(firstMonth.value),
+)
+const canNext = computed(
+  () => !!selected.value && !!latestMonth.value && order(selected.value) < order(latestMonth.value),
+)
+const prevLabel = computed(() =>
+  selected.value ? `Previous month, ${label(shift(selected.value, -1))}` : 'Previous month',
+)
+const nextLabel = computed(() =>
+  selected.value ? `Next month, ${label(shift(selected.value, 1))}` : 'Next month',
+)
 
 const prevMonth = () => {
-  if (analysisMonth.value === 1) {
-    analysisMonth.value = 12
-    analysisYear.value -= 1
-  } else {
-    analysisMonth.value -= 1
-  }
+  if (selected.value && canPrev.value) selected.value = shift(selected.value, -1)
 }
 
 const nextMonth = () => {
-  if (analysisMonth.value === 12) {
-    analysisMonth.value = 1
-    analysisYear.value += 1
-  } else {
-    analysisMonth.value += 1
-  }
+  if (selected.value && canNext.value) selected.value = shift(selected.value, 1)
 }
+
+const monthlyAnalysisData = computed(() => {
+  const month = selected.value
+  const loaded = materials.value
+  if (!month || !props.snapshots || !loaded) return null
+  if (!loaded.history) return { month: month.month, year: month.year, rows: [] }
+  return monthlyAnalysis(props.snapshots, loaded.history, month.year, month.month)
+})
+
+/** On a month without captures: the nearest earlier captured month and the newest one. */
+const jumps = computed(() => {
+  const current = selected.value
+  if (!current) return []
+  const at = order(current)
+  let earlier: CalendarMonth | undefined
+  for (const m of months.value) if (order(m) < at) earlier = m
+  const latest = latestMonth.value
+  const list: { key: string; month: CalendarMonth; label: string; direction: 'prev' | 'next' }[] =
+    []
+  if (earlier) {
+    list.push({ key: 'prev', month: earlier, label: label(earlier), direction: 'prev' })
+  }
+  if (latest && order(latest) > at) {
+    list.push({ key: 'next', month: latest, label: label(latest), direction: 'next' })
+  }
+  return list
+})
 </script>
 
 <template>
-  <!-- Monthly Analysis Table -->
-  <div
-    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 relative z-10 mt-8 transition-colors"
-  >
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-      <h3
-        class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors"
-      >
-        Monthly Analysis
-        <span
-          v-if="monthlyAnalysisData"
-          class="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-400 px-2 py-1 rounded transition-colors"
-        >
-          {{ String(monthlyAnalysisData.month).padStart(2, '0') }} / {{ monthlyAnalysisData.year }}
-        </span>
-      </h3>
-
-      <div class="flex items-center gap-2">
-        <BaseButton
-          variant="secondary"
-          size="xs"
-          class="!p-1.5"
-          aria-label="Previous month"
+  <UiPanel title="Monthly analysis">
+    <template v-if="selected" #actions>
+      <div class="flex items-center gap-1">
+        <UiIconButton
+          :label="prevLabel"
+          :disabled="!canPrev"
+          class="disabled:pointer-events-none disabled:opacity-40"
           @click="prevMonth"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            ></path>
-          </svg>
-        </BaseButton>
-        <BaseButton
-          variant="secondary"
-          size="xs"
-          class="!p-1.5"
-          aria-label="Next month"
+          <ChevronLeft class="size-5" aria-hidden="true" />
+        </UiIconButton>
+        <span class="min-w-32 text-center font-medium" aria-live="polite">{{
+          label(selected)
+        }}</span>
+        <UiIconButton
+          :label="nextLabel"
+          :disabled="!canNext"
+          class="disabled:pointer-events-none disabled:opacity-40"
           @click="nextMonth"
         >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5l7 7-7 7"
-            ></path>
-          </svg>
-        </BaseButton>
+          <ChevronRight class="size-5" aria-hidden="true" />
+        </UiIconButton>
       </div>
-    </div>
+    </template>
 
-    <div v-if="isFetchingMonthly" class="flex justify-center p-8">
-      <span
-        class="w-6 h-6 border-3 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin transition-colors"
-      ></span>
+    <UiError
+      v-if="materialsError && !materials"
+      title="Monthly analysis unavailable"
+      :error="materialsError"
+      @retry="reloadMaterials"
+    />
+    <div v-else-if="!monthlyAnalysisData" class="flex justify-center p-8" role="status">
+      <span class="sr-only">Loading monthly analysis</span>
+      <UiSpinner class="size-6 text-text-muted" />
     </div>
     <div
-      v-else-if="!monthlyAnalysisData || monthlyAnalysisData.rows.length === 0"
-      class="text-center py-8 text-slate-400 dark:text-slate-500 transition-colors"
+      v-else-if="monthlyAnalysisData.rows.length === 0"
+      class="flex flex-col items-center gap-3 py-8 text-center"
     >
-      No data for this month.
+      <p class="text-text-secondary">No captures</p>
+      <div v-if="jumps.length" class="flex flex-wrap justify-center gap-2">
+        <UiButton
+          v-for="jump in jumps"
+          :key="jump.key"
+          size="sm"
+          :title="`Go to ${jump.label}`"
+          @click="selected = jump.month"
+        >
+          <ChevronLeft v-if="jump.direction === 'prev'" class="size-4" aria-hidden="true" />
+          {{ jump.label }}
+          <ChevronRight v-if="jump.direction === 'next'" class="size-4" aria-hidden="true" />
+        </UiButton>
+      </div>
     </div>
     <div v-else class="overflow-x-auto">
       <!-- [&_img]:max-w-none: preflight's img max-width:100% makes the item icons count as
@@ -382,5 +422,5 @@ const nextMonth = () => {
         </tbody>
       </table>
     </div>
-  </div>
+  </UiPanel>
 </template>

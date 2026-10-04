@@ -61,9 +61,8 @@ export function useMaterialsGraph(accountId: () => number) {
       // Ignore a late answer for another account, or one the user already overrode.
       if (id !== accountId() || touchedFor === id) return
       const saved = settings.materialsGraph
-      selectedKeys.value = saved.selectedKeys.length
-        ? saved.selectedKeys.slice(0, MAX_SERIES)
-        : [...DEFAULT_KEYS]
+      // The server fills in the default (Mora, Primogem); an empty list was cleared on purpose.
+      selectedKeys.value = saved.selectedKeys.slice(0, MAX_SERIES)
       group.value = saved.groupBy
       rangeDays.value = toRange(saved.limit)
     } catch {

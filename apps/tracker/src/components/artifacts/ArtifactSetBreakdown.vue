@@ -7,7 +7,8 @@ import { formatNumber } from '@/lib/format'
 
 /**
  * The biggest sets among the current matches as icon + count chips (name in
- * the tooltip); picking one filters to it. Scrolls sideways on a phone.
+ * the tooltip); picking one filters to it. One row that scrolls sideways when
+ * it does not fit.
  */
 const props = withDefaults(
   defineProps<{ sets: SetOption[]; selected: readonly string[]; limit?: number }>(),
@@ -21,7 +22,7 @@ const rest = computed(() => props.sets.length - top.value.length)
 
 <template>
   <div
-    class="flex min-w-0 items-center gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
+    class="-my-1 flex min-w-0 items-center gap-2 overflow-x-auto px-0.5 py-1 [scrollbar-width:none]"
     role="group"
     aria-label="Top sets"
   >

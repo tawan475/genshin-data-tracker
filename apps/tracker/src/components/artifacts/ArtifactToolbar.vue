@@ -1,24 +1,21 @@
 <script setup lang="ts">
-import { computed, ref, useId, watch, type Component } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import {
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
   ChevronDown,
-  Crown,
-  Feather,
-  Flower2,
   Gem,
-  Hourglass,
   Search,
   SlidersHorizontal,
   Star,
-  Wine,
+  Trophy,
   X,
 } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import {
+  BEST_PER_SLOT,
   LEVEL_MAX,
   LEVEL_MIN,
   SLOT_KEYS,
@@ -26,14 +23,15 @@ import {
   clearedFilters,
   defaultDescending,
   isFodderPreset,
+  isSparePreset,
   toggleFodderPreset,
+  toggleSparePreset,
   type ArtifactFilters,
   type ArtifactSort,
   type AstralFilter,
   type EquipFilter,
   type LockFilter,
   type SetOption,
-  type SlotKey,
 } from '@/data/artifacts'
 import { formatNumber } from '@/lib/format'
 import { readJson, writeJson } from '@/lib/storage'
@@ -41,6 +39,7 @@ import { formatSetName, formatSlotName, formatStatName } from '@/utils/artifact-
 import ArtifactSetPicker from './ArtifactSetPicker.vue'
 import ChoiceGroup from './ChoiceGroup.vue'
 import FilterPill from './FilterPill.vue'
+import { SLOT_ICONS } from './styles'
 
 /**
  * Search, sort and every filter, plus the active filters as removable pills.
@@ -49,8 +48,10 @@ import FilterPill from './FilterPill.vue'
  */
 const props = defineProps<{
   sets: SetOption[]
-  /** Fodder in the whole inventory. */
+  /** Preset sizes over the whole inventory. */
   fodderCount: number
+  spareCount: number
+  maxedCount: number
   slotCounts: ReadonlyMap<string, number>
   /** Rarities present in the inventory, highest first. */
   rarities: number[]
@@ -103,13 +104,6 @@ const astral = computed({
   set: (astral: AstralFilter) => patch({ astral }),
 })
 
-const SLOT_ICONS: Record<SlotKey, Component> = {
-  flower: Flower2,
-  plume: Feather,
-  sands: Hourglass,
-  goblet: Wine,
-  circlet: Crown,
-}
 const RARITY_TEXT: Record<number, string> = {
   5: 'text-rarity-5',
   4: 'text-rarity-4',
@@ -136,6 +130,7 @@ function toggleMaxOnly() {
 }
 
 const fodder = computed(() => isFodderPreset(filters.value))
+const spare = computed(() => isSparePreset(filters.value))
 
 // "More filters" stays open or closed per device; it opens by itself when
 // one of the filters inside it is in use, so nothing active is hidden.
@@ -233,6 +228,7 @@ const pills = computed<Pill[]>(() => {
       remove: () => patch({ astral: 'any' }),
     })
   }
+  if (f.best) out.push({ id: 'best', label: 'Best', remove: () => patch({ best: false }) })
   return out
 })
 
@@ -295,8 +291,10 @@ function clearAll() {
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2">
-      <div role="group" aria-label="Slot" class="flex flex-wrap gap-2">
+    <div
+      class="-mx-3 flex items-center gap-2 overflow-x-auto px-3 py-0.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+    >
+      <div role="group" aria-label="Slot" class="flex gap-2 sm:flex-wrap">
         <FilterPill
           v-for="slot in SLOT_KEYS"
           :key="slot"
@@ -306,15 +304,15 @@ function clearAll() {
         >
           <component :is="SLOT_ICONS[slot]" class="size-4 shrink-0" aria-hidden="true" />
           <span class="sr-only">{{ formatSlotName(slot) }}</span>
-          <span class="tabular hidden font-mono text-text-muted sm:inline">
+          <span class="tabular font-mono text-text-muted">
             {{ formatNumber(slotCounts.get(slot) ?? 0) }}
           </span>
         </FilterPill>
       </div>
 
-      <span class="hidden h-6 w-px bg-border-default sm:block" aria-hidden="true" />
+      <span class="h-6 w-px shrink-0 bg-border-default" aria-hidden="true" />
 
-      <div role="group" aria-label="Rarity" class="flex flex-wrap gap-2">
+      <div role="group" aria-label="Rarity" class="flex gap-2 sm:flex-wrap">
         <FilterPill
           v-for="rarity in rarities"
           :key="rarity"
@@ -327,36 +325,59 @@ function clearAll() {
             <Star class="size-3.5 fill-current" :class="RARITY_TEXT[rarity]" aria-hidden="true" />
             <span class="sr-only">-star</span>
           </span>
-          <span class="tabular hidden font-mono text-text-muted sm:inline">
+          <span class="tabular font-mono text-text-muted">
             {{ formatNumber(rarityCounts.get(rarity) ?? 0) }}
           </span>
         </FilterPill>
       </div>
+    </div>
 
-      <span class="hidden h-6 w-px bg-border-default sm:block" aria-hidden="true" />
-
-      <FilterPill
-        :pressed="fodder"
-        title="Unlocked, unequipped 3★–4★"
-        @toggle="filters = toggleFodderPreset(filters)"
+    <div class="flex items-center gap-2">
+      <div
+        role="group"
+        aria-label="Presets"
+        class="-ml-3 flex items-center gap-2 overflow-x-auto pl-3 py-0.5 [scrollbar-width:none] sm:ml-0 sm:flex-wrap sm:overflow-visible sm:pl-0 min-w-0 flex-1"
       >
-        Fodder
-        <span class="tabular font-mono text-text-muted">{{ formatNumber(fodderCount) }}</span>
-      </FilterPill>
-      <FilterPill :pressed="maxOnly" title="Level +20 only" @toggle="toggleMaxOnly">
-        <span class="tabular font-mono">+20</span>
-      </FilterPill>
+        <FilterPill
+          :pressed="filters.best"
+          :title="`Top ${BEST_PER_SLOT} per slot, by the current sort`"
+          @toggle="patch({ best: !filters.best })"
+        >
+          <Trophy class="size-4 shrink-0" aria-hidden="true" />
+          Best
+        </FilterPill>
+        <FilterPill
+          :pressed="fodder"
+          title="Unlocked, unequipped 3★–4★"
+          @toggle="filters = toggleFodderPreset(filters)"
+        >
+          Fodder
+          <span class="tabular font-mono text-text-muted">{{ formatNumber(fodderCount) }}</span>
+        </FilterPill>
+        <FilterPill
+          :pressed="spare"
+          title="Unequipped 5★"
+          @toggle="filters = toggleSparePreset(filters)"
+        >
+          Spare 5★
+          <span class="tabular font-mono text-text-muted">{{ formatNumber(spareCount) }}</span>
+        </FilterPill>
+        <FilterPill :pressed="maxOnly" title="Level +20 only" @toggle="toggleMaxOnly">
+          <span class="tabular font-mono">+20</span>
+          <span class="tabular font-mono text-text-muted">{{ formatNumber(maxedCount) }}</span>
+        </FilterPill>
+      </div>
 
       <button
         type="button"
-        class="ml-auto inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
+        class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
         :aria-expanded="moreOpen"
         :aria-controls="moreId"
         title="Main stat, level, lock, location, astral mark"
         @click="moreOpen = !moreOpen"
       >
         <SlidersHorizontal class="size-4" aria-hidden="true" />
-        More
+        <span class="sr-only sm:not-sr-only">More</span>
         <span v-if="moreCount" class="tabular font-mono text-accent-text">{{ moreCount }}</span>
       </button>
     </div>

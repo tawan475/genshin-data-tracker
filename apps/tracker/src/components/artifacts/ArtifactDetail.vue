@@ -3,27 +3,40 @@ import { computed } from 'vue'
 import { Backpack, FlaskConical, Lock, LockOpen, Sparkle } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
-import type { ArtifactRow } from '@/data/artifacts'
+import { upgradesLeft, type ArtifactRow } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
-import { keyToName } from '@/lib/format'
+import { formatNumber, keyToName } from '@/lib/format'
 import { ROLL_QUALITY_LABEL, ROLL_QUALITY_TEXT, maxLevel } from '@/utils/artifact-rolls'
 import {
   formatCv,
   formatRollValue,
   formatSlotFullName,
+  formatSlotName,
   formatStatName,
   formatStatValue,
 } from '@/utils/artifact-stats'
 import ArtifactRollBars from './ArtifactRollBars.vue'
+import { CV_BANDS_TITLE, cvClass } from './styles'
 
-/** One artifact: stats, flags and every roll, coloured by tier. */
-const props = defineProps<{ row: ArtifactRow }>()
+/** One artifact: stats, rank, who wears it, and every roll coloured by tier. */
+const props = defineProps<{
+  row: ArtifactRow
+  /** CV position among pieces of the same slot and rarity. */
+  rank?: { position: number; of: number }
+}>()
 
 const artifact = computed(() => props.row.artifact)
 const owner = computed(() => (artifact.value.location ? keyToName(artifact.value.location) : ''))
 const inactive = computed(() => artifact.value.unactivatedSubstats ?? [])
-const rollsTitle = computed(() =>
-  (artifact.value.totalRolls ?? 0) > 0 ? 'From the game' : 'Inferred from the level',
+const left = computed(() => upgradesLeft(artifact.value))
+const rollsTitle = computed(() => {
+  const source = (artifact.value.totalRolls ?? 0) > 0 ? 'From the game' : 'Inferred from the level'
+  return left.value > 0 ? `${source} · ${left.value} upgrades to come` : source
+})
+const rankTitle = computed(() =>
+  props.rank
+    ? `CV rank among ${formatNumber(props.rank.of)} ${artifact.value.rarity}★ ${formatSlotName(artifact.value.slotKey).toLowerCase()}s`
+    : '',
 )
 </script>
 
@@ -50,10 +63,12 @@ const rollsTitle = computed(() =>
       </div>
     </div>
 
-    <dl class="grid grid-cols-3 gap-2">
-      <div class="rounded-xl border border-border-default px-3 py-2" title="Crit value">
+    <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div class="rounded-xl border border-border-default px-3 py-2" :title="CV_BANDS_TITLE">
         <dt class="text-sm text-text-secondary">CV</dt>
-        <dd class="tabular font-mono text-xl">{{ formatCv(row.cv) }}</dd>
+        <dd class="tabular font-mono text-xl font-semibold" :class="cvClass(row.cv)">
+          {{ formatCv(row.cv) }}
+        </dd>
       </div>
       <div class="rounded-xl border border-border-default px-3 py-2" title="Roll value">
         <dt class="text-sm text-text-secondary">RV</dt>
@@ -61,7 +76,17 @@ const rollsTitle = computed(() =>
       </div>
       <div class="rounded-xl border border-border-default px-3 py-2" :title="rollsTitle">
         <dt class="text-sm text-text-secondary">Rolls</dt>
-        <dd class="tabular font-mono text-xl">{{ row.rollCount }}</dd>
+        <dd class="tabular font-mono text-xl">
+          {{ row.rollCount }}
+          <span v-if="left > 0" class="text-base text-text-muted">+{{ left }}</span>
+        </dd>
+      </div>
+      <div v-if="rank" class="rounded-xl border border-border-default px-3 py-2" :title="rankTitle">
+        <dt class="text-sm text-text-secondary">Rank</dt>
+        <dd class="tabular font-mono text-xl">
+          #{{ formatNumber(rank.position)
+          }}<span class="text-base text-text-muted"> / {{ formatNumber(rank.of) }}</span>
+        </dd>
       </div>
     </dl>
 
@@ -74,7 +99,7 @@ const rollsTitle = computed(() =>
             size="sm"
             aria-hidden="true"
           />
-          <span class="text-text-primary">{{ owner }}</span>
+          <span class="font-medium text-text-primary">{{ owner }}</span>
         </template>
         <template v-else>
           <Backpack class="size-4" aria-hidden="true" />
@@ -111,14 +136,15 @@ const rollsTitle = computed(() =>
       >
         <div class="flex items-center gap-3">
           <span class="min-w-0 flex-1">{{ formatStatName(substat.key) }}</span>
-          <ArtifactRollBars :rolls="row.rolls[index] ?? []" />
-          <span class="tabular w-16 text-right font-mono">
+          <ArtifactRollBars :rolls="row.rolls[index] ?? []" size="lg" />
+          <span class="tabular w-16 text-right font-mono font-medium">
             {{ formatStatValue(substat.key, substat.value) }}
           </span>
         </div>
         <div
           v-if="row.rolls[index]?.length"
           class="tabular flex flex-wrap gap-x-3 font-mono text-sm"
+          :aria-label="`${row.rolls[index]!.length} rolls`"
         >
           <span
             v-for="(roll, n) in row.rolls[index]"

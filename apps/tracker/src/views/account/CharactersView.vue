@@ -1,27 +1,24 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { Search, SearchX, Upload, Users } from 'lucide-vue-next'
+import { useRoute, useRouter } from 'vue-router'
+import { SearchX, Upload, Users } from 'lucide-vue-next'
 import CharacterCard from '@/components/characters/CharacterCard.vue'
 import CharacterDetail from '@/components/characters/CharacterDetail.vue'
-import SortControl from '@/components/characters/SortControl.vue'
-import ToggleChip from '@/components/characters/ToggleChip.vue'
+import CharacterTable from '@/components/characters/CharacterTable.vue'
+import CharacterToolbar from '@/components/characters/CharacterToolbar.vue'
+import DetailDialog from '@/components/characters/DetailDialog.vue'
+import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
-import UiInput from '@/components/ui/UiInput.vue'
-import UiModal from '@/components/ui/UiModal.vue'
-import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
 import {
   CHARACTER_SORTS,
-  ELEMENTS,
-  ELEMENT_LABELS,
   NO_CHARACTER_FILTERS,
-  WEAPON_TYPES,
-  WEAPON_TYPE_LABELS,
   buildRoster,
+  facetCounts,
   filterCharacters,
   hasCharacterFilters,
   sortCharacters,
@@ -30,7 +27,6 @@ import {
   type SortDirection,
 } from '@/data/characters'
 import { useResource } from '@/data/use-resource'
-import { formatNumber } from '@/lib/format'
 import { readJson, writeJson } from '@/lib/storage'
 import { useAccount } from './context'
 
@@ -49,76 +45,110 @@ const roster = computed(() =>
 const filters = reactive<CharacterFilters>({ ...NO_CHARACTER_FILTERS })
 const filtered = computed(() => hasCharacterFilters(filters))
 
-const saved = readJson<{ sort?: string; direction?: string }>('characters:sort', {})
+const saved = readJson<{ sort?: string; direction?: string; view?: string }>('characters:sort', {})
 const sort = ref<CharacterSort>(
   CHARACTER_SORTS.some((s) => s.value === saved.sort) ? (saved.sort as CharacterSort) : 'level',
 )
 const direction = ref<SortDirection>(saved.direction === 'asc' ? 'asc' : 'desc')
-watch([sort, direction], () =>
-  writeJson('characters:sort', { sort: sort.value, direction: direction.value }),
+const view = ref<'grid' | 'list'>(saved.view === 'list' ? 'list' : 'grid')
+watch([sort, direction, view], () =>
+  writeJson('characters:sort', { sort: sort.value, direction: direction.value, view: view.value }),
 )
 
-const elementOptions = [
-  { value: 'all' as const, label: 'Element' },
-  ...ELEMENTS.map((e) => ({ value: e, label: ELEMENT_LABELS[e] })),
-]
-const rarityOptions = [
-  { value: 'all' as const, label: 'Rarity' },
-  { value: 5 as const, label: '5★' },
-  { value: 4 as const, label: '4★' },
-]
-const weaponOptions = [
-  { value: 'all' as const, label: 'Weapon' },
-  ...WEAPON_TYPES.map((w) => ({ value: w, label: WEAPON_TYPE_LABELS[w] })),
-]
-
+const all = computed(() => roster.value?.characters ?? [])
 const shown = computed(() =>
-  roster.value
-    ? sortCharacters(
-        filterCharacters(roster.value.characters, filters),
-        sort.value,
-        direction.value,
-      )
-    : [],
+  sortCharacters(filterCharacters(all.value, filters), sort.value, direction.value),
 )
+const elementCounts = computed(() => facetCounts(all.value, filters, 'element', (c) => c.element))
+const rarityCounts = computed(() => facetCounts(all.value, filters, 'rarity', (c) => c.rarity))
+
+const strip = computed<StripItem[]>(() => {
+  const r = roster.value
+  if (!r) return []
+  return [
+    { key: 'total', label: 'Characters', value: r.total },
+    { key: 'c6', label: 'C6', value: r.c6 },
+    { key: 'level90', label: 'Lv 90+', value: r.level90 },
+    { key: 'crowns', label: 'Crowns', value: r.crowns, title: 'Talents at level 10' },
+    {
+      key: 'ready',
+      label: 'Ready',
+      value: r.ready,
+      title: 'Lv 90, weapon Lv 90, five maxed artifacts, a full set bonus',
+      pressed: filters.build === 'ready',
+    },
+    {
+      key: 'needs',
+      label: 'Needs work',
+      value: r.total - r.ready,
+      pressed: filters.build === 'needs',
+      tone: 'warning',
+    },
+  ]
+})
+
+function toggleStrip(key: string) {
+  if (key !== 'ready' && key !== 'needs') return
+  filters.build = filters.build === key ? 'all' : key
+}
 
 function clearFilters() {
   Object.assign(filters, NO_CHARACTER_FILTERS)
 }
 
 // ------------------------------------------------------------------ details
+// The open character lives in the URL (?c=Key): links work, and Back closes it.
 
-const selectedKey = ref<string | null>(null)
-const selected = computed(
-  () => roster.value?.characters.find((c) => c.key === selectedKey.value) ?? null,
+const route = useRoute()
+const router = useRouter()
+const selectedKey = computed(() => (typeof route.query.c === 'string' ? route.query.c : null))
+const selected = computed(() => all.value.find((c) => c.key === selectedKey.value) ?? null)
+let pushed = false
+watch(selectedKey, (key) => {
+  if (key === null) pushed = false
+})
+
+function open(key: string) {
+  const query = { ...route.query, c: key }
+  if (selectedKey.value !== null) {
+    void router.replace({ query })
+  } else {
+    pushed = true
+    void router.push({ query })
+  }
+}
+
+function close() {
+  if (pushed) {
+    pushed = false
+    router.back()
+    return
+  }
+  const query = { ...route.query }
+  delete query.c
+  void router.replace({ query })
+}
+
+/** Steps through the list as filtered and sorted (or the whole roster if it is not in it). */
+const stepList = computed(() =>
+  selected.value && shown.value.some((c) => c.key === selected.value!.key)
+    ? shown.value
+    : all.value,
 )
+const selectedIndex = computed(() =>
+  selected.value ? stepList.value.findIndex((c) => c.key === selected.value!.key) : -1,
+)
+function step(delta: -1 | 1) {
+  const list = stepList.value
+  if (list.length < 2 || selectedIndex.value < 0) return
+  const next = list[(selectedIndex.value + delta + list.length) % list.length]
+  if (next) open(next.key)
+}
 </script>
 
 <template>
   <div>
-    <PageHeader title="Characters">
-      <template #meta>
-        <UiSkeleton v-if="!roster && inventory.loading.value" class="mt-2 h-5 w-56 max-w-full" />
-        <p v-else-if="roster" class="mt-1 flex flex-wrap gap-x-4 text-text-secondary">
-          <span
-            ><span class="tabular font-mono text-text-primary">{{
-              formatNumber(roster.total)
-            }}</span>
-            total</span
-          >
-          <span
-            ><span class="tabular font-mono text-text-primary">{{ formatNumber(roster.c6) }}</span>
-            C6</span
-          >
-          <span
-            ><span class="tabular font-mono text-text-primary">{{
-              formatNumber(roster.level90)
-            }}</span>
-            Lv 90+</span
-          >
-        </p>
-      </template>
-    </PageHeader>
+    <PageHeader title="Characters" />
 
     <UiError
       v-if="inventory.error.value"
@@ -129,25 +159,25 @@ const selected = computed(
     />
 
     <div v-if="!roster && inventory.loading.value" aria-busy="true" aria-label="Loading">
-      <div class="mb-6 flex flex-col gap-2 sm:flex-row">
-        <UiSkeleton class="h-11 flex-1" />
-        <UiSkeleton class="h-11 sm:w-64" />
+      <div class="mb-4 grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-6">
+        <UiSkeleton v-for="n in 6" :key="n" class="h-16 sm:h-[4.5rem]" />
       </div>
+      <UiSkeleton class="mb-4 h-40 w-full sm:h-36" />
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <div
-          v-for="n in 12"
+          v-for="n in 9"
           :key="n"
           class="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-raised p-3"
         >
           <div class="flex items-center gap-3">
             <UiSkeleton class="size-16" />
             <div class="flex flex-1 flex-col gap-2">
-              <UiSkeleton class="h-6 w-32" />
+              <UiSkeleton class="h-5 w-32" />
               <UiSkeleton class="h-4 w-full" />
-              <UiSkeleton class="h-3 w-24" />
+              <UiSkeleton class="h-5 w-24" />
             </div>
           </div>
-          <UiSkeleton class="h-9 w-full" />
+          <UiSkeleton class="h-7 w-full" />
         </div>
       </div>
     </div>
@@ -164,76 +194,55 @@ const selected = computed(
     </UiEmpty>
 
     <template v-else-if="roster">
-      <div class="mb-4 flex flex-col gap-2" role="search" aria-label="Filter characters">
-        <div class="flex flex-col gap-2 sm:flex-row">
-          <label class="relative min-w-0 flex-1">
-            <span class="sr-only">Search</span>
-            <Search
-              class="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-text-muted"
-              aria-hidden="true"
-            />
-            <UiInput
-              v-model="filters.query"
-              type="search"
-              class="pl-10"
-              placeholder="Search"
-              title="Name, weapon or set"
-              autocomplete="off"
-            />
-          </label>
-          <SortControl
-            v-model:sort="sort"
-            v-model:direction="direction"
-            class="sm:w-56"
-            :options="CHARACTER_SORTS"
-          />
-        </div>
-        <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
-          <label class="min-w-0 sm:w-36">
-            <span class="sr-only">Element</span>
-            <UiSelect v-model="filters.element" :options="elementOptions" />
-          </label>
-          <label class="min-w-0 sm:w-32">
-            <span class="sr-only">Rarity</span>
-            <UiSelect v-model="filters.rarity" :options="rarityOptions" />
-          </label>
-          <label class="min-w-0 sm:w-36">
-            <span class="sr-only">Weapon type</span>
-            <UiSelect v-model="filters.weaponType" :options="weaponOptions" />
-          </label>
-          <ToggleChip v-model="filters.fourPiece" title="Wearing a 4-piece set">4pc</ToggleChip>
-          <ToggleChip v-model="filters.talents9" title="All three talents at 9 or above"
-            >Talents 9+</ToggleChip
-          >
-          <UiButton v-if="filtered" variant="ghost" @click="clearFilters">Clear</UiButton>
-          <span
-            v-if="filtered"
-            class="tabular self-center font-mono text-sm text-text-secondary sm:ml-auto"
-            aria-live="polite"
-            >{{ formatNumber(shown.length) }} / {{ formatNumber(roster.total) }}</span
-          >
-        </div>
-      </div>
+      <StatStrip class="mb-4" :items="strip" @toggle="toggleStrip" />
+
+      <CharacterToolbar
+        v-model:filters="filters"
+        v-model:sort="sort"
+        v-model:direction="direction"
+        v-model:view="view"
+        class="mb-4"
+        :element-counts="elementCounts"
+        :rarity-counts="rarityCounts"
+        :shown="shown.length"
+        :total="roster.total"
+        :filtered="filtered"
+        @clear="clearFilters"
+      />
 
       <UiEmpty v-if="shown.length === 0" title="No matches">
         <template #icon><SearchX aria-hidden="true" /></template>
         <UiButton @click="clearFilters">Clear</UiButton>
       </UiEmpty>
 
-      <ul v-else class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <ul
+        v-else-if="view === 'grid'"
+        class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        aria-label="Characters"
+      >
         <li v-for="c in shown" :key="c.key" class="flex">
-          <CharacterCard :character="c" @open="selectedKey = c.key" />
+          <CharacterCard :character="c" @open="open(c.key)" />
         </li>
       </ul>
+
+      <CharacterTable
+        v-else
+        v-model:sort="sort"
+        v-model:direction="direction"
+        :characters="shown"
+        @open="open"
+      />
     </template>
 
-    <UiModal
+    <DetailDialog
       :open="selected !== null"
       :title="selected?.name ?? ''"
-      wide
-      @close="selectedKey = null"
+      :index="selectedIndex >= 0 ? selectedIndex : undefined"
+      :total="stepList.length"
+      @close="close"
+      @step="step"
     >
       <CharacterDetail v-if="selected" :character="selected" :account="account" />
-    </UiModal>
+    </DetailDialog>
   </div>
 </template>

@@ -14,11 +14,13 @@ import {
   formatStatValue,
 } from '@/utils/artifact-stats'
 import ArtifactRollBars from './ArtifactRollBars.vue'
+import { cvClass } from './styles'
 
 /**
- * One artifact in the grid, visual only: words live in the tooltip and the
- * detail dialog. A transparent button covers the card, so the whole card is
- * one click target and its focus ring outlines the card.
+ * One artifact in the grid: set and main stat, CV/RV in the corner, substats
+ * with roll bars, and who wears it. Words live in the tooltip and the detail
+ * dialog. A transparent button covers the card, so the whole card is one
+ * click target and its focus ring outlines the card.
  */
 const props = defineProps<{ row: ArtifactRow }>()
 const emit = defineEmits<{ open: [id: number] }>()
@@ -47,25 +49,25 @@ const label = computed(() => {
   <article
     class="relative flex min-w-0 flex-col rounded-xl border border-border-default bg-surface-raised shadow-card transition-colors hover:border-border-strong"
   >
-    <div class="flex items-start gap-3 p-3">
+    <div class="flex items-start gap-3 p-3 pb-2.5" aria-hidden="true">
       <GameIcon
         :src="artifactIcon(artifact.setKey, artifact.slotKey)"
         :name="row.setName"
         :rarity="artifact.rarity"
-        aria-hidden="true"
       />
       <div class="min-w-0 flex-1">
-        <p class="truncate font-medium">{{ formatStatName(artifact.mainStatKey) }}</p>
-        <p class="mt-0.5 flex items-center gap-2">
+        <p class="truncate text-sm text-text-secondary">{{ row.setName }}</p>
+        <p class="truncate leading-snug font-medium">{{ formatStatName(artifact.mainStatKey) }}</p>
+        <p class="flex items-center gap-2">
           <RarityStars :rarity="artifact.rarity" />
-          <span class="tabular font-mono text-sm">+{{ artifact.level }}</span>
+          <span class="tabular font-mono text-sm text-text-secondary">+{{ artifact.level }}</span>
         </p>
       </div>
-      <span class="flex shrink-0 items-center gap-1.5 text-text-muted" aria-hidden="true">
-        <FlaskConical v-if="artifact.elixerCrafted" class="size-4" />
-        <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-rarity-5" />
-        <Lock v-if="artifact.lock" class="size-4" />
-      </span>
+      <div class="tabular shrink-0 text-right font-mono leading-tight">
+        <p class="text-lg font-semibold" :class="cvClass(row.cv)">{{ formatCv(row.cv) }}</p>
+        <p class="text-xs text-text-muted">CV</p>
+        <p class="mt-0.5 text-sm text-text-secondary">{{ row.rv }}%</p>
+      </div>
     </div>
 
     <ul class="flex flex-1 flex-col gap-1 px-3 pb-3 text-sm" aria-hidden="true">
@@ -92,20 +94,19 @@ const label = computed(() => {
     </ul>
 
     <div
-      class="flex min-h-13 items-center gap-3 border-t border-border-subtle px-3 py-2 text-sm"
+      class="flex min-h-11 items-center gap-2 border-t border-border-subtle px-3 py-1.5 text-sm"
       aria-hidden="true"
     >
-      <span class="tabular font-mono">
-        <span class="text-text-muted">CV</span> {{ formatCv(row.cv) }}
+      <template v-if="owner">
+        <GameIcon :src="characterIcon(artifact.location)" :name="owner" size="xs" />
+        <span class="min-w-0 truncate text-text-secondary">{{ owner }}</span>
+      </template>
+      <span v-else class="text-text-muted">—</span>
+      <span class="ml-auto flex shrink-0 items-center gap-1.5 text-text-muted">
+        <FlaskConical v-if="artifact.elixerCrafted" class="size-4" />
+        <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-rarity-5" />
+        <Lock v-if="artifact.lock" class="size-4" />
       </span>
-      <span class="tabular font-mono"> <span class="text-text-muted">RV</span> {{ row.rv }}% </span>
-      <GameIcon
-        v-if="owner"
-        :src="characterIcon(artifact.location)"
-        :name="owner"
-        size="sm"
-        class="ml-auto"
-      />
     </div>
 
     <button

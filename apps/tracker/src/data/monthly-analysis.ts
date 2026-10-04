@@ -182,3 +182,26 @@ export function monthlyAnalysis(
 
   return { month, year, rows }
 }
+
+/** A local calendar month; `month` is 1–12 like monthlyAnalysis takes it. */
+export interface CalendarMonth {
+  year: number
+  month: number
+}
+
+/**
+ * The local calendar months that have at least one capture (a snapshot taken
+ * or seen again), oldest first: exactly the months whose table has rows.
+ */
+export function capturedMonths(snapshots: readonly SnapshotResponse[]): CalendarMonth[] {
+  const seen = new Set<number>()
+  const months: CalendarMonth[] = []
+  for (const capture of buildHistory(snapshots).captures) {
+    const d = new Date(capture.at)
+    const key = d.getFullYear() * 12 + d.getMonth()
+    if (seen.has(key)) continue
+    seen.add(key)
+    months.push({ year: d.getFullYear(), month: d.getMonth() + 1 })
+  }
+  return months
+}
