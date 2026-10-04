@@ -1,6 +1,6 @@
 # Achievements tracker, planner, and our own game data
 
-Status: planned 2026-10-04 · Owner: the user (tawan475) · Built by Claude Code agents in phases.
+Status: phases 1–4 shipped 2026-10-04 (live); phase 5 open · Owner: the user (tawan475) · Built by Claude Code agents in phases.
 
 The user tracks achievements on stardb.gg and plans characters on seelie.me and wants both in the
 tracker, with game data a maintainer can refresh each patch, and our own item images because
@@ -104,11 +104,15 @@ Game data compiled from the dump, committed, refreshed by one command per patch.
 - Per-account Traveler gender setting (the user's Seelie says female → Lumine) for portraits.
 
 ## Phases
-1. `@gdt/game-data` + icons pipeline + app wiring of self-hosted icons. (agent)
-2. D1 tables, routes, shared types and tests for marks and targets. (lead, in parallel with 1)
-3. Achievements page + imports. (agent, after 1–2)
-4. Planner math (pure, tested) + page + Seelie goal import. (agent, after 1–2, parallel with 3)
-5. Drop-rate estimates, polish, docs (README maintainer section, CLAUDE.md).
+1. ✅ `@gdt/game-data` + icons pipeline + app wiring of self-hosted icons. (agent)
+2. ✅ D1 tables, routes, shared types and tests for marks and targets (migration 0005). (lead)
+3. ✅ Achievements page + imports. (agent)
+4. ✅ Planner math (pure, tested) + page + Seelie goal import. (agent) Plus `data/avatars.json`
+   (portraits for characters/weapons newer than GO's asset table) and the per-account
+   Traveler twin setting. (lead)
+5. Open: drop rates in `overrides/drops.json` (runs/resin/days stay hidden until then),
+   levels 95/100 (not in the dump), Dream Solvent swaps, paimon.moe import, keeping
+   Achievements filters across reloads.
 
 ## Credits / licensing
 Text and images © HoYoverse; non-commercial, credited. Dimbreath (dump) asks for credit; stardb
