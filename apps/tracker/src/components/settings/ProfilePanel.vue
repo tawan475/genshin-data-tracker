@@ -11,26 +11,21 @@ import { ApiRequestError } from '@/api'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
-/**
- * Who you are: user id, username, email. Username and email are both login
- * names, so changing either asks for the current password.
- */
+/** Who you are: user id, username, email; the last two edit in place. */
 const session = useSession()
 const feedback = useFeedback()
 
 const editing = ref(false)
 const username = ref('')
 const email = ref('')
-const password = ref('')
 const touched = ref(false)
 const busy = ref(false)
-const serverErrors = ref<{ username?: string; email?: string; password?: string }>({})
+const serverErrors = ref<{ username?: string; email?: string }>({})
 const form = ref<HTMLFormElement>()
 
 function startEdit() {
   username.value = session.me?.username ?? ''
   email.value = session.me?.email ?? ''
-  password.value = ''
   touched.value = false
   serverErrors.value = {}
   editing.value = true
@@ -49,7 +44,6 @@ const errors = computed(() => ({
   email:
     serverErrors.value.email ??
     (!email.value.trim() || emailSchema.safeParse(email.value).success ? '' : 'Invalid email'),
-  password: serverErrors.value.password ?? (password.value ? '' : 'Required'),
 }))
 const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
 const valid = computed(() => Object.values(errors.value).every((e) => !e))
@@ -61,7 +55,6 @@ async function save() {
   busy.value = true
   try {
     await session.updateProfile({
-      currentPassword: password.value,
       ...(usernameChanged.value ? { username: username.value.trim() } : {}),
       ...(emailChanged.value ? { email: email.value.trim() || null } : {}),
     })
@@ -71,14 +64,13 @@ async function save() {
     const code = cause instanceof ApiRequestError ? cause.code : ''
     if (code === 'username_taken') serverErrors.value = { username: 'Taken' }
     else if (code === 'email_taken') serverErrors.value = { email: 'Taken' }
-    else if (code === 'invalid_credentials') serverErrors.value = { password: 'Wrong password' }
     else feedback.error('Profile not saved', cause)
   } finally {
     busy.value = false
   }
 }
 
-const fields = { username, email, password }
+const fields = { username, email }
 
 /** Typing in a field clears the server's complaint about it. */
 function edit(field: keyof typeof fields, value: string) {
@@ -147,18 +139,6 @@ function edit(field: keyof typeof fields, value: string) {
           :disabled="busy"
           autocomplete="email"
           @update:model-value="edit('email', $event)"
-        />
-      </UiField>
-      <UiField v-slot="{ id, describedBy }" label="Current password" :error="show('password')">
-        <UiInput
-          :id="id"
-          :model-value="password"
-          type="password"
-          :aria-describedby="describedBy"
-          :invalid="!!show('password')"
-          :disabled="busy"
-          autocomplete="current-password"
-          @update:model-value="edit('password', $event)"
         />
       </UiField>
       <div class="flex flex-wrap items-center gap-3">

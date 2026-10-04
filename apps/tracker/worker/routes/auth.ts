@@ -125,16 +125,14 @@ export const auth = new Hono<AppEnv>()
     return c.json(toMe(user))
   })
 
-  /** Changes the username and/or email; both are login names, so the password is required. */
+  /** Changes the username and/or email (the user chose not to ask for the password here). */
   .patch('/profile', requireUser, async (c) => {
     const userId = c.get('userId')
     await rateLimit(c.env.AUTH_LIMITER, `profile:${userId}`)
     const body = await parseJson(c, updateProfileRequest)
     const db = getDb(c.env.DB)
     const [user] = await db.select().from(users).where(eq(users.id, userId))
-    if (!user || !verifyPassword(body.currentPassword, user.passwordHash, pepper(c)).ok) {
-      throw invalidCredentials()
-    }
+    if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
     const changes: Partial<typeof users.$inferInsert> = {}
     if (body.username !== undefined && body.username !== user.username) {
       changes.username = body.username
