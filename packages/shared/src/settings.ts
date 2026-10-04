@@ -17,7 +17,8 @@ export interface AccountSettings {
 }
 
 export interface UserSettings {
-  theme: 'light' | 'dark'
+  /** `system` follows the OS (the default). */
+  theme: 'system' | 'light' | 'dark'
   use24Hour: boolean
 }
 
@@ -28,7 +29,7 @@ export interface AccountSettingsPatch {
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
-  theme: 'light',
+  theme: 'system',
   use24Hour: false,
 }
 

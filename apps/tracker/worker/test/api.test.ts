@@ -60,7 +60,7 @@ describe('auth', () => {
   it('registers, reads /me, and refuses a duplicate name', async () => {
     const { client, username, me } = await signUp()
     expect(me.username).toBe(username)
-    expect(me.settings).toEqual({ theme: 'light', use24Hour: false })
+    expect(me.settings).toEqual({ theme: 'system', use24Hour: false })
     expect((await client.json<{ id: number }>('/api/auth/me')).id).toBe(me.id)
 
     const again = await new Client().fetch('/api/auth/register', {

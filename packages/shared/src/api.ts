@@ -62,7 +62,7 @@ export const snapshotIdsRequest = z.object({
 })
 
 export const userSettingsPatch = z
-  .object({ theme: z.enum(['light', 'dark']), use24Hour: z.boolean() })
+  .object({ theme: z.enum(['system', 'light', 'dark']), use24Hour: z.boolean() })
   .partial()
   .strict()
 

@@ -45,7 +45,13 @@ const router = createRouter({
           path: '',
           name: 'home',
           component: () => import('@/views/app/HomeView.vue'),
-          meta: { auth: true, title: 'Accounts' },
+          meta: { auth: true, title: 'Overview' },
+        },
+        {
+          path: 'accounts',
+          name: 'accounts',
+          component: () => import('@/views/app/AccountsView.vue'),
+          meta: { auth: true, title: 'Accounts & Keys' },
         },
         {
           path: 'accounts/new',
@@ -67,8 +73,14 @@ const router = createRouter({
             account(
               '',
               'account-overview',
-              'Overview',
+              'Account Overview',
               () => import('@/views/account/OverviewView.vue'),
+            ),
+            account(
+              'progression',
+              'account-progression',
+              'Detailed Progression',
+              () => import('@/views/account/ProgressionView.vue'),
             ),
             account(
               'characters',
@@ -99,6 +111,12 @@ const router = createRouter({
               'account-snapshots',
               'Snapshots',
               () => import('@/views/account/SnapshotsView.vue'),
+            ),
+            account(
+              'export',
+              'account-export',
+              'Export',
+              () => import('@/views/account/ExportView.vue'),
             ),
             account(
               'import',
