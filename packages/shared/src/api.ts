@@ -89,6 +89,7 @@ export const accountSettingsPatch = z
       })
       .partial()
       .strict(),
+    traveler: z.enum(['F', 'M']),
   })
   .partial()
   .strict()

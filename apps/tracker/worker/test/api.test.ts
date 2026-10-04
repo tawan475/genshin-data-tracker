@@ -482,6 +482,22 @@ describe('accounts and imports', () => {
       limit: 365,
     })
   })
+
+  it("stores the Traveler's twin, Lumine by default", async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const path = `/api/accounts/${account.id}/settings`
+    const before = await client.json<{ settings: { traveler: string } }>(path)
+    expect(before.settings.traveler).toBe('F')
+    const after = await client.json<{ settings: { traveler: string; materialsGraph: unknown } }>(
+      path,
+      { method: 'PATCH', json: { traveler: 'M' } },
+    )
+    expect(after.settings.traveler).toBe('M')
+    expect(after.settings.materialsGraph).toBeTruthy()
+    const bad = await client.fetch(path, { method: 'PATCH', json: { traveler: 'X' } })
+    expect(bad.status).toBe(400)
+  })
 })
 
 describe('D1 cost', () => {

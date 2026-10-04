@@ -12,16 +12,17 @@ never talks to the dump.
 
 ## What is in it
 
-| File                                  | What                                                                                                          | Size (min / gzip)    |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `data/meta.json`                      | Game version, dump repo, commit sha and title, when it was built                                              | tiny                 |
-| `data/achievements.json`              | Every achievement: id, category, order, hidden, previous tier, primogems, progress target, version, disused   | 64 KB / 13 KB        |
-| `data/achievement-goals.json`         | Achievement categories: id, order, icon                                                                       | 3 KB                 |
-| `data/text/en.json`                   | Achievement titles and descriptions, category names                                                           | 190 KB / 58 KB       |
-| `data/planner.json`                   | Characters, weapons, ascension and talent tables, EXP curves, EXP items, planner materials, material families | 226 KB / 40 KB       |
-| `data/materials.json`                 | Every GOOD material key the tracker can show -> item id and icon                                              | 235 KB / 78 KB       |
-| `data/icons.json`                     | Which icons are self-hosted (by source) and which no source has                                               | 57 KB / 8 KB         |
-| `../../apps/tracker/public/gi/*.webp` | The icons, 128 px WebP                                                                                        | ~2,600 files, ~12 MB |
+| File                                  | What                                                                                                                                                                                             | Size (min / gzip)    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| `data/meta.json`                      | Game version, dump repo, commit sha and title, when it was built                                                                                                                                 | tiny                 |
+| `data/achievements.json`              | Every achievement: id, category, order, hidden, previous tier, primogems, progress target, version, disused                                                                                      | 64 KB / 13 KB        |
+| `data/achievement-goals.json`         | Achievement categories: id, order, icon                                                                                                                                                          | 3 KB                 |
+| `data/text/en.json`                   | Achievement titles and descriptions, category names                                                                                                                                              | 190 KB / 58 KB       |
+| `data/planner.json`                   | Characters, weapons, ascension and talent tables, EXP curves, EXP items, planner materials, material families                                                                                    | 226 KB / 40 KB       |
+| `data/materials.json`                 | Every GOOD material key the tracker can show -> item id and icon                                                                                                                                 | 235 KB / 78 KB       |
+| `data/icons.json`                     | Which icons are self-hosted (by source) and which no source has                                                                                                                                  | 57 KB / 8 KB         |
+| `data/avatars.json`                   | Portrait / side-icon names per character, icon / ascended-icon names per weapon, the Traveler's by twin (Enka hosts these; the app uses them where Genshin Optimizer's asset table has no entry) | 32 KB / 5 KB         |
+| `../../apps/tracker/public/gi/*.webp` | The icons, 128 px WebP                                                                                                                                                                           | ~2,600 files, ~12 MB |
 
 Rows are tuples; each file names its columns. `src/format.ts` documents every
 shape. The app uses the typed loaders in `src/index.ts`, which dynamic-import

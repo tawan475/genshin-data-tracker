@@ -26,6 +26,7 @@ import type {
 } from '../src/format.ts'
 import { checkAppendOnly, describeChanges, type DataSet } from './lib/changes.ts'
 import { ACHIEVEMENT_FILES, compileAchievements } from './compile/achievements.ts'
+import { compileAvatarIcons } from './compile/avatars.ts'
 import { compileMaterialIndex } from './compile/materials.ts'
 import { compilePlanner, PLANNER_FILES, type PlannerInputs } from './compile/planner.ts'
 import {
@@ -57,6 +58,7 @@ const OUTPUT = {
   text: ['text/en.json', 2],
   planner: ['planner.json', 2],
   materials: ['materials.json', 2],
+  avatars: ['avatars.json', 2],
 } as const
 
 const { values: args } = parseArgs({
@@ -191,6 +193,8 @@ async function main(): Promise<number> {
     problems,
   })
 
+  const avatars = compileAvatarIcons(plannerInputs, planner.planner, problems)
+
   for (const [name, [ours, theirs]] of keyMismatches) {
     problems.warn(`"${name}": toGoodKey gives ${ours}, irminsul would export ${theirs}`)
   }
@@ -210,6 +214,7 @@ async function main(): Promise<number> {
     text: achievements.text,
     planner: planner.planner,
     materials,
+    avatars,
   }
   checkAppendOnly(previous, next, overrides.keys.removed, problems)
 
@@ -227,7 +232,14 @@ async function main(): Promise<number> {
   }
 
   const written: string[] = []
-  for (const name of ['achievements', 'goals', 'text', 'planner', 'materials'] as const) {
+  for (const name of [
+    'achievements',
+    'goals',
+    'text',
+    'planner',
+    'materials',
+    'avatars',
+  ] as const) {
     const [file, expand] = OUTPUT[name]
     if (writeIfChanged(join(DATA_DIR, file), formatJson(next[name], expand))) written.push(file)
   }

@@ -6,6 +6,7 @@
 
 import type {
   AchievementsFile,
+  AvatarsFile,
   GoalsFile,
   MaterialIndexFile,
   MetaFile,
@@ -22,6 +23,7 @@ export interface DataSet {
   text?: TextFile
   planner?: PlannerFile
   materials?: MaterialIndexFile
+  avatars?: AvatarsFile
 }
 
 const missingFrom = <T>(before: Iterable<T>, after: Set<T>) =>

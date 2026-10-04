@@ -10,6 +10,7 @@ import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { ApiRequestError } from '@/api'
 import { discardImportQueue } from '@/data/import-queue'
 import {
@@ -18,6 +19,8 @@ import {
   type AccountFormErrors,
   type AccountFormValues,
 } from '@/data/import-setup'
+import { saveTraveler, travelerGender } from '@/data/traveler'
+import { characterIcon } from '@/lib/assets'
 import { formatBytes, formatNumber } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -26,6 +29,19 @@ import { useAccount } from './context'
 const account = useAccount()
 const accounts = useAccounts()
 const feedback = useFeedback()
+
+const TRAVELER_OPTIONS = [
+  { value: 'F' as const, label: 'Lumine' },
+  { value: 'M' as const, label: 'Aether' },
+]
+
+async function setTraveler(gender: 'F' | 'M') {
+  try {
+    await saveTraveler(account.value.id, gender)
+  } catch (error) {
+    feedback.error('Not saved', error)
+  }
+}
 const router = useRouter()
 
 const name = computed(() => accounts.displayName(account.value))
@@ -133,6 +149,22 @@ async function confirmDelete() {
           </UiButton>
         </div>
       </form>
+    </UiPanel>
+
+    <UiPanel title="Traveler">
+      <div class="flex items-center gap-4">
+        <img
+          :src="characterIcon('Traveler')"
+          alt=""
+          class="size-12 rounded-lg bg-surface-overlay object-cover"
+        />
+        <UiSegmented
+          :model-value="travelerGender"
+          :options="TRAVELER_OPTIONS"
+          label="Traveler"
+          @update:model-value="setTraveler"
+        />
+      </div>
     </UiPanel>
 
     <ImportKeyPanel :account="account" />

@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 import { SearchX } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
+import { loadTraveler } from '@/data/traveler'
 import { rememberLast, useAccounts } from '@/stores/accounts'
 import { provideAccount } from './context'
 
@@ -20,7 +21,9 @@ provideAccount(computed(() => account.value as AccountResponse))
 watch(
   account,
   (value) => {
-    if (value) rememberLast(value.id)
+    if (!value) return
+    rememberLast(value.id)
+    void loadTraveler(value.id)
   },
   { immediate: true },
 )
