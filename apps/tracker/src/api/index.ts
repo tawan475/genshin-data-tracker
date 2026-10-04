@@ -43,7 +43,7 @@ export const api = {
     }),
   register: (body: {
     username: string
-    email: string
+    email: string | null
     salt: string
     iterations: number
     key: string

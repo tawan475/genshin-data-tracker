@@ -40,8 +40,11 @@ export const users = sqliteTable('users', {
   username: text('username').notNull(),
   /** Lowercased `username`; what uniqueness and login lookups use. */
   usernameKey: text('username_key').notNull().unique(),
-  /** Lowercased. Unverified until an email flow exists: never link accounts by it. */
-  email: text('email').notNull().unique(),
+  /**
+   * Optional, lowercased; unique when set (SQLite allows many NULLs).
+   * Unverified until an email flow exists: never link accounts by it.
+   */
+  email: text('email').unique(),
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
   // The browser derives a key from the password (PBKDF2 with this salt and
   // iteration count); the server stores only HMAC(pepper, key). See auth.

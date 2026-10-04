@@ -21,7 +21,7 @@ const busy = ref(false)
 // The same schemas the server validates with.
 const errors = computed(() => ({
   username: usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _',
-  email: emailSchema.safeParse(email.value).success ? '' : 'Invalid email',
+  email: !email.value.trim() || emailSchema.safeParse(email.value).success ? '' : 'Invalid email',
   password:
     password.value.length < MIN_PASSWORD_LENGTH
       ? `Min ${MIN_PASSWORD_LENGTH} characters`
@@ -39,7 +39,7 @@ async function submit() {
   if (!valid.value) return
   busy.value = true
   try {
-    await session.register(username.value.trim(), email.value.trim(), password.value)
+    await session.register(username.value.trim(), email.value.trim() || null, password.value)
     await router.replace({ name: 'account-new' })
   } catch (cause) {
     serverError.value =
@@ -77,7 +77,9 @@ async function submit() {
         <span v-if="show('username')" class="text-sm text-red-300">{{ show('username') }}</span>
       </label>
       <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-gray-400">Email</span>
+        <span class="text-sm font-medium text-gray-400"
+          >Email <span class="text-gray-500">(optional)</span></span
+        >
         <input
           v-model="email"
           class="glass-input"

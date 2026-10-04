@@ -75,6 +75,55 @@ describe('auth', () => {
     expect(again.status).toBe(409)
   })
 
+  it('registers without an email, keeps email unique when given, and logs in by email', async () => {
+    // Its own client IP, so these sign-ups do not spend the other tests' rate limit.
+    const headers = { 'cf-connecting-ip': '192.0.2.1' }
+    const register = (username: string, email?: string | null) =>
+      new Client().fetch('/api/auth/register', {
+        method: 'POST',
+        headers,
+        json: {
+          username,
+          ...(email === undefined ? {} : { email }),
+          salt: btoa('0123456789abcdef'),
+          iterations: MIN_PASSWORD_ITERATIONS,
+          key: btoa('0123456789abcdef0123456789abcdef'),
+        },
+      })
+    const tag = crypto.randomUUID().slice(0, 8)
+
+    // Several users may have no email: NULLs do not collide in the unique index.
+    for (const [name, email] of [
+      [`noemail-a${tag}`],
+      [`noemail-b${tag}`, null],
+      [`noemail-c${tag}`, ''],
+    ] as const) {
+      const response = await register(name, email)
+      expect(response.status).toBe(201)
+      expect(((await response.json()) as { email: string | null }).email).toBeNull()
+    }
+
+    const email = `Shared${tag}@Example.com`
+    expect((await register(`mail-a${tag}`, email)).status).toBe(201)
+    expect((await register(`mail-b${tag}`, email.toLowerCase())).status).toBe(409)
+    expect((await register(`mail-c${tag}`, 'not-an-email')).status).toBe(400)
+
+    const client = new Client()
+    const { salt } = await client.json<PreloginResponse>('/api/auth/prelogin', {
+      method: 'POST',
+      headers,
+      json: { login: email },
+    })
+    expect(salt).toBe(btoa('0123456789abcdef'))
+    const login = await client.fetch('/api/auth/login', {
+      method: 'POST',
+      headers,
+      json: { login: email, key: btoa('0123456789abcdef0123456789abcdef') },
+    })
+    expect(login.status).toBe(200)
+    expect(((await login.json()) as { username: string }).username).toBe(`mail-a${tag}`)
+  })
+
   it('logs in with the browser-derived key and rejects a wrong password', async () => {
     const { username, password } = await signUp()
     const client = new Client()
