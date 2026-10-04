@@ -3,6 +3,7 @@ import {
   decodeSnapshot,
   inflateBundle,
   readBundle,
+  storedSnapshotOf,
   type AccountCreatedResponse,
   type AccountResponse,
   type CatalogRow,
@@ -18,7 +19,7 @@ import { describe, expect, it } from 'vitest'
 import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import { hashPassword } from '../lib/password'
-import { Client, ORIGIN, irminsulForm, sampleGood, signUp } from './client'
+import { Client, ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 async function createAccount(client: Client) {
   return client.json<AccountCreatedResponse>('/api/accounts', {
@@ -350,16 +351,7 @@ describe('accounts and imports', () => {
     )
     const decoded = manifest.snapshots.map((s) =>
       decodeSnapshot(
-        {
-          ...s,
-          characters: texts.get(s.characters)!,
-          weapons: texts.get(s.weapons)!,
-          artifacts: texts.get(s.artifacts)!,
-          materials: texts.get(s.materials)!,
-          materialsKeyframe:
-            s.materialsKeyframe === s.materials ? null : texts.get(s.materialsKeyframe)!,
-          achievements: s.achievements ? texts.get(s.achievements)! : null,
-        },
+        storedSnapshotOf(s, (hash) => texts.get(hash)!),
         catalog,
         MATERIALS,
       ),
@@ -371,6 +363,106 @@ describe('accounts and imports', () => {
     // The second snapshot shares every section but materials, which is a delta.
     expect(manifest.snapshots[1]!.materials).not.toBe(manifest.snapshots[1]!.materialsKeyframe)
     expect(manifest.snapshots[1]!.characters).toBe(manifest.snapshots[0]!.characters)
+  })
+
+  it("stores irminsul's extra keys, each section shared on its own, and exports them", async () => {
+    const { client } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    const good = sampleGood(sampleExtras())
+    const first = (await (await importByKey(importKey, good, 1_000)).json()) as ImportResponse
+    expect(first.status).toBe('created')
+    expect(first).not.toHaveProperty('warnings')
+
+    // Same inventory at a later login: only gi_player moved, which is a new
+    // snapshot sharing every other section.
+    const extras = sampleExtras()
+    const relogin = sampleGood({ ...extras, gi_player: { ...extras.gi_player, resin: 160 } })
+    const second = (await (await importByKey(importKey, relogin, 2_000)).json()) as ImportResponse
+    expect(second.status).toBe('created')
+
+    const exported = await client.json<Good>(
+      `/api/accounts/${account.id}/snapshots/${first.snapshotId}/good`,
+    )
+    expect(canonical(exported)).toEqual(canonical({ ...good, timestamp: 1_000 }))
+    const latest = await client.json<Good>(`/api/accounts/${account.id}/latest/good`)
+    expect(latest.gi_player?.resin).toBe(160)
+
+    const { manifest, blobs } = readBundle(
+      await (await client.fetch(`/api/accounts/${account.id}/bundle`)).arrayBuffer(),
+    )
+    const [a, b] = manifest.snapshots
+    expect(b!.player).not.toBe(a!.player)
+    expect(b!.achievementTimes).toBe(a!.achievementTimes)
+    expect(b!.characterExtras).toBe(a!.characterExtras)
+    expect(b!.characters).toBe(a!.characters)
+    const texts = await inflateBundle(blobs)
+    const catalog = catalogFromRows(
+      await client.json<CatalogRow[]>(`/api/accounts/${account.id}/catalog`),
+    )
+    expect(
+      canonical(
+        decodeSnapshot(
+          storedSnapshotOf(b!, (h) => texts.get(h)!),
+          catalog,
+          MATERIALS,
+        ),
+      ),
+    ).toEqual(canonical({ ...relogin, timestamp: 2_000 }))
+
+    // A bundle of just the player sections.
+    const players = readBundle(
+      await (
+        await client.fetch(`/api/accounts/${account.id}/bundle?sections=player`)
+      ).arrayBuffer(),
+    )
+    expect(players.manifest.blobs.sort()).toEqual([a!.player, b!.player].sort())
+  })
+
+  it('keeps re-uploading a capture a no-op when it was first stored without the extras', async () => {
+    const { client } = await signUp()
+    const { importKey } = await createAccount(client)
+    // As the tracker stored irminsul's files before it kept the extra keys.
+    const created = (await (
+      await importByKey(importKey, sampleGood(), 1_000)
+    ).json()) as ImportResponse
+    const again = await importByKey(importKey, sampleGood(sampleExtras()), 1_000)
+    expect(again.status).toBe(200)
+    expect(await again.json()).toMatchObject({
+      status: 'unchanged',
+      snapshotId: created.snapshotId,
+    })
+  })
+
+  it("warns, and still stores the file, when its UID is not the account's", async () => {
+    const { client } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    const other = await importByKey(importKey, sampleGood(sampleExtras(813152114)), 1_000)
+    expect(other.status).toBe(201)
+    const body = (await other.json()) as ImportResponse
+    expect(body.warnings).toEqual([
+      { code: 'uid_mismatch', message: expect.stringContaining('UID 813152114') },
+    ])
+
+    const own = (await (
+      await importByKey(importKey, sampleGood(sampleExtras(812345678)), 2_000)
+    ).json()) as ImportResponse
+    expect(own.status).toBe('created')
+    expect(own).not.toHaveProperty('warnings')
+    // The account's UID is never changed by an upload.
+    expect((await client.json<AccountResponse>(`/api/accounts/${account.id}`)).uid).toBe(
+      '812345678',
+    )
+
+    // An account without a UID has nothing to compare.
+    const alt = await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: { name: 'Alt' },
+    })
+    const unset = (await (
+      await importByKey(alt.importKey, sampleGood(sampleExtras(813152114)), 1_000)
+    ).json()) as ImportResponse
+    expect(unset.status).toBe('created')
+    expect(unset).not.toHaveProperty('warnings')
   })
 
   it('revalidates derived views with ETags until the data changes', async () => {

@@ -744,10 +744,14 @@ export const RESIN_MAX = 200
 export const RESIN_MINUTES = 8
 
 export interface ResinNow {
-  /** The snapshot had an `OriginalResin` count. */
+  /** The count is known: irminsul's `gi_player.resin`, or an `OriginalResin` material count. */
   known: boolean
-  /** At the snapshot. */
+  /** Where the count came from. */
+  source: 'player' | 'inventory'
+  /** The count, as of `at`. */
   atSnapshot: number
+  /** When the count was read (ms since epoch): the login for irminsul's, else the snapshot. */
+  at: number
   /** Estimated now: regenerated one per 8 minutes up to 200 (more only from refills). */
   original: number
   /** When it reaches 200 (ms since epoch); null when it already has. */
@@ -759,29 +763,43 @@ export interface ResinNow {
   total: number
 }
 
-/** The resin an account has now, from its newest snapshot taken at `takenAt` (ms). */
+/** irminsul's Original Resin and when the game sent it (see `accountPlayer`). */
+export interface LoginResin {
+  value: number
+  at: number
+}
+
+/**
+ * The resin an account has now, from its newest snapshot taken at `takenAt`
+ * (ms). irminsul's `gi_player.resin`, when given, is preferred over the
+ * material count, and regenerates from the time it was read.
+ */
 export function resinNow(
   planner: PlannerData,
   inventory: Readonly<Record<string, number>>,
   takenAt: number,
   now: number,
+  login: LoginResin | null = null,
 ): ResinNow {
   const count = (key: string) => Math.max(0, Math.trunc(inventory[key] ?? 0))
-  const known = planner.resin.original !== '' && planner.resin.original in inventory
-  const atSnapshot = count(planner.resin.original)
+  const known =
+    login !== null || (planner.resin.original !== '' && planner.resin.original in inventory)
+  const atSnapshot = login ? Math.max(0, Math.trunc(login.value)) : count(planner.resin.original)
+  const at = login ? login.at : takenAt
   const step = RESIN_MINUTES * 60_000
-  const regenerated = Math.max(0, Math.floor((now - takenAt) / step))
+  const regenerated = Math.max(0, Math.floor((now - at) / step))
   const original =
     atSnapshot >= RESIN_MAX ? atSnapshot : Math.min(RESIN_MAX, atSnapshot + regenerated)
-  const fullAt =
-    atSnapshot >= RESIN_MAX || !known ? null : takenAt + (RESIN_MAX - atSnapshot) * step
+  const fullAt = atSnapshot >= RESIN_MAX || !known ? null : at + (RESIN_MAX - atSnapshot) * step
   const items = planner.resin.items
     .map((i) => ({ key: i.key, count: count(i.key), resin: i.resin }))
     .filter((i) => i.count > 0)
   const bag = items.reduce((sum, i) => sum + i.count * i.resin, 0)
   return {
     known,
+    source: login ? 'player' : 'inventory',
     atSnapshot,
+    at,
     original,
     fullAt: fullAt !== null && fullAt <= now ? null : fullAt,
     bag,

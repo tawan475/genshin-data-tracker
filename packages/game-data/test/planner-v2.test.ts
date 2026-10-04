@@ -479,6 +479,33 @@ describe('resin', () => {
     expect(resinNow(planner, {}, at, at).known).toBe(false)
     expect(daysFor(820, 290)).toBe(3)
   })
+
+  it("prefers irminsul's login resin and counts from the login", () => {
+    const login = at - 40 * 60_000
+    const now = resinNow(planner, { OriginalResin: 10, FragileResin: 1 }, at, at, {
+      value: 100,
+      at: login,
+    })
+    expect(now).toMatchObject({
+      known: true,
+      source: 'player',
+      atSnapshot: 100,
+      at: login,
+      original: 105,
+      fullAt: login + 100 * 8 * 60_000,
+      bag: 60,
+      total: 165,
+    })
+    // Known even when the inventory has no OriginalResin entry.
+    expect(resinNow(planner, {}, at, at, { value: 0, at })).toMatchObject({
+      known: true,
+      original: 0,
+    })
+    expect(resinNow(planner, { OriginalResin: 3 }, at, at)).toMatchObject({
+      source: 'inventory',
+      at,
+    })
+  })
 })
 
 describe('goal status and next step', () => {

@@ -40,6 +40,18 @@ location/lock state at the time. Materials are stored as a delta against a
 keyframe. The format is defined in `packages/shared/src/codec` and must stay
 decodable forever: only append.
 
+irminsul's own top-level keys are sections of their own, each optional and
+range-checked again on import: `gi_player` (AR, World Level, resin, UID… as
+read at login) as `player`, `gi_achievement_times` (finish times, unix
+seconds) as `achievementTimes`, `gi_characters` (friendship, obtained date)
+as `characterExtras` (migration 0006 added their hash columns). Each dedupes
+on its own: the player section changes per login, the other two rarely. A
+file without them stores and hashes exactly as before they existed, and
+exports (GOOD rebuild, zip) write them back after `timestamp`. The app uses
+them for the achievements' real completion times, friendship and obtained
+dates on Characters, and the planner's AR/WL (when the settings are empty)
+and resin.
+
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`. Add new keys with
 `pnpm --filter @gdt/shared dictionary --material new-keys.json` (never edit the
@@ -70,8 +82,12 @@ zips are built in the browser; the server only rebuilds single GOOD files.
 - **Irminsul contract** (`irminsul/src/monitor.rs`): `POST
   /api/genshin-accounts-public/import-by-key` (multipart `file` + optional
   `timestamp`, header `x-import-key`) and `GET .../verify-key`. Any 2xx is
-  success; 401/403 makes irminsul re-verify. Re-uploading a capture is a no-op.
-  Import keys are stored as SHA-256 and shown once.
+  success; 401/403 makes irminsul re-verify. Re-uploading a capture is a no-op
+  (also when it was first stored before the extra keys were kept). Responses
+  only gain fields: an import whose `gi_player.uid` is not the account's UID is
+  stored anyway and answers with `warnings: [{code: "uid_mismatch", …}]` (also
+  logged); an account's UID is never set from a file. Import keys are stored as
+  SHA-256 and shown once.
 - **Imports** take two D1 round trips in the usual case; an identical later
   capture only moves `last_seen_at`. Uploads may be gzipped.
 - **Diagnostics.** `GET /api/health` is public (status, build, D1, migrations).

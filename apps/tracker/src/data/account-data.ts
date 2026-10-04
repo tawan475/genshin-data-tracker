@@ -9,11 +9,14 @@
  * version, so a reload revalidates for one round trip and no body.
  */
 
+import { accountPlayer, type AccountPlayer } from '@gdt/game-data/account-player'
 import {
   catalogFromRows,
+  decodePlayer,
   decodeSnapshot,
   inflateBundle,
   readBundle,
+  storedSnapshotOf,
   type BundleSnapshot,
   type CatalogEntry,
   type Good,
@@ -27,7 +30,15 @@ export interface AccountRef {
   dataVersion: number
 }
 
-export type SectionName = 'characters' | 'weapons' | 'artifacts' | 'materials' | 'achievements'
+export type SectionName =
+  | 'characters'
+  | 'weapons'
+  | 'artifacts'
+  | 'materials'
+  | 'achievements'
+  | 'player'
+  | 'achievementTimes'
+  | 'characterExtras'
 
 export interface DecodedBundle {
   snapshots: BundleSnapshot[]
@@ -93,23 +104,7 @@ export function decodeBundleSnapshot(
     if (value === undefined) throw new Error(`Bundle is missing section ${hash}`)
     return value
   }
-  return decodeSnapshot(
-    {
-      format: snapshot.format,
-      version: snapshot.version,
-      source: snapshot.source,
-      takenAt: snapshot.takenAt,
-      characters: text(snapshot.characters),
-      weapons: text(snapshot.weapons),
-      artifacts: text(snapshot.artifacts),
-      materials: text(snapshot.materials),
-      materialsKeyframe:
-        snapshot.materialsKeyframe === snapshot.materials ? null : text(snapshot.materialsKeyframe),
-      achievements: snapshot.achievements ? text(snapshot.achievements) : null,
-    },
-    catalog,
-    materials,
-  )
+  return decodeSnapshot(storedSnapshotOf(snapshot, text), catalog, materials)
 }
 
 export interface Inventory {
@@ -133,5 +128,22 @@ export function loadLatestInventory(
     const snapshot = bundle.snapshots[0]
     if (!snapshot) return null
     return { snapshot, good: decodeBundleSnapshot(snapshot, bundle, catalog, materials), catalog }
+  })
+}
+
+/**
+ * AR, World Level and Original Resin from irminsul's `gi_player` across the
+ * snapshots (see accountPlayer); one small bundle of just those sections.
+ */
+export function loadAccountPlayer(account: AccountRef): Promise<AccountPlayer> {
+  return cached(account, 'player', async () => {
+    const bundle = await loadBundle(account, { sections: ['player'] })
+    return accountPlayer(
+      bundle.snapshots.map((s) => ({ takenAt: s.takenAt, key: s.player })),
+      (key) => {
+        const text = bundle.texts.get(key)
+        return text === undefined ? {} : decodePlayer(JSON.parse(text))
+      },
+    )
   })
 }

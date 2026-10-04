@@ -10,6 +10,7 @@ import {
 } from '@/data/characters'
 import { artifactSetIcon, characterIcon, weaponIcon } from '@/lib/assets'
 import ConstellationPips from './ConstellationPips.vue'
+import FriendshipBadge from './FriendshipBadge.vue'
 import SlotPips from './SlotPips.vue'
 import TalentChips from './TalentChips.vue'
 import { ELEMENT_FILL } from './tokens'
@@ -22,7 +23,8 @@ const c = computed(() => props.character)
 
 const label = computed(
   () =>
-    `${c.value.name}, level ${c.value.level}, C${c.value.constellation}, talents ${c.value.talent.auto} ${c.value.talent.skill} ${c.value.talent.burst}`,
+    `${c.value.name}, level ${c.value.level}, C${c.value.constellation}, talents ${c.value.talent.auto} ${c.value.talent.skill} ${c.value.talent.burst}` +
+    (c.value.friendship !== null ? `, friendship ${c.value.friendship}` : ''),
 )
 const kind = computed(() =>
   [
@@ -77,12 +79,19 @@ const weaponTitle = computed(() => {
           </span>
         </div>
         <div class="flex items-center justify-between gap-2">
-          <span
-            class="tabular font-mono text-sm"
-            :class="c.level < TARGET_LEVEL ? 'text-warning-text' : 'text-text-secondary'"
-            :title="`Level ${c.level} · Ascension ${c.ascension}`"
-            >Lv {{ c.level }}</span
-          >
+          <span class="flex items-center gap-2.5 text-sm">
+            <span
+              class="tabular font-mono"
+              :class="c.level < TARGET_LEVEL ? 'text-warning-text' : 'text-text-secondary'"
+              :title="`Level ${c.level} · Ascension ${c.ascension}`"
+              >Lv {{ c.level }}</span
+            >
+            <FriendshipBadge
+              v-if="c.friendship !== null"
+              :level="c.friendship"
+              class="text-text-secondary"
+            />
+          </span>
           <ConstellationPips :value="c.constellation" :element="c.element" />
         </div>
         <TalentChips :talent="c.talent" />

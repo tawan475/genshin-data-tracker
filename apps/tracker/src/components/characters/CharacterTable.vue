@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Wrench } from 'lucide-vue-next'
+import { Heart, Wrench } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import {
   CHARACTER_SORTS,
@@ -9,6 +9,7 @@ import {
   type SortDirection,
 } from '@/data/characters'
 import { artifactSetIcon, characterIcon, weaponIcon } from '@/lib/assets'
+import FriendshipBadge from './FriendshipBadge.vue'
 import SortHeader from './SortHeader.vue'
 import SlotPips from './SlotPips.vue'
 import TalentChips from './TalentChips.vue'
@@ -18,7 +19,11 @@ import { ELEMENT_FILL } from './tokens'
  * The roster as a dense list: one row per character, sortable headers. Rows
  * open the details like the cards do. Columns drop away on narrow screens.
  */
-defineProps<{ characters: CharacterView[] }>()
+defineProps<{
+  characters: CharacterView[]
+  /** Show the friendship column (the snapshot has irminsul's values). */
+  friendship?: boolean
+}>()
 defineEmits<{ open: [key: string] }>()
 const sort = defineModel<CharacterSort>('sort', { required: true })
 const direction = defineModel<SortDirection>('direction', { required: true })
@@ -74,6 +79,23 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
               :direction="direction"
               @sort="sortBy('constellation')"
             />
+          </th>
+          <th
+            v-if="friendship"
+            scope="col"
+            class="hidden w-14 px-2 py-2 text-right md:table-cell"
+            :aria-sort="ariaSort('friendship')"
+          >
+            <SortHeader
+              label="Friendship"
+              title="Friendship"
+              :active="sort === 'friendship'"
+              :direction="direction"
+              @sort="sortBy('friendship')"
+            >
+              <Heart class="size-4" aria-hidden="true" />
+              <span class="sr-only">Friendship</span>
+            </SortHeader>
           </th>
           <th
             scope="col"
@@ -149,6 +171,10 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
             {{ c.level }}
           </td>
           <td class="tabular px-2 py-1.5 text-right font-mono">{{ c.constellation }}</td>
+          <td v-if="friendship" class="hidden px-2 py-1.5 text-right md:table-cell">
+            <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" />
+            <span v-else class="text-text-muted">—</span>
+          </td>
           <td class="hidden px-2 py-1.5 sm:table-cell">
             <TalentChips :talent="c.talent" />
           </td>

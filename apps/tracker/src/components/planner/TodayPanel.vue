@@ -5,7 +5,7 @@ import { computed } from 'vue'
 import { Clock } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { materialIcon } from '@/lib/assets'
-import { formatNumber, formatTime } from '@/lib/format'
+import { formatDateTime, formatNumber, formatTime } from '@/lib/format'
 import DomainCard from './DomainCard.vue'
 import RunBadge from './RunBadge.vue'
 import { formatCountdown } from './farm-format'
@@ -13,16 +13,19 @@ import { formatCountdown } from './farm-format'
 /**
  * Today on the account's server: the domains open today with what the
  * goals still need (only today's families), their runs, the time to the
- * 04:00 reset and the resin held now (estimated from the newest snapshot).
+ * 04:00 reset and the resin held now (estimated from the newest snapshot:
+ * irminsul's count at login when it has one, else the material count).
  */
 const props = defineProps<{ today: TodayPlan; resin: ResinNow | null }>()
 
 const resinTitle = computed(() => {
   const r = props.resin
   if (!r) return ''
-  const parts = [
-    `Original Resin now ~${formatNumber(r.original)}/200 (${formatNumber(r.atSnapshot)} at the snapshot)`,
-  ]
+  const read =
+    r.source === 'player'
+      ? `${formatNumber(r.atSnapshot)} at login, ${formatDateTime(r.at)}`
+      : `${formatNumber(r.atSnapshot)} at the snapshot`
+  const parts = [`Original Resin now ~${formatNumber(r.original)}/200 (${read})`]
   if (r.fullAt) parts.push(`full at ${formatTime(r.fullAt)}`)
   if (r.bag > 0) {
     const items = r.items.map((i) => `${formatNumber(i.count)} ${i.key.replace(/Resin$/, '')}`)

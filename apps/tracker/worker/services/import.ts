@@ -23,6 +23,7 @@ import {
   decodeMaterials,
   deflateRaw,
   encodeStaticSections,
+  extraSectionsOf,
   inflateRaw,
   prepareSnapshot,
   resolveImportTimestamp,
@@ -30,6 +31,7 @@ import {
   type ArtifactIdentity,
   type EncodedSnapshot,
   type ImportResponse,
+  type ImportWarning,
   type MaterialsKeyframe,
   type MaterialsSection,
   type PreparedSnapshot,
@@ -62,15 +64,23 @@ const LATEST_SQL = `SELECT id, taken_at, content_hash, artifacts_hash, materials
   FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
   ORDER BY taken_at DESC, id DESC LIMIT 1`
 
+/** The account an upload goes to: its id and the UID it was given (if any). */
+export interface ImportTarget {
+  id: number
+  uid: string | null
+}
+
 export async function importSnapshot(
   d1: D1Database,
-  accountId: number,
+  account: ImportTarget,
   upload: Upload,
   meter = new D1Meter(),
 ): Promise<ImportResponse> {
+  const accountId = account.id
   const prepared = await parseUpload(upload.text)
   const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
   const sections = await encodeStaticSections(prepared, MATERIALS)
+  const warnings = uidWarnings(account, prepared)
 
   // Catalog entry for each distinct artifact identity in this upload.
   const identities = new Map<string, ArtifactIdentity>()
@@ -83,6 +93,7 @@ export async function importSnapshot(
     sections.weapons,
     sections.materials,
     sections.achievements,
+    ...extraSectionsOf(sections),
   ]
     .filter((s): s is Section => s !== null)
     .map((s) => s.hash)
@@ -126,17 +137,26 @@ export async function importSnapshot(
   }
 
   let encoded = await completeSnapshot(sections, prepared, artifactIds)
-  const response = (status: ImportResponse['status'], snapshotId: number, storedSize = 0) => ({
+  const response = (
+    status: ImportResponse['status'],
+    snapshotId: number,
+    storedSize = 0,
+  ): ImportResponse => ({
     status,
     snapshotId,
     takenAt,
     rawSize: upload.rawSize,
     storedSize,
+    ...(warnings.length > 0 ? { warnings } : {}),
   })
+  // The same capture, also when it was stored before irminsul's extra keys
+  // were kept (its hash then left them out).
+  const sameCapture = (hash: string) =>
+    hash === encoded.contentHash || hash === encoded.legacyContentHash
 
   if (sameTime) {
     // A re-upload of the same capture is a no-op, so uploaders can retry freely.
-    if (sameTime.content_hash === encoded.contentHash) return response('unchanged', sameTime.id)
+    if (sameCapture(sameTime.content_hash)) return response('unchanged', sameTime.id)
     throw new ApiError(
       409,
       'duplicate_capture',
@@ -186,8 +206,10 @@ export async function importSnapshot(
       .prepare(
         `INSERT INTO snapshots (account_id, taken_at, last_seen_at, created_at, format, version, source,
            raw_size, stored_size, content_hash, characters_hash, weapons_hash, artifacts_hash,
-           materials_hash, materials_keyframe_hash, achievements_hash, summary)
-         VALUES (?1, ?2, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)
+           materials_hash, materials_keyframe_hash, achievements_hash, summary, player_hash,
+           achievement_times_hash, character_extras_hash)
+         VALUES (?1, ?2, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17,
+           ?18, ?19)
          RETURNING id`,
       )
       .bind(
@@ -207,6 +229,9 @@ export async function importSnapshot(
         materialsKeyframeHash,
         encoded.achievements?.hash ?? null,
         JSON.stringify(prepared.summary),
+        encoded.player?.hash ?? null,
+        encoded.achievementTimes?.hash ?? null,
+        encoded.characterExtras?.hash ?? null,
       ),
     recomputeAccount(d1, accountId),
   )
@@ -224,7 +249,7 @@ export async function importSnapshot(
         )
         .bind(accountId, takenAt)
         .first<{ id: number; content_hash: string }>()
-      if (row?.content_hash === encoded.contentHash) return response('unchanged', row.id)
+      if (row && sameCapture(row.content_hash)) return response('unchanged', row.id)
       throw new ApiError(
         409,
         'duplicate_capture',
@@ -255,7 +280,26 @@ async function parseUpload(text: string): Promise<PreparedSnapshot> {
 function sectionsOf(encoded: EncodedSnapshot): Section[] {
   const sections = [encoded.characters, encoded.weapons, encoded.artifacts, encoded.materials]
   if (encoded.achievements) sections.push(encoded.achievements)
-  return sections
+  return [...sections, ...extraSectionsOf(encoded)]
+}
+
+/**
+ * A capture whose `gi_player.uid` is not the account's UID is probably another
+ * account's inventory. It is stored anyway (the key decides where an upload
+ * goes, and irminsul warns its user too); the response and the log say so.
+ * An account without a UID has nothing to compare.
+ */
+function uidWarnings(account: ImportTarget, prepared: PreparedSnapshot): ImportWarning[] {
+  const captured = prepared.good.player?.uid
+  const linked = account.uid?.trim()
+  if (captured === undefined || !linked || linked === String(captured)) return []
+  console.warn('uid_mismatch', JSON.stringify({ accountId: account.id, linked, captured }))
+  return [
+    {
+      code: 'uid_mismatch',
+      message: `This file is UID ${captured}, but the account is UID ${linked}. Stored anyway.`,
+    },
+  ]
 }
 
 function selectArtifactIds(

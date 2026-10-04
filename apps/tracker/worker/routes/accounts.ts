@@ -123,10 +123,10 @@ export const accounts = new Hono<AppEnv>()
   /** Dashboard upload: one GOOD file per request (the browser orchestrates bulk imports). */
   .post('/:id/import', async (c) => {
     const id = idParam(c, 'id')
-    await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
     const meter = new D1Meter()
-    const result = await importSnapshot(c.env.DB, id, await readUpload(c), meter)
+    const result = await importSnapshot(c.env.DB, account, await readUpload(c), meter)
     meter.report(c)
     return c.json(result, result.status === 'created' ? 201 : 200)
   })

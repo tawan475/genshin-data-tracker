@@ -10,7 +10,7 @@ import {
   watch,
 } from 'vue'
 import { Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
-import { decodeAchievements } from '@gdt/shared'
+import { decodeAchievementTimes, decodeAchievements } from '@gdt/shared'
 import { achievementText, loadAchievements } from '@gdt/game-data'
 import {
   NO_ACHIEVEMENT_FILTERS,
@@ -76,16 +76,23 @@ const NONE: CapturedAchievements = {
   takenAt: null,
   firstTakenAt: null,
   firstSeen: new Map(),
+  completedAt: new Map(),
 }
 
 async function loadCaptured(a: AccountRef): Promise<CapturedAchievements> {
-  const bundle = await loadBundle(a, { sections: ['achievements'] })
+  const bundle = await loadBundle(a, { sections: ['achievements', 'achievementTimes'] })
+  const json = (key: string) => {
+    const text = bundle.texts.get(key)
+    return text === undefined ? null : JSON.parse(text)
+  }
   return captureAchievements(
-    bundle.snapshots.map((s) => ({ takenAt: s.takenAt, key: s.achievements })),
-    (key) => {
-      const text = bundle.texts.get(key)
-      return text === undefined ? [] : decodeAchievements(JSON.parse(text))
-    },
+    bundle.snapshots.map((s) => ({
+      takenAt: s.takenAt,
+      key: s.achievements,
+      timesKey: s.achievementTimes,
+    })),
+    (key) => decodeAchievements(json(key) ?? []),
+    (key) => decodeAchievementTimes(json(key) ?? { i: [], t: [] }),
   )
 }
 
@@ -457,8 +464,7 @@ async function importIds(ids: number[]): Promise<boolean> {
             :entries="group.entries"
             :text="game.data.value.text"
             :state="state"
-            :first-seen="captured.firstSeen"
-            :first-taken-at="captured.firstTakenAt"
+            :capture="captured"
             @mark="mark"
             @unmark="unmark"
           />

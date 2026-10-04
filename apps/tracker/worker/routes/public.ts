@@ -3,6 +3,8 @@
  * Paths and shapes are irminsul's wire contract (`irminsul/src/monitor.rs`):
  * the key arrives in `x-import-key`; any 2xx is success; 401/403 makes
  * irminsul re-verify its key; `verify-key` is read from the top level.
+ * Responses only ever gain fields (irminsul ignores unknown ones): an import
+ * answers with `warnings` when the file's UID is not the account's.
  */
 
 import type { VerifyKeyResponse } from '@gdt/shared'
@@ -55,7 +57,7 @@ export const publicImport = new Hono<AppEnv>()
   .post('/import-by-key', async (c) => {
     const account = await accountForKey(c)
     const meter = new D1Meter()
-    const result = await importSnapshot(c.env.DB, account.id, await readUpload(c), meter)
+    const result = await importSnapshot(c.env.DB, account, await readUpload(c), meter)
     meter.report(c)
     return c.json(result, result.status === 'created' ? 201 : 200)
   })

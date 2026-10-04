@@ -5,7 +5,6 @@ import UiInput from '@/components/ui/UiInput.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import {
   BUILD_OPTIONS,
-  CHARACTER_SORTS,
   ELEMENTS,
   ELEMENT_LABELS,
   TALENT_OPTIONS,
@@ -15,6 +14,7 @@ import {
   type CharacterSort,
   type Element,
   type SortDirection,
+  type SortOption,
 } from '@/data/characters'
 import { formatNumber } from '@/lib/format'
 import FilterChip from './FilterChip.vue'
@@ -27,6 +27,8 @@ import { ELEMENT_FILL } from './tokens'
  * you pick this", with the other filters applied.
  */
 defineProps<{
+  /** The sorts the roster offers (see characterSorts). */
+  sorts: SortOption[]
   elementCounts: ReadonlyMap<Element | null, number>
   rarityCounts: ReadonlyMap<number | null, number>
   /** Matches / roster size, shown while filtering. */
@@ -80,7 +82,7 @@ function toggleRarity(r: 5 | 4) {
         v-model:sort="sort"
         v-model:direction="direction"
         class="min-w-0 flex-1 sm:w-48 sm:flex-none"
-        :options="CHARACTER_SORTS"
+        :options="sorts"
       />
       <ViewToggle v-model="view" />
     </div>

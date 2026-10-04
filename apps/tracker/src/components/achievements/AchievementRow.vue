@@ -3,16 +3,18 @@ import { computed } from 'vue'
 import { Check, ExternalLink, EyeOff, Hand } from 'lucide-vue-next'
 import type { AchievementTexts } from '@gdt/game-data'
 import {
+  completedOn,
   doneSource,
   markThrough,
   stardbAchievementUrl,
   unmarkFrom,
   type AchievementEntry,
+  type CapturedAchievements,
   type DoneSource,
   type DoneState,
 } from '@gdt/game-data/achievement-progress'
 import { materialIcon } from '@/lib/assets'
-import { formatDate, formatNumber } from '@/lib/format'
+import { formatDate, formatDateTime, formatNumber } from '@/lib/format'
 
 /**
  * One achievement, or a stage chain as one row with a dot per tier. The
@@ -23,9 +25,8 @@ const props = defineProps<{
   entry: AchievementEntry
   text: AchievementTexts
   state: DoneState
-  firstSeen: ReadonlyMap<number, number>
-  /** When achievements were first captured: ids seen then were done by that date. */
-  firstTakenAt: number | null
+  /** Where the completion dates come from: the game's own, or the snapshots. */
+  capture: CapturedAchievements
 }>()
 const emit = defineEmits<{ mark: [ids: number[]]; unmark: [ids: number[]] }>()
 
@@ -58,9 +59,10 @@ const unmarkable = computed(() => unmarkFrom(props.entry, 0, props.state))
 const anyMarked = computed(() => tiers.value.some((t) => t.source === 'marked'))
 
 function doneOn(id: number): string {
-  const at = props.firstSeen.get(id)
-  if (at === undefined) return 'Captured'
-  return `Completed ${at === props.firstTakenAt ? 'by ' : ''}${formatDate(at)}`
+  const done = completedOn(props.capture, id)
+  if (!done) return 'Captured'
+  if (done.kind === 'exact') return `Completed ${formatDateTime(done.at)}`
+  return `Completed ${done.kind === 'by' ? 'by ' : ''}${formatDate(done.at)}`
 }
 
 function status(id: number, source: DoneSource | null): string {

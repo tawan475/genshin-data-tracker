@@ -9,6 +9,7 @@
  */
 
 import { inflateRaw } from './compress'
+import type { StoredSnapshot } from './snapshot'
 
 export interface BundleSnapshot {
   id: number
@@ -23,6 +24,11 @@ export interface BundleSnapshot {
   materials: string
   materialsKeyframe: string
   achievements: string | null
+  // irminsul's extra sections (null when the snapshot has none). Optional:
+  // a bundle cached before they existed lacks them.
+  player?: string | null
+  achievementTimes?: string | null
+  characterExtras?: string | null
 }
 
 export interface BundleManifest {
@@ -77,6 +83,34 @@ export function readBundle(buffer: ArrayBuffer | Uint8Array): {
     offset += 4 + length
   }
   return { manifest, blobs }
+}
+
+/**
+ * One bundle entry as `decodeSnapshot` takes it. `text` returns a section's
+ * inflated JSON by hash (and throws when the bundle lacks it); only the
+ * sections the snapshot has are asked for.
+ */
+export function storedSnapshotOf(
+  snapshot: BundleSnapshot,
+  text: (hash: string) => string,
+): StoredSnapshot {
+  const optional = (hash: string | null | undefined) => (hash ? text(hash) : null)
+  return {
+    format: snapshot.format,
+    version: snapshot.version,
+    source: snapshot.source,
+    takenAt: snapshot.takenAt,
+    characters: text(snapshot.characters),
+    weapons: text(snapshot.weapons),
+    artifacts: text(snapshot.artifacts),
+    materials: text(snapshot.materials),
+    materialsKeyframe:
+      snapshot.materialsKeyframe === snapshot.materials ? null : text(snapshot.materialsKeyframe),
+    achievements: optional(snapshot.achievements),
+    player: optional(snapshot.player),
+    achievementTimes: optional(snapshot.achievementTimes),
+    characterExtras: optional(snapshot.characterExtras),
+  }
 }
 
 /** Inflates every blob once; snapshots sharing a section share the text. */

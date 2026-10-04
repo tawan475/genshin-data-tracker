@@ -19,7 +19,12 @@ export interface AchievementSection {
   takenAt: number
   /** The section's hash; null when the snapshot has no achievements. */
   key: string | null
+  /** Its finish-times section (irminsul's `gi_achievement_times`), if any. */
+  timesKey?: string | null
 }
+
+/** [achievement id, finish time in unix seconds], as a times section decodes. */
+export type AchievementTime = readonly [number, number]
 
 export interface CapturedAchievements {
   /** Ids completed in the newest snapshot that has any. */
@@ -30,6 +35,11 @@ export interface CapturedAchievements {
   firstTakenAt: number | null
   /** The first snapshot (by takenAt) whose list holds each id. */
   firstSeen: ReadonlyMap<number, number>
+  /**
+   * The game's own finish time (epoch ms) where a snapshot carried one, from
+   * the newest snapshot that has a time for the id.
+   */
+  completedAt: ReadonlyMap<number, number>
 }
 
 /**
@@ -40,6 +50,7 @@ export interface CapturedAchievements {
 export function captureAchievements(
   sections: readonly AchievementSection[],
   decode: (key: string) => readonly number[],
+  decodeTimes?: (key: string) => readonly AchievementTime[],
 ): CapturedAchievements {
   const ordered = sections
     .filter((s): s is AchievementSection & { key: string } => s.key !== null)
@@ -67,7 +78,43 @@ export function captureAchievements(
     takenAt: newest?.takenAt ?? null,
     firstTakenAt,
     firstSeen,
+    completedAt: decodeTimes ? finishTimes(sections, decodeTimes) : new Map(),
   }
+}
+
+/** Newest snapshot first, so the first time found for an id is the newest one. */
+function finishTimes(
+  sections: readonly AchievementSection[],
+  decode: (key: string) => readonly AchievementTime[],
+): Map<number, number> {
+  const keys = sections
+    .filter((s): s is AchievementSection & { timesKey: string } => !!s.timesKey)
+    .sort((a, b) => b.takenAt - a.takenAt)
+    .map((s) => s.timesKey)
+  const times = new Map<number, number>()
+  for (const key of new Set(keys)) {
+    for (const [id, seconds] of decode(key)) if (!times.has(id)) times.set(id, seconds * 1000)
+  }
+  return times
+}
+
+/**
+ * When an achievement was completed, as far as the snapshots tell:
+ * - `exact`: the game's own finish time (irminsul's `gi_achievement_times`)
+ * - `seen`: the first snapshot that had it (done since the one before)
+ * - `by`: it was already done in the first snapshot with achievements, so
+ *   only "by then" is known
+ * Null when no snapshot has it.
+ */
+export function completedOn(
+  captured: Pick<CapturedAchievements, 'firstSeen' | 'firstTakenAt' | 'completedAt'>,
+  id: number,
+): { at: number; kind: 'exact' | 'seen' | 'by' } | null {
+  const exact = captured.completedAt.get(id)
+  if (exact !== undefined) return { at: exact, kind: 'exact' }
+  const seen = captured.firstSeen.get(id)
+  if (seen === undefined) return null
+  return { at: seen, kind: seen === captured.firstTakenAt ? 'by' : 'seen' }
 }
 
 // ------------------------------------------------------------------- entries
