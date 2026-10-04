@@ -17,22 +17,32 @@ function apply(targets: readonly PlannerTarget[], ops: Iterable<Op>): PlannerTar
       continue
     }
     const input = op.input
-    const target =
-      input.kind === 'character'
-        ? ({
-            kind: 'character',
-            key: input.key,
-            owner: '',
-            target: { ...input.target, active: input.target.active ?? true },
-            updatedAt: now,
-          } satisfies PlannerTarget)
-        : ({
-            kind: 'weapon',
-            key: input.key,
-            owner: input.owner,
-            target: { ...input.target, active: input.target.active ?? true },
-            updatedAt: now,
-          } satisfies PlannerTarget)
+    let target: PlannerTarget
+    if (input.kind === 'character') {
+      target = {
+        kind: 'character',
+        key: input.key,
+        owner: '',
+        target: { ...input.target, active: input.target.active ?? true },
+        updatedAt: now,
+      }
+    } else if (input.kind === 'item') {
+      target = {
+        kind: 'item',
+        key: input.key,
+        owner: '',
+        target: { ...input.target, active: input.target.active ?? true },
+        updatedAt: now,
+      }
+    } else {
+      target = {
+        kind: 'weapon',
+        key: input.key,
+        owner: input.owner,
+        target: { ...input.target, active: input.target.active ?? true },
+        updatedAt: now,
+      }
+    }
     byId.set(targetId(input), target)
   }
   return [...byId.values()]

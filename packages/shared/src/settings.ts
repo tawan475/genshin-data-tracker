@@ -16,6 +16,17 @@ export interface AccountSettings {
   materialsGraph: MaterialsGraphSettings
   /** Which twin the Traveler is (GOOD doesn't say): portraits only. */
   traveler: 'F' | 'M'
+  /** Adventure Rank and World Level, for the planner's drop estimates; null = not set. */
+  ar: number | null
+  wl: number | null
+  planner: PlannerSettings
+}
+
+export interface PlannerSettings {
+  /** Cover missing gems by converting spare ones with Dust of Azoth. */
+  azoth: boolean
+  /** Apply owned characters' crafting/ascension mora passives (Raiden, Wanderer). */
+  passives: boolean
 }
 
 export interface UserSettings {
@@ -29,6 +40,9 @@ export type UserSettingsPatch = Partial<UserSettings>
 export interface AccountSettingsPatch {
   materialsGraph?: Partial<MaterialsGraphSettings>
   traveler?: AccountSettings['traveler']
+  ar?: number | null
+  wl?: number | null
+  planner?: Partial<PlannerSettings>
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
@@ -46,6 +60,9 @@ export const MATERIALS_GRAPH_DEFAULTS: MaterialsGraphSettings = {
 export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   materialsGraph: MATERIALS_GRAPH_DEFAULTS,
   traveler: 'F',
+  ar: null,
+  wl: null,
+  planner: { azoth: false, passives: true },
 }
 
 /**

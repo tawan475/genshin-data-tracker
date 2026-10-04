@@ -36,9 +36,12 @@ export type TargetRef = NonNullable<TargetsPatch['remove']>[number]
 
 export const characterGoalId = (key: string) => `character:${key}`
 export const weaponGoalId = (key: string, owner: string) => `weapon:${key}:${owner}`
+export const itemGoalId = (key: string) => `item:${key}`
 
-export function targetId(t: { kind: 'character' | 'weapon'; key: string; owner?: string }) {
-  return t.kind === 'character' ? characterGoalId(t.key) : weaponGoalId(t.key, t.owner ?? '')
+export function targetId(t: { kind: PlannerTarget['kind']; key: string; owner?: string }) {
+  if (t.kind === 'character') return characterGoalId(t.key)
+  if (t.kind === 'item') return itemGoalId(t.key)
+  return weaponGoalId(t.key, t.owner ?? '')
 }
 
 export type RequirementCache = ReturnType<typeof createRequirementCache>
@@ -170,7 +173,7 @@ export function buildBoard(
   for (const t of targets) {
     if (t.kind === 'character') {
       characterGoals.set(t.key, characterGoalView(planner, good, cache, t.key, t.target))
-    } else {
+    } else if (t.kind === 'weapon') {
       const view = weaponGoalView(planner, good, cache, t.key, t.owner, t.target)
       weaponGoals.set(view.id, view)
     }

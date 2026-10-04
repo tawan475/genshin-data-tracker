@@ -90,6 +90,9 @@ export const accountSettingsPatch = z
       .partial()
       .strict(),
     traveler: z.enum(['F', 'M']),
+    ar: z.number().int().min(1).max(60).nullable(),
+    wl: z.number().int().min(0).max(9).nullable(),
+    planner: z.object({ azoth: z.boolean(), passives: z.boolean() }).partial().strict(),
   })
   .partial()
   .strict()
@@ -112,12 +115,19 @@ export const achievementMarksPatch = z
 const talentLevel = z.number().int().min(1).max(10)
 
 /** Planner goal for a character. Levels stop at 90 until the 95/100 costs are in game-data. */
+/** Free text on a goal (plain text, shown as is). */
+const goalNote = z.string().max(1000)
+
 export const characterTarget = z.object({
   level: z.number().int().min(1).max(90),
   ascension: z.number().int().min(0).max(6),
   talents: z.object({ auto: talentLevel, skill: talentLevel, burst: talentLevel }),
   /** Inactive goals are kept but left out of the totals. */
   active: z.boolean().default(true),
+  note: goalNote.optional(),
+  favorite: z.boolean().optional(),
+  /** Lower first when inventory is handed out in order; unset goals come last. */
+  priority: z.number().int().min(0).max(100_000).optional(),
 })
 
 /** Planner goal for a weapon, identified by its key and the character holding it. */
@@ -126,10 +136,19 @@ export const weaponTarget = z.object({
   ascension: z.number().int().min(0).max(6),
   refinement: z.number().int().min(1).max(5),
   active: z.boolean().default(true),
+  note: goalNote.optional(),
+})
+
+/** Extra need for one material on top of every goal (Seelie's custom items). */
+export const itemTarget = z.object({
+  count: z.number().int().min(1).max(1_000_000_000),
+  active: z.boolean().default(true),
+  note: goalNote.optional(),
 })
 
 const targetRef = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('character'), key: goodKeySchema }),
+  z.object({ kind: z.literal('item'), key: goodKeySchema }),
   z.object({
     kind: z.literal('weapon'),
     key: goodKeySchema,
@@ -140,6 +159,7 @@ const targetRef = z.discriminatedUnion('kind', [
 
 export const plannerTargetInput = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('character'), key: goodKeySchema, target: characterTarget }),
+  z.object({ kind: z.literal('item'), key: goodKeySchema, target: itemTarget }),
   z.object({
     kind: z.literal('weapon'),
     key: goodKeySchema,
@@ -233,10 +253,12 @@ export interface AchievementMarksResponse {
 
 export type CharacterTarget = z.infer<typeof characterTarget>
 export type WeaponTarget = z.infer<typeof weaponTarget>
+export type ItemTarget = z.infer<typeof itemTarget>
 
 export type PlannerTarget =
   | { kind: 'character'; key: string; owner: ''; target: CharacterTarget; updatedAt: number }
   | { kind: 'weapon'; key: string; owner: string; target: WeaponTarget; updatedAt: number }
+  | { kind: 'item'; key: string; owner: ''; target: ItemTarget; updatedAt: number }
 
 export interface PlannerTargetsResponse {
   targets: PlannerTarget[]

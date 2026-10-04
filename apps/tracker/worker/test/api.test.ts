@@ -650,4 +650,70 @@ describe('progress set by hand', () => {
     const stranger = await signUp()
     expect((await stranger.client.fetch(url)).status).toBe(404)
   })
+
+  it('stores extra item needs and goal notes, favorites and priorities', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const url = `/api/accounts/${account.id}/planner-targets`
+    const patch = (json: object) => client.fetch(url, { method: 'PATCH', json })
+    const goal = {
+      level: 90,
+      ascension: 6,
+      talents: { auto: 9, skill: 9, burst: 9 },
+      note: 'C2 first',
+      favorite: true,
+      priority: 1,
+    }
+    const res = await patch({
+      upsert: [
+        { kind: 'character', key: 'Furina', target: goal },
+        { kind: 'item', key: 'CrownOfInsight', target: { count: 3, note: 'spare' } },
+      ],
+    })
+    expect(res.status).toBe(200)
+    const { targets } = (await res.json()) as { targets: Record<string, unknown>[] }
+    expect(targets.map(({ updatedAt: _, ...t }) => t)).toEqual([
+      { kind: 'character', key: 'Furina', owner: '', target: { ...goal, active: true } },
+      {
+        kind: 'item',
+        key: 'CrownOfInsight',
+        owner: '',
+        target: { count: 3, note: 'spare', active: true },
+      },
+    ])
+    const removed = await patch({ remove: [{ kind: 'item', key: 'CrownOfInsight' }] })
+    expect(((await removed.json()) as { targets: unknown[] }).targets).toHaveLength(1)
+
+    for (const bad of [
+      { upsert: [{ kind: 'item', key: 'CrownOfInsight', target: { count: 0 } }] },
+      {
+        upsert: [{ kind: 'character', key: 'Furina', target: { ...goal, note: 'x'.repeat(1001) } }],
+      },
+    ]) {
+      expect((await patch(bad)).status, JSON.stringify(bad)).toBe(400)
+    }
+  })
+
+  it('stores AR, WL and planner options as account settings', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const path = `/api/accounts/${account.id}/settings`
+    type S = { settings: { ar: number | null; wl: number | null; planner: object } }
+    const before = await client.json<S>(path)
+    expect(before.settings).toMatchObject({
+      ar: null,
+      wl: null,
+      planner: { azoth: false, passives: true },
+    })
+    const after = await client.json<S>(path, {
+      method: 'PATCH',
+      json: { ar: 60, wl: 9, planner: { azoth: true } },
+    })
+    expect(after.settings).toMatchObject({
+      ar: 60,
+      wl: 9,
+      planner: { azoth: true, passives: true },
+    })
+    expect((await client.fetch(path, { method: 'PATCH', json: { ar: 61 } })).status).toBe(400)
+  })
 })
