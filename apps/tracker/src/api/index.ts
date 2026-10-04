@@ -4,6 +4,7 @@
  */
 
 import type {
+  AchievementMarksResponse,
   AccountCreatedResponse,
   AccountResponse,
   AccountSettingsPatch,
@@ -13,9 +14,12 @@ import type {
   Good,
   ImportResponse,
   MeResponse,
+  PlannerTargetsResponse,
   SnapshotResponse,
   UserSettingsPatch,
 } from '@gdt/shared'
+import type { plannerTargetsPatch } from '@gdt/shared'
+import type { z } from 'zod'
 import { request, requestJson } from './http'
 
 export * from './http'
@@ -62,6 +66,25 @@ export const api = {
     requestJson<AccountSettingsResponse>(`/api/accounts/${id}/settings`, {
       method: 'PATCH',
       json: patch,
+    }),
+
+  // -------------------------------------------------------------- progress
+  /** Achievement ids marked done by hand (captured ones come from snapshots). */
+  achievementMarks: (id: number) =>
+    requestJson<AchievementMarksResponse>(`/api/accounts/${id}/achievement-marks`),
+  /** `done` is applied before `undone`. Answers with the full list. */
+  updateAchievementMarks: (id: number, body: { done?: number[]; undone?: number[] }) =>
+    requestJson<AchievementMarksResponse>(`/api/accounts/${id}/achievement-marks`, {
+      method: 'PATCH',
+      json: body,
+    }),
+  plannerTargets: (id: number) =>
+    requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`),
+  /** `remove` is applied before `upsert`. Answers with every goal. */
+  updatePlannerTargets: (id: number, body: z.input<typeof plannerTargetsPatch>) =>
+    requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`, {
+      method: 'PATCH',
+      json: body,
     }),
 
   // ------------------------------------------------------------- snapshots

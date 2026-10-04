@@ -2,7 +2,14 @@ import { env, SELF } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { getDb } from '../db/client'
-import { blobs, genshinAccounts, snapshots, users } from '../db/schema'
+import {
+  achievementMarks,
+  blobs,
+  genshinAccounts,
+  plannerTargets,
+  snapshots,
+  users,
+} from '../db/schema'
 
 const db = getDb(env.DB)
 
@@ -92,7 +99,25 @@ describe('D1 schema', () => {
   it('deleting a user cascades to everything they own', async () => {
     const account = await seedAccount()
     await db.insert(snapshots).values(snapshotRow(account.id, 2000))
+    await db.insert(achievementMarks).values({ accountId: account.id, achievementId: 81001 })
+    await db.insert(plannerTargets).values({
+      accountId: account.id,
+      kind: 'character',
+      key: 'Furina',
+      target: {
+        level: 90,
+        ascension: 6,
+        talents: { auto: 10, skill: 10, burst: 10 },
+        active: true,
+      },
+    })
     await db.delete(users).where(eq(users.id, account.userId))
     expect(await db.select().from(snapshots).where(eq(snapshots.accountId, account.id))).toEqual([])
+    expect(
+      await db.select().from(achievementMarks).where(eq(achievementMarks.accountId, account.id)),
+    ).toEqual([])
+    expect(
+      await db.select().from(plannerTargets).where(eq(plannerTargets.accountId, account.id)),
+    ).toEqual([])
   })
 })

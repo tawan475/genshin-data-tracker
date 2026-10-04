@@ -6,6 +6,7 @@ import { accounts } from './routes/accounts'
 import { auth } from './routes/auth'
 import { health } from './routes/health'
 import { me } from './routes/me'
+import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
 import { runMaintenance } from './services/maintenance'
 
@@ -24,6 +25,7 @@ app.route('/health', health)
 app.route('/auth', auth)
 app.route('/me', me)
 app.route('/accounts', accounts)
+app.route('/accounts', progress)
 app.route('/genshin-accounts-public', publicImport)
 
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))

@@ -93,6 +93,68 @@ export const accountSettingsPatch = z
   .partial()
   .strict()
 
+// ------------------------------------------------------------ progress
+
+/** A GOOD key (character, weapon or material), as irminsul writes them. */
+export const goodKeySchema = z.string().regex(/^[A-Za-z0-9]{1,64}$/, 'Not a GOOD key')
+
+const achievementIds = z.array(z.number().int().positive()).max(5000)
+
+/**
+ * Achievements marked done by hand (captured ones come from snapshots).
+ * Ids are the game's achievement ids, the same as `gi_achievements`.
+ */
+export const achievementMarksPatch = z
+  .object({ done: achievementIds.default([]), undone: achievementIds.default([]) })
+  .refine((body) => body.done.length + body.undone.length > 0, { message: 'Nothing to change' })
+
+const talentLevel = z.number().int().min(1).max(10)
+
+/** Planner goal for a character. Levels stop at 90 until the 95/100 costs are in game-data. */
+export const characterTarget = z.object({
+  level: z.number().int().min(1).max(90),
+  ascension: z.number().int().min(0).max(6),
+  talents: z.object({ auto: talentLevel, skill: talentLevel, burst: talentLevel }),
+  /** Inactive goals are kept but left out of the totals. */
+  active: z.boolean().default(true),
+})
+
+/** Planner goal for a weapon, identified by its key and the character holding it. */
+export const weaponTarget = z.object({
+  level: z.number().int().min(1).max(90),
+  ascension: z.number().int().min(0).max(6),
+  refinement: z.number().int().min(1).max(5),
+  active: z.boolean().default(true),
+})
+
+const targetRef = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('character'), key: goodKeySchema }),
+  z.object({
+    kind: z.literal('weapon'),
+    key: goodKeySchema,
+    /** Character key the weapon belongs to, '' for a spare one (GOOD weapons have no id). */
+    owner: goodKeySchema.or(z.literal('')),
+  }),
+])
+
+export const plannerTargetInput = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('character'), key: goodKeySchema, target: characterTarget }),
+  z.object({
+    kind: z.literal('weapon'),
+    key: goodKeySchema,
+    owner: goodKeySchema.or(z.literal('')),
+    target: weaponTarget,
+  }),
+])
+
+/** Upserts and removals in one request (a Seelie import sends a few hundred). */
+export const plannerTargetsPatch = z
+  .object({
+    upsert: z.array(plannerTargetInput).max(1000).default([]),
+    remove: z.array(targetRef).max(1000).default([]),
+  })
+  .refine((body) => body.upsert.length + body.remove.length > 0, { message: 'Nothing to change' })
+
 // ------------------------------------------------------------------ responses
 
 export interface ApiError {
@@ -161,4 +223,20 @@ export interface VerifyKeyResponse {
 
 export interface AccountSettingsResponse {
   settings: AccountSettings
+}
+
+export interface AchievementMarksResponse {
+  /** Achievement ids marked done by hand, ascending. */
+  done: number[]
+}
+
+export type CharacterTarget = z.infer<typeof characterTarget>
+export type WeaponTarget = z.infer<typeof weaponTarget>
+
+export type PlannerTarget =
+  | { kind: 'character'; key: string; owner: ''; target: CharacterTarget; updatedAt: number }
+  | { kind: 'weapon'; key: string; owner: string; target: WeaponTarget; updatedAt: number }
+
+export interface PlannerTargetsResponse {
+  targets: PlannerTarget[]
 }

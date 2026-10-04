@@ -1,9 +1,11 @@
 import type {
   AccountSettingsPatch,
+  CharacterTarget,
   CompactSubstat,
   SectionKind,
   SnapshotSummary,
   UserSettingsPatch,
+  WeaponTarget,
 } from '@gdt/shared'
 import { sql } from 'drizzle-orm'
 import {
@@ -174,4 +176,42 @@ export const artifacts = sqliteTable(
     createdAt: timestamp('created_at'),
   },
   (t) => [uniqueIndex('artifacts_account_hash_unique').on(t.accountId, t.hash)],
+)
+
+/**
+ * Achievements marked done by hand. Captured completions come from snapshots
+ * (`gi_achievements`); these cover what irminsul hasn't seen. Kept out of the
+ * account's settings JSON, which rides along on every account request.
+ */
+export const achievementMarks = sqliteTable(
+  'achievement_marks',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    achievementId: integer('achievement_id').notNull(),
+    updatedAt: timestamp('updated_at'),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.achievementId] })],
+)
+
+/**
+ * Planner goals. Current levels come from the latest snapshot; only the
+ * targets are stored. `owner` is '' for characters and the holding character
+ * (or '' for a spare) for weapons, which have no id in GOOD.
+ */
+export const plannerTargets = sqliteTable(
+  'planner_targets',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['character', 'weapon'] }).notNull(),
+    key: text('key').notNull(),
+    owner: text('owner').notNull().default(''),
+    /** Append-only shape: new fields must be optional. */
+    target: text('target', { mode: 'json' }).$type<CharacterTarget | WeaponTarget>().notNull(),
+    updatedAt: timestamp('updated_at'),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.kind, t.key, t.owner] })],
 )
