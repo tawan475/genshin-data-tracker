@@ -8,36 +8,56 @@ import {
   planTotals,
   serverWeekday,
   sourceGroups,
+  type PlanGoal,
 } from '@gdt/game-data/planner-math'
 import type { PlannerTarget } from '@gdt/shared'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Clock, FileInput, Plus, Search, Target, Upload } from 'lucide-vue-next'
+import { Clock, FileInput, Plus, Settings2, Target, Upload } from 'lucide-vue-next'
+import ExtraItems from '@/components/planner/ExtraItems.vue'
 import FarmPanel from '@/components/planner/FarmPanel.vue'
 import GoalCard from '@/components/planner/GoalCard.vue'
-import GoalEditor, { type EditorSubject } from '@/components/planner/GoalEditor.vue'
+import GoalEditor from '@/components/planner/GoalEditor.vue'
 import GoalPicker from '@/components/planner/GoalPicker.vue'
+import GoalToolbar from '@/components/planner/GoalToolbar.vue'
+import ItemEditor from '@/components/planner/ItemEditor.vue'
+import PlannerSettings from '@/components/planner/PlannerSettings.vue'
 import SeelieImport from '@/components/planner/SeelieImport.vue'
-import FilterChip from '@/components/characters/FilterChip.vue'
+import {
+  GOAL_SORTS,
+  NO_GOAL_FILTERS,
+  entryStatuses,
+  filterGoals,
+  filterItems,
+  goalFacetCounts,
+  sortGoals,
+  type GoalFilters,
+  type GoalSort,
+} from '@/components/planner/goal-list'
 import {
   buildBoard,
   characterGoalId,
+  inputOf,
+  itemGoalId,
+  itemRequirement,
   targetId,
   weaponGoalId,
+  type EditorSubject,
   type GoalEntry,
+  type ItemGoalView,
   type RequirementCache,
 } from '@/components/planner/model'
-import { remove, upsert, usePlannerTargets } from '@/components/planner/use-planner-targets'
+import { upsert, usePlannerTargets } from '@/components/planner/use-planner-targets'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
-import UiInput from '@/components/ui/UiInput.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
-import { normalizeSearch } from '@/data/characters'
+import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
 import { formatDateTime, formatRelative } from '@/lib/format'
@@ -46,13 +66,15 @@ import { useFeedback } from '@/stores/feedback'
 import { useAccount } from './context'
 
 /**
- * Planner: goals per character (level, ascension, talents) and weapon, what
- * they cost from the newest snapshot's state, and what is still missing
- * against its inventory, grouped by where it is farmed. Targets live on the
- * server; everything else is computed here from @gdt/game-data.
+ * Planner: goals per character (level, ascension, talents) and weapon, extra
+ * item needs, what they cost from the newest snapshot's state, and what is
+ * still missing against its inventory, grouped by where it is farmed.
+ * Targets and the planner settings live on the server; everything else is
+ * computed here from @gdt/game-data.
  */
 const account = useAccount()
 const feedback = useFeedback()
+const accountId = computed(() => account.value.id)
 
 // ------------------------------------------------------------------ data
 
@@ -76,8 +98,11 @@ const data = computed(() => {
 const planner = computed(() => data.value?.planner ?? null)
 const good = computed(() => data.value?.inventory?.good ?? null)
 
-const store = usePlannerTargets(computed(() => account.value.id))
+const store = usePlannerTargets(accountId)
 onBeforeUnmount(() => void store.flush())
+
+const { settings, save: saveSettings } = usePlannerSettings(accountId)
+const settingsOpen = ref(false)
 
 // One per planner data (it never changes): each goal's cost is computed once per state.
 let cache: RequirementCache | null = null
@@ -99,37 +124,58 @@ const totals = computed(() =>
 )
 const groups = computed(() => (totals.value ? sourceGroups(totals.value, data.value?.drops) : []))
 const estimate = computed(() => planEstimate(groups.value))
-const short = computed(() => ({
-  characterExp: (totals.value?.characterExp.missing ?? 0) > 0,
-  weaponExp: (totals.value?.weaponExp.missing ?? 0) > 0,
-  mora: (totals.value?.mora.missing ?? 0) > 0,
-}))
-const lines = computed(() => totals.value?.lines ?? new Map())
 
 /**
- * Goals the inventory covers on its own (crafting included): what can be
- * levelled right now. Each is checked alone, not against the other goals.
+ * Per goal card, how many things (materials, EXP, Mora) the inventory is
+ * short of for that goal alone, crafting included; 0 means it can be
+ * levelled right now. Done goals are left out.
  */
-const ready = computed(() => {
-  const set = new Set<string>()
+const missing = computed(() => {
+  const map = new Map<string, number>()
   const p = planner.value
   const g = good.value
-  if (!board.value || !p || !g) return set
+  if (!board.value || !p || !g) return map
   for (const entry of board.value.entries) {
-    if (entry.done || !entry.active) continue
+    if (entry.done) continue
     const goals = [entry.character, ...entry.weapons].flatMap((x) =>
       x?.requirement ? [{ id: x.id, requirement: x.requirement }] : [],
     )
     if (goals.length === 0) continue
     const alone = planTotals(p, goals, g.materials)
-    if (
-      alone.mora.missing === 0 &&
-      alone.characterExp.missing === 0 &&
-      alone.weaponExp.missing === 0 &&
-      [...alone.lines.values()].every((l) => l.missing === 0)
-    ) {
-      set.add(entry.id)
-    }
+    let short = [...alone.lines.values()].filter((l) => l.missing > 0).length
+    if (alone.mora.missing > 0) short++
+    if (alone.characterExp.missing > 0) short++
+    if (alone.weaponExp.missing > 0) short++
+    map.set(entry.id, short)
+  }
+  return map
+})
+
+/** Counted goals the inventory covers on its own: what can be levelled right now. */
+const ready = computed(() => {
+  const set = new Set<string>()
+  for (const entry of board.value?.entries ?? []) {
+    if (entry.active && missing.value.get(entry.id) === 0) set.add(entry.id)
+  }
+  return set
+})
+
+/** Extra item needs the inventory covers on their own. */
+const itemsInStock = computed(() => {
+  const set = new Set<string>()
+  const p = planner.value
+  const g = good.value
+  if (!p || !g) return set
+  for (const item of board.value?.items ?? []) {
+    if (!item.material) continue
+    const r = itemRequirement(p, item.key, item.target.count)
+    const alone = planTotals(p, [{ id: item.id, requirement: r }], g.materials)
+    const short =
+      alone.mora.missing > 0 ||
+      alone.characterExp.missing > 0 ||
+      alone.weaponExp.missing > 0 ||
+      [...alone.lines.values()].some((l) => l.missing > 0)
+    if (!short) set.add(item.id)
   }
   return set
 })
@@ -167,31 +213,55 @@ watch(missingOnly, (value) => writeStorage('planner:missing', value ? '1' : '0')
 
 // ------------------------------------------------------------------ goals
 
-type GoalFilter = 'all' | 'ready' | 'off'
-const filter = ref<GoalFilter>('all')
-const query = ref('')
+const filters = reactive<GoalFilters>({ ...NO_GOAL_FILTERS })
+const filtered = computed(
+  () =>
+    filters.query.trim() !== '' ||
+    filters.status !== 'all' ||
+    filters.element !== 'all' ||
+    filters.rarity !== 'all' ||
+    filters.weaponType !== 'all',
+)
+function clearFilters() {
+  Object.assign(filters, NO_GOAL_FILTERS)
+}
+
+const savedSort = readStorage('planner:sort')
+const sort = ref<GoalSort>(
+  GOAL_SORTS.some((s) => s.value === savedSort) ? (savedSort as GoalSort) : 'name',
+)
+watch(sort, (value) => writeStorage('planner:sort', value))
 const showDone = ref(false)
 
-const matching = computed(() => {
-  const entries = board.value?.entries ?? []
-  const q = normalizeSearch(query.value).trim()
-  return entries.filter((e) => {
-    if (filter.value === 'ready' && !ready.value.has(e.id)) return false
-    if (filter.value === 'off' && e.active) return false
-    if (!q) return true
-    const names = [e.name, ...e.weapons.map((w) => w.name)].join(' ')
-    return normalizeSearch(names).includes(q)
-  })
-})
-const pendingEntries = computed(() => matching.value.filter((e) => !e.done))
+const entries = computed(() => board.value?.entries ?? [])
+const matching = computed(() => filterGoals(entries.value, filters, ready.value))
+const pendingEntries = computed(() =>
+  sortGoals(
+    matching.value.filter((e) => !e.done),
+    sort.value,
+    missing.value,
+  ),
+)
 const doneEntries = computed(() => matching.value.filter((e) => e.done))
-const counts = computed(() => {
-  const entries = board.value?.entries ?? []
-  return {
-    all: entries.length,
-    ready: ready.value.size,
-    off: entries.filter((e) => !e.active).length,
-  }
+const shownItems = computed(() =>
+  filterItems(board.value?.items ?? [], filters, (i) => itemsInStock.value.has(i.id)),
+)
+
+const statusCounts = computed(() =>
+  goalFacetCounts(entries.value, filters, ready.value, 'status', (e) =>
+    entryStatuses(e, ready.value),
+  ),
+)
+const elementCounts = computed(() =>
+  goalFacetCounts(entries.value, filters, ready.value, 'element', (e) => e.element),
+)
+const rarityCounts = computed(() =>
+  goalFacetCounts(entries.value, filters, ready.value, 'rarity', (e) => e.rarity),
+)
+const rarities = computed(() => {
+  const set = new Set<number>([5, 4])
+  for (const e of entries.value) if (e.rarity) set.add(e.rarity)
+  return [...set].sort((a, b) => b - a)
 })
 
 function toggleActive(entry: GoalEntry) {
@@ -214,6 +284,18 @@ function toggleActive(entry: GoalEntry) {
   store.change(ops)
 }
 
+function toggleFavorite(entry: GoalEntry) {
+  const c = entry.character
+  if (!c) return
+  const favorite = entry.favorite ? undefined : true
+  store.change([upsert({ kind: 'character', key: c.key, target: { ...c.target, favorite } })])
+}
+
+function toggleItem(item: ItemGoalView) {
+  const target = { ...item.target, active: !item.target.active }
+  store.change([upsert({ kind: 'item', key: item.key, target })])
+}
+
 // ------------------------------------------------------------------ editor
 // The open goal lives in the URL (?goal=character:HuTao): Back closes it.
 
@@ -224,20 +306,29 @@ function parseSubject(raw: unknown): EditorSubject | null {
   if (typeof raw !== 'string') return null
   const [kind, key, owner = ''] = raw.split(':')
   if (!key || !/^[A-Za-z0-9]+$/.test(key)) return null
-  if (kind === 'character') return { kind, key }
+  if (kind === 'character' || kind === 'item') return { kind, key }
   if (kind === 'weapon') return { kind, key, owner }
   return null
 }
 const subject = computed(() => parseSubject(route.query.goal))
+const goalSubject = computed(() => {
+  const s = subject.value
+  return s && s.kind !== 'item' ? s : null
+})
+const itemKey = computed(() => (subject.value?.kind === 'item' ? subject.value.key : null))
 let pushed = false
 watch(subject, (value) => {
   if (value === null) pushed = false
 })
 
+function subjectId(s: EditorSubject) {
+  if (s.kind === 'character') return characterGoalId(s.key)
+  if (s.kind === 'item') return itemGoalId(s.key)
+  return weaponGoalId(s.key, s.owner)
+}
+
 function openEditor(next: EditorSubject) {
-  const id =
-    next.kind === 'character' ? characterGoalId(next.key) : weaponGoalId(next.key, next.owner)
-  const query = { ...route.query, goal: id }
+  const query = { ...route.query, goal: subjectId(next) }
   if (subject.value !== null) void router.replace({ query })
   else {
     pushed = true
@@ -256,17 +347,29 @@ function closeEditor() {
   void router.replace({ query })
 }
 
-const editorCharacterTarget = computed(() => {
+const editorCharacter = computed(() => {
   const s = subject.value
-  return s?.kind === 'character' ? (board.value?.characterGoals.get(s.key)?.target ?? null) : null
+  return s?.kind === 'character' ? (board.value?.characterGoals.get(s.key) ?? null) : null
 })
 const editorWeapons = computed(() => {
   const s = subject.value
   const goals = board.value?.weaponGoals
-  if (!s || !goals) return []
+  if (!s || !goals || s.kind === 'item') return []
   if (s.kind === 'character') return [...goals.values()].filter((w) => w.owner === s.key)
   const one = goals.get(weaponGoalId(s.key, s.owner))
   return one ? [one] : []
+})
+const editorItem = computed(() => {
+  const key = itemKey.value
+  return key ? (board.value?.items.find((i) => i.key === key)?.target ?? null) : null
+})
+/** Every goal but the open one's, for its cost colours. */
+const editorOthers = computed<PlanGoal[]>(() => {
+  const s = subject.value
+  const goals = board.value?.goals ?? []
+  if (!s) return goals
+  const mine = new Set([subjectId(s), ...editorWeapons.value.map((w) => w.id)])
+  return goals.filter((g) => !mine.has(g.id))
 })
 
 function openEntry(entry: GoalEntry) {
@@ -298,19 +401,10 @@ async function removeGoal(ops: Ops) {
     closeEditor()
     feedback.toast({
       tone: 'info',
-      title: 'Goal removed',
+      title: removed.every((t) => t.kind === 'item') ? 'Item removed' : 'Goal removed',
       action: {
         label: 'Undo',
-        run: () =>
-          void store
-            .commit(
-              removed.map((t) =>
-                t.kind === 'character'
-                  ? upsert({ kind: 'character', key: t.key, target: t.target })
-                  : upsert({ kind: 'weapon', key: t.key, owner: t.owner, target: t.target }),
-              ),
-            )
-            .catch(() => {}),
+        run: () => void store.commit(removed.map((t) => upsert(inputOf(t)))).catch(() => {}),
       },
     })
   } catch {
@@ -321,8 +415,14 @@ async function removeGoal(ops: Ops) {
 // ------------------------------------------------------------- add, import
 
 const pickerOpen = ref(false)
+const pickerStart = ref<'item' | null>(null)
 const importOpen = ref(false)
 const taken = computed(() => new Set((store.targets.value ?? []).map((t) => targetId(t))))
+
+function openPicker(start: 'item' | null = null) {
+  pickerStart.value = start
+  pickerOpen.value = true
+}
 
 function pick(next: EditorSubject) {
   pickerOpen.value = false
@@ -341,15 +441,12 @@ async function importGoals(ops: Ops) {
   }
 }
 
-watch(
-  () => account.value.id,
-  () => {
-    pickerOpen.value = false
-    importOpen.value = false
-    query.value = ''
-    filter.value = 'all'
-  },
-)
+watch(accountId, () => {
+  pickerOpen.value = false
+  importOpen.value = false
+  settingsOpen.value = false
+  clearFilters()
+})
 
 // ------------------------------------------------------------------ chrome
 
@@ -364,14 +461,26 @@ const importTo = computed(() => ({
   params: { accountId: account.value.id },
 }))
 const loadError = computed(() => resource.error.value ?? store.error.value)
-const hasGoals = computed(() => (board.value?.entries.length ?? 0) > 0)
+const hasGoals = computed(
+  () => (board.value?.entries.length ?? 0) + (board.value?.items.length ?? 0) > 0,
+)
+const settingsLabel = computed(() => {
+  const s = settings.value
+  const parts = ['Planner settings']
+  if (s.ar !== null) parts.push(`AR ${s.ar}`)
+  if (s.wl !== null) parts.push(`WL ${s.wl}`)
+  return parts.join(' · ')
+})
 /** Open once the data is in, and only for something the planner data knows (a stale link does nothing). */
 const editorShown = computed(() => {
-  const s = subject.value
+  const s = goalSubject.value
   const p = planner.value
   if (!s || !p || !board.value) return false
   return s.kind === 'character' ? p.characters.has(s.key) : p.weapons.has(s.key)
 })
+const itemEditorShown = computed(
+  () => !!itemKey.value && !!board.value && !!planner.value?.materialsByKey.has(itemKey.value),
+)
 </script>
 
 <template>
@@ -383,16 +492,25 @@ const editorShown = computed(() => {
         <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
       </p>
     </template>
-    <template v-if="board && hasGoals" #actions>
-      <UiSegmented v-model="tab" :options="TABS" label="View" />
-      <UiButton title="Import from Seelie" @click="importOpen = true">
-        <FileInput class="size-4" aria-hidden="true" />
-        Seelie
-      </UiButton>
-      <UiButton variant="primary" @click="pickerOpen = true">
-        <Plus class="size-4" aria-hidden="true" />
-        Add
-      </UiButton>
+    <template v-if="board" #actions>
+      <template v-if="hasGoals">
+        <UiSegmented v-model="tab" :options="TABS" label="View" />
+        <UiButton
+          title="Import from Seelie"
+          aria-label="Import from Seelie"
+          @click="importOpen = true"
+        >
+          <FileInput class="size-4" aria-hidden="true" />
+          <span class="hidden sm:inline">Seelie</span>
+        </UiButton>
+        <UiButton variant="primary" @click="openPicker()">
+          <Plus class="size-4" aria-hidden="true" />
+          Add
+        </UiButton>
+      </template>
+      <UiIconButton :label="settingsLabel" @click="settingsOpen = true">
+        <Settings2 class="size-5" aria-hidden="true" />
+      </UiIconButton>
     </template>
   </PageHeader>
 
@@ -417,7 +535,7 @@ const editorShown = computed(() => {
     <UiPanel v-if="!hasGoals" flush>
       <UiEmpty title="No goals">
         <template #icon><Target aria-hidden="true" /></template>
-        <UiButton variant="primary" @click="pickerOpen = true">
+        <UiButton variant="primary" @click="openPicker()">
           <Plus class="size-5" aria-hidden="true" />
           Add goal
         </UiButton>
@@ -439,49 +557,52 @@ const editorShown = computed(() => {
     />
 
     <div v-else class="flex flex-col gap-4">
-      <div class="flex flex-wrap items-center gap-2">
-        <label class="relative min-w-0 flex-1 basis-48">
-          <span class="sr-only">Search</span>
-          <Search
-            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
-            aria-hidden="true"
-          />
-          <UiInput v-model="query" class="pl-9" placeholder="Search" type="search" />
-        </label>
-        <div class="flex gap-2 overflow-x-auto [scrollbar-width:none]">
-          <FilterChip :pressed="filter === 'all'" :count="counts.all" @toggle="filter = 'all'"
-            >All</FilterChip
-          >
-          <FilterChip
-            :pressed="filter === 'ready'"
-            :count="counts.ready"
-            title="Enough in the bag, each goal on its own"
-            @toggle="filter = filter === 'ready' ? 'all' : 'ready'"
-            >In stock</FilterChip
-          >
-          <FilterChip
-            :pressed="filter === 'off'"
-            :count="counts.off"
-            title="Left out of the totals"
-            @toggle="filter = filter === 'off' ? 'all' : 'off'"
-            >Paused</FilterChip
-          >
-        </div>
-      </div>
+      <GoalToolbar
+        v-model:filters="filters"
+        v-model:sort="sort"
+        :status-counts="statusCounts"
+        :element-counts="elementCounts"
+        :rarity-counts="rarityCounts"
+        :rarities="rarities"
+        :filtered="filtered"
+        @clear="clearFilters"
+      />
 
-      <p v-if="matching.length === 0" class="py-8 text-center text-text-secondary">No matches</p>
+      <p
+        v-if="matching.length === 0 && shownItems.length === 0"
+        class="py-8 text-center text-text-secondary"
+      >
+        No matches
+      </p>
 
-      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Goals">
+      <ul
+        v-if="pendingEntries.length"
+        class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        aria-label="Goals"
+      >
         <li v-for="entry in pendingEntries" :key="entry.id" class="flex">
           <GoalCard
             :entry="entry"
             :planner="planner"
             :ready="ready.has(entry.id)"
+            :ar="settings.ar"
             @open="openEntry(entry)"
             @toggle="toggleActive(entry)"
+            @favorite="toggleFavorite(entry)"
           />
         </li>
       </ul>
+
+      <ExtraItems
+        v-if="shownItems.length"
+        :items="shownItems"
+        :planner="planner"
+        :goals="board.goals"
+        :inventory="good.materials"
+        @open="(key) => openEditor({ kind: 'item', key })"
+        @toggle="toggleItem"
+        @add="openPicker('item')"
+      />
 
       <section v-if="doneEntries.length" aria-label="Done">
         <button
@@ -505,8 +626,10 @@ const editorShown = computed(() => {
               :entry="entry"
               :planner="planner"
               :ready="false"
+              :ar="settings.ar"
               @open="openEntry(entry)"
               @toggle="toggleActive(entry)"
+              @favorite="toggleFavorite(entry)"
             />
           </li>
         </ul>
@@ -515,14 +638,27 @@ const editorShown = computed(() => {
 
     <GoalEditor
       :open="editorShown"
-      :subject="subject"
+      :subject="goalSubject"
       :planner="planner"
       :good="good"
       :cache="requirementCache"
-      :character-target="editorCharacterTarget"
+      :character-target="editorCharacter?.target ?? null"
+      :raised="editorCharacter?.raised ?? null"
       :weapon-goals="editorWeapons"
-      :lines="lines"
-      :short="short"
+      :others="editorOthers"
+      :ar="settings.ar"
+      :saving="store.saving.value"
+      @close="closeEditor"
+      @save="save"
+      @remove="removeGoal"
+    />
+    <ItemEditor
+      :open="itemEditorShown"
+      :item-key="itemKey"
+      :planner="planner"
+      :good="good"
+      :target="editorItem"
+      :others="editorOthers"
       :saving="store.saving.value"
       @close="closeEditor"
       @save="save"
@@ -533,6 +669,7 @@ const editorShown = computed(() => {
       :planner="planner"
       :good="good"
       :taken="taken"
+      :start="pickerStart"
       @close="pickerOpen = false"
       @pick="pick"
     />
@@ -556,4 +693,11 @@ const editorShown = computed(() => {
       <UiSkeleton v-for="n in 6" :key="n" class="h-40" />
     </div>
   </div>
+
+  <PlannerSettings
+    :open="settingsOpen"
+    :settings="settings"
+    @close="settingsOpen = false"
+    @change="(patch) => void saveSettings(patch)"
+  />
 </template>
