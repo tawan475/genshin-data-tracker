@@ -39,7 +39,7 @@ export const api = {
   logout: () => requestJson<void>('/api/auth/logout', { method: 'POST', noRefresh: true }),
   logoutAll: () => requestJson<void>('/api/auth/logout-all', { method: 'POST' }),
   me: () => requestJson<MeResponse>('/api/auth/me'),
-  updateProfile: (body: { currentPassword: string; username?: string; email?: string | null }) =>
+  updateProfile: (body: { username?: string; email?: string | null }) =>
     requestJson<MeResponse>('/api/auth/profile', { method: 'PATCH', json: body }),
   changePassword: (body: { currentPassword: string; newPassword: string }) =>
     requestJson<void>('/api/auth/password', { method: 'POST', json: body }),

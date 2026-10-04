@@ -74,11 +74,7 @@ export const useSession = defineStore('session', () => {
   }
 
   /** Username and/or email; omitted fields stay as they are. */
-  async function updateProfile(body: {
-    currentPassword: string
-    username?: string
-    email?: string | null
-  }) {
+  async function updateProfile(body: { username?: string; email?: string | null }) {
     adopt(await api.updateProfile(body))
   }
 

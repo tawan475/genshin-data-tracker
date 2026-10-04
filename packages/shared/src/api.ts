@@ -48,7 +48,6 @@ export const changePasswordRequest = z.object({
  */
 export const updateProfileRequest = z
   .object({
-    currentPassword: anyPassword,
     username: usernameSchema.optional(),
     email: emailSchema.nullish().or(z.literal('').transform(() => null)),
   })
