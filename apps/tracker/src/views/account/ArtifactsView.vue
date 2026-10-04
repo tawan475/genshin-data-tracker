@@ -90,15 +90,13 @@ const results = computed(() => (applied.value.best ? bestPerSlot(matches.value) 
 
 // ------------------------------------------------------------------ counts
 const presetCounts = computed(() => {
-  let fodder = 0
   let spare = 0
   let maxed = 0
   for (const row of rows.value) {
-    if (row.fodder) fodder++
     if (isSpare(row)) spare++
     if (row.artifact.level >= 20) maxed++
   }
-  return { fodder, spare, maxed }
+  return { spare, maxed }
 })
 
 const inventorySets = computed(() => {
@@ -300,7 +298,6 @@ const GRID =
       :rarities="rarities"
       :rarity-counts="rarityCounts"
       :main-stats="mainStats"
-      :fodder-count="presetCounts.fodder"
       :spare-count="presetCounts.spare"
       :maxed-count="presetCounts.maxed"
     />
