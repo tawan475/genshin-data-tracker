@@ -206,7 +206,7 @@ export const plannerTargets = sqliteTable(
     accountId: integer('account_id')
       .notNull()
       .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
-    kind: text('kind', { enum: ['character', 'weapon'] }).notNull(),
+    kind: text('kind', { enum: ['character', 'weapon', 'item'] }).notNull(),
     key: text('key').notNull(),
     owner: text('owner').notNull().default(''),
     /** Append-only shape: new fields must be optional. */

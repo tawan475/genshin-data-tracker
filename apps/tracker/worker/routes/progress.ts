@@ -29,7 +29,7 @@ const SELECT_TARGETS = `SELECT kind, key, owner, target, updated_at AS updatedAt
   FROM planner_targets WHERE account_id = ?1 ORDER BY kind, key, owner`
 
 interface TargetRow {
-  kind: 'character' | 'weapon'
+  kind: PlannerTarget['kind']
   key: string
   owner: string
   target: string
