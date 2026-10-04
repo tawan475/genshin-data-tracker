@@ -275,7 +275,7 @@ export function monthLabel(ref: MonthRef): string {
 }
 
 /** The figures the monthly table follows. */
-export const MONTHLY_KEYS = ['primogem', 'mora'] as const
+export const MONTHLY_KEYS = ['primogem', 'mora', 'fodder4', 'fodder3'] as const
 export type MonthlyKey = (typeof MONTHLY_KEYS)[number]
 
 export interface DayFigure {
@@ -449,6 +449,9 @@ export function monthRows(days: readonly MonthDay[]): MonthRow[] {
   flush()
   return rows
 }
+
+/** Base artifact EXP a level-0 piece gives when used as fodder. */
+export const FODDER_EXP = { fodder4: 2520, fodder3: 1260 } as const
 
 // ---------------------------------------------------------- recent snapshots
 
