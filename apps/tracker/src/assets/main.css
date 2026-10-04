@@ -172,6 +172,11 @@
 
 @layer base {
   html {
+    /* 18px at the browser's default size, as a percentage so a reader's own
+       font-size setting still scales it. Everything is in rem, so text,
+       spacing and the layout grow together; breakpoints are unaffected
+       (media queries measure rem against the browser default). */
+    font-size: 112.5%;
     background-color: var(--surface-base);
     -webkit-tap-highlight-color: transparent;
   }
@@ -179,6 +184,18 @@
   body {
     @apply bg-surface-base font-sans text-text-primary antialiased;
     min-height: 100dvh;
+  }
+
+  /* A screen-reader-only label (sr-only is position: absolute) is laid out
+     against the nearest positioned ancestor, so inside an unpositioned scroll
+     box it escaped the box and widened the whole page on phones. Position
+     every scroll box; a position utility on the same element still wins
+     (utilities come after base). */
+  .overflow-auto,
+  .overflow-x-auto,
+  .overflow-y-auto,
+  .overflow-x-scroll {
+    position: relative;
   }
 
   :focus-visible {
