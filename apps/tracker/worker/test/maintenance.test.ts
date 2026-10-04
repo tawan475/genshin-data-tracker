@@ -41,12 +41,6 @@ describe('maintenance', () => {
     const good = await client.fetch(`/api/accounts/${account.id}/snapshots/${kept.snapshotId}/good`)
     expect(good.status).toBe(200)
   })
-
-  it('removes expired sessions', async () => {
-    await signUp()
-    const result = await runMaintenance(env.DB, Date.now() + 365 * 86_400_000)
-    expect(result.sessions).toBeGreaterThan(0)
-  })
 })
 
 describe('response headers', () => {

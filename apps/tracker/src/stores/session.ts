@@ -1,11 +1,4 @@
-import {
-  PASSWORD_ITERATIONS,
-  USER_SETTINGS_DEFAULTS,
-  derivePasswordKey,
-  randomSalt,
-  type MeResponse,
-  type UserSettings,
-} from '@gdt/shared'
+import { USER_SETTINGS_DEFAULTS, type MeResponse, type UserSettings } from '@gdt/shared'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, onSignedOut } from '@/api'
@@ -22,10 +15,7 @@ function hasSessionHint(): boolean {
   }
 }
 
-/**
- * Who is signed in. The password never leaves the browser: it is stretched
- * with PBKDF2 under the account's salt and only the derived key is sent.
- */
+/** Who is signed in. Tokens live in HttpOnly cookies; this store never sees them. */
 export const useSession = defineStore('session', () => {
   const me = ref<MeResponse | null>(null)
   const status = ref<Status>('unknown')
@@ -60,16 +50,12 @@ export const useSession = defineStore('session', () => {
   }
 
   async function login(login: string, password: string) {
-    const { salt, iterations } = await api.prelogin(login)
-    const key = await derivePasswordKey(password, salt, iterations)
-    adopt(await api.login(login, key))
+    adopt(await api.login(login, password))
     loading = Promise.resolve()
   }
 
   async function register(username: string, email: string | null, password: string) {
-    const salt = randomSalt()
-    const key = await derivePasswordKey(password, salt, PASSWORD_ITERATIONS)
-    adopt(await api.register({ username, email, salt, iterations: PASSWORD_ITERATIONS, key }))
+    adopt(await api.register({ username, email, password }))
     loading = Promise.resolve()
   }
 
@@ -81,13 +67,14 @@ export const useSession = defineStore('session', () => {
     }
   }
 
-  async function changePassword(current: string, next: string) {
-    if (!me.value) throw new Error('Not signed in')
-    const { salt: currentSalt, iterations } = await api.prelogin(me.value.username)
-    const currentKey = await derivePasswordKey(current, currentSalt, iterations)
-    const salt = randomSalt()
-    const key = await derivePasswordKey(next, salt, PASSWORD_ITERATIONS)
-    await api.changePassword({ currentKey, salt, iterations: PASSWORD_ITERATIONS, key })
+  /** Signs out every device, this one included. */
+  async function logoutAll() {
+    await api.logoutAll()
+    adopt(null)
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    await api.changePassword({ currentPassword, newPassword })
   }
 
   /** Applies the change at once and rolls it back if the server refuses it. */
@@ -110,6 +97,7 @@ export const useSession = defineStore('session', () => {
     login,
     register,
     logout,
+    logoutAll,
     changePassword,
     updateSettings,
   }

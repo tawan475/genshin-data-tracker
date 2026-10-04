@@ -1,17 +1,15 @@
-import {
-  MIN_PASSWORD_ITERATIONS,
-  derivePasswordKey,
-  randomSalt,
-  type Good,
-  type MeResponse,
-} from '@gdt/shared'
+import type { Good, MeResponse } from '@gdt/shared'
 import { SELF } from 'cloudflare:test'
 
 export const ORIGIN = 'https://genshin-tracker.475.dev'
 
+let clients = 0
+
 /** A browser stand-in: keeps cookies per path and sends the CSRF header. */
 export class Client {
   private cookies = new Map<string, { value: string; path: string }>()
+  /** Each client is its own IP, so rate limits never couple unrelated tests. */
+  private ip = `2001:db8::${(++clients).toString(16)}`
 
   cookie(name: string): string | undefined {
     return this.cookies.get(name)?.value
@@ -20,6 +18,7 @@ export class Client {
   async fetch(path: string, init: RequestInit & { json?: unknown } = {}): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('x-gdt-csrf', '1')
+    if (!headers.has('cf-connecting-ip')) headers.set('cf-connecting-ip', this.ip)
     const cookie = [...this.cookies]
       .filter(([, c]) => path.startsWith(c.path))
       .map(([name, c]) => `${name}=${c.value}`)
@@ -61,18 +60,10 @@ export async function signUp(): Promise<{
 }> {
   const username = `traveler${++counter}${crypto.randomUUID().slice(0, 6)}`
   const password = 'correct horse battery staple'
-  const salt = randomSalt()
-  const key = await derivePasswordKey(password, salt, MIN_PASSWORD_ITERATIONS)
   const client = new Client()
   const me = await client.json<MeResponse>('/api/auth/register', {
     method: 'POST',
-    json: {
-      username,
-      email: `${username}@example.com`,
-      salt,
-      iterations: MIN_PASSWORD_ITERATIONS,
-      key,
-    },
+    json: { username, email: `${username}@example.com`, password },
   })
   return { client, username, password, me }
 }

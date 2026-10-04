@@ -1,7 +1,6 @@
 /**
  * Daily housekeeping, run by the cron trigger in wrangler.jsonc.
  *
- * - Expired sessions are removed.
  * - Deleted snapshots are kept for TRASH_DAYS (deleting is a soft delete, so a
  *   mistaken bulk delete can still be restored by hand), then purged.
  * - Sections no snapshot references any more (live or in the trash) are
@@ -15,14 +14,12 @@
 export const TRASH_DAYS = 30
 
 export interface MaintenanceResult {
-  sessions: number
   snapshots: number
   blobs: number
 }
 
 export async function runMaintenance(d1: D1Database, now = Date.now()): Promise<MaintenanceResult> {
-  const [sessions, snapshots, blobs] = await d1.batch([
-    d1.prepare('DELETE FROM sessions WHERE expires_at < ?1').bind(now),
+  const [snapshots, blobs] = await d1.batch([
     d1
       .prepare('DELETE FROM snapshots WHERE deleted_at IS NOT NULL AND deleted_at < ?1')
       .bind(now - TRASH_DAYS * 86_400_000),
@@ -35,7 +32,6 @@ export async function runMaintenance(d1: D1Database, now = Date.now()): Promise<
     ),
   ])
   return {
-    sessions: sessions!.meta.changes,
     snapshots: snapshots!.meta.changes,
     blobs: blobs!.meta.changes,
   }

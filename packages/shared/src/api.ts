@@ -4,19 +4,8 @@
  */
 
 import { z } from 'zod'
-import { fromBase64 } from './base64'
-import {
-  MAX_PASSWORD_ITERATIONS,
-  MIN_PASSWORD_ITERATIONS,
-  PASSWORD_KEY_BYTES,
-  PASSWORD_SALT_BYTES,
-} from './password'
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
 import type { AccountSettings, SnapshotSummary, UserSettings } from './index'
-
-const base64Bytes = (bytes: number) =>
-  z.string().refine((value) => fromBase64(value)?.length === bytes, {
-    message: `Must be ${bytes} base64-encoded bytes`,
-  })
 
 export const usernameSchema = z
   .string()
@@ -27,27 +16,30 @@ export const usernameSchema = z
 
 export const emailSchema = z.string().trim().toLowerCase().max(254).pipe(z.email())
 
+/** Not trimmed or normalised here: the Worker hashes exactly what was typed (NFKC). */
+export const passwordSchema = z
+  .string()
+  .min(MIN_PASSWORD_LENGTH, `At least ${MIN_PASSWORD_LENGTH} characters`)
+  .max(MAX_PASSWORD_LENGTH, `At most ${MAX_PASSWORD_LENGTH} characters`)
+
 export const registerRequest = z.object({
   username: usernameSchema,
   /** Optional; empty means none. */
   email: emailSchema.nullish().or(z.literal('').transform(() => null)),
-  salt: base64Bytes(PASSWORD_SALT_BYTES),
-  iterations: z.number().int().min(MIN_PASSWORD_ITERATIONS).max(MAX_PASSWORD_ITERATIONS),
-  key: base64Bytes(PASSWORD_KEY_BYTES),
+  password: passwordSchema,
 })
 
 /** Username or email. */
 export const loginName = z.string().trim().toLowerCase().min(1).max(254)
 
-export const preloginRequest = z.object({ login: loginName })
+/** An existing password: only bounded, since older rules may have allowed it. */
+const anyPassword = z.string().min(1).max(MAX_PASSWORD_LENGTH)
 
-export const loginRequest = z.object({ login: loginName, key: base64Bytes(PASSWORD_KEY_BYTES) })
+export const loginRequest = z.object({ login: loginName, password: anyPassword })
 
 export const changePasswordRequest = z.object({
-  currentKey: base64Bytes(PASSWORD_KEY_BYTES),
-  salt: base64Bytes(PASSWORD_SALT_BYTES),
-  iterations: z.number().int().min(MIN_PASSWORD_ITERATIONS).max(MAX_PASSWORD_ITERATIONS),
-  key: base64Bytes(PASSWORD_KEY_BYTES),
+  currentPassword: anyPassword,
+  newPassword: passwordSchema,
 })
 
 export const GENSHIN_SERVERS = ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] as const
@@ -94,18 +86,11 @@ export interface ApiError {
   error: { code: string; message: string; issues?: { path: string; message: string }[] }
 }
 
-export interface PreloginResponse {
-  salt: string
-  iterations: number
-}
-
 export interface MeResponse {
   id: number
   username: string
   email: string | null
   emailVerified: boolean
-  /** Iteration count the stored password key was derived with. */
-  passwordIterations: number
   settings: UserSettings
 }
 

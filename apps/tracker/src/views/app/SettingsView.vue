@@ -17,10 +17,10 @@ const session = useSession()
 const accounts = useAccounts()
 const feedback = useFeedback()
 const router = useRouter()
-const signingOut = ref(false)
+const signingOut = ref<'here' | 'everywhere' | null>(null)
 
 async function signOut() {
-  signingOut.value = true
+  signingOut.value = 'here'
   try {
     await session.logout()
   } catch (error) {
@@ -28,8 +28,21 @@ async function signOut() {
     feedback.error('Signed out here, but the server could not be reached', error)
   } finally {
     accounts.clear()
-    signingOut.value = false
+    signingOut.value = null
     await router.push({ name: 'login' })
+  }
+}
+
+async function signOutEverywhere() {
+  signingOut.value = 'everywhere'
+  try {
+    await session.logoutAll()
+    accounts.clear()
+    await router.push({ name: 'login' })
+  } catch (error) {
+    feedback.error('Could not sign out everywhere', error)
+  } finally {
+    signingOut.value = null
   }
 }
 </script>
@@ -44,10 +57,18 @@ async function signOut() {
     <AppPanel />
 
     <UiPanel title="Session">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <UiButton :loading="signingOut" @click="signOut">
-          <LogOut v-if="!signingOut" class="size-5" aria-hidden="true" />
+      <div class="flex flex-wrap items-center gap-3">
+        <UiButton :loading="signingOut === 'here'" :disabled="!!signingOut" @click="signOut">
+          <LogOut v-if="signingOut !== 'here'" class="size-5" aria-hidden="true" />
           Sign out
+        </UiButton>
+        <UiButton
+          :loading="signingOut === 'everywhere'"
+          :disabled="!!signingOut"
+          title="Every device, this one included"
+          @click="signOutEverywhere"
+        >
+          Sign out everywhere
         </UiButton>
       </div>
     </UiPanel>

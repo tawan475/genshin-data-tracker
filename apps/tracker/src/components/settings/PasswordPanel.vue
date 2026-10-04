@@ -9,11 +9,7 @@ import { ApiRequestError } from '@/api'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
-/**
- * Change password. Both passwords are stretched with PBKDF2 in the browser
- * (about a second each on a phone), so the button says what it is doing.
- * The server ends every session and signs this device back in.
- */
+/** Change password. The server signs every other device out; this one stays signed in. */
 const session = useSession()
 const feedback = useFeedback()
 
@@ -150,9 +146,7 @@ async function submit() {
       </UiField>
       <p v-if="formError" class="text-sm text-danger-text" role="alert">{{ formError }}</p>
       <div class="flex flex-wrap items-center gap-3">
-        <UiButton type="submit" variant="primary" :loading="busy">
-          {{ busy ? 'Securing…' : 'Change password' }}
-        </UiButton>
+        <UiButton type="submit" variant="primary" :loading="busy"> Change password </UiButton>
       </div>
     </form>
   </UiPanel>

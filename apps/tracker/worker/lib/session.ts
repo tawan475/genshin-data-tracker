@@ -1,12 +1,15 @@
 /**
- * Cookie sessions.
+ * Cookie sessions. Both tokens are HS256 JWTs with a `typ` claim, so neither
+ * can stand in for the other.
  *
- * - Access: a 15-minute HS256 JWT in `gdt_at` (path /api). Verifying it needs
- *   no database read, so ordinary requests cost nothing for auth.
- * - Refresh: an opaque 32-byte token in `gdt_rt` (path /api/auth, SameSite
- *   Strict). D1 stores only its SHA-256 as the session id. Every refresh
- *   rotates it; the replaced hash stays valid for a short grace window so two
- *   tabs refreshing at once do not log each other out.
+ * - Access: 15 minutes in `gdt_at` (path /api). Verifying it needs no
+ *   database read, so ordinary requests cost nothing for auth.
+ * - Refresh: 30 days in `gdt_rt` (path /api/auth, SameSite Strict). It carries
+ *   the user's `token_version`; a refresh reads that one column and reissues
+ *   both tokens, so a device in use stays signed in. Bumping the version
+ *   (password change, "sign out everywhere") invalidates every refresh token
+ *   at once; access tokens already out lapse within 15 minutes. Signing out
+ *   one device clears its cookies; its tokens are not tracked server-side.
  *
  * Both cookies are HttpOnly: page scripts never see a token. Cookie-authed
  * requests that change state must also send `x-gdt-csrf: 1`; a cross-site page
@@ -14,14 +17,14 @@
  * grants.
  */
 
-import { and, eq, gt, or } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { Context, MiddlewareHandler } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { sign, verify } from 'hono/jwt'
+import type { JWTPayload } from 'hono/utils/jwt/types'
 import { getDb } from '../db/client'
-import { sessions } from '../db/schema'
+import { users } from '../db/schema'
 import type { AppEnv } from '../env'
-import { randomToken, sha256Hex } from './crypto'
 import { ApiError } from './http'
 
 const ACCESS_COOKIE = 'gdt_at'
@@ -33,10 +36,11 @@ const REFRESH_COOKIE = 'gdt_rt'
  */
 const HINT_COOKIE = 'gdt_s'
 const ACCESS_TTL_S = 15 * 60
-const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000
-const ROTATION_GRACE_MS = 60 * 1000
+const REFRESH_TTL_S = 30 * 24 * 60 * 60
 
 export const CSRF_HEADER = 'x-gdt-csrf'
+
+type TokenType = 'access' | 'refresh'
 
 function jwtSecret(c: Context<AppEnv>): string {
   const secret = c.env.JWT_SECRET
@@ -46,31 +50,58 @@ function jwtSecret(c: Context<AppEnv>): string {
   return secret
 }
 
-async function setAccessCookie(c: Context<AppEnv>, userId: number): Promise<void> {
-  const exp = Math.floor(Date.now() / 1000) + ACCESS_TTL_S
-  const token = await sign({ sub: String(userId), exp }, jwtSecret(c), 'HS256')
-  setCookie(c, ACCESS_COOKIE, token, {
+/** The verified payload of a cookie token of this type, or null. */
+async function readToken(
+  c: Context<AppEnv>,
+  cookie: string,
+  typ: TokenType,
+): Promise<JWTPayload | null> {
+  const token = getCookie(c, cookie)
+  if (!token) return null
+  const secret = jwtSecret(c)
+  try {
+    const payload = await verify(token, secret, 'HS256')
+    return payload.typ === typ ? payload : null
+  } catch {
+    return null
+  }
+}
+
+/** Signs a user in on this device: fresh access and refresh cookies. */
+export async function startSession(
+  c: Context<AppEnv>,
+  user: { id: number; tokenVersion: number },
+): Promise<void> {
+  const now = Math.floor(Date.now() / 1000)
+  const secret = jwtSecret(c)
+  const sub = String(user.id)
+  const [access, refresh] = await Promise.all([
+    sign({ sub, typ: 'access', iat: now, exp: now + ACCESS_TTL_S }, secret, 'HS256'),
+    sign(
+      { sub, typ: 'refresh', ver: user.tokenVersion, iat: now, exp: now + REFRESH_TTL_S },
+      secret,
+      'HS256',
+    ),
+  ])
+  setCookie(c, ACCESS_COOKIE, access, {
     path: '/api',
     httpOnly: true,
     secure: true,
     sameSite: 'Lax',
     maxAge: ACCESS_TTL_S,
   })
-}
-
-function setRefreshCookie(c: Context<AppEnv>, token: string): void {
-  setCookie(c, REFRESH_COOKIE, token, {
+  setCookie(c, REFRESH_COOKIE, refresh, {
     path: '/api/auth',
     httpOnly: true,
     secure: true,
     sameSite: 'Strict',
-    maxAge: REFRESH_TTL_MS / 1000,
+    maxAge: REFRESH_TTL_S,
   })
   setCookie(c, HINT_COOKIE, '1', {
     path: '/',
     secure: true,
     sameSite: 'Lax',
-    maxAge: REFRESH_TTL_MS / 1000,
+    maxAge: REFRESH_TTL_S,
   })
 }
 
@@ -80,83 +111,42 @@ export function clearSessionCookies(c: Context<AppEnv>): void {
   deleteCookie(c, HINT_COOKIE, { path: '/', secure: true })
 }
 
-/** Signs a user in on this device. */
-export async function startSession(c: Context<AppEnv>, userId: number): Promise<void> {
-  const token = randomToken()
-  await getDb(c.env.DB)
-    .insert(sessions)
-    .values({
-      id: await sha256Hex(token),
-      userId,
-      userAgent: c.req.header('user-agent')?.slice(0, 256) ?? null,
-      expiresAt: Date.now() + REFRESH_TTL_MS,
-    })
-  await setAccessCookie(c, userId)
-  setRefreshCookie(c, token)
-}
-
-/** Exchanges the refresh cookie for a fresh access cookie, rotating it. */
+/** Exchanges a valid refresh cookie for new tokens. One D1 read, no writes. */
 export async function refreshSession(c: Context<AppEnv>): Promise<void> {
-  const token = getCookie(c, REFRESH_COOKIE)
-  if (!token) throw new ApiError(401, 'unauthenticated', 'Not signed in')
-
-  const db = getDb(c.env.DB)
-  const now = Date.now()
-  const hash = await sha256Hex(token)
-  const [session] = await db
-    .select()
-    .from(sessions)
-    .where(
-      and(or(eq(sessions.id, hash), eq(sessions.previousId, hash)), gt(sessions.expiresAt, now)),
-    )
-    .limit(1)
-
-  if (!session) {
+  if (!getCookie(c, REFRESH_COOKIE)) throw new ApiError(401, 'unauthenticated', 'Not signed in')
+  const payload = await readToken(c, REFRESH_COOKIE, 'refresh')
+  if (!payload) {
     clearSessionCookies(c)
     throw new ApiError(401, 'session_expired', 'Session expired, sign in again')
   }
-
-  if (session.id === hash) {
-    const next = randomToken()
-    await db
-      .update(sessions)
-      .set({
-        id: await sha256Hex(next),
-        previousId: hash,
-        rotatedAt: now,
-        lastUsedAt: now,
-        expiresAt: now + REFRESH_TTL_MS,
-      })
-      .where(eq(sessions.id, hash))
-    setRefreshCookie(c, next)
-  } else if ((session.rotatedAt ?? 0) < now - ROTATION_GRACE_MS) {
-    // A replaced token presented long after its rotation: it was copied.
-    // End the session everywhere rather than guess which holder is genuine.
-    await db.delete(sessions).where(eq(sessions.id, session.id))
+  const id = Number(payload.sub)
+  const [user] = await getDb(c.env.DB)
+    .select({ id: users.id, tokenVersion: users.tokenVersion })
+    .from(users)
+    .where(eq(users.id, id))
+  if (!user || user.tokenVersion !== payload.ver) {
     clearSessionCookies(c)
     throw new ApiError(401, 'session_revoked', 'Session ended, sign in again')
   }
-  // Within the grace window the browser already holds the new refresh
-  // cookie from the concurrent rotation; only the access cookie is reissued.
-
-  await setAccessCookie(c, session.userId)
+  await startSession(c, user)
 }
 
-/** Signs this device out. */
-export async function endSession(c: Context<AppEnv>): Promise<void> {
-  const token = getCookie(c, REFRESH_COOKIE)
-  if (token) {
-    const hash = await sha256Hex(token)
-    await getDb(c.env.DB)
-      .delete(sessions)
-      .where(or(eq(sessions.id, hash), eq(sessions.previousId, hash)))
-  }
-  clearSessionCookies(c)
-}
-
-/** Signs the user out everywhere. */
-export async function endAllSessions(c: Context<AppEnv>, userId: number): Promise<void> {
-  await getDb(c.env.DB).delete(sessions).where(eq(sessions.userId, userId))
+/**
+ * Invalidates every refresh token the user holds, on all devices. Returns the
+ * user with the new version, so the caller can sign this device back in.
+ */
+export async function revokeAllSessions(
+  c: Context<AppEnv>,
+  userId: number,
+  set: Partial<typeof users.$inferInsert> = {},
+): Promise<{ id: number; tokenVersion: number }> {
+  const [user] = await getDb(c.env.DB)
+    .update(users)
+    .set({ ...set, tokenVersion: sql`${users.tokenVersion} + 1` })
+    .where(eq(users.id, userId))
+    .returning({ id: users.id, tokenVersion: users.tokenVersion })
+  if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
+  return user
 }
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -166,14 +156,9 @@ export const requireUser: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (!SAFE_METHODS.has(c.req.method) && c.req.header(CSRF_HEADER) !== '1') {
     throw new ApiError(403, 'csrf', `Missing ${CSRF_HEADER} header`)
   }
-  const token = getCookie(c, ACCESS_COOKIE)
-  if (!token) throw new ApiError(401, 'unauthenticated', 'Not signed in')
-  try {
-    const payload = await verify(token, jwtSecret(c), 'HS256')
-    c.set('userId', Number(payload.sub))
-  } catch (error) {
-    if (error instanceof ApiError) throw error
-    throw new ApiError(401, 'token_expired', 'Access token expired')
-  }
+  if (!getCookie(c, ACCESS_COOKIE)) throw new ApiError(401, 'unauthenticated', 'Not signed in')
+  const payload = await readToken(c, ACCESS_COOKIE, 'access')
+  if (!payload) throw new ApiError(401, 'token_expired', 'Access token expired')
+  c.set('userId', Number(payload.sub))
   await next()
 }
