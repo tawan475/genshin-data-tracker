@@ -61,7 +61,7 @@ const importRoute = computed(() => ({
     <UiEmpty title="No snapshots yet">
       <template #icon><History aria-hidden="true" /></template>
       <UiButton variant="primary" :to="importRoute">
-        <Upload class="size-5" aria-hidden="true" />
+        <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>
     </UiEmpty>

@@ -10,13 +10,15 @@ const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)')
 
 let preference: ThemePreference = storedPreference()
 
-/** The painted theme, reactive so charts and toggles follow it. */
-export const resolvedTheme = ref<Theme>(currentTheme())
+/**
+ * The public pages (landing, sign-in, sign-up) are always dark: while one is
+ * shown the document is painted dark whatever the preference. index.html's
+ * inline script does the same before first paint.
+ */
+let publicPage = document.documentElement.hasAttribute('data-public')
 
-/** The theme applied before first paint by index.html's inline script. */
-function currentTheme(): Theme {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-}
+/** The user's theme (not the public pages' forced dark), so charts and toggles follow it. */
+export const resolvedTheme = ref<Theme>(resolveTheme(preference))
 
 function storedPreference(): ThemePreference {
   const stored = readStorage('theme')
@@ -28,15 +30,28 @@ export function resolveTheme(choice: ThemePreference): Theme {
   return darkQuery().matches ? 'dark' : 'light'
 }
 
+/** Browser chrome (status bar, tab strip) per painted ground. */
+const THEME_COLOR = { light: '#f8fafc', dark: '#0f172a', public: '#0f131f' } as const
+
 function paint(theme: Theme): void {
   const root = document.documentElement
-  if (root.dataset.theme !== theme) {
+  const painted = publicPage ? 'dark' : theme
+  if (root.dataset.theme !== painted) {
     root.classList.add('theme-transitions')
-    root.dataset.theme = theme
+    root.dataset.theme = painted
   }
+  root.toggleAttribute('data-public', publicPage)
   resolvedTheme.value = theme
+  const color = THEME_COLOR[publicPage ? 'public' : painted]
   const meta = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
-  meta.forEach((m) => (m.content = theme === 'dark' ? '#0f172a' : '#f8fafc'))
+  meta.forEach((m) => (m.content = color))
+}
+
+/** Called on every navigation: public routes hold the document dark, others restore the theme. */
+export function setPublicPage(on: boolean): void {
+  if (on === publicPage) return
+  publicPage = on
+  paint(resolveTheme(preference))
 }
 
 export function applyTheme(choice: ThemePreference): void {

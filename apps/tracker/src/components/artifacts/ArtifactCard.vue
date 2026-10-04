@@ -47,7 +47,7 @@ const label = computed(() => {
 
 <template>
   <article
-    class="relative flex min-w-0 flex-col rounded-xl border border-border-default bg-surface-raised shadow-card transition-colors hover:border-border-strong"
+    class="relative flex min-w-0 flex-col rounded-xl border border-border-default bg-surface-raised shadow-sm transition-colors hover:border-border-strong"
   >
     <div class="flex items-start gap-3 p-3 pb-2.5" aria-hidden="true">
       <GameIcon

@@ -41,9 +41,7 @@ const owner = (row: ArtifactRow) => (row.artifact.location ? keyToName(row.artif
 </script>
 
 <template>
-  <div
-    class="overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-card"
-  >
+  <div class="overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm">
     <table class="w-full text-sm">
       <thead class="border-b border-border-default bg-surface-overlay/50 text-text-secondary">
         <tr>

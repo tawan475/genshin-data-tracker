@@ -2,13 +2,27 @@
 <html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
+    <meta name="theme-color" content="#f8fafc" />
     <script>
       // Theme before first paint: the user's choice, else the OS preference.
-      try {
-        var t = localStorage.getItem('gdt:theme')
-        if (t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches))
-          document.documentElement.dataset.theme = 'dark'
-      } catch (_) {}
+      // The public pages (/, /login, /register) are always dark (lib/theme.ts).
+      ;(function () {
+        var root = document.documentElement
+        var pub = /^\/(login|register)?\/?$/.test(location.pathname)
+        var dark = pub
+        try {
+          var t = localStorage.getItem('gdt:theme')
+          dark =
+            dark ||
+            t === 'dark' ||
+            (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        } catch (_) {}
+        if (pub) root.setAttribute('data-public', '')
+        if (dark) {
+          root.dataset.theme = 'dark'
+          document.querySelector('meta[name="theme-color"]').content = pub ? '#0f131f' : '#0f172a'
+        }
+      })()
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Genshin Tracker</title>
@@ -16,7 +30,6 @@
       name="description"
       content="Track your Genshin Impact inventory over time: snapshots from Irminsul, artifacts, materials and exports."
     />
-    <meta name="theme-color" content="#f8fafc" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />

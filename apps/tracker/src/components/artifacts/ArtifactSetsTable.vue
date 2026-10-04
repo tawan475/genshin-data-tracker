@@ -27,7 +27,7 @@ function cellTitle(set: SetSummary, index: number): string {
 </script>
 
 <template>
-  <div class="rounded-xl border border-border-default bg-surface-raised shadow-card">
+  <div class="rounded-xl border border-border-default bg-surface-raised shadow-sm">
     <div
       :class="GRID"
       class="border-b border-border-default bg-surface-overlay/50 px-3 py-2 text-sm font-medium text-text-secondary"

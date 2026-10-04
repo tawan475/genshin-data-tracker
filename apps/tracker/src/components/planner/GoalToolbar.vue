@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Search } from 'lucide-vue-next'
-import FilterChip from '@/components/characters/FilterChip.vue'
 import { ELEMENT_FILL } from '@/components/characters/tokens'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { ELEMENTS, ELEMENT_LABELS, WEAPON_TYPES, WEAPON_TYPE_LABELS } from '@/data/characters'
 import type { Element } from '@/data/characters-meta'
 import { GOAL_SORTS, type GoalFilters, type GoalSort, type GoalStatus } from './goal-list'
@@ -50,11 +51,7 @@ function toggleRarity(r: number) {
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm"
-    role="search"
-    aria-label="Filter goals"
-  >
+  <UiToolbar label="Filter goals">
     <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
       <label class="relative col-span-2 min-w-0 sm:flex-1">
         <span class="sr-only">Search</span>
@@ -82,7 +79,7 @@ function toggleRarity(r: number) {
     </div>
 
     <div
-      class="-mx-3 flex gap-2 overflow-x-auto px-3 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
       aria-label="Status, element and rarity"
     >
@@ -127,5 +124,5 @@ function toggleRarity(r: number) {
         >Clear</UiButton
       >
     </div>
-  </div>
+  </UiToolbar>
 </template>

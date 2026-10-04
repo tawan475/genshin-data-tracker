@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { refDebounced, useEventListener } from '@vueuse/core'
-import { ChevronLeft, ChevronRight, Gem, SearchX } from 'lucide-vue-next'
+import { refDebounced } from '@vueuse/core'
+import { Gem, Layers, LayoutGrid, Rows3, SearchX, Upload } from 'lucide-vue-next'
 import ArtifactCard from '@/components/artifacts/ArtifactCard.vue'
 import ArtifactDetail from '@/components/artifacts/ArtifactDetail.vue'
-import ArtifactPager from '@/components/artifacts/ArtifactPager.vue'
 import ArtifactSetBreakdown from '@/components/artifacts/ArtifactSetBreakdown.vue'
 import ArtifactSetsTable from '@/components/artifacts/ArtifactSetsTable.vue'
 import ArtifactTable from '@/components/artifacts/ArtifactTable.vue'
 import ArtifactToolbar from '@/components/artifacts/ArtifactToolbar.vue'
-import ArtifactViewToggle from '@/components/artifacts/ArtifactViewToggle.vue'
 import { SLOT_ICONS } from '@/components/artifacts/styles'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
-import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
+import UiPager from '@/components/ui/UiPager.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
 import { MAIN_STAT_ORDER, formatSetName, formatSlotName } from '@/utils/artifact-stats'
@@ -50,6 +50,12 @@ import { useAccount } from './context'
 
 /** Cards are tall, rows are not: a page of each fills a few screens. */
 const PAGE_SIZE: Record<ArtifactView, number> = { cards: 60, table: 100, sets: Infinity }
+/** Icons only on a phone; the name stays in the tooltip. */
+const VIEW_OPTIONS: SegmentedOption<ArtifactView>[] = [
+  { value: 'cards', label: 'Cards', icon: LayoutGrid },
+  { value: 'table', label: 'Table', icon: Rows3 },
+  { value: 'sets', label: 'Sets', icon: Layers },
+]
 
 const account = useAccount()
 const inventory = useResource(
@@ -228,14 +234,6 @@ function step(delta: number) {
   if (Number.isFinite(pageSize.value)) page.value = Math.floor(index / pageSize.value) + 1
 }
 
-useEventListener(window, 'keydown', (event: KeyboardEvent) => {
-  if (openRow.value === null || event.altKey || event.ctrlKey || event.metaKey) return
-  if (event.key === 'ArrowRight') step(1)
-  else if (event.key === 'ArrowLeft') step(-1)
-  else return
-  event.preventDefault()
-})
-
 const GRID =
   'grid grid-cols-1 gap-3 @xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4 @7xl:grid-cols-5'
 </script>
@@ -243,10 +241,15 @@ const GRID =
 <template>
   <PageHeader title="Artifacts" />
 
-  <UiEmpty v-if="!account.latest" title="No snapshot yet">
-    <template #icon><Gem aria-hidden="true" /></template>
-    <UiButton variant="primary" :to="{ name: 'account-import' }">Import</UiButton>
-  </UiEmpty>
+  <UiPanel v-if="!account.latest" flush>
+    <UiEmpty title="No snapshots yet">
+      <template #icon><Gem aria-hidden="true" /></template>
+      <UiButton variant="primary" :to="{ name: 'account-import' }">
+        <Upload class="size-4" aria-hidden="true" />
+        Import
+      </UiButton>
+    </UiEmpty>
+  </UiPanel>
 
   <UiError
     v-else-if="inventory.error.value && !inventory.data.value"
@@ -280,10 +283,15 @@ const GRID =
     </div>
   </div>
 
-  <UiEmpty v-else-if="rows.length === 0" title="No artifacts">
-    <template #icon><Gem aria-hidden="true" /></template>
-    <UiButton variant="primary" :to="{ name: 'account-import' }">Import</UiButton>
-  </UiEmpty>
+  <UiPanel v-else-if="rows.length === 0" flush>
+    <UiEmpty title="No artifacts">
+      <template #icon><Gem aria-hidden="true" /></template>
+      <UiButton variant="primary" :to="{ name: 'account-import' }">
+        <Upload class="size-4" aria-hidden="true" />
+        Import
+      </UiButton>
+    </UiEmpty>
+  </UiPanel>
 
   <div v-else class="flex flex-col gap-4">
     <UiError
@@ -325,13 +333,15 @@ const GRID =
         :selected="filters.sets"
         @toggle="toggleSet"
       />
-      <ArtifactViewToggle v-model="view" class="ml-auto" />
+      <UiSegmented v-model="view" :options="VIEW_OPTIONS" label="View" compact class="ml-auto" />
     </div>
 
-    <UiEmpty v-if="results.length === 0" title="No matches">
-      <template #icon><SearchX aria-hidden="true" /></template>
-      <UiButton variant="primary" @click="clearFilters">Clear filters</UiButton>
-    </UiEmpty>
+    <UiPanel v-if="results.length === 0" flush>
+      <UiEmpty title="No matches">
+        <template #icon><SearchX aria-hidden="true" /></template>
+        <UiButton @click="clearFilters">Clear</UiButton>
+      </UiEmpty>
+    </UiPanel>
 
     <ArtifactSetsTable v-else-if="view === 'sets'" :sets="setSummaries" @pick="pickSet" />
 
@@ -372,8 +382,7 @@ const GRID =
         </section>
       </div>
 
-      <ArtifactPager
-        v-if="pageCount > 1"
+      <UiPager
         :model-value="page"
         :page-count="pageCount"
         :page-size="pageSize"
@@ -383,32 +392,15 @@ const GRID =
     </template>
   </div>
 
-  <UiModal :open="openRow !== null" :title="openRow?.setName ?? ''" wide @close="openId = null">
+  <UiModal
+    :open="openRow !== null"
+    :title="openRow?.setName ?? ''"
+    size="wide"
+    :index="openIndex >= 0 ? openIndex : undefined"
+    :total="results.length"
+    @close="openId = null"
+    @step="step"
+  >
     <ArtifactDetail v-if="openRow" :row="openRow" :rank="openRank" />
-    <template #footer>
-      <span
-        v-if="openIndex >= 0"
-        class="tabular mr-auto self-center font-mono text-sm text-text-muted"
-        title="← →"
-      >
-        {{ formatNumber(openIndex + 1) }} / {{ formatNumber(results.length) }}
-      </span>
-      <UiIconButton
-        label="Previous"
-        class="disabled:opacity-40"
-        :disabled="openIndex <= 0"
-        @click="step(-1)"
-      >
-        <ChevronLeft class="size-5" aria-hidden="true" />
-      </UiIconButton>
-      <UiIconButton
-        label="Next"
-        class="disabled:opacity-40"
-        :disabled="openIndex < 0 || openIndex >= results.length - 1"
-        @click="step(1)"
-      >
-        <ChevronRight class="size-5" aria-hidden="true" />
-      </UiIconButton>
-    </template>
   </UiModal>
 </template>

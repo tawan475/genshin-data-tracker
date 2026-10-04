@@ -42,6 +42,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadBundle, type AccountRef } from '@/data/account-data'
 import { useResource } from '@/data/use-resource'
@@ -393,9 +394,13 @@ async function importIds(ids: number[]): Promise<boolean> {
             newestCapture.ago
           }}</time>
         </p>
-        <p v-else class="flex items-start gap-2 text-sm text-text-secondary">
-          <Info class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          Open the in-game Achievements menu while irminsul runs to capture them.
+        <p
+          v-else
+          class="flex items-center gap-1.5 text-text-secondary"
+          title="Open the in-game Achievements menu while irminsul runs to capture them"
+        >
+          <Info class="size-4 shrink-0" aria-hidden="true" />
+          Not captured
         </p>
       </template>
       <template #actions>
@@ -423,7 +428,7 @@ async function importIds(ids: number[]): Promise<boolean> {
       <div class="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-6">
         <aside class="hidden lg:block">
           <div
-            class="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-2 shadow-sm [scrollbar-width:thin]"
+            class="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-2 shadow-sm"
           >
             <AchievementCategories
               v-model="filters.goal"
@@ -452,10 +457,12 @@ async function importIds(ids: number[]): Promise<boolean> {
             @unmark-all="unmarkAll"
           />
 
-          <UiEmpty v-if="shown.length === 0" title="No matches">
-            <template #icon><SearchX aria-hidden="true" /></template>
-            <UiButton @click="clearFilters">Clear</UiButton>
-          </UiEmpty>
+          <UiPanel v-if="shown.length === 0" flush>
+            <UiEmpty title="No matches">
+              <template #icon><SearchX aria-hidden="true" /></template>
+              <UiButton @click="clearFilters">Clear</UiButton>
+            </UiEmpty>
+          </UiPanel>
 
           <AchievementGroup
             v-for="group in groups"

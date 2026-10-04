@@ -10,6 +10,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { formatNumber } from '@/lib/format'
 import type { CategoryItem } from './AchievementCategories.vue'
 
@@ -59,11 +60,7 @@ const versionOptions = computed(() => [
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
-    role="search"
-    aria-label="Filter achievements"
-  >
+  <UiToolbar label="Filter achievements">
     <div class="flex flex-wrap items-center gap-2">
       <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
         <span class="sr-only">Search</span>
@@ -137,5 +134,5 @@ const versionOptions = computed(() => [
         </UiButton>
       </div>
     </div>
-  </div>
+  </UiToolbar>
 </template>

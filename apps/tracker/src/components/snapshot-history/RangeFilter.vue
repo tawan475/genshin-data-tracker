@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { CalendarRange, X } from 'lucide-vue-next'
-import BaseButton from '@/components/legacy/BaseButton.vue'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 
 /**
  * Date filter for the table (local days, inclusive; either end open). While
@@ -26,7 +27,7 @@ function clear() {
 }
 
 const input =
-  'min-w-0 flex-1 sm:flex-none sm:w-36 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition-colors'
+  'min-h-8 min-w-0 flex-1 rounded-md border border-border-strong bg-surface-raised px-2 text-sm text-text-primary shadow-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none sm:w-36 sm:flex-none'
 </script>
 
 <template>
@@ -36,10 +37,7 @@ const input =
     @submit.prevent="emit('select')"
   >
     <div class="flex min-w-0 basis-full items-center gap-2 sm:basis-auto">
-      <CalendarRange
-        class="hidden size-4 shrink-0 text-slate-400 dark:text-slate-500 sm:block"
-        aria-hidden="true"
-      />
+      <CalendarRange class="hidden size-4 shrink-0 text-text-muted sm:block" aria-hidden="true" />
       <input
         v-model="from"
         type="date"
@@ -49,7 +47,7 @@ const input =
         :max="to || lastDay"
         :class="input"
       />
-      <span class="text-slate-400 dark:text-slate-500" aria-hidden="true">–</span>
+      <span class="text-text-muted" aria-hidden="true">–</span>
       <input
         v-model="to"
         type="date"
@@ -61,7 +59,7 @@ const input =
       />
     </div>
     <template v-if="active">
-      <BaseButton
+      <UiButton
         type="submit"
         variant="primary"
         size="sm"
@@ -69,16 +67,10 @@ const input =
         :title="`Select the ${matched} snapshots in range`"
       >
         Select {{ matched }}
-      </BaseButton>
-      <button
-        type="button"
-        class="inline-flex size-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors"
-        aria-label="Clear dates"
-        title="Clear dates"
-        @click="clear"
-      >
-        <X class="size-4" aria-hidden="true" />
-      </button>
+      </UiButton>
+      <UiIconButton label="Clear dates" @click="clear">
+        <X class="size-5" aria-hidden="true" />
+      </UiIconButton>
     </template>
   </form>
 </template>

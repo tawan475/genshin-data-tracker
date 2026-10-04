@@ -62,7 +62,7 @@ async function signOutEverywhere() {
     <UiPanel title="Session">
       <div class="flex flex-wrap items-center gap-3">
         <UiButton :loading="signingOut === 'here'" :disabled="!!signingOut" @click="signOut">
-          <LogOut v-if="signingOut !== 'here'" class="size-5" aria-hidden="true" />
+          <LogOut v-if="signingOut !== 'here'" class="size-4" aria-hidden="true" />
           Sign out
         </UiButton>
         <UiButton

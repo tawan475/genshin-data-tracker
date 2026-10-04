@@ -2,9 +2,8 @@
 import type { SnapshotResponse } from '@gdt/shared'
 import { useElementSize } from '@vueuse/core'
 import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { Download, Repeat2, Trash2 } from 'lucide-vue-next'
+import { CalendarX, History, Repeat2, Upload } from 'lucide-vue-next'
 import { api } from '@/api'
-import BaseButton from '@/components/legacy/BaseButton.vue'
 import BasePagination, { type PaginationMeta } from '@/components/legacy/BasePagination.vue'
 import BaseTable, { type TableLabel } from '@/components/legacy/BaseTable.vue'
 import ConfirmDialog from '@/components/snapshot-history/ConfirmDialog.vue'
@@ -12,17 +11,20 @@ import ExportTargets from '@/components/snapshot-history/ExportTargets.vue'
 import FigureCell from '@/components/snapshot-history/FigureCell.vue'
 import LegacyCheckbox from '@/components/snapshot-history/LegacyCheckbox.vue'
 import RangeFilter from '@/components/snapshot-history/RangeFilter.vue'
+import RowActions from '@/components/snapshot-history/RowActions.vue'
 import SelectionBar from '@/components/snapshot-history/SelectionBar.vue'
 import SnapshotCards from '@/components/snapshot-history/SnapshotCards.vue'
 import StorageStrip from '@/components/snapshot-history/StorageStrip.vue'
 import { inDayRange, snapshotChanges } from '@/components/snapshot-history/snapshot-figures'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import { useSnapshotSelection } from '@/composables/useSnapshotSelection'
 import { loadSnapshots } from '@/data/account-data'
 import { cancelExport, downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
 import { currencyMissing, dayKey } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
-import { formatBytes, formatFullDateTime, formatNumber } from '@/lib/format'
+import { clock24, formatBytes, formatFullDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -30,9 +32,15 @@ import { useAccount } from './context'
 
 /** The bulk delete endpoint takes at most this many ids per request. */
 const DELETE_BATCH = 1000
-/** Content widths (px) that fit every column, and every column but Source and Raw Size. */
-const FULL_TABLE = 1100
-const COMPACT_TABLE = 940
+/**
+ * Content widths (px) at which the table's columns fit without scrolling
+ * sideways (measured min-content plus a margin): every column; all but
+ * Source and Raw Size; and also without Stored Size and Weapons. Narrower
+ * than that, the rows become cards (which show every figure).
+ */
+const FULL_TABLE = 1150
+const COMPACT_TABLE = 975
+const NARROW_TABLE = 780
 const PER_PAGE_KEY = 'snapshot-history:per-page'
 
 const account = useAccount()
@@ -122,7 +130,13 @@ const { width } = useElementSize(
   { box: 'border-box' },
 )
 const layout = computed(() =>
-  width.value >= FULL_TABLE ? 'full' : width.value >= COMPACT_TABLE ? 'compact' : 'cards',
+  width.value >= FULL_TABLE
+    ? 'full'
+    : width.value >= COMPACT_TABLE
+      ? 'compact'
+      : width.value >= NARROW_TABLE
+        ? 'narrow'
+        : 'cards',
 )
 
 const tableLabels = computed<TableLabel[]>(() => [
@@ -135,16 +149,20 @@ const tableLabels = computed<TableLabel[]>(() => [
         { key: 'rawSize', title: 'Raw Size', slot: true },
       ]
     : []),
-  { key: 'storedSize', title: 'Stored Size', slot: true },
+  ...(layout.value === 'narrow' ? [] : [{ key: 'storedSize', title: 'Stored Size', slot: true }]),
   { key: 'characters', title: 'Characters', slot: true },
   { key: 'artifacts', title: 'Artifacts', slot: true },
-  { key: 'weapons', title: 'Weapons', slot: true },
+  ...(layout.value === 'narrow' ? [] : [{ key: 'weapons', title: 'Weapons', slot: true }]),
   { key: 'mora', title: 'Mora', slot: true },
   { key: 'primogem', title: 'Primogems', slot: true },
   { key: 'actions', title: 'Actions', slot: true },
 ])
 
 const formatKb = (bytes: number) => (bytes ? (bytes / 1024).toFixed(1) + ' KB' : '0 KB')
+
+/** The old full timestamp split in two lines: "7/13/2026" over "9:45:43 PM". */
+const dayLine = (ms: number) => new Date(ms).toLocaleDateString()
+const timeLine = (ms: number) => new Date(ms).toLocaleTimeString(undefined, { hour12: !clock24() })
 
 // ------------------------------------------------------------------ selection
 
@@ -353,7 +371,7 @@ const handleBulkDelete = async () => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto space-y-6 min-h-[60vh] relative">
+  <div class="relative mx-auto min-h-[60vh] max-w-6xl space-y-6">
     <ExportTargets :account="account" />
 
     <StorageStrip
@@ -380,9 +398,7 @@ const handleBulkDelete = async () => {
       />
 
       <!-- Normal Flow Heading; the selection toolbar covers it. -->
-      <h2
-        class="flex h-[3.25rem] items-center text-xl font-bold text-slate-900 dark:text-white transition-colors"
-      >
+      <h2 class="flex h-[3.25rem] items-center text-xl font-bold transition-colors">
         Import History
       </h2>
 
@@ -401,10 +417,10 @@ const handleBulkDelete = async () => {
       <template v-if="layout === 'cards'">
         <div
           v-if="isLoading && rows.length === 0"
-          class="flex justify-center rounded-xl border border-slate-200 bg-white p-12 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+          class="flex justify-center rounded-xl border border-border-default bg-surface-raised p-12 shadow-sm"
         >
           <span
-            class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-slate-900 dark:border-t-slate-100 rounded-full animate-spin"
+            class="size-8 animate-spin rounded-full border-4 border-border-default border-t-text-primary"
           />
         </div>
         <template v-else>
@@ -425,18 +441,20 @@ const handleBulkDelete = async () => {
               <div v-if="error" class="flex justify-center text-left">
                 <UiError :error="error" title="Load failed" @retry="reload" />
               </div>
-              <div v-else-if="filtering" class="flex flex-col items-center gap-3">
-                <p class="font-medium text-slate-700 dark:text-slate-200">No snapshots in range</p>
-                <BaseButton variant="outline" size="sm" @click="clearDates">Clear dates</BaseButton>
-              </div>
-              <div v-else class="flex flex-col items-center gap-3">
-                <p class="font-medium text-slate-700 dark:text-slate-200">No snapshots</p>
-                <RouterLink
+              <UiEmpty v-else-if="filtering" title="No snapshots in range">
+                <template #icon><CalendarX aria-hidden="true" /></template>
+                <UiButton size="sm" @click="clearDates">Clear</UiButton>
+              </UiEmpty>
+              <UiEmpty v-else title="No snapshots yet">
+                <template #icon><History aria-hidden="true" /></template>
+                <UiButton
+                  variant="primary"
                   :to="{ name: 'account-import', params: { accountId: account.id } }"
-                  class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                  >Import</RouterLink
                 >
-              </div>
+                  <Upload class="size-4" aria-hidden="true" />
+                  Import
+                </UiButton>
+              </UiEmpty>
             </template>
           </SnapshotCards>
           <BasePagination
@@ -453,12 +471,9 @@ const handleBulkDelete = async () => {
       <BaseTable
         v-else
         ref="baseTableRef"
-        class="history-table"
         :labels="tableLabels"
         :data="rows"
-        :row-class="
-          (row) => (isSelected(row.id) ? 'bg-indigo-50/70 dark:bg-indigo-500/10' : undefined)
-        "
+        :row-class="(row) => (isSelected(row.id) ? 'bg-accent/10' : undefined)"
         :is-loading="isLoading"
         :meta="meta"
         @page-change="onPageChange"
@@ -466,7 +481,7 @@ const handleBulkDelete = async () => {
       >
         <template #header-select>
           <LegacyCheckbox
-            class="-mx-2.5 -my-4 px-2.5 py-4"
+            class="-mx-3 -my-2.5 px-3 py-2.5"
             :checked="viewCoverage === 'all'"
             :mixed="viewCoverage === 'some'"
             :label="filtering ? 'Select all in range' : 'Select all snapshots'"
@@ -475,7 +490,7 @@ const handleBulkDelete = async () => {
         </template>
         <template #select="{ item }">
           <LegacyCheckbox
-            class="-mx-2.5 -my-4 px-2.5 py-4"
+            class="-mx-3 -my-2 px-3 py-2"
             :checked="isSelected(item.id)"
             :label="`Select snapshot ${item.id}`"
             title="Shift-click to select a range"
@@ -483,54 +498,45 @@ const handleBulkDelete = async () => {
           />
         </template>
         <template #takenAt="{ item }">
-          <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
-            {{ formatFullDateTime(item.takenAt) }}
-            <span
-              v-if="item.lastSeenAt > item.takenAt"
-              class="text-slate-400 dark:text-slate-500"
-              :title="`Unchanged until ${formatFullDateTime(item.lastSeenAt)}`"
-            >
-              <Repeat2 class="size-3.5" aria-hidden="true" />
-              <span class="sr-only">Unchanged until {{ formatFullDateTime(item.lastSeenAt) }}</span>
+          <span class="flex flex-col whitespace-nowrap" :title="formatFullDateTime(item.takenAt)">
+            <span class="font-medium text-text-primary">{{ dayLine(item.takenAt) }}</span>
+            <span class="inline-flex items-center gap-1 text-xs text-text-muted">
+              {{ timeLine(item.takenAt) }}
+              <span
+                v-if="item.lastSeenAt > item.takenAt"
+                :title="`Unchanged until ${formatFullDateTime(item.lastSeenAt)}`"
+              >
+                <Repeat2 class="size-3.5" aria-hidden="true" />
+                <span class="sr-only"
+                  >Unchanged until {{ formatFullDateTime(item.lastSeenAt) }}</span
+                >
+              </span>
             </span>
           </span>
         </template>
         <template #rawSize="{ item }">
-          <span class="text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">{{
+          <span class="font-medium whitespace-nowrap text-text-muted">{{
             formatKb(item.rawSize)
           }}</span>
         </template>
         <template #storedSize="{ item }">
           <span
-            class="text-emerald-600 dark:text-emerald-400 font-medium whitespace-nowrap"
+            class="font-medium whitespace-nowrap text-success-text"
             :title="`${item.source} · ${formatKb(item.rawSize)} → ${formatKb(item.storedSize)}`"
             >{{ formatKb(item.storedSize) }}</span
           >
         </template>
         <template #characters="{ item }">
-          <FigureCell
-            class="-my-1.5"
-            :value="item.summary.characters"
-            :change="changes.get(item.id)?.characters"
-          />
+          <FigureCell :value="item.summary.characters" :change="changes.get(item.id)?.characters" />
         </template>
         <template #artifacts="{ item }">
-          <FigureCell
-            class="-my-1.5"
-            :value="item.summary.artifacts"
-            :change="changes.get(item.id)?.artifacts"
-          />
+          <FigureCell :value="item.summary.artifacts" :change="changes.get(item.id)?.artifacts" />
         </template>
         <template #weapons="{ item }">
-          <FigureCell
-            class="-my-1.5"
-            :value="item.summary.weapons"
-            :change="changes.get(item.id)?.weapons"
-          />
+          <FigureCell :value="item.summary.weapons" :change="changes.get(item.id)?.weapons" />
         </template>
         <template #mora="{ item }">
           <FigureCell
-            class="-my-1.5"
             kind="mora"
             :value="item.summary.mora"
             :change="changes.get(item.id)?.mora"
@@ -539,7 +545,6 @@ const handleBulkDelete = async () => {
         </template>
         <template #primogem="{ item }">
           <FigureCell
-            class="-my-1.5"
             kind="primogem"
             :value="item.summary.primogem"
             :change="changes.get(item.id)?.primogem"
@@ -547,52 +552,34 @@ const handleBulkDelete = async () => {
           />
         </template>
         <template #actions="{ item }">
-          <div class="flex items-center gap-2">
-            <BaseButton
-              size="xs"
-              variant="primary"
-              :loading="downloading.has(item.id)"
-              @click="downloadSnapshot(item)"
-              title="Download GOOD"
-            >
-              <template #icon>
-                <Download class="w-3.5 h-3.5" aria-hidden="true" />
-              </template>
-              DL
-            </BaseButton>
-            <BaseButton
-              size="xs"
-              variant="danger-soft"
-              :disabled="deleting"
-              @click="deleteSnapshot(item)"
-              title="Delete Snapshot"
-            >
-              <template #icon>
-                <Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
-              </template>
-              Del
-            </BaseButton>
-          </div>
+          <RowActions
+            :id="item.id"
+            class="-my-1"
+            :downloading="downloading.has(item.id)"
+            :deleting="deleting"
+            @download="downloadSnapshot(item)"
+            @delete="deleteSnapshot(item)"
+          />
         </template>
 
         <template #empty>
-          <div v-if="error" class="py-4 flex justify-center text-left">
+          <div v-if="error" class="flex justify-center py-4 text-left">
             <UiError :error="error" title="Load failed" @retry="reload" />
           </div>
-          <div v-else-if="filtering" class="py-8 flex flex-col items-center gap-3">
-            <p class="text-lg font-bold text-slate-700 dark:text-slate-200">
-              No snapshots in range
-            </p>
-            <BaseButton variant="outline" size="sm" @click="clearDates">Clear dates</BaseButton>
-          </div>
-          <div v-else class="py-8 flex flex-col items-center gap-3">
-            <p class="text-lg font-bold text-slate-700 dark:text-slate-200">No snapshots</p>
-            <RouterLink
+          <UiEmpty v-else-if="filtering" title="No snapshots in range">
+            <template #icon><CalendarX aria-hidden="true" /></template>
+            <UiButton size="sm" @click="clearDates">Clear</UiButton>
+          </UiEmpty>
+          <UiEmpty v-else title="No snapshots yet">
+            <template #icon><History aria-hidden="true" /></template>
+            <UiButton
+              variant="primary"
               :to="{ name: 'account-import', params: { accountId: account.id } }"
-              class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
-              >Import</RouterLink
             >
-          </div>
+              <Upload class="size-4" aria-hidden="true" />
+              Import
+            </UiButton>
+          </UiEmpty>
         </template>
       </BaseTable>
     </div>
@@ -600,16 +587,3 @@ const handleBulkDelete = async () => {
     <ConfirmDialog ref="confirmDialog" />
   </div>
 </template>
-
-<style scoped>
-/*
- * Twelve columns (Mora and Primogems replace the old Achievements) do not fit
- * the page with BaseTable's p-4 cells; narrower side padding lets the table
- * fit from a 1440px-wide window instead of hiding Actions behind a scroll.
- */
-.history-table :deep(th),
-.history-table :deep(td) {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-}
-</style>

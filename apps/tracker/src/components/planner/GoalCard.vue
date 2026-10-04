@@ -162,14 +162,14 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               :title="t.title"
             >
               <template v-if="t.up">
-                <span class="text-text-muted">{{ t.from }}</span>
+                <span class="text-text-secondary">{{ t.from }}</span>
                 <ArrowRight class="size-3 text-text-muted" aria-hidden="true" />
                 <span class="font-semibold text-warning-text">{{ t.to }}</span>
               </template>
               <span v-else :class="t.from >= 10 ? 'font-semibold text-rarity-5' : ''">{{
                 t.from
               }}</span>
-              <span v-if="t.boosted" class="text-xs text-text-muted">({{ t.boosted }})</span>
+              <span v-if="t.boosted" class="text-xs text-text-secondary">({{ t.boosted }})</span>
             </span>
           </span>
 

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import type { ProgressSummary } from '@gdt/game-data/achievement-progress'
 import UiProgress from '@/components/ui/UiProgress.vue'
+import UiStat from '@/components/ui/UiStat.vue'
 import { materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 
@@ -27,58 +28,49 @@ const missing = computed(() => props.summary.total - props.summary.done)
 
 <template>
   <ul class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4" aria-label="Summary">
-    <li
-      class="flex min-w-0 flex-col gap-0.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 shadow-sm sm:px-4 sm:py-3"
-      :title="doneTitle"
-    >
-      <span class="text-xs text-text-secondary sm:text-sm">Done</span>
-      <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
-        {{ formatNumber(summary.done)
-        }}<span class="text-sm text-text-muted"> / {{ formatNumber(summary.total) }}</span>
-      </span>
-    </li>
-    <li
-      class="flex min-w-0 flex-col gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 shadow-sm sm:px-4 sm:py-3"
-    >
-      <span class="flex items-baseline justify-between gap-2">
-        <span class="text-xs text-text-secondary sm:text-sm">Progress</span>
-        <span class="tabular font-mono text-lg font-medium sm:text-xl">{{ percent }}%</span>
-      </span>
-      <UiProgress :value="summary.done" :max="summary.total" label="Achievements done" />
-    </li>
-    <li
-      class="flex min-w-0 flex-col gap-0.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 shadow-sm sm:px-4 sm:py-3"
-      title="Primogems collected / on offer"
-    >
-      <span class="flex items-center gap-1 text-xs text-text-secondary sm:text-sm">
-        <img :src="primogem" alt="" class="size-4" />
-        Primogems
-      </span>
-      <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
-        {{ formatNumber(summary.primogems)
-        }}<span class="text-sm text-text-muted"> / {{ formatNumber(summary.primogemsTotal) }}</span>
-      </span>
+    <li class="flex min-w-0">
+      <UiStat label="Done" :hint="doneTitle">
+        <template #value>
+          <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+            {{ formatNumber(summary.done)
+            }}<span class="text-sm text-text-muted"> / {{ formatNumber(summary.total) }}</span>
+          </span>
+        </template>
+      </UiStat>
     </li>
     <li class="flex min-w-0">
-      <button
-        type="button"
-        :aria-pressed="missingOnly"
-        title="Show only what is left"
-        class="flex w-full min-w-0 flex-col gap-0.5 rounded-xl border bg-surface-raised px-3 py-2.5 text-left shadow-sm transition-colors sm:px-4 sm:py-3"
-        :class="
-          missingOnly
-            ? 'border-accent-text ring-1 ring-accent-text'
-            : 'border-border-default hover:border-border-strong hover:bg-surface-overlay'
-        "
+      <UiStat label="Progress" :value="`${percent}%`">
+        <UiProgress
+          class="mt-1"
+          :value="summary.done"
+          :max="summary.total"
+          label="Achievements done"
+        />
+      </UiStat>
+    </li>
+    <li class="flex min-w-0">
+      <UiStat label="Primogems" hint="Primogems collected / on offer">
+        <template #icon><img :src="primogem" alt="" class="size-4" /></template>
+        <template #value>
+          <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+            {{ formatNumber(summary.primogems)
+            }}<span class="text-sm text-text-muted">
+              / {{ formatNumber(summary.primogemsTotal) }}</span
+            >
+          </span>
+        </template>
+      </UiStat>
+    </li>
+    <li class="flex min-w-0">
+      <UiStat
+        label="Missing"
+        :value="missing"
+        exact
+        hint="Show only what is left"
+        :tone="missing > 0 ? 'warning' : 'success'"
+        :pressed="missingOnly"
         @click="$emit('toggleMissing')"
-      >
-        <span class="text-xs text-text-secondary sm:text-sm">Missing</span>
-        <span
-          class="tabular truncate font-mono text-lg font-medium sm:text-xl"
-          :class="missing > 0 ? 'text-warning-text' : 'text-success-text'"
-          >{{ formatNumber(missing) }}</span
-        >
-      </button>
+      />
     </li>
   </ul>
 </template>

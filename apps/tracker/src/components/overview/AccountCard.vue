@@ -72,7 +72,7 @@ const view = computed(() => {
 <template>
   <RouterLink
     :to="{ name: 'account-overview', params: { accountId: account.id } }"
-    class="group flex flex-col gap-4 rounded-xl border border-border-default bg-surface-raised p-5 shadow-card transition-colors hover:border-border-strong"
+    class="group flex flex-col gap-4 rounded-xl border border-border-default bg-surface-raised p-5 shadow-sm transition-colors hover:border-border-strong"
   >
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">

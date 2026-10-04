@@ -13,7 +13,7 @@ import { WEEKDAY_LABELS, type PlanTotals, type SourceKind } from '@gdt/game-data
 import { computed } from 'vue'
 import { Info, PartyPopper } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import ToggleChip from '@/components/characters/ToggleChip.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
@@ -199,9 +199,14 @@ const forgeTitle = computed(() => {
       <UiSegmented v-model="view" :options="VIEWS" label="Farm view" />
       <div class="flex flex-wrap gap-2">
         <span v-if="oreShort || forge" :title="forgeTitle">
-          <ToggleChip v-model="forge">Forge</ToggleChip>
+          <FilterChip :pressed="forge" @toggle="forge = !forge">Forge</FilterChip>
         </span>
-        <ToggleChip v-if="view !== 'craft'" v-model="missingOnly">Missing</ToggleChip>
+        <FilterChip
+          v-if="view !== 'craft'"
+          :pressed="missingOnly"
+          @toggle="missingOnly = !missingOnly"
+          >Missing</FilterChip
+        >
       </div>
     </div>
 

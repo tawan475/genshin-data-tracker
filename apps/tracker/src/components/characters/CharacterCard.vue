@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Wrench } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import UiBadge from '@/components/ui/UiBadge.vue'
 import {
   ELEMENT_LABELS,
   TARGET_LEVEL,
@@ -68,15 +69,11 @@ const weaponTitle = computed(() => {
           <p class="min-w-0 flex-1 truncate font-display text-base font-semibold" :title="kind">
             {{ c.name }}
           </p>
-          <span
-            v-if="c.gaps.length"
-            class="tabular inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-500/15 px-1.5 py-0.5 font-mono text-xs font-medium text-warning-text"
-            :title="gapText"
-          >
+          <UiBadge v-if="c.gaps.length" tone="warning" mono class="shrink-0" :title="gapText">
             <Wrench class="size-3.5" aria-hidden="true" />
             {{ c.gaps.length }}
             <span class="sr-only">to do: {{ gapText }}</span>
-          </span>
+          </UiBadge>
         </div>
         <div class="flex items-center justify-between gap-2">
           <span class="flex items-center gap-2.5 text-sm">

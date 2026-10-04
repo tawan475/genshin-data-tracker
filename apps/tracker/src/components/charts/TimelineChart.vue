@@ -12,6 +12,7 @@ import {
 } from 'chart.js'
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
+import { CHART_FONT } from '@/lib/chart-defaults'
 import { formatCompact, formatDate, formatDateTime, formatNumber } from '@/lib/format'
 
 Chart.register(
@@ -124,8 +125,8 @@ function config(): ChartConfiguration<'line'> {
           borderWidth: 1,
           titleColor: token('--text-primary'),
           bodyColor: token('--text-secondary'),
-          titleFont: { family: 'Outfit, ui-sans-serif, system-ui, sans-serif', size: 14 },
-          bodyFont: { family: 'Outfit, ui-sans-serif, system-ui, sans-serif', size: 14 },
+          titleFont: { family: CHART_FONT, size: 14 },
+          bodyFont: { family: CHART_FONT, size: 14 },
           padding: 10,
           callbacks: {
             title: (items) => (items[0] ? formatDateTime(Number(items[0].parsed.x)) : ''),

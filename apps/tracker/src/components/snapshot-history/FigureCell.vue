@@ -23,26 +23,19 @@ const title = computed(() => figureTitle(props.value, props.change))
 </script>
 
 <template>
-  <span
-    v-if="missing"
-    class="font-medium text-slate-400 dark:text-slate-500"
-    title="No currency in this snapshot"
+  <span v-if="missing" class="font-medium text-text-muted" title="No currency in this snapshot"
     >—</span
   >
   <span v-else class="inline-flex flex-col items-start" :title="title">
-    <MoraDisplay
-      v-if="kind === 'mora'"
-      :amount="value"
-      class="font-medium text-slate-700 dark:text-slate-300"
-    />
+    <MoraDisplay v-if="kind === 'mora'" :amount="value" class="font-medium text-text-primary" />
     <ItemDisplay
       v-else-if="kind === 'primogem'"
       :amount="value"
       :image="materialIcon('Primogem')"
       name="primogem"
-      class="font-medium text-slate-700 dark:text-slate-300"
+      class="font-medium text-text-primary"
     />
-    <span v-else class="font-medium text-slate-700 dark:text-slate-300">{{ value }}</span>
+    <span v-else class="font-medium text-text-primary">{{ value }}</span>
     <span
       v-if="delta !== 0"
       class="text-[11px] leading-4 font-semibold tabular-nums whitespace-nowrap"

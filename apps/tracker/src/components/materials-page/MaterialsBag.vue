@@ -2,10 +2,22 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { useIntersectionObserver } from '@vueuse/core'
-import { ArrowDown, ArrowUp, LayoutGrid, List, Search } from 'lucide-vue-next'
+import {
+  ArrowDown,
+  ArrowUp,
+  LayoutGrid,
+  List,
+  Package,
+  Search,
+  SearchX,
+  Upload,
+} from 'lucide-vue-next'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
+import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import { formatCompact, formatNumber, formatSigned } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -177,30 +189,30 @@ function clearFilters() {
 
 // ------------------------------------------------------------------ display
 
-const showTabs = computed(() => [
+const showTabs = computed<SegmentedOption<Show>[]>(() => [
   {
-    value: 'owned' as const,
+    value: 'owned',
     label: 'Owned',
     title: 'Materials you hold',
     count: pools.value.owned.length,
-    icon: null,
-    tone: '',
   },
   {
-    value: 'gained' as const,
+    value: 'gained',
     label: 'Gained',
     title: `Gained ${props.hint}`,
     count: pools.value.gained.length,
     icon: ArrowUp,
-    tone: 'text-success-text',
+    iconClass: 'text-success-text',
+    disabled: !props.compared,
   },
   {
-    value: 'spent' as const,
+    value: 'spent',
     label: 'Spent',
     title: `Spent ${props.hint}`,
     count: pools.value.spent.length,
     icon: ArrowDown,
-    tone: 'text-danger-text',
+    iconClass: 'text-danger-text',
+    disabled: !props.compared,
   },
 ])
 
@@ -209,9 +221,9 @@ function tileTitle(item: MaterialItem): string {
   const delta = change ? ` (${change > 0 ? '+' : '−'}${formatNumber(Math.abs(change))})` : ''
   return `${item.name}: ${formatNumber(item.count)}${delta}`
 }
-const VIEW_OPTIONS = [
-  { value: 'grid' as const, label: 'Icons', icon: LayoutGrid },
-  { value: 'list' as const, label: 'List', icon: List },
+const VIEW_OPTIONS: SegmentedOption<View>[] = [
+  { value: 'grid', label: 'Icons', icon: LayoutGrid },
+  { value: 'list', label: 'List', icon: List },
 ]
 const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-danger-text')
 </script>
@@ -221,63 +233,8 @@ const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-dan
     <template #header>
       <h2 class="text-base font-semibold">Bag</h2>
       <div class="flex flex-wrap items-center gap-2">
-        <!-- Owned / gained / spent -->
-        <div
-          class="inline-flex rounded-lg bg-surface-overlay p-1"
-          role="radiogroup"
-          aria-label="Show"
-        >
-          <button
-            v-for="tab in showTabs"
-            :key="tab.value"
-            type="button"
-            role="radio"
-            :aria-checked="show === tab.value"
-            :disabled="tab.value !== 'owned' && !compared"
-            :title="tab.title"
-            class="inline-flex min-h-8 items-center gap-1 rounded-md px-2.5 text-sm font-medium transition-colors disabled:opacity-50"
-            :class="
-              show === tab.value
-                ? 'bg-surface-raised text-text-primary shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
-            "
-            @click="show = tab.value"
-          >
-            <component
-              :is="tab.icon"
-              v-if="tab.icon"
-              class="size-4"
-              :class="tab.tone"
-              aria-hidden="true"
-            />
-            <span :class="tab.icon ? 'sr-only sm:not-sr-only' : ''">{{ tab.label }}</span>
-            <span class="tabular font-mono text-text-muted">{{ formatNumber(tab.count) }}</span>
-          </button>
-        </div>
-        <div
-          class="inline-flex rounded-lg bg-surface-overlay p-1"
-          role="radiogroup"
-          aria-label="View"
-        >
-          <button
-            v-for="option in VIEW_OPTIONS"
-            :key="option.value"
-            type="button"
-            role="radio"
-            :aria-checked="view === option.value"
-            :aria-label="option.label"
-            :title="option.label"
-            class="inline-flex size-8 items-center justify-center rounded-md transition-colors"
-            :class="
-              view === option.value
-                ? 'bg-surface-raised text-text-primary shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
-            "
-            @click="view = option.value"
-          >
-            <component :is="option.icon" class="size-4" aria-hidden="true" />
-          </button>
-        </div>
+        <UiSegmented v-model="show" :options="showTabs" label="Show" compact />
+        <UiSegmented v-model="view" :options="VIEW_OPTIONS" label="View" icon-only />
       </div>
     </template>
 
@@ -309,47 +266,38 @@ const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-dan
       </div>
 
       <div
-        class="-mx-4 flex scroll-px-4 gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0"
+        class="scroll-hide scroll-fade-x -mx-4 flex scroll-px-4 gap-2 overflow-x-auto px-4 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:px-0"
         role="radiogroup"
         aria-label="Kind"
       >
-        <button
+        <FilterChip
           v-for="chip in kindChips"
           :key="chip.id"
-          type="button"
-          role="radio"
-          :aria-checked="kind === chip.id"
+          radio
+          :pressed="kind === chip.id"
+          :count="chip.count"
           :title="chip.detail"
-          class="inline-flex min-h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors"
-          :class="[
-            kind === chip.id
-              ? 'border-accent bg-accent text-accent-ink'
-              : 'border-border-default bg-surface-raised text-text-secondary hover:border-border-strong hover:text-text-primary',
-            chip.count === 0 && kind !== chip.id ? 'opacity-50' : '',
-          ]"
-          @click="kind = chip.id"
+          @toggle="kind = chip.id"
         >
           <component :is="chip.icon" v-if="chip.icon" class="size-4" aria-hidden="true" />
           {{ chip.label }}
-          <span
-            class="tabular font-mono text-xs"
-            :class="kind === chip.id ? 'opacity-80' : 'text-text-muted'"
-            >{{ formatNumber(chip.count) }}</span
-          >
-        </button>
+        </FilterChip>
       </div>
     </div>
 
     <div class="p-3 sm:p-5">
-      <div v-if="items.length === 0" class="flex flex-col items-center gap-3 py-10">
-        <p class="text-text-secondary">No materials</p>
-        <UiButton variant="primary" :to="importTo">Import</UiButton>
-      </div>
+      <UiEmpty v-if="items.length === 0" title="No materials">
+        <template #icon><Package aria-hidden="true" /></template>
+        <UiButton variant="primary" :to="importTo">
+          <Upload class="size-4" aria-hidden="true" />
+          Import
+        </UiButton>
+      </UiEmpty>
 
-      <div v-else-if="filtered.length === 0" class="flex flex-col items-center gap-3 py-10">
-        <p class="text-text-secondary">No matches</p>
+      <UiEmpty v-else-if="filtered.length === 0" title="No matches">
+        <template #icon><SearchX aria-hidden="true" /></template>
         <UiButton @click="clearFilters">Clear</UiButton>
-      </div>
+      </UiEmpty>
 
       <template v-else>
         <!-- Icons: the in-game bag -->

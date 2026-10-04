@@ -166,7 +166,7 @@ const importTo = computed(() => ({
     <UiEmpty title="No snapshots yet">
       <template #icon><Package aria-hidden="true" /></template>
       <UiButton variant="primary" :to="importTo">
-        <Upload class="size-5" aria-hidden="true" />
+        <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>
     </UiEmpty>

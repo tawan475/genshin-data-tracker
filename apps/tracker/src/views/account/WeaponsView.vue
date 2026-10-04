@@ -8,8 +8,9 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiModal from '@/components/ui/UiModal.vue'
+import UiPager from '@/components/ui/UiPager.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import ListPager from '@/components/weapons/ListPager.vue'
 import WeaponDetail from '@/components/weapons/WeaponDetail.vue'
 import WeaponGroupCard from '@/components/weapons/WeaponGroupCard.vue'
 import WeaponTable from '@/components/weapons/WeaponTable.vue'
@@ -210,16 +211,15 @@ function close() {
       </div>
     </div>
 
-    <UiEmpty
-      v-else-if="inventory.data.value === null || (armory && armory.total === 0)"
-      title="No weapons"
-    >
-      <template #icon><Swords aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="{ name: 'account-import' }">
-        <Upload class="size-5" aria-hidden="true" />
-        Import
-      </UiButton>
-    </UiEmpty>
+    <UiPanel v-else-if="inventory.data.value === null || (armory && armory.total === 0)" flush>
+      <UiEmpty :title="inventory.data.value === null ? 'No snapshots yet' : 'No weapons'">
+        <template #icon><Swords aria-hidden="true" /></template>
+        <UiButton variant="primary" :to="{ name: 'account-import' }">
+          <Upload class="size-4" aria-hidden="true" />
+          Import
+        </UiButton>
+      </UiEmpty>
+    </UiPanel>
 
     <template v-else-if="armory">
       <StatStrip class="mb-4" :items="strip" @toggle="toggleStrip" />
@@ -239,10 +239,12 @@ function close() {
         @clear="clearFilters"
       />
 
-      <UiEmpty v-if="matched.length === 0" title="No matches">
-        <template #icon><SearchX aria-hidden="true" /></template>
-        <UiButton @click="clearFilters">Clear</UiButton>
-      </UiEmpty>
+      <UiPanel v-if="matched.length === 0" flush>
+        <UiEmpty title="No matches">
+          <template #icon><SearchX aria-hidden="true" /></template>
+          <UiButton @click="clearFilters">Clear</UiButton>
+        </UiEmpty>
+      </UiPanel>
 
       <template v-else>
         <div ref="listTop" class="scroll-mt-20">
@@ -263,9 +265,10 @@ function close() {
             @open="open"
           />
         </div>
-        <ListPager
+        <UiPager
           v-model="page"
           class="mt-4"
+          :page-count="Math.ceil(itemCount / pageSize)"
           :total="itemCount"
           :page-size="pageSize"
           label="Weapon pages"

@@ -4,13 +4,18 @@ import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { formatNumber } from '@/lib/format'
 
 /**
- * Page numbers with first/last and the current page's neighbours, plus the
- * range shown. On a phone only the arrows and "page / pages" remain.
+ * Page navigation under a long list: the range shown, then previous, page
+ * numbers (first, last and the current page's neighbours) and next. On a
+ * phone only the arrows and "page / pages" remain. Renders nothing for a
+ * single page.
  */
-const props = defineProps<{ pageCount: number; total: number; pageSize: number }>()
+const props = withDefaults(
+  defineProps<{ pageCount: number; total: number; pageSize: number; label?: string }>(),
+  { label: 'Pages' },
+)
 const page = defineModel<number>({ required: true })
 
-const from = computed(() => (page.value - 1) * props.pageSize + 1)
+const from = computed(() => (props.total === 0 ? 0 : (page.value - 1) * props.pageSize + 1))
 const to = computed(() => Math.min(props.total, page.value * props.pageSize))
 
 /** 1 … 4 5 6 … 15, as numbers with null for a gap. */
@@ -28,17 +33,24 @@ const items = computed<(number | null)[]>(() => {
 function go(n: number) {
   page.value = Math.min(props.pageCount, Math.max(1, n))
 }
+
+const ARROW =
+  'inline-flex size-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40 disabled:hover:bg-transparent'
 </script>
 
 <template>
-  <nav class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2" aria-label="Pages">
+  <nav
+    v-if="pageCount > 1"
+    class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2"
+    :aria-label="label"
+  >
     <span class="tabular font-mono text-sm text-text-muted">
       {{ formatNumber(from) }}–{{ formatNumber(to) }} / {{ formatNumber(total) }}
     </span>
     <div class="flex items-center gap-1">
       <button
         type="button"
-        class="inline-flex size-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40 disabled:hover:bg-transparent"
+        :class="ARROW"
         aria-label="Previous page"
         title="Previous page"
         :disabled="page <= 1"
@@ -68,7 +80,7 @@ function go(n: number) {
       </template>
       <button
         type="button"
-        class="inline-flex size-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40 disabled:hover:bg-transparent"
+        :class="ARROW"
         aria-label="Next page"
         title="Next page"
         :disabled="page >= pageCount"

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { SnapshotResponse } from '@gdt/shared'
-import { Download, Repeat2, Trash2 } from 'lucide-vue-next'
-import BaseButton from '@/components/legacy/BaseButton.vue'
+import { Repeat2 } from 'lucide-vue-next'
 import { currencyMissing } from '@/data/overview'
 import { formatFullDateTime } from '@/lib/format'
 import FigureCell from './FigureCell.vue'
 import LegacyCheckbox from './LegacyCheckbox.vue'
+import RowActions from './RowActions.vue'
 import type { RowChanges } from './snapshot-figures'
 
 /**
@@ -40,11 +40,11 @@ const FIGURES = [
 
 <template>
   <div
-    class="@container border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 shadow-sm text-sm text-slate-700 dark:text-slate-300 transition-colors"
+    class="@container rounded-xl border border-border-default bg-surface-raised text-sm text-text-secondary shadow-sm transition-colors"
   >
     <div
       v-if="rows.length > 0"
-      class="flex items-center gap-2 rounded-t-xl border-b border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-100 transition-colors"
+      class="flex items-center gap-2 rounded-t-xl border-b border-border-default bg-surface-overlay/50 px-3 py-1 font-semibold text-text-primary transition-colors"
     >
       <LegacyCheckbox
         class="-ml-1 size-10"
@@ -57,12 +57,12 @@ const FIGURES = [
       <span>All</span>
     </div>
 
-    <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
+    <ul class="divide-y divide-border-subtle">
       <li
         v-for="item in rows"
         :key="item.id"
         class="px-3 py-3 transition-colors"
-        :class="isSelected(item.id) ? 'bg-indigo-50/60 dark:bg-indigo-500/10' : ''"
+        :class="isSelected(item.id) ? 'bg-accent/10' : ''"
       >
         <div class="flex items-start gap-2">
           <LegacyCheckbox
@@ -73,11 +73,11 @@ const FIGURES = [
             @toggle="(event) => emit('toggle', item.id, event)"
           />
           <div class="min-w-0 flex-1">
-            <p class="flex items-center gap-1.5 font-medium text-slate-900 dark:text-slate-100">
+            <p class="flex items-center gap-1.5 font-medium text-text-primary">
               <span class="truncate">{{ formatFullDateTime(item.takenAt) }}</span>
               <span
                 v-if="item.lastSeenAt > item.takenAt"
-                class="shrink-0 text-slate-400 dark:text-slate-500"
+                class="shrink-0 text-text-muted"
                 :title="`Unchanged until ${formatFullDateTime(item.lastSeenAt)}`"
               >
                 <Repeat2 class="size-3.5" aria-hidden="true" />
@@ -86,41 +86,21 @@ const FIGURES = [
                 >
               </span>
             </p>
-            <p class="truncate text-xs text-slate-500 dark:text-slate-400">
-              #{{ item.id }} · {{ item.source }}
-            </p>
+            <p class="truncate text-xs text-text-muted">#{{ item.id }} · {{ item.source }}</p>
           </div>
-          <div class="flex shrink-0 items-center gap-2">
-            <BaseButton
-              size="xs"
-              variant="primary"
-              :loading="downloading.has(item.id)"
-              title="Download GOOD"
-              @click="emit('download', item)"
-            >
-              <template #icon>
-                <Download class="w-3.5 h-3.5" aria-hidden="true" />
-              </template>
-              DL
-            </BaseButton>
-            <BaseButton
-              size="xs"
-              variant="danger-soft"
-              :disabled="deleting"
-              title="Delete Snapshot"
-              @click="emit('delete', item)"
-            >
-              <template #icon>
-                <Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
-              </template>
-              Del
-            </BaseButton>
-          </div>
+          <RowActions
+            :id="item.id"
+            class="-my-1 shrink-0"
+            :downloading="downloading.has(item.id)"
+            :deleting="deleting"
+            @download="emit('download', item)"
+            @delete="emit('delete', item)"
+          />
         </div>
 
         <dl class="mt-2 ml-11 grid grid-cols-3 gap-x-3 gap-y-2 @xl:grid-cols-6">
           <div v-for="figure in FIGURES" :key="figure.key" class="min-w-0">
-            <dt class="text-xs text-slate-500 dark:text-slate-400">{{ figure.label }}</dt>
+            <dt class="text-xs text-text-muted">{{ figure.label }}</dt>
             <dd>
               <FigureCell
                 :value="item.summary[figure.key]"
@@ -131,9 +111,9 @@ const FIGURES = [
             </dd>
           </div>
           <div class="min-w-0">
-            <dt class="text-xs text-slate-500 dark:text-slate-400">Stored</dt>
+            <dt class="text-xs text-text-muted">Stored</dt>
             <dd
-              class="font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap"
+              class="font-medium whitespace-nowrap text-success-text"
               :title="`${formatKb(item.rawSize)} → ${formatKb(item.storedSize)}`"
             >
               {{ formatKb(item.storedSize) }}
@@ -143,7 +123,7 @@ const FIGURES = [
       </li>
     </ul>
 
-    <div v-if="rows.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400">
+    <div v-if="rows.length === 0" class="p-8 text-center text-text-muted">
       <slot name="empty" />
     </div>
   </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import BaseButton from './BaseButton.vue'
+import UiButton from '@/components/ui/UiButton.vue'
 
 export interface PaginationMeta {
   page: number
@@ -70,61 +70,61 @@ const scrollToTop = () => {
 }
 
 const showPagination = () => props.showWhenSinglePage || props.meta.totalPages > 1
+
+/** The old compact field (per page, go to page), on the input tokens. */
+const FIELD =
+  'rounded-md border border-border-strong bg-surface-raised px-2 py-1 text-sm text-text-primary shadow-sm transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none'
 </script>
 
 <template>
-  <div v-if="showPagination()" class="flex flex-wrap justify-between items-center gap-4 mt-6">
-    <div class="flex items-center gap-2">
-      <label class="text-sm text-slate-500 dark:text-slate-400 font-medium"> Per page: </label>
+  <div v-if="showPagination()" class="mt-6 flex flex-wrap items-center justify-between gap-4">
+    <label class="flex items-center gap-2">
+      <span class="text-sm font-medium text-text-muted">Per page</span>
       <select
         :value="meta.limit"
-        class="px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500"
+        :class="FIELD"
         @change="emit('limit-change', Number(($event.target as HTMLSelectElement).value))"
       >
         <option v-for="opt in limitOptions" :key="opt" :value="opt">
           {{ opt }}
         </option>
       </select>
-    </div>
+    </label>
 
     <div class="flex items-center gap-4">
-      <BaseButton
-        variant="outline"
+      <UiButton
         size="sm"
         :disabled="meta.page <= 1 || isLoading"
         @click="handlePageChange(meta.page - 1)"
       >
         Previous
-      </BaseButton>
-      <span class="text-sm text-slate-600 dark:text-slate-400 font-medium">
+      </UiButton>
+      <span class="tabular text-sm font-medium text-text-secondary">
         Page {{ meta.page }} of {{ meta.totalPages }}
-        <span class="text-slate-400 dark:text-slate-500 font-normal">
-          ({{ meta.total }} total)
-        </span>
+        <span class="font-normal text-text-muted"> ({{ meta.total }} total) </span>
       </span>
-      <BaseButton
-        variant="outline"
+      <UiButton
         size="sm"
         :disabled="meta.page >= meta.totalPages || isLoading"
         @click="handlePageChange(meta.page + 1)"
       >
         Next
-      </BaseButton>
+      </UiButton>
     </div>
 
-    <div class="flex items-center gap-2">
-      <label class="text-sm text-slate-500 dark:text-slate-400 font-medium"> Go to: </label>
-      <input
-        v-model="pageInput"
-        type="number"
-        min="1"
-        :max="meta.totalPages"
-        class="w-16 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500"
-        @keyup.enter="goToPage"
-      />
-      <BaseButton variant="primary" size="sm" :disabled="isLoading" @click="goToPage">
-        Go
-      </BaseButton>
-    </div>
+    <form class="flex items-center gap-2" @submit.prevent="goToPage">
+      <label class="flex items-center gap-2">
+        <span class="text-sm font-medium text-text-muted">Go to</span>
+        <input
+          v-model="pageInput"
+          type="number"
+          min="1"
+          :max="meta.totalPages"
+          class="w-16"
+          :class="FIELD"
+        />
+      </label>
+      <UiButton type="submit" variant="primary" size="sm" :disabled="isLoading">Go</UiButton>
+    </form>
   </div>
 </template>

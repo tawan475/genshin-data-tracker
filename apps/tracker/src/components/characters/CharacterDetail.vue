@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { Crown, Lock, Wrench } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
+import UiBadge from '@/components/ui/UiBadge.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import type { AccountRef } from '@/data/account-data'
@@ -180,12 +181,7 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
       >
         <Wrench class="size-4 text-warning-text" aria-hidden="true" />
         <span class="sr-only">To do:</span>
-        <span
-          v-for="gap in c.gaps"
-          :key="gap.kind"
-          class="rounded-md bg-amber-500/15 px-2 py-0.5 text-sm text-warning-text"
-          >{{ gap.text }}</span
-        >
+        <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
       </p>
     </section>
 
@@ -259,19 +255,17 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
               <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" />
               <span class="min-w-0 flex-1 truncate text-sm" :title="set.name">{{ set.name }}</span>
               <ul class="flex gap-1" aria-label="Bonuses">
-                <li
-                  v-for="t in set.thresholds"
-                  :key="t"
-                  class="tabular rounded-md px-1.5 font-mono text-xs leading-5"
-                  :class="
-                    set.active.includes(t)
-                      ? 'bg-emerald-500/15 text-success-text'
-                      : 'bg-surface-overlay text-text-muted'
-                  "
-                  :title="`${t}-piece bonus ${set.active.includes(t) ? 'active' : 'inactive'}`"
-                >
-                  {{ t }}pc
-                  <span class="sr-only">{{ set.active.includes(t) ? 'active' : 'inactive' }}</span>
+                <li v-for="t in set.thresholds" :key="t" class="flex">
+                  <UiBadge
+                    :tone="set.active.includes(t) ? 'success' : 'neutral'"
+                    mono
+                    :title="`${t}-piece bonus ${set.active.includes(t) ? 'active' : 'inactive'}`"
+                  >
+                    {{ t }}pc
+                    <span class="sr-only">{{
+                      set.active.includes(t) ? 'active' : 'inactive'
+                    }}</span>
+                  </UiBadge>
                 </li>
               </ul>
             </li>

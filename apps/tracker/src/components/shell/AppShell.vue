@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { LayoutGrid, Menu, Moon, MoreHorizontal, Settings, Sun, Upload, X } from 'lucide-vue-next'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import { resolvedTheme } from '@/lib/theme'
 import { lastAccountId, useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -94,14 +95,9 @@ const navClass = (active: boolean) =>
           >
           GDT
         </RouterLink>
-        <button
-          type="button"
-          class="inline-flex size-9 items-center justify-center rounded-md text-text-secondary lg:hidden"
-          aria-label="Close menu"
-          @click="drawer = false"
-        >
+        <UiIconButton label="Close menu" class="-mr-2 lg:hidden" @click="drawer = false">
           <X class="size-5" aria-hidden="true" />
-        </button>
+        </UiIconButton>
       </div>
 
       <div class="flex flex-1 flex-col gap-7 overflow-y-auto px-4 py-6">
@@ -143,16 +139,13 @@ const navClass = (active: boolean) =>
                 <Settings class="size-5" aria-hidden="true" />
                 Settings
               </RouterLink>
-              <button
-                type="button"
-                class="inline-flex size-9 items-center justify-center rounded-md text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
-                :title="theme === 'dark' ? 'Light theme' : 'Dark theme'"
-                :aria-label="theme === 'dark' ? 'Light theme' : 'Dark theme'"
+              <UiIconButton
+                :label="theme === 'dark' ? 'Light theme' : 'Dark theme'"
                 @click="toggleTheme"
               >
-                <Moon v-if="theme === 'dark'" class="size-4" aria-hidden="true" />
-                <Sun v-else class="size-4" aria-hidden="true" />
-              </button>
+                <Moon v-if="theme === 'dark'" class="size-5" aria-hidden="true" />
+                <Sun v-else class="size-5" aria-hidden="true" />
+              </UiIconButton>
             </div>
           </nav>
         </div>
@@ -181,14 +174,9 @@ const navClass = (active: boolean) =>
       <header
         class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border-default bg-surface-nav/90 px-4 shadow-sm backdrop-blur sm:px-8"
       >
-        <button
-          type="button"
-          class="-ml-2 inline-flex size-10 items-center justify-center rounded-md text-text-secondary lg:hidden"
-          aria-label="Open menu"
-          @click="drawer = true"
-        >
+        <UiIconButton label="Open menu" class="-ml-2 lg:hidden" @click="drawer = true">
           <Menu class="size-5" aria-hidden="true" />
-        </button>
+        </UiIconButton>
         <span class="truncate text-lg font-semibold">{{ title }}</span>
         <template v-if="current">
           <div class="hidden h-4 w-px bg-border-strong sm:block" />
@@ -225,7 +213,7 @@ const navClass = (active: boolean) =>
         v-for="section in primary"
         :key="section.name"
         :to="section.to"
-        class="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium"
+        class="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 text-[0.6875rem] font-medium"
         :class="isActive(section.name) ? 'text-accent-text' : 'text-text-muted'"
         :aria-current="isActive(section.name) ? 'page' : undefined"
       >
@@ -234,7 +222,7 @@ const navClass = (active: boolean) =>
       </RouterLink>
       <button
         type="button"
-        class="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-xs font-medium text-text-muted"
+        class="flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 text-[0.6875rem] font-medium text-text-muted"
         @click="drawer = true"
       >
         <MoreHorizontal class="size-5 shrink-0" aria-hidden="true" />

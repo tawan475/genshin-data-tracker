@@ -345,7 +345,7 @@ const currentLevel = computed(() => {
 </script>
 
 <template>
-  <UiModal :open="open" :title="title" wide @close="emit('close')">
+  <UiModal :open="open" :title="title" size="wide" @close="emit('close')">
     <div v-if="subject" class="flex flex-col gap-5">
       <!-- Character -->
       <section v-if="draft.character && characterKey" class="flex gap-4" aria-label="Character">

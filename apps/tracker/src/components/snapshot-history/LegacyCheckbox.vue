@@ -19,7 +19,7 @@ function onMouseDown(event: MouseEvent) {
 
 <template>
   <div
-    class="flex cursor-pointer items-center justify-center rounded-md select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+    class="flex cursor-pointer items-center justify-center rounded-md select-none outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-inset"
     role="checkbox"
     :aria-checked="mixed ? 'mixed' : checked"
     :aria-label="label"
@@ -29,11 +29,11 @@ function onMouseDown(event: MouseEvent) {
     @keydown.space.prevent="emit('toggle', $event)"
   >
     <div
-      class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
+      class="flex size-4 items-center justify-center rounded border transition-colors"
       :class="
         checked || mixed
-          ? 'bg-indigo-600 border-indigo-600 text-white dark:bg-indigo-500 dark:border-indigo-500'
-          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-transparent'
+          ? 'border-accent bg-accent text-accent-ink'
+          : 'border-border-strong bg-surface-raised text-transparent'
       "
     >
       <svg class="w-3 h-3 stroke-current" fill="none" viewBox="0 0 24 24" aria-hidden="true">

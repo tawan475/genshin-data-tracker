@@ -112,7 +112,7 @@ const kind = computed(() => {
 </script>
 
 <template>
-  <UiModal :open="item !== null" :title="item?.name ?? ''" wide @close="emit('close')">
+  <UiModal :open="item !== null" :title="item?.name ?? ''" size="wide" @close="emit('close')">
     <div v-if="item" class="flex flex-col gap-5">
       <div class="flex items-center gap-3 sm:gap-4">
         <span class="size-14 shrink-0 rounded-xl bg-surface-overlay p-1 text-xl sm:size-16">

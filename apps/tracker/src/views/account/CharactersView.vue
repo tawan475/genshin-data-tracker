@@ -6,12 +6,13 @@ import CharacterCard from '@/components/characters/CharacterCard.vue'
 import CharacterDetail from '@/components/characters/CharacterDetail.vue'
 import CharacterTable from '@/components/characters/CharacterTable.vue'
 import CharacterToolbar from '@/components/characters/CharacterToolbar.vue'
-import DetailDialog from '@/components/characters/DetailDialog.vue'
 import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
+import UiModal from '@/components/ui/UiModal.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
 import {
@@ -193,16 +194,15 @@ function step(delta: -1 | 1) {
       </div>
     </div>
 
-    <UiEmpty
-      v-else-if="inventory.data.value === null || (roster && roster.total === 0)"
-      title="No characters"
-    >
-      <template #icon><Users aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="{ name: 'account-import' }">
-        <Upload class="size-5" aria-hidden="true" />
-        Import
-      </UiButton>
-    </UiEmpty>
+    <UiPanel v-else-if="inventory.data.value === null || (roster && roster.total === 0)" flush>
+      <UiEmpty :title="inventory.data.value === null ? 'No snapshots yet' : 'No characters'">
+        <template #icon><Users aria-hidden="true" /></template>
+        <UiButton variant="primary" :to="{ name: 'account-import' }">
+          <Upload class="size-4" aria-hidden="true" />
+          Import
+        </UiButton>
+      </UiEmpty>
+    </UiPanel>
 
     <template v-else-if="roster">
       <StatStrip class="mb-4" :items="strip" @toggle="toggleStrip" />
@@ -222,10 +222,12 @@ function step(delta: -1 | 1) {
         @clear="clearFilters"
       />
 
-      <UiEmpty v-if="shown.length === 0" title="No matches">
-        <template #icon><SearchX aria-hidden="true" /></template>
-        <UiButton @click="clearFilters">Clear</UiButton>
-      </UiEmpty>
+      <UiPanel v-if="shown.length === 0" flush>
+        <UiEmpty title="No matches">
+          <template #icon><SearchX aria-hidden="true" /></template>
+          <UiButton @click="clearFilters">Clear</UiButton>
+        </UiEmpty>
+      </UiPanel>
 
       <ul
         v-else-if="view === 'grid'"
@@ -247,15 +249,17 @@ function step(delta: -1 | 1) {
       />
     </template>
 
-    <DetailDialog
+    <UiModal
       :open="selected !== null"
       :title="selected?.name ?? ''"
+      size="detail"
       :index="selectedIndex >= 0 ? selectedIndex : undefined"
       :total="stepList.length"
+      loop
       @close="close"
       @step="step"
     >
       <CharacterDetail v-if="selected" :character="selected" :account="account" />
-    </DetailDialog>
+    </UiModal>
   </div>
 </template>
