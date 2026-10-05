@@ -3,7 +3,9 @@
  * AchievementGoalExcelConfigData and RewardExcelConfigData.
  *
  * - goal: `goalId`, missing for goal 0 ("Wonders of the World").
- * - hidden: `isShow == "SHOWTYPE_HIDE"`. disused: `isDisuse` (kept, not counted).
+ * - hidden: `isShow == "SHOWTYPE_HIDE"`. disused: `isDisuse` (kept, not counted),
+ *   or listed in overrides/achievement-unobtainable.json (datamine-only, or not
+ *   obtainable yet): nobody can earn those either.
  * - prevStage: `preStageAchievementId`, chaining the tiers of one achievement.
  * - primogems: item 201 in the `finishRewardId` reward.
  * - version: not in the game data. overrides/achievement-versions.json (seeded
@@ -54,6 +56,8 @@ export interface AchievementInputs {
 export interface AchievementContext {
   gameVersion: string
   versions: Map<number, string>
+  /** Ids nobody can earn though the game doesn't mark them disused. */
+  unobtainable?: ReadonlyMap<number, string>
   previous?: AchievementsFile
   problems: Problems
 }
@@ -116,7 +120,13 @@ export function compileAchievements(
   const unknownShow = new Set<string>()
   for (const achievement of inputs.achievements) {
     const id = num(achievement, 'id')
-    const disused = bool(achievement, 'isDisuse')
+    const disusedInGame = bool(achievement, 'isDisuse')
+    if (disusedInGame && context.unobtainable?.has(id)) {
+      problems.warn(
+        `achievement-unobtainable.json lists ${id}, which the game already marks disused; remove it`,
+      )
+    }
+    const disused = disusedInGame || (context.unobtainable?.has(id) ?? false)
     const goal = num(achievement, 'goalId')
     const progress = num(achievement, 'progress')
     const show = str(achievement, 'isShow')
@@ -169,6 +179,10 @@ export function compileAchievements(
     if (row[4] && !ids.has(row[4])) {
       problems.warn(`Achievement ${row[0]}: previous stage ${row[4]} does not exist`)
     }
+  }
+  for (const id of context.unobtainable?.keys() ?? []) {
+    if (!ids.has(id))
+      problems.warn(`achievement-unobtainable.json lists ${id}, which is not in the dump`)
   }
   for (const id of context.versions.keys()) {
     if (!ids.has(id))

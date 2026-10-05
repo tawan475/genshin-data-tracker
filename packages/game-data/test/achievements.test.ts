@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { achievementText, loadAchievements } from '../src'
 import stardb from './fixtures/stardb-achievements.json'
@@ -5,12 +6,26 @@ import stardb from './fixtures/stardb-achievements.json'
 const data = await loadAchievements()
 const text = await achievementText('en')
 const active = data.achievements.filter((a) => !a.disused)
+// Achievements nobody can earn yet that stardb still lists (flagged impossible).
+const unobtainable = new Set(
+  Object.keys(
+    JSON.parse(
+      readFileSync(new URL('../overrides/achievement-unobtainable.json', import.meta.url), 'utf8'),
+    ) as Record<string, string>,
+  )
+    .filter((key) => !key.startsWith('$'))
+    .map(Number),
+)
 
 describe('achievements vs stardb (sanity check)', () => {
-  it('has every achievement stardb lists, active, and only a handful more', () => {
-    const missing = stardb.ids.filter((id) => data.byId.get(id)?.disused !== false)
+  it('has every achievement stardb lists, active unless listed unobtainable, and few more', () => {
+    const missing = stardb.ids.filter(
+      (id) => !unobtainable.has(id) && data.byId.get(id)?.disused !== false,
+    )
     expect(missing).toEqual([])
-    expect(active.length).toBeGreaterThanOrEqual(stardb.count)
+    for (const id of unobtainable) expect([id, data.byId.get(id)?.disused]).toEqual([id, true])
+    const listedUnobtainable = stardb.ids.filter((id) => unobtainable.has(id)).length
+    expect(active.length).toBeGreaterThanOrEqual(stardb.count - listedUnobtainable)
     expect(active.length - stardb.count).toBeLessThan(150)
   })
 
