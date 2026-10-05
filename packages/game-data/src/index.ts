@@ -21,7 +21,9 @@ import type {
   WeaponType,
 } from './format'
 import { entryIcon, entryId } from './icons'
+import type { ImageCoverage } from './image-url'
 
+export type { ImageCoverage } from './image-url'
 export type { DomainKind, Element, MaterialKind, MetaFile, TalentSlot, WeaponType } from './format'
 export { entryIcon, entryId } from './icons'
 
@@ -555,11 +557,17 @@ export const loadMaterialIndex = once(async (): Promise<MaterialIndex> => {
 })
 
 /**
- * Image names static.nanoka.cc did not serve when `pnpm --filter
- * @gdt/game-data images` last checked (data/missing-images.json): the app
- * shows initials for them instead of asking.
+ * What `pnpm --filter @gdt/game-data images` found at its last check
+ * (data/missing-images.json): the names static.nanoka.cc did not serve, and
+ * which of them gi-cdn.475.dev serves. Resolve URLs with
+ * `imageUrlOf` (`@gdt/game-data/image-url`).
  */
-export const loadMissingImages = once(async (): Promise<ReadonlySet<string>> => {
+export const loadImageCoverage = once(async (): Promise<ImageCoverage> => {
   const file = (await import('../data/missing-images.json')).default as unknown as MissingImagesFile
-  return new Set(file.missing)
+  return { missing: new Set(file.missing), hosted: new Set(file.hosted ?? []) }
 })
+
+/** The names static.nanoka.cc did not serve at the last check (see loadImageCoverage). */
+export const loadMissingImages = once(
+  async (): Promise<ReadonlySet<string>> => (await loadImageCoverage()).missing,
+)

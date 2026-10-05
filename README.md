@@ -138,9 +138,10 @@ pnpm --filter @gdt/tracker icons     # regenerate PWA icons + manifest
 `src/pwa/sw-template.js` is emitted as `/sw.js` by a Vite plugin with the
 build's precache list: one cache per build, network-first navigation with the
 app shell offline, `/api` never cached, and game images (from
-static.nanoka.cc) cache-first in one bounded cache that keeps only image
-responses. A new build waits until the user accepts the "new version" banner.
-`public/_headers` keeps `sw.js` and the manifest uncached.
+static.nanoka.cc, and gi-cdn.475.dev for the few it lacks) cache-first in one
+bounded cache that keeps only image responses. A new build waits until
+the user accepts the "new version" banner. `public/_headers` keeps `sw.js` and
+the manifest uncached.
 
 ## Deploying
 
@@ -160,6 +161,8 @@ trip without placement.
 
 Game data, text and images © HoYoverse. Game data and every image name come
 from Dimbreath's dump (https://gitlab.com/Dimbreath/animegamedata2). Game
-images are loaded from static.nanoka.cc. See `packages/game-data/README.md`
-for the rest (stardb.gg, the Genshin Impact Wiki, Genshin Optimizer as a test
-oracle).
+images are loaded from static.nanoka.cc; the few it lacks come from
+gi-cdn.475.dev, our own extraction from the game client (a private repo that
+publishes only those and serves them only to this site). See
+`packages/game-data/README.md` for the rest (stardb.gg, the Genshin Impact
+Wiki, Genshin Optimizer as a test oracle).

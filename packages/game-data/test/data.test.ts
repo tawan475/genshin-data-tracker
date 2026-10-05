@@ -4,7 +4,9 @@ import imagesJson from '../data/images.json'
 import materialsJson from '../data/materials.json'
 import missingJson from '../data/missing-images.json'
 import plannerJson from '../data/planner.json'
-import { GAME_DATA, loadMaterialIndex, loadMissingImages } from '../src'
+import { GAME_DATA, loadImageCoverage, loadMaterialIndex, loadMissingImages } from '../src'
+import { imageUrlOf } from '../src/image-url'
+import { itemImage } from '../src/images'
 import type {
   GoalsFile,
   ImagesFile,
@@ -12,7 +14,13 @@ import type {
   MissingImagesFile,
   PlannerFile,
 } from '../src/format'
-import { IMAGE_HOST, imageNames, nameSetHash } from '../scripts/lib/image-names.ts'
+import {
+  GI_CDN_HOST,
+  giCdnEligible,
+  IMAGE_HOST,
+  imageNames,
+  nameSetHash,
+} from '../scripts/lib/image-names.ts'
 
 const goals = goalsJson as unknown as GoalsFile
 const images = imagesJson as unknown as ImagesFile
@@ -49,6 +57,16 @@ describe('material index', () => {
   it('has keys like irminsul makes them', () => {
     for (const key of Object.keys(materials)) expect(key).toMatch(/^[A-Za-z0-9]+$/)
   })
+
+  it('has furnishing blueprints, which irminsul exports as materials', async () => {
+    const index = await loadMaterialIndex()
+    expect(index.id('BasicTentANapBeneathTheSnow')).toBe(394662)
+    expect(index.icon('BasicTentANapBeneathTheSnow')).toBe('UI_ItemIcon_Home_Common')
+    expect(index.id('AdventurerCamp')).toBe(350001) // a furnishing set blueprint
+    expect(index.icon('AdventurerCamp')).toBe('UI_ItemIcon_Home_Outdoor')
+    // A blueprint named like an item doesn't take the item's key.
+    expect(index.id('ShinyShell')).toBe(121050)
+  })
 })
 
 describe('image coverage (data/missing-images.json)', () => {
@@ -65,6 +83,63 @@ describe('image coverage (data/missing-images.json)', () => {
   it('lists known names once, sorted', () => {
     expect(missingImages.missing).toEqual([...new Set(missingImages.missing)].sort())
     for (const name of missingImages.missing) expect(names.has(name), name).toBe(true)
+  })
+
+  it('loads from gi-cdn only missing names the app shows (no TCG card art)', () => {
+    const hosted = missingImages.hosted ?? []
+    expect(hosted).toEqual([...new Set(hosted)].sort())
+    const missing = new Set(missingImages.missing)
+    for (const name of hosted) {
+      expect(missing.has(name), name).toBe(true)
+      expect(giCdnEligible(names.get(name)!), name).toBe(true)
+    }
+  })
+
+  it('shows an icon for every material of a typical bag', async () => {
+    const [index, coverage] = await Promise.all([loadMaterialIndex(), loadImageCoverage()])
+    expect([...coverage.hosted]).toEqual(missingImages.hosted ?? [])
+    // Made up, but with every kind a real capture had without an icon before
+    // gi-cdn served the gaps and blueprints were indexed.
+    const bag = [
+      'Mora',
+      'Primogem',
+      'OriginalResin',
+      'CondensedResin',
+      'FragileResin',
+      'MasterlessStardust',
+      'MasterlessStarglitter',
+      'MasterlessStellaFortuna',
+      'LunaSigil',
+      'DustOfEnlightenment',
+      'HerosWit',
+      'MysticEnhancementOre',
+      'CrownOfInsight',
+      'DreamSolvent',
+      'Sunsettia',
+      'LuckyCoin',
+      'BlankDynamicCard',
+      'LegendPlayerBadge',
+      'MatchInvitationLetter',
+      'EnvoysMedal',
+      'MoonPrayerBlossomFromColumbina',
+      'PhotoWithTheLittleWitchesAndTheirImaginaryFriends',
+      'KeepsakePhotoWithYelan',
+      'BasicTentANapBeneathTheSnow',
+      'LargeCargoCrateReliableSupport',
+      'AGoldenWinter',
+      'UselessAdvice',
+      'AdventurerCamp',
+    ]
+    const fromGiCdn: string[] = []
+    for (const key of bag) {
+      const name = itemImage(key) ?? index.icon(key)
+      const url = imageUrlOf(name, coverage, IMAGE_HOST, GI_CDN_HOST)
+      expect(url, key).not.toBe('')
+      if (url.startsWith(GI_CDN_HOST)) fromGiCdn.push(key)
+    }
+    // The Original Resin icon and the game's misspelled photo come from gi-cdn.
+    expect(fromGiCdn).toContain('OriginalResin')
+    expect(fromGiCdn).toContain('PhotoWithTheLittleWitchesAndTheirImaginaryFriends')
   })
 
   it('has every item, achievement category and planner material shown outside the bag', async () => {

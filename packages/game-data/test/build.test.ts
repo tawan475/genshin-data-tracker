@@ -242,6 +242,8 @@ describe('material index', () => {
     '3': '(TEST) Cocktail 1',
     '4': 'Namecard',
     '5': 'Ice',
+    '6': 'Basic Tent: "A Nap Beneath the Snow"',
+    '7': 'Adventurer Camp',
   })
   const materials: Row[] = [
     {
@@ -270,6 +272,26 @@ describe('material index', () => {
       icon: 'UI_ItemIcon_101266',
       materialType: 'MATERIAL_EXCHANGE',
     },
+    // Furnishing blueprints wait in the bag until used, under the furnishing's name.
+    {
+      id: 394662,
+      nameTextMapHash: 6,
+      icon: 'UI_ItemIcon_Home_Common',
+      materialType: 'MATERIAL_FURNITURE_FORMULA',
+    },
+    {
+      id: 350001,
+      nameTextMapHash: 7,
+      icon: 'UI_ItemIcon_Home_Outdoor',
+      materialType: 'MATERIAL_FURNITURE_SUITE_FORMULA',
+    },
+    // A blueprint named like a bag item never takes its key, even with a lower id.
+    {
+      id: 100001,
+      nameTextMapHash: 5,
+      icon: 'UI_ItemIcon_Home_Common',
+      materialType: 'MATERIAL_FURNITURE_FORMULA',
+    },
   ]
   const run = (previous?: Record<string, number>) => {
     const problems = new Problems()
@@ -283,8 +305,13 @@ describe('material index', () => {
     return { out: out.materials, problems }
   }
 
-  it('picks a bag item over quest copies and TCG card backs, and drops test and non-bag items', () => {
-    expect(run().out).toEqual({ Cecilia: 100023, Ice: [101268, 101266] })
+  it('picks a bag item over quest copies, TCG card backs and blueprints, and drops test and non-bag items', () => {
+    expect(run().out).toEqual({
+      AdventurerCamp: [350001, 'UI_ItemIcon_Home_Outdoor'],
+      BasicTentANapBeneathTheSnow: [394662, 'UI_ItemIcon_Home_Common'],
+      Cecilia: 100023,
+      Ice: [101268, 101266],
+    })
   })
 
   it('keeps keys that left the dump, for older snapshots', () => {
