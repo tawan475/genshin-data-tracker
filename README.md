@@ -111,16 +111,29 @@ zips are built in the browser; the server only rebuilds single GOOD files.
 - **Live updates.** `GET /api/live` is a WebSocket (session cookie, this
   site's `Origin`) to the user's `LiveHub` Durable Object: one per user,
   SQLite-backed (as the Free plan requires), on the Hibernation API, with a
-  `ping` → `pong` auto-response, so idle sockets cost nothing. Every write that
-  moves an account's `data_version` or the account list (imports by key or
-  from the dashboard, captures seen again, deletes, account create, rename,
-  delete) tells it after the response (`waitUntil`; a failure is only
-  logged), and it sends `{type: "data", accountId, dataVersion, takenAt?}` or
-  `{type: "accounts"}` to that user's sockets. Tabs then re-read `GET
-  /api/accounts` (one D1 round trip), which has an ETag over its body: a 304
-  when nothing changed. That read is also the catch-up after any gap (events
-  are not replayed). A socket whose access token has expired is closed (4001)
-  at the next event, and the tab reconnects after a refresh.
+  `ping` → `pong` auto-response, so idle sockets cost nothing. A browser holds
+  one socket for all its tabs (the tab holding the Web Lock `gdt-live:<user>`
+  connects and relays over BroadcastChannel; the next tab takes over when it
+  closes). Every write that moves an account's `data_version` or the account
+  list (imports by key or from the dashboard, captures seen again, deletes,
+  account create, rename, delete) tells the hub after the response
+  (`waitUntil`; a failure is only logged), which sends `{type: "data",
+  accountId, dataVersion, takenAt?}` or `{type: "accounts"}` to the user's
+  sockets; tabs then re-read `GET /api/accounts` (one D1 round trip, an ETag
+  over its body: a 304 when nothing changed). Costs are kept down by:
+  `users.live_since` (migration 0010), set by the hub on its first socket and
+  cleared after its last, read by imports and deletes in the batch they
+  already send, so nothing calls the hub while no page is open; a `hello`
+  (each account's version and names, read in the hub's one connect round
+  trip) that tells a reconnecting browser whether it missed anything, instead
+  of a catch-up read; dashboard import runs uploading with `x-gdt-live: quiet`
+  and announcing once at the end (`POST /api/accounts/:id/announce`); a ping
+  every 5 minutes only while some tab is visible. Sockets outlive the 15-minute
+  access token: each keeps its session's token version (the access token's
+  `ver`), and ending sessions (sign out everywhere, a password change) tells
+  the hub, awaited, to close older ones (4003); connects with an older version
+  are refused, and import events carry the current one too. Signing one
+  browser out closes its socket from the page.
 - **Diagnostics.** `GET /api/health` is public (status, build, D1, migrations).
   With `x-diag-key: <DIAG_KEY>` it adds the private tier — every secret with its
   value, bindings, error detail — and imports add `Server-Timing` and
@@ -172,7 +185,8 @@ copies them from the local gi-cdn build). From a clean clone they are missing
 and those few icons show initials.
 
 `wrangler deploy` also creates the `LiveHub` Durable Object class (migration
-`v1` in `wrangler.jsonc`); it needs no D1 migration.
+`v1` in `wrangler.jsonc`). Live updates need D1 migration 0010
+(`users.live_since`): apply it (`db:migrate:remote`) before deploying.
 
 Static assets are served from the edge; `/api` runs with Smart Placement (next
 to D1). Measured from Bangkok: ~5 ms of SQL per import, ~120 ms per D1 round

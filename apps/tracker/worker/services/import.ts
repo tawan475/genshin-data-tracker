@@ -41,6 +41,7 @@ import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { ApiError, isUniqueViolation } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { dataVersionOf, recomputeAccount } from './accounts'
+import { listenerOf, listenerStatement, type Listener } from './live'
 
 export interface Upload {
   text: string
@@ -86,12 +87,14 @@ export interface ImportTarget {
 }
 
 /**
- * What an import did: the response for the uploader, and the account's new
- * data version when it moved (null for a no-op), for the live event.
+ * What an import did: the response for the uploader; for the live event, the
+ * account's new data version when it moved (null for a no-op) and who
+ * listens, read in the same batch as the write.
  */
 export interface ImportResult {
   response: ImportResponse
   dataVersion: number | null
+  listener?: Listener
 }
 
 /**
@@ -169,6 +172,7 @@ export async function importSnapshot(
     snapshotId: number,
     storedSize = 0,
     dataVersion: number | null = null,
+    listener?: Listener,
   ): ImportResult => ({
     response: {
       status,
@@ -179,6 +183,7 @@ export async function importSnapshot(
       ...(warnings.length > 0 ? { warnings } : {}),
     },
     dataVersion,
+    ...(listener ? { listener } : {}),
   })
   // The same capture, also when it was stored before irminsul's extra keys
   // were kept (its hash then left them out).
@@ -198,7 +203,7 @@ export async function importSnapshot(
   if (latest && latest.content_hash === encoded.contentHash && takenAt > latest.taken_at) {
     // Same inventory captured again later: remember when it was last seen
     // instead of storing a duplicate snapshot.
-    const [, bumped] = await meter.batch(d1, 'seen', [
+    const [, bumped, listening] = await meter.batch(d1, 'seen', [
       d1
         .prepare('UPDATE snapshots SET last_seen_at = max(last_seen_at, ?1) WHERE id = ?2')
         .bind(takenAt, latest.id),
@@ -207,8 +212,9 @@ export async function importSnapshot(
           'UPDATE genshin_accounts SET data_version = data_version + 1 WHERE id = ?1 RETURNING data_version',
         )
         .bind(accountId),
+      listenerStatement(d1, accountId),
     ])
-    return response('unchanged', latest.id, 0, dataVersionOf(bumped) ?? null)
+    return response('unchanged', latest.id, 0, dataVersionOf(bumped) ?? null, listenerOf(listening))
   }
 
   const bases = await readBases(basesResult!.results)
@@ -275,6 +281,7 @@ export async function importSnapshot(
         encoded.achievementTimesBase,
       ),
     recomputeAccount(d1, accountId),
+    listenerStatement(d1, accountId),
   )
 
   let results: D1Result<Record<string, unknown>>[]
@@ -300,7 +307,13 @@ export async function importSnapshot(
     throw error
   }
   const snapshotId = results[toStore.length]!.results[0]!.id as number
-  return response('created', snapshotId, storedSize, dataVersionOf(results.at(-1)) ?? null)
+  return response(
+    'created',
+    snapshotId,
+    storedSize,
+    dataVersionOf(results.at(-2)) ?? null,
+    listenerOf(results.at(-1)),
+  )
 }
 
 /** Parses and normalises a GOOD file; malformed input is a 400. */

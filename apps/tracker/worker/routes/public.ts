@@ -96,7 +96,7 @@ export const publicImport = new Hono<AppEnv>()
         owner.accounts,
       ))
     }
-    const { response, dataVersion } = await importSnapshot(
+    const { response, dataVersion, listener } = await importSnapshot(
       c.env.DB,
       account,
       upload,
@@ -108,14 +108,15 @@ export const publicImport = new Hono<AppEnv>()
       throw error
     })
     meter.report(c)
-    // A new account is in the list now even when its first file changed nothing.
+    // Only when someone listens (read in the import's own batch). A new
+    // account is in the list now even when its first file changed nothing.
     if (dataVersion !== null || created) {
-      notifyUser(c, userId, {
-        type: 'data',
-        accountId: account.id,
-        dataVersion,
-        takenAt: response.takenAt,
-      })
+      notifyUser(
+        c,
+        userId,
+        { type: 'data', accountId: account.id, dataVersion, takenAt: response.takenAt },
+        listener,
+      )
     }
     return c.json<ImportResponse>(
       { ...response, account: { id: account.id, name: account.name, uid: account.uid, created } },

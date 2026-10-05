@@ -67,6 +67,13 @@ export const users = sqliteTable(
      * theirs (routed by the capture's UID). NULL: none. Added in 0007.
      */
     importKeyHash: text('import_key_hash'),
+    /**
+     * Set (epoch ms) while the user's live hub (worker/services/live.ts) has
+     * an open socket; NULL when nobody is listening, so writes skip telling
+     * it. Kept by the hub on its first connect and last disconnect. Added in
+     * 0010.
+     */
+    liveSince: integer('live_since'),
   },
   (t) => [
     uniqueIndex('users_import_key_hash_unique')

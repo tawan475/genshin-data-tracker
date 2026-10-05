@@ -1,40 +1,67 @@
 /**
  * The decisions behind live updates, kept pure so they can be tested without
- * a socket, a timer or a page: how long to wait before reconnecting, which
- * events need the account list re-read, how fresh rows fold into the shown
- * list (or wait while a dialog is open), and which of them is a new capture.
+ * a socket, a timer or a page: how long to wait before reconnecting, when to
+ * ping, which events (and which `hello`) need the account list re-read, when
+ * a tab shown again must catch up, how fresh rows fold into the shown list
+ * (or wait while a dialog is open), and which of them is a new capture.
  */
 
-import type { AccountResponse, LiveEvent } from '@gdt/shared'
+import type { AccountResponse, LiveAccount, LiveEvent } from '@gdt/shared'
 
 // ----------------------------------------------------------------- timing
 
 /** First reconnect wait; it doubles per failed attempt up to the cap. */
 export const RECONNECT_BASE_MS = 1_000
 export const RECONNECT_MAX_MS = 30_000
+/** After this many failed connects in a row, try only every RECONNECT_SLOW_MS. */
+export const RECONNECT_SLOW_AFTER = 10
+export const RECONNECT_SLOW_MS = 300_000
 /** Failed connects in a row (none opened) before slow polling backs the socket up. */
 export const FALLBACK_AFTER = 3
-/** Slow poll of the account list while the socket cannot connect (visible tabs only). */
-export const FALLBACK_POLL_MS = 60_000
-/** Keep-alive: a `ping` this often; no `pong` within the timeout means a dead socket. */
-export const PING_MS = 45_000
+/** Slow poll of the account list while the socket cannot connect (visible tabs, shared). */
+export const FALLBACK_POLL_MS = 120_000
+/** Keep-alive: a `ping` this often while some tab is visible (none while all are hidden). */
+export const PING_MS = 300_000
+/** No `pong` within this means a dead socket. */
 export const PONG_TIMEOUT_MS = 10_000
+/** A tab shown again, or the network back, pings unless a pong came this recently. */
+export const RECENT_PONG_MS = 10_000
 /** Re-reads of the list after events: at most one per gap (the first one at once). */
 export const FETCH_GAP_MS = 2_000
 /** A burst (a bulk import elsewhere): this many events within the window widens the gap. */
 export const BURST_EVENTS = 5
 export const BURST_WINDOW_MS = 30_000
 export const BURST_GAP_MS = 10_000
-/** Hidden at least this long, a tab re-reads the list when it is shown again. */
-export const CATCH_UP_AFTER_HIDDEN_MS = 30_000
 
 /**
  * Wait before reconnect attempt `attempt` (1-based): 1 s, 2 s, 4 s … 30 s,
- * each shortened by up to a quarter at random so tabs do not reconnect in step.
+ * then every 5 minutes once it has failed RECONNECT_SLOW_AFTER times in a row
+ * (a network that blocks WebSockets; the slow poll covers it). Each is
+ * shortened by up to a quarter at random so browsers do not reconnect in step.
  */
 export function reconnectDelay(attempt: number, random = Math.random()): number {
-  const raw = Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * 2 ** Math.max(0, attempt - 1))
+  const raw =
+    attempt > RECONNECT_SLOW_AFTER
+      ? RECONNECT_SLOW_MS
+      : Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * 2 ** Math.max(0, attempt - 1))
   return Math.round(raw * (0.75 + 0.25 * Math.min(1, Math.max(0, random))))
+}
+
+export type PingReason = 'tick' | 'shown' | 'online'
+
+/**
+ * Whether the socket's holder should ping now. `tick`: the five-minute beat a
+ * visible tab sends (several tabs share one ping). `shown` / `online`: a tab
+ * came back or the network did, so check at once unless a pong just came.
+ * Never while a ping is still waiting for its pong.
+ */
+export function shouldPing(
+  reason: PingReason,
+  state: { now: number; lastPingAt: number; lastPongAt: number; waiting: boolean },
+): boolean {
+  if (state.waiting) return false
+  if (reason === 'tick') return state.now - state.lastPingAt >= PING_MS * 0.8
+  return state.now - Math.max(state.lastPongAt, state.lastPingAt) >= RECENT_PONG_MS
 }
 
 /** How long until the list may be re-read, given the last read and the recent events. */
@@ -48,14 +75,21 @@ export function fetchDelay(
   return Math.max(0, lastFetchAt + gap - now)
 }
 
-/** Whether a tab shown again should re-read the list (pushes may have been missed). */
+/**
+ * Whether a tab shown again must re-read the list: while the socket is down
+ * (pushes are being lost), or when an event (a `hello` after a reconnect
+ * included) arrived while it was hidden and no tab has read the list since.
+ * A socket that stayed up brought everything already.
+ */
 export function shouldCatchUp(state: {
-  hiddenMs: number
-  /** An event arrived while hidden. */
-  stale: boolean
-  socketOpen: boolean
+  linkUp: boolean
+  /** When the first event this tab did not read for arrived (null: none). */
+  staleSince: number | null
+  /** When this tab, or another one, last started reading the list. */
+  lastReadAt: number
 }): boolean {
-  return state.stale || !state.socketOpen || state.hiddenMs >= CATCH_UP_AFTER_HIDDEN_MS
+  if (!state.linkUp) return true
+  return state.staleSince !== null && state.lastReadAt < state.staleSince
 }
 
 // ----------------------------------------------------------------- events
@@ -72,6 +106,7 @@ export function parseLiveEvent(text: unknown): LiveEvent | null {
   if (!value || typeof value !== 'object') return null
   const event = value as Record<string, unknown>
   if (event.type === 'accounts') return { type: 'accounts' }
+  if (event.type === 'hello') return parseHello(event.accounts)
   if (event.type !== 'data' || !Number.isSafeInteger(event.accountId)) return null
   return {
     type: 'data',
@@ -81,15 +116,59 @@ export function parseLiveEvent(text: unknown): LiveEvent | null {
   }
 }
 
+function parseHello(value: unknown): LiveEvent | null {
+  if (!Array.isArray(value)) return null
+  const accounts: LiveAccount[] = []
+  for (const item of value as Record<string, unknown>[]) {
+    if (!item || !Number.isSafeInteger(item.id) || !Number.isSafeInteger(item.dataVersion)) {
+      return null
+    }
+    accounts.push({
+      id: item.id as number,
+      dataVersion: item.dataVersion as number,
+      name: (item.name as string | null) ?? null,
+      uid: (item.uid as string | null) ?? null,
+      server: (item.server as LiveAccount['server']) ?? null,
+    })
+  }
+  return { type: 'hello', accounts }
+}
+
+/** What a tab holds, as far as telling events apart goes. */
+export interface KnownAccounts {
+  /** The newest version held of an account (shown or waiting), null when not held. */
+  knownVersion: (id: number) => number | null
+  /** The accounts shown. */
+  shown: readonly AccountResponse[]
+}
+
 /**
  * Whether `event` tells this tab something it does not know yet. A data event
  * for a version already held (this tab's own import, or a list another tab
- * shared) needs nothing; anything else re-reads the list.
+ * shared) needs nothing, nor a `hello` that matches what is held; anything
+ * else re-reads the list.
  */
-export function eventNeedsFetch(event: LiveEvent, knownVersion: (id: number) => number | null) {
+export function eventNeedsFetch(event: LiveEvent, known: KnownAccounts): boolean {
+  if (event.type === 'hello') return helloDiffers(event.accounts, known)
   if (event.type !== 'data' || event.dataVersion === null) return true
-  const known = knownVersion(event.accountId)
-  return known === null || known < event.dataVersion
+  const version = known.knownVersion(event.accountId)
+  return version === null || version < event.dataVersion
+}
+
+/** Whether the accounts a `hello` lists differ from the ones held (missed while disconnected). */
+export function helloDiffers(accounts: readonly LiveAccount[], known: KnownAccounts): boolean {
+  if (accounts.length !== known.shown.length) return true
+  const shown = new Map(known.shown.map((a) => [a.id, a]))
+  for (const account of accounts) {
+    const row = shown.get(account.id)
+    const version = known.knownVersion(account.id)
+    if (!row || version === null || version < account.dataVersion) return true
+    // Renamed while away (a rename keeps the version).
+    if (row.name !== account.name || row.uid !== account.uid || row.server !== account.server) {
+      return true
+    }
+  }
+  return false
 }
 
 // ----------------------------------------------------------------- merging

@@ -2,9 +2,12 @@ import type { AccountResponse } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import {
   BURST_GAP_MS,
-  CATCH_UP_AFTER_HIDDEN_MS,
   FETCH_GAP_MS,
+  PING_MS,
+  RECENT_PONG_MS,
   RECONNECT_MAX_MS,
+  RECONNECT_SLOW_AFTER,
+  RECONNECT_SLOW_MS,
   captureToShow,
   eventNeedsFetch,
   fetchDelay,
@@ -13,6 +16,8 @@ import {
   parseLiveEvent,
   reconnectDelay,
   shouldCatchUp,
+  shouldPing,
+  type KnownAccounts,
   type MergeInput,
 } from '../policy'
 
@@ -46,17 +51,30 @@ const merge = (input: Partial<MergeInput> & Pick<MergeInput, 'shown' | 'fresh'>)
   mergeAccounts({ pending: new Map(), complete: true, held: () => false, ...input })
 
 describe('reconnecting', () => {
-  it('doubles from 1 s to a 30 s cap, shortened at random by at most a quarter', () => {
+  it('doubles from 1 s to a 30 s cap, then slows to 5 min, shortened at random', () => {
     expect([1, 2, 3, 4, 5, 6, 7, 10].map((n) => reconnectDelay(n, 1))).toEqual([
       1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 30_000, 30_000,
     ])
+    expect(reconnectDelay(RECONNECT_SLOW_AFTER + 1, 1)).toBe(RECONNECT_SLOW_MS)
     expect(reconnectDelay(1, 0)).toBe(750)
-    expect(reconnectDelay(20, 0)).toBe(RECONNECT_MAX_MS * 0.75)
+    expect(reconnectDelay(RECONNECT_SLOW_AFTER, 0)).toBe(RECONNECT_MAX_MS * 0.75)
     for (let i = 0; i < 50; i++) {
       const delay = reconnectDelay(8, Math.random())
       expect(delay).toBeGreaterThanOrEqual(RECONNECT_MAX_MS * 0.75)
       expect(delay).toBeLessThanOrEqual(RECONNECT_MAX_MS)
     }
+  })
+
+  it('pings on the beat only every five minutes, and at once when a tab comes back', () => {
+    const now = 1_000_000
+    const idle = { now, lastPingAt: now - PING_MS, lastPongAt: now - PING_MS, waiting: false }
+    expect(shouldPing('tick', idle)).toBe(true)
+    // Several visible tabs beat out of step: one ping serves them.
+    expect(shouldPing('tick', { ...idle, lastPingAt: now - 60_000 })).toBe(false)
+    expect(shouldPing('shown', idle)).toBe(true)
+    expect(shouldPing('online', idle)).toBe(true)
+    expect(shouldPing('shown', { ...idle, lastPongAt: now - RECENT_PONG_MS + 1 })).toBe(false)
+    expect(shouldPing('shown', { ...idle, waiting: true })).toBe(false)
   })
 
   it('re-reads at once, then at most every gap, wider in a burst', () => {
@@ -68,12 +86,14 @@ describe('reconnecting', () => {
     expect(fetchDelay(100_000, 99_000, burst)).toBe(FETCH_GAP_MS - 1_000)
   })
 
-  it('catches up when shown again after missing events, a dead socket or a long absence', () => {
-    const quiet = { hiddenMs: 1_000, stale: false, socketOpen: true }
+  it('catches up when shown again only for unread events or a socket that is down', () => {
+    // The socket stayed up and nothing was said: nothing to read, however long it was hidden.
+    const quiet = { linkUp: true, staleSince: null, lastReadAt: 0 }
     expect(shouldCatchUp(quiet)).toBe(false)
-    expect(shouldCatchUp({ ...quiet, stale: true })).toBe(true)
-    expect(shouldCatchUp({ ...quiet, socketOpen: false })).toBe(true)
-    expect(shouldCatchUp({ ...quiet, hiddenMs: CATCH_UP_AFTER_HIDDEN_MS })).toBe(true)
+    expect(shouldCatchUp({ ...quiet, linkUp: false })).toBe(true)
+    // An event while hidden: read, unless a tab read the list after it (and shared it).
+    expect(shouldCatchUp({ ...quiet, staleSince: 5_000, lastReadAt: 4_000 })).toBe(true)
+    expect(shouldCatchUp({ ...quiet, staleSince: 5_000, lastReadAt: 6_000 })).toBe(false)
   })
 })
 
@@ -88,13 +108,37 @@ describe('events', () => {
       accountId: 3,
       dataVersion: null,
     })
-    for (const junk of ['pong', '{', '{"type":"data"}', '{"type":"other"}', 'null', 42]) {
+    const hello =
+      '{"type":"hello","accounts":[{"id":1,"dataVersion":5,"name":"Main","uid":"8","server":"ASIA"}]}'
+    expect(parseLiveEvent(hello)).toEqual({
+      type: 'hello',
+      accounts: [{ id: 1, dataVersion: 5, name: 'Main', uid: '8', server: 'ASIA' }],
+    })
+    expect(parseLiveEvent('{"type":"hello","accounts":[]}')).toEqual({
+      type: 'hello',
+      accounts: [],
+    })
+    for (const junk of [
+      'pong',
+      '{',
+      '{"type":"data"}',
+      '{"type":"other"}',
+      '{"type":"hello"}',
+      '{"type":"hello","accounts":[{"id":1}]}',
+      'null',
+      42,
+    ]) {
       expect(parseLiveEvent(junk)).toBeNull()
     }
   })
 
+  const held = account(1, 5, null, { name: 'Main', uid: '8', server: 'ASIA' })
+  const known: KnownAccounts = {
+    knownVersion: (id) => (id === 1 ? 5 : null),
+    shown: [held],
+  }
+
   it('re-reads only for versions this tab does not hold yet', () => {
-    const known = (id: number) => (id === 1 ? 5 : null)
     const data = (accountId: number, dataVersion: number | null) =>
       ({ type: 'data', accountId, dataVersion }) as const
     expect(eventNeedsFetch(data(1, 5), known)).toBe(false)
@@ -103,6 +147,17 @@ describe('events', () => {
     expect(eventNeedsFetch(data(1, null), known)).toBe(true)
     expect(eventNeedsFetch(data(2, 1), known)).toBe(true) // an account this tab has not seen
     expect(eventNeedsFetch({ type: 'accounts' }, known)).toBe(true)
+  })
+
+  it('re-reads after a reconnect only when the hello shows something was missed', () => {
+    const as = { id: 1, dataVersion: 5, name: 'Main', uid: '8', server: 'ASIA' as const }
+    const hello = (...accounts: (typeof as)[]) => ({ type: 'hello', accounts }) as const
+    expect(eventNeedsFetch(hello(as), known)).toBe(false)
+    expect(eventNeedsFetch(hello({ ...as, dataVersion: 4 }), known)).toBe(false) // a stale tab
+    expect(eventNeedsFetch(hello({ ...as, dataVersion: 6 }), known)).toBe(true) // an upload
+    expect(eventNeedsFetch(hello({ ...as, name: 'Alt' }), known)).toBe(true) // a rename
+    expect(eventNeedsFetch(hello(as, { ...as, id: 2 }), known)).toBe(true) // a new account
+    expect(eventNeedsFetch(hello(), known)).toBe(true) // a deleted one
   })
 })
 

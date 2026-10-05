@@ -36,7 +36,7 @@ import {
   type SectionName,
 } from '../services/export'
 import { importSnapshot } from '../services/import'
-import { notifyUser } from '../services/live'
+import { listenerOf, listenerStatement, notifyUser } from '../services/live'
 
 /**
  * Part of the snapshot list's ETag. Bump it whenever the list's JSON changes
@@ -149,28 +149,45 @@ export const accounts = new Hono<AppEnv>()
     })
   })
 
-  /** Dashboard upload: one GOOD file per request (the browser orchestrates bulk imports). */
+  /**
+   * Dashboard upload: one GOOD file per request (the browser orchestrates bulk
+   * imports). A run of many sends `x-gdt-live: quiet` and tells the live
+   * pages once at its end (`announce`), instead of after every file.
+   */
   .post('/:id/import', async (c) => {
     const id = idParam(c, 'id')
     const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
     const meter = new D1Meter()
-    const { response, dataVersion } = await importSnapshot(
+    const { response, dataVersion, listener } = await importSnapshot(
       c.env.DB,
       account,
       await readUpload(c),
       meter,
     )
     meter.report(c)
-    if (dataVersion !== null) {
-      notifyUser(c, c.get('userId'), {
-        type: 'data',
-        accountId: id,
-        dataVersion,
-        takenAt: response.takenAt,
-      })
+    if (dataVersion !== null && c.req.header('x-gdt-live') !== 'quiet') {
+      notifyUser(
+        c,
+        c.get('userId'),
+        { type: 'data', accountId: id, dataVersion, takenAt: response.takenAt },
+        listener,
+      )
     }
     return c.json(response, response.status === 'created' ? 201 : 200)
+  })
+
+  /** The account, after a quiet import run: also tells the live pages it moved. */
+  .post('/:id/announce', async (c) => {
+    const id = idParam(c, 'id')
+    const [account] = await listAccounts(c.env.DB, c.get('userId'), id)
+    if (!account) throw notFound('Account')
+    notifyUser(c, c.get('userId'), {
+      type: 'data',
+      accountId: id,
+      dataVersion: account.dataVersion,
+    })
+    return c.json(account)
   })
 
   .get('/:id/snapshots', async (c) => {
@@ -201,14 +218,15 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const { ids } = await parseJson(c, snapshotIdsRequest)
     await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
-    const [deleted, recomputed] = await c.env.DB.batch([
+    const [deleted, recomputed, listening] = await c.env.DB.batch([
       c.env.DB.prepare(
         `UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND deleted_at IS NULL
          AND id IN (SELECT value FROM json_each(?2)) RETURNING id`,
       ).bind(id, JSON.stringify(ids), Date.now()),
       recomputeAccount(c.env.DB, id),
+      listenerStatement(c.env.DB, id),
     ])
-    notifyData(c, id, recomputed)
+    notifyData(c, id, recomputed, listening)
     // meta.changes would also count the counter trigger's updates.
     return c.json({ deleted: deleted!.results.length })
   })
@@ -217,13 +235,14 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const snapshotId = idParam(c, 'snapshotId')
     await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
-    const [deleted, recomputed] = await c.env.DB.batch([
+    const [deleted, recomputed, listening] = await c.env.DB.batch([
       c.env.DB.prepare(
         'UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND id = ?2 AND deleted_at IS NULL',
       ).bind(id, snapshotId, Date.now()),
       recomputeAccount(c.env.DB, id),
+      listenerStatement(c.env.DB, id),
     ])
-    notifyData(c, id, recomputed)
+    notifyData(c, id, recomputed, listening)
     if (deleted!.meta.changes === 0) throw notFound('Snapshot')
     return c.body(null, 204)
   })
@@ -274,12 +293,18 @@ export const accounts = new Hono<AppEnv>()
   })
 
 /** A delete moved the account's data version (even when it matched nothing). */
-function notifyData(c: Context<AppEnv>, accountId: number, recomputed: D1Result | undefined) {
-  notifyUser(c, c.get('userId'), {
-    type: 'data',
-    accountId,
-    dataVersion: dataVersionOf(recomputed) ?? null,
-  })
+function notifyData(
+  c: Context<AppEnv>,
+  accountId: number,
+  recomputed: D1Result | undefined,
+  listening: D1Result | undefined,
+) {
+  notifyUser(
+    c,
+    c.get('userId'),
+    { type: 'data', accountId, dataVersion: dataVersionOf(recomputed) ?? null },
+    listenerOf(listening),
+  )
 }
 
 /** The (user_id, uid) unique index: one account per UID per user (see migration 0007). */

@@ -2,7 +2,10 @@ export interface AppEnv {
   Bindings: Env
   Variables: {
     userId: number
-    /** The access token's expiry (epoch seconds), set with userId by requireUser. */
-    tokenExp: number
+    /**
+     * The session's token version as the access token carries it (null in a
+     * token issued before it did), set with userId by requireUser.
+     */
+    tokenVersion: number | null
   }
 }

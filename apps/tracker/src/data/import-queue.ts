@@ -433,7 +433,8 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
     try {
       const { body, gzip } = await compressFile(item.file)
       noteRequest(queue.accountId)
-      const result = await api.importGood(queue.accountId, body, { gzip })
+      // Quiet: the live pages hear about the run once, when it ends (reloadAccount).
+      const result = await api.importGood(queue.accountId, body, { gzip, quiet: true })
       item.status = result.status
       item.takenAt = result.takenAt
       item.sentBytes = body.size
@@ -610,9 +611,10 @@ function finishDone(queue: ImportQueue) {
   )
 }
 
+/** Re-reads the account after a run, and tells the live pages (its uploads were quiet). */
 function reloadAccount(queue: ImportQueue) {
   useAccounts()
-    .reload(queue.accountId)
+    .reload(queue.accountId, { announce: true })
     .catch(() => {
       // The list refreshes on the next navigation; nothing to tell the user.
     })

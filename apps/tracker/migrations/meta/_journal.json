@@ -71,6 +71,13 @@
       "when": 1791192602584,
       "tag": "0009_snapshot_delta_bases",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1791214406989,
+      "tag": "0010_users_live_since",
+      "breakpoints": true
     }
   ]
 }
