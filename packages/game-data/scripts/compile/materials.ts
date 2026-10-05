@@ -6,10 +6,13 @@
  * Keys are made exactly like irminsul makes them: the TextMap_MediumEN name
  * through toGoodKey. Item types that never sit in the bag as a stack are left
  * out (except the currencies irminsul exports), as are the game's test items.
+ * Furnishing blueprints are in: they wait in the bag until used, and
+ * irminsul exports them under the furnishing's name.
  * When several items share a key (quest copies, TCG card backs named after
- * flowers), the representative is the planner material or currency, else a
- * normal bag item, else a quest item, else TCG; then the lowest id.
- * overrides/keys.json `materials.prefer` picks one by hand.
+ * flowers, blueprints named like an item), the representative is the planner
+ * material or currency, else a normal bag item, else a quest item, else TCG,
+ * else a blueprint; then the lowest id. overrides/keys.json
+ * `materials.prefer` picks one by hand.
  *
  * The index only grows: a key that disappears from the dump (an item renamed
  * by the game) is carried over from the previous build, because snapshots
@@ -31,8 +34,6 @@ export const NOT_IN_BAG = new Set([
   'MATERIAL_CHANNELLER_SLAB_BUFF',
   'MATERIAL_COSTUME',
   'MATERIAL_FLYCLOAK',
-  'MATERIAL_FURNITURE_FORMULA',
-  'MATERIAL_FURNITURE_SUITE_FORMULA',
   'MATERIAL_MUSIC_GAME_BOOK_THEME',
   'MATERIAL_NAMECARD',
   'MATERIAL_PHOTOGRAPH_POSE',
@@ -51,11 +52,15 @@ export const CURRENCIES = new Set([106, 201, 202, 203, 204])
 /** The game's own test items ("(TEST) Cocktail 16", "Jean Test Package", …). */
 export const TEST_ITEM = /^\(test\)|^test |\btest (package|bundle)\b/i
 
+/** Furnishing and furnishing set blueprints, named after what they unlock. */
+const BLUEPRINTS = new Set(['MATERIAL_FURNITURE_FORMULA', 'MATERIAL_FURNITURE_SUITE_FORMULA'])
+
 /** Preference when several items share a key: lower wins. */
 function rank(type: string, planner: boolean): number {
   if (planner) return 0
   if (type === 'MATERIAL_QUEST') return 2
   if (type.startsWith('MATERIAL_GCG')) return 3
+  if (BLUEPRINTS.has(type)) return 4
   return 1
 }
 

@@ -216,7 +216,8 @@ export type CharacterImagesRow = [
 /**
  * `images.json`: the game's own names for every image the tracker shows
  * beyond materials and achievement categories, all from the dump. The app
- * loads `https://static.nanoka.cc/assets/gi/<name>.webp` for each.
+ * loads `https://static.nanoka.cc/assets/gi/<name>.webp` for each, or
+ * gi-cdn.475.dev's copy where that host lacks one (see `MissingImagesFile`).
  */
 export interface ImagesFile {
   columns: {
@@ -238,19 +239,23 @@ export interface ImagesFile {
 
 /**
  * `missing-images.json` (written by `pnpm --filter @gdt/game-data images`):
- * the image names static.nanoka.cc did not serve when last checked. The app
- * shows initials for them instead of asking. `names` and `hash` identify the
- * checked set, so a test can tell when a build added names nobody checked.
+ * the image names static.nanoka.cc did not serve when last checked, and the
+ * ones among them that load from `https://gi-cdn.475.dev/ui/<name>.webp`
+ * (the private `gi-cdn` repo's client extraction, which publishes exactly
+ * this list). The app shows initials for the rest instead of asking.
+ * `names` and `hash` identify the checked set, so a test can tell when a
+ * build added names nobody checked.
  */
 export interface MissingImagesFile {
   /** URL prefix the names were checked against. */
   source: string
   /** How many names were checked. */
   names: number
-  /** sha256 (hex, first 16) of the sorted checked names joined by "
-". */
+  /** sha256 (hex, first 16) of the sorted checked names joined by "\n". */
   hash: string
   missing: string[]
+  /** Missing names gi-cdn.475.dev serves (sorted; appended field, absent before). */
+  hosted?: string[]
 }
 
 export interface PlannerFile {
