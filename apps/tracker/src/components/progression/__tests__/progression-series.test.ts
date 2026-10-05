@@ -2,7 +2,17 @@ import type { SnapshotSummary } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import { DAY, HOUR } from '@/data/chart-range'
 import type { Capture } from '@/data/overview'
-import { buildProgression, periodTotals } from '../progression-series'
+import {
+  buildProgression,
+  buildSnapshotProgression,
+  captureChanges,
+  defaultGroup,
+  MAX_PERIODS,
+  periodTotals,
+  SNAPSHOT_BAR_WIDTH,
+  snapshotBarWidth,
+  snapshotTotals,
+} from '../progression-series'
 
 const at = (y: number, m: number, d: number, h = 0, min = 0) =>
   new Date(y, m - 1, d, h, min).getTime()
@@ -62,5 +72,106 @@ describe('progression over short ranges', () => {
 
     const hourly = buildProgression(daily, 'hour', '30d')!
     expect(hourly.lineBucket).toBe('hour')
+  })
+})
+
+describe('per snapshot', () => {
+  const last = at(2026, 10, 5, 22, 35)
+  // A capture before the range, then four in the last hour: a re-sighting, a
+  // primogem-only change, a gain and a loss in mora.
+  const captures: Capture[] = [
+    { at: at(2026, 10, 5, 18), summary: summary(1_000, 10) },
+    { at: at(2026, 10, 5, 21, 40), summary: summary(1_000, 10) },
+    { at: at(2026, 10, 5, 21, 55), summary: summary(1_000, 30) },
+    { at: at(2026, 10, 5, 22, 10), summary: summary(1_500, 30) },
+    { at: last, summary: summary(1_200, 30) },
+  ]
+
+  it('gives each capture its change, skipping the ones that changed nothing', () => {
+    expect(captureChanges(captures, 1, 1_000, 'mora')).toEqual([
+      { at: at(2026, 10, 5, 22, 10), change: 500, value: 1_500 },
+      { at: last, change: -300, value: 1_200 },
+    ])
+    // The first capture in the range against the value carried in.
+    expect(captureChanges(captures, 1, 900, 'mora')[0]).toEqual({
+      at: at(2026, 10, 5, 21, 40),
+      change: 100,
+      value: 1_000,
+    })
+    expect(captureChanges(captures, 1, 10, 'primogem')).toEqual([
+      { at: at(2026, 10, 5, 21, 55), change: 20, value: 30 },
+    ])
+  })
+
+  it('puts every bar under a step of the line, on the same time axis', () => {
+    const s = buildSnapshotProgression(captures, '1h')!
+    // The range is the hour up to the newest capture, not snapped to 22:00.
+    const from = last - HOUR
+    expect(s.domain).toEqual([from, last])
+    expect(s.open).toEqual({ mora: 1_000, primogem: 10 })
+    expect(s.truncated).toBe(false)
+    for (const key of ['mora', 'primogem'] as const) {
+      const line = s.lines[key]
+      expect([line[0]!.x, line.at(-1)!.x]).toEqual(s.domain)
+      // Each change is where the line steps to its value.
+      for (const change of s.changes[key]) {
+        expect(line).toContainEqual({ x: change.at, y: change.value })
+        expect(change.at).toBeGreaterThan(s.domain[0])
+        expect(change.at).toBeLessThanOrEqual(s.domain[1])
+      }
+    }
+    expect(s.changes.mora.map((c) => c.change)).toEqual([500, -300])
+    expect(snapshotTotals(s, 'mora')).toEqual({ last: 1_200, net: 200, gained: 500, spent: 300 })
+    expect(snapshotTotals(s, 'primogem')).toEqual({ last: 30, net: 20, gained: 20, spent: 0 })
+  })
+
+  it('starts all history at the first capture, which has nothing to change from', () => {
+    const s = buildSnapshotProgression(captures, 'all')!
+    expect(s.domain).toEqual([captures[0]!.at, last])
+    expect(s.changes.mora.map((c) => c.at)).toEqual([at(2026, 10, 5, 22, 10), last])
+    expect(snapshotTotals(s, 'mora').net).toBe(200)
+  })
+
+  it('carries the value in when nothing changed in the range', () => {
+    const quiet = [...captures, { at: last + 3 * HOUR, summary: summary(1_200, 30) }]
+    const s = buildSnapshotProgression(quiet, '1h')!
+    expect(s.changes).toEqual({ mora: [], primogem: [] })
+    expect(s.lines.mora).toEqual([
+      { x: last + 2 * HOUR, y: 1_200 },
+      { x: last + 3 * HOUR, y: 1_200 },
+    ])
+    expect(snapshotTotals(s, 'mora')).toEqual({ last: 1_200, net: 0, gained: 0, spent: 0 })
+  })
+
+  it('keeps the newest bars past the cap, starting the line with them', () => {
+    const many: Capture[] = Array.from({ length: MAX_PERIODS + 10 }, (_, i) => ({
+      at: at(2026, 1, 1) + i * HOUR,
+      // Mora changes every capture, primogems never.
+      summary: summary(1_000 + i, 5),
+    }))
+    const s = buildSnapshotProgression(many, 'all')!
+    expect(s.truncated).toBe(true)
+    expect(s.changes.mora.length).toBe(MAX_PERIODS)
+    const firstKept = many.length - MAX_PERIODS
+    expect(s.changes.mora[0]!.at).toBe(many[firstKept]!.at)
+    // Measured against the capture before, where the line and axis start.
+    expect(s.open.mora).toBe(many[firstKept - 1]!.summary.mora)
+    expect(s.domain).toEqual([many[firstKept - 1]!.at, many.at(-1)!.at])
+    expect(s.lines.mora[0]).toEqual({ x: s.domain[0], y: s.open.mora })
+  })
+
+  it('thins bars as they crowd, within bounds', () => {
+    expect(snapshotBarWidth(4, 560)).toBe(SNAPSHOT_BAR_WIDTH.max)
+    expect(snapshotBarWidth(50, 560)).toBe(6)
+    expect(snapshotBarWidth(550, 560)).toBe(SNAPSHOT_BAR_WIDTH.min)
+    expect(snapshotBarWidth(0, 560)).toBe(SNAPSHOT_BAR_WIDTH.max)
+    expect(snapshotBarWidth(10, 0)).toBe(SNAPSHOT_BAR_WIDTH.max)
+  })
+
+  it('defaults to snapshots up to a week, days beyond', () => {
+    expect(defaultGroup('1h')).toBe('snapshot')
+    expect(defaultGroup('7d')).toBe('snapshot')
+    expect(defaultGroup('14d')).toBe('day')
+    expect(defaultGroup('all')).toBe('day')
   })
 })
