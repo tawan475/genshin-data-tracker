@@ -99,17 +99,23 @@ function finishTimes(
 }
 
 /**
- * When an achievement was completed, as far as the snapshots tell:
+ * When an achievement was completed (`at`, epoch ms), as far as the
+ * snapshots tell:
  * - `exact`: the game's own finish time (irminsul's `gi_achievement_times`)
  * - `seen`: the first snapshot that had it (done since the one before)
  * - `by`: it was already done in the first snapshot with achievements, so
  *   only "by then" is known
- * Null when no snapshot has it.
  */
+export interface CompletedOn {
+  at: number
+  kind: 'exact' | 'seen' | 'by'
+}
+
+/** See `CompletedOn`. Null when no snapshot has it. */
 export function completedOn(
   captured: Pick<CapturedAchievements, 'firstSeen' | 'firstTakenAt' | 'completedAt'>,
   id: number,
-): { at: number; kind: 'exact' | 'seen' | 'by' } | null {
+): CompletedOn | null {
   const exact = captured.completedAt.get(id)
   if (exact !== undefined) return { at: exact, kind: 'exact' }
   const seen = captured.firstSeen.get(id)
@@ -207,6 +213,25 @@ export function tiersDone(entry: AchievementEntry, state: DoneState): number {
   let done = 0
   for (const tier of entry.tiers) if (isDone(state, tier.id)) done++
   return done
+}
+
+/**
+ * The completion to show on an entry's row: its highest done tier's
+ * (`tier` is that tier's index), or null when nothing is done or that tier
+ * has no date (marked by hand, never captured).
+ */
+export function entryCompletedOn(
+  entry: AchievementEntry,
+  state: DoneState,
+  captured: Pick<CapturedAchievements, 'firstSeen' | 'firstTakenAt' | 'completedAt'>,
+): (CompletedOn & { tier: number }) | null {
+  for (let tier = entry.tiers.length - 1; tier >= 0; tier--) {
+    const id = entry.tiers[tier]!.id
+    if (!isDone(state, id)) continue
+    const done = completedOn(captured, id)
+    return done && { ...done, tier }
+  }
+  return null
 }
 
 // --------------------------------------------------------------------- counts
