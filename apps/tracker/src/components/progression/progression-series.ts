@@ -1,12 +1,15 @@
 /**
- * Mora and primogems grouped into periods (hour / day / month / year) for the
- * progression charts: each period's closing value and its change against the
- * period before, and a stepped line through the captures. Pure: the
+ * Mora and primogems for the progression charts: a stepped line through the
+ * captures, and the change under it either per period (hour / day / month /
+ * year: each period's closing value against the period before) or per
+ * snapshot (each capture that changed a figure against the capture before,
+ * on the line's own time axis so every bar sits under its step). Pure: the
  * component calls it through computed().
  *
  * Short ranges stay detailed: the component fits the grouping to the range
  * (fitGroupBy: "Per day" over 6h shows hours), and the line keeps every
- * capture up to a week (pointBucket), never coarser than the bars.
+ * capture up to a week (pointBucket), never coarser than the bars (every
+ * capture, per snapshot).
  *
  * Captures come from buildHistory, so a capture that missed the currency
  * packet already carries the previous mora and primogems. Leading captures
@@ -15,9 +18,11 @@
 
 import type { TimelineGroupBy } from '@gdt/shared'
 import {
+  DAY,
   finerBucket,
   hourTick,
   pointBucket,
+  rangeLength,
   rangeStart,
   type AxisFormat,
   type ChartRange,
@@ -30,9 +35,22 @@ import { nextPeriod } from '@/data/progression'
 export type CurrencyKey = 'mora' | 'primogem'
 export const CURRENCY_KEYS: readonly CurrencyKey[] = ['mora', 'primogem']
 
-const DAY = 86_400_000
+/** The bar charts' grouping: every capture, or a period. */
+export type ProgressionGroup = 'snapshot' | TimelineGroupBy
 
-/** Most periods drawn at once (hourly over years would be tens of thousands of bars). */
+/**
+ * The grouping until one is picked on this device: per snapshot up to a
+ * week, where captures are few enough to read one by one; per day beyond.
+ */
+export function defaultGroup(range: ChartRange): ProgressionGroup {
+  return rangeLength(range) <= 7 * DAY ? 'snapshot' : 'day'
+}
+
+/**
+ * Most bars drawn at once, periods or snapshots (hourly over years would be
+ * tens of thousands). Older ones are left out and the line starts with the
+ * bars.
+ */
 export const MAX_PERIODS = 3000
 
 /** Longest a period can be (DST adds an hour), to bound the walk back from the newest. */
@@ -187,10 +205,122 @@ export function buildProgression(
   return { periods, lines, lineBucket, open, truncated }
 }
 
+// --------------------------------------------------------------- per snapshot
+
+export interface CaptureChange {
+  /** The capture (epoch ms): the bar's place on the time axis. */
+  at: number
+  /** Against the capture before; the first in a range against the value carried in. */
+  change: number
+  /** After the capture. */
+  value: number
+}
+
+/**
+ * The change each capture from `index` on made to one figure, against the
+ * capture before (the first against `open`, the value carried into the
+ * range). Captures that left it as it was, re-sightings or ones where only
+ * the other figure moved, get no entry: they draw no step either.
+ */
+export function captureChanges(
+  captures: readonly Capture[],
+  index: number,
+  open: number,
+  key: CurrencyKey,
+): CaptureChange[] {
+  const changes: CaptureChange[] = []
+  let previous = open
+  for (let i = index; i < captures.length; i++) {
+    const capture = captures[i]!
+    const value = capture.summary[key]
+    if (value !== previous) changes.push({ at: capture.at, change: value - previous, value })
+    previous = value
+  }
+  return changes
+}
+
+export interface SnapshotProgression {
+  /** Per figure, oldest first: one bar per capture that changed it. */
+  changes: Record<CurrencyKey, CaptureChange[]>
+  /** Every capture as a stepped line from the value held at `domain[0]`. */
+  lines: Record<CurrencyKey, Point[]>
+  /** The time axis the line and the bars share: the line's start to the newest capture. */
+  domain: [number, number]
+  /** What the first change is measured against. */
+  open: Figures
+  /** Older captures were dropped to stay within MAX_PERIODS bars. */
+  truncated: boolean
+}
+
+/**
+ * Per-snapshot changes over `range`, not snapped to periods ("1h" is the
+ * hour up to the newest capture), and the line they sit under. As in
+ * buildProgression, the value held when the range opens is carried in at
+ * its start. When more than MAX_PERIODS captures in the range changed mora
+ * or primogems, the newest that many are kept and the range starts at the
+ * capture before them, as "Per hour" over years keeps the newest hours.
+ */
+export function buildSnapshotProgression(
+  allCaptures: readonly Capture[],
+  range: ChartRange,
+): SnapshotProgression | null {
+  const captures = allCaptures.filter((c) => !currencyMissing(c.summary))
+  const first = captures[0]
+  const last = captures[captures.length - 1]
+  if (!first || !last) return null
+
+  const from = Math.max(first.at, rangeStart(range, last.at))
+  let index = lowerBound(captures, from)
+  let baseline = index > 0 ? captures[index - 1]! : null
+  let x0 = baseline ? from : first.at
+
+  // Captures in the range that changed either figure, for the cap.
+  const changed: number[] = []
+  let previous = figures(baseline ?? first)
+  for (let i = index; i < captures.length; i++) {
+    const current = figures(captures[i]!)
+    if (current.mora !== previous.mora || current.primogem !== previous.primogem) changed.push(i)
+    previous = current
+  }
+  const truncated = changed.length > MAX_PERIODS
+  if (truncated) {
+    index = changed[changed.length - MAX_PERIODS]!
+    baseline = captures[index - 1]!
+    x0 = baseline.at
+  }
+
+  const open = figures(baseline ?? first)
+  return {
+    changes: {
+      mora: captureChanges(captures, index, open.mora, 'mora'),
+      primogem: captureChanges(captures, index, open.primogem, 'primogem'),
+    },
+    lines: linePoints(captures, index, x0, open, 'raw'),
+    domain: [x0, last.at],
+    open,
+    truncated,
+  }
+}
+
+/** Narrowest and widest a snapshot's bar is drawn (px). */
+export const SNAPSHOT_BAR_WIDTH = { min: 2, max: 12 } as const
+
+/**
+ * Bar width for `count` snapshots across a plot `plotWidth` px wide: wide
+ * for a handful, thinning as they crowd, never under 2px.
+ */
+export function snapshotBarWidth(count: number, plotWidth: number): number {
+  const { min, max } = SNAPSHOT_BAR_WIDTH
+  if (!(count > 0) || !(plotWidth > 0)) return max
+  return Math.max(min, Math.min(max, Math.floor((plotWidth / count) * 0.6)))
+}
+
+// --------------------------------------------------------------------- totals
+
 export interface PeriodTotals {
-  /** Newest close. */
+  /** Newest value. */
   last: number
-  /** Newest close minus `open`: the sum of every period's change. */
+  /** Newest value minus `open`: the sum of every bar's change. */
   net: number
   gained: number
   spent: number
@@ -206,6 +336,18 @@ export function periodTotals(progression: Progression, key: CurrencyKey): Period
   }
   const last = progression.periods[progression.periods.length - 1]?.close[key] ?? 0
   return { last, net: last - progression.open[key], gained, spent }
+}
+
+export function snapshotTotals(progression: SnapshotProgression, key: CurrencyKey): PeriodTotals {
+  let gained = 0
+  let spent = 0
+  for (const { change } of progression.changes[key]) {
+    if (change > 0) gained += change
+    else spent -= change
+  }
+  const open = progression.open[key]
+  const last = progression.changes[key].at(-1)?.value ?? open
+  return { last, net: last - open, gained, spent }
 }
 
 interface PeriodFormats {

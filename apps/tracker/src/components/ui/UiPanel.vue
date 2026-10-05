@@ -15,7 +15,8 @@ defineProps<{ title?: string; description?: string; flush?: boolean }>()
           <p v-if="description" class="text-sm text-text-muted">{{ description }}</p>
         </div>
       </slot>
-      <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2">
+      <!-- min-w-0: a row of actions that scrolls sideways on phones stays inside the header. -->
+      <div v-if="$slots.actions" class="flex max-w-full min-w-0 flex-wrap items-center gap-2">
         <slot name="actions" />
       </div>
     </header>

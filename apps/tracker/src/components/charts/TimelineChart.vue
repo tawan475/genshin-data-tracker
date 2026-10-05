@@ -49,9 +49,16 @@ const props = withDefaults(
     format?: (value: number) => string
     stepped?: boolean
     fill?: boolean
+    /** Least width of the y axis (px), to line the plot up with a chart below. */
+    yAxisWidth?: number
+    /** Room after the plot (px). */
+    padRight?: number
   }>(),
-  { height: 260, fill: undefined },
+  { height: 260, fill: undefined, yAxisWidth: 0, padRight: 0 },
 )
+
+/** The y axis's own width after each layout, for charts that line up with this one. */
+const emit = defineEmits<{ yAxisFit: [width: number] }>()
 
 const canvas = ref<HTMLCanvasElement>()
 const chart = shallowRef<Chart<'line'>>()
@@ -94,6 +101,7 @@ function config(): ChartConfiguration<'line'> {
       parsing: false,
       normalized: true,
       interaction: { mode: 'nearest', axis: 'x', intersect: false },
+      layout: { padding: { right: props.padRight } },
       scales: {
         x: {
           type: 'linear',
@@ -120,6 +128,10 @@ function config(): ChartConfiguration<'line'> {
             color: muted,
             callback: (value, _, ticks) =>
               format ? format(Number(value)) : formatCompactTick(Number(value), tickStep(ticks)),
+          },
+          afterFit: (scale) => {
+            emit('yAxisFit', scale.width)
+            scale.width = Math.max(scale.width, props.yAxisWidth)
           },
         },
       },
@@ -151,7 +163,12 @@ function render() {
 
 onMounted(render)
 onBeforeUnmount(() => chart.value?.destroy())
-watch(() => [props.series, props.stepped, props.fill], render, { deep: true })
+watch(() => [props.series, props.stepped, props.fill, props.padRight], render, { deep: true })
+// A wider y axis only moves the plot: lay it out again.
+watch(
+  () => props.yAxisWidth,
+  () => chart.value?.update('none'),
+)
 // Re-read the tokens when the theme flips.
 useMutationObserver(
   () => document.documentElement,
