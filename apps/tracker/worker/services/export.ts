@@ -5,14 +5,13 @@
  */
 
 import {
+  artifactRows,
   decodeSnapshot,
   expandSubstats,
-  deltaDecode,
   inflateRaw,
   storedSnapshotOf,
   writeBundle,
   type ArtifactIdentity,
-  type ArtifactsSection,
   type BundleSnapshot,
   type Good,
 } from '@gdt/shared'
@@ -50,11 +49,14 @@ interface SnapshotRow {
   player_hash: string | null
   achievement_times_hash: string | null
   character_extras_hash: string | null
+  artifacts_base_hash: string | null
+  achievement_times_base_hash: string | null
 }
 
 const SNAPSHOT_COLUMNS = `id, taken_at, last_seen_at, format, version, source, characters_hash,
   weapons_hash, artifacts_hash, materials_hash, materials_keyframe_hash, achievements_hash,
-  player_hash, achievement_times_hash, character_extras_hash`
+  player_hash, achievement_times_hash, character_extras_hash, artifacts_base_hash,
+  achievement_times_base_hash`
 
 function toBundleSnapshot(row: SnapshotRow): BundleSnapshot {
   return {
@@ -73,6 +75,8 @@ function toBundleSnapshot(row: SnapshotRow): BundleSnapshot {
     player: row.player_hash,
     achievementTimes: row.achievement_times_hash,
     characterExtras: row.character_extras_hash,
+    artifactsBase: row.artifacts_base_hash,
+    achievementTimesBase: row.achievement_times_base_hash,
   }
 }
 
@@ -80,12 +84,16 @@ function blobHashes(row: SnapshotRow, sections: ReadonlySet<SectionName>): strin
   const hashes: string[] = []
   if (sections.has('characters')) hashes.push(row.characters_hash)
   if (sections.has('weapons')) hashes.push(row.weapons_hash)
-  if (sections.has('artifacts')) hashes.push(row.artifacts_hash)
+  if (sections.has('artifacts')) {
+    hashes.push(row.artifacts_hash)
+    if (row.artifacts_base_hash) hashes.push(row.artifacts_base_hash)
+  }
   if (sections.has('materials')) hashes.push(row.materials_hash, row.materials_keyframe_hash)
   if (sections.has('achievements') && row.achievements_hash) hashes.push(row.achievements_hash)
   if (sections.has('player') && row.player_hash) hashes.push(row.player_hash)
   if (sections.has('achievementTimes') && row.achievement_times_hash) {
     hashes.push(row.achievement_times_hash)
+    if (row.achievement_times_base_hash) hashes.push(row.achievement_times_base_hash)
   }
   if (sections.has('characterExtras') && row.character_extras_hash) {
     hashes.push(row.character_extras_hash)
@@ -164,7 +172,12 @@ export async function buildGood(
   const stored = storedSnapshotOf(toBundleSnapshot(row), (hash) => texts.get(hash)!)
 
   const artifactIds = [
-    ...new Set(deltaDecode((JSON.parse(stored.artifacts) as ArtifactsSection).i)),
+    ...new Set(
+      artifactRows(
+        JSON.parse(stored.artifacts),
+        stored.artifactsBase ? JSON.parse(stored.artifactsBase) : null,
+      ).map((row) => row[0]),
+    ),
   ]
   const catalog = await loadCatalogEntries(d1, accountId, artifactIds)
 

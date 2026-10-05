@@ -10,7 +10,11 @@ import {
   watch,
 } from 'vue'
 import { Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
-import { decodeAchievementTimes, decodeAchievements } from '@gdt/shared'
+import {
+  decodeAchievementTimes,
+  decodeAchievements,
+  type AchievementTimesSection,
+} from '@gdt/shared'
 import { achievementText, loadAchievements } from '@gdt/game-data'
 import {
   NO_ACHIEVEMENT_FILTERS,
@@ -93,7 +97,11 @@ async function loadCaptured(a: AccountRef): Promise<CapturedAchievements> {
       timesKey: s.achievementTimes,
     })),
     (key) => decodeAchievements(json(key) ?? []),
-    (key) => decodeAchievementTimes(json(key) ?? { i: [], t: [] }),
+    (key) => {
+      // A delta names its full base, which the bundle carries along.
+      const section: AchievementTimesSection = json(key) ?? { i: [], t: [] }
+      return decodeAchievementTimes(section, section.b ? json(section.b) : null)
+    },
   )
 }
 

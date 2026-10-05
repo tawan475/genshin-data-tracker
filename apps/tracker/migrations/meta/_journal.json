@@ -64,6 +64,13 @@
       "when": 1791146076873,
       "tag": "0008_rename_summary_artifact_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1791192602584,
+      "tag": "0009_snapshot_delta_bases",
+      "breakpoints": true
     }
   ]
 }

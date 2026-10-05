@@ -36,8 +36,13 @@ A snapshot row holds metadata, a small summary and the hashes of its sections
 canonical JSON, deflated and stored once per account in `blobs`, so an
 unchanged section costs nothing. Artifacts live in an immutable per-account
 catalog; each snapshot records which catalog entries it held and their
-location/lock state at the time. Materials are stored as a delta against a
-keyframe. The format is defined in `packages/shared/src/codec` and must stay
+location/lock state at the time. Materials, artifacts and achievement times
+are usually stored as a delta against a full base section of the latest
+snapshot (for materials, the keyframe), never against another delta; a new
+base is stored once the delta passes √(2·25 B·base size), the cheapest point
+in the cost model in `sections.ts` (migration 0009 added the base columns;
+older rows are all full sections). The content hash is always taken over the
+full forms. The format is defined in `packages/shared/src/codec` and must stay
 decodable forever: only append.
 
 irminsul's own top-level keys are sections of their own, each optional and

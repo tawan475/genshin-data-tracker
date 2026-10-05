@@ -110,12 +110,49 @@ export function decodeWeapons(rows: readonly KeyRef[][]): GoodWeapon[] {
   }))
 }
 
+// ------------------------------------------------------------ bases & deltas
+// Materials, artifacts and achievement times change a little on most
+// snapshots, so a snapshot usually stores only how its section differs from a
+// full "base" section of the same kind (for materials, the "keyframe"), whose
+// hash the delta names in `b`. Deltas always point straight at a full base,
+// never at another delta, so decoding needs at most two sections and
+// snapshots can be imported in any order. A new snapshot is a delta against
+// the base of the account's latest snapshot, so the delta is cumulative: it
+// grows with each change until storing a new base is cheaper.
+//
+// When that is: a base costs B bytes (deflated) once, and each later snapshot
+// that changes the section stores a delta of about d0 + g·n bytes after n such
+// snapshots (d0 ≈ 60 B, mostly the base's hash). Over a run of N snapshots on
+// one base, the cost per snapshot is B/N + d0 + g(N+1)/2, lowest at
+// N ≈ √(2B/g), where the delta has grown by √(2gB). So a new base is stored
+// once the delta passes √(2gB). With g = 25 B (the materials delta's measured
+// growth per snapshot) that is ≈ 590 B for a 7 KB materials keyframe, ≈ 635 B
+// for an 8 KB achievement-times base and ≈ 245 B for a 1.2 KB artifacts base.
+// The optimum is flat: g off by 2x in either direction costs about 6% more,
+// so one g serves all three kinds (achievement times grow slower, artifacts
+// faster, and the square root already scales the threshold with B).
+
+/** Bytes a delta grows by per changed snapshot, in the base-or-delta cost model above. */
+export const DELTA_GROWTH_BYTES = 25
+
+/** True while storing a `deltaBytes` delta beats storing a new `baseBytes` base. */
+export function deltaPaysOff(deltaBytes: number, baseBytes: number): boolean {
+  return deltaBytes * deltaBytes <= 2 * DELTA_GROWTH_BYTES * baseBytes
+}
+
 // ----------------------------------------------------------------- artifacts
 // Artifacts themselves live in the per-account catalog; a snapshot stores one
 // entry per artifact it held: catalog id, plus the state it had *then*.
 // `i` = delta-encoded sorted catalog ids, `l` = location character, `f` = flags.
+// Identical pieces share a catalog id, so an id can have several rows.
+//
+// A delta (`b` set) lists, for every id whose rows differ from the base's,
+// all of that id's rows now; an id with no rows left is listed once with
+// flags -1. Decoding replaces the base's rows of each listed id.
 
 export interface ArtifactsSection {
+  /** Base this delta applies to; absent when the section is full. */
+  b?: string
   i: number[]
   l: KeyRef[]
   f: number[]
@@ -126,39 +163,77 @@ export interface ArtifactRef {
   state: ArtifactState
 }
 
+/** One stored artifact entry: [catalog id, location, flags]. */
+export type ArtifactRow = [number, KeyRef, number]
+
 const LOCK = 1
 const ASTRAL_MARK = 2
+/** In an artifacts delta, flags of -1 mean the id has no rows any more. */
+const NO_ROWS = -1
 
 export function encodeArtifacts(refs: readonly ArtifactRef[]): ArtifactsSection {
-  const rows = refs
-    .map((r): [number, KeyRef, number] => [
-      r.id,
-      toRef(CHARACTERS, r.state.location),
-      (r.state.lock ? LOCK : 0) | (r.state.astralMark ? ASTRAL_MARK : 0),
-    ])
-    .sort(compareTuples)
-  return {
-    i: deltaEncode(rows.map((r) => r[0])),
-    l: rows.map((r) => r[1]),
-    f: rows.map((r) => r[2]),
+  return sectionOfRows(
+    refs.map(
+      (r): ArtifactRow => [
+        r.id,
+        toRef(CHARACTERS, r.state.location),
+        (r.state.lock ? LOCK : 0) | (r.state.astralMark ? ASTRAL_MARK : 0),
+      ],
+    ),
+  )
+}
+
+/** `full` (a full section) as a delta against the full section `base`. */
+export function encodeArtifactsDelta(
+  full: ArtifactsSection,
+  base: ArtifactsSection,
+  baseHash: string,
+): ArtifactsSection {
+  const now = rowsById(artifactRows(full))
+  const before = rowsById(artifactRows(base))
+  const rows: ArtifactRow[] = []
+  for (const [id, current] of now) {
+    if (!sameRows(current, before.get(id))) rows.push(...current)
   }
+  for (const id of before.keys()) if (!now.has(id)) rows.push([id, 0, NO_ROWS])
+  return { b: baseHash, ...sectionOfRows(rows) }
+}
+
+/**
+ * Every entry of a section, as its full form lists them (sorted). A delta
+ * needs the full section it names as `base`.
+ */
+export function artifactRows(
+  section: ArtifactsSection,
+  base: ArtifactsSection | null = null,
+): ArtifactRow[] {
+  const own = deltaDecode(section.i).map(
+    (id, index): ArtifactRow => [id, section.l[index] ?? 0, section.f[index] ?? 0],
+  )
+  if (section.b === undefined) return own
+  if (!base || base.b !== undefined) throw new Error(`Artifacts delta needs base ${section.b}`)
+  const listed = new Set(own.map((row) => row[0]))
+  return [
+    ...artifactRows(base).filter((row) => !listed.has(row[0])),
+    ...own.filter((row) => row[2] !== NO_ROWS),
+  ].sort(compareTuples)
 }
 
 export function decodeArtifacts(
   section: ArtifactsSection,
   catalog: ReadonlyMap<number, ArtifactIdentity>,
+  base: ArtifactsSection | null = null,
 ): GoodArtifact[] {
-  return deltaDecode(section.i).map((id, index) => {
+  return artifactRows(section, base).map(([id, location, flags]) => {
     const identity = catalog.get(id)
     if (!identity) throw new Error(`Artifact ${id} is missing from the catalog`)
-    const flags = section.f[index] ?? 0
     return {
       setKey: identity.setKey,
       slotKey: identity.slotKey,
       level: identity.level,
       rarity: identity.rarity,
       mainStatKey: identity.mainStatKey,
-      location: fromRef(CHARACTERS, section.l[index] ?? 0),
+      location: fromRef(CHARACTERS, location),
       lock: (flags & LOCK) !== 0,
       substats: identity.substats,
       totalRolls: identity.totalRolls,
@@ -169,12 +244,37 @@ export function decodeArtifacts(
   })
 }
 
+function sectionOfRows(rows: ArtifactRow[]): ArtifactsSection {
+  rows.sort(compareTuples)
+  return {
+    i: deltaEncode(rows.map((r) => r[0])),
+    l: rows.map((r) => r[1]),
+    f: rows.map((r) => r[2]),
+  }
+}
+
+function rowsById(rows: readonly ArtifactRow[]): Map<number, ArtifactRow[]> {
+  const byId = new Map<number, ArtifactRow[]>()
+  for (const row of rows) {
+    const list = byId.get(row[0])
+    if (list) list.push(row)
+    else byId.set(row[0], [row])
+  }
+  return byId
+}
+
+/** Both lists are sorted (they come from sorted sections). */
+function sameRows(a: readonly ArtifactRow[], b: readonly ArtifactRow[] | undefined): boolean {
+  return (
+    b !== undefined && a.length === b.length && a.every((row, i) => compareTuples(row, b[i]!) === 0)
+  )
+}
+
 // ----------------------------------------------------------------- materials
 // Materials change a little on almost every snapshot (median 3 of ~1,400), so
 // most snapshots store only the difference from a full "keyframe" section,
-// named by `b`. Deltas always point straight at a keyframe, never at another
-// delta, so decoding needs at most two sections and snapshots can be imported
-// in any order. A count of -1 in a delta means the key is absent.
+// named by `b` (see "bases & deltas" above). A count of -1 in a delta means
+// the key is absent.
 
 export interface MaterialsSection {
   /** Keyframe this delta applies to; absent when this section is a keyframe. */
@@ -187,9 +287,6 @@ export interface MaterialsKeyframe {
   materials: ReadonlyMap<string, number>
 }
 
-/** Above this many changed entries a new keyframe is cheaper than the delta. */
-export const MATERIALS_MAX_DELTA = 200
-
 const REMOVED = -1
 
 export function encodeMaterialsFull(
@@ -199,22 +296,24 @@ export function encodeMaterialsFull(
   return { m: sortEntries([...materials].map(([key, count]) => [toRef(dictionary, key), count])) }
 }
 
-export function encodeMaterials(
+/**
+ * `materials` as a delta against `keyframe`. Compared by key, not by stored
+ * ref: a key the dictionary learned since the keyframe was written is a raw
+ * string there and an id here, yet the same material.
+ */
+export function encodeMaterialsDelta(
   materials: ReadonlyMap<string, number>,
   dictionary: KeyDictionary,
-  keyframe: MaterialsKeyframe | null,
+  keyframe: MaterialsKeyframe,
 ): MaterialsSection {
-  if (keyframe) {
-    const delta: [KeyRef, number][] = []
-    for (const [key, count] of materials) {
-      if (keyframe.materials.get(key) !== count) delta.push([toRef(dictionary, key), count])
-    }
-    for (const key of keyframe.materials.keys()) {
-      if (!materials.has(key)) delta.push([toRef(dictionary, key), REMOVED])
-    }
-    if (delta.length <= MATERIALS_MAX_DELTA) return { b: keyframe.hash, m: sortEntries(delta) }
+  const delta: [KeyRef, number][] = []
+  for (const [key, count] of materials) {
+    if (keyframe.materials.get(key) !== count) delta.push([toRef(dictionary, key), count])
   }
-  return encodeMaterialsFull(materials, dictionary)
+  for (const key of keyframe.materials.keys()) {
+    if (!materials.has(key)) delta.push([toRef(dictionary, key), REMOVED])
+  }
+  return { b: keyframe.hash, m: sortEntries(delta) }
 }
 
 export function decodeMaterials(
@@ -269,9 +368,15 @@ export function decodePlayer(section: GiPlayer): GiPlayer {
 
 // ---------------------------------------------------------- achievementTimes
 // irminsul's `gi_achievement_times`: `i` = delta-encoded sorted achievement
-// ids, `t` = each one's finish time in unix seconds.
+// ids, `t` = each one's finish time in unix seconds. ~1,800 high-entropy
+// times make this the largest section, and a snapshot usually adds one or two,
+// so it is stored as a delta against a full base like materials (see "bases &
+// deltas" above): a delta lists the ids whose time is new or changed, and a
+// time of -1 for an id that is gone.
 
 export interface AchievementTimesSection {
+  /** Base this delta applies to; absent when the section is full. */
+  b?: string
   i: number[]
   t: number[]
 }
@@ -283,9 +388,42 @@ export function encodeAchievementTimes(
   return { i: deltaEncode(sorted.map((t) => t[0])), t: sorted.map((t) => t[1]) }
 }
 
-/** Achievement id -> unix seconds, ascending by id. */
-export function decodeAchievementTimes(section: AchievementTimesSection): [number, number][] {
-  return deltaDecode(section.i).map((id, index) => [id, section.t[index] ?? 0])
+/** `full` (a full section) as a delta against the full section `base`. */
+export function encodeAchievementTimesDelta(
+  full: AchievementTimesSection,
+  base: AchievementTimesSection,
+  baseHash: string,
+): AchievementTimesSection {
+  const now = new Map(decodeAchievementTimes(full))
+  const before = new Map(decodeAchievementTimes(base))
+  const changed: [number, number][] = []
+  for (const [id, at] of now) if (before.get(id) !== at) changed.push([id, at])
+  for (const id of before.keys()) if (!now.has(id)) changed.push([id, REMOVED])
+  return { b: baseHash, ...encodeAchievementTimes(changed) }
+}
+
+/**
+ * Achievement id -> unix seconds, ascending by id. A delta needs the full
+ * section it names as `base`.
+ */
+export function decodeAchievementTimes(
+  section: AchievementTimesSection,
+  base: AchievementTimesSection | null = null,
+): [number, number][] {
+  const own = deltaDecode(section.i).map((id, index): [number, number] => [
+    id,
+    section.t[index] ?? 0,
+  ])
+  if (section.b === undefined) return own
+  if (!base || base.b !== undefined) {
+    throw new Error(`Achievement times delta needs base ${section.b}`)
+  }
+  const times = new Map(decodeAchievementTimes(base))
+  for (const [id, at] of own) {
+    if (at === REMOVED) times.delete(id)
+    else times.set(id, at)
+  }
+  return [...times].sort((a, b) => a[0] - b[0])
 }
 
 // ----------------------------------------------------------- characterExtras

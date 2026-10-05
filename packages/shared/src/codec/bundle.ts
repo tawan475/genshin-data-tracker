@@ -29,6 +29,11 @@ export interface BundleSnapshot {
   player?: string | null
   achievementTimes?: string | null
   characterExtras?: string | null
+  // The full sections `artifacts` and `achievementTimes` are deltas of; null
+  // when they are stored in full (and absent from bundles written before
+  // they could be deltas).
+  artifactsBase?: string | null
+  achievementTimesBase?: string | null
 }
 
 export interface BundleManifest {
@@ -103,14 +108,36 @@ export function storedSnapshotOf(
     characters: text(snapshot.characters),
     weapons: text(snapshot.weapons),
     artifacts: text(snapshot.artifacts),
+    artifactsBase: optional(snapshot.artifactsBase),
     materials: text(snapshot.materials),
     materialsKeyframe:
       snapshot.materialsKeyframe === snapshot.materials ? null : text(snapshot.materialsKeyframe),
     achievements: optional(snapshot.achievements),
     player: optional(snapshot.player),
     achievementTimes: optional(snapshot.achievementTimes),
+    achievementTimesBase: optional(snapshot.achievementTimesBase),
     characterExtras: optional(snapshot.characterExtras),
   }
+}
+
+/**
+ * Every section hash a full decode of `snapshot` reads (bases included), for
+ * callers that inflate only what a selection of snapshots needs.
+ */
+export function sectionHashesOf(snapshot: BundleSnapshot): string[] {
+  return [
+    snapshot.characters,
+    snapshot.weapons,
+    snapshot.artifacts,
+    snapshot.artifactsBase,
+    snapshot.materials,
+    snapshot.materialsKeyframe,
+    snapshot.achievements,
+    snapshot.player,
+    snapshot.achievementTimes,
+    snapshot.achievementTimesBase,
+    snapshot.characterExtras,
+  ].filter((hash): hash is string => !!hash)
 }
 
 /** Inflates every blob once; snapshots sharing a section share the text. */

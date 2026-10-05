@@ -149,6 +149,11 @@ export const snapshots = sqliteTable(
     playerHash: text('player_hash'),
     achievementTimesHash: text('achievement_times_hash'),
     characterExtrasHash: text('character_extras_hash'),
+    // The full section `artifacts_hash` / `achievement_times_hash` is a delta
+    // of (see "bases & deltas" in @gdt/shared); NULL when it is stored in
+    // full, as in every row written before 0009.
+    artifactsBaseHash: text('artifacts_base_hash'),
+    achievementTimesBaseHash: text('achievement_times_base_hash'),
   },
   (t) => [
     index('snapshots_account_taken_idx').on(t.accountId, t.takenAt),

@@ -164,3 +164,47 @@ export function irminsulForm(good: unknown, timestamp?: number): FormData {
   )
   return form
 }
+
+const SLOTS = ['flower', 'plume', 'sands', 'goblet', 'circlet'] as const
+
+/**
+ * A larger inventory (with irminsul's extras): a delta only pays off against a
+ * base of some size, so tests of delta storage need real-sized sections.
+ * Deterministic; times are spread like real ones.
+ */
+export function bigGood(overrides: Partial<Good> = {}): Good {
+  const scatter = (i: number, n: number) => ((i * 2_654_435_761) >>> 7) % n
+  const base = sampleGood(sampleExtras())
+  const artifacts = Array.from({ length: 1000 }, (_, i) => ({
+    setKey: 'GoldenTroupe',
+    slotKey: SLOTS[i % 5]!,
+    level: 20,
+    rarity: 5,
+    mainStatKey: 'hp',
+    location: ['', '', '', 'Furina', 'Bennett', 'Xiangling'][scatter(i, 6)]!,
+    lock: scatter(i, 3) !== 0,
+    astralMark: scatter(i, 11) === 0,
+    totalRolls: 9,
+    elixerCrafted: false,
+    substats: [
+      { key: 'critRate_', value: 3 + (i % 50) / 10 },
+      { key: 'hp', value: 100 + i },
+    ],
+    unactivatedSubstats: [],
+  }))
+  const times = Array.from({ length: 600 }, (_, i): [string, number] => [
+    String(81000 + i),
+    1_650_000_000 + ((i * 7_919_993) % 120_000_000),
+  ])
+  const materials = Object.fromEntries(
+    Array.from({ length: 400 }, (_, i) => [`Material${i}`, ((i * 7919) % 5000) + 1]),
+  )
+  return {
+    ...base,
+    artifacts: [...base.artifacts, ...artifacts],
+    materials: { ...base.materials, ...materials },
+    gi_achievements: times.map(([id]) => Number(id)),
+    gi_achievement_times: Object.fromEntries(times),
+    ...overrides,
+  }
+}
