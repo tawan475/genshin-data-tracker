@@ -1,10 +1,11 @@
 /**
- * The game data can't tell an achievement nobody can earn (datamine-only, or
- * not obtainable yet) from a real one, so the build compares it with
- * stardb.gg's list (https://stardb.gg, thanks!), which only has achievements
- * players can see and flags the ones nobody can complete. Warnings only: the
- * hand-kept overrides/achievement-unobtainable.json decides, so builds stay
- * reproducible, and an unreachable stardb only skips the check.
+ * The game data can't tell a datamine-only achievement (in the files, never
+ * shown in game) from a real one, so the build compares it with stardb.gg's
+ * list (https://stardb.gg, thanks!), which only has achievements players can
+ * see. Warnings only: the hand-kept overrides/achievement-unobtainable.json
+ * decides, so builds stay reproducible, and an unreachable stardb only skips
+ * the check. stardb's `impossible` flag is not used: it marks real
+ * achievements few or no players have completed, which still count in game.
  */
 
 import type { AchievementsFile } from '../../src/format.ts'
@@ -15,7 +16,6 @@ const STARDB = 'https://stardb.gg/api/gi/achievements?lang=en'
 
 export interface StardbAchievement {
   id: number
-  impossible?: boolean
 }
 
 /** What to look at in achievement-unobtainable.json, as warnings. */
@@ -24,30 +24,22 @@ export function compareWithStardb(
   unobtainable: ReadonlyMap<number, string>,
   stardb: readonly StardbAchievement[],
 ): string[] {
-  const listed = new Map(stardb.map((a) => [a.id, a.impossible === true]))
+  const listed = new Set(stardb.map((a) => a.id))
   const warnings: string[] = []
   const missing: number[] = []
-  const impossible: number[] = []
   for (const row of achievements.rows) {
     const [id, , , , , , , , disused] = row
-    if (disused === 1) continue
-    if (!listed.has(id)) missing.push(id)
-    else if (listed.get(id)) impossible.push(id)
+    if (disused === 0 && !listed.has(id)) missing.push(id)
   }
   if (missing.length > 0) {
     warnings.push(
-      `stardb.gg doesn't list achievement(s) ${missing.join(', ')}: datamine-only? If so, add them to achievement-unobtainable.json (new this patch: stardb may not have caught up yet)`,
+      `stardb.gg doesn't list achievement(s) ${missing.join(', ')}: datamine-only? If the game never shows them, add them to achievement-unobtainable.json (new this patch: stardb may not have caught up yet)`,
     )
   }
-  if (impossible.length > 0) {
+  const shown = [...unobtainable.keys()].filter((id) => listed.has(id))
+  if (shown.length > 0) {
     warnings.push(
-      `stardb.gg flags achievement(s) ${impossible.join(', ')} impossible: add them to achievement-unobtainable.json if nobody can earn them yet`,
-    )
-  }
-  const obtainable = [...unobtainable.keys()].filter((id) => listed.get(id) === false)
-  if (obtainable.length > 0) {
-    warnings.push(
-      `achievement-unobtainable.json lists ${obtainable.join(', ')}, which stardb.gg now lists as obtainable: remove them if they are`,
+      `achievement-unobtainable.json lists ${shown.join(', ')}, which stardb.gg lists: players can see them, so remove them`,
     )
   }
   return warnings

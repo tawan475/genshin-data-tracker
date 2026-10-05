@@ -1,7 +1,4 @@
 {
-  "$comment": "Achievements nobody can earn, as {\"id\": \"why\"}. The build treats them like the game's own disused ones: kept in data/, hidden and not counted. The build compares the dump with stardb.gg and warns about live achievements stardb doesn't list or flags impossible, and about ids here that stardb now lists as obtainable (remove those).",
-  "84517": "Only in the datamine: stardb.gg doesn't list it (Instant Karma)",
-  "81622": "Not obtainable yet: stardb.gg flags it impossible, 0% of players (Magnum Opus)",
-  "80507": "Not obtainable yet: stardb.gg flags it impossible, 0% of players (Pale and Lucent as Ice)",
-  "86063": "Not obtainable yet: stardb.gg flags it impossible, 0% of players (\"Veteran Shadowdiver\")"
+  "$comment": "Datamine-only achievements: in the game data, but players never see them, as {\"id\": \"why\"}. The build treats them like the game's own disused ones: kept in data/, hidden and not counted. Only list achievements the game doesn't show; a real one stays, even if nobody has completed it yet. The build compares the dump with stardb.gg and warns about live achievements stardb doesn't list (datamine-only?) and about ids here that stardb lists (remove those).",
+  "84517": "Only in the datamine: stardb.gg doesn't list it (Instant Karma)"
 }

@@ -49,15 +49,17 @@ move the id to the right list.
 
 ## achievement-unobtainable.json
 
-Achievements nobody can earn although the game doesn't mark them disused, as
-`{ "<id>": "why" }`: datamine-only ones, and ones that can't be completed yet.
-The build compiles them as disused, so the app hides them and leaves them out
-of every count; their version and text stay. Each build compares the dump with
-stardb.gg's list (only achievements players can see, with an `impossible`
-flag) and warns about live achievements stardb doesn't list or flags
-impossible, and about ids here that stardb now lists as obtainable. A brand-new
-achievement can be missing from stardb for a few days after a patch; add it
-here only if it really can't be earned. An unreachable stardb skips the check.
+Datamine-only achievements: in the game data, never shown in game, and not
+marked disused, as `{ "<id>": "why" }`. The build compiles them as disused, so
+the app hides them and leaves them out of every count; their version and text
+stay. Only list achievements players can't see: a real one stays and counts,
+as it does in game, even if nobody can complete it yet (stardb.gg flags some
+of those `impossible`; the build ignores that flag). Each build compares the
+dump with stardb.gg's list (only achievements players can see) and warns about
+live achievements stardb doesn't list, and about ids here that stardb lists
+(remove those). A brand-new achievement can be missing from stardb for a few
+days after a patch; add it here only once you know players can't see it. An
+unreachable stardb skips the check.
 
 ## keys.json
 

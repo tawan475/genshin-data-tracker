@@ -51,7 +51,7 @@ export interface Overrides {
   weekdays: WeekdaysOverride
   /** achievement id -> version it was added in */
   versions: Map<number, string>
-  /** achievement id -> why nobody can earn it (compiled as disused) */
+  /** datamine-only achievement id -> why (compiled as disused) */
   unobtainable: Map<number, string>
   /** Raw overrides/drops.json; the build validates it with src/drops.ts. */
   drops: Record<string, unknown>
