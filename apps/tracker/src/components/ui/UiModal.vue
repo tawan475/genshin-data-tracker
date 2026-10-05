@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { ChevronLeft, ChevronRight, X } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, RefreshCw, X } from 'lucide-vue-next'
 import { formatNumber } from '@/lib/format'
+import { applyPendingNow, updatePending, useUpdateHold } from '@/live/holds'
 import UiIconButton from './UiIconButton.vue'
 
 /**
@@ -13,6 +14,8 @@ import UiIconButton from './UiIconButton.vue'
  *   in the header with "12 / 97", the arrow keys step too (`step` event).
  *   `loop` wraps at the ends instead of stopping.
  * Slots: default (body), `heading` (replaces the title), `footer`.
+ * While open it holds live updates back (nothing changes under the user);
+ * when new data waits, the header offers "Refresh" to take it now.
  */
 const props = withDefaults(
   defineProps<{
@@ -26,6 +29,7 @@ const props = withDefaults(
   { size: 'md', index: undefined, total: undefined },
 )
 const emit = defineEmits<{ close: []; step: [delta: -1 | 1] }>()
+useUpdateHold(() => props.open)
 const dialog = ref<HTMLDialogElement>()
 const body = ref<HTMLElement>()
 
@@ -95,6 +99,16 @@ const detail = computed(() => props.size === 'detail')
         <slot name="heading">
           <h2 class="mr-auto min-w-0 flex-1 truncate text-lg font-semibold">{{ title }}</h2>
         </slot>
+        <button
+          v-if="open && updatePending"
+          type="button"
+          class="mr-1 inline-flex min-h-8 shrink-0 items-center gap-1.5 rounded-lg bg-accent/15 px-2.5 text-sm font-medium text-accent-text transition-colors hover:bg-accent/25"
+          title="New data"
+          @click="applyPendingNow"
+        >
+          <RefreshCw class="size-4" aria-hidden="true" />
+          Refresh
+        </button>
         <template v-if="stepping">
           <span class="tabular mx-1 hidden font-mono text-sm text-text-muted sm:inline" title="← →">
             {{ formatNumber(index! + 1) }} / {{ formatNumber(total!) }}

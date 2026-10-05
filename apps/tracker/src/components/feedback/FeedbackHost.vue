@@ -24,6 +24,7 @@ function runAction(toast: Toast) {
       class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border bg-surface-raised p-3 shadow-overlay"
       :class="toast.tone === 'danger' ? 'border-danger-border' : 'border-border-default'"
       :role="toast.tone === 'danger' ? 'alert' : 'status'"
+      :title="toast.hint"
     >
       <CircleAlert
         v-if="toast.tone === 'danger'"

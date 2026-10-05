@@ -1,10 +1,15 @@
-import { serverFromUid, type AccountResponse, type GenshinServer } from '@gdt/shared'
+import {
+  serverFromUid,
+  type AccountResponse,
+  type GenshinServer,
+  type SnapshotSummary,
+} from '@gdt/shared'
 import { and, eq } from 'drizzle-orm'
 import type { Db } from '../db/client'
-import { genshinAccounts, snapshots } from '../db/schema'
+import { genshinAccounts } from '../db/schema'
 import { randomToken, sha256Hex } from '../lib/crypto'
 import { ApiError, notFound } from '../lib/http'
-import type { D1Meter } from '../lib/meter'
+import { D1Meter } from '../lib/meter'
 
 export type AccountRow = typeof genshinAccounts.$inferSelect
 
@@ -36,49 +41,73 @@ export async function assertOwnsAccount(db: Db, userId: number, accountId: numbe
   if (!row) throw notFound('Account')
 }
 
-/** Accounts with their latest snapshot, in one query. */
+interface AccountListRow {
+  id: number
+  name: string | null
+  uid: string | null
+  server: GenshinServer | null
+  created_at: number
+  data_version: number
+  snapshot_count: number
+  raw_bytes: number
+  stored_bytes: number
+  latest_id: number | null
+  taken_at: number | null
+  last_seen_at: number | null
+  summary: string | null
+}
+
+/**
+ * Accounts with their latest snapshot: one round trip, reading each account
+ * (by the user index) and its latest snapshot (by primary key). The app also
+ * re-reads this list to catch up after missing live events, so it stays this
+ * cheap.
+ */
 export async function listAccounts(
-  db: Db,
+  d1: D1Database,
   userId: number,
   accountId?: number,
+  meter = new D1Meter(),
 ): Promise<AccountResponse[]> {
-  const rows = await db
-    .select({
-      account: genshinAccounts,
-      latest: {
-        id: snapshots.id,
-        takenAt: snapshots.takenAt,
-        lastSeenAt: snapshots.lastSeenAt,
-        summary: snapshots.summary,
-      },
-    })
-    .from(genshinAccounts)
-    .leftJoin(snapshots, eq(snapshots.id, genshinAccounts.latestSnapshotId))
-    .where(
-      accountId === undefined
-        ? eq(genshinAccounts.userId, userId)
-        : and(eq(genshinAccounts.userId, userId), eq(genshinAccounts.id, accountId)),
-    )
-    .orderBy(genshinAccounts.id)
-  return rows.map(({ account, latest }) => ({
-    id: account.id,
-    name: account.name,
-    uid: account.uid,
-    server: account.server,
-    createdAt: account.createdAt,
-    dataVersion: account.dataVersion,
-    snapshotCount: account.snapshotCount,
-    rawBytes: account.rawBytes,
-    storedBytes: account.storedBytes,
-    latest: latest && latest.id !== null ? latest : null,
+  const [result] = await meter.batch<AccountListRow>(d1, 'accounts', [
+    d1
+      .prepare(
+        `SELECT a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
+           a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at, s.summary
+         FROM genshin_accounts AS a LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id
+         WHERE a.user_id = ?1 AND (?2 IS NULL OR a.id = ?2)
+         ORDER BY a.id`,
+      )
+      .bind(userId, accountId ?? null),
+  ])
+  return result!.results.map((row) => ({
+    id: row.id,
+    name: row.name,
+    uid: row.uid,
+    server: row.server,
+    createdAt: row.created_at,
+    dataVersion: row.data_version,
+    snapshotCount: row.snapshot_count,
+    rawBytes: row.raw_bytes,
+    storedBytes: row.stored_bytes,
+    latest:
+      row.latest_id === null
+        ? null
+        : {
+            id: row.latest_id,
+            takenAt: row.taken_at!,
+            lastSeenAt: row.last_seen_at!,
+            summary: JSON.parse(row.summary!) as SnapshotSummary,
+          },
   }))
 }
 
 /**
  * Bumps the account's data version and re-points its latest snapshot. Run in
- * the same batch as any snapshot write. The counters (snapshot_count,
- * raw_bytes, stored_bytes) are kept by triggers (migration 0002), and the
- * latest-snapshot lookup reads one index row.
+ * the same batch as any snapshot write; it answers with the new version (for
+ * the live event). The counters (snapshot_count, raw_bytes, stored_bytes) are
+ * kept by triggers (migration 0002), and the latest-snapshot lookup reads one
+ * index row.
  */
 export function recomputeAccount(d1: D1Database, accountId: number): D1PreparedStatement {
   return d1
@@ -87,9 +116,15 @@ export function recomputeAccount(d1: D1Database, accountId: number): D1PreparedS
          data_version = data_version + 1,
          latest_snapshot_id = (SELECT id FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
                                ORDER BY taken_at DESC, id DESC LIMIT 1)
-       WHERE id = ?1`,
+       WHERE id = ?1 RETURNING data_version`,
     )
     .bind(accountId)
+}
+
+/** The data version a batch's `recomputeAccount` statement answered with. */
+export function dataVersionOf(result: D1Result | undefined): number | undefined {
+  const value = (result?.results[0] as { data_version?: unknown } | undefined)?.data_version
+  return typeof value === 'number' ? value : undefined
 }
 
 /** An account's own key: uploads always go to that account. */
@@ -121,7 +156,7 @@ export interface KeyAccount {
 }
 
 export type ImportKeyOwner =
-  | { scope: 'account'; account: KeyAccount }
+  | { scope: 'account'; account: KeyAccount; userId: number }
   | {
       scope: 'user'
       user: { id: number; username: string }
@@ -139,7 +174,9 @@ export async function findImportKeyOwner(
 ): Promise<ImportKeyOwner | null> {
   const [account, user, accounts] = await d1.batch<Record<string, unknown>>([
     d1
-      .prepare('SELECT id, name, uid, server FROM genshin_accounts WHERE import_key_hash = ?1')
+      .prepare(
+        'SELECT id, name, uid, server, user_id FROM genshin_accounts WHERE import_key_hash = ?1',
+      )
       .bind(hash),
     d1.prepare('SELECT id, username FROM users WHERE import_key_hash = ?1').bind(hash),
     d1
@@ -150,8 +187,11 @@ export async function findImportKeyOwner(
       )
       .bind(hash),
   ])
-  const ownAccount = account!.results[0]
-  if (ownAccount) return { scope: 'account', account: ownAccount as unknown as KeyAccount }
+  const ownAccount = account!.results[0] as (KeyAccount & { user_id: number }) | undefined
+  if (ownAccount) {
+    const { user_id: userId, ...rest } = ownAccount
+    return { scope: 'account', account: rest, userId }
+  }
   const owner = user!.results[0] as { id: number; username: string } | undefined
   if (!owner) return null
   return {

@@ -26,6 +26,7 @@ import {
   type KeyAccount,
 } from '../services/accounts'
 import { importSnapshot, parseUpload } from '../services/import'
+import { notifyUser } from '../services/live'
 
 async function keyOwner(c: Context<AppEnv>): Promise<ImportKeyOwner> {
   const key = c.req.header('x-import-key')
@@ -70,11 +71,14 @@ export const publicImport = new Hono<AppEnv>()
     const upload = await readUpload(c)
     const meter = new D1Meter()
     let account: KeyAccount
+    let userId: number
     let created = false
     let parsed: PreparedSnapshot | undefined
     if (owner.scope === 'account') {
       account = owner.account
+      userId = owner.userId
     } else {
+      userId = owner.user.id
       parsed = await parseUpload(upload.text)
       const uid = parsed.good.player?.uid
       if (uid === undefined) {
@@ -92,10 +96,29 @@ export const publicImport = new Hono<AppEnv>()
         owner.accounts,
       ))
     }
-    const result = await importSnapshot(c.env.DB, account, upload, meter, parsed)
+    const { response, dataVersion } = await importSnapshot(
+      c.env.DB,
+      account,
+      upload,
+      meter,
+      parsed,
+    ).catch((error: unknown) => {
+      // The account this upload made stays, whatever happened to the file.
+      if (created) notifyUser(c, userId, { type: 'accounts' })
+      throw error
+    })
     meter.report(c)
+    // A new account is in the list now even when its first file changed nothing.
+    if (dataVersion !== null || created) {
+      notifyUser(c, userId, {
+        type: 'data',
+        accountId: account.id,
+        dataVersion,
+        takenAt: response.takenAt,
+      })
+    }
     return c.json<ImportResponse>(
-      { ...result, account: { id: account.id, name: account.name, uid: account.uid, created } },
-      result.status === 'created' ? 201 : 200,
+      { ...response, account: { id: account.id, name: account.name, uid: account.uid, created } },
+      response.status === 'created' ? 201 : 200,
     )
   })

@@ -108,6 +108,19 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `uid_taken`.
 - **Imports** take two D1 round trips in the usual case; an identical later
   capture only moves `last_seen_at`. Uploads may be gzipped.
+- **Live updates.** `GET /api/live` is a WebSocket (session cookie, this
+  site's `Origin`) to the user's `LiveHub` Durable Object: one per user,
+  SQLite-backed (as the Free plan requires), on the Hibernation API, with a
+  `ping` → `pong` auto-response, so idle sockets cost nothing. Every write that
+  moves an account's `data_version` or the account list (imports by key or
+  from the dashboard, captures seen again, deletes, account create, rename,
+  delete) tells it after the response (`waitUntil`; a failure is only
+  logged), and it sends `{type: "data", accountId, dataVersion, takenAt?}` or
+  `{type: "accounts"}` to that user's sockets. Tabs then re-read `GET
+  /api/accounts` (one D1 round trip), which has an ETag over its body: a 304
+  when nothing changed. That read is also the catch-up after any gap (events
+  are not replayed). A socket whose access token has expired is closed (4001)
+  at the next event, and the tab reconnects after a refresh.
 - **Diagnostics.** `GET /api/health` is public (status, build, D1, migrations).
   With `x-diag-key: <DIAG_KEY>` it adds the private tier — every secret with its
   value, bindings, error detail — and imports add `Server-Timing` and
@@ -157,6 +170,9 @@ Deploy from a checkout that has the gap icons in `apps/tracker/public/gi/`
 (gitignored; `pnpm --filter @gdt/game-data images --gi-cdn-dir ../gi-cdn`
 copies them from the local gi-cdn build). From a clean clone they are missing
 and those few icons show initials.
+
+`wrangler deploy` also creates the `LiveHub` Durable Object class (migration
+`v1` in `wrangler.jsonc`); it needs no D1 migration.
 
 Static assets are served from the edge; `/api` runs with Smart Placement (next
 to D1). Measured from Bangkok: ~5 ms of SQL per import, ~120 ms per D1 round

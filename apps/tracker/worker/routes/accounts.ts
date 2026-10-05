@@ -9,16 +9,17 @@ import {
   type SnapshotResponse,
 } from '@gdt/shared'
 import { and, eq } from 'drizzle-orm'
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { getDb } from '../db/client'
 import { genshinAccounts } from '../db/schema'
 import type { AppEnv } from '../env'
-import { accountEtag, checkEtag } from '../lib/etag'
+import { accountEtag, bodyEtag, checkEtag } from '../lib/etag'
 import { ApiError, idParam, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { requireUser } from '../lib/session'
 import { readUpload } from '../lib/upload'
 import {
+  dataVersionOf,
   listAccounts,
   loadOwnedAccount,
   newImportKey,
@@ -35,6 +36,7 @@ import {
   type SectionName,
 } from '../services/export'
 import { importSnapshot } from '../services/import'
+import { notifyUser } from '../services/live'
 
 /**
  * Part of the snapshot list's ETag. Bump it whenever the list's JSON changes
@@ -47,7 +49,20 @@ const SNAPSHOT_LIST_FORMAT = 2
 export const accounts = new Hono<AppEnv>()
   .use(requireUser)
 
-  .get('/', async (c) => c.json(await listAccounts(getDb(c.env.DB), c.get('userId'))))
+  /**
+   * The user's accounts. Tabs re-read it to catch up after a gap in live
+   * events, so it carries an ETag over its body: unchanged, it is a 304 for
+   * the one indexed read that tells.
+   */
+  .get('/', async (c) => {
+    const meter = new D1Meter()
+    const body = JSON.stringify(await listAccounts(c.env.DB, c.get('userId'), undefined, meter))
+    meter.report(c)
+    const cached = checkEtag(c, await bodyEtag('l', body))
+    if (cached) return cached
+    c.header('Content-Type', 'application/json; charset=utf-8')
+    return c.body(body)
+  })
 
   .post('/', async (c) => {
     const body = await parseJson(c, accountInput)
@@ -64,12 +79,13 @@ export const accounts = new Hono<AppEnv>()
       })
       .returning({ id: genshinAccounts.id })
       .catch(rethrowUidTaken)
-    const [account] = await listAccounts(db, c.get('userId'), row!.id)
+    const [account] = await listAccounts(c.env.DB, c.get('userId'), row!.id)
+    notifyUser(c, c.get('userId'), { type: 'accounts' })
     return c.json<AccountCreatedResponse>({ account: account!, importKey: key }, 201)
   })
 
   .get('/:id', async (c) => {
-    const [account] = await listAccounts(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const [account] = await listAccounts(c.env.DB, c.get('userId'), idParam(c, 'id'))
     if (!account) throw notFound('Account')
     return c.json(account)
   })
@@ -88,7 +104,8 @@ export const accounts = new Hono<AppEnv>()
       })
       .where(eq(genshinAccounts.id, id))
       .catch(rethrowUidTaken)
-    const [account] = await listAccounts(db, c.get('userId'), id)
+    const [account] = await listAccounts(c.env.DB, c.get('userId'), id)
+    notifyUser(c, c.get('userId'), { type: 'accounts' })
     return c.json(account!)
   })
 
@@ -99,6 +116,7 @@ export const accounts = new Hono<AppEnv>()
       .where(and(eq(genshinAccounts.id, id), eq(genshinAccounts.userId, c.get('userId'))))
       .returning({ id: genshinAccounts.id })
     if (result.length === 0) throw notFound('Account')
+    notifyUser(c, c.get('userId'), { type: 'accounts' })
     return c.body(null, 204)
   })
 
@@ -137,9 +155,22 @@ export const accounts = new Hono<AppEnv>()
     const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
     const meter = new D1Meter()
-    const result = await importSnapshot(c.env.DB, account, await readUpload(c), meter)
+    const { response, dataVersion } = await importSnapshot(
+      c.env.DB,
+      account,
+      await readUpload(c),
+      meter,
+    )
     meter.report(c)
-    return c.json(result, result.status === 'created' ? 201 : 200)
+    if (dataVersion !== null) {
+      notifyUser(c, c.get('userId'), {
+        type: 'data',
+        accountId: id,
+        dataVersion,
+        takenAt: response.takenAt,
+      })
+    }
+    return c.json(response, response.status === 'created' ? 201 : 200)
   })
 
   .get('/:id/snapshots', async (c) => {
@@ -170,13 +201,14 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const { ids } = await parseJson(c, snapshotIdsRequest)
     await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
-    const [deleted] = await c.env.DB.batch([
+    const [deleted, recomputed] = await c.env.DB.batch([
       c.env.DB.prepare(
         `UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND deleted_at IS NULL
          AND id IN (SELECT value FROM json_each(?2)) RETURNING id`,
       ).bind(id, JSON.stringify(ids), Date.now()),
       recomputeAccount(c.env.DB, id),
     ])
+    notifyData(c, id, recomputed)
     // meta.changes would also count the counter trigger's updates.
     return c.json({ deleted: deleted!.results.length })
   })
@@ -185,12 +217,13 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const snapshotId = idParam(c, 'snapshotId')
     await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
-    const [deleted] = await c.env.DB.batch([
+    const [deleted, recomputed] = await c.env.DB.batch([
       c.env.DB.prepare(
         'UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND id = ?2 AND deleted_at IS NULL',
       ).bind(id, snapshotId, Date.now()),
       recomputeAccount(c.env.DB, id),
     ])
+    notifyData(c, id, recomputed)
     if (deleted!.meta.changes === 0) throw notFound('Snapshot')
     return c.body(null, 204)
   })
@@ -239,6 +272,15 @@ export const accounts = new Hono<AppEnv>()
     c.header('Content-Disposition', `attachment; filename="${goodFileName(takenAt)}"`)
     return c.json(good)
   })
+
+/** A delete moved the account's data version (even when it matched nothing). */
+function notifyData(c: Context<AppEnv>, accountId: number, recomputed: D1Result | undefined) {
+  notifyUser(c, c.get('userId'), {
+    type: 'data',
+    accountId,
+    dataVersion: dataVersionOf(recomputed) ?? null,
+  })
+}
 
 /** The (user_id, uid) unique index: one account per UID per user (see migration 0007). */
 function rethrowUidTaken(error: unknown): never {

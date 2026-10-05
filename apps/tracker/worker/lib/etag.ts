@@ -17,3 +17,16 @@ export function checkEtag(c: Context, etag: string): Response | null {
   if (match && match.split(/\s*,\s*/).includes(etag)) return c.body(null, 304)
   return null
 }
+
+/**
+ * An ETag over a response body itself, for responses that depend on more than
+ * one account's data version (the account list: names, versions, latest
+ * summaries). 96 bits of SHA-256 under a short kind prefix.
+ */
+export async function bodyEtag(kind: string, body: string): Promise<string> {
+  const digest = new Uint8Array(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body)),
+  )
+  const hex = [...digest.slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('')
+  return `W/"${kind}.${hex}"`
+}

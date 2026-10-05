@@ -269,6 +269,19 @@ export interface ImportedAccount {
 }
 
 /**
+ * What the live socket (`GET /api/live`) sends when the user's accounts
+ * change, so open pages update without a reload:
+ * - `data`: an account's snapshots changed (an import, a capture seen again,
+ *   a delete); `dataVersion` is the account's new version, `takenAt` the
+ *   capture time for an import.
+ * - `accounts`: an account was added, renamed or removed.
+ * Events only say that something changed; the app re-reads the account list.
+ */
+export type LiveEvent =
+  | { type: 'data'; accountId: number; dataVersion: number | null; takenAt?: number }
+  | { type: 'accounts' }
+
+/**
  * `uid_mismatch`: the file's `gi_player.uid` is not the account's UID (the
  * capture may be another account's). Stored anyway, as asked.
  */
