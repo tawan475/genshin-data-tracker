@@ -3,9 +3,10 @@
  *
  * - Deleted snapshots are kept for TRASH_DAYS (deleting is a soft delete, so a
  *   mistaken bulk delete can still be restored by hand), then purged.
- * - Sections no snapshot references any more (live or in the trash) are
- *   garbage-collected. Sections are shared between snapshots, which is why a
- *   delete cannot free them on the spot.
+ * - Sections no snapshot references any more (live or in the trash), as a
+ *   section or as the base of a delta, are garbage-collected. Sections are
+ *   shared between snapshots, which is why a delete cannot free them on the
+ *   spot.
  *
  * Account counters stay exact through all of this: the triggers from
  * migration 0002 adjust them for every row actually deleted.
@@ -28,7 +29,8 @@ export async function runMaintenance(d1: D1Database, now = Date.now()): Promise<
          SELECT 1 FROM snapshots s WHERE s.account_id = blobs.account_id AND blobs.hash IN (
            s.characters_hash, s.weapons_hash, s.artifacts_hash, s.materials_hash,
            s.materials_keyframe_hash, s.achievements_hash, s.player_hash,
-           s.achievement_times_hash, s.character_extras_hash)
+           s.achievement_times_hash, s.character_extras_hash, s.artifacts_base_hash,
+           s.achievement_times_base_hash)
        )`,
     ),
   ])

@@ -1,10 +1,14 @@
 import {
   catalogFromRows,
   decodeSnapshot,
+  encodeSnapshot,
+  hashArtifactIdentity,
   inflateBundle,
+  prepareSnapshot,
   readBundle,
   storedSnapshotOf,
   type AccountCreatedResponse,
+  type BundleSnapshot,
   type AccountResponse,
   type CatalogRow,
   type Good,
@@ -17,14 +21,16 @@ import {
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { env, SELF } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
+import { unzipSync } from 'fflate'
 import { describe, expect, it } from 'vitest'
+import { decodeFromSections, writeGoodZip, zipEntryNames } from '../../src/data/export-zip'
 import { getDb } from '../db/client'
 import { genshinAccounts, users } from '../db/schema'
 import { ApiError } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { hashPassword } from '../lib/password'
 import { accountForUid } from '../services/accounts'
-import { Client, ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
+import { Client, ORIGIN, bigGood, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 async function createAccount(client: Client) {
   return client.json<AccountCreatedResponse>('/api/accounts', {
@@ -366,9 +372,12 @@ describe('accounts and imports', () => {
       canonical({ ...good, timestamp: 1_780_000_000_000 }),
       canonical({ ...changed, timestamp: 1_780_000_200_000 }),
     ])
-    // The second snapshot shares every section but materials, which is a delta.
-    expect(manifest.snapshots[1]!.materials).not.toBe(manifest.snapshots[1]!.materialsKeyframe)
+    // The second snapshot shares every section but materials. A 3-key keyframe
+    // is cheaper to store again than a delta naming it, so it is a keyframe.
+    expect(manifest.snapshots[1]!.materials).not.toBe(manifest.snapshots[0]!.materials)
+    expect(manifest.snapshots[1]!.materials).toBe(manifest.snapshots[1]!.materialsKeyframe)
     expect(manifest.snapshots[1]!.characters).toBe(manifest.snapshots[0]!.characters)
+    expect(manifest.snapshots[1]!.artifacts).toBe(manifest.snapshots[0]!.artifacts)
   })
 
   it("stores irminsul's extra keys, each section shared on its own, and exports them", async () => {
@@ -851,6 +860,128 @@ describe('user import key', () => {
         .values({ ...row, uid: '', importKeyHash: crypto.randomUUID() })
         .returning(),
     ).resolves.toHaveLength(1)
+  })
+})
+
+describe('delta storage', () => {
+  it("stores changed sections as deltas against the latest snapshot's bases", async () => {
+    const { client } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    const upload = async (good: Good, at: number) =>
+      (await (await importByKey(importKey, good, at)).json()) as ImportResponse
+    const big = bigGood()
+    // One more achievement, two pieces relocked, Mora spent.
+    const played = bigGood({
+      artifacts: big.artifacts.map((a, i) => (i === 5 || i === 9 ? { ...a, lock: !a.lock } : a)),
+      materials: { ...big.materials, Mora: 5 },
+      gi_achievement_times: { ...big.gi_achievement_times, '84584': 1_791_189_294 },
+    })
+    // Older than the latest: a time changed, one gone, a piece gone.
+    const { '81001': _, ...fewer } = big.gi_achievement_times!
+    const older = bigGood({
+      artifacts: big.artifacts.slice(1),
+      gi_achievement_times: { ...fewer, '81002': 1_700_000_001 },
+    })
+    // A later login with only gi_player changed.
+    const relogin = { ...played, gi_player: { ...played.gi_player!, resin: 1 } }
+    const goods = [big, played, older, relogin]
+    const times = [1_000, 3_000, 2_000, 4_000]
+    const results: ImportResponse[] = []
+    for (const [i, good] of goods.entries()) results.push(await upload(good, times[i]!))
+    expect(results.map((r) => r.status)).toEqual(['created', 'created', 'created', 'created'])
+
+    const { manifest, blobs } = readBundle(
+      await (await client.fetch(`/api/accounts/${account.id}/bundle`)).arrayBuffer(),
+    )
+    const byId = new Map(manifest.snapshots.map((s) => [s.id, s]))
+    const [a, b, c, d] = results.map((r) => byId.get(r.snapshotId)!) as [
+      BundleSnapshot,
+      BundleSnapshot,
+      BundleSnapshot,
+      BundleSnapshot,
+    ]
+    expect(a).toMatchObject({ artifactsBase: null, achievementTimesBase: null })
+    // The base is the latest snapshot's own (full) section.
+    expect(b).toMatchObject({
+      artifactsBase: a.artifacts,
+      achievementTimesBase: a.achievementTimes,
+      materialsKeyframe: a.materials,
+    })
+    // Out of order: still the latest's bases.
+    expect(c).toMatchObject({
+      artifactsBase: a.artifacts,
+      achievementTimesBase: a.achievementTimes,
+    })
+    // Unchanged since the latest: the same deltas, nothing new but gi_player.
+    expect(d.artifacts).toBe(b.artifacts)
+    expect(d.achievementTimes).toBe(b.achievementTimes)
+    expect(d.materials).toBe(b.materials)
+    const playerBytes = blobs.get(d.player!)!.length
+    expect(results[3]!.storedSize).toBe(playerBytes)
+    expect(results[1]!.storedSize).toBeLessThan(results[0]!.storedSize / 10)
+
+    // The export zip, decoded from the bundle as the browser does it...
+    const texts = await inflateBundle(blobs)
+    const catalog = catalogFromRows(
+      await client.json<CatalogRow[]>(`/api/accounts/${account.id}/catalog`),
+    )
+    const chunks: Uint8Array[] = []
+    writeGoodZip({
+      snapshots: manifest.snapshots,
+      decode: (snapshot) => decodeFromSections(snapshot, texts, catalog, MATERIALS),
+      onChunk: (chunk) => chunks.push(chunk.slice()),
+    })
+    const zip = new Uint8Array(chunks.reduce((sum, chunk) => sum + chunk.length, 0))
+    chunks.reduce((offset, chunk) => (zip.set(chunk, offset), offset + chunk.length), 0)
+    const files = unzipSync(zip)
+    const names = zipEntryNames(manifest.snapshots)
+
+    // ...holds byte for byte the files these uploads give when every section
+    // is stored in full, as before deltas existed.
+    const ids = new Map<string, number>()
+    for (const entry of catalog.values()) ids.set(await hashArtifactIdentity(entry), entry.id)
+    for (const [i, good] of goods.entries()) {
+      const snapshot = byId.get(results[i]!.snapshotId)!
+      const full = await encodeSnapshot(await prepareSnapshot(good), ids, MATERIALS)
+      const expected = JSON.stringify(
+        decodeSnapshot(
+          {
+            format: good.format,
+            version: good.version,
+            source: good.source,
+            takenAt: times[i]!,
+            characters: full.characters.json,
+            weapons: full.weapons.json,
+            artifacts: full.artifacts.json,
+            materials: full.materials.json,
+            materialsKeyframe: null,
+            achievements: full.achievements?.json ?? null,
+            player: full.player?.json ?? null,
+            achievementTimes: full.achievementTimes?.json ?? null,
+            characterExtras: full.characterExtras?.json ?? null,
+          },
+          catalog,
+          MATERIALS,
+        ),
+      )
+      expect(new TextDecoder().decode(files[names.get(snapshot.id)!]), `upload ${i}`).toBe(expected)
+      // The server's single-file export agrees.
+      const served = await client.json<Good>(
+        `/api/accounts/${account.id}/snapshots/${snapshot.id}/good`,
+      )
+      expect(JSON.stringify(served)).toBe(expected)
+      expect(canonical(served)).toEqual(canonical({ ...good, timestamp: times[i]! }))
+    }
+
+    // A bundle of just achievement times carries the bases the deltas need.
+    const timesOnly = readBundle(
+      await (
+        await client.fetch(`/api/accounts/${account.id}/bundle?sections=achievementTimes`)
+      ).arrayBuffer(),
+    )
+    expect(timesOnly.manifest.blobs.sort()).toEqual(
+      [...new Set([a, b, c].map((s) => s.achievementTimes!))].sort(),
+    )
   })
 })
 

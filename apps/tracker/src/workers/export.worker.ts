@@ -11,7 +11,7 @@ import {
   catalogFromRows,
   inflateBundle,
   readBundle,
-  type BundleSnapshot,
+  sectionHashesOf,
   type CatalogRow,
 } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
@@ -68,18 +68,6 @@ async function readBody(response: Response, onBytes: (count: number) => void) {
   return bytes
 }
 
-function sectionHashes(snapshot: BundleSnapshot): string[] {
-  const hashes = [
-    snapshot.characters,
-    snapshot.weapons,
-    snapshot.artifacts,
-    snapshot.materials,
-    snapshot.materialsKeyframe,
-  ]
-  if (snapshot.achievements) hashes.push(snapshot.achievements)
-  return hashes
-}
-
 async function run({ accountId, ids, level }: ExportStart) {
   const query = ids && ids.length <= MAX_IDS_IN_URL ? `?ids=${ids.join(',')}` : ''
   const [bundleResponse, catalogResponse] = await Promise.all([
@@ -108,7 +96,8 @@ async function run({ accountId, ids, level }: ExportStart) {
   if (snapshots.length === 0) {
     throw new Error('Snapshots no longer exist')
   }
-  const needed = new Set(snapshots.flatMap(sectionHashes))
+  // Every section the selection decodes: bases and irminsul's extras included.
+  const needed = new Set(snapshots.flatMap(sectionHashesOf))
   const texts = await inflateBundle(new Map([...blobs].filter(([hash]) => needed.has(hash))))
   const rows = JSON.parse(new TextDecoder().decode(catalogBytes)) as CatalogRow[]
   const catalog = catalogFromRows(rows)

@@ -2,6 +2,7 @@ import { hashArtifactIdentity, type ArtifactIdentity } from '../artifact'
 import type { KeyDictionary } from '../dictionary'
 import type { Good } from '../good'
 import { sha256Hex128 } from '../hash'
+import { deflateRaw } from './compress'
 import { normalizeGood, type NormalizedGood } from './normalize'
 import {
   decodeAchievements,
@@ -12,16 +13,21 @@ import {
   decodeMaterials,
   decodePlayer,
   decodeWeapons,
+  deltaPaysOff,
   encodeAchievements,
   encodeAchievementTimes,
+  encodeAchievementTimesDelta,
   encodeArtifacts,
+  encodeArtifactsDelta,
   encodeCharacterExtras,
   encodeCharacters,
-  encodeMaterials,
+  encodeMaterialsDelta,
   encodeMaterialsFull,
   encodeWeapons,
   makeSection,
-  type MaterialsKeyframe,
+  type AchievementTimesSection,
+  type ArtifactsSection,
+  type MaterialsSection,
   type Section,
 } from './sections'
 
@@ -94,13 +100,18 @@ export interface EncodedSnapshot extends ExtraSections {
   artifacts: Section
   materials: Section
   achievements: Section | null
-  /** True when `materials` is a full keyframe rather than a delta. */
-  materialsIsKeyframe: boolean
   /**
-   * Identity of the whole inventory. Built from the *full* materials form, so
-   * whether materials were stored as a keyframe or a delta never changes it.
-   * A file without irminsul's extra keys hashes exactly as it did before they
-   * were stored.
+   * For each section that can be stored as a delta (see `withBases`): the
+   * full section it is a delta of, or null when it is stored in full.
+   */
+  materialsBase: string | null
+  artifactsBase: string | null
+  achievementTimesBase: string | null
+  /**
+   * Identity of the whole inventory. Built from the *full* form of every
+   * section, so whether a section was stored in full or as a delta never
+   * changes it. A file without irminsul's extra keys hashes exactly as it did
+   * before they were stored.
    */
   contentHash: string
   /**
@@ -163,9 +174,9 @@ export async function encodeStaticSections(
 
 /**
  * Step 2b, once the catalog has assigned ids: the artifacts section and the
- * content hash. Materials are still a full keyframe; the content hash is final
- * here, so an unchanged inventory is detected before any keyframe is loaded.
- * Call {@link withMaterialsKeyframe} only when the snapshot will be stored.
+ * content hash. Every section is still in full; the content hash is final
+ * here, so an unchanged inventory is detected before any base is loaded.
+ * Call {@link withBases} only when the snapshot will be stored.
  */
 export async function completeSnapshot(
   sections: StaticSections,
@@ -193,7 +204,15 @@ export async function completeSnapshot(
   const contentHash = extras.some((s) => s !== null)
     ? await sha256Hex128([...base, ...extras.map((s) => s?.hash ?? '')].join(':'))
     : legacyContentHash
-  return { ...sections, artifacts, materialsIsKeyframe: true, contentHash, legacyContentHash }
+  return {
+    ...sections,
+    artifacts,
+    materialsBase: null,
+    artifactsBase: null,
+    achievementTimesBase: null,
+    contentHash,
+    legacyContentHash,
+  }
 }
 
 /** Steps 2a and 2b together. */
@@ -209,25 +228,90 @@ export async function encodeSnapshot(
   )
 }
 
+/** A full section stored earlier, which a new snapshot's section may be a delta of. */
+export interface SectionBase {
+  hash: string
+  /** The section's JSON (inflated). */
+  json: string
+  /** What it takes in storage: its deflated size in bytes. */
+  size: number
+}
+
+/** The bases a new snapshot may use: those of the account's latest snapshot. */
+export interface SnapshotBases {
+  materials: SectionBase | null
+  artifacts: SectionBase | null
+  achievementTimes: SectionBase | null
+}
+
 /**
- * Re-expresses materials as a delta against `keyframe` (the keyframe the
- * account's latest snapshot uses) when the delta is small enough; otherwise
- * the snapshot keeps its own full keyframe. The content hash is unaffected.
+ * Step 3, only for a snapshot that will be stored: re-expresses materials,
+ * artifacts and achievement times as deltas against `bases` where that is
+ * cheaper (see "bases & deltas" in sections.ts). A section stays in full when
+ * there is no base, when its full form is already stored (`isStored`; then it
+ * costs nothing, as when nothing changed since the base), or when its delta
+ * has grown past the point where a new base pays off. A delta that is already
+ * stored (the latest snapshot's, when the section did not change since) is
+ * always used. The content hash is unaffected.
  */
-export async function withMaterialsKeyframe(
+export async function withBases(
   encoded: EncodedSnapshot,
   prepared: PreparedSnapshot,
   materialsDictionary: KeyDictionary,
-  keyframe: MaterialsKeyframe | null,
+  bases: SnapshotBases,
+  isStored: (hash: string) => boolean = () => false,
 ): Promise<EncodedSnapshot> {
-  if (!keyframe) return encoded
-  const stored = encodeMaterials(prepared.good.materials, materialsDictionary, keyframe)
-  if (stored.b === undefined) return encoded
+  const times = encoded.achievementTimes
+  const [materials, artifacts, achievementTimes] = await Promise.all([
+    rebase(encoded.materials, bases.materials, isStored, (base) => {
+      const keyframe = JSON.parse(base.json) as MaterialsSection
+      if (keyframe.b !== undefined) return null
+      return encodeMaterialsDelta(prepared.good.materials, materialsDictionary, {
+        hash: base.hash,
+        materials: decodeMaterials(keyframe, materialsDictionary, null),
+      })
+    }),
+    rebase(encoded.artifacts, bases.artifacts, isStored, (base) => {
+      const full = JSON.parse(base.json) as ArtifactsSection
+      if (full.b !== undefined) return null
+      return encodeArtifactsDelta(JSON.parse(encoded.artifacts.json), full, base.hash)
+    }),
+    times
+      ? rebase(times, bases.achievementTimes, isStored, (base) => {
+          const full = JSON.parse(base.json) as AchievementTimesSection
+          if (full.b !== undefined) return null
+          return encodeAchievementTimesDelta(JSON.parse(times.json), full, base.hash)
+        })
+      : { section: null, base: null },
+  ])
   return {
     ...encoded,
-    materials: await makeSection('materials', stored),
-    materialsIsKeyframe: false,
+    materials: materials.section,
+    materialsBase: materials.base,
+    artifacts: artifacts.section,
+    artifactsBase: artifacts.base,
+    achievementTimes: achievementTimes.section,
+    achievementTimesBase: achievementTimes.base,
   }
+}
+
+/** `full`, or its delta against `base` when that is cheaper. */
+async function rebase(
+  full: Section,
+  base: SectionBase | null,
+  isStored: (hash: string) => boolean,
+  delta: (base: SectionBase) => object | null,
+): Promise<{ section: Section; base: string | null }> {
+  const asFull = { section: full, base: null }
+  if (!base || full.hash === base.hash || isStored(full.hash)) return asFull
+  // A base that is itself a delta cannot be built on (never happens: bases are
+  // read from a snapshot's base columns, which only ever name full sections).
+  const value = delta(base)
+  if (!value) return asFull
+  const section = await makeSection(full.kind, value)
+  if (isStored(section.hash)) return { section, base: base.hash }
+  const size = (await deflateRaw(section.json)).length
+  return deltaPaysOff(size, base.size) ? { section, base: base.hash } : asFull
 }
 
 /** A snapshot as read back from storage, sections already inflated to JSON text. */
@@ -239,6 +323,8 @@ export interface StoredSnapshot {
   characters: string
   weapons: string
   artifacts: string
+  /** Required when `artifacts` is a delta; absent or null when it is full. */
+  artifactsBase?: string | null
   materials: string
   /** Required when `materials` is a delta. */
   materialsKeyframe: string | null
@@ -246,8 +332,13 @@ export interface StoredSnapshot {
   // irminsul's extra sections; absent or null when the snapshot has none.
   player?: string | null
   achievementTimes?: string | null
+  /** Required when `achievementTimes` is a delta; absent or null when it is full. */
+  achievementTimesBase?: string | null
   characterExtras?: string | null
 }
+
+const parseOrNull = <T>(text: string | null | undefined): T | null =>
+  text ? (JSON.parse(text) as T) : null
 
 /** Rebuilds the GOOD file a stored snapshot came from. Runs in the browser. */
 export function decodeSnapshot(
@@ -265,7 +356,11 @@ export function decodeSnapshot(
     version: stored.version,
     source: stored.source,
     characters: decodeCharacters(JSON.parse(stored.characters)),
-    artifacts: decodeArtifacts(JSON.parse(stored.artifacts), catalog),
+    artifacts: decodeArtifacts(
+      JSON.parse(stored.artifacts),
+      catalog,
+      parseOrNull(stored.artifactsBase),
+    ),
     weapons: decodeWeapons(JSON.parse(stored.weapons)),
     materials: Object.fromEntries(materials),
   }
@@ -277,10 +372,10 @@ export function decodeSnapshot(
   if (stored.player) good.gi_player = decodePlayer(JSON.parse(stored.player))
   if (stored.achievementTimes) {
     good.gi_achievement_times = Object.fromEntries(
-      decodeAchievementTimes(JSON.parse(stored.achievementTimes)).map(([id, at]) => [
-        String(id),
-        at,
-      ]),
+      decodeAchievementTimes(
+        JSON.parse(stored.achievementTimes),
+        parseOrNull(stored.achievementTimesBase),
+      ).map(([id, at]) => [String(id), at]),
     )
   }
   if (stored.characterExtras) {
