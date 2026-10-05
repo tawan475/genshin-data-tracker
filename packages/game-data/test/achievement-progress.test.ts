@@ -121,6 +121,9 @@ describe('captureAchievements', () => {
     expect(captured.takenAt).toBe(400)
     expect(captured.firstTakenAt).toBe(100)
     expect(Object.fromEntries(captured.firstSeen)).toEqual({ 10: 100, 11: 100, 20: 200, 21: 400 })
+    // The capture before the first with each id lacked it; the repeat of
+    // list a at 300 counts as a capture, the empty list at 500 doesn't.
+    expect(Object.fromEntries(captured.lastMissing)).toEqual({ 20: 100, 21: 300 })
     // Each distinct section is decoded once.
     expect(decoded.sort()).toEqual(['a', 'b', 'c', 'e'])
   })
@@ -136,6 +139,7 @@ describe('captureAchievements', () => {
     expect(captured.ids.size).toBe(0)
     expect(captured.takenAt).toBeNull()
     expect(captured.firstTakenAt).toBeNull()
+    expect(captured.lastMissing.size).toBe(0)
     expect(captured.completedAt.size).toBe(0)
   })
 
@@ -183,14 +187,16 @@ describe('completedOn', () => {
       [11, 100],
       [20, 200],
     ]),
+    lastMissing: new Map([[20, 150]]),
     completedAt: new Map([[11, 1_600_400_000_000]]),
   }
 
-  it('prefers the real finish time, then the first snapshot that had the id', () => {
+  it('prefers the real finish time, then the captures around the first that had the id', () => {
     expect(completedOn(captured, 11)).toEqual({ at: 1_600_400_000_000, kind: 'exact' })
     // Already done when achievements were first captured: only "by then".
     expect(completedOn(captured, 10)).toEqual({ at: 100, kind: 'by' })
-    expect(completedOn(captured, 20)).toEqual({ at: 200, kind: 'seen' })
+    // Done after the capture at 150, which lacked it, and by the one at 200.
+    expect(completedOn(captured, 20)).toEqual({ at: 200, kind: 'seen', since: 150 })
     expect(completedOn(captured, 99)).toBeNull()
   })
 
@@ -234,6 +240,7 @@ describe('entryCompletedOn', () => {
       [11, 100],
       [12, 200],
     ]),
+    lastMissing: new Map([[12, 100]]),
     completedAt: new Map([[11, 1_600_400_000_000]]),
   }
 
@@ -257,12 +264,20 @@ describe('entryCompletedOn', () => {
     expect(entryCompletedOn(entry(11), state([11, 12]), captured)).toEqual({
       at: 200,
       kind: 'seen',
+      since: 100,
       tier: 1,
     })
   })
 
-  it('shows no date when the highest done tier was only marked by hand', () => {
-    expect(entryCompletedOn(entry(11), state([11, 12], [13]), captured)).toBeNull()
+  it('says so when the highest done tier was only marked by hand', () => {
+    expect(entryCompletedOn(entry(11), state([11, 12], [13]), captured)).toEqual({
+      kind: 'marked',
+      tier: 2,
+    })
+    expect(entryCompletedOn(entry(20), state([], [20]), captured)).toEqual({
+      kind: 'marked',
+      tier: 0,
+    })
     // Marked by hand, but a capture has its finish time: the date still shows.
     const timed = { ...captured, completedAt: new Map([[13, 5_000]]) }
     expect(entryCompletedOn(entry(11), state([11, 12], [13]), timed)).toEqual({

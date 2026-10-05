@@ -36,6 +36,11 @@ export interface CapturedAchievements {
   /** The first snapshot (by takenAt) whose list holds each id. */
   firstSeen: ReadonlyMap<number, number>
   /**
+   * For each id first seen after the first capture: when the capture before
+   * that one was taken, which lacked it. The id was completed in between.
+   */
+  lastMissing: ReadonlyMap<number, number>
+  /**
    * The game's own finish time (epoch ms) where a snapshot carried one, from
    * the newest snapshot that has a time for the id.
    */
@@ -57,6 +62,7 @@ export function captureAchievements(
     .sort((a, b) => a.takenAt - b.takenAt)
   const decoded = new Map<string, readonly number[]>()
   const firstSeen = new Map<number, number>()
+  const lastMissing = new Map<number, number>()
   let newest: { takenAt: number; ids: readonly number[] } | null = null
   let firstTakenAt: number | null = null
 
@@ -66,7 +72,11 @@ export function captureAchievements(
       ids = decode(section.key)
       decoded.set(section.key, ids)
       // A list seen before was recorded at its earlier time already.
-      for (const id of ids) if (!firstSeen.has(id)) firstSeen.set(id, section.takenAt)
+      for (const id of ids) {
+        if (firstSeen.has(id)) continue
+        firstSeen.set(id, section.takenAt)
+        if (newest) lastMissing.set(id, newest.takenAt)
+      }
     }
     if (ids.length === 0) continue
     firstTakenAt ??= section.takenAt
@@ -78,6 +88,7 @@ export function captureAchievements(
     takenAt: newest?.takenAt ?? null,
     firstTakenAt,
     firstSeen,
+    lastMissing,
     completedAt: decodeTimes ? finishTimes(sections, decodeTimes) : new Map(),
   }
 }
@@ -102,25 +113,32 @@ function finishTimes(
  * When an achievement was completed (`at`, epoch ms), as far as the
  * snapshots tell:
  * - `exact`: the game's own finish time (irminsul's `gi_achievement_times`)
- * - `seen`: the first snapshot that had it (done since the one before)
+ * - `seen`: between two captures: `since`, the last one without it, and
+ *   `at`, the first one with it
  * - `by`: it was already done in the first snapshot with achievements, so
  *   only "by then" is known
  */
-export interface CompletedOn {
-  at: number
-  kind: 'exact' | 'seen' | 'by'
-}
+export type CompletedOn =
+  | { kind: 'exact'; at: number }
+  | { kind: 'seen'; at: number; since: number }
+  | { kind: 'by'; at: number }
+
+/** What `completedOn` reads. */
+export type CompletionTimes = Pick<
+  CapturedAchievements,
+  'firstSeen' | 'firstTakenAt' | 'lastMissing' | 'completedAt'
+>
 
 /** See `CompletedOn`. Null when no snapshot has it. */
-export function completedOn(
-  captured: Pick<CapturedAchievements, 'firstSeen' | 'firstTakenAt' | 'completedAt'>,
-  id: number,
-): CompletedOn | null {
+export function completedOn(captured: CompletionTimes, id: number): CompletedOn | null {
   const exact = captured.completedAt.get(id)
   if (exact !== undefined) return { at: exact, kind: 'exact' }
   const seen = captured.firstSeen.get(id)
   if (seen === undefined) return null
-  return { at: seen, kind: seen === captured.firstTakenAt ? 'by' : 'seen' }
+  const since = captured.lastMissing.get(id)
+  return seen === captured.firstTakenAt || since === undefined
+    ? { at: seen, kind: 'by' }
+    : { at: seen, kind: 'seen', since }
 }
 
 // ------------------------------------------------------------------- entries
@@ -215,21 +233,24 @@ export function tiersDone(entry: AchievementEntry, state: DoneState): number {
   return done
 }
 
+/** `CompletedOn`, or `marked`: done by hand only, so no capture dates it. */
+export type DoneOn = CompletedOn | { kind: 'marked' }
+
 /**
- * The completion to show on an entry's row: its highest done tier's
- * (`tier` is that tier's index), or null when nothing is done or that tier
- * has no date (marked by hand, never captured).
+ * The completion to show on an entry's row: its highest done tier's (`tier`
+ * is that tier's index), or null when nothing is done.
  */
 export function entryCompletedOn(
   entry: AchievementEntry,
   state: DoneState,
-  captured: Pick<CapturedAchievements, 'firstSeen' | 'firstTakenAt' | 'completedAt'>,
-): (CompletedOn & { tier: number }) | null {
+  captured: CompletionTimes,
+): (DoneOn & { tier: number }) | null {
   for (let tier = entry.tiers.length - 1; tier >= 0; tier--) {
     const id = entry.tiers[tier]!.id
     if (!isDone(state, id)) continue
     const done = completedOn(captured, id)
-    return done && { ...done, tier }
+    if (done) return { ...done, tier }
+    return doneSource(state, id) === 'marked' ? { kind: 'marked', tier } : null
   }
   return null
 }

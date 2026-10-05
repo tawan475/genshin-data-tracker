@@ -1,4 +1,5 @@
-// TSConfig for the Worker (runs in workerd, not Node or the browser).
+// TSConfig for the Worker (runs in workerd, not Node or the browser), and for
+// the app helpers' tests (src/**/__tests__), which run there too.
 {
   "compilerOptions": {
     "target": "ES2023",
@@ -13,7 +14,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["@cloudflare/vitest-pool-workers/types"],
+    "paths": { "@/*": ["./src/*"] },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.worker.tsbuildinfo"
   },
-  "include": ["worker/**/*.ts", "worker-configuration.d.ts"]
+  "include": ["worker/**/*.ts", "worker-configuration.d.ts", "src/**/__tests__/*.ts"]
 }

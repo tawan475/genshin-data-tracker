@@ -75,6 +75,36 @@ export function formatTime(ms: number): string {
   })
 }
 
+/** "Oct 4": a date without its year. */
+export function formatMonthDay(ms: number): string {
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+/** Whether two times fall on the same local day. */
+export function sameDay(a: number, b: number): boolean {
+  return new Date(a).toDateString() === new Date(b).toDateString()
+}
+
+/** Keeps a date or time on one line when the text around it wraps ("4:41 PM", not "4:41" / "PM"). */
+export function nowrap(text: string): string {
+  return text.replaceAll(' ', '\u00a0')
+}
+
+/**
+ * Some time between two moments, as short as stays clear: "between Oct 1
+ * and Oct 4, 2026" (the year once when both share it), "between Dec 28,
+ * 2025 and Jan 4, 2026", or within one day "Oct 4, 2026, between 9:10 AM
+ * and 4:05 PM". Each date and time stays on one line.
+ */
+export function formatBetween(from: number, to: number): string {
+  if (sameDay(from, to)) {
+    return `${nowrap(formatDate(to))}, between ${nowrap(formatTime(from))} and ${nowrap(formatTime(to))}`
+  }
+  const sameYear = new Date(from).getFullYear() === new Date(to).getFullYear()
+  const start = sameYear ? formatMonthDay(from) : formatDate(from)
+  return `between ${nowrap(start)} and ${nowrap(formatDate(to))}`
+}
+
 const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
 
 /** "3 hours ago", "yesterday", "in 2 days". */
