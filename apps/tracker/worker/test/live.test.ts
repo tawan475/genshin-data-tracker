@@ -5,16 +5,19 @@ import type {
   ImportResponse,
   LiveEvent,
 } from '@gdt/shared'
-import { env, SELF } from 'cloudflare:test'
+import { env, runInDurableObject, SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
-import { SESSION_EXPIRED_CLOSE, liveHub } from '../services/live'
+import { SESSION_ENDED_CLOSE, liveHub, type LiveHub } from '../services/live'
 import { Client, ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 const DIAG = 'test-diag-key-test-diag-key-test-diag-key'
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /** An open live socket, with its messages queued for the test to read in order. */
 interface Tab {
   socket: WebSocket
+  /** The `hello` it opened with. */
+  hello: LiveEvent
   /** The next message (event or `pong`), or a failure after `ms`. */
   next(ms?: number): Promise<unknown>
   /** Fails if a message arrives within `ms`. */
@@ -22,7 +25,7 @@ interface Tab {
   closed: Promise<CloseEvent>
 }
 
-function tabOf(socket: WebSocket): Tab {
+async function tabOf(socket: WebSocket): Promise<Tab> {
   socket.accept()
   const queue: unknown[] = []
   let wake: (() => void) | null = null
@@ -47,23 +50,29 @@ function tabOf(socket: WebSocket): Tab {
         resolve(true)
       }
     })
+  const next = async (ms = 2000) => {
+    if (!(await waitFor(ms))) throw new Error(`No live message within ${ms} ms`)
+    return queue.shift()
+  }
+  const hello = (await next()) as LiveEvent
+  expect(hello.type).toBe('hello')
   return {
     socket,
+    hello,
     closed,
-    async next(ms = 2000) {
-      if (!(await waitFor(ms))) throw new Error(`No live message within ${ms} ms`)
-      return queue.shift()
-    },
+    next,
     async quiet(ms = 150) {
       if (await waitFor(ms)) throw new Error(`Unexpected live message: ${JSON.stringify(queue)}`)
     },
   }
 }
 
+function upgrade(client: Client) {
+  return client.fetch('/api/live', { headers: { upgrade: 'websocket', origin: ORIGIN } })
+}
+
 async function openTab(client: Client): Promise<Tab> {
-  const response = await client.fetch('/api/live', {
-    headers: { upgrade: 'websocket', origin: ORIGIN },
-  })
+  const response = await upgrade(client)
   expect(response.status).toBe(101)
   return tabOf(response.webSocket!)
 }
@@ -87,16 +96,37 @@ async function versionOf(client: Client, id: number) {
   return (await client.json<AccountResponse>(`/api/accounts/${id}`)).dataVersion
 }
 
+async function liveSince(userId: number): Promise<number | null> {
+  const row = await env.DB.prepare('SELECT live_since FROM users WHERE id = ?1')
+    .bind(userId)
+    .first<{ live_since: number | null }>()
+  return row!.live_since
+}
+
+/** Waits for the hub's flag write that follows a close. */
+async function eventually(check: () => Promise<boolean>, ms = 2000) {
+  const until = Date.now() + ms
+  while (!(await check())) {
+    if (Date.now() > until) throw new Error('Condition not met in time')
+    await sleep(20)
+  }
+}
+
+/** Events this user's hub instance sent since it woke (0 for one woken just now). */
+function notified(userId: number): Promise<number> {
+  return runInDurableObject(liveHub(env, userId), (hub: LiveHub) => hub.notified)
+}
+
 describe('live socket', () => {
   it('needs a session, this site as the origin, and an upgrade', async () => {
-    const upgrade = { upgrade: 'websocket', origin: ORIGIN }
-    const anonymous = await new Client().fetch('/api/live', { headers: upgrade })
+    const headers = { upgrade: 'websocket', origin: ORIGIN }
+    const anonymous = await new Client().fetch('/api/live', { headers })
     expect(anonymous.status).toBe(401)
     expect(anonymous.webSocket).toBeNull()
 
     const { client } = await signUp()
     const elsewhere = await client.fetch('/api/live', {
-      headers: { ...upgrade, origin: 'https://evil.example' },
+      headers: { ...headers, origin: 'https://evil.example' },
     })
     expect(elsewhere.status).toBe(403)
     const noOrigin = await client.fetch('/api/live', { headers: { upgrade: 'websocket' } })
@@ -110,7 +140,27 @@ describe('live socket', () => {
     tab.socket.close(1000)
   })
 
-  it("tells every tab of the user about each change, and nobody else's tabs", async () => {
+  it('opens with each account as it is, to tell what a tab missed', async () => {
+    const { client } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    await importByKey(importKey, sampleGood(), 1_000)
+    const tab = await openTab(client)
+    expect(tab.hello).toEqual<LiveEvent>({
+      type: 'hello',
+      accounts: [
+        {
+          id: account.id,
+          dataVersion: await versionOf(client, account.id),
+          name: 'Main',
+          uid: '812345678',
+          server: 'ASIA',
+        },
+      ],
+    })
+    tab.socket.close(1000)
+  })
+
+  it("tells every socket of the user about each change, and nobody else's", async () => {
     const { client, me } = await signUp()
     const other = await signUp()
     const [first, second, stranger] = await Promise.all([
@@ -182,7 +232,7 @@ describe('live socket', () => {
     for (const tab of [first, second, stranger]) tab.socket.close(1000)
   })
 
-  it("reaches the user's tabs from their all-accounts key, new accounts included", async () => {
+  it("reaches the user's sockets from their all-accounts key, new accounts included", async () => {
     const { client } = await signUp()
     const tab = await openTab(client)
     const { importKey } = await client.json<ImportKeyResponse>('/api/me/import-key', {
@@ -201,19 +251,123 @@ describe('live socket', () => {
     tab.socket.close(1000)
   })
 
-  it('closes a socket whose session token has expired instead of telling it', async () => {
-    const { client, me } = await signUp()
-    const hub = liveHub(env, me.id)
-    const expired = await hub.fetch(`${ORIGIN}/api/live`, {
-      headers: { upgrade: 'websocket', 'x-gdt-token-exp': String(Math.floor(Date.now() / 1000)) },
+  it('tells a dashboard import run once, at its end', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const tab = await openTab(client)
+    for (const [i, mora] of [1, 2, 3].entries()) {
+      const response = await client.fetch(
+        `/api/accounts/${account.id}/import?timestamp=${1_000 + i}`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-gdt-live': 'quiet' },
+          body: JSON.stringify(sampleGood({ materials: { Mora: mora } })),
+        },
+      )
+      expect(response.status).toBe(201)
+    }
+    await tab.quiet()
+    const announced = await client.json<AccountResponse>(`/api/accounts/${account.id}/announce`, {
+      method: 'POST',
     })
-    const stale = tabOf(expired.webSocket!)
-    const fresh = await openTab(client)
+    expect(announced.snapshotCount).toBe(3)
+    expect(await tab.next()).toEqual<LiveEvent>({
+      type: 'data',
+      accountId: account.id,
+      dataVersion: announced.dataVersion,
+    })
+    tab.socket.close(1000)
+  })
+})
 
-    await createAccount(client)
-    expect(await fresh.next()).toEqual<LiveEvent>({ type: 'accounts' })
-    expect((await stale.closed).code).toBe(SESSION_EXPIRED_CLOSE)
-    fresh.socket.close(1000)
+describe('who is listening', () => {
+  it('is marked while the user has a socket open, and cleared after the last one', async () => {
+    const { client, me } = await signUp()
+    expect(await liveSince(me.id)).toBeNull()
+    const first = await openTab(client)
+    const since = await liveSince(me.id)
+    expect(since).toBeGreaterThan(0)
+    const second = await openTab(client)
+    expect(await liveSince(me.id)).toBe(since) // set once, not on every connect
+
+    first.socket.close(1000)
+    await first.closed
+    await sleep(100)
+    expect(await liveSince(me.id)).toBe(since)
+    second.socket.close(1000)
+    await eventually(async () => (await liveSince(me.id)) === null)
+  })
+
+  it('costs an upload nothing live when no page is open', async () => {
+    const { client, me } = await signUp()
+    const { importKey } = await createAccount(client)
+    await sleep(100)
+    // Creating it (a dashboard action) told the hub, which found nobody.
+    const before = await notified(me.id)
+    expect(await liveSince(me.id)).toBeNull()
+    expect((await importByKey(importKey, sampleGood(), 1_000)).status).toBe(201)
+    expect((await importByKey(importKey, sampleGood(), 2_000)).status).toBe(200)
+    await sleep(100)
+    // The uploads never called it.
+    expect(await notified(me.id)).toBe(before)
+  })
+
+  it('stops being called once an event finds nobody (a flag left over from a crash)', async () => {
+    const { client, me } = await signUp()
+    const { importKey } = await createAccount(client)
+    await env.DB.prepare('UPDATE users SET live_since = 1 WHERE id = ?1').bind(me.id).run()
+    expect((await importByKey(importKey, sampleGood(), 1_000)).status).toBe(201)
+    await eventually(async () => (await liveSince(me.id)) === null)
+    expect(await notified(me.id)).toBe(1)
+  })
+})
+
+describe('ending sessions', () => {
+  it('closes the sockets of every session when the user signs out everywhere', async () => {
+    const { client, username, password } = await signUp()
+    const phone = new Client()
+    await phone.json('/api/auth/login', { method: 'POST', json: { login: username, password } })
+    const [here, there] = await Promise.all([openTab(client), openTab(phone)])
+
+    expect((await client.fetch('/api/auth/logout-all', { method: 'POST' })).status).toBe(204)
+    expect((await here.closed).code).toBe(SESSION_ENDED_CLOSE)
+    expect((await there.closed).code).toBe(SESSION_ENDED_CLOSE)
+    // The phone's access cookie is still within its 15 minutes, but its session is over.
+    const refused = await upgrade(phone)
+    expect(refused.status).toBe(401)
+    expect(await refused.json()).toMatchObject({ error: { code: 'session_revoked' } })
+  })
+
+  it('keeps the device that changed the password connected, with its new session', async () => {
+    const { client, me, username, password } = await signUp()
+    const other = new Client()
+    await other.json('/api/auth/login', { method: 'POST', json: { login: username, password } })
+    const [here, there] = await Promise.all([openTab(client), openTab(other)])
+
+    const changed = await client.fetch('/api/auth/password', {
+      method: 'POST',
+      json: { currentPassword: password, newPassword: 'another horse battery staple' },
+    })
+    expect(changed.status).toBe(204)
+    expect((await there.closed).code).toBe(SESSION_ENDED_CLOSE)
+    // This device's old socket goes too; its new cookie connects again.
+    expect((await here.closed).code).toBe(SESSION_ENDED_CLOSE)
+    expect((await upgrade(other)).status).toBe(401)
+    const again = await openTab(client)
+    expect(await liveHub(env, me.id).sockets()).toBe(1)
+    again.socket.close(1000)
+  })
+
+  it('closes a socket of an ended session at the next event, should the revoke be lost', async () => {
+    const { client, me } = await signUp()
+    const { importKey } = await createAccount(client)
+    const tab = await openTab(client)
+    // As if signing out everywhere had not reached the hub.
+    await env.DB.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?1')
+      .bind(me.id)
+      .run()
+    expect((await importByKey(importKey, sampleGood(), 1_000)).status).toBe(201)
+    expect((await tab.closed).code).toBe(SESSION_ENDED_CLOSE)
   })
 })
 

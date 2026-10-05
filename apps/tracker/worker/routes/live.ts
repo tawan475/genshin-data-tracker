@@ -1,11 +1,14 @@
 /**
- * GET /api/live — the WebSocket a signed-in tab keeps open to hear about
- * changes to the user's accounts (see services/live.ts).
+ * GET /api/live — the WebSocket a signed-in browser keeps open (one tab holds
+ * it for all) to hear about changes to the user's accounts (see
+ * services/live.ts).
  *
  * The browser sends the session cookies with the upgrade (same origin), so the
  * access cookie authorises it like any request; an expired one is a 401 and
- * the tab reconnects after its usual refresh. The `Origin` must be this site:
- * a page elsewhere cannot open a socket on a visitor's session.
+ * the tab reconnects after its usual refresh. Once open, the socket lives on
+ * past the access token's expiry until its session is ended. The `Origin`
+ * must be this site: a page elsewhere cannot open a socket on a visitor's
+ * session.
  */
 
 import { Hono } from 'hono'
@@ -28,10 +31,21 @@ export const live = new Hono<AppEnv>().get(
   requireUser,
   async (c) => {
     // Only what the hub needs: no cookies go on to the Durable Object.
+    const version = c.get('tokenVersion')
     const upgraded = await liveHub(c.env, c.get('userId')).fetch(c.req.url, {
-      headers: { upgrade: 'websocket', 'x-gdt-token-exp': String(c.get('tokenExp')) },
+      headers: {
+        upgrade: 'websocket',
+        'x-gdt-user': String(c.get('userId')),
+        'x-gdt-token-version': version === null ? '' : String(version),
+      },
     })
-    if (!upgraded.webSocket) return upgraded
+    if (!upgraded.webSocket) {
+      // A token from before its session was ended (sign out everywhere).
+      if (upgraded.status === 401) {
+        throw new ApiError(401, 'session_revoked', 'Session ended, sign in again')
+      }
+      throw new ApiError(502, 'live_unavailable', 'Live updates are unavailable')
+    }
     // A fresh response: middleware may still add headers to it.
     return new Response(null, { status: 101, webSocket: upgraded.webSocket })
   },

@@ -87,9 +87,15 @@ export const useAccounts = defineStore('accounts', () => {
     return loading
   }
 
-  /** Re-reads one account (after an import or delete moved its data version). */
-  async function reload(id: number): Promise<AccountResponse> {
-    const fresh = await api.account(id)
+  /**
+   * Re-reads one account (after an import or delete moved its data version).
+   * `announce`: after quiet imports, also tell the live pages elsewhere.
+   */
+  async function reload(
+    id: number,
+    options: { announce?: boolean } = {},
+  ): Promise<AccountResponse> {
+    const fresh = await (options.announce ? api.announceAccount(id) : api.account(id))
     merge([fresh])
     const userId = useSession().me?.id
     if (userId !== undefined) postToTabs({ type: 'rows', userId, rows: [fresh] })

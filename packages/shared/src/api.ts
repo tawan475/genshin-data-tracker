@@ -271,6 +271,9 @@ export interface ImportedAccount {
 /**
  * What the live socket (`GET /api/live`) sends when the user's accounts
  * change, so open pages update without a reload:
+ * - `hello`: first, on every connect: each account's id, data version and
+ *   names as they are now, so a tab can tell whether it missed anything while
+ *   it had no socket (and only then re-read the list).
  * - `data`: an account's snapshots changed (an import, a capture seen again,
  *   a delete); `dataVersion` is the account's new version, `takenAt` the
  *   capture time for an import.
@@ -278,8 +281,18 @@ export interface ImportedAccount {
  * Events only say that something changed; the app re-reads the account list.
  */
 export type LiveEvent =
+  | { type: 'hello'; accounts: LiveAccount[] }
   | { type: 'data'; accountId: number; dataVersion: number | null; takenAt?: number }
   | { type: 'accounts' }
+
+/** An account as the live `hello` describes it. */
+export interface LiveAccount {
+  id: number
+  dataVersion: number
+  name: string | null
+  uid: string | null
+  server: GenshinServer | null
+}
 
 /**
  * `uid_mismatch`: the file's `gi_player.uid` is not the account's UID (the

@@ -25,6 +25,7 @@ import type { JWTPayload } from 'hono/utils/jwt/types'
 import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import type { AppEnv } from '../env'
+import { revokeLive } from '../services/live'
 import { ApiError } from './http'
 
 const ACCESS_COOKIE = 'gdt_at'
@@ -76,7 +77,12 @@ export async function startSession(
   const secret = jwtSecret(c)
   const sub = String(user.id)
   const [access, refresh] = await Promise.all([
-    sign({ sub, typ: 'access', iat: now, exp: now + ACCESS_TTL_S }, secret, 'HS256'),
+    // `ver` lets a live socket opened with this token be ended with the session.
+    sign(
+      { sub, typ: 'access', ver: user.tokenVersion, iat: now, exp: now + ACCESS_TTL_S },
+      secret,
+      'HS256',
+    ),
     sign(
       { sub, typ: 'refresh', ver: user.tokenVersion, iat: now, exp: now + REFRESH_TTL_S },
       secret,
@@ -132,8 +138,9 @@ export async function refreshSession(c: Context<AppEnv>): Promise<void> {
 }
 
 /**
- * Invalidates every refresh token the user holds, on all devices. Returns the
- * user with the new version, so the caller can sign this device back in.
+ * Invalidates every refresh token the user holds, on all devices, and closes
+ * their live sockets (awaited: a socket must not outlive its session). Returns
+ * the user with the new version, so the caller can sign this device back in.
  */
 export async function revokeAllSessions(
   c: Context<AppEnv>,
@@ -144,9 +151,10 @@ export async function revokeAllSessions(
     .update(users)
     .set({ ...set, tokenVersion: sql`${users.tokenVersion} + 1` })
     .where(eq(users.id, userId))
-    .returning({ id: users.id, tokenVersion: users.tokenVersion })
+    .returning({ id: users.id, tokenVersion: users.tokenVersion, liveSince: users.liveSince })
   if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
-  return user
+  if (user.liveSince !== null) await revokeLive(c.env, userId, user.tokenVersion)
+  return { id: user.id, tokenVersion: user.tokenVersion }
 }
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -160,6 +168,6 @@ export const requireUser: MiddlewareHandler<AppEnv> = async (c, next) => {
   const payload = await readToken(c, ACCESS_COOKIE, 'access')
   if (!payload) throw new ApiError(401, 'token_expired', 'Access token expired')
   c.set('userId', Number(payload.sub))
-  c.set('tokenExp', Number(payload.exp))
+  c.set('tokenVersion', typeof payload.ver === 'number' ? payload.ver : null)
   await next()
 }

@@ -73,6 +73,9 @@ export const api = {
     }
   },
   account: (id: number) => requestJson<AccountResponse>(`/api/accounts/${id}`),
+  /** The account, after quiet imports: also tells the live pages it moved. */
+  announceAccount: (id: number) =>
+    requestJson<AccountResponse>(`/api/accounts/${id}/announce`, { method: 'POST' }),
   createAccount: (input: AccountInput) =>
     requestJson<AccountCreatedResponse>('/api/accounts', { method: 'POST', json: input }),
   updateAccount: (id: number, input: AccountInput) =>
@@ -112,7 +115,7 @@ export const api = {
   importGood: (
     id: number,
     body: BodyInit,
-    options: { gzip?: boolean; timestamp?: number } = {},
+    options: { gzip?: boolean; timestamp?: number; quiet?: boolean } = {},
   ) => {
     const query = options.timestamp ? `?timestamp=${options.timestamp}` : ''
     return requestJson<ImportResponse>(`/api/accounts/${id}/import${query}`, {
@@ -121,6 +124,8 @@ export const api = {
       headers: {
         'content-type': 'application/json',
         ...(options.gzip ? { 'content-encoding': 'gzip' } : {}),
+        // A run of uploads tells the live pages once, at its end (`announce`).
+        ...(options.quiet ? { 'x-gdt-live': 'quiet' } : {}),
       },
     })
   },
