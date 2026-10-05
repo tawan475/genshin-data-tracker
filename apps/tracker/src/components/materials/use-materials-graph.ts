@@ -8,17 +8,6 @@ export const MAX_SERIES = 6
 /** Shown when nothing has been saved for the account. */
 export const DEFAULT_KEYS = ['Mora', 'Primogem']
 
-/**
- * The range is stored in the account's `materialsGraph.limit` as days;
- * ALL_DAYS (the schema's maximum) means the whole history.
- */
-export const ALL_DAYS = 10_000
-export const RANGE_OPTIONS = [
-  { value: 30, label: '30d' },
-  { value: 90, label: '90d' },
-  { value: 365, label: '1y' },
-  { value: ALL_DAYS, label: 'All' },
-]
 export const GROUP_OPTIONS: { value: TimelineGroupBy; label: string }[] = [
   { value: 'hour', label: 'Hour' },
   { value: 'day', label: 'Day' },
@@ -26,26 +15,21 @@ export const GROUP_OPTIONS: { value: TimelineGroupBy; label: string }[] = [
   { value: 'year', label: 'Year' },
 ]
 
-/** Older clients stored a period count here; snap anything to the nearest range. */
-function toRange(limit: number): number {
-  if (limit <= 30) return 30
-  if (limit <= 90) return 90
-  if (limit <= 365) return 365
-  return ALL_DAYS
-}
-
 const SAVE_DELAY_MS = 800
 
 /**
  * The account's chart settings: loaded from the server, changed locally at
  * once (optimistic), saved in the background after a short pause. Pending
  * changes are flushed when the account changes or the page closes.
+ *
+ * The chart range is not here: like every history chart's, it is remembered
+ * on the device (useChartRange). The server's `limit` (days) is left as
+ * stored, for older clients; it cannot express hour ranges.
  */
 export function useMaterialsGraph(accountId: () => number) {
   const feedback = useFeedback()
   const selectedKeys = ref<string[]>([...DEFAULT_KEYS])
   const group = ref<TimelineGroupBy>('day')
-  const rangeDays = ref(365)
   /** True once the saved settings are in (or could not be loaded). */
   const ready = ref(false)
 
@@ -64,7 +48,6 @@ export function useMaterialsGraph(accountId: () => number) {
       // The server fills in the default (Mora, Primogem); an empty list was cleared on purpose.
       selectedKeys.value = saved.selectedKeys.slice(0, MAX_SERIES)
       group.value = saved.groupBy
-      rangeDays.value = toRange(saved.limit)
     } catch {
       // Defaults stay on screen; saving still works.
     } finally {
@@ -103,7 +86,6 @@ export function useMaterialsGraph(accountId: () => number) {
       touchedFor = null
       selectedKeys.value = [...DEFAULT_KEYS]
       group.value = 'day'
-      rangeDays.value = 365
       void load(id)
     },
     { immediate: true },
@@ -123,13 +105,6 @@ export function useMaterialsGraph(accountId: () => number) {
       set: (value: TimelineGroupBy) => {
         group.value = value
         save({ groupBy: value })
-      },
-    }),
-    range: computed({
-      get: () => rangeDays.value,
-      set: (value: number) => {
-        rangeDays.value = value
-        save({ limit: value })
       },
     }),
     isSelected: (key: string) => selectedKeys.value.includes(key),

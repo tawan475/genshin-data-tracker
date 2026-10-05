@@ -12,7 +12,7 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
 import { formatSignedExact } from '@/data/overview'
 import { CHART_FONT as FONT } from '@/lib/chart-defaults'
-import { formatSigned } from '@/lib/format'
+import { formatSignedTick, tickStep } from '@/lib/format'
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip)
 
@@ -97,7 +97,11 @@ function config(): ChartConfiguration<'bar'> {
         y: {
           grid: { color: (ctx) => (ctx.tick?.value === 0 ? zero : grid) },
           border: { display: false },
-          ticks: { color: muted, maxTicksLimit: 5, callback: (v) => formatSigned(Number(v)) },
+          ticks: {
+            color: muted,
+            maxTicksLimit: 5,
+            callback: (v, _, ticks) => formatSignedTick(Number(v), tickStep(ticks)),
+          },
         },
       },
       plugins: {

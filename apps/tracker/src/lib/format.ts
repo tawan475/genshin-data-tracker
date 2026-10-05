@@ -20,6 +20,41 @@ export function formatSigned(value: number): string {
   return `${value > 0 ? '+' : '−'}${formatCompact(Math.abs(value))}`
 }
 
+const compactTicks = new Map<number, Intl.NumberFormat>()
+
+/**
+ * An axis tick, compact with as many decimals (up to three) as the `step`
+ * between ticks needs: over an hour Mora moves in 50K steps, which one
+ * decimal would print as "9.1M, 9.1M, 9.2M".
+ */
+export function formatCompactTick(value: number, step: number): string {
+  const abs = Math.abs(value)
+  if (abs < 10_000 || !(step > 0)) return formatCompact(value)
+  const unit = abs >= 1e12 ? 1e12 : abs >= 1e9 ? 1e9 : abs >= 1e6 ? 1e6 : 1e3
+  const scaled = step / unit
+  let digits = 1
+  while (digits < 3 && Math.abs(Math.round(scaled * 10 ** digits) - scaled * 10 ** digits) > 1e-6) {
+    digits++
+  }
+  let format = compactTicks.get(digits)
+  if (!format) {
+    format = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: digits })
+    compactTicks.set(digits, format)
+  }
+  return format.format(value)
+}
+
+/** As formatCompactTick, signed ("+150K", "−1.25M"). */
+export function formatSignedTick(value: number, step: number): string {
+  if (value === 0) return '0'
+  return `${value > 0 ? '+' : '−'}${formatCompactTick(Math.abs(value), step)}`
+}
+
+/** The step between a Chart.js axis's ticks (0 with fewer than two). */
+export function tickStep(ticks: readonly { value: number }[]): number {
+  return ticks.length > 1 ? Math.abs(ticks[1]!.value - ticks[0]!.value) : 0
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   const units = ['KB', 'MB', 'GB', 'TB']

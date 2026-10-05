@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef, watch } from 'vue'
 import { Clock, Package, Upload } from 'lucide-vue-next'
+import { useChartRange } from '@/components/charts/use-chart-range'
 import MaterialDetail from '@/components/materials-page/MaterialDetail.vue'
 import MaterialsBag from '@/components/materials-page/MaterialsBag.vue'
 import TrackedPanel from '@/components/materials-page/TrackedPanel.vue'
@@ -110,7 +111,8 @@ const newest = computed(() => {
 
 // ------------------------------------------------------------------ tracked
 
-const frame = computed(() => (history.value ? rangeFrame(history.value, graph.range.value) : null))
+const range = useChartRange('materials:range')
+const frame = computed(() => (history.value ? rangeFrame(history.value, range.value) : null))
 const canTrack = computed(() => graph.selectedKeys.value.length < MAX_SERIES)
 
 const detailKey = shallowRef<string | null>(null)
@@ -189,7 +191,7 @@ const importTo = computed(() => ({
     />
 
     <TrackedPanel
-      v-model:range="graph.range.value"
+      v-model:range="range"
       :history="history"
       :frame="frame"
       :keys="graph.selectedKeys.value"
@@ -212,7 +214,7 @@ const importTo = computed(() => ({
     />
 
     <MaterialDetail
-      v-model:range="graph.range.value"
+      v-model:range="range"
       :item="detailItem"
       :history="history"
       :icon="icon"

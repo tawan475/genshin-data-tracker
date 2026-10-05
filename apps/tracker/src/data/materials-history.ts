@@ -185,14 +185,26 @@ export interface ChartFrame {
   end: number
 }
 
-export function chartFrame(history: MaterialsHistory, from: number, groupBy: GroupBy): ChartFrame {
+/**
+ * The frame for a chart from `from` on, keeping every snapshot (`raw`) or
+ * the last one per local hour or day.
+ */
+export function chartFrame(
+  history: MaterialsHistory,
+  from: number,
+  bucket: GroupBy | 'raw',
+): ChartFrame {
   const { times } = history
   const start = indexAtOrBefore(times, from) + 1
   const carryIn = start > 0 && start <= times.length ? start - 1 : -1
   const indices: number[] = []
   let period = Number.NaN
   for (let i = start; i < times.length; i++) {
-    const p = periodStart(times[i]!, groupBy)
+    if (bucket === 'raw') {
+      indices.push(i)
+      continue
+    }
+    const p = periodStart(times[i]!, bucket)
     // Same period as the previous snapshot: the later one replaces it.
     if (p === period) indices[indices.length - 1] = i
     else indices.push(i)

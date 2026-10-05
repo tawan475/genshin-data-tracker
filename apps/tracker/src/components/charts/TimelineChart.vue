@@ -12,8 +12,9 @@ import {
 } from 'chart.js'
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
+import { axisFormat, axisTick, axisTicks } from '@/data/chart-range'
 import { CHART_FONT } from '@/lib/chart-defaults'
-import { formatCompact, formatDate, formatDateTime, formatNumber } from '@/lib/format'
+import { clock24, formatCompactTick, formatDateTime, formatNumber, tickStep } from '@/lib/format'
 
 Chart.register(
   LineController,
@@ -35,14 +36,16 @@ export interface TimelineSeries {
 /**
  * A line chart over time (x in epoch ms). Colours come from the design
  * tokens and are re-read when the theme flips. Series with very different
- * scales belong in separate charts: there is one y axis.
+ * scales belong in separate charts: there is one y axis. The x axis ticks
+ * fall on round local times, labelled by the span shown (see axisFormat):
+ * times of day up to a day, day and time up to a week, dates beyond.
  */
 const props = withDefaults(
   defineProps<{
     series: TimelineSeries[]
     label: string
     height?: number
-    /** Formats y values (axis and tooltip). Defaults to compact numbers. */
+    /** Formats y values on the axis. Defaults to compact numbers as precise as the ticks need. */
     format?: (value: number) => string
     stepped?: boolean
     fill?: boolean
@@ -58,11 +61,13 @@ function token(name: string): string {
 }
 
 function config(): ChartConfiguration<'line'> {
-  const format = props.format ?? formatCompact
+  const format = props.format
   const grid = token('--chart-grid')
   const muted = token('--text-muted')
   const xs = props.series.flatMap((s) => s.points.map((p) => p.x))
   const span = xs.length ? Math.max(...xs) - Math.min(...xs) : 0
+  const axis = axisFormat(span)
+  const hour12 = !clock24()
   return {
     type: 'line',
     data: {
@@ -99,23 +104,23 @@ function config(): ChartConfiguration<'line'> {
             color: muted,
             maxTicksLimit: 6,
             maxRotation: 0,
-            callback: (value) => formatDate(Number(value)),
+            callback: (value) => axisTick(Number(value), axis, hour12),
           },
-          // Under two days, label ticks with times rather than repeating the date.
-          ...(span < 2 * 86400_000
-            ? {
-                ticks: {
-                  color: muted,
-                  maxTicksLimit: 6,
-                  callback: (v) => formatDateTime(Number(v)),
-                },
-              }
-            : {}),
+          // Round local times (every 15 minutes, 3 hours, day…), as many as fit the width.
+          afterBuildTicks: (scale) => {
+            scale.ticks = axisTicks(scale.min, scale.max, scale.width, axis).map((value) => ({
+              value,
+            }))
+          },
         },
         y: {
           grid: { color: grid },
           border: { display: false },
-          ticks: { color: muted, callback: (value) => format(Number(value)) },
+          ticks: {
+            color: muted,
+            callback: (value, _, ticks) =>
+              format ? format(Number(value)) : formatCompactTick(Number(value), tickStep(ticks)),
+          },
         },
       },
       plugins: {

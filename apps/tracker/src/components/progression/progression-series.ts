@@ -1,7 +1,12 @@
 /**
  * Mora and primogems grouped into periods (hour / day / month / year) for the
  * progression charts: each period's closing value and its change against the
- * period before. Pure: the component calls it through computed().
+ * period before, and a stepped line through the captures. Pure: the
+ * component calls it through computed().
+ *
+ * Short ranges stay detailed: the component fits the grouping to the range
+ * (fitGroupBy: "Per day" over 6h shows hours), and the line keeps every
+ * capture up to a week (pointBucket), never coarser than the bars.
  *
  * Captures come from buildHistory, so a capture that missed the currency
  * packet already carries the previous mora and primogems. Leading captures
@@ -9,6 +14,15 @@
  */
 
 import type { TimelineGroupBy } from '@gdt/shared'
+import {
+  finerBucket,
+  hourTick,
+  pointBucket,
+  rangeStart,
+  type AxisFormat,
+  type ChartRange,
+  type PointBucket,
+} from '@/data/chart-range'
 import { periodStart } from '@/data/materials-history'
 import { currencyMissing, type Capture, type Point } from '@/data/overview'
 import { nextPeriod } from '@/data/progression'
@@ -16,23 +30,7 @@ import { nextPeriod } from '@/data/progression'
 export type CurrencyKey = 'mora' | 'primogem'
 export const CURRENCY_KEYS: readonly CurrencyKey[] = ['mora', 'primogem']
 
-export type ProgressionRange = '7d' | '30d' | '90d' | '1y' | 'all'
-
-export const PROGRESSION_RANGES: { value: ProgressionRange; label: string }[] = [
-  { value: '7d', label: '7d' },
-  { value: '30d', label: '30d' },
-  { value: '90d', label: '90d' },
-  { value: '1y', label: '1y' },
-  { value: 'all', label: 'All' },
-]
-
 const DAY = 86_400_000
-const RANGE_DAYS: Record<Exclude<ProgressionRange, 'all'>, number> = {
-  '7d': 7,
-  '30d': 30,
-  '90d': 90,
-  '1y': 365,
-}
 
 /** Most periods drawn at once (hourly over years would be tens of thousands of bars). */
 export const MAX_PERIODS = 3000
@@ -61,8 +59,12 @@ export interface Period {
 export interface Progression {
   /** Oldest first, every period from the start of the range to the newest capture. */
   periods: Period[]
-  /** Stepped line per figure: the closing capture of each period. */
+  /**
+   * Stepped line per figure from the value held at the range start: every
+   * capture, or the closing capture per `lineBucket`.
+   */
   lines: Record<CurrencyKey, Point[]>
+  lineBucket: PointBucket | TimelineGroupBy
   /** What the first period is measured against. */
   open: Figures
   /** Older periods were dropped to stay within MAX_PERIODS. */
@@ -98,21 +100,51 @@ function dedupe(points: Point[]): Point[] {
 }
 
 /**
+ * Line points from the value held at `x0` through the captures from `index`
+ * on: every capture, or the last one per period of `by`.
+ */
+function linePoints(
+  captures: readonly Capture[],
+  index: number,
+  x0: number,
+  open: Figures,
+  by: PointBucket | TimelineGroupBy,
+): Record<CurrencyKey, Point[]> {
+  const lines: Record<CurrencyKey, Point[]> = {
+    mora: [{ x: x0, y: open.mora }],
+    primogem: [{ x: x0, y: open.primogem }],
+  }
+  let period = Number.NaN
+  for (let i = index; i < captures.length; i++) {
+    const capture = captures[i]!
+    const p = by === 'raw' ? Number.NaN : periodStart(capture.at, by)
+    for (const key of CURRENCY_KEYS) {
+      const point = { x: capture.at, y: capture.summary[key] }
+      // Same period as the capture before: the later one closes it.
+      if (p === period) lines[key][lines[key].length - 1] = point
+      else lines[key].push(point)
+    }
+    period = p
+  }
+  return { mora: dedupe(lines.mora), primogem: dedupe(lines.primogem) }
+}
+
+/**
  * `captures` as buildHistory returns them (oldest first). Ranges end at the
- * newest capture rather than today, like the overview's history, and snap to
- * whole periods.
+ * newest capture rather than now, like the overview's history, and snap to
+ * whole periods of `groupBy`.
  */
 export function buildProgression(
   allCaptures: readonly Capture[],
   groupBy: TimelineGroupBy,
-  range: ProgressionRange,
+  range: ChartRange,
 ): Progression | null {
   const captures = allCaptures.filter((c) => !currencyMissing(c.summary))
   const first = captures[0]
   const last = captures[captures.length - 1]
   if (!first || !last) return null
 
-  const wanted = range === 'all' ? first.at : Math.max(first.at, last.at - RANGE_DAYS[range] * DAY)
+  const wanted = Math.max(first.at, rangeStart(range, last.at))
   const bounded = Math.max(wanted, last.at - MAX_PERIODS * LONGEST[groupBy])
   const lastStart = periodStart(last.at, groupBy)
   let starts: number[] = []
@@ -127,11 +159,9 @@ export function buildProgression(
   let j = lowerBound(captures, from)
   const baseline = j > 0 ? captures[j - 1]! : null
   const open = figures(baseline ?? first)
-
-  const raw: Record<CurrencyKey, Point[]> = {
-    mora: [{ x: baseline ? from : first.at, y: open.mora }],
-    primogem: [{ x: baseline ? from : first.at, y: open.primogem }],
-  }
+  const x0 = baseline ? from : first.at
+  const lineBucket = finerBucket(pointBucket(last.at - x0), groupBy)
+  const lines = linePoints(captures, j, x0, open, lineBucket)
 
   const periods: Period[] = []
   let previous = open
@@ -145,10 +175,6 @@ export function buildProgression(
       j++
     }
     const close = closing ? figures(closing) : previous
-    if (closing) {
-      raw.mora.push({ x: closing.at, y: close.mora })
-      raw.primogem.push({ x: closing.at, y: close.primogem })
-    }
     periods.push({
       start,
       captures: count,
@@ -158,12 +184,7 @@ export function buildProgression(
     previous = close
   })
 
-  return {
-    periods,
-    lines: { mora: dedupe(raw.mora), primogem: dedupe(raw.primogem) },
-    open,
-    truncated,
-  }
+  return { periods, lines, lineBucket, open, truncated }
 }
 
 export interface PeriodTotals {
@@ -188,7 +209,6 @@ export function periodTotals(progression: Progression, key: CurrencyKey): Period
 }
 
 interface PeriodFormats {
-  hourTick: Intl.DateTimeFormat
   dayTick: Intl.DateTimeFormat
   monthTick: Intl.DateTimeFormat
   hour: Intl.DateTimeFormat
@@ -206,7 +226,6 @@ function formats(hour12: boolean): PeriodFormats {
     const make = (options: Intl.DateTimeFormatOptions) =>
       new Intl.DateTimeFormat(undefined, options)
     f = {
-      hourTick: make({ month: 'short', day: 'numeric', hour: 'numeric', hour12 }),
       dayTick: make({ month: 'short', day: 'numeric' }),
       monthTick: make({ month: 'short', year: 'numeric' }),
       hour: make({ hour: 'numeric', minute: '2-digit', hour12 }),
@@ -219,12 +238,20 @@ function formats(hour12: boolean): PeriodFormats {
   return f
 }
 
-/** Short axis label for a period start: "Jul 6, 3 PM", "Jul 6", "Jul 2026", "2026". */
-export function periodTick(start: number, groupBy: TimelineGroupBy, hour12: boolean): string {
+/**
+ * Short axis label for a period start: "Jul 6, 3 PM" ("3:00 PM" when the
+ * bars span a day, see axisFormat), "Jul 6", "Jul 2026", "2026".
+ */
+export function periodTick(
+  start: number,
+  groupBy: TimelineGroupBy,
+  hour12: boolean,
+  axis: AxisFormat = 'date',
+): string {
   const f = formats(hour12)
   if (groupBy === 'year') return String(new Date(start).getFullYear())
   if (groupBy === 'month') return f.monthTick.format(start)
-  if (groupBy === 'hour') return f.hourTick.format(start)
+  if (groupBy === 'hour') return hourTick(start, axis, hour12)
   return f.dayTick.format(start)
 }
 
