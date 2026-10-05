@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Pin, PinOff } from 'lucide-vue-next'
+import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
-import { MAX_SERIES, RANGE_OPTIONS } from '@/components/materials/use-materials-graph'
+import { MAX_SERIES } from '@/components/materials/use-materials-graph'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
-import UiSegmented from '@/components/ui/UiSegmented.vue'
+import { formatRangeEdge, formatWindow, type ChartRange } from '@/data/chart-range'
 import type { MaterialsHistory } from '@/data/materials'
-import { formatCompact, formatDate, formatNumber } from '@/lib/format'
+import { clock24, formatCompact, formatDate, formatNumber } from '@/lib/format'
 import DeltaText from './DeltaText.vue'
 import MaterialIcon from './MaterialIcon.vue'
 import type { MaterialItem } from './material-items'
@@ -17,6 +18,7 @@ import {
   countAt,
   firstSeen,
   flowBetween,
+  frameStart,
   PERIOD_OPTIONS,
   rangeFrame,
   referenceFor,
@@ -32,7 +34,7 @@ const props = defineProps<{
   canTrack: boolean
 }>()
 const emit = defineEmits<{ close: []; toggleTrack: [key: string] }>()
-const range = defineModel<number>('range', { required: true })
+const range = defineModel<ChartRange>('range', { required: true })
 
 const last = computed(() => props.history.times.length - 1)
 const series = computed(() => (props.item ? props.history.series.get(props.item.key) : undefined))
@@ -63,17 +65,20 @@ const chart = computed<TimelineSeries[]>(() =>
       ]
     : [],
 )
-const rangeStart = computed(() => {
-  const f = frame.value
-  return f.carryIn >= 0 ? f.from : (props.history.times[f.baseline] ?? 0)
-})
+const rangeStart = computed(() => frameStart(props.history, frame.value))
+/** "since Oct 5, 2026, 2:10 PM" (the date alone over a week). */
+const sinceStart = computed(
+  () =>
+    `since ${formatRangeEdge(rangeStart.value, frame.value.end - rangeStart.value, !clock24())}`,
+)
+const rangeDetail = computed(() => formatWindow(rangeStart.value, frame.value.end, !clock24()))
 
 const stats = computed(() => {
   const item = props.item
   if (!item) return []
   const flow = flowBetween(series.value, frame.value.baseline, last.value)
   const since = firstSeen(props.history, item.key)
-  const inRange = `since ${formatDate(rangeStart.value)}`
+  const inRange = sinceStart.value
   const signed = (value: number, sign: string, format: (n: number) => string) =>
     value ? `${sign}${format(value)}` : '0'
   return [
@@ -159,11 +164,11 @@ const kind = computed(() => {
 
       <section class="flex flex-col gap-3" aria-label="History">
         <div class="flex justify-end">
-          <UiSegmented v-model="range" :options="RANGE_OPTIONS" label="Chart range" />
+          <ChartRangeSelect v-model="range" :detail="rangeDetail" />
         </div>
         <TimelineChart
           :series="chart"
-          :label="`${item.name} over time, since ${formatDate(rangeStart)}`"
+          :label="`${item.name} over time, ${sinceStart}`"
           :height="220"
           stepped
           fill

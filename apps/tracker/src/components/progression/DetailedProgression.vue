@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import type { TimelineGroupBy } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
+import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
+import { useChartRange } from '@/components/charts/use-chart-range'
 import ChangeValue from '@/components/overview/ChangeValue.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
-import UiSegmented from '@/components/ui/UiSegmented.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import { axisFormat, fitGroupBy, formatWindow, groupFits } from '@/data/chart-range'
 import type { Capture } from '@/data/overview'
-import { GROUP_BY_OPTIONS } from '@/data/progression'
-import { clock24, formatDate, formatNumber } from '@/lib/format'
+import { GROUP_BY_OPTIONS, nextPeriod } from '@/data/progression'
+import { clock24, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import type { ChangeBar } from './ChangeBarChart.vue'
 import ChangeBarChart from './ChangeBarChart.vue'
@@ -18,15 +21,15 @@ import {
   periodTick,
   periodTitle,
   periodTotals,
-  PROGRESSION_RANGES,
   type CurrencyKey,
-  type ProgressionRange,
 } from './progression-series'
 
 /**
- * Mora and primogems per period: the closing value as a stepped line and the
- * gain or loss of each period as columns. Group-by and range are remembered
- * on this device. `captures` is undefined while the history loads.
+ * Mora and primogems per period: the value as a stepped line and the gain or
+ * loss of each period as columns. Group-by and range are remembered on this
+ * device. A grouping too coarse for the range is greyed out and the next
+ * finer one shown (6h is per hour), the choice coming back with a longer
+ * range. `captures` is undefined while the history loads.
  */
 const props = defineProps<{ captures: Capture[] | undefined }>()
 
@@ -42,17 +45,26 @@ const PER: Record<TimelineGroupBy, { label: string; one: string; many: string }>
   year: { label: 'Per year', one: 'year', many: 'years' },
 }
 
-function stored<T extends string>(key: string, options: { value: T }[], fallback: T): T {
-  const value = readStorage(key)
-  return options.some((o) => o.value === value) ? (value as T) : fallback
-}
-
 const GROUP_KEY = 'progression-group-by'
-const RANGE_KEY = 'progression-range'
-const groupBy = ref<TimelineGroupBy>(stored(GROUP_KEY, GROUP_BY_OPTIONS, 'day'))
-const range = ref<ProgressionRange>(stored(RANGE_KEY, PROGRESSION_RANGES, '90d'))
-watch(groupBy, (value) => writeStorage(GROUP_KEY, value))
-watch(range, (value) => writeStorage(RANGE_KEY, value))
+const storedGroup = readStorage(GROUP_KEY)
+const chosenGroup = ref<TimelineGroupBy>(
+  GROUP_BY_OPTIONS.find((o) => o.value === storedGroup)?.value ?? 'day',
+)
+watch(chosenGroup, (value) => writeStorage(GROUP_KEY, value))
+const range = useChartRange('progression-range')
+
+/** The grouping in use: the choice, or a finer one when the range is too short for it. */
+const groupBy = computed<TimelineGroupBy>({
+  get: () => fitGroupBy(range.value, chosenGroup.value),
+  set: (value) => (chosenGroup.value = value),
+})
+const groupOptions = computed<SegmentedOption<TimelineGroupBy>[]>(() =>
+  GROUP_BY_OPTIONS.map((option) =>
+    groupFits(range.value, option.value)
+      ? option
+      : { ...option, disabled: true, title: 'Longer than the range' },
+  ),
+)
 
 const progression = computed(() =>
   props.captures ? buildProgression(props.captures, groupBy.value, range.value) : null,
@@ -76,8 +88,12 @@ const periodLabels = computed(() => {
   const p = progression.value
   if (!p) return []
   const hour12 = !clock24()
+  const first = p.periods[0]
+  const last = p.periods[p.periods.length - 1]
+  const axis =
+    first && last ? axisFormat(nextPeriod(last.start, groupBy.value) - first.start) : 'date'
   return p.periods.map((period) => ({
-    tick: periodTick(period.start, groupBy.value, hour12),
+    tick: periodTick(period.start, groupBy.value, hour12, axis),
     title: periodTitle(period.start, groupBy.value, hour12),
     captures:
       period.captures === 0
@@ -86,11 +102,12 @@ const periodLabels = computed(() => {
   }))
 })
 
+/** The window both charts cover, for the range tooltip and the charts' accessible names. */
 const span = computed(() => {
   const p = progression.value
-  const first = p?.periods[0]
-  const lastLine = p?.lines.mora[p.lines.mora.length - 1]
-  return first && lastLine ? `${formatDate(first.start)} – ${formatDate(lastLine.x)}` : ''
+  const first = p?.lines.mora[0]
+  const last = p?.lines.mora[p.lines.mora.length - 1]
+  return first && last ? formatWindow(first.x, last.x, !clock24()) : ''
 })
 
 const per = computed(() => PER[groupBy.value])
@@ -136,8 +153,8 @@ const charts = computed<ChartView[]>(() => {
 <template>
   <UiPanel title="Detailed progression">
     <template #actions>
-      <UiSegmented v-model="groupBy" :options="GROUP_BY_OPTIONS" label="Group by" />
-      <UiSegmented v-model="range" :options="PROGRESSION_RANGES" label="Time range" />
+      <UiSegmented v-model="groupBy" :options="groupOptions" label="Group by" />
+      <ChartRangeSelect v-model="range" :detail="span || undefined" />
     </template>
 
     <div v-if="!captures" class="grid gap-8 lg:grid-cols-2" role="status">

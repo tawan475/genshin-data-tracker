@@ -1,6 +1,7 @@
 /**
  * Changes and flows over a material's history (see @/data/materials-history
- * for the change-point series these walk). Pure functions.
+ * for the change-point series these walk). Pure functions; they import that
+ * module rather than @/data/materials (which loads data) so tests can run them.
  *
  * Some captures miss part of the inventory (a key absent from a snapshot
  * counts 0), so a series can drop to 0 for one snapshot and come straight
@@ -9,15 +10,14 @@
  * functions read such a dip as the count it interrupts.
  */
 
-import { ALL_DAYS } from '@/components/materials/use-materials-graph'
+import { pointBucket, rangeStart, type ChartRange } from '@/data/chart-range'
 import {
   chartFrame,
   indexAtOrBefore,
   type ChartFrame,
-  type GroupBy,
   type MaterialSeries,
   type MaterialsHistory,
-} from '@/data/materials'
+} from '@/data/materials-history'
 
 const DAY = 86_400_000
 
@@ -168,15 +168,20 @@ export function firstSeen(history: MaterialsHistory, key: string): number | null
 }
 
 /**
- * The snapshots a chart over the last `days` plots (ending at the newest
- * capture, not today). Short ranges keep every snapshot; long ones keep the
- * last one per day so a year stays light.
+ * The snapshots a chart over `range` plots, ending at the newest capture
+ * (its last sighting), not now. The count held at the range start is carried
+ * in, so a short range with nothing new draws the last known count as a flat
+ * line. Up to a week every snapshot is kept; longer spans keep the last per
+ * hour, then per day, so a year stays light (see pointBucket).
  */
-export function rangeFrame(history: MaterialsHistory, days: number): ChartFrame {
+export function rangeFrame(history: MaterialsHistory, range: ChartRange): ChartFrame {
   const end = Math.max(history.lastSeenAt, history.times.at(-1) ?? 0)
-  const from = days >= ALL_DAYS ? -Infinity : end - days * DAY
+  const from = rangeStart(range, end)
   const first = history.times[0] ?? end
-  const span = end - Math.max(first, from)
-  const groupBy: GroupBy = span <= 90 * DAY ? 'hour' : 'day'
-  return chartFrame(history, from, groupBy)
+  return chartFrame(history, from, pointBucket(end - Math.max(first, from)))
+}
+
+/** Where the frame's line starts: the range start, or the first snapshot when history is shorter. */
+export function frameStart(history: MaterialsHistory, frame: ChartFrame): number {
+  return frame.carryIn >= 0 ? frame.from : (history.times[frame.baseline] ?? 0)
 }

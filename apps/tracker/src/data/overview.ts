@@ -6,8 +6,7 @@
 
 import type { AccountResponse, GenshinServer, SnapshotResponse, SnapshotSummary } from '@gdt/shared'
 import { formatNumber } from '@/lib/format'
-
-const DAY = 86_400_000
+import { rangeStart, type ChartRange } from './chart-range'
 
 // ------------------------------------------------------------------ accounts
 
@@ -173,17 +172,6 @@ export function buildHistory(snapshots: readonly SnapshotResponse[]): History {
   return { captures, days }
 }
 
-export type HistoryRange = '30d' | '90d' | '1y' | 'all'
-
-export const HISTORY_RANGES: { value: HistoryRange; label: string }[] = [
-  { value: '30d', label: '30d' },
-  { value: '90d', label: '90d' },
-  { value: '1y', label: '1y' },
-  { value: 'all', label: 'All' },
-]
-
-const RANGE_DAYS: Record<Exclude<HistoryRange, 'all'>, number> = { '30d': 30, '90d': 90, '1y': 365 }
-
 /** First index whose `at` is >= `from` (captures are sorted by `at`). */
 function lowerBound(captures: readonly Capture[], from: number): number {
   let lo = 0
@@ -196,15 +184,41 @@ function lowerBound(captures: readonly Capture[], from: number): number {
   return lo
 }
 
+export interface HistoryWindow {
+  /**
+   * Oldest first: the value held when the window opens (a capture from
+   * before it, moved to `from`), then every capture inside it.
+   */
+  captures: Capture[]
+  /** Captures inside the window; the carried-in value is not one. */
+  count: number
+  /** Where the window starts: the range start, or the first capture when history is shorter. */
+  from: number
+  /** The newest capture. */
+  to: number
+}
+
 /**
- * The captures inside a range. Ranges end at the newest capture rather than
- * today, so an account that has not been captured for a while still shows
- * its last stretch of history.
+ * The captures a range shows. Ranges end at the newest capture rather than
+ * now (see chart-range.ts), so an account that has not been captured for a
+ * while still shows its last stretch of history, and the value held at the
+ * range start is carried in: an hour with one capture still draws a line,
+ * and the change in range is measured from what was held when it opened.
  */
-export function capturesInRange(captures: readonly Capture[], range: HistoryRange): Capture[] {
+export function historyWindow(captures: readonly Capture[], range: ChartRange): HistoryWindow {
   const last = captures[captures.length - 1]
-  if (!last || range === 'all') return captures.slice()
-  return captures.slice(lowerBound(captures, last.at - RANGE_DAYS[range] * DAY))
+  if (!last) return { captures: [], count: 0, from: 0, to: 0 }
+  const start = rangeStart(range, last.at)
+  const index = lowerBound(captures, start)
+  const inside = captures.slice(index)
+  const before = index > 0 ? captures[index - 1]! : null
+  const carry = before && inside[0]!.at > start
+  return {
+    captures: carry ? [{ at: start, summary: before.summary }, ...inside] : inside,
+    count: inside.length,
+    from: carry ? start : inside[0]!.at,
+    to: last.at,
+  }
 }
 
 export interface Point {

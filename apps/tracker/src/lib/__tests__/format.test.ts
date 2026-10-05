@@ -1,12 +1,15 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   formatBetween,
+  formatCompactTick,
   formatDate,
   formatMonthDay,
+  formatSignedTick,
   formatTime,
   nowrap,
   sameDay,
   setClockPreference,
+  tickStep,
 } from '../format'
 
 // The runtime's own locale and time zone apply, so expectations are built
@@ -51,5 +54,26 @@ describe('date ranges', () => {
     setClockPreference(true)
     expect(formatBetween(from, to)).toBe(range())
     expect(formatBetween(from, to)).toMatch(/16.05/)
+  })
+})
+
+describe('axis ticks', () => {
+  it('prints as many decimals as the step between ticks needs', () => {
+    // Mora over an hour: 50K steps would all read 9.1M / 9.2M with one decimal.
+    expect([9_100_000, 9_150_000, 9_200_000].map((v) => formatCompactTick(v, 50_000))).toEqual([
+      '9.1M',
+      '9.15M',
+      '9.2M',
+    ])
+    expect(formatCompactTick(9_125_000, 25_000)).toBe('9.125M')
+    expect(formatCompactTick(9_000_000, 500_000)).toBe('9M')
+    expect(formatCompactTick(32_500, 500)).toBe('32.5K')
+    // Small values stay exact; no step falls back to one decimal.
+    expect(formatCompactTick(9_500, 50)).toBe('9,500')
+    expect(formatCompactTick(9_150_000, 0)).toBe('9.2M')
+    expect(formatSignedTick(-1_250_000, 250_000)).toBe('−1.25M')
+    expect(formatSignedTick(150_000, 50_000)).toBe('+150K')
+    expect(tickStep([{ value: 10 }, { value: 35 }])).toBe(25)
+    expect(tickStep([{ value: 10 }])).toBe(0)
   })
 })

@@ -2,17 +2,19 @@
 import type { TimelineGroupBy } from '@gdt/shared'
 import { computed, ref } from 'vue'
 import { X } from 'lucide-vue-next'
+import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import type { ChartRange } from '@/data/chart-range'
 import { changeOver, seriesPoints, type ChartFrame, type MaterialsHistory } from '@/data/materials'
 import { formatDate, formatNumber, formatSigned } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { materialName } from '@/utils/materials'
-import { ALL_DAYS, GROUP_OPTIONS, RANGE_OPTIONS } from './use-materials-graph'
+import { GROUP_OPTIONS } from './use-materials-graph'
 
 const props = defineProps<{
   history: MaterialsHistory
@@ -23,7 +25,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ remove: [key: string]; reset: [] }>()
 const groupBy = defineModel<TimelineGroupBy>('groupBy', { required: true })
-const range = defineModel<number>('range', { required: true })
+const range = defineModel<ChartRange>('range', { required: true })
 
 type Layout = 'combined' | 'split'
 const LAYOUT_KEY = 'materials:chart-layout'
@@ -74,11 +76,7 @@ const combined = computed<TimelineSeries[]>(() =>
   rows.value.map((r) => ({ label: r.name, color: r.color, points: r.points })),
 )
 
-const rangeLabel = computed(() =>
-  range.value === ALL_DAYS
-    ? 'all history'
-    : `last ${RANGE_OPTIONS.find((o) => o.value === range.value)?.label ?? `${range.value}d`}`,
-)
+const rangeLabel = computed(() => (range.value === 'all' ? 'all history' : `last ${range.value}`))
 const chartLabel = (names: string[]) =>
   `${names.join(', ')}: count over ${rangeLabel.value}, last value per ${groupBy.value}`
 
@@ -101,7 +99,7 @@ const deltaClass = (value: number) =>
     </template>
     <template #actions>
       <UiSegmented v-model="groupBy" :options="GROUP_OPTIONS" label="Group by" />
-      <UiSegmented v-model="range" :options="RANGE_OPTIONS" label="Range" />
+      <ChartRangeSelect v-model="range" />
     </template>
 
     <div v-if="!ready" class="flex flex-col gap-4" aria-busy="true">

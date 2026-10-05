@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Plus, X } from 'lucide-vue-next'
+import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
-import { MAX_SERIES, RANGE_OPTIONS } from '@/components/materials/use-materials-graph'
+import { MAX_SERIES } from '@/components/materials/use-materials-graph'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
-import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import { formatRangeEdge, formatWindow, type ChartRange } from '@/data/chart-range'
 import type { ChartFrame, MaterialsHistory } from '@/data/materials'
-import { formatDate, formatNumber } from '@/lib/format'
+import { clock24, formatNumber } from '@/lib/format'
 import { materialName } from '@/utils/materials'
 import DeltaText from './DeltaText.vue'
 import MaterialIcon from './MaterialIcon.vue'
-import { chartPoints, frameChange } from './material-stats'
+import { chartPoints, frameChange, frameStart } from './material-stats'
 
 /**
  * Tracked materials as small multiples: one stepped chart each, so Mora and
@@ -26,13 +27,13 @@ const props = defineProps<{
   icon: (key: string) => string
 }>()
 const emit = defineEmits<{ open: [key: string]; remove: [key: string]; add: [] }>()
-const range = defineModel<number>('range', { required: true })
+const range = defineModel<ChartRange>('range', { required: true })
 
-const rangeHint = computed(() => {
-  const { frame, history } = props
-  const from = frame.carryIn >= 0 ? frame.from : (history.times[frame.baseline] ?? 0)
-  return `since ${formatDate(from)}`
-})
+const from = computed(() => frameStart(props.history, props.frame))
+const rangeHint = computed(
+  () => `since ${formatRangeEdge(from.value, props.frame.end - from.value, !clock24())}`,
+)
+const rangeDetail = computed(() => formatWindow(from.value, props.frame.end, !clock24()))
 
 const rows = computed(() =>
   props.keys.map((key, index) => {
@@ -66,7 +67,7 @@ const rows = computed(() =>
       </h2>
     </template>
     <template #actions>
-      <UiSegmented v-model="range" :options="RANGE_OPTIONS" label="Chart range" />
+      <ChartRangeSelect v-model="range" :detail="rangeDetail" />
       <UiButton v-if="keys.length > 0 && keys.length < MAX_SERIES" size="sm" @click="emit('add')">
         <Plus class="size-4" aria-hidden="true" />
         Track

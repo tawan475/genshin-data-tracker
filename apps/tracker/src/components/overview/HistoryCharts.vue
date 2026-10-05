@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
+import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
+import { useChartRange } from '@/components/charts/use-chart-range'
 import UiPanel from '@/components/ui/UiPanel.vue'
-import UiSegmented from '@/components/ui/UiSegmented.vue'
-import { formatDate, formatNumber } from '@/lib/format'
-import { readStorage, writeStorage } from '@/lib/storage'
+import { formatWindow } from '@/data/chart-range'
+import { clock24, formatNumber } from '@/lib/format'
 import {
-  capturesInRange,
-  HISTORY_RANGES,
+  historyWindow,
   rangeFigure,
   stepSeries,
   type Capture,
-  type HistoryRange,
   type RangeFigure,
   type SummaryKey,
 } from '@/data/overview'
@@ -20,7 +19,8 @@ import ChangeValue from './ChangeValue.vue'
 /**
  * Mora, primogems, artifacts and unlocked 4★/3★ artifacts over time, one
  * chart per scale. One range control above all four filters every chart the
- * same way.
+ * same way. Every capture is drawn (repeats dropped), so an hour range shows
+ * each capture in it, with the value held when the range opens carried in.
  */
 const props = defineProps<{ captures: Capture[] }>()
 
@@ -67,23 +67,16 @@ const SWATCH: Record<TimelineSeries['color'], string> = {
   6: 'bg-chart-6',
 }
 
-const RANGE_KEY = 'overview-range'
-const stored = readStorage(RANGE_KEY)
-const range = ref<HistoryRange>(
-  HISTORY_RANGES.some((r) => r.value === stored) ? (stored as HistoryRange) : '90d',
-)
-watch(range, (value) => writeStorage(RANGE_KEY, value))
+const range = useChartRange('overview-range')
 
-const inRange = computed(() => capturesInRange(props.captures, range.value))
+const view = computed(() => historyWindow(props.captures, range.value))
 
-/** "182 captures, Jun 20, 2026 – Jul 13, 2026": for the charts' accessible names. */
+/** "182 captures, Jun 20, 2026 – Jul 13, 2026": the range tooltip and the charts' accessible names. */
 const span = computed(() => {
-  const list = inRange.value
-  const first = list[0]
-  const last = list[list.length - 1]
-  if (!first || !last) return 'no captures'
-  const count = `${formatNumber(list.length)} ${list.length === 1 ? 'capture' : 'captures'}`
-  return `${count}, ${formatDate(first.at)} – ${formatDate(last.at)}`
+  const { count, from, to } = view.value
+  if (!count) return 'no captures'
+  const captures = `${formatNumber(count)} ${count === 1 ? 'capture' : 'captures'}`
+  return `${captures}, ${formatWindow(from, to, !clock24())}`
 })
 
 interface ChartView {
@@ -97,7 +90,7 @@ interface ChartView {
 
 // Computed once per data version and range; the template only reads.
 const charts = computed<ChartView[]>(() => {
-  const list = inRange.value
+  const list = view.value.captures
   return CHARTS.map((def) => {
     const figures = def.series.map((s) => {
       const figure = rangeFigure(list, s.key)
@@ -128,7 +121,7 @@ const charts = computed<ChartView[]>(() => {
 <template>
   <UiPanel title="History">
     <template #actions>
-      <UiSegmented v-model="range" :options="HISTORY_RANGES" label="Time range" />
+      <ChartRangeSelect v-model="range" :detail="span" />
     </template>
 
     <div class="grid gap-8 lg:grid-cols-2">
