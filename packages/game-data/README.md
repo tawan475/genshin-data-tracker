@@ -7,8 +7,8 @@ families and domain days), where and how materials are farmed (domains and
 their tiers, weekly bosses, Dream Solvent and Dust of Azoth conversions, ore
 forging, resin items, passives), hand-kept drop rates for the planner's
 estimates, a material index, and the name of every game image the tracker
-shows (the images load from static.nanoka.cc, or from gi-cdn.475.dev for the
-few that host lacks).
+shows (the images load from static.nanoka.cc, or from the tracker's own copy
+for the few that host lacks).
 
 Everything is compiled from the game's own tables in Dimbreath's dump, checked
 in under `data/`, and refreshed by a maintainer once per game patch. The app
@@ -25,7 +25,7 @@ never talks to the dump.
 | `data/planner.json`           | Characters (with the talent C3/C5 raise), weapons, ascension and talent tables (AR per phase, ascension per talent level), EXP curves, EXP items, planner materials, material families, domains and tiers, weekly bosses, conversions, forging, resin, passives | 234 KB / 42 KB    |
 | `data/materials.json`         | Every GOOD material key the tracker can show -> item id and icon (furnishing blueprints included)                                                                                                                                                               | 326 KB / 102 KB   |
 | `data/images.json`            | Image names per character (portrait, namecard, normal attack, skill, burst, C1-C6; the Traveler's portrait by twin), per weapon (icon, ascended), per artifact set (each slot's piece) and for a few items                                                      | 65 KB / 12 KB     |
-| `data/missing-images.json`    | The names static.nanoka.cc lacked at the last `images` check, and which of them load from gi-cdn.475.dev (`hosted`); the app shows initials for the rest                                                                                                        | 37 KB / 5 KB      |
+| `data/missing-images.json`    | The names static.nanoka.cc lacked at the last `images` check, and which of them the tracker serves itself (`hosted`); the app shows initials for the rest                                                                                                       | 37 KB / 5 KB      |
 
 Rows are tuples; each file names its columns. `src/format.ts` documents every
 shape. The app uses the typed loaders in `src/index.ts`, which dynamic-import
@@ -61,9 +61,8 @@ all synchronous over `loadPlanner()` data and tested in Node:
 `@gdt/game-data/images` resolves image names synchronously (`characterImages`,
 `weaponImages`, `artifactImage`, `itemImage`, `travelerIcon`), and
 `@gdt/game-data/image-url` turns a name into its URL (`imageUrlOf`, with
-`loadImageCoverage()`): `https://static.nanoka.cc/assets/gi/<name>.webp`,
-`https://gi-cdn.475.dev/ui/<name>.webp` for a `hosted` name that host lacks, or
-'' (initials).
+`loadImageCoverage()`): `https://static.nanoka.cc/assets/gi/<name>.webp`, the
+tracker's own `/gi/<name>.webp` for a name that host lacks, or '' (initials).
 The app does this in `apps/tracker/src/lib/assets.ts`.
 
 ## Refreshing after a game patch
@@ -81,14 +80,12 @@ pnpm --filter @gdt/game-data build --ref latest
 # 3. Update the private gi-cdn checkout from the client (game closed; see its README).
 (cd ../gi-cdn && pnpm run update)
 
-# 4. Check the image names on static.nanoka.cc (only new and missing ones are asked);
-#    the missing ones gi-cdn has built become `hosted` (see Images).
+# 4. Check the image names on static.nanoka.cc (only new and missing ones are asked)
+#    and copy the missing ones from gi-cdn's build into the tracker (see Images).
 pnpm --filter @gdt/game-data images --gi-cdn-dir ../gi-cdn
 
-# 5. Publish that list on gi-cdn and deploy it, before the tracker.
-(cd ../gi-cdn && pnpm run stage --from ../genshin-data-tracker/packages/game-data/data/missing-images.json && pnpm run deploy)
-
-# 6. Test, commit data/ and overrides/ together, then deploy the tracker.
+# 5. Test, then commit data/ and overrides/ together (apps/tracker/public/gi/ is
+#    gitignored), and deploy the tracker from this checkout.
 pnpm test
 ```
 
@@ -143,12 +140,16 @@ The game data lacks a few things, and a few entries need a human decision.
 Game images come from `https://static.nanoka.cc/assets/gi/<name>.webp` (WebP,
 CORS open, behind Cloudflare), and every name comes from the dump: the
 material index, the achievement categories and `data/images.json` (see
-`scripts/compile/images.ts` for where each name is read). The few names that
-host lacks load from `https://gi-cdn.475.dev/ui/<name>.webp` when gi-cdn has
-them: native-size WebPs extracted from the game client by the private
-`gi-cdn` repo (a sibling checkout), which publishes only this package's
-`hosted` list and serves it only to the tracker's pages (by `Origin` or
-`Referer`). No image is kept in this repo.
+`scripts/compile/images.ts` for where each name is read). For the few names
+that host lacks, the tracker serves its own static copy from
+`apps/tracker/public/gi/<name>.webp`, copied from the private `gi-cdn` repo's
+local build (native-size WebPs extracted from the game client, a sibling
+checkout). That folder is **gitignored**: the art is the game's and this repo
+is public, so the files exist only in a checkout that ran the copy and ship
+only with `pnpm run deploy` from it. A deploy from a clean clone lacks them:
+`/gi/<name>.webp` then answers a 404 (the Worker's) or the SPA page, never
+an image, so the image components show initials on error and the service
+worker, which keeps only image responses, caches nothing for it.
 
 `pnpm --filter @gdt/game-data images` sends one HEAD request per name
 (`gdt-game-data` User-Agent, 4 at a time, backing off on errors), caches the
@@ -157,36 +158,34 @@ names found in `.cache/images/`, and writes the ones the host lacks to
 With `--gi-cdn-dir <gi-cdn checkout>` (relative to where pnpm runs), each
 missing name the app can show (everything but TCG card art, which no player
 holds as an item) that gi-cdn has built (`public/ui/<name>.webp` there) is
-listed in `hosted`; without it, the previous `hosted` names that are still
-missing are kept. A name the host now serves leaves the list. Then it asks
-gi-cdn.475.dev for each hosted name and warns (never fails) about any it
-doesn't serve yet. The report groups the missing names by kind, lists the
-ones that stay initials, and names any currency, resin or planner material
-without an icon. Run it after every `build`: a test fails while the build has
-names it never checked. When `hosted` changes, stage and deploy gi-cdn
-(`pnpm run stage --from <this package>/data/missing-images.json`, then
-`pnpm run deploy` there) before the tracker; until then those icons 404 and
-show initials.
+copied as is to `apps/tracker/public/gi/` and listed in `hosted`. Without it,
+the previous `hosted` names that are still missing are kept, whether or not
+their files are here (the report says how many are absent). A copy whose name
+is no longer hosted (the host serves it now, or no data names it) is
+deleted. The report groups the missing names by kind, lists the ones that
+stay initials, and names any currency, resin or planner material without an
+icon. Run it after every `build`: a test fails while the build has names it
+never checked, or, in a checkout that has the folder, while `hosted` and the
+folder disagree (a clean clone skips that check).
 
 Names are looked up exactly as the game writes them, typos included: the
-game's own `Ul_Itemlcon_121565` (lowercase L for I) is on gi-cdn under that
+game's own `Ul_Itemlcon_121565` (lowercase L for I) is hosted under that
 name.
 
-Known gaps (7.1): 186 names the app can show are missing on the host; 87 load
-from gi-cdn (936 KB), and 99 are in neither the host nor the client (85 item
+Known gaps (7.1): 186 names the app can show are missing on the host; 87 are
+hosted (936 KB), and 99 are in neither the host nor the client (85 item
 icons, mostly old event, quest and placeholder items; 8 weapon and 6 artifact
 piece icons of things the game never released), so the app shows initials
-for them. The 623 TCG card pictures the host lacks are not on gi-cdn. Bursts
-use the dump's own `skillIcon` (64 px); the `_HD` variant other tools use is
-the same art at 128 px, which the host lacks for 17 newer characters.
+for them. The 623 TCG card pictures the host lacks are not hosted. Bursts use
+the dump's own `skillIcon` (64 px); the `_HD` variant other tools use is the
+same art at 128 px, which the host lacks for 17 newer characters.
 
-If the host goes away, any CDN with the same `<name>.webp` layout works
-(gi-cdn's local build has every name the client has; it would have to publish
-them): change `IMAGE_BASE` in
+If the host goes away, any CDN or a self-hosted copy with the same
+`<name>.webp` layout works (gi-cdn's local build has every name the client
+has): change `IMAGE_BASE` in
 `apps/tracker/src/lib/assets.ts`, `IMAGE_HOST` here
 (`scripts/lib/image-names.ts`) and in `apps/tracker/src/pwa/sw-template.js`,
-and the preconnect in `apps/tracker/index.html`. gi-cdn's address is
-`GI_CDN_BASE` / `GI_CDN_HOST` / `IMAGE_HOSTS` in the same three files.
+and the preconnect in `apps/tracker/index.html`.
 
 ## Tests
 
@@ -201,9 +200,11 @@ and the preconnect in `apps/tracker/index.html`. gi-cdn's address is
 - every image name equals Genshin Optimizer's asset table where GO names it
   (`test/fixtures/go-assets.json`, 1,971 names: portraits, namecards, skills,
   bursts, constellations, weapons, artifact pieces), and
-  `data/missing-images.json` was refreshed after the last build, and
-  `hosted` holds only missing names the app shows; URLs resolve to the host,
-  gi-cdn or initials, and a made-up bag has an icon for every item;
+  `data/missing-images.json` was refreshed after the last build, `hosted`
+  holds only missing names the app shows and, where the gitignored
+  `apps/tracker/public/gi/` exists, has a WebP there for each name and nothing
+  else; URLs resolve to the host, our copy or initials, and a made-up bag has
+  an icon for every item;
 - the build's own checks (field presence, version precedence, append-only,
   key choice) on small made-up inputs.
 
@@ -235,6 +236,6 @@ Game data, text and images © HoYoverse. The data comes from Dimbreath's dump
 Achievement versions were seeded from stardb.gg. Drop rates come from the
 Genshin Impact Wiki (genshin-impact.fandom.com, CC BY-SA), each cited by page
 revision in `overrides/drops.json`. Images are loaded from static.nanoka.cc
-(Hakushin's image host), the few it lacks from gi-cdn.475.dev (our own
-extraction from the game client); their names come from the dump. Genshin Optimizer
+(Hakushin's image host), the few it lacks from the tracker's own copies taken
+from the game client (not in this repo); their names come from the dump. Genshin Optimizer
 (MIT) is used only as a test oracle for costs and image names.

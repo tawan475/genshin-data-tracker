@@ -559,7 +559,7 @@ export const loadMaterialIndex = once(async (): Promise<MaterialIndex> => {
 /**
  * What `pnpm --filter @gdt/game-data images` found at its last check
  * (data/missing-images.json): the names static.nanoka.cc did not serve, and
- * which of them gi-cdn.475.dev serves. Resolve URLs with
+ * which of them the tracker serves itself. Resolve URLs with
  * `imageUrlOf` (`@gdt/game-data/image-url`).
  */
 export const loadImageCoverage = once(async (): Promise<ImageCoverage> => {

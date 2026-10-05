@@ -1,48 +1,50 @@
 #!/usr/bin/env node
 /**
  * Checks which game images static.nanoka.cc serves, the tracker's image
- * host, and records the ones it lacks. Of those, the ones gi-cdn.475.dev has
- * (built from the game client by the private `gi-cdn` repo) load from there;
- * the app shows initials for the rest instead of asking.
+ * host, and records the ones it lacks. For those, the tracker serves its own
+ * copy when the local gi-cdn build (a client extraction) has the picture; the
+ * app shows initials for the rest instead of asking.
  *
  *   pnpm --filter @gdt/game-data images                           # check new names and the ones missing last time
  *   pnpm --filter @gdt/game-data images --all                     # check every name again
- *   pnpm --filter @gdt/game-data images --gi-cdn-dir ../gi-cdn    # also pick what gi-cdn serves, from its build
+ *   pnpm --filter @gdt/game-data images --gi-cdn-dir ../gi-cdn    # also copy what the host lacks from gi-cdn's build
  *
  * The names come from our data only (scripts/lib/image-names.ts): run this
  * after every `build`. One HEAD request per name with a gdt-game-data
  * User-Agent, 4 at a time, backing off on errors; names found are cached in
  * .cache/images/ so a rerun only asks about new and missing ones.
  *
- * gi-cdn: each missing name the app can show (`giCdnEligible`: not TCG card
- * art) that the gi-cdn checkout has built (`<dir>/public/ui/<name>.webp`)
- * becomes `hosted`. gi-cdn then publishes exactly that list (`pnpm run stage
- * --from <this repo>/packages/game-data/data/missing-images.json`, then
- * `pnpm run deploy` there). Without `--gi-cdn-dir` the previous `hosted`
- * names that are still missing are kept. No image enters this repo. Finally
- * the hosted names are asked of gi-cdn.475.dev itself; one it doesn't serve
- * yet is only a warning (deploy gi-cdn before the tracker).
+ * Hosting: each missing name the app can show (`selfHostable`: not TCG card
+ * art) that the gi-cdn checkout has built (`<dir>/public/ui/<name>.webp`,
+ * native-size WebP) is copied to apps/tracker/public/gi/ (served at
+ * /gi/<name>.webp) and listed in `hosted`. That folder is gitignored (the
+ * art is the game's and the repo is public), so the files ship only with a
+ * deploy from a checkout that has them. Without `--gi-cdn-dir` the previous
+ * `hosted` names that are still missing are kept, whether or not their files
+ * are here. Copies of names no longer hosted are deleted.
  *
  * Writes data/missing-images.json (`missing` and `hosted`); nothing is
- * written when a request to static.nanoka.cc failed.
+ * written when a request failed.
  */
 
-import { existsSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  unlinkSync,
+} from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import type { MaterialIndexFile, MissingImagesFile, PlannerFile } from '../src/format.ts'
 import { entryIcon, entryId } from '../src/icons.ts'
 import { CURRENCIES } from './compile/materials.ts'
-import {
-  GI_CDN_HOST,
-  giCdnEligible,
-  IMAGE_HOST,
-  imageNames,
-  nameSetHash,
-} from './lib/image-names.ts'
+import { IMAGE_HOST, imageNames, nameSetHash, selfHostable } from './lib/image-names.ts'
 import { get, HttpError, pool } from './lib/http.ts'
 import { formatJson, readJson, readJsonIfExists, writeIfChanged } from './lib/json.ts'
-import { CACHE_DIR, DATA_DIR } from './lib/paths.ts'
+import { CACHE_DIR, DATA_DIR, HOSTED_DIR } from './lib/paths.ts'
 
 const { values: args } = parseArgs({
   options: {
@@ -56,57 +58,24 @@ if (args.help) {
   console.log(`Usage: pnpm --filter @gdt/game-data images [--all] [--concurrency 4] [--gi-cdn-dir <dir>]
   --all                check every name again, not only new and missing ones
   --gi-cdn-dir <dir>   a gi-cdn checkout with its build in public/ui/ (relative to where
-                       pnpm was run); the missing names it has become \`hosted\``)
+                       pnpm was run); the missing names the app can show that it has are
+                       copied to apps/tracker/public/gi/<name>.webp (gitignored)`)
   process.exit(0)
 }
 
 const OUTPUT = join(DATA_DIR, 'missing-images.json')
 const FOUND = join(CACHE_DIR, 'images', 'found.json')
-/** gi-cdn serves only the tracker's pages (by Origin or Referer), so the check says it is one. */
-const TRACKER_ORIGIN = 'https://genshin-tracker.475.dev'
 
-/**
- * Asks gi-cdn.475.dev for the hosted names (HEAD). Only reports: gi-cdn is
- * deployed from its own repo, possibly after this runs.
- */
-async function checkGiCdn(hosted: readonly string[]): Promise<void> {
-  if (hosted.length === 0) return
-  const ask = (name: string) =>
-    get(`${GI_CDN_HOST}${name}.webp`, {
-      method: 'HEAD',
-      attempts: 2,
-      timeoutMs: 15_000,
-      headers: { origin: TRACKER_ORIGIN },
-    })
-  try {
-    await ask(hosted[0]!)
-  } catch (error) {
-    const reason = error instanceof HttpError ? `HTTP ${error.status}` : (error as Error).message
-    console.log(
-      `\nWarning: ${GI_CDN_HOST} didn't answer (${reason}); not checked. Deploy gi-cdn first.`,
-    )
-    return
+/** Copies `<built>/<name>.webp` to HOSTED_DIR; false when the build doesn't have it. */
+function host(built: string, name: string): boolean {
+  const source = join(built, `${name}.webp`)
+  if (!existsSync(source)) return false
+  const target = join(HOSTED_DIR, `${name}.webp`)
+  // Rewrite only real changes, so file times (and a deploy's upload) stay put.
+  if (!existsSync(target) || !readFileSync(target).equals(readFileSync(source))) {
+    copyFileSync(source, target)
   }
-  const notServed: string[] = []
-  const failed: string[] = []
-  await pool(hosted, Math.max(1, Number(args.concurrency) || 4), async (name) => {
-    try {
-      if (!(await ask(name))) notServed.push(name)
-    } catch (error) {
-      failed.push(
-        `${name} (${error instanceof HttpError ? `HTTP ${error.status}` : (error as Error).message})`,
-      )
-    }
-  })
-  if (!notServed.length && !failed.length) {
-    console.log(`${GI_CDN_HOST} serves all ${hosted.length}.`)
-    return
-  }
-  console.log(
-    `\nWarning: ${GI_CDN_HOST} doesn't serve ${notServed.length + failed.length} of ${hosted.length} yet ` +
-      '(the app shows initials for them until gi-cdn is staged with this list and deployed):',
-  )
-  for (const name of [...notServed.sort(), ...failed.sort()]) console.log(`  ${name}`)
+  return true
 }
 
 async function main(): Promise<number> {
@@ -147,7 +116,7 @@ async function main(): Promise<number> {
     return 1
   }
 
-  // --- what gi-cdn serves of what the host lacks ----------------------------------
+  // --- our own copies of what the host lacks --------------------------------------
   // pnpm runs this from packages/game-data; resolve against where it was called.
   const giCdnDir =
     args['gi-cdn-dir'] && resolve(process.env.INIT_CWD ?? process.cwd(), args['gi-cdn-dir'])
@@ -157,12 +126,25 @@ async function main(): Promise<number> {
     return 1
   }
   const previous = new Set(readJsonIfExists<MissingImagesFile>(OUTPUT)?.hosted ?? [])
-  const eligible = [...missing].filter((name) => giCdnEligible(names.get(name)!)).sort()
+  const hostable = [...missing].filter((name) => selfHostable(names.get(name)!)).sort()
+  if (built) mkdirSync(HOSTED_DIR, { recursive: true })
   const hosted: string[] = []
   const neither: string[] = []
-  for (const name of eligible) {
-    const has = built ? existsSync(join(built, `${name}.webp`)) : previous.has(name)
+  for (const name of hostable) {
+    const has = built ? host(built, name) : previous.has(name)
     ;(has ? hosted : neither).push(name)
+  }
+  const keep = new Set(hosted.map((name) => `${name}.webp`))
+  const removed: string[] = []
+  const present: string[] = []
+  for (const file of existsSync(HOSTED_DIR) ? readdirSync(HOSTED_DIR) : []) {
+    if (!file.endsWith('.webp')) continue
+    if (keep.has(file)) {
+      present.push(file)
+      continue
+    }
+    unlinkSync(join(HOSTED_DIR, file))
+    removed.push(file)
   }
 
   const file: MissingImagesFile = {
@@ -188,14 +170,19 @@ async function main(): Promise<number> {
     console.log(`  ${kind}: ${list.length}  e.g. ${list.slice(0, 3).join(', ')}`)
   }
 
-  const added = hosted.filter((name) => !previous.has(name))
-  const dropped = [...previous].filter((name) => !hosted.includes(name)).sort()
+  const bytes = present.reduce((sum, name) => sum + statSync(join(HOSTED_DIR, name)).size, 0)
   console.log(
-    `\nFrom ${GI_CDN_HOST}: ${hosted.length} of ${eligible.length} missing names the app shows` +
-      (built ? ` (in ${built})` : '; no --gi-cdn-dir, so the previous list was kept'),
+    `\nServed from apps/tracker/public/gi/ (gitignored): ${hosted.length} of ${hostable.length}` +
+      ` missing names the app shows; ${present.length} files here (${Math.round(bytes / 1024)} KB)` +
+      (built ? ` copied from ${built}` : '; no --gi-cdn-dir, so the previous list was kept'),
   )
-  if (added.length) console.log(`  new: ${added.join(', ')}`)
-  if (dropped.length) console.log(`  no longer needed: ${dropped.join(', ')}`)
+  if (removed.length) console.log(`  deleted (no longer hosted): ${removed.join(', ')}`)
+  if (present.length < hosted.length) {
+    console.log(
+      `  ${hosted.length - present.length} hosted names have no file here: a deploy from this` +
+        ' checkout shows initials for them (rerun with --gi-cdn-dir).',
+    )
+  }
   if (neither.length) {
     console.log(`Initials (in neither ${IMAGE_HOST} nor ${built ?? 'the previous list'}):`)
     for (const name of neither) console.log(`  ${name} (${names.get(name)})`)
@@ -219,15 +206,7 @@ async function main(): Promise<number> {
   console.log(
     `\nCurrencies, resin and planner materials without an icon: ${notableMissing.join(', ') || 'none'}`,
   )
-
-  await checkGiCdn(hosted)
-
   console.log(changed ? '\nWrote data/missing-images.json' : '\ndata/missing-images.json unchanged')
-  if (added.length || dropped.length) {
-    console.log(
-      `hosted changed: in gi-cdn, \`pnpm run stage --from ${OUTPUT}\` and \`pnpm run deploy\` before deploying the tracker.`,
-    )
-  }
   return 0
 }
 

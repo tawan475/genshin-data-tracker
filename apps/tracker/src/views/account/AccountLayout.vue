@@ -19,7 +19,7 @@ const account = computed(() => accounts.byId.get(accountId.value))
 // Sections below only render once the account exists, so this is safe.
 provideAccount(computed(() => account.value as AccountResponse))
 
-// Which game images the host lacks and which gi-cdn serves (small): portraits and
+// Which game images the host lacks and which we serve (small): portraits and
 // icons render before it arrives and switch once it does.
 loadGameIcons().catch(() => {})
 

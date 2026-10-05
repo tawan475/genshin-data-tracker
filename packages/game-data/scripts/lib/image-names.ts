@@ -13,16 +13,8 @@ import { entryIcon } from '../../src/icons.ts'
 import { readJson } from './json.ts'
 import { DATA_DIR } from './paths.ts'
 
-/** Where the app loads every image from (`IMAGE_BASE` in `apps/tracker/src/lib/assets.ts`). */
+/** Where the app loads every image from (`apps/tracker/src/lib/assets.ts`). */
 export const IMAGE_HOST = 'https://static.nanoka.cc/assets/gi/'
-
-/**
- * Where the app loads the names IMAGE_HOST lacks (`GI_CDN_BASE` in
- * `apps/tracker/src/lib/assets.ts`): gi-cdn.475.dev, built from the game
- * client by the private `gi-cdn` repo, which publishes only the names in
- * data/missing-images.json `hosted`.
- */
-export const GI_CDN_HOST = 'https://gi-cdn.475.dev/ui/'
 
 /** name -> what shows it (for reports), in a stable order. */
 export function imageNames(): Map<string, string> {
@@ -58,14 +50,14 @@ export function imageNames(): Map<string, string> {
 }
 
 /**
- * Whether a name the image host lacks should come from gi-cdn (`what` as
- * imageNames reports it). Everything the app shows, except TCG card art:
- * card faces and backs are material index entries only because the game
- * files them as items, but they never sit in a player's bag (they unlock in
- * the card collection), so no export holds them. The client has about 2,700
- * of them; leaving them out keeps gi-cdn's deploy small.
+ * Whether the tracker serves its own copy of a name the image host lacks
+ * (`what` as imageNames reports it). Everything the app shows, except TCG
+ * card art: card faces and backs are material index entries only because
+ * the game files them as items, but they never sit in a player's bag (they
+ * unlock in the card collection), so no export holds them. The client has
+ * about 2,700 of them; leaving them out keeps the deploy small.
  */
-export function giCdnEligible(what: string): boolean {
+export function selfHostable(what: string): boolean {
   return !what.startsWith('TCG card art ')
 }
 

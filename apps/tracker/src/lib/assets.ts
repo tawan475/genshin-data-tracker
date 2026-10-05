@@ -1,11 +1,12 @@
 /**
  * Game images. They load from static.nanoka.cc (`<name>.webp`, CORS open,
- * behind Cloudflare), except the names that host lacks: of those, the ones
- * gi-cdn.475.dev serves (`ui/<name>.webp`, from the game client; it answers
- * only this site's pages and service worker) load from there, and the rest
- * return '', so GameIcon shows initials. Both lists come from
- * data/missing-images.json (`pnpm --filter @gdt/game-data images`); the
- * service worker keeps either kind cache-first. The names
+ * behind Cloudflare), except the names that host lacks: of those, the ones a
+ * client extraction has are served from this app's own `/gi/<name>.webp`
+ * (public/gi/, copied from the local gi-cdn build and gitignored; a deploy
+ * without them 404s there, and the image components show initials on error),
+ * and the rest return '', so GameIcon shows initials. Both
+ * lists come from data/missing-images.json (`pnpm --filter @gdt/game-data
+ * images`); the service worker keeps either kind cache-first. The names
  * come only from our own game data (@gdt/game-data, compiled from the
  * game's tables): `images` for characters, weapons, artifacts and a few
  * items, the material index for materials, achievement categories for
@@ -34,22 +35,22 @@ import {
 /** The image host (also in the service worker and index.html's preconnect). */
 export const IMAGE_BASE = 'https://static.nanoka.cc/assets/gi/'
 
-/** The few images the host lacks (also in the service worker). */
-export const GI_CDN_BASE = 'https://gi-cdn.475.dev/ui/'
+/** This app's own copies of images the host lacks (public/gi/, also in the service worker). */
+export const OWN_IMAGE_BASE = '/gi/'
 
 /**
- * What the host lacks and what gi-cdn serves of it; null until
- * loadGameIcons resolves. Reactive, so images rendered before it arrived
- * switch to gi-cdn or to initials.
+ * What the host lacks and what we serve instead; null until loadGameIcons
+ * resolves. Reactive, so images rendered before it arrived switch to our
+ * copy or to initials.
  */
 const coverage = shallowRef<ImageCoverage | null>(null)
 
 /**
- * URL of a game image by name: the host's, gi-cdn's for a name the host
- * lacks, or '' (no name, or no image anywhere).
+ * URL of a game image by name: the host's, ours for a name the host lacks,
+ * or '' (no name, or no image anywhere).
  */
 export function imageUrl(name: string | undefined): string {
-  return imageUrlOf(name, coverage.value, IMAGE_BASE, GI_CDN_BASE)
+  return imageUrlOf(name, coverage.value, IMAGE_BASE, OWN_IMAGE_BASE)
 }
 
 /**
@@ -92,7 +93,7 @@ export function artifactSetIcon(setKey: string): string {
 
 let materialIndex: MaterialIndex | null = null
 
-/** Loads which names the host lacks and which gi-cdn serves (small); AccountLayout starts it. */
+/** Loads which names the host lacks and which we serve (small); AccountLayout starts it. */
 export async function loadGameIcons(): Promise<void> {
   coverage.value ??= await loadImageCoverage()
 }
