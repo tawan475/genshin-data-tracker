@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { loadAchievements, type Achievement, type AchievementTexts } from '../src'
 import {
+  DEFAULT_ACHIEVEMENT_FILTERS,
   NO_ACHIEVEMENT_FILTERS,
   achievementVersions,
   captureAchievements,
@@ -340,10 +341,19 @@ describe('filters', () => {
     expect(countAchievements(entries, 'missing', s)).toBe(3)
   })
 
-  it('knows when filters are on', () => {
-    expect(hasAchievementFilters(NO_ACHIEVEMENT_FILTERS)).toBe(false)
-    expect(hasAchievementFilters(filters({ query: ' ' }))).toBe(false)
-    expect(hasAchievementFilters(filters({ goal: 0 }))).toBe(true)
+  it('knows when filters are on, "Missing" being the default', () => {
+    expect(DEFAULT_ACHIEVEMENT_FILTERS).toEqual({
+      ...NO_ACHIEVEMENT_FILTERS,
+      completion: 'missing',
+    })
+    expect(hasAchievementFilters({ ...DEFAULT_ACHIEVEMENT_FILTERS })).toBe(false)
+    expect(hasAchievementFilters({ ...DEFAULT_ACHIEVEMENT_FILTERS, query: ' ' })).toBe(false)
+    expect(hasAchievementFilters({ ...DEFAULT_ACHIEVEMENT_FILTERS, goal: 0 })).toBe(true)
+    expect(hasAchievementFilters(filters({}))).toBe(true)
+    expect(hasAchievementFilters(filters({ completion: 'done' }))).toBe(true)
+    // Against other defaults.
+    expect(hasAchievementFilters(NO_ACHIEVEMENT_FILTERS, NO_ACHIEVEMENT_FILTERS)).toBe(false)
+    expect(hasAchievementFilters(filters({ goal: 0 }), NO_ACHIEVEMENT_FILTERS)).toBe(true)
   })
 })
 

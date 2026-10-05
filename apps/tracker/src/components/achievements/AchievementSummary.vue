@@ -66,7 +66,7 @@ const missing = computed(() => props.summary.total - props.summary.done)
         label="Missing"
         :value="missing"
         exact
-        hint="Show only what is left"
+        :hint="missingOnly ? 'Show all' : 'Show only what is left'"
         :tone="missing > 0 ? 'warning' : 'success'"
         :pressed="missingOnly"
         @click="$emit('toggleMissing')"
