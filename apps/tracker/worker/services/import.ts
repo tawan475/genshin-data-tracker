@@ -40,7 +40,7 @@ import {
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { ApiError, isUniqueViolation } from '../lib/http'
 import { D1Meter } from '../lib/meter'
-import { recomputeAccount } from './accounts'
+import { dataVersionOf, recomputeAccount } from './accounts'
 
 export interface Upload {
   text: string
@@ -86,6 +86,15 @@ export interface ImportTarget {
 }
 
 /**
+ * What an import did: the response for the uploader, and the account's new
+ * data version when it moved (null for a no-op), for the live event.
+ */
+export interface ImportResult {
+  response: ImportResponse
+  dataVersion: number | null
+}
+
+/**
  * Stores `upload` in `account`. `parsed` is the upload already parsed by
  * `parseUpload`, for a caller that had to read it first (a user key routes by
  * the file's UID).
@@ -96,7 +105,7 @@ export async function importSnapshot(
   upload: Upload,
   meter = new D1Meter(),
   parsed?: PreparedSnapshot,
-): Promise<ImportResponse> {
+): Promise<ImportResult> {
   const accountId = account.id
   const prepared = parsed ?? (await parseUpload(upload.text))
   const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
@@ -159,13 +168,17 @@ export async function importSnapshot(
     status: ImportResponse['status'],
     snapshotId: number,
     storedSize = 0,
-  ): ImportResponse => ({
-    status,
-    snapshotId,
-    takenAt,
-    rawSize: upload.rawSize,
-    storedSize,
-    ...(warnings.length > 0 ? { warnings } : {}),
+    dataVersion: number | null = null,
+  ): ImportResult => ({
+    response: {
+      status,
+      snapshotId,
+      takenAt,
+      rawSize: upload.rawSize,
+      storedSize,
+      ...(warnings.length > 0 ? { warnings } : {}),
+    },
+    dataVersion,
   })
   // The same capture, also when it was stored before irminsul's extra keys
   // were kept (its hash then left them out).
@@ -185,15 +198,17 @@ export async function importSnapshot(
   if (latest && latest.content_hash === encoded.contentHash && takenAt > latest.taken_at) {
     // Same inventory captured again later: remember when it was last seen
     // instead of storing a duplicate snapshot.
-    await meter.batch(d1, 'seen', [
+    const [, bumped] = await meter.batch(d1, 'seen', [
       d1
         .prepare('UPDATE snapshots SET last_seen_at = max(last_seen_at, ?1) WHERE id = ?2')
         .bind(takenAt, latest.id),
       d1
-        .prepare('UPDATE genshin_accounts SET data_version = data_version + 1 WHERE id = ?1')
+        .prepare(
+          'UPDATE genshin_accounts SET data_version = data_version + 1 WHERE id = ?1 RETURNING data_version',
+        )
         .bind(accountId),
     ])
-    return response('unchanged', latest.id)
+    return response('unchanged', latest.id, 0, dataVersionOf(bumped) ?? null)
   }
 
   const bases = await readBases(basesResult!.results)
@@ -285,7 +300,7 @@ export async function importSnapshot(
     throw error
   }
   const snapshotId = results[toStore.length]!.results[0]!.id as number
-  return response('created', snapshotId, storedSize)
+  return response('created', snapshotId, storedSize, dataVersionOf(results.at(-1)) ?? null)
 }
 
 /** Parses and normalises a GOOD file; malformed input is a 400. */

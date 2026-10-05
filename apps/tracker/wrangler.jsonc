@@ -30,6 +30,13 @@
     },
   ],
 
+  // Live updates (worker/services/live.ts): one LiveHub per user holds that
+  // user's open tabs' WebSockets (hibernating while idle) and fans out every
+  // change. SQLite-backed, as the Free plan requires; it stores nothing.
+  // `wrangler deploy` applies the migration; there is no D1 change.
+  "durable_objects": { "bindings": [{ "name": "LIVE", "class_name": "LiveHub" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["LiveHub"] }],
+
   // Per-isolate-group request limits (period must be 10 or 60 seconds).
   "ratelimits": [
     { "name": "AUTH_LIMITER", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } },

@@ -6,6 +6,8 @@ export interface Toast {
   tone: 'info' | 'success' | 'danger'
   title: string
   detail?: string
+  /** Tooltip with the specifics (e.g. which capture, when). */
+  hint?: string
   action?: { label: string; run: () => void }
 }
 

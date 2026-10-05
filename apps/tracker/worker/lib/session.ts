@@ -160,5 +160,6 @@ export const requireUser: MiddlewareHandler<AppEnv> = async (c, next) => {
   const payload = await readToken(c, ACCESS_COOKIE, 'access')
   if (!payload) throw new ApiError(401, 'token_expired', 'Access token expired')
   c.set('userId', Number(payload.sub))
+  c.set('tokenExp', Number(payload.exp))
   await next()
 }

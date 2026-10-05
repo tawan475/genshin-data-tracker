@@ -5,6 +5,7 @@ import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
 import { auth } from './routes/auth'
 import { health } from './routes/health'
+import { live } from './routes/live'
 import { me } from './routes/me'
 import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
@@ -27,6 +28,7 @@ app.route('/me', me)
 app.route('/accounts', accounts)
 app.route('/accounts', progress)
 app.route('/genshin-accounts-public', publicImport)
+app.route('/live', live)
 
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
 
@@ -35,6 +37,8 @@ app.onError((error, c) => {
   console.error(error)
   return c.json(errorBody(new ApiError(500, 'internal', 'Something went wrong')), 500)
 })
+
+export { LiveHub } from './services/live'
 
 export default {
   fetch: app.fetch,

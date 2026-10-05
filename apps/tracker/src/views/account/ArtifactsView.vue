@@ -193,7 +193,9 @@ function pickSet(setKey: string, slot?: SlotKey) {
 const page = ref(1)
 const pageSize = computed(() => PAGE_SIZE[view.value])
 const pageCount = computed(() => Math.max(1, Math.ceil(results.value.length / pageSize.value)))
-watch([results, view], () => (page.value = 1))
+// A new filter, view or account starts at the top; new data keeps the page.
+watch([applied, view, () => account.value.id], () => (page.value = 1))
+watch(pageCount, (count) => (page.value = Math.min(page.value, count)))
 const pageRows = computed(() =>
   results.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value),
 )

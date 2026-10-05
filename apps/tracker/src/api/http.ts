@@ -107,7 +107,7 @@ export async function request(path: string, options: RequestOptions = {}): Promi
     throw error
   }
   const retry = await send(path, options)
-  if (!retry.ok) {
+  if (!retry.ok && retry.status !== 304) {
     const retryError = await toError(retry)
     if (retry.status === 401) signedOutHandler?.()
     throw retryError

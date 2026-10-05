@@ -55,7 +55,23 @@ export const api = {
   revokeUserImportKey: () => requestJson<void>('/api/me/import-key', { method: 'DELETE' }),
 
   // -------------------------------------------------------------- accounts
-  accounts: () => requestJson<AccountResponse[]>('/api/accounts'),
+  /**
+   * The account list unless it still has ETag `etag` (null: unchanged, a 304
+   * with no body). Never from the HTTP cache: the tag is what decides.
+   */
+  accountsSince: async (
+    etag: string | null,
+  ): Promise<{ list: AccountResponse[]; etag: string | null } | null> => {
+    const response = await request('/api/accounts', {
+      cache: 'no-store',
+      headers: etag ? { 'if-none-match': etag } : undefined,
+    })
+    if (response.status === 304) return null
+    return {
+      list: (await response.json()) as AccountResponse[],
+      etag: response.headers.get('etag'),
+    }
+  },
   account: (id: number) => requestJson<AccountResponse>(`/api/accounts/${id}`),
   createAccount: (input: AccountInput) =>
     requestJson<AccountCreatedResponse>('/api/accounts', { method: 'POST', json: input }),

@@ -16,6 +16,7 @@ import { MAX_IMPORT_FILES, MAX_IMPORT_FILE_SIZE_BYTES, MAX_IMPORT_FILE_SIZE_MB }
 import { markRaw, reactive } from 'vue'
 import { ApiRequestError, api } from '@/api'
 import { formatDateTime, formatNumber } from '@/lib/format'
+import { importingAccounts } from '@/live/holds'
 import router from '@/router'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -389,6 +390,8 @@ async function loop(queue: ImportQueue) {
   if (loops.has(queue)) return
   loops.add(queue)
   watchUnload()
+  // The account's pages wait for the run instead of re-loading after every file.
+  importingAccounts.add(queue.accountId)
   let changed = false
   try {
     while (queue.state === 'running') {
@@ -403,6 +406,7 @@ async function loop(queue: ImportQueue) {
     }
   } finally {
     loops.delete(queue)
+    importingAccounts.delete(queue.accountId)
   }
 
   if (discarded.has(queue)) return

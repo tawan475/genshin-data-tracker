@@ -125,7 +125,11 @@ const pageGroups = computed(() =>
 const pageRows = computed(() =>
   sortedRows.value.slice((page.value - 1) * LIST_PAGE, page.value * LIST_PAGE),
 )
-watch([filters, sort, direction, view, armory], () => (page.value = 1))
+// A new filter, sort, view or account starts at the top; new data keeps the page.
+watch([filters, sort, direction, view, () => account.value.id], () => (page.value = 1))
+watch(itemCount, (count) => {
+  page.value = Math.min(page.value, Math.max(1, Math.ceil(count / pageSize.value)))
+})
 
 const listTop = ref<HTMLElement>()
 watch(page, () => {
