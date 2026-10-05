@@ -81,6 +81,7 @@ const NONE: CapturedAchievements = {
   takenAt: null,
   firstTakenAt: null,
   firstSeen: new Map(),
+  lastMissing: new Map(),
   completedAt: new Map(),
 }
 

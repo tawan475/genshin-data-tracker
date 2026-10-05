@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Check, ExternalLink, EyeOff, Hand } from 'lucide-vue-next'
+import { Check, ExternalLink, EyeOff, Hand, Trophy } from 'lucide-vue-next'
 import type { AchievementTexts } from '@gdt/game-data'
 import {
   completedOn,
@@ -11,19 +11,20 @@ import {
   unmarkFrom,
   type AchievementEntry,
   type CapturedAchievements,
-  type CompletedOn,
   type DoneSource,
   type DoneState,
 } from '@gdt/game-data/achievement-progress'
 import { materialIcon } from '@/lib/assets'
-import { formatDate, formatDateTime, formatNumber } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
+import { completionText } from './completion'
 
 /**
  * One achievement, or a stage chain as one row with a dot per tier. The
  * round button marks it done by hand; captured ones (green) come from a
- * snapshot and stay done. A done row shows when it was completed (a chain:
- * its highest done tier): the game's own date, or "by" the capture that
- * first had it; details live in tooltips.
+ * snapshot and stay done. A done row says when it was completed (a chain:
+ * its highest done tier): the game's own time, the window between the
+ * captures without and with it, "by" the first capture, or that it was
+ * marked by hand; tooltips say where that comes from.
  */
 const props = defineProps<{
   entry: AchievementEntry
@@ -62,29 +63,24 @@ const state = computed<DoneSource | null>(() => {
 const unmarkable = computed(() => unmarkFrom(props.entry, 0, props.state))
 const anyMarked = computed(() => tiers.value.some((t) => t.source === 'marked'))
 
-function describe(done: CompletedOn): string {
-  if (done.kind === 'exact') return `Completed ${formatDateTime(done.at)}`
-  const capture = done.kind === 'by' ? 'already in the first capture' : 'first capture that has it'
-  return `Completed by ${formatDateTime(done.at)} (${capture})`
-}
-
-function doneOn(id: number): string {
-  const done = completedOn(props.capture, id)
-  return done ? describe(done) : 'Captured'
-}
-
-/** The date on the row: the highest done tier's; none when that was only marked by hand. */
+/** When the row was completed: its highest done tier's. */
 const completed = computed(() => entryCompletedOn(props.entry, props.state, props.capture))
-const completedTitle = computed(() => {
+const completedLine = computed(() => {
   const done = completed.value
-  if (!done) return ''
-  return chain.value ? `Tier ${done.tier + 1} · ${describe(done)}` : describe(done)
+  if (!done) return null
+  return {
+    ...completionText(done, chain.value ? done.tier : undefined),
+    kind: done.kind,
+    datetime: 'at' in done ? new Date(done.at).toISOString() : null,
+  }
 })
 
 function status(id: number, source: DoneSource | null): string {
-  if (source === 'captured') return `${doneOn(id)} · in a snapshot, can't be unmarked`
-  if (source === 'marked') return 'Marked by hand · click to unmark'
-  return 'Click to mark done'
+  if (!source) return 'Click to mark done'
+  const done = completedOn(props.capture, id)
+  if (source === 'marked')
+    return `${completionText(done ?? { kind: 'marked' }).text} · click to unmark`
+  return `${done ? completionText(done).text : 'Captured'} · in a capture, so it stays done`
 }
 
 const mainTitle = computed(() => {
@@ -199,20 +195,39 @@ const FILL: Record<DoneSource, string> = {
           <EyeOff class="size-3.5" aria-hidden="true" />
           Hidden
         </span>
-        <span v-if="anyMarked" class="flex items-center text-accent-text" title="Marked by hand">
+        <span
+          v-if="anyMarked && completedLine?.kind !== 'marked'"
+          class="flex items-center text-accent-text"
+          title="Marked by hand"
+        >
           <Hand class="size-3.5" aria-hidden="true" />
           <span class="sr-only">Marked by hand</span>
         </span>
-        <span class="ml-auto flex items-center gap-2">
-          <time
-            v-if="completed"
-            :datetime="new Date(completed.at).toISOString()"
-            class="tabular whitespace-nowrap"
-            :class="completed.kind === 'exact' && 'text-text-secondary'"
-            :title="completedTitle"
-            ><template v-if="completed.kind !== 'exact'">by </template
-            >{{ formatDate(completed.at) }}</time
+        <span class="ml-auto flex min-w-0 items-center gap-2">
+          <span
+            v-if="completedLine"
+            class="flex min-w-0 items-center gap-1"
+            :class="completedLine.kind === 'exact' && 'text-text-secondary'"
+            :title="completedLine.title"
           >
+            <Trophy
+              v-if="completedLine.kind === 'exact'"
+              class="size-3.5 shrink-0"
+              aria-hidden="true"
+            />
+            <Hand
+              v-else-if="completedLine.kind === 'marked'"
+              class="size-3.5 shrink-0 text-accent-text"
+              aria-hidden="true"
+            />
+            <time
+              v-if="completedLine.datetime"
+              :datetime="completedLine.datetime"
+              class="tabular sm:whitespace-nowrap"
+              >{{ completedLine.text }}</time
+            >
+            <span v-else class="sm:whitespace-nowrap">{{ completedLine.text }}</span>
+          </span>
           <a
             :href="stardbAchievementUrl(entry.tiers.at(-1)!.id)"
             target="_blank"

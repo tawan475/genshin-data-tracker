@@ -20,7 +20,7 @@ Cloudflare Worker serves the Vue dashboard as static assets and the API under
 ```bash
 pnpm install
 pnpm dev                                  # Vue app + Worker (workerd) on one Vite server
-pnpm test                                 # shared tests (Node) + worker tests (workerd + local D1)
+pnpm test                                 # shared tests (Node) + worker and app helper tests (workerd + local D1)
 pnpm --filter @gdt/tracker db:generate    # after editing worker/db/schema.ts
 pnpm --filter @gdt/tracker db:migrate:local
 pnpm --filter @gdt/tracker cf-typegen     # after editing wrangler.jsonc

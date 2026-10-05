@@ -3,7 +3,8 @@ import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-pool-worker
 import { defineConfig } from 'vitest/config'
 
 // Worker tests run inside workerd against a local D1, with the real migrations
-// applied before each test file (see worker/test/setup.ts).
+// applied before each test file (see worker/test/setup.ts). The app's pure
+// helpers (src/**/__tests__) run there too: en-US and UTC, so dates are stable.
 export default defineConfig(async () => {
   const migrations = await readD1Migrations(fileURLToPath(new URL('./migrations', import.meta.url)))
   return {
@@ -20,8 +21,9 @@ export default defineConfig(async () => {
         },
       }),
     ],
+    resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     test: {
-      include: ['worker/**/*.test.ts'],
+      include: ['worker/**/*.test.ts', 'src/**/__tests__/*.test.ts'],
       setupFiles: ['./worker/test/setup.ts'],
     },
   }
