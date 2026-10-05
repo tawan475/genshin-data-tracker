@@ -46,6 +46,7 @@ import { formatJson, readJsonIfExists, writeIfChanged } from './lib/json.ts'
 import { loadOverrides } from './lib/overrides.ts'
 import { DATA_DIR } from './lib/paths.ts'
 import { Problems } from './lib/problems.ts'
+import { checkAgainstStardb } from './lib/stardb.ts'
 
 const TEXT_FILES = {
   medium: 'TextMap/TextMap_MediumEN.json',
@@ -179,8 +180,15 @@ async function main(): Promise<number> {
       rewards: rows(ACHIEVEMENT_FILES.rewards),
       text,
     },
-    { gameVersion, versions: overrides.versions, previous: previous.achievements, problems },
+    {
+      gameVersion,
+      versions: overrides.versions,
+      unobtainable: overrides.unobtainable,
+      previous: previous.achievements,
+      problems,
+    },
   )
+  await checkAgainstStardb(achievements.achievements, overrides.unobtainable, problems)
 
   const plannerInputs = Object.fromEntries(
     Object.entries(PLANNER_FILES).map(([name, path]) => [name, rows(path)]),

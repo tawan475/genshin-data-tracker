@@ -51,6 +51,8 @@ export interface Overrides {
   weekdays: WeekdaysOverride
   /** achievement id -> version it was added in */
   versions: Map<number, string>
+  /** achievement id -> why nobody can earn it (compiled as disused) */
+  unobtainable: Map<number, string>
   /** Raw overrides/drops.json; the build validates it with src/drops.ts. */
   drops: Record<string, unknown>
   planner: PlannerOverride
@@ -230,6 +232,11 @@ export function loadOverrides(problems: Problems): Overrides {
     keys: loadKeys(problems),
     weekdays: loadWeekdays(problems),
     versions: loadVersions(problems),
+    unobtainable: idMap(
+      problems,
+      'achievement-unobtainable.json',
+      load(problems, 'achievement-unobtainable.json'),
+    ),
     drops: load(problems, 'drops.json'),
     planner: loadPlanner(problems),
   }

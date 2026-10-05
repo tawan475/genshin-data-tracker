@@ -15,6 +15,7 @@ import { checkFields, costs, num, str, TextMap, type Row } from '../scripts/lib/
 import { formatJson } from '../scripts/lib/json.ts'
 import type { KeysOverride } from '../scripts/lib/overrides.ts'
 import { Problems } from '../scripts/lib/problems.ts'
+import { compareWithStardb } from '../scripts/lib/stardb.ts'
 
 const noKeys = (): KeysOverride => ({
   characters: { exclude: new Map(), key: new Map() },
@@ -151,6 +152,56 @@ describe('achievement versions', () => {
       { gameVersion: '7.1', versions: new Map(), problems: new Problems() },
     )
     expect(broken.achievements.rows).toHaveLength(1)
+  })
+
+  it('compiles achievements listed as unobtainable as disused, keeping their version and text', () => {
+    const problems = new Problems()
+    const out = compileAchievements(inputs, {
+      gameVersion: '7.1',
+      versions: new Map([[100, '4.2']]),
+      unobtainable: new Map([
+        [100, 'datamine only'],
+        [102, 'already disused'],
+        [999, 'gone'],
+      ]),
+      problems,
+    })
+    expect(out.achievements.rows[0]).toEqual([100, 0, 0, 1, 0, 20, 40, '4.2', 1])
+    expect(out.achievements.rows[1]![8]).toBe(0)
+    expect(out.text.achievements['100']).toEqual(['First', 'Do it 40 times'])
+    const warnings = problems.warnings.join('\n')
+    expect(warnings).toMatch(/lists 102, which the game already marks disused/)
+    expect(warnings).toMatch(/lists 999, which is not in the dump/)
+  })
+})
+
+describe('stardb comparison', () => {
+  const achievements = {
+    columns: [],
+    rows: [
+      [1, 0, 0, 0, 0, 5, 1, '1.0', 0],
+      [2, 0, 0, 0, 0, 5, 1, '7.1', 0],
+      [3, 0, 0, 0, 0, 5, 1, '7.0', 0],
+      [4, 0, 0, 0, 0, 5, 1, '1.0', 1],
+      [5, 0, 0, 0, 0, 5, 1, '6.0', 1],
+    ],
+  } as AchievementsFile
+
+  it('names live achievements stardb lacks or flags, and listed ones it now allows', () => {
+    const warnings = compareWithStardb(achievements, new Map([[5, 'not yet']]), [
+      { id: 1 },
+      { id: 3, impossible: true },
+      { id: 5, impossible: false },
+    ])
+    expect(warnings).toHaveLength(3)
+    expect(warnings[0]).toMatch(/doesn't list achievement\(s\) 2:/)
+    expect(warnings[1]).toMatch(/flags achievement\(s\) 3 impossible/)
+    expect(warnings[2]).toMatch(/lists 5, which stardb.gg now lists as obtainable/)
+  })
+
+  it('is quiet when the data and the list agree', () => {
+    const stardb = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 5, impossible: true }]
+    expect(compareWithStardb(achievements, new Map([[5, 'not yet']]), stardb)).toEqual([])
   })
 })
 

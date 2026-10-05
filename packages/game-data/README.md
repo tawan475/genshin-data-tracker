@@ -118,6 +118,8 @@ The game data lacks a few things, and a few entries need a human decision.
 - `weekdays.json`: domain days per talent book and weapon material family
   (checked against the game's own domain reward list).
 - `achievement-versions.json`: the version each achievement was added in.
+- `achievement-unobtainable.json`: achievements nobody can earn (datamine-only,
+  not obtainable yet), compiled as disused; the build checks it against stardb.gg.
 - `keys.json`: GOOD key fixes, exclusions, inclusions and acknowledged removals.
 - `planner.json`: domain entrance names, weekly boss names the data lacks,
   weekly materials no boss drops.
