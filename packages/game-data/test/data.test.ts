@@ -1,3 +1,5 @@
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import goalsJson from '../data/achievement-goals.json'
 import imagesJson from '../data/images.json'
@@ -14,13 +16,8 @@ import type {
   MissingImagesFile,
   PlannerFile,
 } from '../src/format'
-import {
-  GI_CDN_HOST,
-  giCdnEligible,
-  IMAGE_HOST,
-  imageNames,
-  nameSetHash,
-} from '../scripts/lib/image-names.ts'
+import { IMAGE_HOST, imageNames, nameSetHash, selfHostable } from '../scripts/lib/image-names.ts'
+import { HOSTED_DIR } from '../scripts/lib/paths.ts'
 
 const goals = goalsJson as unknown as GoalsFile
 const images = imagesJson as unknown as ImagesFile
@@ -85,21 +82,40 @@ describe('image coverage (data/missing-images.json)', () => {
     for (const name of missingImages.missing) expect(names.has(name), name).toBe(true)
   })
 
-  it('loads from gi-cdn only missing names the app shows (no TCG card art)', () => {
+  it('hosts only missing names the app shows (no TCG card art)', () => {
     const hosted = missingImages.hosted ?? []
     expect(hosted).toEqual([...new Set(hosted)].sort())
     const missing = new Set(missingImages.missing)
     for (const name of hosted) {
       expect(missing.has(name), name).toBe(true)
-      expect(giCdnEligible(names.get(name)!), name).toBe(true)
+      expect(selfHostable(names.get(name)!), name).toBe(true)
     }
   })
+
+  // The copies are gitignored (game art, public repo): only a checkout that
+  // ran `images --gi-cdn-dir` has them, and a clean one skips this.
+  const hostedFiles = existsSync(HOSTED_DIR)
+    ? readdirSync(HOSTED_DIR).filter((file) => file.endsWith('.webp'))
+    : []
+  it.skipIf(hostedFiles.length === 0)(
+    'has a WebP in apps/tracker/public/gi/ for each hosted name, and nothing else',
+    () => {
+      const hosted = missingImages.hosted ?? []
+      expect([...hostedFiles].sort()).toEqual(hosted.map((name) => `${name}.webp`).sort())
+      for (const name of hosted) {
+        const head = readFileSync(join(HOSTED_DIR, `${name}.webp`))
+          .subarray(0, 12)
+          .toString('latin1')
+        expect([head.slice(0, 4), head.slice(8)], name).toEqual(['RIFF', 'WEBP'])
+      }
+    },
+  )
 
   it('shows an icon for every material of a typical bag', async () => {
     const [index, coverage] = await Promise.all([loadMaterialIndex(), loadImageCoverage()])
     expect([...coverage.hosted]).toEqual(missingImages.hosted ?? [])
     // Made up, but with every kind a real capture had without an icon before
-    // gi-cdn served the gaps and blueprints were indexed.
+    // the tracker hosted its own copies and indexed blueprints.
     const bag = [
       'Mora',
       'Primogem',
@@ -130,16 +146,16 @@ describe('image coverage (data/missing-images.json)', () => {
       'UselessAdvice',
       'AdventurerCamp',
     ]
-    const fromGiCdn: string[] = []
+    const own: string[] = []
     for (const key of bag) {
       const name = itemImage(key) ?? index.icon(key)
-      const url = imageUrlOf(name, coverage, IMAGE_HOST, GI_CDN_HOST)
+      const url = imageUrlOf(name, coverage, IMAGE_HOST, '/gi/')
       expect(url, key).not.toBe('')
-      if (url.startsWith(GI_CDN_HOST)) fromGiCdn.push(key)
+      if (url.startsWith('/gi/')) own.push(key)
     }
-    // The Original Resin icon and the game's misspelled photo come from gi-cdn.
-    expect(fromGiCdn).toContain('OriginalResin')
-    expect(fromGiCdn).toContain('PhotoWithTheLittleWitchesAndTheirImaginaryFriends')
+    // The Original Resin icon and the game's misspelled photo come from our copies.
+    expect(own).toContain('OriginalResin')
+    expect(own).toContain('PhotoWithTheLittleWitchesAndTheirImaginaryFriends')
   })
 
   it('has every item, achievement category and planner material shown outside the bag', async () => {

@@ -138,10 +138,10 @@ pnpm --filter @gdt/tracker icons     # regenerate PWA icons + manifest
 `src/pwa/sw-template.js` is emitted as `/sw.js` by a Vite plugin with the
 build's precache list: one cache per build, network-first navigation with the
 app shell offline, `/api` never cached, and game images (from
-static.nanoka.cc, and gi-cdn.475.dev for the few it lacks) cache-first in one
-bounded cache that keeps only image responses. A new build waits until
+static.nanoka.cc, and the app's own `/gi/` for the few it lacks) cache-first
+in one bounded cache that keeps only image responses. A new build waits until
 the user accepts the "new version" banner. `public/_headers` keeps `sw.js` and
-the manifest uncached.
+the manifest uncached and gives `/gi/*` a week.
 
 ## Deploying
 
@@ -153,6 +153,11 @@ pnpm --filter @gdt/tracker db:migrate:remote
 pnpm --filter @gdt/tracker deploy                        # type-check + build + wrangler deploy
 ```
 
+Deploy from a checkout that has the gap icons in `apps/tracker/public/gi/`
+(gitignored; `pnpm --filter @gdt/game-data images --gi-cdn-dir ../gi-cdn`
+copies them from the local gi-cdn build). From a clean clone they are missing
+and those few icons show initials.
+
 Static assets are served from the edge; `/api` runs with Smart Placement (next
 to D1). Measured from Bangkok: ~5 ms of SQL per import, ~120 ms per D1 round
 trip without placement.
@@ -161,8 +166,8 @@ trip without placement.
 
 Game data, text and images © HoYoverse. Game data and every image name come
 from Dimbreath's dump (https://gitlab.com/Dimbreath/animegamedata2). Game
-images are loaded from static.nanoka.cc; the few it lacks come from
-gi-cdn.475.dev, our own extraction from the game client (a private repo that
-publishes only those and serves them only to this site). See
+images are loaded from static.nanoka.cc; the few it lacks are served from
+copies taken from the game client (`apps/tracker/public/gi/`, not in this
+repo). See
 `packages/game-data/README.md` for the rest (stardb.gg, the Genshin Impact
 Wiki, Genshin Optimizer as a test oracle).

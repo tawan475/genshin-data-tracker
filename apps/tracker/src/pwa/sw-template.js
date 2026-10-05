@@ -8,20 +8,20 @@
  *   back to the cached app shell offline.
  * - /api is never cached: account data on a shared device is readable by the
  *   next person who opens it.
- * - Game images come from static.nanoka.cc, or from gi-cdn.475.dev for the
- *   names that host lacks (src/lib/assets.ts), and are kept cache-first in
- *   their own bounded cache across builds. They are fetched in CORS mode
- *   (nanoka allows any origin; gi-cdn allows this site's origin, which a CORS
- *   fetch sends), so only real image responses are kept, never an error page
- *   or an opaque response (which would also count megabytes against the
- *   storage quota). Bump IMAGES' version to drop them.
+ * - Game images come from static.nanoka.cc, or from our own /gi/ for names
+ *   that host lacks (src/lib/assets.ts), and are kept cache-first in their own
+ *   bounded cache across builds. They are fetched in CORS mode (the host
+ *   allows any origin), so only real image responses are kept, never an error
+ *   page, the SPA fallback page or an opaque response (which would also count
+ *   megabytes against the storage quota). Bump IMAGES' version to drop them.
  */
 
 const BUILD = '__BUILD__'
 const PRECACHE = __PRECACHE__
 const CACHE = `gdt-${BUILD}`
-/** Image hosts: nanoka, and gi-cdn for the few names nanoka lacks. */
-const IMAGE_HOSTS = ['static.nanoka.cc', 'gi-cdn.475.dev']
+const IMAGE_HOST = 'static.nanoka.cc'
+/** Our own copies of images the host lacks (public/gi/). */
+const OWN_IMAGES = '/gi/'
 const IMAGES = 'gdt-images-v2'
 const MAX_IMAGES = 2500
 const KEEP = [IMAGES]
@@ -102,12 +102,16 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   const url = new URL(request.url)
 
-  if (IMAGE_HOSTS.includes(url.hostname)) {
+  if (url.hostname === IMAGE_HOST) {
     event.respondWith(cacheImage(request))
     return
   }
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
+  if (url.pathname.startsWith(OWN_IMAGES)) {
+    event.respondWith(cacheImage(request))
+    return
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(navigate(event))
