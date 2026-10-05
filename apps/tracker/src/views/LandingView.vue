@@ -24,7 +24,7 @@ const session = useSession()
         <p class="mb-10 max-w-md text-lg text-gray-400">
           Every login, snapshotted. Artifacts, materials, history.
         </p>
-        <div class="mb-14 flex flex-col gap-4 sm:flex-row">
+        <div class="flex flex-col gap-4 sm:flex-row">
           <RouterLink v-if="session.status === 'signed-in'" :to="{ name: 'home' }" class="btn-glow">
             Open dashboard
           </RouterLink>
@@ -32,29 +32,6 @@ const session = useSession()
             <RouterLink :to="{ name: 'register' }" class="btn-glow">Get started</RouterLink>
             <RouterLink :to="{ name: 'login' }" class="btn-glass">Sign in</RouterLink>
           </template>
-        </div>
-
-        <div class="glass-panel inline-flex items-center gap-5 px-5 py-5 sm:gap-8 sm:px-8">
-          <div class="flex flex-col gap-1">
-            <span class="text-2xl font-bold text-white sm:text-3xl">~1 KB</span>
-            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase"
-              >Per snapshot</span
-            >
-          </div>
-          <div class="h-10 w-px shrink-0 bg-white/10" />
-          <div class="flex flex-col gap-1">
-            <span class="text-2xl font-bold text-white sm:text-3xl">Auto</span>
-            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase"
-              >GOOD sync</span
-            >
-          </div>
-          <div class="h-10 w-px shrink-0 bg-white/10" />
-          <div class="flex flex-col gap-1">
-            <span class="text-2xl font-bold text-white sm:text-3xl">Offline</span>
-            <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase"
-              >Installable</span
-            >
-          </div>
         </div>
       </div>
 
