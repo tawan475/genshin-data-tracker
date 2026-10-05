@@ -9,7 +9,7 @@ import {
   shallowRef,
   watch,
 } from 'vue'
-import { Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
+import { CheckCheck, Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
 import {
   decodeAchievementTimes,
   decodeAchievements,
@@ -17,7 +17,7 @@ import {
 } from '@gdt/shared'
 import { achievementText, loadAchievements } from '@gdt/game-data'
 import {
-  NO_ACHIEVEMENT_FILTERS,
+  DEFAULT_ACHIEVEMENT_FILTERS,
   achievementVersions,
   captureAchievements,
   countAchievements,
@@ -206,7 +206,8 @@ const newestCapture = computed(() => {
 
 // ------------------------------------------------------------------ filters
 
-const filters = reactive<AchievementFilters>({ ...NO_ACHIEVEMENT_FILTERS })
+/** The page opens on what is left ("Missing" is the default, not a filter); a choice lasts while on it. */
+const filters = reactive<AchievementFilters>({ ...DEFAULT_ACHIEVEMENT_FILTERS })
 const filtered = computed(() => hasAchievementFilters(filters))
 /** A search or the Done filter is looking for done ones: don't hide them. */
 const hideSeriesEntries = computed(
@@ -240,23 +241,31 @@ function keep(ids: number[]) {
   kept.value = next
 }
 
-const shown = computed<AchievementEntry[]>(() => {
+/** Entries matching every filter but completion. */
+const matching = computed<AchievementEntry[]>(() => {
   const g = game.data.value
   if (!g) return []
-  return filterAchievements(
-    entries.value,
-    { ...filters, completion: 'all' },
-    state.value,
-    g.text,
-  ).filter(
+  return filterAchievements(entries.value, { ...filters, completion: 'all' }, state.value, g.text)
+})
+const shown = computed<AchievementEntry[]>(() =>
+  matching.value.filter(
     (entry) =>
       (kept.value.has(entry.id) || matchesCompletion(entry, filters.completion, state.value)) &&
       (!hideSeriesEntries.value || !hiddenSeries.value.has(entry.goal)),
-  )
+  ),
+)
+/**
+ * Why nothing shows: nothing matches, or everything that does is done
+ * (under "Missing", or in completed series) or none of it is (under "Done").
+ */
+const empty = computed<'none' | 'allDone' | 'noneDone' | null>(() => {
+  if (shown.value.length > 0) return null
+  if (matching.value.length === 0) return 'none'
+  return filters.completion === 'done' ? 'noneDone' : 'allDone'
 })
 
 function clearFilters() {
-  Object.assign(filters, NO_ACHIEVEMENT_FILTERS)
+  Object.assign(filters, DEFAULT_ACHIEVEMENT_FILTERS)
 }
 /** Counted in achievements (tiers), like the summary. */
 const shownCount = computed(() => countAchievements(shown.value, filters.completion, state.value))
@@ -465,8 +474,16 @@ async function importIds(ids: number[]): Promise<boolean> {
             @unmark-all="unmarkAll"
           />
 
-          <UiPanel v-if="shown.length === 0" flush>
-            <UiEmpty title="No matches">
+          <UiPanel v-if="empty" flush>
+            <UiEmpty v-if="empty === 'allDone'" title="All done">
+              <template #icon><CheckCheck class="text-success-text" aria-hidden="true" /></template>
+              <UiButton @click="filters.completion = 'done'">Show done</UiButton>
+            </UiEmpty>
+            <UiEmpty v-else-if="empty === 'noneDone'" title="None done">
+              <template #icon><SearchX aria-hidden="true" /></template>
+              <UiButton @click="filters.completion = 'missing'">Show missing</UiButton>
+            </UiEmpty>
+            <UiEmpty v-else title="No matches">
               <template #icon><SearchX aria-hidden="true" /></template>
               <UiButton @click="clearFilters">Clear</UiButton>
             </UiEmpty>

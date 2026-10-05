@@ -321,13 +321,23 @@ export const NO_ACHIEVEMENT_FILTERS: Readonly<AchievementFilters> = {
   query: '',
 }
 
-export function hasAchievementFilters(filters: AchievementFilters): boolean {
+/** What the page opens on, and what clearing the filters returns to: what is left. */
+export const DEFAULT_ACHIEVEMENT_FILTERS: Readonly<AchievementFilters> = {
+  ...NO_ACHIEVEMENT_FILTERS,
+  completion: 'missing',
+}
+
+/** Whether any filter differs from the defaults (a blank search is none). */
+export function hasAchievementFilters(
+  filters: AchievementFilters,
+  defaults: Readonly<AchievementFilters> = DEFAULT_ACHIEVEMENT_FILTERS,
+): boolean {
   return (
-    filters.completion !== 'all' ||
-    filters.goal !== null ||
-    filters.version !== null ||
-    filters.hidden !== 'all' ||
-    filters.query.trim() !== ''
+    filters.completion !== defaults.completion ||
+    filters.goal !== defaults.goal ||
+    filters.version !== defaults.version ||
+    filters.hidden !== defaults.hidden ||
+    filters.query.trim() !== defaults.query.trim()
   )
 }
 
