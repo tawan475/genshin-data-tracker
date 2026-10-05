@@ -8,6 +8,7 @@ import {
   completedOn,
   countAchievements,
   doneSource,
+  entryCompletedOn,
   filterAchievements,
   groupAchievements,
   hasAchievementFilters,
@@ -221,6 +222,53 @@ describe('groupAchievements', () => {
     expect(compareVersions('4.10', '4.9')).toBeGreaterThan(0)
     expect(compareVersions('', '1.0')).toBeLessThan(0)
     expect(achievementVersions(entries)).toEqual(['4.10', '4.2', '1.0'])
+  })
+})
+
+describe('entryCompletedOn', () => {
+  const captured = {
+    firstTakenAt: 100,
+    firstSeen: new Map([
+      [10, 100],
+      [11, 100],
+      [12, 200],
+    ]),
+    completedAt: new Map([[11, 1_600_400_000_000]]),
+  }
+
+  it("shows a single achievement's date only when it is done", () => {
+    expect(entryCompletedOn(entry(10), state([10]), captured)).toEqual({
+      at: 100,
+      kind: 'by',
+      tier: 0,
+    })
+    // Seen in an old snapshot but not done now (or never captured): no date.
+    expect(entryCompletedOn(entry(10), state([]), captured)).toBeNull()
+    expect(entryCompletedOn(entry(20), state([20]), captured)).toBeNull()
+  })
+
+  it("shows a chain's highest done tier", () => {
+    expect(entryCompletedOn(entry(11), state([11]), captured)).toEqual({
+      at: 1_600_400_000_000,
+      kind: 'exact',
+      tier: 0,
+    })
+    expect(entryCompletedOn(entry(11), state([11, 12]), captured)).toEqual({
+      at: 200,
+      kind: 'seen',
+      tier: 1,
+    })
+  })
+
+  it('shows no date when the highest done tier was only marked by hand', () => {
+    expect(entryCompletedOn(entry(11), state([11, 12], [13]), captured)).toBeNull()
+    // Marked by hand, but a capture has its finish time: the date still shows.
+    const timed = { ...captured, completedAt: new Map([[13, 5_000]]) }
+    expect(entryCompletedOn(entry(11), state([11, 12], [13]), timed)).toEqual({
+      at: 5_000,
+      kind: 'exact',
+      tier: 2,
+    })
   })
 })
 

@@ -5,11 +5,13 @@ import type { AchievementTexts } from '@gdt/game-data'
 import {
   completedOn,
   doneSource,
+  entryCompletedOn,
   markThrough,
   stardbAchievementUrl,
   unmarkFrom,
   type AchievementEntry,
   type CapturedAchievements,
+  type CompletedOn,
   type DoneSource,
   type DoneState,
 } from '@gdt/game-data/achievement-progress'
@@ -19,7 +21,9 @@ import { formatDate, formatDateTime, formatNumber } from '@/lib/format'
 /**
  * One achievement, or a stage chain as one row with a dot per tier. The
  * round button marks it done by hand; captured ones (green) come from a
- * snapshot and stay done. Dates and details live in tooltips.
+ * snapshot and stay done. A done row shows when it was completed (a chain:
+ * its highest done tier): the game's own date, or "by" the capture that
+ * first had it; details live in tooltips.
  */
 const props = defineProps<{
   entry: AchievementEntry
@@ -58,12 +62,24 @@ const state = computed<DoneSource | null>(() => {
 const unmarkable = computed(() => unmarkFrom(props.entry, 0, props.state))
 const anyMarked = computed(() => tiers.value.some((t) => t.source === 'marked'))
 
+function describe(done: CompletedOn): string {
+  if (done.kind === 'exact') return `Completed ${formatDateTime(done.at)}`
+  const capture = done.kind === 'by' ? 'already in the first capture' : 'first capture that has it'
+  return `Completed by ${formatDateTime(done.at)} (${capture})`
+}
+
 function doneOn(id: number): string {
   const done = completedOn(props.capture, id)
-  if (!done) return 'Captured'
-  if (done.kind === 'exact') return `Completed ${formatDateTime(done.at)}`
-  return `Completed ${done.kind === 'by' ? 'by ' : ''}${formatDate(done.at)}`
+  return done ? describe(done) : 'Captured'
 }
+
+/** The date on the row: the highest done tier's; none when that was only marked by hand. */
+const completed = computed(() => entryCompletedOn(props.entry, props.state, props.capture))
+const completedTitle = computed(() => {
+  const done = completed.value
+  if (!done) return ''
+  return chain.value ? `Tier ${done.tier + 1} · ${describe(done)}` : describe(done)
+})
 
 function status(id: number, source: DoneSource | null): string {
   if (source === 'captured') return `${doneOn(id)} · in a snapshot, can't be unmarked`
@@ -187,16 +203,27 @@ const FILL: Record<DoneSource, string> = {
           <Hand class="size-3.5" aria-hidden="true" />
           <span class="sr-only">Marked by hand</span>
         </span>
-        <a
-          :href="stardbAchievementUrl(entry.tiers.at(-1)!.id)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="-my-1 ml-auto inline-flex min-h-7 items-center gap-1 rounded px-1 hover:text-text-primary"
-          title="Guide on stardb.gg"
-        >
-          <ExternalLink class="size-3.5" aria-hidden="true" />
-          <span class="sr-only">Guide on stardb.gg</span>
-        </a>
+        <span class="ml-auto flex items-center gap-2">
+          <time
+            v-if="completed"
+            :datetime="new Date(completed.at).toISOString()"
+            class="tabular whitespace-nowrap"
+            :class="completed.kind === 'exact' && 'text-text-secondary'"
+            :title="completedTitle"
+            ><template v-if="completed.kind !== 'exact'">by </template
+            >{{ formatDate(completed.at) }}</time
+          >
+          <a
+            :href="stardbAchievementUrl(entry.tiers.at(-1)!.id)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="-my-1 inline-flex min-h-7 items-center gap-1 rounded px-1 hover:text-text-primary"
+            title="Guide on stardb.gg"
+          >
+            <ExternalLink class="size-3.5" aria-hidden="true" />
+            <span class="sr-only">Guide on stardb.gg</span>
+          </a>
+        </span>
       </div>
     </div>
   </li>
