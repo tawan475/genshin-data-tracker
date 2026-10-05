@@ -6,8 +6,8 @@ import stardb from './fixtures/stardb-achievements.json'
 const data = await loadAchievements()
 const text = await achievementText('en')
 const active = data.achievements.filter((a) => !a.disused)
-// Achievements nobody can earn yet that stardb still lists (flagged impossible).
-const unobtainable = new Set(
+// Datamine-only achievements: players never see them, so stardb doesn't list them.
+const datamineOnly = new Set(
   Object.keys(
     JSON.parse(
       readFileSync(new URL('../overrides/achievement-unobtainable.json', import.meta.url), 'utf8'),
@@ -18,15 +18,19 @@ const unobtainable = new Set(
 )
 
 describe('achievements vs stardb (sanity check)', () => {
-  it('has every achievement stardb lists, active unless listed unobtainable, and few more', () => {
-    const missing = stardb.ids.filter(
-      (id) => !unobtainable.has(id) && data.byId.get(id)?.disused !== false,
-    )
+  it('has every achievement stardb lists active, and few more', () => {
+    const missing = stardb.ids.filter((id) => data.byId.get(id)?.disused !== false)
     expect(missing).toEqual([])
-    for (const id of unobtainable) expect([id, data.byId.get(id)?.disused]).toEqual([id, true])
-    const listedUnobtainable = stardb.ids.filter((id) => unobtainable.has(id)).length
-    expect(active.length).toBeGreaterThanOrEqual(stardb.count - listedUnobtainable)
+    expect(active.length).toBeGreaterThanOrEqual(stardb.count)
     expect(active.length - stardb.count).toBeLessThan(150)
+  })
+
+  it('hides beyond the game’s disused ones only what stardb doesn’t list', () => {
+    const listed = new Set(stardb.ids)
+    expect(datamineOnly.size).toBeGreaterThan(0)
+    for (const id of datamineOnly) {
+      expect([id, listed.has(id), data.byId.get(id)?.disused]).toEqual([id, false, true])
+    }
   })
 
   it('pays the same primogems for stardb’s achievements', () => {

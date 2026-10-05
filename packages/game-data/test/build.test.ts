@@ -187,21 +187,20 @@ describe('stardb comparison', () => {
     ],
   } as AchievementsFile
 
-  it('names live achievements stardb lacks or flags, and listed ones it now allows', () => {
-    const warnings = compareWithStardb(achievements, new Map([[5, 'not yet']]), [
+  it('names live achievements stardb lacks, and listed ones it shows', () => {
+    const warnings = compareWithStardb(achievements, new Map([[5, 'datamine only']]), [
       { id: 1 },
-      { id: 3, impossible: true },
-      { id: 5, impossible: false },
+      { id: 3 },
+      { id: 5 },
     ])
-    expect(warnings).toHaveLength(3)
+    expect(warnings).toHaveLength(2)
     expect(warnings[0]).toMatch(/doesn't list achievement\(s\) 2:/)
-    expect(warnings[1]).toMatch(/flags achievement\(s\) 3 impossible/)
-    expect(warnings[2]).toMatch(/lists 5, which stardb.gg now lists as obtainable/)
+    expect(warnings[1]).toMatch(/lists 5, which stardb.gg lists: .*remove them/)
   })
 
-  it('is quiet when the data and the list agree', () => {
-    const stardb = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 5, impossible: true }]
-    expect(compareWithStardb(achievements, new Map([[5, 'not yet']]), stardb)).toEqual([])
+  it("ignores stardb's impossible flag: a real achievement nobody has done yet stays", () => {
+    const stardb = [{ id: 1 }, { id: 2, impossible: true }, { id: 3, impossible: true }]
+    expect(compareWithStardb(achievements, new Map([[5, 'datamine only']]), stardb)).toEqual([])
   })
 })
 

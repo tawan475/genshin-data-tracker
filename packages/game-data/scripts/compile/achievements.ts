@@ -4,8 +4,8 @@
  *
  * - goal: `goalId`, missing for goal 0 ("Wonders of the World").
  * - hidden: `isShow == "SHOWTYPE_HIDE"`. disused: `isDisuse` (kept, not counted),
- *   or listed in overrides/achievement-unobtainable.json (datamine-only, or not
- *   obtainable yet): nobody can earn those either.
+ *   or listed in overrides/achievement-unobtainable.json (datamine-only: the
+ *   game never shows them, so nobody can earn them either).
  * - prevStage: `preStageAchievementId`, chaining the tiers of one achievement.
  * - primogems: item 201 in the `finishRewardId` reward.
  * - version: not in the game data. overrides/achievement-versions.json (seeded
@@ -56,7 +56,7 @@ export interface AchievementInputs {
 export interface AchievementContext {
   gameVersion: string
   versions: Map<number, string>
-  /** Ids nobody can earn though the game doesn't mark them disused. */
+  /** Datamine-only ids: the game neither shows them nor marks them disused. */
   unobtainable?: ReadonlyMap<number, string>
   previous?: AchievementsFile
   problems: Problems
