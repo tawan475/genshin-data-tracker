@@ -26,6 +26,10 @@ export default defineConfig(async () => {
     test: {
       include: ['worker/**/*.test.ts', 'src/**/__tests__/*.test.ts'],
       setupFiles: ['./worker/test/setup.ts'],
+      // Many worker tests sign users up and in, and each password hash is
+      // ~200 ms of Argon2id: on a busy machine a test of several logins and
+      // imports passed alone but crossed the 5 s default in a full run.
+      testTimeout: 20_000,
     },
   }
 })
