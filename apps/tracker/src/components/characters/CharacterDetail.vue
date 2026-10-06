@@ -1,73 +1,66 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Crown, Lock, Wrench } from 'lucide-vue-next'
+import { Wrench } from 'lucide-vue-next'
 import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
-import ElementBadge from '@/components/ui/ElementBadge.vue'
-import GameIcon from '@/components/ui/GameIcon.vue'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import type { AccountRef } from '@/data/account-data'
+import { buildPanel, talentLevels } from '@/data/character-build'
 import {
+  ELEMENT_LABELS,
   SLOT_ORDER,
   TARGET_LEVEL,
   WEAPON_TYPE_LABELS,
-  artifactTotals,
   type CharacterView,
 } from '@/data/characters'
 import { loadCharacterHistory } from '@/data/characters-history'
 import { useResource } from '@/data/use-resource'
-import { artifactSetIcon, characterBanner, characterIcon, weaponIcon } from '@/lib/assets'
+import { characterBanner } from '@/lib/assets'
 import { formatDate, formatFullDateTime } from '@/lib/format'
-import { formatStatName, formatStatValue } from '@/utils/artifact-stats'
 import ArtifactPiece from './ArtifactPiece.vue'
+import BuildStats from './BuildStats.vue'
 import CharacterTimeline from './CharacterTimeline.vue'
+import ConstellationIcons from './ConstellationIcons.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
 import NamecardBackdrop from './NamecardBackdrop.vue'
-import TalentGlyph from './TalentGlyph.vue'
-import { talentIcons } from './talent-icons'
-import { ELEMENT_SOFT, ELEMENT_TEXT } from './tokens'
+import SetBonuses from './SetBonuses.vue'
+import SplashArt from './SplashArt.vue'
+import TalentLevels from './TalentLevels.vue'
+import WeaponBlock from './WeaponBlock.vue'
+import { ELEMENT_GLOW } from './tokens'
+import { useConstellationBoosts } from './use-boosts'
 
-/** Everything about one character: talents, weapon, the five pieces, sets, history. */
+/**
+ * Everything about one character, Enka-style: splash art with the
+ * constellations, level, talents (C3/C5 included), weapon and the in-game
+ * stat panel; then the five pieces with their sets and crit value, and the
+ * character's history.
+ */
 const props = defineProps<{ character: CharacterView; account: AccountRef }>()
 
 const c = computed(() => props.character)
-const totals = computed(() => artifactTotals(c.value))
 
-const glyphs = computed(() => talentIcons(c.value.key))
-const talents = computed(() => [
-  {
-    key: 'auto',
-    label: 'Attack',
-    title: 'Normal attack',
-    value: c.value.talent.auto,
-    icon: glyphs.value.auto,
-  },
-  {
-    key: 'skill',
-    label: 'Skill',
-    title: 'Elemental skill',
-    value: c.value.talent.skill,
-    icon: glyphs.value.skill,
-  },
-  {
-    key: 'burst',
-    label: 'Burst',
-    title: 'Elemental burst',
-    value: c.value.talent.burst,
-    icon: glyphs.value.burst,
-  },
-])
-// The namecard art behind the summary (gone at once when stepping to the next character).
+const boosts = useConstellationBoosts(() => c.value.key)
+const talents = computed(() => talentLevels(c.value.talent, c.value.constellation, boosts.value))
+const panel = computed(() => buildPanel(c.value))
+
+// The namecard art behind the build (gone at once when stepping to the next character).
 const banner = computed(() => characterBanner(c.value.key))
-
-const glyphTone = computed(() =>
-  c.value.element
-    ? `${ELEMENT_SOFT[c.value.element]} ${ELEMENT_TEXT[c.value.element]}`
-    : 'bg-surface-overlay text-text-secondary',
+const glow = computed(() =>
+  c.value.element ? ELEMENT_GLOW[c.value.element] : 'from-border-default',
+)
+const kind = computed(() =>
+  [
+    c.value.element ? ELEMENT_LABELS[c.value.element] : null,
+    c.value.weaponType ? WEAPON_TYPE_LABELS[c.value.weaponType] : null,
+  ]
+    .filter(Boolean)
+    .join(' · '),
 )
 
 const history = useResource(
@@ -75,81 +68,96 @@ const history = useResource(
   (account) => loadCharacterHistory(account),
 )
 const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
-
-const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
 </script>
 
 <template>
   <div class="flex flex-col gap-5">
-    <!-- Summary -->
     <section
       class="relative overflow-hidden rounded-xl border border-border-default bg-surface-base"
-      aria-label="Summary"
+      aria-label="Build"
     >
+      <div
+        class="pointer-events-none absolute inset-0 bg-linear-to-br via-transparent to-transparent"
+        :class="glow"
+      />
       <NamecardBackdrop
         :src="banner"
-        class="absolute inset-y-0 right-0 h-full w-full opacity-25 [mask-image:linear-gradient(to_left,black_20%,transparent)] sm:w-3/4 dark:opacity-20"
+        class="absolute inset-y-0 right-0 h-full w-full opacity-20 [mask-image:linear-gradient(to_left,black_25%,transparent)] md:w-3/4 dark:opacity-15"
       />
-      <div class="relative flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center">
-        <div class="flex min-w-0 flex-1 items-center gap-4">
-          <GameIcon
-            :src="characterIcon(c.key)"
+
+      <div
+        class="relative grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:grid-cols-[minmax(0,12fr)_minmax(0,13fr)_minmax(0,11fr)]"
+      >
+        <!-- Splash art, constellations down its right edge -->
+        <div
+          class="relative h-72 min-[480px]:h-80 md:row-span-2 md:h-auto md:min-h-[26rem] xl:row-span-1"
+        >
+          <SplashArt
+            :character-key="c.key"
             :name="c.name"
-            :rarity="c.rarity ?? undefined"
-            size="lg"
-            class="size-20! rounded-xl! sm:size-24!"
+            :rarity="c.rarity"
+            class="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_75%,transparent)] md:[mask-image:linear-gradient(to_right,black_80%,transparent)]"
+            img-class="scale-[1.15] object-[50%_30%]"
           />
-          <div class="flex min-w-0 flex-col gap-1.5">
-            <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-secondary">
+          <ConstellationIcons
+            :character-key="c.key"
+            :value="c.constellation"
+            :element="c.element"
+            class="absolute top-1/2 right-3 -translate-y-1/2 md:right-1"
+          />
+        </div>
+
+        <!-- Who: name, level, friendship, constellation; talents; weapon -->
+        <div class="flex min-w-0 flex-col gap-4 p-4 sm:p-5 md:pl-3">
+          <header class="flex min-w-0 flex-col gap-1.5">
+            <p class="flex min-w-0 items-center gap-2">
+              <ElementIcon v-if="c.element" :element="c.element" size="lg" />
+              <span
+                class="min-w-0 truncate font-display text-2xl font-semibold sm:text-3xl"
+                :title="kind"
+                >{{ c.name }}</span
+              >
+            </p>
+            <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
               <RarityStars v-if="c.rarity" :rarity="c.rarity" />
-              <ElementBadge v-if="c.element" :element="c.element" class="text-text-primary" />
               <span v-if="c.weaponType">{{ WEAPON_TYPE_LABELS[c.weaponType] }}</span>
-              <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" />
               <time
                 v-if="c.obtainedAt !== null"
                 :datetime="new Date(c.obtainedAt).toISOString()"
                 :title="`Obtained ${formatFullDateTime(c.obtainedAt)}`"
-                >Obtained {{ formatDate(c.obtainedAt) }}</time
+                >{{ formatDate(c.obtainedAt) }}</time
               >
             </p>
-            <p class="text-2xl font-semibold">
-              <LevelText :level="c.level" :ascension="c.ascension" :target="TARGET_LEVEL" />
+            <p class="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <LevelText
+                :level="c.level"
+                :ascension="c.ascension"
+                :target="TARGET_LEVEL"
+                class="text-lg font-medium"
+              />
+              <FriendshipBadge
+                v-if="c.friendship !== null"
+                :level="c.friendship"
+                class="text-sm text-text-secondary"
+              />
+              <ConstellationStars :value="c.constellation" :element="c.element" />
             </p>
-            <ConstellationStars :value="c.constellation" :element="c.element" size="lg" />
-          </div>
+          </header>
+          <TalentLevels :character-key="c.key" :levels="talents" :element="c.element" />
+          <WeaponBlock :weapon="c.weapon" :account-id="account.id" />
         </div>
 
-        <dl class="grid grid-cols-3 gap-2 md:w-80">
-          <div
-            v-for="t in talents"
-            :key="t.key"
-            class="flex min-w-0 items-center gap-2 rounded-xl border bg-surface-raised/90 p-2 sm:p-2.5"
-            :class="t.value >= 10 ? 'border-rarity-5/60' : 'border-border-default'"
-            :title="`${t.title} ${t.value}${t.value >= 10 ? ' (crowned)' : ''}`"
-          >
-            <span
-              v-if="t.icon"
-              class="hidden size-8 shrink-0 items-center justify-center rounded-full min-[400px]:inline-flex"
-              :class="glyphTone"
-            >
-              <TalentGlyph :src="t.icon" class="size-6" />
-            </span>
-            <div class="min-w-0">
-              <dt class="truncate text-xs text-text-secondary">{{ t.label }}</dt>
-              <dd
-                class="tabular flex items-center gap-1 font-mono text-xl leading-tight font-semibold"
-                :class="t.value >= 10 ? 'text-rarity-5' : ''"
-              >
-                {{ t.value }}
-                <Crown v-if="t.value >= 10" class="size-4" aria-label="Crowned" />
-              </dd>
-            </div>
-          </div>
-        </dl>
+        <!-- The in-game stat panel -->
+        <div
+          class="min-w-0 px-4 pb-4 sm:px-5 sm:pb-5 md:col-start-2 md:pl-3 xl:col-start-3 xl:row-start-1 xl:pt-5 xl:pl-0"
+        >
+          <BuildStats :panel="panel" />
+        </div>
       </div>
+
       <p
         v-if="c.gaps.length"
-        class="relative flex flex-wrap items-center gap-1.5 border-t border-border-default px-4 py-2 sm:px-5"
+        class="relative flex flex-wrap items-center gap-1.5 border-t border-border-default bg-surface-base/70 px-4 py-2 sm:px-5"
       >
         <Wrench class="size-4 text-warning-text" aria-hidden="true" />
         <span class="sr-only">To do:</span>
@@ -157,145 +165,29 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
       </p>
     </section>
 
-    <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-      <div class="flex min-w-0 flex-col gap-5">
-        <section aria-labelledby="detail-weapon">
-          <h3 id="detail-weapon" class="mb-2 text-sm font-semibold text-text-secondary">Weapon</h3>
-          <div
-            v-if="c.weapon"
-            class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised p-3"
-          >
-            <GameIcon
-              :src="weaponIcon(c.weapon.key, c.weapon.ascension)"
-              :name="c.weapon.name"
-              :rarity="c.weapon.rarity ?? undefined"
-            />
-            <div class="flex min-w-0 flex-1 flex-col gap-1">
-              <RouterLink
-                :to="{
-                  name: 'account-weapons',
-                  params: { accountId: account.id },
-                  query: { w: c.weapon.key },
-                }"
-                class="truncate font-medium hover:text-accent-text"
-                :title="c.weapon.name"
-                >{{ c.weapon.name }}</RouterLink
-              >
-              <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <LevelText
-                  :level="c.weapon.level"
-                  :ascension="c.weapon.ascension"
-                  :target="TARGET_LEVEL"
-                />
-                <span
-                  class="inline-flex items-center gap-1.5"
-                  :title="`Refinement ${c.weapon.refinement} of 5`"
-                >
-                  <span class="tabular font-mono">R{{ c.weapon.refinement }}</span>
-                  <span class="inline-flex gap-0.5" aria-hidden="true">
-                    <span
-                      v-for="n in 5"
-                      :key="n"
-                      class="h-1.5 w-2.5 rounded-full"
-                      :class="n <= c.weapon.refinement ? 'bg-accent' : 'bg-border-strong'"
-                    />
-                  </span>
-                </span>
-                <RarityStars v-if="c.weapon.rarity" :rarity="c.weapon.rarity" />
-                <span v-if="c.weapon.lock" class="inline-flex text-text-muted" title="Locked">
-                  <Lock class="size-3.5" aria-hidden="true" />
-                  <span class="sr-only">Locked</span>
-                </span>
-              </p>
-            </div>
-          </div>
-          <p
-            v-else
-            class="rounded-xl border border-dashed border-border-strong p-3 text-sm text-text-muted"
-          >
-            None
-          </p>
-        </section>
-
-        <section v-if="c.sets.length" aria-labelledby="detail-sets">
-          <h3 id="detail-sets" class="mb-2 text-sm font-semibold text-text-secondary">Sets</h3>
-          <ul
-            class="flex flex-col divide-y divide-border-subtle rounded-xl border border-border-default bg-surface-raised"
-          >
-            <li v-for="set in c.sets" :key="set.setKey" class="flex items-center gap-2.5 px-3 py-2">
-              <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" />
-              <span class="min-w-0 flex-1 truncate text-sm" :title="set.name">{{ set.name }}</span>
-              <ul class="flex gap-1" aria-label="Bonuses">
-                <li v-for="t in set.thresholds" :key="t" class="flex">
-                  <UiBadge
-                    :tone="set.active.includes(t) ? 'success' : 'neutral'"
-                    mono
-                    :title="`${t}-piece bonus ${set.active.includes(t) ? 'active' : 'inactive'}`"
-                  >
-                    {{ t }}pc
-                    <span class="sr-only">{{
-                      set.active.includes(t) ? 'active' : 'inactive'
-                    }}</span>
-                  </UiBadge>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </section>
-
-        <section v-if="totals.length" aria-labelledby="detail-totals">
-          <h3
-            id="detail-totals"
-            class="mb-2 text-sm font-semibold text-text-secondary"
-            title="Artifact main stats and substats, summed"
-          >
-            Artifact stats
-          </h3>
-          <dl
-            class="grid grid-cols-1 gap-x-4 rounded-xl border border-border-default bg-surface-raised px-3 py-1.5 sm:grid-cols-2 lg:grid-cols-1"
-          >
-            <div
-              v-for="stat in totals"
-              :key="stat.key"
-              class="flex items-baseline justify-between gap-2 py-1 text-sm"
-            >
-              <dt
-                class="truncate"
-                :class="CRIT_KEYS.has(stat.key) ? 'text-text-primary' : 'text-text-secondary'"
-              >
-                {{ formatStatName(stat.key) }}
-              </dt>
-              <dd class="tabular font-mono" :class="CRIT_KEYS.has(stat.key) ? 'font-semibold' : ''">
-                {{ formatStatValue(stat.key, stat.value) }}
-              </dd>
-            </div>
-          </dl>
-        </section>
+    <section class="min-w-0" aria-labelledby="detail-artifacts">
+      <div class="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
+        <SetBonuses v-if="c.sets.length" :sets="c.sets" />
+        <span v-else class="text-sm text-text-muted">No artifacts</span>
+        <CritValue
+          v-if="c.artifactCount"
+          :value="c.cv"
+          scope="build"
+          label
+          class="text-sm"
+          :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
+        />
       </div>
-
-      <section class="min-w-0" aria-labelledby="detail-artifacts">
-        <div class="mb-2 flex items-baseline justify-between gap-2">
-          <h3 id="detail-artifacts" class="text-sm font-semibold text-text-secondary">Artifacts</h3>
-          <p v-if="c.artifactCount" class="flex gap-3 text-sm text-text-secondary">
-            <span title="CRIT Rate / CRIT DMG from artifacts"
-              >Crit
-              <span class="tabular font-mono text-text-primary"
-                >{{ c.critRate }}% / {{ c.critDmg }}%</span
-              ></span
-            >
-            <CritValue :value="c.cv" scope="build" label />
-          </p>
-        </div>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <ArtifactPiece
-            v-for="(slot, index) in SLOT_ORDER"
-            :key="slot"
-            :slot-key="slot"
-            :piece="c.artifacts[index] ?? null"
-          />
-        </div>
-      </section>
-    </div>
+      <div class="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <ArtifactPiece
+          v-for="(slot, index) in SLOT_ORDER"
+          :key="slot"
+          :slot-key="slot"
+          :piece="c.artifacts[index] ?? null"
+        />
+      </div>
+    </section>
 
     <section aria-labelledby="detail-changes">
       <h3 id="detail-changes" class="mb-3 text-sm font-semibold text-text-secondary">History</h3>

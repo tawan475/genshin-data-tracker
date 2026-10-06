@@ -47,3 +47,14 @@ export const RARITY_SOFT: Record<number, string> = {
   2: 'bg-rarity-2/20',
   1: 'bg-rarity-1/20',
 }
+
+/** A gradient's start in the element colour, behind a build (use with bg-linear-to-*). */
+export const ELEMENT_GLOW: Record<Element, string> = {
+  pyro: 'from-pyro/30',
+  hydro: 'from-hydro/30',
+  anemo: 'from-anemo/30',
+  electro: 'from-electro/30',
+  dendro: 'from-dendro/30',
+  cryo: 'from-cryo/30',
+  geo: 'from-geo/30',
+}
