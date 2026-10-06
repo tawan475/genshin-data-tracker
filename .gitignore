@@ -17,7 +17,7 @@ coverage
 # Diagnostics key for /api/health (x-diag-key); see apps/tracker/README
 .diag-key
 
-# Gap icons the image host lacks, copied from the local gi-cdn build (game art,
-# public repo): `pnpm --filter @gdt/game-data images --gi-cdn-dir ../gi-cdn`.
-# They ship only with a deploy from a checkout that has them.
+# Game art never enters this repo. The gap icons static.nanoka.cc lacks load
+# from gi-cdn.475.dev (the game data's GI_CDN_HOST); this folder held local
+# copies before that and must not come back.
 apps/tracker/public/gi/

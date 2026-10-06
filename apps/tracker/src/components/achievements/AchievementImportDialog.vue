@@ -8,7 +8,7 @@ import {
   type AchievementImportPlan,
   type DoneState,
   type ParsedAchievementImport,
-} from '@gdt/game-data/achievement-progress'
+} from '@/data/achievement-progress'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import { formatNumber } from '@/lib/format'

@@ -7,7 +7,7 @@ import UiInput from '@/components/ui/UiInput.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { ELEMENTS, ELEMENT_LABELS, WEAPON_TYPES, WEAPON_TYPE_LABELS } from '@/data/characters'
-import type { Element } from '@/data/characters-meta'
+import type { Element } from '@/data/game-meta'
 import { GOAL_SORTS, type GoalFilters, type GoalSort, type GoalStatus } from './goal-list'
 
 /**

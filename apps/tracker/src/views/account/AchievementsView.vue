@@ -33,7 +33,7 @@ import {
   type CapturedAchievements,
   type DoneState,
   type ProgressCount,
-} from '@gdt/game-data/achievement-progress'
+} from '@/data/achievement-progress'
 import AchievementCategories, {
   type CategoryItem,
 } from '@/components/achievements/AchievementCategories.vue'

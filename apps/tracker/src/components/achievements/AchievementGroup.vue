@@ -4,7 +4,7 @@ import type {
   AchievementEntry,
   CapturedAchievements,
   DoneState,
-} from '@gdt/game-data/achievement-progress'
+} from '@/data/achievement-progress'
 import { formatNumber } from '@/lib/format'
 import type { CategoryItem } from './AchievementCategories.vue'
 import AchievementRow from './AchievementRow.vue'

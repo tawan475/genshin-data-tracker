@@ -1,4 +1,4 @@
-import type { DoneOn } from '@gdt/game-data/achievement-progress'
+import type { DoneOn } from '@/data/achievement-progress'
 import { formatBetween, formatDate, formatDateTime, nowrap } from '@/lib/format'
 
 /** A row's completion as it reads (`text`) and its tooltip (`title`). */

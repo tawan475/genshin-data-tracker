@@ -5,7 +5,7 @@ import type {
   AchievementFilters,
   Completion,
   HiddenFilter,
-} from '@gdt/game-data/achievement-progress'
+} from '@/data/achievement-progress'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'

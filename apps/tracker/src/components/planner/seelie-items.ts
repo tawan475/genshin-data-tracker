@@ -6,7 +6,7 @@
  * pick exactly one family (or item) of the type's kinds; the rest are in the
  * alias table. Anything else is reported, not guessed.
  *
- * Belongs next to `@gdt/game-data/seelie` (goals) once that package takes it.
+ * The goals half of a Seelie import is `@/data/seelie`.
  */
 
 import type { MaterialKind, PlannerData, PlannerMaterial } from '@gdt/game-data'

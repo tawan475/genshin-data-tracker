@@ -5,7 +5,7 @@
  */
 
 import type { WeaponType } from '@gdt/game-data'
-import type { Element } from '@/data/characters-meta'
+import type { Element } from '@/data/game-meta'
 import { normalizeSearch } from '@/data/characters'
 import type { GoalEntry, ItemGoalView } from './model'
 

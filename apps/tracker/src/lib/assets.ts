@@ -1,16 +1,16 @@
 /**
  * Game images. They load from static.nanoka.cc (`<name>.webp`, CORS open,
- * behind Cloudflare), except the names that host lacks: of those, the ones a
- * client extraction has are served from this app's own `/gi/<name>.webp`
- * (public/gi/, copied from the local gi-cdn build and gitignored; a deploy
- * without them 404s there, and the image components show initials on error),
- * and the rest return '', so GameIcon shows initials. Both
- * lists come from data/missing-images.json (`pnpm --filter @gdt/game-data
- * images`); the service worker keeps either kind cache-first. The names
- * come only from our own game data (@gdt/game-data, compiled from the
- * game's tables): `images` for characters, weapons, artifacts and a few
- * items, the material index for materials, achievement categories for
- * theirs. The Traveler's portrait follows the account's twin setting.
+ * behind Cloudflare), except the names that host lacks: of those, the ones
+ * gi-cdn.475.dev serves (`ui/<name>.webp`, extracted from the game client by
+ * the private gi-cdn repo; it answers only this site's pages and service
+ * worker) load from there, and the rest return '', so GameIcon shows
+ * initials. Both hosts and both lists come from the game data
+ * (`@gdt/game-data/image-url`, data/missing-images.json); the service worker
+ * keeps either kind cache-first. The names come only from our own game data
+ * (@gdt/game-data, compiled from the game's tables): `images` for
+ * characters, weapons, artifacts and a few items, the material index for
+ * materials, achievement categories for theirs. The Traveler's portrait
+ * follows the account's twin setting.
  */
 
 import {
@@ -23,7 +23,7 @@ import {
   type ArtifactSlot,
   type TravelerGender,
 } from '@gdt/game-data/images'
-import { imageUrlOf } from '@gdt/game-data/image-url'
+import { GI_CDN_HOST, IMAGE_HOST, imageUrlOf } from '@gdt/game-data/image-url'
 import { shallowRef } from 'vue'
 import {
   loadImageCoverage,
@@ -32,25 +32,26 @@ import {
   type MaterialIndex,
 } from '@gdt/game-data'
 
-/** The image host (also in the service worker and index.html's preconnect). */
-export const IMAGE_BASE = 'https://static.nanoka.cc/assets/gi/'
-
-/** This app's own copies of images the host lacks (public/gi/, also in the service worker). */
-export const OWN_IMAGE_BASE = '/gi/'
+/**
+ * The image host and gi-cdn, as the game data writes them (vite.config.ts
+ * gives the service worker and index.html's preconnect the same).
+ */
+export const IMAGE_BASE = IMAGE_HOST
+export const GI_CDN_BASE = GI_CDN_HOST
 
 /**
- * What the host lacks and what we serve instead; null until loadGameIcons
- * resolves. Reactive, so images rendered before it arrived switch to our
- * copy or to initials.
+ * What the host lacks and what gi-cdn serves of it; null until
+ * loadGameIcons resolves. Reactive, so images rendered before it arrived
+ * switch to gi-cdn or to initials.
  */
 const coverage = shallowRef<ImageCoverage | null>(null)
 
 /**
- * URL of a game image by name: the host's, ours for a name the host lacks,
- * or '' (no name, or no image anywhere).
+ * URL of a game image by name: the host's, gi-cdn's for a name the host
+ * lacks, or '' (no name, or no image anywhere).
  */
 export function imageUrl(name: string | undefined): string {
-  return imageUrlOf(name, coverage.value, IMAGE_BASE, OWN_IMAGE_BASE)
+  return imageUrlOf(name, coverage.value, IMAGE_BASE, GI_CDN_BASE)
 }
 
 /**
