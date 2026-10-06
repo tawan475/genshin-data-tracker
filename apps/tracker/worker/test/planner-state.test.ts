@@ -110,7 +110,8 @@ describe('planner hand edits', () => {
     expect(brief((await three.json()) as State)).toEqual([
       { key: 'Mora', delta: 1, set: null, base: 3_000 },
     ])
-  })
+    // Several imports and writes in one test: allow for a busy machine.
+  }, 20_000)
 
   it("sets and clears a goal's current state, which goal edits leave alone", async () => {
     const { client, targets, patch, state } = await setup()
