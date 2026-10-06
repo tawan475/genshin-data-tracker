@@ -4,12 +4,12 @@ import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, reactive, watch } from 'vue'
 import { ChartLine, Minus, Plus, RotateCcw } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import type { ItemContext } from './item-popover'
+import { materialSoft } from './material-soft'
 
 /**
  * The inventory editor every material icon opens: the material's whole
@@ -214,7 +214,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
       >
         <span
           class="size-10 shrink-0 overflow-hidden rounded-lg text-xs"
-          :class="RARITY_SOFT[row.material.rarity] ?? 'bg-surface-sunken'"
+          :class="materialSoft(row.material.key, row.material.rarity)"
         >
           <MaterialIcon :src="iconOf(row.material)" :name="row.material.name" />
         </span>

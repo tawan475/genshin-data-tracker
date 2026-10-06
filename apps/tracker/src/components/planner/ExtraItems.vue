@@ -10,10 +10,10 @@ import {
 import { computed } from 'vue'
 import { Eye, EyeOff, Plus } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { STOCK_MEANING, STOCK_TONE } from './farm-format'
+import { materialSoft } from './material-soft'
 import type { ItemGoalView } from './model'
 
 /**
@@ -95,7 +95,7 @@ const rows = computed(() =>
         >
           <span
             class="size-10 shrink-0 overflow-hidden rounded-lg text-xs"
-            :class="RARITY_SOFT[row.item.material?.rarity ?? 0] ?? 'bg-surface-sunken'"
+            :class="materialSoft(row.item.key, row.item.material?.rarity)"
           >
             <MaterialIcon :src="row.icon" :name="row.item.name" />
           </span>

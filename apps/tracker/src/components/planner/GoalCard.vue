@@ -15,13 +15,13 @@ import {
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import { artifactSetIcon, characterIcon, gameIcon, materialIcon, weaponIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { formatSetName } from '@/utils/artifact-stats'
 import { characterParts, weaponPart, type DonePart } from './done'
 import { ARTIFACTS_LEFT, READINESS } from './farm-format'
 import { fromTouch, useItemPopover } from './item-popover'
+import { materialSoft } from './material-soft'
 import { levelLabel, type GoalEntry, type NextHint, type WeaponGoalView } from './model'
 import type { GoalNeeds, NeedChip } from './needs'
 
@@ -420,7 +420,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
           >
             <span
               class="size-8 overflow-hidden rounded-md text-[0.625rem]"
-              :class="RARITY_SOFT[chip.material.rarity] ?? 'bg-surface-sunken'"
+              :class="materialSoft(chip.material.key, chip.material.rarity)"
             >
               <MaterialIcon :src="chipIcon(chip)" :name="chip.material.name" />
             </span>

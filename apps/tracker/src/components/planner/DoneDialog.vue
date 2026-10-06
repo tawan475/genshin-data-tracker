@@ -3,12 +3,13 @@ import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import { computed } from 'vue'
 import { ArrowRight, Check, TriangleAlert } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
+import { materialName } from '@/utils/materials'
 import type { DoneCost } from './done'
+import { materialSoft } from './material-soft'
 
 /**
  * The check before a Done: what it sets (from → to) and what it takes out
@@ -59,9 +60,13 @@ function items(map: ReadonlyMap<string, number> | undefined): Item[] {
       return {
         key,
         material,
-        name: material?.name ?? key,
+        name: material?.name ?? materialName(key),
         icon:
-          key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(material?.icon ?? ''),
+          key === props.planner.mora.key
+            ? materialIcon('Mora')
+            : material
+              ? gameIcon(material.icon)
+              : materialIcon(key),
         count,
       }
     })
@@ -78,7 +83,7 @@ const short = computed(() => items(props.cost?.short))
 const steps = computed(() =>
   (props.cost?.steps ?? []).map((s) =>
     s.kind === 'forge'
-      ? `Forge ${formatNumber(s.count)} ${s.to.name} from ${formatNumber(s.uses)} ${props.planner.materialsByKey.get(s.input)?.name ?? s.input}`
+      ? `Forge ${formatNumber(s.count)} ${s.to.name} from ${formatNumber(s.uses)} ${props.planner.materialsByKey.get(s.input)?.name ?? materialName(s.input)}`
       : s.kind === 'craft'
         ? `Craft ${formatNumber(s.count)} ${s.to.name} from ${formatNumber(s.uses)} ${s.from.name}`
         : `Convert ${formatNumber(s.count)} ${s.from.name} into ${s.to.name}`,
@@ -102,7 +107,7 @@ const steps = computed(() =>
           <li v-for="i in take" :key="i.key" class="flex items-center gap-2.5">
             <span
               class="size-9 shrink-0 overflow-hidden rounded-lg text-xs"
-              :class="RARITY_SOFT[i.material?.rarity ?? 0] ?? 'bg-surface-sunken'"
+              :class="materialSoft(i.key, i.material?.rarity)"
             >
               <MaterialIcon :src="i.icon" :name="i.name" />
             </span>
@@ -131,7 +136,7 @@ const steps = computed(() =>
           <li v-for="i in short" :key="i.key" class="flex items-center gap-2.5">
             <span
               class="size-8 shrink-0 overflow-hidden rounded-lg text-xs"
-              :class="RARITY_SOFT[i.material?.rarity ?? 0] ?? 'bg-surface-sunken'"
+              :class="materialSoft(i.key, i.material?.rarity)"
             >
               <MaterialIcon :src="i.icon" :name="i.name" />
             </span>

@@ -3,7 +3,6 @@ import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import { ELEMENT_KEYS, WEAPON_TYPE_KEYS, type CustomCharacter } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiInput from '@/components/ui/UiInput.vue'
@@ -13,6 +12,7 @@ import { ELEMENT_LABELS, WEAPON_TYPE_LABELS } from '@/data/characters'
 import { toElement } from '@/data/game-meta'
 import { gameIcon } from '@/lib/assets'
 import { customChoices, familyName } from './custom-character'
+import { materialSoft } from './material-soft'
 
 /**
  * What a custom character is: name, rarity, element, weapon type and its
@@ -132,7 +132,7 @@ const weaponOptions = WEAPON_TYPE_KEYS.map((w) => ({ value: w, label: WEAPON_TYP
           class="size-10 shrink-0 overflow-hidden rounded-lg text-[0.625rem]"
           :class="
             shown(s.slot)
-              ? (RARITY_SOFT[shown(s.slot)!.rarity] ?? 'bg-surface-sunken')
+              ? materialSoft(shown(s.slot)!.key, shown(s.slot)!.rarity)
               : 'bg-surface-sunken'
           "
         >

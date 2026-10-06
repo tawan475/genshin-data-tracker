@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Plus, X } from 'lucide-vue-next'
+import { RARITY_SOFT } from '@/components/characters/tokens'
 import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { MAX_SERIES } from '@/components/materials/use-materials-graph'
@@ -10,7 +11,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { formatRangeEdge, formatWindow, type ChartRange } from '@/data/chart-range'
 import type { ChartFrame, MaterialsHistory } from '@/data/materials'
 import { clock24, formatNumber } from '@/lib/format'
-import { materialName } from '@/utils/materials'
+import { materialName, materialRarity } from '@/utils/materials'
 import DeltaText from './DeltaText.vue'
 import MaterialIcon from './MaterialIcon.vue'
 import { chartPoints, frameChange, frameStart } from './material-stats'
@@ -46,6 +47,7 @@ const rows = computed(() =>
     return {
       key,
       name,
+      rarity: materialRarity(key),
       series: [series],
       count: props.history.latest.get(key) ?? 0,
       change: frameChange(props.history, key, props.frame),
@@ -101,7 +103,10 @@ const rows = computed(() =>
             :title="row.name"
             @click="emit('open', row.key)"
           >
-            <span class="size-10 shrink-0 rounded-lg bg-surface-overlay p-0.5 text-xs">
+            <span
+              class="size-10 shrink-0 rounded-lg p-0.5 text-xs"
+              :class="RARITY_SOFT[row.rarity ?? 0] ?? 'bg-surface-overlay'"
+            >
               <MaterialIcon :src="icon(row.key)" :name="row.name" />
             </span>
             <span class="flex min-w-0 flex-col">

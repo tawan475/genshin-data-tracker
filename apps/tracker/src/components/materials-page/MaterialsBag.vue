@@ -13,6 +13,7 @@ import {
   SearchX,
   Upload,
 } from 'lucide-vue-next'
+import { RARITY_SOFT } from '@/components/characters/tokens'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
@@ -50,8 +51,6 @@ const props = defineProps<{
   hint: string
   tracked: string[]
   icon: (key: string) => string
-  /** A tile's backdrop rarity; null where the data has none. */
-  rarity: (key: string) => number | null
   importTo: RouteLocationRaw
   /** Counts set by hand on the Planner (where they differ from the capture's). */
   edited?: ReadonlyMap<string, number>
@@ -417,7 +416,7 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
               <MaterialTile
                 :name="item.name"
                 :src="icon(item.key)"
-                :rarity="rarity(item.key)"
+                :rarity="item.rarity"
                 :count="countOf(item)"
                 :change="changeOf(item.key)"
                 :tracked="trackedSet.has(item.key)"
@@ -438,8 +437,11 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
                 @click="open(item.key, $event)"
               >
                 <span
-                  class="relative size-10 shrink-0 rounded-lg bg-surface-overlay p-0.5 text-xs"
-                  :class="item.count === 0 ? 'opacity-40 grayscale' : ''"
+                  class="relative size-10 shrink-0 rounded-lg p-0.5 text-xs"
+                  :class="[
+                    RARITY_SOFT[item.rarity ?? 0] ?? 'bg-surface-overlay',
+                    item.count === 0 ? 'opacity-40 grayscale' : '',
+                  ]"
                 >
                   <MaterialIcon :src="icon(item.key)" :name="item.name" />
                   <span

@@ -42,6 +42,7 @@ import { loadMaterialsHistory, type MaterialsHistory } from '@/data/materials'
 import { useResource } from '@/data/use-resource'
 import { formatDate, formatDateTime, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { preloadMaterialNames, preloadMaterialRarities } from '@/utils/materials'
 import { useAccount } from './context'
 
 /**
@@ -57,13 +58,22 @@ const account = useAccount()
 const icon = useMaterialIcons()
 const graph = useMaterialsGraph(() => account.value.id)
 
+// The game's names load alongside (their own chunk, not waited for): until
+// they are in, names are the keys' words, and everything showing one updates.
+void preloadMaterialNames()
+
 // Tagged with the account id, so switching accounts shows a skeleton rather
-// than the previous account's materials while the next one loads.
+// than the previous account's materials while the next one loads. The index
+// (rarities) is the chunk the bag's order already waits for.
 const resource = useResource(
   () => account.value,
   async (a): Promise<{ accountId: number; history: MaterialsHistory | null }> => {
     if (!a.latest) return { accountId: a.id, history: null }
-    const [history] = await Promise.all([loadMaterialsHistory(a), loadMaterialMeta()])
+    const [history] = await Promise.all([
+      loadMaterialsHistory(a),
+      loadMaterialMeta(),
+      preloadMaterialRarities(),
+    ])
     return { accountId: a.id, history }
   },
 )
@@ -137,11 +147,6 @@ const edited = computed(() => {
   }
   return map
 })
-
-/** A tile's backdrop: the planner data's rarity (the only material rarity the data has). */
-function rarityOf(key: string): number | null {
-  return planning.planner.value?.materialsByKey.get(key)?.rarity || null
-}
 
 function openTile(key: string, anchor: HTMLElement, touch: boolean) {
   const known = planning.planner.value?.materialsByKey.has(key)
@@ -248,7 +253,6 @@ const importTo = computed(() => ({
       :hint="hint"
       :tracked="graph.selectedKeys.value"
       :icon="icon"
-      :rarity="rarityOf"
       :import-to="importTo"
       :edited="edited"
       @open="openTile"
