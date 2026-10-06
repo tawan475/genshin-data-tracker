@@ -2,9 +2,10 @@
 import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, reactive, watch } from 'vue'
-import { Minus, Plus, RotateCcw } from 'lucide-vue-next'
+import { ChartLine, Minus, Plus, RotateCcw } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { RARITY_SOFT } from '@/components/characters/tokens'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
@@ -15,8 +16,10 @@ import type { ItemContext } from './item-popover'
  * family (talent books, gems… tier by tier; EXP books or ores together),
  * each with what all goals need, what is still missing after crafting
  * (and what crafting covers), what the goal it was opened from needs, and
- * the count held: typed, or ±1 with the buttons, ↑/↓ or W/S (Shift: ±10).
- * A count that differs from the capture shows it, with a reset.
+ * the count held: typed, or ±1 with the buttons, ↑/↓ or W/S (Shift: ±10),
+ * or what was just obtained added on Enter or leaving the field (after a
+ * domain run). A count that differs from the capture shows it, with a reset.
+ * `history` adds a button to the material's history (the Materials page).
  */
 const props = defineProps<{
   open: boolean
@@ -31,8 +34,16 @@ const props = defineProps<{
   /** The capture's counts (none without a capture). */
   capture: Readonly<Record<string, number>>
   totals: PlanTotals | null
+  /** Offer the material's history (emits `history`). */
+  history?: boolean
 }>()
-const emit = defineEmits<{ close: []; change: [key: string, value: number] }>()
+const emit = defineEmits<{
+  close: []
+  change: [key: string, value: number]
+  /** Obtained: add to the count. */
+  add: [key: string, count: number]
+  history: [key: string]
+}>()
 
 const material = computed(() =>
   props.itemKey ? (props.planner.materialsByKey.get(props.itemKey) ?? null) : null,
@@ -136,6 +147,27 @@ function onKey(row: Row, event: KeyboardEvent) {
 }
 
 const value = (row: Row) => drafts.get(row.material.key) ?? String(row.have)
+
+/** What is typed in the "obtained" fields, per material. */
+const gains = reactive(new Map<string, string>())
+watch(
+  () => props.open,
+  () => gains.clear(),
+)
+
+function onGain(row: Row, event: Event) {
+  const input = event.target as HTMLInputElement
+  const digits = input.value.replace(/\D+/g, '').slice(0, 9)
+  if (digits !== input.value) input.value = digits
+  gains.set(row.material.key, digits)
+}
+
+/** Adds what was typed in the row's "obtained" field (Enter, or leaving it). */
+function commitGain(row: Row) {
+  const n = Number(gains.get(row.material.key) ?? '')
+  gains.delete(row.material.key)
+  if (Number.isInteger(n) && n > 0) emit('add', row.material.key, n)
+}
 const title = computed(() => material.value?.name ?? '')
 const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
 </script>
@@ -153,6 +185,13 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
         <h2 class="truncate text-base font-semibold">{{ title }}</h2>
         <p v-if="context" class="truncate text-xs text-text-muted">{{ context.label }}</p>
       </div>
+      <UiIconButton
+        v-if="history && material"
+        :label="`${title}: history`"
+        @click="emit('history', material.key)"
+      >
+        <ChartLine class="size-5" aria-hidden="true" />
+      </UiIconButton>
     </template>
 
     <p
@@ -170,7 +209,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
       <li
         v-for="row in rows"
         :key="row.material.key"
-        class="flex items-center gap-3 px-4 py-2"
+        class="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-2"
         :class="row.material.key === itemKey ? 'bg-surface-overlay/60' : ''"
       >
         <span
@@ -179,7 +218,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
         >
           <MaterialIcon :src="iconOf(row.material)" :name="row.material.name" />
         </span>
-        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span class="flex min-w-[6rem] flex-1 flex-col gap-0.5">
           <span class="line-clamp-2 text-sm leading-tight font-medium break-words">{{
             row.material.name
           }}</span>
@@ -211,37 +250,52 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
             </span>
           </span>
         </span>
-        <span class="flex shrink-0 items-center">
-          <button
-            type="button"
-            class="inline-flex size-9 items-center justify-center rounded-l-md border border-border-strong bg-surface-overlay text-text-secondary hover:text-text-primary disabled:opacity-40"
-            :aria-label="`${row.material.name} −1`"
-            :disabled="row.have === 0"
-            @click="set(row, row.have - 1)"
-          >
-            <Minus class="size-4" aria-hidden="true" />
-          </button>
+        <span class="ml-auto flex shrink-0 items-center gap-1.5">
+          <span class="flex items-center">
+            <button
+              type="button"
+              class="inline-flex size-9 items-center justify-center rounded-l-md border border-border-strong bg-surface-overlay text-text-secondary hover:text-text-primary disabled:opacity-40"
+              :aria-label="`${row.material.name} −1`"
+              :disabled="row.have === 0"
+              @click="set(row, row.have - 1)"
+            >
+              <Minus class="size-4" aria-hidden="true" />
+            </button>
+            <input
+              :value="value(row)"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              :autofocus="row.material.key === itemKey || undefined"
+              :aria-label="`${row.material.name} held`"
+              :title="keysHint"
+              class="tabular h-9 w-16 border-y border-border-strong bg-surface-raised px-1 text-center font-mono text-sm text-text-primary focus:relative focus:z-10 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
+              @input="onInput(row, $event)"
+              @keydown="onKey(row, $event)"
+              @blur="drafts.delete(row.material.key)"
+            />
+            <button
+              type="button"
+              class="inline-flex size-9 items-center justify-center rounded-r-md border border-border-strong bg-surface-overlay text-text-secondary hover:text-text-primary"
+              :aria-label="`${row.material.name} +1`"
+              @click="set(row, row.have + 1)"
+            >
+              <Plus class="size-4" aria-hidden="true" />
+            </button>
+          </span>
           <input
-            :value="value(row)"
+            :value="gains.get(row.material.key) ?? ''"
             type="text"
             inputmode="numeric"
             autocomplete="off"
-            :autofocus="row.material.key === itemKey || undefined"
-            :aria-label="`${row.material.name} held`"
-            :title="keysHint"
-            class="tabular h-9 w-[4.5rem] border-y border-border-strong bg-surface-raised px-1 text-center font-mono text-sm text-text-primary focus:relative focus:z-10 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
-            @input="onInput(row, $event)"
-            @keydown="onKey(row, $event)"
-            @blur="drafts.delete(row.material.key)"
+            placeholder="+ add"
+            :aria-label="`${row.material.name}: add obtained`"
+            title="Add what you got (Enter)"
+            class="tabular h-9 w-12 rounded-md border border-border-default bg-surface-raised px-1 text-center font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
+            @input="onGain(row, $event)"
+            @keydown.enter.prevent="commitGain(row)"
+            @blur="commitGain(row)"
           />
-          <button
-            type="button"
-            class="inline-flex size-9 items-center justify-center rounded-r-md border border-border-strong bg-surface-overlay text-text-secondary hover:text-text-primary"
-            :aria-label="`${row.material.name} +1`"
-            @click="set(row, row.have + 1)"
-          >
-            <Plus class="size-4" aria-hidden="true" />
-          </button>
         </span>
       </li>
     </ul>

@@ -1,17 +1,8 @@
 <script setup lang="ts">
-import { loadPlanner } from '@gdt/game-data'
-import { NO_PLAYER } from '@/data/account-player'
-import { loadDropRates } from '@gdt/game-data/drops'
 import { craftingSteps } from '@gdt/game-data/planner-convert'
-import { domainSchedule, farmPlan, resinNow, todayPlan } from '@gdt/game-data/planner-estimate'
-import {
-  createRequirementCache,
-  itemGoal,
-  planTotals,
-  type PlanGoal,
-  type PlanOptions,
-} from '@gdt/game-data/planner-math'
-import type { Good, PlannerTarget } from '@gdt/shared'
+import { farmPlan, resinNow } from '@gdt/game-data/planner-estimate'
+import { itemGoal, type PlanGoal } from '@gdt/game-data/planner-math'
+import type { PlannerTarget } from '@gdt/shared'
 import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Clock, FileInput, Info, Plus, SearchX, Settings2, Target, Upload } from 'lucide-vue-next'
@@ -28,6 +19,8 @@ import PlannerSettings from '@/components/planner/PlannerSettings.vue'
 import SeelieImport from '@/components/planner/SeelieImport.vue'
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
 import { READINESS } from '@/components/planner/farm-format'
+import { farmDay } from '@/components/planner/farm-today'
+import { provideGoalActions } from '@/components/planner/goal-actions'
 import {
   GOAL_SORTS,
   NO_GOAL_FILTERS,
@@ -39,14 +32,8 @@ import {
   type GoalFilters,
   type GoalSort,
 } from '@/components/planner/goal-list'
-import {
-  countChange,
-  effectiveInventory,
-  replacedAdjustments,
-} from '@/components/planner/hand-edits'
 import { provideItemPopover, type ItemRequest } from '@/components/planner/item-popover'
 import {
-  buildBoard,
   characterGoalId,
   entryGoal,
   inputOf,
@@ -60,11 +47,11 @@ import {
   type GoalEntry,
   type ItemGoalView,
   type NextHint,
-  type RequirementCache,
 } from '@/components/planner/model'
 import { goalNeeds, type GoalNeeds } from '@/components/planner/needs'
-import { usePlannerState, type CurrentChange } from '@/components/planner/use-planner-state'
-import { upsert, usePlannerTargets } from '@/components/planner/use-planner-targets'
+import type { CurrentChange } from '@/components/planner/use-planner-state'
+import { usePlannerModel } from '@/components/planner/use-planner-model'
+import { upsert } from '@/components/planner/use-planner-targets'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
@@ -73,15 +60,8 @@ import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
-import { usePlannerSettings } from '@/data/planner-settings'
-import { useResource } from '@/data/use-resource'
-import { loadGameIcons, loadMaterialIcons } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
-import { updatesHeld } from '@/live/holds'
-import { onPlannerChange } from '@/live/planner-changes'
-import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useAccount } from './context'
 
@@ -100,117 +80,39 @@ import { useAccount } from './context'
  * planner settings live on the server; other tabs and devices follow live.
  */
 const account = useAccount()
-const accounts = useAccounts()
+const route = useRoute()
+const router = useRouter()
 const feedback = useFeedback()
-const accountId = computed(() => account.value.id)
-/** The capture hand edits are made against: the newest one's last sighting, 0 for none. */
-const base = computed(() => account.value.latest?.lastSeenAt ?? 0)
 
-const NO_CAPTURE: Good = {
-  format: 'GOOD',
-  version: 3,
-  source: '',
-  characters: [],
-  artifacts: [],
-  weapons: [],
-  materials: {},
-}
-
-// ------------------------------------------------------------------ data
-
-const resource = useResource(
-  () => account.value,
-  async (a) => {
-    const [inventory, planner, drops, player] = await Promise.all([
-      a.latest ? loadLatestInventory(a) : Promise.resolve(null),
-      loadPlanner(),
-      // No rates means no estimates, not a broken page.
-      loadDropRates().catch(() => null),
-      // Nice to have: without it the settings (or the top bracket) decide.
-      a.latest ? loadAccountPlayer(a).catch(() => NO_PLAYER) : Promise.resolve(NO_PLAYER),
-      loadGameIcons(),
-      loadMaterialIcons(),
-    ])
-    return { accountId: a.id, inventory, planner, drops, player }
-  },
-)
-const data = computed(() => {
-  const value = resource.data.value
-  return value && value.accountId === account.value.id ? value : undefined
-})
-const planner = computed(() => data.value?.planner ?? null)
-/** The newest capture (an empty one when there is none). */
-const good = computed(() => (data.value ? (data.value.inventory?.good ?? NO_CAPTURE) : null))
-const drops = computed(() => data.value?.drops ?? null)
-const hasCapture = computed(() => !!data.value?.inventory)
-
-const store = usePlannerTargets(accountId)
-onBeforeUnmount(() => void store.flush())
-
-const state = usePlannerState(accountId, base, async (id) => {
-  // The page's account is behind the server: bring it up to date now.
-  await accounts.reload(id).catch(() => {})
-  accounts.applyPending(true)
-})
-onBeforeUnmount(() => void state.flush())
-
-/** The bag the planner works with: the capture's counts and the hand edits that still apply. */
-const bag = computed(() => {
-  const g = good.value
-  const edits = state.adjustments.value
-  return g && edits ? effectiveInventory(g.materials, edits, base.value) : null
-})
-/** The capture with the planner's bag, for the dialogs that read counts. */
-const goodView = computed<Good | null>(() =>
-  good.value && bag.value ? { ...good.value, materials: bag.value } : null,
-)
-/** Edits a newer capture replaced (until the next write drops them). */
-const replaced = computed(() =>
-  state.adjustments.value ? replacedAdjustments(state.adjustments.value, base.value).length : 0,
-)
-
-const { settings, save: saveSettings } = usePlannerSettings(accountId)
+const {
+  accountId,
+  resource,
+  data,
+  planner,
+  good,
+  drops,
+  hasCapture,
+  store,
+  state,
+  bag,
+  goodView,
+  replaced,
+  settings,
+  saveSettings,
+  player,
+  ar,
+  wl,
+  forge,
+  passiveOwners,
+  planOptions,
+  requirementCache,
+  board,
+  totals,
+  setCount,
+  addCount,
+} = usePlannerModel(account)
 const settingsOpen = ref(false)
-/** What irminsul read at the newest login; an AR/WL setting wins over it. */
-const player = computed(() => data.value?.player ?? NO_PLAYER)
-const ar = computed(() => settings.value.ar ?? player.value.ar)
-const wl = computed(() => settings.value.wl ?? player.value.wl)
 
-/** Count the Mystic ore the chunks held can be forged into (this device's choice). */
-const forge = ref(readStorage('planner:forge') === '1')
-watch(forge, (value) => writeStorage('planner:forge', value ? '1' : '0'))
-
-/** Characters in the snapshot, for the Mora passives (Raiden Shogun, Wanderer). */
-const ownedCharacters = computed(() => new Set((good.value?.characters ?? []).map((c) => c.key)))
-const passiveOwners = computed(() =>
-  settings.value.planner.passives ? ownedCharacters.value : null,
-)
-const planOptions = computed<PlanOptions>(() => ({
-  azoth: settings.value.planner.azoth,
-  passives: passiveOwners.value,
-  forge: forge.value,
-}))
-
-// One per planner data (it never changes): each goal's cost is computed once per state.
-let cache: RequirementCache | null = null
-const requirementCache = computed(() =>
-  planner.value ? (cache ??= createRequirementCache(planner.value)) : null,
-)
-const board = computed(() => {
-  const p = planner.value
-  const g = good.value
-  const b = bag.value
-  const targets = store.targets.value
-  const overrides = state.overrides.value
-  const c = requirementCache.value
-  if (!p || !g || !b || !targets || !overrides || !c) return null
-  return buildBoard(p, g, b, targets, c, overrides)
-})
-const totals = computed(() =>
-  planner.value && bag.value && board.value
-    ? planTotals(planner.value, board.value.goals, bag.value, planOptions.value)
-    : null,
-)
 const plan = computed(() =>
   planner.value && totals.value
     ? farmPlan(planner.value, totals.value, drops.value, {
@@ -222,23 +124,29 @@ const plan = computed(() =>
 const steps = computed(() =>
   planner.value && totals.value ? craftingSteps(planner.value, totals.value) : [],
 )
-const schedule = computed(() => (plan.value ? domainSchedule(plan.value) : []))
 
 // A clock for today's domains, the reset countdown and the resin estimate.
 const now = ref(Date.now())
 const clock = setInterval(() => (now.value = Date.now()), 30_000)
 onBeforeUnmount(() => clearInterval(clock))
-const today = computed(() =>
-  plan.value ? todayPlan(plan.value, now.value, account.value.server) : null,
-)
+/**
+ * Dev only: `?at=2026-10-04T12:00:00Z` (or ms) pins the farm clock, to see
+ * another server day (Sunday, a reset) without waiting for it.
+ */
+const pinned = computed(() => {
+  if (!import.meta.env.DEV) return null
+  const raw = route.query.at
+  if (typeof raw !== 'string' || raw === '') return null
+  const at = /^\d+$/.test(raw) ? Number(raw) : Date.parse(raw)
+  return Number.isFinite(at) ? at : null
+})
+const day = computed(() => farmDay(pinned.value ?? now.value, account.value.server))
 const resin = computed(() => {
   const at = account.value.latest?.takenAt
   return planner.value && bag.value && at !== undefined && hasCapture.value
     ? resinNow(planner.value, bag.value, at, now.value, player.value.resin)
     : null
 })
-/** Weapon EXP still short (after forging, when that is on). */
-const oreShort = computed(() => (totals.value?.weaponExp.missing ?? 0) > 0)
 
 /** Each card's cost as one goal (a character with its weapons). */
 const entryGoals = computed(() => {
@@ -357,14 +265,8 @@ const TABS: { value: Tab; label: string }[] = [
 const tab = ref<Tab>(readStorage('planner:tab') === 'goals' ? 'goals' : 'farm')
 watch(tab, (value) => writeStorage('planner:tab', value))
 
-const missingOnly = ref(readStorage('planner:missing') !== '0')
-watch(missingOnly, (value) => writeStorage('planner:missing', value ? '1' : '0'))
-
-type FarmView = 'sources' | 'schedule' | 'craft'
-const savedFarmView = readStorage('planner:farm')
-const farmView = ref<FarmView>(
-  savedFarmView === 'schedule' || savedFarmView === 'craft' ? savedFarmView : 'sources',
-)
+type FarmView = 'today' | 'schedule'
+const farmView = ref<FarmView>(readStorage('planner:farm') === 'schedule' ? 'schedule' : 'today')
 watch(farmView, (value) => writeStorage('planner:farm', value))
 
 // ------------------------------------------------------------------ goals
@@ -452,6 +354,61 @@ function toggleItem(item: ItemGoalView) {
   store.change([upsert({ kind: 'item', key: item.key, target })])
 }
 
+// ------------------------------------------------------------ farm cards
+// A portrait on a farm card opens its goal; a long press or right click pauses it.
+
+/** The goal card a goal id is on (a weapon goal's: its holder's card when there is one). */
+function entryOf(id: string): GoalEntry | null {
+  return (
+    board.value?.entries.find(
+      (e) => e.character?.id === id || e.weapons.some((w) => w.id === id),
+    ) ?? null
+  )
+}
+
+function openGoal(id: string) {
+  const [kind, key = ''] = id.split(':')
+  if (kind === 'item') {
+    openEditor({ kind: 'item', key })
+    return
+  }
+  const entry = entryOf(id)
+  if (entry) openEntry(entry)
+}
+
+/** Stops counting a goal's card (a character with its weapons; an item need), with an Undo. */
+function pauseGoal(id: string) {
+  const entry = id.startsWith('item:') ? null : entryOf(id)
+  const ids = new Set(
+    entry ? [entry.character?.id, ...entry.weapons.map((w) => w.id)].filter(Boolean) : [id],
+  )
+  const before = (store.targets.value ?? []).filter(
+    (t) => ids.has(targetId(t)) && t.target.active !== false,
+  )
+  if (before.length === 0) return
+  const paused = (t: PlannerTarget) =>
+    upsert({ ...inputOf(t), target: { ...t.target, active: false } } as Parameters<
+      typeof upsert
+    >[0])
+  store.change(before.map(paused))
+  const name = entry?.name ?? board.value?.items.find((i) => i.id === id)?.name ?? before[0]!.key
+  feedback.toast({
+    tone: 'info',
+    title: `${name} paused`,
+    action: { label: 'Undo', run: () => store.change(before.map((t) => upsert(inputOf(t)))) },
+  })
+}
+
+const favorites = computed<ReadonlySet<string>>(
+  () =>
+    new Set(
+      (board.value?.entries ?? []).flatMap((e) =>
+        e.favorite && e.character ? [e.character.key] : [],
+      ),
+    ),
+)
+provideGoalActions({ open: openGoal, pause: pauseGoal, favorites })
+
 // ------------------------------------------------------------ inventory
 
 /** The inventory editor every material icon opens (one for the page). */
@@ -461,11 +418,6 @@ provideItemPopover((request) => {
   itemRequest.value = request
   itemOpen.value = true
 })
-
-function setCount(key: string, value: number) {
-  const capture = good.value?.materials[key] ?? 0
-  state.change({ inventory: [countChange(key, value, capture)] })
-}
 
 // ------------------------------------------------------------------ done
 
@@ -548,9 +500,6 @@ async function confirmDone() {
 
 // ------------------------------------------------------------------ editor
 // The open goal lives in the URL (?goal=character:HuTao): Back closes it.
-
-const route = useRoute()
-const router = useRouter()
 
 function parseSubject(raw: unknown): EditorSubject | null {
   if (typeof raw !== 'string') return null
@@ -702,31 +651,6 @@ watch(accountId, () => {
   clearFilters()
 })
 
-// ------------------------------------------------------------- live
-
-/**
- * Goals or hand edits changed in another tab or device: re-read them, once
- * this tab is shown and nothing is open (data never changes under a dialog).
- */
-let stale = false
-function catchUp() {
-  if (!stale || updatesHeld.value || document.visibilityState !== 'visible') return
-  stale = false
-  void store.refresh()
-  void state.refresh()
-}
-const stopListening = onPlannerChange((id) => {
-  if (id !== accountId.value) return
-  stale = true
-  catchUp()
-})
-watch(updatesHeld, catchUp)
-document.addEventListener('visibilitychange', catchUp)
-onBeforeUnmount(() => {
-  stopListening()
-  document.removeEventListener('visibilitychange', catchUp)
-})
-
 // ------------------------------------------------------------------ chrome
 
 const newest = computed(() => {
@@ -773,7 +697,8 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
 <template>
   <PageHeader title="Planner">
     <template v-if="data" #meta>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary">
+        <UiSegmented v-if="board && hasGoals" v-model="tab" :options="TABS" label="View" />
         <p v-if="newest && hasCapture" class="flex items-center gap-1.5">
           <Clock class="size-4" aria-hidden="true" />
           <span class="sr-only">Newest capture</span>
@@ -802,7 +727,6 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
     </template>
     <template v-if="board" #actions>
       <template v-if="hasGoals">
-        <UiSegmented v-model="tab" :options="TABS" label="View" />
         <UiButton title="Import from Seelie" @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
           Seelie
@@ -828,9 +752,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
   />
 
   <template
-    v-else-if="
-      board && planner && good && goodView && bag && totals && plan && today && requirementCache
-    "
+    v-else-if="board && planner && good && goodView && bag && totals && plan && requirementCache"
   >
     <UiPanel v-if="!hasGoals" flush>
       <UiEmpty title="No goals">
@@ -852,17 +774,18 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
 
     <FarmPanel
       v-else-if="tab === 'farm'"
-      v-model:missing-only="missingOnly"
       v-model:view="farmView"
       v-model:forge="forge"
       :planner="planner"
       :totals="totals"
       :plan="plan"
       :steps="steps"
-      :schedule="schedule"
-      :today="today"
+      :drops="drops"
+      :ar="ar"
+      :wl="wl"
+      :refreshes="settings.planner.refreshes ?? 0"
+      :day="day"
       :resin="resin"
-      :ore-short="oreShort"
       @settings="settingsOpen = true"
     />
 
@@ -979,6 +902,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       :drops="drops"
       :ar="ar"
       :wl="wl"
+      :refreshes="settings.planner.refreshes ?? 0"
       :saving="store.saving.value || state.saving.value"
       @close="closeEditor"
       @save="save"
@@ -1039,6 +963,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       :totals="totals"
       @close="itemOpen = false"
       @change="setCount"
+      @add="addCount"
     />
   </template>
 

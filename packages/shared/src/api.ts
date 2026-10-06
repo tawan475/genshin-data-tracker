@@ -110,7 +110,14 @@ export const accountSettingsPatch = z
     traveler: z.enum(['F', 'M']),
     ar: z.number().int().min(1).max(60).nullable(),
     wl: z.number().int().min(0).max(9).nullable(),
-    planner: z.object({ azoth: z.boolean(), passives: z.boolean() }).partial().strict(),
+    planner: z
+      .object({
+        azoth: z.boolean(),
+        passives: z.boolean(),
+        refreshes: z.number().int().min(0).max(6),
+      })
+      .partial()
+      .strict(),
   })
   .partial()
   .strict()

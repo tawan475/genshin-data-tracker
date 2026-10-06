@@ -27,6 +27,8 @@ export interface PlannerSettings {
   azoth: boolean
   /** Apply owned characters' crafting/ascension mora passives (Raiden, Wanderer). */
   passives: boolean
+  /** Original Resin refreshes a day (0–6, 60 resin each): the Farm view's days count them. */
+  refreshes: number
 }
 
 export interface UserSettings {
@@ -62,7 +64,7 @@ export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   traveler: 'F',
   ar: null,
   wl: null,
-  planner: { azoth: false, passives: true },
+  planner: { azoth: false, passives: true, refreshes: 0 },
 }
 
 /**

@@ -102,12 +102,28 @@ planner math stayed in the tracker, no data-repo release.
 - *Per-goal needs on the card*, readable without hover: what's missing, readiness colour with a
   visible legend. Planner in the phone bottom nav.
 
-**Phase 2 — "What to farm today"**
+**Phase 2 — "What to farm today"** — *built 2026-10-06* (`farm-today.ts` regroups
+`farmPlan`'s estimates; `FarmCard`, `CraftCard`, `GoalAvatars` with `goal-actions.ts`; account
+setting `planner.refreshes`, 0–6, no migration: settings are JSON merged with defaults).
 - Today = cards grouped by resin cost (0 / 20 / 40 / weekly / artifacts), each with location,
   runs ×N, resin, condensed, days, the items with missing counts, and **avatars of who needs it**
   (click = open goal, long-press/right-click = deactivate). Server-reset weekday, Sunday = all.
 - Schedule tab for the other weekday pairs; one headline "resin • days" with a daily-refresh
   setting. No repeated sections.
+- Built as: the old Sources/Schedule/Craft tabs, the tiles row and the second Today block are
+  gone. 0 resin holds local specialties, common and elite enemy drops, enhancement ore (with
+  "Forge from chunks"), what has no resin source (crowns, Brilliant Diamond, quest-only weekly
+  materials) and a compact Crafting card (crafts, Dream Solvent / Dust of Azoth conversions,
+  forging); 20 holds today's domains and the two ley lines; 40 normal boss drops and gems; 30/60
+  weekly bosses. No artifacts group yet (artifact goals are Phase 4). Locked cards (AR/WL too
+  low) are greyed with what they need ("AR 40"). Days count 180 + 60 × refreshes a day.
+- Also: the Materials page tiles open the same inventory editor (with a link to the history,
+  hand-set counts shown in the bag); the editor has an "add obtained" field per row (adds on
+  Enter or leaving it). The planner data pipeline both pages share is `use-planner-model.ts`.
+  Dev only: `?at=<ISO or ms>` on the Planner pins the farm clock (another server day).
+- Data gaps for the data repo (cards list items without a place rather than guess): normal boss
+  names (a boss card is named after its drop; gems can't be tied to a boss), enemy names per
+  common/elite drop family, local specialty regions, which gem family each normal boss drops.
 
 **Phase 3 — Goal editing like Seelie**
 - One auto-saving modal per character: Level / Talents / Weapon / Artifacts tabs, one-click level

@@ -1,17 +1,11 @@
 /**
- * Labels for the planner's estimates and stock states: short readable text
- * for the cards ("12 runs · 240 resin · 2 days") and the words for their
- * tooltips.
+ * Labels for the planner's estimates and stock states: the words for the
+ * farm cards' tooltips, readiness and stock colours, countdowns.
  */
 
 import type { StockStatus } from '@gdt/game-data/planner-goals'
-import type {
-  Bracket,
-  EstimateStatus,
-  RunEstimate,
-  WeeklyRun,
-} from '@gdt/game-data/planner-estimate'
-import { formatCompact, formatNumber } from '@/lib/format'
+import type { Bracket, EstimateStatus } from '@gdt/game-data/planner-estimate'
+import { formatNumber } from '@/lib/format'
 
 export const STOCK_TONE: Record<StockStatus, string> = {
   all: 'text-success-text',
@@ -72,50 +66,9 @@ export function bracketText(b: Bracket): string {
   return `${base}${ar}${b.assumed ? ', assumed' : ''}`
 }
 
-/** "12 runs · 240 resin · 2 days" */
-export function runText(run: RunEstimate): string {
-  return `${plural(run.runs, 'run')} · ${formatCompact(run.resin)} resin · ${plural(run.days, 'day')}`
-}
-
-/** "12 runs · 240 resin (4 condensed) · 2 days · Tier IV (AR 45)" */
-export function runTitle(run: RunEstimate): string {
-  const condensed = run.condensed > 0 ? ` (${formatNumber(run.condensed)} condensed)` : ''
-  return [
-    `${formatNumber(run.runs)} runs`,
-    `${formatNumber(run.resin)} resin${condensed}`,
-    `${formatNumber(run.days)} days`,
-    bracketText(run.bracket),
-  ].join(' · ')
-}
-
-/** "3 claims · 90–180 resin · 3 weeks" */
-export function weeklyText(run: WeeklyRun): string {
-  const resin =
-    run.resinMin === run.resinMax
-      ? formatCompact(run.resinMax)
-      : `${formatCompact(run.resinMin)}–${formatCompact(run.resinMax)}`
-  return `${plural(run.runs, 'claim')} · ${resin} resin · ${plural(run.weeks, 'week')}`
-}
-
-/** "2 days", "3 weeks": for the headline tiles. */
+/** "2 days", "3 weeks" */
 export const daysText = (days: number) => plural(days, 'day')
 export const weeksText = (weeks: number) => plural(weeks, 'week')
-
-export function weeklyTitle(run: WeeklyRun): string {
-  return [
-    `${formatNumber(run.runs)} claims, one a week`,
-    `${formatNumber(run.resinMin)}–${formatNumber(run.resinMax)} resin`,
-    `Dream Solvent: about ${formatNumber(run.solvent.need)} to convert, ${formatNumber(run.solvent.income)} dropped`,
-    bracketText(run.bracket),
-  ].join(' · ')
-}
-
-/** Card text for a source without runs; '' when there is nothing to say. */
-export function statusText(status: EstimateStatus): string {
-  if (status === 'locked') return 'Locked'
-  if (status === 'no-rate') return 'No rate'
-  return ''
-}
 
 export function statusTitle(status: EstimateStatus): string {
   if (status === 'locked') return 'Adventure Rank or World Level too low to farm it yet'

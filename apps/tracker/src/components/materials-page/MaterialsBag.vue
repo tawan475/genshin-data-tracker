@@ -43,8 +43,20 @@ const props = defineProps<{
   tracked: string[]
   icon: (key: string) => string
   importTo: RouteLocationRaw
+  /** Counts set by hand on the Planner (where they differ from the capture's). */
+  edited?: ReadonlyMap<string, number>
 }>()
-const emit = defineEmits<{ open: [key: string] }>()
+/** A tile was opened: the tile, and whether by touch (for the inventory editor). */
+const emit = defineEmits<{ open: [key: string, anchor: HTMLElement, touch: boolean] }>()
+
+function open(key: string, event: MouseEvent) {
+  emit(
+    'open',
+    key,
+    event.currentTarget as HTMLElement,
+    (event as PointerEvent).pointerType === 'touch',
+  )
+}
 
 // ------------------------------------------------------------------ controls
 
@@ -216,10 +228,18 @@ const showTabs = computed<SegmentedOption<Show>[]>(() => [
   },
 ])
 
+/** The count shown: the hand-set one where the Planner has one. */
+const countOf = (item: MaterialItem) => props.edited?.get(item.key) ?? item.count
+
 function tileTitle(item: MaterialItem): string {
   const change = changeOf(item.key)
   const delta = change ? ` (${change > 0 ? '+' : '−'}${formatNumber(Math.abs(change))})` : ''
-  return `${item.name}: ${formatNumber(item.count)}${delta}`
+  const hand = props.edited?.get(item.key)
+  const edit =
+    hand === undefined
+      ? ''
+      : ` · set by hand ${formatNumber(hand)} (capture ${formatNumber(item.count)})`
+  return `${item.name}: ${formatNumber(item.count)}${delta}${edit}`
 }
 const VIEW_OPTIONS: SegmentedOption<View>[] = [
   { value: 'grid', label: 'Icons', icon: LayoutGrid },
@@ -311,7 +331,7 @@ const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-dan
               class="group relative flex w-full flex-col overflow-hidden rounded-lg border border-border-default bg-surface-raised text-left shadow-sm transition hover:-translate-y-px hover:border-accent hover:shadow-md"
               :title="tileTitle(item)"
               :aria-label="tileTitle(item)"
-              @click="emit('open', item.key)"
+              @click="open(item.key, $event)"
             >
               <span
                 class="block aspect-square w-full bg-surface-overlay p-1 text-base sm:text-lg"
@@ -321,7 +341,8 @@ const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-dan
               </span>
               <span
                 class="tabular block truncate border-t border-border-default px-1 text-center font-mono text-xs leading-5 font-semibold"
-                >{{ formatCompact(item.count) }}</span
+                :class="edited?.has(item.key) ? 'text-accent-text' : ''"
+                >{{ formatCompact(countOf(item)) }}</span
               >
               <span
                 v-if="changeOf(item.key)"
@@ -347,7 +368,7 @@ const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-dan
               type="button"
               class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-overlay"
               :title="tileTitle(item)"
-              @click="emit('open', item.key)"
+              @click="open(item.key, $event)"
             >
               <span
                 class="relative size-10 shrink-0 rounded-lg bg-surface-overlay p-0.5 text-xs"
@@ -362,9 +383,11 @@ const toneOf = (change: number) => (change > 0 ? 'text-success-text' : 'text-dan
               </span>
               <span class="min-w-0 flex-1 truncate text-sm">{{ item.name }}</span>
               <span class="flex shrink-0 flex-col items-end">
-                <span class="tabular font-mono text-sm font-semibold">{{
-                  formatNumber(item.count)
-                }}</span>
+                <span
+                  class="tabular font-mono text-sm font-semibold"
+                  :class="edited?.has(item.key) ? 'text-accent-text' : ''"
+                  >{{ formatNumber(countOf(item)) }}</span
+                >
                 <DeltaText :value="changeOf(item.key) || null" :hint="hint" class="text-xs" />
               </span>
             </button>

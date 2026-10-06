@@ -31,6 +31,7 @@ import { characterIcon, weaponIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import CostList from './CostList.vue'
 import { daysText, weeksText } from './farm-format'
+import { resinDays } from './farm-today'
 import { characterNow, weaponNow } from './hand-edits'
 import LevelSelect from './LevelSelect.vue'
 import {
@@ -86,6 +87,8 @@ const props = defineProps<{
   /** The account's Adventure Rank and World Level, when set. */
   ar: number | null
   wl: number | null
+  /** Daily resin refreshes (the estimate's days count them). */
+  refreshes?: number
   saving: boolean
 }>()
 const emit = defineEmits<{
@@ -322,10 +325,11 @@ const estimate = computed(() => {
   const t = plan.total
   const weeks = plan.weeklyTotal.weeks
   if (t.resin === 0 && weeks === 0) return null
-  const parts = [`~${formatCompact(t.resin)}${t.partial ? '+' : ''} resin · ${daysText(t.days)}`]
+  const days = resinDays(t.resin, props.refreshes ?? 0)
+  const parts = [`~${formatCompact(t.resin)}${t.partial ? '+' : ''} resin · ${daysText(days)}`]
   if (weeks > 0) parts.push(weeksText(weeks))
   const title = [
-    `${formatNumber(t.runs)} runs · ${formatNumber(t.resin)} resin (${formatNumber(t.condensed)} condensed) · ${formatNumber(t.days)} days`,
+    `${formatNumber(t.runs)} runs · ${formatNumber(t.resin)} resin (${formatNumber(t.condensed)} condensed) · ${formatNumber(days)} days`,
     weeks > 0 ? `weekly bosses: ${formatNumber(weeks)} weeks` : '',
     t.gems.runs > 0 ? `gems: ${formatNumber(t.gems.runs)} runs` : '',
     t.partial ? 'some sources have no drop rate' : '',

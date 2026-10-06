@@ -1,362 +1,319 @@
 <script setup lang="ts">
-import type { DomainKind, PlannerData } from '@gdt/game-data'
+import type { PlannerData } from '@gdt/game-data'
+import type { DropRates } from '@gdt/game-data/drops'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
-import type {
-  DaySchedule,
-  FarmGroup,
-  FarmLeyLine,
-  FarmPlan,
-  ResinNow,
-  TodayPlan,
-} from '@gdt/game-data/planner-estimate'
-import { WEEKDAY_LABELS, type PlanTotals, type SourceKind } from '@gdt/game-data/planner-math'
+import type { FarmPlan, ResinNow } from '@gdt/game-data/planner-estimate'
+import { WEEKDAY_LABELS, type PlanTotals } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
-import { Info, PartyPopper } from 'lucide-vue-next'
+import { Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
-import { gameIcon, materialIcon } from '@/lib/assets'
-import { formatCompact, formatNumber } from '@/lib/format'
-import CraftList from './CraftList.vue'
-import DomainCard from './DomainCard.vue'
-import FarmTiles from './FarmTiles.vue'
-import RunBadge from './RunBadge.vue'
-import SourceCard from './SourceCard.vue'
-import TodayPanel from './TodayPanel.vue'
-import WeeklyCard from './WeeklyCard.vue'
-import { formatSeconds } from './farm-format'
+import { materialIcon } from '@/lib/assets'
+import { formatCompact, formatDateTime, formatNumber, formatTime } from '@/lib/format'
+import CraftCard from './CraftCard.vue'
+import FarmCard from './FarmCard.vue'
+import { formatCountdown, formatSeconds } from './farm-format'
+import {
+  REFRESH_RESIN,
+  clampRefreshes,
+  farmHeadline,
+  resinDays,
+  scheduleDays,
+  todaySections,
+  type FarmDay,
+  type FarmInput,
+} from './farm-today'
 
 /**
- * "What to farm": the headline (resin, weeks, Mora, EXP, conversion
- * currencies), today's domains, then one of three views:
- * - Sources: domain entrances (open today first), weekly bosses with their
- *   Dream Solvent conversions, normal bosses, gems (Dust of Azoth), ley
- *   lines, and what has no resin source;
- * - Schedule: the domains by day pair (Mon/Thu, Tue/Fri, Wed/Sat);
- * - Craft: what the totals assume you craft, convert and forge first.
+ * What to farm (farm-today.ts): one headline (resin and days for domains,
+ * normal bosses and ley lines at the account's daily resin, Condensed
+ * Resin, weeks of weekly bosses), then
+ * - Today: what can be farmed on the server's day, by what a run costs
+ *   (nothing, 20, 40, 30/60), with crafting among the no-resin cards;
+ * - Schedule: the other day pairs' domains.
+ * Every card lists what is still missing and who needs it.
  */
 const props = defineProps<{
   planner: PlannerData
   totals: PlanTotals
   plan: FarmPlan
   steps: readonly PlanStep[]
-  schedule: readonly DaySchedule[]
-  today: TodayPlan
+  drops: DropRates | null
+  ar: number | null
+  wl: number | null
+  refreshes: number
+  day: FarmDay
   resin: ResinNow | null
-  /** Weapon EXP is short (offer forging ore from chunks). */
-  oreShort: boolean
 }>()
-const missingOnly = defineModel<boolean>('missingOnly', { required: true })
-const view = defineModel<'sources' | 'schedule' | 'craft'>('view', { required: true })
+const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
 const emit = defineEmits<{ settings: [] }>()
 
-const VIEWS = computed(() => [
-  { value: 'sources' as const, label: 'Sources' },
+const VIEWS = [
+  { value: 'today' as const, label: 'Today' },
   { value: 'schedule' as const, label: 'Schedule' },
-  {
-    value: 'craft' as const,
-    label: props.steps.length ? `Craft ${props.steps.length}` : 'Craft',
-  },
-])
-
-const weekday = computed(() => props.today.weekday)
-const solvent = computed(
-  () => props.planner.materialsByKey.get(props.planner.items.dreamSolvent) ?? null,
-)
-const dust = computed(() => props.planner.materialsByKey.get(props.planner.items.dustOfAzoth))
-
-const shown = <T extends { missing: number }>(list: readonly T[]) =>
-  missingOnly.value ? list.filter((x) => x.missing > 0) : [...list]
-
-// ---------------------------------------------------------------- sources
-
-const DOMAIN_SECTIONS: { kind: DomainKind; label: string }[] = [
-  { kind: 'talent', label: 'Talent books' },
-  { kind: 'weapon', label: 'Weapon materials' },
 ]
 
-const domainSections = computed(() =>
-  DOMAIN_SECTIONS.map((s) => {
-    const all = props.plan.domains.filter((d) => d.entry.kind === s.kind)
-    const openToday = (d: (typeof all)[number]) =>
-      d.groups.some((g) => g.missing > 0 && g.weekdays.includes(weekday.value))
-    const list = all
-      .filter((d) => !missingOnly.value || d.status !== 'done')
-      .map((d) => ({
-        ...d,
-        groups: missingOnly.value ? d.groups.filter((g) => g.missing > 0) : d.groups,
-      }))
-      .sort((a, b) => Number(openToday(b)) - Number(openToday(a)))
-    return { ...s, list, missing: all.filter((d) => d.status !== 'done').length }
-  }).filter((s) => s.list.length > 0),
-)
+const input = computed<FarmInput>(() => ({
+  planner: props.planner,
+  plan: props.plan,
+  totals: props.totals,
+  drops: props.drops,
+  ar: props.ar,
+  wl: props.wl,
+  refreshes: clampRefreshes(props.refreshes),
+}))
+const weekday = computed(() => props.day.weekday)
+const sections = computed(() => todaySections(input.value, weekday.value))
+const schedule = computed(() => scheduleDays(input.value, weekday.value))
+const headline = computed(() => farmHeadline(props.plan, input.value.refreshes))
 
-const weekly = computed(() => shown(props.plan.weekly))
+// ------------------------------------------------------------ headline
 
-const GROUP_SECTIONS: { kind: SourceKind; label: string; compact: boolean }[] = [
-  { kind: 'boss', label: 'Bosses', compact: true },
-  { kind: 'gem', label: 'Gems', compact: false },
-  { kind: 'local', label: 'Specialties', compact: true },
-  { kind: 'enemy', label: 'Enemy drops', compact: false },
-  { kind: 'crown', label: 'Crowns', compact: true },
-]
+const plural = (n: number, one: string) => `${formatNumber(n)} ${one}${n === 1 ? '' : 's'}`
 
-const groupSections = computed(() => {
-  const byKind = (kind: SourceKind) => props.plan.groups.filter((g) => g.kind === kind)
-  return GROUP_SECTIONS.map((s) => {
-    const all = byKind(s.kind)
-    return { ...s, list: shown(all), missing: all.filter((g) => g.missing > 0).length }
-  })
-})
-const before = computed(() => groupSections.value.slice(0, 2).filter((s) => s.list.length))
-const after = computed(() => groupSections.value.slice(2).filter((s) => s.list.length))
-
-const gemConversions = (g: FarmGroup) =>
-  props.totals.azoth?.conversions.filter((c) => c.to.family?.key === g.key) ?? []
-
-interface LeyCard {
-  line: FarmLeyLine
-  name: string
-  icon: string
-  missing: string
-  title: string
-}
-const leyLines = computed<LeyCard[]>(() => {
-  const { exp, mora } = props.plan.leyLines
-  const book = props.planner.expItems.character.at(-1)
-  const list: LeyCard[] = [
-    {
-      line: exp,
-      name: 'Blossom of Revelation',
-      icon: book ? gameIcon(book.material.icon) : '',
-      missing: `${formatCompact(exp.missing)} EXP`,
-      title: `Character EXP missing ${formatNumber(exp.missing)}`,
-    },
-    {
-      line: mora,
-      name: 'Blossom of Wealth',
-      icon: materialIcon('Mora'),
-      missing: formatCompact(Math.max(0, mora.missing - mora.fromDomains)),
-      title: `Mora missing ${formatNumber(mora.missing)} · the planned domain runs pay ${formatNumber(mora.fromDomains)}`,
-    },
+const resinTitle = computed(() => {
+  const h = headline.value
+  const r = input.value.refreshes
+  const parts = [
+    `${plural(h.runs, 'run')} · ${formatNumber(h.resin)} resin (${formatNumber(h.condensed)} condensed) · ${plural(h.days, 'day')}`,
+    'domains, normal bosses and ley lines',
+    `${formatNumber(h.daily)} resin a day${r ? ` (180 + ${r} × ${REFRESH_RESIN})` : ''}`,
   ]
-  return list.filter((c) => !missingOnly.value || c.line.status !== 'done')
+  if (props.resin?.known && h.resin > 0) {
+    const left = Math.max(0, h.resin - props.resin.total)
+    parts.push(`${plural(resinDays(left, r), 'day')} with the resin held`)
+  }
+  if (h.gems.runs > 0) {
+    parts.push(`gems: ${plural(h.gems.runs, 'run')}, ${formatNumber(h.gems.resin)} resin`)
+  }
+  if (h.partial) parts.push('some sources have no drop rate')
+  return parts.join(' · ')
+})
+const weeklyTitle = computed(() => {
+  const w = headline.value.weekly
+  return [
+    `Weekly bosses: ${plural(w.claims, 'claim')} over ${plural(w.weeks, 'week')}`,
+    `${formatNumber(w.resin)} resin with the weekly discount (${formatNumber(w.resinMax)} without)`,
+    w.partial ? 'some bosses have no drop rate' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
 })
 
-const anyMissing = computed(
+const resinNowTitle = computed(() => {
+  const r = props.resin
+  if (!r) return ''
+  const read =
+    r.source === 'player'
+      ? `${formatNumber(r.atSnapshot)} at login, ${formatDateTime(r.at)}`
+      : `${formatNumber(r.atSnapshot)} at the snapshot`
+  const parts = [`Original Resin now ~${formatNumber(r.original)}/200 (${read})`]
+  if (r.fullAt) parts.push(`full at ${formatTime(r.fullAt)}`)
+  if (r.bag > 0) {
+    const items = r.items.map((i) => `${formatNumber(i.count)} ${i.key.replace(/Resin$/, '')}`)
+    parts.push(`in the bag ${formatNumber(r.bag)} (${items.join(', ')})`)
+  }
+  return parts.join(' · ')
+})
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const dayTitle = computed(
   () =>
-    props.plan.domains.some((d) => d.status !== 'done') ||
-    props.plan.weekly.some((w) => w.missing > 0) ||
-    props.plan.groups.some((g) => g.missing > 0) ||
-    props.plan.leyLines.exp.status !== 'done' ||
-    props.plan.leyLines.mora.status !== 'done',
+    `Server day: ${DAY_NAMES[weekday.value]}${weekday.value === 0 ? ' (every domain open)' : ''} · the 04:00 reset in ${formatCountdown(props.day.msUntilReset)}`,
 )
 
-// ---------------------------------------------------------------- schedule
+// ------------------------------------------------------------ forging
 
-const days = computed(() =>
-  props.schedule.map((day) => {
-    const domains = day.domains
-      .map((d) => ({
-        ...d,
-        groups: missingOnly.value ? d.groups.filter((g) => g.missing > 0) : d.groups,
-      }))
-      .filter((d) => d.groups.length > 0)
-    return {
-      ...day,
-      domains,
-      label: day.days.map((d) => WEEKDAY_LABELS[d]).join(' · '),
-      today: day.days.includes(weekday.value),
-    }
-  }),
-)
-
+/** Weapon EXP is short (offer forging ore from chunks), or forging is on. */
+const oreCard = computed(() => sections.value.flatMap((s) => s.cards).find((c) => c.kind === 'ore'))
 const forgeTitle = computed(() => {
   const f = props.totals.forge
   if (!forge.value || !f) return 'Count the Mystic ore the chunks held can be forged into'
   return `Forge ${formatNumber(f.count)} ${f.ore.name}: ${formatNumber(f.mora)} Mora, ${formatSeconds(f.seconds)}${f.short ? ` · still short ${formatNumber(f.short)}` : ''}`
 })
+
+const dayLabel = (days: readonly number[]) => days.map((d) => WEEKDAY_LABELS[d]).join(' · ')
+/** Today's sections, with a no-resin one for the crafting card when nothing else needs it. */
+const shown = computed(() => {
+  const list = sections.value
+  if (props.steps.length === 0 || list.some((s) => s.key === 'free')) return list
+  return [{ key: 'free' as const, resin: '0', label: 'No resin', cards: [] }, ...list]
+})
+const nothing = computed(() => shown.value.length === 0)
 </script>
 
 <template>
-  <div class="flex flex-col gap-6">
-    <FarmTiles :planner="planner" :totals="totals" :plan="plan" :resin="resin" />
+  <div class="flex flex-col gap-3">
+    <section
+      class="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 shadow-sm"
+      aria-label="Totals"
+    >
+      <p class="flex items-center gap-2" :title="resinTitle">
+        <span class="size-7 shrink-0">
+          <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+        </span>
+        <span class="tabular font-mono text-lg leading-7 font-semibold"
+          >{{ headline.resin > 0 ? formatNumber(headline.resin) : '–'
+          }}{{ headline.partial ? '+' : '' }}</span
+        >
+        <span class="text-sm text-text-secondary">resin</span>
+        <template v-if="headline.days">
+          <span class="text-text-muted" aria-hidden="true">·</span>
+          <span class="tabular font-mono text-lg leading-7 font-semibold">{{
+            formatNumber(headline.days)
+          }}</span>
+          <span class="text-sm text-text-secondary">{{
+            headline.days === 1 ? 'day' : 'days'
+          }}</span>
+        </template>
+        <span class="sr-only">{{ resinTitle }}</span>
+      </p>
+      <p
+        class="tabular flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-sm text-text-secondary"
+      >
+        <span
+          v-if="headline.condensed"
+          class="inline-flex items-center gap-1"
+          :title="`${formatNumber(headline.condensed)} Condensed Resin`"
+        >
+          <span class="size-5 shrink-0">
+            <MaterialIcon :src="materialIcon('CondensedResin')" name="Condensed Resin" />
+          </span>
+          {{ formatNumber(headline.condensed) }}
+          <span class="sr-only">Condensed Resin</span>
+        </span>
+        <span
+          v-if="input.refreshes"
+          class="font-sans"
+          :title="`${input.refreshes} resin ${input.refreshes === 1 ? 'refresh' : 'refreshes'} a day: ${formatNumber(headline.daily)} resin a day`"
+          >{{ formatNumber(headline.daily) }}/day</span
+        >
+        <span v-if="headline.weekly.weeks" class="font-sans" :title="weeklyTitle"
+          >Weekly
+          <span class="font-mono"
+            >{{ formatNumber(headline.weekly.weeks) }}{{ headline.weekly.partial ? '+' : '' }}</span
+          >
+          {{ headline.weekly.weeks === 1 ? 'week' : 'weeks'
+          }}<span class="sr-only">: {{ weeklyTitle }}</span></span
+        >
+        <span
+          v-if="headline.locked"
+          class="inline-flex items-center gap-1 text-warning-text"
+          :title="`${plural(headline.locked, 'source')} locked by AR/WL`"
+        >
+          <Lock class="size-3.5" aria-hidden="true" />
+          {{ formatNumber(headline.locked) }}
+          <span class="sr-only">locked by AR/WL</span>
+        </span>
+        <span v-if="resin?.known" class="inline-flex items-center gap-1" :title="resinNowTitle">
+          <span class="font-sans text-text-muted">Now</span>
+          ~{{ formatNumber(resin.original)
+          }}<span v-if="resin.bag" class="text-text-muted">+{{ formatCompact(resin.bag) }}</span>
+          <span class="sr-only">{{ resinNowTitle }}</span>
+        </span>
+      </p>
+    </section>
+
+    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+      <UiSegmented v-model="view" :options="VIEWS" label="Farm view" />
+      <span
+        class="tabular inline-flex items-center gap-1 font-mono text-sm text-text-secondary"
+        :title="dayTitle"
+      >
+        <Clock class="size-4" aria-hidden="true" />
+        <span class="font-sans font-medium text-text-primary">{{ WEEKDAY_LABELS[weekday] }}</span>
+        {{ formatCountdown(day.msUntilReset) }}
+        <span class="sr-only">{{ dayTitle }}</span>
+      </span>
+    </div>
 
     <p
       v-if="plan.assumed.ar || plan.assumed.wl"
-      class="-mt-3 flex flex-wrap items-center gap-2 text-sm text-text-muted"
+      class="-mt-2 flex flex-wrap items-center gap-2 text-sm text-text-muted"
     >
       <Info class="size-4" aria-hidden="true" />
       AR/WL not set: top bracket assumed
       <UiButton variant="ghost" size="sm" @click="emit('settings')">Set</UiButton>
     </p>
 
-    <TodayPanel :today="today" :resin="resin" />
-
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <UiSegmented v-model="view" :options="VIEWS" label="Farm view" />
-      <div class="flex flex-wrap gap-2">
-        <span v-if="oreShort || forge" :title="forgeTitle">
-          <FilterChip :pressed="forge" @toggle="forge = !forge">Forge</FilterChip>
-        </span>
-        <FilterChip
-          v-if="view !== 'craft'"
-          :pressed="missingOnly"
-          @toggle="missingOnly = !missingOnly"
-          >Missing</FilterChip
-        >
-      </div>
-    </div>
-
-    <template v-if="view === 'sources'">
-      <p
-        v-if="!anyMissing && missingOnly"
-        class="flex items-center justify-center gap-2 py-8 text-text-secondary"
-      >
+    <template v-if="view === 'today'">
+      <p v-if="nothing" class="flex items-center justify-center gap-2 py-8 text-text-secondary">
         <PartyPopper class="size-5" aria-hidden="true" />
-        Nothing missing
+        Nothing to farm
       </p>
 
-      <section v-for="s in domainSections" :key="s.kind" :aria-label="s.label">
-        <h2 class="mb-2 flex items-center gap-2 text-base font-semibold">
-          {{ s.label }}
-          <span class="tabular font-mono text-sm font-normal text-text-muted">{{ s.missing }}</span>
+      <section
+        v-for="s in shown"
+        :key="s.key"
+        class="mt-1 flex flex-col gap-1.5"
+        :aria-label="`${s.label}: ${s.resin} resin`"
+      >
+        <h2 class="flex items-center gap-1.5 text-sm font-semibold">
+          <span class="size-5 shrink-0">
+            <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+          </span>
+          <span class="tabular font-mono">{{ s.resin }}</span>
+          <span class="font-normal text-text-muted">{{ s.label }}</span>
         </h2>
-        <div class="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
-          <DomainCard
-            v-for="d in s.list"
-            :key="d.id"
-            :entry="d.entry"
-            :groups="d.groups"
-            :run="d.run"
-            :status="d.status"
-            :goals="d.goals"
-            :today="weekday"
-          />
-        </div>
-      </section>
-
-      <section v-if="weekly.length" aria-label="Weekly bosses">
-        <h2 class="mb-2 flex items-center gap-2 text-base font-semibold">
-          Weekly bosses
-          <span class="tabular font-mono text-sm font-normal text-text-muted">{{
-            plan.weekly.filter((w) => w.missing > 0).length
-          }}</span>
-        </h2>
-        <div class="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
-          <WeeklyCard v-for="w in weekly" :key="w.id" :weekly="w" :solvent="solvent" />
-        </div>
-      </section>
-
-      <section v-for="s in before" :key="s.kind" :aria-label="s.label">
-        <h2 class="mb-2 flex items-center gap-2 text-base font-semibold">
-          {{ s.label }}
-          <span class="tabular font-mono text-sm font-normal text-text-muted">{{ s.missing }}</span>
-          <span
-            v-if="s.kind === 'gem' && plan.total.gems.runs"
-            class="tabular ml-auto font-mono text-xs font-normal text-text-secondary"
-            :title="`Normal boss runs for gems: ${formatNumber(plan.total.gems.runs)}, ${formatNumber(plan.total.gems.resin)} resin (not in the headline)`"
-            >×{{ formatNumber(plan.total.gems.runs) }} ·
-            {{ formatCompact(plan.total.gems.resin) }}</span
-          >
-        </h2>
-        <div
-          class="grid gap-2 sm:gap-3"
-          :class="
-            s.compact
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'
-              : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
-          "
-        >
-          <SourceCard
-            v-for="g in s.list"
-            :key="g.id"
-            :group="g"
-            :compact="s.compact"
-            :conversions="s.kind === 'gem' ? gemConversions(g) : undefined"
-            :via="dust"
-          />
-        </div>
-      </section>
-
-      <section v-if="leyLines.length" aria-label="Ley lines">
-        <h2 class="mb-2 text-base font-semibold">Ley lines</h2>
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
-          <article
-            v-for="c in leyLines"
-            :key="c.line.kind"
-            class="flex items-center gap-2.5 rounded-xl border border-border-default bg-surface-raised p-2.5 shadow-sm"
-            :title="c.title"
-          >
-            <span class="size-12 shrink-0 overflow-hidden rounded-lg bg-surface-sunken text-xs">
-              <MaterialIcon :src="c.icon" :name="c.name" />
-            </span>
-            <span class="flex min-w-0 flex-1 flex-col gap-1">
-              <h3 class="truncate text-sm font-medium">{{ c.name }}</h3>
-              <span
-                class="tabular font-mono text-xs"
-                :class="c.line.status === 'done' ? 'text-success-text' : 'text-warning-text'"
-                >{{ c.line.status === 'done' ? '✓' : c.missing }}</span
-              >
-              <RunBadge :run="c.line.run" :status="c.line.status" />
-            </span>
-            <span class="sr-only">{{ c.title }}</span>
-          </article>
-        </div>
-      </section>
-
-      <section v-for="s in after" :key="s.kind" :aria-label="s.label">
-        <h2 class="mb-2 flex items-center gap-2 text-base font-semibold">
-          {{ s.label }}
-          <span class="tabular font-mono text-sm font-normal text-text-muted">{{ s.missing }}</span>
-        </h2>
-        <div
-          class="grid gap-2 sm:gap-3"
-          :class="
-            s.compact
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'
-              : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
-          "
-        >
-          <SourceCard v-for="g in s.list" :key="g.id" :group="g" :compact="s.compact" />
+        <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
+          <FarmCard v-for="card in s.cards" :key="card.id" :card="card">
+            <button
+              v-if="card.kind === 'ore'"
+              type="button"
+              class="self-start rounded-md border px-2 py-0.5 text-xs font-medium transition-colors"
+              :class="
+                forge
+                  ? 'border-accent-text text-accent-text'
+                  : 'border-border-default text-text-secondary hover:text-text-primary'
+              "
+              :aria-pressed="forge"
+              :title="forgeTitle"
+              @click="forge = !forge"
+            >
+              Forge from chunks
+            </button>
+          </FarmCard>
+          <CraftCard v-if="s.key === 'free' && steps.length" :planner="planner" :steps="steps">
+            <button
+              v-if="forge && !oreCard"
+              type="button"
+              class="rounded-md border border-accent-text px-2 py-0.5 text-xs font-medium text-accent-text"
+              aria-pressed="true"
+              :title="forgeTitle"
+              @click="forge = false"
+            >
+              Forge from chunks
+            </button>
+          </CraftCard>
         </div>
       </section>
     </template>
 
-    <div v-else-if="view === 'schedule'" class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <section
-        v-for="day in days"
-        :key="day.label"
-        class="flex flex-col gap-2"
-        :aria-label="day.label"
+        v-for="pair in schedule"
+        :key="pair.days.join()"
+        class="flex min-w-0 flex-col gap-2"
+        :aria-label="dayLabel(pair.days)"
       >
-        <h2 class="flex items-center gap-2 text-base font-semibold">
+        <h2 class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-sm font-semibold">
+          {{ dayLabel(pair.days) }}
           <span
-            class="rounded-md px-2 py-0.5"
-            :class="day.today && weekday !== 0 ? 'bg-accent text-accent-ink' : ''"
-            >{{ day.label }}</span
+            v-if="pair.run"
+            class="tabular inline-flex items-center gap-0.5 font-mono text-xs font-normal text-text-secondary"
+            :title="`${plural(pair.run.runs, 'run')} · ${formatNumber(pair.run.resin)} resin · ${plural(pair.run.days, 'day')}`"
           >
-          <span class="ml-auto font-normal">
-            <RunBadge :run="day.run" :status="day.run ? 'ok' : 'done'" />
+            {{ plural(pair.run.runs, 'run') }} ·
+            <span class="size-4 shrink-0">
+              <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+            </span>
+            {{ formatCompact(pair.run.resin) }}
           </span>
         </h2>
-        <p v-if="day.domains.length === 0" class="text-sm text-text-muted">–</p>
-        <DomainCard
-          v-for="d in day.domains"
-          :key="d.domain.id"
-          :entry="d.domain.entry"
-          :groups="d.groups"
-          :run="d.run"
-          :status="d.run ? 'ok' : d.domain.status"
-          :goals="d.domain.goals"
-          :today="weekday"
-          compact
-        />
+        <p v-if="pair.cards.length === 0" class="text-sm text-text-muted">–</p>
+        <FarmCard v-for="card in pair.cards" :key="card.id" :card="card" />
       </section>
     </div>
-
-    <CraftList v-else :planner="planner" :steps="steps" />
   </div>
 </template>

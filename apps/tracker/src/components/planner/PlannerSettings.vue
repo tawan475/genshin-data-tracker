@@ -6,12 +6,13 @@ import UiModal from '@/components/ui/UiModal.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import type { PlannerOptions, PlannerOptionsPatch } from '@/data/planner-settings'
+import { MAX_REFRESHES, REFRESH_RESIN } from './farm-today'
 
 /**
- * The planner's account settings: Adventure Rank, World Level and two
- * options. Each change is saved as it is made (no Save button). AR and WL
- * left empty follow what irminsul read at the newest login, shown as the
- * placeholder.
+ * The planner's account settings: Adventure Rank, World Level, the daily
+ * resin refreshes the Farm view counts days with, and two options. Each
+ * change is saved as it is made (no Save button). AR and WL left empty
+ * follow what irminsul read at the newest login, shown as the placeholder.
  */
 const props = defineProps<{ open: boolean; settings: PlannerOptions; player: AccountPlayer }>()
 
@@ -56,12 +57,21 @@ function setWl(value: number | null) {
 function setOption(key: 'azoth' | 'passives', value: boolean) {
   emit('change', { planner: { [key]: value } })
 }
+
+const refreshOptions = Array.from({ length: MAX_REFRESHES + 1 }, (_, i) => ({
+  value: i,
+  label: String(i),
+}))
+
+function setRefreshes(value: number) {
+  if (value !== props.settings.planner.refreshes) emit('change', { planner: { refreshes: value } })
+}
 </script>
 
 <template>
   <UiModal :open="open" title="Planner settings" @close="emit('close')">
     <div class="flex flex-col gap-4">
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-3 gap-3">
         <label
           class="flex min-w-0 flex-col gap-1"
           :title="`Adventure Rank (1–60)${player.ar === null ? '' : ` · ${player.ar} from irminsul`}`"
@@ -92,6 +102,18 @@ function setOption(key: 'azoth' | 'passives', value: boolean) {
             @update:model-value="setWl"
           />
           <span v-if="wlFromPlayer" class="text-xs text-text-muted">from irminsul</span>
+        </label>
+        <label
+          class="flex min-w-0 flex-col gap-1"
+          :title="`Original Resin refreshes a day (${REFRESH_RESIN} resin each): days count 180 + ${REFRESH_RESIN} per refresh`"
+        >
+          <span class="text-sm text-text-secondary">Refreshes</span>
+          <UiSelect
+            :model-value="settings.planner.refreshes ?? 0"
+            :options="refreshOptions"
+            aria-label="Resin refreshes a day"
+            @update:model-value="setRefreshes"
+          />
         </label>
       </div>
       <div class="flex flex-col border-t border-border-subtle pt-2">
