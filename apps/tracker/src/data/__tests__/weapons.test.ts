@@ -69,6 +69,16 @@ describe('buildArmory', () => {
     expect(armory.rows.every((r) => r.gameId === 12405 && r.maxLevel === 90)).toBe(true)
   })
 
+  it('reads game ids and level caps from the catalog, with nothing else loaded', () => {
+    const armory = buildArmory(
+      good([weapon('Rainslasher'), weapon('OldMercsPal'), weapon('AWeaponFromAFuturePatch')]),
+    )
+    const byKey = new Map(armory.rows.map((r) => [r.key, r]))
+    expect(byKey.get('Rainslasher')).toMatchObject({ gameId: 12405, maxLevel: 90 })
+    expect(byKey.get('OldMercsPal')).toMatchObject({ gameId: 12201, maxLevel: 70 })
+    expect(byKey.get('AWeaponFromAFuturePatch')).toMatchObject({ gameId: 0, maxLevel: 90 })
+  })
+
   it('caps 1–2★ weapons at 70, so "Max" is their own cap', () => {
     const armory = buildArmory(
       good([

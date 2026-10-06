@@ -8,7 +8,7 @@ import { ref, watch } from 'vue'
  * along its foot and a footer line (`footer`, then `footer-end` on the
  * right). The whole tile is one button; `label` is its accessible name and
  * tooltip, so the slots stay visual. `selected` rings it in the accent.
- * Same frame as the Materials bag's tiles.
+ * The Weapons, Artifacts and Materials bags draw their tiles with it.
  */
 const props = defineProps<{
   src: string
@@ -18,7 +18,8 @@ const props = defineProps<{
   stars?: boolean
   selected?: boolean
 }>()
-defineEmits<{ open: [] }>()
+/** `open` carries the click (its target anchors a popover; pointerType tells touch). */
+defineEmits<{ open: [event: MouseEvent] }>()
 
 const failed = ref(false)
 watch(
@@ -63,7 +64,7 @@ function initials(name: string): string {
     :title="label"
     class="group flex w-full min-w-0 flex-col overflow-hidden rounded-lg border bg-surface-raised text-left shadow-sm transition hover:-translate-y-px hover:border-accent hover:shadow-md"
     :class="selected ? 'border-accent ring-2 ring-accent' : 'border-border-default'"
-    @click="$emit('open')"
+    @click="$emit('open', $event)"
   >
     <span
       class="relative block aspect-square w-full bg-linear-to-br"
