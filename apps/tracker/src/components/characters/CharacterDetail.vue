@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { Crown, Lock, Wrench } from 'lucide-vue-next'
+import ConstellationStars from '@/components/ui/ConstellationStars.vue'
+import CritValue from '@/components/ui/CritValue.vue'
+import ElementBadge from '@/components/ui/ElementBadge.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import type { AccountRef } from '@/data/account-data'
 import {
-  ELEMENT_LABELS,
   SLOT_ORDER,
   TARGET_LEVEL,
   WEAPON_TYPE_LABELS,
@@ -22,11 +25,11 @@ import { formatDate, formatFullDateTime } from '@/lib/format'
 import { formatStatName, formatStatValue } from '@/utils/artifact-stats'
 import ArtifactPiece from './ArtifactPiece.vue'
 import CharacterTimeline from './CharacterTimeline.vue'
-import ConstellationPips from './ConstellationPips.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
+import NamecardBackdrop from './NamecardBackdrop.vue'
 import TalentGlyph from './TalentGlyph.vue'
-import { constellationIcons, talentIcons } from './talent-icons'
-import { ELEMENT_FILL, ELEMENT_SOFT, ELEMENT_TEXT } from './tokens'
+import { talentIcons } from './talent-icons'
+import { ELEMENT_SOFT, ELEMENT_TEXT } from './tokens'
 
 /** Everything about one character: talents, weapon, the five pieces, sets, history. */
 const props = defineProps<{ character: CharacterView; account: AccountRef }>()
@@ -58,13 +61,8 @@ const talents = computed(() => [
     icon: glyphs.value.burst,
   },
 ])
-const constellations = computed(() => constellationIcons(c.value.key))
-const hasConstellationIcons = computed(() => constellations.value.some(Boolean))
-
-// The namecard art behind the summary; hidden if it fails.
+// The namecard art behind the summary (gone at once when stepping to the next character).
 const banner = computed(() => characterBanner(c.value.key))
-const bannerFailed = ref(false)
-watch(banner, () => (bannerFailed.value = false))
 
 const glyphTone = computed(() =>
   c.value.element
@@ -88,13 +86,9 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
       class="relative overflow-hidden rounded-xl border border-border-default bg-surface-base"
       aria-label="Summary"
     >
-      <img
-        v-if="banner && !bannerFailed"
+      <NamecardBackdrop
         :src="banner"
-        alt=""
-        decoding="async"
-        class="pointer-events-none absolute inset-y-0 right-0 h-full w-full object-cover opacity-25 [mask-image:linear-gradient(to_left,black_20%,transparent)] sm:w-3/4 dark:opacity-20"
-        @error="bannerFailed = true"
+        class="absolute inset-y-0 right-0 h-full w-full opacity-25 [mask-image:linear-gradient(to_left,black_20%,transparent)] sm:w-3/4 dark:opacity-20"
       />
       <div class="relative flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center">
         <div class="flex min-w-0 flex-1 items-center gap-4">
@@ -108,10 +102,7 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
           <div class="flex min-w-0 flex-col gap-1.5">
             <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-secondary">
               <RarityStars v-if="c.rarity" :rarity="c.rarity" />
-              <span v-if="c.element" class="inline-flex items-center gap-1.5">
-                <span class="size-2.5 rounded-full" :class="ELEMENT_FILL[c.element]" />
-                <span :class="ELEMENT_TEXT[c.element]">{{ ELEMENT_LABELS[c.element] }}</span>
-              </span>
+              <ElementBadge v-if="c.element" :element="c.element" class="text-text-primary" />
               <span v-if="c.weaponType">{{ WEAPON_TYPE_LABELS[c.weaponType] }}</span>
               <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" />
               <time
@@ -121,29 +112,10 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
                 >Obtained {{ formatDate(c.obtainedAt) }}</time
               >
             </p>
-            <p class="tabular font-mono text-2xl font-semibold" :title="`Ascension ${c.ascension}`">
-              Lv
-              <span :class="c.level < TARGET_LEVEL ? 'text-warning-text' : ''">{{ c.level }}</span>
-              <span class="text-base font-normal text-text-muted">A{{ c.ascension }}</span>
+            <p class="text-2xl font-semibold">
+              <LevelText :level="c.level" :ascension="c.ascension" :target="TARGET_LEVEL" />
             </p>
-            <ul
-              v-if="hasConstellationIcons"
-              class="flex gap-1.5"
-              :aria-label="`Constellation ${c.constellation} of 6`"
-            >
-              <li
-                v-for="(icon, index) in constellations"
-                :key="index"
-                class="inline-flex size-7 items-center justify-center rounded-full"
-                :class="
-                  index < c.constellation ? glyphTone : 'bg-surface-overlay text-text-muted/50'
-                "
-                :title="`C${index + 1}${index < c.constellation ? '' : ' (locked)'}`"
-              >
-                <TalentGlyph :src="icon" class="size-5" />
-              </li>
-            </ul>
-            <ConstellationPips v-else :value="c.constellation" :element="c.element" />
+            <ConstellationStars :value="c.constellation" :element="c.element" size="lg" />
           </div>
         </div>
 
@@ -210,12 +182,11 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
                 >{{ c.weapon.name }}</RouterLink
               >
               <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                <span
-                  class="tabular font-mono"
-                  :class="c.weapon.level < TARGET_LEVEL ? 'text-warning-text' : ''"
-                  :title="`Ascension ${c.weapon.ascension}`"
-                  >Lv {{ c.weapon.level }}</span
-                >
+                <LevelText
+                  :level="c.weapon.level"
+                  :ascension="c.weapon.ascension"
+                  :target="TARGET_LEVEL"
+                />
                 <span
                   class="inline-flex items-center gap-1.5"
                   :title="`Refinement ${c.weapon.refinement} of 5`"
@@ -312,10 +283,7 @@ const CRIT_KEYS = new Set(['critRate_', 'critDMG_'])
                 >{{ c.critRate }}% / {{ c.critDmg }}%</span
               ></span
             >
-            <span title="Crit value"
-              >CV
-              <span class="tabular font-mono text-text-primary">{{ c.cv.toFixed(1) }}</span></span
-            >
+            <CritValue :value="c.cv" scope="build" label />
           </p>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">

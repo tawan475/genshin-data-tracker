@@ -370,19 +370,6 @@ export function summarizeSets(rows: readonly ArtifactRow[]): SetSummary[] {
   return list.sort((a, b) => b.score - a.score || b.count - a.count || a.name.localeCompare(b.name))
 }
 
-/**
- * Crit value bands: 0 none, 1 below 30, 2 from 30, 3 from 40 (the usual
- * "good" and "great" lines for a levelled 5★ piece).
- */
-export const CV_GOOD = 30
-export const CV_GREAT = 40
-
-export function cvBand(cv: number): 0 | 1 | 2 | 3 {
-  if (cv >= CV_GREAT) return 3
-  if (cv >= CV_GOOD) return 2
-  return cv > 0 ? 1 : 0
-}
-
 /** Position by CV among pieces of the same slot and rarity (1 = highest). */
 export function cvRank(
   rows: readonly ArtifactRow[],

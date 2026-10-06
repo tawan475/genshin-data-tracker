@@ -3,7 +3,8 @@ import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import { ELEMENT_KEYS, WEAPON_TYPE_KEYS, type CustomCharacter } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { ELEMENT_FILL, RARITY_SOFT } from '@/components/characters/tokens'
+import { RARITY_SOFT } from '@/components/characters/tokens'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
@@ -121,11 +122,7 @@ const weaponOptions = WEAPON_TYPE_KEYS.map((w) => ({ value: w, label: WEAPON_TYP
         :pressed="profile.element === e"
         @toggle="set('element', e)"
       >
-        <span
-          class="size-2.5 rounded-full"
-          :class="ELEMENT_FILL[toElement(e)!]"
-          aria-hidden="true"
-        />
+        <ElementIcon :element="toElement(e)!" decorative size="sm" />
         {{ ELEMENT_LABELS[toElement(e)!] }}
       </FilterChip>
     </div>

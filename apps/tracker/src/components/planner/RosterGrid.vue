@@ -3,7 +3,7 @@ import type { PlannerData } from '@gdt/game-data'
 import type { Good } from '@gdt/shared'
 import { computed, reactive } from 'vue'
 import { Check, Search } from 'lucide-vue-next'
-import { ELEMENT_FILL } from '@/components/characters/tokens'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiInput from '@/components/ui/UiInput.vue'
@@ -114,7 +114,7 @@ const weaponOptions = [
         :title="ELEMENT_LABELS[e]"
         @toggle="filters.element = filters.element === e ? 'all' : e"
       >
-        <span class="size-2.5 rounded-full" :class="ELEMENT_FILL[e]" aria-hidden="true" />
+        <ElementIcon :element="e" decorative size="sm" />
         <span class="sr-only sm:not-sr-only">{{ ELEMENT_LABELS[e] }}</span>
       </FilterChip>
     </div>

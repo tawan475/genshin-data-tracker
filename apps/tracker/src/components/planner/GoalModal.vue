@@ -33,7 +33,8 @@ import {
   Star,
   Trash2,
 } from 'lucide-vue-next'
-import { ELEMENT_FILL, RARITY_TEXT } from '@/components/characters/tokens'
+import { RARITY_TEXT } from '@/components/characters/tokens'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -382,12 +383,7 @@ const replaceSelected = computed<ReadonlySet<string>>(
           :rarity="portrait.rarity ?? undefined"
           size="sm"
         />
-        <span
-          v-if="c?.element"
-          class="size-2.5 shrink-0 rounded-full"
-          :class="ELEMENT_FILL[c.element]"
-          aria-hidden="true"
-        />
+        <ElementIcon v-if="c?.element" :element="c.element" />
         <h2 class="min-w-0 truncate text-lg font-semibold">{{ title }}</h2>
         <span
           v-if="c?.rarity"

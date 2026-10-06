@@ -29,6 +29,7 @@ import {
   type SortDirection,
 } from '@/data/characters'
 import { useResource } from '@/data/use-resource'
+import { characterBanner } from '@/lib/assets'
 import { readJson, writeJson } from '@/lib/storage'
 import { useAccount } from './context'
 
@@ -156,6 +157,16 @@ function step(delta: -1 | 1) {
   const next = list[(selectedIndex.value + delta + list.length) % list.length]
   if (next) open(next.key)
 }
+
+// Fetch the neighbours' namecards ahead, so the next one is ready when stepping.
+watch(selectedIndex, (index) => {
+  const list = stepList.value
+  if (index < 0 || list.length < 2) return
+  for (const delta of [-1, 1]) {
+    const src = characterBanner(list[(index + delta + list.length) % list.length]!.key)
+    if (src) new Image().src = src
+  }
+})
 </script>
 
 <template>

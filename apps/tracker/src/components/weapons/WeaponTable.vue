@@ -2,6 +2,7 @@
 import { Lock } from 'lucide-vue-next'
 import SortHeader from '@/components/characters/SortHeader.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
 import {
   MAX_REFINEMENT,
   WEAPON_SORTS,
@@ -67,7 +68,7 @@ function ariaSort(key: WeaponSort) {
           <th scope="col" class="hidden w-24 px-2 py-2 text-left font-medium lg:table-cell">
             Type
           </th>
-          <th scope="col" class="w-12 px-2 py-2 text-right sm:w-16" :aria-sort="ariaSort('level')">
+          <th scope="col" class="w-16 px-2 py-2 text-right sm:w-20" :aria-sort="ariaSort('level')">
             <SortHeader
               label="Lv"
               title="Level"
@@ -138,12 +139,8 @@ function ariaSort(key: WeaponSort) {
           <td class="hidden truncate px-2 py-1.5 text-text-secondary lg:table-cell">
             {{ row.type ? WEAPON_TYPE_LABELS[row.type] : '' }}
           </td>
-          <td
-            class="tabular px-2 py-1.5 text-right font-mono"
-            :class="row.level >= 90 ? '' : 'text-text-secondary'"
-            :title="`Ascension ${row.ascension}`"
-          >
-            {{ row.level }}
+          <td class="px-2 py-1.5 text-right" :class="row.level >= 90 ? '' : 'text-text-secondary'">
+            <LevelText :level="row.level" :ascension="row.ascension" bare />
           </td>
           <td
             class="tabular px-2 py-1.5 text-right font-mono"

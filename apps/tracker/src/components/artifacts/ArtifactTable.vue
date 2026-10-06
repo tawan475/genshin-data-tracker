@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ArrowDown, ArrowUp, FlaskConical, Lock, Sparkle } from 'lucide-vue-next'
+import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import RollValue from '@/components/ui/RollValue.vue'
 import type { ArtifactRow, ArtifactSort } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
+import { isCritCirclet } from '@/lib/crit-tiers'
 import { keyToName } from '@/lib/format'
 import {
-  formatCv,
   formatSlotName,
   formatStatName,
   formatStatShort,
@@ -13,7 +15,7 @@ import {
   formatStatValue,
 } from '@/utils/artifact-stats'
 import ArtifactRollBars from './ArtifactRollBars.vue'
-import { CV_BANDS_TITLE, cvClass, slotIcon } from './styles'
+import { slotIcon } from './styles'
 
 /**
  * The compact view: one row per artifact. Headers sort; the set name is the
@@ -82,7 +84,7 @@ const owner = (row: ArtifactRow) => (row.artifact.location ? keyToName(row.artif
               type="button"
               class="inline-flex min-h-9 items-center gap-1 rounded-md px-1 hover:text-text-primary"
               :class="sort === key ? 'text-text-primary' : ''"
-              :title="key === 'cv' ? CV_BANDS_TITLE : 'Roll value'"
+              :title="key === 'cv' ? 'Crit value' : 'Roll value'"
               @click="emit('sort', key)"
             >
               <component
@@ -164,13 +166,15 @@ const owner = (row: ArtifactRow) => (row.artifact.location ? keyToName(row.artif
               </li>
             </ul>
           </td>
-          <td class="tabular px-2 py-1.5 text-right font-mono">
-            <span class="font-semibold" :class="cvClass(row.cv)">{{ formatCv(row.cv) }}</span>
+          <td class="px-2 py-1.5 text-right">
+            <CritValue
+              :value="row.cv"
+              :crit-circlet="isCritCirclet(row.artifact.slotKey, row.artifact.mainStatKey)"
+              class="font-semibold"
+            />
           </td>
-          <td
-            class="tabular hidden px-2 py-1.5 text-right font-mono text-text-secondary sm:table-cell"
-          >
-            {{ row.rv }}%
+          <td class="hidden px-2 py-1.5 text-right sm:table-cell">
+            <RollValue :value="row.rv" />
           </td>
           <td class="py-1.5 pr-3 pl-2 md:max-w-40">
             <div v-if="owner(row)" class="flex min-w-0 items-center gap-2" :title="owner(row)">

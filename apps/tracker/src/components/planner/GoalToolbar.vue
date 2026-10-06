@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Search } from 'lucide-vue-next'
-import { ELEMENT_FILL } from '@/components/characters/tokens'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
@@ -100,7 +100,7 @@ function toggleRarity(r: number) {
         :count="elementCounts.get(e) ?? 0"
         @toggle="toggleElement(e)"
       >
-        <span class="size-2.5 rounded-full" :class="ELEMENT_FILL[e]" aria-hidden="true" />
+        <ElementIcon :element="e" decorative size="sm" />
         {{ ELEMENT_LABELS[e] }}
       </FilterChip>
       <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />

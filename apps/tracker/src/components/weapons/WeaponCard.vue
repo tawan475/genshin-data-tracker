@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
 import { WEAPON_TYPE_LABELS, type WeaponRow } from '@/data/weapons'
 import { characterIcon, weaponIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
@@ -13,7 +14,6 @@ const details = computed(() =>
   [
     props.weapon.rarity ? `${props.weapon.rarity}★` : null,
     props.weapon.type ? WEAPON_TYPE_LABELS[props.weapon.type] : null,
-    `A${props.weapon.ascension}`,
   ]
     .filter(Boolean)
     .join(' · '),
@@ -44,7 +44,8 @@ const avatarFailed = ref(false)
       </div>
       <div class="flex items-center gap-3 text-sm">
         <span class="tabular font-mono whitespace-nowrap">
-          Lv {{ weapon.level }} · R{{ weapon.refinement }}
+          <LevelText :level="weapon.level" :ascension="weapon.ascension" />
+          <span class="text-text-muted"> · </span>R{{ weapon.refinement }}
         </span>
         <span v-if="weapon.lock" class="inline-flex text-text-muted" title="Locked">
           <Lock class="size-4" aria-hidden="true" />
