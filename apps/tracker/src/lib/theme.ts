@@ -33,12 +33,23 @@ export function resolveTheme(choice: ThemePreference): Theme {
 /** Browser chrome (status bar, tab strip) per painted ground. */
 const THEME_COLOR = { light: '#f8fafc', dark: '#0f172a', public: '#0f131f' } as const
 
+/**
+ * How long the colour-only transitions stay on after a theme flip. The class
+ * swaps every element's transitions for colour ones, so it must not outlive
+ * the fade: left on, it cut every later non-colour transition (drawers, the
+ * collapsing nav).
+ */
+const THEME_FADE_MS = 300
+let fadeTimer: ReturnType<typeof setTimeout> | undefined
+
 function paint(theme: Theme): void {
   const root = document.documentElement
   const painted = publicPage ? 'dark' : theme
   if (root.dataset.theme !== painted) {
     root.classList.add('theme-transitions')
     root.dataset.theme = painted
+    clearTimeout(fadeTimer)
+    fadeTimer = setTimeout(() => root.classList.remove('theme-transitions'), THEME_FADE_MS)
   }
   root.toggleAttribute('data-public', publicPage)
   resolvedTheme.value = theme
