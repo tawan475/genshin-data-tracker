@@ -10,7 +10,7 @@
  * they count once the data catches up.
  */
 
-import type { Achievement, AchievementData, AchievementTexts } from './index'
+import type { Achievement, AchievementData, AchievementTexts } from '@gdt/game-data'
 
 // ------------------------------------------------------------------ captured
 

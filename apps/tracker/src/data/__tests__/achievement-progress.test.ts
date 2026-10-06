@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loadAchievements, type Achievement, type AchievementTexts } from '../src'
+import { loadAchievements, type Achievement, type AchievementTexts } from '@gdt/game-data'
 import {
   DEFAULT_ACHIEVEMENT_FILTERS,
   NO_ACHIEVEMENT_FILTERS,
@@ -24,7 +24,7 @@ import {
   unmarkFrom,
   type AchievementFilters,
   type DoneState,
-} from '../src/achievement-progress'
+} from '../achievement-progress'
 
 // A made-up game: two categories (goal 2 comes first in game order).
 function achievement(

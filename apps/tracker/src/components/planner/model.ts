@@ -41,7 +41,7 @@ import type {
   plannerTargetsPatch,
 } from '@gdt/shared'
 import type { z } from 'zod'
-import type { Element } from '@/data/characters-meta'
+import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
 import { formatNumber, keyToName } from '@/lib/format'
 
@@ -162,16 +162,6 @@ export interface Board {
   weaponGoals: Map<string, WeaponGoalView>
 }
 
-const ELEMENTS: Record<string, Element> = {
-  Pyro: 'pyro',
-  Hydro: 'hydro',
-  Anemo: 'anemo',
-  Electro: 'electro',
-  Dendro: 'dendro',
-  Cryo: 'cryo',
-  Geo: 'geo',
-}
-
 export function characterName(key: string): string {
   return keyToName(key)
 }
@@ -199,7 +189,7 @@ export function characterGoalView(
     key,
     name: characterName(key),
     rarity: data?.rarity ?? null,
-    element: data?.element ? (ELEMENTS[data.element] ?? null) : null,
+    element: toElement(data?.element),
     weapon: data?.weapon ?? null,
     owned,
     current: state,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NO_PLAYER, accountPlayer, type PlayerValues } from '../src/account-player'
+import { NO_PLAYER, accountPlayer, type PlayerValues } from '../account-player'
 
 describe('accountPlayer', () => {
   const players: Record<string, PlayerValues> = {

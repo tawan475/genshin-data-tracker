@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import plannerJson from '../data/planner.json'
-import { decodePlanner } from '../src'
-import type { PlannerFile } from '../src/format'
-import type { CharacterState } from '../src/planner-math'
-import { isSeelieExport, mapSeelieGoals, seelieKeys } from '../src/seelie'
+import plannerJson from '@gdt/game-data/data/planner.json'
+import { decodePlanner } from '@gdt/game-data'
+import type { PlannerFile } from '@gdt/game-data/format'
+import type { CharacterState } from '@gdt/game-data/planner-math'
+import { isSeelieExport, mapSeelieGoals, seelieKeys } from '../seelie'
 
 const planner = decodePlanner(plannerJson as unknown as PlannerFile)
 const keys = seelieKeys(planner)

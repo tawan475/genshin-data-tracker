@@ -13,7 +13,7 @@ import {
   type CapturedAchievements,
   type DoneSource,
   type DoneState,
-} from '@gdt/game-data/achievement-progress'
+} from '@/data/achievement-progress'
 import { materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 import { completionText } from './completion'

@@ -9,7 +9,7 @@
  * version, so a reload revalidates for one round trip and no body.
  */
 
-import { accountPlayer, type AccountPlayer } from '@gdt/game-data/account-player'
+import { accountPlayer, type AccountPlayer } from '@/data/account-player'
 import {
   catalogFromRows,
   decodePlayer,

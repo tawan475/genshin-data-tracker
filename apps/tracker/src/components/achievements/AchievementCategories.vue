@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Eye, EyeOff } from 'lucide-vue-next'
-import type { ProgressCount } from '@gdt/game-data/achievement-progress'
+import type { ProgressCount } from '@/data/achievement-progress'
 import { formatNumber } from '@/lib/format'
 import CategoryIcon from './CategoryIcon.vue'
 

@@ -18,13 +18,13 @@
  * current refinement.
  */
 
-import type { PlannerData } from './index'
+import type { PlannerData } from '@gdt/game-data'
 import {
   normalizeLevel,
   type CharacterGoal,
   type CharacterState,
   type WeaponGoal,
-} from './planner-math'
+} from '@gdt/game-data/planner-math'
 
 const norm = (slug: string) => slug.toLowerCase().replace(/[^a-z0-9]/g, '')
 

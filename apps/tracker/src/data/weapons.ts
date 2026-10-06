@@ -14,8 +14,7 @@
 
 import type { Good } from '@gdt/shared'
 import { keyToName } from '@/lib/format'
-import type { WeaponType } from './characters-meta'
-import { WEAPON_META } from './weapons-meta'
+import { weaponMeta, type WeaponType } from './game-meta'
 
 export type { WeaponType }
 
@@ -153,7 +152,7 @@ export function buildArmory(good: Good): Armory {
   const byRarity = new Map<number, number>()
   let spare5 = 0
   good.weapons.forEach((w, index) => {
-    const meta = WEAPON_META[w.key]
+    const meta = weaponMeta(w.key)
     const rarity = meta?.[0] ?? null
     if (rarity !== null) byRarity.set(rarity, (byRarity.get(rarity) ?? 0) + 1)
     if (w.location) equipped++

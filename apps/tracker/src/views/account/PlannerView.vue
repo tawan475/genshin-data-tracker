@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { loadPlanner } from '@gdt/game-data'
-import { NO_PLAYER } from '@gdt/game-data/account-player'
+import { NO_PLAYER } from '@/data/account-player'
 import { loadDropRates } from '@gdt/game-data/drops'
 import { craftingSteps } from '@gdt/game-data/planner-convert'
 import { domainSchedule, farmPlan, resinNow, todayPlan } from '@gdt/game-data/planner-estimate'

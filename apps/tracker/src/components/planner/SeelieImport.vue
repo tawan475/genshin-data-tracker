@@ -2,7 +2,7 @@
 import type { PlannerData } from '@gdt/game-data'
 import { raiseForTalents } from '@gdt/game-data/planner-goals'
 import { findCharacterState, findWeaponState } from '@gdt/game-data/planner-math'
-import { isSeelieExport, mapSeelieGoals, type SeelieImport } from '@gdt/game-data/seelie'
+import { isSeelieExport, mapSeelieGoals, type SeelieImport } from '@/data/seelie'
 import type { Good, PlannerTarget } from '@gdt/shared'
 import { computed, ref, shallowRef, watch } from 'vue'
 import { FileUp, TriangleAlert } from 'lucide-vue-next'

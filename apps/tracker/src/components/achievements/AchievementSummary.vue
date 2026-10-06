@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ProgressSummary } from '@gdt/game-data/achievement-progress'
+import type { ProgressSummary } from '@/data/achievement-progress'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import { materialIcon } from '@/lib/assets'

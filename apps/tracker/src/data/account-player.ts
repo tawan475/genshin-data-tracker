@@ -8,7 +8,7 @@
  * snapshot of that run, the one closest to the login, not from the newest.
  */
 
-import type { LoginResin } from './planner-estimate'
+import type { LoginResin } from '@gdt/game-data/planner-estimate'
 
 /** The `gi_player` fields read here (the stored section has more). */
 export interface PlayerValues {

@@ -1,9 +1,9 @@
 /**
  * The Characters page's model: one pass over a GOOD inventory joins every
  * character with the weapon and artifacts it wears, adds rarity / element /
- * weapon type from the static tables, and derives what the cards show (set
- * bonuses, crit value, what is left to build). Pure functions; the view only
- * filters and sorts the result.
+ * weapon type from the game data (game-meta.ts), and derives what the cards
+ * show (set bonuses, crit value, what is left to build). Pure functions; the
+ * view only filters and sorts the result.
  */
 
 import {
@@ -15,14 +15,8 @@ import {
 } from '@gdt/shared'
 import { keyToName } from '@/lib/format'
 import { maxLevel } from '@/utils/artifact-rolls'
-import {
-  ARTIFACT_MAIN_STATS,
-  ARTIFACT_SET_THRESHOLDS,
-  CHARACTER_META,
-  type Element,
-  type WeaponType,
-} from './characters-meta'
-import { WEAPON_META } from './weapons-meta'
+import { ARTIFACT_MAIN_STATS, ARTIFACT_SET_THRESHOLDS } from './artifact-stats'
+import { characterMeta, weaponMeta, type Element, type WeaponType } from './game-meta'
 import { WEAPON_TYPE_LABELS, itemName } from './weapons'
 
 export { WEAPON_TYPES, WEAPON_TYPE_LABELS, itemName } from './weapons'
@@ -158,7 +152,7 @@ export function normalizeSearch(text: string): string {
 }
 
 export function weaponInfo(key: string): { rarity: number | null; type: WeaponType | null } {
-  const meta = WEAPON_META[key]
+  const meta = weaponMeta(key)
   return { rarity: meta?.[0] ?? null, type: meta?.[1] ?? null }
 }
 
@@ -236,7 +230,7 @@ export function buildRoster(good: Good): Roster {
   }
 
   const characters = good.characters.map((c): CharacterView => {
-    const meta = CHARACTER_META[c.key]
+    const meta = characterMeta(c.key)
     const worn = weapons.get(c.key)
     const weapon: EquippedWeapon | null = worn
       ? { ...worn, name: itemName(worn.key), ...weaponInfo(worn.key) }
