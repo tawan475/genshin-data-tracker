@@ -161,6 +161,11 @@ export function usePlannerTargets(accountId: Ref<number>) {
     reload: () => load(),
     change,
     commit,
+    /** Sends what waits, then re-reads (a change made in another tab or device). */
+    async refresh() {
+      await flush().catch(() => {})
+      await load(true)
+    },
     /** Sends anything still waiting (on leaving the page). */
     flush: () => flush().catch(() => {}),
   }

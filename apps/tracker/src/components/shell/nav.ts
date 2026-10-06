@@ -29,7 +29,7 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-artifacts', label: 'Artifacts', icon: Gem, primary: true },
   { name: 'account-weapons', label: 'Weapons', icon: Swords },
   { name: 'account-materials', label: 'Materials', icon: Package, primary: true },
-  { name: 'account-planner', label: 'Planner', icon: ClipboardList },
+  { name: 'account-planner', label: 'Planner', icon: ClipboardList, primary: true },
   { name: 'account-achievements', label: 'Achievements', icon: Trophy },
   { name: 'account-snapshots', label: 'Snapshots', icon: History },
   { name: 'account-import', label: 'Import', icon: Upload },

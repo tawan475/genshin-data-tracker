@@ -1,7 +1,8 @@
 /**
  * The Planner page's model: stored targets joined with the newest snapshot
- * (current levels, talents, weapons) and the planner data, each goal's cost
- * memoised (`createRequirementCache`). Costs, totals, conversions and
+ * (current levels, talents, weapons; a state set by hand where it is ahead,
+ * see hand-edits.ts) and the planner data, each goal's cost memoised
+ * (`createRequirementCache`). Costs, totals, conversions and
  * estimates come from `@gdt/game-data` (planner-math, planner-goals,
  * planner-estimate); this file only shapes them for the page. Pure
  * functions; the view keeps them in computed()s.
@@ -32,10 +33,12 @@ import {
   type WeaponState,
 } from '@gdt/game-data/planner-math'
 import type {
+  CharacterCurrent,
   CharacterTarget,
   Good,
   ItemTarget,
   PlannerTarget,
+  WeaponCurrent,
   WeaponTarget,
   plannerTargetInput,
   plannerTargetsPatch,
@@ -44,6 +47,7 @@ import type { z } from 'zod'
 import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
 import { formatNumber, keyToName } from '@/lib/format'
+import { characterNow, weaponNow } from './hand-edits'
 
 export type TargetInput = z.input<typeof plannerTargetInput>
 export type TargetsPatch = z.input<typeof plannerTargetsPatch>
@@ -92,7 +96,11 @@ export interface WeaponGoalView {
   type: WeaponType | null
   /** Whether a copy is in the inventory (else it starts at level 1). */
   owned: boolean
+  /** The capture's state, with a hand-set one where that is ahead (`edited`). */
   current: WeaponState
+  /** The capture's state alone (level 1 when not owned). */
+  captured: WeaponState
+  edited: boolean
   target: WeaponTarget
   requirement: Requirement | null
   /** Level, ascension and refinement reached. */
@@ -107,7 +115,11 @@ export interface CharacterGoalView {
   element: Element | null
   weapon: WeaponType | null
   owned: boolean
+  /** The capture's state, with a hand-set one where that is ahead (`edited`). */
   current: CharacterState
+  /** The capture's state alone (level 1 when not owned). */
+  captured: CharacterState
+  edited: boolean
   /** Constellation now (0 when not owned). */
   constellation: number
   /** Talent levels as the game shows them with C3/C5 (current and target). */
@@ -176,9 +188,12 @@ export function characterGoalView(
   cache: RequirementCache,
   key: string,
   stored: CharacterTarget,
+  override?: CharacterCurrent | null,
 ): CharacterGoalView {
   const data = planner.characters.get(key)
-  const { state, owned } = findCharacterState(good.characters, key)
+  const found = findCharacterState(good.characters, key)
+  const { state, edited } = characterNow(found.state, override)
+  const owned = found.owned
   const { target, raised } = data
     ? raiseForTalents(data.ascension, stored, planner.talentAscension)
     : { target: stored, raised: null }
@@ -193,6 +208,8 @@ export function characterGoalView(
     weapon: data?.weapon ?? null,
     owned,
     current: state,
+    captured: found.state,
+    edited,
     constellation,
     boosted: {
       current: boostedTalents(planner, key, state.talents, constellation),
@@ -212,9 +229,12 @@ export function weaponGoalView(
   key: string,
   owner: string,
   target: WeaponTarget,
+  override?: WeaponCurrent | null,
 ): WeaponGoalView {
   const data = planner.weapons.get(key)
-  const { state, owned } = findWeaponState(good.weapons, key, owner)
+  const found = findWeaponState(good.weapons, key, owner)
+  const { state, edited } = weaponNow(found.state, override)
+  const owned = found.owned
   const requirement = cache.weapon(key, state, target)
   return {
     id: weaponGoalId(key, owner),
@@ -225,27 +245,40 @@ export function weaponGoalView(
     type: data?.type ?? null,
     owned,
     current: state,
+    captured: found.state,
+    edited,
     target,
     requirement,
     done: (requirement ? isDone(requirement) : false) && state.refinement >= target.refinement,
   }
 }
 
-/** Joins the targets with the inventory; characters by name, done ones last. */
+/** Hand-set current states by goal id (`character:Key`, `weapon:Key:Owner`). */
+export type Overrides = ReadonlyMap<string, CharacterCurrent | WeaponCurrent>
+
+/**
+ * Joins the targets with the capture (`good`, its characters and weapons),
+ * the hand-set current states and the bag (`bag`: the capture's materials
+ * with the hand edits); characters by name, done ones last.
+ */
 export function buildBoard(
   planner: PlannerData,
   good: Good,
+  bag: Readonly<Record<string, number>>,
   targets: readonly PlannerTarget[],
   cache: RequirementCache,
+  overrides: Overrides = new Map(),
 ): Board {
   const characterGoals = new Map<string, CharacterGoalView>()
   const weaponGoals = new Map<string, WeaponGoalView>()
   const items: ItemGoalView[] = []
   for (const t of targets) {
     if (t.kind === 'character') {
-      characterGoals.set(t.key, characterGoalView(planner, good, cache, t.key, t.target))
+      const override = overrides.get(characterGoalId(t.key)) as CharacterCurrent | undefined
+      characterGoals.set(t.key, characterGoalView(planner, good, cache, t.key, t.target, override))
     } else if (t.kind === 'weapon') {
-      const view = weaponGoalView(planner, good, cache, t.key, t.owner, t.target)
+      const override = overrides.get(weaponGoalId(t.key, t.owner)) as WeaponCurrent | undefined
+      const view = weaponGoalView(planner, good, cache, t.key, t.owner, t.target, override)
       weaponGoals.set(view.id, view)
     } else {
       const material = planner.materialsByKey.get(t.key) ?? null
@@ -255,7 +288,7 @@ export function buildBoard(
         material,
         name: material?.name ?? keyToName(t.key),
         target: t.target,
-        have: Math.max(0, Math.trunc(good.materials[t.key] ?? 0)),
+        have: Math.max(0, Math.trunc(bag[t.key] ?? 0)),
       })
     }
   }
@@ -389,7 +422,7 @@ export function shortCount(
 // ------------------------------------------------------------ next step
 
 export interface NextHint {
-  /** "Lv 70+ · 6/8/8", "Lv 80" */
+  /** "Lv 70+ · talents 6/8/8", "Lv 80" */
   text: string
   title: string
 }
@@ -430,7 +463,7 @@ export function nextHint(
         (t) => s.talents[t] > c.current.talents[t],
       )
       if (levelUp) parts.push(`Lv ${levelLabel(planner, 'character', c.key, s.level, s.ascension)}`)
-      if (talentsUp) parts.push(`${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`)
+      if (talentsUp) parts.push(`talents ${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`)
       details.push(
         `${c.name}: Lv ${s.level} (A${s.ascension}), talents ${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`,
       )

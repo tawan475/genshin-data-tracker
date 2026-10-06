@@ -11,10 +11,11 @@ import {
   type PlanGoal,
   type PlanOptions,
 } from '@gdt/game-data/planner-math'
-import type { PlannerTarget } from '@gdt/shared'
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import type { Good, PlannerTarget } from '@gdt/shared'
+import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Clock, FileInput, Plus, SearchX, Settings2, Target, Upload } from 'lucide-vue-next'
+import { Clock, FileInput, Info, Plus, SearchX, Settings2, Target, Upload } from 'lucide-vue-next'
+import DoneDialog from '@/components/planner/DoneDialog.vue'
 import ExtraItems from '@/components/planner/ExtraItems.vue'
 import FarmPanel from '@/components/planner/FarmPanel.vue'
 import GoalCard from '@/components/planner/GoalCard.vue'
@@ -22,8 +23,11 @@ import GoalEditor from '@/components/planner/GoalEditor.vue'
 import GoalPicker from '@/components/planner/GoalPicker.vue'
 import GoalToolbar from '@/components/planner/GoalToolbar.vue'
 import ItemEditor from '@/components/planner/ItemEditor.vue'
+import ItemPopover from '@/components/planner/ItemPopover.vue'
 import PlannerSettings from '@/components/planner/PlannerSettings.vue'
 import SeelieImport from '@/components/planner/SeelieImport.vue'
+import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
+import { READINESS } from '@/components/planner/farm-format'
 import {
   GOAL_SORTS,
   NO_GOAL_FILTERS,
@@ -35,6 +39,12 @@ import {
   type GoalFilters,
   type GoalSort,
 } from '@/components/planner/goal-list'
+import {
+  countChange,
+  effectiveInventory,
+  replacedAdjustments,
+} from '@/components/planner/hand-edits'
+import { provideItemPopover, type ItemRequest } from '@/components/planner/item-popover'
 import {
   buildBoard,
   characterGoalId,
@@ -52,6 +62,8 @@ import {
   type NextHint,
   type RequirementCache,
 } from '@/components/planner/model'
+import { goalNeeds, type GoalNeeds } from '@/components/planner/needs'
+import { usePlannerState, type CurrentChange } from '@/components/planner/use-planner-state'
 import { upsert, usePlannerTargets } from '@/components/planner/use-planner-targets'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -65,39 +77,57 @@ import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
 import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons, loadMaterialIcons } from '@/lib/assets'
-import { formatDateTime, formatRelative } from '@/lib/format'
+import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { updatesHeld } from '@/live/holds'
+import { onPlannerChange } from '@/live/planner-changes'
+import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useAccount } from './context'
 
 /**
  * Planner: goals per character (level, ascension, talents) and weapon, extra
- * item needs, what they cost from the newest snapshot's state, and what is
- * still missing against its inventory (crafting, Dream Solvent, optionally
- * Dust of Azoth and forging, Mora passives), with runs, resin and days per
- * source from the account's AR and World Level. Targets and the planner
- * settings live on the server; everything else is computed here from
- * @gdt/game-data.
+ * item needs, what they cost from the current state, and what is still
+ * missing against the bag (crafting, Dream Solvent, optionally Dust of
+ * Azoth and forging, Mora passives), with runs, resin and days per source
+ * from the account's AR and World Level.
+ *
+ * The bag and the current states are the newest capture's with the hand
+ * edits on top (hand-edits.ts): every material icon edits its count, a Done
+ * spends a part's materials and sets its state, and a newer capture replaces
+ * the edits (irminsul is the truth). Without any capture the bag starts
+ * empty, so the planner works from what is typed in. Goals, edits and the
+ * planner settings live on the server; other tabs and devices follow live.
  */
 const account = useAccount()
+const accounts = useAccounts()
 const feedback = useFeedback()
 const accountId = computed(() => account.value.id)
+/** The capture hand edits are made against: the newest one's last sighting, 0 for none. */
+const base = computed(() => account.value.latest?.lastSeenAt ?? 0)
+
+const NO_CAPTURE: Good = {
+  format: 'GOOD',
+  version: 3,
+  source: '',
+  characters: [],
+  artifacts: [],
+  weapons: [],
+  materials: {},
+}
 
 // ------------------------------------------------------------------ data
 
 const resource = useResource(
   () => account.value,
   async (a) => {
-    if (!a.latest) {
-      return { accountId: a.id, inventory: null, planner: null, drops: null, player: NO_PLAYER }
-    }
     const [inventory, planner, drops, player] = await Promise.all([
-      loadLatestInventory(a),
+      a.latest ? loadLatestInventory(a) : Promise.resolve(null),
       loadPlanner(),
       // No rates means no estimates, not a broken page.
       loadDropRates().catch(() => null),
       // Nice to have: without it the settings (or the top bracket) decide.
-      loadAccountPlayer(a).catch(() => NO_PLAYER),
+      a.latest ? loadAccountPlayer(a).catch(() => NO_PLAYER) : Promise.resolve(NO_PLAYER),
       loadGameIcons(),
       loadMaterialIcons(),
     ])
@@ -109,11 +139,35 @@ const data = computed(() => {
   return value && value.accountId === account.value.id ? value : undefined
 })
 const planner = computed(() => data.value?.planner ?? null)
-const good = computed(() => data.value?.inventory?.good ?? null)
+/** The newest capture (an empty one when there is none). */
+const good = computed(() => (data.value ? (data.value.inventory?.good ?? NO_CAPTURE) : null))
 const drops = computed(() => data.value?.drops ?? null)
+const hasCapture = computed(() => !!data.value?.inventory)
 
 const store = usePlannerTargets(accountId)
 onBeforeUnmount(() => void store.flush())
+
+const state = usePlannerState(accountId, base, async (id) => {
+  // The page's account is behind the server: bring it up to date now.
+  await accounts.reload(id).catch(() => {})
+  accounts.applyPending(true)
+})
+onBeforeUnmount(() => void state.flush())
+
+/** The bag the planner works with: the capture's counts and the hand edits that still apply. */
+const bag = computed(() => {
+  const g = good.value
+  const edits = state.adjustments.value
+  return g && edits ? effectiveInventory(g.materials, edits, base.value) : null
+})
+/** The capture with the planner's bag, for the dialogs that read counts. */
+const goodView = computed<Good | null>(() =>
+  good.value && bag.value ? { ...good.value, materials: bag.value } : null,
+)
+/** Edits a newer capture replaced (until the next write drops them). */
+const replaced = computed(() =>
+  state.adjustments.value ? replacedAdjustments(state.adjustments.value, base.value).length : 0,
+)
 
 const { settings, save: saveSettings } = usePlannerSettings(accountId)
 const settingsOpen = ref(false)
@@ -145,14 +199,16 @@ const requirementCache = computed(() =>
 const board = computed(() => {
   const p = planner.value
   const g = good.value
+  const b = bag.value
   const targets = store.targets.value
+  const overrides = state.overrides.value
   const c = requirementCache.value
-  if (!p || !g || !targets || !c) return null
-  return buildBoard(p, g, targets, c)
+  if (!p || !g || !b || !targets || !overrides || !c) return null
+  return buildBoard(p, g, b, targets, c, overrides)
 })
 const totals = computed(() =>
-  planner.value && good.value && board.value
-    ? planTotals(planner.value, board.value.goals, good.value.materials, planOptions.value)
+  planner.value && bag.value && board.value
+    ? planTotals(planner.value, board.value.goals, bag.value, planOptions.value)
     : null,
 )
 const plan = computed(() =>
@@ -177,45 +233,73 @@ const today = computed(() =>
 )
 const resin = computed(() => {
   const at = account.value.latest?.takenAt
-  return planner.value && good.value && at !== undefined
-    ? resinNow(planner.value, good.value.materials, at, now.value, player.value.resin)
+  return planner.value && bag.value && at !== undefined && hasCapture.value
+    ? resinNow(planner.value, bag.value, at, now.value, player.value.resin)
     : null
 })
 /** Weapon EXP still short (after forging, when that is on). */
 const oreShort = computed(() => (totals.value?.weaponExp.missing ?? 0) > 0)
 
-/**
- * Per goal card, how many things (materials, EXP, Mora) the stock is short
- * of for that goal alone (crafting and conversions included); 0 means it
- * can be done right now. Done goals are left out.
- */
-const missing = computed(() => {
-  const map = new Map<string, number>()
+/** Each card's cost as one goal (a character with its weapons). */
+const entryGoals = computed(() => {
+  const map = new Map<string, PlanGoal>()
   const p = planner.value
-  const g = good.value
-  if (!board.value || !p || !g) return map
-  const options = withoutPassives(planOptions.value)
+  if (!p || !board.value) return map
   for (const entry of board.value.entries) {
-    if (entry.done) continue
     const goal = entryGoal(p, entry, passiveOwners.value)
-    if (goal) map.set(entry.id, shortCount(p, goal, g.materials, options))
+    if (goal) map.set(entry.id, goal)
   }
   return map
 })
 
-/** Counted goals the inventory covers on its own: what can be levelled right now. */
+/**
+ * Per card: ready with every counted goal, ready alone, or short, and the
+ * materials it is short of. A card with a goal that isn't counted is costed
+ * together with the counted ones (its own goals left out of them).
+ */
+const needs = computed(() => {
+  const map = new Map<string, GoalNeeds>()
+  const p = planner.value
+  const b = bag.value
+  const t = totals.value
+  if (!board.value || !p || !b || !t) return map
+  const options = withoutPassives(planOptions.value)
+  for (const entry of board.value.entries) {
+    const goal = entryGoals.value.get(entry.id)
+    if (entry.done || !goal) continue
+    const own = [entry.character, ...entry.weapons].filter((x) => x !== null)
+    const counted = own.every((x) => x.target.active)
+    const others = counted
+      ? t
+      : { others: board.value.goals.filter((g) => !own.some((x) => x.id === g.id)) }
+    map.set(entry.id, goalNeeds(p, goal, b, options, others))
+  }
+  return map
+})
+
+/** Counted goals the bag covers on their own: what can be levelled right now. */
 const ready = computed(() => {
   const set = new Set<string>()
   for (const entry of board.value?.entries ?? []) {
-    if (entry.active && missing.value.get(entry.id) === 0) set.add(entry.id)
+    const status = needs.value.get(entry.id)?.status
+    if (entry.active && status && status !== 'short') set.add(entry.id)
   }
   return set
 })
 
+/** Per card, how many materials it is short of on its own (for the "Missing" sort). */
+const missing = computed(() => {
+  const map = new Map<string, number>()
+  for (const [id, n] of needs.value) {
+    map.set(id, n.chips.filter((c) => c.status === 'short').length)
+  }
+  return map
+})
+
 /**
  * What each card can level now, when that is only part of its goal. Kept per
- * goal state for one inventory and set of options, so a favorite toggle
- * doesn't recompute them all.
+ * goal state for one bag and set of options, so a favorite toggle doesn't
+ * recompute them all.
  */
 let hintMemo = {
   inventory: null as object | null,
@@ -225,12 +309,12 @@ let hintMemo = {
 const hints = computed(() => {
   const result = new Map<string, NextHint | null>()
   const p = planner.value
-  const g = good.value
-  if (!board.value || !p || !g) return result
+  const b = bag.value
+  if (!board.value || !p || !b) return result
   const o = planOptions.value
   const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, ar.value])
-  if (hintMemo.inventory !== g.materials || hintMemo.options !== optionsKey) {
-    hintMemo = { inventory: g.materials, options: optionsKey, map: new Map() }
+  if (hintMemo.inventory !== b || hintMemo.options !== optionsKey) {
+    hintMemo = { inventory: b, options: optionsKey, map: new Map() }
   }
   for (const entry of board.value.entries) {
     if (entry.done || missing.value.get(entry.id) === 0) continue
@@ -242,7 +326,7 @@ const hints = computed(() => {
     ])
     let hint = hintMemo.map.get(key)
     if (hint === undefined) {
-      hint = nextHint(p, entry, g.materials, { ...o, ar: ar.value })
+      hint = nextHint(p, entry, b, { ...o, ar: ar.value })
       hintMemo.map.set(key, hint)
     }
     result.set(entry.id, hint)
@@ -250,15 +334,15 @@ const hints = computed(() => {
   return result
 })
 
-/** Extra item needs the inventory covers on their own. */
+/** Extra item needs the bag covers on their own. */
 const itemsInStock = computed(() => {
   const set = new Set<string>()
   const p = planner.value
-  const g = good.value
-  if (!p || !g) return set
+  const b = bag.value
+  if (!p || !b) return set
   for (const item of board.value?.items ?? []) {
     const goal = itemGoal(p, item.key, item.target)
-    if (shortCount(p, goal, g.materials, planOptions.value) === 0) set.add(item.id)
+    if (shortCount(p, goal, b, planOptions.value) === 0) set.add(item.id)
   }
   return set
 })
@@ -368,6 +452,100 @@ function toggleItem(item: ItemGoalView) {
   store.change([upsert({ kind: 'item', key: item.key, target })])
 }
 
+// ------------------------------------------------------------ inventory
+
+/** The inventory editor every material icon opens (one for the page). */
+const itemRequest = shallowRef<ItemRequest | null>(null)
+const itemOpen = ref(false)
+provideItemPopover((request) => {
+  itemRequest.value = request
+  itemOpen.value = true
+})
+
+function setCount(key: string, value: number) {
+  const capture = good.value?.materials[key] ?? 0
+  state.change({ inventory: [countChange(key, value, capture)] })
+}
+
+// ------------------------------------------------------------------ done
+
+interface DoneRequest {
+  entry: GoalEntry
+  part: DonePart
+  cost: DoneCost
+  label: string
+  from: string
+  to: string
+}
+const doneRequest = shallowRef<DoneRequest | null>(null)
+const doneOpen = ref(false)
+const doneSaving = ref(false)
+
+function askDone(
+  entry: GoalEntry,
+  part: DonePart,
+  text: { label: string; from: string; to: string },
+) {
+  const p = planner.value
+  const b = bag.value
+  if (!p || !b) return
+  const cost = doneCost(p, part.requirement, b, planOptions.value)
+  doneRequest.value = { entry, part, cost, ...text }
+  doneOpen.value = true
+}
+
+function stateChange(part: DonePart, current: DonePart['next']['current'] | null): CurrentChange {
+  const next = part.next
+  return next.kind === 'character'
+    ? { kind: 'character', key: next.key, current: current as typeof next.current | null }
+    : {
+        kind: 'weapon',
+        key: next.key,
+        owner: next.owner,
+        current: current as typeof next.current | null,
+      }
+}
+
+async function confirmDone() {
+  const request = doneRequest.value
+  if (!request) return
+  const { part, cost } = request
+  /** The state set by hand before, for Undo (null: none). */
+  const previous = state.overrides.value?.get(part.goal) ?? null
+  doneSaving.value = true
+  try {
+    await state.commit({
+      inventory: costChanges(cost),
+      current: [stateChange(part, part.next.current)],
+    })
+  } catch {
+    // Said by the store (a newer capture, or not saved).
+    doneOpen.value = false
+    return
+  } finally {
+    doneSaving.value = false
+  }
+  doneOpen.value = false
+  feedback.toast(
+    {
+      tone: 'success',
+      title: `${request.entry.name}: ${request.label} done`,
+      hint: `${request.from} → ${request.to}`,
+      action: {
+        label: 'Undo',
+        run: () =>
+          void state
+            .commit({
+              inventory: costChanges(cost, true),
+              current: [stateChange(part, previous)],
+            })
+            .catch(() => {}),
+      },
+    },
+    8000,
+  )
+}
+
 // ------------------------------------------------------------------ editor
 // The open goal lives in the URL (?goal=character:HuTao): Back closes it.
 
@@ -454,12 +632,14 @@ function openEntry(entry: GoalEntry) {
 
 type Ops = Parameters<typeof store.commit>[0]
 
-async function save(ops: Ops) {
+/** Goals first: a new goal's current state needs the goal to land on. */
+async function save(ops: Ops, current: CurrentChange[] = []) {
   try {
     await store.commit(ops)
+    if (current.length) await state.commit({ current })
     closeEditor()
   } catch {
-    // The store already said what went wrong and reloaded.
+    // The stores already said what went wrong and reloaded.
   }
 }
 
@@ -517,7 +697,34 @@ watch(accountId, () => {
   pickerOpen.value = false
   importOpen.value = false
   settingsOpen.value = false
+  itemOpen.value = false
+  doneOpen.value = false
   clearFilters()
+})
+
+// ------------------------------------------------------------- live
+
+/**
+ * Goals or hand edits changed in another tab or device: re-read them, once
+ * this tab is shown and nothing is open (data never changes under a dialog).
+ */
+let stale = false
+function catchUp() {
+  if (!stale || updatesHeld.value || document.visibilityState !== 'visible') return
+  stale = false
+  void store.refresh()
+  void state.refresh()
+}
+const stopListening = onPlannerChange((id) => {
+  if (id !== accountId.value) return
+  stale = true
+  catchUp()
+})
+watch(updatesHeld, catchUp)
+document.addEventListener('visibilitychange', catchUp)
+onBeforeUnmount(() => {
+  stopListening()
+  document.removeEventListener('visibilitychange', catchUp)
 })
 
 // ------------------------------------------------------------------ chrome
@@ -532,7 +739,7 @@ const importTo = computed(() => ({
   name: 'account-import',
   params: { accountId: account.value.id },
 }))
-const loadError = computed(() => resource.error.value ?? store.error.value)
+const loadError = computed(() => resource.error.value ?? store.error.value ?? state.error.value)
 const hasGoals = computed(
   () => (board.value?.entries.length ?? 0) + (board.value?.items.length ?? 0) > 0,
 )
@@ -552,31 +759,57 @@ const editorShown = computed(() => {
 const itemEditorShown = computed(
   () => !!itemKey.value && !!board.value && !!planner.value?.materialsByKey.has(itemKey.value),
 )
+const LEGEND = (['all', 'alone', 'short'] as const).map((s) => READINESS[s])
+
+// An editor opened from inside a dialog closes with it (and stops holding live updates).
+watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
+  const closed = now.some((open, i) => !open && before?.[i])
+  if (closed && itemOpen.value && itemRequest.value?.anchor.closest('dialog')) {
+    itemOpen.value = false
+  }
+})
 </script>
 
 <template>
   <PageHeader title="Planner">
-    <template v-if="newest && hasGoals" #meta>
-      <p class="flex items-center gap-1.5 text-text-secondary">
-        <Clock class="size-4" aria-hidden="true" />
-        <span class="sr-only">Newest snapshot</span>
-        <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
-      </p>
+    <template v-if="data" #meta>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+        <p v-if="newest && hasCapture" class="flex items-center gap-1.5">
+          <Clock class="size-4" aria-hidden="true" />
+          <span class="sr-only">Newest capture</span>
+          <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
+        </p>
+        <p v-else class="flex items-center gap-1.5">
+          <Info class="size-4" aria-hidden="true" />
+          No capture: counts are yours
+          <RouterLink :to="importTo" class="font-medium text-accent-text hover:underline"
+            >Import</RouterLink
+          >
+        </p>
+        <p v-if="replaced" class="flex items-center gap-1.5 text-accent-text">
+          <Info class="size-4" aria-hidden="true" />
+          {{ formatNumber(replaced) }} hand {{ replaced === 1 ? 'edit' : 'edits' }} replaced by the
+          capture
+          <button
+            type="button"
+            class="rounded px-1.5 font-medium hover:bg-surface-overlay"
+            @click="state.prune()"
+          >
+            OK
+          </button>
+        </p>
+      </div>
     </template>
     <template v-if="board" #actions>
       <template v-if="hasGoals">
         <UiSegmented v-model="tab" :options="TABS" label="View" />
-        <UiButton
-          title="Import from Seelie"
-          aria-label="Import from Seelie"
-          @click="importOpen = true"
-        >
+        <UiButton title="Import from Seelie" @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
-          <span class="hidden sm:inline">Seelie</span>
+          Seelie
         </UiButton>
-        <UiButton variant="primary" title="Add goal" aria-label="Add goal" @click="openPicker()">
+        <UiButton variant="primary" title="Add goal" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
-          <span class="hidden sm:inline">Add</span>
+          Add
         </UiButton>
       </template>
       <UiIconButton :label="settingsLabel" @click="settingsOpen = true">
@@ -585,24 +818,20 @@ const itemEditorShown = computed(
     </template>
   </PageHeader>
 
-  <UiPanel v-if="!account.latest || (data && !data.inventory)" flush>
-    <UiEmpty title="No snapshots yet">
-      <template #icon><Target aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="importTo">
-        <Upload class="size-4" aria-hidden="true" />
-        Import
-      </UiButton>
-    </UiEmpty>
-  </UiPanel>
-
   <UiError
-    v-else-if="loadError && !board"
+    v-if="loadError && !board"
     title="Could not load the planner"
     :error="loadError"
-    @retry="resource.error.value ? resource.reload() : store.reload()"
+    @retry="
+      resource.error.value ? resource.reload() : store.error.value ? store.reload() : state.reload()
+    "
   />
 
-  <template v-else-if="board && planner && good && totals && plan && today && requirementCache">
+  <template
+    v-else-if="
+      board && planner && good && goodView && bag && totals && plan && today && requirementCache
+    "
+  >
     <UiPanel v-if="!hasGoals" flush>
       <UiEmpty title="No goals">
         <template #icon><Target aria-hidden="true" /></template>
@@ -613,6 +842,10 @@ const itemEditorShown = computed(
         <UiButton @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
           Import from Seelie
+        </UiButton>
+        <UiButton v-if="!hasCapture" :to="importTo">
+          <Upload class="size-4" aria-hidden="true" />
+          Import a capture
         </UiButton>
       </UiEmpty>
     </UiPanel>
@@ -645,6 +878,17 @@ const itemEditorShown = computed(
         @clear="clearFilters"
       />
 
+      <ul
+        class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary"
+        aria-label="Readiness"
+      >
+        <li v-for="s in LEGEND" :key="s.label" class="inline-flex items-center gap-1.5">
+          <span class="size-2 rounded-full" :class="s.dot" aria-hidden="true" />
+          <span class="font-medium text-text-primary">{{ s.label }}</span>
+          {{ s.meaning }}
+        </li>
+      </ul>
+
       <UiPanel v-if="matching.length === 0 && shownItems.length === 0" flush>
         <UiEmpty title="No matches">
           <template #icon><SearchX aria-hidden="true" /></template>
@@ -661,12 +905,14 @@ const itemEditorShown = computed(
           <GoalCard
             :entry="entry"
             :planner="planner"
-            :ready="ready.has(entry.id)"
             :ar="ar"
             :hint="hints.get(entry.id) ?? null"
+            :needs="needs.get(entry.id) ?? null"
+            :goal="entryGoals.get(entry.id) ?? null"
             @open="openEntry(entry)"
             @toggle="toggleActive(entry)"
             @favorite="toggleFavorite(entry)"
+            @done="(part, text) => askDone(entry, part, text)"
           />
         </li>
       </ul>
@@ -677,7 +923,7 @@ const itemEditorShown = computed(
         :planner="planner"
         :goals="board.goals"
         :totals="totals"
-        :inventory="good.materials"
+        :inventory="bag"
         :options="planOptions"
         @open="(key) => openEditor({ kind: 'item', key })"
         @toggle="toggleItem"
@@ -705,9 +951,10 @@ const itemEditorShown = computed(
             <GoalCard
               :entry="entry"
               :planner="planner"
-              :ready="false"
               :ar="ar"
               :hint="null"
+              :needs="null"
+              :goal="null"
               @open="openEntry(entry)"
               @toggle="toggleActive(entry)"
               @favorite="toggleFavorite(entry)"
@@ -721,9 +968,10 @@ const itemEditorShown = computed(
       :open="editorShown"
       :subject="goalSubject"
       :planner="planner"
-      :good="good"
+      :good="goodView"
       :cache="requirementCache"
       :character-target="editorCharacter?.target ?? null"
+      :character-current="editorCharacter?.current ?? null"
       :raised="editorCharacter?.raised ?? null"
       :weapon-goals="editorWeapons"
       :others="editorOthers"
@@ -731,7 +979,7 @@ const itemEditorShown = computed(
       :drops="drops"
       :ar="ar"
       :wl="wl"
-      :saving="store.saving.value"
+      :saving="store.saving.value || state.saving.value"
       @close="closeEditor"
       @save="save"
       @remove="removeGoal"
@@ -740,7 +988,7 @@ const itemEditorShown = computed(
       :open="itemEditorShown"
       :item-key="itemKey"
       :planner="planner"
-      :good="good"
+      :good="goodView"
       :target="editorItem"
       :others="editorOthers"
       :options="planOptions"
@@ -752,7 +1000,7 @@ const itemEditorShown = computed(
     <GoalPicker
       :open="pickerOpen"
       :planner="planner"
-      :good="good"
+      :good="goodView"
       :taken="taken"
       :start="pickerStart"
       @close="pickerOpen = false"
@@ -761,11 +1009,36 @@ const itemEditorShown = computed(
     <SeelieImport
       :open="importOpen"
       :planner="planner"
-      :good="good"
+      :good="goodView"
       :targets="store.targets.value ?? []"
       :saving="store.saving.value"
       @close="importOpen = false"
       @apply="importGoals"
+    />
+    <DoneDialog
+      :open="doneOpen"
+      :title="doneRequest?.entry.name ?? ''"
+      :part="doneRequest?.label ?? ''"
+      :from="doneRequest?.from ?? ''"
+      :to="doneRequest?.to ?? ''"
+      :cost="doneRequest?.cost ?? null"
+      :planner="planner"
+      :saving="doneSaving"
+      @close="doneOpen = false"
+      @confirm="confirmDone"
+    />
+    <ItemPopover
+      :open="itemOpen"
+      :anchor="itemRequest?.anchor ?? null"
+      :item-key="itemRequest?.key ?? null"
+      :context="itemRequest?.context ?? null"
+      :touch="itemRequest?.touch ?? false"
+      :planner="planner"
+      :bag="bag"
+      :capture="good.materials"
+      :totals="totals"
+      @close="itemOpen = false"
+      @change="setCount"
     />
   </template>
 

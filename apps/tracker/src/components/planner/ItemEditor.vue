@@ -13,6 +13,7 @@ import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 import CostList from './CostList.vue'
+import { fromTouch, useItemPopover } from './item-popover'
 import NoteInput from './NoteInput.vue'
 import { remove, upsert } from './use-planner-targets'
 
@@ -35,6 +36,22 @@ const props = defineProps<{
   saving: boolean
 }>()
 const emit = defineEmits<{ close: []; save: [ops: Op[]]; remove: [ops: Op[]] }>()
+const openItem = useItemPopover()
+
+function editHave(event: MouseEvent) {
+  if (!props.itemKey) return
+  openItem?.({
+    key: props.itemKey,
+    anchor: event.currentTarget as HTMLElement,
+    touch: fromTouch(event),
+    context: material.value
+      ? {
+          label: material.value.name,
+          requirement: requirements.value[0] ?? itemRequirement(props.planner, props.itemKey, 0),
+        }
+      : null,
+  })
+}
 
 const count = ref('')
 const note = ref('')
@@ -109,7 +126,17 @@ function removeItem() {
         </label>
         <span class="ml-auto flex flex-col items-end gap-1">
           <span class="text-sm text-text-secondary">Have</span>
-          <span class="tabular flex min-h-10 items-center font-mono text-sm">{{
+          <button
+            v-if="openItem"
+            type="button"
+            aria-haspopup="dialog"
+            class="tabular flex min-h-10 items-center rounded-md border border-border-strong px-3 font-mono text-sm hover:bg-surface-overlay"
+            :aria-label="`Have ${formatNumber(have)}: edit`"
+            @click="editHave"
+          >
+            {{ formatNumber(have) }}
+          </button>
+          <span v-else class="tabular flex min-h-10 items-center font-mono text-sm">{{
             formatNumber(have)
           }}</span>
         </span>
@@ -124,6 +151,7 @@ function removeItem() {
           :others="others"
           :inventory="good.materials"
           :options="options"
+          :label="material.name"
         />
       </section>
     </div>

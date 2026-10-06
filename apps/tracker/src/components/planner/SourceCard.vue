@@ -39,11 +39,11 @@ defineProps<{
     </template>
 
     <template v-else>
-      <header class="flex items-center gap-2">
-        <h3 class="min-w-0 flex-1 truncate font-semibold" :title="group.name">
+      <header class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+        <h3 class="max-w-full min-w-0 truncate font-semibold" :title="group.name">
           {{ group.name }}
         </h3>
-        <RunBadge :run="group.run" :status="group.status" />
+        <span class="ml-auto"><RunBadge :run="group.run" :status="group.status" /></span>
       </header>
       <div class="flex flex-wrap content-start items-end gap-x-1 gap-y-2">
         <MaterialCell v-for="line in group.lines" :key="line.material.key" :line="line" />

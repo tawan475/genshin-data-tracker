@@ -20,16 +20,16 @@ defineProps<{ weekly: FarmWeekly; solvent: PlannerMaterial | null }>()
   <article
     class="flex min-w-0 flex-col gap-2 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm"
   >
-    <header class="flex items-center gap-2">
+    <header class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
       <h3
-        class="min-w-0 flex-1 truncate font-semibold"
+        class="max-w-full min-w-0 truncate font-semibold"
         :title="
           weekly.boss ? weekly.boss.name : 'No weekly boss drops it; Dream Solvent can’t make it'
         "
       >
         {{ weekly.boss ? weekly.boss.name : 'Quest only' }}
       </h3>
-      <RunBadge :run="weekly.run" :status="weekly.status" weekly />
+      <span class="ml-auto"><RunBadge :run="weekly.run" :status="weekly.status" weekly /></span>
     </header>
     <div class="flex flex-wrap items-end gap-x-1 gap-y-2">
       <MaterialCell v-for="line in weekly.lines" :key="line.material.key" :line="line" />

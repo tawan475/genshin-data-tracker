@@ -47,15 +47,15 @@ const title = computed(
       compact ? 'p-2.5' : 'p-3',
     ]"
   >
-    <header class="flex items-center gap-2">
+    <header class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
       <h3
-        class="min-w-0 flex-1 truncate font-semibold"
+        class="max-w-full min-w-0 truncate font-semibold"
         :class="compact ? 'text-sm' : ''"
         :title="title"
       >
         {{ entry.name || groups.map((g) => g.name).join(' · ') }}
       </h3>
-      <RunBadge :run="run" :status="status" />
+      <span class="ml-auto"><RunBadge :run="run" :status="status" /></span>
     </header>
     <div
       v-for="g in groups"

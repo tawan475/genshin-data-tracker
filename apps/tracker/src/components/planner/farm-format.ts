@@ -1,6 +1,7 @@
 /**
- * Labels for the planner's estimates and stock states: short text for the
- * cards ("×12 · 240 · 2d") and the words for their tooltips.
+ * Labels for the planner's estimates and stock states: short readable text
+ * for the cards ("12 runs · 240 resin · 2 days") and the words for their
+ * tooltips.
  */
 
 import type { StockStatus } from '@gdt/game-data/planner-goals'
@@ -24,6 +25,40 @@ export const STOCK_MEANING: Record<StockStatus, string> = {
   short: 'short',
 }
 
+/** A goal's readiness, as its card and the legend show it (a label, never colour alone). */
+export const READINESS: Record<
+  StockStatus | 'done',
+  { label: string; meaning: string; badge: string; dot: string }
+> = {
+  all: {
+    label: 'Ready',
+    meaning: 'Enough for every goal',
+    badge: 'bg-emerald-500/15 text-success-text',
+    dot: 'bg-emerald-500',
+  },
+  alone: {
+    label: 'Ready alone',
+    meaning: 'Enough for this goal, not for all of them',
+    badge: 'bg-amber-500/10 text-warning-text',
+    dot: 'bg-amber-500',
+  },
+  short: {
+    label: 'Short',
+    meaning: 'Not enough, even for this goal alone',
+    badge: 'bg-danger-surface text-danger-text',
+    dot: 'bg-danger',
+  },
+  done: {
+    label: 'Done',
+    meaning: 'Reached',
+    badge: 'bg-surface-overlay text-text-secondary',
+    dot: 'bg-emerald-500',
+  },
+}
+
+const plural = (n: number, one: string, many = `${one}s`) =>
+  `${formatNumber(n)} ${n === 1 ? one : many}`
+
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI']
 
 export function bracketText(b: Bracket): string {
@@ -37,9 +72,9 @@ export function bracketText(b: Bracket): string {
   return `${base}${ar}${b.assumed ? ', assumed' : ''}`
 }
 
-/** "×12 · 240 · 2d" */
+/** "12 runs · 240 resin · 2 days" */
 export function runText(run: RunEstimate): string {
-  return `×${formatNumber(run.runs)} · ${formatCompact(run.resin)} · ${formatNumber(run.days)}d`
+  return `${plural(run.runs, 'run')} · ${formatCompact(run.resin)} resin · ${plural(run.days, 'day')}`
 }
 
 /** "12 runs · 240 resin (4 condensed) · 2 days · Tier IV (AR 45)" */
@@ -53,14 +88,18 @@ export function runTitle(run: RunEstimate): string {
   ].join(' · ')
 }
 
-/** "×3 · 90~180 · 3w" */
+/** "3 claims · 90–180 resin · 3 weeks" */
 export function weeklyText(run: WeeklyRun): string {
   const resin =
     run.resinMin === run.resinMax
       ? formatCompact(run.resinMax)
-      : `${formatCompact(run.resinMin)}~${formatCompact(run.resinMax)}`
-  return `×${formatNumber(run.runs)} · ${resin} · ${formatNumber(run.weeks)}w`
+      : `${formatCompact(run.resinMin)}–${formatCompact(run.resinMax)}`
+  return `${plural(run.runs, 'claim')} · ${resin} resin · ${plural(run.weeks, 'week')}`
 }
+
+/** "2 days", "3 weeks": for the headline tiles. */
+export const daysText = (days: number) => plural(days, 'day')
+export const weeksText = (weeks: number) => plural(weeks, 'week')
 
 export function weeklyTitle(run: WeeklyRun): string {
   return [
