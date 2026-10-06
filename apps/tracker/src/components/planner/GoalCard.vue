@@ -2,7 +2,16 @@
 import type { PlannerData } from '@gdt/game-data'
 import type { PlanGoal } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
-import { ArrowRight, Check, CircleArrowUp, Eye, EyeOff, PencilLine, Star } from 'lucide-vue-next'
+import {
+  ArrowRight,
+  Check,
+  CircleArrowUp,
+  Eye,
+  EyeOff,
+  GripVertical,
+  PencilLine,
+  Star,
+} from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { ELEMENT_FILL, RARITY_SOFT } from '@/components/characters/tokens'
@@ -22,6 +31,10 @@ import type { GoalNeeds, NeedChip } from './needs'
  * chips (the inventory editor) and its readiness: ready with every goal,
  * ready on its own, or short. The header opens the editor; the star marks
  * a favorite, the eye counts it in the totals or not.
+ *
+ * In priority order (`order`) a handle with the card's place leads the
+ * header: drag it (mouse, finger) or use the arrow keys on it. While
+ * selecting (`selecting`), the header picks the card instead of opening it.
  */
 const props = defineProps<{
   entry: GoalEntry
@@ -34,9 +47,17 @@ const props = defineProps<{
   needs: GoalNeeds | null
   /** The card's cost as one goal, for the inventory editor's "Goal" counts. */
   goal: PlanGoal | null
+  /** Its place in priority order, while the list is in that order (it can be dragged). */
+  order?: { rank: number; dragging: boolean; over: boolean } | null
+  /** Picking cards for a bulk change. */
+  selecting?: boolean
+  selected?: boolean
 }>()
 const emit = defineEmits<{
   open: []
+  select: []
+  grab: [event: PointerEvent]
+  nudge: [event: KeyboardEvent]
   toggle: []
   favorite: []
   /** A part's Done, with how the card reads it ("Talents", "6/8/8", "9/9/9"). */
@@ -133,7 +154,11 @@ function pairDiffers(
 
 const portrait = computed(() => {
   if (c.value)
-    return { src: characterIcon(c.value.key), name: c.value.name, rarity: c.value.rarity }
+    return {
+      src: c.value.custom ? '' : characterIcon(c.value.key),
+      name: c.value.name,
+      rarity: c.value.rarity,
+    }
   const w = props.entry.weapons[0]!
   return { src: weaponIcon(w.key, w.target.ascension), name: w.name, rarity: w.rarity }
 })
@@ -145,7 +170,7 @@ const status = computed(() =>
 const chipIcon = (chip: NeedChip) =>
   chip.key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(chip.material.icon)
 const chipTitle = (chip: NeedChip) =>
-  `${chip.material.name}${chip.exp ? ' (EXP)' : ''}: ${formatNumber(chip.count)} short${chip.status === 'alone' ? ' with all goals' : ''}`
+  `${chip.material.name}${chip.exp ? ' (EXP)' : ''}: ${formatNumber(chip.count)} short${chip.status === 'alone' ? ' after the goals above' : ''}`
 
 function openChip(chip: NeedChip, event: MouseEvent) {
   openItem?.({
@@ -161,22 +186,60 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
 
 <template>
   <article
-    class="flex w-full flex-col rounded-xl border border-border-default bg-surface-raised shadow-sm transition-colors hover:border-border-strong"
+    class="flex w-full flex-col rounded-xl border bg-surface-raised shadow-sm transition-[color,border-color,opacity]"
+    :class="[
+      order?.over && !order.dragging
+        ? 'border-accent-text ring-2 ring-accent/30'
+        : selected
+          ? 'border-accent-text'
+          : 'border-border-default hover:border-border-strong',
+      order?.dragging ? 'opacity-50' : '',
+    ]"
+    :data-goal-card="entry.id"
   >
-    <div class="flex items-start gap-1 p-3 pr-1.5 pb-2">
+    <div class="flex items-start gap-1 p-3 pr-1.5 pb-2" :class="order ? 'pl-1' : ''">
+      <button
+        v-if="order"
+        type="button"
+        class="-my-1 inline-flex w-8 shrink-0 cursor-grab touch-none flex-col items-center justify-center gap-0.5 self-stretch rounded-md text-text-muted transition-colors select-none hover:bg-surface-overlay hover:text-text-primary active:cursor-grabbing"
+        :data-goal-handle="entry.id"
+        :aria-label="`${entry.name}: place ${order.rank}, move with the arrow keys`"
+        :title="`#${order.rank} · drag, or arrow keys`"
+        @pointerdown="emit('grab', $event)"
+        @keydown="emit('nudge', $event)"
+      >
+        <span class="tabular font-mono text-xs">{{ order.rank }}</span>
+        <GripVertical class="size-4" aria-hidden="true" />
+      </button>
       <button
         type="button"
-        aria-haspopup="dialog"
+        :aria-haspopup="selecting ? undefined : 'dialog'"
+        :aria-pressed="selecting ? selected : undefined"
         class="flex min-w-0 flex-1 items-center gap-3 text-left"
         :class="entry.active ? '' : 'opacity-50'"
-        @click="emit('open')"
+        @click="selecting ? emit('select') : emit('open')"
       >
-        <GameIcon
-          :src="portrait.src"
-          :name="portrait.name"
-          :rarity="portrait.rarity ?? undefined"
-          size="md"
-        />
+        <span class="relative shrink-0">
+          <GameIcon
+            :src="portrait.src"
+            :name="portrait.name"
+            :rarity="portrait.rarity ?? undefined"
+            size="md"
+            :class="c?.custom ? 'outline-1 outline-border-strong outline-dashed' : ''"
+          />
+          <span
+            v-if="selecting"
+            class="absolute -top-1 -left-1 inline-flex size-5 items-center justify-center rounded-full border-2"
+            :class="
+              selected
+                ? 'border-accent bg-accent text-accent-ink'
+                : 'border-border-strong bg-surface-raised'
+            "
+            aria-hidden="true"
+          >
+            <Check v-if="selected" class="size-3" />
+          </span>
+        </span>
         <span class="flex min-w-0 flex-1 flex-col items-start gap-1">
           <span class="flex w-full min-w-0 items-center gap-2">
             <span
@@ -189,10 +252,10 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               entry.name
             }}</span>
             <span
-              v-if="entry.priority !== null"
-              class="tabular shrink-0 font-mono text-xs text-text-muted"
-              :title="`Priority ${entry.priority}`"
-              >#{{ entry.priority }}</span
+              v-if="c?.custom"
+              class="shrink-0 text-xs text-text-muted"
+              title="Custom character: not in the game data yet"
+              >Custom</span
             >
           </span>
           <span

@@ -90,7 +90,10 @@ export function seelieKeys(planner: Pick<PlannerData, 'characters' | 'weapons'>)
 export interface SeelieImport {
   /** One goal per character: Seelie's level and talent goals merged. */
   characters: { key: string; target: CharacterGoal }[]
-  /** Weapon goals by (weapon, owner); owner '' when Seelie's owner is unknown. */
+  /**
+   * Weapon goals in file order, one per Seelie goal (two of one weapon stay
+   * two); owner '' when Seelie's owner is unknown.
+   */
   weapons: { key: string; owner: string; target: WeaponGoal }[]
   /** Seelie slugs with no GOOD key in the planner data, sorted. */
   unmapped: { characters: string[]; weapons: string[] }
@@ -151,7 +154,7 @@ export function mapSeelieGoals(
     active: boolean
   }
   const merged = new Map<string, Merged>()
-  const weapons = new Map<string, { key: string; owner: string; target: WeaponGoal }>()
+  const weapons: SeelieImport['weapons'] = []
   const isInactive = (goal: Json) =>
     inactive.has(String(goal.id)) ||
     (typeof goal.character === 'string' && inactive.has(goal.character))
@@ -211,7 +214,7 @@ export function mapSeelieGoals(
       const level = int(target.level) ?? 1
       if (level > weapon.maxLevel) clamped++
       const lv = normalizeLevel(weapon.ascension, level, int(target.asc) ?? 0)
-      weapons.set(`${key}:${owner ?? ''}`, {
+      weapons.push({
         key,
         owner: owner ?? '',
         target: {
@@ -246,7 +249,7 @@ export function mapSeelieGoals(
 
   return {
     characters,
-    weapons: [...weapons.values()],
+    weapons,
     unmapped: {
       characters: [...unmapped.characters].sort(),
       weapons: [...unmapped.weapons].sort(),

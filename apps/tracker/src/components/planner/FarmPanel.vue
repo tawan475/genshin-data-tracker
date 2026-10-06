@@ -207,9 +207,13 @@ const nothing = computed(() => shown.value.length === 0)
           <span class="sr-only">locked by AR/WL</span>
         </span>
         <span v-if="resin?.known" class="inline-flex items-center gap-1" :title="resinNowTitle">
-          <span class="font-sans text-text-muted">Now</span>
-          ~{{ formatNumber(resin.original)
-          }}<span v-if="resin.bag" class="text-text-muted">+{{ formatCompact(resin.bag) }}</span>
+          <span class="font-sans text-text-muted">Resin now</span>
+          ~{{ formatNumber(resin.original) }}
+          <template v-if="resin.bag">
+            <span class="text-text-muted" aria-hidden="true">·</span>
+            +{{ formatCompact(resin.bag) }}
+            <span class="font-sans text-text-muted">in bag</span>
+          </template>
           <span class="sr-only">{{ resinNowTitle }}</span>
         </span>
       </p>

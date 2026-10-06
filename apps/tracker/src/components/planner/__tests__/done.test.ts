@@ -233,16 +233,18 @@ describe('Done parts of a goal', () => {
 
   it('makes a weapon goal one part, refinement included', () => {
     const sword = { level: 90, ascension: 6, refinement: 2, active: true }
-    const view = weaponGoalView(planner, good, cache, 'StaffOfHoma', 'HuTao', sword)
+    const goal = { id: 'staff01', key: 'StaffOfHoma', owner: 'HuTao', target: sword }
+    const view = weaponGoalView(planner, good, cache, goal)
     const part = weaponPart(planner, view)!
     expect(part.next).toEqual({
       kind: 'weapon',
+      id: 'staff01',
       key: 'StaffOfHoma',
       owner: 'HuTao',
       current: { level: 90, ascension: 6, refinement: 2 },
     })
     expect(part.requirement.weaponExp).toBeGreaterThan(0)
-    const reached = weaponGoalView(planner, good, cache, 'StaffOfHoma', 'HuTao', sword, {
+    const reached = weaponGoalView(planner, good, cache, goal, {
       level: 90,
       ascension: 6,
       refinement: 2,

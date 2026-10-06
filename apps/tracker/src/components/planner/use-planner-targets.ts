@@ -13,17 +13,36 @@ function apply(targets: readonly PlannerTarget[], ops: Iterable<Op>): PlannerTar
   const now = Date.now()
   for (const op of ops) {
     if (op.kind === 'remove') {
-      byId.delete(targetId(op.ref))
+      const ref = op.ref
+      // A weapon named without its id: every goal with that weapon and owner (as the server does).
+      if (ref.kind === 'weapon' && !ref.id) {
+        for (const [id, t] of byId) {
+          if (t.kind === 'weapon' && t.key === ref.key && t.owner === ref.owner) byId.delete(id)
+        }
+      } else byId.delete(targetId(ref))
       continue
     }
     const input = op.input
+    const active = input.target.active ?? true
     let target: PlannerTarget
-    if (input.kind === 'character') {
+    if (input.kind === 'weapon') {
+      // Its id names it: a goal that changes weapon or owner replaces its old entry.
+      const goalId = input.id ?? ''
+      for (const [id, t] of byId) if (t.kind === 'weapon' && t.id === goalId) byId.delete(id)
       target = {
-        kind: 'character',
+        kind: 'weapon',
+        id: goalId,
+        key: input.key,
+        owner: input.owner,
+        target: { ...input.target, active },
+        updatedAt: now,
+      }
+    } else if (input.kind === 'custom') {
+      target = {
+        kind: 'custom',
         key: input.key,
         owner: '',
-        target: { ...input.target, active: input.target.active ?? true },
+        target: { ...input.target, active, custom: { ...input.target.custom } },
         updatedAt: now,
       }
     } else if (input.kind === 'item') {
@@ -31,21 +50,27 @@ function apply(targets: readonly PlannerTarget[], ops: Iterable<Op>): PlannerTar
         kind: 'item',
         key: input.key,
         owner: '',
-        target: { ...input.target, active: input.target.active ?? true },
+        target: { ...input.target, active },
         updatedAt: now,
       }
     } else {
       target = {
-        kind: 'weapon',
+        kind: 'character',
         key: input.key,
-        owner: input.owner,
-        target: { ...input.target, active: input.target.active ?? true },
+        owner: '',
+        target: { ...input.target, active },
         updatedAt: now,
       }
     }
-    byId.set(targetId(input), target)
+    byId.set(targetId(target), target)
   }
   return [...byId.values()]
+}
+
+/** The key pending ops are merged by: a weapon goal by its own id. */
+const opKey = (op: Op) => {
+  const t = op.kind === 'remove' ? op.ref : op.input
+  return t.kind === 'weapon' && t.id ? `weapon#${t.id}` : targetId(t)
 }
 
 /**
@@ -107,7 +132,9 @@ export function usePlannerTargets(accountId: Ref<number>) {
 
   function queue(ops: Op[]) {
     for (const op of ops) {
-      const id = op.kind === 'remove' ? targetId(op.ref) : targetId(op.input)
+      const id = opKey(op)
+      // Later ops come after earlier ones, also for the same goal.
+      pending.delete(id)
       pending.set(id, op)
     }
     targets.value = apply(server, pending.values())

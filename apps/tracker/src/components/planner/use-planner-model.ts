@@ -1,7 +1,7 @@
 import { loadPlanner } from '@gdt/game-data'
 import { loadDropRates } from '@gdt/game-data/drops'
 import { createRequirementCache, planTotals, type PlanOptions } from '@gdt/game-data/planner-math'
-import type { AccountResponse, Good } from '@gdt/shared'
+import type { AccountResponse, CustomCharacter, Good } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch, type ComputedRef } from 'vue'
 import { NO_PLAYER } from '@/data/account-player'
 import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
@@ -13,7 +13,8 @@ import { updatesHeld } from '@/live/holds'
 import { onPlannerChange } from '@/live/planner-changes'
 import { useAccounts } from '@/stores/accounts'
 import { countChange, effectiveInventory, replacedAdjustments } from './hand-edits'
-import { buildBoard, type RequirementCache } from './model'
+import { withCustomCharacters } from './custom-character'
+import { buildBoard } from './model'
 import { usePlannerState } from './use-planner-state'
 import { usePlannerTargets } from './use-planner-targets'
 
@@ -36,6 +37,10 @@ const NO_CAPTURE: Good = {
  *
  * Goals and hand edits changed in another tab or device are re-read once
  * this tab is shown and nothing is open (data never changes under a dialog).
+ *
+ * `planner` is the planner data with the account's custom characters in it
+ * (custom-character.ts), so they cost like any other; `basePlanner` is the
+ * game's alone (the roster to pick from, the Seelie import).
  */
 export function usePlannerModel(account: ComputedRef<AccountResponse>) {
   const accounts = useAccounts()
@@ -63,7 +68,7 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     const value = resource.data.value
     return value && value.accountId === account.value.id ? value : undefined
   })
-  const planner = computed(() => data.value?.planner ?? null)
+  const basePlanner = computed(() => data.value?.planner ?? null)
   /** The newest capture (an empty one when there is none). */
   const good = computed(() => (data.value ? (data.value.inventory?.good ?? NO_CAPTURE) : null))
   const drops = computed(() => data.value?.drops ?? null)
@@ -72,11 +77,32 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
   const store = usePlannerTargets(accountId)
   onBeforeUnmount(() => void store.flush())
 
-  const state = usePlannerState(accountId, base, async (id) => {
-    // The page's account is behind the server: bring it up to date now.
-    await accounts.reload(id).catch(() => {})
-    accounts.applyPending(true)
+  /** Custom characters as text: the planner below changes only when one does. */
+  const customs = computed(() =>
+    JSON.stringify(
+      (store.targets.value ?? []).flatMap((t) =>
+        t.kind === 'custom' ? [[t.key, t.target.custom]] : [],
+      ),
+    ),
+  )
+  const planner = computed(() => {
+    const p = basePlanner.value
+    return p
+      ? withCustomCharacters(p, JSON.parse(customs.value) as [string, CustomCharacter][])
+      : null
   })
+
+  const state = usePlannerState(
+    accountId,
+    base,
+    async (id) => {
+      // The page's account is behind the server: bring it up to date now.
+      await accounts.reload(id).catch(() => {})
+      accounts.applyPending(true)
+    },
+    // A new goal's current state needs the goal on the server first.
+    () => store.flush(),
+  )
   onBeforeUnmount(() => void state.flush())
 
   /** The bag the planner works with: the capture's counts and the hand edits that still apply. */
@@ -115,10 +141,9 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     forge: forge.value,
   }))
 
-  // One per planner data (it never changes): each goal's cost is computed once per state.
-  let cache: RequirementCache | null = null
+  // One per planner data (new only when a custom character changes): each goal's cost once per state.
   const requirementCache = computed(() =>
-    planner.value ? (cache ??= createRequirementCache(planner.value)) : null,
+    planner.value ? createRequirementCache(planner.value) : null,
   )
   const board = computed(() => {
     const p = planner.value
@@ -174,6 +199,7 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     resource,
     data,
     planner,
+    basePlanner,
     good,
     drops,
     hasCapture,

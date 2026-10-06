@@ -11,7 +11,7 @@ const db = getDb(env.DB)
 interface State {
   capturedAt: number | null
   adjustments: { key: string; delta: number; set: number | null; base: number; updatedAt: number }[]
-  overrides: { kind: string; key: string; owner: string; current: unknown }[]
+  overrides: { kind: string; id?: string; key: string; owner: string; current: unknown }[]
 }
 
 const furina = { level: 90, ascension: 6, talents: { auto: 6, skill: 9, burst: 10 } }
@@ -143,7 +143,8 @@ describe('planner hand edits', () => {
     expect(done.status).toBe(200)
     expect(((await done.json()) as State).overrides).toEqual([
       { kind: 'character', key: 'Furina', owner: '', current: now },
-      { kind: 'weapon', key: 'FavoniusSword', owner: '', current: sword },
+      // Named the old way (no id): the weapon goal's own id comes back.
+      { kind: 'weapon', id: expect.any(String), key: 'FavoniusSword', owner: '', current: sword },
     ])
 
     // Editing the goal keeps its current state; the goal list never carries it.

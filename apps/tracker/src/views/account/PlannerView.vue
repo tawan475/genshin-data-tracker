@@ -1,22 +1,54 @@
 <script setup lang="ts">
 import { craftingSteps } from '@gdt/game-data/planner-convert'
 import { farmPlan, resinNow } from '@gdt/game-data/planner-estimate'
-import { itemGoal, type PlanGoal } from '@gdt/game-data/planner-math'
-import type { PlannerTarget } from '@gdt/shared'
+import {
+  NEW_CHARACTER,
+  findCharacterState,
+  findWeaponState,
+  itemGoal,
+  type CharacterState,
+  type PlanGoal,
+  type Requirement,
+  type WeaponState,
+} from '@gdt/game-data/planner-math'
+import type {
+  CharacterCurrent,
+  CharacterTarget,
+  CustomCharacter,
+  PlannerTarget,
+  WeaponCurrent,
+  WeaponTarget,
+} from '@gdt/shared'
 import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Clock, FileInput, Info, Plus, SearchX, Settings2, Target, Upload } from 'lucide-vue-next'
+import {
+  CheckSquare,
+  Clock,
+  Eye,
+  EyeOff,
+  FileInput,
+  Info,
+  Plus,
+  SearchX,
+  Settings2,
+  Target,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-vue-next'
 import DoneDialog from '@/components/planner/DoneDialog.vue'
 import ExtraItems from '@/components/planner/ExtraItems.vue'
 import FarmPanel from '@/components/planner/FarmPanel.vue'
 import GoalCard from '@/components/planner/GoalCard.vue'
-import GoalEditor from '@/components/planner/GoalEditor.vue'
+import GoalModal from '@/components/planner/GoalModal.vue'
 import GoalPicker from '@/components/planner/GoalPicker.vue'
 import GoalToolbar from '@/components/planner/GoalToolbar.vue'
 import ItemEditor from '@/components/planner/ItemEditor.vue'
 import ItemPopover from '@/components/planner/ItemPopover.vue'
 import PlannerSettings from '@/components/planner/PlannerSettings.vue'
 import SeelieImport from '@/components/planner/SeelieImport.vue'
+import { allocateNeeds, moveTo, reprioritize } from '@/components/planner/allocation'
+import { newCustomKey, replaceCustom } from '@/components/planner/custom-character'
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
 import { READINESS } from '@/components/planner/farm-format'
 import { farmDay } from '@/components/planner/farm-today'
@@ -32,26 +64,41 @@ import {
   type GoalFilters,
   type GoalSort,
 } from '@/components/planner/goal-list'
+import { characterNow, weaponNow } from '@/components/planner/hand-edits'
 import { provideItemPopover, type ItemRequest } from '@/components/planner/item-popover'
 import {
+  allocationOrder,
   characterGoalId,
+  characterInput,
+  characterName,
+  customGoalId,
+  defaultWeaponTarget,
   entryGoal,
+  entryInputs,
+  entryRefs,
   inputOf,
   itemGoalId,
+  newGoalId,
   nextHint,
+  parseGoalId,
   shortCount,
   targetId,
   weaponGoalId,
+  weaponInput,
   withoutPassives,
   type EditorSubject,
   type GoalEntry,
   type ItemGoalView,
   type NextHint,
+  type TargetRef,
+  type WeaponGoalView,
 } from '@/components/planner/model'
-import { goalNeeds, type GoalNeeds } from '@/components/planner/needs'
+import type { GoalNeeds } from '@/components/planner/needs'
+import { PRESETS, applyPreset, presetById, type PresetId } from '@/components/planner/presets'
+import { useDragOrder } from '@/components/planner/use-drag-order'
 import type { CurrentChange } from '@/components/planner/use-planner-state'
 import { usePlannerModel } from '@/components/planner/use-planner-model'
-import { upsert } from '@/components/planner/use-planner-targets'
+import { remove, upsert } from '@/components/planner/use-planner-targets'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
@@ -59,6 +106,7 @@ import UiError from '@/components/ui/UiError.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
+import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -78,6 +126,11 @@ import { useAccount } from './context'
  * the edits (irminsul is the truth). Without any capture the bag starts
  * empty, so the planner works from what is typed in. Goals, edits and the
  * planner settings live on the server; other tabs and devices follow live.
+ *
+ * Goals are edited in one modal per card that saves as you go (GoalModal),
+ * added several at a time with a preset (GoalPicker), changed in bulk, and
+ * ordered by priority: the bag goes to the goals at the top first, so a
+ * card is ready when it is covered after the ones above it (allocation.ts).
  */
 const account = useAccount()
 const route = useRoute()
@@ -89,6 +142,7 @@ const {
   resource,
   data,
   planner,
+  basePlanner,
   good,
   drops,
   hasCapture,
@@ -148,41 +202,68 @@ const resin = computed(() => {
     : null
 })
 
-/** Each card's cost as one goal (a character with its weapons). */
+const sameList = (a: readonly unknown[], b: readonly unknown[]) =>
+  a.length === b.length && a.every((x, i) => x === b[i])
+
+/**
+ * Each card's cost as one goal (a character with its weapons). Kept per
+ * card while its parts' costs are the same objects (the requirement cache
+ * hands back the same one for the same numbers), so a note or a favourite
+ * doesn't recost every card.
+ */
+let goalMemo = {
+  planner: null as object | null,
+  owners: null as object | null,
+  map: new Map<string, { parts: (Requirement | null)[]; goal: PlanGoal | null }>(),
+}
 const entryGoals = computed(() => {
   const map = new Map<string, PlanGoal>()
   const p = planner.value
   if (!p || !board.value) return map
+  const owners = passiveOwners.value
+  if (goalMemo.planner !== p || goalMemo.owners !== owners) {
+    goalMemo = { planner: p, owners, map: new Map() }
+  }
+  const next = new Map<string, { parts: (Requirement | null)[]; goal: PlanGoal | null }>()
   for (const entry of board.value.entries) {
-    const goal = entryGoal(p, entry, passiveOwners.value)
+    const parts = [entry.character?.requirement ?? null, ...entry.weapons.map((w) => w.requirement)]
+    const seen = goalMemo.map.get(entry.id)
+    const goal = seen && sameList(seen.parts, parts) ? seen.goal : entryGoal(p, entry, owners)
+    next.set(entry.id, { parts, goal })
     if (goal) map.set(entry.id, goal)
   }
+  goalMemo.map = next
   return map
 })
 
+/** Cards in priority order: the bag goes to the first ones first. */
+const order = computed(() => allocationOrder(board.value?.entries ?? []))
+
 /**
- * Per card: ready with every counted goal, ready alone, or short, and the
- * materials it is short of. A card with a goal that isn't counted is costed
- * together with the counted ones (its own goals left out of them).
+ * Per card: ready after the counted cards above it, ready alone, or short,
+ * and the materials it is short of (allocation.ts). Recomputed only when a
+ * card's cost, its place or its counting changes, or the bag does.
  */
+let needsMemo = { key: [] as unknown[], map: new Map<string, GoalNeeds>() }
 const needs = computed(() => {
-  const map = new Map<string, GoalNeeds>()
   const p = planner.value
   const b = bag.value
-  const t = totals.value
-  if (!board.value || !p || !b || !t) return map
+  if (!board.value || !p || !b) return new Map<string, GoalNeeds>()
   const options = withoutPassives(planOptions.value)
-  for (const entry of board.value.entries) {
-    const goal = entryGoals.value.get(entry.id)
-    if (entry.done || !goal) continue
-    const own = [entry.character, ...entry.weapons].filter((x) => x !== null)
-    const counted = own.every((x) => x.target.active)
-    const others = counted
-      ? t
-      : { others: board.value.goals.filter((g) => !own.some((x) => x.id === g.id)) }
-    map.set(entry.id, goalNeeds(p, goal, b, options, others))
-  }
-  return map
+  const items = order.value.map((e) => ({
+    id: e.id,
+    goal: e.done ? null : (entryGoals.value.get(e.id) ?? null),
+    active: e.active,
+  }))
+  const key = [
+    p,
+    b,
+    `${options.azoth}|${options.forge}`,
+    ...items.flatMap((i) => [i.id, i.goal, i.active]),
+  ]
+  if (sameList(needsMemo.key, key)) return needsMemo.map
+  needsMemo = { key, map: allocateNeeds(p, items, b, options) }
+  return needsMemo.map
 })
 
 /** Counted goals the bag covers on their own: what can be levelled right now. */
@@ -212,6 +293,7 @@ const missing = computed(() => {
 let hintMemo = {
   inventory: null as object | null,
   options: '',
+  planner: null as object | null,
   map: new Map<string, NextHint | null>(),
 }
 const hints = computed(() => {
@@ -221,8 +303,8 @@ const hints = computed(() => {
   if (!board.value || !p || !b) return result
   const o = planOptions.value
   const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, ar.value])
-  if (hintMemo.inventory !== b || hintMemo.options !== optionsKey) {
-    hintMemo = { inventory: b, options: optionsKey, map: new Map() }
+  if (hintMemo.inventory !== b || hintMemo.options !== optionsKey || hintMemo.planner !== p) {
+    hintMemo = { inventory: b, options: optionsKey, planner: p, map: new Map() }
   }
   for (const entry of board.value.entries) {
     if (entry.done || missing.value.get(entry.id) === 0) continue
@@ -230,7 +312,7 @@ const hints = computed(() => {
     const key = JSON.stringify([
       entry.id,
       c ? [c.current, c.target.level, c.target.ascension, c.target.talents] : null,
-      entry.weapons.map((w) => [w.key, w.owner, w.current, w.target.level, w.target.ascension]),
+      entry.weapons.map((w) => [w.goalId, w.current, w.target.level, w.target.ascension]),
     ])
     let hint = hintMemo.map.get(key)
     if (hint === undefined) {
@@ -293,13 +375,17 @@ const showDone = ref(false)
 
 const entries = computed(() => board.value?.entries ?? [])
 const matching = computed(() => filterGoals(entries.value, filters, ready.value))
-const pendingEntries = computed(() =>
-  sortGoals(
-    matching.value.filter((e) => !e.done),
-    sort.value,
-    missing.value,
-  ),
-)
+const pendingEntries = computed(() => {
+  if (sort.value !== 'priority') {
+    return sortGoals(
+      matching.value.filter((e) => !e.done),
+      sort.value,
+      missing.value,
+    )
+  }
+  const shown = new Set(matching.value.map((e) => e.id))
+  return order.value.filter((e) => !e.done && shown.has(e.id))
+})
 const doneEntries = computed(() => matching.value.filter((e) => e.done))
 const shownItems = computed(() =>
   filterItems(board.value?.items ?? [], filters, (i) => itemsInStock.value.has(i.id)),
@@ -323,30 +409,14 @@ const rarities = computed(() => {
 })
 
 function toggleActive(entry: GoalEntry) {
-  const active = !entry.active
-  const ops = []
-  if (entry.character) {
-    ops.push(
-      upsert({
-        kind: 'character',
-        key: entry.character.key,
-        target: { ...entry.character.target, active },
-      }),
-    )
-  }
-  for (const w of entry.weapons) {
-    ops.push(
-      upsert({ kind: 'weapon', key: w.key, owner: w.owner, target: { ...w.target, active } }),
-    )
-  }
-  store.change(ops)
+  store.change(entryInputs(entry, { active: !entry.active }).map(upsert))
 }
 
 function toggleFavorite(entry: GoalEntry) {
   const c = entry.character
   if (!c) return
   const favorite = entry.favorite ? undefined : true
-  store.change([upsert({ kind: 'character', key: c.key, target: { ...c.target, favorite } })])
+  store.change([upsert(characterInput(c, { ...c.stored, favorite }))])
 }
 
 function toggleItem(item: ItemGoalView) {
@@ -354,31 +424,153 @@ function toggleItem(item: ItemGoalView) {
   store.change([upsert({ kind: 'item', key: item.key, target })])
 }
 
+// ------------------------------------------------------------ priority order
+
+/** Pending cards in priority order (the done ones keep their place). */
+const pendingOrder = computed(() => order.value.filter((e) => !e.done).map((e) => e.id))
+/** Each pending card's place, 1 first. */
+const ranks = computed(() => new Map(pendingOrder.value.map((id, i) => [id, i + 1])))
+
+/** Stores an order as priorities 1, 2, 3… (only the cards whose number changes). */
+function applyOrder(ids: string[]) {
+  const byId = new Map(order.value.map((e) => [e.id, e]))
+  const changes = reprioritize(ids, new Map(ids.map((id) => [id, byId.get(id)?.priority ?? null])))
+  const ops = [...changes].flatMap(([id, priority]) => {
+    const e = byId.get(id)
+    if (!e) return []
+    if (e.character)
+      return [upsert(characterInput(e.character, { ...e.character.stored, priority }))]
+    const w = e.weapons[0]
+    return w ? [upsert(weaponInput(w, { ...w.target, priority }))] : []
+  })
+  if (ops.length) store.change(ops)
+}
+
+const drag = useDragOrder({
+  move: (id, to) => applyOrder(moveTo(pendingOrder.value, id, to)),
+  // Keys move among the cards shown (filters may hide some).
+  step: (id, by) => {
+    const shown = pendingEntries.value.map((e) => e.id)
+    const at = shown.indexOf(id)
+    if (at < 0) return
+    const to = by === 'start' ? 0 : by === 'end' ? shown.length - 1 : at + by
+    const target = shown[Math.max(0, Math.min(shown.length - 1, to))]
+    if (target && target !== id) applyOrder(moveTo(pendingOrder.value, id, target))
+  },
+})
+const sorting = computed(() => sort.value === 'priority' && !selecting.value)
+function orderOf(entry: GoalEntry) {
+  if (!sorting.value) return null
+  return {
+    rank: ranks.value.get(entry.id) ?? 0,
+    dragging: drag.dragging.value === entry.id,
+    over: drag.over.value === entry.id,
+  }
+}
+
+// ------------------------------------------------------------------ bulk
+
+const selecting = ref(false)
+const picked = ref<Set<string>>(new Set())
+watch(selecting, (on) => {
+  if (!on) picked.value = new Set()
+})
+function togglePicked(id: string) {
+  const next = new Set(picked.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  picked.value = next
+}
+const pickedEntries = computed(() => entries.value.filter((e) => picked.value.has(e.id)))
+const allPicked = computed(
+  () =>
+    pendingEntries.value.length > 0 && pendingEntries.value.every((e) => picked.value.has(e.id)),
+)
+function pickAll() {
+  picked.value = allPicked.value ? new Set() : new Set(pendingEntries.value.map((e) => e.id))
+}
+const bulkPreset = ref<PresetId | ''>('')
+const presetChoices = [
+  { value: '' as const, label: 'Preset' },
+  ...PRESETS.map((p) => ({ value: p.id, label: p.label })),
+]
+
+/** Stored targets of some cards, for an Undo. */
+function snapshotOf(list: readonly GoalEntry[]): PlannerTarget[] {
+  const ids = new Set(list.flatMap((e) => entryRefs(e).map((r) => targetId(r))))
+  return (store.targets.value ?? []).filter((t) => ids.has(targetId(t)))
+}
+
+function undoToast(title: string, before: PlannerTarget[]) {
+  feedback.toast({
+    tone: 'info',
+    title,
+    action: { label: 'Undo', run: () => store.change(before.map((t) => upsert(inputOf(t)))) },
+  })
+}
+
+watch(bulkPreset, (id) => {
+  if (!id) return
+  bulkPreset.value = ''
+  const preset = presetById(id)
+  const p = planner.value
+  if (!preset || !p) return
+  const list = pickedEntries.value.filter((e) => e.character)
+  if (list.length === 0) return
+  const before = snapshotOf(list)
+  store.change(
+    list.map((e) => {
+      const c = e.character!
+      const phases = p.characters.get(c.key)?.ascension
+      return upsert(characterInput(c, applyPreset(preset, c.current, c.stored, phases)))
+    }),
+  )
+  undoToast(`${preset.label}: ${formatNumber(list.length)} goals`, before)
+})
+
+function bulkActive(active: boolean) {
+  const list = pickedEntries.value
+  if (list.length === 0) return
+  const before = snapshotOf(list)
+  store.change(list.flatMap((e) => entryInputs(e, { active }).map(upsert)))
+  undoToast(`${formatNumber(list.length)} ${active ? 'counted' : 'paused'}`, before)
+}
+
+function bulkRemove() {
+  const list = pickedEntries.value
+  if (list.length === 0) return
+  void removeGoals(list.flatMap(entryRefs), `${formatNumber(list.length)} goals removed`)
+  selecting.value = false
+}
+
 // ------------------------------------------------------------ farm cards
 // A portrait on a farm card opens its goal; a long press or right click pauses it.
 
-/** The goal card a goal id is on (a weapon goal's: its holder's card when there is one). */
-function entryOf(id: string): GoalEntry | null {
-  return (
-    board.value?.entries.find(
-      (e) => e.character?.id === id || e.weapons.some((w) => w.id === id),
-    ) ?? null
-  )
+/** The card a goal is on (a weapon goal's: its holder's card when there is one). */
+function entryFor(s: EditorSubject | null): GoalEntry | null {
+  if (!s) return null
+  const list = board.value?.entries ?? []
+  if (s.kind === 'character') {
+    return list.find((e) => e.character?.id === characterGoalId(s.key)) ?? null
+  }
+  if (s.kind === 'custom') return list.find((e) => e.character?.id === customGoalId(s.key)) ?? null
+  if (s.kind === 'weapon') return list.find((e) => e.weapons.some((w) => w.goalId === s.id)) ?? null
+  return null
 }
 
 function openGoal(id: string) {
-  const [kind, key = ''] = id.split(':')
-  if (kind === 'item') {
-    openEditor({ kind: 'item', key })
+  const s = parseGoalId(id)
+  if (s?.kind === 'item') {
+    openEditor(id)
     return
   }
-  const entry = entryOf(id)
+  const entry = entryFor(s)
   if (entry) openEntry(entry)
 }
 
 /** Stops counting a goal's card (a character with its weapons; an item need), with an Undo. */
 function pauseGoal(id: string) {
-  const entry = id.startsWith('item:') ? null : entryOf(id)
+  const entry = id.startsWith('item:') ? null : entryFor(parseGoalId(id))
   const ids = new Set(
     entry ? [entry.character?.id, ...entry.weapons.map((w) => w.id)].filter(Boolean) : [id],
   )
@@ -407,7 +599,16 @@ const favorites = computed<ReadonlySet<string>>(
       ),
     ),
 )
-provideGoalActions({ open: openGoal, pause: pauseGoal, favorites })
+/** Custom characters' names by id (portraits, weapon holders). */
+const customNames = computed<ReadonlyMap<string, string>>(
+  () =>
+    new Map(
+      [...(board.value?.characterGoals.values() ?? [])].flatMap((c) =>
+        c.custom ? [[c.key, c.name] as const] : [],
+      ),
+    ),
+)
+provideGoalActions({ open: openGoal, pause: pauseGoal, favorites, names: customNames })
 
 // ------------------------------------------------------------ inventory
 
@@ -448,14 +649,15 @@ function askDone(
 
 function stateChange(part: DonePart, current: DonePart['next']['current'] | null): CurrentChange {
   const next = part.next
-  return next.kind === 'character'
-    ? { kind: 'character', key: next.key, current: current as typeof next.current | null }
-    : {
+  return next.kind === 'weapon'
+    ? {
         kind: 'weapon',
+        id: next.id,
         key: next.key,
         owner: next.owner,
-        current: current as typeof next.current | null,
+        current: current as WeaponCurrent | null,
       }
+    : { kind: next.kind, key: next.key, current: current as CharacterCurrent | null }
 }
 
 async function confirmDone() {
@@ -501,33 +703,19 @@ async function confirmDone() {
 // ------------------------------------------------------------------ editor
 // The open goal lives in the URL (?goal=character:HuTao): Back closes it.
 
-function parseSubject(raw: unknown): EditorSubject | null {
-  if (typeof raw !== 'string') return null
-  const [kind, key, owner = ''] = raw.split(':')
-  if (!key || !/^[A-Za-z0-9]+$/.test(key)) return null
-  if (kind === 'character' || kind === 'item') return { kind, key }
-  if (kind === 'weapon') return { kind, key, owner }
-  return null
-}
-const subject = computed(() => parseSubject(route.query.goal))
-const goalSubject = computed(() => {
-  const s = subject.value
-  return s && s.kind !== 'item' ? s : null
-})
+const subject = computed(() => parseGoalId(route.query.goal))
 const itemKey = computed(() => (subject.value?.kind === 'item' ? subject.value.key : null))
+/** The card the goal editor is open on (null: none, or one that is gone). */
+const editorEntry = computed(() =>
+  subject.value?.kind === 'item' ? null : entryFor(subject.value),
+)
 let pushed = false
 watch(subject, (value) => {
   if (value === null) pushed = false
 })
 
-function subjectId(s: EditorSubject) {
-  if (s.kind === 'character') return characterGoalId(s.key)
-  if (s.kind === 'item') return itemGoalId(s.key)
-  return weaponGoalId(s.key, s.owner)
-}
-
-function openEditor(next: EditorSubject) {
-  const query = { ...route.query, goal: subjectId(next) }
+function openEditor(goalId: string) {
+  const query = { ...route.query, goal: goalId }
   if (subject.value !== null) void router.replace({ query })
   else {
     pushed = true
@@ -546,71 +734,176 @@ function closeEditor() {
   void router.replace({ query })
 }
 
-const editorCharacter = computed(() => {
-  const s = subject.value
-  return s?.kind === 'character' ? (board.value?.characterGoals.get(s.key) ?? null) : null
-})
-const editorWeapons = computed(() => {
-  const s = subject.value
-  const goals = board.value?.weaponGoals
-  if (!s || !goals || s.kind === 'item') return []
-  if (s.kind === 'character') return [...goals.values()].filter((w) => w.owner === s.key)
-  const one = goals.get(weaponGoalId(s.key, s.owner))
-  return one ? [one] : []
-})
+function openEntry(entry: GoalEntry) {
+  openEditor(entry.id)
+}
+
 const editorItem = computed(() => {
   const key = itemKey.value
   return key ? (board.value?.items.find((i) => i.key === key)?.target ?? null) : null
 })
-/** Every goal but the open one's, for its cost colours. */
+/** Every goal but the open card's (or item's), for its cost colours. */
 const editorOthers = computed<PlanGoal[]>(() => {
-  const s = subject.value
   const goals = board.value?.goals ?? []
-  if (!s) return goals
-  const mine = new Set([subjectId(s), ...editorWeapons.value.map((w) => w.id)])
+  const mine = new Set<string>()
+  const e = editorEntry.value
+  if (e?.character) mine.add(e.character.id)
+  for (const w of e?.weapons ?? []) mine.add(w.id)
+  if (itemKey.value) mine.add(itemGoalId(itemKey.value))
   return goals.filter((g) => !mine.has(g.id))
 })
 
-function openEntry(entry: GoalEntry) {
-  if (entry.character) openEditor({ kind: 'character', key: entry.character.key })
-  else {
-    const w = entry.weapons[0]!
-    openEditor({ kind: 'weapon', key: w.key, owner: w.owner })
-  }
-}
+/** Character keys with a goal (what "Replace with" leaves out). */
+const takenCharacters = computed(
+  () =>
+    new Set((store.targets.value ?? []).flatMap((t) => (t.kind === 'character' ? [t.key] : []))),
+)
 
 type Ops = Parameters<typeof store.commit>[0]
 
-/** Goals first: a new goal's current state needs the goal to land on. */
-async function save(ops: Ops, current: CurrentChange[] = []) {
+/** Item editor: goals first, then closes. */
+async function save(ops: Ops) {
   try {
     await store.commit(ops)
-    if (current.length) await state.commit({ current })
     closeEditor()
   } catch {
     // The stores already said what went wrong and reloaded.
   }
 }
 
-async function removeGoal(ops: Ops) {
-  const before = new Map((store.targets.value ?? []).map((t) => [targetId(t), t]))
-  const removed = ops
-    .map((op) => (op.kind === 'remove' ? before.get(targetId(op.ref)) : undefined))
-    .filter((t): t is PlannerTarget => t !== undefined)
+/** A stored goal's hand-set current state, as the change that puts it back. */
+function currentOf(t: PlannerTarget): CurrentChange | null {
+  const current = state.overrides.value?.get(targetId(t))
+  if (!current) return null
+  if (t.kind === 'weapon') {
+    return {
+      kind: 'weapon',
+      id: t.id,
+      key: t.key,
+      owner: t.owner,
+      current: current as WeaponCurrent,
+    }
+  }
+  if (t.kind === 'item') return null
+  return { kind: t.kind, key: t.key, current: current as CharacterCurrent }
+}
+
+/** Removes goals now, with an Undo that puts them back with their hand-set states. */
+async function removeGoals(refs: TargetRef[], title: string) {
+  const ids = new Set(refs.map((r) => targetId(r)))
+  const removed = (store.targets.value ?? []).filter((t) => ids.has(targetId(t)))
+  const states = removed.flatMap((t) => currentOf(t) ?? [])
   try {
-    await store.commit(ops)
-    closeEditor()
-    feedback.toast({
+    await store.commit(refs.map(remove))
+  } catch {
+    return // Reported by the store.
+  }
+  feedback.toast(
+    {
       tone: 'info',
-      title: removed.every((t) => t.kind === 'item') ? 'Item removed' : 'Goal removed',
+      title,
       action: {
         label: 'Undo',
-        run: () => void store.commit(removed.map((t) => upsert(inputOf(t)))).catch(() => {}),
+        run: () =>
+          void (async () => {
+            await store.commit(removed.map((t) => upsert(inputOf(t))))
+            if (states.length) await state.commit({ current: states })
+          })().catch(() => {}),
       },
-    })
+    },
+    8000,
+  )
+}
+
+/** The item editor's remove (one item need). */
+async function removeItem(ops: Ops) {
+  const refs = ops.flatMap((op) => (op.kind === 'remove' ? [op.ref] : []))
+  closeEditor()
+  await removeGoals(refs, 'Item removed')
+}
+
+// The modal saves as you go: each change is written at once (sent after a short pause).
+
+function writeCharacter(target: CharacterTarget & { custom?: CustomCharacter }) {
+  const c = editorEntry.value?.character
+  if (c) store.change([upsert(characterInput(c, target))])
+}
+
+function writeCharacterNow(next: CharacterState | null) {
+  const c = editorEntry.value?.character
+  if (!c) return
+  // Back to no hand-set state where the capture already says as much.
+  const current =
+    next && characterNow(c.captured, next).edited
+      ? { level: next.level, ascension: next.ascension, talents: { ...next.talents } }
+      : null
+  state.change({ current: [{ kind: c.custom ? 'custom' : 'character', key: c.key, current }] })
+}
+
+function writeWeapon(w: WeaponGoalView, target: WeaponTarget) {
+  store.change([upsert(weaponInput(w, target))])
+}
+
+function writeWeaponNow(w: WeaponGoalView, next: WeaponState | null) {
+  const current = next && weaponNow(w.captured, next).edited ? { ...next } : null
+  state.change({
+    current: [{ kind: 'weapon', id: w.goalId, key: w.key, owner: w.owner, current }],
+  })
+}
+
+function addWeaponGoal(key: string) {
+  const c = editorEntry.value?.character
+  const p = planner.value
+  const g = goodView.value
+  if (!c || !p || !g) return
+  const start = findWeaponState(g.weapons, key, c.key).state
+  store.change([
+    upsert({
+      kind: 'weapon',
+      id: newGoalId(),
+      key,
+      owner: c.key,
+      target: defaultWeaponTarget(p, key, start),
+    }),
+  ])
+}
+
+function removeWeaponGoal(w: WeaponGoalView) {
+  void removeGoals(
+    [{ kind: 'weapon', key: w.key, owner: w.owner, id: w.goalId }],
+    `${w.name} removed`,
+  )
+}
+
+function removeEntry() {
+  const e = editorEntry.value
+  if (!e) return
+  closeEditor()
+  void removeGoals(entryRefs(e), `${e.name} removed`)
+}
+
+async function replaceWith(real: string) {
+  const e = editorEntry.value
+  const c = e?.character
+  if (!e || !c?.custom) return
+  const stored = (store.targets.value ?? []).find((t) => t.kind === 'custom' && t.key === c.key)
+  if (stored?.kind !== 'custom') return
+  const override = (state.overrides.value?.get(c.id) as CharacterCurrent | undefined) ?? null
+  const r = replaceCustom(
+    c.key,
+    stored.target,
+    real,
+    e.weapons.map((w) => ({ goalId: w.goalId, key: w.key, target: w.target })),
+    override,
+  )
+  try {
+    await store.commit([...r.remove.map(remove), ...r.upsert.map(upsert)])
+    if (r.current.length) await state.commit({ current: r.current })
   } catch {
-    // Reported by the store.
+    return // Reported by the stores.
   }
+  openEditor(characterGoalId(real))
+  feedback.toast({ tone: 'success', title: `${c.name} → ${characterName(real)}` })
 }
 
 // ------------------------------------------------------------- add, import
@@ -625,9 +918,68 @@ function openPicker(start: 'item' | null = null) {
   pickerOpen.value = true
 }
 
-function pick(next: EditorSubject) {
+/** New goals from the picker; the card of a single one opens. */
+async function addGoals(ops: Ops, open: string | null, title: string) {
+  try {
+    await store.commit(ops)
+  } catch {
+    return // Reported by the store.
+  }
   pickerOpen.value = false
-  openEditor(next)
+  tab.value = 'goals'
+  if (open) openEditor(open)
+  else feedback.toast({ tone: 'success', title })
+}
+
+function addCharacters(keys: string[], presetId: PresetId) {
+  const p = basePlanner.value
+  const g = goodView.value
+  const preset = presetById(presetId)
+  if (!p || !g || !preset || keys.length === 0) return
+  const ops = keys.map((key) =>
+    upsert({
+      kind: 'character',
+      key,
+      target: applyPreset(
+        preset,
+        findCharacterState(g.characters, key).state,
+        {},
+        p.characters.get(key)?.ascension,
+      ),
+    }),
+  )
+  void addGoals(
+    ops,
+    keys.length === 1 ? characterGoalId(keys[0]!) : null,
+    `Added ${formatNumber(keys.length)} goals`,
+  )
+}
+
+function addWeapon(key: string, owner: string) {
+  const p = planner.value
+  const g = goodView.value
+  if (!p || !g) return
+  const id = newGoalId()
+  const target = defaultWeaponTarget(p, key, findWeaponState(g.weapons, key, owner).state)
+  void addGoals(
+    [upsert({ kind: 'weapon', id, key, owner, target })],
+    weaponGoalId(key, owner, id),
+    '',
+  )
+}
+
+function addCustom(custom: CustomCharacter, presetId: PresetId) {
+  const preset = presetById(presetId)
+  const p = planner.value
+  if (!preset || !p) return
+  const key = newCustomKey()
+  const target = { ...applyPreset(preset, NEW_CHARACTER), custom }
+  void addGoals([upsert({ kind: 'custom', key, target })], customGoalId(key), '')
+}
+
+function addItem(key: string) {
+  pickerOpen.value = false
+  openEditor(itemGoalId(key))
 }
 
 async function importGoals(ops: Ops) {
@@ -648,6 +1000,7 @@ watch(accountId, () => {
   settingsOpen.value = false
   itemOpen.value = false
   doneOpen.value = false
+  selecting.value = false
   clearFilters()
 })
 
@@ -673,13 +1026,8 @@ const settingsLabel = computed(() => {
   if (wl.value !== null) parts.push(`WL ${wl.value}`)
   return parts.join(' · ')
 })
-/** Open once the data is in, and only for something the planner data knows (a stale link does nothing). */
-const editorShown = computed(() => {
-  const s = goalSubject.value
-  const p = planner.value
-  if (!s || !p || !board.value) return false
-  return s.kind === 'character' ? p.characters.has(s.key) : p.weapons.has(s.key)
-})
+/** Open once the data is in, and only on a card that exists (a stale link does nothing). */
+const editorShown = computed(() => !!editorEntry.value && !!planner.value)
 const itemEditorShown = computed(
   () => !!itemKey.value && !!board.value && !!planner.value?.materialsByKey.has(itemKey.value),
 )
@@ -731,7 +1079,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           <FileInput class="size-4" aria-hidden="true" />
           Seelie
         </UiButton>
-        <UiButton variant="primary" title="Add goal" @click="openPicker()">
+        <UiButton variant="primary" title="Add goals" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
           Add
         </UiButton>
@@ -752,14 +1100,24 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
   />
 
   <template
-    v-else-if="board && planner && good && goodView && bag && totals && plan && requirementCache"
+    v-else-if="
+      board &&
+      planner &&
+      basePlanner &&
+      good &&
+      goodView &&
+      bag &&
+      totals &&
+      plan &&
+      requirementCache
+    "
   >
     <UiPanel v-if="!hasGoals" flush>
       <UiEmpty title="No goals">
         <template #icon><Target aria-hidden="true" /></template>
         <UiButton variant="primary" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
-          Add goal
+          Add goals
         </UiButton>
         <UiButton @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
@@ -801,16 +1159,74 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         @clear="clearFilters"
       />
 
-      <ul
-        class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary"
-        aria-label="Readiness"
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <ul
+          class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary"
+          aria-label="Readiness"
+        >
+          <li v-for="s in LEGEND" :key="s.label" class="inline-flex items-center gap-1.5">
+            <span class="size-2 rounded-full" :class="s.dot" aria-hidden="true" />
+            <span class="font-medium text-text-primary">{{ s.label }}</span>
+            {{ s.meaning }}
+          </li>
+        </ul>
+        <UiButton
+          v-if="pendingEntries.length"
+          variant="ghost"
+          size="sm"
+          :aria-pressed="selecting"
+          title="Pick goals to change together"
+          @click="selecting = !selecting"
+        >
+          <CheckSquare class="size-4" aria-hidden="true" />
+          Select
+        </UiButton>
+      </div>
+
+      <div
+        v-if="selecting"
+        class="sticky top-[4.5rem] z-20 flex flex-wrap items-center gap-2 rounded-xl border border-border-strong bg-surface-raised/95 px-2 py-2 shadow-overlay backdrop-blur"
+        role="toolbar"
+        aria-label="Selected goals"
       >
-        <li v-for="s in LEGEND" :key="s.label" class="inline-flex items-center gap-1.5">
-          <span class="size-2 rounded-full" :class="s.dot" aria-hidden="true" />
-          <span class="font-medium text-text-primary">{{ s.label }}</span>
-          {{ s.meaning }}
-        </li>
-      </ul>
+        <span
+          class="tabular inline-flex min-w-8 items-center justify-center rounded-md bg-accent/15 px-2 font-mono text-sm font-semibold text-accent-text"
+          role="status"
+          :title="`${formatNumber(picked.size)} selected`"
+          >{{ formatNumber(picked.size) }}<span class="sr-only"> selected</span></span
+        >
+        <UiButton variant="ghost" size="sm" @click="pickAll">
+          {{ allPicked ? 'None' : 'All' }}
+        </UiButton>
+        <UiSelect
+          v-model="bulkPreset"
+          :options="presetChoices"
+          class="w-36"
+          aria-label="Apply a preset"
+          :disabled="picked.size === 0"
+        />
+        <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(false)">
+          <EyeOff class="size-4" aria-hidden="true" />
+          Pause
+        </UiButton>
+        <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(true)">
+          <Eye class="size-4" aria-hidden="true" />
+          Count
+        </UiButton>
+        <UiButton
+          size="sm"
+          variant="ghost"
+          class="text-danger-text"
+          :disabled="picked.size === 0"
+          @click="bulkRemove"
+        >
+          <Trash2 class="size-4" aria-hidden="true" />
+          Remove
+        </UiButton>
+        <UiIconButton label="Done selecting" class="ml-auto" @click="selecting = false">
+          <X class="size-5" aria-hidden="true" />
+        </UiIconButton>
+      </div>
 
       <UiPanel v-if="matching.length === 0 && shownItems.length === 0" flush>
         <UiEmpty title="No matches">
@@ -832,7 +1248,13 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
             :hint="hints.get(entry.id) ?? null"
             :needs="needs.get(entry.id) ?? null"
             :goal="entryGoals.get(entry.id) ?? null"
+            :order="orderOf(entry)"
+            :selecting="selecting"
+            :selected="picked.has(entry.id)"
             @open="openEntry(entry)"
+            @select="togglePicked(entry.id)"
+            @grab="drag.start(entry.id, $event)"
+            @nudge="drag.key(entry.id, $event)"
             @toggle="toggleActive(entry)"
             @favorite="toggleFavorite(entry)"
             @done="(part, text) => askDone(entry, part, text)"
@@ -848,7 +1270,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         :totals="totals"
         :inventory="bag"
         :options="planOptions"
-        @open="(key) => openEditor({ kind: 'item', key })"
+        @open="(key) => openEditor(itemGoalId(key))"
         @toggle="toggleItem"
         @add="openPicker('item')"
       />
@@ -878,7 +1300,10 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
               :hint="null"
               :needs="null"
               :goal="null"
+              :selecting="selecting"
+              :selected="picked.has(entry.id)"
               @open="openEntry(entry)"
+              @select="togglePicked(entry.id)"
               @toggle="toggleActive(entry)"
               @favorite="toggleFavorite(entry)"
             />
@@ -887,26 +1312,31 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       </section>
     </div>
 
-    <GoalEditor
+    <GoalModal
       :open="editorShown"
-      :subject="goalSubject"
+      :entry="editorEntry"
       :planner="planner"
+      :base-planner="basePlanner"
       :good="goodView"
-      :cache="requirementCache"
-      :character-target="editorCharacter?.target ?? null"
-      :character-current="editorCharacter?.current ?? null"
-      :raised="editorCharacter?.raised ?? null"
-      :weapon-goals="editorWeapons"
       :others="editorOthers"
       :options="planOptions"
       :drops="drops"
       :ar="ar"
       :wl="wl"
       :refreshes="settings.planner.refreshes ?? 0"
-      :saving="store.saving.value || state.saving.value"
+      :taken="takenCharacters"
+      :names="customNames"
       @close="closeEditor"
-      @save="save"
-      @remove="removeGoal"
+      @character="writeCharacter"
+      @character-now="writeCharacterNow"
+      @weapon="writeWeapon"
+      @weapon-now="writeWeaponNow"
+      @add-weapon="addWeaponGoal"
+      @remove-weapon="removeWeaponGoal"
+      @toggle="editorEntry && toggleActive(editorEntry)"
+      @favorite="editorEntry && toggleFavorite(editorEntry)"
+      @remove="removeEntry"
+      @replace="replaceWith"
     />
     <ItemEditor
       :open="itemEditorShown"
@@ -919,20 +1349,24 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       :saving="store.saving.value"
       @close="closeEditor"
       @save="save"
-      @remove="removeGoal"
+      @remove="removeItem"
     />
     <GoalPicker
       :open="pickerOpen"
-      :planner="planner"
+      :planner="basePlanner"
       :good="goodView"
       :taken="taken"
       :start="pickerStart"
+      :saving="store.saving.value"
       @close="pickerOpen = false"
-      @pick="pick"
+      @characters="addCharacters"
+      @weapon="addWeapon"
+      @item="addItem"
+      @custom="addCustom"
     />
     <SeelieImport
       :open="importOpen"
-      :planner="planner"
+      :planner="basePlanner"
       :good="goodView"
       :targets="store.targets.value ?? []"
       :saving="store.saving.value"

@@ -1091,14 +1091,22 @@ describe('progress set by hand', () => {
     })
     expect(created.status).toBe(200)
     const { targets } = (await created.json()) as { targets: Record<string, unknown>[] }
+    // Weapon goals get an id (none sent: a new one) and come in the order they were made.
     expect(targets.map(({ updatedAt: _, ...t }) => t)).toEqual([
       { kind: 'character', key: 'Furina', owner: '', target: { ...furina, active: true } },
-      { kind: 'weapon', key: 'FavoniusSword', owner: '', target: { ...sword, active: false } },
       {
         kind: 'weapon',
+        id: expect.stringMatching(/^[0-9a-f]{12}$/),
         key: 'SplendorOfTranquilWaters',
         owner: 'Furina',
         target: { ...sword, active: true },
+      },
+      {
+        kind: 'weapon',
+        id: expect.stringMatching(/^[0-9a-f]{12}$/),
+        key: 'FavoniusSword',
+        owner: '',
+        target: { ...sword, active: false },
       },
     ])
 
@@ -1122,10 +1130,33 @@ describe('progress set by hand', () => {
     ])
     expect(after[0]!.target.level).toBe(80)
 
+    const custom = { name: 'Nova', rarity: 5, element: 'Pyro', weapon: 'sword' }
     for (const bad of [
       { upsert: [{ kind: 'character', key: 'Furina', target: { ...furina, level: 91 } }] },
       { upsert: [{ kind: 'character', key: 'Furi na', target: furina }] },
       { upsert: [{ kind: 'weapon', key: 'FavoniusSword', target: sword }] },
+      { upsert: [{ kind: 'weapon', key: 'FavoniusSword', owner: '', id: 'No-Id', target: sword }] },
+      { upsert: [{ kind: 'custom', key: 'Nova12', target: { ...furina, custom } }] },
+      { upsert: [{ kind: 'custom', key: 'nova12', target: furina }] },
+      {
+        upsert: [
+          {
+            kind: 'custom',
+            key: 'nova12',
+            target: { ...furina, custom: { ...custom, rarity: 3 } },
+          },
+        ],
+      },
+      {
+        upsert: [
+          {
+            kind: 'custom',
+            key: 'nova12',
+            target: { ...furina, custom: { ...custom, name: ' ' } },
+          },
+        ],
+      },
+      { upsert: [{ kind: 'character', key: 'Furina', target: { ...furina, constellation: 7 } }] },
       { remove: [{ kind: 'artifact', key: 'X' }] },
       {},
     ]) {
@@ -1134,6 +1165,140 @@ describe('progress set by hand', () => {
 
     const stranger = await signUp()
     expect((await stranger.client.fetch(url)).status).toBe(404)
+  })
+
+  it('keeps several goals of one weapon by id, and names them the old way too', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const url = `/api/accounts/${account.id}/planner-targets`
+    const state = `/api/accounts/${account.id}/planner-state`
+    type Target = {
+      kind: string
+      id?: string
+      key: string
+      owner: string
+      target: { level: number }
+    }
+    const patch = async (json: object) => {
+      const res = await client.fetch(url, { method: 'PATCH', json })
+      expect(res.status, JSON.stringify(json)).toBe(200)
+      return ((await res.json()) as { targets: Target[] }).targets
+    }
+    const at = (level: number) => ({ level, ascension: level > 80 ? 6 : 5, refinement: 1 })
+    const brief = (list: Target[]) =>
+      list
+        .filter((t) => t.kind === 'weapon')
+        .map((t) => `${t.id}:${t.key}:${t.owner}:${t.target.level}`)
+
+    // Two copies of one weapon for nobody yet, then a third the old way (no id: the first one).
+    await patch({
+      upsert: [
+        { kind: 'weapon', id: 'copy01', key: 'FavoniusSword', owner: '', target: at(80) },
+        { kind: 'weapon', id: 'copy02', key: 'FavoniusSword', owner: '', target: at(70) },
+      ],
+    })
+    expect(
+      brief(
+        await patch({
+          upsert: [{ kind: 'weapon', key: 'FavoniusSword', owner: '', target: at(90) }],
+        }),
+      ),
+    ).toEqual(['copy01:FavoniusSword::90', 'copy02:FavoniusSword::70'])
+
+    // By id: one moves to Bennett (the other stays); a hand-set state stays with it.
+    await patch({
+      upsert: [
+        { kind: 'weapon', id: 'copy02', key: 'FavoniusSword', owner: 'Bennett', target: at(70) },
+      ],
+    })
+    const sword = { level: 50, ascension: 2, refinement: 3 }
+    const set = await client.fetch(state, {
+      method: 'PATCH',
+      json: {
+        base: 0,
+        current: [
+          { kind: 'weapon', key: 'FavoniusSword', owner: 'Bennett', id: 'copy02', current: sword },
+        ],
+      },
+    })
+    expect(set.status).toBe(200)
+    type Overrides = { overrides: { id?: string; key: string; current: unknown }[] }
+    expect(((await set.json()) as Overrides).overrides).toEqual([
+      { kind: 'weapon', id: 'copy02', key: 'FavoniusSword', owner: 'Bennett', current: sword },
+    ])
+    await patch({
+      upsert: [{ kind: 'weapon', id: 'copy02', key: 'FavoniusSword', owner: '', target: at(80) }],
+    })
+    expect((await client.json<Overrides>(state)).overrides.map((o) => o.id)).toEqual(['copy02'])
+    // Another weapon on the same goal: the old one's state goes.
+    expect(
+      brief(
+        await patch({
+          upsert: [
+            {
+              kind: 'weapon',
+              id: 'copy02',
+              key: 'SacrificialSword',
+              owner: 'Bennett',
+              target: at(90),
+            },
+          ],
+        }),
+      ),
+    ).toEqual(['copy01:FavoniusSword::90', 'copy02:SacrificialSword:Bennett:90'])
+    expect((await client.json<Overrides>(state)).overrides).toEqual([])
+
+    // Removal by id takes one goal; the old way (weapon + owner) every such goal.
+    await patch({
+      upsert: [
+        { kind: 'weapon', id: 'copy03', key: 'FavoniusSword', owner: '', target: at(80) },
+        { kind: 'weapon', id: 'copy04', key: 'FavoniusSword', owner: '', target: at(80) },
+      ],
+    })
+    expect(
+      brief(
+        await patch({
+          remove: [{ kind: 'weapon', key: 'FavoniusSword', owner: '', id: 'copy03' }],
+        }),
+      ),
+    ).toEqual([
+      'copy01:FavoniusSword::90',
+      'copy02:SacrificialSword:Bennett:90',
+      'copy04:FavoniusSword::80',
+    ])
+    expect(
+      brief(await patch({ remove: [{ kind: 'weapon', key: 'FavoniusSword', owner: '' }] })),
+    ).toEqual(['copy02:SacrificialSword:Bennett:90'])
+
+    // A custom character is a goal like a character's; weapon goals can be for it.
+    const goal = { level: 90, ascension: 6, talents: { auto: 9, skill: 9, burst: 9 } }
+    const custom = {
+      name: 'Nova',
+      rarity: 5,
+      element: 'Pyro',
+      weapon: 'sword',
+      book: 'TeachingsOfFreedom',
+      boss: 'EverflameSeed',
+    }
+    const made = await patch({
+      upsert: [
+        { kind: 'custom', key: 'cnova01', target: { ...goal, custom } },
+        {
+          kind: 'weapon',
+          id: 'copy05',
+          key: 'MistsplitterReforged',
+          owner: 'cnova01',
+          target: at(90),
+        },
+      ],
+    })
+    expect(made.find((t) => t.kind === 'custom')).toMatchObject({
+      key: 'cnova01',
+      owner: '',
+      target: { ...goal, active: true, custom },
+    })
+    const left = await patch({ remove: [{ kind: 'custom', key: 'cnova01' }] })
+    expect(left.map((t) => t.kind)).toEqual(['weapon', 'weapon'])
   })
 
   it('stores extra item needs and goal notes, favorites and priorities', async () => {

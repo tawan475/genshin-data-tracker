@@ -36,7 +36,11 @@ export const GOAL_SORTS: { value: GoalSort; label: string; title: string }[] = [
   { value: 'name', label: 'Name', title: 'A to Z' },
   { value: 'missing', label: 'Missing', title: 'Fewest items missing first' },
   { value: 'favorites', label: 'Favorites', title: 'Favorites first' },
-  { value: 'priority', label: 'Priority', title: 'Lowest priority number first' },
+  {
+    value: 'priority',
+    label: 'Priority',
+    title: 'Materials go to the top goals first: drag to reorder',
+  },
 ]
 
 function statusMatches(status: GoalStatus, active: boolean, ready: boolean): boolean {

@@ -143,14 +143,14 @@ export type DonePartKind = 'level' | 'talents' | 'weapon'
 
 /** A Done's new current state for one goal (a full state; only what is ahead of the capture counts). */
 export type DoneState =
-  | { kind: 'character'; key: string; current: CharacterCurrent }
-  | { kind: 'weapon'; key: string; owner: string; current: WeaponCurrent }
+  | { kind: 'character' | 'custom'; key: string; current: CharacterCurrent }
+  | { kind: 'weapon'; id: string; key: string; owner: string; current: WeaponCurrent }
 
 export interface DonePart {
   /** `${goal id}|${kind}` */
   id: string
   kind: DonePartKind
-  /** The goal: `character:Key` or `weapon:Key:Owner`. */
+  /** The goal: `character:Key`, `custom:<id>` or `weapon:Key:Owner:<id>`. */
   goal: string
   requirement: Requirement
   /** The current state once done: the goal's for this part, the rest as it is. */
@@ -179,7 +179,7 @@ export function characterParts(planner: PlannerData, c: CharacterGoalView): Done
         kind: 'level',
         goal: c.id,
         requirement,
-        next: { kind: 'character', key: c.key, current: to },
+        next: { kind: c.custom ? 'custom' : 'character', key: c.key, current: to },
       })
     }
   }
@@ -194,7 +194,7 @@ export function characterParts(planner: PlannerData, c: CharacterGoalView): Done
         kind: 'talents',
         goal: c.id,
         requirement,
-        next: { kind: 'character', key: c.key, current: to },
+        next: { kind: c.custom ? 'custom' : 'character', key: c.key, current: to },
       })
     }
   }
@@ -216,6 +216,7 @@ export function weaponPart(planner: PlannerData, w: WeaponGoalView): DonePart | 
     requirement,
     next: {
       kind: 'weapon',
+      id: w.goalId,
       key: w.key,
       owner: w.owner,
       current: {
