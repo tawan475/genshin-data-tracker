@@ -4,11 +4,11 @@ import {
   History,
   LayoutDashboard,
   Package,
-  Settings,
   Swords,
   Trophy,
   TrendingUp,
   Upload,
+  UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-vue-next'
@@ -33,5 +33,5 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-achievements', label: 'Achievements', icon: Trophy },
   { name: 'account-snapshots', label: 'Snapshots', icon: History },
   { name: 'account-import', label: 'Import', icon: Upload },
-  { name: 'account-settings', label: 'Manage', icon: Settings },
+  { name: 'account-settings', label: 'Manage', icon: UserCog },
 ]
