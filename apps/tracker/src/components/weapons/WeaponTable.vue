@@ -20,7 +20,7 @@ import { RARITY_TEXT } from '@/components/characters/tokens'
  * sortable headers. A row opens its weapon's details.
  */
 defineProps<{ rows: WeaponRow[] }>()
-defineEmits<{ open: [key: string] }>()
+defineEmits<{ open: [row: WeaponRow] }>()
 const sort = defineModel<WeaponSort>('sort', { required: true })
 const direction = defineModel<SortDirection>('direction', { required: true })
 
@@ -55,18 +55,27 @@ function ariaSort(key: WeaponSort) {
           <th
             scope="col"
             class="hidden w-20 px-2 py-2 text-left md:table-cell"
-            :aria-sort="ariaSort('rarity')"
+            :aria-sort="ariaSort('quality')"
           >
             <SortHeader
               label="★"
-              title="Rarity"
-              :active="sort === 'rarity'"
+              title="Quality: rarity, level, refinement, newest"
+              :active="sort === 'quality'"
               :direction="direction"
-              @sort="sortBy('rarity')"
+              @sort="sortBy('quality')"
             />
           </th>
-          <th scope="col" class="hidden w-24 px-2 py-2 text-left font-medium lg:table-cell">
-            Type
+          <th
+            scope="col"
+            class="hidden w-24 px-2 py-2 text-left lg:table-cell"
+            :aria-sort="ariaSort('type')"
+          >
+            <SortHeader
+              label="Type"
+              :active="sort === 'type'"
+              :direction="direction"
+              @sort="sortBy('type')"
+            />
           </th>
           <th scope="col" class="w-16 px-2 py-2 text-right sm:w-20" :aria-sort="ariaSort('level')">
             <SortHeader
@@ -113,14 +122,14 @@ function ariaSort(key: WeaponSort) {
           v-for="row in rows"
           :key="row.id"
           class="cursor-pointer transition-colors hover:bg-surface-overlay/60"
-          @click="$emit('open', row.key)"
+          @click="$emit('open', row)"
         >
           <td class="px-3 py-1.5">
             <button
               type="button"
               aria-haspopup="dialog"
               class="flex w-full min-w-0 items-center gap-2.5 text-left"
-              @click.stop="$emit('open', row.key)"
+              @click.stop="$emit('open', row)"
             >
               <GameIcon
                 :src="weaponIcon(row.key, row.ascension)"
@@ -139,7 +148,10 @@ function ariaSort(key: WeaponSort) {
           <td class="hidden truncate px-2 py-1.5 text-text-secondary lg:table-cell">
             {{ row.type ? WEAPON_TYPE_LABELS[row.type] : '' }}
           </td>
-          <td class="px-2 py-1.5 text-right" :class="row.level >= 90 ? '' : 'text-text-secondary'">
+          <td
+            class="px-2 py-1.5 text-right"
+            :class="row.level >= row.maxLevel ? '' : 'text-text-secondary'"
+          >
             <LevelText :level="row.level" :ascension="row.ascension" bare />
           </td>
           <td

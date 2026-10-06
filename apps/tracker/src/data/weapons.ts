@@ -2,11 +2,11 @@
  * The Weapons page's model. An account holds 1,000+ weapons, most of them
  * identical low-rarity copies, so copies are handled at two levels:
  *
- * - rows: unequipped copies with the same key, level, ascension, refinement
- *   and lock state collapse into one row with a count; an equipped weapon
- *   always gets its own row (the List view);
+ * - rows (stacks): unequipped copies with the same key, level, ascension,
+ *   refinement and lock state collapse into one row with a count; an
+ *   equipped weapon always gets its own row (the Bag's tiles, the List);
  * - groups: every row of one weapon key together, with its owners and what
- *   the spare copies could refine (the Cards view).
+ *   the spare copies could refine (the By weapon view, the details).
  *
  * Filters apply to rows, then rows are grouped, so a group shows the copies
  * that match. Pure functions, run once per inventory or filter change.
@@ -14,7 +14,8 @@
 
 import type { Good } from '@gdt/shared'
 import { keyToName } from '@/lib/format'
-import { weaponMeta, type WeaponType } from './game-meta'
+import { levelCap } from '@/lib/level'
+import { weaponGameId, weaponMaxLevel, weaponMeta, type WeaponType } from './game-meta'
 
 export type { WeaponType }
 
@@ -33,6 +34,10 @@ export interface WeaponRow {
   ownerName: string
   lock: boolean
   count: number
+  /** The weapon's level cap: 90, or 70 for 1–2★. */
+  maxLevel: number
+  /** The game's weapon id ("newest" sorts by it); 0 while unknown. */
+  gameId: number
   haystack: string
 }
 
@@ -55,12 +60,12 @@ export interface WeaponGroup {
   name: string
   rarity: number | null
   type: WeaponType | null
-  /** Matching rows, best first (equipped, then level, then refinement). */
+  /** Matching rows: equipped copies first, then stacks by level, then refinement. */
   rows: WeaponRow[]
   /** Matching copies. */
   count: number
   owners: { key: string; name: string }[]
-  /** The best matching copy. */
+  /** The best matching copy (highest level, then refinement). */
   best: WeaponRow
   /** From the whole inventory, not just the matches. */
   refine: RefineInfo | null
@@ -97,6 +102,9 @@ export const WEAPON_TYPE_LABELS: Record<WeaponType, string> = {
 }
 
 export const MAX_REFINEMENT = 5
+
+/** Every rarity a weapon can have, highest first (the chips and the Bag's sections). */
+export const WEAPON_RARITIES = [5, 4, 3, 2, 1] as const
 
 const SMALL_WORDS = /(?<= )(Of|The|And|An|In|To|For|From|On|At|By|With)(?= )/g
 
@@ -146,7 +154,11 @@ function refineInfo(rows: readonly WeaponRow[]): RefineInfo | null {
   return targets.length ? { spare, targets } : null
 }
 
-export function buildArmory(good: Good): Armory {
+/**
+ * Rows, refine headroom and headline counts. `gameId` is the weapon's game
+ * id (the default reads what the Planner loaded; tests pass their own).
+ */
+export function buildArmory(good: Good, gameId: (key: string) => number = weaponGameId): Armory {
   const rows = new Map<string, WeaponRow>()
   let equipped = 0
   const byRarity = new Map<number, number>()
@@ -181,6 +193,8 @@ export function buildArmory(good: Good): Armory {
       ownerName,
       lock: w.lock,
       count: 1,
+      maxLevel: weaponMaxLevel(w.key, rarity),
+      gameId: gameId(w.key),
       haystack: normalize(`${name} ${w.key} ${ownerName} ${type ? WEAPON_TYPE_LABELS[type] : ''}`),
     })
   })
@@ -209,8 +223,11 @@ export function buildArmory(good: Good): Armory {
   }
 }
 
-/** Equipped first, then the highest level, then the highest refinement. */
-function compareCopies(a: WeaponRow, b: WeaponRow): number {
+/**
+ * The order of one weapon's copies (By weapon chips, the details): equipped
+ * copies first, then the highest level, then the highest refinement.
+ */
+export function compareCopies(a: WeaponRow, b: WeaponRow): number {
   return (
     Number(b.location !== '') - Number(a.location !== '') ||
     b.level - a.level ||
@@ -218,6 +235,11 @@ function compareCopies(a: WeaponRow, b: WeaponRow): number {
     Number(b.lock) - Number(a.lock) ||
     a.ownerName.localeCompare(b.ownerName)
   )
+}
+
+/** The best copy: highest level, then refinement (equipped wins a tie). */
+function compareBest(a: WeaponRow, b: WeaponRow): number {
+  return b.level - a.level || b.refinement - a.refinement || compareCopies(a, b)
 }
 
 /** Groups (already filtered) rows by weapon key. */
@@ -234,6 +256,8 @@ export function groupWeapons(
   return [...byKey].map(([key, same]) => {
     same.sort(compareCopies)
     const first = same[0]!
+    let best = first
+    for (const row of same) if (compareBest(row, best) < 0) best = row
     return {
       key,
       name: first.name,
@@ -242,34 +266,49 @@ export function groupWeapons(
       rows: same,
       count: same.reduce((sum, r) => sum + r.count, 0),
       owners: same.filter((r) => r.location).map((r) => ({ key: r.location, name: r.ownerName })),
-      best: [...same].sort(
-        (a, b) => b.level - a.level || b.refinement - a.refinement || compareCopies(a, b),
-      )[0]!,
+      best,
       refine: refine.get(key) ?? null,
     }
   })
 }
 
+/** "Favonius Greatsword · R1 · Lv 1/20 · 55 copies · Locked", for tooltips. */
+export function weaponTitle(row: WeaponRow): string {
+  return [
+    row.name,
+    `R${row.refinement}`,
+    `Lv ${row.level}/${levelCap(row.ascension, row.level)}`,
+    row.count > 1 ? `${row.count} copies` : '',
+    row.ownerName,
+    row.lock ? 'Locked' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 // ------------------------------------------------------------ filter & sort
 
-export type WeaponSort = 'rarity' | 'level' | 'refinement' | 'count' | 'name'
+export type WeaponSort = 'quality' | 'level' | 'refinement' | 'count' | 'name' | 'type'
 export type SortDirection = 'asc' | 'desc'
 
 export const WEAPON_SORTS: { value: WeaponSort; label: string; natural: SortDirection }[] = [
-  { value: 'rarity', label: 'Rarity', natural: 'desc' },
+  { value: 'quality', label: 'Quality', natural: 'desc' },
   { value: 'level', label: 'Level', natural: 'desc' },
   { value: 'refinement', label: 'Refinement', natural: 'desc' },
   { value: 'count', label: 'Copies', natural: 'desc' },
   { value: 'name', label: 'Name', natural: 'asc' },
+  { value: 'type', label: 'Type', natural: 'asc' },
 ]
 
-export type RarityFilter = 'all' | 5 | 4 | 3 | 'low'
+export type RarityFilter = 'all' | 1 | 2 | 3 | 4 | 5
 export type LevelFilter = 'all' | 'max' | 'levelled' | 'base'
+export type StatusFilter = 'all' | 'equipped' | 'unequipped'
+export type LockFilter = 'all' | 'locked' | 'unlocked'
 
 export interface WeaponFilters {
   query: string
-  status: 'all' | 'equipped' | 'unequipped'
-  lock: 'all' | 'locked' | 'unlocked'
+  status: StatusFilter
+  lock: LockFilter
   rarity: RarityFilter
   type: WeaponType | 'all'
   level: LevelFilter
@@ -288,7 +327,7 @@ export const NO_WEAPON_FILTERS: WeaponFilters = {
 
 export const LEVEL_OPTIONS: { value: LevelFilter; label: string }[] = [
   { value: 'all', label: 'Level' },
-  { value: 'max', label: 'Lv 90' },
+  { value: 'max', label: 'Max' },
   { value: 'levelled', label: 'Levelled' },
   { value: 'base', label: 'Lv 1' },
 ]
@@ -305,16 +344,11 @@ export function hasWeaponFilters(f: WeaponFilters): boolean {
   )
 }
 
-/** The rarity a row falls under in the rarity filter. */
-export function rarityBucket(rarity: number | null): RarityFilter | null {
-  if (rarity === null) return null
-  return rarity <= 2 ? 'low' : (rarity as 5 | 4 | 3)
-}
-
-function levelMatches(level: number, wanted: LevelFilter): boolean {
-  if (wanted === 'max') return level >= 90
-  if (wanted === 'levelled') return level > 1
-  if (wanted === 'base') return level <= 1
+/** "Max" is the weapon's own cap (70 for 1–2★), not a flat 90. */
+export function levelMatches(row: Pick<WeaponRow, 'level' | 'maxLevel'>, wanted: LevelFilter) {
+  if (wanted === 'max') return row.level >= row.maxLevel
+  if (wanted === 'levelled') return row.level > 1
+  if (wanted === 'base') return row.level <= 1
   return true
 }
 
@@ -333,8 +367,8 @@ export function filterWeapons(
       (f.status === 'all' || (f.status === 'equipped') === (r.location !== '')) &&
       (f.lock === 'all' || (f.lock === 'locked') === r.lock) &&
       (except === 'type' || f.type === 'all' || r.type === f.type) &&
-      (except === 'rarity' || f.rarity === 'all' || rarityBucket(r.rarity) === f.rarity) &&
-      levelMatches(r.level, f.level) &&
+      (except === 'rarity' || f.rarity === 'all' || r.rarity === f.rarity) &&
+      levelMatches(r, f.level) &&
       (!f.refinable || refine.has(r.key)) &&
       words.every((w) => r.haystack.includes(w)),
   )
@@ -356,15 +390,25 @@ export function weaponFacetCounts<K>(
   return counts
 }
 
+const typeIndex = (type: WeaponType | null) =>
+  type === null ? WEAPON_TYPES.length : WEAPON_TYPES.indexOf(type)
+
+/** Each written low to high; the sort's direction flips it. */
 const compareRows: Record<WeaponSort, (a: WeaponRow, b: WeaponRow) => number> = {
-  rarity: (a, b) => (a.rarity ?? 0) - (b.rarity ?? 0),
+  // The game's "Quality": rarity, level, refinement, then the newest weapon.
+  quality: (a, b) =>
+    (a.rarity ?? 0) - (b.rarity ?? 0) ||
+    a.level - b.level ||
+    a.refinement - b.refinement ||
+    a.gameId - b.gameId,
   level: (a, b) => a.level - b.level || a.ascension - b.ascension,
   refinement: (a, b) => a.refinement - b.refinement,
   count: (a, b) => a.count - b.count,
   name: (a, b) => a.name.localeCompare(b.name),
+  type: (a, b) => typeIndex(a.type) - typeIndex(b.type),
 }
 
-/** Ties fall back to rarity, level (high first), then name. */
+/** Ties fall back to quality (best first), then name, equipped first, then owner. */
 export function sortWeapons(
   rows: readonly WeaponRow[],
   sort: WeaponSort,
@@ -375,22 +419,24 @@ export function sortWeapons(
   return [...rows].sort(
     (a, b) =>
       sign * primary(a, b) ||
-      compareRows.rarity(b, a) ||
-      compareRows.level(b, a) ||
+      compareRows.quality(b, a) ||
       compareRows.name(a, b) ||
+      Number(b.location !== '') - Number(a.location !== '') ||
+      Number(b.lock) - Number(a.lock) ||
       a.ownerName.localeCompare(b.ownerName),
   )
 }
 
 const compareGroups: Record<WeaponSort, (a: WeaponGroup, b: WeaponGroup) => number> = {
-  rarity: (a, b) => (a.rarity ?? 0) - (b.rarity ?? 0),
+  quality: (a, b) => compareRows.quality(a.best, b.best),
   level: (a, b) => compareRows.level(a.best, b.best),
   refinement: (a, b) => a.best.refinement - b.best.refinement,
   count: (a, b) => a.count - b.count,
   name: (a, b) => a.name.localeCompare(b.name),
+  type: (a, b) => typeIndex(a.type) - typeIndex(b.type),
 }
 
-/** Ties: rarity, then equipped copies, then best level (high first), then name. */
+/** Ties: quality (best copy, best first), then equipped copies, then name. */
 export function sortGroups(
   groups: readonly WeaponGroup[],
   sort: WeaponSort,
@@ -401,9 +447,88 @@ export function sortGroups(
   return [...groups].sort(
     (a, b) =>
       sign * primary(a, b) ||
-      compareGroups.rarity(b, a) ||
+      compareGroups.quality(b, a) ||
       b.owners.length - a.owners.length ||
-      compareGroups.level(b, a) ||
       compareGroups.name(a, b),
   )
+}
+
+export interface RaritySection {
+  /** 0 for weapons the game data doesn't know. */
+  rarity: number
+  rows: WeaponRow[]
+  copies: number
+}
+
+/**
+ * Sorted rows split by rarity, keeping their order inside each section:
+ * the Bag's sections, highest rarity first (lowest first for Quality
+ * ascending, so the order reads the same way).
+ */
+export function raritySections(sorted: readonly WeaponRow[], lowestFirst = false): RaritySection[] {
+  const byRarity = new Map<number, RaritySection>()
+  for (const row of sorted) {
+    const rarity = row.rarity ?? 0
+    let section = byRarity.get(rarity)
+    if (!section) {
+      section = { rarity, rows: [], copies: 0 }
+      byRarity.set(rarity, section)
+    }
+    section.rows.push(row)
+    section.copies += row.count
+  }
+  // Unknown weapons (rarity 0) always last.
+  const rank = (r: number) => (r === 0 ? -Infinity : lowestFirst ? -r : r)
+  return [...byRarity.values()].sort((a, b) => rank(b.rarity) - rank(a.rarity))
+}
+
+// ------------------------------------------------------------- stored state
+// The page keeps filters per account and sort/view per device (lib/storage);
+// these turn whatever was stored into valid values. No storage here: the
+// Planner's model imports this module, and its tests run without a DOM.
+
+export type WeaponView = 'bag' | 'weapon' | 'list'
+
+const STATUS: readonly StatusFilter[] = ['all', 'equipped', 'unequipped']
+const LOCKS: readonly LockFilter[] = ['all', 'locked', 'unlocked']
+const LEVELS: readonly LevelFilter[] = ['all', 'max', 'levelled', 'base']
+
+function oneOf<T>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return allowed.includes(value as T) ? (value as T) : fallback
+}
+
+/** Whatever was stored, as valid filters (old or hand-edited values fall back). */
+export function sanitizeWeaponFilters(value: unknown): WeaponFilters {
+  if (!value || typeof value !== 'object') return { ...NO_WEAPON_FILTERS }
+  const v = value as Record<string, unknown>
+  return {
+    query: typeof v.query === 'string' ? v.query.slice(0, 100) : '',
+    status: oneOf(v.status, STATUS, 'all'),
+    lock: oneOf(v.lock, LOCKS, 'all'),
+    rarity: oneOf<RarityFilter>(v.rarity, ['all', ...WEAPON_RARITIES], 'all'),
+    type: oneOf<WeaponType | 'all'>(v.type, ['all', ...WEAPON_TYPES], 'all'),
+    level: oneOf(v.level, LEVELS, 'all'),
+    refinable: v.refinable === true,
+  }
+}
+
+export interface WeaponPrefs {
+  sort: WeaponSort
+  direction: SortDirection
+  view: WeaponView
+}
+
+/** Stored sort and view, valid. Older saves: "rarity" is now Quality, "grid" the Bag. */
+export function sanitizeWeaponPrefs(value: unknown): WeaponPrefs {
+  const saved = value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+  const sort = oneOf<WeaponSort>(
+    saved.sort === 'rarity' ? 'quality' : saved.sort,
+    WEAPON_SORTS.map((s) => s.value),
+    'quality',
+  )
+  return {
+    sort,
+    direction: oneOf<SortDirection>(saved.direction, ['asc', 'desc'], 'desc'),
+    view: oneOf<WeaponView>(saved.view, ['bag', 'weapon', 'list'], 'bag'),
+  }
 }

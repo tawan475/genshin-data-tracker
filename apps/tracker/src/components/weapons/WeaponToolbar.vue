@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUp, LayoutGrid, List, Search } from 'lucide-vue-next'
+import { ArrowUp, Backpack, Layers, List, Search } from 'lucide-vue-next'
 import SortControl from '@/components/characters/SortControl.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -9,14 +9,15 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import {
   LEVEL_OPTIONS,
+  WEAPON_RARITIES,
   WEAPON_SORTS,
   WEAPON_TYPES,
   WEAPON_TYPE_LABELS,
-  type RarityFilter,
   type SortDirection,
   type WeaponFilters,
   type WeaponSort,
   type WeaponType,
+  type WeaponView,
 } from '@/data/weapons'
 import { formatNumber } from '@/lib/format'
 
@@ -26,7 +27,9 @@ import { formatNumber } from '@/lib/format'
  */
 defineProps<{
   typeCounts: ReadonlyMap<WeaponType | null, number>
-  rarityCounts: ReadonlyMap<RarityFilter | null, number>
+  rarityCounts: ReadonlyMap<number | null, number>
+  /** Rarities the inventory has at all (a chip without any says so). */
+  present: ReadonlySet<number>
   refinableCount: number
   /** Matching copies / all copies, shown while filtering. */
   shown: number
@@ -36,17 +39,19 @@ defineProps<{
 const filters = defineModel<WeaponFilters>('filters', { required: true })
 const sort = defineModel<WeaponSort>('sort', { required: true })
 const direction = defineModel<SortDirection>('direction', { required: true })
-const view = defineModel<'grid' | 'list'>('view', { required: true })
+const view = defineModel<WeaponView>('view', { required: true })
 defineEmits<{ clear: [] }>()
 
-const RARITIES: { value: Exclude<RarityFilter, 'all'>; label: string; tone: string }[] = [
-  { value: 5, label: '5★', tone: 'text-rarity-5' },
-  { value: 4, label: '4★', tone: 'text-rarity-4' },
-  { value: 3, label: '3★', tone: 'text-rarity-3' },
-  { value: 'low', label: '1–2★', tone: 'text-rarity-2' },
-]
-const VIEWS: SegmentedOption<'grid' | 'list'>[] = [
-  { value: 'grid', label: 'Cards', icon: LayoutGrid },
+const RARITY_TEXT: Record<number, string> = {
+  5: 'text-rarity-5',
+  4: 'text-rarity-4',
+  3: 'text-rarity-3',
+  2: 'text-rarity-2',
+  1: 'text-rarity-1',
+}
+const VIEWS: SegmentedOption<WeaponView>[] = [
+  { value: 'bag', label: 'Bag', icon: Backpack },
+  { value: 'weapon', label: 'By weapon', icon: Layers },
   { value: 'list', label: 'List', icon: List },
 ]
 const statusOptions = [
@@ -63,7 +68,7 @@ const lockOptions = [
 function toggleType(t: WeaponType) {
   filters.value.type = filters.value.type === t ? 'all' : t
 }
-function toggleRarity(r: Exclude<RarityFilter, 'all'>) {
+function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
   filters.value.rarity = filters.value.rarity === r ? 'all' : r
 }
 </script>
@@ -111,13 +116,14 @@ function toggleRarity(r: Exclude<RarityFilter, 'all'>) {
       </FilterChip>
       <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />
       <FilterChip
-        v-for="r in RARITIES"
-        :key="r.value"
-        :pressed="filters.rarity === r.value"
-        :count="rarityCounts.get(r.value) ?? 0"
-        @toggle="toggleRarity(r.value)"
+        v-for="r in WEAPON_RARITIES"
+        :key="r"
+        :pressed="filters.rarity === r"
+        :count="rarityCounts.get(r) ?? 0"
+        :title="present.has(r) ? undefined : 'None in this capture'"
+        @toggle="toggleRarity(r)"
       >
-        <span :class="r.tone">{{ r.label }}</span>
+        <span :class="RARITY_TEXT[r]">{{ r }}★</span>
       </FilterChip>
       <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />
       <FilterChip
