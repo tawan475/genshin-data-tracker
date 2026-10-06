@@ -25,6 +25,10 @@ concurrency:
 
 jobs:
   check:
+    # game-data-bump.yml runs these checks itself and merges its pull request
+    # (deleting the branch) seconds later, so a pull_request run there only
+    # duplicates them or fails to start once the branch is gone.
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'game-data/')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
