@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { Heart, Wrench } from 'lucide-vue-next'
+import { Wrench } from 'lucide-vue-next'
+import CritValue from '@/components/ui/CritValue.vue'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
 import {
   CHARACTER_SORTS,
   TARGET_LEVEL,
@@ -9,11 +12,11 @@ import {
   type SortDirection,
 } from '@/data/characters'
 import { artifactSetIcon, characterIcon, weaponIcon } from '@/lib/assets'
+import { formatLevel } from '@/lib/level'
 import FriendshipBadge from './FriendshipBadge.vue'
 import SortHeader from './SortHeader.vue'
 import SlotPips from './SlotPips.vue'
 import TalentChips from './TalentChips.vue'
-import { ELEMENT_FILL } from './tokens'
 
 /**
  * The roster as a dense list: one row per character, sortable headers. Rows
@@ -58,7 +61,7 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
               @sort="sortBy('name')"
             />
           </th>
-          <th scope="col" class="w-14 px-2 py-2 text-right sm:w-16" :aria-sort="ariaSort('level')">
+          <th scope="col" class="w-16 px-2 py-2 text-right sm:w-20" :aria-sort="ariaSort('level')">
             <SortHeader
               label="Lv"
               title="Level"
@@ -83,19 +86,15 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
           <th
             v-if="friendship"
             scope="col"
-            class="hidden w-14 px-2 py-2 text-right md:table-cell"
+            class="hidden w-24 px-2 py-2 text-right md:table-cell"
             :aria-sort="ariaSort('friendship')"
           >
             <SortHeader
               label="Friendship"
-              title="Friendship"
               :active="sort === 'friendship'"
               :direction="direction"
               @sort="sortBy('friendship')"
-            >
-              <Heart class="size-4" aria-hidden="true" />
-              <span class="sr-only">Friendship</span>
-            </SortHeader>
+            />
           </th>
           <th
             scope="col"
@@ -109,7 +108,7 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
               @sort="sortBy('talents')"
             />
           </th>
-          <th scope="col" class="hidden w-28 px-2 py-2 text-left font-medium md:table-cell">
+          <th scope="col" class="hidden w-32 px-2 py-2 text-left font-medium md:table-cell">
             Weapon
           </th>
           <th scope="col" class="hidden w-36 px-2 py-2 text-left font-medium lg:table-cell">
@@ -154,25 +153,16 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
                 :rarity="c.rarity ?? undefined"
                 size="sm"
               />
-              <span
-                v-if="c.element"
-                class="size-2 shrink-0 rounded-full"
-                :class="ELEMENT_FILL[c.element]"
-                aria-hidden="true"
-              />
+              <ElementIcon v-if="c.element" :element="c.element" />
               <span class="min-w-0 truncate font-medium">{{ c.name }}</span>
             </button>
           </td>
-          <td
-            class="tabular px-2 py-1.5 text-right font-mono"
-            :class="c.level < TARGET_LEVEL ? 'text-warning-text' : ''"
-            :title="`Ascension ${c.ascension}`"
-          >
-            {{ c.level }}
+          <td class="px-2 py-1.5 text-right">
+            <LevelText :level="c.level" :ascension="c.ascension" :target="TARGET_LEVEL" bare />
           </td>
           <td class="tabular px-2 py-1.5 text-right font-mono">{{ c.constellation }}</td>
           <td v-if="friendship" class="hidden px-2 py-1.5 text-right md:table-cell">
-            <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" />
+            <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" bare />
             <span v-else class="text-text-muted">—</span>
           </td>
           <td class="hidden px-2 py-1.5 sm:table-cell">
@@ -182,7 +172,7 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
             <span
               v-if="c.weapon"
               class="flex items-center gap-1.5"
-              :title="`${c.weapon.name} · Lv ${c.weapon.level} · R${c.weapon.refinement}`"
+              :title="`${c.weapon.name} · ${formatLevel(c.weapon.level, c.weapon.ascension)} · R${c.weapon.refinement}`"
             >
               <GameIcon
                 :src="weaponIcon(c.weapon.key, c.weapon.ascension)"
@@ -191,11 +181,12 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
                 size="xs"
               />
               <span class="tabular font-mono">R{{ c.weapon.refinement }}</span>
-              <span
-                class="tabular font-mono"
-                :class="c.weapon.level < TARGET_LEVEL ? 'text-warning-text' : 'text-text-muted'"
-                >{{ c.weapon.level }}</span
-              >
+              <LevelText
+                :level="c.weapon.level"
+                :ascension="c.weapon.ascension"
+                :target="TARGET_LEVEL"
+                bare
+              />
             </span>
             <span v-else class="text-text-muted">—</span>
           </td>
@@ -219,8 +210,9 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
             <template v-if="c.artifactCount">{{ c.critRate }} / {{ c.critDmg }}</template>
             <template v-else>—</template>
           </td>
-          <td class="tabular px-2 py-1.5 text-right font-mono">
-            {{ c.artifactCount ? c.cv.toFixed(1) : '—' }}
+          <td class="px-2 py-1.5 text-right">
+            <CritValue v-if="c.artifactCount" :value="c.cv" scope="build" />
+            <span v-else class="text-text-muted">—</span>
           </td>
           <td class="px-2 py-1.5 text-right">
             <span v-if="c.gaps.length" class="inline-flex text-warning-text" :title="gapText(c)">

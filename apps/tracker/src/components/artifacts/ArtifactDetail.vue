@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Backpack, FlaskConical, Lock, LockOpen, Sparkle } from 'lucide-vue-next'
+import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
+import RollValue from '@/components/ui/RollValue.vue'
 import { upgradesLeft, type ArtifactRow } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
+import { isCritCirclet } from '@/lib/crit-tiers'
 import { formatNumber, keyToName } from '@/lib/format'
 import { ROLL_QUALITY_LABEL, ROLL_QUALITY_TEXT, maxLevel } from '@/utils/artifact-rolls'
 import {
-  formatCv,
   formatRollValue,
   formatSlotFullName,
   formatSlotName,
@@ -16,7 +18,6 @@ import {
   formatStatValue,
 } from '@/utils/artifact-stats'
 import ArtifactRollBars from './ArtifactRollBars.vue'
-import { CV_BANDS_TITLE, cvClass } from './styles'
 
 /** One artifact: stats, rank, who wears it, and every roll coloured by tier. */
 const props = defineProps<{
@@ -64,15 +65,18 @@ const rankTitle = computed(() =>
     </div>
 
     <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      <div class="rounded-xl border border-border-default px-3 py-2" :title="CV_BANDS_TITLE">
+      <div class="rounded-xl border border-border-default px-3 py-2">
         <dt class="text-sm text-text-secondary">CV</dt>
-        <dd class="tabular font-mono text-xl font-semibold" :class="cvClass(row.cv)">
-          {{ formatCv(row.cv) }}
+        <dd class="text-xl font-semibold">
+          <CritValue
+            :value="row.cv"
+            :crit-circlet="isCritCirclet(artifact.slotKey, artifact.mainStatKey)"
+          />
         </dd>
       </div>
-      <div class="rounded-xl border border-border-default px-3 py-2" title="Roll value">
+      <div class="rounded-xl border border-border-default px-3 py-2">
         <dt class="text-sm text-text-secondary">RV</dt>
-        <dd class="tabular font-mono text-xl">{{ row.rv }}%</dd>
+        <dd class="text-xl"><RollValue :value="row.rv" /></dd>
       </div>
       <div class="rounded-xl border border-border-default px-3 py-2" :title="rollsTitle">
         <dt class="text-sm text-text-secondary">Rolls</dt>

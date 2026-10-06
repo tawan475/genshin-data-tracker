@@ -12,9 +12,10 @@ import {
   PencilLine,
   Star,
 } from 'lucide-vue-next'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { ELEMENT_FILL, RARITY_SOFT } from '@/components/characters/tokens'
+import { RARITY_SOFT } from '@/components/characters/tokens'
 import { artifactSetIcon, characterIcon, gameIcon, materialIcon, weaponIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { formatSetName } from '@/utils/artifact-stats'
@@ -264,12 +265,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
         </span>
         <span class="flex min-w-0 flex-1 flex-col items-start gap-1">
           <span class="flex w-full min-w-0 items-center gap-2">
-            <span
-              v-if="c?.element"
-              class="size-2.5 shrink-0 rounded-full"
-              :class="ELEMENT_FILL[c.element]"
-              aria-hidden="true"
-            />
+            <ElementIcon v-if="c?.element" :element="c.element" />
             <span class="min-w-0 truncate font-display text-base font-semibold">{{
               entry.name
             }}</span>

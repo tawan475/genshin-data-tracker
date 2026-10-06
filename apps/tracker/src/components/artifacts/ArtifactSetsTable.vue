@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import { SLOT_KEYS, type SetSummary, type SlotKey } from '@/data/artifacts'
 import { artifactSetIcon } from '@/lib/assets'
+import { isCritCirclet } from '@/lib/crit-tiers'
 import { formatNumber } from '@/lib/format'
 import { formatCv, formatSlotName, formatStatShort } from '@/utils/artifact-stats'
-import { CV_BANDS_TITLE, SLOT_ICONS, cvClass } from './styles'
+import { SLOT_ICONS } from './styles'
 
 /**
  * "Which sets do I have good pieces for": every set among the matches with
@@ -43,7 +45,7 @@ function cellTitle(set: SetSummary, index: number): string {
       >
         <component :is="SLOT_ICONS[slot]" class="size-4" />
       </span>
-      <span class="text-right" :title="`Best CV per slot, added up. ${CV_BANDS_TITLE}`">Σ CV</span>
+      <span class="text-right" title="Best CV per slot, added up">Σ CV</span>
     </div>
 
     <ul class="divide-y divide-border-subtle" aria-label="Sets">
@@ -68,17 +70,25 @@ function cellTitle(set: SetSummary, index: number): string {
           :key="index"
           type="button"
           class="tabular flex min-h-9 items-center justify-center rounded-lg font-mono text-sm transition-colors hover:bg-surface-overlay disabled:cursor-default disabled:hover:bg-transparent"
-          :class="best ? cvClass(best.cv) : 'text-text-muted'"
+          :class="best ? '' : 'text-text-muted'"
           :disabled="!best"
           :title="cellTitle(set, index)"
           :aria-label="cellTitle(set, index)"
           @click="emit('pick', set.key, SLOT_KEYS[index])"
         >
-          {{ best ? formatCv(best.cv) : '—' }}
+          <CritValue
+            v-if="best"
+            :value="best.cv"
+            :crit-circlet="isCritCirclet(best.artifact.slotKey, best.artifact.mainStatKey)"
+          />
+          <template v-else>—</template>
         </button>
-        <span class="tabular text-right font-mono text-sm font-semibold">
-          {{ set.score.toFixed(1) }}
-        </span>
+        <CritValue
+          :value="set.score"
+          scope="build"
+          class="text-right text-sm font-semibold"
+          detail="Best CV per slot, added up"
+        />
       </li>
     </ul>
   </div>

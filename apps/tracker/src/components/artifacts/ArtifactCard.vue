@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { FlaskConical, Lock, Sparkle } from 'lucide-vue-next'
+import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
+import RollValue from '@/components/ui/RollValue.vue'
 import type { ArtifactRow } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
+import { isCritCirclet } from '@/lib/crit-tiers'
 import { keyToName } from '@/lib/format'
 import {
   formatCv,
@@ -14,7 +17,6 @@ import {
   formatStatValue,
 } from '@/utils/artifact-stats'
 import ArtifactRollBars from './ArtifactRollBars.vue'
-import { cvClass } from './styles'
 
 /**
  * One artifact in the grid: set and main stat, CV/RV in the corner, substats
@@ -64,9 +66,13 @@ const label = computed(() => {
         </p>
       </div>
       <div class="tabular shrink-0 text-right font-mono leading-tight">
-        <p class="text-lg font-semibold" :class="cvClass(row.cv)">{{ formatCv(row.cv) }}</p>
+        <CritValue
+          :value="row.cv"
+          :crit-circlet="isCritCirclet(artifact.slotKey, artifact.mainStatKey)"
+          class="block text-lg font-semibold"
+        />
         <p class="text-xs text-text-muted">CV</p>
-        <p class="mt-0.5 text-sm text-text-secondary">{{ row.rv }}%</p>
+        <RollValue :value="row.rv" class="mt-0.5 block text-sm" />
       </div>
     </div>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import { MAX_REFINEMENT, WEAPON_TYPE_LABELS, type WeaponGroup } from '@/data/weapons'
 import { weaponIcon } from '@/lib/assets'
@@ -47,13 +48,8 @@ const label = computed(
         <span v-if="g.type">{{ WEAPON_TYPE_LABELS[g.type] }}</span>
       </p>
       <div class="flex min-w-0 items-center gap-2 text-sm">
-        <span
-          class="tabular font-mono whitespace-nowrap"
-          :title="`Best copy: Lv ${g.best.level} · A${g.best.ascension} · R${g.best.refinement}`"
-        >
-          <span :class="g.best.level >= 90 ? '' : 'text-text-secondary'"
-            >Lv {{ g.best.level }}</span
-          >
+        <span class="tabular font-mono whitespace-nowrap" title="Best copy">
+          <LevelText :level="g.best.level" :ascension="g.best.ascension" />
           <span class="text-text-muted"> · </span>
           <span :class="g.best.refinement >= MAX_REFINEMENT ? 'font-semibold text-accent-text' : ''"
             >R{{ g.best.refinement }}</span

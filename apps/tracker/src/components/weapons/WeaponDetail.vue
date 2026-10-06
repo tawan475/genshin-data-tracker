@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ArrowRight, ArrowUp, Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import { MAX_REFINEMENT, WEAPON_TYPE_LABELS, type WeaponGroup } from '@/data/weapons'
 import { characterIcon, weaponIcon } from '@/lib/assets'
@@ -62,9 +63,7 @@ const equipped = computed(() => g.value.owners.length)
 
     <ul class="divide-y divide-border-subtle rounded-xl border border-border-default">
       <li v-for="row in g.rows" :key="row.id" class="flex items-center gap-3 px-3 py-2">
-        <span class="tabular w-14 shrink-0 font-mono" :title="`Ascension ${row.ascension}`"
-          >Lv {{ row.level }}</span
-        >
+        <LevelText :level="row.level" :ascension="row.ascension" class="w-20 shrink-0" />
         <span
           class="inline-flex shrink-0 items-center gap-1.5"
           :title="`Refinement ${row.refinement} of ${MAX_REFINEMENT}`"

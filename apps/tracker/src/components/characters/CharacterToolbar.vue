@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { LayoutGrid, List, Search } from 'lucide-vue-next'
+import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
@@ -21,7 +22,6 @@ import {
 } from '@/data/characters'
 import { formatNumber } from '@/lib/format'
 import SortControl from './SortControl.vue'
-import { ELEMENT_FILL } from './tokens'
 
 /**
  * Search, sort, view, and the roster filters. Chip counts are "matches if
@@ -100,7 +100,7 @@ function toggleRarity(r: 5 | 4) {
         :count="elementCounts.get(e) ?? 0"
         @toggle="toggleElement(e)"
       >
-        <span class="size-2.5 rounded-full" :class="ELEMENT_FILL[e]" aria-hidden="true" />
+        <ElementIcon :element="e" decorative size="sm" />
         {{ ELEMENT_LABELS[e] }}
       </FilterChip>
       <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />

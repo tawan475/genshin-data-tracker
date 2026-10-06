@@ -43,9 +43,11 @@ const initials = computed(() =>
       rarity ? backdrop[rarity] : 'bg-surface-sunken',
     ]"
   >
-    <!-- loading/decoding before src: a lazy image off screen then isn't fetched or decoded. -->
+    <!-- loading/decoding before src: a lazy image off screen then isn't fetched or decoded.
+         Keyed by src: a new picture gets a new <img>, so the old one never lingers while it loads. -->
     <img
       v-if="src && !failed"
+      :key="src"
       loading="lazy"
       decoding="async"
       :src="src"

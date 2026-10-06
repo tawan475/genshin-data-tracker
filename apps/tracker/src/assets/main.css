@@ -60,6 +60,15 @@
   --element-cryo: #0891b2;
   --element-geo: #ca8a04;
   --element-physical: #52525b;
+  /* Crit value / roll value tiers (lib/crit-tiers): akasha.cv's hue order
+     (grey, blue, purple, orange, gold, cyan, red), darkened to 4.5:1+ on white. */
+  --cv-0: #64748b;
+  --cv-1: #2563eb;
+  --cv-2: #9333ea;
+  --cv-3: #c45200;
+  --cv-4: #a16207;
+  --cv-5: #0e7490;
+  --cv-6: #dc2626;
   --chart-1: #4f46e5;
   /* 600 shades: 3:1+ on white for lines and bars. */
   --chart-2: #d97706;
@@ -112,6 +121,14 @@
   --element-cryo: #67e8f9;
   --element-geo: #facc15;
   --element-physical: #d4d4d8;
+  /* akasha.cv's own colours (made for dark), slate grey and a lighter red. */
+  --cv-0: #94a3b8;
+  --cv-1: #66a3ff;
+  --cv-2: #c266ff;
+  --cv-3: #ffa500;
+  --cv-4: #ffd900;
+  --cv-5: #22d3ee;
+  --cv-6: #ff5252;
   --chart-1: #818cf8;
   --chart-2: #fbbf24;
   --chart-3: #34d399;
@@ -172,6 +189,13 @@
   --color-cryo: var(--element-cryo);
   --color-geo: var(--element-geo);
   --color-physical: var(--element-physical);
+  --color-cv-0: var(--cv-0);
+  --color-cv-1: var(--cv-1);
+  --color-cv-2: var(--cv-2);
+  --color-cv-3: var(--cv-3);
+  --color-cv-4: var(--cv-4);
+  --color-cv-5: var(--cv-5);
+  --color-cv-6: var(--cv-6);
 
   --shadow-overlay: var(--shadow-overlay);
 }
@@ -364,6 +388,20 @@ html.theme-transitions body * {
   .animate-fade-up {
     animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+  /* The top crit tier pulses a glow in its own colour, as akasha.cv's does. */
+  .cv-glow {
+    animation: cv-glow 2s ease infinite;
+  }
+}
+
+@keyframes cv-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 70%, transparent));
+  }
 }
 
 @keyframes float {
@@ -393,5 +431,9 @@ html.theme-transitions body * {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+  .cv-glow {
+    animation: none;
+    filter: drop-shadow(0 0 2px currentColor);
   }
 }

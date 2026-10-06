@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import RollValue from '@/components/ui/RollValue.vue'
 import { SLOT_LABELS, itemName, type EquippedArtifact, type SlotKey } from '@/data/characters'
 import { artifactIcon } from '@/lib/assets'
+import { isCritCirclet } from '@/lib/crit-tiers'
 import { ROLL_QUALITY_LABEL, inferArtifactRolls, maxLevel } from '@/utils/artifact-rolls'
 import { formatRollValue, formatStatShort, formatStatValue } from '@/utils/artifact-stats'
 import RollBars from './RollBars.vue'
@@ -102,12 +105,12 @@ function rollTitle(index: number, key: string): string {
     <p
       class="mt-auto flex items-center gap-3 border-t border-border-subtle px-1 pt-2 text-sm text-text-secondary"
     >
-      <span title="Crit value"
-        >CV <span class="tabular font-mono text-text-primary">{{ piece.cv.toFixed(1) }}</span></span
-      >
-      <span title="Roll value"
-        >RV <span class="tabular font-mono text-text-primary">{{ piece.rv }}%</span></span
-      >
+      <CritValue
+        :value="piece.cv"
+        :crit-circlet="isCritCirclet(piece.slotKey, piece.mainStatKey)"
+        label
+      />
+      <RollValue :value="piece.rv" label />
       <span class="ml-auto" title="Rolls"
         ><span class="tabular font-mono">{{ rollCount }}</span> rolls</span
       >
