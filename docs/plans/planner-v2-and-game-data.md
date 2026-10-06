@@ -84,7 +84,12 @@ origin-locked, is ready) — *decision below*.
 
 Built on the same storage; phased so each phase ships on its own.
 
-**Phase 1 — the core loop (fixes the top three problems)**
+**Phase 1 — the core loop (fixes the top three problems)** — *built 2026-10-06* (migration 0011:
+`inventory_adjustments` + `planner_targets.current`; `/planner-state`; `hand-edits.ts`, `done.ts`,
+`needs.ts`, `ItemPopover` on the kit's `UiPopover`). Decisions: an edit is tied to the newest
+capture's `lastSeenAt`, so a capture seen again later also replaces it; a hand-set current state
+counts field by field only where it is ahead of the capture (no timestamp needed to retire it); the
+planner math stayed in the tracker, no data-repo release.
 - *Editable inventory on top of the capture*: inventory = newest capture + manual adjustments made
   after it; a newer capture supersedes older adjustments (irminsul stays the truth, the planner
   never drifts). Stored per account in D1.

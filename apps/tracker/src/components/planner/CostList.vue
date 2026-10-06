@@ -15,12 +15,14 @@ import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { characterName, mergeRequirements } from './model'
 import { STOCK_MEANING, STOCK_TONE } from './farm-format'
+import { fromTouch, useItemPopover } from './item-popover'
 
 /**
  * What a goal costs, as item tiles: materials by kind and tier, EXP as
  * books / ores, then Mora. Each count is coloured by what the bag covers
  * (`goalStatus`): every counted goal with this one, this one alone, or not
- * even that.
+ * even that. On the Planner each tile opens the inventory editor, which
+ * shows what this goal (`label`) needs of it.
  */
 const props = defineProps<{
   planner: PlannerData
@@ -29,7 +31,22 @@ const props = defineProps<{
   others: readonly PlanGoal[]
   inventory: Readonly<Record<string, number>>
   options: PlanOptions
+  /** The goal's name, for the inventory editor. */
+  label?: string
 }>()
+const openItem = useItemPopover()
+
+function open(key: string, event: MouseEvent) {
+  openItem?.({
+    key,
+    anchor: event.currentTarget as HTMLElement,
+    touch: fromTouch(event),
+    context: {
+      label: props.label ?? '',
+      requirement: mergeRequirements(props.planner, props.requirements, owned.value),
+    },
+  })
+}
 
 const KIND_ORDER = [
   'gem',
@@ -114,22 +131,26 @@ const cells = computed<Cell[]>(() => {
 
 <template>
   <ul v-if="cells.length" class="flex flex-wrap gap-x-1.5 gap-y-2">
-    <li
-      v-for="c in cells"
-      :key="c.key"
-      class="flex w-14 flex-col items-center gap-0.5"
-      :title="c.title"
-    >
-      <span
-        class="size-11 overflow-hidden rounded-lg text-xs"
-        :class="RARITY_SOFT[c.rarity] ?? 'bg-surface-sunken'"
+    <li v-for="c in cells" :key="c.key" class="w-14" :title="c.title">
+      <component
+        :is="openItem ? 'button' : 'span'"
+        :type="openItem ? 'button' : undefined"
+        class="flex w-full flex-col items-center gap-0.5 rounded-lg"
+        :class="openItem ? 'transition-colors hover:bg-surface-overlay' : ''"
+        :aria-haspopup="openItem ? 'dialog' : undefined"
+        @click="open(c.key, $event)"
       >
-        <MaterialIcon :src="c.icon" :name="c.name" />
-      </span>
-      <span class="tabular font-mono text-xs font-medium" :class="STOCK_TONE[c.status]">{{
-        formatCompact(c.count)
-      }}</span>
-      <span class="sr-only">{{ c.title }}</span>
+        <span
+          class="size-11 overflow-hidden rounded-lg text-xs"
+          :class="RARITY_SOFT[c.rarity] ?? 'bg-surface-sunken'"
+        >
+          <MaterialIcon :src="c.icon" :name="c.name" />
+        </span>
+        <span class="tabular font-mono text-xs font-medium" :class="STOCK_TONE[c.status]">{{
+          formatCompact(c.count)
+        }}</span>
+        <span class="sr-only">{{ c.title }}</span>
+      </component>
     </li>
   </ul>
   <p v-else class="text-sm text-text-muted">Nothing to spend</p>

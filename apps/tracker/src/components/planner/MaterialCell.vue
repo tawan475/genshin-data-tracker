@@ -5,14 +5,17 @@ import { formatCompact, formatNumber } from '@/lib/format'
 import { gameIcon } from '@/lib/assets'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { RARITY_SOFT } from '@/components/characters/tokens'
+import { fromTouch, useItemPopover } from './item-popover'
 
 /**
  * One material of a farming group: the icon, what is still missing (or a
- * check), and have / need underneath. Crafting details in the tooltip.
+ * check), and have / need underneath. On the Planner it is a button that
+ * opens the inventory editor (name, crafting, counts).
  */
 const props = withDefaults(defineProps<{ line: MaterialLine; size?: 'md' | 'sm' }>(), {
   size: 'md',
 })
+const openItem = useItemPopover()
 
 const title = computed(() => {
   const l = props.line
@@ -24,13 +27,28 @@ const title = computed(() => {
   if (l.missing) parts.push(`Missing ${formatNumber(l.missing)}`)
   return parts.join(' · ')
 })
+
+function open(event: MouseEvent) {
+  openItem?.({
+    key: props.line.material.key,
+    anchor: event.currentTarget as HTMLElement,
+    touch: fromTouch(event),
+  })
+}
 </script>
 
 <template>
-  <div
-    class="flex flex-col items-center gap-1"
-    :class="size === 'sm' ? 'w-12' : 'w-16'"
+  <component
+    :is="openItem ? 'button' : 'div'"
+    :type="openItem ? 'button' : undefined"
+    class="flex flex-col items-center gap-1 rounded-lg"
+    :class="[
+      size === 'sm' ? 'w-12' : 'w-16',
+      openItem ? 'transition-colors hover:bg-surface-overlay focus-visible:bg-surface-overlay' : '',
+    ]"
     :title="title"
+    :aria-haspopup="openItem ? 'dialog' : undefined"
+    @click="open"
   >
     <span
       class="overflow-hidden rounded-lg text-xs"
@@ -59,5 +77,5 @@ const title = computed(() => {
       }}<template v-if="line.need > 0">/{{ formatCompact(line.need) }}</template>
     </span>
     <span class="sr-only">{{ title }}</span>
-  </div>
+  </component>
 </template>

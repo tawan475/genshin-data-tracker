@@ -6,7 +6,7 @@ import { computed } from 'vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
-import { formatSeconds } from './farm-format'
+import { daysText, formatSeconds, weeksText } from './farm-format'
 import { characterName } from './model'
 
 /**
@@ -124,7 +124,7 @@ const tiles = computed<Tile[]>(() => {
     name: 'Original Resin',
     main: total.resin > 0 ? `~${formatCompact(total.resin)}${total.partial ? '+' : ''}` : '–',
     tone: 'neutral',
-    sub: total.resin > 0 ? `${formatNumber(total.days)}d` : '',
+    sub: total.resin > 0 ? daysText(total.days) : '',
     title: resinParts.join(' · '),
   })
 
@@ -136,7 +136,7 @@ const tiles = computed<Tile[]>(() => {
       label: 'Weekly',
       icon: icon(p.weekly[0]?.lines[0]?.material.key ?? ''),
       name: 'Weekly bosses',
-      main: w.weeks > 0 ? `${formatNumber(w.weeks)}w${w.partial ? '+' : ''}` : '–',
+      main: w.weeks > 0 ? `${weeksText(w.weeks)}${w.partial ? '+' : ''}` : '–',
       tone: 'neutral',
       sub: w.resin > 0 ? formatCompact(w.resin) : '',
       title: [
