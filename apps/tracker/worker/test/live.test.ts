@@ -318,7 +318,14 @@ describe('who is listening', () => {
     await env.DB.prepare('UPDATE users SET live_since = 1 WHERE id = ?1').bind(me.id).run()
     expect((await importByKey(importKey, sampleGood(), 1_000)).status).toBe(201)
     await eventually(async () => (await liveSince(me.id)) === null)
-    expect(await notified(me.id)).toBe(1)
+    // The notifications that read the stale flag before it was cleared still
+    // arrive (how many depends on timing); once it is cleared, uploads stop.
+    const before = await notified(me.id)
+    expect(before).toBeGreaterThanOrEqual(1)
+    // The same inventory again: "seen again", which notifies too while someone listens.
+    expect((await importByKey(importKey, sampleGood(), 2_000)).status).toBe(200)
+    expect(await liveSince(me.id)).toBeNull()
+    expect(await notified(me.id)).toBe(before)
   })
 })
 
