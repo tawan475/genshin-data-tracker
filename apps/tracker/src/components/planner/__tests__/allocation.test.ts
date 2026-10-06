@@ -3,8 +3,16 @@ import plannerJson from '@gdt/game-data/data/planner.json'
 import type { PlannerFile } from '@gdt/game-data/format'
 import { emptyRequirement, planTotals, type PlanGoal } from '@gdt/game-data/planner-math'
 import { describe, expect, it } from 'vitest'
-import { allocateNeeds, moveBy, moveTo, reprioritize } from '../allocation'
+import {
+  allocateNeeds,
+  createAllocationMemo,
+  moveBy,
+  moveTo,
+  reprioritize,
+  type AllocationItem,
+} from '../allocation'
 import { allocationOrder } from '../model'
+import { needsBetween, type GoalNeeds } from '../needs'
 
 const planner = decodePlanner(plannerJson as unknown as PlannerFile)
 
@@ -142,5 +150,65 @@ describe('priority order', () => {
         ]),
       ),
     ).toEqual(new Map())
+  })
+})
+
+describe('allocation at scale', () => {
+  /** The first way of doing it: every goal above listed again for each goal (quadratic). */
+  function reference(items: readonly AllocationItem[], bag: Record<string, number>) {
+    const result = new Map<string, GoalNeeds>()
+    const above: PlanGoal[] = []
+    let before: ReturnType<typeof planTotals> | null = null
+    for (const item of items) {
+      if (!item.goal) continue
+      const self = { ...item.goal, active: true }
+      const alone = planTotals(planner, [self], bag, {})
+      const after = above.length ? planTotals(planner, [...above, self], bag, {}) : alone
+      result.set(item.id, needsBetween(planner, item.goal, alone, before, after))
+      if (item.active) {
+        above.push(self)
+        before = after
+      }
+    }
+    return result
+  }
+
+  it('sums the goals above as it goes, with the same result', () => {
+    const keys = [...planner.materialsByKey.values()]
+      .filter((m) => m.kind !== 'mora' && m.kind !== 'currency')
+      .map((m) => m.key)
+    const items: AllocationItem[] = Array.from({ length: 60 }, (_, i) => ({
+      id: `character:G${i}`,
+      goal: goal(
+        `character:G${i}`,
+        Object.fromEntries(
+          [0, 1, 2, 3].map((k) => [keys[(i * 7 + k * 13) % keys.length]!, 1 + ((i + k) % 9)]),
+        ),
+        { mora: 20_000 * (i % 5), characterExp: 50_000 * (i % 3), weaponExp: 10_000 * (i % 2) },
+      ),
+      // Every fifth paused: costed where it stands, takes nothing.
+      active: i % 5 !== 4,
+    }))
+    const bag = Object.fromEntries(keys.map((k, i) => [k, (i * 11) % 23]))
+    Object.assign(bag, { Mora: 1_000_000, HerosWit: 60, MysticEnhancementOre: 30 })
+    expect(brief(allocateNeeds(planner, items, bag, {}))).toEqual(brief(reference(items, bag)))
+
+    // With a memo: a goal paused in the middle, then one moved, then a new bag; each as if fresh.
+    const memo = createAllocationMemo()
+    const first = allocateNeeds(planner, items, bag, {}, memo)
+    expect(brief(first)).toEqual(brief(reference(items, bag)))
+    const paused = items.map((x, i) => (i === 30 ? { ...x, active: !x.active } : x))
+    const again = allocateNeeds(planner, paused, bag, {}, memo)
+    expect(brief(again)).toEqual(brief(reference(paused, bag)))
+    // The goals above the change keep their objects.
+    expect(again.get('character:G3')).toBe(first.get('character:G3'))
+    const moved = [...paused.slice(0, 10), paused[11]!, paused[10]!, ...paused.slice(12)]
+    expect(brief(allocateNeeds(planner, moved, bag, {}, memo))).toEqual(
+      brief(reference(moved, bag)),
+    )
+    const richer = { ...bag, Mora: 9_000_000 }
+    expect(brief(allocateNeeds(planner, moved, richer, {}, memo))).toEqual(
+      brief(reference(moved, richer)),
+    )
   })
 })

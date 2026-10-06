@@ -10,6 +10,10 @@
  * Goal ids: `character:Key`, `custom:<id>` (a custom character, see
  * custom-character.ts), `weapon:Key:Owner:<id>` (each weapon goal has its
  * own id, so a weapon can have several) and `item:Key`.
+ *
+ * A character goal may also want artifacts (artifact-goals.ts): no cost,
+ * ticked from what the capture shows it wearing; a card is done when its
+ * levels, talents and weapons are and its artifacts too.
  */
 
 import type { PlannerData, PlannerMaterial, WeaponType } from '@gdt/game-data'
@@ -41,6 +45,7 @@ import type {
   CharacterTarget,
   CustomCharacter,
   Good,
+  GoodArtifact,
   ItemTarget,
   PlannerTarget,
   WeaponCurrent,
@@ -52,6 +57,13 @@ import type { z } from 'zod'
 import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
 import { formatNumber, keyToName } from '@/lib/format'
+import {
+  artifactProgress,
+  hasArtifactGoal,
+  wornBy,
+  type ArtifactProgress,
+  type ArtifactSlot,
+} from './artifact-goals'
 import { characterGoalId, customGoalId, itemGoalId, targetId, weaponGoalId } from './goal-ids'
 import { characterNow, weaponNow } from './hand-edits'
 import { assignWeaponCopies, type WeaponCopy } from './weapon-copies'
@@ -147,7 +159,10 @@ export interface CharacterGoalView {
   /** Ascension the stored target was raised to for its talents, else null. */
   raised: number | null
   requirement: Requirement | null
+  /** Level, ascension and talents reached (artifacts aside). */
   done: boolean
+  /** The artifact goal's ticks; null when it has none. */
+  artifacts: ArtifactProgress | null
 }
 
 /** An extra need for one material (Seelie's custom items). */
@@ -171,7 +186,12 @@ export interface GoalEntry {
   owner: string
   name: string
   active: boolean
+  /** Everything reached: levels, talents, weapons and artifacts. */
   done: boolean
+  /** Levels, talents and weapons reached (nothing left to spend on). */
+  materialsDone: boolean
+  /** The character's artifact goal; null when it has none. */
+  artifacts: ArtifactProgress | null
   /** The character's, or the weapon's on a weapon-only card. */
   note: string
   favorite: boolean
@@ -200,6 +220,36 @@ export function characterName(key: string): string {
 
 export function weaponName(key: string): string {
   return itemName(key)
+}
+
+interface WornIndex {
+  byLocation: Map<string, GoodArtifact[]>
+  worn: Map<string, ReadonlyMap<ArtifactSlot, GoodArtifact>>
+}
+const wornIndexes = new WeakMap<readonly GoodArtifact[], WornIndex>()
+
+/** What a character wears (artifact-goals.ts `wornBy`), indexed once per capture. */
+export function wornByCharacter(good: Good, key: string): ReadonlyMap<ArtifactSlot, GoodArtifact> {
+  let index = wornIndexes.get(good.artifacts)
+  if (!index) {
+    const byLocation = new Map<string, GoodArtifact[]>()
+    for (const a of good.artifacts) {
+      if (!a.location) continue
+      const list = byLocation.get(a.location)
+      if (list) list.push(a)
+      else byLocation.set(a.location, [a])
+    }
+    index = { byLocation, worn: new Map() }
+    wornIndexes.set(good.artifacts, index)
+  }
+  let worn = index.worn.get(key)
+  if (!worn) {
+    const own = index.byLocation.get(key) ?? []
+    const traveler = key.startsWith('Traveler') ? (index.byLocation.get('Traveler') ?? []) : []
+    worn = wornBy([...own, ...traveler], key)
+    index.worn.set(key, worn)
+  }
+  return worn
 }
 
 /**
@@ -248,6 +298,9 @@ export function characterGoalView(
     raised,
     requirement,
     done: requirement ? isDone(requirement) : false,
+    artifacts: hasArtifactGoal(stored.artifacts)
+      ? artifactProgress(stored.artifacts, custom ? new Map() : wornByCharacter(good, key))
+      : null,
   }
 }
 
@@ -357,6 +410,8 @@ export function buildBoard(
         name: w.name,
         active: w.target.active,
         done: w.done,
+        materialsDone: w.done,
+        artifacts: null,
         note: w.target.note ?? '',
         favorite: false,
         priority: w.target.priority ?? null,
@@ -369,6 +424,7 @@ export function buildBoard(
   }
   for (const c of characterGoals.values()) {
     const weapons = byOwner.get(c.key) ?? []
+    const materialsDone = c.done && weapons.every((w) => w.done)
     entries.push({
       id: c.id,
       character: c,
@@ -376,7 +432,9 @@ export function buildBoard(
       owner: c.key,
       name: c.name,
       active: c.target.active || weapons.some((w) => w.target.active),
-      done: c.done && weapons.every((w) => w.done),
+      done: materialsDone && (c.artifacts?.complete ?? true),
+      materialsDone,
+      artifacts: c.artifacts,
       note: c.target.note ?? '',
       favorite: c.target.favorite ?? false,
       priority: c.target.priority ?? null,
@@ -496,7 +554,7 @@ export function nextHint(
   inventory: Readonly<Record<string, number>>,
   options: PlanOptions & { ar?: number | null },
 ): NextHint | null {
-  if (entry.done) return null
+  if (entry.materialsDone) return null
   const parts: string[] = []
   const details: string[] = []
   const stops = new Set<'stock' | 'ar'>()

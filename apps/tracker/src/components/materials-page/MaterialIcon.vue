@@ -41,12 +41,13 @@ const initials = computed(() =>
 </script>
 
 <template>
+  <!-- loading/decoding before src: a lazy image off screen then isn't fetched or decoded. -->
   <img
     v-if="src && !failed"
-    :src="src"
-    alt=""
     loading="lazy"
     decoding="async"
+    :src="src"
+    alt=""
     draggable="false"
     class="size-full object-contain"
     @error="onError"

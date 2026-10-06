@@ -47,11 +47,16 @@ import ItemEditor from '@/components/planner/ItemEditor.vue'
 import ItemPopover from '@/components/planner/ItemPopover.vue'
 import PlannerSettings from '@/components/planner/PlannerSettings.vue'
 import SeelieImport from '@/components/planner/SeelieImport.vue'
-import { allocateNeeds, moveTo, reprioritize } from '@/components/planner/allocation'
+import {
+  allocateNeeds,
+  createAllocationMemo,
+  moveTo,
+  reprioritize,
+} from '@/components/planner/allocation'
 import { newCustomKey, replaceCustom } from '@/components/planner/custom-character'
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
 import { READINESS } from '@/components/planner/farm-format'
-import { farmDay } from '@/components/planner/farm-today'
+import { farmDay, type ArtifactWant } from '@/components/planner/farm-today'
 import { provideGoalActions } from '@/components/planner/goal-actions'
 import {
   GOAL_SORTS,
@@ -95,7 +100,9 @@ import {
 } from '@/components/planner/model'
 import type { GoalNeeds } from '@/components/planner/needs'
 import { PRESETS, applyPreset, presetById, type PresetId } from '@/components/planner/presets'
+import { keepUnchangedValues } from '@/components/planner/keep-unchanged'
 import { useDragOrder } from '@/components/planner/use-drag-order'
+import { useProgressive } from '@/components/planner/use-progressive'
 import type { CurrentChange } from '@/components/planner/use-planner-state'
 import { usePlannerModel } from '@/components/planner/use-planner-model'
 import { remove, upsert } from '@/components/planner/use-planner-targets'
@@ -145,6 +152,7 @@ const {
   basePlanner,
   good,
   drops,
+  farming,
   hasCapture,
   store,
   state,
@@ -245,6 +253,8 @@ const order = computed(() => allocationOrder(board.value?.entries ?? []))
  * card's cost, its place or its counting changes, or the bag does.
  */
 let needsMemo = { key: [] as unknown[], map: new Map<string, GoalNeeds>() }
+/** What allocation kept from the last time (each goal's own totals, the goals above a change). */
+const allocationMemo = createAllocationMemo()
 const needs = computed(() => {
   const p = planner.value
   const b = bag.value
@@ -252,7 +262,7 @@ const needs = computed(() => {
   const options = withoutPassives(planOptions.value)
   const items = order.value.map((e) => ({
     id: e.id,
-    goal: e.done ? null : (entryGoals.value.get(e.id) ?? null),
+    goal: e.materialsDone ? null : (entryGoals.value.get(e.id) ?? null),
     active: e.active,
   }))
   const key = [
@@ -262,7 +272,11 @@ const needs = computed(() => {
     ...items.flatMap((i) => [i.id, i.goal, i.active]),
   ]
   if (sameList(needsMemo.key, key)) return needsMemo.map
-  needsMemo = { key, map: allocateNeeds(p, items, b, options) }
+  // A card whose needs are the same keeps the object: it doesn't re-render.
+  needsMemo = {
+    key,
+    map: keepUnchangedValues(needsMemo.map, allocateNeeds(p, items, b, options, allocationMemo)),
+  }
   return needsMemo.map
 })
 
@@ -296,33 +310,39 @@ let hintMemo = {
   planner: null as object | null,
   map: new Map<string, NextHint | null>(),
 }
-const hints = computed(() => {
-  const result = new Map<string, NextHint | null>()
+/** What a card can level now (only for the cards shown: 100 goals mount a few at a time). */
+function hintOf(entry: GoalEntry): NextHint | null {
   const p = planner.value
   const b = bag.value
-  if (!board.value || !p || !b) return result
+  if (!p || !b) return null
+  if (entry.materialsDone || missing.value.get(entry.id) === 0) return null
   const o = planOptions.value
   const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, ar.value])
   if (hintMemo.inventory !== b || hintMemo.options !== optionsKey || hintMemo.planner !== p) {
     hintMemo = { inventory: b, options: optionsKey, planner: p, map: new Map() }
   }
-  for (const entry of board.value.entries) {
-    if (entry.done || missing.value.get(entry.id) === 0) continue
-    const c = entry.character
-    const key = JSON.stringify([
-      entry.id,
-      c ? [c.current, c.target.level, c.target.ascension, c.target.talents] : null,
-      entry.weapons.map((w) => [w.goalId, w.current, w.target.level, w.target.ascension]),
-    ])
-    let hint = hintMemo.map.get(key)
-    if (hint === undefined) {
-      hint = nextHint(p, entry, b, { ...o, ar: ar.value })
-      hintMemo.map.set(key, hint)
-    }
-    result.set(entry.id, hint)
+  const c = entry.character
+  const key = JSON.stringify([
+    entry.id,
+    c ? [c.current, c.target.level, c.target.ascension, c.target.talents] : null,
+    entry.weapons.map((w) => [w.goalId, w.current, w.target.level, w.target.ascension]),
+  ])
+  let hint = hintMemo.map.get(key)
+  if (hint === undefined) {
+    hint = nextHint(p, entry, b, { ...o, ar: ar.value })
+    hintMemo.map.set(key, hint)
   }
-  return result
-})
+  return hint
+}
+
+/** Artifact sets the counted character goals still want (Today's artifact domains). */
+const artifactWants = computed<ArtifactWant[]>(() =>
+  (board.value?.entries ?? []).flatMap((e) => {
+    const c = e.character
+    const open = c?.target.active ? (c.artifacts?.open ?? []) : []
+    return c && open.length && !c.artifacts?.complete ? [{ goal: c.id, sets: open }] : []
+  }),
+)
 
 /** Extra item needs the bag covers on their own. */
 const itemsInStock = computed(() => {
@@ -387,6 +407,29 @@ const pendingEntries = computed(() => {
   return order.value.filter((e) => !e.done && shown.has(e.id))
 })
 const doneEntries = computed(() => matching.value.filter((e) => e.done))
+/** The cards mounted so far: the first ones at once, the rest over the next frames. */
+const progressive = useProgressive(
+  computed(() => pendingEntries.value.length),
+  6,
+  6,
+)
+const shownPending = computed(() => pendingEntries.value.slice(0, progressive.shown.value))
+/**
+ * The views shown so far. Once shown, a view stays mounted (hidden): going
+ * back is a display switch, not a remount of 100 cards (and unmounting the
+ * other's), which took a slow phone well over 100 ms.
+ */
+const seen = reactive({ farm: false, goals: false })
+watch(
+  tab,
+  (value) => {
+    if (seen[value]) return
+    seen[value] = true
+    // First shown now: its cards mount from the first ones again.
+    if (value === 'goals') progressive.restart()
+  },
+  { immediate: true },
+)
 const shownItems = computed(() =>
   filterItems(board.value?.items ?? [], filters, (i) => itemsInStock.value.has(i.id)),
 )
@@ -459,13 +502,21 @@ const drag = useDragOrder({
   },
 })
 const sorting = computed(() => sort.value === 'priority' && !selecting.value)
+/** Each card's last place object: the same one while it doesn't change (no re-render). */
+const orderObjects = new Map<string, { rank: number; dragging: boolean; over: boolean }>()
 function orderOf(entry: GoalEntry) {
   if (!sorting.value) return null
-  return {
+  const next = {
     rank: ranks.value.get(entry.id) ?? 0,
     dragging: drag.dragging.value === entry.id,
     over: drag.over.value === entry.id,
   }
+  const old = orderObjects.get(entry.id)
+  if (old && old.rank === next.rank && old.dragging === next.dragging && old.over === next.over) {
+    return old
+  }
+  orderObjects.set(entry.id, next)
+  return next
 }
 
 // ------------------------------------------------------------------ bulk
@@ -734,7 +785,10 @@ function closeEditor() {
   void router.replace({ query })
 }
 
-function openEntry(entry: GoalEntry) {
+/** The tab the editor opens on (a card's Artifacts row); null: the last one used. */
+const editorTab = ref<'artifacts' | null>(null)
+function openEntry(entry: GoalEntry, tab: 'artifacts' | null = null) {
+  editorTab.value = tab
   openEditor(entry.id)
 }
 
@@ -1130,187 +1184,193 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       </UiEmpty>
     </UiPanel>
 
-    <FarmPanel
-      v-else-if="tab === 'farm'"
-      v-model:view="farmView"
-      v-model:forge="forge"
-      :planner="planner"
-      :totals="totals"
-      :plan="plan"
-      :steps="steps"
-      :drops="drops"
-      :ar="ar"
-      :wl="wl"
-      :refreshes="settings.planner.refreshes ?? 0"
-      :day="day"
-      :resin="resin"
-      @settings="settingsOpen = true"
-    />
-
-    <div v-else class="flex flex-col gap-4">
-      <GoalToolbar
-        v-model:filters="filters"
-        v-model:sort="sort"
-        :status-counts="statusCounts"
-        :element-counts="elementCounts"
-        :rarity-counts="rarityCounts"
-        :rarities="rarities"
-        :filtered="filtered"
-        @clear="clearFilters"
-      />
-
-      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <ul
-          class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary"
-          aria-label="Readiness"
-        >
-          <li v-for="s in LEGEND" :key="s.label" class="inline-flex items-center gap-1.5">
-            <span class="size-2 rounded-full" :class="s.dot" aria-hidden="true" />
-            <span class="font-medium text-text-primary">{{ s.label }}</span>
-            {{ s.meaning }}
-          </li>
-        </ul>
-        <UiButton
-          v-if="pendingEntries.length"
-          variant="ghost"
-          size="sm"
-          :aria-pressed="selecting"
-          title="Pick goals to change together"
-          @click="selecting = !selecting"
-        >
-          <CheckSquare class="size-4" aria-hidden="true" />
-          Select
-        </UiButton>
-      </div>
-
-      <div
-        v-if="selecting"
-        class="sticky top-[4.5rem] z-20 flex flex-wrap items-center gap-2 rounded-xl border border-border-strong bg-surface-raised/95 px-2 py-2 shadow-overlay backdrop-blur"
-        role="toolbar"
-        aria-label="Selected goals"
-      >
-        <span
-          class="tabular inline-flex min-w-8 items-center justify-center rounded-md bg-accent/15 px-2 font-mono text-sm font-semibold text-accent-text"
-          role="status"
-          :title="`${formatNumber(picked.size)} selected`"
-          >{{ formatNumber(picked.size) }}<span class="sr-only"> selected</span></span
-        >
-        <UiButton variant="ghost" size="sm" @click="pickAll">
-          {{ allPicked ? 'None' : 'All' }}
-        </UiButton>
-        <UiSelect
-          v-model="bulkPreset"
-          :options="presetChoices"
-          class="w-36"
-          aria-label="Apply a preset"
-          :disabled="picked.size === 0"
+    <template v-else>
+      <!-- v-show on a wrapper: on the component it would re-render it with every change here. -->
+      <div v-if="seen.farm" v-show="tab === 'farm'">
+        <FarmPanel
+          v-model:view="farmView"
+          v-model:forge="forge"
+          :planner="planner"
+          :totals="totals"
+          :plan="plan"
+          :steps="steps"
+          :drops="drops"
+          :ar="ar"
+          :wl="wl"
+          :refreshes="settings.planner.refreshes ?? 0"
+          :day="day"
+          :resin="resin"
+          :farming="farming"
+          :artifacts="artifactWants"
+          @settings="settingsOpen = true"
         />
-        <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(false)">
-          <EyeOff class="size-4" aria-hidden="true" />
-          Pause
-        </UiButton>
-        <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(true)">
-          <Eye class="size-4" aria-hidden="true" />
-          Count
-        </UiButton>
-        <UiButton
-          size="sm"
-          variant="ghost"
-          class="text-danger-text"
-          :disabled="picked.size === 0"
-          @click="bulkRemove"
-        >
-          <Trash2 class="size-4" aria-hidden="true" />
-          Remove
-        </UiButton>
-        <UiIconButton label="Done selecting" class="ml-auto" @click="selecting = false">
-          <X class="size-5" aria-hidden="true" />
-        </UiIconButton>
       </div>
 
-      <UiPanel v-if="matching.length === 0 && shownItems.length === 0" flush>
-        <UiEmpty title="No matches">
-          <template #icon><SearchX aria-hidden="true" /></template>
-          <UiButton @click="clearFilters">Clear</UiButton>
-        </UiEmpty>
-      </UiPanel>
+      <div v-if="seen.goals" v-show="tab === 'goals'" class="flex flex-col gap-4">
+        <GoalToolbar
+          v-model:filters="filters"
+          v-model:sort="sort"
+          :status-counts="statusCounts"
+          :element-counts="elementCounts"
+          :rarity-counts="rarityCounts"
+          :rarities="rarities"
+          :filtered="filtered"
+          @clear="clearFilters"
+        />
 
-      <ul
-        v-if="pendingEntries.length"
-        class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
-        aria-label="Goals"
-      >
-        <li v-for="entry in pendingEntries" :key="entry.id" class="flex">
-          <GoalCard
-            :entry="entry"
-            :planner="planner"
-            :ar="ar"
-            :hint="hints.get(entry.id) ?? null"
-            :needs="needs.get(entry.id) ?? null"
-            :goal="entryGoals.get(entry.id) ?? null"
-            :order="orderOf(entry)"
-            :selecting="selecting"
-            :selected="picked.has(entry.id)"
-            @open="openEntry(entry)"
-            @select="togglePicked(entry.id)"
-            @grab="drag.start(entry.id, $event)"
-            @nudge="drag.key(entry.id, $event)"
-            @toggle="toggleActive(entry)"
-            @favorite="toggleFavorite(entry)"
-            @done="(part, text) => askDone(entry, part, text)"
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <ul
+            class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary"
+            aria-label="Readiness"
+          >
+            <li v-for="s in LEGEND" :key="s.label" class="inline-flex items-center gap-1.5">
+              <span class="size-2 rounded-full" :class="s.dot" aria-hidden="true" />
+              <span class="font-medium text-text-primary">{{ s.label }}</span>
+              {{ s.meaning }}
+            </li>
+          </ul>
+          <UiButton
+            v-if="pendingEntries.length"
+            variant="ghost"
+            size="sm"
+            :aria-pressed="selecting"
+            title="Pick goals to change together"
+            @click="selecting = !selecting"
+          >
+            <CheckSquare class="size-4" aria-hidden="true" />
+            Select
+          </UiButton>
+        </div>
+
+        <div
+          v-if="selecting"
+          class="sticky top-[4.5rem] z-20 flex flex-wrap items-center gap-2 rounded-xl border border-border-strong bg-surface-raised/95 px-2 py-2 shadow-overlay backdrop-blur"
+          role="toolbar"
+          aria-label="Selected goals"
+        >
+          <span
+            class="tabular inline-flex min-w-8 items-center justify-center rounded-md bg-accent/15 px-2 font-mono text-sm font-semibold text-accent-text"
+            role="status"
+            :title="`${formatNumber(picked.size)} selected`"
+            >{{ formatNumber(picked.size) }}<span class="sr-only"> selected</span></span
+          >
+          <UiButton variant="ghost" size="sm" @click="pickAll">
+            {{ allPicked ? 'None' : 'All' }}
+          </UiButton>
+          <UiSelect
+            v-model="bulkPreset"
+            :options="presetChoices"
+            class="w-36"
+            aria-label="Apply a preset"
+            :disabled="picked.size === 0"
           />
-        </li>
-      </ul>
+          <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(false)">
+            <EyeOff class="size-4" aria-hidden="true" />
+            Pause
+          </UiButton>
+          <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(true)">
+            <Eye class="size-4" aria-hidden="true" />
+            Count
+          </UiButton>
+          <UiButton
+            size="sm"
+            variant="ghost"
+            class="text-danger-text"
+            :disabled="picked.size === 0"
+            @click="bulkRemove"
+          >
+            <Trash2 class="size-4" aria-hidden="true" />
+            Remove
+          </UiButton>
+          <UiIconButton label="Done selecting" class="ml-auto" @click="selecting = false">
+            <X class="size-5" aria-hidden="true" />
+          </UiIconButton>
+        </div>
 
-      <ExtraItems
-        v-if="shownItems.length"
-        :items="shownItems"
-        :planner="planner"
-        :goals="board.goals"
-        :totals="totals"
-        :inventory="bag"
-        :options="planOptions"
-        @open="(key) => openEditor(itemGoalId(key))"
-        @toggle="toggleItem"
-        @add="openPicker('item')"
-      />
+        <UiPanel v-if="matching.length === 0 && shownItems.length === 0" flush>
+          <UiEmpty title="No matches">
+            <template #icon><SearchX aria-hidden="true" /></template>
+            <UiButton @click="clearFilters">Clear</UiButton>
+          </UiEmpty>
+        </UiPanel>
 
-      <section v-if="doneEntries.length" aria-label="Done">
-        <button
-          type="button"
-          class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-text-secondary hover:text-text-primary"
-          :aria-expanded="showDone"
-          @click="showDone = !showDone"
-        >
-          Done
-          <span class="tabular font-mono font-normal text-text-muted">{{
-            doneEntries.length
-          }}</span>
-        </button>
         <ul
-          v-if="showDone"
+          v-if="pendingEntries.length"
           class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
-          aria-label="Done goals"
+          aria-label="Goals"
         >
-          <li v-for="entry in doneEntries" :key="entry.id" class="flex">
+          <li v-for="entry in shownPending" :key="entry.id" class="flex">
             <GoalCard
               :entry="entry"
               :planner="planner"
               :ar="ar"
-              :hint="null"
-              :needs="null"
-              :goal="null"
+              :hint="hintOf(entry)"
+              :needs="needs.get(entry.id) ?? null"
+              :goal="entryGoals.get(entry.id) ?? null"
+              :order="orderOf(entry)"
               :selecting="selecting"
               :selected="picked.has(entry.id)"
-              @open="openEntry(entry)"
+              @open="(tab) => openEntry(entry, tab ?? null)"
               @select="togglePicked(entry.id)"
+              @grab="drag.start(entry.id, $event)"
+              @nudge="drag.key(entry.id, $event)"
               @toggle="toggleActive(entry)"
               @favorite="toggleFavorite(entry)"
+              @done="(part, text) => askDone(entry, part, text)"
             />
           </li>
         </ul>
-      </section>
-    </div>
+
+        <ExtraItems
+          v-if="shownItems.length"
+          :items="shownItems"
+          :planner="planner"
+          :goals="board.goals"
+          :totals="totals"
+          :inventory="bag"
+          :options="planOptions"
+          @open="(key) => openEditor(itemGoalId(key))"
+          @toggle="toggleItem"
+          @add="openPicker('item')"
+        />
+
+        <section v-if="doneEntries.length" aria-label="Done">
+          <button
+            type="button"
+            class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-text-secondary hover:text-text-primary"
+            :aria-expanded="showDone"
+            @click="showDone = !showDone"
+          >
+            Done
+            <span class="tabular font-mono font-normal text-text-muted">{{
+              doneEntries.length
+            }}</span>
+          </button>
+          <ul
+            v-if="showDone"
+            class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+            aria-label="Done goals"
+          >
+            <li v-for="entry in doneEntries" :key="entry.id" class="flex">
+              <GoalCard
+                :entry="entry"
+                :planner="planner"
+                :ar="ar"
+                :hint="null"
+                :needs="null"
+                :goal="null"
+                :selecting="selecting"
+                :selected="picked.has(entry.id)"
+                @open="(tab) => openEntry(entry, tab ?? null)"
+                @select="togglePicked(entry.id)"
+                @toggle="toggleActive(entry)"
+                @favorite="toggleFavorite(entry)"
+              />
+            </li>
+          </ul>
+        </section>
+      </div>
+    </template>
 
     <GoalModal
       :open="editorShown"
@@ -1326,6 +1386,8 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       :refreshes="settings.planner.refreshes ?? 0"
       :taken="takenCharacters"
       :names="customNames"
+      :farming="farming"
+      :start-tab="editorTab"
       @close="closeEditor"
       @character="writeCharacter"
       @character-now="writeCharacterNow"

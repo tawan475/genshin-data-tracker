@@ -1,5 +1,6 @@
 import { loadPlanner } from '@gdt/game-data'
 import { loadDropRates } from '@gdt/game-data/drops'
+import { loadFarming } from '@gdt/game-data/farming'
 import { createRequirementCache, planTotals, type PlanOptions } from '@gdt/game-data/planner-math'
 import type { AccountResponse, CustomCharacter, Good } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch, type ComputedRef } from 'vue'
@@ -14,7 +15,8 @@ import { onPlannerChange } from '@/live/planner-changes'
 import { useAccounts } from '@/stores/accounts'
 import { countChange, effectiveInventory, replacedAdjustments } from './hand-edits'
 import { withCustomCharacters } from './custom-character'
-import { buildBoard } from './model'
+import { keepUnchanged } from './keep-unchanged'
+import { buildBoard, type Board } from './model'
 import { usePlannerState } from './use-planner-state'
 import { usePlannerTargets } from './use-planner-targets'
 
@@ -51,17 +53,19 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
   const resource = useResource(
     () => account.value,
     async (a) => {
-      const [inventory, planner, drops, player] = await Promise.all([
+      const [inventory, planner, drops, player, farming] = await Promise.all([
         a.latest ? loadLatestInventory(a) : Promise.resolve(null),
         loadPlanner(),
         // No rates means no estimates, not a broken page.
         loadDropRates().catch(() => null),
         // Nice to have: without it the settings (or the top bracket) decide.
         a.latest ? loadAccountPlayer(a).catch(() => NO_PLAYER) : Promise.resolve(NO_PLAYER),
+        // Who drops what (farm card names, artifact domains); without it the cards have no places.
+        loadFarming().catch(() => null),
         loadGameIcons(),
         loadMaterialIcons(),
       ])
-      return { accountId: a.id, inventory, planner, drops, player }
+      return { accountId: a.id, inventory, planner, drops, player, farming }
     },
   )
   const data = computed(() => {
@@ -72,6 +76,7 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
   /** The newest capture (an empty one when there is none). */
   const good = computed(() => (data.value ? (data.value.inventory?.good ?? NO_CAPTURE) : null))
   const drops = computed(() => data.value?.drops ?? null)
+  const farming = computed(() => data.value?.farming ?? null)
   const hasCapture = computed(() => !!data.value?.inventory)
 
   const store = usePlannerTargets(accountId)
@@ -145,6 +150,11 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
   const requirementCache = computed(() =>
     planner.value ? createRequirementCache(planner.value) : null,
   )
+  /**
+   * The goal cards. A card equal to the one before keeps its object, so only
+   * the cards that changed re-render (keep-unchanged.ts).
+   */
+  let previousBoard: Board | null = null
   const board = computed(() => {
     const p = planner.value
     const g = good.value
@@ -153,7 +163,10 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     const overrides = state.overrides.value
     const c = requirementCache.value
     if (!p || !g || !b || !targets || !overrides || !c) return null
-    return buildBoard(p, g, b, targets, c, overrides)
+    const next = buildBoard(p, g, b, targets, c, overrides)
+    next.entries = keepUnchanged(previousBoard?.entries, next.entries)
+    previousBoard = next
+    return next
   })
   const totals = computed(() =>
     planner.value && bag.value && board.value
@@ -202,6 +215,7 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     basePlanner,
     good,
     drops,
+    farming,
     hasCapture,
     store,
     state,

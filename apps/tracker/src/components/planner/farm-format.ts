@@ -53,6 +53,14 @@ export const READINESS: Record<
   },
 }
 
+/** A card whose levels are reached but whose artifacts aren't yet. */
+export const ARTIFACTS_LEFT = {
+  label: 'Artifacts',
+  meaning: 'Levels reached, artifacts to go',
+  badge: 'bg-accent/10 text-accent-text',
+  dot: 'bg-accent',
+}
+
 const plural = (n: number, one: string, many = `${one}s`) =>
   `${formatNumber(n)} ${n === 1 ? one : many}`
 

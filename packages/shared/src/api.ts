@@ -149,6 +149,36 @@ const goalNote = z.string().max(1000)
  */
 const goalPriority = z.number().int().min(0).max(100_000)
 
+/** Artifact slots in GOOD's order (`slotKey`). */
+export const ARTIFACT_SLOT_KEYS = ['flower', 'plume', 'sands', 'goblet', 'circlet'] as const
+
+/** A GOOD stat key ("atk_", "enerRech_", "pyro_dmg_"). */
+const statKeySchema = z.string().regex(/^[A-Za-z_]{1,32}$/, 'Not a stat key')
+const mainStats = z.array(statKeySchema).max(16)
+/** Ticked by hand: true done, false not done (over the capture); absent: the capture says. */
+const handTick = z.boolean().optional()
+
+/**
+ * Artifact goal of a character (Seelie's Artifacts tab): sets wanted (any of
+ * them), main stats wanted per slot (any of them), and ticks by hand. The
+ * capture ticks a slot by itself (see the planner's artifact-goals.ts).
+ */
+export const artifactGoal = z.object({
+  sets: z.array(z.object({ key: goodKeySchema, done: handTick })).max(8),
+  sands: mainStats.optional(),
+  goblet: mainStats.optional(),
+  circlet: mainStats.optional(),
+  slots: z
+    .object({
+      flower: handTick,
+      plume: handTick,
+      sands: handTick,
+      goblet: handTick,
+      circlet: handTick,
+    })
+    .optional(),
+})
+
 /** Planner goal for a character. Levels stop at 90 until the 95/100 costs are in game-data. */
 
 export const characterTarget = z.object({
@@ -165,6 +195,8 @@ export const characterTarget = z.object({
    * the capture's counts where it is higher.
    */
   constellation: z.number().int().min(0).max(6).optional(),
+  /** Sets and main stats to farm (no material cost). */
+  artifacts: artifactGoal.optional(),
 })
 
 /** Planner goal for a weapon (several may be the same weapon: each has its own id). */
@@ -494,6 +526,8 @@ export type WeaponTarget = z.infer<typeof weaponTarget>
 export type ItemTarget = z.infer<typeof itemTarget>
 export type CustomCharacter = z.infer<typeof customCharacter>
 export type CustomTarget = z.infer<typeof customTarget>
+export type ArtifactGoal = z.infer<typeof artifactGoal>
+export type ArtifactSlotKey = (typeof ARTIFACT_SLOT_KEYS)[number]
 
 /** Weapon goals carry their own `id`; the others are one per kind and key. */
 export type PlannerTarget =
