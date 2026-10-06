@@ -83,6 +83,12 @@ jobs:
           TAG: ${{ steps.tag.outputs.tag }}
         run: pnpm --filter @gdt/tracker add "@gdt/game-data@github:tawan475/genshin-game-data#${TAG}"
 
+      # `add` with a filter installs only the tracker's own dependencies; the
+      # checks need the whole workspace (packages/shared's zod and the rest).
+      - name: Install the workspace
+        if: steps.tag.outputs.skip == 'false'
+        run: pnpm install --frozen-lockfile
+
       - name: Tests
         id: test
         if: steps.tag.outputs.skip == 'false'
