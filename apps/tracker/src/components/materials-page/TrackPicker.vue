@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Check, Plus, Search } from 'lucide-vue-next'
+import { RARITY_SOFT } from '@/components/characters/tokens'
 import { MAX_SERIES } from '@/components/materials/use-materials-graph'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
@@ -95,7 +96,10 @@ const results = computed(() => {
             :title="!selected.includes(item.key) && full ? `Up to ${MAX_SERIES}` : item.name"
             @click="emit('toggle', item.key)"
           >
-            <span class="size-10 shrink-0 rounded-lg bg-surface-overlay p-0.5 text-xs">
+            <span
+              class="size-10 shrink-0 rounded-lg p-0.5 text-xs"
+              :class="RARITY_SOFT[item.rarity ?? 0] ?? 'bg-surface-overlay'"
+            >
               <MaterialIcon :src="icon(item.key)" :name="item.name" />
             </span>
             <span class="min-w-0 flex-1 truncate text-sm">{{ item.name }}</span>

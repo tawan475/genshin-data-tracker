@@ -57,6 +57,7 @@ import type { z } from 'zod'
 import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
 import { formatNumber, keyToName } from '@/lib/format'
+import { materialName } from '@/utils/materials'
 import {
   artifactProgress,
   hasArtifactGoal,
@@ -384,7 +385,7 @@ export function buildBoard(
         id: itemGoalId(t.key),
         key: t.key,
         material,
-        name: material?.name ?? keyToName(t.key),
+        name: material?.name ?? materialName(t.key),
         target: t.target,
         have: Math.max(0, Math.trunc(bag[t.key] ?? 0)),
       })

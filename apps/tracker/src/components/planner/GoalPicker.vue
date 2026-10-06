@@ -4,7 +4,6 @@ import type { CustomCharacter, Good } from '@gdt/shared'
 import { computed, reactive, ref, watch } from 'vue'
 import { Plus, Search } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
@@ -15,6 +14,7 @@ import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import CustomForm from './CustomForm.vue'
+import { materialSoft } from './material-soft'
 import { characterGoalId, itemGoalId } from './model'
 import { DEFAULT_PRESET, PRESETS, presetById, type PresetId } from './presets'
 import RosterGrid from './RosterGrid.vue'
@@ -192,7 +192,7 @@ function addCustom() {
             >
               <span
                 class="size-12 overflow-hidden rounded-lg text-xs"
-                :class="RARITY_SOFT[m.material.rarity] ?? 'bg-surface-sunken'"
+                :class="materialSoft(m.material.key, m.material.rarity)"
               >
                 <MaterialIcon :src="m.icon" :name="m.material.name" />
               </span>

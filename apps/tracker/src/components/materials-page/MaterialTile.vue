@@ -11,7 +11,7 @@ import { formatCompact, formatSigned } from '@/lib/format'
 defineProps<{
   name: string
   src: string
-  /** null where the game data has none (only planner materials carry one). */
+  /** The game's (material index); null for a key newer than the data. */
   rarity: number | null
   /** The count shown (the hand-set one where the Planner has one). */
   count: number

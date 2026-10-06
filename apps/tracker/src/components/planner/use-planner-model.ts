@@ -13,6 +13,7 @@ import { readStorage, writeStorage } from '@/lib/storage'
 import { updatesHeld } from '@/live/holds'
 import { onPlannerChange } from '@/live/planner-changes'
 import { useAccounts } from '@/stores/accounts'
+import { preloadMaterialRarities } from '@/utils/materials'
 import { countChange, effectiveInventory, replacedAdjustments } from './hand-edits'
 import { withCustomCharacters } from './custom-character'
 import { keepUnchanged } from './keep-unchanged'
@@ -69,6 +70,9 @@ export function usePlannerModel(
         loadFarming().catch(() => null),
         loadGameIcons(),
         loadMaterialIcons(),
+        // The game's rarity for every material's backdrop (the icons' chunk;
+        // the planner data has 0 for local specialties).
+        preloadMaterialRarities(),
       ])
       return { accountId: a.id, inventory, planner, drops, player, farming }
     },

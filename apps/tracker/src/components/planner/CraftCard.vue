@@ -6,7 +6,8 @@ import { ArrowRight, ChevronsUp, Clock, Hammer, Repeat2 } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { RARITY_SOFT } from '@/components/characters/tokens'
 import { gameIcon, materialIcon } from '@/lib/assets'
-import { formatCompact, formatNumber, keyToName } from '@/lib/format'
+import { formatCompact, formatNumber } from '@/lib/format'
+import { materialName, materialRarity } from '@/utils/materials'
 import { formatSeconds } from './farm-format'
 
 /**
@@ -36,9 +37,9 @@ const icon = (key: string): Icon => {
     ? {
         src: key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(m.icon),
         name: m.name,
-        rarity: m.rarity,
+        rarity: materialRarity(key, m.rarity) ?? 0,
       }
-    : { src: materialIcon(key), name: keyToName(key), rarity: 0 }
+    : { src: materialIcon(key), name: materialName(key), rarity: materialRarity(key) ?? 0 }
 }
 
 const rows = computed(() =>

@@ -4,8 +4,8 @@ import { computed } from 'vue'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import { fromTouch, useItemPopover } from './item-popover'
+import { materialSoft } from './material-soft'
 
 /**
  * One material of a farm card: the icon, what is still missing (or a
@@ -60,7 +60,7 @@ function open(event: MouseEvent) {
       class="overflow-hidden rounded-lg text-xs"
       :class="[
         { md: 'size-12', sm: 'size-9', xs: 'size-8' }[size],
-        RARITY_SOFT[line.material.rarity] ?? 'bg-surface-sunken',
+        materialSoft(line.material.key, line.material.rarity),
       ]"
     >
       <MaterialIcon :src="src" :name="line.material.name" />

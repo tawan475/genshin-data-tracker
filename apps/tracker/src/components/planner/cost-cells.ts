@@ -17,6 +17,7 @@ import {
 } from '@gdt/game-data/planner-math'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
+import { materialRarity } from '@/utils/materials'
 import { STOCK_MEANING } from './farm-format'
 import { characterName, mergeRequirements } from './model'
 
@@ -37,6 +38,7 @@ export interface CostCell {
   key: string
   name: string
   icon: string
+  /** The game's (material index), else the planner data's; 0 for none. */
   rarity: number
   count: number
   status: StockStatus
@@ -77,7 +79,7 @@ export function costCells(input: CostInput): CostCell[] {
     key: material.key,
     name: material.name,
     icon: gameIcon(material.icon),
-    rarity: material.rarity,
+    rarity: materialRarity(material.key, material.rarity) ?? 0,
     count,
     status: s,
     title: [`${material.name} ×${formatNumber(count)}`, STOCK_MEANING[s], extra]

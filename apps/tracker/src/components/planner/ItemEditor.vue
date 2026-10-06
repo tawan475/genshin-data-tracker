@@ -5,7 +5,6 @@ import type { Good, ItemTarget } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { RARITY_SOFT } from '@/components/characters/tokens'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
@@ -14,6 +13,7 @@ import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 import CostList from './CostList.vue'
 import { fromTouch, useItemPopover } from './item-popover'
+import { materialSoft } from './material-soft'
 import NoteInput from './NoteInput.vue'
 import { remove, upsert } from './use-planner-targets'
 
@@ -110,7 +110,7 @@ function removeItem() {
       <div class="flex items-end gap-3">
         <span
           class="size-14 shrink-0 overflow-hidden rounded-lg text-xs"
-          :class="RARITY_SOFT[material.rarity] ?? 'bg-surface-sunken'"
+          :class="materialSoft(material.key, material.rarity)"
         >
           <MaterialIcon :src="icon" :name="material.name" />
         </span>
