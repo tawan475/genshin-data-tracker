@@ -10,11 +10,14 @@ import { usePlannerModel } from '@/components/planner/use-planner-model'
 import TrackedPanel from '@/components/materials-page/TrackedPanel.vue'
 import TrackPicker from '@/components/materials-page/TrackPicker.vue'
 import WalletStrip, { type WalletItem } from '@/components/materials-page/WalletStrip.vue'
-import { buildItems, type MaterialItem } from '@/components/materials-page/material-items'
 import {
+  buildItems,
+  materialItem,
+  type MaterialItem,
+} from '@/components/materials-page/material-items'
+import {
+  bagTabs,
   loadMaterialMeta,
-  materialMeta,
-  WALLET,
   WALLET_KEYS,
   WALLET_LABELS,
 } from '@/components/materials-page/material-meta'
@@ -39,17 +42,16 @@ import { loadMaterialsHistory, type MaterialsHistory } from '@/data/materials'
 import { useResource } from '@/data/use-resource'
 import { formatDate, formatDateTime, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
-import { materialName } from '@/utils/materials'
 import { useAccount } from './context'
 
 /**
  * Materials: the wallet (currencies) on top, tracked materials as small
- * charts, then the bag, an icon grid of everything held. All from the
- * materials sections of the account's snapshots, decoded once per data
- * version. A material the Planner knows opens its inventory editor (the
- * Planner's: counts set by hand on top of the capture, what the goals need,
- * a link to the history); anything else opens the detail view with its
- * history.
+ * charts, then the bag, everything held in the in-game Inventory's tabs and
+ * order. All from the materials sections of the account's snapshots,
+ * decoded once per data version. A material the Planner knows opens its
+ * inventory editor (the Planner's: counts set by hand on top of the
+ * capture, what the goals need, a link to the history); anything else
+ * opens the detail view with its history.
  */
 const account = useAccount()
 const icon = useMaterialIcons()
@@ -136,6 +138,11 @@ const edited = computed(() => {
   return map
 })
 
+/** A tile's backdrop: the planner data's rarity (the only material rarity the data has). */
+function rarityOf(key: string): number | null {
+  return planning.planner.value?.materialsByKey.get(key)?.rarity || null
+}
+
 function openTile(key: string, anchor: HTMLElement, touch: boolean) {
   const known = planning.planner.value?.materialsByKey.has(key)
   if (known && planning.bag.value && planning.totals.value) {
@@ -160,17 +167,7 @@ const detailKey = shallowRef<string | null>(null)
 const detailItem = computed<MaterialItem | null>(() => {
   const key = detailKey.value
   if (!key) return null
-  const meta = materialMeta(key)
-  return (
-    byKey.value.get(key) ?? {
-      key,
-      name: materialName(key),
-      kind: meta.kind,
-      order: meta.order,
-      count: 0,
-      wallet: WALLET.has(key),
-    }
-  )
+  return byKey.value.get(key) ?? materialItem(key, 0)
 })
 const pickerOpen = ref(false)
 
@@ -245,11 +242,13 @@ const importTo = computed(() => ({
 
     <MaterialsBag
       :items="items"
+      :tabs="bagTabs()"
       :changes="changes"
       :compared="reference !== null"
       :hint="hint"
       :tracked="graph.selectedKeys.value"
       :icon="icon"
+      :rarity="rarityOf"
       :import-to="importTo"
       :edited="edited"
       @open="openTile"
@@ -309,7 +308,7 @@ const importTo = computed(() => ({
       <div class="flex flex-col gap-4">
         <UiSkeleton class="h-10 w-full" />
         <div
-          class="grid grid-cols-[repeat(auto-fill,minmax(3.5rem,1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))]"
+          class="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] sm:gap-2"
         >
           <UiSkeleton v-for="n in 36" :key="n" class="aspect-[4/5]" />
         </div>

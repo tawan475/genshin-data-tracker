@@ -6,7 +6,6 @@ import type { AccountResponse, CustomCharacter, Good } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch, type ComputedRef } from 'vue'
 import { NO_PLAYER } from '@/data/account-player'
 import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
-import { rememberPlannerWeapons } from '@/data/game-meta'
 import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons, loadMaterialIcons } from '@/lib/assets'
@@ -71,8 +70,6 @@ export function usePlannerModel(
         loadGameIcons(),
         loadMaterialIcons(),
       ])
-      // Weapon ids and caps for the Weapons page's sorts and "Max" filter.
-      rememberPlannerWeapons(planner.weapons)
       return { accountId: a.id, inventory, planner, drops, player, farming }
     },
   )

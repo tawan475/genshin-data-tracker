@@ -36,7 +36,7 @@ export interface WeaponRow {
   count: number
   /** The weapon's level cap: 90, or 70 for 1–2★. */
   maxLevel: number
-  /** The game's weapon id ("newest" sorts by it); 0 while unknown. */
+  /** The game's weapon id ("newest" sorts by it); 0 for a key the data doesn't know. */
   gameId: number
   haystack: string
 }
@@ -156,7 +156,7 @@ function refineInfo(rows: readonly WeaponRow[]): RefineInfo | null {
 
 /**
  * Rows, refine headroom and headline counts. `gameId` is the weapon's game
- * id (the default reads what the Planner loaded; tests pass their own).
+ * id (the default reads the game data's catalog; tests pass their own).
  */
 export function buildArmory(good: Good, gameId: (key: string) => number = weaponGameId): Armory {
   const rows = new Map<string, WeaponRow>()

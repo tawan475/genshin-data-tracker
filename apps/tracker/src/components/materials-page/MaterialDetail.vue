@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Pin, PinOff } from 'lucide-vue-next'
+import { Coins, Pin, PinOff } from 'lucide-vue-next'
 import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { MAX_SERIES } from '@/components/materials/use-materials-graph'
@@ -12,7 +12,7 @@ import { clock24, formatCompact, formatDate, formatNumber } from '@/lib/format'
 import DeltaText from './DeltaText.vue'
 import MaterialIcon from './MaterialIcon.vue'
 import type { MaterialItem } from './material-items'
-import { KIND_BY_ID, WALLET_KIND } from './material-meta'
+import { tabDisplay } from './bag-tabs'
 import {
   chartPoints,
   countAt,
@@ -109,10 +109,15 @@ const stats = computed(() => {
   ]
 })
 
-const kind = computed(() => {
+/** Where it sits: its in-game Inventory tab; currencies the Inventory doesn't show, the wallet. */
+const place = computed(() => {
   const item = props.item
   if (!item) return undefined
-  return item.wallet ? WALLET_KIND : KIND_BY_ID.get(item.kind)
+  if (item.wallet && item.tab === 'other') {
+    return { label: 'Wallet', title: 'Currencies and wish items', icon: Coins }
+  }
+  const tab = tabDisplay(item.tab)
+  return { label: tab.name, title: tab.title, icon: tab.icon }
 })
 </script>
 
@@ -129,12 +134,12 @@ const kind = computed(() => {
             >{{ formatNumber(item.count) }}</span
           >
           <span
-            v-if="kind"
-            class="inline-flex items-center gap-1.5 text-sm text-text-muted"
-            :title="kind.detail"
+            v-if="place"
+            class="inline-flex min-w-0 items-center gap-1.5 text-sm text-text-muted"
+            :title="place.title"
           >
-            <component :is="kind.icon" class="size-4" aria-hidden="true" />
-            {{ kind.label }}
+            <component :is="place.icon" class="size-4 shrink-0" aria-hidden="true" />
+            <span class="truncate">{{ place.label }}</span>
           </span>
         </div>
         <UiButton
