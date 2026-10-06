@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, FlaskConical, Lock, Sparkle } from 'lucide-vue-next
 import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RollValue from '@/components/ui/RollValue.vue'
+import RollBars from '@/components/ui/RollBars.vue'
 import type { ArtifactRow, ArtifactSort } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
 import { isCritCirclet } from '@/lib/crit-tiers'
@@ -14,7 +15,6 @@ import {
   formatStatTiny,
   formatStatValue,
 } from '@/utils/artifact-stats'
-import ArtifactRollBars from './ArtifactRollBars.vue'
 import { slotIcon } from './styles'
 
 /**
@@ -162,7 +162,7 @@ const owner = (row: ArtifactRow) => (row.artifact.location ? keyToName(row.artif
                 <span class="tabular w-11 shrink-0 text-right font-mono">
                   {{ formatStatValue(substat.key, substat.value) }}
                 </span>
-                <ArtifactRollBars :rolls="row.rolls[index] ?? []" size="sm" />
+                <RollBars :rolls="row.rolls[index] ?? []" size="sm" />
               </li>
             </ul>
           </td>
@@ -170,11 +170,12 @@ const owner = (row: ArtifactRow) => (row.artifact.location ? keyToName(row.artif
             <CritValue
               :value="row.cv"
               :crit-circlet="isCritCirclet(row.artifact.slotKey, row.artifact.mainStatKey)"
+              :plain="row.artifact.rarity < 5"
               class="font-semibold"
             />
           </td>
           <td class="hidden px-2 py-1.5 text-right sm:table-cell">
-            <RollValue :value="row.rv" />
+            <RollValue :value="row.rv" :plain="row.artifact.rarity < 5" />
           </td>
           <td class="py-1.5 pr-3 pl-2 md:max-w-40">
             <div v-if="owner(row)" class="flex min-w-0 items-center gap-2" :title="owner(row)">

@@ -13,7 +13,9 @@ import {
  * A crit value in its tier colour (akasha.cv's tiers, lib/crit-tiers): one
  * artifact's by default, `scope="build"` for five pieces added up. Pass
  * `crit-circlet` for a circlet with a CRIT main stat (tiered 7.77 higher).
- * `label` writes "CV" before it; `detail` adds a tooltip line.
+ * `label` writes "CV" before it; `detail` adds a tooltip line. `plain`
+ * drops the tier colour (secondary text): the tiers are 5★ scales, so 1–4★
+ * pieces show theirs plain.
  */
 const props = withDefaults(
   defineProps<{
@@ -22,6 +24,7 @@ const props = withDefaults(
     critCirclet?: boolean
     label?: boolean
     detail?: string
+    plain?: boolean
   }>(),
   { scope: 'artifact', detail: undefined },
 )
@@ -31,8 +34,10 @@ const title = computed(() =>
   [
     `CV ${props.value.toFixed(1)} · CRIT Rate × 2 + CRIT DMG`,
     props.detail,
-    `${tierBounds(props.scope === 'build' ? BUILD_CV_TIERS : ARTIFACT_CV_TIERS)}` +
-      (props.critCirclet ? ' · CRIT circlet +7.77' : ''),
+    props.plain
+      ? ''
+      : `${tierBounds(props.scope === 'build' ? BUILD_CV_TIERS : ARTIFACT_CV_TIERS)}` +
+        (props.critCirclet ? ' · CRIT circlet +7.77' : ''),
   ]
     .filter(Boolean)
     .join('\n'),
@@ -42,6 +47,8 @@ const title = computed(() =>
 <template>
   <span class="tabular font-mono whitespace-nowrap" :title="title">
     <span v-if="label" class="text-text-secondary">CV </span>
-    <span :class="CRIT_TIER_TEXT[tier]">{{ value.toFixed(1) }}</span>
+    <span :class="plain ? 'text-text-secondary' : CRIT_TIER_TEXT[tier]">{{
+      value.toFixed(1)
+    }}</span>
   </span>
 </template>

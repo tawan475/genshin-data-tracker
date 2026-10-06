@@ -121,3 +121,15 @@ const STAT_TINY: Readonly<Record<string, string>> = {
 export function formatStatTiny(key: string): string {
   return STAT_TINY[key] ?? formatStatShort(key)
 }
+
+const STAT_TILE: Readonly<Record<string, string>> = {
+  electro_dmg_: 'Elec',
+  dendro_dmg_: 'Dend',
+  physical_dmg_: 'Phys',
+  heal_: 'Heal',
+}
+
+/** Shortest label, for bag tiles: "CR", "ATK%", "Pyro", "Elec", "Phys", "Heal". */
+export function formatStatTile(key: string): string {
+  return STAT_TILE[key] ?? formatStatTiny(key)
+}

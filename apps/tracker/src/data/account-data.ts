@@ -11,6 +11,7 @@
 
 import { accountPlayer, type AccountPlayer } from '@/data/account-player'
 import {
+  artifactRows,
   catalogFromRows,
   decodePlayer,
   decodeSnapshot,
@@ -111,6 +112,19 @@ export interface Inventory {
   snapshot: BundleSnapshot
   good: Good
   catalog: Map<number, CatalogEntry>
+  /** Catalog id of each of `good.artifacts`, same order. */
+  artifactIds: number[]
+}
+
+/** Catalog ids of a snapshot's artifacts, in `decodeArtifacts` order. */
+function artifactIdsOf(snapshot: BundleSnapshot, bundle: DecodedBundle): number[] {
+  const text = (hash: string | null | undefined) => {
+    const value = hash ? bundle.texts.get(hash) : undefined
+    return value === undefined ? null : JSON.parse(value)
+  }
+  const section = text(snapshot.artifacts)
+  if (!section) throw new Error(`Bundle is missing section ${snapshot.artifacts}`)
+  return artifactRows(section, text(snapshot.artifactsBase)).map((row) => row[0])
 }
 
 /** The newest snapshot, fully decoded, with the catalog for artifact details. */
@@ -127,7 +141,35 @@ export function loadLatestInventory(
     ])
     const snapshot = bundle.snapshots[0]
     if (!snapshot) return null
-    return { snapshot, good: decodeBundleSnapshot(snapshot, bundle, catalog, materials), catalog }
+    return {
+      snapshot,
+      good: decodeBundleSnapshot(snapshot, bundle, catalog, materials),
+      catalog,
+      artifactIds: artifactIdsOf(snapshot, bundle),
+    }
+  })
+}
+
+/**
+ * Catalog ids of the artifacts in the snapshot before the newest one (null
+ * when there is none): what the Artifacts page's "New" compares against. A
+ * piece that levelled up has a new id, so "new" means new or changed. One
+ * small bundle of just that snapshot's artifacts section.
+ */
+export function loadPreviousArtifactIds(
+  account: AccountRef & { latest: { id: number; takenAt: number } | null },
+): Promise<ReadonlySet<number> | null> {
+  const latest = account.latest
+  if (!latest) return Promise.resolve(null)
+  return cached(account, `previous-artifacts:${latest.id}`, async () => {
+    const snapshots = await loadSnapshots(account)
+    const index = snapshots.findIndex((s) => s.id === latest.id)
+    const previous =
+      index >= 0 ? snapshots[index + 1] : snapshots.find((s) => s.takenAt < latest.takenAt)
+    if (!previous) return null
+    const bundle = await loadBundle(account, { ids: [previous.id], sections: ['artifacts'] })
+    const snapshot = bundle.snapshots[0]
+    return snapshot ? new Set(artifactIdsOf(snapshot, bundle)) : null
   })
 }
 
