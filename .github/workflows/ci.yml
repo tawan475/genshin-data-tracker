@@ -14,7 +14,7 @@ on:
       ref:
         description: "Ref to check (default: the event's)"
         type: string
-        default: ""
+        default: ''
 
 permissions:
   contents: read
@@ -35,6 +35,7 @@ jobs:
 
       - uses: ./.github/actions/setup
         with:
+          game-data-deploy-key: ${{ secrets.GAME_DATA_DEPLOY_KEY }}
           game-data-token: ${{ secrets.GAME_DATA_TOKEN }}
 
       - name: Tests

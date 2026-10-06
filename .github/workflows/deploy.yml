@@ -2,8 +2,11 @@ name: Deploy
 # Every push to main (and a game data bump this repository merged itself):
 # the CI checks, then the remote D1 migrations, then `wrangler deploy`, in
 # that order, as the manual deploy does (a deploy may need a migration; a
-# migration never needs the new code). Secrets: CLOUDFLARE_API_TOKEN,
-# CLOUDFLARE_ACCOUNT_ID (README: Deploying), GAME_DATA_TOKEN.
+# migration never needs the new code). Secrets: GAME_DATA_DEPLOY_KEY (or
+# GAME_DATA_TOKEN); CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID are optional
+# — without them the checks still run and the deploy steps are skipped with a
+# notice: deploy from a machine with wrangler logged in (`pnpm run deploy`
+# after `pnpm run db:migrate:remote`, README: Deploying).
 #
 # The gap icons load from gi-cdn.475.dev: deploy gi-cdn first when a game
 # data release adds `hosted` names (its README), or those show initials
@@ -15,9 +18,9 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: "Commit to deploy (game-data-bump.yml passes its merge commit)"
+        description: 'Commit to deploy (game-data-bump.yml passes its merge commit)'
         type: string
-        default: ""
+        default: ''
 
 permissions:
   contents: read
@@ -50,21 +53,28 @@ jobs:
 
       - uses: ./.github/actions/setup
         with:
+          game-data-deploy-key: ${{ secrets.GAME_DATA_DEPLOY_KEY }}
           game-data-token: ${{ secrets.GAME_DATA_TOKEN }}
 
       - name: Cloudflare credentials
+        id: creds
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::error::Set the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets (README: Deploying)."
-            exit 1
+            echo "::notice::No CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets: checks passed, deploy skipped. Deploy with wrangler from a logged-in machine (README: Deploying)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Apply D1 migrations
+        if: steps.creds.outputs.enabled == 'true'
         run: pnpm --filter @gdt/tracker db:migrate:remote
 
       - name: Build
+        if: steps.creds.outputs.enabled == 'true'
         run: pnpm --filter @gdt/tracker build-only
 
       - name: Deploy the Worker
+        if: steps.creds.outputs.enabled == 'true'
         working-directory: apps/tracker
         run: pnpm exec wrangler deploy --message "$(git rev-parse --short HEAD) via ${GITHUB_EVENT_NAME}"

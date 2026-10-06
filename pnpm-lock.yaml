@@ -15,8 +15,8 @@ importers:
   apps/tracker:
     dependencies:
       '@gdt/game-data':
-        specifier: git+file:///C:/Users/tawan475/Documents/NodeJs/auto-genshin-progress/genshin-game-data#v7.1.0
-        version: git+file:///C:/Users/tawan475/Documents/NodeJs/auto-genshin-progress/genshin-game-data#c07452c3a6fb26bdc3a30bb5f42386a4c0d08852
+        specifier: github:tawan475/genshin-game-data#v7.1.0
+        version: git+https://git@github.com:tawan475/genshin-game-data.git#c07452c3a6fb26bdc3a30bb5f42386a4c0d08852
       '@gdt/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -984,8 +984,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@gdt/game-data@git+file:///C:/Users/tawan475/Documents/NodeJs/auto-genshin-progress/genshin-game-data#c07452c3a6fb26bdc3a30bb5f42386a4c0d08852':
-    resolution: {commit: c07452c3a6fb26bdc3a30bb5f42386a4c0d08852, repo: file:///C:/Users/tawan475/Documents/NodeJs/auto-genshin-progress/genshin-game-data, type: git}
+  '@gdt/game-data@git+https://git@github.com:tawan475/genshin-game-data.git#c07452c3a6fb26bdc3a30bb5f42386a4c0d08852':
+    resolution: {commit: c07452c3a6fb26bdc3a30bb5f42386a4c0d08852, repo: git@github.com:tawan475/genshin-game-data.git, type: git}
     version: 7.1.0
     engines: {node: '>=24.12.0'}
 
@@ -3385,7 +3385,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@gdt/game-data@git+file:///C:/Users/tawan475/Documents/NodeJs/auto-genshin-progress/genshin-game-data#c07452c3a6fb26bdc3a30bb5f42386a4c0d08852': {}
+  '@gdt/game-data@git+https://git@github.com:tawan475/genshin-game-data.git#c07452c3a6fb26bdc3a30bb5f42386a4c0d08852': {}
 
   '@img/colour@1.1.0': {}
 
