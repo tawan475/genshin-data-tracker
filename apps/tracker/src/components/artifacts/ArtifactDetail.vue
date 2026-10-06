@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { Backpack, FlaskConical, Lock, LockOpen, Sparkle } from 'lucide-vue-next'
 import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import RollValue from '@/components/ui/RollValue.vue'
-import { upgradesLeft, type ArtifactRow } from '@/data/artifacts'
+import RollBars from '@/components/ui/RollBars.vue'
+import UiBadge from '@/components/ui/UiBadge.vue'
+import type { ArtifactRow } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
 import { isCritCirclet } from '@/lib/crit-tiers'
 import { formatNumber, keyToName } from '@/lib/format'
@@ -15,21 +17,33 @@ import {
   formatSlotFullName,
   formatSlotName,
   formatStatName,
+  formatStatShort,
   formatStatValue,
 } from '@/utils/artifact-stats'
-import ArtifactRollBars from './ArtifactRollBars.vue'
 
-/** One artifact: stats, rank, who wears it, and every roll coloured by tier. */
+/**
+ * One artifact: stats, rank, who wears it, every roll coloured by tier and,
+ * while it can still level, its potential (what the upgrades to come should
+ * add; data/artifact-potential).
+ */
 const props = defineProps<{
   row: ArtifactRow
   /** CV position among pieces of the same slot and rarity. */
   rank?: { position: number; of: number }
+  isNew?: boolean
 }>()
 
 const artifact = computed(() => props.row.artifact)
 const owner = computed(() => (artifact.value.location ? keyToName(artifact.value.location) : ''))
 const inactive = computed(() => artifact.value.unactivatedSubstats ?? [])
-const left = computed(() => upgradesLeft(artifact.value))
+const potential = computed(() => props.row.potential)
+const left = computed(() => potential.value.left)
+const plain = computed(() => artifact.value.rarity < 5)
+const critCirclet = computed(() =>
+  isCritCirclet(artifact.value.slotKey, artifact.value.mainStatKey),
+)
+const maxed = computed(() => `+${maxLevel(artifact.value.rarity)}`)
+const potentialId = useId()
 const rollsTitle = computed(() => {
   const source = (artifact.value.totalRolls ?? 0) > 0 ? 'From the game' : 'Inferred from the level'
   return left.value > 0 ? `${source} · ${left.value} upgrades to come` : source
@@ -60,6 +74,7 @@ const rankTitle = computed(() =>
             +{{ artifact.level
             }}<span class="text-text-muted">/{{ maxLevel(artifact.rarity) }}</span>
           </span>
+          <UiBadge v-if="isNew" tone="accent" title="Not in the previous capture">New</UiBadge>
         </p>
       </div>
     </div>
@@ -68,15 +83,12 @@ const rankTitle = computed(() =>
       <div class="rounded-xl border border-border-default px-3 py-2">
         <dt class="text-sm text-text-secondary">CV</dt>
         <dd class="text-xl font-semibold">
-          <CritValue
-            :value="row.cv"
-            :crit-circlet="isCritCirclet(artifact.slotKey, artifact.mainStatKey)"
-          />
+          <CritValue :value="row.cv" :crit-circlet="critCirclet" :plain="plain" />
         </dd>
       </div>
       <div class="rounded-xl border border-border-default px-3 py-2">
         <dt class="text-sm text-text-secondary">RV</dt>
-        <dd class="text-xl"><RollValue :value="row.rv" /></dd>
+        <dd class="text-xl"><RollValue :value="row.rv" :plain="plain" /></dd>
       </div>
       <div class="rounded-xl border border-border-default px-3 py-2" :title="rollsTitle">
         <dt class="text-sm text-text-secondary">Rolls</dt>
@@ -93,6 +105,67 @@ const rankTitle = computed(() =>
         </dd>
       </div>
     </dl>
+
+    <section v-if="left > 0" :aria-labelledby="potentialId" class="flex flex-col gap-2">
+      <h3 :id="potentialId" class="text-sm font-medium text-text-secondary">
+        Potential <span class="tabular font-mono text-text-muted">{{ maxed }}</span>
+      </h3>
+      <dl class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div
+          class="rounded-xl bg-surface-overlay/60 px-3 py-2"
+          :title="`One substat roll every 4 levels, up to ${maxed}`"
+        >
+          <dt class="text-sm text-text-secondary">Upgrades</dt>
+          <dd class="tabular font-mono text-lg">{{ left }}</dd>
+        </div>
+        <div class="rounded-xl bg-surface-overlay/60 px-3 py-2">
+          <dt class="text-sm text-text-secondary">Expected CV</dt>
+          <dd class="text-lg">
+            <CritValue
+              :value="potential.expectedCv"
+              :crit-circlet="critCirclet"
+              :plain="plain"
+              :detail="`Expected at ${maxed}: each upgrade rolls a crit line ${Math.round(potential.critChance * 100)}% of the time, by an average roll`"
+            />
+          </dd>
+        </div>
+        <div class="rounded-xl bg-surface-overlay/60 px-3 py-2">
+          <dt class="text-sm text-text-secondary">Best case</dt>
+          <dd class="text-lg">
+            <CritValue
+              :value="potential.bestCv"
+              :crit-circlet="critCirclet"
+              :plain="plain"
+              :detail="`Every upgrade a top crit roll, up to ${maxed}`"
+            />
+          </dd>
+        </div>
+        <div
+          class="rounded-xl bg-surface-overlay/60 px-3 py-2"
+          :title="`${potential.critLines} of 4 lines are CRIT: the chance an upgrade rolls one`"
+        >
+          <dt class="text-sm text-text-secondary">Crit / roll</dt>
+          <dd class="tabular font-mono text-lg">{{ Math.round(potential.critChance * 100) }}%</dd>
+        </div>
+        <div
+          v-if="potential.activates"
+          class="rounded-xl bg-surface-overlay/60 px-3 py-2"
+          title="The fourth line, opened by the first upgrade"
+        >
+          <dt class="text-sm text-text-secondary">+4 adds</dt>
+          <dd class="flex items-baseline gap-1.5 text-lg">
+            <span class="truncate">{{ formatStatShort(potential.activates.key) }}</span>
+            <span class="tabular font-mono">{{
+              formatStatValue(potential.activates.key, potential.activates.value)
+            }}</span>
+          </dd>
+        </div>
+        <div class="rounded-xl bg-surface-overlay/60 px-3 py-2">
+          <dt class="text-sm text-text-secondary">Max RV</dt>
+          <dd class="text-lg"><RollValue :value="potential.maxRv" :plain="plain" /></dd>
+        </div>
+      </dl>
+    </section>
 
     <ul class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary">
       <li class="flex items-center gap-2">
@@ -140,7 +213,7 @@ const rankTitle = computed(() =>
       >
         <div class="flex items-center gap-3">
           <span class="min-w-0 flex-1">{{ formatStatName(substat.key) }}</span>
-          <ArtifactRollBars :rolls="row.rolls[index] ?? []" size="lg" />
+          <RollBars :rolls="row.rolls[index] ?? []" size="lg" />
           <span class="tabular w-16 text-right font-mono font-medium">
             {{ formatStatValue(substat.key, substat.value) }}
           </span>

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { refDebounced } from '@vueuse/core'
-import { Gem, Layers, LayoutGrid, Rows3, SearchX, Upload } from 'lucide-vue-next'
+import { Backpack, Gem, Layers, LayoutGrid, Rows3, SearchX, Upload } from 'lucide-vue-next'
+import ArtifactBag from '@/components/artifacts/ArtifactBag.vue'
+import { useProgressive } from '@/components/planner/use-progressive'
 import ArtifactCard from '@/components/artifacts/ArtifactCard.vue'
 import ArtifactDetail from '@/components/artifacts/ArtifactDetail.vue'
 import ArtifactSetBreakdown from '@/components/artifacts/ArtifactSetBreakdown.vue'
 import ArtifactSetsTable from '@/components/artifacts/ArtifactSetsTable.vue'
 import ArtifactTable from '@/components/artifacts/ArtifactTable.vue'
 import ArtifactToolbar from '@/components/artifacts/ArtifactToolbar.vue'
+import LowerRarityStrip from '@/components/artifacts/LowerRarityStrip.vue'
 import { SLOT_ICONS } from '@/components/artifacts/styles'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -18,10 +21,11 @@ import UiPager from '@/components/ui/UiPager.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import { loadLatestInventory } from '@/data/account-data'
+import { loadLatestInventory, loadPreviousArtifactIds } from '@/data/account-data'
 import { MAIN_STAT_ORDER, formatSetName, formatSlotName } from '@/utils/artifact-stats'
 import {
   SLOT_KEYS,
+  SUBSTAT_KEYS,
   activeFilterCount,
   bestPerSlot,
   buildArtifactRows,
@@ -30,11 +34,9 @@ import {
   cvRank,
   defaultDescending,
   facetCounts,
+  isNewPiece,
   isSpare,
-  loadFilters,
-  loadView,
-  saveFilters,
-  saveView,
+  rarityGroups,
   sortRows,
   summarizeSets,
   type ArtifactFilters,
@@ -44,29 +46,53 @@ import {
   type SetOption,
   type SlotKey,
 } from '@/data/artifacts'
+import {
+  loadFilters,
+  loadFlag,
+  loadView,
+  saveFilters,
+  saveFlag,
+  saveView,
+} from '@/data/artifact-prefs'
 import { useResource } from '@/data/use-resource'
+import { readJson, writeJson } from '@/lib/storage'
 import { formatNumber } from '@/lib/format'
 import { useAccount } from './context'
 
-/** Cards are tall, rows are not: a page of each fills a few screens. */
-const PAGE_SIZE: Record<ArtifactView, number> = { cards: 60, table: 100, sets: Infinity }
+/** Cards are tall, rows are not: a page of each fills a few screens. The Bag fills in as it goes. */
+const PAGE_SIZE: Record<ArtifactView, number> = {
+  cards: 60,
+  table: 100,
+  bag: Infinity,
+  sets: Infinity,
+}
 /** Icons only on a phone; the name stays in the tooltip. */
 const VIEW_OPTIONS: SegmentedOption<ArtifactView>[] = [
   { value: 'cards', label: 'Cards', icon: LayoutGrid },
+  { value: 'bag', label: 'Bag', icon: Backpack },
   { value: 'table', label: 'Table', icon: Rows3 },
   { value: 'sets', label: 'Sets', icon: Layers },
 ]
+/** Sorts that rank 5★ pieces above the rest, so lower rarities sink to the end. */
+const STRIP_SORTS: readonly ArtifactSort[] = ['cv', 'rv', 'potential']
 
 const account = useAccount()
 const inventory = useResource(
   () => account.value,
   (a) => loadLatestInventory(a),
 )
-
-/** Derived once per inventory (CV, RV, rolls, search text); cached by the data module. */
-const rows = computed<ArtifactRow[]>(() =>
-  inventory.data.value ? buildArtifactRows(inventory.data.value.good.artifacts) : [],
+/** The previous capture's catalog ids, for "New" (null: none, or not loaded yet). */
+const previousIds = useResource(
+  () => account.value,
+  (a) => loadPreviousArtifactIds(a),
 )
+const previous = computed(() => previousIds.data.value ?? null)
+
+/** Derived once per inventory (CV, RV, rolls, potential, search text); cached by the data module. */
+const rows = computed<ArtifactRow[]>(() => {
+  const inv = inventory.data.value
+  return inv ? buildArtifactRows(inv.good.artifacts, inv.artifactIds) : []
+})
 
 // ------------------------------------------------------------- filter state
 // Per account, remembered on this device. Always replaced, never mutated, so
@@ -90,7 +116,9 @@ const applied = computed<ArtifactFilters>(() => ({
 
 // Filtering a sorted list keeps its order, so sorting only reruns on a sort change.
 const sorted = computed(() => sortRows(rows.value, filters.value.sort, filters.value.descending))
-const matches = computed(() => sorted.value.filter(compileFilter(applied.value)))
+const matches = computed(() =>
+  sorted.value.filter(compileFilter(applied.value, undefined, previous.value)),
+)
 /** What the list shows: the matches, or with "Best" their top pieces per slot. */
 const results = computed(() => (applied.value.best ? bestPerSlot(matches.value) : matches.value))
 
@@ -99,13 +127,22 @@ const presetCounts = computed(() => {
   let feedable = 0
   let spare = 0
   let maxed = 0
+  let zero = 0
+  let fresh = 0
   for (const row of rows.value) {
     if (row.feedable) feedable++
-    if (isSpare(row)) spare++
+    if (isSpare(row)) {
+      spare++
+      if (row.artifact.level === 0) zero++
+    }
     if (row.artifact.level >= 20) maxed++
+    if (isNewPiece(row, previous.value)) fresh++
   }
-  return { feedable, spare, maxed }
+  return { feedable, spare, maxed, zero, fresh: previous.value ? fresh : null }
 })
+
+const facet = <K,>(name: Parameters<typeof facetCounts>[2], key: (row: ArtifactRow) => K) =>
+  facetCounts(rows.value, applied.value, name, key, previous.value)
 
 const inventorySets = computed(() => {
   const keys = new Set<string>()
@@ -113,23 +150,48 @@ const inventorySets = computed(() => {
   return keys
 })
 const setOptions = computed<SetOption[]>(() => {
-  const counts = facetCounts(rows.value, applied.value, 'sets', (r) => r.artifact.setKey)
+  const counts = facet('sets', (r) => r.artifact.setKey)
   const keys = new Set([...inventorySets.value, ...filters.value.sets])
   return [...keys].map((key) => ({ key, name: formatSetName(key), count: counts.get(key) ?? 0 }))
 })
-const slotCounts = computed(() =>
-  facetCounts(rows.value, applied.value, 'slots', (r) => r.artifact.slotKey),
-)
-const rarityCounts = computed(() =>
-  facetCounts(rows.value, applied.value, 'rarities', (r) => r.artifact.rarity),
-)
-const rarities = computed(() => {
-  const present = new Set<number>(filters.value.rarities)
+const ownerOptions = computed<SetOption[]>(() => {
+  const counts = facet('owners', (r) => r.artifact.location)
+  const names = new Map<string, string>()
+  for (const row of rows.value) if (row.equipped) names.set(row.artifact.location, row.ownerName)
+  for (const key of filters.value.owners) if (!names.has(key)) names.set(key, key)
+  return [...names].map(([key, name]) => ({ key, name, count: counts.get(key) ?? 0 }))
+})
+const slotCounts = computed(() => facet('slots', (r) => r.artifact.slotKey))
+const rarityCounts = computed(() => facet('rarities', (r) => r.artifact.rarity))
+const presentRarities = computed(() => {
+  const present = new Set<number>()
   for (const row of rows.value) present.add(row.artifact.rarity)
-  return [...present].sort((a, b) => b - a)
+  return present
+})
+const lineCounts = computed(() => facet('lines', (r) => r.lines))
+/** Per substat: matches if it were added to the substats already picked. */
+const substatCounts = computed(() => {
+  const pass = compileFilter(applied.value, 'substats', previous.value)
+  const wanted = applied.value.substats
+  const counts = new Map<string, number>()
+  for (const row of rows.value) {
+    if (!pass(row)) continue
+    let hasWanted = true
+    for (const key of wanted) {
+      if (!(row.subMask & (1 << SUBSTAT_KEYS.indexOf(key as (typeof SUBSTAT_KEYS)[number])))) {
+        hasWanted = false
+        break
+      }
+    }
+    if (!hasWanted) continue
+    SUBSTAT_KEYS.forEach((key, bit) => {
+      if (row.subMask & (1 << bit)) counts.set(key, (counts.get(key) ?? 0) + 1)
+    })
+  }
+  return counts
 })
 const mainStats = computed(() => {
-  const counts = facetCounts(rows.value, applied.value, 'mainStat', (r) => r.artifact.mainStatKey)
+  const counts = facet('mainStat', (r) => r.artifact.mainStatKey)
   const keys = new Set<string>()
   for (const row of rows.value) keys.add(row.artifact.mainStatKey)
   if (filters.value.mainStat) keys.add(filters.value.mainStat)
@@ -183,11 +245,50 @@ function sortBy(sort: ArtifactSort) {
 /** Only built while the Sets view is open. */
 const setSummaries = computed(() => (view.value === 'sets' ? summarizeSets(matches.value) : []))
 
-/** From the Sets view: show that set (and slot) as cards. */
+/** From the Sets view: that set (and slot) in the Bag. */
 function pickSet(setKey: string, slot?: SlotKey) {
   filters.value = { ...filters.value, sets: [setKey], slots: slot ? [slot] : [] }
-  view.value = 'cards'
+  view.value = 'bag'
 }
+
+// ---------------------------------------------------------------- the Bag
+/** Rarity groups, only while the Bag is open. */
+const bagGroups = computed(() => (view.value === 'bag' ? rarityGroups(results.value) : []))
+/**
+ * Open groups, per device. By default only 5★ (lower rarities fold away when
+ * there are 5★); a lone group is always open.
+ */
+const bagOpenSaved = ref<number[] | null>(readJson<number[] | null>('artifacts:bag-open', null))
+const bagOpen = computed<ReadonlySet<number>>(() => {
+  const groups = bagGroups.value
+  const open = new Set<number>(
+    Array.isArray(bagOpenSaved.value)
+      ? bagOpenSaved.value
+      : groups.some((g) => g.rarity === 5)
+        ? [5]
+        : groups.map((g) => g.rarity),
+  )
+  if (groups.length === 1) open.add(groups[0]!.rarity)
+  return open
+})
+function toggleBagGroup(rarity: number) {
+  const open = new Set(bagOpen.value)
+  if (open.has(rarity)) open.delete(rarity)
+  else open.add(rarity)
+  bagOpenSaved.value = [...open]
+  writeJson('artifacts:bag-open', bagOpenSaved.value)
+}
+
+// ---------------------------------------------------- lower-rarity strip
+/** Below-5★ matches, while a CV/RV/Potential sort sinks them and no rarity is picked. */
+const lowerRows = computed(() => {
+  const f = applied.value
+  if (view.value === 'bag' || view.value === 'sets') return []
+  if (f.rarities.length || f.best || !STRIP_SORTS.includes(f.sort)) return []
+  return matches.value.filter((row) => row.artifact.rarity < 5)
+})
+const stripOpen = ref(loadFlag('lower-open', false))
+watch(stripOpen, (open) => saveFlag('lower-open', open))
 
 // --------------------------------------------------------------- pagination
 const page = ref(1)
@@ -197,7 +298,22 @@ const pageCount = computed(() => Math.max(1, Math.ceil(results.value.length / pa
 watch([applied, view, () => account.value.id], () => (page.value = 1))
 watch(pageCount, (count) => (page.value = Math.min(page.value, count)))
 const pageRows = computed(() =>
-  results.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value),
+  Number.isFinite(pageSize.value)
+    ? results.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value)
+    : results.value,
+)
+
+// A page of cards or table rows mounts a screenful first and the rest over
+// the next frames, so a filter or view change paints at once.
+const pageLength = computed(() =>
+  view.value === 'cards' || view.value === 'table' ? pageRows.value.length : 0,
+)
+const { shown: pageShown, restart: restartPage } = useProgressive(pageLength, 16, 16)
+watch(pageRows, restartPage)
+const shownRows = computed(() =>
+  pageShown.value >= pageRows.value.length
+    ? pageRows.value
+    : pageRows.value.slice(0, pageShown.value),
 )
 
 const resultsTop = useTemplateRef<HTMLElement>('resultsTop')
@@ -210,9 +326,9 @@ async function goToPage(n: number) {
 
 /** Cards, split by slot while "Best" groups them. */
 const cardGroups = computed(() => {
-  if (!applied.value.best) return [{ slot: '', rows: pageRows.value }]
+  if (!applied.value.best) return [{ slot: '', rows: shownRows.value }]
   const groups = new Map<string, ArtifactRow[]>()
-  for (const row of pageRows.value) {
+  for (const row of shownRows.value) {
     const list = groups.get(row.artifact.slotKey)
     if (list) list.push(row)
     else groups.set(row.artifact.slotKey, [row])
@@ -222,18 +338,32 @@ const cardGroups = computed(() => {
 
 // ------------------------------------------------------------------- detail
 const openId = ref<number | null>(null)
+/** Opened from the lower-rarity strip: stepping then walks the strip. */
+const fromStrip = ref(false)
 watch(rows, () => (openId.value = null))
 const openRow = computed(() => (openId.value === null ? null : (rows.value[openId.value] ?? null)))
-const openIndex = computed(() => (openRow.value ? results.value.indexOf(openRow.value) : -1))
+function openPiece(id: number, strip = false) {
+  fromStrip.value = strip
+  openId.value = id
+}
+/** Stepping follows what is on screen: the Bag's groups, the strip, or the list. */
+const stepList = computed<ArtifactRow[]>(() => {
+  if (view.value === 'bag') return bagGroups.value.flatMap((g) => g.rows)
+  if (fromStrip.value && lowerRows.value.length) return lowerRows.value
+  return results.value
+})
+const openIndex = computed(() => (openRow.value ? stepList.value.indexOf(openRow.value) : -1))
 const openRank = computed(() => (openRow.value ? cvRank(rows.value, openRow.value) : undefined))
 
 function step(delta: number) {
   const index = openIndex.value + delta
-  const next = results.value[index]
+  const next = stepList.value[index]
   if (!next) return
   openId.value = next.id
   // Keep the piece on the page behind the dialog.
-  if (Number.isFinite(pageSize.value)) page.value = Math.floor(index / pageSize.value) + 1
+  if (stepList.value === results.value && Number.isFinite(pageSize.value)) {
+    page.value = Math.floor(index / pageSize.value) + 1
+  }
 }
 
 const GRID =
@@ -306,13 +436,18 @@ const GRID =
     <ArtifactToolbar
       v-model="filters"
       :sets="setOptions"
+      :owners="ownerOptions"
       :slot-counts="slotCounts"
-      :rarities="rarities"
       :rarity-counts="rarityCounts"
+      :present="presentRarities"
       :main-stats="mainStats"
+      :substat-counts="substatCounts"
+      :line-counts="lineCounts"
       :feedable-count="presetCounts.feedable"
       :spare-count="presetCounts.spare"
       :maxed-count="presetCounts.maxed"
+      :zero-count="presetCounts.zero"
+      :new-count="presetCounts.fresh"
     />
 
     <div ref="resultsTop" class="flex min-w-0 scroll-mt-20 items-center gap-3">
@@ -338,6 +473,14 @@ const GRID =
       <UiSegmented v-model="view" :options="VIEW_OPTIONS" label="View" compact class="ml-auto" />
     </div>
 
+    <LowerRarityStrip
+      v-if="lowerRows.length"
+      v-model:open="stripOpen"
+      :rows="lowerRows"
+      :previous="previous"
+      @pick="openPiece($event, true)"
+    />
+
     <UiPanel v-if="results.length === 0" flush>
       <UiEmpty title="No matches">
         <template #icon><SearchX aria-hidden="true" /></template>
@@ -347,13 +490,22 @@ const GRID =
 
     <ArtifactSetsTable v-else-if="view === 'sets'" :sets="setSummaries" @pick="pickSet" />
 
+    <ArtifactBag
+      v-else-if="view === 'bag'"
+      :groups="bagGroups"
+      :open="bagOpen"
+      :previous="previous"
+      @open="openPiece($event)"
+      @toggle="toggleBagGroup"
+    />
+
     <template v-else>
       <ArtifactTable
         v-if="view === 'table'"
-        :rows="pageRows"
+        :rows="shownRows"
         :sort="filters.sort"
         :descending="filters.descending"
-        @open="openId = $event"
+        @open="openPiece($event)"
         @sort="sortBy"
       />
 
@@ -377,8 +529,17 @@ const GRID =
             {{ formatSlotName(group.slot) }}
           </h2>
           <ul :class="GRID">
-            <li v-for="row in group.rows" :key="row.id" class="flex">
-              <ArtifactCard :row="row" class="flex-1" @open="openId = $event" />
+            <li
+              v-for="row in group.rows"
+              :key="row.id"
+              class="flex [contain-intrinsic-size:auto_16rem] [content-visibility:auto]"
+            >
+              <ArtifactCard
+                :row="row"
+                :is-new="isNewPiece(row, previous)"
+                class="flex-1"
+                @open="openPiece($event)"
+              />
             </li>
           </ul>
         </section>
@@ -399,10 +560,15 @@ const GRID =
     :title="openRow?.setName ?? ''"
     size="wide"
     :index="openIndex >= 0 ? openIndex : undefined"
-    :total="results.length"
+    :total="stepList.length"
     @close="openId = null"
     @step="step"
   >
-    <ArtifactDetail v-if="openRow" :row="openRow" :rank="openRank" />
+    <ArtifactDetail
+      v-if="openRow"
+      :row="openRow"
+      :rank="openRank"
+      :is-new="isNewPiece(openRow, previous)"
+    />
   </UiModal>
 </template>

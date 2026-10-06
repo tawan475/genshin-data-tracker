@@ -6,14 +6,18 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import type { SetOption } from '@/data/artifacts'
-import { artifactSetIcon } from '@/lib/assets'
+import { artifactSetIcon, characterIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 
 /**
- * Multi-select of sets in a dialog (fits 60 sets on a phone). Changes apply
+ * Multi-select in a dialog (fits 60 sets on a phone): artifact sets by
+ * default, or with `characters` the wearers ("Equipped by"). Changes apply
  * as they are ticked; counts follow the other filters.
  */
-const props = defineProps<{ open: boolean; options: SetOption[] }>()
+const props = withDefaults(
+  defineProps<{ open: boolean; options: SetOption[]; title?: string; characters?: boolean }>(),
+  { title: 'Sets' },
+)
 const emit = defineEmits<{ close: [] }>()
 const selected = defineModel<string[]>({ required: true })
 
@@ -44,10 +48,10 @@ function toggle(key: string, on: boolean) {
 </script>
 
 <template>
-  <UiModal :open="open" title="Sets" @close="emit('close')">
+  <UiModal :open="open" :title="title" @close="emit('close')">
     <div class="flex flex-col gap-3">
       <label class="block">
-        <span class="sr-only">Find a set</span>
+        <span class="sr-only">Find</span>
         <UiInput v-model="query" type="search" autocomplete="off" placeholder="Search" />
       </label>
 
@@ -64,9 +68,10 @@ function toggle(key: string, on: boolean) {
               @change="toggle(option.key, ($event.target as HTMLInputElement).checked)"
             />
             <GameIcon
-              :src="artifactSetIcon(option.key)"
+              :src="characters ? characterIcon(option.key) : artifactSetIcon(option.key)"
               :name="option.name"
               size="sm"
+              :class="characters ? 'rounded-full!' : ''"
               aria-hidden="true"
             />
             <span class="min-w-0 flex-1">{{ option.name }}</span>

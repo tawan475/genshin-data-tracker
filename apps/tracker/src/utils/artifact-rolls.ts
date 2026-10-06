@@ -314,12 +314,15 @@ export const ROLL_QUALITY_TEXT: Readonly<Record<RollQuality, string>> = {
   4: 'text-rarity-5',
 }
 
-/** Bar height per quality, so the difference reads without colour too. */
-export const ROLL_QUALITY_HEIGHT: Readonly<Record<RollQuality, string>> = {
-  1: 'h-2.5',
-  2: 'h-3',
-  3: 'h-3.5',
-  4: 'h-4',
+/**
+ * How much of a roll bar (ui/RollBars) a roll fills; exaggerated past the
+ * real 70–100 % so tiers read at a glance, without colour too.
+ */
+export const ROLL_QUALITY_FILL: Readonly<Record<RollQuality, string>> = {
+  1: '45%',
+  2: '65%',
+  3: '82%',
+  4: '100%',
 }
 
 export const ROLL_QUALITY_LABEL: Readonly<Record<RollQuality, string>> = {

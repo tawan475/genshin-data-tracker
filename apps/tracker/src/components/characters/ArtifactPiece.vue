@@ -3,12 +3,12 @@ import { computed } from 'vue'
 import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RollValue from '@/components/ui/RollValue.vue'
+import RollBars from '@/components/ui/RollBars.vue'
 import { SLOT_LABELS, itemName, type EquippedArtifact, type SlotKey } from '@/data/characters'
 import { artifactIcon } from '@/lib/assets'
 import { isCritCirclet } from '@/lib/crit-tiers'
 import { ROLL_QUALITY_LABEL, inferArtifactRolls, maxLevel } from '@/utils/artifact-rolls'
 import { formatRollValue, formatStatShort, formatStatValue } from '@/utils/artifact-stats'
-import RollBars from './RollBars.vue'
 import { RARITY_TEXT } from './tokens'
 
 /** One equipped artifact (or its empty slot) in the character details, rolls included. */

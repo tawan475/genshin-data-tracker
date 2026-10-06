@@ -9,9 +9,10 @@ import { formatCv, formatSlotName, formatStatShort } from '@/utils/artifact-stat
 import { SLOT_ICONS } from './styles'
 
 /**
- * "Which sets do I have good pieces for": every set among the matches with
- * its best CV per slot. A set opens its pieces; a slot cell opens that slot.
- * On a phone the name takes its own line above the five slots.
+ * "Which sets do I have good pieces for": every set among the matches (all
+ * rarities) with its pieces and best CV per slot. A set opens its pieces in
+ * the Bag; a slot cell opens that slot. On a phone the name takes its own
+ * line above the five slots.
  */
 defineProps<{ sets: readonly SetSummary[] }>()
 const emit = defineEmits<{ pick: [setKey: string, slot?: SlotKey] }>()
@@ -24,7 +25,7 @@ function cellTitle(set: SetSummary, index: number): string {
   const best = set.best[index]
   if (!best) return `${slot}: none`
   const main = formatStatShort(best.artifact.mainStatKey)
-  return `${slot} · ${formatNumber(set.slotCounts[index] ?? 0)} · best ${main} +${best.artifact.level}, CV ${formatCv(best.cv)}`
+  return `${slot} · ${formatNumber(set.slotCounts[index] ?? 0)} pieces · best ${best.artifact.rarity}★ ${main} +${best.artifact.level}, CV ${formatCv(best.cv)}`
 }
 </script>
 
@@ -41,7 +42,7 @@ function cellTitle(set: SetSummary, index: number): string {
         v-for="slot in SLOT_KEYS"
         :key="slot"
         class="flex justify-center"
-        :title="`${formatSlotName(slot)}: best CV`"
+        :title="`${formatSlotName(slot)}: best CV, pieces`"
       >
         <component :is="SLOT_ICONS[slot]" class="size-4" />
       </span>
@@ -69,18 +70,23 @@ function cellTitle(set: SetSummary, index: number): string {
           v-for="(best, index) in set.best"
           :key="index"
           type="button"
-          class="tabular flex min-h-9 items-center justify-center rounded-lg font-mono text-sm transition-colors hover:bg-surface-overlay disabled:cursor-default disabled:hover:bg-transparent"
+          class="tabular flex min-h-11 flex-col items-center justify-center rounded-lg font-mono text-sm leading-tight transition-colors hover:bg-surface-overlay disabled:cursor-default disabled:hover:bg-transparent"
           :class="best ? '' : 'text-text-muted'"
           :disabled="!best"
           :title="cellTitle(set, index)"
           :aria-label="cellTitle(set, index)"
           @click="emit('pick', set.key, SLOT_KEYS[index])"
         >
-          <CritValue
-            v-if="best"
-            :value="best.cv"
-            :crit-circlet="isCritCirclet(best.artifact.slotKey, best.artifact.mainStatKey)"
-          />
+          <template v-if="best">
+            <CritValue
+              :value="best.cv"
+              :crit-circlet="isCritCirclet(best.artifact.slotKey, best.artifact.mainStatKey)"
+              :plain="best.artifact.rarity < 5"
+            />
+            <span class="text-xs text-text-muted">{{
+              formatNumber(set.slotCounts[index] ?? 0)
+            }}</span>
+          </template>
           <template v-else>—</template>
         </button>
         <CritValue

@@ -7,7 +7,9 @@ import {
   Gem,
   Search,
   SlidersHorizontal,
+  Sparkles,
   Trophy,
+  UserRound,
   X,
 } from 'lucide-vue-next'
 import FilterChip from '@/components/ui/FilterChip.vue'
@@ -18,27 +20,38 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import {
+  ARTIFACT_RARITIES,
   BEST_PER_SLOT,
   LEVEL_MAX,
   LEVEL_MIN,
   SLOT_KEYS,
   SORT_OPTIONS,
+  SUBSTAT_KEYS,
   clearedFilters,
   defaultDescending,
   isFeedablePreset,
   isSparePreset,
+  isZeroPreset,
   toggleFeedablePreset,
   toggleSparePreset,
+  toggleZeroPreset,
   type ArtifactFilters,
   type ArtifactSort,
   type AstralFilter,
+  type ElixirFilter,
   type EquipFilter,
+  type LinesFilter,
   type LockFilter,
   type SetOption,
 } from '@/data/artifacts'
+import { loadFlag, saveFlag } from '@/data/artifact-prefs'
 import { formatNumber } from '@/lib/format'
-import { readJson, writeJson } from '@/lib/storage'
-import { formatSetName, formatSlotName, formatStatName } from '@/utils/artifact-stats'
+import {
+  formatSetName,
+  formatSlotName,
+  formatStatName,
+  formatStatTiny,
+} from '@/utils/artifact-stats'
 import ArtifactSetPicker from './ArtifactSetPicker.vue'
 import { SLOT_ICONS } from './styles'
 
@@ -49,15 +62,22 @@ import { SLOT_ICONS } from './styles'
  */
 const props = defineProps<{
   sets: SetOption[]
+  /** Characters wearing pieces, for "Equipped by". */
+  owners: SetOption[]
   /** Preset sizes over the whole inventory. */
   feedableCount: number
   spareCount: number
   maxedCount: number
+  zeroCount: number
+  /** Pieces the previous capture lacked; null without a previous capture. */
+  newCount: number | null
   slotCounts: ReadonlyMap<string, number>
-  /** Rarities present in the inventory, highest first. */
-  rarities: number[]
   rarityCounts: ReadonlyMap<number, number>
+  /** Rarities the inventory has at all. */
+  present: ReadonlySet<number>
   mainStats: { key: string; count: number }[]
+  substatCounts: ReadonlyMap<string, number>
+  lineCounts: ReadonlyMap<number, number>
 }>()
 const filters = defineModel<ArtifactFilters>({ required: true })
 
@@ -79,6 +99,9 @@ const sort = computed({
   get: () => filters.value.sort,
   set: (sort: ArtifactSort) => patch({ sort, descending: defaultDescending(sort) }),
 })
+const sortTitle = computed(
+  () => SORT_OPTIONS.find((o) => o.value === filters.value.sort)?.title ?? 'Sort',
+)
 const mainStat = computed({
   get: () => filters.value.mainStat,
   set: (mainStat: string) => patch({ mainStat }),
@@ -102,6 +125,14 @@ const equipped = computed({
 const astral = computed({
   get: () => filters.value.astral,
   set: (astral: AstralFilter) => patch({ astral }),
+})
+const elixir = computed({
+  get: () => filters.value.elixir,
+  set: (elixir: ElixirFilter) => patch({ elixir }),
+})
+const lines = computed({
+  get: () => filters.value.lines,
+  set: (lines: LinesFilter) => patch({ lines }),
 })
 
 const RARITY_TEXT: Record<number, string> = {
@@ -127,6 +158,21 @@ const ASTRAL_OPTIONS: { value: AstralFilter; label: string }[] = [
   { value: 'marked', label: 'Yes' },
   { value: 'unmarked', label: 'No' },
 ]
+const ELIXIR_OPTIONS: { value: ElixirFilter; label: string }[] = [
+  { value: 'any', label: 'All' },
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+]
+const lineOptions = computed(() => [
+  { value: 0 as LinesFilter, label: 'All' },
+  ...([4, 3] as const).map((n) => ({
+    value: n as LinesFilter,
+    label: `${n}`,
+    count: props.lineCounts.get(n) ?? 0,
+    title: `${n} lines now`,
+  })),
+])
+const sortOptions = SORT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))
 
 const levelOptions = Array.from({ length: LEVEL_MAX - LEVEL_MIN + 1 }, (_, i) => ({
   value: LEVEL_MIN + i,
@@ -147,28 +193,42 @@ function toggleMaxOnly() {
 
 const feedable = computed(() => isFeedablePreset(filters.value))
 const spare = computed(() => isSparePreset(filters.value))
+const zero = computed(() => isZeroPreset(filters.value))
 
-// "More filters" stays open or closed per device; it opens by itself when
-// one of the filters inside it is in use, so nothing active is hidden.
+// "More filters" stays open or closed per device and opens by itself when a
+// filter inside it is in use, so nothing active is hidden. On a phone it
+// always starts closed: its count badge and the pills show what is on.
 const moreCount = computed(() => {
   const f = filters.value
   return (
     Number(f.mainStat !== '') +
+    Number(f.substats.length > 0) +
+    Number(f.lines !== 0) +
     Number(f.levelMin > LEVEL_MIN || f.levelMax < LEVEL_MAX) +
     Number(f.lock !== 'any') +
     Number(f.equipped !== 'any') +
-    Number(f.astral !== 'any')
+    Number(f.owners.length > 0) +
+    Number(f.astral !== 'any') +
+    Number(f.elixir !== 'any')
   )
 })
-const moreOpen = ref(readJson<boolean>('artifacts:more-filters', false) || moreCount.value > 0)
-watch(moreOpen, (open) => writeJson('artifacts:more-filters', open))
+const phone = typeof matchMedia === 'function' && matchMedia('(max-width: 639px)').matches
+const moreOpen = ref(!phone && (loadFlag('more-filters', false) || moreCount.value > 0))
+watch(moreOpen, (open) => saveFlag('more-filters', open))
 
 const pickerOpen = ref(false)
+const ownersOpen = ref(false)
 const selectedSets = computed({
   get: () => filters.value.sets,
   set: (sets: string[]) => patch({ sets }),
 })
+const selectedOwners = computed({
+  get: () => filters.value.owners,
+  set: (owners: string[]) => patch({ owners }),
+})
 const setsTitle = computed(() => filters.value.sets.map(formatSetName).join(', ') || 'All sets')
+const ownerName = (key: string) => props.owners.find((o) => o.key === key)?.name ?? key
+const ownersTitle = computed(() => filters.value.owners.map(ownerName).join(', ') || 'Anyone')
 
 interface Pill {
   id: string
@@ -187,12 +247,14 @@ const ASTRAL_LABEL: Record<AstralFilter, string> = {
   marked: 'Astral',
   unmarked: 'No astral',
 }
+const ELIXIR_LABEL: Record<ElixirFilter, string> = { any: '', yes: 'Elixir', no: 'No elixir' }
 
 const pills = computed<Pill[]>(() => {
   const f = filters.value
   const out: Pill[] = []
   const text = f.search.trim()
   if (text) out.push({ id: 'search', label: `“${text}”`, remove: () => patch({ search: '' }) })
+  if (f.fresh) out.push({ id: 'fresh', label: 'New', remove: () => patch({ fresh: false }) })
   for (const key of f.sets) {
     out.push({
       id: `set:${key}`,
@@ -213,6 +275,16 @@ const pills = computed<Pill[]>(() => {
       label: `Main: ${formatStatName(f.mainStat)}`,
       remove: () => patch({ mainStat: '' }),
     })
+  }
+  if (f.substats.length) {
+    out.push({
+      id: 'substats',
+      label: f.substats.map(formatStatTiny).join(' + '),
+      remove: () => patch({ substats: [] }),
+    })
+  }
+  if (f.lines) {
+    out.push({ id: 'lines', label: `${f.lines} lines`, remove: () => patch({ lines: 0 }) })
   }
   for (const rarity of [...f.rarities].sort((a, b) => b - a)) {
     out.push({
@@ -237,11 +309,25 @@ const pills = computed<Pill[]>(() => {
       remove: () => patch({ equipped: 'any' }),
     })
   }
+  for (const key of f.owners) {
+    out.push({
+      id: `owner:${key}`,
+      label: ownerName(key),
+      remove: () => patch({ owners: filters.value.owners.filter((k) => k !== key) }),
+    })
+  }
   if (f.astral !== 'any') {
     out.push({
       id: 'astral',
       label: ASTRAL_LABEL[f.astral],
       remove: () => patch({ astral: 'any' }),
+    })
+  }
+  if (f.elixir !== 'any') {
+    out.push({
+      id: 'elixir',
+      label: ELIXIR_LABEL[f.elixir],
+      remove: () => patch({ elixir: 'any' }),
     })
   }
   if (f.best) out.push({ id: 'best', label: 'Best', remove: () => patch({ best: false }) })
@@ -288,9 +374,9 @@ function clearAll() {
           </span>
           <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
         </UiButton>
-        <label class="shrink-0" title="Sort">
+        <label class="shrink-0" :title="sortTitle">
           <span class="sr-only">Sort by</span>
-          <UiSelect v-model="sort" :options="SORT_OPTIONS" class="w-28" />
+          <UiSelect v-model="sort" :options="sortOptions" class="w-32" />
         </label>
         <UiIconButton
           :label="filters.descending ? 'Descending' : 'Ascending'"
@@ -323,10 +409,11 @@ function clearAll() {
 
       <div role="group" aria-label="Rarity" class="flex gap-2 sm:flex-wrap">
         <FilterChip
-          v-for="rarity in rarities"
+          v-for="rarity in ARTIFACT_RARITIES"
           :key="rarity"
           :pressed="filters.rarities.includes(rarity)"
           :count="rarityCounts.get(rarity) ?? 0"
+          :title="present.has(rarity) ? undefined : 'None in this capture'"
           @toggle="patch({ rarities: toggled(filters.rarities, rarity) })"
         >
           <span :class="RARITY_TEXT[rarity]">{{ rarity }}★</span>
@@ -347,6 +434,27 @@ function clearAll() {
         >
           <Trophy class="size-4 shrink-0" aria-hidden="true" />
           Best
+        </FilterChip>
+        <FilterChip
+          :pressed="filters.fresh"
+          :count="newCount ?? 0"
+          :title="
+            newCount === null
+              ? 'No earlier capture to compare with'
+              : 'Not in the previous capture: new, or levelled since'
+          "
+          @toggle="patch({ fresh: !filters.fresh })"
+        >
+          <Sparkles class="size-4 shrink-0" aria-hidden="true" />
+          New
+        </FilterChip>
+        <FilterChip
+          :pressed="zero"
+          :count="zeroCount"
+          title="Unequipped 5★ at +0"
+          @toggle="filters = toggleZeroPreset(filters)"
+        >
+          <span class="tabular font-mono">+0</span> 5★
         </FilterChip>
         <FilterChip
           :pressed="feedable"
@@ -379,7 +487,7 @@ function clearAll() {
         class="shrink-0 px-3"
         :aria-expanded="moreOpen"
         :aria-controls="moreId"
-        title="Main stat, level, lock, location, astral mark"
+        title="Main stat, substats, lines, level, lock, location, wearer, astral mark, elixir"
         @click="moreOpen = !moreOpen"
       >
         <SlidersHorizontal class="size-4" aria-hidden="true" />
@@ -391,33 +499,88 @@ function clearAll() {
     <div
       v-show="moreOpen"
       :id="moreId"
-      class="flex flex-wrap items-end gap-x-4 gap-y-3 border-t border-border-subtle pt-3"
+      class="flex flex-col gap-3 border-t border-border-subtle pt-3"
     >
-      <label class="flex w-full min-w-0 flex-col gap-1.5 sm:w-48">
-        <span class="text-sm font-medium text-text-secondary">Main stat</span>
-        <UiSelect v-model="mainStat" :options="mainStatOptions" />
-      </label>
-      <div class="flex gap-2">
-        <label class="flex w-24 flex-col gap-1.5">
-          <span class="text-sm font-medium text-text-secondary">Min</span>
-          <UiSelect v-model="levelMin" :options="levelOptions" />
+      <div class="flex flex-col gap-1.5">
+        <span
+          class="text-sm font-medium text-text-secondary"
+          title="Has all of these (the line +4 opens counts)"
+          >Substats</span
+        >
+        <div
+          role="group"
+          aria-label="Substats"
+          class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
+        >
+          <FilterChip
+            v-for="key in SUBSTAT_KEYS"
+            :key="key"
+            :pressed="filters.substats.includes(key)"
+            :count="substatCounts.get(key) ?? 0"
+            :title="formatStatName(key)"
+            @toggle="patch({ substats: toggled(filters.substats, key) })"
+          >
+            {{ formatStatTiny(key) }}
+          </FilterChip>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-end gap-x-4 gap-y-3">
+        <label class="flex w-full min-w-0 flex-col gap-1.5 sm:w-48">
+          <span class="text-sm font-medium text-text-secondary">Main stat</span>
+          <UiSelect v-model="mainStat" :options="mainStatOptions" />
         </label>
-        <label class="flex w-24 flex-col gap-1.5">
-          <span class="text-sm font-medium text-text-secondary">Max</span>
-          <UiSelect v-model="levelMax" :options="levelOptions" />
-        </label>
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Lock</span>
-        <UiSegmented v-model="lock" :options="LOCK_OPTIONS" label="Lock" />
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Location</span>
-        <UiSegmented v-model="equipped" :options="EQUIP_OPTIONS" label="Location" />
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Astral mark</span>
-        <UiSegmented v-model="astral" :options="ASTRAL_OPTIONS" label="Astral mark" />
+        <div class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Lines</span>
+          <UiSegmented v-model="lines" :options="lineOptions" label="Lines" />
+        </div>
+        <div class="flex gap-2">
+          <label class="flex w-24 flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-secondary">Min</span>
+            <UiSelect v-model="levelMin" :options="levelOptions" />
+          </label>
+          <label class="flex w-24 flex-col gap-1.5">
+            <span class="text-sm font-medium text-text-secondary">Max</span>
+            <UiSelect v-model="levelMax" :options="levelOptions" />
+          </label>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Lock</span>
+          <UiSegmented v-model="lock" :options="LOCK_OPTIONS" label="Lock" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Location</span>
+          <UiSegmented v-model="equipped" :options="EQUIP_OPTIONS" label="Location" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-text-secondary" aria-hidden="true"
+            >Equipped by</span
+          >
+          <UiButton
+            :class="filters.owners.length ? 'border-accent-text!' : ''"
+            :title="ownersTitle"
+            aria-haspopup="dialog"
+            aria-label="Equipped by"
+            @click="ownersOpen = true"
+          >
+            <UserRound class="size-4 shrink-0" aria-hidden="true" />
+            <span v-if="filters.owners.length" class="tabular font-mono text-accent-text">
+              {{ filters.owners.length }}
+            </span>
+            <span v-else>Anyone</span>
+            <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
+          </UiButton>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-sm font-medium text-text-secondary" aria-hidden="true"
+            >Astral mark</span
+          >
+          <UiSegmented v-model="astral" :options="ASTRAL_OPTIONS" label="Astral mark" />
+        </div>
+        <div class="flex flex-col gap-1.5" title="Sanctifying Elixir">
+          <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Elixir</span>
+          <UiSegmented v-model="elixir" :options="ELIXIR_OPTIONS" label="Elixir" />
+        </div>
       </div>
     </div>
 
@@ -445,6 +608,14 @@ function clearAll() {
       :open="pickerOpen"
       :options="sets"
       @close="pickerOpen = false"
+    />
+    <ArtifactSetPicker
+      v-model="selectedOwners"
+      :open="ownersOpen"
+      :options="owners"
+      title="Equipped by"
+      characters
+      @close="ownersOpen = false"
     />
   </UiToolbar>
 </template>
