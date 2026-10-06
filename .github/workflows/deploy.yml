@@ -1,0 +1,70 @@
+name: Deploy
+# Every push to main (and a game data bump this repository merged itself):
+# the CI checks, then the remote D1 migrations, then `wrangler deploy`, in
+# that order, as the manual deploy does (a deploy may need a migration; a
+# migration never needs the new code). Secrets: CLOUDFLARE_API_TOKEN,
+# CLOUDFLARE_ACCOUNT_ID (README: Deploying), GAME_DATA_TOKEN.
+#
+# The gap icons load from gi-cdn.475.dev: deploy gi-cdn first when a game
+# data release adds `hosted` names (its README), or those show initials
+# until it is.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Commit to deploy (game-data-bump.yml passes its merge commit)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+    with:
+      # What was pushed, or the merge commit game-data-bump.yml passes (not
+      # the commit that run started on).
+      ref: ${{ inputs.ref || github.sha }}
+    secrets: inherit
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          game-data-token: ${{ secrets.GAME_DATA_TOKEN }}
+
+      - name: Cloudflare credentials
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Set the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets (README: Deploying)."
+            exit 1
+          fi
+
+      - name: Apply D1 migrations
+        run: pnpm --filter @gdt/tracker db:migrate:remote
+
+      - name: Build
+        run: pnpm --filter @gdt/tracker build-only
+
+      - name: Deploy the Worker
+        working-directory: apps/tracker
+        run: pnpm exec wrangler deploy --message "$(git rev-parse --short HEAD) via ${GITHUB_EVENT_NAME}"

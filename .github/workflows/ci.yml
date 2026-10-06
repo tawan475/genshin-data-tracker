@@ -1,0 +1,47 @@
+name: CI
+# Tests (shared in Node, worker and app helpers in workerd with a local D1),
+# type check and the app build, on every pull request and on pushes to other
+# branches. Pushes to main run it as the first job of deploy.yml, which
+# deploys only when it passes; game-data-bump.yml runs the same checks
+# before it merges a game data release.
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Ref to check (default: the event's)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          game-data-token: ${{ secrets.GAME_DATA_TOKEN }}
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Build
+        run: pnpm --filter @gdt/tracker build-only

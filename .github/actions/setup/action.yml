@@ -1,0 +1,47 @@
+name: Set up
+description: >
+  pnpm and Node 24, read access to the private game data repository
+  (tawan475/genshin-game-data, a git dependency of apps/tracker), and the
+  workspace's dependencies.
+
+inputs:
+  game-data-token:
+    description: "GAME_DATA_TOKEN: a fine-grained token with Contents: read on tawan475/genshin-game-data"
+    required: true
+  install:
+    description: "Run pnpm install --frozen-lockfile"
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: pnpm
+
+    # pnpm sees the repository is private and fetches it with git: give git the
+    # token for that one repository, whichever URL form the lockfile records.
+    # (Check out with persist-credentials: false, or the checkout's own
+    # GITHUB_TOKEN header is sent instead and the fetch answers "not found".)
+    - name: Read access to the game data
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.game-data-token }}
+      run: |
+        if [ -z "$TOKEN" ]; then
+          echo "::error::The GAME_DATA_TOKEN secret is not set: pnpm can't fetch tawan475/genshin-game-data."
+          exit 1
+        fi
+        echo "::add-mask::$TOKEN"
+        base="https://x-access-token:${TOKEN}@github.com/tawan475/genshin-game-data"
+        git config --global --add "url.${base}.insteadOf" "https://github.com/tawan475/genshin-game-data"
+        git config --global --add "url.${base}.insteadOf" "ssh://git@github.com/tawan475/genshin-game-data"
+        git config --global --add "url.${base}.insteadOf" "git@github.com:tawan475/genshin-game-data"
+
+    - name: Install
+      if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile
