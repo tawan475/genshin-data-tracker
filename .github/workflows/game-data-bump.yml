@@ -1,0 +1,148 @@
+name: Game data bump
+# The game data comes from the private tawan475/genshin-game-data, pinned to
+# a release tag in apps/tracker/package.json. When it releases (its
+# release.yml sends `repository_dispatch` `game-data-release` with the tag),
+# or at the daily check for a newer tag, this bumps the dependency on a
+# branch, runs the tests, type check and build, opens a pull request and
+# merges it when they pass; then deploy.yml deploys the merge. A failing
+# check leaves the pull request open (label `needs-human`) for a human.
+on:
+  repository_dispatch:
+    types: [game-data-release]
+  schedule:
+    - cron: "29 4 * * *" # daily fallback, after the data repo's update
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (default: the newest)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: game-data-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      merged: ${{ steps.merge.outputs.merged }}
+      sha: ${{ steps.merge.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          game-data-token: ${{ secrets.GAME_DATA_TOKEN }}
+          install: "false"
+
+      - name: Which release
+        id: tag
+        env:
+          PAYLOAD_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          current=$(node -p "(require('./apps/tracker/package.json').dependencies['@gdt/game-data'] ?? '').split('#')[1] ?? ''")
+          tag="${PAYLOAD_TAG:-$INPUT_TAG}"
+          if [ -z "$tag" ]; then
+            tag=$(git ls-remote --tags --refs https://github.com/tawan475/genshin-game-data.git 'v*' \
+              | sed 's#.*refs/tags/##' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          fi
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::No release tag to bump to (got '$tag')."
+            exit 1
+          fi
+          newest=$(printf '%s\n%s\n' "$current" "$tag" | sort -V | tail -n 1)
+          echo "current $current, release $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "branch=game-data/$tag" >> "$GITHUB_OUTPUT"
+          if [ "$tag" = "$current" ] || [ "$newest" != "$tag" ]; then
+            echo "Already on $current."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "$(gh pr list --head "game-data/$tag" --state open --json number --jq '.[].number')" ]; then
+            echo "A pull request for $tag is open already: a human has it."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump
+        if: steps.tag.outputs.skip == 'false'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: pnpm --filter @gdt/tracker add "@gdt/game-data@github:tawan475/genshin-game-data#${TAG}"
+
+      - name: Tests
+        id: test
+        if: steps.tag.outputs.skip == 'false'
+        continue-on-error: true
+        run: pnpm test
+
+      - name: Type check
+        id: typecheck
+        if: steps.tag.outputs.skip == 'false'
+        continue-on-error: true
+        run: pnpm type-check
+
+      - name: Build
+        id: build
+        if: steps.tag.outputs.skip == 'false'
+        continue-on-error: true
+        run: pnpm --filter @gdt/tracker build-only
+
+      - name: Pull request
+        id: merge
+        if: steps.tag.outputs.skip == 'false'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          BRANCH: ${{ steps.tag.outputs.branch }}
+          PASSED: ${{ steps.test.outcome == 'success' && steps.typecheck.outcome == 'success' && steps.build.outcome == 'success' }}
+          REPO: ${{ github.repository }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add apps/tracker/package.json pnpm-lock.yaml
+          git commit -m "Game data $TAG" -m "Bumped by the Game data bump workflow."
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${BRANCH}"
+          {
+            echo "Game data release [${TAG}](https://github.com/tawan475/genshin-game-data/releases/tag/${TAG})."
+            echo
+            if [ "$PASSED" = "true" ]; then
+              echo "Tests, type check and build pass: merged and deployed by the workflow."
+            else
+              echo "**Needs a human**: tests ${{ steps.test.outcome }}, type check ${{ steps.typecheck.outcome }}, build ${{ steps.build.outcome }}. Fix it on this branch and merge (deploy.yml deploys the merge)."
+            fi
+            echo
+            echo "Run: $RUN"
+          } > body.md
+          url=$(gh pr create --base main --head "$BRANCH" --title "Game data $TAG" --body-file body.md)
+          echo "$url"
+          if [ "$PASSED" = "true" ]; then
+            gh pr merge "$url" --merge --delete-branch
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$(gh pr view "$url" --json mergeCommit --jq .mergeCommit.oid)" >> "$GITHUB_OUTPUT"
+          else
+            gh label create needs-human --color d93f0b --description "Waits for a human" 2> /dev/null || true
+            gh pr edit "$url" --add-label needs-human
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: bump
+    if: needs.bump.outputs.merged == 'true'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      ref: ${{ needs.bump.outputs.sha }}
+    secrets: inherit
