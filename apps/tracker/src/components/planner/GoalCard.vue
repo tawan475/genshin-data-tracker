@@ -15,10 +15,11 @@ import {
 import GameIcon from '@/components/ui/GameIcon.vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { ELEMENT_FILL, RARITY_SOFT } from '@/components/characters/tokens'
-import { characterIcon, gameIcon, materialIcon, weaponIcon } from '@/lib/assets'
+import { artifactSetIcon, characterIcon, gameIcon, materialIcon, weaponIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
+import { formatSetName } from '@/utils/artifact-stats'
 import { characterParts, weaponPart, type DonePart } from './done'
-import { READINESS } from './farm-format'
+import { ARTIFACTS_LEFT, READINESS } from './farm-format'
 import { fromTouch, useItemPopover } from './item-popover'
 import { levelLabel, type GoalEntry, type NextHint, type WeaponGoalView } from './model'
 import type { GoalNeeds, NeedChip } from './needs'
@@ -29,8 +30,10 @@ import type { GoalNeeds, NeedChip } from './needs'
  * Done (it spends the materials, see DoneDialog); a part set by hand shows
  * the pencil. Under them, what the goal is still short of as tappable
  * chips (the inventory editor) and its readiness: ready with every goal,
- * ready on its own, or short. The header opens the editor; the star marks
- * a favorite, the eye counts it in the totals or not.
+ * ready on its own, or short. An artifact goal is a row of its own (sets
+ * still farmed, slots done; it opens the editor's Artifacts tab). The
+ * header opens the editor; the star marks a favorite, the eye counts it in
+ * the totals or not.
  *
  * In priority order (`order`) a handle with the card's place leads the
  * header: drag it (mouse, finger) or use the arrow keys on it. While
@@ -54,7 +57,8 @@ const props = defineProps<{
   selected?: boolean
 }>()
 const emit = defineEmits<{
-  open: []
+  /** Open the editor (on a tab: the Artifacts row). */
+  open: [tab?: 'artifacts']
   select: []
   grab: [event: PointerEvent]
   nudge: [event: KeyboardEvent]
@@ -163,9 +167,26 @@ const portrait = computed(() => {
   return { src: weaponIcon(w.key, w.target.ascension), name: w.name, rarity: w.rarity }
 })
 
-const status = computed(() =>
-  props.entry.done ? READINESS.done : props.needs ? READINESS[props.needs.status] : null,
-)
+const status = computed(() => {
+  const e = props.entry
+  if (e.done) return READINESS.done
+  if (e.materialsDone && e.artifacts) return ARTIFACTS_LEFT
+  return props.needs ? READINESS[props.needs.status] : null
+})
+
+/** The artifact row: the sets still farmed (else all), slots done. */
+const artifacts = computed(() => {
+  const a = props.entry.artifacts
+  if (!a) return null
+  const sets = a.open.length ? a.open : a.sets.map((s) => s.key)
+  const names = sets.map(formatSetName)
+  return {
+    sets: sets.slice(0, 3),
+    done: a.done,
+    complete: a.complete,
+    title: `Artifacts: ${a.done}/5 slots${names.length ? ` · ${names.join(', ')}` : ''}`,
+  }
+})
 
 const chipIcon = (chip: NeedChip) =>
   chip.key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(chip.material.icon)
@@ -185,8 +206,9 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
 </script>
 
 <template>
+  <!-- content-visibility: cards off screen skip layout and paint (100 goals on a phone). -->
   <article
-    class="flex w-full flex-col rounded-xl border bg-surface-raised shadow-sm transition-[color,border-color,opacity]"
+    class="flex w-full flex-col rounded-xl border bg-surface-raised shadow-sm transition-[color,border-color,opacity] [contain-intrinsic-size:auto_18rem] [content-visibility:auto]"
     :class="[
       order?.over && !order.dragging
         ? 'border-accent-text ring-2 ring-accent/30'
@@ -351,6 +373,37 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
           aria-label="Reached"
           role="img"
         />
+      </li>
+      <li v-if="artifacts" class="flex">
+        <button
+          type="button"
+          class="flex min-h-11 w-full items-center gap-2 px-3 py-1 text-left transition-colors hover:bg-surface-overlay"
+          :title="artifacts.title"
+          :aria-label="`${entry.name}: ${artifacts.title}`"
+          @click="emit('open', 'artifacts')"
+        >
+          <span class="w-16 shrink-0 text-sm text-text-muted">Artifacts</span>
+          <span class="flex min-w-0 flex-1 items-center gap-1">
+            <GameIcon
+              v-for="set in artifacts.sets"
+              :key="set"
+              :src="artifactSetIcon(set)"
+              :name="formatSetName(set)"
+              :rarity="5"
+              size="xs"
+            />
+          </span>
+          <span
+            class="tabular font-mono text-sm"
+            :class="artifacts.complete ? 'text-success-text' : 'text-text-secondary'"
+            >{{ artifacts.done }}/5</span
+          >
+          <Check
+            v-if="artifacts.complete"
+            class="size-4 shrink-0 text-success-text"
+            aria-hidden="true"
+          />
+        </button>
       </li>
     </ul>
 

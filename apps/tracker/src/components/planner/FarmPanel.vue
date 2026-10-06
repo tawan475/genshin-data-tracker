@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
 import type { DropRates } from '@gdt/game-data/drops'
+import type { FarmingData } from '@gdt/game-data/farming'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { FarmPlan, ResinNow } from '@gdt/game-data/planner-estimate'
 import { WEEKDAY_LABELS, type PlanTotals } from '@gdt/game-data/planner-math'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -14,6 +15,8 @@ import { formatCompact, formatDateTime, formatNumber, formatTime } from '@/lib/f
 import CraftCard from './CraftCard.vue'
 import FarmCard from './FarmCard.vue'
 import { formatCountdown, formatSeconds } from './farm-format'
+import { sameValue } from './keep-unchanged'
+import { useProgressive } from './use-progressive'
 import {
   REFRESH_RESIN,
   clampRefreshes,
@@ -21,6 +24,8 @@ import {
   resinDays,
   scheduleDays,
   todaySections,
+  type ArtifactWant,
+  type FarmCard as FarmCardData,
   type FarmDay,
   type FarmInput,
 } from './farm-today'
@@ -30,7 +35,8 @@ import {
  * normal bosses and ley lines at the account's daily resin, Condensed
  * Resin, weeks of weekly bosses), then
  * - Today: what can be farmed on the server's day, by what a run costs
- *   (nothing, 20, 40, 30/60), with crafting among the no-resin cards;
+ *   (nothing, 20, 40, 30/60), with crafting among the no-resin cards, then
+ *   the artifact domains of the sets the goals want;
  * - Schedule: the other day pairs' domains.
  * Every card lists what is still missing and who needs it.
  */
@@ -45,6 +51,10 @@ const props = defineProps<{
   refreshes: number
   day: FarmDay
   resin: ResinNow | null
+  /** Bosses, enemies, regions and artifact domains (null: cards without places). */
+  farming: FarmingData | null
+  /** Artifact sets the counted goals still want. */
+  artifacts: readonly ArtifactWant[]
 }>()
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
@@ -63,9 +73,26 @@ const input = computed<FarmInput>(() => ({
   ar: props.ar,
   wl: props.wl,
   refreshes: clampRefreshes(props.refreshes),
+  farming: props.farming,
+  artifacts: props.artifacts,
 }))
 const weekday = computed(() => props.day.weekday)
-const sections = computed(() => todaySections(input.value, weekday.value))
+/** Cards equal to the last ones keep their objects: only the cards that changed re-render. */
+let lastCards = new Map<string, FarmCardData>()
+const sections = computed(() => {
+  const next = new Map<string, FarmCardData>()
+  const list = todaySections(input.value, weekday.value).map((s) => ({
+    ...s,
+    cards: s.cards.map((card) => {
+      const old = lastCards.get(card.id)
+      const kept = old && sameValue(old, card) ? old : card
+      next.set(card.id, kept)
+      return kept
+    }),
+  }))
+  lastCards = next
+  return list
+})
 const schedule = computed(() => scheduleDays(input.value, weekday.value))
 const headline = computed(() => farmHeadline(props.plan, input.value.refreshes))
 
@@ -76,8 +103,9 @@ const plural = (n: number, one: string) => `${formatNumber(n)} ${one}${n === 1 ?
 const resinTitle = computed(() => {
   const h = headline.value
   const r = input.value.refreshes
+  const most = h.upperBound ? 'at most ' : ''
   const parts = [
-    `${plural(h.runs, 'run')} · ${formatNumber(h.resin)} resin (${formatNumber(h.condensed)} condensed) · ${plural(h.days, 'day')}`,
+    `${most}${plural(h.runs, 'run')} · ${formatNumber(h.resin)} resin (${formatNumber(h.condensed)} condensed) · ${plural(h.days, 'day')}`,
     'domains, normal bosses and ley lines',
     `${formatNumber(h.daily)} resin a day${r ? ` (180 + ${r} × ${REFRESH_RESIN})` : ''}`,
   ]
@@ -89,6 +117,7 @@ const resinTitle = computed(() => {
     parts.push(`gems: ${plural(h.gems.runs, 'run')}, ${formatNumber(h.gems.resin)} resin`)
   }
   if (h.partial) parts.push('some sources have no drop rate')
+  if (h.upperBound) parts.push('World Level 9 boss drops are a guaranteed minimum')
   return parts.join(' · ')
 })
 const weeklyTitle = computed(() => {
@@ -141,6 +170,26 @@ const shown = computed(() => {
   return [{ key: 'free' as const, resin: '0', label: 'No resin', cards: [] }, ...list]
 })
 const nothing = computed(() => shown.value.length === 0)
+
+/**
+ * Cards mounted so far, the first ones at once and the rest over the next
+ * frames (many goals make many cards); a section shows once its first card does.
+ */
+const progressive = useProgressive(
+  computed(() => shown.value.reduce((n, s) => n + s.cards.length + 1, 0)),
+)
+const visible = computed(() => {
+  let budget = progressive.shown.value
+  return shown.value.flatMap((s) => {
+    if (budget <= 0) return []
+    const cards = s.cards.slice(0, Math.max(0, budget - 1))
+    budget -= s.cards.length + 1
+    return [{ ...s, cards, whole: cards.length === s.cards.length }]
+  })
+})
+watch(view, (value) => {
+  if (value === 'today') progressive.restart()
+})
 </script>
 
 <template>
@@ -154,6 +203,7 @@ const nothing = computed(() => shown.value.length === 0)
           <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
         </span>
         <span class="tabular font-mono text-lg leading-7 font-semibold"
+          ><span v-if="headline.upperBound && headline.resin > 0" aria-hidden="true">≤</span
           >{{ headline.resin > 0 ? formatNumber(headline.resin) : '–'
           }}{{ headline.partial ? '+' : '' }}</span
         >
@@ -248,7 +298,7 @@ const nothing = computed(() => shown.value.length === 0)
       </p>
 
       <section
-        v-for="s in shown"
+        v-for="s in visible"
         :key="s.key"
         class="mt-1 flex flex-col gap-1.5"
         :aria-label="`${s.label}: ${s.resin} resin`"
@@ -278,7 +328,11 @@ const nothing = computed(() => shown.value.length === 0)
               Forge from chunks
             </button>
           </FarmCard>
-          <CraftCard v-if="s.key === 'free' && steps.length" :planner="planner" :steps="steps">
+          <CraftCard
+            v-if="s.key === 'free' && s.whole && steps.length"
+            :planner="planner"
+            :steps="steps"
+          >
             <button
               v-if="forge && !oreCard"
               type="button"

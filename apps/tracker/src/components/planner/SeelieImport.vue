@@ -110,8 +110,9 @@ const canon = (value: unknown) =>
 const same = (a: unknown, b: unknown) => canon(a) === canon(b)
 
 /**
- * What the import writes. Notes, favorites and priorities are the tracker's
- * own, and an item need keeps its note and on/off state: those stay as stored.
+ * What the import writes. Notes, favorites, priorities and artifact goals
+ * are the tracker's own, and an item need keeps its note and on/off state:
+ * those stay as stored.
  */
 const plan = computed(() => {
   const r = result.value
@@ -125,6 +126,7 @@ const plan = computed(() => {
       favorite: keep?.favorite,
       priority: keep?.priority,
       constellation: keep?.constellation,
+      artifacts: keep?.artifacts,
     }
     return { key: c.key, target: { ...c.target, ...own } }
   })

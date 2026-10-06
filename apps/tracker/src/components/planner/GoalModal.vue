@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
 import type { DropRates } from '@gdt/game-data/drops'
+import type { FarmingData } from '@gdt/game-data/farming'
 import { goalEstimate } from '@gdt/game-data/planner-estimate'
 import {
   TALENTS,
@@ -12,7 +13,13 @@ import {
   type TalentName,
   type WeaponState,
 } from '@gdt/game-data/planner-math'
-import type { CharacterTarget, CustomCharacter, Good, WeaponTarget } from '@gdt/shared'
+import type {
+  ArtifactGoal,
+  CharacterTarget,
+  CustomCharacter,
+  Good,
+  WeaponTarget,
+} from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import {
   CircleAlert,
@@ -35,9 +42,10 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { characterIcon, weaponIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import ArtifactGoalBlock from './ArtifactGoalBlock.vue'
 import CostList from './CostList.vue'
 import CustomForm from './CustomForm.vue'
-import { STOCK_MEANING, STOCK_TONE, daysText, weeksText } from './farm-format'
+import { daysText, weeksText } from './farm-format'
 import { resinDays } from './farm-today'
 import LevelGrid from './LevelGrid.vue'
 import { goalAtLeast, talentGap, type LevelStep } from './level-grid'
@@ -46,6 +54,7 @@ import {
   levelLabel,
   mergeRequirements,
   withoutPassives,
+  wornByCharacter,
   type GoalEntry,
   type WeaponGoalView,
 } from './model'
@@ -60,8 +69,9 @@ import WeaponGoalBlock from './WeaponGoalBlock.vue'
  * a character's Level (now and goal as level buttons), Talents (− / +
  * steppers, C3/C5 marked, a warning when the goal level's ascension doesn't
  * allow them) and Weapon goals (any weapon of its type, owned or not, the
- * same one twice if wanted); a custom character also has its profile and
- * "Replace with" a real one. Presets set the whole goal in one click. A
+ * same one twice if wanted), Artifacts (sets, main stats and ticks, ticked
+ * from the capture too: ArtifactGoalBlock); a custom character also has its
+ * profile and "Replace with" a real one. Presets set the whole goal in one click. A
  * weapon on its own card gets its editor alone. The cost of the card is
  * beside it (below on phones), each tile coloured by what the bag covers.
  * The header has the favourite, counted and delete (with Undo, from the
@@ -90,6 +100,10 @@ const props = defineProps<{
   taken: ReadonlySet<string>
   /** Custom characters' names by id. */
   names: ReadonlyMap<string, string>
+  /** Artifact domains and the rest (null: not loaded). */
+  farming: FarmingData | null
+  /** The tab to open on (a card's Artifacts row); null: the last one used. */
+  startTab?: string | null
 }>()
 const emit = defineEmits<{
   close: []
@@ -114,16 +128,17 @@ const phases = computed(() =>
   c.value ? (props.planner.characters.get(c.value.key)?.ascension ?? null) : null,
 )
 
-type Tab = 'level' | 'talents' | 'weapon' | 'custom'
+type Tab = 'level' | 'talents' | 'weapon' | 'artifacts' | 'custom'
+const TABS_SAVED: readonly string[] = ['talents', 'weapon', 'artifacts']
 const saved = readStorage('planner:goal-tab')
-const tab = ref<Tab>(saved === 'talents' || saved === 'weapon' ? saved : 'level')
+const tab = ref<Tab>(saved && TABS_SAVED.includes(saved) ? (saved as Tab) : 'level')
 watch(tab, (value) => writeStorage('planner:goal-tab', value))
-// Phase 4 adds an Artifacts tab here.
 const tabs = computed(() => {
   const list: { value: Tab; label: string; count?: number }[] = [
     { value: 'level', label: 'Level' },
     { value: 'talents', label: 'Talents' },
     { value: 'weapon', label: 'Weapon', count: props.entry?.weapons.length || undefined },
+    { value: 'artifacts', label: 'Artifacts' },
   ]
   if (c.value?.custom) list.push({ value: 'custom', label: 'Custom' })
   return list
@@ -144,6 +159,7 @@ watch(
       replaceWith.value = null
       noteOpen.value = !!props.entry?.note
       note.value = props.entry?.note ?? ''
+      if (props.startTab && TABS_SAVED.includes(props.startTab)) tab.value = props.startTab as Tab
       if (tab.value === 'custom' && !c.value?.custom) tab.value = 'level'
     }
   },
@@ -255,6 +271,14 @@ const talentsEdited = computed(() => {
   const ch = c.value
   return !!ch && ch.edited && TALENTS.some((t) => ch.current.talents[t] !== ch.captured.talents[t])
 })
+/** What the character wears (nothing for a custom one). */
+const worn = computed(() =>
+  c.value && !c.value.custom ? wornByCharacter(props.good, c.value.key) : new Map(),
+)
+function setArtifacts(artifacts: ArtifactGoal | undefined) {
+  if (stored.value) setCharacter({ ...stored.value, artifacts })
+}
+
 const arNeed = computed(() => {
   const need = c.value?.requirement?.ar ?? 0
   return props.ar !== null && need > props.ar ? need : 0
@@ -316,11 +340,6 @@ const estimate = computed(() => {
   ]
   return { text: parts.join(' · '), title: title.filter(Boolean).join(' · ') }
 })
-
-const LEGEND = (['all', 'alone', 'short'] as const).map((s) => ({
-  tone: STOCK_TONE[s],
-  meaning: STOCK_MEANING[s],
-}))
 
 // --------------------------------------------------------------- chrome
 
@@ -610,6 +629,15 @@ const replaceSelected = computed<ReadonlySet<string>>(
             </div>
           </section>
 
+          <!-- Artifacts -->
+          <ArtifactGoalBlock
+            v-else-if="tab === 'artifacts'"
+            :goal="stored.artifacts"
+            :worn="worn"
+            :farming="farming"
+            @change="setArtifacts"
+          />
+
           <!-- Custom -->
           <section
             v-else-if="tab === 'custom' && c.custom"
@@ -692,13 +720,8 @@ const replaceSelected = computed<ReadonlySet<string>>(
           :inventory="good.materials"
           :options="options"
           :label="title"
+          legend
         />
-        <ul class="flex flex-col gap-0.5 text-xs text-text-muted" aria-label="Colours">
-          <li v-for="l in LEGEND" :key="l.meaning" class="flex items-center gap-1.5">
-            <span class="font-mono font-semibold" :class="l.tone" aria-hidden="true">12</span>
-            {{ l.meaning }}
-          </li>
-        </ul>
         <p
           v-if="estimate"
           class="tabular font-mono text-sm text-text-secondary"

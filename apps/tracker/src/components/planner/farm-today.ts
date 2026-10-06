@@ -11,14 +11,22 @@
  * resin refreshes the account spends. Pure; the Farm view keeps the results
  * in computed()s.
  *
- * Data gaps (the cards say nothing rather than guess): the game data has no
- * normal boss names (a boss card is named after its drop), no enemy names
- * for the common and elite drop families, and no region for local
- * specialties, so those list their items without a place.
+ * Who and where come from `@gdt/game-data/farming` (`FarmInput.farming`):
+ * a boss card is named after its boss, and a gem a single-element boss on a
+ * card drops joins that card (one run drops both); other gems get a card
+ * named after the bosses dropping them, single-element ones first. Common
+ * and elite drops get a card per enemy, local specialties one per region
+ * (the areas they grow in underneath). Without that data (still loading, or
+ * failed) the cards list their items without a place. World Level 9 boss
+ * estimates are upper bounds ("at most N runs").
+ *
+ * Artifacts: the domains of the sets the counted goals still want, with who
+ * wants them (20 resin a run, no run estimate: artifacts are luck).
  */
 
 import type { DomainEntry, DomainKind, PlannerData } from '@gdt/game-data'
 import type { DropRates } from '@gdt/game-data/drops'
+import type { EnemyGroup, FarmingData, NormalBoss } from '@gdt/game-data/farming'
 import {
   domainTierFor,
   weeklyTierFor,
@@ -39,6 +47,8 @@ import {
   type MaterialLine,
   type PlanTotals,
 } from '@gdt/game-data/planner-math'
+import { formatSetName } from '@/utils/artifact-stats'
+import { domainsForSet, type ArtifactDomainInfo } from './artifact-domains'
 
 // ------------------------------------------------------------------ resin per day
 
@@ -94,6 +104,7 @@ export type FarmCardKind =
   | 'elite'
   | 'ore'
   | 'other'
+  | 'artifact'
 
 /** A card's estimate, with days counted at the account's daily resin. */
 export interface CardRun {
@@ -109,14 +120,22 @@ export interface CardRun {
   weekly: boolean
   /** Domain tier, boss level or World Level the runs assume. */
   bracket: Bracket | null
+  /** The runs are the most it takes (World Level 9 boss drops: "at most N runs"). */
+  upperBound: boolean
 }
 
 export interface FarmCard {
   id: string
   kind: FarmCardKind
-  /** Domain entrance, weekly boss, ley line; the drop for a normal boss; what an item list holds. */
+  /**
+   * Domain entrance, weekly boss, ley line, normal boss, enemy, region; what
+   * an item list holds when the place isn't known.
+   */
   name: string
-  /** Domain cards: the families it drops today ("Freedom"); else ''. */
+  /**
+   * The second line: a domain's families today ("Freedom"), the other bosses
+   * or enemies dropping it, a region's areas, an artifact domain's sets; ''.
+   */
   detail: string
   /** Talent books or weapon materials (domain cards). */
   domain: DomainKind | null
@@ -135,6 +154,15 @@ export interface FarmCard {
   paid: number
   /** Weekly bosses: conversions not made for lack of Dream Solvent. */
   blocked: number
+  /** Artifact cards: the sets wanted there (GOOD keys); else []. */
+  sets: string[]
+}
+
+/** Artifact sets a counted goal still wants. */
+export interface ArtifactWant {
+  /** The character's goal id (`character:Key`, `custom:<id>`). */
+  goal: string
+  sets: readonly string[]
 }
 
 export interface FarmInput {
@@ -147,6 +175,10 @@ export interface FarmInput {
   wl: number | null
   /** Daily resin refreshes (0–6). */
   refreshes: number
+  /** Who drops what and where it grows (`loadFarming`); null/absent: cards without places. */
+  farming?: FarmingData | null
+  /** Artifact sets the counted goals still want. */
+  artifacts?: readonly ArtifactWant[]
 }
 
 const missingOnly = (lines: readonly MaterialLine[]) => lines.filter((l) => l.missing > 0)
@@ -180,7 +212,20 @@ function sumRuns(
     days: resinDays(resin, input.refreshes),
     weekly: false,
     bracket: first.bracket,
+    upperBound: runs.some((r) => r.upperBound === true),
   }
+}
+
+/**
+ * Estimates for things one run drops together (a boss's material and its
+ * gems): the runs of the one that takes longest.
+ */
+function longestRun(
+  runs: readonly RunEstimate[],
+  input: Pick<FarmInput, 'planner' | 'refreshes'>,
+): CardRun | null {
+  const longest = runs.reduce<RunEstimate | null>((a, r) => (a && a.runs >= r.runs ? a : r), null)
+  return longest ? sumRuns([longest], input) : null
 }
 
 /** The worst status of the parts with something missing. */
@@ -234,35 +279,12 @@ export function domainCard(
     goals: goalsOf(lines),
     paid: 0,
     blocked: 0,
+    sets: [],
   }
 }
 
-/** A run on its own (a boss, a gem family, a ley line). */
+/** A run on its own (a ley line). */
 const oneRun = (run: RunEstimate | null, input: FarmInput) => (run ? sumRuns([run], input) : null)
-
-function groupCard(
-  group: FarmGroup,
-  kind: 'boss' | 'gem',
-  input: FarmInput,
-  resinPerRun: number,
-): FarmCard {
-  const lines = missingOnly(group.lines)
-  return {
-    id: group.id,
-    kind,
-    name: group.name,
-    detail: '',
-    domain: null,
-    resinPerRun,
-    run: oneRun(group.run, input),
-    status: group.status,
-    lock: group.status === 'locked' ? wlLock(input.drops?.bosses.byWorldLevel) : null,
-    lines,
-    goals: goalsOf(lines),
-    paid: 0,
-    blocked: 0,
-  }
-}
 
 /** EXP points as the largest book or ore (what the chip shows; the popover has them all). */
 export function expLine(planner: PlannerData, total: ExpTotal, kind: 'character' | 'weapon') {
@@ -310,6 +332,7 @@ function leyCard(line: FarmLeyLine, input: FarmInput): FarmCard | null {
     goals: goalsOf(lines),
     paid: line.fromDomains,
     blocked: 0,
+    sets: [],
   }
 }
 
@@ -342,6 +365,7 @@ function weeklyCard(weekly: FarmWeekly, input: FarmInput): FarmCard | null {
           days: run.weeks,
           weekly: true,
           bracket: run.bracket,
+          upperBound: run.upperBound === true,
         }
       : null,
     status: weekly.status,
@@ -350,6 +374,7 @@ function weeklyCard(weekly: FarmWeekly, input: FarmInput): FarmCard | null {
     goals: goalsOf(lines),
     paid: 0,
     blocked: weekly.conversion?.blocked ?? 0,
+    sets: [],
   }
 }
 
@@ -359,6 +384,7 @@ function listCard(
   kind: 'local' | 'common' | 'elite' | 'other',
   name: string,
   lines: readonly MaterialLine[],
+  detail = '',
 ): FarmCard | null {
   const short = missingOnly(lines)
   if (short.length === 0) return null
@@ -366,7 +392,7 @@ function listCard(
     id,
     kind,
     name,
-    detail: '',
+    detail,
     domain: null,
     resinPerRun: 0,
     run: null,
@@ -376,6 +402,7 @@ function listCard(
     goals: goalsOf(short),
     paid: 0,
     blocked: 0,
+    sets: [],
   }
 }
 
@@ -398,12 +425,13 @@ function oreCard(input: FarmInput): FarmCard | null {
     goals: goalsOf([line]),
     paid: 0,
     blocked: 0,
+    sets: [],
   }
 }
 
 // ------------------------------------------------------------------ sections
 
-export type FarmSectionKey = 'free' | 'domain' | 'boss' | 'weekly'
+export type FarmSectionKey = 'free' | 'domain' | 'boss' | 'weekly' | 'artifact'
 
 export interface FarmSection {
   key: FarmSectionKey
@@ -422,28 +450,97 @@ const lockedLast = (cards: FarmCard[]) =>
     .sort((a, b) => Number(a.card.lock !== null) - Number(b.card.lock !== null) || a.i - b.i)
     .map((x) => x.card)
 
+const unique = (list: readonly string[]) => [...new Set(list)]
+
+/** "Slime", "Hilichurl · Samachurl · Mitachurl": the first name, the rest underneath. */
+function nameAndDetail(names: readonly string[], fallback: string) {
+  const list = unique(names)
+  return { name: list[0] ?? fallback, detail: list.slice(1).join(' · ') }
+}
+
+/** Local specialties, one card per region (its areas underneath); unknown regions last. */
+function localCards(input: FarmInput, groups: readonly FarmGroup[]): FarmCard[] {
+  const lines = groups.filter((g) => g.kind === 'local').flatMap((g) => missingOnly(g.lines))
+  const farming = input.farming
+  if (!farming) return nonNull([listCard('local', 'local', 'Local specialties', lines)])
+  const byRegion = new Map<number, { name: string; lines: MaterialLine[]; areas: string[] }>()
+  for (const line of lines) {
+    const source = farming.localOf.get(line.material.key)
+    const id = source?.region?.id ?? 0
+    const region = byRegion.get(id) ?? {
+      name: source?.region?.name ?? 'Local specialties',
+      lines: [],
+      areas: [],
+    }
+    region.lines.push(line)
+    region.areas.push(...(source?.areas ?? []))
+    byRegion.set(id, region)
+  }
+  return [...byRegion]
+    .sort(([a], [b]) => (a || Infinity) - (b || Infinity))
+    .flatMap(([id, r]) =>
+      nonNull([listCard(`local:${id}`, 'local', r.name, r.lines, unique(r.areas).join(' · '))]),
+    )
+}
+
+/**
+ * Common or elite drops, one card per enemy (the enemy the game data lists
+ * first for the drop: its own category, fewest drops); families sharing it
+ * share the card. The other enemies dropping them go underneath.
+ */
+function enemyCards(
+  input: FarmInput,
+  groups: readonly FarmGroup[],
+  kind: 'common' | 'elite',
+): FarmCard[] {
+  const mine = groups.filter((g) => g.kind === 'enemy' && g.lines[0]?.material.kind === kind)
+  const label = kind === 'common' ? 'Common enemies' : 'Elite enemies'
+  const farming = input.farming
+  if (!farming) {
+    return nonNull([
+      listCard(
+        kind,
+        kind,
+        label,
+        mine.flatMap((g) => g.lines),
+      ),
+    ])
+  }
+  const cards = new Map<string, { enemies: EnemyGroup[]; lines: MaterialLine[] }>()
+  for (const g of mine) {
+    const enemies = farming.enemiesOf.get(g.key) ?? []
+    const id = enemies[0] ? `${kind}:${enemies[0].id || enemies[0].name}` : `${kind}:${g.key}`
+    const card = cards.get(id) ?? { enemies: [], lines: [] }
+    card.enemies.push(...enemies)
+    card.lines.push(...g.lines)
+    cards.set(id, card)
+  }
+  return [...cards].flatMap(([id, c]) => {
+    const { name, detail } = nameAndDetail(
+      c.enemies.map((e) => e.name),
+      label,
+    )
+    return nonNull([listCard(id, kind, name, c.lines, detail)])
+  })
+}
+
 /** Everything farmed without resin: local specialties, enemy drops, ore, what isn't farmed. */
 export function freeCards(input: FarmInput): FarmCard[] {
   const groups = input.plan.groups.filter((g) => g.missing > 0)
   const lines = (pick: (g: FarmGroup) => boolean) => groups.filter(pick).flatMap((g) => g.lines)
-  const enemy = (kind: 'common' | 'elite') => (g: FarmGroup) =>
-    g.kind === 'enemy' && g.lines[0]?.material.kind === kind
   const quest = input.plan.weekly.filter((w) => w.boss === null).flatMap((w) => w.lines)
-  return nonNull([
-    listCard(
-      'local',
-      'local',
-      'Local specialties',
-      lines((g) => g.kind === 'local'),
-    ),
-    listCard('common', 'common', 'Common enemies', lines(enemy('common'))),
-    listCard('elite', 'elite', 'Elite enemies', lines(enemy('elite'))),
-    oreCard(input),
-    listCard('other', 'other', 'Other', [
-      ...lines((g) => g.kind === 'crown' || (g.kind === 'gem' && g.status === 'not-farmed')),
-      ...quest,
+  return [
+    ...localCards(input, groups),
+    ...enemyCards(input, groups, 'common'),
+    ...enemyCards(input, groups, 'elite'),
+    ...nonNull([
+      oreCard(input),
+      listCard('other', 'other', 'Other', [
+        ...lines((g) => g.kind === 'crown' || (g.kind === 'gem' && g.status === 'not-farmed')),
+        ...quest,
+      ]),
     ]),
-  ])
+  ]
 }
 
 /** Ley lines (every day). */
@@ -454,16 +551,75 @@ export function leyCards(input: FarmInput): FarmCard[] {
   ])
 }
 
-/** Normal bosses (40 resin, every day): their drops, then the gems. */
+interface BossCardParts {
+  id: string
+  kind: 'boss' | 'gem'
+  /** Who drops it, the first named on the card. */
+  bosses: readonly NormalBoss[]
+  /** Without boss names: the drop's name. */
+  fallback: string
+  groups: FarmGroup[]
+}
+
+function bossCard(parts: BossCardParts, input: FarmInput, resinPerRun: number): FarmCard {
+  const lines = parts.groups.flatMap((g) => missingOnly(g.lines))
+  const status = worst(parts.groups.map((g) => g.status))
+  const { name, detail } = nameAndDetail(
+    parts.bosses.map((b) => b.name),
+    parts.fallback,
+  )
+  return {
+    id: parts.id,
+    kind: parts.kind,
+    name,
+    detail,
+    domain: null,
+    resinPerRun,
+    run: longestRun(
+      parts.groups.flatMap((g) => (g.run ? [g.run] : [])),
+      input,
+    ),
+    status,
+    lock: status === 'locked' ? wlLock(input.drops?.bosses.byWorldLevel) : null,
+    lines,
+    goals: goalsOf(lines),
+    paid: 0,
+    blocked: 0,
+    sets: [],
+  }
+}
+
+/**
+ * Normal bosses (40 resin, every day), named after the boss: its drops, and
+ * the gems it drops when it is a single-element boss (a run drops both);
+ * then the other gems, each named after the bosses dropping it,
+ * single-element ones first.
+ */
 export function bossCards(input: FarmInput): FarmCard[] {
   const resin = input.drops?.bosses.resin ?? 40
   const groups = input.plan.groups.filter((g) => g.missing > 0)
-  return lockedLast([
-    ...groups.filter((g) => g.kind === 'boss').map((g) => groupCard(g, 'boss', input, resin)),
-    ...groups
-      .filter((g) => g.kind === 'gem' && g.status !== 'not-farmed')
-      .map((g) => groupCard(g, 'gem', input, resin)),
-  ])
+  const farming = input.farming
+  const cards = new Map<string, BossCardParts>()
+  /** Boss card id by boss (name: hand-kept bosses have no handbook id). */
+  const byBoss = new Map<string, string>()
+  for (const g of groups.filter((x) => x.kind === 'boss')) {
+    const bosses = farming?.bossesOf.get(g.key) ?? []
+    const boss = bosses[0]
+    const id = boss ? `boss:${boss.name}` : g.id
+    const card = cards.get(id)
+    if (card) card.groups.push(g)
+    else cards.set(id, { id, kind: 'boss', bosses, fallback: g.name, groups: [g] })
+    for (const b of bosses) if (!byBoss.has(b.name)) byBoss.set(b.name, id)
+  }
+  const gems: BossCardParts[] = []
+  for (const g of groups.filter((x) => x.kind === 'gem' && x.status !== 'not-farmed')) {
+    const bosses = farming?.gemBossesOf.get(g.key) ?? []
+    const host = bosses.find((b) => b.gems.length === 1 && byBoss.has(b.name))
+    const card = host ? cards.get(byBoss.get(host.name)!) : undefined
+    if (card) card.groups.push(g)
+    else gems.push({ id: g.id, kind: 'gem', bosses, fallback: g.name, groups: [g] })
+  }
+  return lockedLast([...cards.values(), ...gems].map((parts) => bossCard(parts, input, resin)))
 }
 
 /** Weekly bosses (one claim a week each). */
@@ -486,10 +642,74 @@ export function domainCardsOn(input: FarmInput, weekday: number): FarmCard[] {
   )
 }
 
+/** Sets with no domain in the game data (bosses, events…) share one card. */
+export const ELSEWHERE = 'Elsewhere'
+
+/**
+ * Artifact domains (20 resin, every day) for the sets the counted goals
+ * still want, each with the sets wanted there and who wants them, in the
+ * order the goals want them. A set several domains drop (4★ sets) goes
+ * where the same goal already farms, else to a domain already on a card,
+ * else the first. Sets no domain drops share one card, last. No run
+ * estimate: artifacts are luck.
+ */
+export function artifactCards(input: FarmInput): FarmCard[] {
+  const wants = input.artifacts ?? []
+  const cards = new Map<
+    number,
+    { domain: ArtifactDomainInfo | null; sets: string[]; goals: string[] }
+  >()
+  const add = (domain: ArtifactDomainInfo | null, set: string, goal: string) => {
+    const id = domain?.id ?? -1
+    const card = cards.get(id) ?? { domain, sets: [], goals: [] }
+    if (!card.sets.includes(set)) card.sets.push(set)
+    if (!card.goals.includes(goal)) card.goals.push(goal)
+    cards.set(id, card)
+  }
+  const later: { set: string; goal: string; domains: readonly ArtifactDomainInfo[] }[] = []
+  for (const want of wants) {
+    for (const set of want.sets) {
+      const domains = domainsForSet(input.farming, set)
+      if (domains.length <= 1) add(domains[0] ?? null, set, want.goal)
+      else later.push({ set, goal: want.goal, domains })
+    }
+  }
+  for (const { set, goal, domains } of later) {
+    const mine = domains.find((d) => cards.get(d.id)?.goals.includes(goal))
+    add(mine ?? domains.find((d) => cards.has(d.id)) ?? domains[0]!, set, goal)
+  }
+  const ar = input.ar
+  const list = [...cards.values()].map(({ domain, sets, goals }): FarmCard => {
+    const lock = domain && ar !== null && ar < domain.ar ? `AR ${domain.ar}` : null
+    return {
+      id: domain ? `artifact:${domain.id}` : 'artifact:elsewhere',
+      kind: 'artifact',
+      name: domain?.name ?? ELSEWHERE,
+      detail: sets.map(formatSetName).join(' · '),
+      domain: null,
+      resinPerRun: domain?.resin ?? 0,
+      run: null,
+      status: lock ? 'locked' : domain ? 'ok' : 'not-farmed',
+      lock,
+      lines: [],
+      goals,
+      paid: 0,
+      blocked: 0,
+      sets,
+    }
+  })
+  return lockedLast(
+    list.sort(
+      (a, b) => Number(a.id === 'artifact:elsewhere') - Number(b.id === 'artifact:elsewhere'),
+    ),
+  )
+}
+
 /**
  * Today's cards by what a run costs: nothing (exploration, enemies, ore,
  * other), 20 (today's domains, then ley lines), 40 (normal bosses and
- * gems), 30/60 (weekly bosses). Sections with nothing to farm are left out.
+ * gems), 30/60 (weekly bosses), then artifact domains (20). Sections with
+ * nothing to farm are left out.
  */
 export function todaySections(input: FarmInput, weekday: number): FarmSection[] {
   const sections: FarmSection[] = [
@@ -502,6 +722,7 @@ export function todaySections(input: FarmInput, weekday: number): FarmSection[] 
     },
     { key: 'boss', resin: '40', label: 'Bosses', cards: bossCards(input) },
     { key: 'weekly', resin: '30/60', label: 'Weekly bosses', cards: weeklyCards(input) },
+    { key: 'artifact', resin: '20', label: 'Artifacts', cards: artifactCards(input) },
   ]
   return sections.filter((s) => s.cards.length > 0)
 }
@@ -563,6 +784,7 @@ function combine(runs: readonly CardRun[], input: FarmInput): CardRun | null {
     days: resinDays(resin, input.refreshes),
     weekly: false,
     bracket: first.bracket,
+    upperBound: runs.some((r) => r.upperBound),
   }
 }
 
@@ -578,6 +800,8 @@ export interface FarmHeadline {
   daily: number
   /** Something farmable is missing without an estimate. */
   partial: boolean
+  /** Some runs are upper bounds (World Level 9 boss drops): it takes at most this. */
+  upperBound: boolean
   /** Sources the account's AR/WL can't farm yet. */
   locked: number
   weekly: { claims: number; weeks: number; resin: number; resinMax: number; partial: boolean }
@@ -595,6 +819,7 @@ export function farmHeadline(plan: FarmPlan, refreshes: number): FarmHeadline {
     days: resinDays(t.resin, refreshes),
     daily: dailyResin(refreshes),
     partial: t.partial,
+    upperBound: t.upperBound === true,
     locked: t.locked,
     weekly: {
       claims: w.runs,

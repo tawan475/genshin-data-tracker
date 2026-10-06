@@ -159,8 +159,33 @@ setting `planner.refreshes`, 0–6, no migration: settings are JSON merged with 
 - Also: "Resin now ~180 · +120 in bag" in the farm headline; a farm card's "+N" shows every
   portrait. Levels read 80✦ everywhere (was 80+).
 
+**Phase 4a — names on Today, artifact goals, fixes** — *built 2026-10-06* (no migration; game data
+7.1.2 for artifact domains). Decisions:
+- Today names its places from `@gdt/game-data/farming`: boss cards by boss (a gem a single-element
+  boss on a card drops joins that card, the runs being the longer of the two; other gems get a card
+  named after their bosses, single-element first), a card per enemy for common/elite drops (the
+  other enemies underneath), local specialties per region (areas underneath). The handbook AR never
+  greys a boss. World Level 9 boss estimates read "at most N runs" (headline "≤").
+- Artifact goals are an optional `artifacts` object on the character goal's target (`artifactGoal`
+  in `packages/shared/src/api.ts`: sets with an optional hand tick, Sands/Goblet/Circlet main stats,
+  per-slot hand ticks). Auto-tick (`artifact-goals.ts`): a slot is done when the character wears a
+  piece there at its top level for its rarity (+20 on a 5★), of a chosen set (the fifth slot is free
+  once the other four are chosen sets) with a chosen main stat; none chosen = any. A set is done
+  when every slot is. Hand ticks win both ways; a tap back to what the capture says clears them.
+  The Traveler's gear is on "Traveler". A card is done when its levels and its artifacts are; a card
+  with only artifacts left shows "Artifacts" instead of a readiness.
+- Today's "Artifacts" section (20 resin, no run estimate): the domains (`farming.artifactDomains`,
+  read through `artifact-domains.ts` so older game data still builds) of the sets counted goals
+  still want; sets no domain drops go to "Elsewhere".
+- Fixes: the goal editor's cost legend counts the tiles of each colour (`cost-cells.ts`).
+  Readiness work is linear (the goals above summed as one) with a memo that keeps each goal's own
+  totals and redoes only the goals from the first change down; unchanged cards keep their objects
+  (`keep-unchanged.ts`) so only changed cards re-render; long lists mount a few cards per frame
+  (`use-progressive.ts`), cards off screen skip layout (`content-visibility`), and both views stay
+  mounted once shown. At 100 goals on a 4× slowed CPU: toggle ~75 ms, move ~80 ms, open a goal
+  ~110 ms, first view of a tab ~180–200 ms (was 0.6–2.3 s).
+
 **Phase 4 — the rest**
-- Artifact goals (sets + main stats; we can auto-tick them from captured artifacts).
 - Tasks: permanent dailies/weeklies + custom recurring tasks; resin tracker from irminsul's resin
   with regeneration.
 - Seelie import of inventory and current values (today only goals), and export.
