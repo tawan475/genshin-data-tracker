@@ -36,7 +36,7 @@
 import type { AccountResponse, LiveEvent } from '@gdt/shared'
 import { onScopeDispose, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { api } from '@/api'
+import { TAB_ID, api } from '@/api'
 import { formatDateTime } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -44,6 +44,7 @@ import { useSession } from '@/stores/session'
 import { onTabMessage, postToTabs, tabsCanTalk, type TabMessage } from './channel'
 import { importingAccounts, onApplyPending, updatesHeld } from './holds'
 import { requestLeadership } from './leader'
+import { emitPlannerChange } from './planner-changes'
 import {
   BURST_WINDOW_MS,
   FALLBACK_AFTER,
@@ -197,6 +198,11 @@ export function useLiveUpdates(): void {
 
   /** A socket event: this tab's own (the leader's) or relayed. */
   function onEvent(event: LiveEvent) {
+    if (event.type === 'planner') {
+      // Not about the account list: the open Planner re-reads its own data.
+      if (event.tab !== TAB_ID) emitPlannerChange(event.accountId)
+      return
+    }
     const now = Date.now()
     eventTimes.push(now)
     while (eventTimes.length > 0 && now - eventTimes[0]! >= BURST_WINDOW_MS) eventTimes.shift()

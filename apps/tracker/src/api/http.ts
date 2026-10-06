@@ -37,6 +37,12 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
   noRefresh?: boolean
 }
 
+/**
+ * This tab, on every write (`x-gdt-tab`): the live event a write causes
+ * names it, so the tab that made a change does not re-read it.
+ */
+export const TAB_ID = Math.random().toString(36).slice(2, 12)
+
 let signedOutHandler: (() => void) | null = null
 let refreshing: Promise<boolean> | null = null
 
@@ -51,7 +57,10 @@ const REFRESHABLE = new Set(['unauthenticated', 'token_expired'])
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const method = (options.method ?? 'GET').toUpperCase()
   const headers = new Headers(options.headers)
-  if (!SAFE.has(method)) headers.set('x-gdt-csrf', '1')
+  if (!SAFE.has(method)) {
+    headers.set('x-gdt-csrf', '1')
+    headers.set('x-gdt-tab', TAB_ID)
+  }
   let body = options.body
   if (options.json !== undefined) {
     headers.set('content-type', 'application/json')

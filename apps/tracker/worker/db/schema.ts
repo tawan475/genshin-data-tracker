@@ -1,10 +1,12 @@
 import type {
   AccountSettingsPatch,
+  CharacterCurrent,
   CharacterTarget,
   CompactSubstat,
   SectionKind,
   SnapshotSummary,
   UserSettingsPatch,
+  WeaponCurrent,
   WeaponTarget,
 } from '@gdt/shared'
 import { sql } from 'drizzle-orm'
@@ -249,6 +251,35 @@ export const plannerTargets = sqliteTable(
     /** Append-only shape: new fields must be optional. */
     target: text('target', { mode: 'json' }).$type<CharacterTarget | WeaponTarget>().notNull(),
     updatedAt: timestamp('updated_at'),
+    /**
+     * The current state set by hand (a Done, or typed in the goal editor),
+     * null for the capture's. It counts only where it is ahead of the
+     * capture, so a capture that reaches it retires it. Written by the
+     * planner-state route only: goal upserts leave it alone (migration 0011).
+     */
+    current: text('current', { mode: 'json' }).$type<CharacterCurrent | WeaponCurrent>(),
   },
   (t) => [primaryKey({ columns: [t.accountId, t.kind, t.key, t.owner] })],
+)
+
+/**
+ * Hand edits of material counts on top of the newest capture (Planner):
+ * the count is `set_value ?? the capture's`, plus `delta`. `base_seen_at` is
+ * the `last_seen_at` of the newest capture when the edit was made (0 for
+ * none); once the newest capture is a later one, the edit no longer applies
+ * and the next write deletes it (irminsul is the truth).
+ */
+export const inventoryAdjustments = sqliteTable(
+  'inventory_adjustments',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    key: text('key').notNull(),
+    delta: integer('delta').notNull().default(0),
+    setValue: integer('set_value'),
+    baseSeenAt: integer('base_seen_at').notNull(),
+    updatedAt: timestamp('updated_at'),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.key] })],
 )

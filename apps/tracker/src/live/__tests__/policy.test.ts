@@ -118,6 +118,15 @@ describe('events', () => {
       type: 'hello',
       accounts: [],
     })
+    expect(parseLiveEvent('{"type":"planner","accountId":3,"tab":"t1"}')).toEqual({
+      type: 'planner',
+      accountId: 3,
+      tab: 't1',
+    })
+    expect(parseLiveEvent('{"type":"planner","accountId":3,"tab":7}')).toEqual({
+      type: 'planner',
+      accountId: 3,
+    })
     for (const junk of [
       'pong',
       '{',
@@ -125,6 +134,7 @@ describe('events', () => {
       '{"type":"other"}',
       '{"type":"hello"}',
       '{"type":"hello","accounts":[{"id":1}]}',
+      '{"type":"planner"}',
       'null',
       42,
     ]) {
@@ -147,6 +157,8 @@ describe('events', () => {
     expect(eventNeedsFetch(data(1, null), known)).toBe(true)
     expect(eventNeedsFetch(data(2, 1), known)).toBe(true) // an account this tab has not seen
     expect(eventNeedsFetch({ type: 'accounts' }, known)).toBe(true)
+    // The Planner re-reads its own data; the account list has not moved.
+    expect(eventNeedsFetch({ type: 'planner', accountId: 1 }, known)).toBe(false)
   })
 
   it('re-reads after a reconnect only when the hello shows something was missed', () => {

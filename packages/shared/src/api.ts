@@ -194,6 +194,76 @@ export const plannerTargetsPatch = z
   })
   .refine((body) => body.upsert.length + body.remove.length > 0, { message: 'Nothing to change' })
 
+// ------------------------------------------------------- planner state
+
+const MAX_COUNT = 1_000_000_000
+
+/**
+ * A hand edit of one material's count, on top of the newest capture:
+ * - `set`: the count is this (`add` on top, usually 0);
+ * - `set: null`: back to the capture's count (plus `add`; nothing left drops the edit);
+ * - `add` alone: add to whatever the count is now (a Done takes materials away).
+ */
+export const inventoryChange = z
+  .object({
+    key: goodKeySchema,
+    set: z.number().int().min(0).max(MAX_COUNT).nullable().optional(),
+    add: z.number().int().min(-MAX_COUNT).max(MAX_COUNT).optional(),
+  })
+  .refine((c) => c.set !== undefined || c.add !== undefined, { message: 'Nothing to change' })
+
+/** A character's level, ascension and (base) talents, set by hand. */
+export const characterCurrent = z.object({
+  level: z.number().int().min(1).max(90),
+  ascension: z.number().int().min(0).max(6),
+  talents: z.object({ auto: talentLevel, skill: talentLevel, burst: talentLevel }),
+})
+
+/** A weapon's level, ascension and refinement, set by hand. */
+export const weaponCurrent = z.object({
+  level: z.number().int().min(1).max(90),
+  ascension: z.number().int().min(0).max(6),
+  refinement: z.number().int().min(1).max(5),
+})
+
+/** A goal's current state set by hand (null: the capture's again). */
+export const currentOverride = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('character'),
+    key: goodKeySchema,
+    current: characterCurrent.nullable(),
+  }),
+  z.object({
+    kind: z.literal('weapon'),
+    key: goodKeySchema,
+    owner: goodKeySchema.or(z.literal('')),
+    current: weaponCurrent.nullable(),
+  }),
+])
+
+/**
+ * Hand edits on top of the newest capture, in one request (a Done sends both
+ * kinds). `base` is the capture the edits were made against: its
+ * `lastSeenAt`, 0 without one. When the account's newest capture is another
+ * one by now, nothing is written and the answer is a 409 (`capture_changed`).
+ * Every write also drops the material edits a newer capture has replaced;
+ * `prune` asks for just that.
+ */
+export const plannerStatePatch = z
+  .object({
+    base: z.number().int().min(0),
+    inventory: z.array(inventoryChange).max(1000).default([]),
+    current: z.array(currentOverride).max(1000).default([]),
+    prune: z.boolean().optional(),
+  })
+  .refine((body) => body.inventory.length + body.current.length > 0 || body.prune === true, {
+    message: 'Nothing to change',
+  })
+  .refine((body) => new Set(body.inventory.map((c) => c.key)).size === body.inventory.length, {
+    message: 'One change per material',
+    path: ['inventory'],
+  })
+
 // ------------------------------------------------------------------ responses
 
 export interface ApiError {
@@ -278,12 +348,16 @@ export interface ImportedAccount {
  *   a delete); `dataVersion` is the account's new version, `takenAt` the
  *   capture time for an import.
  * - `accounts`: an account was added, renamed or removed.
- * Events only say that something changed; the app re-reads the account list.
+ * - `planner`: an account's planner goals or hand edits changed; `tab` is the
+ *   tab that sent the change (`x-gdt-tab`), which already has it.
+ * Events only say that something changed; the app re-reads the account list
+ * (or, for `planner`, an open Planner re-reads its goals and edits).
  */
 export type LiveEvent =
   | { type: 'hello'; accounts: LiveAccount[] }
   | { type: 'data'; accountId: number; dataVersion: number | null; takenAt?: number }
   | { type: 'accounts' }
+  | { type: 'planner'; accountId: number; tab?: string }
 
 /** An account as the live `hello` describes it. */
 export interface LiveAccount {
@@ -345,4 +419,34 @@ export type PlannerTarget =
 
 export interface PlannerTargetsResponse {
   targets: PlannerTarget[]
+}
+
+export type InventoryChange = z.input<typeof inventoryChange>
+export type CharacterCurrent = z.infer<typeof characterCurrent>
+export type WeaponCurrent = z.infer<typeof weaponCurrent>
+
+/**
+ * One material's hand edit: the count is `set ?? the capture's count`, plus
+ * `delta`. It applies while the account's newest capture is the one it was
+ * made against (`base`, that capture's `lastSeenAt`, 0 for none) or older;
+ * a newer capture replaces it (irminsul is the truth).
+ */
+export interface InventoryAdjustment {
+  key: string
+  delta: number
+  set: number | null
+  base: number
+  updatedAt: number
+}
+
+/** A goal's current state set by hand; it counts until a capture reaches it. */
+export type CurrentOverride =
+  | { kind: 'character'; key: string; owner: ''; current: CharacterCurrent }
+  | { kind: 'weapon'; key: string; owner: string; current: WeaponCurrent }
+
+export interface PlannerStateResponse {
+  /** The newest capture's `lastSeenAt` (null without one): what `base` must be to write. */
+  capturedAt: number | null
+  adjustments: InventoryAdjustment[]
+  overrides: CurrentOverride[]
 }
