@@ -18,6 +18,7 @@ import {
   artifactSetImage,
   characterImages,
   itemImage,
+  travelerArt,
   travelerIcon,
   weaponImages,
   type ArtifactSlot,
@@ -70,6 +71,16 @@ const isTraveler = (key: string) => key.startsWith('Traveler')
 export function characterIcon(key: string): string {
   if (isTraveler(key)) return imageUrl(travelerIcon(traveler.value))
   return imageUrl(characterImages(key)?.icon)
+}
+
+/**
+ * The character's wish splash art (full body, 2048×1024 on transparency);
+ * the Traveler's follows the twin setting. '' for a character newer than
+ * the game data.
+ */
+export function characterSplash(key: string): string {
+  if (isTraveler(key)) return imageUrl(travelerArt(traveler.value).gacha)
+  return imageUrl(characterImages(key)?.gacha)
 }
 
 /** The character's namecard picture ('' for the Traveler and Manekin). */

@@ -1,0 +1,254 @@
+/**
+ * A character's build sheet, as the details and the share card show it: the
+ * in-game Attributes rows (`@gdt/game-data/stats`, the game's panel formula
+ * without team buffs, like Enka), talent levels as the game shows them with
+ * the C3 / C5 +3, the weapon's own lines, and what each set bonus adds.
+ * Pure functions over a roster entry (data/characters.ts).
+ */
+
+import type { TalentSlot } from '@gdt/game-data'
+import statsJson from '@gdt/game-data/data/stats.json'
+import type { StatsFile } from '@gdt/game-data/format'
+import {
+  computeStats,
+  displayStat,
+  hasCharacterStats,
+  hasWeaponStats,
+  weaponStats,
+  type PanelStats,
+  type StatArtifact,
+  type StatCharacter,
+  type StatWeapon,
+} from '@gdt/game-data/stats'
+import { formatNumber } from '@/lib/format'
+import { formatStatName } from '@/utils/artifact-stats'
+import type { Element } from './game-meta'
+
+const statsFile = statsJson as unknown as StatsFile
+
+// ------------------------------------------------------------------ panel
+
+/** A DMG bonus row's colour: an element, or physical. */
+export type DamageKind = Element | 'physical'
+
+export interface StatRow {
+  /** GOOD's stat key (`hp`, `critRate_`, `pyro_dmg_`…). */
+  key: string
+  /** As the game's Attributes screen names it: "Max HP", "Pyro DMG Bonus". */
+  label: string
+  /** As displayed: whole for HP / ATK / DEF / EM, percent with one decimal. */
+  value: number
+  /** "18,663", "62.2%". */
+  text: string
+  /** HP, ATK and DEF: the white number (character + weapon base) and the green one. */
+  base?: number
+  bonus?: number
+  /** DMG bonus rows. */
+  damage?: DamageKind
+}
+
+/** The game's order of the DMG bonuses in the Attributes screen. */
+export const DAMAGE_ORDER: readonly DamageKind[] = [
+  'pyro',
+  'hydro',
+  'dendro',
+  'electro',
+  'anemo',
+  'cryo',
+  'geo',
+  'physical',
+]
+
+const PANEL_LABELS: Readonly<Record<string, string>> = { hp: 'Max HP' }
+
+export function statLabel(key: string): string {
+  return PANEL_LABELS[key] ?? formatStatName(key)
+}
+
+/** "18,663" for flat stats, "62.2%" for percentages (GOOD's trailing underscore). */
+export function formatPanelValue(key: string, value: number): string {
+  return key.endsWith('_') ? `${value.toFixed(1)}%` : formatNumber(Math.round(value))
+}
+
+function row(key: string, value: number, extra: Partial<StatRow> = {}): StatRow {
+  return { key, label: statLabel(key), value, text: formatPanelValue(key, value), ...extra }
+}
+
+/**
+ * The Attributes screen's rows in the game's order: Max HP, ATK, DEF,
+ * Elemental Mastery, CRIT Rate, CRIT DMG, Healing Bonus (only when there
+ * is some), Energy Recharge, then the DMG bonuses: the character's own
+ * element always, any other element or physical only when above 0.
+ */
+export function panelRows(panel: PanelStats, element: Element | null): StatRow[] {
+  const split = (key: 'hp' | 'atk' | 'def') =>
+    row(key, panel[key], { base: panel.base[key], bonus: panel[key] - panel.base[key] })
+  const rows = [
+    split('hp'),
+    split('atk'),
+    split('def'),
+    row('eleMas', panel.em),
+    row('critRate_', panel.critRate),
+    row('critDMG_', panel.critDmg),
+  ]
+  if (panel.healing > 0) rows.push(row('heal_', panel.healing))
+  rows.push(row('enerRech_', panel.er))
+  for (const kind of DAMAGE_ORDER) {
+    const value = kind === 'physical' ? panel.physicalDmg : panel.elementalDmg[kind]
+    if (value > 0 || kind === element) rows.push(row(`${kind}_dmg_`, value, { damage: kind }))
+  }
+  return rows
+}
+
+/** What the build panel reads of a roster entry (data/characters.ts CharacterView). */
+export interface BuildInput extends StatCharacter {
+  element: Element | null
+  weapon: StatWeapon | null
+  artifacts: readonly (StatArtifact | null)[]
+}
+
+export interface BuildPanel {
+  stats: PanelStats
+  rows: StatRow[]
+  /** The worn weapon is newer than the game data: its stats are left out. */
+  weaponMissing: boolean
+  /** All-DMG bonus (Freedom-Sworn, Skyward Pride…) the game's panel doesn't list; 0 when none. */
+  allDmg: number
+}
+
+/** The panel for a character, or null when the game data doesn't know the character yet. */
+export function buildPanel(input: BuildInput): BuildPanel | null {
+  if (!hasCharacterStats(input.key)) return null
+  const known = input.weapon && hasWeaponStats(input.weapon.key) ? input.weapon : null
+  const artifacts = input.artifacts.filter((a): a is StatArtifact => a !== null)
+  const stats = computeStats(
+    { key: input.key, level: input.level, ascension: input.ascension },
+    known,
+    artifacts,
+  )
+  return {
+    stats,
+    rows: panelRows(stats, input.element),
+    weaponMissing: input.weapon !== null && known === null,
+    allDmg: stats.other.dmg_ ?? 0,
+  }
+}
+
+// ---------------------------------------------------------------- talents
+
+export type TalentKey = TalentSlot
+
+export const TALENT_KEYS: readonly TalentKey[] = ['auto', 'skill', 'burst']
+
+export const TALENT_LABELS: Readonly<Record<TalentKey, string>> = {
+  auto: 'Normal Attack',
+  skill: 'Elemental Skill',
+  burst: 'Elemental Burst',
+}
+
+/** The talents a character's 3rd and 5th constellations raise by 3 (the planner data's). */
+export interface ConstellationBoosts {
+  c3: TalentKey | null
+  c5: TalentKey | null
+}
+
+export interface TalentLevel {
+  key: TalentKey
+  /** GOOD's level, what the books paid for. */
+  base: number
+  /** As the game shows it: base + 3 from C3 or C5. */
+  level: number
+  /** The constellation that raises it (3 or 5), when unlocked. */
+  from: 3 | 5 | null
+  /** A Crown of Insight spent: base level 10. */
+  crowned: boolean
+}
+
+/**
+ * Attack, skill and burst as the game shows them: +3 on the talent C3
+ * raises once constellation 3 is unlocked, on C5's from 5 (Enka's "10 → 13").
+ * `boosts` null (data not loaded, or a character newer than it) shows base
+ * levels.
+ */
+export function talentLevels(
+  talent: Readonly<Record<TalentKey, number>>,
+  constellation: number,
+  boosts: ConstellationBoosts | null,
+): TalentLevel[] {
+  return TALENT_KEYS.map((key) => {
+    const base = talent[key]
+    const from =
+      boosts?.c3 === key && constellation >= 3
+        ? 3
+        : boosts?.c5 === key && constellation >= 5
+          ? 5
+          : null
+    return { key, base, level: base + (from ? 3 : 0), from, crowned: base >= 10 }
+  })
+}
+
+/** "Elemental Skill 10 + 3 (C3) = 13 · crowned". */
+export function talentTitle(t: TalentLevel): string {
+  const value = t.from ? `${t.base} + 3 (C${t.from}) = ${t.level}` : `${t.level}`
+  return `${TALENT_LABELS[t.key]} ${value}${t.crowned ? ' · crowned' : ''}`
+}
+
+// ----------------------------------------------------------------- weapon
+
+export interface WeaponLines {
+  /** Base ATK. */
+  atk: StatRow
+  /** The secondary stat; null for 1–2★ weapons. */
+  sub: StatRow | null
+  /** What the passive always adds at this refinement (Staff of Homa's HP%), for tooltips. */
+  passive: StatRow[]
+}
+
+/**
+ * A weapon's own lines at its level, ascension and refinement, as the
+ * weapon screen shows them; null for a weapon newer than the game data.
+ */
+export function weaponLines(weapon: StatWeapon): WeaponLines | null {
+  if (!hasWeaponStats(weapon.key)) return null
+  const all = weaponStats(weapon)
+  const [, sub, , passiveId] = statsFile.weapons[weapon.key]!
+  const ranks = passiveId ? (statsFile.refinements[passiveId] ?? []) : []
+  const passive = ranks[Math.min(Math.max(weapon.refinement, 1), ranks.length) - 1] ?? {}
+  const subKey = sub?.[0]
+  const shown = (key: string, value: number) => row(key, displayStat(key, value))
+  return {
+    atk: { ...shown('atk', all.baseAtk ?? 0), key: 'baseAtk', label: 'Base ATK' },
+    sub: subKey ? shown(subKey, (all[subKey] ?? 0) - (passive[subKey] ?? 0)) : null,
+    passive: Object.entries(passive).map(([key, value]) => shown(key, value)),
+  }
+}
+
+// ------------------------------------------------------------------- sets
+
+export interface SetBonusLine {
+  pieces: number
+  /** Stats the bonus always adds ("Pyro DMG Bonus +15.0%"); empty for effects that aren't stats. */
+  stats: StatRow[]
+}
+
+/** Each bonus of a set with the stats it always adds (game data; conditional effects aren't stats). */
+export function setBonusLines(setKey: string): SetBonusLine[] {
+  const bonuses = Object.hasOwn(statsFile.artifacts.sets, setKey)
+    ? statsFile.artifacts.sets[setKey]!
+    : []
+  return bonuses.map(([pieces, stats]) => ({
+    pieces,
+    stats: Object.entries(stats).map(([key, value]) => row(key, displayStat(key, value))),
+  }))
+}
+
+/** "2-piece: Pyro DMG Bonus +15.0%" lines for a set's tooltip (only bonuses that add stats). */
+export function setBonusTitle(setKey: string, active: readonly number[]): string[] {
+  return setBonusLines(setKey)
+    .filter((b) => b.stats.length > 0)
+    .map(
+      (b) =>
+        `${b.pieces}-piece${active.includes(b.pieces) ? '' : ' (inactive)'}: ` +
+        b.stats.map((s) => `${s.label} +${s.text}`).join(', '),
+    )
+}

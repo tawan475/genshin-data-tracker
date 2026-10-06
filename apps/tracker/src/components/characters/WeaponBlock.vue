@@ -1,0 +1,74 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { Lock } from 'lucide-vue-next'
+import GameIcon from '@/components/ui/GameIcon.vue'
+import LevelText from '@/components/ui/LevelText.vue'
+import RarityStars from '@/components/ui/RarityStars.vue'
+import { weaponLines } from '@/data/character-build'
+import { TARGET_LEVEL, type EquippedWeapon } from '@/data/characters'
+import { weaponIcon } from '@/lib/assets'
+import RefinementPips from './RefinementPips.vue'
+
+/**
+ * The equipped weapon as the weapon screen shows it: icon, level, refinement,
+ * base ATK and the substat (none on 1–2★); what the passive always adds is
+ * in the tooltip. The name opens the Weapons page on it.
+ */
+const props = defineProps<{ weapon: EquippedWeapon | null; accountId: number }>()
+
+const lines = computed(() => (props.weapon ? weaponLines(props.weapon) : null))
+const passiveTitle = computed(() =>
+  lines.value?.passive.length
+    ? `Passive: ${lines.value.passive.map((s) => `${s.label} +${s.text}`).join(', ')}`
+    : undefined,
+)
+</script>
+
+<template>
+  <section
+    v-if="weapon"
+    class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised/85 p-2.5 sm:p-3"
+    aria-label="Weapon"
+  >
+    <GameIcon
+      :src="weaponIcon(weapon.key, weapon.ascension)"
+      :name="weapon.name"
+      :rarity="weapon.rarity ?? undefined"
+      size="lg"
+    />
+    <div class="flex min-w-0 flex-1 flex-col gap-1">
+      <RouterLink
+        :to="{ name: 'account-weapons', params: { accountId }, query: { w: weapon.key } }"
+        class="truncate font-medium hover:text-accent-text"
+        :title="weapon.name"
+        >{{ weapon.name }}</RouterLink
+      >
+      <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <LevelText :level="weapon.level" :ascension="weapon.ascension" :target="TARGET_LEVEL" />
+        <RefinementPips :value="weapon.refinement" />
+        <RarityStars v-if="weapon.rarity" :rarity="weapon.rarity" />
+        <span v-if="weapon.lock" class="inline-flex text-text-muted" title="Locked">
+          <Lock class="size-3.5" aria-hidden="true" />
+          <span class="sr-only">Locked</span>
+        </span>
+      </p>
+      <dl v-if="lines" class="flex flex-wrap gap-1.5 text-sm" :title="passiveTitle">
+        <div
+          v-for="stat in [lines.atk, lines.sub].filter((s) => s !== null)"
+          :key="stat.key"
+          class="flex items-baseline gap-1 rounded-md bg-surface-overlay/70 px-1.5 py-0.5"
+        >
+          <dt class="text-text-secondary">{{ stat.label }}</dt>
+          <dd class="tabular font-mono font-medium">{{ stat.text }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+  <p
+    v-else
+    class="rounded-xl border border-dashed border-border-strong p-3 text-sm text-text-muted"
+    aria-label="Weapon"
+  >
+    No weapon
+  </p>
+</template>

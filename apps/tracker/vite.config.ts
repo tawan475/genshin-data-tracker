@@ -94,6 +94,7 @@ export default defineConfig({
       'chartjs-plugin-zoom',
       'vue-chartjs',
       '@vueuse/core',
+      'modern-screenshot',
     ],
     // The game data (a git dependency, built ESM) is served as is: pre-bundling
     // would merge its per-file JSON chunks, and its subpath modules would each

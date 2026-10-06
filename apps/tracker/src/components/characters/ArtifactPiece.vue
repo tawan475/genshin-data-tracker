@@ -108,9 +108,10 @@ function rollTitle(index: number, key: string): string {
       <CritValue
         :value="piece.cv"
         :crit-circlet="isCritCirclet(piece.slotKey, piece.mainStatKey)"
+        :plain="piece.rarity < 5"
         label
       />
-      <RollValue :value="piece.rv" label />
+      <RollValue :value="piece.rv" :plain="piece.rarity < 5" label />
       <span class="ml-auto" title="Rolls"
         ><span class="tabular font-mono">{{ rollCount }}</span> rolls</span
       >
