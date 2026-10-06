@@ -19,6 +19,7 @@ import { keepUnchanged } from './keep-unchanged'
 import { buildBoard, type Board } from './model'
 import { usePlannerState } from './use-planner-state'
 import { usePlannerTargets } from './use-planner-targets'
+import { usePlannerTasks } from './use-planner-tasks'
 
 const NO_CAPTURE: Good = {
   format: 'GOOD',
@@ -42,9 +43,13 @@ const NO_CAPTURE: Good = {
  *
  * `planner` is the planner data with the account's custom characters in it
  * (custom-character.ts), so they cost like any other; `basePlanner` is the
- * game's alone (the roster to pick from, the Seelie import).
+ * game's alone (the roster to pick from, the Seelie import). With `tasks`
+ * (the Planner), the account's tasks come along in their own store.
  */
-export function usePlannerModel(account: ComputedRef<AccountResponse>) {
+export function usePlannerModel(
+  account: ComputedRef<AccountResponse>,
+  options: { tasks?: boolean } = {},
+) {
   const accounts = useAccounts()
   const accountId = computed(() => account.value.id)
   /** The capture hand edits are made against: the newest one's last sighting, 0 for none. */
@@ -125,7 +130,10 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     state.adjustments.value ? replacedAdjustments(state.adjustments.value, base.value).length : 0,
   )
 
-  const { settings, save: saveSettings } = usePlannerSettings(accountId)
+  const { settings, save: saveSettings, reload: reloadSettings } = usePlannerSettings(accountId)
+
+  const tasks = options.tasks ? usePlannerTasks(accountId) : null
+  if (tasks) onBeforeUnmount(() => void tasks.flush())
   /** What irminsul read at the newest login; an AR/WL setting wins over it. */
   const player = computed(() => data.value?.player ?? NO_PLAYER)
   const ar = computed(() => settings.value.ar ?? player.value.ar)
@@ -193,6 +201,8 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     stale = false
     void store.refresh()
     void state.refresh()
+    void tasks?.refresh()
+    void reloadSettings()
   }
   const stopListening = onPlannerChange((id) => {
     if (id !== accountId.value) return
@@ -224,6 +234,7 @@ export function usePlannerModel(account: ComputedRef<AccountResponse>) {
     replaced,
     settings,
     saveSettings,
+    tasks,
     player,
     ar,
     wl,

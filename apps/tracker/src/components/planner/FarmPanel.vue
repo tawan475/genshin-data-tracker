@@ -3,7 +3,7 @@ import type { PlannerData } from '@gdt/game-data'
 import type { DropRates } from '@gdt/game-data/drops'
 import type { FarmingData } from '@gdt/game-data/farming'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
-import type { FarmPlan, ResinNow } from '@gdt/game-data/planner-estimate'
+import type { FarmPlan } from '@gdt/game-data/planner-estimate'
 import { WEEKDAY_LABELS, type PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, watch } from 'vue'
 import { Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
@@ -11,7 +11,7 @@ import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { materialIcon } from '@/lib/assets'
-import { formatCompact, formatDateTime, formatNumber, formatTime } from '@/lib/format'
+import { formatCompact, formatNumber } from '@/lib/format'
 import CraftCard from './CraftCard.vue'
 import FarmCard from './FarmCard.vue'
 import { formatCountdown, formatSeconds } from './farm-format'
@@ -50,7 +50,8 @@ const props = defineProps<{
   wl: number | null
   refreshes: number
   day: FarmDay
-  resin: ResinNow | null
+  /** Original Resin now plus what the bag holds in items (null: not known). */
+  resinHeld: number | null
   /** Bosses, enemies, regions and artifact domains (null: cards without places). */
   farming: FarmingData | null
   /** Artifact sets the counted goals still want. */
@@ -109,8 +110,8 @@ const resinTitle = computed(() => {
     'domains, normal bosses and ley lines',
     `${formatNumber(h.daily)} resin a day${r ? ` (180 + ${r} × ${REFRESH_RESIN})` : ''}`,
   ]
-  if (props.resin?.known && h.resin > 0) {
-    const left = Math.max(0, h.resin - props.resin.total)
+  if (props.resinHeld !== null && h.resin > 0) {
+    const left = Math.max(0, h.resin - props.resinHeld)
     parts.push(`${plural(resinDays(left, r), 'day')} with the resin held`)
   }
   if (h.gems.runs > 0) {
@@ -131,21 +132,6 @@ const weeklyTitle = computed(() => {
     .join(' · ')
 })
 
-const resinNowTitle = computed(() => {
-  const r = props.resin
-  if (!r) return ''
-  const read =
-    r.source === 'player'
-      ? `${formatNumber(r.atSnapshot)} at login, ${formatDateTime(r.at)}`
-      : `${formatNumber(r.atSnapshot)} at the snapshot`
-  const parts = [`Original Resin now ~${formatNumber(r.original)}/200 (${read})`]
-  if (r.fullAt) parts.push(`full at ${formatTime(r.fullAt)}`)
-  if (r.bag > 0) {
-    const items = r.items.map((i) => `${formatNumber(i.count)} ${i.key.replace(/Resin$/, '')}`)
-    parts.push(`in the bag ${formatNumber(r.bag)} (${items.join(', ')})`)
-  }
-  return parts.join(' · ')
-})
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const dayTitle = computed(
   () =>
@@ -255,16 +241,6 @@ watch(view, (value) => {
           <Lock class="size-3.5" aria-hidden="true" />
           {{ formatNumber(headline.locked) }}
           <span class="sr-only">locked by AR/WL</span>
-        </span>
-        <span v-if="resin?.known" class="inline-flex items-center gap-1" :title="resinNowTitle">
-          <span class="font-sans text-text-muted">Resin now</span>
-          ~{{ formatNumber(resin.original) }}
-          <template v-if="resin.bag">
-            <span class="text-text-muted" aria-hidden="true">·</span>
-            +{{ formatCompact(resin.bag) }}
-            <span class="font-sans text-text-muted">in bag</span>
-          </template>
-          <span class="sr-only">{{ resinNowTitle }}</span>
         </span>
       </p>
     </section>

@@ -4,7 +4,8 @@ import { defineConfig } from 'vitest/config'
 
 // Worker tests run inside workerd against a local D1, with the real migrations
 // applied before each test file (see worker/test/setup.ts). The app's pure
-// helpers (src/**/__tests__) run there too: en-US and UTC, so dates are stable.
+// helpers (src/**/__tests__) run there too, in en-US and the machine's time zone
+// (UTC on CI): a test of local time builds what it expects with the Date constructor.
 export default defineConfig(async () => {
   const migrations = await readD1Migrations(fileURLToPath(new URL('./migrations', import.meta.url)))
   return {

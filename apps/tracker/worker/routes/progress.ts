@@ -1,7 +1,8 @@
 /**
  * Per-account progress the player sets by hand: achievements marked done,
- * planner goals, and the planner's hand edits on top of the newest capture
- * (material counts, a goal's current state). None of it touches snapshots,
+ * planner goals, the planner's hand edits on top of the newest capture
+ * (material counts, a goal's current state) and its tasks (built-in dailies
+ * and weeklies, the player's own). None of it touches snapshots,
  * so `dataVersion` (and with it every cached bundle) stays put.
  *
  * Writes go through `json_each` so a bulk change (a Seelie import is a few
@@ -20,20 +21,23 @@ import {
   achievementMarksPatch,
   plannerStatePatch,
   plannerTargetsPatch,
+  plannerTasksPatch,
   type AchievementMarksResponse,
   type CurrentOverride,
   type InventoryAdjustment,
   type PlannerStateResponse,
   type PlannerTarget,
   type PlannerTargetsResponse,
+  type PlannerTask,
+  type PlannerTasksResponse,
 } from '@gdt/shared'
-import { Hono, type Context } from 'hono'
+import { Hono } from 'hono'
 import { getDb } from '../db/client'
 import type { AppEnv } from '../env'
 import { ApiError, idParam, parseJson } from '../lib/http'
 import { requireUser } from '../lib/session'
 import { assertOwnsAccount } from '../services/accounts'
-import { listenerOf, listenerStatement, notifyUser } from '../services/live'
+import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
 
 const SELECT_MARKS =
   'SELECT achievement_id AS id FROM achievement_marks WHERE account_id = ?1 ORDER BY achievement_id'
@@ -115,10 +119,25 @@ function plannerState(
   }
 }
 
-/** The tab that sent a write (`x-gdt-tab`), echoed in its live event so that tab skips it. */
-function senderTab(c: Context<AppEnv>): { tab?: string } {
-  const tab = c.req.header('x-gdt-tab')
-  return tab && /^[A-Za-z0-9_-]{1,40}$/.test(tab) ? { tab } : {}
+/** Built-in tasks first, then custom ones by position, then as made. */
+const SELECT_TASKS = `SELECT kind, id, data, updated_at AS updatedAt FROM planner_tasks
+  WHERE account_id = ?1
+  ORDER BY kind, COALESCE(json_extract(data, '$.position'), 1000000), rowid`
+
+interface TaskRow {
+  kind: PlannerTask['kind']
+  id: string
+  data: string
+  updatedAt: number
+}
+
+function toTasks(rows: TaskRow[]): PlannerTask[] {
+  return rows.map(({ kind, id, data, updatedAt }) => ({
+    ...(JSON.parse(data) as object),
+    kind,
+    id,
+    updatedAt,
+  })) as PlannerTask[]
 }
 
 export const progress = new Hono<AppEnv>()
@@ -412,4 +431,64 @@ export const progress = new Hono<AppEnv>()
       listenerOf(listener),
     )
     return c.json<PlannerStateResponse>(state)
+  })
+
+  .get('/:id/planner-tasks', async (c) => {
+    const id = idParam(c, 'id')
+    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    const { results } = await c.env.DB.prepare(SELECT_TASKS).bind(id).all<TaskRow>()
+    return c.json<PlannerTasksResponse>({ tasks: toTasks(results) })
+  })
+
+  /** `remove` is applied before `upsert`; a task is written whole. */
+  .patch('/:id/planner-tasks', async (c) => {
+    const id = idParam(c, 'id')
+    const body = await parseJson(c, plannerTasksPatch)
+    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    const d1 = c.env.DB
+    const statements: D1PreparedStatement[] = []
+    if (body.remove.length > 0) {
+      statements.push(
+        d1
+          .prepare(
+            `DELETE FROM planner_tasks WHERE account_id = ?1 AND EXISTS (
+               SELECT 1 FROM json_each(?2) r
+               WHERE json_extract(r.value, '$.kind') = planner_tasks.kind
+                 AND json_extract(r.value, '$.id') = planner_tasks.id)`,
+          )
+          .bind(id, JSON.stringify(body.remove)),
+      )
+    }
+    if (body.upsert.length > 0) {
+      const rows = body.upsert.map(({ kind, id: taskId, ...data }) => ({
+        kind,
+        id: taskId,
+        data: JSON.stringify(data),
+      }))
+      statements.push(
+        d1
+          .prepare(
+            `INSERT INTO planner_tasks (account_id, kind, id, data, updated_at)
+             SELECT ?1, json_extract(value, '$.kind'), json_extract(value, '$.id'),
+                    json_extract(value, '$.data'), ?2
+             FROM json_each(?3) WHERE true
+             ON CONFLICT (account_id, kind, id)
+             DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
+          )
+          .bind(id, Date.now(), JSON.stringify(rows)),
+      )
+    }
+    const results = await d1.batch([
+      ...statements,
+      d1.prepare(SELECT_TASKS).bind(id),
+      listenerStatement(d1, id),
+    ])
+    const rows = (results.at(-2)!.results ?? []) as unknown as TaskRow[]
+    notifyUser(
+      c,
+      c.get('userId'),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      listenerOf(results.at(-1)),
+    )
+    return c.json<PlannerTasksResponse>({ tasks: toTasks(rows) })
   })

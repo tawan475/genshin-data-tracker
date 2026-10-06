@@ -17,10 +17,11 @@ import type {
   MeResponse,
   PlannerStateResponse,
   PlannerTargetsResponse,
+  PlannerTasksResponse,
   SnapshotResponse,
   UserSettingsPatch,
 } from '@gdt/shared'
-import type { plannerStatePatch, plannerTargetsPatch } from '@gdt/shared'
+import type { plannerStatePatch, plannerTargetsPatch, plannerTasksPatch } from '@gdt/shared'
 import type { z } from 'zod'
 import { request, requestJson } from './http'
 
@@ -116,6 +117,15 @@ export const api = {
   /** All or nothing; a 409 `capture_changed` when `base` is no longer the newest capture. */
   updatePlannerState: (id: number, body: z.input<typeof plannerStatePatch>) =>
     requestJson<PlannerStateResponse>(`/api/accounts/${id}/planner-state`, {
+      method: 'PATCH',
+      json: body,
+    }),
+  /** Built-in tasks' state and the player's own tasks. */
+  plannerTasks: (id: number) =>
+    requestJson<PlannerTasksResponse>(`/api/accounts/${id}/planner-tasks`),
+  /** `remove` is applied before `upsert`; each task is written whole. Answers with every task. */
+  updatePlannerTasks: (id: number, body: z.input<typeof plannerTasksPatch>) =>
+    requestJson<PlannerTasksResponse>(`/api/accounts/${id}/planner-tasks`, {
       method: 'PATCH',
       json: body,
     }),

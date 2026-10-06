@@ -19,7 +19,15 @@ import type {
   WeaponCurrent,
   WeaponTarget,
 } from '@gdt/shared'
-import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   CheckSquare,
@@ -46,7 +54,8 @@ import GoalToolbar from '@/components/planner/GoalToolbar.vue'
 import ItemEditor from '@/components/planner/ItemEditor.vue'
 import ItemPopover from '@/components/planner/ItemPopover.vue'
 import PlannerSettings from '@/components/planner/PlannerSettings.vue'
-import SeelieImport from '@/components/planner/SeelieImport.vue'
+import ResinTracker from '@/components/planner/ResinTracker.vue'
+import TasksStrip from '@/components/planner/TasksStrip.vue'
 import {
   allocateNeeds,
   createAllocationMemo,
@@ -100,6 +109,12 @@ import {
 } from '@/components/planner/model'
 import type { GoalNeeds } from '@/components/planner/needs'
 import { PRESETS, applyPreset, presetById, type PresetId } from '@/components/planner/presets'
+import { resinAt, resinReading } from '@/components/planner/resin'
+import type { SeelieWrites } from '@/components/planner/seelie-plan'
+import { upsertTask } from '@/components/planner/use-planner-tasks'
+import { saveTraveler, travelerGender } from '@/data/traveler'
+import { ApiRequestError } from '@/api'
+import { useAccounts } from '@/stores/accounts'
 import { keepUnchangedValues } from '@/components/planner/keep-unchanged'
 import { useDragOrder } from '@/components/planner/use-drag-order'
 import { useProgressive } from '@/components/planner/use-progressive'
@@ -143,6 +158,7 @@ const account = useAccount()
 const route = useRoute()
 const router = useRouter()
 const feedback = useFeedback()
+const accounts = useAccounts()
 
 const {
   accountId,
@@ -161,6 +177,7 @@ const {
   replaced,
   settings,
   saveSettings,
+  tasks,
   player,
   ar,
   wl,
@@ -172,7 +189,7 @@ const {
   totals,
   setCount,
   addCount,
-} = usePlannerModel(account)
+} = usePlannerModel(account, { tasks: true })
 const settingsOpen = ref(false)
 
 const plan = computed(() =>
@@ -203,12 +220,29 @@ const pinned = computed(() => {
   return Number.isFinite(at) ? at : null
 })
 const day = computed(() => farmDay(pinned.value ?? now.value, account.value.server))
+/** The capture's resin: irminsul's at login, else the snapshot's count. */
 const resin = computed(() => {
   const at = account.value.latest?.takenAt
   return planner.value && bag.value && at !== undefined && hasCapture.value
     ? resinNow(planner.value, bag.value, at, now.value, player.value.resin)
     : null
 })
+/** The resin to count from: the capture's, or one set by hand after it. */
+const reading = computed(() => resinReading(resin.value, settings.value.resin))
+/** Original Resin now plus the bag's resin items (the farm headline's days). */
+const resinHeld = computed(() => {
+  const r = reading.value
+  return r ? resinAt(r, now.value) + (resin.value?.bag ?? 0) : null
+})
+/** Condensed Resin held, and the most one can hold. */
+const condensed = computed(() => {
+  const c = planner.value?.resin.condensed
+  return { count: c?.key ? Math.max(0, bag.value?.[c.key] ?? 0) : 0, max: c?.max ?? 0 }
+})
+const plannerUrl = computed(
+  () => router.resolve({ name: 'account-planner', params: { accountId: account.value.id } }).href,
+)
+const accountLabel = computed(() => account.value.name ?? account.value.uid ?? 'Genshin account')
 
 const sameList = (a: readonly unknown[], b: readonly unknown[]) =>
   a.length === b.length && a.every((x, i) => x === b[i])
@@ -965,6 +999,13 @@ async function replaceWith(real: string) {
 const pickerOpen = ref(false)
 const pickerStart = ref<'item' | null>(null)
 const importOpen = ref(false)
+const importing = ref(false)
+/** The Seelie dialog (and its slug tables) load the first time it opens. */
+const SeelieImport = defineAsyncComponent(() => import('@/components/planner/SeelieImport.vue'))
+const seelieShown = ref(false)
+watch(importOpen, (open) => {
+  if (open) seelieShown.value = true
+})
 const taken = computed(() => new Set((store.targets.value ?? []).map((t) => targetId(t))))
 
 function openPicker(start: 'item' | null = null) {
@@ -1036,16 +1077,85 @@ function addItem(key: string) {
   openEditor(itemGoalId(key))
 }
 
-async function importGoals(ops: Ops) {
+/** A Seelie import: goals first (current states land on stored goals), then the rest. */
+async function importSeelie(writes: SeelieWrites) {
+  importing.value = true
   try {
-    await store.commit(ops)
-    importOpen.value = false
-    const added = ops.filter((op) => op.kind === 'upsert').length
-    feedback.toast({ tone: 'success', title: `Imported ${added} goals` })
-    tab.value = 'farm'
-  } catch {
-    // Reported by the store.
+    if (writes.targets.length) await store.commit(writes.targets)
+    if (writes.current.length || writes.inventory.length) {
+      await state.commit({ current: writes.current, inventory: writes.inventory })
+    }
+    if (writes.tasks.length && tasks) await tasks.commit(writes.tasks.map(upsertTask))
+    const patch = { ...writes.settings, ...(writes.resin ? { resin: writes.resin } : {}) }
+    if (Object.keys(patch).length) await saveSettings(patch)
+    if (writes.traveler) await saveTraveler(account.value.id, writes.traveler)
+    if (writes.server) await accounts.update(account.value.id, { server: writes.server })
+  } catch (cause) {
+    // The stores say what went wrong; the rest (settings, account) here.
+    if (!(cause instanceof ApiRequestError)) feedback.error('Not imported', cause)
+    return
+  } finally {
+    importing.value = false
   }
+  importOpen.value = false
+  const goals = writes.targets.filter((op) => op.kind === 'upsert').length
+  const parts = [
+    goals && `${formatNumber(goals)} goals`,
+    writes.current.length && `${formatNumber(writes.current.length)} current`,
+    writes.inventory.length && `${formatNumber(writes.inventory.length)} items`,
+    writes.tasks.length && `${formatNumber(writes.tasks.length)} tasks`,
+  ].filter(Boolean)
+  feedback.toast({
+    tone: 'success',
+    title: 'Imported from Seelie',
+    ...(parts.length ? { detail: parts.join(' · ') } : {}),
+  })
+  tab.value = 'farm'
+}
+
+/** Downloads the planner as a Seelie account file (goals, inventory, tasks, resin, settings). */
+async function exportSeelie() {
+  const p = planner.value
+  const b = board.value
+  const g = good.value
+  if (!p || !b || !g || !bag.value) return
+  const now = Date.now()
+  const r = reading.value
+  let module: typeof import('@/data/seelie-export')
+  try {
+    module = await import('@/data/seelie-export')
+  } catch (cause) {
+    feedback.error('Not exported', cause)
+    return
+  }
+  const { buildSeelieExport, seelieExportFileName } = module
+  const file = buildSeelieExport({
+    planner: p,
+    targets: store.targets.value ?? [],
+    characterNow: (kind, key) =>
+      b.characterGoals.get(kind === 'custom' ? customGoalId(key) : characterGoalId(key))?.current ??
+      findCharacterState(g.characters, key).state,
+    weaponNow: (w) =>
+      b.weaponGoals.get(weaponGoalId(w.key, w.owner, w.id))?.current ??
+      findWeaponState(g.weapons, w.key, w.owner).state,
+    constellation: (key) => b.characterGoals.get(characterGoalId(key))?.constellation ?? 0,
+    bag: bag.value,
+    tasks: tasks?.tasks.value ?? [],
+    // The reading itself: Seelie regenerates from it the same way.
+    resin: r ? { value: r.value, at: r.at } : null,
+    settings: { ar: ar.value, wl: wl.value, traveler: travelerGender.value },
+    server: account.value.server,
+    now,
+  })
+  const blob = new Blob([JSON.stringify(file)], { type: 'application/json' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = seelieExportFileName(now)
+  document.body.append(link)
+  link.click()
+  link.remove()
+  setTimeout(() => URL.revokeObjectURL(link.href), 10_000)
+  feedback.toast({ tone: 'success', title: 'Exported for Seelie', hint: link.download })
 }
 
 watch(accountId, () => {
@@ -1129,7 +1239,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
     </template>
     <template v-if="board" #actions>
       <template v-if="hasGoals">
-        <UiButton title="Import from Seelie" @click="importOpen = true">
+        <UiButton title="Import from or export to Seelie" @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
           Seelie
         </UiButton>
@@ -1166,6 +1276,29 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       requirementCache
     "
   >
+    <div
+      v-if="tasks?.tasks.value && (!hasGoals || tab === 'farm')"
+      class="mb-3 flex flex-col gap-3"
+    >
+      <ResinTracker
+        :reading="reading"
+        :condensed="condensed.count"
+        :condensed-max="condensed.max"
+        :steps="settings.planner.resinSteps ?? []"
+        :now="now"
+        :account-id="account.id"
+        :account-name="accountLabel"
+        :url="plannerUrl"
+        @set="(value) => void saveSettings({ resin: value })"
+      />
+      <TasksStrip
+        :tasks="tasks.tasks.value"
+        :now="now"
+        :server="account.server"
+        @change="tasks.change"
+      />
+    </div>
+
     <UiPanel v-if="!hasGoals" flush>
       <UiEmpty title="No goals">
         <template #icon><Target aria-hidden="true" /></template>
@@ -1199,7 +1332,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :wl="wl"
           :refreshes="settings.planner.refreshes ?? 0"
           :day="day"
-          :resin="resin"
+          :resin-held="resinHeld"
           :farming="farming"
           :artifacts="artifactWants"
           @settings="settingsOpen = true"
@@ -1427,13 +1560,22 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       @custom="addCustom"
     />
     <SeelieImport
+      v-if="seelieShown"
       :open="importOpen"
       :planner="basePlanner"
-      :good="goodView"
+      :capture="good"
+      :bag="bag"
       :targets="store.targets.value ?? []"
-      :saving="store.saving.value"
+      :overrides="state.overrides.value ?? new Map()"
+      :tasks="tasks?.tasks.value ?? []"
+      :resin="reading"
+      :settings="{ ar, wl, traveler: travelerGender }"
+      :irminsul-ar="player.ar !== null"
+      :server="account.server"
+      :saving="importing"
       @close="importOpen = false"
-      @apply="importGoals"
+      @apply="importSeelie"
+      @export="exportSeelie"
     />
     <DoneDialog
       :open="doneOpen"

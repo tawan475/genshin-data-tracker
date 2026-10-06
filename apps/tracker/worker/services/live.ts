@@ -252,6 +252,12 @@ export function listenerOf(result: D1Result | undefined): Listener | undefined {
   }
 }
 
+/** The tab that sent a write (`x-gdt-tab`), echoed in its live event so that tab skips it. */
+export function senderTab(c: Context<AppEnv>): { tab?: string } {
+  const tab = c.req.header('x-gdt-tab')
+  return tab && /^[A-Za-z0-9_-]{1,40}$/.test(tab) ? { tab } : {}
+}
+
 /**
  * Tells the user's open pages that something changed, after the response:
  * never awaited by the request, never failing it. With a `listener` read in

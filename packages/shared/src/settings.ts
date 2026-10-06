@@ -20,6 +20,18 @@ export interface AccountSettings {
   ar: number | null
   wl: number | null
   planner: PlannerSettings
+  /**
+   * Original Resin set by hand in the planner's resin tracker, regenerating
+   * from `at`. A capture whose resin was read after `at` replaces it; null:
+   * the capture's count.
+   */
+  resin: ManualResin | null
+}
+
+export interface ManualResin {
+  value: number
+  /** When it was set (ms since epoch). */
+  at: number
 }
 
 export interface PlannerSettings {
@@ -29,6 +41,8 @@ export interface PlannerSettings {
   passives: boolean
   /** Original Resin refreshes a day (0–6, 60 resin each): the Farm view's days count them. */
   refreshes: number
+  /** The resin tracker's quick buttons: amounts to add (−40 spends a boss run). */
+  resinSteps: number[]
 }
 
 export interface UserSettings {
@@ -45,6 +59,7 @@ export interface AccountSettingsPatch {
   ar?: number | null
   wl?: number | null
   planner?: Partial<PlannerSettings>
+  resin?: ManualResin | null
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
@@ -64,7 +79,8 @@ export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   traveler: 'F',
   ar: null,
   wl: null,
-  planner: { azoth: false, passives: true, refreshes: 0 },
+  planner: { azoth: false, passives: true, refreshes: 0, resinSteps: [-40, 60] },
+  resin: null,
 }
 
 /**

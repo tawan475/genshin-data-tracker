@@ -8,7 +8,7 @@ import type { FarmingFile, PlannerFile } from '@gdt/game-data/format'
 import { farmPlan } from '@gdt/game-data/planner-estimate'
 import { emptyRequirement, planTotals, type PlanGoal } from '@gdt/game-data/planner-math'
 import { describe, expect, it } from 'vitest'
-import type { ArtifactDomainInfo } from '../artifact-domains'
+import type { ArtifactDomain } from '../artifact-domains'
 import {
   ELSEWHERE,
   artifactCards,
@@ -177,13 +177,15 @@ describe('enemy and local cards', () => {
 })
 
 describe('artifact cards', () => {
-  const domain = (id: number, name: string, sets: string[], ar = 30): ArtifactDomainInfo => ({
+  const domain = (id: number, name: string, sets: string[], ar = 30): ArtifactDomain => ({
     id,
     name,
     region: null,
     ar,
     resin: 20,
     sets,
+    // The domain's own two sets are 5★, the shared one after them 4★.
+    rarities: sets.map((_, i) => (i < 2 ? 5 : 4)),
   })
   const midsummer = domain(
     1,
@@ -197,7 +199,7 @@ describe('artifact cards', () => {
     'Gambler',
   ])
   const domains = [midsummer, momiji]
-  const of = new Map<string, ArtifactDomainInfo[]>()
+  const of = new Map<string, ArtifactDomain[]>()
   for (const d of domains) for (const s of d.sets) of.set(s, [...(of.get(s) ?? []), d])
   const withDomains = { ...farming, artifactDomains: domains, artifactDomainsOf: of } as FarmingData
 

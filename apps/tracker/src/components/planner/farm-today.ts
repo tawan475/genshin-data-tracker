@@ -48,7 +48,7 @@ import {
   type PlanTotals,
 } from '@gdt/game-data/planner-math'
 import { formatSetName } from '@/utils/artifact-stats'
-import { domainsForSet, type ArtifactDomainInfo } from './artifact-domains'
+import { domainsForSet, type ArtifactDomain } from './artifact-domains'
 
 // ------------------------------------------------------------------ resin per day
 
@@ -657,16 +657,16 @@ export function artifactCards(input: FarmInput): FarmCard[] {
   const wants = input.artifacts ?? []
   const cards = new Map<
     number,
-    { domain: ArtifactDomainInfo | null; sets: string[]; goals: string[] }
+    { domain: ArtifactDomain | null; sets: string[]; goals: string[] }
   >()
-  const add = (domain: ArtifactDomainInfo | null, set: string, goal: string) => {
+  const add = (domain: ArtifactDomain | null, set: string, goal: string) => {
     const id = domain?.id ?? -1
     const card = cards.get(id) ?? { domain, sets: [], goals: [] }
     if (!card.sets.includes(set)) card.sets.push(set)
     if (!card.goals.includes(goal)) card.goals.push(goal)
     cards.set(id, card)
   }
-  const later: { set: string; goal: string; domains: readonly ArtifactDomainInfo[] }[] = []
+  const later: { set: string; goal: string; domains: readonly ArtifactDomain[] }[] = []
   for (const want of wants) {
     for (const set of want.sets) {
       const domains = domainsForSet(input.farming, set)

@@ -16,6 +16,8 @@
  *   so only real image responses are kept, never an error page or an opaque
  *   response (which would also count megabytes against the storage quota).
  *   Bump IMAGES' version to drop them.
+ * - Notifications (the planner's resin alerts) are shown by the open page
+ *   through here; a click focuses a tab of the site or opens the page.
  */
 
 const BUILD = '__BUILD__'
@@ -48,6 +50,20 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting()
+})
+
+/** A resin alert (the page shows it through here): focus an open tab of the site, else open its page. */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const path = event.notification.data?.url ?? '/'
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      const open = windows.find((w) => new URL(w.url).origin === self.location.origin)
+      if (open) return open.focus()
+      return self.clients.openWindow(new URL(path, self.location.origin).href)
+    })(),
+  )
 })
 
 /** Drops the oldest entries beyond `max` (keys come back in insertion order). */
