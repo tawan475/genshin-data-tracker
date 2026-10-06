@@ -184,9 +184,17 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `GET/PATCH /api/accounts/:id/achievement-marks` (`{done, undone}` id lists;
   marks by hand, on top of what snapshots captured) and
   `GET/PATCH /api/accounts/:id/planner-targets` (`{upsert, remove}`; character
-  and weapon goals, weapons keyed by owner). Neither bumps the account's
-  `dataVersion`. Account settings also hold `traveler` (`F`/`M`), which picks
-  the Traveler's portrait.
+  and weapon goals, weapons keyed by owner), and
+  `GET/PATCH /api/accounts/:id/planner-state`: the Planner's hand edits on top
+  of the newest capture (`{base, inventory, current, prune}`: material counts
+  set or added to, and goals' current state). `base` is the newest capture's
+  `lastSeenAt` the edit was made against; when a newer capture has landed the
+  whole request writes nothing (409 `capture_changed`), and a newer capture
+  replaces older count edits (irminsul is the truth; table
+  `inventory_adjustments`, column `planner_targets.current`, migration 0011).
+  None of these bumps the account's `dataVersion`; planner writes send a
+  `planner` live event naming the tab that made them (`x-gdt-tab`). Account
+  settings also hold `traveler` (`F`/`M`), which picks the Traveler's portrait.
 - **Maintenance** runs daily (cron): snapshots deleted more than 30 days ago
   are purged, unreferenced sections are collected.
   Account counters are kept exact by triggers (migration 0002).

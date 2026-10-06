@@ -107,6 +107,14 @@ export function parseLiveEvent(text: unknown): LiveEvent | null {
   const event = value as Record<string, unknown>
   if (event.type === 'accounts') return { type: 'accounts' }
   if (event.type === 'hello') return parseHello(event.accounts)
+  if (event.type === 'planner') {
+    if (!Number.isSafeInteger(event.accountId)) return null
+    return {
+      type: 'planner',
+      accountId: event.accountId as number,
+      ...(typeof event.tab === 'string' ? { tab: event.tab } : {}),
+    }
+  }
   if (event.type !== 'data' || !Number.isSafeInteger(event.accountId)) return null
   return {
     type: 'data',
@@ -145,10 +153,12 @@ export interface KnownAccounts {
 /**
  * Whether `event` tells this tab something it does not know yet. A data event
  * for a version already held (this tab's own import, or a list another tab
- * shared) needs nothing, nor a `hello` that matches what is held; anything
- * else re-reads the list.
+ * shared) needs nothing, nor a `hello` that matches what is held, nor a
+ * planner change (the Planner page re-reads that itself); anything else
+ * re-reads the list.
  */
 export function eventNeedsFetch(event: LiveEvent, known: KnownAccounts): boolean {
+  if (event.type === 'planner') return false
   if (event.type === 'hello') return helloDiffers(event.accounts, known)
   if (event.type !== 'data' || event.dataVersion === null) return true
   const version = known.knownVersion(event.accountId)

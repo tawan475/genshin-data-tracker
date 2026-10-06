@@ -15,11 +15,12 @@ import type {
   ImportKeyResponse,
   ImportResponse,
   MeResponse,
+  PlannerStateResponse,
   PlannerTargetsResponse,
   SnapshotResponse,
   UserSettingsPatch,
 } from '@gdt/shared'
-import type { plannerTargetsPatch } from '@gdt/shared'
+import type { plannerStatePatch, plannerTargetsPatch } from '@gdt/shared'
 import type { z } from 'zod'
 import { request, requestJson } from './http'
 
@@ -106,6 +107,15 @@ export const api = {
   /** `remove` is applied before `upsert`. Answers with every goal. */
   updatePlannerTargets: (id: number, body: z.input<typeof plannerTargetsPatch>) =>
     requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`, {
+      method: 'PATCH',
+      json: body,
+    }),
+  /** Hand edits on top of the newest capture: material counts, goals' current state. */
+  plannerState: (id: number) =>
+    requestJson<PlannerStateResponse>(`/api/accounts/${id}/planner-state`),
+  /** All or nothing; a 409 `capture_changed` when `base` is no longer the newest capture. */
+  updatePlannerState: (id: number, body: z.input<typeof plannerStatePatch>) =>
+    requestJson<PlannerStateResponse>(`/api/accounts/${id}/planner-state`, {
       method: 'PATCH',
       json: body,
     }),
