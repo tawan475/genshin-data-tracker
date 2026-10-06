@@ -63,6 +63,16 @@ jobs:
             echo "::notice::No CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets: checks passed, deploy skipped. Deploy with wrangler from a logged-in machine (README: Deploying)."
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           else
+            # A pasted secret easily picks up a line break, spaces or quotes,
+            # which Cloudflare rejects as "Invalid format for Authorization
+            # header": strip them, and say what the value looks like (length
+            # and character set only, never the value).
+            clean=$(printf '%s' "$CLOUDFLARE_API_TOKEN" | tr -d "\r\n\t \"'")
+            echo "::add-mask::$clean"
+            charset=no
+            if [[ "$clean" =~ ^[A-Za-z0-9_-]+$ ]]; then charset=yes; fi
+            echo "API token: ${#clean} characters after trimming (${#CLOUDFLARE_API_TOKEN} stored), letters/digits/_/- only: $charset"
+            echo "CLOUDFLARE_API_TOKEN=$clean" >> "$GITHUB_ENV"
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
 
