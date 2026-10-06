@@ -8,6 +8,7 @@
 
 import type { Element as GameElement, WeaponType } from '@gdt/game-data'
 import { characterInfo, weaponInfo } from '@gdt/game-data/catalog'
+import { shallowRef } from 'vue'
 
 export type Element = Lowercase<GameElement>
 export type { WeaponType }
@@ -31,4 +32,30 @@ export function characterMeta(
 export function weaponMeta(key: string): readonly [number, WeaponType] | undefined {
   const info = weaponInfo(key)
   return info && [info.rarity, info.type]
+}
+
+/**
+ * Weapon ids and level caps from planner.json, once something has loaded it
+ * (the Planner and Materials pages do; nothing loads it just for these).
+ * When catalog.json carries `id` and `maxLevel` columns, the two functions
+ * below read `weaponInfo(key)` instead and this goes.
+ */
+const plannerWeapons = shallowRef<ReadonlyMap<string, { id: number; maxLevel: number }> | null>(
+  null,
+)
+
+export function rememberPlannerWeapons(
+  weapons: ReadonlyMap<string, { id: number; maxLevel: number }>,
+): void {
+  plannerWeapons.value = weapons
+}
+
+/** The game's weapon id (newer weapons have higher ids within a type); 0 while unknown. */
+export function weaponGameId(key: string): number {
+  return plannerWeapons.value?.get(key)?.id ?? 0
+}
+
+/** The level a weapon tops out at: 90, or 70 for 1–2★. */
+export function weaponMaxLevel(key: string, rarity: number | null): number {
+  return plannerWeapons.value?.get(key)?.maxLevel ?? (rarity !== null && rarity <= 2 ? 70 : 90)
 }

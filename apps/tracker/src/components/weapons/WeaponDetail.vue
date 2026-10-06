@@ -1,25 +1,41 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowRight, ArrowUp, Lock } from 'lucide-vue-next'
+import { ArrowRight, ArrowUp, Backpack, Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
-import { MAX_REFINEMENT, WEAPON_TYPE_LABELS, type WeaponGroup } from '@/data/weapons'
+import {
+  MAX_REFINEMENT,
+  WEAPON_TYPE_LABELS,
+  weaponTitle,
+  type WeaponGroup,
+  type WeaponRow,
+} from '@/data/weapons'
 import { characterIcon, weaponIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 
-/** Every copy of one weapon: level, refinement, lock and who holds it. */
-const props = defineProps<{ group: WeaponGroup; accountId: number }>()
+/**
+ * Every copy of one weapon. The head is the chosen copy as the game shows a
+ * selected weapon ("R5 · Lv. 90/90", refinement diamonds, who wears it);
+ * below, one line per copy or stack of spare copies, the chosen one
+ * highlighted. Picking a line chooses it.
+ */
+const props = defineProps<{ group: WeaponGroup; selectedId: string | null; accountId: number }>()
+const emit = defineEmits<{ select: [id: string] }>()
 
 const g = computed(() => props.group)
+const selected = computed<WeaponRow>(
+  () => g.value.rows.find((r) => r.id === props.selectedId) ?? g.value.best,
+)
 const equipped = computed(() => g.value.owners.length)
+const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT}`
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex items-center gap-4">
       <GameIcon
-        :src="weaponIcon(g.key, g.best.ascension)"
+        :src="weaponIcon(g.key, selected.ascension)"
         :name="g.name"
         :rarity="g.rarity ?? undefined"
         size="lg"
@@ -29,20 +45,60 @@ const equipped = computed(() => g.value.owners.length)
           <RarityStars v-if="g.rarity" :rarity="g.rarity" />
           <span v-if="g.type">{{ WEAPON_TYPE_LABELS[g.type] }}</span>
         </p>
-        <p class="flex flex-wrap gap-x-4 text-sm text-text-secondary">
+        <p class="flex flex-wrap items-center gap-x-2 text-lg">
           <span
-            ><span class="tabular font-mono text-lg text-text-primary">{{
-              formatNumber(g.count)
-            }}</span>
-            {{ g.count === 1 ? 'copy' : 'copies' }}</span
+            class="tabular font-mono font-semibold"
+            :class="selected.refinement >= MAX_REFINEMENT ? 'text-accent-text' : ''"
+            :title="refinementTitle(selected.refinement)"
+            >R{{ selected.refinement }}</span
           >
-          <span v-if="equipped"
-            ><span class="tabular font-mono text-lg text-text-primary">{{ equipped }}</span>
-            equipped</span
+          <span class="text-text-muted" aria-hidden="true">·</span>
+          <LevelText :level="selected.level" :ascension="selected.ascension" />
+        </p>
+        <p class="flex min-w-0 items-center gap-2 text-sm text-text-secondary">
+          <span
+            class="inline-flex shrink-0 gap-1"
+            role="img"
+            :aria-label="refinementTitle(selected.refinement)"
+            :title="refinementTitle(selected.refinement)"
           >
+            <span
+              v-for="n in MAX_REFINEMENT"
+              :key="n"
+              class="size-2 rotate-45 rounded-[1px]"
+              :class="n <= selected.refinement ? 'bg-accent' : 'bg-border-strong'"
+            />
+          </span>
+          <template v-if="selected.location">
+            <GameIcon
+              :src="characterIcon(selected.location)"
+              :name="selected.ownerName"
+              size="xs"
+              class="rounded-full!"
+            />
+            <span class="min-w-0 truncate">{{ selected.ownerName }}</span>
+          </template>
+          <span v-else class="inline-flex items-center gap-1.5">
+            <Backpack class="size-4" aria-hidden="true" />
+            Unequipped
+          </span>
+          <Lock v-if="selected.lock" class="size-4 shrink-0" aria-label="Locked" />
         </p>
       </div>
     </div>
+
+    <p class="flex flex-wrap gap-x-4 text-sm text-text-secondary">
+      <span
+        ><span class="tabular font-mono text-lg text-text-primary">{{
+          formatNumber(g.count)
+        }}</span>
+        {{ g.count === 1 ? 'copy' : 'copies' }}</span
+      >
+      <span v-if="equipped"
+        ><span class="tabular font-mono text-lg text-text-primary">{{ equipped }}</span>
+        equipped</span
+      >
+    </p>
 
     <ul
       v-if="g.refine"
@@ -61,23 +117,38 @@ const equipped = computed(() => g.value.owners.length)
       </li>
     </ul>
 
-    <ul class="divide-y divide-border-subtle rounded-xl border border-border-default">
-      <li v-for="row in g.rows" :key="row.id" class="flex items-center gap-3 px-3 py-2">
+    <ul
+      class="divide-y divide-border-subtle overflow-hidden rounded-xl border border-border-default"
+      aria-label="Copies"
+    >
+      <li
+        v-for="row in g.rows"
+        :key="row.id"
+        class="relative flex min-h-11 items-center gap-3 px-3 py-1.5 transition-colors"
+        :class="row.id === selected.id ? 'bg-accent/10' : 'hover:bg-surface-overlay/60'"
+      >
+        <button
+          type="button"
+          class="absolute inset-0"
+          :aria-label="weaponTitle(row)"
+          :aria-pressed="row.id === selected.id"
+          @click="emit('select', row.id)"
+        />
         <LevelText :level="row.level" :ascension="row.ascension" class="w-20 shrink-0" />
         <span
           class="inline-flex shrink-0 items-center gap-1.5"
-          :title="`Refinement ${row.refinement} of ${MAX_REFINEMENT}`"
+          :title="refinementTitle(row.refinement)"
         >
           <span
             class="tabular w-6 font-mono"
             :class="row.refinement >= MAX_REFINEMENT ? 'font-semibold text-accent-text' : ''"
             >R{{ row.refinement }}</span
           >
-          <span class="hidden gap-0.5 min-[400px]:inline-flex" aria-hidden="true">
+          <span class="hidden gap-1 min-[400px]:inline-flex" aria-hidden="true">
             <span
               v-for="n in MAX_REFINEMENT"
               :key="n"
-              class="h-1.5 w-2.5 rounded-full"
+              class="size-1.5 rotate-45 rounded-[1px]"
               :class="n <= row.refinement ? 'bg-accent' : 'bg-border-strong'"
             />
           </span>
@@ -92,7 +163,7 @@ const equipped = computed(() => g.value.owners.length)
             params: { accountId },
             query: { c: row.location },
           }"
-          class="flex min-w-0 flex-1 items-center gap-2 rounded-md hover:text-accent-text"
+          class="relative z-10 flex min-w-0 flex-1 items-center gap-2 rounded-md hover:text-accent-text"
         >
           <GameIcon
             :src="characterIcon(row.location)"
