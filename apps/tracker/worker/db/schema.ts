@@ -294,6 +294,27 @@ export const plannerWeaponGoals = sqliteTable(
 )
 
 /**
+ * Planner tasks (migration 0013): built-in ones by their id (daily
+ * commissions, the Spiral Abyss…: only the state, `{next?, hidden?}`) and
+ * the player's own by an id the app makes (`{task, due, position?}`). The
+ * row is written whole; `data` is the task without kind and id (see
+ * `plannerTaskInput`), an append-only shape.
+ */
+export const plannerTasks = sqliteTable(
+  'planner_tasks',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['builtin', 'custom'] }).notNull(),
+    id: text('id').notNull(),
+    data: text('data', { mode: 'json' }).$type<Record<string, unknown>>().notNull(),
+    updatedAt: timestamp('updated_at'),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.kind, t.id] })],
+)
+
+/**
  * Hand edits of material counts on top of the newest capture (Planner):
  * the count is `set_value ?? the capture's`, plus `delta`. `base_seen_at` is
  * the `last_seen_at` of the newest capture when the edit was made (0 for

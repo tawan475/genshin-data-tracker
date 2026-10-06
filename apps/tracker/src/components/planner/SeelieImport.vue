@@ -1,46 +1,79 @@
 <script setup lang="ts">
 import type { PlannerData } from '@gdt/game-data'
-import { raiseForTalents } from '@gdt/game-data/planner-goals'
+import images from '@gdt/game-data/data/images.json'
 import { findCharacterState, findWeaponState } from '@gdt/game-data/planner-math'
-import { isSeelieExport, mapSeelieGoals, type SeelieImport } from '@/data/seelie'
-import type { Good, PlannerTarget } from '@gdt/shared'
-import { computed, ref, shallowRef, watch } from 'vue'
-import { FileUp, TriangleAlert } from 'lucide-vue-next'
+import type {
+  CharacterCurrent,
+  GenshinServer,
+  Good,
+  PlannerTarget,
+  PlannerTask,
+  WeaponCurrent,
+} from '@gdt/shared'
+import { computed, reactive, ref, shallowRef, watch } from 'vue'
+import { Download, FileUp, TriangleAlert } from 'lucide-vue-next'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
+import { isSeelieExport } from '@/data/seelie'
 import { formatNumber } from '@/lib/format'
-import { characterGoalId, itemGoalId, newGoalId, refOf, targetId, weaponGoalId } from './model'
-import { mapSeelieItems, matchWeaponGoals, type SeelieItems } from './seelie-items'
-import { remove, upsert } from './use-planner-targets'
-
-type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
+import { newGoalId } from './goal-ids'
+import type { ResinReading } from './resin'
+import {
+  SEELIE_SECTIONS,
+  defaultPicks,
+  parseSeelie,
+  planSeelie,
+  sectionHasChanges,
+  type SeelieAccount,
+  type SeelieParsed,
+  type SeeliePicks,
+  type SeelieSection,
+  type SeelieWrites,
+  type SectionSummary,
+} from './seelie-plan'
 
 /**
- * Goals from a Seelie export: pick or drop the file, see what it maps to
- * (new / changed / same, and what could not be mapped), then apply it as
- * one request. Extra item needs (`custom_items`) come along. "Replace" also
- * removes goals the file does not have. Weapon goals are matched to the
- * stored ones of the same weapon and owner in order (`matchWeaponGoals`),
- * so the same file twice changes nothing.
+ * Seelie, both ways. Import: pick or drop an account export, see what each
+ * part would change (new / changed / same, what could not be mapped), tick
+ * the parts to bring over, apply. Goals, artifact goals, custom characters,
+ * current values (as hand-set "Now" states), inventory (as hand edits on
+ * the newest capture), tasks, resin and settings are each opt-in
+ * (seelie-plan.ts). "Replace" also removes goals the file doesn't have.
+ * Export: a Seelie account file of the goals, inventory and tasks
+ * (Seelie → Settings → Import Account keeps what the file leaves out).
  */
 const props = defineProps<{
   open: boolean
   planner: PlannerData
-  good: Good
+  /** The newest capture (empty without one); `materials` are the capture's counts. */
+  capture: Good
+  /** The planner's bag (the capture with the hand edits). */
+  bag: Readonly<Record<string, number>>
   targets: readonly PlannerTarget[]
+  overrides: ReadonlyMap<string, CharacterCurrent | WeaponCurrent>
+  tasks: readonly PlannerTask[]
+  resin: ResinReading | null
+  /** AR and World Level as the planner uses them; whether irminsul says them. */
+  settings: { ar: number | null; wl: number | null; traveler: 'F' | 'M' }
+  irminsulAr: boolean
+  server: GenshinServer | null
   saving: boolean
 }>()
-const emit = defineEmits<{ close: []; apply: [ops: Op[]] }>()
+const emit = defineEmits<{ close: []; apply: [writes: SeelieWrites]; export: [] }>()
+
+const ARTIFACT_SETS = Object.keys((images as { artifacts: Record<string, unknown> }).artifacts)
 
 const input = ref<HTMLInputElement>()
 const dragging = ref(false)
 const fileName = ref('')
 const failure = ref('')
-const result = shallowRef<SeelieImport | null>(null)
-const extra = shallowRef<SeelieItems | null>(null)
+const parsed = shallowRef<SeelieParsed | null>(null)
 const replace = ref(false)
+const picks = reactive<SeeliePicks>(
+  Object.fromEntries(SEELIE_SECTIONS.map((s) => [s, false])) as SeeliePicks,
+)
 
 watch(
   () => props.open,
@@ -48,39 +81,52 @@ watch(
     if (!open) return
     fileName.value = ''
     failure.value = ''
-    result.value = null
-    extra.value = null
+    parsed.value = null
     replace.value = false
   },
 )
+
+const account = computed<SeelieAccount>(() => ({
+  capture: props.capture,
+  bag: props.bag,
+  targets: props.targets,
+  overrides: props.overrides,
+  tasks: props.tasks,
+  resin: props.resin,
+  settings: props.settings,
+  server: props.server,
+  newId: newGoalId,
+}))
 
 async function read(file: File | undefined) {
   if (!file) return
   fileName.value = file.name
   failure.value = ''
-  result.value = null
-  extra.value = null
+  parsed.value = null
   try {
     const json: unknown = JSON.parse(await file.text())
     if (!isSeelieExport(json)) throw new Error('Not a Seelie export')
-    const mapped = mapSeelieGoals(json, props.planner, {
-      character: (key) => findCharacterState(props.good.characters, key).state,
-      refinement: (key, owner) => findWeaponState(props.good.weapons, key, owner).state.refinement,
-    })
-    // Seelie allows talents its ascension can't reach; raise the ascension for them.
-    result.value = {
-      ...mapped,
-      characters: mapped.characters.map((c) => {
-        const phases = props.planner.characters.get(c.key)?.ascension
-        return phases
-          ? {
-              ...c,
-              target: raiseForTalents(phases, c.target, props.planner.talentAscension).target,
-            }
-          : c
+    const result = parseSeelie(
+      json,
+      props.planner,
+      {
+        character: (key) => findCharacterState(props.capture.characters, key).state,
+        refinement: (key, owner) =>
+          findWeaponState(props.capture.weapons, key, owner).state.refinement,
+        artifactSets: ARTIFACT_SETS,
+      },
+      props.server,
+      Date.now(),
+    )
+    const none = Object.fromEntries(SEELIE_SECTIONS.map((s) => [s, false])) as SeeliePicks
+    Object.assign(
+      picks,
+      defaultPicks(planSeelie(result, account.value, none), {
+        irminsulAr: props.irminsulAr,
+        server: props.server,
       }),
-    }
-    extra.value = mapSeelieItems(json, props.planner)
+    )
+    parsed.value = result
   } catch (cause) {
     failure.value =
       cause instanceof SyntaxError ? 'Not a JSON file' : String((cause as Error).message)
@@ -98,141 +144,74 @@ function onDrop(event: DragEvent) {
   void read(event.dataTransfer?.files?.[0])
 }
 
-const existing = computed(() => new Map(props.targets.map((t) => [targetId(t), t])))
+const plan = computed(() =>
+  parsed.value ? planSeelie(parsed.value, account.value, { ...picks }, replace.value) : null,
+)
 
-/** Key order does not matter: the server returns targets as stored. */
-const canon = (value: unknown) =>
-  JSON.stringify(value, (_, x: unknown) =>
-    x && typeof x === 'object' && !Array.isArray(x)
-      ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b)))
-      : x,
-  )
-const same = (a: unknown, b: unknown) => canon(a) === canon(b)
-
-/**
- * What the import writes. Notes, favorites, priorities and artifact goals
- * are the tracker's own, and an item need keeps its note and on/off state:
- * those stay as stored.
- */
-const plan = computed(() => {
-  const r = result.value
-  if (!r) return null
-  const at = (id: string) => existing.value.get(id)
-  const characters = r.characters.map((c) => {
-    const now = at(characterGoalId(c.key))
-    const keep = now?.kind === 'character' ? now.target : null
-    const own = {
-      note: keep?.note,
-      favorite: keep?.favorite,
-      priority: keep?.priority,
-      constellation: keep?.constellation,
-      artifacts: keep?.artifacts,
-    }
-    return { key: c.key, target: { ...c.target, ...own } }
-  })
-  const stored = props.targets.flatMap((t) => (t.kind === 'weapon' ? [t] : []))
-  const ids = matchWeaponGoals(r.weapons, stored)
-  const weapons = r.weapons.map((w, i) => {
-    const id = ids[i] ?? newGoalId()
-    const now = at(weaponGoalId(w.key, w.owner, id))
-    const keep = now?.kind === 'weapon' ? now.target : null
-    return {
-      id,
-      key: w.key,
-      owner: w.owner,
-      target: { ...w.target, note: keep?.note, priority: keep?.priority },
-    }
-  })
-  const items = (extra.value?.items ?? []).map((i) => {
-    const now = at(itemGoalId(i.key))
-    const keep = now?.kind === 'item' ? now.target : null
-    return {
-      key: i.key,
-      target: { count: i.count, active: keep?.active ?? true, note: keep?.note },
-    }
-  })
-  return { characters, weapons, items }
-})
-
-const preview = computed(() => {
-  const r = result.value
-  const x = plan.value
-  if (!r || !x) return null
-  const count = (ids: { id: string; target: unknown }[]) => {
-    let added = 0
-    let changed = 0
-    for (const { id, target } of ids) {
-      const now = existing.value.get(id)
-      if (!now) added++
-      else if (!same(now.target, target)) changed++
-    }
-    return { total: ids.length, added, changed, same: ids.length - added - changed }
-  }
-  const characters = x.characters.map((c) => ({ id: characterGoalId(c.key), target: c.target }))
-  const weapons = x.weapons.map((w) => ({
-    id: weaponGoalId(w.key, w.owner, w.id),
-    target: w.target,
-  }))
-  const items = x.items.map((i) => ({ id: itemGoalId(i.key), target: i.target }))
-  const incoming = new Set([...characters, ...weapons, ...items].map((t) => t.id))
-  return {
-    characters: count(characters),
-    weapons: count(weapons),
-    items: count(items),
-    dropped: props.targets.filter((t) => !incoming.has(targetId(t))),
-    unmapped: [...r.unmapped.characters, ...r.unmapped.weapons, ...(extra.value?.unmapped ?? [])],
-  }
-})
-
-/** The preview tiles; Items only when the file has extra item needs. */
-const rows = computed(() => {
-  const p = preview.value
-  if (!p) return []
-  const list = [
-    { label: 'Characters', data: p.characters },
-    { label: 'Weapons', data: p.weapons },
-  ]
-  if (p.items.total > 0) list.push({ label: 'Items', data: p.items })
-  return list
-})
-
-/** "12 new · 3 changed", zeros left out. */
-function breakdown(data: { added: number; changed: number; same: number }) {
-  const parts = [
-    [data.added, 'new'],
-    [data.changed, 'changed'],
-    [data.same, 'same'],
-  ] as const
-  return parts
-    .filter(([n]) => n > 0)
-    .map(([n, label]) => `${formatNumber(n)} ${label}`)
-    .join(' · ')
+const LABELS: Record<SeelieSection, { label: string; title: string }> = {
+  goals: { label: 'Goals', title: 'Character, talent and weapon goals, extra item needs' },
+  artifacts: { label: 'Artifact goals', title: 'Sets and main stats to farm' },
+  customs: {
+    label: 'Custom characters',
+    title: 'Characters Seelie has as custom ones, with goals',
+  },
+  current: {
+    label: 'Current levels',
+    title: 'Seelie’s current levels, talents and constellations where ahead of the capture',
+  },
+  inventory: {
+    label: 'Inventory',
+    title: 'Counts as hand edits on the newest capture (a newer capture replaces them)',
+  },
+  tasks: { label: 'Tasks', title: 'Custom tasks, and permanent ones done in Seelie' },
+  resin: { label: 'Resin', title: 'Seelie’s resin tracker, when newer than ours' },
+  settings: { label: 'Settings', title: 'AR, World Level, server and Traveler' },
 }
 
+/** "12 new · 3 changed · 4 same", zeros left out. */
+function breakdown(s: SectionSummary) {
+  const parts = [
+    [s.added, 'new'],
+    [s.changed, 'changed'],
+    [s.same, 'same'],
+  ] as const
+  return [
+    ...parts.filter(([n]) => n > 0).map(([n, label]) => `${formatNumber(n)} ${label}`),
+    ...s.facts,
+  ].join(' · ')
+}
+
+const rows = computed(() => {
+  const p = plan.value
+  if (!p) return []
+  return SEELIE_SECTIONS.filter((id) => p.sections[id].total > 0).map((id) => ({
+    id,
+    ...LABELS[id],
+    data: p.sections[id],
+    available: sectionHasChanges(p.sections[id]),
+  }))
+})
+
+const writes = computed(() => plan.value?.writes ?? null)
 const canApply = computed(() => {
-  const p = preview.value
-  if (!p) return false
-  const changes = [p.characters, p.weapons, p.items].reduce((n, x) => n + x.added + x.changed, 0)
-  return changes > 0 || (replace.value && p.dropped.length > 0)
+  const w = writes.value
+  if (!w) return false
+  return (
+    w.targets.length + w.current.length + w.inventory.length + w.tasks.length > 0 ||
+    !!w.resin ||
+    !!w.traveler ||
+    !!w.server ||
+    Object.keys(w.settings).length > 0
+  )
 })
 
 function apply() {
-  const x = plan.value
-  const p = preview.value
-  if (!x || !p) return
-  const ops: Op[] = []
-  if (replace.value) {
-    for (const t of p.dropped) ops.push(remove(refOf(t)))
-  }
-  for (const c of x.characters) ops.push(upsert({ kind: 'character', ...c }))
-  for (const w of x.weapons) ops.push(upsert({ kind: 'weapon', ...w }))
-  for (const i of x.items) ops.push(upsert({ kind: 'item', ...i }))
-  emit('apply', ops)
+  if (writes.value) emit('apply', writes.value)
 }
 </script>
 
 <template>
-  <UiModal :open="open" title="Import from Seelie" @close="emit('close')">
+  <UiModal :open="open" title="Seelie" @close="emit('close')">
     <div class="flex flex-col gap-4">
       <div
         class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
@@ -263,48 +242,66 @@ function apply() {
         {{ failure }}
       </p>
 
-      <template v-if="preview">
-        <dl class="grid grid-cols-2 gap-2" :class="rows.length > 2 ? 'sm:grid-cols-3' : ''">
-          <div
+      <template v-if="plan">
+        <fieldset
+          class="flex min-w-0 flex-col divide-y divide-border-subtle rounded-lg border border-border-default"
+        >
+          <legend class="sr-only">What to import</legend>
+          <label
             v-for="row in rows"
-            :key="row.label"
-            class="rounded-lg border border-border-default p-3"
+            :key="row.id"
+            class="flex min-h-12 items-center gap-3 px-3 py-1.5"
+            :class="row.available ? 'cursor-pointer' : 'opacity-60'"
+            :title="row.title"
           >
-            <dt class="text-xs text-text-muted">{{ row.label }}</dt>
-            <dd class="tabular font-mono text-xl font-semibold">
-              {{ formatNumber(row.data.total) }}
-            </dd>
-            <dd class="text-xs text-text-secondary">
-              {{ breakdown(row.data) }}
-            </dd>
-          </div>
-        </dl>
+            <input
+              v-model="picks[row.id]"
+              type="checkbox"
+              class="size-5 shrink-0 cursor-pointer accent-accent"
+              :disabled="!row.available"
+            />
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="text-sm font-medium">{{ row.label }}</span>
+              <span class="truncate text-xs text-text-secondary">{{ breakdown(row.data) }}</span>
+            </span>
+            <span class="tabular font-mono text-lg font-semibold">{{
+              formatNumber(row.data.total)
+            }}</span>
+          </label>
+        </fieldset>
 
-        <div v-if="preview.unmapped.length" class="flex flex-col gap-1.5">
-          <span class="text-xs text-text-muted">Skipped {{ preview.unmapped.length }}</span>
+        <div v-if="plan.unmapped.length" class="flex flex-col gap-1.5">
+          <span class="text-xs text-text-muted">Skipped {{ plan.unmapped.length }}</span>
           <span class="flex flex-wrap gap-1">
-            <UiBadge v-for="slug in preview.unmapped" :key="slug" tone="warning">{{
-              slug
-            }}</UiBadge>
+            <UiBadge v-for="slug in plan.unmapped" :key="slug" tone="warning">{{ slug }}</UiBadge>
           </span>
         </div>
         <p
-          v-if="result?.clamped"
+          v-if="plan.clamped"
           class="text-xs text-text-muted"
           title="Targets above level 90 were set to 90"
         >
-          Capped at 90: {{ result.clamped }}
+          Capped at 90: {{ plan.clamped }}
         </p>
 
         <UiSwitch
-          v-if="preview.dropped.length"
+          v-if="picks.goals && plan.dropped.length"
           v-model="replace"
-          :label="`Replace (remove ${preview.dropped.length})`"
+          :label="`Replace (remove ${plan.dropped.length})`"
         />
       </template>
     </div>
 
     <template #footer>
+      <UiButton
+        variant="ghost"
+        class="mr-auto"
+        title="A Seelie account file: goals, inventory, tasks (Seelie → Settings → Import Account)"
+        @click="emit('export')"
+      >
+        <Download class="size-4" aria-hidden="true" />
+        Export
+      </UiButton>
       <UiButton @click="emit('close')">Cancel</UiButton>
       <UiButton variant="primary" :disabled="!canApply" :loading="saving" @click="apply">
         Import

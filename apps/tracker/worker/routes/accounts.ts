@@ -36,7 +36,7 @@ import {
   type SectionName,
 } from '../services/export'
 import { importSnapshot } from '../services/import'
-import { listenerOf, listenerStatement, notifyUser } from '../services/live'
+import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
 
 /**
  * Part of the snapshot list's ETag. Bump it whenever the list's JSON changes
@@ -143,7 +143,20 @@ export const accounts = new Hono<AppEnv>()
     const db = getDb(c.env.DB)
     const account = await loadOwnedAccount(db, c.get('userId'), id)
     const stored = deepMerge(account.settings, patch)
-    await db.update(genshinAccounts).set({ settings: stored }).where(eq(genshinAccounts.id, id))
+    const [, listener] = await c.env.DB.batch([
+      c.env.DB.prepare('UPDATE genshin_accounts SET settings = ?1 WHERE id = ?2').bind(
+        JSON.stringify(stored),
+        id,
+      ),
+      listenerStatement(c.env.DB, id),
+    ])
+    // The planner reads AR/WL, its options and the resin set by hand: open ones follow.
+    notifyUser(
+      c,
+      c.get('userId'),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      listenerOf(listener),
+    )
     return c.json<AccountSettingsResponse>({
       settings: deepMerge(ACCOUNT_SETTINGS_DEFAULTS, stored),
     })

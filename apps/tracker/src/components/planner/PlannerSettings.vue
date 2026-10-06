@@ -7,10 +7,12 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import type { PlannerOptions, PlannerOptionsPatch } from '@/data/planner-settings'
 import { MAX_REFRESHES, REFRESH_RESIN } from './farm-today'
+import { formatStep, parseSteps } from './resin'
 
 /**
  * The planner's account settings: Adventure Rank, World Level, the daily
- * resin refreshes the Farm view counts days with, and two options. Each
+ * resin refreshes the Farm view counts days with, the resin tracker's quick
+ * buttons, and two options. Each
  * change is saved as it is made (no Save button). AR and WL left empty
  * follow what irminsul read at the newest login, shown as the placeholder.
  */
@@ -66,6 +68,28 @@ const refreshOptions = Array.from({ length: MAX_REFRESHES + 1 }, (_, i) => ({
 function setRefreshes(value: number) {
   if (value !== props.settings.planner.refreshes) emit('change', { planner: { refreshes: value } })
 }
+
+const stepsText = (steps: readonly number[]) => steps.map(formatStep).join(' ').replaceAll('−', '-')
+const steps = ref('')
+const stepsInvalid = ref(false)
+watch(
+  () => [props.open, props.settings.planner.resinSteps] as const,
+  ([open, value]) => {
+    if (!open) return
+    steps.value = stepsText(value ?? [])
+    stepsInvalid.value = false
+  },
+  { immediate: true },
+)
+function commitSteps() {
+  const parsed = parseSteps(String(steps.value ?? ''))
+  stepsInvalid.value = parsed === null
+  if (!parsed) return
+  steps.value = stepsText(parsed)
+  if (stepsText(parsed) !== stepsText(props.settings.planner.resinSteps ?? [])) {
+    emit('change', { planner: { resinSteps: parsed } })
+  }
+}
 </script>
 
 <template>
@@ -116,6 +140,20 @@ function setRefreshes(value: number) {
           />
         </label>
       </div>
+      <label
+        class="flex flex-col gap-1"
+        title="Up to four amounts, e.g. -40 +60: the resin tracker adds them (minus spends)"
+      >
+        <span class="text-sm text-text-secondary">Resin buttons</span>
+        <UiInput
+          v-model="steps"
+          mono
+          placeholder="-40 +60"
+          :invalid="stepsInvalid"
+          @change="commitSteps"
+          @keydown.enter="commitSteps"
+        />
+      </label>
       <div class="flex flex-col border-t border-border-subtle pt-2">
         <div title="Cover missing gems with spare gems of another element">
           <UiSwitch

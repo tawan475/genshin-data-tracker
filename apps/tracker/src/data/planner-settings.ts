@@ -2,25 +2,30 @@ import {
   ACCOUNT_SETTINGS_DEFAULTS,
   type AccountSettings,
   type AccountSettingsPatch,
+  type ManualResin,
   type PlannerSettings,
 } from '@gdt/shared'
 import { shallowRef, watch, type Ref } from 'vue'
 import { api } from '@/api'
 import { useFeedback } from '@/stores/feedback'
 
-/** The account settings the planner reads: AR, World Level and its options. */
-export type PlannerOptions = Pick<AccountSettings, 'ar' | 'wl'> & { planner: PlannerSettings }
+/** The account settings the planner reads: AR, World Level, its options and the hand-set resin. */
+export type PlannerOptions = Pick<AccountSettings, 'ar' | 'wl' | 'resin'> & {
+  planner: PlannerSettings
+}
 
 export interface PlannerOptionsPatch {
   ar?: number | null
   wl?: number | null
   planner?: Partial<PlannerSettings>
+  resin?: ManualResin | null
 }
 
 const DEFAULTS: PlannerOptions = {
   ar: ACCOUNT_SETTINGS_DEFAULTS.ar,
   wl: ACCOUNT_SETTINGS_DEFAULTS.wl,
   planner: { ...ACCOUNT_SETTINGS_DEFAULTS.planner },
+  resin: null,
 }
 
 /** Last known per account, so coming back to the page shows them at once. */
@@ -30,12 +35,14 @@ const pick = (s: AccountSettings): PlannerOptions => ({
   ar: s.ar,
   wl: s.wl,
   planner: { ...s.planner },
+  resin: s.resin ?? null,
 })
 
 const merge = (base: PlannerOptions, patch: PlannerOptionsPatch): PlannerOptions => ({
   ar: patch.ar === undefined ? base.ar : patch.ar,
   wl: patch.wl === undefined ? base.wl : patch.wl,
   planner: { ...base.planner, ...patch.planner },
+  resin: patch.resin === undefined ? base.resin : patch.resin,
 })
 
 /**
@@ -90,5 +97,14 @@ export function usePlannerSettings(accountId: Ref<number>) {
     return run
   }
 
-  return { settings, save }
+  return {
+    settings,
+    save,
+    /** Re-reads them (changed in another tab or on another device), after what waits. */
+    reload: async () => {
+      const id = accountId.value
+      await queue.catch(() => {})
+      await load(id)
+    },
+  }
 }

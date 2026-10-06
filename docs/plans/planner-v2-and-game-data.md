@@ -1,9 +1,10 @@
 # Planner v2 (Seelie parity) and a standalone game-data repo
 
 Status: **approved 2026-10-06** (data repo private; clean patches auto-merge and release; CI deploys the
-tracker with the gap icons on gi-cdn; order: Part A, then Phase 1). Based on three research reports:
-a feature inventory of seelie.me (v7.1 build 260922, read from a blank browser profile and its
-public bundles), an audit of our Planner + `@gdt/game-data`, and a survey of Genshin data sources.
+tracker with the gap icons on gi-cdn; order: Part A, then Phase 1); Part B built through Phase 4b.
+Based on three research reports: a feature inventory of seelie.me (v7.1 build 260922, read from a
+blank browser profile and its public bundles), an audit of our Planner + `@gdt/game-data`, and a
+survey of Genshin data sources.
 
 ## Why the current Planner loses to Seelie
 
@@ -185,10 +186,39 @@ setting `planner.refreshes`, 0–6, no migration: settings are JSON merged with 
   mounted once shown. At 100 goals on a 4× slowed CPU: toggle ~75 ms, move ~80 ms, open a goal
   ~110 ms, first view of a tab ~180–200 ms (was 0.6–2.3 s).
 
-**Phase 4 — the rest**
-- Tasks: permanent dailies/weeklies + custom recurring tasks; resin tracker from irminsul's resin
-  with regeneration.
-- Seelie import of inventory and current values (today only goals), and export.
+**Phase 4b — tasks, resin tracker, Seelie both ways** — *built 2026-10-06* (migration 0013:
+`planner_tasks`; `tasks.ts`, `resin.ts`, `resin-alerts.ts`, `seelie-plan.ts`, `seelie-slugs.ts`,
+`@/data/seelie-extras`, `@/data/seelie-export`; `TasksStrip`, `TaskEditor`, `ResinTracker`; game data
+7.1.2, so `artifact-domains.ts` reads `@gdt/game-data/farming`'s `ArtifactDomain` directly). Decisions:
+- Tasks sit at the top of the Farm tab (both views, so the Today/Schedule switch doesn't jump),
+  collapsible, tabs All / Permanent / Custom. Built-in ones are the resets the game keeps, in server
+  time (fixed offsets, 04:00): Daily Commissions (daily), Trounce Domains, Battle Pass weekly,
+  reputation (Monday), Spiral Abyss (the 16th, monthly since 4.7), Imaginarium Theater and Paimon's
+  Bargains (the 1st), Parametric Transformer (166 h after use). A row is red when it isn't done
+  and its reset is close (3 h daily, 1 day weekly, 3 days monthly). Done rests it until the next
+  reset (Undo in the toast), a snooze until a later day before the reset ("Last day" marked), "show
+  done" lists the resting ones ticked (a tick takes it back); each can be hidden. Custom tasks are
+  Seelie's: name, every 1–7 days, start day, from the start day's rhythm or from the day done, note;
+  stored by their due game day, reordered by handle in the Custom tab. Stygian Onslaught, Disturbance
+  Outbreak, banners and events follow the patch calendar (no official machine-readable source): left
+  out. Table `planner_tasks` (account, kind, id, JSON `data`), routes `/planner-tasks`, writes tell
+  open pages (`planner` live event); account settings writes now do too.
+- Resin tracker: Original Resin now from the newest reading, the capture's (irminsul's at login, else
+  the snapshot's count) or one set by hand (account setting `resin {value, at}`), which counts until a
+  capture reads resin after it (a login later; a capture in the same session leaves it). −40/+60
+  (account setting `planner.resinSteps`, up to four) keep the regeneration clock; the number sets it;
+  full at, the next 40, Condensed held/most. Alerts: the browser's Notification API at an amount
+  chosen per device, a timer in the open tab (survives leaving the Planner, not closing the site; no
+  push server), shown through the service worker when there is one (its `notificationclick` focuses
+  the site).
+- Seelie: every section of an account export is opt-in (goals, artifact goals, custom characters,
+  current levels as hand-set states, inventory as hand edits on the capture, tasks, resin, settings)
+  with new/changed/same per section; AR/WL that irminsul already gives and a set server start
+  unticked. Slugs map through Seelie's identifiers (items by game id, characters/weapons/artifact
+  sets by rule with exceptions; 14 weapon slugs the old import missed). Export writes Seelie's
+  account keys for goals, inventory, tasks, resin and settings only (its import keeps the rest,
+  achievements included); importing our export changes nothing. Known loss: Seelie pauses a paused
+  character's weapon goals too.
 
 Out of scope until data exists: levels 95/100 (not in the dump or any API), local-specialty routes
 on a map, event calendars from an official source.

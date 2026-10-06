@@ -3,7 +3,8 @@ import plannerJson from '@gdt/game-data/data/planner.json'
 import { decodePlanner } from '@gdt/game-data'
 import type { PlannerFile } from '@gdt/game-data/format'
 import type { CharacterState } from '@gdt/game-data/planner-math'
-import { isSeelieExport, mapSeelieGoals, seelieKeys } from '../seelie'
+import images from '@gdt/game-data/data/images.json'
+import { customKeyFromSeelie, isSeelieExport, mapSeelieGoals, seelieKeys } from '../seelie'
 
 const planner = decodePlanner(plannerJson as unknown as PlannerFile)
 const keys = seelieKeys(planner)
@@ -95,8 +96,13 @@ describe('Seelie goals', () => {
   const character = (key: string) => result.characters.find((c) => c.key === key)?.target
 
   it('counts what it read and reports what it could not map', () => {
-    expect(result.read).toEqual({ character: 3, talent: 2, weapon: 5, other: 2 })
-    expect(result.unmapped).toEqual({ characters: ['not_a_character'], weapons: ['not_a_weapon'] })
+    expect(result.read).toEqual({ character: 3, talent: 2, weapon: 5, artifact: 0, other: 2 })
+    expect(result.unmapped).toEqual({
+      characters: ['not_a_character'],
+      weapons: ['not_a_weapon'],
+      artifacts: [],
+      other: [],
+    })
     expect(result.characters.map((c) => c.key).sort()).toEqual([
       'HuTao',
       'RaidenShogun',
@@ -134,6 +140,8 @@ describe('Seelie goals', () => {
       key: 'StaffOfHoma',
       owner: 'HuTao',
       target: { level: 80, ascension: 6, refinement: 2, active: true },
+      // Seelie's craft 0 is no refinement: the copy's stays.
+      current: { level: 1, ascension: 0, refinement: 2 },
     })
     expect(weapon('EngulfingLightning')?.owner).toBe('RaidenShogun')
     // Level 70 needs phase 4 (ascension omitted in the file).
@@ -146,5 +154,253 @@ describe('Seelie goals', () => {
     expect(isSeelieExport(fixture)).toBe(true)
     expect(isSeelieExport({ gi_achievements: [] })).toBe(false)
     expect(() => mapSeelieGoals([], planner, context)).toThrow(/Seelie/)
+  })
+})
+
+const artifactSets = Object.keys((images as { artifacts: Record<string, unknown> }).artifacts)
+
+describe('Seelie weapon slugs that are older or other names', () => {
+  it('maps every one of them', () => {
+    const slugs: Record<string, string> = {
+      crossing_of_fleuve_cendre: 'FleuveCendreFerryman',
+      demon_slayer_bow: 'Hamayumi',
+      brumal_star: 'PolarStar',
+      trawler: 'EndOfTheLine',
+      blackcliff_amulet: 'BlackcliffAgate',
+      fumetsu_gekka: 'EverlastingMoonglow',
+      prototype_malice: 'PrototypeAmber',
+      white_dragon_ring: 'HakushinRing',
+      katsuragis_slasher: 'KatsuragikiriNagamasa',
+      prototype_aminus: 'PrototypeArchaic',
+      snow_tombed_starsliver: 'SnowTombedStarsilver',
+      prototype_grudge: 'PrototypeStarglitter',
+      amenoma_kageuta_blade: 'AmenomaKageuchi',
+      cursed_blade: 'KagotsurubeIsshin',
+    }
+    for (const [slug, key] of Object.entries(slugs)) expect(keys.weapon(slug)).toBe(key)
+  })
+})
+
+describe('Seelie current values, constellations and notes', () => {
+  const result = mapSeelieGoals(
+    { ...fixture, notes: { hutao: '  C1 first  ', kaeya: 'x' } },
+    planner,
+    context,
+  )
+  const entry = (key: string) => result.characters.find((c) => c.key === key)
+
+  it('reads the current levels and talents, the account ones where the file has none', () => {
+    expect(entry('HuTao')?.current).toEqual({
+      level: 80,
+      ascension: 5,
+      talents: { auto: 6, skill: 8, burst: 8 },
+    })
+    // Raiden: only a talent goal, with the normal attack's current level.
+    expect(entry('RaidenShogun')?.current).toEqual({
+      level: 90,
+      ascension: 6,
+      talents: { auto: 1, skill: 9, burst: 10 },
+    })
+    expect(entry('TravelerCryo')?.current).toBeUndefined()
+  })
+
+  it('takes cons as the constellation and notes by character', () => {
+    expect(entry('HuTao')?.constellation).toBe(1)
+    expect(entry('RaidenShogun')?.constellation).toBeUndefined()
+    expect(entry('HuTao')?.note).toBe('C1 first')
+    expect(entry('RaidenShogun')?.note).toBeUndefined()
+  })
+})
+
+describe('Seelie artifact goals', () => {
+  const file = {
+    goals: [
+      {
+        type: 'artifact',
+        character: 'hutao',
+        artifacts: ['crimson_witch_of_flames', 'seal_of_insulation', 'long_night', 'not_a_set'],
+        sands: 'hp_p',
+        goblet: 'pyro_dmg',
+        circlet: 'crit_rate_dmg_p',
+        done: { crimson_witch_of_flames: true },
+        id: 1,
+      },
+      { type: 'artifact', character: 'kazuha', artifacts: [], sands: 'elemental_mastery', id: 2 },
+    ],
+  }
+  const result = mapSeelieGoals(file, planner, { ...context, artifactSets })
+
+  it('maps sets (with their done tick) and main stats onto the character goal', () => {
+    expect(result.read.artifact).toBe(2)
+    const hutao = result.characters.find((c) => c.key === 'HuTao')!
+    expect(hutao.artifacts).toEqual({
+      sets: [
+        { key: 'CrimsonWitchOfFlames', done: true },
+        { key: 'EmblemOfSeveredFate' },
+        { key: 'LongNightsOath' },
+      ],
+      sands: ['hp_'],
+      goblet: ['pyro_dmg_'],
+      circlet: ['critRate_', 'critDMG_'],
+    })
+    // No level goal in the file: the levels stay where the character is.
+    expect(hutao.target).toMatchObject({ level: 80, ascension: 5 })
+    expect(result.characters.find((c) => c.key === 'KaedeharaKazuha')?.artifacts).toEqual({
+      sets: [],
+      sands: ['eleMas'],
+    })
+    expect(result.unmapped.artifacts).toEqual(['not_a_set'])
+  })
+
+  it('reports every set when the planner knows none', () => {
+    const bare = mapSeelieGoals(file, planner, context)
+    expect(bare.characters.find((c) => c.key === 'HuTao')?.artifacts?.sets).toEqual([])
+    expect(bare.unmapped.artifacts).toHaveLength(4)
+  })
+})
+
+describe('Seelie custom characters', () => {
+  const file = {
+    goals: [
+      {
+        type: 'character',
+        character: 'custom-k3j9xz',
+        current: { level: 20, asc: 1 },
+        goal: { level: 80, asc: 6 },
+        id: 1,
+      },
+      {
+        type: 'talent',
+        character: 'custom-k3j9xz',
+        normal: { current: 1, goal: 6 },
+        skill: { current: 2, goal: 9 },
+        burst: { current: 1, goal: 9 },
+        id: 2,
+      },
+      {
+        type: 'weapon',
+        character: 'custom-k3j9xz',
+        weapon: 'freedom-sworn',
+        goal: { level: 90, asc: 6 },
+        id: 3,
+      },
+    ],
+    customs: {
+      'custom-k3j9xz': {
+        custom: 'character',
+        name: 'Windy',
+        tier: 5,
+        element: 'anemo',
+        weapon: 'sword',
+        element_1: 'vayuda_turqoise',
+        element_2: 'maguu_kishin',
+        local: 'sea_ganoderma',
+        common: 'th_insignia',
+        talent: 'diligence',
+        boss: 'gilded_scale',
+      },
+      'custom-1x2y3z': {
+        custom: 'character',
+        name: 'Later',
+        tier: 4,
+        element_1: 'agnidus_agate',
+        weapon: 'bow',
+        talent: 'no_such_book',
+      },
+    },
+    inactive: { 'custom-1x2y3z': true },
+  }
+  const result = mapSeelieGoals(file, planner, context)
+
+  it('keeps ids readable and stable', () => {
+    expect(customKeyFromSeelie('custom-k3j9xz')).toBe('k3j9xz')
+    expect(customKeyFromSeelie('custom-1x2y3z')).toBe('c1x2y3z')
+    expect(customKeyFromSeelie('custom-cabc12345678')).toBe('cabc12345678')
+    const short = customKeyFromSeelie('custom-ab')
+    expect(short).toMatch(/^c[0-9a-z]{7}$/)
+    expect(customKeyFromSeelie('custom-ab')).toBe(short)
+  })
+
+  it('maps what they are, with their goals and weapon goals', () => {
+    expect(result.characters).toEqual([])
+    const windy = result.customs.find((c) => c.key === 'k3j9xz')!
+    expect(windy.custom).toEqual({
+      name: 'Windy',
+      rarity: 5,
+      element: 'Anemo',
+      weapon: 'sword',
+      book: 'TeachingsOfDiligence',
+      common: 'TreasureHoarderInsignia',
+      boss: 'MarionetteCore',
+      local: 'SeaGanoderma',
+      weekly: 'GildedScale',
+    })
+    expect(windy.target).toEqual({
+      level: 80,
+      ascension: 6,
+      talents: { auto: 6, skill: 9, burst: 9 },
+      active: true,
+    })
+    expect(windy.current).toEqual({
+      level: 20,
+      ascension: 1,
+      talents: { auto: 1, skill: 2, burst: 1 },
+    })
+    expect(result.weapons).toEqual([
+      expect.objectContaining({ key: 'FreedomSworn', owner: 'k3j9xz' }),
+    ])
+  })
+
+  it('brings one without goals along, its element from its gem', () => {
+    const later = result.customs.find((c) => c.key === 'c1x2y3z')!
+    expect(later.custom).toEqual({ name: 'Later', rarity: 4, element: 'Pyro', weapon: 'bow' })
+    expect(later.target).toMatchObject({ level: 1, ascension: 0, active: false })
+    expect(result.unmapped.other).toEqual(['talent/no_such_book'])
+  })
+})
+
+describe('Seelie weapon goals: duplicates, current values and refinement', () => {
+  const file = {
+    goals: [
+      {
+        type: 'weapon',
+        character: 'bennett',
+        weapon: 'favonius_sword',
+        current: { level: 90, asc: 6, craft: 3 },
+        goal: { level: 90, asc: 6, craft: 5 },
+        id: 1,
+      },
+      {
+        type: 'weapon',
+        character: 'bennett',
+        weapon: 'favonius_sword',
+        goal: { level: 70, asc: 4, craft: 0 },
+        id: 2,
+      },
+      { type: 'weapon', weapon: 'favonius_sword', goal: { level: 50, asc: 2 }, id: 3 },
+    ],
+    inactive: { '2': true },
+  }
+  const result = mapSeelieGoals(file, planner, context)
+
+  it('keeps both goals of one weapon in file order, and the spare', () => {
+    expect(result.weapons).toEqual([
+      {
+        key: 'FavoniusSword',
+        owner: 'Bennett',
+        target: { level: 90, ascension: 6, refinement: 5, active: true },
+        current: { level: 90, ascension: 6, refinement: 3 },
+      },
+      {
+        key: 'FavoniusSword',
+        owner: 'Bennett',
+        target: { level: 70, ascension: 4, refinement: 1, active: false },
+      },
+      {
+        key: 'FavoniusSword',
+        owner: '',
+        target: { level: 50, ascension: 2, refinement: 1, active: true },
+      },
+    ])
   })
 })

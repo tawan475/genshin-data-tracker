@@ -115,9 +115,32 @@ export const accountSettingsPatch = z
         azoth: z.boolean(),
         passives: z.boolean(),
         refreshes: z.number().int().min(0).max(6),
+        /** The resin tracker's quick buttons (−40, +60): amounts to add, none zero. */
+        resinSteps: z
+          .array(
+            z
+              .number()
+              .int()
+              .min(-200)
+              .max(200)
+              .refine((n) => n !== 0, 'Not zero'),
+          )
+          .max(4),
       })
       .partial()
       .strict(),
+    /**
+     * Original Resin set by hand (the resin tracker): `value` at `at` (ms),
+     * regenerating from then. A capture read after `at` replaces it; null:
+     * none.
+     */
+    resin: z
+      .object({
+        value: z.number().int().min(0).max(2_000),
+        at: z.number().int().min(0).max(8_640_000_000_000_000),
+      })
+      .strict()
+      .nullable(),
   })
   .partial()
   .strict()
@@ -377,6 +400,69 @@ export const plannerStatePatch = z
     path: ['inventory'],
   })
 
+// ------------------------------------------------------- planner tasks
+
+/**
+ * A built-in task's id: one whose reset the planner knows (daily
+ * commissions, the Spiral Abyss…; see the planner's tasks.ts). Ids are never
+ * reused; an app that doesn't know one leaves it alone.
+ */
+export const builtinTaskIdSchema = z.string().regex(/^[a-z][a-z0-9-]{1,31}$/, 'Not a task id')
+
+/** A game day, `YYYY-MM-DD`: the day that starts at 04:00 server time. */
+export const gameDaySchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, 'Not a day')
+
+/**
+ * How a custom task comes back: `original` keeps the rhythm of the day it
+ * started on; `completed` counts from the day it was done.
+ */
+export const TASK_MODES = ['original', 'completed'] as const
+
+/** A task the player made (Seelie's custom tasks): name, every N days, notes. */
+export const customTask = z.object({
+  name: z.string().trim().min(1).max(80),
+  every: z.number().int().min(1).max(30),
+  mode: z.enum(TASK_MODES),
+  note: goalNote.optional(),
+})
+
+/**
+ * A task's state, written whole. A built-in one rests until `next` (ms: a
+ * Done moves it to the next reset, a snooze to a later day; absent or past:
+ * due) and can be turned off (`hidden`). A custom one is due on the game day
+ * `due` (a Done moves it on); `position` orders them.
+ */
+export const plannerTaskInput = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('builtin'),
+    id: builtinTaskIdSchema,
+    next: z.number().int().min(0).max(8_640_000_000_000_000).nullable().optional(),
+    hidden: z.boolean().optional(),
+  }),
+  z.object({
+    kind: z.literal('custom'),
+    id: plannerGoalIdSchema,
+    task: customTask,
+    due: gameDaySchema,
+    position: z.number().int().min(0).max(100_000).optional(),
+  }),
+])
+
+const taskRef = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('builtin'), id: builtinTaskIdSchema }),
+  z.object({ kind: z.literal('custom'), id: plannerGoalIdSchema }),
+])
+
+/** Upserts and removals in one request (`remove` first); a Seelie import sends a few dozen. */
+export const plannerTasksPatch = z
+  .object({
+    upsert: z.array(plannerTaskInput).max(500).default([]),
+    remove: z.array(taskRef).max(500).default([]),
+  })
+  .refine((body) => body.upsert.length + body.remove.length > 0, { message: 'Nothing to change' })
+
 // ------------------------------------------------------------------ responses
 
 export interface ApiError {
@@ -576,4 +662,31 @@ export interface PlannerStateResponse {
   capturedAt: number | null
   adjustments: InventoryAdjustment[]
   overrides: CurrentOverride[]
+}
+
+export type CustomTask = z.infer<typeof customTask>
+export type TaskMode = (typeof TASK_MODES)[number]
+export type PlannerTaskInput = z.input<typeof plannerTaskInput>
+
+/** A stored task (see `plannerTaskInput`). */
+export type PlannerTask =
+  | {
+      kind: 'builtin'
+      id: string
+      next?: number | null
+      hidden?: boolean
+      updatedAt: number
+    }
+  | {
+      kind: 'custom'
+      id: string
+      task: CustomTask
+      due: string
+      position?: number
+      updatedAt: number
+    }
+
+export interface PlannerTasksResponse {
+  /** Built-in ones first, custom ones by position (then as made). */
+  tasks: PlannerTask[]
 }
