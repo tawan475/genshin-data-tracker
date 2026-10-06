@@ -2,7 +2,7 @@ name: Game data bump
 # The game data comes from the private tawan475/genshin-game-data, pinned to
 # a release tag in apps/tracker/package.json. When it releases (its
 # release.yml sends `repository_dispatch` `game-data-release` with the tag),
-# or at the daily check for a newer tag, this bumps the dependency on a
+# or at the 3-hourly check for a newer tag, this bumps the dependency on a
 # branch, runs the tests, type check and build, opens a pull request and
 # merges it when they pass; then deploy.yml deploys the merge. A failing
 # check leaves the pull request open (label `needs-human`) for a human.
@@ -10,13 +10,13 @@ on:
   repository_dispatch:
     types: [game-data-release]
   schedule:
-    - cron: "29 4 * * *" # daily fallback, after the data repo's update
+    - cron: '29 */3 * * *' # every 3 hours: the data repo has no token to notify this one
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (default: the newest)"
+        description: 'Release tag (default: the newest)'
         required: false
-        default: ""
+        default: ''
 
 permissions:
   contents: write
@@ -43,8 +43,9 @@ jobs:
 
       - uses: ./.github/actions/setup
         with:
+          game-data-deploy-key: ${{ secrets.GAME_DATA_DEPLOY_KEY }}
           game-data-token: ${{ secrets.GAME_DATA_TOKEN }}
-          install: "false"
+          install: 'false'
 
       - name: Which release
         id: tag

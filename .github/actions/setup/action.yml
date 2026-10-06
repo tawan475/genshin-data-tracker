@@ -5,12 +5,15 @@ description: >
   workspace's dependencies.
 
 inputs:
+  game-data-deploy-key:
+    description: 'GAME_DATA_DEPLOY_KEY: the private half of a read-only deploy key on tawan475/genshin-game-data (preferred)'
+    default: ''
   game-data-token:
-    description: "GAME_DATA_TOKEN: a fine-grained token with Contents: read on tawan475/genshin-game-data"
-    required: true
+    description: 'GAME_DATA_TOKEN: a fine-grained token with Contents: read on tawan475/genshin-game-data (alternative)'
+    default: ''
   install:
-    description: "Run pnpm install --frozen-lockfile"
-    default: "true"
+    description: 'Run pnpm install --frozen-lockfile'
+    default: 'true'
 
 runs:
   using: composite
@@ -22,24 +25,35 @@ runs:
         node-version: 24
         cache: pnpm
 
-    # pnpm sees the repository is private and fetches it with git: give git the
-    # token for that one repository, whichever URL form the lockfile records.
-    # (Check out with persist-credentials: false, or the checkout's own
-    # GITHUB_TOKEN header is sent instead and the fetch answers "not found".)
+    # pnpm sees the repository is private and fetches it with git: point every
+    # URL form the lockfile may record for that one repository at credentials
+    # for it — a read-only deploy key (over SSH, through a host alias so no
+    # other repository uses it) or, failing that, a token. (Check out with
+    # persist-credentials: false, or the checkout's own GITHUB_TOKEN header is
+    # sent instead and the fetch answers "not found".)
     - name: Read access to the game data
       shell: bash
       env:
+        DEPLOY_KEY: ${{ inputs.game-data-deploy-key }}
         TOKEN: ${{ inputs.game-data-token }}
       run: |
-        if [ -z "$TOKEN" ]; then
-          echo "::error::The GAME_DATA_TOKEN secret is not set: pnpm can't fetch tawan475/genshin-game-data."
+        if [ -n "$DEPLOY_KEY" ]; then
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/game_data && chmod 600 ~/.ssh/game_data
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          printf 'Host github-game-data\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/game_data\n  IdentitiesOnly yes\n' >> ~/.ssh/config
+          base="git@github-game-data:tawan475/genshin-game-data"
+        elif [ -n "$TOKEN" ]; then
+          echo "::add-mask::$TOKEN"
+          base="https://x-access-token:${TOKEN}@github.com/tawan475/genshin-game-data"
+        else
+          echo "::error::Neither GAME_DATA_DEPLOY_KEY nor GAME_DATA_TOKEN is set: pnpm can't fetch tawan475/genshin-game-data."
           exit 1
         fi
-        echo "::add-mask::$TOKEN"
-        base="https://x-access-token:${TOKEN}@github.com/tawan475/genshin-game-data"
         git config --global --add "url.${base}.insteadOf" "https://github.com/tawan475/genshin-game-data"
         git config --global --add "url.${base}.insteadOf" "ssh://git@github.com/tawan475/genshin-game-data"
         git config --global --add "url.${base}.insteadOf" "git@github.com:tawan475/genshin-game-data"
+        git config --global --add "url.${base}.insteadOf" "git+https://github.com/tawan475/genshin-game-data"
 
     - name: Install
       if: inputs.install == 'true'

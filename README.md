@@ -44,10 +44,13 @@ own lazy chunk.
 - **Access.** `pnpm install` fetches it with git. Locally your own GitHub
   credentials do (Git Credential Manager, `gh auth setup-git` or SSH);
   without read access to that repository the install fails. CI uses the
-  `GAME_DATA_TOKEN` secret (`.github/actions/setup`).
+  `GAME_DATA_DEPLOY_KEY` secret, the private half of a read-only deploy key on
+  that repository (`.github/actions/setup`; a `GAME_DATA_TOKEN` fine-grained
+  token works too).
 - **Updates arrive by themselves.** The data repository builds, cross-checks
-  and releases every new game patch; its release sends `repository_dispatch`
-  `game-data-release` here, and `.github/workflows/game-data-bump.yml` bumps
+  and releases every new game patch; `game-data-bump.yml` checks for a new
+  release every 3 hours (or on a `repository_dispatch` `game-data-release`, if
+  the data repository has a `TRACKER_DISPATCH_TOKEN`), and `.github/workflows/game-data-bump.yml` bumps
   the tag on a branch, runs the tests, type check and build, merges, and
   deploys. A daily run picks up a release whose dispatch was missed. A
   failing check leaves the pull request open with `needs-human`.
@@ -212,15 +215,16 @@ waits until the user accepts the "new version" banner. `public/_headers` keeps
 CI deploys: every push to `main` runs `.github/workflows/deploy.yml`, which
 runs the CI checks, then `db:migrate:remote`, then `wrangler deploy` (the
 manual order below). A game data bump merged by `game-data-bump.yml`
-deploys the same way.
+deploys the same way. Without the Cloudflare secrets the checks still run and
+the deploy steps are skipped with a notice; deploy by hand instead.
 
 Repository secrets (Settings → Secrets and variables → Actions):
 
 | Secret | What |
 |---|---|
-| `GAME_DATA_TOKEN` | Fine-grained personal access token, repository `tawan475/genshin-game-data`, permission **Contents: read** (install the private game data) |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API token from the "Edit Cloudflare Workers" template plus **Account · D1 · Edit**, for this account and the `475.dev` zone |
-| `CLOUDFLARE_ACCOUNT_ID` | The Cloudflare account id (dashboard → Workers & Pages, right column) |
+| `GAME_DATA_DEPLOY_KEY` | Private half of a **read-only deploy key** on `tawan475/genshin-game-data` (install the private game data). Or `GAME_DATA_TOKEN`: a fine-grained token with Contents: read on that repository |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token from the "Edit Cloudflare Workers" template plus **Account · D1 · Edit**, for this account and the `475.dev` zone (optional: without it CI doesn't deploy) |
+| `CLOUDFLARE_ACCOUNT_ID` | The Cloudflare account id (`wrangler whoami`) |
 
 Settings → Actions → General: "Allow GitHub Actions to create and approve
 pull requests" (the bump workflow opens and merges one). `main` must accept
