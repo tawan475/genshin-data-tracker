@@ -3,6 +3,8 @@ import type {
   CharacterCurrent,
   CharacterTarget,
   CompactSubstat,
+  CustomTarget,
+  ItemTarget,
   SectionKind,
   SnapshotSummary,
   UserSettingsPatch,
@@ -235,9 +237,11 @@ export const achievementMarks = sqliteTable(
 )
 
 /**
- * Planner goals. Current levels come from the latest snapshot; only the
- * targets are stored. `owner` is '' for characters and the holding character
- * (or '' for a spare) for weapons, which have no id in GOOD.
+ * Planner goals, one per kind and key: characters, custom characters (`key`
+ * their id, the target says what they are) and extra item needs. Current
+ * levels come from the latest snapshot; only the targets are stored.
+ * `owner` is always '' now: weapon goals moved to `planner_weapon_goals`
+ * (migration 0012), which gives each its own id.
  */
 export const plannerTargets = sqliteTable(
   'planner_targets',
@@ -245,11 +249,13 @@ export const plannerTargets = sqliteTable(
     accountId: integer('account_id')
       .notNull()
       .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
-    kind: text('kind', { enum: ['character', 'weapon', 'item'] }).notNull(),
+    kind: text('kind', { enum: ['character', 'item', 'custom'] }).notNull(),
     key: text('key').notNull(),
     owner: text('owner').notNull().default(''),
     /** Append-only shape: new fields must be optional. */
-    target: text('target', { mode: 'json' }).$type<CharacterTarget | WeaponTarget>().notNull(),
+    target: text('target', { mode: 'json' })
+      .$type<CharacterTarget | CustomTarget | ItemTarget>()
+      .notNull(),
     updatedAt: timestamp('updated_at'),
     /**
      * The current state set by hand (a Done, or typed in the goal editor),
@@ -257,9 +263,34 @@ export const plannerTargets = sqliteTable(
      * capture, so a capture that reaches it retires it. Written by the
      * planner-state route only: goal upserts leave it alone (migration 0011).
      */
-    current: text('current', { mode: 'json' }).$type<CharacterCurrent | WeaponCurrent>(),
+    current: text('current', { mode: 'json' }).$type<CharacterCurrent>(),
   },
   (t) => [primaryKey({ columns: [t.accountId, t.kind, t.key, t.owner] })],
+)
+
+/**
+ * Planner weapon goals, each with its own id (made by the app), so two goals
+ * can be the same weapon for the same character. `owner` is the character
+ * (or custom character id) it is for, '' for a spare. `current` as on
+ * planner_targets. Listed in the order they were made (rowid): the first
+ * goals of a weapon take the copies the capture has (migration 0012 moved
+ * the weapon rows of planner_targets here).
+ */
+export const plannerWeaponGoals = sqliteTable(
+  'planner_weapon_goals',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    key: text('key').notNull(),
+    owner: text('owner').notNull().default(''),
+    /** Append-only shape: new fields must be optional. */
+    target: text('target', { mode: 'json' }).$type<WeaponTarget>().notNull(),
+    updatedAt: timestamp('updated_at'),
+    current: text('current', { mode: 'json' }).$type<WeaponCurrent>(),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.id] })],
 )
 
 /**

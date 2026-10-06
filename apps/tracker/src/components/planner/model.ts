@@ -6,6 +6,10 @@
  * estimates come from `@gdt/game-data` (planner-math, planner-goals,
  * planner-estimate); this file only shapes them for the page. Pure
  * functions; the view keeps them in computed()s.
+ *
+ * Goal ids: `character:Key`, `custom:<id>` (a custom character, see
+ * custom-character.ts), `weapon:Key:Owner:<id>` (each weapon goal has its
+ * own id, so a weapon can have several) and `item:Key`.
  */
 
 import type { PlannerData, PlannerMaterial, WeaponType } from '@gdt/game-data'
@@ -35,6 +39,7 @@ import {
 import type {
   CharacterCurrent,
   CharacterTarget,
+  CustomCharacter,
   Good,
   ItemTarget,
   PlannerTarget,
@@ -47,7 +52,9 @@ import type { z } from 'zod'
 import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
 import { formatNumber, keyToName } from '@/lib/format'
+import { characterGoalId, customGoalId, itemGoalId, targetId, weaponGoalId } from './goal-ids'
 import { characterNow, weaponNow } from './hand-edits'
+import { assignWeaponCopies, type WeaponCopy } from './weapon-copies'
 
 export type TargetInput = z.input<typeof plannerTargetInput>
 export type TargetsPatch = z.input<typeof plannerTargetsPatch>
@@ -56,31 +63,32 @@ export type TargetRef = NonNullable<TargetsPatch['remove']>[number]
 /** What the editor dialog is open on (`?goal=` in the URL). */
 export type EditorSubject =
   | { kind: 'character'; key: string }
-  | { kind: 'weapon'; key: string; owner: string }
+  | { kind: 'custom'; key: string }
+  | { kind: 'weapon'; id: string }
   | { kind: 'item'; key: string }
 
-export const characterGoalId = (key: string) => `character:${key}`
-export const weaponGoalId = (key: string, owner: string) => `weapon:${key}:${owner}`
-export const itemGoalId = (key: string) => `item:${key}`
-
-export function targetId(t: { kind: PlannerTarget['kind']; key: string; owner?: string }) {
-  if (t.kind === 'character') return characterGoalId(t.key)
-  if (t.kind === 'item') return itemGoalId(t.key)
-  return weaponGoalId(t.key, t.owner ?? '')
-}
+export {
+  characterGoalId,
+  customGoalId,
+  itemGoalId,
+  newGoalId,
+  parseGoalId,
+  targetId,
+  weaponGoalId,
+} from './goal-ids'
 
 /** A stored target as a removal. */
 export function refOf(t: PlannerTarget): TargetRef {
-  return t.kind === 'weapon'
-    ? { kind: 'weapon', key: t.key, owner: t.owner }
-    : { kind: t.kind, key: t.key }
+  if (t.kind === 'weapon') return { kind: 'weapon', key: t.key, owner: t.owner, id: t.id }
+  return { kind: t.kind, key: t.key }
 }
 
 /** A stored target as an upsert (to put it back). */
 export function inputOf(t: PlannerTarget): TargetInput {
   if (t.kind === 'character') return { kind: 'character', key: t.key, target: t.target }
+  if (t.kind === 'custom') return { kind: 'custom', key: t.key, target: t.target }
   if (t.kind === 'item') return { kind: 'item', key: t.key, target: t.target }
-  return { kind: 'weapon', key: t.key, owner: t.owner, target: t.target }
+  return { kind: 'weapon', id: t.id, key: t.key, owner: t.owner, target: t.target }
 }
 
 export type RequirementCache = ReturnType<typeof createRequirementCache>
@@ -88,7 +96,10 @@ export type RequirementCache = ReturnType<typeof createRequirementCache>
 // ------------------------------------------------------------ goal views
 
 export interface WeaponGoalView {
+  /** `weapon:Key:Owner:<goalId>` */
   id: string
+  /** The goal's own id (several goals can be one weapon). */
+  goalId: string
   key: string
   owner: string
   name: string
@@ -108,8 +119,11 @@ export interface WeaponGoalView {
 }
 
 export interface CharacterGoalView {
+  /** `character:Key`, or `custom:<id>` for a custom character (`key` is then its id). */
   id: string
   key: string
+  /** What a custom character is (null for a real one). */
+  custom: CustomCharacter | null
   name: string
   rarity: number | null
   element: Element | null
@@ -120,12 +134,16 @@ export interface CharacterGoalView {
   /** The capture's state alone (level 1 when not owned). */
   captured: CharacterState
   edited: boolean
-  /** Constellation now (0 when not owned). */
+  /** Constellation now: the capture's, or the one set by hand when higher (0 when not owned). */
   constellation: number
+  /** The capture's constellation. */
+  capturedConstellation: number
   /** Talent levels as the game shows them with C3/C5 (current and target). */
   boosted: { current: Talents; target: Talents }
   /** The stored target, made valid (`raiseForTalents`). */
   target: CharacterTarget
+  /** The stored target as it is (the goal editor edits this one). */
+  stored: CharacterTarget
   /** Ascension the stored target was raised to for its talents, else null. */
   raised: number | null
   requirement: Requirement | null
@@ -145,6 +163,7 @@ export interface ItemGoalView {
 
 /** One card on the Goals tab: a character with its weapon goals, or a weapon on its own. */
 export interface GoalEntry {
+  /** The character's goal id (`character:Key`, `custom:<id>`), or the weapon's on its own. */
   id: string
   character: CharacterGoalView | null
   weapons: WeaponGoalView[]
@@ -156,6 +175,7 @@ export interface GoalEntry {
   /** The character's, or the weapon's on a weapon-only card. */
   note: string
   favorite: boolean
+  /** The character's priority, or the weapon's on a weapon-only card (see `allocationOrder`). */
   priority: number | null
   element: Element | null
   weaponType: WeaponType | null
@@ -182,6 +202,10 @@ export function weaponName(key: string): string {
   return itemName(key)
 }
 
+/**
+ * A character goal as the page shows it. `planner` must know the character:
+ * a custom one (`custom`) is in it through `withCustomCharacters`.
+ */
 export function characterGoalView(
   planner: PlannerData,
   good: Good,
@@ -189,6 +213,7 @@ export function characterGoalView(
   key: string,
   stored: CharacterTarget,
   override?: CharacterCurrent | null,
+  custom: CustomCharacter | null = null,
 ): CharacterGoalView {
   const data = planner.characters.get(key)
   const found = findCharacterState(good.characters, key)
@@ -198,11 +223,13 @@ export function characterGoalView(
     ? raiseForTalents(data.ascension, stored, planner.talentAscension)
     : { target: stored, raised: null }
   const requirement = cache.character(key, state, target)
-  const constellation = good.characters.find((c) => c.key === key)?.constellation ?? 0
+  const capturedConstellation = good.characters.find((c) => c.key === key)?.constellation ?? 0
+  const constellation = Math.max(capturedConstellation, stored.constellation ?? 0)
   return {
-    id: characterGoalId(key),
+    id: custom ? customGoalId(key) : characterGoalId(key),
     key,
-    name: characterName(key),
+    custom,
+    name: custom?.name ?? characterName(key),
     rarity: data?.rarity ?? null,
     element: toElement(data?.element),
     weapon: data?.weapon ?? null,
@@ -211,33 +238,40 @@ export function characterGoalView(
     captured: found.state,
     edited,
     constellation,
+    capturedConstellation,
     boosted: {
       current: boostedTalents(planner, key, state.talents, constellation),
       target: boostedTalents(planner, key, target.talents, constellation),
     },
     target,
+    stored,
     raised,
     requirement,
     done: requirement ? isDone(requirement) : false,
   }
 }
 
+/**
+ * A weapon goal as the page shows it. `found` is the copy in the capture it
+ * starts from (`assignWeaponCopies`, so two goals of a weapon don't share
+ * one); without it, the one `findWeaponState` picks.
+ */
 export function weaponGoalView(
   planner: PlannerData,
   good: Good,
   cache: RequirementCache,
-  key: string,
-  owner: string,
-  target: WeaponTarget,
+  goal: { id: string; key: string; owner: string; target: WeaponTarget },
   override?: WeaponCurrent | null,
+  found: WeaponCopy = findWeaponState(good.weapons, goal.key, goal.owner),
 ): WeaponGoalView {
+  const { key, owner, target } = goal
   const data = planner.weapons.get(key)
-  const found = findWeaponState(good.weapons, key, owner)
   const { state, edited } = weaponNow(found.state, override)
   const owned = found.owned
   const requirement = cache.weapon(key, state, target)
   return {
-    id: weaponGoalId(key, owner),
+    id: weaponGoalId(key, owner, goal.id),
+    goalId: goal.id,
     key,
     owner,
     name: weaponName(key),
@@ -253,13 +287,15 @@ export function weaponGoalView(
   }
 }
 
-/** Hand-set current states by goal id (`character:Key`, `weapon:Key:Owner`). */
+/** Hand-set current states by goal id (`character:Key`, `custom:<id>`, `weapon:Key:Owner:<id>`). */
 export type Overrides = ReadonlyMap<string, CharacterCurrent | WeaponCurrent>
 
 /**
  * Joins the targets with the capture (`good`, its characters and weapons),
  * the hand-set current states and the bag (`bag`: the capture's materials
- * with the hand edits); characters by name, done ones last.
+ * with the hand edits); characters by name, done ones last. Custom
+ * characters must be in `planner` (`withCustomCharacters`). `characterGoals`
+ * is by character key (a custom one's id), `weaponGoals` by goal id.
  */
 export function buildBoard(
   planner: PlannerData,
@@ -272,13 +308,22 @@ export function buildBoard(
   const characterGoals = new Map<string, CharacterGoalView>()
   const weaponGoals = new Map<string, WeaponGoalView>()
   const items: ItemGoalView[] = []
+  const weaponTargets = targets.filter(
+    (t): t is Extract<PlannerTarget, { kind: 'weapon' }> => t.kind === 'weapon',
+  )
+  const copies = assignWeaponCopies(good.weapons, weaponTargets)
   for (const t of targets) {
-    if (t.kind === 'character') {
-      const override = overrides.get(characterGoalId(t.key)) as CharacterCurrent | undefined
-      characterGoals.set(t.key, characterGoalView(planner, good, cache, t.key, t.target, override))
+    if (t.kind === 'character' || t.kind === 'custom') {
+      const id = t.kind === 'custom' ? customGoalId(t.key) : characterGoalId(t.key)
+      const override = overrides.get(id) as CharacterCurrent | undefined
+      const custom = t.kind === 'custom' ? t.target.custom : null
+      characterGoals.set(
+        t.key,
+        characterGoalView(planner, good, cache, t.key, t.target, override, custom),
+      )
     } else if (t.kind === 'weapon') {
-      const override = overrides.get(weaponGoalId(t.key, t.owner)) as WeaponCurrent | undefined
-      const view = weaponGoalView(planner, good, cache, t.key, t.owner, t.target, override)
+      const override = overrides.get(targetId(t)) as WeaponCurrent | undefined
+      const view = weaponGoalView(planner, good, cache, t, override, copies.get(t.id))
       weaponGoals.set(view.id, view)
     } else {
       const material = planner.materialsByKey.get(t.key) ?? null
@@ -314,7 +359,7 @@ export function buildBoard(
         done: w.done,
         note: w.target.note ?? '',
         favorite: false,
-        priority: null,
+        priority: w.target.priority ?? null,
         element: null,
         weaponType: w.type,
         rarity: w.rarity,
@@ -357,6 +402,19 @@ export function buildBoard(
   }
   for (const i of items) goals.push(itemGoal(planner, i.key, i.target))
   return { entries, items, goals, characterGoals, weaponGoals }
+}
+
+/**
+ * The order materials are handed out in (higher first): by priority, unset
+ * ones last, then as the board lists them. Done cards keep their place.
+ */
+export function allocationOrder<E extends Pick<GoalEntry, 'priority'>>(entries: readonly E[]): E[] {
+  const at = new Map(entries.map((e, i) => [e, i]))
+  return [...entries].sort(
+    (a, b) =>
+      (a.priority ?? Number.MAX_SAFE_INTEGER) - (b.priority ?? Number.MAX_SAFE_INTEGER) ||
+      at.get(a)! - at.get(b)!,
+  )
 }
 
 // ------------------------------------------------------------ whole subjects
@@ -518,7 +576,7 @@ export function defaultWeaponTarget(planner: PlannerData, key: string, current: 
   } satisfies WeaponTarget
 }
 
-/** "Lv 80" or "Lv 80+" (ascended at the cap, ready for the next band). */
+/** "80" or "80✦" (ascended at the cap, ready for the next band), as the game marks it. */
 export function levelLabel(
   planner: PlannerData,
   kind: 'character' | 'weapon',
@@ -532,5 +590,54 @@ export function levelLabel(
       : planner.weapons.get(key)?.ascension
   const capBelow = ascension > 0 ? phases?.[ascension - 1]?.cap : undefined
   const ascended = capBelow === level && phases?.[ascension]?.cap !== level
-  return `${level}${ascended ? '+' : ''}`
+  return `${level}${ascended ? '✦' : ''}`
+}
+
+// ------------------------------------------------------------ writes
+
+/** A character goal (a custom one keeps its profile) as an upsert. */
+export function characterInput(
+  c: Pick<CharacterGoalView, 'key' | 'custom'>,
+  target: CharacterTarget & { custom?: CustomCharacter },
+): TargetInput {
+  const { custom: _, ...rest } = target
+  return c.custom
+    ? { kind: 'custom', key: c.key, target: { ...rest, custom: target.custom ?? c.custom } }
+    : { kind: 'character', key: c.key, target: rest }
+}
+
+/** A weapon goal as an upsert (its own id; `owner` moves it to another character). */
+export function weaponInput(
+  w: Pick<WeaponGoalView, 'goalId' | 'key' | 'owner'>,
+  target: WeaponTarget,
+  owner = w.owner,
+): TargetInput {
+  return { kind: 'weapon', id: w.goalId, key: w.key, owner, target }
+}
+
+/** Every goal on a card, as removals. */
+export function entryRefs(entry: GoalEntry): TargetRef[] {
+  const refs: TargetRef[] = []
+  const c = entry.character
+  if (c) refs.push(c.custom ? { kind: 'custom', key: c.key } : { kind: 'character', key: c.key })
+  for (const w of entry.weapons) {
+    refs.push({ kind: 'weapon', key: w.key, owner: w.owner, id: w.goalId })
+  }
+  return refs
+}
+
+/** Every goal on a card with `patch` applied to its stored target (active, priority…). */
+export function entryInputs(
+  entry: GoalEntry,
+  patch: { active?: boolean; priority?: number },
+): TargetInput[] {
+  const list: TargetInput[] = []
+  const c = entry.character
+  if (c) list.push(characterInput(c, { ...c.stored, ...patch }))
+  for (const w of entry.weapons) {
+    // On a character's card the card's order is the character's.
+    const own = c ? { ...patch, priority: w.target.priority } : patch
+    list.push(weaponInput(w, { ...w.target, ...own }))
+  }
+  return list
 }

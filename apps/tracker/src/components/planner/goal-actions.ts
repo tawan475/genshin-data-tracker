@@ -8,12 +8,14 @@
 import { inject, provide, type InjectionKey, type Ref } from 'vue'
 
 export interface GoalActions {
-  /** Opens the goal's editor (`character:Key`, `weapon:Key:Owner`, `item:Key`). */
+  /** Opens the goal's editor (`character:Key`, `custom:<id>`, `weapon:Key:Owner:<id>`, `item:Key`). */
   open(goal: string): void
   /** Stops counting the goal (with an Undo). */
   pause(goal: string): void
-  /** Character keys marked favourite. */
+  /** Character keys (custom ids too) marked favourite. */
   favorites: Readonly<Ref<ReadonlySet<string>>>
+  /** Custom characters' names, by id. */
+  names: Readonly<Ref<ReadonlyMap<string, string>>>
 }
 
 const KEY: InjectionKey<GoalActions> = Symbol('goal-actions')

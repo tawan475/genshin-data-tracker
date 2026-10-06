@@ -158,3 +158,22 @@ export function mapSeelieItems(
     unmapped: [...unmapped].sort(),
   }
 }
+
+/**
+ * Which stored weapon goal each imported one is, so importing the same file
+ * again changes nothing: the n-th imported goal of a weapon and owner is the
+ * n-th stored one (in their order); one past them is new (null).
+ */
+export function matchWeaponGoals(
+  incoming: readonly { key: string; owner: string }[],
+  stored: readonly { id: string; key: string; owner: string }[],
+): (string | null)[] {
+  const pools = new Map<string, string[]>()
+  for (const s of stored) {
+    const slot = `${s.key}:${s.owner}`
+    const pool = pools.get(slot)
+    if (pool) pool.push(s.id)
+    else pools.set(slot, [s.id])
+  }
+  return incoming.map((w) => pools.get(`${w.key}:${w.owner}`)?.shift() ?? null)
+}

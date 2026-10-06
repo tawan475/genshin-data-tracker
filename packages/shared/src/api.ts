@@ -139,9 +139,17 @@ export const achievementMarksPatch = z
 
 const talentLevel = z.number().int().min(1).max(10)
 
-/** Planner goal for a character. Levels stop at 90 until the 95/100 costs are in game-data. */
 /** Free text on a goal (plain text, shown as is). */
 const goalNote = z.string().max(1000)
+
+/**
+ * Where a goal sits in the planner's order: materials go to lower numbers
+ * first (a goal is ready when the bag covers it after the ones above);
+ * unset goals come last.
+ */
+const goalPriority = z.number().int().min(0).max(100_000)
+
+/** Planner goal for a character. Levels stop at 90 until the 95/100 costs are in game-data. */
 
 export const characterTarget = z.object({
   level: z.number().int().min(1).max(90),
@@ -151,18 +159,62 @@ export const characterTarget = z.object({
   active: z.boolean().default(true),
   note: goalNote.optional(),
   favorite: z.boolean().optional(),
-  /** Lower first when inventory is handed out in order; unset goals come last. */
-  priority: z.number().int().min(0).max(100_000).optional(),
+  priority: goalPriority.optional(),
+  /**
+   * Constellation set by hand (for the C3/C5 talent levels the game shows);
+   * the capture's counts where it is higher.
+   */
+  constellation: z.number().int().min(0).max(6).optional(),
 })
 
-/** Planner goal for a weapon, identified by its key and the character holding it. */
+/** Planner goal for a weapon (several may be the same weapon: each has its own id). */
 export const weaponTarget = z.object({
   level: z.number().int().min(1).max(90),
   ascension: z.number().int().min(0).max(6),
   refinement: z.number().int().min(1).max(5),
   active: z.boolean().default(true),
   note: goalNote.optional(),
+  /** A weapon goal on its own card (no character goal holds it); see `goalPriority`. */
+  priority: goalPriority.optional(),
 })
+
+/**
+ * A weapon goal's own id, made by the client (`[a-z0-9]`, 6-32): two goals
+ * can be the same weapon for the same character. Migration 0012 gave the
+ * goals stored before it one.
+ */
+export const plannerGoalIdSchema = z.string().regex(/^[a-z0-9]{6,32}$/, 'Not a goal id')
+
+/** A custom character's id: lowercase first, so never a GOOD key. */
+export const customKeySchema = z.string().regex(/^[a-z][a-z0-9]{5,31}$/, 'Not a custom id')
+
+export const ELEMENT_KEYS = ['Anemo', 'Geo', 'Electro', 'Dendro', 'Hydro', 'Pyro', 'Cryo'] as const
+export const WEAPON_TYPE_KEYS = ['sword', 'claymore', 'polearm', 'catalyst', 'bow'] as const
+
+/**
+ * A character the game data doesn't have yet (unreleased, or newer than
+ * this build): what the planner needs to cost it. Materials are GOOD keys
+ * (a family by its lowest tier); one not set yet is left out of the cost.
+ */
+export const customCharacter = z.object({
+  name: z.string().trim().min(1).max(40),
+  rarity: z.union([z.literal(4), z.literal(5)]),
+  element: z.enum(ELEMENT_KEYS),
+  weapon: z.enum(WEAPON_TYPE_KEYS),
+  /** Talent book family. */
+  book: goodKeySchema.optional(),
+  /** Common enemy drop family (ascension and talents). */
+  common: goodKeySchema.optional(),
+  /** Normal boss drop. */
+  boss: goodKeySchema.optional(),
+  /** Local specialty. */
+  local: goodKeySchema.optional(),
+  /** Weekly boss drop. */
+  weekly: goodKeySchema.optional(),
+})
+
+/** Planner goal for a custom character: a character goal plus what it is. */
+export const customTarget = characterTarget.extend({ custom: customCharacter })
 
 /** Extra need for one material on top of every goal (Seelie's custom items). */
 export const itemTarget = z.object({
@@ -171,26 +223,41 @@ export const itemTarget = z.object({
   note: goalNote.optional(),
 })
 
+/** Character key (or custom id) a weapon goal is for, '' for a spare one. */
+const weaponOwner = goodKeySchema.or(z.literal(''))
+
+/**
+ * A weapon goal by its `id`; without one (apps from before 0012), every goal
+ * with that weapon and owner.
+ */
 const targetRef = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('character'), key: goodKeySchema }),
   z.object({ kind: z.literal('item'), key: goodKeySchema }),
   z.object({
     kind: z.literal('weapon'),
     key: goodKeySchema,
-    /** Character key the weapon belongs to, '' for a spare one (GOOD weapons have no id). */
-    owner: goodKeySchema.or(z.literal('')),
+    owner: weaponOwner,
+    id: plannerGoalIdSchema.optional(),
   }),
+  z.object({ kind: z.literal('custom'), key: customKeySchema }),
 ])
 
+/**
+ * A goal to write. A weapon goal with an `id` is that goal (made, or its
+ * weapon, owner and target changed); without one (apps from before 0012),
+ * the first goal with that weapon and owner, else a new one.
+ */
 export const plannerTargetInput = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('character'), key: goodKeySchema, target: characterTarget }),
   z.object({ kind: z.literal('item'), key: goodKeySchema, target: itemTarget }),
   z.object({
     kind: z.literal('weapon'),
     key: goodKeySchema,
-    owner: goodKeySchema.or(z.literal('')),
+    owner: weaponOwner,
+    id: plannerGoalIdSchema.optional(),
     target: weaponTarget,
   }),
+  z.object({ kind: z.literal('custom'), key: customKeySchema, target: customTarget }),
 ])
 
 /** Upserts and removals in one request (a Seelie import sends a few hundred). */
@@ -243,8 +310,15 @@ export const currentOverride = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('weapon'),
     key: goodKeySchema,
-    owner: goodKeySchema.or(z.literal('')),
+    owner: weaponOwner,
+    /** The goal; without one, every goal with that weapon and owner (apps from before 0012). */
+    id: plannerGoalIdSchema.optional(),
     current: weaponCurrent.nullable(),
+  }),
+  z.object({
+    kind: z.literal('custom'),
+    key: customKeySchema,
+    current: characterCurrent.nullable(),
   }),
 ])
 
@@ -418,11 +492,22 @@ export interface AchievementMarksResponse {
 export type CharacterTarget = z.infer<typeof characterTarget>
 export type WeaponTarget = z.infer<typeof weaponTarget>
 export type ItemTarget = z.infer<typeof itemTarget>
+export type CustomCharacter = z.infer<typeof customCharacter>
+export type CustomTarget = z.infer<typeof customTarget>
 
+/** Weapon goals carry their own `id`; the others are one per kind and key. */
 export type PlannerTarget =
   | { kind: 'character'; key: string; owner: ''; target: CharacterTarget; updatedAt: number }
-  | { kind: 'weapon'; key: string; owner: string; target: WeaponTarget; updatedAt: number }
+  | {
+      kind: 'weapon'
+      id: string
+      key: string
+      owner: string
+      target: WeaponTarget
+      updatedAt: number
+    }
   | { kind: 'item'; key: string; owner: ''; target: ItemTarget; updatedAt: number }
+  | { kind: 'custom'; key: string; owner: ''; target: CustomTarget; updatedAt: number }
 
 export interface PlannerTargetsResponse {
   targets: PlannerTarget[]
@@ -449,7 +534,8 @@ export interface InventoryAdjustment {
 /** A goal's current state set by hand; it counts until a capture reaches it. */
 export type CurrentOverride =
   | { kind: 'character'; key: string; owner: ''; current: CharacterCurrent }
-  | { kind: 'weapon'; key: string; owner: string; current: WeaponCurrent }
+  | { kind: 'weapon'; id: string; key: string; owner: string; current: WeaponCurrent }
+  | { kind: 'custom'; key: string; owner: ''; current: CharacterCurrent }
 
 export interface PlannerStateResponse {
   /** The newest capture's `lastSeenAt` (null without one): what `base` must be to write. */

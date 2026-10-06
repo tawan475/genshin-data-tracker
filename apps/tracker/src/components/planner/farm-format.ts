@@ -19,26 +19,29 @@ export const STOCK_MEANING: Record<StockStatus, string> = {
   short: 'short',
 }
 
-/** A goal's readiness, as its card and the legend show it (a label, never colour alone). */
+/**
+ * A goal's readiness, as its card and the legend show it (a label, never
+ * colour alone). The bag goes to goals in priority order (allocation.ts).
+ */
 export const READINESS: Record<
   StockStatus | 'done',
   { label: string; meaning: string; badge: string; dot: string }
 > = {
   all: {
     label: 'Ready',
-    meaning: 'Enough for every goal',
+    meaning: 'Enough after the goals above',
     badge: 'bg-emerald-500/15 text-success-text',
     dot: 'bg-emerald-500',
   },
   alone: {
     label: 'Ready alone',
-    meaning: 'Enough for this goal, not for all of them',
+    meaning: 'Enough alone, not after the goals above',
     badge: 'bg-amber-500/10 text-warning-text',
     dot: 'bg-amber-500',
   },
   short: {
     label: 'Short',
-    meaning: 'Not enough, even for this goal alone',
+    meaning: 'Not enough, even alone',
     badge: 'bg-danger-surface text-danger-text',
     dot: 'bg-danger',
   },

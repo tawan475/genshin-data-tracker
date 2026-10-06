@@ -125,14 +125,39 @@ setting `planner.refreshes`, 0–6, no migration: settings are JSON merged with 
   names (a boss card is named after its drop; gems can't be tied to a boss), enemy names per
   common/elite drop family, local specialty regions, which gem family each normal boss drops.
 
-**Phase 3 — Goal editing like Seelie**
-- One auto-saving modal per character: Level / Talents / Weapon / Artifacts tabs, one-click level
-  grid (1, 20, 20✦ … 90), talent steppers, constellation, notes, favourite, active.
-- Presets ("max", 90/10/10/10, 80/8/8/8), multi-add from the roster.
-- Standalone weapon goals including unowned and duplicates (goals get their own id — fixes the
-  key+owner collision).
-- *Priority that allocates*: drag to reorder; materials go to higher goals first (Seelie only sorts).
-- Custom/unreleased character placeholder, replaceable by the real one later.
+**Phase 3 — Goal editing like Seelie** — *built 2026-10-06* (migration 0012:
+`planner_weapon_goals`; `GoalModal`, `LevelGrid`, `NumberStepper`, `WeaponGoalBlock`,
+`WeaponChooser`, `RosterGrid`, `CustomForm`; pure `level-grid.ts`, `presets.ts`, `allocation.ts`,
+`weapon-copies.ts`, `custom-character.ts`, `goal-ids.ts`).
+- One auto-saving modal per card (`?goal=` in the URL): Level / Talents / Weapon tabs (the
+  Artifacts tab is Phase 4's slot), one-click level grid (1, 20, 20✦ … 90; "now" can't go below
+  the capture, setting it past the goal moves the goal), talent steppers with C3/C5 marked and the
+  in-game level, a warning with a one-click fix when talents need more ascension than the goal
+  level, constellation stepper (stored as `constellation`, the capture's counts when higher),
+  presets, folding note, favourite, counted, delete with Undo (hand-set states come back too). Each
+  change goes through the existing optimistic stores (sent after 500 ms); no Save button. Phones
+  get the full-screen sheet.
+- Presets: Max, 90/9/9/9, 80/8/8/8, Talents only (9/9/9), Level only (90); never below now.
+  Multi-add: the roster (owned first, element / weapon / rarity filters) picks several at once with
+  one preset; bulk edit of selected cards (preset, pause / count, remove), each with Undo.
+- Weapon goals have their own id (client-made, `[a-z0-9]{6,32}`) in `planner_weapon_goals`
+  (`planner_targets`' key stays kind + key + owner and is not rebuilt; 0012 copied every weapon
+  row with its target and hand-set state, then deleted it there). Any weapon, owned or not, the
+  same one twice. Copies in the capture go to goals without sharing (holders, then spares; one
+  goal alone still follows its copy to whoever holds it). Apps from before 0012 still write by
+  weapon + owner (first such goal; removals take all). The Seelie import keeps weapon goals in
+  file order and matches them to stored ones in order, so a re-import changes nothing.
+- *Priority that allocates*: in Priority order cards carry a handle (drag with mouse or finger,
+  arrow keys / Home / End); the order is stored as priorities 1…n (`weaponTarget.priority` for a
+  weapon on its own card). A card is Ready when the bag covers it after the counted cards above
+  it; a paused card is costed where it stands and takes nothing. Farm totals are unchanged.
+- Custom character: a goal of kind `custom` (id lowercase-first, never a GOOD key) whose target
+  carries name, rarity, element, weapon type and materials (book / enemy drop families, boss,
+  specialty, weekly; unknown ones left out of the cost). It is costed as a regular character of
+  its rarity with those materials swapped in, so totals, Done and Today work unchanged; "Replace
+  with…" turns it into the real character, its weapon goals and hand-set state moved along.
+- Also: "Resin now ~180 · +120 in bag" in the farm headline; a farm card's "+N" shows every
+  portrait. Levels read 80✦ everywhere (was 80+).
 
 **Phase 4 — the rest**
 - Artifact goals (sets + main stats; we can auto-tick them from captured artifacts).

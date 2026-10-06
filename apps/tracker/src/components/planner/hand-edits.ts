@@ -24,6 +24,7 @@ import type {
   InventoryChange,
   WeaponCurrent,
 } from '@gdt/shared'
+import { targetId } from './goal-ids'
 
 type Bag = Readonly<Record<string, number>>
 
@@ -120,8 +121,13 @@ export function countChange(key: string, value: number, capture: number): Invent
 
 // ------------------------------------------------------------- current state
 
-export const overrideId = (o: Pick<CurrentOverride, 'kind' | 'key' | 'owner'>) =>
-  o.kind === 'character' ? `character:${o.key}` : `weapon:${o.key}:${o.owner}`
+/** The goal id a current state belongs to (`character:Key`, `custom:<id>`, `weapon:Key:Owner:<id>`). */
+export const overrideId = (o: {
+  kind: CurrentOverride['kind']
+  key: string
+  owner?: string
+  id?: string
+}) => targetId(o)
 
 /** Whether (level, ascension) `a` is past `b`: a higher phase, or the same phase at a higher level. */
 function pairAhead(

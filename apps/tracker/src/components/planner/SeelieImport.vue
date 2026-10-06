@@ -11,8 +11,8 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { formatNumber } from '@/lib/format'
-import { characterGoalId, itemGoalId, refOf, targetId, weaponGoalId } from './model'
-import { mapSeelieItems, type SeelieItems } from './seelie-items'
+import { characterGoalId, itemGoalId, newGoalId, refOf, targetId, weaponGoalId } from './model'
+import { mapSeelieItems, matchWeaponGoals, type SeelieItems } from './seelie-items'
 import { remove, upsert } from './use-planner-targets'
 
 type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
@@ -21,7 +21,9 @@ type Op = ReturnType<typeof upsert> | ReturnType<typeof remove>
  * Goals from a Seelie export: pick or drop the file, see what it maps to
  * (new / changed / same, and what could not be mapped), then apply it as
  * one request. Extra item needs (`custom_items`) come along. "Replace" also
- * removes goals the file does not have.
+ * removes goals the file does not have. Weapon goals are matched to the
+ * stored ones of the same weapon and owner in order (`matchWeaponGoals`),
+ * so the same file twice changes nothing.
  */
 const props = defineProps<{
   open: boolean
@@ -118,13 +120,26 @@ const plan = computed(() => {
   const characters = r.characters.map((c) => {
     const now = at(characterGoalId(c.key))
     const keep = now?.kind === 'character' ? now.target : null
-    const own = { note: keep?.note, favorite: keep?.favorite, priority: keep?.priority }
+    const own = {
+      note: keep?.note,
+      favorite: keep?.favorite,
+      priority: keep?.priority,
+      constellation: keep?.constellation,
+    }
     return { key: c.key, target: { ...c.target, ...own } }
   })
-  const weapons = r.weapons.map((w) => {
-    const now = at(weaponGoalId(w.key, w.owner))
-    const note = now?.kind === 'weapon' ? now.target.note : undefined
-    return { key: w.key, owner: w.owner, target: { ...w.target, note } }
+  const stored = props.targets.flatMap((t) => (t.kind === 'weapon' ? [t] : []))
+  const ids = matchWeaponGoals(r.weapons, stored)
+  const weapons = r.weapons.map((w, i) => {
+    const id = ids[i] ?? newGoalId()
+    const now = at(weaponGoalId(w.key, w.owner, id))
+    const keep = now?.kind === 'weapon' ? now.target : null
+    return {
+      id,
+      key: w.key,
+      owner: w.owner,
+      target: { ...w.target, note: keep?.note, priority: keep?.priority },
+    }
   })
   const items = (extra.value?.items ?? []).map((i) => {
     const now = at(itemGoalId(i.key))
@@ -152,7 +167,10 @@ const preview = computed(() => {
     return { total: ids.length, added, changed, same: ids.length - added - changed }
   }
   const characters = x.characters.map((c) => ({ id: characterGoalId(c.key), target: c.target }))
-  const weapons = x.weapons.map((w) => ({ id: weaponGoalId(w.key, w.owner), target: w.target }))
+  const weapons = x.weapons.map((w) => ({
+    id: weaponGoalId(w.key, w.owner, w.id),
+    target: w.target,
+  }))
   const items = x.items.map((i) => ({ id: itemGoalId(i.key), target: i.target }))
   const incoming = new Set([...characters, ...weapons, ...items].map((t) => t.id))
   return {

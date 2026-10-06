@@ -24,7 +24,7 @@ export interface StateChanges {
 const DEBOUNCE_MS = 500
 
 const changeId = (c: CurrentChange) =>
-  overrideId({ kind: c.kind, key: c.key, owner: c.kind === 'weapon' ? c.owner : '' })
+  overrideId(c.kind === 'weapon' ? c : { kind: c.kind, key: c.key })
 
 /**
  * The account's hand edits on top of the newest capture (material counts,
@@ -42,6 +42,8 @@ export function usePlannerState(
   accountId: Ref<number>,
   base: Ref<number>,
   onCaptureChanged: (accountId: number) => Promise<void>,
+  /** Runs before each send (the goals' own writes: a current state lands only on a stored goal). */
+  before: () => Promise<void> = async () => {},
 ) {
   const feedback = useFeedback()
   /** The server's answer; the view is this plus what is waiting to be sent. */
@@ -141,6 +143,7 @@ export function usePlannerState(
   async function flush(extra: { prune?: boolean } = {}): Promise<void> {
     clearTimeout(timer)
     timer = undefined
+    await before()
     while (flight) await flight.catch(() => {})
     if (inventory.size + current.size === 0 && !extra.prune) return
     const madeAgainst = inventory.size + current.size > 0 ? queuedBase : base.value
