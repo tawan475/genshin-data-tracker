@@ -4,6 +4,9 @@ import { Clock, Package, Upload } from 'lucide-vue-next'
 import { useChartRange } from '@/components/charts/use-chart-range'
 import MaterialDetail from '@/components/materials-page/MaterialDetail.vue'
 import MaterialsBag from '@/components/materials-page/MaterialsBag.vue'
+import ItemPopover from '@/components/planner/ItemPopover.vue'
+import { adjustmentApplies } from '@/components/planner/hand-edits'
+import { usePlannerModel } from '@/components/planner/use-planner-model'
 import TrackedPanel from '@/components/materials-page/TrackedPanel.vue'
 import TrackPicker from '@/components/materials-page/TrackPicker.vue'
 import WalletStrip, { type WalletItem } from '@/components/materials-page/WalletStrip.vue'
@@ -41,9 +44,12 @@ import { useAccount } from './context'
 
 /**
  * Materials: the wallet (currencies) on top, tracked materials as small
- * charts, then the bag, an icon grid of everything held. Any material opens
- * a detail view with its history. All from the materials sections of the
- * account's snapshots, decoded once per data version.
+ * charts, then the bag, an icon grid of everything held. All from the
+ * materials sections of the account's snapshots, decoded once per data
+ * version. A material the Planner knows opens its inventory editor (the
+ * Planner's: counts set by hand on top of the capture, what the goals need,
+ * a link to the history); anything else opens the detail view with its
+ * history.
  */
 const account = useAccount()
 const icon = useMaterialIcons()
@@ -109,6 +115,40 @@ const newest = computed(() => {
     : { iso: new Date(at).toISOString(), ago: formatRelative(at), title: formatDateTime(at) }
 })
 
+// ------------------------------------------------------------------ inventory editor
+
+const planning = usePlannerModel(account)
+const editor = shallowRef<{ key: string; anchor: HTMLElement; touch: boolean } | null>(null)
+const editorOpen = ref(false)
+
+/** Counts set by hand that differ from the capture's (the bag shows them). */
+const edited = computed(() => {
+  const map = new Map<string, number>()
+  const bag = planning.bag.value
+  const good = planning.good.value
+  const edits = planning.state.adjustments.value
+  if (!bag || !good || !edits) return map
+  for (const edit of edits) {
+    if (!adjustmentApplies(edit, planning.base.value)) continue
+    const count = bag[edit.key] ?? 0
+    if (count !== (good.materials[edit.key] ?? 0)) map.set(edit.key, count)
+  }
+  return map
+})
+
+function openTile(key: string, anchor: HTMLElement, touch: boolean) {
+  const known = planning.planner.value?.materialsByKey.has(key)
+  if (known && planning.bag.value && planning.totals.value) {
+    editor.value = { key, anchor, touch }
+    editorOpen.value = true
+  } else detailKey.value = key
+}
+
+function showHistory(key: string) {
+  editorOpen.value = false
+  detailKey.value = key
+}
+
 // ------------------------------------------------------------------ tracked
 
 const range = useChartRange('materials:range')
@@ -139,6 +179,7 @@ watch(
   () => {
     detailKey.value = null
     pickerOpen.value = false
+    editorOpen.value = false
   },
 )
 
@@ -210,7 +251,8 @@ const importTo = computed(() => ({
       :tracked="graph.selectedKeys.value"
       :icon="icon"
       :import-to="importTo"
-      @open="detailKey = $event"
+      :edited="edited"
+      @open="openTile"
     />
 
     <MaterialDetail
@@ -222,6 +264,24 @@ const importTo = computed(() => ({
       :can-track="canTrack"
       @close="detailKey = null"
       @toggle-track="graph.toggle"
+    />
+
+    <ItemPopover
+      v-if="planning.planner.value && planning.bag.value && planning.good.value"
+      :open="editorOpen"
+      :anchor="editor?.anchor ?? null"
+      :item-key="editor?.key ?? null"
+      :context="null"
+      :touch="editor?.touch ?? false"
+      :planner="planning.planner.value"
+      :bag="planning.bag.value"
+      :capture="planning.good.value.materials"
+      :totals="planning.totals.value"
+      history
+      @close="editorOpen = false"
+      @change="planning.setCount"
+      @add="planning.addCount"
+      @history="showHistory"
     />
 
     <TrackPicker

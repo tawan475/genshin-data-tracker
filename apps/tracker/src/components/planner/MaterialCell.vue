@@ -2,17 +2,18 @@
 import type { MaterialLine } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
 import { formatCompact, formatNumber } from '@/lib/format'
-import { gameIcon } from '@/lib/assets'
+import { gameIcon, materialIcon } from '@/lib/assets'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { RARITY_SOFT } from '@/components/characters/tokens'
 import { fromTouch, useItemPopover } from './item-popover'
 
 /**
- * One material of a farming group: the icon, what is still missing (or a
- * check), and have / need underneath. On the Planner it is a button that
- * opens the inventory editor (name, crafting, counts).
+ * One material of a farm card: the icon, what is still missing (or a
+ * check), and have / need underneath (not at `xs`: the tooltip and the
+ * editor have them). On the Planner it is a button that opens the
+ * inventory editor (name, crafting, counts).
  */
-const props = withDefaults(defineProps<{ line: MaterialLine; size?: 'md' | 'sm' }>(), {
+const props = withDefaults(defineProps<{ line: MaterialLine; size?: 'md' | 'sm' | 'xs' }>(), {
   size: 'md',
 })
 const openItem = useItemPopover()
@@ -28,6 +29,11 @@ const title = computed(() => {
   return parts.join(' · ')
 })
 
+/** Mora's game icon isn't on the image host: the material index's is. */
+const src = computed(() =>
+  props.line.material.key === 'Mora' ? materialIcon('Mora') : gameIcon(props.line.material.icon),
+)
+
 function open(event: MouseEvent) {
   openItem?.({
     key: props.line.material.key,
@@ -41,9 +47,9 @@ function open(event: MouseEvent) {
   <component
     :is="openItem ? 'button' : 'div'"
     :type="openItem ? 'button' : undefined"
-    class="flex flex-col items-center gap-1 rounded-lg"
+    class="flex flex-col items-center gap-0.5 rounded-lg"
     :class="[
-      size === 'sm' ? 'w-12' : 'w-16',
+      { md: 'w-16 gap-1', sm: 'w-12 gap-1', xs: 'w-10' }[size],
       openItem ? 'transition-colors hover:bg-surface-overlay focus-visible:bg-surface-overlay' : '',
     ]"
     :title="title"
@@ -53,16 +59,16 @@ function open(event: MouseEvent) {
     <span
       class="overflow-hidden rounded-lg text-xs"
       :class="[
-        size === 'sm' ? 'size-9' : 'size-12',
+        { md: 'size-12', sm: 'size-9', xs: 'size-8' }[size],
         RARITY_SOFT[line.material.rarity] ?? 'bg-surface-sunken',
       ]"
     >
-      <MaterialIcon :src="gameIcon(line.material.icon)" :name="line.material.name" />
+      <MaterialIcon :src="src" :name="line.material.name" />
     </span>
     <span
       class="tabular font-mono leading-4 font-semibold"
       :class="[
-        size === 'sm' ? 'text-xs' : 'text-sm',
+        size === 'md' ? 'text-sm' : 'text-xs',
         line.missing > 0
           ? 'text-warning-text'
           : line.need > 0
@@ -72,7 +78,7 @@ function open(event: MouseEvent) {
     >
       {{ line.missing > 0 ? formatCompact(line.missing) : line.need > 0 ? '✓' : '–' }}
     </span>
-    <span class="tabular font-mono text-[0.6875rem] leading-3 text-text-muted">
+    <span v-if="size !== 'xs'" class="tabular font-mono text-[0.6875rem] leading-3 text-text-muted">
       {{ formatCompact(line.have)
       }}<template v-if="line.need > 0">/{{ formatCompact(line.need) }}</template>
     </span>

@@ -1188,7 +1188,7 @@ describe('progress set by hand', () => {
     expect(before.settings).toMatchObject({
       ar: null,
       wl: null,
-      planner: { azoth: false, passives: true },
+      planner: { azoth: false, passives: true, refreshes: 0 },
     })
     const after = await client.json<S>(path, {
       method: 'PATCH',
@@ -1197,8 +1197,20 @@ describe('progress set by hand', () => {
     expect(after.settings).toMatchObject({
       ar: 60,
       wl: 9,
-      planner: { azoth: true, passives: true },
+      planner: { azoth: true, passives: true, refreshes: 0 },
     })
+    const refreshed = await client.json<S>(path, {
+      method: 'PATCH',
+      json: { planner: { refreshes: 2 } },
+    })
+    expect(refreshed.settings.planner).toEqual({ azoth: true, passives: true, refreshes: 2 })
     expect((await client.fetch(path, { method: 'PATCH', json: { ar: 61 } })).status).toBe(400)
+    for (const refreshes of [7, -1, 1.5]) {
+      const response = await client.fetch(path, {
+        method: 'PATCH',
+        json: { planner: { refreshes } },
+      })
+      expect(response.status, String(refreshes)).toBe(400)
+    }
   })
 })
