@@ -109,7 +109,9 @@ describe('planner tasks', () => {
     expect(brief(await tasks())[1]).toMatchObject({ due: '2026-10-08' })
     await patch({ upsert: [laundry] })
     expect(brief(await tasks())[1]).toEqual(laundry)
-  })
+    // The file's first test also pays for workerd's start and a sign-up (Argon2id):
+    // past the default 5 s on a busy machine.
+  }, 20_000)
 
   it('refuses malformed tasks and other users', async () => {
     const { url, patch } = await setup()
