@@ -17,7 +17,7 @@ import {
 } from './goal-list'
 
 /**
- * Search, sort and the goal filters: the Upgrade now and No weekly toggles
+ * Search, sort and the goal filters: the Upgrade now and No weekly boss toggles
  * (first: they are remembered, and a phone's chip row scrolls), status
  * (all / in stock / counted / paused), element and rarity chips with
  * counts, weapon type.
@@ -51,8 +51,9 @@ const TOGGLES: { value: GoalToggle; label: string; title: string }[] = [
   },
   {
     value: 'noWeekly',
-    label: 'No weekly',
-    title: 'Goals whose remaining cost needs no weekly boss material',
+    label: 'No weekly boss',
+    title:
+      'Still to farm, but no weekly boss: its drops are held or convertible (after the goals above)',
   },
 ]
 

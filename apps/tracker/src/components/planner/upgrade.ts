@@ -9,8 +9,13 @@
  *   A card with any is "Upgrade now". The bag alone, like Ready alone: what
  *   the game lets you do right now, even when it takes materials the goals
  *   above it are counting on.
- * - `needsWeekly`: whether what is left needs a weekly boss material (the
- *   game data's `weekly` kind: Dvalin's Plume, Shard of a Foul Legacy…).
+ * - `farmsNoWeekly`: whether a counted goal still has something to farm
+ *   but no weekly boss to fight: its readiness (allocation.ts, the bag
+ *   after the goals above, crafting and Dream Solvent conversions counted)
+ *   is short of something, and of no weekly boss material (the game data's
+ *   `weekly` kind: Dvalin's Plume, Shard of a Foul Legacy…). Weekly drops
+ *   it needs that are held, or convertible from the same boss's other
+ *   drops, don't count against it; ones a goal above takes first do.
  */
 
 import type { PlannerData } from '@gdt/game-data'
@@ -20,10 +25,10 @@ import {
   ascensionForTalents,
   characterRequirement,
   type PlanOptions,
-  type Requirement,
 } from '@gdt/game-data/planner-math'
 import { characterParts, weaponPart } from './done'
 import type { GoalEntry } from './model'
+import type { GoalNeeds } from './needs'
 
 type Bag = Readonly<Record<string, number>>
 
@@ -92,11 +97,14 @@ export function partReadiness(
   return ready
 }
 
-/** Whether a cost needs any weekly boss material. */
-export function needsWeekly(planner: PlannerData, requirement: Requirement | null | undefined) {
-  if (!requirement) return false
-  for (const [key, count] of requirement.items) {
-    if (count > 0 && planner.materialsByKey.get(key)?.kind === 'weekly') return true
-  }
-  return false
+/**
+ * A counted goal with something left to farm after the goals above, none
+ * of it a weekly boss material (`needs`: its readiness from allocateNeeds).
+ */
+export function farmsNoWeekly(
+  entry: Pick<GoalEntry, 'active' | 'materialsDone'>,
+  needs: GoalNeeds | null | undefined,
+): boolean {
+  if (!entry.active || entry.materialsDone || !needs || needs.chips.length === 0) return false
+  return needs.chips.every((chip) => chip.material.kind !== 'weekly')
 }

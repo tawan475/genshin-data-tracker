@@ -1,6 +1,6 @@
 /**
  * The Goals tab's toolbar: search, status, element / rarity / weapon type
- * filters, the "Upgrade now" and "No weekly" toggles (chips count "matches
+ * filters, the "Upgrade now" and "No weekly boss" toggles (chips count "matches
  * if you pick this", like the Characters page) and the sort orders. Pure
  * functions over the board's entries and what the page knows of each
  * (`GoalFacts`).
@@ -22,7 +22,7 @@ export interface GoalFilters {
   weaponType: WeaponType | 'all'
   /** Only counted goals that can level now (upgrade.ts: a part, or its next step). */
   upgrade: boolean
-  /** Only goals whose remaining cost needs no weekly boss material. */
+  /** Only counted goals still to farm, but no weekly boss (upgrade.ts `farmsNoWeekly`). */
   noWeekly: boolean
 }
 
@@ -42,8 +42,8 @@ export interface GoalFacts {
   ready: ReadonlySet<string>
   /** Counted goals with a part that can level now (Upgrade now). */
   upgrade: ReadonlySet<string>
-  /** Goals whose remaining cost needs a weekly boss material. */
-  weekly: ReadonlySet<string>
+  /** Counted goals still to farm, none of it from a weekly boss (No weekly boss). */
+  noWeekly: ReadonlySet<string>
 }
 
 export type GoalToggle = 'upgrade' | 'noWeekly'
@@ -96,7 +96,7 @@ export function filterGoals(
     if (except !== 'status' && !statusMatches(f.status, e.active, facts.ready.has(e.id)))
       return false
     if (except !== 'upgrade' && f.upgrade && !facts.upgrade.has(e.id)) return false
-    if (except !== 'noWeekly' && f.noWeekly && facts.weekly.has(e.id)) return false
+    if (except !== 'noWeekly' && f.noWeekly && !facts.noWeekly.has(e.id)) return false
     if (except !== 'element' && f.element !== 'all' && e.element !== f.element) return false
     if (except !== 'rarity' && f.rarity !== 'all' && e.rarity !== f.rarity) return false
     if (f.weaponType !== 'all' && e.weaponType !== f.weaponType) return false

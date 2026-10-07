@@ -116,7 +116,7 @@ import type { GoalNeeds } from '@/components/planner/needs'
 import { PRESETS, applyPreset, presetById, type PresetId } from '@/components/planner/presets'
 import { resinAt, resinReading } from '@/components/planner/resin'
 import type { SeelieWrites } from '@/components/planner/seelie-plan'
-import { needsWeekly, partReadiness, type PartReady } from '@/components/planner/upgrade'
+import { farmsNoWeekly, partReadiness, type PartReady } from '@/components/planner/upgrade'
 import { upsertTask } from '@/components/planner/use-planner-tasks'
 import { saveTraveler, travelerGender } from '@/data/traveler'
 import { ApiRequestError } from '@/api'
@@ -419,16 +419,16 @@ const parts = computed(() => {
   return result
 })
 
-/** What the filters know of each card: in stock, can level now, needs a weekly boss. */
+/**
+ * What the filters know of each card: in stock, can level now, and still
+ * to farm without a weekly boss (its readiness: after the goals above).
+ */
 const facts = computed<GoalFacts>(() => {
-  const p = planner.value
-  const weekly = new Set<string>()
-  if (p) {
-    for (const [id, goal] of entryGoals.value) {
-      if (needsWeekly(p, goal.requirement)) weekly.add(id)
-    }
+  const noWeekly = new Set<string>()
+  for (const entry of board.value?.entries ?? []) {
+    if (farmsNoWeekly(entry, needs.value.get(entry.id))) noWeekly.add(entry.id)
   }
-  return { ready: ready.value, upgrade: new Set(parts.value.keys()), weekly }
+  return { ready: ready.value, upgrade: new Set(parts.value.keys()), noWeekly }
 })
 
 /** Artifact sets the counted character goals still want (Today's artifact domains). */
@@ -469,7 +469,7 @@ watch(farmView, (value) => writeStorage('planner:farm', value))
 
 // ------------------------------------------------------------------ goals
 
-// The Upgrade now / No weekly toggles are remembered on this device, like the sort.
+// The Upgrade now / No weekly boss toggles are remembered on this device, like the sort.
 const filters = reactive<GoalFilters>({
   ...NO_GOAL_FILTERS,
   ...parseGoalToggles(readStorage('planner:goal-toggles')),
