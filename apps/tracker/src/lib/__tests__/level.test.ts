@@ -18,10 +18,11 @@ describe('level cap', () => {
     expect(levelCap(4, 70)).toBe(70)
   })
 
-  it('goes to 100 past 90', () => {
+  it('shows 95/95 and 100/100 past 90 (raised with Masterless Stardust, not EXP)', () => {
     expect(levelCap(6, 90)).toBe(90)
-    expect(levelCap(6, 95)).toBe(100)
+    expect(levelCap(6, 95)).toBe(95)
     expect(levelCap(6, 100)).toBe(100)
+    expect(formatLevel(95, 6)).toBe('Lv. 95/95')
   })
 
   it('never shows a cap below the level, and clamps odd ascensions', () => {
