@@ -12,14 +12,12 @@ import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
-import { characterIcon, materialIcon, weaponIcon } from '@/lib/assets'
+import { materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import CraftCard from './CraftCard.vue'
 import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
 import { formatCountdown, formatSeconds } from './farm-format'
-import { useGoalActions } from './goal-actions'
-import GoalPortrait from './GoalPortrait.vue'
 import { sameValue } from './keep-unchanged'
 import type { GoalEntry } from './model'
 import { useProgressive } from './use-progressive'
@@ -49,8 +47,9 @@ import {
  *
  * "No weekly boss" (beside Today / Schedule; the Goals toolbar's toggle,
  * one value) narrows all of it to the goals still to farm without a weekly
- * boss (`planFor`; the page hands their share in `totals` and `plan`),
- * shown as a row of portraits; with none, an empty state turns it off.
+ * boss (`planFor`; the page hands their share in `totals` and `plan`): the
+ * cards below show only what those goals need; with none, an empty state
+ * turns it off.
  */
 const props = defineProps<{
   planner: PlannerData
@@ -80,36 +79,11 @@ const props = defineProps<{
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
 const noWeekly = defineModel<boolean>('noWeekly', { required: true })
-const actions = useGoalActions()
 const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]]; hideCrafting: [] }>()
 
 const NO_WEEKLY_TITLE =
   'Only the goals still to farm without a weekly boss: their drops are held or convertible (after the goals above)'
 
-/** The plan's goals as portraits (No weekly boss on). */
-const people = computed(() =>
-  (props.planFor ?? []).map((e) => {
-    const c = e.character
-    const w = e.weapons[0]
-    return c
-      ? {
-          id: e.id,
-          name: e.name,
-          src: c.custom ? '' : characterIcon(c.key),
-          rarity: c.rarity,
-          element: c.element,
-          custom: !!c.custom,
-        }
-      : {
-          id: e.id,
-          name: e.name,
-          src: w ? weaponIcon(w.key, w.target.ascension) : '',
-          rarity: w?.rarity ?? null,
-          element: null,
-          custom: false,
-        }
-  }),
-)
 /** No weekly boss is on and leaves no goal. */
 const noneLeft = computed(() => props.planFor !== null && props.planFor.length === 0)
 
@@ -321,33 +295,6 @@ watch(view, (value) => {
         <span class="sr-only">{{ dayTitle }}</span>
       </span>
     </div>
-
-    <ul
-      v-if="people.length"
-      class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 py-1 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
-      aria-label="The plan is for"
-      title="The plan is for these goals"
-    >
-      <li v-for="p in people" :key="p.id" class="shrink-0">
-        <component
-          :is="actions ? 'button' : 'span'"
-          :type="actions ? 'button' : undefined"
-          class="block rounded-xl transition-transform hover:scale-105 focus-visible:scale-105"
-          :title="actions ? `${p.name} · open` : p.name"
-          :aria-label="p.name"
-          @click="actions?.open(p.id)"
-        >
-          <GoalPortrait
-            size="sm"
-            :src="p.src"
-            :name="p.name"
-            :rarity="p.rarity"
-            :element="p.element"
-            :custom="p.custom"
-          />
-        </component>
-      </li>
-    </ul>
 
     <div
       v-if="noneLeft"
