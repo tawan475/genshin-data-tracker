@@ -67,6 +67,14 @@ export function useSnapshotSelection(snapshots: Ref<readonly Row[]>) {
     )
   }
 
+  /** Adds every row of `view` to the selection (Gmail's "Select all N"). */
+  function selectAll(view: readonly Row[]) {
+    setMany(
+      view.map((s) => s.id),
+      true,
+    )
+  }
+
   /** Replaces the selection with `view`. */
   function selectOnly(view: readonly Row[]) {
     selected.value = new Set(view.map((s) => s.id))
@@ -97,6 +105,7 @@ export function useSnapshotSelection(snapshots: Ref<readonly Row[]>) {
     toggle,
     coverage,
     toggleView,
+    selectAll,
     selectOnly,
     selectedIdList,
     retain,

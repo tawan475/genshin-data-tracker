@@ -173,13 +173,25 @@ const {
   toggle,
   coverage,
   toggleView,
+  selectAll,
   selectOnly,
   selectedIdList,
   retain,
   resetSelection,
 } = useSnapshotSelection(list)
 
+/**
+ * Like Gmail: the header checkbox selects the page on screen; once it is
+ * selected, a bar offers every snapshot in the view (all pages, or the date
+ * range), and once those are, to clear.
+ */
+const pageCoverage = computed(() => coverage(rows.value))
 const viewCoverage = computed(() => coverage(filtered.value))
+const morePages = computed(() => filtered.value.length > rows.value.length)
+const offerAll = computed(
+  () => morePages.value && pageCoverage.value === 'all' && viewCoverage.value !== 'all',
+)
+const allInView = computed(() => morePages.value && viewCoverage.value === 'all')
 /** Selected snapshots outside the date filter. */
 const hiddenSelected = computed(() => {
   if (!filtering.value) return 0
@@ -190,7 +202,8 @@ const hiddenSelected = computed(() => {
 
 const onToggle = (id: number, event: MouseEvent | KeyboardEvent) =>
   toggle(id, filtered.value, event.shiftKey)
-const onToggleAll = () => toggleView(filtered.value)
+const onToggleAll = () => toggleView(rows.value)
+const onSelectAll = () => selectAll(filtered.value)
 const selectRange = () => selectOnly(filtered.value)
 
 // The view is reused when switching accounts: start over.
@@ -414,6 +427,39 @@ const handleBulkDelete = async () => {
 
       <UiError v-if="error && snapshots" :error="error" title="Load failed" @retry="reload" />
 
+      <p
+        v-if="offerAll || allInView"
+        class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-lg border border-border-default bg-surface-overlay px-3 py-2 text-sm text-text-secondary"
+        role="status"
+      >
+        <template v-if="offerAll">
+          <span>
+            All <span class="tabular font-mono">{{ formatNumber(rows.length) }}</span> on this page
+            are selected.
+          </span>
+          <button
+            type="button"
+            class="rounded-md px-1.5 py-0.5 font-semibold text-accent-text hover:bg-surface-raised"
+            @click="onSelectAll"
+          >
+            Select all {{ formatNumber(filtered.length) }}{{ filtering ? ' in range' : '' }}
+          </button>
+        </template>
+        <template v-else>
+          <span>
+            All <span class="tabular font-mono">{{ formatNumber(filtered.length) }}</span>
+            {{ filtering ? 'snapshots in range' : 'snapshots' }} are selected.
+          </span>
+          <button
+            type="button"
+            class="rounded-md px-1.5 py-0.5 font-semibold text-accent-text hover:bg-surface-raised"
+            @click="resetSelection"
+          >
+            Clear selection
+          </button>
+        </template>
+      </p>
+
       <template v-if="layout === 'cards'">
         <div
           v-if="isLoading && rows.length === 0"
@@ -428,7 +474,7 @@ const handleBulkDelete = async () => {
             :rows="rows"
             :changes="changes"
             :is-selected="isSelected"
-            :coverage="viewCoverage"
+            :coverage="pageCoverage"
             :downloading="downloading"
             :deleting="deleting"
             :format-kb="formatKb"
@@ -482,9 +528,9 @@ const handleBulkDelete = async () => {
         <template #header-select>
           <LegacyCheckbox
             class="-mx-3 -my-2.5 px-3 py-2.5"
-            :checked="viewCoverage === 'all'"
-            :mixed="viewCoverage === 'some'"
-            :label="filtering ? 'Select all in range' : 'Select all snapshots'"
+            :checked="pageCoverage === 'all'"
+            :mixed="pageCoverage === 'some'"
+            label="Select this page"
             @toggle="onToggleAll"
           />
         </template>

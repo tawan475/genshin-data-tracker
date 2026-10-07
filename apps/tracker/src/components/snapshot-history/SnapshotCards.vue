@@ -50,8 +50,8 @@ const FIGURES = [
         class="-ml-1 size-10"
         :checked="coverage === 'all'"
         :mixed="coverage === 'some'"
-        label="Select all shown"
-        title="Select all shown"
+        label="Select this page"
+        title="Select this page"
         @toggle="emit('toggleAll')"
       />
       <span>All</span>
