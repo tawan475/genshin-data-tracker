@@ -22,6 +22,7 @@ import type {
 import {
   computed,
   defineAsyncComponent,
+  nextTick,
   onBeforeUnmount,
   reactive,
   ref,
@@ -53,6 +54,7 @@ import GoalPicker from '@/components/planner/GoalPicker.vue'
 import GoalToolbar from '@/components/planner/GoalToolbar.vue'
 import ItemEditor from '@/components/planner/ItemEditor.vue'
 import ItemPopover from '@/components/planner/ItemPopover.vue'
+import MaterialFocus from '@/components/planner/MaterialFocus.vue'
 import PlannerSettings from '@/components/planner/PlannerSettings.vue'
 import ResinTracker from '@/components/planner/ResinTracker.vue'
 import TasksStrip from '@/components/planner/TasksStrip.vue'
@@ -86,6 +88,14 @@ import {
 } from '@/components/planner/goal-list'
 import { characterNow, weaponNow } from '@/components/planner/hand-edits'
 import { provideItemPopover, type ItemRequest } from '@/components/planner/item-popover'
+import {
+  focusChips,
+  focusRows,
+  materialGroups,
+  materialOption,
+  materialUses,
+  type FocusChip,
+} from '@/components/planner/material-filter'
 import {
   allocationOrder,
   characterGoalId,
@@ -408,16 +418,29 @@ const parts = computed(() => {
   return result
 })
 
+/** Per counted card with something left to spend, the material options its cost uses. */
+const uses = computed(() =>
+  planner.value && board.value
+    ? materialUses(planner.value, board.value.entries, entryGoals.value)
+    : new Map<string, Set<string>>(),
+)
+
 /**
- * What the filters know of each card: in stock, can level now, and still
- * to farm without a weekly boss (its readiness: after the goals above).
+ * What the filters know of each card: in stock, can level now, still to
+ * farm without a weekly boss (its readiness: after the goals above), and
+ * the materials it still needs.
  */
 const facts = computed<GoalFacts>(() => {
   const noWeekly = new Set<string>()
   for (const entry of board.value?.entries ?? []) {
     if (farmsNoWeekly(entry, needs.value.get(entry.id))) noWeekly.add(entry.id)
   }
-  return { ready: ready.value, upgrade: new Set(parts.value.keys()), noWeekly }
+  return {
+    ready: ready.value,
+    upgrade: new Set(parts.value.keys()),
+    noWeekly,
+    materials: uses.value,
+  }
 })
 
 // ------------------------------------------------------------------ farm
@@ -515,10 +538,12 @@ const filtered = computed(
     filters.rarity !== 'all' ||
     filters.weaponType !== 'all' ||
     filters.upgrade ||
-    filters.noWeekly,
+    filters.noWeekly ||
+    filters.material !== null,
 )
 function clearFilters() {
-  Object.assign(filters, NO_GOAL_FILTERS)
+  Object.assign(filters, { ...NO_GOAL_FILTERS, material: filters.material })
+  setMaterial(null)
 }
 
 const savedSort = readStorage('planner:sort')
@@ -589,6 +614,119 @@ const rarities = computed(() => {
   for (const e of entries.value) if (e.rarity) set.add(e.rarity)
   return [...set].sort((a, b) => b - a)
 })
+
+// ------------------------------------------------------------------ material
+// The material filter lives in the URL (?material=HerosWit): Back undoes it, a link opens it.
+
+const materialKey = computed(() => {
+  const raw = route.query.material
+  return typeof raw === 'string' && raw !== '' ? raw : null
+})
+/** The option the URL names (a tier or EXP item leads to its family or EXP); null: none, or unknown. */
+const materialFilter = computed(() =>
+  planner.value && materialKey.value ? materialOption(planner.value, materialKey.value) : null,
+)
+watch(
+  materialFilter,
+  (option) => {
+    filters.material = option?.key ?? null
+  },
+  { immediate: true },
+)
+
+/** The filter was set here by a push (Back, or ×, goes back to before it). */
+let materialPushed = false
+/** The tab it was set from (the Farm view's "Goals using it"), to go back to when it goes. */
+let materialFrom: Tab | null = null
+watch(
+  materialKey,
+  (key) => {
+    if (key !== null) {
+      // A link, Back or a pick: the goals it is about.
+      tab.value = 'goals'
+      return
+    }
+    materialPushed = false
+    if (materialFrom) tab.value = materialFrom
+    materialFrom = null
+  },
+  { immediate: true },
+)
+
+/**
+ * Sets the material filter (null clears it): a push from none, a replace
+ * from another. Cleared here (×, Clear, Any) the Goals tab stays; Back
+ * returns to the tab it was set from.
+ */
+function setMaterial(key: string | null) {
+  if (key === materialKey.value) return
+  if (key === null) materialFrom = null
+  if (key === null && materialPushed) {
+    materialPushed = false
+    router.back()
+    return
+  }
+  const query = { ...route.query }
+  if (key === null) delete query.material
+  else query.material = key
+  if (key !== null && materialKey.value === null) {
+    materialPushed = true
+    void router.push({ query })
+  } else void router.replace({ query })
+}
+
+/** Per material option, the goals using it with the other filters applied. */
+const materialCounts = computed(() =>
+  goalFacetCounts(entries.value, filters, facts.value, 'material', (e) => [
+    ...(uses.value.get(e.id) ?? []),
+  ]),
+)
+const materials = computed(() =>
+  planner.value
+    ? materialGroups(planner.value, uses.value, materialCounts.value, filters.material)
+    : [],
+)
+
+/**
+ * Each card's chips for the material filter, kept per card while its cost
+ * and needs are the same objects (the card doesn't re-render).
+ */
+interface FocusMemo {
+  goal: PlanGoal | undefined
+  needs: GoalNeeds | undefined
+  chips: FocusChip[]
+}
+let focusMemo = { option: null as object | null, map: new Map<string, FocusMemo>() }
+function focusOf(entry: GoalEntry): FocusChip[] | null {
+  const option = materialFilter.value
+  const p = planner.value
+  if (!option || !p) return null
+  if (focusMemo.option !== option) focusMemo = { option, map: new Map() }
+  const goal = entryGoals.value.get(entry.id)
+  const n = needs.value.get(entry.id)
+  const seen = focusMemo.map.get(entry.id)
+  if (seen && seen.goal === goal && seen.needs === n) return seen.chips
+  const chips = goal ? focusChips(p, option, goal.requirement, n ?? null) : []
+  focusMemo.map.set(entry.id, { goal, needs: n, chips })
+  return chips
+}
+
+/**
+ * The line above the cards: what the goals shown need of the material, each
+ * after the counted goals above it (allocated-totals.ts, as the Farm view's
+ * No weekly boss), against the bag.
+ */
+const focusLine = computed(() => {
+  const option = materialFilter.value
+  const p = planner.value
+  if (!option || !p) return null
+  // Runs the allocation first (and recomputes with it): allocationMemo then holds this one.
+  void needs.value
+  const shown = new Set(pendingEntries.value.map((e) => e.id))
+  const rows = shown.size ? focusRows(option, allocatedTotals(p, allocationMemo, shown)) : []
+  return { option, rows, goals: shown.size }
+})
+const focusEl = ref<{ $el: HTMLElement } | null>(null)
 
 function toggleActive(entry: GoalEntry) {
   store.change(entryInputs(entry, { active: !entry.active }).map(upsert))
@@ -809,6 +947,44 @@ provideItemPopover((request) => {
   itemRequest.value = request
   itemOpen.value = true
 })
+
+/** "Goals using it" in the inventory editor: how many (null: none, or opened in a dialog). */
+const popoverGoals = computed(() => {
+  const r = itemRequest.value
+  const p = planner.value
+  if (!r || !p || r.anchor.closest('dialog')) return null
+  const option = materialOption(p, r.key)
+  if (!option || option.key === filters.material) return null
+  if (![...uses.value.values()].some((set) => set.has(option.key))) return null
+  const f = { ...goalsUsingFilters(), material: option.key }
+  return filterGoals(entries.value, f, facts.value).length
+})
+
+/**
+ * The filters "Goals using it" applies with: from the Farm view only the
+ * remembered toggles stay (the Goals toolbar's search and chips aren't in
+ * sight there), from a goal card all of them.
+ */
+function goalsUsingFilters(): GoalFilters {
+  return tab.value === 'goals'
+    ? { ...filters }
+    : { ...NO_GOAL_FILTERS, upgrade: filters.upgrade, noWeekly: filters.noWeekly }
+}
+
+/** The inventory editor's "Goals using it": the Goals tab, filtered by the material. */
+function goalsUsing(key: string) {
+  const p = planner.value
+  const option = p ? materialOption(p, key) : null
+  if (!option) return
+  itemOpen.value = false
+  if (tab.value !== 'goals') {
+    Object.assign(filters, { ...goalsUsingFilters(), material: filters.material })
+    materialFrom = tab.value
+  }
+  setMaterial(option.key)
+  tab.value = 'goals'
+  void nextTick(() => focusEl.value?.$el.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }))
+}
 
 // ------------------------------------------------------------------ done
 
@@ -1312,11 +1488,12 @@ watch(accountId, () => {
   itemOpen.value = false
   doneOpen.value = false
   selecting.value = false
-  // The remembered toggles stay; the rest start over.
+  // The remembered toggles stay; the rest start over (the material follows the URL).
   Object.assign(filters, {
     ...NO_GOAL_FILTERS,
     upgrade: filters.upgrade,
     noWeekly: filters.noWeekly,
+    material: filters.material,
   })
 })
 
@@ -1502,6 +1679,8 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         <GoalToolbar
           v-model:filters="filters"
           v-model:sort="sort"
+          :materials="materials"
+          :material="materialFilter"
           :status-counts="statusCounts"
           :toggle-counts="toggleCounts"
           :element-counts="elementCounts"
@@ -1509,6 +1688,16 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :rarities="rarities"
           :filtered="filtered"
           @clear="clearFilters"
+          @material="setMaterial"
+        />
+
+        <MaterialFocus
+          v-if="focusLine"
+          ref="focusEl"
+          :option="focusLine.option"
+          :rows="focusLine.rows"
+          :goals="focusLine.goals"
+          @clear="setMaterial(null)"
         />
 
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -1601,6 +1790,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
               :parts="parts.get(entry.id) ?? null"
               :needs="needs.get(entry.id) ?? null"
               :goal="entryGoals.get(entry.id) ?? null"
+              :focus="focusOf(entry)"
               :order="orderOf(entry)"
               :selecting="selecting"
               :selected="picked.has(entry.id)"
@@ -1760,9 +1950,11 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       :bag="bag"
       :capture="good.materials"
       :totals="totals"
+      :goals="popoverGoals"
       @close="itemOpen = false"
       @change="setCount"
       @add="addCount"
+      @goals="goalsUsing"
     />
   </template>
 

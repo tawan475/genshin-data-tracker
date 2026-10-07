@@ -15,14 +15,20 @@ import {
   type GoalStatus,
   type GoalToggle,
 } from './goal-list'
+import type { MaterialGroup, MaterialOption } from './material-filter'
+import MaterialPicker from './MaterialPicker.vue'
 
 /**
  * Search, sort and the goal filters: the Upgrade now and No weekly boss toggles
  * (first: they are remembered, and a phone's chip row scrolls), status
  * (all / in stock / counted / paused), element and rarity chips with
- * counts, weapon type.
+ * counts, weapon type, and the material (MaterialPicker: the page keeps it
+ * in the URL, so it is emitted, not written into `filters`).
  */
 defineProps<{
+  /** The material picker's options and the one picked (null: any). */
+  materials: readonly MaterialGroup[]
+  material: MaterialOption | null
   statusCounts: ReadonlyMap<GoalStatus, number>
   toggleCounts: Readonly<Record<GoalToggle, number>>
   elementCounts: ReadonlyMap<Element | null, number>
@@ -33,7 +39,7 @@ defineProps<{
 }>()
 const filters = defineModel<GoalFilters>('filters', { required: true })
 const sort = defineModel<GoalSort>('sort', { required: true })
-defineEmits<{ clear: [] }>()
+defineEmits<{ clear: []; material: [key: string | null] }>()
 
 const STATUSES: { value: GoalStatus; label: string; title?: string }[] = [
   { value: 'all', label: 'All' },
@@ -103,6 +109,13 @@ function toggleRarity(r: number) {
         <span class="sr-only">Weapon type</span>
         <UiSelect v-model="filters.weaponType" :options="weaponOptions" />
       </label>
+      <div class="col-span-2 min-w-0 sm:w-56">
+        <MaterialPicker
+          :groups="materials"
+          :selected="material"
+          @pick="(key) => $emit('material', key)"
+        />
+      </div>
     </div>
 
     <div

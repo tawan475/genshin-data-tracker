@@ -2,7 +2,7 @@
 import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, reactive, watch } from 'vue'
-import { ChartLine, Minus, Plus, RotateCcw } from 'lucide-vue-next'
+import { ChartLine, ListFilter, Minus, Plus, RotateCcw } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
@@ -19,7 +19,9 @@ import { materialSoft } from './material-soft'
  * the count held: typed, or ±1 with the buttons, ↑/↓ or W/S (Shift: ±10),
  * or what was just obtained added on Enter or leaving the field (after a
  * domain run). A count that differs from the capture shows it, with a reset.
- * `history` adds a button to the material's history (the Materials page).
+ * `history` adds a button to the material's history (the Materials page);
+ * `goals` one to the goals using it (the Goals tab filtered by it), with
+ * how many there are.
  */
 const props = defineProps<{
   open: boolean
@@ -36,6 +38,8 @@ const props = defineProps<{
   totals: PlanTotals | null
   /** Offer the material's history (emits `history`). */
   history?: boolean
+  /** Offer the goals using it, this many (emits `goals`); null: not offered. */
+  goals?: number | null
 }>()
 const emit = defineEmits<{
   close: []
@@ -43,6 +47,7 @@ const emit = defineEmits<{
   /** Obtained: add to the count. */
   add: [key: string, count: number]
   history: [key: string]
+  goals: [key: string]
 }>()
 
 const material = computed(() =>
@@ -185,6 +190,18 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
         <h2 class="truncate text-base font-semibold">{{ title }}</h2>
         <p v-if="context" class="truncate text-xs text-text-muted">{{ context.label }}</p>
       </div>
+      <button
+        v-if="goals != null && material"
+        type="button"
+        class="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
+        :aria-label="`${title}: goals using it (${formatNumber(goals)})`"
+        title="Goals using it"
+        data-goals-using
+        @click="emit('goals', material.key)"
+      >
+        <ListFilter class="size-5" aria-hidden="true" />
+        <span class="tabular font-mono text-sm">{{ formatNumber(goals) }}</span>
+      </button>
       <UiIconButton
         v-if="history && material"
         :label="`${title}: history`"

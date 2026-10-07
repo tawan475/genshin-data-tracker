@@ -94,3 +94,46 @@ describe('the Upgrade now and No weekly boss toggles', () => {
     expect(parseGoalToggles(null)).toEqual({ upgrade: false, noWeekly: false })
   })
 })
+
+describe('the material filter', () => {
+  // a and b use Agnidus Agate, b and e Hero's Wit; d (paused) has none: only counted goals do.
+  const withMaterials: GoalFacts = {
+    ...facts,
+    materials: new Map([
+      ['a', new Set(['AgnidusAgateSliver'])],
+      ['b', new Set(['AgnidusAgateSliver', 'HerosWit'])],
+      ['e', new Set(['HerosWit'])],
+    ]),
+  }
+
+  it('keeps the goals using the material', () => {
+    const f = filters({ material: 'AgnidusAgateSliver' })
+    expect(ids(filterGoals(entries, f, withMaterials))).toEqual(['a', 'b'])
+    expect(ids(filterGoals(entries, filters({ material: 'HerosWit' }), withMaterials))).toEqual([
+      'b',
+      'e',
+    ])
+    // Without what the page knows, nothing matches.
+    expect(filterGoals(entries, f, facts)).toEqual([])
+  })
+
+  it('combines with the other filters, and counts with them', () => {
+    const f = filters({ material: 'HerosWit', element: 'pyro' })
+    expect(ids(filterGoals(entries, f, withMaterials))).toEqual(['b'])
+    const counts = goalFacetCounts(entries, f, withMaterials, 'material', (e) => [
+      ...(withMaterials.materials!.get(e.id) ?? []),
+    ])
+    // Pyro goals only: a and b use Agnidus, b Hero's Wit.
+    expect(Object.fromEntries(counts)).toEqual({ AgnidusAgateSliver: 2, HerosWit: 1 })
+    const elements = goalFacetCounts(entries, f, withMaterials, 'element', (e) => e.element)
+    expect(Object.fromEntries(elements)).toEqual({ pyro: 1, anemo: 1 })
+    expect(goalToggleCount(entries, f, withMaterials, 'noWeekly')).toBe(1)
+  })
+
+  it('hides the extra item needs', () => {
+    const items = [
+      { id: 'item:HerosWit', name: 'Hero', target: { active: true } },
+    ] as ItemGoalView[]
+    expect(filterItems(items, filters({ material: 'HerosWit' }), () => true)).toHaveLength(0)
+  })
+})
