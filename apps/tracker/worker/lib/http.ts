@@ -2,13 +2,17 @@ import type { Context } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { z } from 'zod'
 
-/** An error the client is meant to see: rendered as `{ error: { code, message } }`. */
+/**
+ * An error the client is meant to see: rendered as `{ error: { code, message } }`,
+ * with `headers` (e.g. Retry-After) on the response.
+ */
 export class ApiError extends Error {
   constructor(
     readonly status: ContentfulStatusCode,
     readonly code: string,
     message: string,
     readonly issues?: { path: string; message: string }[],
+    readonly headers?: Record<string, string>,
   ) {
     super(message)
     this.name = 'ApiError'

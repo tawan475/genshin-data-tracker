@@ -11,6 +11,42 @@ export const MAX_IMPORT_FILE_SIZE_MB = 10
 export const MAX_IMPORT_FILE_SIZE_BYTES = MAX_IMPORT_FILE_SIZE_MB * 1024 * 1024
 
 /**
+ * The most of each kind of item one GOOD file may carry: about 1.5× what the
+ * game itself holds, so no real export comes near them, while a file of
+ * made-up items is refused before anything is stored (normalizeGood throws a
+ * GoodLimitError; the Worker answers 422). One real account at 7.1 exported
+ * 103 characters, 1,121 weapons, 1,743 artifacts, 1,547 material keys and
+ * 1,840 achievements. When a game data bump brings the game's own count
+ * within 1.2× of a cap, the tracker's `good-limits.test.ts` fails: raise the
+ * cap then.
+ */
+export const GOOD_LIMITS = {
+  /** 130 playable characters in the 7.1 game data (`@gdt/game-data` catalog.json) × 1.5. */
+  characters: 200,
+  /** The game's weapon inventory holds 2,000. */
+  weapons: 3_000,
+  /** The game's artifact inventory holds 2,700 (raised from 2,400 in 7.0). */
+  artifacts: 4_050,
+  /** 7,394 material ids in the 7.1 game data (`@gdt/game-data` materials.json) × 1.5. */
+  materialKeys: 11_100,
+  /**
+   * 2,012 achievement ids in the 7.1 game data (`@gdt/game-data`
+   * achievements.json) × 1.5. Also for `gi_achievement_times`.
+   */
+  achievements: 3_020,
+  /** An artifact has at most 4 substats (and unactivated ones). */
+  substats: 6,
+  /**
+   * Characters in a key no dictionary knows (stored spelled out), and in
+   * `source`. The longest key in a real export so far is 63 characters (a
+   * material); the dictionaries' longest character, weapon and set keys are
+   * 17, 31 and 34. Four material keys the game has are longer (up to 90): a
+   * key the material dictionary knows passes at any length.
+   */
+  keyLength: 64,
+} as const
+
+/**
  * Coerces one untrusted timestamp candidate into epoch milliseconds.
  *
  * Accepts what the uploaders actually produce: an epoch-milliseconds number

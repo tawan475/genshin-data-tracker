@@ -181,6 +181,22 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `uid_taken`.
 - **Imports** take two D1 round trips in the usual case; an identical later
   capture only moves `last_seen_at`. Uploads may be gzipped.
+- **Upload limits.** Per file: 10 MB, and `GOOD_LIMITS` (`packages/shared/src/import.ts`,
+  about 1.5× what the game holds: 200 characters, 3,000 weapons, 4,050
+  artifacts, 11,100 material keys, 3,020 achievements, 6 substats; a key no
+  dictionary knows and `source` at most 64 characters): over is a 422
+  `too_many_items` / `key_too_long`. Per user (`worker/services/upload-limits.ts`,
+  migration 0018): 1,000 new snapshots and 20 MB newly stored a UTC day (429
+  `daily_upload_limit`, `Retry-After` to 00:00 UTC; counted in
+  `user_upload_days` by the import's own batch) and 200 MB stored in all
+  (sections + catalog chunks; 413 `storage_quota`). Only an upload that would
+  store something is checked or counted; the one that crosses a limit is
+  stored. The usage is read in the import's first batch: no extra round trip.
+  A `site_settings` row overrides a default (`upload.daily_snapshots`,
+  `upload.daily_bytes`, `upload.storage_quota`: a non-negative integer as
+  text), `users.storage_quota` one user's storage quota. Bursts: 20 uploads a
+  minute per import key (`KEY_IMPORT_LIMITER`), 60 a minute per account from
+  the website and 60 key checks (`verify-key`) per key (`IMPORT_LIMITER`).
 - **Live updates.** `GET /api/live` is a WebSocket (session cookie, this
   site's `Origin`) to the user's `LiveHub` Durable Object: one per user,
   SQLite-backed (as the Free plan requires), on the Hibernation API, with a
@@ -230,8 +246,9 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   settings also hold `traveler` (`F`/`M`), which picks the Traveler's portrait.
 - **Maintenance** runs daily (cron): snapshots deleted more than 30 days ago
   are purged, unreferenced sections (v1 and v2, bases kept while anything
-  needs them) are collected, and with `REPACK_CRON_LIMIT` set, v1 rows are
-  repacked (see Storage model).
+  needs them) are collected, upload-quota days older than 90 days are
+  dropped, and with `REPACK_CRON_LIMIT` set, v1 rows are repacked (see
+  Storage model).
   Account counters are kept exact by triggers (migration 0002).
 
 ## Account recovery
