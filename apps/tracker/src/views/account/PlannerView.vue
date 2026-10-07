@@ -63,6 +63,7 @@ import {
   reprioritize,
 } from '@/components/planner/allocation'
 import { newCustomKey, replaceCustom } from '@/components/planner/custom-character'
+import { craftChanges, rowText, type CraftRow } from '@/components/planner/crafting'
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
 import { READINESS } from '@/components/planner/farm-format'
 import { farmDay, type ArtifactWant } from '@/components/planner/farm-today'
@@ -74,7 +75,11 @@ import {
   filterGoals,
   filterItems,
   goalFacetCounts,
+  goalToggleCount,
+  goalTogglesValue,
+  parseGoalToggles,
   sortGoals,
+  type GoalFacts,
   type GoalFilters,
   type GoalSort,
 } from '@/components/planner/goal-list'
@@ -111,6 +116,7 @@ import type { GoalNeeds } from '@/components/planner/needs'
 import { PRESETS, applyPreset, presetById, type PresetId } from '@/components/planner/presets'
 import { resinAt, resinReading } from '@/components/planner/resin'
 import type { SeelieWrites } from '@/components/planner/seelie-plan'
+import { needsWeekly, partReadiness, type PartReady } from '@/components/planner/upgrade'
 import { upsertTask } from '@/components/planner/use-planner-tasks'
 import { saveTraveler, travelerGender } from '@/data/traveler'
 import { ApiRequestError } from '@/api'
@@ -133,6 +139,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
+import { materialName } from '@/utils/materials'
 import { useAccount } from './context'
 
 /**
@@ -344,6 +351,16 @@ let hintMemo = {
   planner: null as object | null,
   map: new Map<string, NextHint | null>(),
 }
+/** A card's goals and states, as a memo key (what its hint and part marks follow). */
+function stateKey(entry: GoalEntry): string {
+  const c = entry.character
+  return JSON.stringify([
+    entry.id,
+    c ? [c.current, c.target.level, c.target.ascension, c.target.talents] : null,
+    entry.weapons.map((w) => [w.goalId, w.current, w.target.level, w.target.ascension]),
+  ])
+}
+
 /** What a card can level now (only for the cards shown: 100 goals mount a few at a time). */
 function hintOf(entry: GoalEntry): NextHint | null {
   const p = planner.value
@@ -355,12 +372,7 @@ function hintOf(entry: GoalEntry): NextHint | null {
   if (hintMemo.inventory !== b || hintMemo.options !== optionsKey || hintMemo.planner !== p) {
     hintMemo = { inventory: b, options: optionsKey, planner: p, map: new Map() }
   }
-  const c = entry.character
-  const key = JSON.stringify([
-    entry.id,
-    c ? [c.current, c.target.level, c.target.ascension, c.target.talents] : null,
-    entry.weapons.map((w) => [w.goalId, w.current, w.target.level, w.target.ascension]),
-  ])
+  const key = stateKey(entry)
   let hint = hintMemo.map.get(key)
   if (hint === undefined) {
     hint = nextHint(p, entry, b, { ...o, ar: ar.value })
@@ -368,6 +380,56 @@ function hintOf(entry: GoalEntry): NextHint | null {
   }
   return hint
 }
+
+/**
+ * Per counted card, the parts that can level now with the bag (upgrade.ts):
+ * the "Upgrade now" filter and the marks on the card's rows. Every card is
+ * checked (the filter counts them all), each a few `planTotals`; kept per
+ * goal state for one bag and set of options, so a favourite toggle or a
+ * note doesn't redo them.
+ */
+let partsMemo = {
+  inventory: null as object | null,
+  options: '',
+  planner: null as object | null,
+  map: new Map<string, ReadonlyMap<string, PartReady>>(),
+}
+const NO_PARTS: ReadonlyMap<string, PartReady> = new Map()
+const parts = computed(() => {
+  const result = new Map<string, ReadonlyMap<string, PartReady>>()
+  const p = planner.value
+  const b = bag.value
+  if (!p || !b) return result
+  const o = planOptions.value
+  const optionsKey = JSON.stringify([o.azoth, !!o.passives, o.forge, ar.value])
+  if (partsMemo.inventory !== b || partsMemo.options !== optionsKey || partsMemo.planner !== p) {
+    partsMemo = { inventory: b, options: optionsKey, planner: p, map: new Map() }
+  }
+  for (const entry of board.value?.entries ?? []) {
+    if (!entry.active || entry.materialsDone) continue
+    const key = stateKey(entry)
+    let found = partsMemo.map.get(key)
+    if (!found) {
+      const map = partReadiness(p, entry, b, { ...o, ar: ar.value })
+      found = map.size ? map : NO_PARTS
+      partsMemo.map.set(key, found)
+    }
+    if (found.size) result.set(entry.id, found)
+  }
+  return result
+})
+
+/** What the filters know of each card: in stock, can level now, needs a weekly boss. */
+const facts = computed<GoalFacts>(() => {
+  const p = planner.value
+  const weekly = new Set<string>()
+  if (p) {
+    for (const [id, goal] of entryGoals.value) {
+      if (needsWeekly(p, goal.requirement)) weekly.add(id)
+    }
+  }
+  return { ready: ready.value, upgrade: new Set(parts.value.keys()), weekly }
+})
 
 /** Artifact sets the counted character goals still want (Today's artifact domains). */
 const artifactWants = computed<ArtifactWant[]>(() =>
@@ -407,14 +469,24 @@ watch(farmView, (value) => writeStorage('planner:farm', value))
 
 // ------------------------------------------------------------------ goals
 
-const filters = reactive<GoalFilters>({ ...NO_GOAL_FILTERS })
+// The Upgrade now / No weekly toggles are remembered on this device, like the sort.
+const filters = reactive<GoalFilters>({
+  ...NO_GOAL_FILTERS,
+  ...parseGoalToggles(readStorage('planner:goal-toggles')),
+})
+watch(
+  () => goalTogglesValue(filters),
+  (value) => writeStorage('planner:goal-toggles', value),
+)
 const filtered = computed(
   () =>
     filters.query.trim() !== '' ||
     filters.status !== 'all' ||
     filters.element !== 'all' ||
     filters.rarity !== 'all' ||
-    filters.weaponType !== 'all',
+    filters.weaponType !== 'all' ||
+    filters.upgrade ||
+    filters.noWeekly,
 )
 function clearFilters() {
   Object.assign(filters, NO_GOAL_FILTERS)
@@ -428,7 +500,7 @@ watch(sort, (value) => writeStorage('planner:sort', value))
 const showDone = ref(false)
 
 const entries = computed(() => board.value?.entries ?? [])
-const matching = computed(() => filterGoals(entries.value, filters, ready.value))
+const matching = computed(() => filterGoals(entries.value, filters, facts.value))
 const pendingEntries = computed(() => {
   if (sort.value !== 'priority') {
     return sortGoals(
@@ -469,15 +541,19 @@ const shownItems = computed(() =>
 )
 
 const statusCounts = computed(() =>
-  goalFacetCounts(entries.value, filters, ready.value, 'status', (e) =>
+  goalFacetCounts(entries.value, filters, facts.value, 'status', (e) =>
     entryStatuses(e, ready.value),
   ),
 )
+const toggleCounts = computed(() => ({
+  upgrade: goalToggleCount(entries.value, filters, facts.value, 'upgrade'),
+  noWeekly: goalToggleCount(entries.value, filters, facts.value, 'noWeekly'),
+}))
 const elementCounts = computed(() =>
-  goalFacetCounts(entries.value, filters, ready.value, 'element', (e) => e.element),
+  goalFacetCounts(entries.value, filters, facts.value, 'element', (e) => e.element),
 )
 const rarityCounts = computed(() =>
-  goalFacetCounts(entries.value, filters, ready.value, 'rarity', (e) => e.rarity),
+  goalFacetCounts(entries.value, filters, facts.value, 'rarity', (e) => e.rarity),
 )
 const rarities = computed(() => {
   const set = new Set<number>([5, 4])
@@ -779,6 +855,31 @@ async function confirmDone() {
               current: [stateChange(part, previous)],
             })
             .catch(() => {}),
+      },
+    },
+    8000,
+  )
+}
+
+// ------------------------------------------------------------------ crafting
+
+/** Crafting steps done in game: their inputs and costs out of the bag, products in (with an Undo). */
+async function crafted(rows: CraftRow[]) {
+  if (rows.length === 0) return
+  try {
+    await state.commit({ inventory: craftChanges(rows) })
+  } catch {
+    return // Said by the store (a newer capture, or not saved).
+  }
+  const one = rows.length === 1 ? rows[0]! : null
+  feedback.toast(
+    {
+      tone: 'success',
+      title: one ? 'Crafting step done' : `${formatNumber(rows.length)} crafting steps done`,
+      ...(one ? { hint: rowText(one, materialName) } : {}),
+      action: {
+        label: 'Undo',
+        run: () => void state.commit({ inventory: craftChanges(rows, true) }).catch(() => {}),
       },
     },
     8000,
@@ -1165,7 +1266,12 @@ watch(accountId, () => {
   itemOpen.value = false
   doneOpen.value = false
   selecting.value = false
-  clearFilters()
+  // The remembered toggles stay; the rest start over.
+  Object.assign(filters, {
+    ...NO_GOAL_FILTERS,
+    upgrade: filters.upgrade,
+    noWeekly: filters.noWeekly,
+  })
 })
 
 // ------------------------------------------------------------------ chrome
@@ -1327,6 +1433,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :totals="totals"
           :plan="plan"
           :steps="steps"
+          :bag="bag"
           :drops="drops"
           :ar="ar"
           :wl="wl"
@@ -1336,6 +1443,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :farming="farming"
           :artifacts="artifactWants"
           @settings="settingsOpen = true"
+          @crafted="crafted"
         />
       </div>
 
@@ -1344,6 +1452,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           v-model:filters="filters"
           v-model:sort="sort"
           :status-counts="statusCounts"
+          :toggle-counts="toggleCounts"
           :element-counts="elementCounts"
           :rarity-counts="rarityCounts"
           :rarities="rarities"
@@ -1438,6 +1547,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
               :planner="planner"
               :ar="ar"
               :hint="hintOf(entry)"
+              :parts="parts.get(entry.id) ?? null"
               :needs="needs.get(entry.id) ?? null"
               :goal="entryGoals.get(entry.id) ?? null"
               :order="orderOf(entry)"

@@ -16,10 +16,10 @@ import MaterialCell from './MaterialCell.vue'
  * region, a domain) with the other places underneath, the runs, resin,
  * Condensed Resin and days it takes ("at most" where the estimate is an
  * upper bound), the materials still missing (each opens the inventory
- * editor) or the artifact sets wanted, and who needs them (a tap opens the
- * goal, a long press pauses it). Up to two items sit beside the text, more
- * go under it. A card the account can't farm yet is greyed with what it
- * lacks.
+ * editor) or the artifact sets wanted, and who needs them on a row of
+ * their own at the foot (a tap opens the goal, a long press pauses it). Up
+ * to two items sit beside the text, more go under it. A card the account
+ * can't farm yet is greyed with what it lacks.
  */
 const props = defineProps<{ card: FarmCard }>()
 
@@ -105,12 +105,9 @@ const meta = computed(
     </div>
 
     <div class="flex min-w-0 flex-col gap-0.5" :class="side ? 'flex-1' : ''">
-      <div class="flex min-w-0 items-center gap-2">
-        <h3 class="min-w-0 flex-1 truncate text-sm leading-7 font-semibold" :title="title">
-          {{ card.name }}
-        </h3>
-        <GoalAvatars class="shrink-0" :goals="card.goals" :max="side ? 3 : 5" />
-      </div>
+      <h3 class="min-w-0 truncate text-sm leading-7 font-semibold" :title="title">
+        {{ card.name }}
+      </h3>
 
       <p
         v-if="meta"
@@ -181,6 +178,7 @@ const meta = computed(
         </span>
       </p>
       <slot />
+      <GoalAvatars v-if="side && card.goals.length" class="mt-1" :goals="card.goals" :max="5" />
     </div>
 
     <div v-if="!side" class="flex flex-wrap gap-1">
@@ -195,5 +193,6 @@ const meta = computed(
         size="sm"
       />
     </div>
+    <GoalAvatars v-if="!side && card.goals.length" :goals="card.goals" :max="7" />
   </article>
 </template>
