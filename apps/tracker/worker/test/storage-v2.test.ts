@@ -184,6 +184,17 @@ describe('storage v2 conversion', () => {
     expect(result.snapshots.mismatched).toEqual([])
     expect(result.catalog.mismatchedAccounts).toEqual([])
     expect(result.remaining).toMatchObject({ snapshots: 0, legacyArtifacts: 0 })
+    expect(result.d1.rowsWritten).toBeGreaterThan(0)
+    expect(result.d1.roundTrips).toBeGreaterThan(0)
+    // A full section that changed (the levelled characters) is stored against
+    // the previous one as its dictionary, as an import would.
+    const anchored = await env.DB.prepare(
+      `SELECT count(*) AS n FROM section_blobs
+       WHERE account_id = ?1 AND base_id IS NOT NULL AND kind & 16 = 0`,
+    )
+      .bind(account.id)
+      .first<{ n: number }>()
+    expect(anchored!.n).toBeGreaterThan(0)
     expect(await rowFormats(account.id)).toMatchObject({
       v1: 0,
       v2: 6,
