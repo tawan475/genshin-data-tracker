@@ -20,27 +20,34 @@
  *   waits; a failure is only logged).
  *
  * Sessions: a socket is authorised once, by the access cookie at the upgrade,
- * and keeps the session's token version (the access token's `ver`). Ending
- * sessions (sign out everywhere, a password change) bumps the version in D1
- * and tells the hub, awaited, which closes every socket of an older version
- * (4003); a connect with an older version is refused, and every import's
- * event carries the current version too, so a socket never outlives a revoked
- * session. Signing one browser out only clears its cookies (sessions are not
- * tracked server-side), and its page closes its socket itself.
+ * and keeps the session's token version and row (the access token's `ver`
+ * and `sid`). Ending sessions (sign out everywhere, a password change) bumps
+ * the version in D1 and tells the hub, awaited, which closes every socket of
+ * an older version (4003); a connect with an older version is refused, and
+ * every import's event carries the current version too, so a socket never
+ * outlives a revoked session. Ending one session (signing a device out)
+ * revokes its row and tells the hub, which closes that session's sockets; a
+ * connect for a revoked row is refused. On a 4003 the page refreshes its
+ * session and signs out if that fails.
  */
 
-import type { LiveAccount, LiveEvent } from '@gdt/shared'
+import { LIVE_SESSION_ENDED_CLOSE, type LiveAccount, type LiveEvent } from '@gdt/shared'
 import { DurableObject } from 'cloudflare:workers'
 import type { Context } from 'hono'
 import type { AppEnv } from '../env'
 
 /** Close code for a socket whose session was ended: reconnect only with a fresh one. */
-export const SESSION_ENDED_CLOSE = 4003
+export const SESSION_ENDED_CLOSE = LIVE_SESSION_ENDED_CLOSE
+
+/** How long a revoked session is remembered against a connect already past its D1 read. */
+const REVOKED_MEMORY_MS = 60_000
 
 interface Attachment {
   userId: number
   /** The session's token version when the socket opened. */
   ver: number
+  /** Its session row (`user_sessions.id`); null for a token from before rows. */
+  sid?: number | null
 }
 
 /** Whether anyone listens, and the session version, as a write's batch read them. */
@@ -58,6 +65,12 @@ export class LiveHub extends DurableObject<Env> {
   private flag: boolean | null = null
   /** Flag writes run one after another, each deciding on the sockets as they are then. */
   private chain: Promise<unknown> = Promise.resolve()
+  /**
+   * Sessions revoked lately (sid → when): a connect whose D1 read still saw
+   * one active, before the revoke arrived, is refused when it gets to
+   * accepting its socket.
+   */
+  private revoked = new Map<number, number>()
   /** Events this instance was asked to send since it woke (diagnostics and tests). */
   notified = 0
 
@@ -72,19 +85,26 @@ export class LiveHub extends DurableObject<Env> {
       return new Response('Expected a WebSocket upgrade', { status: 426 })
     }
     const userId = Number(request.headers.get('x-gdt-user'))
-    const claimed = request.headers.get('x-gdt-token-version')
-    const ver = claimed === null || claimed === '' ? null : Number(claimed)
+    const ver = numberHeader(request, 'x-gdt-token-version')
+    const sid = numberHeader(request, 'x-gdt-session')
     this.connecting++
     let accepted = false
     try {
-      // One round trip: mark the user as listening, read the session version
-      // and what the tab needs to tell whether it missed anything.
+      // One round trip: mark the user as listening, read the session (its
+      // version and row) and what the tab needs to tell whether it missed
+      // anything.
+      const now = Date.now()
       const [, user, accounts] = await this.serial(async () => {
         const results = await this.env.DB.batch<Record<string, unknown>>([
           this.env.DB.prepare(
             'UPDATE users SET live_since = ?2 WHERE id = ?1 AND live_since IS NULL',
-          ).bind(userId, Date.now()),
-          this.env.DB.prepare('SELECT token_version FROM users WHERE id = ?1').bind(userId),
+          ).bind(userId, now),
+          this.env.DB.prepare(
+            `SELECT u.token_version, s.id AS sid FROM users AS u
+             LEFT JOIN user_sessions AS s ON s.id = ?2 AND s.user_id = u.id
+               AND s.revoked_at IS NULL AND s.expires_at > ?3
+             WHERE u.id = ?1`,
+          ).bind(userId, sid, now),
           this.env.DB.prepare(
             `SELECT id, data_version, name, uid, server FROM genshin_accounts
              WHERE user_id = ?1 ORDER BY id`,
@@ -93,17 +113,23 @@ export class LiveHub extends DurableObject<Env> {
         this.flag = true
         return results
       })
-      const current = user!.results[0]?.token_version
+      const row = user!.results[0]
+      const current = row?.token_version
       // A token from before its session was ended. (A token from before
-      // access tokens carried a version is taken at the current one.)
+      // access tokens carried a version is taken at the current one; one
+      // from before session rows goes by its version alone.)
       if (typeof current !== 'number' || (ver !== null && !(ver >= current))) {
+        return new Response('Session ended', { status: 401 })
+      }
+      // Its row revoked, or revoked while this connect was reading it.
+      if (sid !== null && (row!.sid !== sid || this.revoked.has(sid))) {
         return new Response('Session ended', { status: 401 })
       }
 
       const pair = new WebSocketPair()
       const [client, server] = [pair[0], pair[1]]
       this.ctx.acceptWebSocket(server)
-      server.serializeAttachment({ userId, ver: ver ?? current } satisfies Attachment)
+      server.serializeAttachment({ userId, ver: ver ?? current, sid } satisfies Attachment)
       const hello: LiveEvent = {
         type: 'hello',
         accounts: accounts!.results.map(
@@ -154,10 +180,35 @@ export class LiveHub extends DurableObject<Env> {
     return sent
   }
 
-  /** Closes every socket of a session older than `tokenVersion` (the user's sessions were ended). */
-  async revoke(userId: number, tokenVersion: number): Promise<void> {
+  /**
+   * Closes every socket of a session older than `tokenVersion` (the user's
+   * sessions were ended), but `keep`'s: the device that ended the others
+   * stays connected, at the new version.
+   */
+  async revoke(userId: number, tokenVersion: number, keep?: number | null): Promise<void> {
     for (const socket of this.ctx.getWebSockets()) {
-      if (attachment(socket).ver >= tokenVersion) continue
+      const current = attachment(socket)
+      if (current.ver >= tokenVersion) continue
+      try {
+        if (keep != null && current.sid === keep) {
+          socket.serializeAttachment({ ...current, ver: tokenVersion } satisfies Attachment)
+        } else {
+          socket.close(SESSION_ENDED_CLOSE, 'session ended')
+        }
+      } catch {
+        // Already closing.
+      }
+    }
+    await this.release(userId)
+  }
+
+  /** Closes the sockets of one session (that device was signed out). */
+  async revokeSession(userId: number, sid: number): Promise<void> {
+    const now = Date.now()
+    for (const [id, at] of this.revoked) if (at < now - REVOKED_MEMORY_MS) this.revoked.delete(id)
+    this.revoked.set(sid, now)
+    for (const socket of this.ctx.getWebSockets()) {
+      if (attachment(socket).sid !== sid) continue
       try {
         socket.close(SESSION_ENDED_CLOSE, 'session ended')
       } catch {
@@ -225,6 +276,14 @@ function attachment(socket: WebSocket): Attachment {
   return (socket.deserializeAttachment() ?? { userId: 0, ver: 0 }) as Attachment
 }
 
+/** A whole-number header the Worker set, or null when empty or absent. */
+function numberHeader(request: Request, name: string): number | null {
+  const value = request.headers.get(name)
+  if (value === null || value === '') return null
+  const number = Number(value)
+  return Number.isSafeInteger(number) ? number : null
+}
+
 /** The user's hub: one Durable Object per user, by id. */
 export function liveHub(env: Env, userId: number): DurableObjectStub<LiveHub> {
   return env.LIVE.get(env.LIVE.idFromName(String(userId)))
@@ -282,19 +341,39 @@ export function notifyUser(
 }
 
 /**
- * Closes the sockets of the user's ended sessions. Awaited by the caller and
- * tried twice: this is what keeps a socket from outliving its session.
+ * Closes the sockets of the user's ended sessions (older than
+ * `tokenVersion`, but `keep`'s). Awaited by the caller and tried twice: this
+ * is what keeps a socket from outliving its session. Should both fail, the
+ * next import's event, and every connect, still check the version.
  */
-export async function revokeLive(env: Env, userId: number, tokenVersion: number): Promise<void> {
+export async function revokeLive(
+  env: Env,
+  userId: number,
+  tokenVersion: number,
+  keep: number | null = null,
+): Promise<void> {
   if (!env.LIVE) return
+  await twice('live_revoke_failed', () => liveHub(env, userId).revoke(userId, tokenVersion, keep))
+}
+
+/**
+ * Closes the sockets of one ended session, like revokeLive. Should both
+ * tries fail, every connect still checks the row, and the page learns at its
+ * next refresh.
+ */
+export async function revokeLiveSession(env: Env, userId: number, sid: number): Promise<void> {
+  if (!env.LIVE) return
+  await twice('live_revoke_session_failed', () => liveHub(env, userId).revokeSession(userId, sid))
+}
+
+async function twice(label: string, work: () => Promise<unknown>): Promise<void> {
   for (let attempt = 1; ; attempt++) {
     try {
-      await liveHub(env, userId).revoke(userId, tokenVersion)
+      await work()
       return
     } catch (error) {
       if (attempt >= 2) {
-        // The next import's event, and every connect, still check the version.
-        console.error('live_revoke_failed', String(error))
+        console.error(label, String(error))
         return
       }
     }

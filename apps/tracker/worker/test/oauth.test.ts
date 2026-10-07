@@ -12,7 +12,7 @@ import { and, eq } from 'drizzle-orm'
 import { decode } from 'hono/jwt'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDb } from '../db/client'
-import { userIdentities, users } from '../db/schema'
+import { userIdentities, userSessions, users } from '../db/schema'
 import worker from '../index'
 import { PENDING_COOKIE, STATE_COOKIE, STATE_TTL_S, seal } from '../lib/oauth'
 import { Client, ORIGIN, type Transport } from './client'
@@ -275,6 +275,9 @@ async function providerUser(provider: OAuthProvider = 'discord', who = account()
 const identitiesOf = (userId: number) =>
   db.select().from(userIdentities).where(eq(userIdentities.userId, userId))
 
+const sessionsOf = (userId: number) =>
+  db.select().from(userSessions).where(eq(userSessions.userId, userId)).orderBy(userSessions.id)
+
 describe('configuration', () => {
   it('without the secrets every provider is off and nothing can start', async () => {
     const client = new Client(via(NO_SECRETS))
@@ -483,6 +486,19 @@ describe('sign in', () => {
     expect(mail.sent).toEqual([])
   })
 
+  it('records how each session signed in, and where a provider sign-up came from', async () => {
+    const { me, who } = await providerUser('discord')
+    const [user] = await db.select().from(users).where(eq(users.id, me.id))
+    expect(user!.signupIp).toMatch(/^2001:db8::/)
+    expect(await roundTrip(new Client(via()), 'discord', who)).toBe('/app')
+    const { username, me: other } = await passwordUser()
+    const linking = new Client(via())
+    expect(await roundTrip(linking, 'google', account())).toBe('/oauth')
+    await post(linking, '/api/auth/oauth/pending/login', { login: username, password: PASSWORD })
+    expect((await sessionsOf(me.id)).map((row) => row.method)).toEqual(['discord', 'discord'])
+    expect((await sessionsOf(other.id)).map((row) => row.method)).toEqual(['password', 'password'])
+  })
+
   it('a passwordless account never signs in with a password', async () => {
     const { me } = await providerUser('discord')
     const client = new Client(via())
@@ -577,6 +593,33 @@ describe('link from Settings', () => {
     const [row] = await db.select().from(users).where(eq(users.id, me.id))
     expect(row!.tokenVersion).toBe(0)
     expect((await client.fetch('/api/auth/refresh', { method: 'POST' })).status).toBe(204)
+  })
+
+  it('makes no new session; the callback is refused once that session was signed out', async () => {
+    const { client, me } = await passwordUser()
+    const before = await sessionsOf(me.id)
+    expect(before).toHaveLength(1)
+    const url = await startLink(client, 'discord')
+    expect(await sessionsOf(me.id)).toEqual(before)
+    // The renewed cookie is the same session.
+    expect(decode(client.cookie('gdt_at')!).payload.sid).toBe(before[0]!.id)
+
+    // Signed out from another device while at the provider.
+    const elsewhere = new Client(via())
+    await post(elsewhere, '/api/auth/login', { login: me.username, password: PASSWORD })
+    const revoked = await elsewhere.fetch(`/api/auth/sessions/${before[0]!.id}`, {
+      method: 'DELETE',
+    })
+    expect(revoked.status).toBe(204)
+    const landed = location(await callback(client, 'discord', providers.approve(url, account())))
+    expect(landed).toBe('/app/settings?oauth_error=session')
+    expect(await identitiesOf(me.id)).toEqual([])
+    expect(providers.requests).toEqual([])
+    // Nor can it start another.
+    expect(await post(client, '/api/auth/oauth/discord/link')).toMatchObject({
+      status: 401,
+      code: 'session_revoked',
+    })
   })
 
   it('needs a session to start', async () => {

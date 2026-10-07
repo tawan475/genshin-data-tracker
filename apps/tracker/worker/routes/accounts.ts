@@ -16,7 +16,7 @@ import type { AppEnv } from '../env'
 import { accountEtag, bodyEtag, checkEtag } from '../lib/etag'
 import { ApiError, idParam, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
 import { D1Meter } from '../lib/meter'
-import { requireUser } from '../lib/session'
+import { requireActiveSession, requireUser } from '../lib/session'
 import { readUpload } from '../lib/upload'
 import {
   dataVersionOf,
@@ -129,7 +129,7 @@ export const accounts = new Hono<AppEnv>()
   })
 
   /** Replaces the import key; the old one stops working immediately. */
-  .post('/:id/import-key', async (c) => {
+  .post('/:id/import-key', requireActiveSession, async (c) => {
     const id = idParam(c, 'id')
     const db = getDb(c.env.DB)
     await loadOwnedAccount(db, c.get('userId'), id)

@@ -6,7 +6,8 @@
  *   cookie-authed writes without it).
  * - An expired access cookie (401) triggers one refresh, shared by every
  *   request that hit it at once, then a single retry. If the refresh fails the
- *   session is over and `onSignedOut` runs.
+ *   session is over and `onSignedOut` runs. So does a 401 `session_revoked`
+ *   (this device was signed out elsewhere): its refresh is refused.
  * - Errors become ApiRequestError with the server's `code`, which is what
  *   callers branch on; `message` is safe to show.
  */
@@ -43,8 +44,11 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
  */
 export const TAB_ID = Math.random().toString(36).slice(2, 12)
 
+/** What a refresh found: new cookies, the session over (401), or no answer. */
+type RefreshOutcome = 'ok' | 'ended' | 'unknown'
+
 let signedOutHandler: (() => void) | null = null
-let refreshing: Promise<boolean> | null = null
+let refreshing: Promise<RefreshOutcome> | null = null
 
 /** Called once when a refresh fails: the session is gone. */
 export function onSignedOut(handler: () => void): void {
@@ -52,7 +56,7 @@ export function onSignedOut(handler: () => void): void {
 }
 
 const SAFE = new Set(['GET', 'HEAD'])
-const REFRESHABLE = new Set(['unauthenticated', 'token_expired'])
+const REFRESHABLE = new Set(['unauthenticated', 'token_expired', 'session_revoked'])
 
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const method = (options.method ?? 'GET').toUpperCase()
@@ -69,15 +73,34 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
   return fetch(path, { ...options, method, headers, body, credentials: 'same-origin' })
 }
 
-/** Refreshes the access cookie once for any number of concurrent callers. */
-export function refreshSession(): Promise<boolean> {
+function refresh(): Promise<RefreshOutcome> {
   refreshing ??= fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' })
-    .then((response) => response.ok)
-    .catch(() => false)
+    .then((response): RefreshOutcome => {
+      if (response.ok) return 'ok'
+      return response.status === 401 ? 'ended' : 'unknown'
+    })
+    .catch((): RefreshOutcome => 'unknown')
     .finally(() => {
       refreshing = null
     })
   return refreshing
+}
+
+/** Refreshes the access cookie once for any number of concurrent callers. */
+export async function refreshSession(): Promise<boolean> {
+  return (await refresh()) === 'ok'
+}
+
+/**
+ * Whether this browser's session still holds, asked with a refresh after a
+ * sign it may have ended (the live socket was closed for it). Over: the
+ * signed-out handler runs and the answer is false. No answer from the
+ * server: true, as nothing is known (the next request tells).
+ */
+export async function checkSession(): Promise<boolean> {
+  if ((await refresh()) !== 'ended') return true
+  signedOutHandler?.()
+  return false
 }
 
 async function toError(response: Response): Promise<ApiRequestError> {

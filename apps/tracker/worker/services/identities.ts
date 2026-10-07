@@ -101,7 +101,13 @@ export async function linkIdentity(
  */
 export async function createUserWithIdentity(
   d1: D1Database,
-  account: { username: string; email: string | null },
+  account: {
+    username: string
+    email: string | null
+    /** Where the sign-up came from (users.signup_ip, signup_country). */
+    signupIp?: string | null
+    signupCountry?: string | null
+  },
   identity: PendingIdentity,
   now = Date.now(),
 ): Promise<User> {
@@ -110,10 +116,17 @@ export async function createUserWithIdentity(
   await d1.batch([
     d1
       .prepare(
-        `INSERT INTO users (username, username_key, email, email_verified, password_hash, token_version, settings, created_at)
-         VALUES (?1, ?2, ?3, 0, '', 0, '{}', ?4)`,
+        `INSERT INTO users (username, username_key, email, email_verified, password_hash, token_version, settings, created_at, signup_ip, signup_country)
+         VALUES (?1, ?2, ?3, 0, '', 0, '{}', ?4, ?5, ?6)`,
       )
-      .bind(account.username, usernameKey, account.email, now),
+      .bind(
+        account.username,
+        usernameKey,
+        account.email,
+        now,
+        account.signupIp ?? null,
+        account.signupCountry ?? null,
+      ),
     d1
       .prepare(
         `INSERT INTO user_identities (user_id, provider, provider_user_id, email, email_verified, display_name, avatar_url, created_at, last_used_at)

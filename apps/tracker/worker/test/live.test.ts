@@ -4,6 +4,7 @@ import type {
   ImportKeyResponse,
   ImportResponse,
   LiveEvent,
+  SessionResponse,
 } from '@gdt/shared'
 import { env, runInDurableObject, SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
@@ -357,12 +358,50 @@ describe('ending sessions', () => {
     })
     expect(changed.status).toBe(204)
     expect((await there.closed).code).toBe(SESSION_ENDED_CLOSE)
-    // This device's old socket goes too; its new cookie connects again.
-    expect((await here.closed).code).toBe(SESSION_ENDED_CLOSE)
     expect((await upgrade(other)).status).toBe(401)
-    const again = await openTab(client)
+    // This device's socket stays, at the new version: the next event reaches it.
     expect(await liveHub(env, me.id).sockets()).toBe(1)
+    const { importKey } = await createAccount(client)
+    expect(await here.next()).toEqual<LiveEvent>({ type: 'accounts' })
+    expect((await importByKey(importKey, sampleGood(), 1_000)).status).toBe(201)
+    expect(await here.next()).toMatchObject({ type: 'data', takenAt: 1_000 })
+    // And its new cookie connects too.
+    const again = await openTab(client)
+    expect(await liveHub(env, me.id).sockets()).toBe(2)
+    here.socket.close(1000)
     again.socket.close(1000)
+  })
+
+  it("closes only a signed-out device's socket, and refuses it from then on", async () => {
+    const { client, me, username, password } = await signUp()
+    const phone = new Client()
+    await phone.json('/api/auth/login', { method: 'POST', json: { login: username, password } })
+    const [here, there] = await Promise.all([openTab(client), openTab(phone)])
+    const sessions = await client.json<SessionResponse[]>('/api/auth/sessions')
+    const phoneSession = sessions.find((s) => !s.current)!
+
+    const revoked = await client.fetch(`/api/auth/sessions/${phoneSession.id}`, {
+      method: 'DELETE',
+    })
+    expect(revoked.status).toBe(204)
+    expect((await there.closed).code).toBe(SESSION_ENDED_CLOSE)
+    // The phone's access cookie is still a valid JWT, but its session is over.
+    const refused = await upgrade(phone)
+    expect(refused.status).toBe(401)
+    expect(await refused.json()).toMatchObject({ error: { code: 'session_revoked' } })
+    // This device is untouched.
+    await createAccount(client)
+    expect(await here.next()).toEqual<LiveEvent>({ type: 'accounts' })
+    expect(await liveHub(env, me.id).sockets()).toBe(1)
+    here.socket.close(1000)
+  })
+
+  it('refuses a connect for a session it was just told is over, before D1 says so', async () => {
+    const { client, me } = await signUp()
+    const [session] = await client.json<SessionResponse[]>('/api/auth/sessions')
+    // As if the revoke reached the hub while this connect's read was in flight.
+    await liveHub(env, me.id).revokeSession(me.id, session!.id)
+    expect((await upgrade(client)).status).toBe(401)
   })
 
   it('closes a socket of an ended session at the next event, should the revoke be lost', async () => {

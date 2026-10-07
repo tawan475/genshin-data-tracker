@@ -9,23 +9,37 @@ import {
   updateProfileRequest,
   type IdentitiesResponse,
   type MeResponse,
+  type SessionResponse,
 } from '@gdt/shared'
-import { and, eq, or } from 'drizzle-orm'
+import { and, desc, eq, gt, isNull, or } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import type { z } from 'zod'
 import { getDb } from '../db/client'
-import { users } from '../db/schema'
+import { userSessions, users } from '../db/schema'
 import type { AppEnv } from '../env'
 import { emailEnabled, emailFeatures, linkOrigin, sendMail, signInAddedMail } from '../lib/email'
-import { ApiError, clientIp, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
+import {
+  ApiError,
+  clientIp,
+  idParam,
+  isUniqueViolation,
+  notFound,
+  parseJson,
+  rateLimit,
+} from '../lib/http'
 import { clearPendingCookie, enabledProviders, isProvider } from '../lib/oauth'
 import { hashPassword, verifyPassword } from '../lib/password'
 import {
+  browserSession,
   clearSessionCookies,
+  createSession,
+  endSession,
+  issueTokens,
   refreshSession,
+  requestOrigin,
+  requireActiveSession,
   requireUser,
   revokeAllSessions,
-  startSession,
 } from '../lib/session'
 import { closeResetLinks, mailVerification } from '../services/auth-tokens'
 import { listIdentities, unlinkIdentity } from '../services/identities'
@@ -137,6 +151,7 @@ export const auth = new Hono<AppEnv>()
     const body = emailFeatures(c.env)
       ? await parseJson(c, registerRequest)
       : { ...(await parseJson(c, registerWithoutEmail)), email: null }
+    const origin = requestOrigin(c)
     let user: User
     try {
       ;[user] = (await getDb(c.env.DB)
@@ -146,6 +161,8 @@ export const auth = new Hono<AppEnv>()
           usernameKey: body.username.toLowerCase(),
           email: body.email ?? null,
           passwordHash: hashPassword(body.password, pepper(c)),
+          signupIp: origin.ip,
+          signupCountry: origin.country,
         })
         .returning()) as [User]
     } catch (error) {
@@ -155,7 +172,7 @@ export const auth = new Hono<AppEnv>()
       throw error
     }
     clearPendingCookie(c)
-    await startSession(c, user)
+    await createSession(c, user, 'password')
     confirmEmailLater(c, user)
     return c.json(toMe(user, c.env), 201)
   })
@@ -164,7 +181,7 @@ export const auth = new Hono<AppEnv>()
     const user = await passwordSignIn(c, await parseJson(c, loginRequest))
     // A provider account left waiting in this browser is not this user's to link.
     clearPendingCookie(c)
-    await startSession(c, user)
+    await createSession(c, user, 'password')
     return c.json(toMe(user, c.env))
   })
 
@@ -173,17 +190,73 @@ export const auth = new Hono<AppEnv>()
     return c.body(null, 204)
   })
 
-  /** Signs this device out. */
-  .post('/logout', (c) => {
+  /** Signs this device out: its session ends, so a copy of its refresh token is refused too. */
+  .post('/logout', async (c) => {
+    const session = await browserSession(c)
+    if (session) await endSession(c.env, session.userId, session.sid)
     clearSessionCookies(c)
     clearPendingCookie(c)
     return c.body(null, 204)
   })
 
   /** Signs every device out, this one included. */
-  .post('/logout-all', requireUser, async (c) => {
+  .post('/logout-all', requireActiveSession, async (c) => {
     await revokeAllSessions(c, c.get('userId'))
     clearSessionCookies(c)
+    return c.body(null, 204)
+  })
+
+  /** The user's signed-in devices, the most recently seen first. */
+  .get('/sessions', requireActiveSession, async (c) => {
+    c.header('Cache-Control', 'no-store')
+    const current = c.get('sessionId')
+    const rows = await getDb(c.env.DB)
+      .select({
+        id: userSessions.id,
+        method: userSessions.method,
+        userAgent: userSessions.userAgent,
+        ip: userSessions.ip,
+        country: userSessions.country,
+        city: userSessions.city,
+        createdAt: userSessions.createdAt,
+        lastSeenAt: userSessions.lastSeenAt,
+      })
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.userId, c.get('userId')),
+          isNull(userSessions.revokedAt),
+          gt(userSessions.expiresAt, Date.now()),
+        ),
+      )
+      .orderBy(desc(userSessions.lastSeenAt), desc(userSessions.id))
+    return c.json(rows.map((row): SessionResponse => ({ ...row, current: row.id === current })))
+  })
+
+  /**
+   * Signs one device out: its refresh is refused from now on and its live
+   * socket closes (its page then finds it is signed out). This device's own
+   * is a sign-out here.
+   */
+  .delete('/sessions/:id', requireActiveSession, async (c) => {
+    const userId = c.get('userId')
+    const id = idParam(c, 'id')
+    await rateLimit(c.env.AUTH_LIMITER, `sessions:${userId}`)
+    if (!(await endSession(c.env, userId, id))) throw notFound('Session')
+    if (id === c.get('sessionId')) clearSessionCookies(c)
+    return c.body(null, 204)
+  })
+
+  /**
+   * Signs every other device out; this one stays, with new tokens. Bumps the
+   * token version, so devices signed in before sessions were listed go too.
+   */
+  .post('/sessions/revoke-others', requireActiveSession, async (c) => {
+    const userId = c.get('userId')
+    const sid = c.get('sessionId')!
+    await rateLimit(c.env.AUTH_LIMITER, `sessions:${userId}`)
+    const user = await revokeAllSessions(c, userId, { keep: sid })
+    await issueTokens(c, user, sid)
     return c.body(null, 204)
   })
 
@@ -201,7 +274,7 @@ export const auth = new Hono<AppEnv>()
    * password here). While the email features are off, the email can only be
    * removed: another address is 403 `email_paused`.
    */
-  .patch('/profile', requireUser, async (c) => {
+  .patch('/profile', requireActiveSession, async (c) => {
     const userId = c.get('userId')
     await rateLimit(c.env.AUTH_LIMITER, `profile:${userId}`)
     const body = await parseJson(c, updateProfileRequest)
@@ -247,9 +320,9 @@ export const auth = new Hono<AppEnv>()
 
   /**
    * Changing the password signs every other device out (this one stays signed
-   * in) and ends any open reset link.
+   * in, the same session with new tokens) and ends any open reset link.
    */
-  .post('/password', requireUser, async (c) => {
+  .post('/password', requireActiveSession, async (c) => {
     const userId = c.get('userId')
     await rateLimit(c.env.AUTH_LIMITER, `password:${userId}`)
     const body = await parseJson(c, changePasswordRequest)
@@ -257,11 +330,14 @@ export const auth = new Hono<AppEnv>()
     if (!user || !verifyPassword(body.currentPassword, user.passwordHash, pepper(c)).ok) {
       throw invalidCredentials()
     }
+    const sid = c.get('sessionId')
     const updated = await revokeAllSessions(c, userId, {
-      passwordHash: hashPassword(body.newPassword, pepper(c)),
+      set: { passwordHash: hashPassword(body.newPassword, pepper(c)) },
+      keep: sid,
     })
     await closeResetLinks(c.env.DB, userId)
-    await startSession(c, updated)
+    if (sid === null) await createSession(c, updated, 'password')
+    else await issueTokens(c, updated, sid)
     return c.body(null, 204)
   })
 
@@ -270,7 +346,7 @@ export const auth = new Hono<AppEnv>()
    * session, no current password (there is none). Ends any open reset link;
    * signs no one out (nothing was replaced).
    */
-  .post('/password/set', requireUser, async (c) => {
+  .post('/password/set', requireActiveSession, async (c) => {
     const userId = c.get('userId')
     await rateLimit(c.env.AUTH_LIMITER, `password:${userId}`)
     const body = await parseJson(c, setPasswordRequest)
@@ -297,7 +373,7 @@ export const auth = new Hono<AppEnv>()
   })
 
   /** Unlinks a provider, unless it is the account's last way in (409 `last_sign_in`). */
-  .delete('/identities/:provider', requireUser, async (c) => {
+  .delete('/identities/:provider', requireActiveSession, async (c) => {
     const provider = c.req.param('provider')
     if (!isProvider(provider)) throw notFound('Identity')
     const userId = c.get('userId')

@@ -25,6 +25,7 @@ import type {
   PlannerTargetsResponse,
   PlannerTasksResponse,
   ResetLinkResponse,
+  SessionResponse,
   SnapshotResponse,
   UserSettingsPatch,
   VerifyEmailResponse,
@@ -125,6 +126,14 @@ export const api = {
       noRefresh: true,
     }),
   identities: () => requestJson<IdentitiesResponse>('/api/auth/identities'),
+  /** The signed-in devices, this one marked `current`. */
+  sessions: () => requestJson<SessionResponse[]>('/api/auth/sessions', { cache: 'no-store' }),
+  /** Signs one device out (this one's: a sign-out here). */
+  revokeSession: (id: number) =>
+    requestJson<void>(`/api/auth/sessions/${id}`, { method: 'DELETE' }),
+  /** Signs every other device out; this one stays signed in. */
+  revokeOtherSessions: () =>
+    requestJson<void>('/api/auth/sessions/revoke-others', { method: 'POST' }),
   unlinkIdentity: (provider: OAuthProvider) =>
     requestJson<void>(`/api/auth/identities/${provider}`, { method: 'DELETE' }),
 

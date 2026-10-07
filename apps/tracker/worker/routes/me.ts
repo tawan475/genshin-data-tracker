@@ -5,7 +5,7 @@ import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import type { AppEnv } from '../env'
 import { ApiError, parseJson } from '../lib/http'
-import { requireUser } from '../lib/session'
+import { requireActiveSession, requireUser } from '../lib/session'
 import { newImportKey } from '../services/accounts'
 import { toMe } from './auth'
 
@@ -30,7 +30,7 @@ export const me = new Hono<AppEnv>()
    * one replaces the old, which stops working at once. Shown once; only its
    * hash is stored.
    */
-  .post('/import-key', async (c) => {
+  .post('/import-key', requireActiveSession, async (c) => {
     const { key, hash } = await newImportKey('user')
     const [updated] = await getDb(c.env.DB)
       .update(users)

@@ -32,15 +32,17 @@ export const live = new Hono<AppEnv>().get(
   async (c) => {
     // Only what the hub needs: no cookies go on to the Durable Object.
     const version = c.get('tokenVersion')
+    const sid = c.get('sessionId')
     const upgraded = await liveHub(c.env, c.get('userId')).fetch(c.req.url, {
       headers: {
         upgrade: 'websocket',
         'x-gdt-user': String(c.get('userId')),
         'x-gdt-token-version': version === null ? '' : String(version),
+        'x-gdt-session': sid === null ? '' : String(sid),
       },
     })
     if (!upgraded.webSocket) {
-      // A token from before its session was ended (sign out everywhere).
+      // A token from before its session was ended (this device signed out, or everywhere).
       if (upgraded.status === 401) {
         throw new ApiError(401, 'session_revoked', 'Session ended, sign in again')
       }
