@@ -120,6 +120,13 @@
       "when": 1791371660463,
       "tag": "0016_storage_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1791374208002,
+      "tag": "0017_drop_storage_v1",
+      "breakpoints": true
     }
   ]
 }

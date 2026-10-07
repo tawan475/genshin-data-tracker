@@ -5,8 +5,6 @@ import type {
   CompactSubstat,
   CustomTarget,
   ItemTarget,
-  SectionKind,
-  SnapshotSummary,
   UserSettingsPatch,
   WeaponCurrent,
   WeaponTarget,
@@ -138,39 +136,15 @@ export const snapshots = sqliteTable(
     /** Latest capture that found this exact inventory; re-uploads only bump it. */
     lastSeenAt: integer('last_seen_at').notNull(),
     createdAt: timestamp('created_at'),
-    format: text('format').notNull(),
-    version: integer('version').notNull(),
-    source: text('source').notNull(),
     /** Bytes of the uploaded GOOD file. */
     rawSize: integer('raw_size').notNull(),
     /** Bytes of the sections this snapshot newly stored (shared ones cost nothing). */
     storedSize: integer('stored_size').notNull(),
-    /** Identity of the whole inventory; equal hashes mean nothing changed. */
-    contentHash: text('content_hash').notNull(),
-    charactersHash: text('characters_hash').notNull(),
-    weaponsHash: text('weapons_hash').notNull(),
-    artifactsHash: text('artifacts_hash').notNull(),
-    materialsHash: text('materials_hash').notNull(),
-    /** Keyframe the materials section is a delta of (itself when it is one). */
-    materialsKeyframeHash: text('materials_keyframe_hash').notNull(),
-    achievementsHash: text('achievements_hash'),
-    summary: text('summary', { mode: 'json' }).$type<SnapshotSummary>().notNull(),
     deletedAt: integer('deleted_at'),
-    // irminsul's own keys (gi_player, gi_achievement_times, gi_characters),
-    // one section each; NULL when the upload had none. Added in 0006.
-    playerHash: text('player_hash'),
-    achievementTimesHash: text('achievement_times_hash'),
-    characterExtrasHash: text('character_extras_hash'),
-    // The full section `artifacts_hash` / `achievement_times_hash` is a delta
-    // of (see "bases & deltas" in @gdt/shared); NULL when it is stored in
-    // full, as in every row written before 0009.
-    artifactsBaseHash: text('artifacts_base_hash'),
-    achievementTimesBaseHash: text('achievement_times_base_hash'),
-    // Storage format v2 (migration 0016; see @gdt/shared codec/store-v2.ts).
-    // A v2 row names its sections by `section_blobs.id` in the eight *_ref
-    // columns (characters_ref is never NULL in one, which is how a row tells
-    // its format) and keeps the v1 columns empty ('' / 0 / NULL) until they
-    // are dropped. Rows written before are converted by the repack job.
+    // Storage format v2 (@gdt/shared codec/store-v2.ts): the eight sections
+    // by `section_blobs.id`, NULL for an optional one the capture lacked.
+    // The v1 columns (hex hashes, summary JSON, format/version/source) were
+    // dropped by migration 0017 once repack had converted every row.
     /** The first 47 bits of the content hash (codec/section-blob.ts contentKey). */
     contentKey: integer('content_key'),
     charactersRef: integer('characters_ref'),
@@ -184,27 +158,14 @@ export const snapshots = sqliteTable(
     /** Summary, GOOD header and per-login player values (codec/snapshot-meta.ts). */
     meta: bytes('meta'),
   },
+  // Every per-account read is of live rows, which this index serves; the
+  // trash is only read by maintenance, in whole-table passes (migration 0017
+  // dropped the plain (account_id, taken_at) index).
   (t) => [
-    index('snapshots_account_taken_idx').on(t.accountId, t.takenAt),
     uniqueIndex('snapshots_account_taken_live_unique')
       .on(t.accountId, t.takenAt)
       .where(sql`${t.deletedAt} is null`),
   ],
-)
-
-/** Deflated snapshot sections, stored once per account by content hash. */
-export const blobs = sqliteTable(
-  'blobs',
-  {
-    accountId: integer('account_id')
-      .notNull()
-      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
-    hash: text('hash').notNull(),
-    kind: text('kind').$type<SectionKind>().notNull(),
-    data: bytes('data').notNull(),
-    rawSize: integer('raw_size').notNull(),
-  },
-  (t) => [primaryKey({ columns: [t.accountId, t.hash] })],
 )
 
 /**
