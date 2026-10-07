@@ -1,6 +1,8 @@
 import {
   USER_SETTINGS_DEFAULTS,
+  hasPermission,
   type MeResponse,
+  type PermissionNode,
   type OAuthLinkLoginResponse,
   type UserSettings,
 } from '@gdt/shared'
@@ -27,6 +29,14 @@ export const useSession = defineStore('session', () => {
   let loading: Promise<void> | null = null
 
   const settings = computed<UserSettings>(() => me.value?.settings ?? USER_SETTINGS_DEFAULTS)
+
+  /**
+   * Whether the user's staff roles grant `node` (the app hides what they
+   * can't use; the Worker checks every request again).
+   */
+  function can(node: PermissionNode): boolean {
+    return hasPermission(me.value?.permissions ?? [], node)
+  }
 
   function adopt(user: MeResponse | null) {
     me.value = user
@@ -151,6 +161,12 @@ export const useSession = defineStore('session', () => {
     if (me.value) me.value = { ...me.value, hasImportKey: false }
   }
 
+  /** Deletes this user and everything they own (signed out everywhere after). */
+  async function deleteMe(username: string) {
+    await api.deleteMe(username)
+    adopt(null)
+  }
+
   return {
     me,
     status,
@@ -170,5 +186,7 @@ export const useSession = defineStore('session', () => {
     updateSettings,
     newImportKey,
     revokeImportKey,
+    deleteMe,
+    can,
   }
 })

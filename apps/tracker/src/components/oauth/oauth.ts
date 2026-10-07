@@ -1,4 +1,10 @@
-import { OAUTH_PROVIDERS, OAUTH_PROVIDER_LABELS, type OAuthProvider } from '@gdt/shared'
+import {
+  OAUTH_PROVIDERS,
+  OAUTH_PROVIDER_LABELS,
+  SIGNUP_MODES,
+  type OAuthProvider,
+  type SignupMode,
+} from '@gdt/shared'
 import { api } from '@/api'
 
 export const providerLabel = (provider: OAuthProvider): string => OAUTH_PROVIDER_LABELS[provider]
@@ -9,12 +15,14 @@ export function isProvider(value: unknown): value is OAuthProvider {
 
 /**
  * What the signed-out pages offer: the server's providers, whether email
- * features are on, and the human check's site key (null while it is off).
+ * features are on, the human check's site key (null while it is off), and
+ * who may sign up (the staff switch).
  */
 export interface SignInOptions {
   providers: OAuthProvider[]
   emailFeatures: boolean
   turnstileSiteKey: string | null
+  signups: SignupMode
 }
 
 let options: Promise<SignInOptions> | null = null
@@ -36,10 +44,19 @@ export function loadSignInOptions(fresh = false): Promise<SignInOptions> {
         typeof response.turnstileSiteKey === 'string' && response.turnstileSiteKey
           ? response.turnstileSiteKey
           : null,
+      // An older Worker doesn't say: sign-ups are open there.
+      signups: (SIGNUP_MODES as readonly string[]).includes(response.signups)
+        ? response.signups
+        : 'open',
     }))
     .catch(() => {
       options = null
-      return { providers: [], emailFeatures: false, turnstileSiteKey: null }
+      return {
+        providers: [],
+        emailFeatures: false,
+        turnstileSiteKey: null,
+        signups: 'open' as const,
+      }
     })
   return options
 }
@@ -67,6 +84,8 @@ export function oauthErrorText(code: unknown): string {
       return 'Another account of that provider is linked. Unlink it first.'
     case 'rate_limited':
       return 'Too many tries. Wait a minute.'
+    case 'suspended':
+      return 'This account is suspended'
     default:
       return 'Sign-in failed. Try again.'
   }

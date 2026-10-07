@@ -25,18 +25,11 @@ import {
   newImportKey,
   recomputeAccount,
   uidTaken,
+  uploadsRefused,
 } from '../services/accounts'
-import {
-  MAX_BUNDLE_SNAPSHOTS,
-  SECTION_NAMES,
-  buildBundle,
-  buildGood,
-  catalogJson,
-  goodFileName,
-  type SectionName,
-} from '../services/export'
+import { listSnapshots, parseIds, parseSections } from '../services/account-views'
+import { buildBundle, buildGood, catalogJson, goodFileName } from '../services/export'
 import { importSnapshot } from '../services/import'
-import { metaOf, withLegacySchema } from '../services/storage'
 import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
 
 /**
@@ -178,7 +171,12 @@ export const accounts = new Hono<AppEnv>()
    */
   .post('/:id/import', async (c) => {
     const id = idParam(c, 'id')
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    const [account, blocked] = await Promise.all([
+      loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id),
+      uploadBlock(c.env.DB, c.get('userId')),
+    ])
+    // Staff stopped this user's uploads: the website's too, not only the key's.
+    if (blocked) throw uploadsRefused(blocked)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
     const meter = new D1Meter()
     const { response, dataVersion, listener } = await importSnapshot(
@@ -216,30 +214,7 @@ export const accounts = new Hono<AppEnv>()
     const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
     const cached = checkEtag(c, accountEtag(account, `snapshots.${SNAPSHOT_LIST_FORMAT}`))
     if (cached) return cached
-    const { results } = await withLegacySchema((legacy) =>
-      c.env.DB.prepare(
-        `SELECT id, taken_at, last_seen_at, created_at, raw_size, stored_size,
-           ${legacy ? 'format, version, source, summary, ' : ''}meta
-         FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL ORDER BY taken_at DESC, id DESC`,
-      )
-        .bind(account.id)
-        .all<Record<string, unknown>>(),
-    )
-    return c.json<SnapshotResponse[]>(
-      results.map((r) => {
-        const meta = metaOf(r)
-        return {
-          id: r.id as number,
-          takenAt: r.taken_at as number,
-          lastSeenAt: r.last_seen_at as number,
-          createdAt: r.created_at as number,
-          source: meta.source,
-          rawSize: r.raw_size as number,
-          storedSize: r.stored_size as number,
-          summary: meta.summary,
-        }
-      }),
-    )
+    return c.json<SnapshotResponse[]>(await listSnapshots(c.env.DB, account.id))
   })
 
   .post('/:id/snapshots/delete', async (c) => {
@@ -327,6 +302,19 @@ export const accounts = new Hono<AppEnv>()
     return c.json(good)
   })
 
+/** Whether staff suspended the user or blocked their uploads. */
+async function uploadBlock(
+  d1: D1Database,
+  userId: number,
+): Promise<'suspended' | 'uploads_blocked' | null> {
+  const row = await d1
+    .prepare('SELECT suspended_at, uploads_blocked_at FROM users WHERE id = ?1')
+    .bind(userId)
+    .first<{ suspended_at: number | null; uploads_blocked_at: number | null }>()
+  if (row?.suspended_at != null) return 'suspended'
+  return row?.uploads_blocked_at != null ? 'uploads_blocked' : null
+}
+
 /** A delete moved the account's data version (even when it matched nothing). */
 function notifyData(
   c: Context<AppEnv>,
@@ -346,29 +334,6 @@ function notifyData(
 function rethrowUidTaken(error: unknown): never {
   if (isUniqueViolation(error, 'genshin_accounts.user_id')) throw uidTaken()
   throw error
-}
-
-function parseIds(raw: string | undefined): number[] | null {
-  if (!raw) return null
-  const ids = raw.split(',').map(Number)
-  if (ids.length > MAX_BUNDLE_SNAPSHOTS || ids.some((n) => !Number.isSafeInteger(n) || n <= 0)) {
-    throw new ApiError(
-      400,
-      'invalid_request',
-      '`ids` must be a comma-separated list of snapshot ids',
-    )
-  }
-  return [...new Set(ids)].sort((a, b) => a - b)
-}
-
-function parseSections(raw: string | undefined): Set<SectionName> {
-  if (!raw) return new Set(SECTION_NAMES)
-  const names = raw.split(',')
-  const invalid = names.filter((name) => !(SECTION_NAMES as readonly string[]).includes(name))
-  if (invalid.length > 0) {
-    throw new ApiError(400, 'invalid_request', `Unknown sections: ${invalid.join(', ')}`)
-  }
-  return new Set(names as SectionName[])
 }
 
 async function shortHash(text: string): Promise<string> {

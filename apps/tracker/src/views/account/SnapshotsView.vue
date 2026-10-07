@@ -28,7 +28,7 @@ import { clock24, formatBytes, formatFullDateTime, formatNumber } from '@/lib/fo
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
-import { useAccount } from './context'
+import { useAccount, useAccountMode } from './context'
 
 /** The bulk delete endpoint takes at most this many ids per request. */
 const DELETE_BATCH = 1000
@@ -45,6 +45,13 @@ const PER_PAGE_KEY = 'snapshot-history:per-page'
 
 const account = useAccount()
 const accounts = useAccounts()
+/**
+ * Staff Inspect: read-only; with data.delete, snapshots can be selected and
+ * purged (deleted at once, no trash).
+ */
+const mode = useAccountMode()
+const readOnly = mode.readOnly
+const canDelete = !readOnly || mode.purge !== undefined
 const feedback = useFeedback()
 
 const {
@@ -140,7 +147,7 @@ const layout = computed(() =>
 )
 
 const tableLabels = computed<TableLabel[]>(() => [
-  { key: 'select', title: '', slot: true, headerSlot: true },
+  ...(canDelete ? [{ key: 'select', title: '', slot: true, headerSlot: true }] : []),
   { key: 'id', title: 'ID' },
   { key: 'takenAt', title: 'Date', slot: true },
   ...(layout.value === 'full'
@@ -155,7 +162,7 @@ const tableLabels = computed<TableLabel[]>(() => [
   ...(layout.value === 'narrow' ? [] : [{ key: 'weapons', title: 'Weapons', slot: true }]),
   { key: 'mora', title: 'Mora', slot: true },
   { key: 'primogem', title: 'Primogems', slot: true },
-  { key: 'actions', title: 'Actions', slot: true },
+  ...(readOnly ? [] : [{ key: 'actions', title: 'Actions', slot: true }]),
 ])
 
 const formatKb = (bytes: number) => (bytes ? (bytes / 1024).toFixed(1) + ' KB' : '0 KB')
@@ -301,7 +308,11 @@ async function removeSnapshots(ids: number[], bulk: boolean) {
   let reported = 0
   let failure: unknown = null
   try {
-    if (ids.length === 1) {
+    if (mode.purge) {
+      for (let i = 0; i < ids.length; i += DELETE_BATCH) {
+        reported += await mode.purge(ids.slice(i, i + DELETE_BATCH))
+      }
+    } else if (ids.length === 1) {
       await api.deleteSnapshot(accountId, ids[0]!)
       reported = 1
     } else {
@@ -317,7 +328,8 @@ async function removeSnapshots(ids: number[], bulk: boolean) {
   // then count from the fresh list: the bulk endpoint's `deleted` overstates.
   let deleted = reported
   try {
-    const fresh = await accounts.reload(accountId)
+    const fresh = mode.reload ? await mode.reload() : await accounts.reload(accountId)
+    if (!fresh) throw new Error('Account gone')
     const live = new Set((await loadSnapshots(fresh)).map((s) => s.id))
     deleted = ids.filter((id) => !live.has(id)).length
   } catch {
@@ -362,7 +374,9 @@ const handleBulkDelete = async () => {
 
   const confirmed = await confirmDialog.value?.ask({
     title: 'Are you sure?',
-    text: `You are about to delete ${selectedCount.value} snapshot(s). This cannot be undone.`,
+    text: mode.purge
+      ? `You are about to delete ${selectedCount.value} of this user's snapshot(s) now, skipping the trash. This cannot be undone.`
+      : `You are about to delete ${selectedCount.value} snapshot(s). This cannot be undone.`,
     confirmText: 'Yes, delete them!',
   })
   if (!confirmed) return
@@ -385,7 +399,7 @@ const handleBulkDelete = async () => {
 
 <template>
   <div class="relative mx-auto min-h-[60vh] max-w-6xl space-y-6">
-    <ExportTargets :account="account" />
+    <ExportTargets v-if="!readOnly" :account="account" />
 
     <StorageStrip
       :snapshots="account.snapshotCount"
@@ -397,7 +411,9 @@ const handleBulkDelete = async () => {
     <div ref="host" class="space-y-3">
       <!-- Sticks within this block (the whole table), so not wrapped with the heading. -->
       <SelectionBar
+        v-if="canDelete"
         class="mb-0"
+        :downloadable="!readOnly"
         :selected="selectedCount"
         :total="list.length"
         :hidden="hiddenSelected"
@@ -478,6 +494,8 @@ const handleBulkDelete = async () => {
             :downloading="downloading"
             :deleting="deleting"
             :format-kb="formatKb"
+            :selectable="canDelete"
+            :actions="!readOnly"
             @toggle="onToggle"
             @toggle-all="onToggleAll"
             @download="downloadSnapshot"
@@ -494,6 +512,7 @@ const handleBulkDelete = async () => {
               <UiEmpty v-else title="No snapshots yet">
                 <template #icon><History aria-hidden="true" /></template>
                 <UiButton
+                  v-if="!readOnly"
                   variant="primary"
                   :to="{ name: 'account-import', params: { accountId: account.id } }"
                 >
@@ -619,6 +638,7 @@ const handleBulkDelete = async () => {
           <UiEmpty v-else title="No snapshots yet">
             <template #icon><History aria-hidden="true" /></template>
             <UiButton
+              v-if="!readOnly"
               variant="primary"
               :to="{ name: 'account-import', params: { accountId: account.id } }"
             >

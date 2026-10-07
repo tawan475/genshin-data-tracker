@@ -3,6 +3,7 @@ import {
   USER_SETTINGS_DEFAULTS,
   changePasswordRequest,
   deepMerge,
+  deleteSelfRequest,
   loginRequest,
   registerRequest,
   setPasswordRequest,
@@ -42,8 +43,12 @@ import {
   requireUser,
   revokeAllSessions,
 } from '../lib/session'
+import { auditStatement } from '../services/audit'
 import { closeResetLinks, mailVerification } from '../services/auth-tokens'
 import { listIdentities, unlinkIdentity } from '../services/identities'
+import { userPermissions } from '../services/roles'
+import { signupMode } from '../services/staff-deps'
+import { deleteUsers, isLastOwner } from '../services/user-delete'
 
 type User = typeof users.$inferSelect
 
@@ -56,7 +61,7 @@ export function pepper(c: Context<AppEnv>): string {
   return secret
 }
 
-export function toMe(user: User, env: Env): MeResponse {
+export function toMe(user: User, env: Env, permissions: string[] = []): MeResponse {
   return {
     id: user.id,
     username: user.username,
@@ -67,7 +72,37 @@ export function toMe(user: User, env: Env): MeResponse {
     emailEnabled: emailEnabled(env),
     emailFeatures: emailFeatures(env),
     hasPassword: user.passwordHash !== '',
+    permissions,
   }
+}
+
+/** `toMe` with the user's staff permissions (one small read). */
+export async function meOf(c: Context<AppEnv>, user: User): Promise<MeResponse> {
+  return toMe(user, c.env, await userPermissions(c.env.DB, user.id))
+}
+
+/** A suspended user can't sign in, refresh a session or upload with a key (staff dashboard). */
+export const suspendedError = () =>
+  new ApiError(
+    403,
+    'account_suspended',
+    'This account is suspended. Ask on Discord if you think it is a mistake.',
+  )
+
+/** Refused while the staff switch says no (`signup.mode`): `oauth` still lets providers sign up. */
+export async function assertSignupsOpen(
+  c: Context<AppEnv>,
+  via: 'password' | 'oauth',
+): Promise<void> {
+  const mode = await signupMode(c.env.DB)
+  if (mode === 'open' || (mode === 'oauth' && via === 'oauth')) return
+  throw new ApiError(
+    403,
+    'signups_closed',
+    mode === 'oauth'
+      ? 'New accounts sign up with Discord or Google for now'
+      : 'Sign-ups are closed for now',
+  )
 }
 
 /**
@@ -119,6 +154,8 @@ export async function passwordSignIn(
   const user = await findByLogin(c, body.login)
   const check = verifyPassword(body.password, user?.passwordHash, pepper(c))
   if (!user || !check.ok) throw invalidCredentials()
+  // Only told to someone who knows the password.
+  if (user.suspendedAt !== null) throw suspendedError()
   if (check.rehash) {
     // Hashed under older Argon2 parameters: upgrade while the password is at hand.
     await getDb(c.env.DB)
@@ -151,6 +188,7 @@ export const auth = new Hono<AppEnv>()
    */
   .post('/register', async (c) => {
     await rateLimit(c.env.AUTH_LIMITER, `register:${clientIp(c)}`)
+    await assertSignupsOpen(c, 'password')
     const body = emailFeatures(c.env)
       ? await parseJson(c, registerRequest)
       : { ...(await parseJson(c, registerWithoutEmail)), email: null }
@@ -187,7 +225,7 @@ export const auth = new Hono<AppEnv>()
     // A provider account left waiting in this browser is not this user's to link.
     clearPendingCookie(c)
     await createSession(c, user, 'password')
-    return c.json(toMe(user, c.env))
+    return c.json(await meOf(c, user))
   })
 
   .post('/refresh', async (c) => {
@@ -271,7 +309,42 @@ export const auth = new Hono<AppEnv>()
       .from(users)
       .where(eq(users.id, c.get('userId')))
     if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
-    return c.json(toMe(user, c.env))
+    return c.json(await meOf(c, user))
+  })
+
+  /**
+   * Deletes the signed-in user and everything they own (accounts, snapshots,
+   * keys, sign-ins), after they typed their username. Signs this device out;
+   * other devices' sockets close. The last Owner can't (409 `last_owner`).
+   */
+  .delete('/account', requireActiveSession, async (c) => {
+    const userId = c.get('userId')
+    await rateLimit(c.env.AUTH_LIMITER, `delete-self:${userId}`)
+    const body = await parseJson(c, deleteSelfRequest)
+    const [user] = await getDb(c.env.DB).select().from(users).where(eq(users.id, userId))
+    if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
+    if (body.username.toLowerCase() !== user.usernameKey) {
+      throw new ApiError(400, 'confirm_mismatch', 'Type your username to confirm', [
+        { path: 'username', message: 'Not your username' },
+      ])
+    }
+    if (await isLastOwner(c.env.DB, userId)) {
+      throw new ApiError(409, 'last_owner', 'Give the Owner role to someone else first')
+    }
+    const actor = { userId, username: user.username }
+    await deleteUsers(
+      c.env,
+      [{ id: userId, liveSince: user.liveSince }],
+      [
+        auditStatement(c.env.DB, actor, {
+          action: 'user.delete_self',
+          target: { id: userId, label: user.username },
+        }),
+      ],
+    )
+    clearSessionCookies(c)
+    clearPendingCookie(c)
+    return c.body(null, 204)
   })
 
   /**
@@ -299,7 +372,7 @@ export const auth = new Hono<AppEnv>()
       // Verification belongs to the address, not the account.
       changes.emailVerified = false
     }
-    if (Object.keys(changes).length === 0) return c.json(toMe(user, c.env))
+    if (Object.keys(changes).length === 0) return c.json(await meOf(c, user))
     try {
       const [updated] = (await db
         .update(users)
@@ -311,7 +384,7 @@ export const auth = new Hono<AppEnv>()
         await closeResetLinks(c.env.DB, userId, { mailedOnly: true })
         confirmEmailLater(c, updated)
       }
-      return c.json(toMe(updated, c.env))
+      return c.json(await meOf(c, updated))
     } catch (error) {
       if (isUniqueViolation(error, 'users.username_key')) {
         throw new ApiError(409, 'username_taken', 'That username is taken')
@@ -365,7 +438,7 @@ export const auth = new Hono<AppEnv>()
     if (!user) throw new ApiError(409, 'has_password', 'This account already has a password')
     await closeResetLinks(c.env.DB, userId)
     notifySignInAdded(c, user, 'A password')
-    return c.json(toMe(user, c.env))
+    return c.json(await meOf(c, user))
   })
 
   /** Sign-in providers on this server, and the ones linked to this user. */

@@ -28,6 +28,16 @@ import { api, BUNDLE_FORMAT } from '@/api'
 export interface AccountRef {
   id: number
   dataVersion: number
+  /**
+   * `staff`: read through /api/staff (Inspect, someone else's account),
+   * cached apart from the owner's own reads.
+   */
+  source?: 'staff'
+}
+
+/** Where an account's data is read from. */
+function reader(account: AccountRef) {
+  return account.source === 'staff' ? api.staff : api
 }
 
 export type SectionName =
@@ -51,7 +61,7 @@ const MAX_ENTRIES = 40
 
 function cached<T>(account: AccountRef, kind: string, load: () => Promise<T>): Promise<T> {
   // The bundle layout is part of the key: a decoded bundle never outlives a layout change.
-  const key = `${account.id}:${account.dataVersion}:${BUNDLE_FORMAT}:${kind}`
+  const key = `${account.source ?? 'own'}:${account.id}:${account.dataVersion}:${BUNDLE_FORMAT}:${kind}`
   let entry = cache.get(key) as Promise<T> | undefined
   if (!entry) {
     entry = load()
@@ -65,12 +75,14 @@ function cached<T>(account: AccountRef, kind: string, load: () => Promise<T>): P
 
 /** Snapshot metadata and summaries, newest first. */
 export function loadSnapshots(account: AccountRef): Promise<SnapshotResponse[]> {
-  return cached(account, 'snapshots', () => api.snapshots(account.id))
+  return cached(account, 'snapshots', () => reader(account).snapshots(account.id))
 }
 
 /** Every artifact the account has held, by catalog id, with CV/RV derived. */
 export function loadCatalog(account: AccountRef): Promise<Map<number, CatalogEntry>> {
-  return cached(account, 'catalog', async () => catalogFromRows(await api.catalog(account.id)))
+  return cached(account, 'catalog', async () =>
+    catalogFromRows(await reader(account).catalog(account.id)),
+  )
 }
 
 /** Stored sections for some or all snapshots (oldest first), inflated. */
@@ -79,7 +91,9 @@ export function loadBundle(
   options: { ids?: number[]; sections?: SectionName[] } = {},
 ): Promise<DecodedBundle> {
   const variant = `bundle:${options.sections?.join('+') ?? 'all'}:${options.ids?.join(',') ?? 'all'}`
-  return cached(account, variant, async () => decodeBundle(await api.bundle(account.id, options)))
+  return cached(account, variant, async () =>
+    decodeBundle(await reader(account).bundle(account.id, options)),
+  )
 }
 
 let materialsDictionary: Promise<KeyDictionary> | null = null

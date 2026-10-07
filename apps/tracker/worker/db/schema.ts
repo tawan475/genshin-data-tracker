@@ -91,11 +91,23 @@ export const users = sqliteTable(
     signupCountry: text('signup_country'),
     /** Epoch ms of the last sign-in or refresh, written at most hourly. Added in 0019. */
     lastActiveAt: integer('last_active_at'),
+    /**
+     * Set (epoch ms) by staff (worker/routes/staff.ts): the user can't sign
+     * in, refresh a session or upload with a key (403 `account_suspended`);
+     * their data stays. `suspended_reason` is the staff member's note. Added
+     * in 0020.
+     */
+    suspendedAt: integer('suspended_at'),
+    suspendedReason: text('suspended_reason'),
+    /** Set by staff: uploads (key and website) are refused with 403 `uploads_blocked`. Added in 0020. */
+    uploadsBlockedAt: integer('uploads_blocked_at'),
   },
   (t) => [
     uniqueIndex('users_import_key_hash_unique')
       .on(t.importKeyHash)
       .where(sql`${t.importKeyHash} is not null`),
+    // The staff pages list and count users by when they joined (0020).
+    index('users_created_idx').on(t.createdAt),
   ],
 )
 
@@ -179,6 +191,13 @@ export const snapshots = sqliteTable(
     uniqueIndex('snapshots_account_taken_live_unique')
       .on(t.accountId, t.takenAt)
       .where(sql`${t.deletedAt} is null`),
+    // The staff pages count uploads per day and per window, and each
+    // account's trash (a small index: the trash is emptied after 30 days).
+    // Added in 0020.
+    index('snapshots_created_idx').on(t.createdAt),
+    index('snapshots_trash_idx')
+      .on(t.accountId)
+      .where(sql`${t.deletedAt} is not null`),
   ],
 )
 
@@ -506,3 +525,72 @@ export const siteSettings = sqliteTable('site_settings', {
   /** The staff member who set it; NULL: set by hand (wrangler) or since deleted. */
   updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' }),
 })
+
+/**
+ * Staff roles (migration 0020), Discord's model: `permissions` is a JSON array
+ * of nodes (PERMISSION_NODES in @gdt/shared, or `*` for all), a user's
+ * permissions are the union of their roles', and `position` is the
+ * hierarchy: higher outranks lower, and staff only act on users and roles
+ * below their own highest role. `built_in` marks Owner (`*`, the top), which
+ * is given only from the command line (scripts/admin-grant.mjs) and can't be
+ * edited from the dashboard. 0020 seeds Owner, Admin, Moderator and Support.
+ */
+export const roles = sqliteTable('roles', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  /** '#rrggbb'. */
+  color: text('color').notNull(),
+  position: integer('position').notNull(),
+  permissions: text('permissions', { mode: 'json' })
+    .$type<string[]>()
+    .notNull()
+    .$defaultFn(() => []),
+  builtIn: integer('built_in', { mode: 'boolean' }).notNull().default(false),
+  createdAt: timestamp('created_at'),
+})
+
+/**
+ * Who holds which role (migration 0020). `assigned_by` is the staff member
+ * (NULL: the command line, or since deleted).
+ */
+export const userRoles = sqliteTable(
+  'user_roles',
+  {
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    roleId: integer('role_id')
+      .notNull()
+      .references(() => roles.id, { onDelete: 'cascade' }),
+    assignedBy: integer('assigned_by').references(() => users.id, { onDelete: 'set null' }),
+    assignedAt: timestamp('assigned_at'),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.roleId] }), index('user_roles_role_idx').on(t.roleId)],
+)
+
+/**
+ * What staff did (migration 0020): every write from the dashboard and every
+ * look at a user's game data (`data.inspect`). No foreign keys: a row
+ * outlives the users it names, so the names are kept as labels too.
+ * `detail` is a small JSON object (the reason, what changed).
+ */
+export const adminAudit = sqliteTable(
+  'admin_audit',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    actorUserId: integer('actor_user_id').notNull(),
+    actorLabel: text('actor_label').notNull(),
+    action: text('action').notNull(),
+    targetUserId: integer('target_user_id'),
+    targetLabel: text('target_label'),
+    detail: text('detail', { mode: 'json' })
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .$defaultFn(() => ({})),
+    createdAt: timestamp('created_at'),
+  },
+  (t) => [
+    index('admin_audit_created_idx').on(t.createdAt),
+    index('admin_audit_target_idx').on(t.targetUserId, t.createdAt),
+  ],
+)

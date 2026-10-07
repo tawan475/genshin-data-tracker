@@ -13,6 +13,7 @@ import {
 } from '@/data/weapons'
 import { characterIcon, weaponIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
+import { useAccountRoute } from '@/views/account/context'
 
 /**
  * Every copy of one weapon. The head is the chosen copy as the game shows a
@@ -22,6 +23,7 @@ import { formatNumber } from '@/lib/format'
  */
 const props = defineProps<{ group: WeaponGroup; selectedId: string | null; accountId: number }>()
 const emit = defineEmits<{ select: [id: string] }>()
+const routeName = useAccountRoute()
 
 const g = computed(() => props.group)
 const selected = computed<WeaponRow>(
@@ -159,7 +161,7 @@ const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT
         <RouterLink
           v-if="row.location"
           :to="{
-            name: 'account-characters',
+            name: routeName('account-characters'),
             params: { accountId },
             query: { c: row.location },
           }"

@@ -86,6 +86,32 @@ export async function issueMailedToken(
   return result.meta.changes === 1 ? token : null
 }
 
+/** How long a reset link made by staff works (the dashboard's Reset link, or the CLI). */
+export const ADMIN_LINK_TTL_MS = 24 * HOUR
+
+/**
+ * A password reset link for staff to hand over privately (e.g. on Discord):
+ * the row scripts/admin-reset-link.mjs writes, `email` NULL (it was never
+ * mailed, so it doesn't count against the mail limit and survives an email
+ * change). The token is returned once; only its hash is stored. Run
+ * `statement` (in the batch with the audit row) to make it work.
+ */
+export async function adminResetLink(
+  d1: D1Database,
+  userId: number,
+  now = Date.now(),
+): Promise<{ token: string; expiresAt: number; statement: D1PreparedStatement }> {
+  const token = randomToken(32)
+  const expiresAt = now + ADMIN_LINK_TTL_MS
+  const statement = d1
+    .prepare(
+      `INSERT INTO auth_tokens (user_id, kind, token_hash, email, expires_at, created_at)
+       VALUES (?1, 'reset_password', ?2, NULL, ?3, ?4)`,
+    )
+    .bind(userId, await sha256Hex(token), expiresAt, now)
+  return { token, expiresAt, statement }
+}
+
 /** Forgets a link whose mail never went out, so it doesn't count against the limit. */
 async function dropToken(d1: D1Database, token: string): Promise<void> {
   await getDb(d1)

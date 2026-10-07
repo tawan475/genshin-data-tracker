@@ -30,7 +30,7 @@ import {
 import { useFavoriteCharacters } from '@/data/favorite-characters'
 import { useResource } from '@/data/use-resource'
 import { readJson, writeJson } from '@/lib/storage'
-import { useAccount } from './context'
+import { useAccount, useReadOnly } from './context'
 
 // The details (also the share card) carry the game's stat tables: loaded on first open.
 const CharacterModal = defineAsyncComponent(
@@ -38,6 +38,8 @@ const CharacterModal = defineAsyncComponent(
 )
 
 const account = useAccount()
+/** Staff Inspect: nothing here links to the owner's own pages. */
+const readOnly = useReadOnly()
 const inventory = useResource(
   () => account.value,
   (a) => loadLatestInventory(a),
@@ -250,7 +252,7 @@ watch(
     <UiPanel v-else-if="inventory.data.value === null || (roster && roster.total === 0)" flush>
       <UiEmpty :title="inventory.data.value === null ? 'No snapshots yet' : 'No characters'">
         <template #icon><Users aria-hidden="true" /></template>
-        <UiButton variant="primary" :to="{ name: 'account-import' }">
+        <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
           <Upload class="size-4" aria-hidden="true" />
           Import
         </UiButton>

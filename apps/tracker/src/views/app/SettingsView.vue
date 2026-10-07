@@ -2,6 +2,7 @@
 import AppPanel from '@/components/settings/AppPanel.vue'
 import AppearancePanel from '@/components/settings/AppearancePanel.vue'
 import ConnectedAccountsPanel from '@/components/settings/ConnectedAccountsPanel.vue'
+import DeleteUserPanel from '@/components/settings/DeleteUserPanel.vue'
 import PasswordPanel from '@/components/settings/PasswordPanel.vue'
 import ProfilePanel from '@/components/settings/ProfilePanel.vue'
 import SessionsPanel from '@/components/settings/SessionsPanel.vue'
@@ -21,5 +22,6 @@ import PageHeader from '@/components/ui/PageHeader.vue'
     <ConnectedAccountsPanel />
     <AppPanel />
     <SessionsPanel />
+    <DeleteUserPanel />
   </div>
 </template>

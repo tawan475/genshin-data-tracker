@@ -57,7 +57,7 @@ import {
 import { useResource } from '@/data/use-resource'
 import { readJson, writeJson } from '@/lib/storage'
 import { formatNumber } from '@/lib/format'
-import { useAccount } from './context'
+import { useAccount, useReadOnly } from './context'
 
 /** Cards are tall, rows are not: a page of each fills a few screens. The Bag fills in as it goes. */
 const PAGE_SIZE: Record<ArtifactView, number> = {
@@ -77,6 +77,8 @@ const VIEW_OPTIONS: SegmentedOption<ArtifactView>[] = [
 const STRIP_SORTS: readonly ArtifactSort[] = ['cv', 'rv', 'potential']
 
 const account = useAccount()
+/** Staff Inspect: nothing here links to the owner's own pages. */
+const readOnly = useReadOnly()
 const inventory = useResource(
   () => account.value,
   (a) => loadLatestInventory(a),
@@ -376,7 +378,7 @@ const GRID =
   <UiPanel v-if="!account.latest" flush>
     <UiEmpty title="No snapshots yet">
       <template #icon><Gem aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="{ name: 'account-import' }">
+      <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
         <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>
@@ -418,7 +420,7 @@ const GRID =
   <UiPanel v-else-if="rows.length === 0" flush>
     <UiEmpty title="No artifacts">
       <template #icon><Gem aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="{ name: 'account-import' }">
+      <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
         <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>

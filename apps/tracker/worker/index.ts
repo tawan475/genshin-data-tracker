@@ -12,6 +12,7 @@ import { oauth } from './routes/oauth'
 import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
 import { recovery } from './routes/recovery'
+import { staff } from './routes/staff'
 import { runMaintenance } from './services/maintenance'
 
 const app = new Hono<AppEnv>().basePath('/api')
@@ -35,6 +36,7 @@ app.route('/accounts', progress)
 app.route('/genshin-accounts-public', publicImport)
 app.route('/live', live)
 app.route('/admin', admin)
+app.route('/staff', staff)
 
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
 

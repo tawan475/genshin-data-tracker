@@ -305,6 +305,8 @@ const sessionEnded = () => new ApiError(401, 'session_revoked', 'Session ended, 
 interface Slid {
   id: number
   last_active_at: number | null
+  /** Staff suspended the user (their sessions were ended then; this catches any left). */
+  suspended_at: number | null
 }
 
 /**
@@ -349,7 +351,8 @@ export async function refreshSession(c: Context<AppEnv>): Promise<void> {
             `UPDATE user_sessions SET ${SLIDE_SET}
              WHERE id = ?1 AND user_id = ?2 AND revoked_at IS NULL AND expires_at > ?4
                AND (SELECT token_version FROM users WHERE id = ?2) = ?3
-             RETURNING id, (SELECT last_active_at FROM users WHERE id = ?2) AS last_active_at`,
+             RETURNING id, (SELECT last_active_at FROM users WHERE id = ?2) AS last_active_at,
+               (SELECT suspended_at FROM users WHERE id = ?2) AS suspended_at`,
           )
             .bind(sid, userId, ver, ...binds)
             .first<Slid>()
@@ -357,6 +360,10 @@ export async function refreshSession(c: Context<AppEnv>): Promise<void> {
   if (!row) {
     clearSessionCookies(c)
     throw sessionEnded()
+  }
+  if (row.suspended_at !== null) {
+    clearSessionCookies(c)
+    throw new ApiError(403, 'account_suspended', 'This account is suspended')
   }
   if (row.last_active_at === null || row.last_active_at <= at - ACTIVE_STAMP_MS) {
     // After the response: only "active lately" for staff, never worth a wait.
@@ -407,7 +414,8 @@ async function adoptLegacySession(
          WHERE user_id = ?2 AND method = 'legacy' AND user_agent IS ?7 AND created_at = ?1
            AND revoked_at IS NULL AND expires_at > ?4
            AND (SELECT token_version FROM users WHERE id = ?2) = ?3
-         RETURNING id, (SELECT last_active_at FROM users WHERE id = ?2) AS last_active_at`,
+         RETURNING id, (SELECT last_active_at FROM users WHERE id = ?2) AS last_active_at,
+           (SELECT suspended_at FROM users WHERE id = ?2) AS suspended_at`,
       )
       .bind(createdAt, userId, ver, ...binds),
   ])

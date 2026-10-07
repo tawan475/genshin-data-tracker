@@ -149,11 +149,12 @@ describe('migrations from 0018 on', () => {
   // Production holds real data. drizzle-kit rebuilds a table it cannot ALTER
   // (CREATE `__new_x`, copy, DROP x), and on D1 that DROP cascades into every
   // child row (`PRAGMA foreign_keys=OFF` is ignored there). From 0018 on a
-  // migration only adds. One that truly needs more is hand-written (as 0003's
+  // migration only adds: tables, indexes, columns, and seed rows (0020's
+  // built-in roles). One that truly needs more is hand-written (as 0003's
   // column swap was) and named in HAND_WRITTEN here, with its reason.
   const HAND_WRITTEN = new Set<string>()
 
-  it('only create tables and indexes and add columns, never rebuild or drop', () => {
+  it('only create tables and indexes, add columns and seed rows, never rebuild or drop', () => {
     const later = env.TEST_MIGRATIONS.filter(
       (m) => Number(m.name.slice(0, 4)) >= 18 && !HAND_WRITTEN.has(m.name),
     )
@@ -163,7 +164,7 @@ describe('migrations from 0018 on', () => {
         const sql = query.replace(/--.*$/gm, '')
         expect(sql, migration.name).not.toMatch(/\bDROP\b|__new_|\bRENAME\b/i)
         expect(sql.trim(), migration.name).toMatch(
-          /^(CREATE TABLE|CREATE (UNIQUE )?INDEX|ALTER TABLE `?\w+`? ADD\b)/i,
+          /^(CREATE TABLE|CREATE (UNIQUE )?INDEX|ALTER TABLE `?\w+`? ADD\b|INSERT INTO\b)/i,
         )
       }
     }

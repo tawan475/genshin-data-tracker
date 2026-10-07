@@ -54,6 +54,29 @@ export const COLLECT_SECTION_BLOBS = `WITH RECURSIVE live(id) AS (
       WHERE b.base_id IS NOT NULL)
   DELETE FROM section_blobs WHERE id NOT IN (SELECT id FROM live) RETURNING 1`
 
+/**
+ * COLLECT_SECTION_BLOBS for one account (?1), after staff purged some of its
+ * snapshots: sections are only ever shared within an account. Reads the
+ * account's live rows and its trash by their indexes.
+ */
+export function collectAccountBlobs(d1: D1Database, accountId: number): D1PreparedStatement {
+  return d1
+    .prepare(
+      `WITH RECURSIVE refs AS (
+         SELECT ${REFS_SQL} FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+         UNION ALL
+         SELECT ${REFS_SQL} FROM snapshots WHERE account_id = ?1 AND deleted_at IS NOT NULL),
+       live(id) AS (
+         SELECT j.value FROM refs AS s, json_each(json_array(${REFS_SQL})) AS j
+         WHERE j.value IS NOT NULL
+         UNION SELECT b.base_id FROM section_blobs AS b JOIN live ON b.id = live.id
+           WHERE b.base_id IS NOT NULL)
+       DELETE FROM section_blobs WHERE account_id = ?1 AND id NOT IN (SELECT id FROM live)
+       RETURNING 1`,
+    )
+    .bind(accountId)
+}
+
 export async function runMaintenance(
   d1: D1Database,
   now = Date.now(),

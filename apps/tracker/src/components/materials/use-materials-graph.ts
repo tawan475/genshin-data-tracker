@@ -2,6 +2,7 @@ import type { MaterialsGraphSettings, TimelineGroupBy } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { api } from '@/api'
 import { useFeedback } from '@/stores/feedback'
+import { useReadOnly } from '@/views/account/context'
 
 /** One colour token per series (--chart-1…6), so at most six on a chart. */
 export const MAX_SERIES = 6
@@ -28,6 +29,8 @@ const SAVE_DELAY_MS = 800
  */
 export function useMaterialsGraph(accountId: () => number) {
   const feedback = useFeedback()
+  /** Staff Inspect: the owner's chart settings are neither read nor saved. */
+  const readOnly = useReadOnly()
   const selectedKeys = ref<string[]>([...DEFAULT_KEYS])
   const group = ref<TimelineGroupBy>('day')
   /** True once the saved settings are in (or could not be loaded). */
@@ -39,6 +42,10 @@ export function useMaterialsGraph(accountId: () => number) {
   let timer: ReturnType<typeof setTimeout> | undefined
 
   async function load(id: number) {
+    if (readOnly) {
+      ready.value = true
+      return
+    }
     ready.value = false
     try {
       const { settings } = await api.accountSettings(id)
@@ -70,6 +77,7 @@ export function useMaterialsGraph(accountId: () => number) {
   }
 
   function save(patch: Partial<MaterialsGraphSettings>) {
+    if (readOnly) return
     const id = accountId()
     if (pendingFor !== null && pendingFor !== id) void flush()
     pending = { ...pending, ...patch }

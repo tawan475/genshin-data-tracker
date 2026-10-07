@@ -285,6 +285,7 @@ describe('configuration', () => {
       providers: [],
       emailFeatures: false,
       turnstileSiteKey: null,
+      signups: 'open',
     })
     const start = await post(client, '/api/auth/oauth/discord/start', {})
     expect(start).toMatchObject({ status: 404, code: 'provider_unavailable' })
@@ -296,6 +297,7 @@ describe('configuration', () => {
       providers: [],
       emailFeatures: false,
       turnstileSiteKey: null,
+      signups: 'open',
     })
     expect(providers.requests).toEqual([])
   })
@@ -306,6 +308,7 @@ describe('configuration', () => {
       providers: [],
       emailFeatures: false,
       turnstileSiteKey: null,
+      signups: 'open',
     })
   })
 
@@ -315,10 +318,16 @@ describe('configuration', () => {
       providers: ['discord', 'google'],
       emailFeatures: false,
       turnstileSiteKey: null,
+      signups: 'open',
     })
     expect(
       await new Client(via(MAIL_ON)).json<OAuthProvidersResponse>('/api/auth/oauth/providers'),
-    ).toEqual({ providers: ['discord', 'google'], emailFeatures: true, turnstileSiteKey: null })
+    ).toEqual({
+      providers: ['discord', 'google'],
+      emailFeatures: true,
+      turnstileSiteKey: null,
+      signups: 'open',
+    })
     const discord = new URL(await startSignIn(client, 'discord'))
     expect(discord.origin + discord.pathname).toBe('https://discord.com/oauth2/authorize')
     expect(Object.fromEntries(discord.searchParams)).toMatchObject({
@@ -375,6 +384,40 @@ describe('configuration', () => {
 })
 
 describe('sign in', () => {
+  it('a suspended user goes back with `suspended`, signed in nowhere', async () => {
+    const { who, me } = await providerUser('discord')
+    await db.update(users).set({ suspendedAt: Date.now() }).where(eq(users.id, me.id))
+    const client = new Client(via())
+    expect(await roundTrip(client, 'discord', who)).toBe('/login?oauth_error=suspended')
+    expect((await client.fetch('/api/auth/me')).status).toBe(401)
+  })
+
+  it('the sign-up switch: "Discord/Google only" still makes provider accounts, closed not', async () => {
+    const setMode = (mode: string | null) =>
+      mode === null
+        ? env.DB.prepare("DELETE FROM site_settings WHERE key = 'signup.mode'").run()
+        : env.DB.prepare(
+            `INSERT INTO site_settings (key, value, updated_at) VALUES ('signup.mode', ?1, 0)
+             ON CONFLICT (key) DO UPDATE SET value = excluded.value`,
+          )
+            .bind(mode)
+            .run()
+    try {
+      await setMode('oauth')
+      await providerUser('google')
+      await setMode('closed')
+      const client = new Client(via())
+      expect(await roundTrip(client, 'discord', account())).toBe('/oauth')
+      const pending = await client.json<OAuthPendingResponse>('/api/auth/oauth/pending')
+      const refused = await post(client, '/api/auth/oauth/pending/register', {
+        username: pending.username,
+      })
+      expect(refused).toMatchObject({ status: 403, code: 'signups_closed' })
+    } finally {
+      await setMode(null)
+    }
+  })
+
   it('signs in the linked user like a password login, to `next`', async () => {
     const { who, me } = await providerUser('discord')
     const client = new Client(via())

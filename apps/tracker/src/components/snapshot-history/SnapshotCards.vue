@@ -12,16 +12,23 @@ import type { RowChanges } from './snapshot-figures'
  * The Import History rows as stacked cards, for widths where the table's
  * columns don't fit: same figures, labelled, in the table's frame.
  */
-defineProps<{
-  rows: readonly SnapshotResponse[]
-  changes: ReadonlyMap<number, RowChanges>
-  isSelected: (id: number) => boolean
-  /** Header box state for the filtered list. */
-  coverage: 'none' | 'some' | 'all'
-  downloading: ReadonlySet<number>
-  deleting: boolean
-  formatKb: (bytes: number) => string
-}>()
+withDefaults(
+  defineProps<{
+    rows: readonly SnapshotResponse[]
+    changes: ReadonlyMap<number, RowChanges>
+    isSelected: (id: number) => boolean
+    /** Header box state for the filtered list. */
+    coverage: 'none' | 'some' | 'all'
+    downloading: ReadonlySet<number>
+    deleting: boolean
+    formatKb: (bytes: number) => string
+    /** Checkboxes (off on staff Inspect without data.delete). */
+    selectable?: boolean
+    /** Download and delete per row (off on staff Inspect). */
+    actions?: boolean
+  }>(),
+  { selectable: true, actions: true },
+)
 const emit = defineEmits<{
   toggle: [id: number, event: MouseEvent | KeyboardEvent]
   toggleAll: []
@@ -43,7 +50,7 @@ const FIGURES = [
     class="@container rounded-xl border border-border-default bg-surface-raised text-sm text-text-secondary shadow-sm transition-colors"
   >
     <div
-      v-if="rows.length > 0"
+      v-if="rows.length > 0 && selectable"
       class="flex items-center gap-2 rounded-t-xl border-b border-border-default bg-surface-overlay/50 px-3 py-1 font-semibold text-text-primary transition-colors"
     >
       <LegacyCheckbox
@@ -66,6 +73,7 @@ const FIGURES = [
       >
         <div class="flex items-start gap-2">
           <LegacyCheckbox
+            v-if="selectable"
             class="-my-2.5 -ml-1 size-10 shrink-0"
             :checked="isSelected(item.id)"
             :label="`Select snapshot ${item.id}`"
@@ -89,6 +97,7 @@ const FIGURES = [
             <p class="truncate text-xs text-text-muted">#{{ item.id }} · {{ item.source }}</p>
           </div>
           <RowActions
+            v-if="actions"
             :id="item.id"
             class="-my-1 shrink-0"
             :downloading="downloading.has(item.id)"
@@ -98,7 +107,10 @@ const FIGURES = [
           />
         </div>
 
-        <dl class="mt-2 ml-11 grid grid-cols-3 gap-x-3 gap-y-2 @xl:grid-cols-6">
+        <dl
+          class="mt-2 grid grid-cols-3 gap-x-3 gap-y-2 @xl:grid-cols-6"
+          :class="selectable ? 'ml-11' : ''"
+        >
           <div v-for="figure in FIGURES" :key="figure.key" class="min-w-0">
             <dt class="text-xs text-text-muted">{{ figure.label }}</dt>
             <dd>

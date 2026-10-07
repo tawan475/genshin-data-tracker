@@ -30,6 +30,7 @@ import type {
   UserSettingsPatch,
   VerifyEmailResponse,
 } from '@gdt/shared'
+import { staffApi } from './staff'
 import type { plannerStatePatch, plannerTargetsPatch, plannerTasksPatch } from '@gdt/shared'
 import type { z } from 'zod'
 import { BUNDLE_FORMAT } from './format'
@@ -37,6 +38,7 @@ import { request, requestJson } from './http'
 
 export { BUNDLE_FORMAT }
 export * from './http'
+export type { PurgeBody, StaffApi } from './staff'
 
 export interface AccountInput {
   name?: string | null
@@ -145,6 +147,9 @@ export const api = {
 
   updateUserSettings: (patch: UserSettingsPatch) =>
     requestJson<MeResponse>('/api/me/settings', { method: 'PATCH', json: patch }),
+  /** Deletes the signed-in user and everything they own, once their username is typed. */
+  deleteMe: (username: string) =>
+    requestJson<void>('/api/auth/account', { method: 'DELETE', json: { username } }),
   /** The user's Irminsul key for all accounts; replaces any old one. */
   newUserImportKey: () => requestJson<ImportKeyResponse>('/api/me/import-key', { method: 'POST' }),
   revokeUserImportKey: () => requestJson<void>('/api/me/import-key', { method: 'DELETE' }),
@@ -264,4 +269,7 @@ export const api = {
   snapshotGood: (id: number, snapshotId: number) =>
     requestJson<Good>(`/api/accounts/${id}/snapshots/${snapshotId}/good`),
   latestGood: (id: number) => requestJson<Good>(`/api/accounts/${id}/latest/good`),
+
+  /** The staff dashboard (/api/staff): only for users with the nodes. */
+  staff: staffApi,
 }

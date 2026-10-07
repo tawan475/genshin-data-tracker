@@ -6,8 +6,10 @@
 //
 // The token is 32 random bytes; only its SHA-256 goes into D1 (`auth_tokens`,
 // kind reset_password, no email, valid 24 hours), through `wrangler d1
-// execute` on the remote database (`--local`: the dev database). Using it
-// signs every device out and ends the user's other reset links.
+// execute` on the remote database (`--local`: the dev database): the same row
+// the staff dashboard's "Reset link" writes (adminResetLink in
+// worker/services/auth-tokens.ts). Using it signs every device out and ends
+// the user's other reset links.
 
 import { execFileSync } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'

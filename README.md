@@ -317,7 +317,8 @@ output with the path of its text and HTML files, nothing is sent.
 
 **Admin reset** (also for users without an email): prints a link valid for 24
 hours that sets a new password once; send it privately (e.g. on Discord). The
-admin never sees or sets the password.
+admin never sees or sets the password. Staff with `users.reset_password`
+make the same link from the dashboard (a user's page, Reset link).
 
 ```bash
 pnpm --filter @gdt/tracker admin:reset-link <username|email>           # production D1
@@ -416,6 +417,45 @@ the app learns the site key from `GET /api/auth/oauth/providers`
 `.dev.vars` override them (site key `3x00000000000000000000FF` forces an
 interactive challenge, empty values turn it off). Tests run with it off and
 turn it on per request.
+
+## Staff dashboard
+
+`/app/staff` (lazy; a "Staff" link in the sidebar for whoever has
+`staff.view`): Overview, Users (and one user's page), Storage, Roles, Audit,
+and Inspect (someone's Characters, Weapons, Artifacts, Materials and
+Snapshots, read-only). API: `/api/staff/*` (`worker/routes/staff.ts`), on
+the session (`requireActiveSession`), never the diag key. Migration 0020.
+
+- **Roles, Discord-style** (`worker/services/roles.ts`): a user's permissions
+  are the union of their roles' nodes (`PERMISSION_NODES` in
+  `packages/shared/src/staff.ts`; managing and deleting are always separate
+  nodes); `position` is the hierarchy. Staff act only on users whose highest
+  role is below theirs (never themselves), change and give only roles below
+  theirs, and grant or take away only nodes they hold. Seeded: Owner (`*`,
+  locked), Admin, Moderator, Support (editable).
+- **Owner only from the command line** (the dashboard can't give it, so a
+  stolen staff session never makes one; the last Owner can't be revoked):
+
+  ```bash
+  pnpm --filter @gdt/tracker admin:grant <username|email> <role> [--revoke]   # production D1
+  pnpm --filter @gdt/tracker admin:grant <username|email> owner --local       # dev database
+  ```
+
+- **Enforcement.** Nodes are read from D1 on every staff request; without the
+  node a route is a 404. Private fields (email, IPs, sessions, identities)
+  need `users.view_private` and are never shown of a user as high as you.
+  Every write, and every look at someone's data, writes an `admin_audit`
+  row (no foreign keys: it outlives the users it names).
+- **Actions.** Suspend (403 `account_suspended` on sign-in, Discord/Google
+  sign-in, refresh, reset links and key uploads; ends every session and
+  socket), block uploads (403 `uploads_blocked` for key and website
+  uploads), reset an account's key or revoke the user key, a 24-hour reset
+  link (shown once, the row `admin:reset-link` makes), rename, unlink a
+  provider (not the last way in), delete users (one, or ≤100), storage
+  quota, delete data now (snapshots by id or date, the trash, a whole
+  account; sections collected in the same batch), the sign-up switch (Open /
+  Discord-Google only / Closed) and the upload limits (`site_settings`).
+  Users delete themselves in Settings (`DELETE /api/auth/account`).
 
 ## Scripts
 

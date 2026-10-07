@@ -28,6 +28,7 @@ import {
   accountForUid,
   findImportKeyOwner,
   hashImportKey,
+  uploadsRefused,
   type ImportKeyOwner,
   type KeyAccount,
 } from '../services/accounts'
@@ -48,6 +49,8 @@ async function keyOwner(
     await rateLimit(c.env.AUTH_LIMITER, `bad-key:${clientIp(c)}`)
     throw new ApiError(401, 'invalid_import_key', 'Unknown import key')
   }
+  // Staff stopped this user's uploads (the staff dashboard).
+  if (owner.blocked) throw uploadsRefused(owner.blocked)
   return owner
 }
 
