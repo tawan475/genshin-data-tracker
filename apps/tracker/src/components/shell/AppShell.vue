@@ -357,14 +357,16 @@ const footButton =
             >
               {{ current.name }}
             </button>
+            <span v-if="current.name && current.uid" aria-hidden="true">·</span>
             <button
               v-if="current.uid"
               type="button"
               class="tabular shrink-0 rounded-md px-1 py-0.5 font-mono transition-colors hover:bg-surface-overlay hover:text-text-primary"
               title="Copy UID"
+              :aria-label="`Copy UID ${current.uid}`"
               @click="copyFromBar('UID', String(current.uid), $event)"
             >
-              <span class="font-sans text-text-muted">UID</span> {{ current.uid }}
+              {{ current.uid }}
             </button>
             <span v-if="!current.name && !current.uid" class="truncate">{{
               accounts.displayName(current)
