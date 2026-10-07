@@ -7,7 +7,8 @@ import type { Element } from '@/data/game-meta'
  * A white game glyph (talent, constellation) on a dark translucent disc with
  * the element's ring inside its edge and a soft glow in the element's
  * colour, as the game and Enka draw them; the same in either theme. The
- * glyph fills 88 % of the disc (the game's icons carry their own margin).
+ * glyph fills 88 % of the disc (the game's icons carry their own margin),
+ * or `glyph` px.
  * `locked` dims it, rings it
  * thinly in grey and adds a lock. `px` sets any size (the share card's 84
  * and 112); `--disc-bg` / `--disc-glow` on an ancestor restyle the disc (the
@@ -21,11 +22,13 @@ const props = withDefaults(
     size?: 'md' | 'lg' | 'xl'
     /** Diameter in px; overrides `size`. */
     px?: number
+    /** Glyph size in px (default 88 % of the disc). */
+    glyph?: number
     locked?: boolean
     /** Shown instead of the glyph when there is none ("C3"). */
     fallback?: string
   }>(),
-  { size: 'md', px: undefined, fallback: '' },
+  { size: 'md', px: undefined, glyph: undefined, fallback: '' },
 )
 
 const SIZE_PX = { md: 36, lg: 48, xl: 64 } as const
@@ -54,8 +57,9 @@ const lock = computed(() => `${Math.max(14, Math.round(diameter.value * 0.3))}px
       v-if="src"
       :src="src"
       alt=""
-      class="pointer-events-none size-[88%]"
-      :class="locked ? 'opacity-35' : ''"
+      class="pointer-events-none"
+      :class="[glyph ? '' : 'size-[88%]', locked ? 'opacity-35' : '']"
+      :style="glyph ? { width: `${glyph}px`, height: `${glyph}px` } : undefined"
     />
     <span
       v-else
