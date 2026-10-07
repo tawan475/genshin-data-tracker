@@ -2,6 +2,7 @@
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, emailSchema, usernameSchema } from '@gdt/shared'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
 import { useSession } from '@/stores/session'
@@ -116,6 +117,7 @@ async function submit() {
         Create account
       </button>
     </form>
+    <OAuthButtons />
     <template #footer>
       Have an account?
       <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">

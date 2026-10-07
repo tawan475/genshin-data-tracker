@@ -12,9 +12,15 @@ import type {
   CatalogRow,
   GenshinServer,
   Good,
+  IdentitiesResponse,
   ImportKeyResponse,
   ImportResponse,
   MeResponse,
+  OAuthLinkLoginResponse,
+  OAuthPendingResponse,
+  OAuthProvider,
+  OAuthProvidersResponse,
+  OAuthStartResponse,
   PlannerStateResponse,
   PlannerTargetsResponse,
   PlannerTasksResponse,
@@ -80,6 +86,46 @@ export const api = {
       json: { token, password },
       noRefresh: true,
     }),
+  /** A first password, for an account made with Discord or Google. */
+  setPassword: (password: string) =>
+    requestJson<MeResponse>('/api/auth/password/set', { method: 'POST', json: { password } }),
+
+  // ----------------------------------------------------- Discord / Google
+  /** Which sign-in providers this server has (none until their secrets are set). */
+  oauthProviders: () =>
+    requestJson<OAuthProvidersResponse>('/api/auth/oauth/providers', { noRefresh: true }),
+  /** Starts signing in at the provider: the URL to send the browser to. */
+  oauthStart: (provider: OAuthProvider, next?: string) =>
+    requestJson<OAuthStartResponse>(`/api/auth/oauth/${provider}/start`, {
+      method: 'POST',
+      json: next ? { next } : {},
+      noRefresh: true,
+    }),
+  /** Starts linking the provider to the signed-in user. */
+  oauthLink: (provider: OAuthProvider) =>
+    requestJson<OAuthStartResponse>(`/api/auth/oauth/${provider}/link`, { method: 'POST' }),
+  /** The provider account that signed in without a linked user (410 once it ran out). */
+  oauthPending: () =>
+    requestJson<OAuthPendingResponse>('/api/auth/oauth/pending', { noRefresh: true }),
+  oauthCancel: () =>
+    requestJson<void>('/api/auth/oauth/pending', { method: 'DELETE', noRefresh: true }),
+  oauthRegister: (body: { username: string; useEmail: boolean }) =>
+    requestJson<MeResponse>('/api/auth/oauth/pending/register', {
+      method: 'POST',
+      json: body,
+      noRefresh: true,
+    }),
+  /** Signs in with a password and links the pending provider account. */
+  oauthLinkLogin: (login: string, password: string) =>
+    requestJson<OAuthLinkLoginResponse>('/api/auth/oauth/pending/login', {
+      method: 'POST',
+      json: { login, password },
+      noRefresh: true,
+    }),
+  identities: () => requestJson<IdentitiesResponse>('/api/auth/identities'),
+  unlinkIdentity: (provider: OAuthProvider) =>
+    requestJson<void>(`/api/auth/identities/${provider}`, { method: 'DELETE' }),
+
   updateUserSettings: (patch: UserSettingsPatch) =>
     requestJson<MeResponse>('/api/me/settings', { method: 'PATCH', json: patch }),
   /** The user's Irminsul key for all accounts; replaces any old one. */

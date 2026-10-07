@@ -366,3 +366,35 @@ export const authTokens = sqliteTable(
     index('auth_tokens_user_kind_idx').on(t.userId, t.kind),
   ],
 )
+
+/**
+ * Sign-in identities from OAuth providers (migration 0015): Discord or
+ * Google, at most one of each per user, and each provider account linked to
+ * at most one user. Linked only by a completed sign-in at the provider, never
+ * by matching an email. `email` / `email_verified` are what the provider said
+ * at the last sign-in, shown in Settings only: they never confirm the
+ * account's own email. `last_used_at`: the last sign-in with it (NULL: never,
+ * it was linked from Settings).
+ */
+export const userIdentities = sqliteTable(
+  'user_identities',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    provider: text('provider', { enum: ['discord', 'google'] }).notNull(),
+    /** Discord's user id (a snowflake) or Google's `sub`. */
+    providerUserId: text('provider_user_id').notNull(),
+    email: text('email'),
+    emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
+    displayName: text('display_name'),
+    avatarUrl: text('avatar_url'),
+    createdAt: timestamp('created_at'),
+    lastUsedAt: integer('last_used_at'),
+  },
+  (t) => [
+    uniqueIndex('user_identities_provider_user_unique').on(t.provider, t.providerUserId),
+    uniqueIndex('user_identities_user_provider_unique').on(t.userId, t.provider),
+  ],
+)

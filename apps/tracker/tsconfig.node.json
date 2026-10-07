@@ -3,6 +3,7 @@
   "extends": "@tsconfig/node24/tsconfig.json",
   "include": [
     "vite.config.*",
+    "dev/*.ts",
     "drizzle.config.*",
     "vitest.config.*",
     "cypress.config.*",
@@ -14,6 +15,8 @@
     // Bundler mode provides a smoother developer experience.
     "module": "preserve",
     "moduleResolution": "bundler",
+    // vite.config.ts imports dev/*.ts with the extension, as Vite's native config loader wants.
+    "allowImportingTsExtensions": true,
 
     // Include Node.js types and avoid accidentally including other `@types/*` packages.
     "types": ["node"],

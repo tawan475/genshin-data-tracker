@@ -236,6 +236,58 @@ pnpm --filter @gdt/tracker admin:reset-link <username|email>           # product
 pnpm --filter @gdt/tracker admin:reset-link <username|email> --local   # dev database, localhost link
 ```
 
+## Sign in with Discord / Google
+
+Optional: a provider is on only while the Worker has both its secrets, and the
+app shows its button only then (`GET /api/auth/oauth/providers`). With none
+set, nothing changes. Code: `worker/lib/oauth.ts` (flow, cookies),
+`worker/routes/oauth.ts`, `worker/services/identities.ts`, table
+`user_identities` (migration 0015).
+
+- **Flow.** Authorization code with PKCE (S256) and `state`; Google's is
+  OpenID Connect (`openid email profile`, a `nonce`, the ID token from the
+  token endpoint checked for issuer, audience, expiry and nonce); Discord's
+  user comes from `users/@me` (`identify email`). State, verifier, nonce and
+  intent sit in `gdt_oauth` (HS256 under a key derived from `JWT_SECRET`,
+  HttpOnly, Secure, SameSite Lax, path `/api/auth/oauth`, 10 minutes). The
+  redirect URI is fixed: `<site>/api/auth/oauth/<provider>/callback`, from
+  `SITE_URL` or the production origin (loopback under `vite dev`).
+- **Linked** provider account: signs its user in like a password login.
+- **Not linked**: never matched by email. `/oauth` offers a new account (no
+  password; the username is suggested from the provider, the provider's email
+  can be set as the account's, unconfirmed, with a confirmation link mailed)
+  or "I have an account" (password sign-in that links it). The provider
+  account waits in `gdt_oauth_pending` (15 minutes), never in a URL.
+- **Settings → Connected accounts**: Link (needs the session; the callback
+  must find the same user in the same session, else `oauth_error=session`) and
+  Unlink, refused while it is the only way in (no password, no other
+  provider). An account without a password gets "Set password" (session only).
+  Linking or a first password mails a notice to a confirmed email. Nothing
+  here ends a session.
+
+**Setup** (the redirect URIs must match exactly):
+
+1. Discord: <https://discord.com/developers/applications> → New Application →
+   OAuth2 → Redirects: add
+   `https://genshin-tracker.475.dev/api/auth/oauth/discord/callback` (and
+   `http://localhost:5173/api/auth/oauth/discord/callback` to try the real
+   one locally). Copy the Client ID; Reset Secret for the Client Secret.
+2. Google: <https://console.cloud.google.com> → new project → Google Auth
+   Platform (OAuth consent screen): External; app name, support email,
+   authorized domain `475.dev`, developer contact; Data access: `openid`,
+   `.../auth/userinfo.email`, `.../auth/userinfo.profile`; Clients → Create
+   client → Web application → Authorized redirect URIs:
+   `https://genshin-tracker.475.dev/api/auth/oauth/google/callback` (and the
+   localhost one). Audience → Publish app (these scopes need no review).
+3. From `apps/tracker`: `pnpm exec wrangler secret put DISCORD_CLIENT_ID`
+   (then `DISCORD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`).
+   A secret takes effect at once, no redeploy. Apply migration 0015 first
+   (CI does on the next push).
+
+`vite dev` uses a fake Discord and Google (`dev/oauth-mock.ts`, pick who signs
+in); `OAUTH_DEV_MOCK=0` in `.dev.vars`, with the four secrets there, uses the
+real ones.
+
 ## Scripts
 
 ```bash

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { LogOut } from 'lucide-vue-next'
 import AppPanel from '@/components/settings/AppPanel.vue'
 import AppearancePanel from '@/components/settings/AppearancePanel.vue'
+import ConnectedAccountsPanel from '@/components/settings/ConnectedAccountsPanel.vue'
 import PasswordPanel from '@/components/settings/PasswordPanel.vue'
 import ProfilePanel from '@/components/settings/ProfilePanel.vue'
 import UserImportKeyPanel from '@/components/settings/UserImportKeyPanel.vue'
@@ -57,6 +58,7 @@ async function signOutEverywhere() {
     <UserImportKeyPanel />
     <AppearancePanel />
     <PasswordPanel />
+    <ConnectedAccountsPanel />
     <AppPanel />
 
     <UiPanel title="Session">

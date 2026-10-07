@@ -7,6 +7,7 @@ import { auth } from './routes/auth'
 import { health } from './routes/health'
 import { live } from './routes/live'
 import { me } from './routes/me'
+import { oauth } from './routes/oauth'
 import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
 import { recovery } from './routes/recovery'
@@ -26,6 +27,7 @@ app.use(async (c, next) => {
 app.route('/health', health)
 app.route('/auth', auth)
 app.route('/auth', recovery)
+app.route('/auth/oauth', oauth)
 app.route('/me', me)
 app.route('/accounts', accounts)
 app.route('/accounts', progress)

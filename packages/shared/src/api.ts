@@ -67,6 +67,40 @@ export const forgotPasswordRequest = z.object({ login: loginName })
 /** `POST /api/auth/reset-password`: the new password follows the sign-up rules. */
 export const resetPasswordRequest = z.object({ token: linkToken, password: passwordSchema })
 
+/** `POST /api/auth/password/set`: a first password for an account that has none. */
+export const setPasswordRequest = z.object({ password: passwordSchema })
+
+/**
+ * Sign-in providers (OAuth). Each is on only while the Worker has its client
+ * id and secret; `GET /api/auth/oauth/providers` says which.
+ */
+export const OAUTH_PROVIDERS = ['discord', 'google'] as const
+export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number]
+
+export const OAUTH_PROVIDER_LABELS: Record<OAuthProvider, string> = {
+  discord: 'Discord',
+  google: 'Google',
+}
+
+/** Where a sign-in may land afterwards: a path inside the app (printable ASCII only). */
+export const appPath = z
+  .string()
+  .max(512)
+  .regex(/^\/app(?:[/?#][!-~]*)?$/)
+
+/**
+ * `POST /api/auth/oauth/:provider/start`: sign in (linking from Settings is
+ * `POST …/:provider/link`, no body).
+ */
+export const oauthStartRequest = z.object({ next: appPath.optional() })
+
+/** `POST /api/auth/oauth/pending/register`: a new account for the pending identity. */
+export const oauthRegisterRequest = z.object({
+  username: usernameSchema,
+  /** Also set the provider's email as the account's (unconfirmed, a link is mailed). */
+  useEmail: z.boolean().default(false),
+})
+
 export const GENSHIN_SERVERS = ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] as const
 export type GenshinServer = (typeof GENSHIN_SERVERS)[number]
 
@@ -495,7 +529,85 @@ export interface MeResponse {
    * until the Worker has its `EMAIL` binding.
    */
   emailEnabled: boolean
+  /** False for an account made with Discord or Google: it signs in with those until it sets one. */
+  hasPassword: boolean
 }
+
+/** `GET /api/auth/oauth/providers`: the sign-in providers this server has. */
+export interface OAuthProvidersResponse {
+  providers: OAuthProvider[]
+}
+
+/** `POST /api/auth/oauth/:provider/start`: where to send the browser. */
+export interface OAuthStartResponse {
+  url: string
+}
+
+/**
+ * `GET /api/auth/oauth/pending`: the provider account that signed in without
+ * a linked user (held in a short-lived cookie, never in a URL).
+ */
+export interface OAuthPendingResponse {
+  provider: OAuthProvider
+  displayName: string | null
+  email: string | null
+  emailVerified: boolean
+  /** A free username made from the provider's name, to start the form with. */
+  username: string
+}
+
+/**
+ * Why the pending identity could not be linked when signing in to link it:
+ * gone (the cookie ran out), `taken` (linked to another user meanwhile) or
+ * `already` (this user has another account of that provider linked).
+ */
+export type OAuthLinkProblem = 'expired' | 'taken' | 'already'
+
+/** `POST /api/auth/oauth/pending/login`: signed in, and linked unless `problem`. */
+export interface OAuthLinkLoginResponse {
+  me: MeResponse
+  linked: OAuthProvider | null
+  problem: OAuthLinkProblem | null
+}
+
+export interface IdentityResponse {
+  provider: OAuthProvider
+  displayName: string | null
+  email: string | null
+  emailVerified: boolean
+  avatarUrl: string | null
+  createdAt: number
+  /** Last sign-in with it; null: linked from Settings, never used yet. */
+  lastUsedAt: number | null
+}
+
+/** `GET /api/auth/identities`: enabled providers and the user's linked accounts. */
+export interface IdentitiesResponse {
+  providers: OAuthProvider[]
+  identities: IdentityResponse[]
+}
+
+/**
+ * `?oauth_error=` codes a provider round trip comes back with (to /login, or
+ * to Settings when linking): `unavailable` (provider off), `state` (no or a
+ * wrong state: started in another browser, or reloaded), `expired` (over 10
+ * minutes), `denied` (cancelled at the provider), `failed` (the provider's
+ * answer was refused), `session` (signed out or another user while linking),
+ * `taken` (linked to another user), `already` (another account of that
+ * provider is linked here), `rate_limited`.
+ */
+export const OAUTH_ERROR_CODES = [
+  'unavailable',
+  'state',
+  'expired',
+  'denied',
+  'failed',
+  'session',
+  'taken',
+  'already',
+  'rate_limited',
+] as const
+export type OAuthErrorCode = (typeof OAUTH_ERROR_CODES)[number]
 
 /** `POST /api/auth/verify-email`: the address now confirmed. */
 export interface VerifyEmailResponse {
