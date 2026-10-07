@@ -22,6 +22,7 @@ import { readStorage, writeStorage } from '@/lib/storage'
 import { resolvedTheme } from '@/lib/theme'
 import { lastAccountId, useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
+import { copyText } from '@/data/import-setup'
 import { useSession } from '@/stores/session'
 import { useStaff } from '@/stores/staff'
 import AccountSwitcher from './AccountSwitcher.vue'
@@ -95,6 +96,13 @@ const currentId = computed<number | null>(() => {
   return last && accounts.byId.has(last) ? last : (accounts.list[0]?.id ?? null)
 })
 const current = computed(() => (currentId.value ? accounts.byId.get(currentId.value) : undefined))
+
+/** The top bar's account name and UID copy on click. */
+async function copyFromBar(label: string, value: string, event: MouseEvent) {
+  const ok = await copyText(value, event.currentTarget as HTMLElement | null)
+  if (ok) feedback.toast({ tone: 'success', title: `${label} copied`, detail: value })
+  else feedback.toast({ tone: 'danger', title: 'Could not copy', detail: value })
+}
 
 const sections = computed(() =>
   currentId.value
@@ -337,10 +345,30 @@ const footButton =
         <template v-else-if="current">
           <div class="hidden h-4 w-px bg-border-strong sm:block" />
           <span
-            class="hidden min-w-0 items-center gap-2 text-sm font-medium text-text-muted sm:flex"
+            class="hidden min-w-0 items-center gap-1.5 text-sm font-medium text-text-muted sm:flex"
           >
             <span class="size-2 shrink-0 rounded-full bg-emerald-500" />
-            <span class="truncate">{{ accounts.displayName(current) }}</span>
+            <button
+              v-if="current.name"
+              type="button"
+              class="min-w-0 truncate rounded-md px-1 py-0.5 transition-colors hover:bg-surface-overlay hover:text-text-primary"
+              title="Copy name"
+              @click="copyFromBar('Name', current.name, $event)"
+            >
+              {{ current.name }}
+            </button>
+            <button
+              v-if="current.uid"
+              type="button"
+              class="tabular shrink-0 rounded-md px-1 py-0.5 font-mono transition-colors hover:bg-surface-overlay hover:text-text-primary"
+              title="Copy UID"
+              @click="copyFromBar('UID', String(current.uid), $event)"
+            >
+              <span class="font-sans text-text-muted">UID</span> {{ current.uid }}
+            </button>
+            <span v-if="!current.name && !current.uid" class="truncate">{{
+              accounts.displayName(current)
+            }}</span>
           </span>
         </template>
         <RouterLink
