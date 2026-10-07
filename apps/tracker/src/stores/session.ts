@@ -54,25 +54,35 @@ export const useSession = defineStore('session', () => {
     return loading
   }
 
-  async function login(login: string, password: string) {
-    adopt(await api.login(login, password))
+  /** `turnstile`: the human check's token, while the server has it on (all four). */
+  async function login(login: string, password: string, turnstile?: string) {
+    adopt(await api.login(login, password, turnstile))
     loading = Promise.resolve()
   }
 
-  async function register(username: string, email: string | null, password: string) {
-    adopt(await api.register({ username, email, password }))
+  async function register(
+    username: string,
+    email: string | null,
+    password: string,
+    turnstile?: string,
+  ) {
+    adopt(await api.register({ username, email, password, turnstile }))
     loading = Promise.resolve()
   }
 
   /** A new account for the provider account waiting on /oauth; signs in. */
-  async function oauthRegister(username: string, useEmail: boolean) {
-    adopt(await api.oauthRegister({ username, useEmail }))
+  async function oauthRegister(username: string, useEmail: boolean, turnstile?: string) {
+    adopt(await api.oauthRegister({ username, useEmail, turnstile }))
     loading = Promise.resolve()
   }
 
   /** Signs in with a password and links the waiting provider account (unless `problem`). */
-  async function oauthLinkLogin(login: string, password: string): Promise<OAuthLinkLoginResponse> {
-    const result = await api.oauthLinkLogin(login, password)
+  async function oauthLinkLogin(
+    login: string,
+    password: string,
+    turnstile?: string,
+  ): Promise<OAuthLinkLoginResponse> {
+    const result = await api.oauthLinkLogin(login, password, turnstile)
     adopt(result.me)
     loading = Promise.resolve()
     return result

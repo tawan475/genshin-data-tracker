@@ -377,6 +377,46 @@ set, nothing changes. Code: `worker/lib/oauth.ts` (flow, cookies),
 in); `OAUTH_DEV_MOCK=0` in `.dev.vars`, with the four secrets there, uses the
 real ones.
 
+## Human check (Turnstile)
+
+Cloudflare Turnstile on sign-up (`/register`, action `register`), password
+sign-in (`/login` and `/oauth/pending/login`, action `login`) and a new
+account through Discord / Google (`/oauth/pending/register`, `register`).
+Not on "Continue with …" itself, linking, or import keys. Off until the
+Worker has **both** secrets `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`;
+the app learns the site key from `GET /api/auth/oauth/providers`
+(`turnstileSiteKey`). Code: `worker/lib/turnstile.ts`,
+`src/components/auth/HumanCheck.vue`, `src/lib/turnstile.ts`.
+
+- The widget is Managed with appearance interaction-only: invisible unless
+  Cloudflare wants a click. The server checks each token with siteverify
+  (visitor IP, 5 s timeout): success, the form's action and this site's
+  hostname.
+- No token: 400 `human_check_required` ("Reload the page to sign in / up",
+  what an app cached from before shows). Refused: 403 `human_check_failed`.
+  siteverify down: a sign-up gets 503 `human_check_unavailable`, a sign-in
+  goes on (logged). A rejected secret logs `turnstile_secret_rejected`.
+- Sign-in checks in this order: per-IP limit, human check, per-name limit,
+  Argon2, so a bot without a token can't use up a name's budget.
+
+**Setup:**
+
+1. Ship the app with this code first and wait a few days, so cached PWAs
+   have the widget before the server asks for it (old ones get "Reload the
+   page to sign in").
+2. Dashboard → Turnstile → Add widget: name "Genshin Tracker", hostname
+   `genshin-tracker.475.dev`, mode **Managed**, no pre-clearance. Copy the
+   site key and the secret key.
+3. From `apps/tracker`: `pnpm exec wrangler secret put TURNSTILE_SITE_KEY`, then
+   `TURNSTILE_SECRET_KEY` (paste at the hidden prompt). Both at once: with
+   one only, the check stays off. A secret takes effect at once, no
+   redeploy; deleting either turns the check off again.
+
+`vite dev` uses Cloudflare's always-pass test keys (vite.config.ts); keys in
+`.dev.vars` override them (site key `3x00000000000000000000FF` forces an
+interactive challenge, empty values turn it off). Tests run with it off and
+turn it on per request.
+
 ## Scripts
 
 ```bash

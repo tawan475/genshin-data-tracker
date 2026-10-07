@@ -284,6 +284,7 @@ describe('configuration', () => {
     expect(await client.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: [],
       emailFeatures: false,
+      turnstileSiteKey: null,
     })
     const start = await post(client, '/api/auth/oauth/discord/start', {})
     expect(start).toMatchObject({ status: 404, code: 'provider_unavailable' })
@@ -294,6 +295,7 @@ describe('configuration', () => {
     expect(await half.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: [],
       emailFeatures: false,
+      turnstileSiteKey: null,
     })
     expect(providers.requests).toEqual([])
   })
@@ -303,6 +305,7 @@ describe('configuration', () => {
     expect(await client.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: [],
       emailFeatures: false,
+      turnstileSiteKey: null,
     })
   })
 
@@ -311,10 +314,11 @@ describe('configuration', () => {
     expect(await client.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: ['discord', 'google'],
       emailFeatures: false,
+      turnstileSiteKey: null,
     })
     expect(
       await new Client(via(MAIL_ON)).json<OAuthProvidersResponse>('/api/auth/oauth/providers'),
-    ).toEqual({ providers: ['discord', 'google'], emailFeatures: true })
+    ).toEqual({ providers: ['discord', 'google'], emailFeatures: true, turnstileSiteKey: null })
     const discord = new URL(await startSignIn(client, 'discord'))
     expect(discord.origin + discord.pathname).toBe('https://discord.com/oauth2/authorize')
     expect(Object.fromEntries(discord.searchParams)).toMatchObject({
