@@ -1,9 +1,9 @@
 /**
  * The Goals tab's toolbar: search, status, element / rarity / weapon type
- * filters, the "Upgrade now" and "No weekly boss" toggles (chips count "matches
- * if you pick this", like the Characters page) and the sort orders. Pure
- * functions over the board's entries and what the page knows of each
- * (`GoalFacts`).
+ * filters, the "Upgrade now" and "No weekly boss" toggles, the material
+ * (material-filter.ts; chips and options count "matches if you pick this",
+ * like the Characters page) and the sort orders. Pure functions over the
+ * board's entries and what the page knows of each (`GoalFacts`).
  */
 
 import type { WeaponType } from '@gdt/game-data'
@@ -24,6 +24,8 @@ export interface GoalFilters {
   upgrade: boolean
   /** Only counted goals still to farm, but no weekly boss (upgrade.ts `farmsNoWeekly`). */
   noWeekly: boolean
+  /** Only counted goals whose remaining cost uses this material option (its key; null: any). */
+  material: string | null
 }
 
 export const NO_GOAL_FILTERS: GoalFilters = {
@@ -34,6 +36,7 @@ export const NO_GOAL_FILTERS: GoalFilters = {
   weaponType: 'all',
   upgrade: false,
   noWeekly: false,
+  material: null,
 }
 
 /** What the filters know of each goal, by entry id. */
@@ -44,11 +47,13 @@ export interface GoalFacts {
   upgrade: ReadonlySet<string>
   /** Counted goals still to farm, none of it from a weekly boss (No weekly boss). */
   noWeekly: ReadonlySet<string>
+  /** Per counted goal, the material options its remaining cost uses (material-filter.ts). */
+  materials?: ReadonlyMap<string, ReadonlySet<string>>
 }
 
 export type GoalToggle = 'upgrade' | 'noWeekly'
 
-export type GoalFacet = 'status' | 'element' | 'rarity' | GoalToggle
+export type GoalFacet = 'status' | 'element' | 'rarity' | 'material' | GoalToggle
 
 const TOGGLES: readonly GoalToggle[] = ['upgrade', 'noWeekly']
 
@@ -97,6 +102,8 @@ export function filterGoals(
       return false
     if (except !== 'upgrade' && f.upgrade && !facts.upgrade.has(e.id)) return false
     if (except !== 'noWeekly' && f.noWeekly && !facts.noWeekly.has(e.id)) return false
+    if (except !== 'material' && f.material && !facts.materials?.get(e.id)?.has(f.material))
+      return false
     if (except !== 'element' && f.element !== 'all' && e.element !== f.element) return false
     if (except !== 'rarity' && f.rarity !== 'all' && e.rarity !== f.rarity) return false
     if (f.weaponType !== 'all' && e.weaponType !== f.weaponType) return false
@@ -143,7 +150,8 @@ export function entryStatuses(e: GoalEntry, ready: ReadonlySet<string>): GoalSta
 
 /**
  * Extra item needs pass the search and status filters; element, rarity or
- * weapon filters and the toggles (levels, weekly bosses) hide them.
+ * weapon filters, the toggles (levels, weekly bosses) and the material hide
+ * them (the material counts and sums the goal cards).
  */
 export function filterItems(
   items: readonly ItemGoalView[],
@@ -151,7 +159,7 @@ export function filterItems(
   inStock: (item: ItemGoalView) => boolean,
 ): ItemGoalView[] {
   if (f.element !== 'all' || f.rarity !== 'all' || f.weaponType !== 'all') return []
-  if (f.upgrade || f.noWeekly) return []
+  if (f.upgrade || f.noWeekly || f.material) return []
   const words = normalizeSearch(f.query).split(' ').filter(Boolean)
   return items.filter((i) => {
     if (!statusMatches(f.status, i.target.active, inStock(i))) return false

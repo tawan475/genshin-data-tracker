@@ -30,6 +30,7 @@ import { characterParts, weaponPart, type DonePart } from './done'
 import { ARTIFACTS_LEFT, READINESS } from './farm-format'
 import GoalPortrait from './GoalPortrait.vue'
 import { fromTouch, useItemPopover } from './item-popover'
+import { expName, type FocusChip } from './material-filter'
 import { materialSoft } from './material-soft'
 import { levelLabel, type GoalEntry, type NextHint, type WeaponGoalView } from './model'
 import type { GoalNeeds, NeedChip } from './needs'
@@ -44,7 +45,9 @@ import type { PartReady } from './upgrade'
  * Done (it spends the materials, see DoneDialog); a part set by hand shows
  * the pencil, and one the bag can level now a mark (upgrade.ts: the whole
  * part, or its next step). Under them, what the goal is still short of as
- * tappable chips (the inventory editor). An artifact goal is a row of its
+ * tappable chips (the inventory editor). While the Goals tab shows the
+ * goals using a material (`focus`), its chips lead, ringed, with what this
+ * goal needs of it and how short it is. An artifact goal is a row of its
  * own (sets still farmed, slots done; it opens the editor's Artifacts tab).
  * The header opens the editor; the star marks a favorite, the eye counts
  * it in the totals or not.
@@ -66,6 +69,8 @@ const props = defineProps<{
   needs: GoalNeeds | null
   /** The card's cost as one goal, for the inventory editor's "Goal" counts. */
   goal: PlanGoal | null
+  /** The material filter's chips: what this goal needs of it (null: no filter). */
+  focus?: readonly FocusChip[] | null
   /** Its place in priority order, while the list is in that order (it can be dragged). */
   order?: { rank: number; dragging: boolean; over: boolean } | null
   /** Picking cards for a bulk change. */
@@ -236,7 +241,27 @@ const chipIcon = (chip: NeedChip) =>
 const chipTitle = (chip: NeedChip) =>
   `${chip.material.name}${chip.exp ? ' (EXP)' : ''}: ${formatNumber(chip.count)} short${chip.status === 'alone' ? ' after the goals above' : ''}`
 
-function openChip(chip: NeedChip, event: MouseEvent) {
+/** The missing chips the focus chips don't already show. */
+const chips = computed(() => {
+  const list = props.needs?.chips ?? []
+  const focus = props.focus
+  if (!focus?.length) return list
+  const shown = new Set(focus.map((f) => `${f.material.key}|${f.exp ?? ''}`))
+  return list.filter((c) => !shown.has(`${c.key}|${c.exp ?? ''}`))
+})
+
+function focusTitle(f: FocusChip): string {
+  const amount = f.exp
+    ? `${expName(f.exp)}: ${formatNumber(f.points ?? 0)} (${formatNumber(f.count)} ${f.material.name})`
+    : `${f.material.name}: ${formatNumber(f.count)}`
+  const state =
+    f.status === 'all'
+      ? 'enough after the goals above'
+      : `${formatNumber(f.short)} short${f.status === 'alone' ? ' after the goals above' : ''}`
+  return `${amount} · ${state}`
+}
+
+function openChip(chip: Pick<NeedChip, 'key'>, event: MouseEvent) {
   openItem?.({
     key: chip.key,
     anchor: event.currentTarget as HTMLElement,
@@ -458,9 +483,43 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
       </li>
     </ul>
 
-    <div v-if="needs && needs.chips.length" class="border-t border-border-subtle px-3 py-2.5">
+    <div
+      v-if="(focus && focus.length) || chips.length"
+      class="border-t border-border-subtle px-3 py-2.5"
+    >
       <ul class="flex flex-wrap gap-1.5" :aria-label="`${entry.name}: missing`">
-        <li v-for="chip in needs.chips" :key="chip.key">
+        <li v-for="f in focus ?? []" :key="`focus:${f.material.key}`">
+          <component
+            :is="openItem ? 'button' : 'span'"
+            :type="openItem ? 'button' : undefined"
+            class="flex items-center gap-1 rounded-lg border border-accent-text py-0.5 pr-1.5 pl-0.5 ring-2 ring-accent/25"
+            :class="openItem ? 'transition-colors hover:bg-surface-overlay' : ''"
+            :title="focusTitle(f)"
+            :aria-haspopup="openItem ? 'dialog' : undefined"
+            data-focus-chip
+            @click="openChip({ key: f.material.key }, $event)"
+          >
+            <span
+              class="size-8 overflow-hidden rounded-md text-[0.625rem]"
+              :class="materialSoft(f.material.key, f.material.rarity)"
+            >
+              <MaterialIcon :src="gameIcon(f.material.icon)" :name="f.material.name" />
+            </span>
+            <span class="tabular font-mono text-sm font-semibold text-text-primary">{{
+              formatCompact(f.count)
+            }}</span>
+            <span
+              v-if="f.status !== 'all'"
+              class="tabular font-mono text-xs font-semibold"
+              :class="f.status === 'short' ? 'text-danger-text' : 'text-warning-text'"
+              aria-hidden="true"
+              >−{{ formatCompact(f.short) }}</span
+            >
+            <Check v-else class="size-3.5 text-success-text" aria-hidden="true" />
+            <span class="sr-only">{{ focusTitle(f) }}</span>
+          </component>
+        </li>
+        <li v-for="chip in chips" :key="chip.key">
           <component
             :is="openItem ? 'button' : 'span'"
             :type="openItem ? 'button' : undefined"
