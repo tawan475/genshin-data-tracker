@@ -9,13 +9,15 @@
  *
  * The server allows 60 uploads a minute per account: the queue paces itself
  * under that and, if it is still refused (another tab, Irminsul uploading at
- * the same time), waits and retries instead of failing the file.
+ * the same time), waits and retries instead of failing the file. The daily
+ * upload quota and the storage quota (per user) refuse every later new
+ * snapshot too: that file fails and the queue pauses, the rest kept.
  */
 
 import { MAX_IMPORT_FILES, MAX_IMPORT_FILE_SIZE_BYTES, MAX_IMPORT_FILE_SIZE_MB } from '@gdt/shared'
 import { markRaw, reactive } from 'vue'
 import { ApiRequestError, api } from '@/api'
-import { formatDateTime, formatNumber } from '@/lib/format'
+import { formatDateTime, formatNumber, formatTime } from '@/lib/format'
 import { importingAccounts } from '@/live/holds'
 import router from '@/router'
 import { useAccounts } from '@/stores/accounts'
@@ -444,6 +446,17 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
       return 'stored'
     } catch (error) {
       const status = error instanceof ApiRequestError ? error.status : -1
+      if (error instanceof ApiRequestError && QUOTA_CODES.has(error.code)) {
+        // Every later file that stores something would be refused too.
+        fail(item, describeError(error, item), true)
+        queue.state = 'pausing'
+        useFeedback().toast({
+          tone: 'danger',
+          title: 'Upload paused',
+          detail: item.message ?? undefined,
+        })
+        return 'stop'
+      }
       if (status === 429 && ++rateLimited <= MAX_RATE_LIMIT_RETRIES) {
         const resumed = await wait(
           queue,
@@ -503,9 +516,21 @@ function describeError(error: unknown, item: ImportItem): string {
         : 'Other snapshot at this time'
     case 'rate_limited':
       return 'Rate limited'
+    case 'daily_upload_limit':
+      return `Daily limit · resets ${formatTime(nextUtcMidnight())}`
+    case 'storage_quota':
+      return 'Storage full'
     default:
       return error.message
   }
+}
+
+/** Refusals by the per-user quotas (the server's upload limits), not by the file. */
+const QUOTA_CODES = new Set(['daily_upload_limit', 'storage_quota'])
+
+/** When the daily upload quota starts over: the next 00:00 UTC. */
+function nextUtcMidnight(now = new Date()): number {
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
 }
 
 function noteRequest(accountId: number) {

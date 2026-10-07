@@ -530,7 +530,7 @@ class V2Store {
   } | null = null
 
   async upload(good: Good) {
-    const prepared = await prepareSnapshot(good)
+    const prepared = await prepareSnapshot(good, { materials: MATERIALS })
     prepared.artifactHashes.forEach((hash, i) => {
       if (this.ids.has(hash)) return
       const id = this.ids.size + 1

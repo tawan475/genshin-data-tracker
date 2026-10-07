@@ -77,6 +77,11 @@ export const users = sqliteTable(
      * 0010.
      */
     liveSince: integer('live_since'),
+    /**
+     * Bytes this user may store (services/upload-limits.ts), set by staff for
+     * one user; NULL: the site's default. Added in 0018.
+     */
+    storageQuota: integer('storage_quota'),
   },
   (t) => [
     uniqueIndex('users_import_key_hash_unique')
@@ -425,3 +430,37 @@ export const userIdentities = sqliteTable(
     uniqueIndex('user_identities_user_provider_unique').on(t.userId, t.provider),
   ],
 )
+
+/**
+ * What each user stored per UTC day (migration 0018), for the daily upload
+ * quota (services/upload-limits.ts): counted in the import's own write batch,
+ * only for an upload that stored a snapshot (a re-upload or a capture seen
+ * again stores nothing and counts nothing). `stored_bytes`: its new sections
+ * and catalog chunks. Purged by maintenance after UPLOAD_DAYS_KEPT days.
+ */
+export const userUploadDays = sqliteTable(
+  'user_upload_days',
+  {
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** 'YYYY-MM-DD', UTC. */
+    day: text('day').notNull(),
+    snapshots: integer('snapshots').notNull().default(0),
+    storedBytes: integer('stored_bytes').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.day] })],
+)
+
+/**
+ * Site-wide settings staff can change without a deploy (migration 0018):
+ * each overrides a default in code, e.g. `upload.daily_snapshots`
+ * (services/upload-limits.ts). A missing or unreadable value means the default.
+ */
+export const siteSettings = sqliteTable('site_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: timestamp('updated_at'),
+  /** The staff member who set it; NULL: set by hand (wrangler) or since deleted. */
+  updatedBy: integer('updated_by').references(() => users.id, { onDelete: 'set null' }),
+})

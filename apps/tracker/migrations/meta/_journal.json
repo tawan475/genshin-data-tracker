@@ -127,6 +127,13 @@
       "when": 1791374208002,
       "tag": "0017_drop_storage_v1",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1791400983232,
+      "tag": "0018_upload_limits",
+      "breakpoints": true
     }
   ]
 }

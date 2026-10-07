@@ -10,6 +10,12 @@
  * Two kinds of key: an account's own key uploads to that account; a user's
  * key uploads to the user's account whose UID is the file's `gi_player.uid`,
  * making that account on the first upload of a new UID.
+ *
+ * Limits (irminsul shows the message of any refusal): 20 uploads a minute
+ * per key (KEY_IMPORT_LIMITER; irminsul uploads at most every few seconds,
+ * and only when the game sent new data), 60 verifications a minute per key,
+ * 20 unknown keys a minute per IP; per file GOOD_LIMITS (422) and the
+ * owner's daily and storage quotas (429 / 413, services/upload-limits.ts).
  */
 
 import type { ImportResponse, PreparedSnapshot, VerifyKeyResponse } from '@gdt/shared'
@@ -28,11 +34,15 @@ import {
 import { importSnapshot, parseUpload } from '../services/import'
 import { notifyUser } from '../services/live'
 
-async function keyOwner(c: Context<AppEnv>): Promise<ImportKeyOwner> {
+/** The key's owner; `limiter` is the per-minute budget of this route, per key. */
+async function keyOwner(
+  c: Context<AppEnv>,
+  limiter: RateLimit | undefined,
+): Promise<ImportKeyOwner> {
   const key = c.req.header('x-import-key')
   if (!key) throw new ApiError(401, 'missing_import_key', 'Missing x-import-key header')
   const hash = await hashImportKey(key)
-  await rateLimit(c.env.IMPORT_LIMITER, `key:${hash}`)
+  await rateLimit(limiter, `key:${hash}`)
   const owner = await findImportKeyOwner(c.env.DB, hash)
   if (!owner) {
     await rateLimit(c.env.AUTH_LIMITER, `bad-key:${clientIp(c)}`)
@@ -43,7 +53,7 @@ async function keyOwner(c: Context<AppEnv>): Promise<ImportKeyOwner> {
 
 export const publicImport = new Hono<AppEnv>()
   .get('/verify-key', async (c) => {
-    const owner = await keyOwner(c)
+    const owner = await keyOwner(c, c.env.IMPORT_LIMITER)
     // Same origin the request came in on, so links are right for any deployment.
     if (owner.scope === 'user') {
       return c.json<VerifyKeyResponse>({
@@ -67,7 +77,7 @@ export const publicImport = new Hono<AppEnv>()
   })
 
   .post('/import-by-key', async (c) => {
-    const owner = await keyOwner(c)
+    const owner = await keyOwner(c, c.env.KEY_IMPORT_LIMITER)
     const upload = await readUpload(c)
     const meter = new D1Meter()
     let account: KeyAccount

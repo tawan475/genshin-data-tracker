@@ -8,14 +8,16 @@
  * milliseconds, but they still dominate an import):
  *   1. one batch: latest snapshot, same-capture-time snapshot, the catalog
  *      (its compact chunks, plus v1 rows not repacked yet, probed by hash),
- *      the latest snapshot's sections with their bases, and which of the
- *      id-independent sections already exist
+ *      the latest snapshot's sections with their bases, which of the
+ *      id-independent sections already exist, and the owner's upload usage
+ *      and limits (upload-limits.ts)
  *   2. only if some artifacts are new: insert them (the `artifacts` table
  *      hands out their ids) and read their ids
  *   3. one batch: new sections, the snapshot row, the new artifacts as a
- *      catalog chunk, account update (atomic)
+ *      catalog chunk, the owner's upload day, account update (atomic)
  * An unchanged re-upload stops after 1 (plus a one-row update when it is a
- * later capture of the same inventory).
+ * later capture of the same inventory). An upload that will store something
+ * is checked against the upload limits before its first write (2 or 3).
  *
  * Lookups by hash are driven from json_each with CROSS JOIN, which makes
  * SQLite probe the unique index once per hash instead of scanning: D1 bills,
@@ -24,6 +26,7 @@
 
 import {
   GoodFormatError,
+  GoodLimitError,
   SLOTS,
   artifactKeyString,
   compactSubstats,
@@ -56,6 +59,13 @@ import { D1Meter } from '../lib/meter'
 import { dataVersionOf, recomputeAccount } from './accounts'
 import { listenerOf, listenerStatement, type Listener } from './live'
 import { REFS_SQL, REF_COLUMNS, toBytes, withLegacySchema } from './storage'
+import {
+  assertCanStore,
+  countUploadStatement,
+  readUsage,
+  usageStatement,
+  utcDay,
+} from './upload-limits'
 
 export interface Upload {
   text: string
@@ -162,7 +172,9 @@ async function importOnce(
   legacy: boolean,
 ): Promise<ImportResult> {
   const accountId = account.id
-  const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
+  const now = Date.now()
+  const day = utcDay(now)
+  const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp, now)
   const sections = await encodeStaticSections(prepared, MATERIALS)
   const player = prepared.good.player ? await storedPlayer(prepared.good.player) : null
   const warnings = uidWarnings(account, prepared)
@@ -188,20 +200,28 @@ async function importOnce(
   if (player) staticHashes.push(shortHashHex(player.hash))
 
   // 1.
-  const [latestResult, sameTimeResult, idsResult, chunksResult, blobsResult, existingResult] =
-    await meter.batch(d1, 'lookup', [
-      d1.prepare(latestSql(legacy)).bind(accountId),
-      d1.prepare(sameTimeSql(legacy)).bind(accountId, takenAt),
-      selectArtifactIds(d1, accountId, hashes),
-      d1.prepare('SELECT id, data FROM artifact_chunks WHERE account_id = ?1').bind(accountId),
-      d1.prepare(LATEST_BLOBS_SQL).bind(accountId),
-      d1
-        .prepare(
-          `SELECT b.id, hex(b.hash) AS hash, b.kind FROM json_each(?2) AS j
+  const [
+    latestResult,
+    sameTimeResult,
+    idsResult,
+    chunksResult,
+    blobsResult,
+    existingResult,
+    usageResult,
+  ] = await meter.batch(d1, 'lookup', [
+    d1.prepare(latestSql(legacy)).bind(accountId),
+    d1.prepare(sameTimeSql(legacy)).bind(accountId, takenAt),
+    selectArtifactIds(d1, accountId, hashes),
+    d1.prepare('SELECT id, data FROM artifact_chunks WHERE account_id = ?1').bind(accountId),
+    d1.prepare(LATEST_BLOBS_SQL).bind(accountId),
+    d1
+      .prepare(
+        `SELECT b.id, hex(b.hash) AS hash, b.kind FROM json_each(?2) AS j
            CROSS JOIN section_blobs AS b ON b.account_id = ?1 AND b.hash = unhex(j.value)`,
-        )
-        .bind(accountId, JSON.stringify(staticHashes)),
-    ])
+      )
+      .bind(accountId, JSON.stringify(staticHashes)),
+    usageStatement(d1, accountId, day),
+  ])
   const latest = (latestResult!.results[0] as LatestRow | undefined) ?? null
   const sameTime = sameTimeResult!.results[0] as SameTimeRow | undefined
   const legacyIds = idMap(idsResult!.results)
@@ -212,6 +232,7 @@ async function importOnce(
       { id: row.id as number, code: row.kind as number },
     ]),
   )
+  const usage = readUsage(usageResult!.results[0])
 
   // Ids for every identity: a v1 row by hash, or a chunk by packed bytes.
   const artifactIds = new Map<string, number>()
@@ -227,6 +248,8 @@ async function importOnce(
   const missing = hashes.filter((hash) => !artifactIds.has(hash))
   let staged: { id: number; identity: ArtifactIdentity }[] = []
   if (missing.length > 0) {
+    // An artifact the catalog lacks: this upload stores a snapshot.
+    assertCanStore(usage, now)
     const inserted = await insertArtifacts(d1, meter, accountId, missing, identities, chunks.maxId)
     for (const hash of missing) {
       // A chunk written since step 1 may hold it already: use that id.
@@ -296,6 +319,8 @@ async function importOnce(
     return response('unchanged', latest.id, 0, dataVersionOf(bumped) ?? null, listenerOf(listening))
   }
 
+  assertCanStore(usage, now)
+
   // The latest snapshot's sections are what new ones are deltas of or
   // compressed against; a v1 latest has none, so everything is stored whole
   // (once per account, until repack converts it).
@@ -333,8 +358,16 @@ async function importOnce(
     }),
   )
   const snapshotIndex = statements.length - 1
-  statements.push(...catalogChunkStatements(d1, accountId, staged))
-  statements.push(recomputeAccount(d1, accountId), listenerStatement(d1, accountId))
+  const chunkBytes = { bytes: 0 }
+  statements.push(...catalogChunkStatements(d1, accountId, staged, chunkBytes))
+  statements.push(
+    countUploadStatement(d1, accountId, day, plan.storedSize + chunkBytes.bytes, {
+      takenAt,
+      contentKey: key,
+    }),
+    recomputeAccount(d1, accountId),
+    listenerStatement(d1, accountId),
+  )
 
   let results: D1Result<Record<string, unknown>>[]
   try {
@@ -369,7 +402,10 @@ async function importOnce(
   )
 }
 
-/** Parses and normalises a GOOD file; malformed input is a 400. */
+/**
+ * Parses and normalises a GOOD file; malformed input is a 400, a file over
+ * GOOD_LIMITS (more items than the game holds, an overlong key) a 422.
+ */
 export async function parseUpload(text: string): Promise<PreparedSnapshot> {
   let input: unknown
   try {
@@ -378,8 +414,9 @@ export async function parseUpload(text: string): Promise<PreparedSnapshot> {
     throw new ApiError(400, 'invalid_json', 'The file is not valid JSON')
   }
   try {
-    return await prepareSnapshot(input)
+    return await prepareSnapshot(input, { materials: MATERIALS })
   } catch (error) {
+    if (error instanceof GoodLimitError) throw new ApiError(422, error.code, error.message)
     if (error instanceof GoodFormatError) throw new ApiError(400, 'invalid_good', error.message)
     throw error
   }
@@ -498,6 +535,8 @@ export function catalogChunkStatements(
   d1: D1Database,
   accountId: number,
   entries: readonly { id: number; identity: ArtifactIdentity }[],
+  /** Adds the bytes of the chunks it writes to `written.bytes`. */
+  written?: { bytes: number },
 ): D1PreparedStatement[] {
   const statements: D1PreparedStatement[] = []
   for (let i = 0; i < entries.length; i += CATALOG_CHUNK_SIZE) {
@@ -505,6 +544,8 @@ export function catalogChunkStatements(
     const ids = JSON.stringify(part.map((e) => e.id))
     const first = part[0]!.id
     const last = part.at(-1)!.id
+    const data = encodeCatalogChunk(part)
+    if (written) written.bytes += data.length
     statements.push(
       d1
         .prepare(
@@ -513,7 +554,7 @@ export function catalogChunkStatements(
            WHERE (SELECT count(*) FROM artifacts
                   WHERE account_id = ?1 AND id IN (SELECT value FROM json_each(?6))) = ?4`,
         )
-        .bind(accountId, first, last, part.length, encodeCatalogChunk(part), ids),
+        .bind(accountId, first, last, part.length, data, ids),
       d1
         .prepare(
           `DELETE FROM artifacts WHERE account_id = ?1 AND id IN (SELECT value FROM json_each(?2))

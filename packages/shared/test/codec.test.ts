@@ -14,6 +14,9 @@ import {
   encodeArtifactsDelta,
   encodeSnapshot,
   extraSectionsOf,
+  GOOD_LIMITS,
+  GoodFormatError,
+  GoodLimitError,
   inflateRaw,
   normalizeGood,
   prepareSnapshot,
@@ -76,7 +79,7 @@ async function roundTrip(
   catalog = new Catalog(),
   bases: Partial<SnapshotBases> = {},
 ) {
-  const prepared = await prepareSnapshot(input)
+  const prepared = await prepareSnapshot(input, { materials: MATERIALS })
   catalog.add(prepared)
   const encoded = await withBases(
     await encodeSnapshot(prepared, catalog.ids, MATERIALS),
@@ -140,7 +143,7 @@ class Store {
   constructor(private readonly useBases = true) {}
 
   async upload(input: unknown, takenAt: number): Promise<BundleSnapshot> {
-    const prepared = await prepareSnapshot(input)
+    const prepared = await prepareSnapshot(input, { materials: MATERIALS })
     this.catalog.add(prepared)
     let encoded = await encodeSnapshot(prepared, this.catalog.ids, MATERIALS)
     const latest = this.rows.reduce<BundleSnapshot | null>(
@@ -213,7 +216,7 @@ class Store {
 
 /** What a perfect round trip must produce: the normalized input, order-insensitive. */
 function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
-  const good = normalizeGood(input)
+  const good = normalizeGood(input, { materials: MATERIALS })
   const expected: Omit<Good, 'timestamp'> = {
     format: good.format,
     version: good.version,
@@ -406,6 +409,102 @@ describe('snapshot codec', () => {
   it('rejects JSON that is not a GOOD file', async () => {
     await expect(prepareSnapshot({ hello: 'world' })).rejects.toThrow(/Not a GOOD file/)
     await expect(prepareSnapshot([])).rejects.toThrow(/JSON object/)
+  })
+
+  it('refuses a file with more items than the game holds, and takes one at the limit', async () => {
+    const limitError = (input: unknown, code: string, message: RegExp) =>
+      expect(prepareSnapshot(input, { materials: MATERIALS })).rejects.toSatisfy(
+        (error) =>
+          error instanceof GoodLimitError &&
+          error instanceof GoodFormatError &&
+          error.code === code &&
+          message.test(error.message),
+      )
+    const times = (n: number) => Array.from({ length: n }, (_, i) => i)
+    const artifact = sample.artifacts[1]!
+    const weapon = sample.weapons[1]!
+    const character = sample.characters[0]!
+    const keyed = (n: number) => Object.fromEntries(times(n).map((i) => [`Item${i}`, 1]))
+    const over: [string, Record<string, unknown>][] = [
+      ['characters', { characters: times(GOOD_LIMITS.characters + 1).map(() => character) }],
+      ['weapons', { weapons: times(GOOD_LIMITS.weapons + 1).map(() => weapon) }],
+      ['artifacts', { artifacts: times(GOOD_LIMITS.artifacts + 1).map(() => artifact) }],
+      ['materials', { materials: keyed(GOOD_LIMITS.materialKeys + 1) }],
+      ['achievements', { gi_achievements: times(GOOD_LIMITS.achievements + 1) }],
+      ['achievement times', { gi_achievement_times: keyed(GOOD_LIMITS.achievements + 1) }],
+      ['character extras', { gi_characters: keyed(GOOD_LIMITS.characters + 1) }],
+    ]
+    for (const [what, fields] of over) {
+      await limitError({ ...sample, ...fields }, 'too_many_items', new RegExp(` ${what}; at most`))
+    }
+    // Malformed entries count too: the cap is on what was sent.
+    await limitError(
+      { ...sample, artifacts: times(GOOD_LIMITS.artifacts + 1) },
+      'too_many_items',
+      /4,051 artifacts; at most 4,050/,
+    )
+    await limitError(
+      {
+        ...sample,
+        artifacts: [{ ...artifact, substats: times(7).map(() => ({ key: 'hp', value: 1 })) }],
+      },
+      'too_many_items',
+      /7 substats; at most 6/,
+    )
+
+    const atLimit = await prepareSnapshot(
+      {
+        ...sample,
+        weapons: times(GOOD_LIMITS.weapons).map(() => weapon),
+        artifacts: times(GOOD_LIMITS.artifacts).map(() => artifact),
+        materials: keyed(GOOD_LIMITS.materialKeys),
+        gi_achievements: times(GOOD_LIMITS.achievements),
+      },
+      { materials: MATERIALS },
+    )
+    expect(atLimit.summary.artifacts).toBe(GOOD_LIMITS.artifacts)
+    expect(atLimit.good.materials.size).toBe(GOOD_LIMITS.materialKeys)
+  })
+
+  it('refuses a key longer than any real one unless the material dictionary knows it', async () => {
+    const long = 'X'.repeat(GOOD_LIMITS.keyLength + 1)
+    const fits = 'X'.repeat(GOOD_LIMITS.keyLength)
+    const artifact = sample.artifacts[0]!
+    const cases: [string, Record<string, unknown>][] = [
+      ['source', { source: long }],
+      ['character key', { characters: [{ ...sample.characters[0]!, key: long }] }],
+      ['weapon key', { weapons: [{ ...sample.weapons[0]!, key: long }] }],
+      ['weapon location', { weapons: [{ ...sample.weapons[0]!, location: long }] }],
+      ['artifact set key', { artifacts: [{ ...artifact, setKey: long }] }],
+      ['artifact location', { artifacts: [{ ...artifact, location: long }] }],
+      ['substat key', { artifacts: [{ ...artifact, substats: [{ key: long, value: 1 }] }] }],
+      ['material key', { materials: { [long]: 1 } }],
+      ['character key', { gi_characters: { [long]: { friendship: 10 } } }],
+    ]
+    for (const [what, fields] of cases) {
+      await expect(
+        prepareSnapshot({ ...sample, ...fields }, { materials: MATERIALS }),
+      ).rejects.toSatisfy(
+        (error) =>
+          error instanceof GoodLimitError &&
+          error.code === 'key_too_long' &&
+          error.message.startsWith(`A ${what} in this file is 65 characters long`),
+      )
+    }
+    const ok = await prepareSnapshot(
+      { ...sample, source: fits, materials: { [fits]: 1 } },
+      { materials: MATERIALS },
+    )
+    expect(ok.good.source).toBe(fits)
+
+    // The game's own longest keys are materials (90 characters): known, they pass.
+    const known = MATERIALS.keys.filter((key) => key.length > GOOD_LIMITS.keyLength)
+    expect(known.length).toBeGreaterThan(0)
+    const withKnown = { ...sample, materials: Object.fromEntries(known.map((k) => [k, 1])) }
+    const prepared = await prepareSnapshot(withKnown, { materials: MATERIALS })
+    expect([...prepared.good.materials.keys()]).toEqual(known)
+    // Without the dictionary nothing is known.
+    await expect(prepareSnapshot(withKnown)).rejects.toThrow(GoodLimitError)
   })
 
   it('summarizes the figures the dashboard reads', async () => {

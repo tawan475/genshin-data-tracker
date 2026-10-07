@@ -39,6 +39,8 @@ import {
   sampleExtras,
   sampleGood,
   signUp,
+  withEnv,
+  type Transport,
 } from './client'
 
 async function createAccount(client: Client) {
@@ -48,13 +50,21 @@ async function createAccount(client: Client) {
   })
 }
 
-function importByKey(key: string, good: unknown, timestamp?: number) {
-  return SELF.fetch(`${ORIGIN}/api/genshin-accounts-public/import-by-key`, {
+function importByKey(
+  key: string,
+  good: unknown,
+  timestamp?: number,
+  transport: Transport = (url, init) => SELF.fetch(url, init),
+) {
+  return transport(`${ORIGIN}/api/genshin-accounts-public/import-by-key`, {
     method: 'POST',
     headers: { 'x-import-key': key },
     body: irminsulForm(good, timestamp),
   })
 }
+
+/** Without the per-key upload limit (20 a minute), for tests that upload more. */
+const unlimited = withEnv({ KEY_IMPORT_LIMITER: undefined })
 
 /** JSON with object keys sorted, so field order never affects a comparison. */
 function stableStringify(value: unknown): string {
@@ -706,8 +716,8 @@ describe('user import key', () => {
   const capture = (uid: number, overrides: Partial<Good> = {}) =>
     sampleGood({ ...sampleExtras(uid), ...overrides })
 
-  async function upload(key: string, good: unknown, timestamp: number) {
-    const response = await importByKey(key, good, timestamp)
+  async function upload(key: string, good: unknown, timestamp: number, transport?: Transport) {
+    const response = await importByKey(key, good, timestamp, transport)
     return { status: response.status, body: (await response.json()) as ImportResponse }
   }
 
@@ -817,13 +827,18 @@ describe('user import key', () => {
     const { client } = await signUp()
     const key = await newUserKey(client)
     for (let n = 0; n < 20; n++) {
-      expect((await upload(key, capture(800_000_000 + n), 1_000)).status).toBe(201)
+      expect((await upload(key, capture(800_000_000 + n), 1_000, unlimited)).status).toBe(201)
     }
-    const refused = await importByKey(key, capture(899_999_999), 1_000)
+    const refused = await importByKey(key, capture(899_999_999), 1_000, unlimited)
     expect(refused.status).toBe(409)
     expect(await refused.json()).toMatchObject({ error: { code: 'account_limit' } })
     expect(await client.json<AccountResponse[]>('/api/accounts')).toHaveLength(20)
-    const existing = await upload(key, capture(800_000_005, { materials: { Mora: 1 } }), 2_000)
+    const existing = await upload(
+      key,
+      capture(800_000_005, { materials: { Mora: 1 } }),
+      2_000,
+      unlimited,
+    )
     expect(existing.body.account).toMatchObject({ uid: '800000005', created: false })
   })
 

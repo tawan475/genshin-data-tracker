@@ -3,7 +3,7 @@ import type { KeyDictionary } from '../dictionary'
 import type { Good } from '../good'
 import { sha256Hex128 } from '../hash'
 import { deflateRaw } from './compress'
-import { normalizeGood, type NormalizedGood } from './normalize'
+import { normalizeGood, type NormalizedGood, type NormalizeOptions } from './normalize'
 import {
   decodeAchievements,
   decodeAchievementTimes,
@@ -59,9 +59,16 @@ export interface PreparedSnapshot {
   summary: SnapshotSummary
 }
 
-/** Step 1 of an import: validate and hash. Needs no database. */
-export async function prepareSnapshot(input: unknown): Promise<PreparedSnapshot> {
-  const good = normalizeGood(input)
+/**
+ * Step 1 of an import: validate and hash. Needs no database. The server
+ * passes the material dictionary (`options.materials`), so a known material
+ * key is never refused for its length.
+ */
+export async function prepareSnapshot(
+  input: unknown,
+  options: NormalizeOptions = {},
+): Promise<PreparedSnapshot> {
+  const good = normalizeGood(input, options)
   const artifactHashes = await Promise.all(
     good.artifacts.map((a) => hashArtifactIdentity(a.identity)),
   )

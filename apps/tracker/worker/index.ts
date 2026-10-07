@@ -39,7 +39,7 @@ app.route('/admin', admin)
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
 
 app.onError((error, c) => {
-  if (error instanceof ApiError) return c.json(errorBody(error), error.status)
+  if (error instanceof ApiError) return c.json(errorBody(error), error.status, error.headers)
   console.error(error)
   return c.json(errorBody(new ApiError(500, 'internal', 'Something went wrong')), 500)
 })

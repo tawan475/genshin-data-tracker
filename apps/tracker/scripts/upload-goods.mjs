@@ -68,6 +68,12 @@ async function worker() {
       })
       ms = performance.now() - started
       if (response.status !== 429 || attempt >= 20) break
+      // The daily upload quota only starts over at 00:00 UTC: no use waiting.
+      const refusal = await response
+        .clone()
+        .json()
+        .catch(() => ({}))
+      if (refusal.error?.code === 'daily_upload_limit') break
       await response.body?.cancel()
       await new Promise((r) => setTimeout(r, 3000))
     }
