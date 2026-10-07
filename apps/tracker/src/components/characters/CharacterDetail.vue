@@ -6,7 +6,6 @@ import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
-import RarityStars from '@/components/ui/RarityStars.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
@@ -28,6 +27,7 @@ import BuildStats from './BuildStats.vue'
 import CharacterTimeline from './CharacterTimeline.vue'
 import ConstellationIcons from './ConstellationIcons.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
+import GameStars from './GameStars.vue'
 import NamecardBackdrop from './NamecardBackdrop.vue'
 import SetBonuses from './SetBonuses.vue'
 import ShareCard from './ShareCard.vue'
@@ -167,7 +167,7 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
                 >
               </p>
               <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
-                <RarityStars v-if="c.rarity" :rarity="c.rarity" />
+                <GameStars v-if="c.rarity" :rarity="c.rarity" />
                 <span v-if="c.weaponType">{{ WEAPON_TYPE_LABELS[c.weaponType] }}</span>
                 <time
                   v-if="c.obtainedAt !== null"
