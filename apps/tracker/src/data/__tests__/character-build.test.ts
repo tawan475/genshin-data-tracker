@@ -5,6 +5,7 @@ import { constellationBoosts } from '@gdt/game-data/planner-math'
 import { computeStats, type PanelStats } from '@gdt/game-data/stats'
 import { describe, expect, it } from 'vitest'
 import {
+  bonusSets,
   buildPanel,
   damageBonuses,
   formatPanelValue,
@@ -246,6 +247,33 @@ describe('weaponLines', () => {
 
   it('is null for a weapon newer than the data', () => {
     expect(weaponLines({ ...homa, key: 'SomeNewSpear' })).toBeNull()
+  })
+})
+
+describe('bonusSets', () => {
+  const set = (setKey: string, count: number, thresholds: readonly number[] = [2, 4]) => ({
+    setKey,
+    count,
+    thresholds,
+  })
+
+  it('lists a 4-piece and leaves out the single piece', () => {
+    const listed = bonusSets([set('SilkenMoonsSerenade', 4), set('CrimsonWitchOfFlames', 1)])
+    expect(listed.map((b) => [b.set.setKey, b.pieces])).toEqual([['SilkenMoonsSerenade', 4]])
+  })
+
+  it('lists 2 + 2, and a 5th or 3rd piece reads as the bonus it reaches', () => {
+    expect(bonusSets([set('A', 2), set('B', 3)]).map((b) => [b.set.setKey, b.pieces])).toEqual([
+      ['A', 2],
+      ['B', 2],
+    ])
+    expect(bonusSets([set('A', 5)])[0]!.pieces).toBe(4)
+  })
+
+  it('lists nothing when no set reaches 2 pieces, nor 1-piece bonuses', () => {
+    expect(bonusSets([set('A', 1), set('B', 1), set('C', 1)])).toEqual([])
+    expect(bonusSets([set('PrayersForWisdom', 1, [1])])).toEqual([])
+    expect(bonusSets([])).toEqual([])
   })
 })
 

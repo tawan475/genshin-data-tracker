@@ -214,14 +214,14 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
       <section class="min-w-0" aria-labelledby="detail-artifacts">
         <div class="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
-          <SetBonuses v-if="c.sets.length" :sets="c.sets" />
+          <SetBonuses v-if="c.artifactCount" :sets="c.sets" />
           <span v-else class="text-sm text-text-muted">No artifacts</span>
           <CritValue
             v-if="c.artifactCount"
             :value="c.cv"
             scope="build"
             label
-            class="text-sm"
+            class="ml-auto text-sm"
             :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
           />
         </div>
