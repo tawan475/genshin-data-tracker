@@ -1,8 +1,8 @@
 /**
  * Account data, fetched once per data version and decoded in the browser.
  *
- * The server stores snapshots as deduplicated, deflated sections and sends
- * them untouched (a GDT1 bundle); this module inflates and rebuilds them.
+ * The server stores snapshots as deduplicated, compressed sections and sends
+ * them untouched (a GDT2 bundle); this module decodes and rebuilds them.
  * Everything is cached by `${accountId}:${dataVersion}`: an import or delete
  * moves the version, so stale entries are simply never asked for again. The
  * HTTP layer adds a second cache: responses carry an ETag on the same
@@ -13,10 +13,9 @@ import { accountPlayer, type AccountPlayer } from '@/data/account-player'
 import {
   artifactRows,
   catalogFromRows,
+  decodeBundle,
   decodePlayer,
   decodeSnapshot,
-  inflateBundle,
-  readBundle,
   storedSnapshotOf,
   type BundleSnapshot,
   type CatalogEntry,
@@ -24,7 +23,7 @@ import {
   type KeyDictionary,
   type SnapshotResponse,
 } from '@gdt/shared'
-import { api } from '@/api'
+import { api, BUNDLE_FORMAT } from '@/api'
 
 export interface AccountRef {
   id: number
@@ -43,7 +42,7 @@ export type SectionName =
 
 export interface DecodedBundle {
   snapshots: BundleSnapshot[]
-  /** Section hash -> inflated JSON text. */
+  /** Section key -> its canonical JSON text (see decodeBundle). */
   texts: Map<string, string>
 }
 
@@ -51,7 +50,8 @@ const cache = new Map<string, Promise<unknown>>()
 const MAX_ENTRIES = 40
 
 function cached<T>(account: AccountRef, kind: string, load: () => Promise<T>): Promise<T> {
-  const key = `${account.id}:${account.dataVersion}:${kind}`
+  // The bundle layout is part of the key: a decoded bundle never outlives a layout change.
+  const key = `${account.id}:${account.dataVersion}:${BUNDLE_FORMAT}:${kind}`
   let entry = cache.get(key) as Promise<T> | undefined
   if (!entry) {
     entry = load()
@@ -79,10 +79,7 @@ export function loadBundle(
   options: { ids?: number[]; sections?: SectionName[] } = {},
 ): Promise<DecodedBundle> {
   const variant = `bundle:${options.sections?.join('+') ?? 'all'}:${options.ids?.join(',') ?? 'all'}`
-  return cached(account, variant, async () => {
-    const { manifest, blobs } = readBundle(await api.bundle(account.id, options))
-    return { snapshots: manifest.snapshots, texts: await inflateBundle(blobs) }
-  })
+  return cached(account, variant, async () => decodeBundle(await api.bundle(account.id, options)))
 }
 
 let materialsDictionary: Promise<KeyDictionary> | null = null

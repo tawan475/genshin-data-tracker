@@ -1,47 +1,61 @@
 /**
  * The import pipeline: one GOOD file in, one snapshot (or nothing) out.
+ * New snapshots are written in storage format v2 (@gdt/shared codec/store-v2.ts:
+ * section blobs by id, binary layouts, the summary and GOOD header in `meta`);
+ * rows from before are read as they are until the repack job converts them.
  *
- * D1 round trips, typical case (the Worker runs at the edge, D1 in APAC, so
- * each round trip is tens of milliseconds and dominates an import):
- *   1. one batch: latest snapshot, same-capture-time snapshot, catalog ids for
- *      the upload's artifacts, the latest snapshot's bases (materials keyframe,
- *      artifacts and achievement-times bases), and which of the id-independent
- *      sections already exist
- *   2. only if some artifacts are new: insert them and read their ids
- *   3. one batch: new sections, the snapshot row, account update (atomic)
+ * D1 round trips, typical case (the Worker runs next to D1, so each is a few
+ * milliseconds, but they still dominate an import):
+ *   1. one batch: latest snapshot, same-capture-time snapshot, the catalog
+ *      (its compact chunks, plus v1 rows not repacked yet, probed by hash),
+ *      the latest snapshot's sections with their bases, and which of the
+ *      id-independent sections already exist
+ *   2. only if some artifacts are new: insert them (the `artifacts` table
+ *      hands out their ids) and read their ids
+ *   3. one batch: new sections, the snapshot row, the new artifacts as a
+ *      catalog chunk, account update (atomic)
  * An unchanged re-upload stops after 1 (plus a one-row update when it is a
  * later capture of the same inventory).
  *
  * Lookups by hash are driven from json_each with CROSS JOIN, which makes
- * SQLite probe the unique index once per hash instead of scanning the
- * account's whole catalog: D1 bills, and waits on, every row read.
+ * SQLite probe the unique index once per hash instead of scanning: D1 bills,
+ * and waits on, every row read.
  */
 
 import {
   GoodFormatError,
+  SLOTS,
+  artifactKeyString,
   compactSubstats,
   completeSnapshot,
-  deflateRaw,
+  contentKey,
+  decodeCatalogChunk,
+  encodeCatalogChunk,
+  encodeSnapshotMeta,
   encodeStaticSections,
-  extraSectionsOf,
-  inflateRaw,
+  planSnapshotV2,
   prepareSnapshot,
   resolveImportTimestamp,
-  withBases,
+  shortHashHex,
+  storedPlayer,
+  BlobDecoder,
   type ArtifactIdentity,
-  type EncodedSnapshot,
+  type BlobRef,
   type ImportResponse,
   type ImportWarning,
+  type KnownBlob,
   type PreparedSnapshot,
+  type RawBlob,
   type Section,
-  type SectionBase,
-  type SnapshotBases,
+  type Slot,
+  type SnapshotPlan,
 } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { ApiError, isUniqueViolation } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { dataVersionOf, recomputeAccount } from './accounts'
 import { listenerOf, listenerStatement, type Listener } from './live'
+import { REFS_SQL, REF_COLUMNS, toBytes, withLegacySchema } from './storage'
 
 export interface Upload {
   text: string
@@ -50,35 +64,48 @@ export interface Upload {
   timestamp: unknown
 }
 
-interface LatestRow {
+interface LatestRow extends Record<string, unknown> {
   id: number
   taken_at: number
-  content_hash: string
-  artifacts_hash: string
-  materials_hash: string
-  achievement_times_hash: string | null
+  content_hash: string | null
+  content_key: number | null
+  characters_ref: number | null
+}
+
+interface SameTimeRow {
+  id: number
+  content_hash: string | null
+  content_key: number | null
 }
 
 /** Artifacts per INSERT statement; keeps each bound JSON parameter well under D1's limits. */
 const ARTIFACT_INSERT_CHUNK = 400
+/** Artifacts per catalog chunk an import writes (repack merges small ones). */
+export const CATALOG_CHUNK_SIZE = 512
 
-const LATEST_SQL = `SELECT id, taken_at, content_hash, artifacts_hash, materials_hash,
-    achievement_times_hash
+/** The latest live snapshot (a v1 row's content hash only while the schema has v1). */
+const latestSql = (legacy: boolean) => `SELECT id, taken_at,
+    ${legacy ? 'content_hash' : 'NULL AS content_hash'}, content_key, ${REFS_SQL}
   FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
   ORDER BY taken_at DESC, id DESC LIMIT 1`
 
 /**
- * The full sections the latest snapshot builds on, which a new snapshot's
- * deltas use too: its materials keyframe, and its artifacts / achievement
- * times base (the section itself when it is stored in full, as in every row
- * from before 0009). Up to three rows, told apart by kind.
+ * The latest snapshot's v2 sections and every blob they need (bases, and
+ * their dictionaries), with data: at most three levels. Nothing for a v1 row.
  */
-const BASES_SQL = `SELECT b.kind, b.hash, b.data FROM (
-    SELECT materials_keyframe_hash AS m, coalesce(artifacts_base_hash, artifacts_hash) AS a,
-      coalesce(achievement_times_base_hash, achievement_times_hash) AS t
-    FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
-    ORDER BY taken_at DESC, id DESC LIMIT 1) AS latest
-  CROSS JOIN blobs AS b ON b.account_id = ?1 AND b.hash IN (latest.m, latest.a, latest.t)`
+const LATEST_BLOBS_SQL = `WITH RECURSIVE latest AS (
+    SELECT ${REFS_SQL} FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+    ORDER BY taken_at DESC, id DESC LIMIT 1),
+  need(id, depth) AS (
+    SELECT j.value, 0 FROM latest, json_each(json_array(${REFS_SQL})) AS j
+    UNION SELECT b.base_id, n.depth + 1 FROM section_blobs AS b JOIN need AS n ON b.id = n.id
+      WHERE b.base_id IS NOT NULL AND n.depth < 3)
+  SELECT b.id, b.kind, hex(b.hash) AS hash, b.base_id, b.data FROM section_blobs AS b
+  WHERE b.account_id = ?1 AND b.id IN (SELECT id FROM need WHERE id IS NOT NULL)`
+
+const sameTimeSql = (legacy: boolean) => `SELECT id,
+    ${legacy ? 'content_hash' : 'NULL AS content_hash'}, content_key FROM snapshots
+  WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`
 
 /** The account an upload goes to: its id and the UID it was given (if any). */
 export interface ImportTarget {
@@ -97,6 +124,9 @@ export interface ImportResult {
   listener?: Listener
 }
 
+/** A section another write removed between our read and our write: start over. */
+class Retry extends Error {}
+
 /**
  * Stores `upload` in `account`. `parsed` is the upload already parsed by
  * `parseUpload`, for a caller that had to read it first (a user key routes by
@@ -109,10 +139,32 @@ export async function importSnapshot(
   meter = new D1Meter(),
   parsed?: PreparedSnapshot,
 ): Promise<ImportResult> {
-  const accountId = account.id
   const prepared = parsed ?? (await parseUpload(upload.text))
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await withLegacySchema((legacy) =>
+        importOnce(d1, account, upload, meter, prepared, legacy),
+      )
+    } catch (error) {
+      // Only the daily maintenance or repack can pull a section away mid-import.
+      if (error instanceof Retry && attempt < 3) continue
+      throw error
+    }
+  }
+}
+
+async function importOnce(
+  d1: D1Database,
+  account: ImportTarget,
+  upload: Upload,
+  meter: D1Meter,
+  prepared: PreparedSnapshot,
+  legacy: boolean,
+): Promise<ImportResult> {
+  const accountId = account.id
   const takenAt = resolveImportTimestamp(upload.timestamp, prepared.good.timestamp)
   const sections = await encodeStaticSections(prepared, MATERIALS)
+  const player = prepared.good.player ? await storedPlayer(prepared.good.player) : null
   const warnings = uidWarnings(account, prepared)
 
   // Catalog entry for each distinct artifact identity in this upload.
@@ -121,52 +173,75 @@ export async function importSnapshot(
     if (!identities.has(hash)) identities.set(hash, prepared.good.artifacts[i]!.identity)
   })
   const hashes = [...identities.keys()]
+  // Sections whose hash needs no catalog ids: a server can ask which exist
+  // in the first round trip.
   const staticHashes = [
     sections.characters,
     sections.weapons,
     sections.materials,
     sections.achievements,
-    ...extraSectionsOf(sections),
+    sections.achievementTimes,
+    sections.characterExtras,
   ]
     .filter((s): s is Section => s !== null)
-    .map((s) => s.hash)
+    .map((s) => shortHashHex(s.hash))
+  if (player) staticHashes.push(shortHashHex(player.hash))
 
   // 1.
-  const [latestResult, sameTimeResult, idsResult, basesResult, existingResult] = await meter.batch(
-    d1,
-    'lookup',
-    [
-      d1.prepare(LATEST_SQL).bind(accountId),
-      d1
-        .prepare(
-          `SELECT id, content_hash FROM snapshots
-           WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
-        )
-        .bind(accountId, takenAt),
+  const [latestResult, sameTimeResult, idsResult, chunksResult, blobsResult, existingResult] =
+    await meter.batch(d1, 'lookup', [
+      d1.prepare(latestSql(legacy)).bind(accountId),
+      d1.prepare(sameTimeSql(legacy)).bind(accountId, takenAt),
       selectArtifactIds(d1, accountId, hashes),
-      d1.prepare(BASES_SQL).bind(accountId),
+      d1.prepare('SELECT id, data FROM artifact_chunks WHERE account_id = ?1').bind(accountId),
+      d1.prepare(LATEST_BLOBS_SQL).bind(accountId),
       d1
         .prepare(
-          `SELECT b.hash FROM json_each(?2) AS j
-           CROSS JOIN blobs AS b ON b.account_id = ?1 AND b.hash = j.value`,
+          `SELECT b.id, hex(b.hash) AS hash, b.kind FROM json_each(?2) AS j
+           CROSS JOIN section_blobs AS b ON b.account_id = ?1 AND b.hash = unhex(j.value)`,
         )
         .bind(accountId, JSON.stringify(staticHashes)),
-    ],
-  )
+    ])
   const latest = (latestResult!.results[0] as LatestRow | undefined) ?? null
-  const sameTime = sameTimeResult!.results[0] as { id: number; content_hash: string } | undefined
-  const artifactIds = idMap(idsResult!.results)
-  const existing = new Set(existingResult!.results.map((row) => row.hash as string))
+  const sameTime = sameTimeResult!.results[0] as SameTimeRow | undefined
+  const legacyIds = idMap(idsResult!.results)
+  const chunks = readChunks(chunksResult!.results)
+  const existing = new Map(
+    existingResult!.results.map((row) => [
+      (row.hash as string).toLowerCase(),
+      { id: row.id as number, code: row.kind as number },
+    ]),
+  )
+
+  // Ids for every identity: a v1 row by hash, or a chunk by packed bytes.
+  const artifactIds = new Map<string, number>()
+  const keys = new Map<string, string>()
+  for (const [hash, identity] of identities) {
+    const key = artifactKeyString(identity)
+    keys.set(hash, key)
+    const id = legacyIds.get(hash) ?? chunks.ids.get(key)
+    if (id !== undefined) artifactIds.set(hash, id)
+  }
 
   // 2.
   const missing = hashes.filter((hash) => !artifactIds.has(hash))
+  let staged: { id: number; identity: ArtifactIdentity }[] = []
   if (missing.length > 0) {
-    for (const [hash, id] of await insertArtifacts(d1, meter, accountId, missing, identities)) {
+    const inserted = await insertArtifacts(d1, meter, accountId, missing, identities, chunks.maxId)
+    for (const hash of missing) {
+      // A chunk written since step 1 may hold it already: use that id.
+      const id = inserted.chunkIds.get(keys.get(hash)!) ?? inserted.ids.get(hash)
+      if (id === undefined) throw new Error(`No catalog id for artifact ${hash}`)
       artifactIds.set(hash, id)
+      if (!inserted.chunkIds.has(keys.get(hash)!))
+        staged.push({ id, identity: identities.get(hash)! })
     }
+    staged = staged.sort((a, b) => a.id - b.id)
   }
 
-  let encoded = await completeSnapshot(sections, prepared, artifactIds)
+  const encoded = await completeSnapshot(sections, prepared, artifactIds)
+  const key = contentKey(encoded.contentHash)
+  const legacyKey = contentKey(encoded.legacyContentHash)
   const response = (
     status: ImportResponse['status'],
     snapshotId: number,
@@ -186,13 +261,17 @@ export async function importSnapshot(
     ...(listener ? { listener } : {}),
   })
   // The same capture, also when it was stored before irminsul's extra keys
-  // were kept (its hash then left them out).
-  const sameCapture = (hash: string) =>
-    hash === encoded.contentHash || hash === encoded.legacyContentHash
+  // were kept (its hash then left them out), in either storage format.
+  const sameCapture = (row: SameTimeRow) =>
+    row.content_key !== null
+      ? row.content_key === key || row.content_key === legacyKey
+      : row.content_hash === encoded.contentHash || row.content_hash === encoded.legacyContentHash
+  const sameInventory = (row: LatestRow) =>
+    row.content_key !== null ? row.content_key === key : row.content_hash === encoded.contentHash
 
   if (sameTime) {
     // A re-upload of the same capture is a no-op, so uploaders can retry freely.
-    if (sameCapture(sameTime.content_hash)) return response('unchanged', sameTime.id)
+    if (sameCapture(sameTime)) return response('unchanged', sameTime.id)
     throw new ApiError(
       409,
       'duplicate_capture',
@@ -200,7 +279,7 @@ export async function importSnapshot(
     )
   }
 
-  if (latest && latest.content_hash === encoded.contentHash && takenAt > latest.taken_at) {
+  if (latest && sameInventory(latest) && takenAt > latest.taken_at) {
     // Same inventory captured again later: remember when it was last seen
     // instead of storing a duplicate snapshot.
     const [, bumped, listening] = await meter.batch(d1, 'seen', [
@@ -217,72 +296,45 @@ export async function importSnapshot(
     return response('unchanged', latest.id, 0, dataVersionOf(bumped) ?? null, listenerOf(listening))
   }
 
-  const bases = await readBases(basesResult!.results)
-  // Sections known to be stored already cost nothing: the id-independent ones
-  // found in step 1, the latest snapshot's (an unchanged artifacts or times
-  // section is usually the latest's delta again) and the bases themselves.
-  const stored = new Set(existing)
-  for (const hash of [
-    latest?.artifacts_hash,
-    latest?.materials_hash,
-    latest?.achievement_times_hash,
-  ]) {
-    if (hash) stored.add(hash)
-  }
-  for (const base of Object.values(bases)) if (base) stored.add(base.hash)
-  encoded = await withBases(encoded, prepared, MATERIALS, bases, (hash) => stored.has(hash))
-
-  const toStore = sectionsOf(encoded).filter((s) => !stored.has(s.hash))
-  const compressed = await Promise.all(toStore.map((section) => deflateRaw(section.json)))
-  const storedSize = compressed.reduce((sum, bytes) => sum + bytes.length, 0)
+  // The latest snapshot's sections are what new ones are deltas of or
+  // compressed against; a v1 latest has none, so everything is stored whole
+  // (once per account, until repack converts it).
+  const known = latest?.characters_ref != null ? knownBlobs(blobsResult!.results) : null
+  const plan = await planSnapshotV2({
+    encoded,
+    prepared,
+    materialsDictionary: MATERIALS,
+    latest: known
+      ? Object.fromEntries(
+          SLOTS.map((slot) => [
+            slot,
+            known.get((latest![REF_COLUMNS[slot]] as number) ?? -1) ?? null,
+          ]),
+        )
+      : {},
+    existing,
+  })
 
   // 3.
-  const statements = toStore.map((section, i) =>
-    d1
-      .prepare(
-        `INSERT INTO blobs (account_id, hash, kind, data, raw_size) VALUES (?1, ?2, ?3, ?4, ?5)
-         ON CONFLICT DO NOTHING`,
-      )
-      .bind(accountId, section.hash, section.kind, compressed[i]!, section.json.length),
-  )
+  const statements = plan.blobs.map((blob) => insertBlobStatement(d1, accountId, blob))
   statements.push(
-    d1
-      .prepare(
-        `INSERT INTO snapshots (account_id, taken_at, last_seen_at, created_at, format, version, source,
-           raw_size, stored_size, content_hash, characters_hash, weapons_hash, artifacts_hash,
-           materials_hash, materials_keyframe_hash, achievements_hash, summary, player_hash,
-           achievement_times_hash, character_extras_hash, artifacts_base_hash,
-           achievement_times_base_hash)
-         VALUES (?1, ?2, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17,
-           ?18, ?19, ?20, ?21)
-         RETURNING id`,
-      )
-      .bind(
-        accountId,
-        takenAt,
-        Date.now(),
-        prepared.good.format,
-        prepared.good.version,
-        prepared.good.source,
-        upload.rawSize,
-        storedSize,
-        encoded.contentHash,
-        encoded.characters.hash,
-        encoded.weapons.hash,
-        encoded.artifacts.hash,
-        encoded.materials.hash,
-        encoded.materialsBase ?? encoded.materials.hash,
-        encoded.achievements?.hash ?? null,
-        JSON.stringify(prepared.summary),
-        encoded.player?.hash ?? null,
-        encoded.achievementTimes?.hash ?? null,
-        encoded.characterExtras?.hash ?? null,
-        encoded.artifactsBase,
-        encoded.achievementTimesBase,
-      ),
-    recomputeAccount(d1, accountId),
-    listenerStatement(d1, accountId),
+    insertSnapshotStatement(d1, accountId, legacy, {
+      takenAt,
+      rawSize: upload.rawSize,
+      contentKey: key,
+      plan,
+      meta: encodeSnapshotMeta({
+        format: prepared.good.format,
+        version: prepared.good.version,
+        source: prepared.good.source,
+        summary: prepared.summary,
+        playerVars: plan.playerVars,
+      }),
+    }),
   )
+  const snapshotIndex = statements.length - 1
+  statements.push(...catalogChunkStatements(d1, accountId, staged))
+  statements.push(recomputeAccount(d1, accountId), listenerStatement(d1, accountId))
 
   let results: D1Result<Record<string, unknown>>[]
   try {
@@ -291,13 +343,10 @@ export async function importSnapshot(
     // Lost a race with a concurrent upload of the same capture time.
     if (isUniqueViolation(error, 'snapshots')) {
       const row = await d1
-        .prepare(
-          `SELECT id, content_hash FROM snapshots
-           WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
-        )
+        .prepare(sameTimeSql(legacy))
         .bind(accountId, takenAt)
-        .first<{ id: number; content_hash: string }>()
-      if (row && sameCapture(row.content_hash)) return response('unchanged', row.id)
+        .first<SameTimeRow>()
+      if (row && sameCapture(row)) return response('unchanged', row.id)
       throw new ApiError(
         409,
         'duplicate_capture',
@@ -306,11 +355,15 @@ export async function importSnapshot(
     }
     throw error
   }
-  const snapshotId = results[toStore.length]!.results[0]!.id as number
+  const inserted = results[snapshotIndex]!.results[0] as { id: number } | undefined
+  // A section it points at was collected in between. The batch stored only
+  // sections (the next collection takes them) and the catalog chunk (which
+  // the next attempt finds), so try again from the top.
+  if (!inserted) throw new Retry()
   return response(
     'created',
-    snapshotId,
-    storedSize,
+    inserted.id,
+    plan.storedSize,
     dataVersionOf(results.at(-2)) ?? null,
     listenerOf(results.at(-1)),
   )
@@ -332,12 +385,6 @@ export async function parseUpload(text: string): Promise<PreparedSnapshot> {
   }
 }
 
-function sectionsOf(encoded: EncodedSnapshot): Section[] {
-  const sections = [encoded.characters, encoded.weapons, encoded.artifacts, encoded.materials]
-  if (encoded.achievements) sections.push(encoded.achievements)
-  return [...sections, ...extraSectionsOf(encoded)]
-}
-
 /**
  * A capture whose `gi_player.uid` is not the account's UID is probably another
  * account's inventory. It is stored anyway (the key decides where an upload
@@ -357,6 +404,7 @@ function uidWarnings(account: ImportTarget, prepared: PreparedSnapshot): ImportW
   ]
 }
 
+/** v1 catalog rows (not repacked yet) by identity hash. */
 function selectArtifactIds(
   d1: D1Database,
   accountId: number,
@@ -374,16 +422,35 @@ function idMap(rows: Record<string, unknown>[]): Map<string, number> {
   return new Map(rows.map((row) => [row.hash as string, row.id as number]))
 }
 
-/** Inserts catalog rows (idempotently) and returns the ids of `hashes`. */
+/** Catalog ids by packed identity, from chunk rows; and the highest chunk row id seen. */
+function readChunks(rows: Record<string, unknown>[]): { ids: Map<string, number>; maxId: number } {
+  const ids = new Map<string, number>()
+  let maxId = 0
+  for (const row of rows) {
+    maxId = Math.max(maxId, row.id as number)
+    for (const entry of decodeCatalogChunk(toBytes(row.data))) ids.set(entry.key, entry.id)
+  }
+  return { ids, maxId }
+}
+
+/**
+ * Inserts catalog rows (idempotently) and returns the ids of `hashes`; also
+ * any of them that a chunk written since `afterChunk` holds already.
+ */
 async function insertArtifacts(
   d1: D1Database,
   meter: D1Meter,
   accountId: number,
   hashes: string[],
   identities: ReadonlyMap<string, ArtifactIdentity>,
-): Promise<Map<string, number>> {
+  afterChunk: number,
+): Promise<{ ids: Map<string, number>; chunkIds: Map<string, number> }> {
   const now = Date.now()
-  const statements: D1PreparedStatement[] = []
+  const statements: D1PreparedStatement[] = [
+    d1
+      .prepare('SELECT id, data FROM artifact_chunks WHERE account_id = ?1 AND id > ?2')
+      .bind(accountId, afterChunk),
+  ]
   for (let i = 0; i < hashes.length; i += ARTIFACT_INSERT_CHUNK) {
     const rows = hashes.slice(i, i + ARTIFACT_INSERT_CHUNK).map((hash) => {
       const a = identities.get(hash)!
@@ -415,30 +482,160 @@ async function insertArtifacts(
   }
   statements.push(selectArtifactIds(d1, accountId, hashes))
   const results = await meter.batch(d1, 'catalog', statements)
-  return idMap(results[results.length - 1]!.results)
+  return {
+    ids: idMap(results[results.length - 1]!.results),
+    chunkIds: readChunks(results[0]!.results).ids,
+  }
 }
 
-/** The latest snapshot's bases (rows of BASES_SQL), inflated. */
-async function readBases(rows: Record<string, unknown>[]): Promise<SnapshotBases> {
-  const bases: SnapshotBases = { materials: null, artifacts: null, achievementTimes: null }
-  await Promise.all(
-    rows.map(async (row) => {
-      const kind = row.kind as string
-      if (kind !== 'materials' && kind !== 'artifacts' && kind !== 'achievementTimes') return
-      const data = row.data
-      const bytes =
-        data instanceof Uint8Array
-          ? data
-          : Array.isArray(data)
-            ? Uint8Array.from(data as number[])
-            : new Uint8Array(data as ArrayBuffer)
-      const base: SectionBase = {
-        hash: row.hash as string,
-        json: await inflateRaw(bytes),
-        size: bytes.length,
-      }
-      bases[kind] = base
-    }),
-  )
-  return bases
+/**
+ * Moves catalog rows into compact chunks: each chunk is written only while
+ * every id in it still has its v1 row, and those rows are deleted only once
+ * a chunk of exactly them exists, in one batch. Run against a concurrent
+ * repack, every identity ends up in exactly one place.
+ */
+export function catalogChunkStatements(
+  d1: D1Database,
+  accountId: number,
+  entries: readonly { id: number; identity: ArtifactIdentity }[],
+): D1PreparedStatement[] {
+  const statements: D1PreparedStatement[] = []
+  for (let i = 0; i < entries.length; i += CATALOG_CHUNK_SIZE) {
+    const part = entries.slice(i, i + CATALOG_CHUNK_SIZE)
+    const ids = JSON.stringify(part.map((e) => e.id))
+    const first = part[0]!.id
+    const last = part.at(-1)!.id
+    statements.push(
+      d1
+        .prepare(
+          `INSERT INTO artifact_chunks (account_id, first_id, last_id, count, data)
+           SELECT ?1, ?2, ?3, ?4, ?5
+           WHERE (SELECT count(*) FROM artifacts
+                  WHERE account_id = ?1 AND id IN (SELECT value FROM json_each(?6))) = ?4`,
+        )
+        .bind(accountId, first, last, part.length, encodeCatalogChunk(part), ids),
+      d1
+        .prepare(
+          `DELETE FROM artifacts WHERE account_id = ?1 AND id IN (SELECT value FROM json_each(?2))
+           AND EXISTS (SELECT 1 FROM artifact_chunks
+                       WHERE account_id = ?1 AND first_id = ?3 AND last_id = ?4 AND count = ?5)`,
+        )
+        .bind(accountId, ids, first, last, part.length),
+    )
+  }
+  return statements
+}
+
+/** Rows of LATEST_BLOBS_SQL, decoded, by id. */
+function knownBlobs(rows: Record<string, unknown>[]): Map<number, KnownBlob> {
+  const raw = new Map<number, RawBlob & { hash: string }>()
+  for (const row of rows) {
+    raw.set(row.id as number, {
+      id: row.id as number,
+      code: row.kind as number,
+      baseId: (row.base_id as number | null) ?? null,
+      data: toBytes(row.data),
+      hash: (row.hash as string).toLowerCase(),
+    })
+  }
+  const decoder = new BlobDecoder((id) => raw.get(id))
+  const known = new Map<number, KnownBlob>()
+  const build = (id: number): KnownBlob | null => {
+    const cached = known.get(id)
+    if (cached) return cached
+    const blob = raw.get(id)
+    if (!blob) return null
+    const entry: KnownBlob = {
+      id,
+      code: blob.code,
+      hash: blob.hash,
+      size: blob.data.length,
+      decoded: decoder.decode(id),
+      base: blob.baseId === null ? null : build(blob.baseId),
+    }
+    known.set(id, entry)
+    return entry
+  }
+  for (const id of raw.keys()) build(id)
+  return known
+}
+
+/** A blob row; its base must still exist, or nothing is inserted (and the snapshot then fails). */
+export function insertBlobStatement(
+  d1: D1Database,
+  accountId: number,
+  blob: { hash: string; code: number; base: BlobRef | null; data: Uint8Array },
+): D1PreparedStatement {
+  const [baseId, baseHash] = refParams(blob.base)
+  return d1
+    .prepare(
+      `INSERT INTO section_blobs (account_id, hash, kind, base_id, data)
+       SELECT ?1, unhex(?2), ?3, base.id, ?4 FROM (SELECT ${refSql('?5', '?6')} AS id) AS base
+       WHERE (?5 IS NULL AND ?6 IS NULL) OR base.id IS NOT NULL
+       ON CONFLICT DO NOTHING`,
+    )
+    .bind(accountId, blob.hash, blob.code, blob.data, baseId, baseHash)
+}
+
+/** SQL for a blob's id, by id (checked to exist) or by hash; ?1 is the account. */
+function refSql(idParam: string, hashParam: string): string {
+  return `coalesce((SELECT id FROM section_blobs WHERE id = ${idParam} AND account_id = ?1),
+    (SELECT id FROM section_blobs WHERE account_id = ?1 AND hash = unhex(${hashParam})))`
+}
+
+function refParams(ref: BlobRef | null): [number | null, string | null] {
+  if (ref === null) return [null, null]
+  return 'id' in ref ? [ref.id, null] : [null, ref.hash]
+}
+
+export interface SnapshotRowV2 {
+  takenAt: number
+  rawSize: number
+  contentKey: number
+  plan: Pick<SnapshotPlan, 'refs' | 'storedSize'>
+  meta: Uint8Array
+}
+
+/**
+ * The v2 snapshot row, inserted only when every section it names exists
+ * (RETURNING then has no row). The v1 NOT NULL columns get '' / 0.
+ */
+function insertSnapshotStatement(
+  d1: D1Database,
+  accountId: number,
+  legacy: boolean,
+  row: SnapshotRowV2,
+): D1PreparedStatement {
+  const params: unknown[] = [accountId, row.takenAt, Date.now(), row.rawSize, row.plan.storedSize]
+  params.push(row.contentKey, row.meta)
+  const selects: string[] = []
+  const guards: string[] = []
+  for (const slot of SLOTS) {
+    const [id, hash] = refParams(row.plan.refs[slot])
+    const idParam = `?${params.push(id)}`
+    const hashParam = `?${params.push(hash)}`
+    selects.push(`${refSql(idParam, hashParam)} AS ${REF_COLUMNS[slot]}`)
+    guards.push(
+      `((${idParam} IS NULL AND ${hashParam} IS NULL) OR r.${REF_COLUMNS[slot]} IS NOT NULL)`,
+    )
+  }
+  // While the v1 columns exist, their NOT NULL ones get '' / 0.
+  const [v1Columns, v1Values] = legacy
+    ? [
+        `format, version, source, content_hash, characters_hash, weapons_hash, artifacts_hash,
+         materials_hash, materials_keyframe_hash, summary, `,
+        `'', 0, '', '', '', '', '', '', '', '', `,
+      ]
+    : ['', '']
+  return d1
+    .prepare(
+      `INSERT INTO snapshots (account_id, taken_at, last_seen_at, created_at, raw_size,
+         stored_size, ${v1Columns}content_key, meta, ${REFS_SQL})
+       SELECT ?1, ?2, ?2, ?3, ?4, ?5, ${v1Values}?6, ?7,
+         ${SLOTS.map((slot) => `r.${REF_COLUMNS[slot]}`).join(', ')}
+       FROM (SELECT ${selects.join(', ')}) AS r
+       WHERE ${guards.join(' AND ')}
+       RETURNING id`,
+    )
+    .bind(...params)
 }

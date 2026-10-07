@@ -166,6 +166,23 @@ export const snapshots = sqliteTable(
     // full, as in every row written before 0009.
     artifactsBaseHash: text('artifacts_base_hash'),
     achievementTimesBaseHash: text('achievement_times_base_hash'),
+    // Storage format v2 (migration 0016; see @gdt/shared codec/store-v2.ts).
+    // A v2 row names its sections by `section_blobs.id` in the eight *_ref
+    // columns (characters_ref is never NULL in one, which is how a row tells
+    // its format) and keeps the v1 columns empty ('' / 0 / NULL) until they
+    // are dropped. Rows written before are converted by the repack job.
+    /** The first 47 bits of the content hash (codec/section-blob.ts contentKey). */
+    contentKey: integer('content_key'),
+    charactersRef: integer('characters_ref'),
+    weaponsRef: integer('weapons_ref'),
+    artifactsRef: integer('artifacts_ref'),
+    materialsRef: integer('materials_ref'),
+    achievementsRef: integer('achievements_ref'),
+    playerRef: integer('player_ref'),
+    achievementTimesRef: integer('achievement_times_ref'),
+    characterExtrasRef: integer('character_extras_ref'),
+    /** Summary, GOOD header and per-login player values (codec/snapshot-meta.ts). */
+    meta: bytes('meta'),
   },
   (t) => [
     index('snapshots_account_taken_idx').on(t.accountId, t.takenAt),
@@ -188,6 +205,55 @@ export const blobs = sqliteTable(
     rawSize: integer('raw_size').notNull(),
   },
   (t) => [primaryKey({ columns: [t.accountId, t.hash] })],
+)
+
+/**
+ * Snapshot sections in storage format v2 (migration 0016): each stored once
+ * per account under the first 8 bytes of its content address, with a stable
+ * id that snapshot rows point at. 8 bytes is enough: dedup only ever compares
+ * sections of one account, and two different ones sharing 64 bits, among
+ * even 100,000 sections in an account, is a ~3·10⁻¹⁰ chance. `kind` is the section kind code (+16 for a
+ * delta), `base_id` the blob this one needs to decode (a delta's base, or the
+ * blob whose payload is its DEFLATE dictionary), `data` the format byte and
+ * payload (@gdt/shared codec/section-blob.ts). Ids are never reused
+ * (AUTOINCREMENT), so a stale reference can only miss, never mislead.
+ */
+export const sectionBlobs = sqliteTable(
+  'section_blobs',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    hash: bytes('hash').notNull(),
+    kind: integer('kind').notNull(),
+    baseId: integer('base_id'),
+    data: bytes('data').notNull(),
+  },
+  (t) => [uniqueIndex('section_blobs_account_hash_unique').on(t.accountId, t.hash)],
+)
+
+/**
+ * The artifact catalog in storage format v2 (migration 0016): identities
+ * packed many to a row (@gdt/shared codec/catalog-binary.ts) under the same
+ * catalog ids, so snapshots point at them unchanged. An import adds one
+ * chunk for its new artifacts; repack merges small ones. Ids still come from
+ * `artifacts` (AUTOINCREMENT); a row there only lives until its identity is
+ * in a chunk.
+ */
+export const artifactChunks = sqliteTable(
+  'artifact_chunks',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    firstId: integer('first_id').notNull(),
+    lastId: integer('last_id').notNull(),
+    count: integer('count').notNull(),
+    data: bytes('data').notNull(),
+  },
+  (t) => [index('artifact_chunks_account_idx').on(t.accountId)],
 )
 
 /**

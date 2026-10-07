@@ -15,6 +15,7 @@ import {
   toRef,
 } from '../src'
 import frozen from '../src/dictionary/frozen.json'
+import { ARTIFACT_SETS } from '../src/dictionary/artifacts'
 import { MATERIALS } from '../src/dictionary/materials'
 
 describe('static dictionary', () => {
@@ -25,6 +26,7 @@ describe('static dictionary', () => {
     ['character', CHARACTERS],
     ['weapon', WEAPONS],
     ['material', MATERIALS],
+    ['artifactSet', { keys: ARTIFACT_SETS }],
   ] as const)('%s list is append-only', (kind, dictionary) => {
     const pin = frozen[kind]
     const prefix = dictionary.keys.slice(0, pin.count).join('\n')

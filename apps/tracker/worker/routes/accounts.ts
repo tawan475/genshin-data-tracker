@@ -36,6 +36,7 @@ import {
   type SectionName,
 } from '../services/export'
 import { importSnapshot } from '../services/import'
+import { metaOf, withLegacySchema } from '../services/storage'
 import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
 
 /**
@@ -45,6 +46,13 @@ import { listenerOf, listenerStatement, notifyUser, senderTab } from '../service
  * unlocked, unequipped artifact counts are artifact3 / artifact4 (migration 0008).
  */
 const SNAPSHOT_LIST_FORMAT = 2
+
+/**
+ * Part of a bundle's ETag, per layout: a GDT1 body cached by an older app is
+ * never revalidated into a GDT2 one, and the other way round. v2 storage
+ * changed how GDT1 names v2 sections (`#<id>` keys), hence "1b".
+ */
+const BUNDLE_FORMAT_ETAG = { 1: 'g1b', 2: 'g2' } as const
 
 export const accounts = new Hono<AppEnv>()
   .use(requireUser)
@@ -207,23 +215,29 @@ export const accounts = new Hono<AppEnv>()
     const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
     const cached = checkEtag(c, accountEtag(account, `snapshots.${SNAPSHOT_LIST_FORMAT}`))
     if (cached) return cached
-    const { results } = await c.env.DB.prepare(
-      `SELECT id, taken_at, last_seen_at, created_at, source, raw_size, stored_size, summary
-       FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL ORDER BY taken_at DESC, id DESC`,
+    const { results } = await withLegacySchema((legacy) =>
+      c.env.DB.prepare(
+        `SELECT id, taken_at, last_seen_at, created_at, raw_size, stored_size,
+           ${legacy ? 'format, version, source, summary, ' : ''}meta
+         FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL ORDER BY taken_at DESC, id DESC`,
+      )
+        .bind(account.id)
+        .all<Record<string, unknown>>(),
     )
-      .bind(account.id)
-      .all<Record<string, unknown>>()
     return c.json<SnapshotResponse[]>(
-      results.map((r) => ({
-        id: r.id as number,
-        takenAt: r.taken_at as number,
-        lastSeenAt: r.last_seen_at as number,
-        createdAt: r.created_at as number,
-        source: r.source as string,
-        rawSize: r.raw_size as number,
-        storedSize: r.stored_size as number,
-        summary: JSON.parse(r.summary as string),
-      })),
+      results.map((r) => {
+        const meta = metaOf(r)
+        return {
+          id: r.id as number,
+          takenAt: r.taken_at as number,
+          lastSeenAt: r.last_seen_at as number,
+          createdAt: r.created_at as number,
+          source: meta.source,
+          rawSize: r.raw_size as number,
+          storedSize: r.stored_size as number,
+          summary: meta.summary,
+        }
+      }),
     )
   })
 
@@ -270,19 +284,26 @@ export const accounts = new Hono<AppEnv>()
   })
 
   /**
-   * Stored sections for many snapshots in one binary GDT1 bundle:
-   * `?ids=1,2,3` (default: all live snapshots) and
-   * `?sections=materials,artifacts` (default: all sections).
+   * Stored sections for many snapshots in one binary bundle:
+   * `?ids=1,2,3` (default: all live snapshots),
+   * `?sections=materials,artifacts` (default: all sections) and
+   * `?format=2` for GDT2 (stored v2 sections as they are; the app asks for
+   * it). Without it the answer is GDT1, which apps from before v2 storage
+   * read (v2 sections decoded into the v1 form for them).
    */
   .get('/:id/bundle', async (c) => {
     const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
     const ids = parseIds(c.req.query('ids'))
     const sections = parseSections(c.req.query('sections'))
+    const format = c.req.query('format') === '2' ? 2 : 1
     const variant = `bundle.${[...sections].sort().join('+')}.${ids ? ids.join('-') : 'all'}`
-    const cached = checkEtag(c, accountEtag(account, await shortHash(variant)))
+    const cached = checkEtag(
+      c,
+      accountEtag(account, `${await shortHash(variant)}.${BUNDLE_FORMAT_ETAG[format]}`),
+    )
     if (cached) return cached
     c.header('Content-Type', 'application/octet-stream')
-    return c.body(await buildBundle(c.env.DB, account.id, ids, sections))
+    return c.body(await buildBundle(c.env.DB, account.id, ids, sections, format))
   })
 
   .get('/:id/snapshots/:snapshotId/good', async (c) => {

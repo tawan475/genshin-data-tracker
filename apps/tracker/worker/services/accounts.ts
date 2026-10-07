@@ -1,15 +1,11 @@
-import {
-  serverFromUid,
-  type AccountResponse,
-  type GenshinServer,
-  type SnapshotSummary,
-} from '@gdt/shared'
+import { serverFromUid, type AccountResponse, type GenshinServer } from '@gdt/shared'
 import { and, eq } from 'drizzle-orm'
 import type { Db } from '../db/client'
 import { genshinAccounts } from '../db/schema'
 import { randomToken, sha256Hex } from '../lib/crypto'
 import { ApiError, notFound } from '../lib/http'
 import { D1Meter } from '../lib/meter'
+import { metaOf, withLegacySchema } from './storage'
 
 export type AccountRow = typeof genshinAccounts.$inferSelect
 
@@ -54,7 +50,8 @@ interface AccountListRow {
   latest_id: number | null
   taken_at: number | null
   last_seen_at: number | null
-  summary: string | null
+  summary?: string | null
+  meta: unknown
 }
 
 /**
@@ -69,17 +66,21 @@ export async function listAccounts(
   accountId?: number,
   meter = new D1Meter(),
 ): Promise<AccountResponse[]> {
-  const [result] = await meter.batch<AccountListRow>(d1, 'accounts', [
-    d1
-      .prepare(
-        `SELECT a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
-           a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at, s.summary
-         FROM genshin_accounts AS a LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id
-         WHERE a.user_id = ?1 AND (?2 IS NULL OR a.id = ?2)
-         ORDER BY a.id`,
-      )
-      .bind(userId, accountId ?? null),
-  ])
+  const result = await withLegacySchema(async (legacy) => {
+    const [rows] = await meter.batch<AccountListRow>(d1, 'accounts', [
+      d1
+        .prepare(
+          `SELECT a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
+             a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at,
+             ${legacy ? 's.summary, ' : ''}s.meta
+           FROM genshin_accounts AS a LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id
+           WHERE a.user_id = ?1 AND (?2 IS NULL OR a.id = ?2)
+           ORDER BY a.id`,
+        )
+        .bind(userId, accountId ?? null),
+    ])
+    return rows
+  })
   return result!.results.map((row) => ({
     id: row.id,
     name: row.name,
@@ -97,7 +98,7 @@ export async function listAccounts(
             id: row.latest_id,
             takenAt: row.taken_at!,
             lastSeenAt: row.last_seen_at!,
-            summary: JSON.parse(row.summary!) as SnapshotSummary,
+            summary: metaOf(row).summary,
           },
   }))
 }

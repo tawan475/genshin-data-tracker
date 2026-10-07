@@ -31,8 +31,10 @@ import type {
 } from '@gdt/shared'
 import type { plannerStatePatch, plannerTargetsPatch, plannerTasksPatch } from '@gdt/shared'
 import type { z } from 'zod'
+import { BUNDLE_FORMAT } from './format'
 import { request, requestJson } from './http'
 
+export { BUNDLE_FORMAT }
 export * from './http'
 
 export interface AccountInput {
@@ -234,11 +236,12 @@ export const api = {
       json: { ids },
     }),
   catalog: (id: number) => requestJson<CatalogRow[]>(`/api/accounts/${id}/catalog`),
-  /** Binary GDT1 bundle; decode with readBundle from @gdt/shared. */
+  /** Binary GDT2 bundle; decode with decodeBundle / openBundle from @gdt/shared. */
   bundle: async (id: number, options: { ids?: number[]; sections?: string[] } = {}) => {
     const query = new URLSearchParams()
     if (options.ids) query.set('ids', options.ids.join(','))
     if (options.sections) query.set('sections', options.sections.join(','))
+    query.set('format', String(BUNDLE_FORMAT))
     const qs = query.toString()
     const response = await request(`/api/accounts/${id}/bundle${qs ? `?${qs}` : ''}`)
     return response.arrayBuffer()

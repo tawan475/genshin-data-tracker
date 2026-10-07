@@ -2,6 +2,7 @@
 // Appends new GOOD keys to the static dictionary.
 //
 //   node scripts/update-dictionary.mjs --character chars.json --material mats.json ...
+//   (kinds: --character, --weapon, --material, --artifactSet)
 //
 // Each source is a JSON array of keys or a JSON object whose own keys are the
 // GOOD keys. Keys already present are ignored; new ones are appended in sorted
@@ -14,7 +15,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 
-const KINDS = ['character', 'weapon', 'material']
+const KINDS = ['character', 'weapon', 'material', 'artifactSet']
 const dataDir = new URL('../src/dictionary/data/', import.meta.url)
 const frozenFile = new URL('../src/dictionary/frozen.json', import.meta.url)
 

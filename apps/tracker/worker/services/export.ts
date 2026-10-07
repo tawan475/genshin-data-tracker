@@ -1,22 +1,42 @@
 /**
- * Reading snapshots back. The bundle path sends stored bytes untouched (the
- * browser decodes); the GOOD path decodes one snapshot server-side for tools
- * that just want a file.
+ * Reading snapshots back, in either storage format (see storage.ts). The
+ * bundle path sends stored bytes untouched (the browser decodes); the GOOD
+ * path decodes one snapshot server-side for tools that just want a file.
  */
 
 import {
+  KIND_DELTA,
+  SectionTexts,
   artifactRows,
+  decodeCatalogChunk,
   decodeSnapshot,
+  deflateRaw,
   expandSubstats,
-  inflateRaw,
   storedSnapshotOf,
+  v1SnapshotOf,
   writeBundle,
+  writeBundleV2,
   type ArtifactIdentity,
+  type BundleKey,
   type BundleSnapshot,
+  type BundleSnapshotV2,
+  type CatalogRow,
   type Good,
+  type RawBlob,
+  type Slot,
 } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { notFound } from '../lib/http'
+import {
+  isV2,
+  metaOf,
+  refOf,
+  rowColumns,
+  toBytes,
+  withLegacySchema,
+  type StoredRow,
+  type V1StoredRow,
+} from './storage'
 
 export const SECTION_NAMES = [
   'characters',
@@ -27,38 +47,18 @@ export const SECTION_NAMES = [
   'player',
   'achievementTimes',
   'characterExtras',
-] as const
+] as const satisfies readonly Slot[]
 export type SectionName = (typeof SECTION_NAMES)[number]
 
 /** Most snapshots one bundle request may cover; sections dedupe, so this is still small. */
 export const MAX_BUNDLE_SNAPSHOTS = 5000
 
-interface SnapshotRow {
-  id: number
-  taken_at: number
-  last_seen_at: number
-  format: string
-  version: number
-  source: string
-  characters_hash: string
-  weapons_hash: string
-  artifacts_hash: string
-  materials_hash: string
-  materials_keyframe_hash: string
-  achievements_hash: string | null
-  player_hash: string | null
-  achievement_times_hash: string | null
-  character_extras_hash: string | null
-  artifacts_base_hash: string | null
-  achievement_times_base_hash: string | null
-}
+/** Bundle layout: 1 for apps from before v2 storage (asked for nothing), 2 when asked. */
+export type BundleFormat = 1 | 2
 
-const SNAPSHOT_COLUMNS = `id, taken_at, last_seen_at, format, version, source, characters_hash,
-  weapons_hash, artifacts_hash, materials_hash, materials_keyframe_hash, achievements_hash,
-  player_hash, achievement_times_hash, character_extras_hash, artifacts_base_hash,
-  achievement_times_base_hash`
+// ------------------------------------------------------------------ v1 rows
 
-function toBundleSnapshot(row: SnapshotRow): BundleSnapshot {
+function toBundleSnapshotV1(row: V1StoredRow): BundleSnapshot {
   return {
     id: row.id,
     takenAt: row.taken_at,
@@ -80,7 +80,7 @@ function toBundleSnapshot(row: SnapshotRow): BundleSnapshot {
   }
 }
 
-function blobHashes(row: SnapshotRow, sections: ReadonlySet<SectionName>): string[] {
+function v1Hashes(row: V1StoredRow, sections: ReadonlySet<SectionName>): string[] {
   const hashes: string[] = []
   if (sections.has('characters')) hashes.push(row.characters_hash)
   if (sections.has('weapons')) hashes.push(row.weapons_hash)
@@ -101,47 +101,231 @@ function blobHashes(row: SnapshotRow, sections: ReadonlySet<SectionName>): strin
   return hashes
 }
 
-async function loadBlobs(d1: D1Database, accountId: number, hashes: string[]) {
+async function loadV1Blobs(d1: D1Database, accountId: number, hashes: string[]) {
+  if (hashes.length === 0) return new Map<string, Uint8Array>()
   const { results } = await d1
     .prepare(
       `SELECT hash, data FROM blobs WHERE account_id = ?1
        AND hash IN (SELECT value FROM json_each(?2))`,
     )
     .bind(accountId, JSON.stringify(hashes))
-    .all<{ hash: string; data: ArrayBuffer | Uint8Array | number[] }>()
+    .all<{ hash: string; data: unknown }>()
   return new Map(results.map((row) => [row.hash, toBytes(row.data)]))
 }
 
-function toBytes(data: ArrayBuffer | Uint8Array | number[]): Uint8Array {
-  if (data instanceof Uint8Array) return data
-  if (Array.isArray(data)) return Uint8Array.from(data)
-  return new Uint8Array(data)
+// ------------------------------------------------------------------ v2 rows
+
+/** Blob rows (with data) of `ids` and every base they need. */
+async function loadV2Blobs(
+  d1: D1Database,
+  accountId: number,
+  ids: number[],
+): Promise<Map<number, RawBlob>> {
+  if (ids.length === 0) return new Map()
+  const { results } = await d1
+    .prepare(
+      `WITH RECURSIVE need(id, depth) AS (
+         SELECT value, 0 FROM json_each(?2)
+         UNION SELECT b.base_id, n.depth + 1 FROM section_blobs AS b JOIN need AS n ON b.id = n.id
+           WHERE b.base_id IS NOT NULL AND n.depth < 3)
+       SELECT id, kind, base_id, data FROM section_blobs
+       WHERE account_id = ?1 AND id IN (SELECT id FROM need)`,
+    )
+    .bind(accountId, JSON.stringify(ids))
+    .all<Record<string, unknown>>()
+  return new Map(
+    results.map((row) => [
+      row.id as number,
+      {
+        id: row.id as number,
+        code: row.kind as number,
+        baseId: (row.base_id as number | null) ?? null,
+        data: toBytes(row.data),
+      },
+    ]),
+  )
 }
 
-/** Live snapshots (all, or `ids`) and the requested sections, as a GDT1 bundle. */
+/** Kind and base of blobs, without their data. */
+async function loadV2Meta(
+  d1: D1Database,
+  accountId: number,
+  ids: number[],
+): Promise<Map<number, { code: number; baseId: number | null }>> {
+  if (ids.length === 0) return new Map()
+  const { results } = await d1
+    .prepare(
+      `SELECT id, kind, base_id FROM section_blobs WHERE account_id = ?1
+       AND id IN (SELECT value FROM json_each(?2))`,
+    )
+    .bind(accountId, JSON.stringify(ids))
+    .all<Record<string, unknown>>()
+  return new Map(
+    results.map((row) => [
+      row.id as number,
+      { code: row.kind as number, baseId: (row.base_id as number | null) ?? null },
+    ]),
+  )
+}
+
+/** The base a delta-kind section is a delta of, or null when it is stored in full. */
+function deltaBase(
+  meta: ReadonlyMap<number, { code: number; baseId: number | null }>,
+  id: number | null,
+): number | null {
+  if (id === null) return null
+  const blob = meta.get(id)
+  return blob && (blob.code & KIND_DELTA) !== 0 ? blob.baseId : null
+}
+
+function toBundleSnapshotV2(
+  row: StoredRow,
+  meta: ReadonlyMap<number, { code: number; baseId: number | null }>,
+): BundleSnapshotV2 {
+  const ref = (slot: Slot) => refOf(row, slot)
+  const required = (slot: Slot): BundleKey => {
+    const id = ref(slot)
+    if (id === null) throw new Error(`Snapshot ${row.id} has no ${slot}`)
+    return id
+  }
+  const { format, version, source, playerVars } = metaOf(row)
+  return {
+    id: row.id,
+    takenAt: row.taken_at,
+    lastSeenAt: row.last_seen_at,
+    format,
+    version,
+    source,
+    characters: required('characters'),
+    weapons: required('weapons'),
+    artifacts: required('artifacts'),
+    artifactsBase: deltaBase(meta, ref('artifacts')),
+    materials: required('materials'),
+    materialsKeyframe: deltaBase(meta, ref('materials')) ?? required('materials'),
+    achievements: ref('achievements'),
+    player: ref('player'),
+    achievementTimes: ref('achievementTimes'),
+    achievementTimesBase: deltaBase(meta, ref('achievementTimes')),
+    characterExtras: ref('characterExtras'),
+    ...(playerVars.resin !== undefined || playerVars.arExp !== undefined ? { playerVars } : {}),
+  }
+}
+
+// ------------------------------------------------------------------ bundles
+
+/** Live snapshots (all, or `ids`) and the requested sections, as a bundle. */
 export async function buildBundle(
   d1: D1Database,
   accountId: number,
   ids: number[] | null,
   sections: ReadonlySet<SectionName>,
+  format: BundleFormat = 1,
 ): Promise<Uint8Array<ArrayBuffer>> {
-  const { results: rows } = await d1
-    .prepare(
-      `SELECT ${SNAPSHOT_COLUMNS} FROM snapshots
-       WHERE account_id = ?1 AND deleted_at IS NULL
-       AND (?2 IS NULL OR id IN (SELECT value FROM json_each(?2)))
-       ORDER BY taken_at, id LIMIT ?3`,
-    )
-    .bind(accountId, ids ? JSON.stringify(ids) : null, MAX_BUNDLE_SNAPSHOTS)
-    .all<SnapshotRow>()
+  const { results: rows } = await withLegacySchema((legacy) =>
+    d1
+      .prepare(
+        `SELECT ${rowColumns(legacy)} FROM snapshots
+         WHERE account_id = ?1 AND deleted_at IS NULL
+         AND (?2 IS NULL OR id IN (SELECT value FROM json_each(?2)))
+         ORDER BY taken_at, id LIMIT ?3`,
+      )
+      .bind(accountId, ids ? JSON.stringify(ids) : null, MAX_BUNDLE_SNAPSHOTS)
+      .all<StoredRow>(),
+  )
 
-  const hashes = [...new Set(rows.flatMap((row) => blobHashes(row, sections)))]
-  const blobs = hashes.length > 0 ? await loadBlobs(d1, accountId, hashes) : new Map()
+  const v1Rows = rows.filter((row) => !isV2(row)) as V1StoredRow[]
+  const v2Rows = rows.filter(isV2)
+  const hashes = [...new Set(v1Rows.flatMap((row) => v1Hashes(row, sections)))]
+  const refs = [
+    ...new Set(
+      v2Rows.flatMap((row) =>
+        SECTION_NAMES.map((slot) => refOf(row, slot)).filter((id): id is number => id !== null),
+      ),
+    ),
+  ]
+  const wanted = [
+    ...new Set(
+      v2Rows.flatMap((row) =>
+        SECTION_NAMES.filter((slot) => sections.has(slot))
+          .map((slot) => refOf(row, slot))
+          .filter((id): id is number => id !== null),
+      ),
+    ),
+  ]
+  const [legacy, meta, blobs] = await Promise.all([
+    loadV1Blobs(d1, accountId, hashes),
+    loadV2Meta(d1, accountId, refs),
+    loadV2Blobs(d1, accountId, wanted),
+  ])
+  const entries = rows.map((row) =>
+    isV2(row) ? toBundleSnapshotV2(row, meta) : toBundleSnapshotV1(row as V1StoredRow),
+  )
+
+  if (format === 2) {
+    const v2Entries = entries.map((entry, i) =>
+      isV2(rows[i]!) ? (entry as BundleSnapshotV2) : v1AsV2(entry as BundleSnapshot),
+    )
+    return writeBundleV2(v2Entries, {
+      legacy: hashes
+        .filter((hash) => legacy.has(hash))
+        .map((hash) => ({ hash, data: legacy.get(hash)! })),
+      blobs: [...blobs.values()].sort((a, b) => a.id - b.id),
+    })
+  }
+
+  // An app from before v2 storage: every v2 section as the deflated JSON it
+  // knows, under the key decodeBundle would give it.
+  const snapshots: BundleSnapshot[] = []
+  const texts = new SectionTexts(new Map(), blobs, false)
+  const keys: string[] = []
+  for (const [i, entry] of entries.entries()) {
+    const row = rows[i]!
+    if (!isV2(row)) {
+      snapshots.push(entry as BundleSnapshot)
+      continue
+    }
+    const { snapshot, player } = v1SnapshotOf(entry as BundleSnapshotV2)
+    if (player) texts.derivePlayer(...player)
+    snapshots.push(snapshot)
+    for (const slot of SECTION_NAMES) {
+      if (!sections.has(slot)) continue
+      const key = slotKey(snapshot, slot)
+      if (key) keys.push(key)
+      if (slot === 'artifacts' && snapshot.artifactsBase) keys.push(snapshot.artifactsBase)
+      if (slot === 'materials') keys.push(snapshot.materialsKeyframe)
+      if (slot === 'achievementTimes' && snapshot.achievementTimesBase) {
+        keys.push(snapshot.achievementTimesBase)
+      }
+    }
+  }
+  const out = new Map<string, Uint8Array>(legacy)
+  for (const key of new Set(keys)) out.set(key, await deflateRaw(await texts.text(key)))
   return writeBundle(
-    { snapshots: rows.map(toBundleSnapshot), blobs: hashes.filter((hash) => blobs.has(hash)) },
-    blobs,
+    {
+      snapshots,
+      blobs: [...hashes.filter((hash) => legacy.has(hash)), ...new Set(keys)],
+    },
+    out,
   )
 }
+
+/** A v1 row's entry in a GDT2 manifest: the same, keys being v1 hashes. */
+function v1AsV2(entry: BundleSnapshot): BundleSnapshotV2 {
+  return {
+    ...entry,
+    artifactsBase: entry.artifactsBase ?? null,
+    player: entry.player ?? null,
+    achievementTimes: entry.achievementTimes ?? null,
+    achievementTimesBase: entry.achievementTimesBase ?? null,
+    characterExtras: entry.characterExtras ?? null,
+  }
+}
+
+function slotKey(snapshot: BundleSnapshot, slot: SectionName): string | null {
+  return (snapshot[slot] as string | null | undefined) ?? null
+}
+
+// ------------------------------------------------------------------ GOOD
 
 /** One live snapshot (or the latest) rebuilt as a GOOD file. */
 export async function buildGood(
@@ -149,92 +333,142 @@ export async function buildGood(
   accountId: number,
   snapshotId: number | 'latest',
 ): Promise<{ good: Good; takenAt: number }> {
-  const row = await d1
-    .prepare(
-      `SELECT ${SNAPSHOT_COLUMNS} FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
-       AND (?2 IS NULL OR id = ?2) ORDER BY taken_at DESC, id DESC LIMIT 1`,
-    )
-    .bind(accountId, snapshotId === 'latest' ? null : snapshotId)
-    .first<SnapshotRow>()
+  const row = await withLegacySchema((legacy) =>
+    d1
+      .prepare(
+        `SELECT ${rowColumns(legacy)} FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+         AND (?2 IS NULL OR id = ?2) ORDER BY taken_at DESC, id DESC LIMIT 1`,
+      )
+      .bind(accountId, snapshotId === 'latest' ? null : snapshotId)
+      .first<StoredRow>(),
+  )
   if (!row) throw notFound('Snapshot')
 
-  const hashes = blobHashes(row, new Set(SECTION_NAMES))
-  const blobs = await loadBlobs(d1, accountId, hashes)
-  const texts = new Map(
-    await Promise.all(
-      [...new Set(hashes)].map(async (hash) => {
-        const data = blobs.get(hash)
-        if (!data) throw new Error(`Snapshot ${row.id} is missing section ${hash}`)
-        return [hash, await inflateRaw(data)] as const
-      }),
-    ),
-  )
-  const stored = storedSnapshotOf(toBundleSnapshot(row), (hash) => texts.get(hash)!)
+  let snapshot: BundleSnapshot
+  let text: (key: string) => string
+  if (isV2(row)) {
+    const ids = SECTION_NAMES.map((slot) => refOf(row, slot)).filter(
+      (id): id is number => id !== null,
+    )
+    const blobs = await loadV2Blobs(d1, accountId, ids)
+    const opened = v1SnapshotOf(toBundleSnapshotV2(row, blobs))
+    snapshot = opened.snapshot
+    const texts = new SectionTexts(new Map(), blobs, false)
+    if (opened.player) texts.derivePlayer(...opened.player)
+    const decoded = await texts.many(
+      [
+        snapshot.characters,
+        snapshot.weapons,
+        snapshot.artifacts,
+        snapshot.artifactsBase,
+        snapshot.materials,
+        snapshot.materialsKeyframe,
+        snapshot.achievements,
+        snapshot.player,
+        snapshot.achievementTimes,
+        snapshot.achievementTimesBase,
+        snapshot.characterExtras,
+      ].filter((key): key is string => !!key),
+    )
+    text = (key) => decoded.get(key)!
+  } else {
+    const v1 = row as V1StoredRow
+    snapshot = toBundleSnapshotV1(v1)
+    const hashes = v1Hashes(v1, new Set(SECTION_NAMES))
+    const blobs = await loadV1Blobs(d1, accountId, hashes)
+    const texts = new SectionTexts(blobs, new Map(), false)
+    for (const hash of hashes) {
+      if (!blobs.has(hash)) throw new Error(`Snapshot ${row.id} is missing section ${hash}`)
+    }
+    const decoded = await texts.many(hashes)
+    text = (key) => decoded.get(key)!
+  }
+  const stored = storedSnapshotOf(snapshot, text)
 
   const artifactIds = [
     ...new Set(
       artifactRows(
         JSON.parse(stored.artifacts),
         stored.artifactsBase ? JSON.parse(stored.artifactsBase) : null,
-      ).map((row) => row[0]),
+      ).map((entry) => entry[0]),
     ),
   ]
-  const catalog = await loadCatalogEntries(d1, accountId, artifactIds)
-
+  const catalog = await loadCatalog(d1, accountId, artifactIds)
   return { good: decodeSnapshot(stored, catalog, MATERIALS), takenAt: row.taken_at }
 }
 
-async function loadCatalogEntries(
-  d1: D1Database,
-  accountId: number,
-  ids: number[],
-): Promise<Map<number, ArtifactIdentity>> {
-  const { results } = await d1
-    .prepare(
-      `SELECT id, set_key, slot_key, level, rarity, main_stat_key, substats, total_rolls,
-         elixer_crafted, unactivated_substats
-       FROM artifacts WHERE account_id = ?1 AND id IN (SELECT value FROM json_each(?2))`,
-    )
-    .bind(accountId, JSON.stringify(ids))
-    .all<Record<string, unknown>>()
-  return new Map(
-    results.map((r) => [
-      r.id as number,
-      {
-        setKey: r.set_key as string,
-        slotKey: r.slot_key as string,
-        level: r.level as number,
-        rarity: r.rarity as number,
-        mainStatKey: r.main_stat_key as string,
-        substats: expandSubstats(JSON.parse(r.substats as string)),
-        totalRolls: r.total_rolls as number,
-        elixerCrafted: r.elixer_crafted === 1,
-        unactivatedSubstats: expandSubstats(JSON.parse(r.unactivated_substats as string)),
-      },
-    ]),
-  )
+// ------------------------------------------------------------------ catalog
+
+const CATALOG_COLUMNS = `id, set_key, slot_key, level, rarity, main_stat_key, substats,
+  total_rolls, elixer_crafted, unactivated_substats`
+
+function identityOfRow(r: Record<string, unknown>): ArtifactIdentity {
+  return {
+    setKey: r.set_key as string,
+    slotKey: r.slot_key as string,
+    level: r.level as number,
+    rarity: r.rarity as number,
+    mainStatKey: r.main_stat_key as string,
+    substats: expandSubstats(JSON.parse(r.substats as string)),
+    totalRolls: r.total_rolls as number,
+    elixerCrafted: r.elixer_crafted === 1,
+    unactivatedSubstats: expandSubstats(JSON.parse(r.unactivated_substats as string)),
+  }
 }
 
 /**
- * The whole catalog as a JSON array of CatalogRow. Substats are spliced in as
- * the JSON text they are stored as, so the response is built without parsing
- * and re-serialising thousands of arrays.
+ * Catalog identities by id: v1 rows (all of the account's, or only `ids`)
+ * and every compact chunk, which is where nearly all of them are.
  */
+export async function loadCatalog(
+  d1: D1Database,
+  accountId: number,
+  ids: number[] | null,
+): Promise<Map<number, ArtifactIdentity>> {
+  const [rows, chunks] = await d1.batch<Record<string, unknown>>([
+    d1
+      .prepare(
+        `SELECT ${CATALOG_COLUMNS} FROM artifacts WHERE account_id = ?1
+         AND (?2 IS NULL OR id IN (SELECT value FROM json_each(?2)))`,
+      )
+      .bind(accountId, ids ? JSON.stringify(ids) : null),
+    d1.prepare('SELECT data FROM artifact_chunks WHERE account_id = ?1').bind(accountId),
+  ])
+  const wanted = ids ? new Set(ids) : null
+  const catalog = new Map<number, ArtifactIdentity>()
+  for (const row of chunks!.results) {
+    for (const entry of decodeCatalogChunk(toBytes(row.data))) {
+      if (!wanted || wanted.has(entry.id)) catalog.set(entry.id, entry.identity)
+    }
+  }
+  for (const row of rows!.results) catalog.set(row.id as number, identityOfRow(row))
+  return catalog
+}
+
+/** The whole catalog as a JSON array of CatalogRow, ordered by id. */
 export async function catalogJson(d1: D1Database, accountId: number): Promise<string> {
-  const rows = await d1
-    .prepare(
-      `SELECT id, set_key, slot_key, level, rarity, main_stat_key, substats, total_rolls,
-         elixer_crafted, unactivated_substats
-       FROM artifacts WHERE account_id = ?1 ORDER BY id`,
+  const catalog = await loadCatalog(d1, accountId, null)
+  const rows = [...catalog]
+    .sort((a, b) => a[0] - b[0])
+    .map(
+      ([id, a]): CatalogRow => [
+        id,
+        a.setKey,
+        a.slotKey,
+        a.level,
+        a.rarity,
+        a.mainStatKey,
+        a.substats.map((s) =>
+          s.initialValue === undefined ? [s.key, s.value] : [s.key, s.value, s.initialValue],
+        ),
+        a.totalRolls,
+        a.elixerCrafted ? 1 : 0,
+        a.unactivatedSubstats.map((s) =>
+          s.initialValue === undefined ? [s.key, s.value] : [s.key, s.value, s.initialValue],
+        ),
+      ],
     )
-    .bind(accountId)
-    .raw<[number, string, string, number, number, string, string, number, number, string]>()
-  const parts = rows.map(
-    (r) =>
-      `[${r[0]},${JSON.stringify(r[1])},${JSON.stringify(r[2])},${r[3]},${r[4]},${JSON.stringify(r[5])},` +
-      `${r[6]},${r[7]},${r[8]},${r[9]}]`,
-  )
-  return `[${parts.join(',')}]`
+  return JSON.stringify(rows)
 }
 
 /** Gives a GOOD download a stable, sortable file name. */

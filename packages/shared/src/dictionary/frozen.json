@@ -10,5 +10,9 @@
   "material": {
     "count": 7631,
     "sha256": "9552744abbcad126a4a2e06a807fa2a800a5623839cfaad538fc58ea6534d2fc"
+  },
+  "artifactSet": {
+    "count": 65,
+    "sha256": "1579fc746e6ec26d82f82875f636484c4ea481268403263dfe3983fe34250e5f"
   }
 }

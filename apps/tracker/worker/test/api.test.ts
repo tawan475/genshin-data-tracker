@@ -372,10 +372,11 @@ describe('accounts and imports', () => {
       canonical({ ...good, timestamp: 1_780_000_000_000 }),
       canonical({ ...changed, timestamp: 1_780_000_200_000 }),
     ])
-    // The second snapshot shares every section but materials. A 3-key keyframe
-    // is cheaper to store again than a delta naming it, so it is a keyframe.
+    // The second snapshot shares every section but materials, which is a delta
+    // of the first's (in storage v2 a delta names its base in the row, so even
+    // a one-key delta of a 3-key keyframe is the cheaper one).
     expect(manifest.snapshots[1]!.materials).not.toBe(manifest.snapshots[0]!.materials)
-    expect(manifest.snapshots[1]!.materials).toBe(manifest.snapshots[1]!.materialsKeyframe)
+    expect(manifest.snapshots[1]!.materialsKeyframe).toBe(manifest.snapshots[0]!.materials)
     expect(manifest.snapshots[1]!.characters).toBe(manifest.snapshots[0]!.characters)
     expect(manifest.snapshots[1]!.artifacts).toBe(manifest.snapshots[0]!.artifacts)
   })
@@ -916,8 +917,11 @@ describe('delta storage', () => {
     expect(d.artifacts).toBe(b.artifacts)
     expect(d.achievementTimes).toBe(b.achievementTimes)
     expect(d.materials).toBe(b.materials)
-    const playerBytes = blobs.get(d.player!)!.length
-    expect(results[3]!.storedSize).toBe(playerBytes)
+    // Resin moved, which the row keeps (storage v2): nothing new is stored,
+    // yet the snapshot's player section reads the new value.
+    expect(d.player).not.toBe(b.player)
+    expect(blobs.has(d.player!)).toBe(true)
+    expect(results[3]!.storedSize).toBe(0)
     expect(results[1]!.storedSize).toBeLessThan(results[0]!.storedSize / 10)
 
     // The export zip, decoded from the bundle as the browser does it...
@@ -1004,9 +1008,11 @@ describe('D1 cost', () => {
     return { status: response.status, cost }
   }
 
-  // A large catalog makes a scan show up: 1,500 stored artifacts, then an
-  // upload that holds only 2 of them must not read the other 1,498.
-  it('probes the catalog by index instead of scanning it', async () => {
+  // A large catalog makes a row-by-row read show up: 1,500 stored artifacts,
+  // then an upload that holds only 2 of them reads the catalog as the few
+  // compact chunks it is stored in (and probes v1 rows by index), never
+  // 1,500 rows. The rest is a fixed cost per import.
+  it('reads the catalog as a few chunks instead of row by row', async () => {
     const { client } = await signUp()
     const { importKey } = await createAccount(client)
     const many = Array.from({ length: 1500 }, (_, i) => ({
@@ -1018,7 +1024,7 @@ describe('D1 cost', () => {
     const small = await costedImport(importKey, sampleGood(), 2_000)
     expect(small.status).toBe(201)
     expect(small.cost['round-trips']).toBeLessThanOrEqual(3)
-    expect(small.cost['rows-read']).toBeLessThan(100)
+    expect(small.cost['rows-read']).toBeLessThan(150)
   })
 
   it('answers an unchanged re-upload in one round trip', async () => {
