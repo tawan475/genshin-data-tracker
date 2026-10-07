@@ -60,10 +60,12 @@ const props = defineProps<{
   farming: FarmingData | null
   /** Artifact sets the counted goals still want. */
   artifacts: readonly ArtifactWant[]
+  /** Show the Crafting checklist (a planner setting). */
+  crafting: boolean
 }>()
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
-const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]] }>()
+const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]]; hideCrafting: [] }>()
 
 const VIEWS = [
   { value: 'today' as const, label: 'Today' },
@@ -292,12 +294,13 @@ watch(view, (value) => {
         </h2>
         <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
           <CraftCard
-            v-if="s.key === 'free' && steps.length"
+            v-if="s.key === 'free' && crafting && steps.length"
             class="col-span-full"
             :planner="planner"
             :steps="steps"
             :bag="bag"
             @done="(rows) => emit('crafted', rows)"
+            @hide="emit('hideCrafting')"
           >
             <button
               v-if="forge && !oreCard"

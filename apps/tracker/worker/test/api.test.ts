@@ -1373,7 +1373,13 @@ describe('progress set by hand', () => {
       passives: true,
       refreshes: 2,
       resinSteps: [-40, 60],
+      crafting: true,
     })
+    const hidden = await client.json<S>(path, {
+      method: 'PATCH',
+      json: { planner: { crafting: false } },
+    })
+    expect(hidden.settings.planner).toMatchObject({ crafting: false, refreshes: 2 })
     expect((await client.fetch(path, { method: 'PATCH', json: { ar: 61 } })).status).toBe(400)
     for (const refreshes of [7, -1, 1.5]) {
       const response = await client.fetch(path, {

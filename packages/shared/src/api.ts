@@ -126,6 +126,7 @@ export const accountSettingsPatch = z
               .refine((n) => n !== 0, 'Not zero'),
           )
           .max(4),
+        crafting: z.boolean(),
       })
       .partial()
       .strict(),

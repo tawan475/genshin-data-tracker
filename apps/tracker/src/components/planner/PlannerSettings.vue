@@ -12,7 +12,7 @@ import { formatStep, parseSteps } from './resin'
 /**
  * The planner's account settings: Adventure Rank, World Level, the daily
  * resin refreshes the Farm view counts days with, the resin tracker's quick
- * buttons, and two options. Each
+ * buttons, and three switches. Each
  * change is saved as it is made (no Save button). AR and WL left empty
  * follow what irminsul read at the newest login, shown as the placeholder.
  */
@@ -56,7 +56,7 @@ function setWl(value: number | null) {
   if (value !== props.settings.wl) emit('change', { wl: value })
 }
 
-function setOption(key: 'azoth' | 'passives', value: boolean) {
+function setOption(key: 'azoth' | 'passives' | 'crafting', value: boolean) {
   emit('change', { planner: { [key]: value } })
 }
 
@@ -167,6 +167,13 @@ function commitSteps() {
             :model-value="settings.planner.passives"
             label="Mora passives"
             @update:model-value="setOption('passives', $event)"
+          />
+        </div>
+        <div title="The Farm view's checklist of what to convert, craft and forge">
+          <UiSwitch
+            :model-value="settings.planner.crafting !== false"
+            label="Crafting checklist"
+            @update:model-value="setOption('crafting', $event)"
           />
         </div>
       </div>
