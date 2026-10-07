@@ -45,9 +45,10 @@ import { useCrownIcon } from './use-boosts'
 /**
  * The build as one 1920×1080 card, after the "Character Showcase Card"
  * design: on the namecard, the splash art fading into it; name, level,
- * friendship and stars, the constellations down the left column's edge and
- * the talents at its foot; weapon, the in-game stats and the sets in the
- * middle; the five pieces on the right; owner and site along the bottom.
+ * friendship and stars, the constellations down the left column's edge, the
+ * talents with the owner and the capture date and site at its foot; weapon,
+ * the in-game stats and the sets in the middle; the five pieces on the
+ * right, both running to the bottom edge.
  * The wide character details show it scaled to their width, and the PNG is
  * this card at 1× (lib/share-image).
  *
@@ -201,7 +202,7 @@ const ownerLine = computed(() =>
     <div class="absolute inset-0 [background:var(--card-vignette)]" />
 
     <div
-      class="absolute inset-[44px_48px_40px_48px] grid grid-cols-[700px_528px_532px] grid-rows-[minmax(0,1fr)_36px] gap-x-[32px] gap-y-[16px]"
+      class="absolute inset-[44px_48px_44px_48px] grid grid-cols-[700px_528px_532px] grid-rows-[minmax(0,1fr)] gap-x-[32px]"
     >
       <!-- Left: who, the constellations down its right edge, the talents at its foot -->
       <section class="relative flex min-h-0 flex-col justify-between" aria-label="Character">
@@ -263,28 +264,48 @@ const ownerLine = computed(() =>
           </li>
         </ol>
 
-        <ul class="flex items-end gap-[30px]" aria-label="Talents">
-          <li
-            v-for="t in talents"
-            :key="t.key"
-            class="flex flex-col items-center gap-[10px]"
-            :title="talentTitle(t)"
-          >
-            <ElementDisc :src="glyphs[t.key]" :element="c.element" :px="112" />
-            <span
-              class="flex h-[40px] items-center gap-[6px] rounded-full bg-(--card-pill) px-[14px]"
-              :class="t.crowned ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]' : ''"
+        <!-- Talents, then the owner and the capture date with the site, flush with the panels' foot -->
+        <div class="flex flex-col gap-[22px]">
+          <ul class="flex items-end gap-[30px]" aria-label="Talents">
+            <li
+              v-for="t in talents"
+              :key="t.key"
+              class="flex flex-col items-center gap-[10px]"
+              :title="talentTitle(t)"
             >
-              <img
-                v-if="t.crowned && crown"
-                :src="crown"
-                alt="Crowned"
-                class="ml-[-6px] size-[30px]"
-              />
-              <span class="text-[26px] font-bold" :class="talentTone(t)">{{ t.level }}</span>
-            </span>
-          </li>
-        </ul>
+              <ElementDisc :src="glyphs[t.key]" :element="c.element" :px="112" :glyph="90" />
+              <span
+                class="flex h-[40px] items-center gap-[6px] rounded-full bg-(--card-pill) px-[14px]"
+                :class="t.crowned ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]' : ''"
+              >
+                <img
+                  v-if="t.crowned && crown"
+                  :src="crown"
+                  alt="Crowned"
+                  class="ml-[-6px] size-[30px]"
+                />
+                <span class="text-[26px] font-bold" :class="talentTone(t)">{{ t.level }}</span>
+              </span>
+            </li>
+          </ul>
+          <div class="flex flex-col gap-[4px] pl-[4px]" :class="HERO">
+            <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[12px] text-[22px]">
+              <template v-for="(part, index) in ownerLine" :key="index">
+                <span v-if="index" class="opacity-60">·</span>
+                <span class="truncate" :class="index === 0 && owner.name ? 'font-semibold' : ''">{{
+                  part
+                }}</span>
+              </template>
+            </p>
+            <p class="flex items-center gap-[12px] text-[18px] whitespace-nowrap opacity-80">
+              <template v-if="takenAt">
+                <span>{{ formatDate(takenAt) }}</span>
+                <span class="opacity-60">·</span>
+              </template>
+              <span>genshin-tracker.475.dev</span>
+            </p>
+          </div>
+        </div>
       </section>
 
       <!-- Middle: weapon, stats (they take the height left), sets and the build -->
@@ -509,23 +530,6 @@ const ownerLine = computed(() =>
           </div>
         </li>
       </ol>
-
-      <!-- Foot: owner on the left, capture date and site on the right -->
-      <p class="col-start-1 flex min-w-0 items-center gap-[12px] text-[21px]" :class="HERO">
-        <template v-for="(part, index) in ownerLine" :key="index">
-          <span v-if="index" class="opacity-60">·</span>
-          <span class="truncate" :class="index === 0 && owner.name ? 'font-semibold' : ''">{{
-            part
-          }}</span>
-        </template>
-      </p>
-      <p class="col-span-2 col-start-2 flex items-center justify-end">
-        <span
-          class="rounded-[10px] bg-(--card-panel) px-[14px] py-[4px] text-[18px] whitespace-nowrap text-(--card-secondary) shadow-(--card-panel-shadow)"
-          ><template v-if="takenAt">{{ formatDate(takenAt) }} · </template
-          >genshin-tracker.475.dev</span
-        >
-      </p>
     </div>
   </div>
 </template>
