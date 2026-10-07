@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Lock } from 'lucide-vue-next'
 import type { Element } from '@/data/game-meta'
+import FadeImage from './FadeImage.vue'
 
 /**
  * A white game glyph (talent, constellation) on a dark translucent disc with
@@ -12,8 +13,9 @@ import type { Element } from '@/data/game-meta'
  * `locked` dims it, rings it
  * thinly in grey and adds a lock. `px` sets any size (the share card's 84
  * and 112); `--disc-bg` / `--disc-glow` on an ancestor restyle the disc (the
- * share card's light theme). A plain <img>, no CSS mask, so the card's PNG
- * export draws it.
+ * share card's light theme). A plain <img> (FadeImage: a new one per src,
+ * shown once loaded, never the last character's), no CSS mask, so the
+ * card's PNG export draws it.
  */
 const props = withDefaults(
   defineProps<{
@@ -53,14 +55,14 @@ const lock = computed(() => `${Math.max(14, Math.round(diameter.value * 0.3))}px
 
 <template>
   <span class="relative flex shrink-0 items-center justify-center rounded-full" :style="style">
-    <img
+    <span
       v-if="src"
-      :src="src"
-      alt=""
-      class="pointer-events-none"
+      class="pointer-events-none flex items-center justify-center"
       :class="[glyph ? '' : 'size-[88%]', locked ? 'opacity-35' : '']"
       :style="glyph ? { width: `${glyph}px`, height: `${glyph}px` } : undefined"
-    />
+    >
+      <FadeImage :src="src" class="size-full" />
+    </span>
     <span
       v-else
       class="font-mono text-xs font-semibold text-accent-ink"

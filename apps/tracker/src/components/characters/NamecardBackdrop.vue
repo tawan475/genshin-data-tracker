@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { isDecoded, markDecoded } from '@/lib/image-preload'
 
 /**
  * A character's namecard art behind a card or the details summary. Place
@@ -10,15 +11,19 @@ import { ref, watch } from 'vue'
  */
 const props = defineProps<{ src: string; lazy?: boolean }>()
 
-const loaded = ref(false)
+const loaded = ref(isDecoded(props.src))
 const failed = ref(false)
 watch(
   () => props.src,
-  () => {
-    loaded.value = false
+  (src) => {
+    loaded.value = isDecoded(src)
     failed.value = false
   },
 )
+function onLoad() {
+  markDecoded(props.src)
+  loaded.value = true
+}
 </script>
 
 <template>
@@ -32,7 +37,7 @@ watch(
     aria-hidden="true"
     class="pointer-events-none object-cover transition-opacity duration-300 motion-reduce:transition-none"
     :style="loaded ? undefined : { opacity: 0 }"
-    @load="loaded = true"
+    @load="onLoad"
     @error="failed = true"
   />
 </template>

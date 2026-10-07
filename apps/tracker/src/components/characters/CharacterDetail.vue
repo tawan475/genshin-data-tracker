@@ -45,28 +45,21 @@ import { useConstellationBoosts } from './use-boosts'
  * the PNG export draws it; then what is left to do and the history.
  * Narrow: the same build stacked to read on a phone (splash art with the
  * constellations, level, talents with C3/C5, weapon, the in-game stats,
- * sets, the five pieces), and the card is rendered off screen only when
- * an export asks for it (`offscreen`). `cardElement()` is the card's root
- * for the export.
+ * sets, the five pieces). The export draws its own copy of the card
+ * (CharacterModal, in a hidden iframe), whatever this shows.
  */
 const props = defineProps<{
   character: CharacterView
   account: AccountRef
   showcase: boolean
-  offscreen: boolean
   cardTheme: 'light' | 'dark'
   owner: CardOwner
   takenAt: number | null
 }>()
 
-const card = useTemplateRef<InstanceType<typeof ShareCard>>('card')
 const frame = useTemplateRef<HTMLElement>('frame')
 const { width: frameWidth } = useElementSize(frame)
 const scale = computed(() => (frameWidth.value ? frameWidth.value / CARD_WIDTH : 0))
-
-defineExpose({
-  cardElement: (): HTMLElement | null => (card.value?.$el as HTMLElement | undefined) ?? null,
-})
 
 const c = computed(() => props.character)
 
@@ -101,14 +94,13 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
       <div
         ref="frame"
         class="relative w-full overflow-hidden rounded-xl border border-border-default bg-surface-sunken"
-        :style="{ height: `${CARD_HEIGHT * scale}px` }"
+        :style="{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}` }"
       >
         <div
           class="absolute top-0 left-0 origin-top-left"
           :style="{ transform: `scale(${scale})` }"
         >
           <ShareCard
-            ref="card"
             :character="c"
             :panel="panel"
             :talents="talents"
@@ -220,7 +212,10 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
           <SetBonuses v-if="c.artifactCount" :sets="c.sets" />
           <span v-else class="text-sm text-text-muted">No artifacts</span>
-          <span v-if="c.artifactCount" class="ml-auto flex items-baseline gap-3 text-sm">
+          <span
+            v-if="c.artifactCount"
+            class="ml-auto flex items-baseline gap-3 text-sm [&>span>span:last-child]:font-bold"
+          >
             <RollValue :value="buildRv(c.artifacts)" scope="build" label />
             <CritValue
               :value="c.cv"
@@ -239,29 +234,6 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           />
         </div>
       </section>
-
-      <!-- The share card, laid out off screen for an export (narrow screens don't show it) -->
-      <div
-        v-if="offscreen"
-        class="pointer-events-none fixed top-0"
-        :style="{
-          left: `-${CARD_WIDTH * 3}px`,
-          width: `${CARD_WIDTH}px`,
-          height: `${CARD_HEIGHT}px`,
-        }"
-        aria-hidden="true"
-        inert
-      >
-        <ShareCard
-          ref="card"
-          :character="c"
-          :panel="panel"
-          :talents="talents"
-          :theme="cardTheme"
-          :owner="owner"
-          :taken-at="takenAt"
-        />
-      </div>
     </template>
 
     <section aria-labelledby="detail-changes">

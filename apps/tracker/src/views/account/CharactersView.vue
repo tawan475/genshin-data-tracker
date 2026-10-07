@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SearchX, Upload, Users } from 'lucide-vue-next'
 import CharacterCard from '@/components/characters/CharacterCard.vue'
+import { preloadCharacter } from '@/components/characters/card-images'
 import CharacterTable from '@/components/characters/CharacterTable.vue'
 import CharacterToolbar from '@/components/characters/CharacterToolbar.vue'
 import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
@@ -28,7 +29,6 @@ import {
 } from '@/data/characters'
 import { useFavoriteCharacters } from '@/data/favorite-characters'
 import { useResource } from '@/data/use-resource'
-import { characterBanner } from '@/lib/assets'
 import { readJson, writeJson } from '@/lib/storage'
 import { useAccount } from './context'
 
@@ -192,15 +192,23 @@ watch(
 )
 const player = computed(() => inventory.data.value?.good.gi_player ?? null)
 
-// Fetch the neighbours' namecards ahead, so the next one is ready when stepping.
-watch(selectedIndex, (index) => {
-  const list = stepList.value
-  if (index < 0 || list.length < 2) return
-  for (const delta of [-1, 1]) {
-    const src = characterBanner(list[(index + delta + list.length) % list.length]!.key)
-    if (src) new Image().src = src
-  }
-})
+// Fetch and decode the open character's card images first, then both
+// neighbours' (after, so they don't slow the open one down), so stepping shows
+// the next one at once. Bounded: lib/image-preload keeps a few characters.
+let preloadRun = 0
+watch(
+  selectedIndex,
+  async (index) => {
+    const run = ++preloadRun
+    const list = stepList.value
+    if (index < 0) return
+    await preloadCharacter(list[index])
+    if (run !== preloadRun || list.length < 2) return
+    void preloadCharacter(list[(index + 1) % list.length])
+    void preloadCharacter(list[(index - 1 + list.length) % list.length])
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -280,7 +288,13 @@ watch(selectedIndex, (index) => {
         class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
         aria-label="Characters"
       >
-        <li v-for="c in shown" :key="c.key" class="flex">
+        <li
+          v-for="c in shown"
+          :key="c.key"
+          class="flex"
+          @pointerenter="void preloadCharacter(c)"
+          @focusin="void preloadCharacter(c)"
+        >
           <CharacterCard
             :character="c"
             :favorite="favorites.has(c.key)"

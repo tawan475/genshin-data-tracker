@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
   bonusSets,
@@ -28,9 +28,11 @@ import {
 import CardRollBars from './CardRollBars.vue'
 import ElementDisc from './ElementDisc.vue'
 import GameStars from './GameStars.vue'
+import FadeImage from './FadeImage.vue'
 import SplashArt from './SplashArt.vue'
 import {
   CARD_HEIGHT,
+  CARD_STILL,
   CARD_THEMES,
   CARD_WIDTH,
   RARITY_GRADIENT,
@@ -65,7 +67,10 @@ const props = defineProps<{
   owner: CardOwner
   /** When the capture was taken (epoch ms). */
   takenAt: number | null
+  /** Drawn for the PNG export: images show as soon as they load, no fade. */
+  still?: boolean
 }>()
+provide(CARD_STILL, props.still)
 
 /** Tailwind's rem-based spacing pinned to 4px, so stray utilities don't follow the page's root size. */
 const ROOT = computed(() => ({
@@ -122,7 +127,7 @@ const pieces = computed(() =>
   SLOT_ORDER.map((slot, index) => {
     const piece = c.value.artifacts[index] ?? null
     if (!piece) {
-      return { slot, piece, lines: [], rollCount: 0, cvTone: '', title: SLOT_LABELS[slot] }
+      return { slot, piece, lines: [], cvTone: '', rvTone: '', title: SLOT_LABELS[slot] }
     }
     const rolls = inferArtifactRolls(piece)
     const lines: {
@@ -141,12 +146,14 @@ const pieces = computed(() =>
     // akasha's tiers are 5★ scales: 1–4★ pieces and a CV of 0 stay muted.
     const tier = cvTier(piece.cv, 'artifact', isCritCirclet(piece.slotKey, piece.mainStatKey))
     const cvTone = piece.rarity < 5 || piece.cv <= 0 ? 'text-(--card-muted)' : CRIT_TIER_TEXT[tier]
+    const rvTone =
+      piece.rarity < 5 || piece.rv <= 0 ? 'text-(--card-muted)' : CRIT_TIER_TEXT[rvTier(piece.rv)]
     const title = [
       formatSetName(piece.setKey),
       `${SLOT_LABELS[slot]} +${piece.level} · ${piece.rarity}★`,
       `CV ${piece.cv.toFixed(1)} · RV ${piece.rv}% · ${rollCount} rolls (the first ones and one per +4)`,
     ].join('\n')
-    return { slot, piece, lines, rollCount, cvTone, title }
+    return { slot, piece, lines, cvTone, rvTone, title }
   }),
 )
 /** The sets listed: 2 pieces or more (a single piece grants nothing). */
@@ -183,10 +190,8 @@ const ownerLine = computed(() =>
     <!-- One picture, back to front: the namecard blurred into atmosphere (it is only
          840×400; oversized so the blur has no edge), a scrim, the element's glow, the
          splash cut-out whole with its shadow, a full-width vignette. No boxes, no masks. -->
-    <img
-      v-if="banner"
+    <FadeImage
       :src="banner"
-      alt=""
       class="pointer-events-none absolute top-[-40px] left-[-60px] h-[1160px] w-[2040px] max-w-none object-cover [filter:var(--card-namecard-filter)]"
     />
     <div class="absolute inset-0 [background:var(--card-scrim)]" />
@@ -195,7 +200,7 @@ const ownerLine = computed(() =>
       :character-key="c.key"
       :name="c.name"
       :rarity="c.rarity"
-      eager
+      :eager="still"
       class="absolute top-[-20px] left-[-660px] h-[1100px] w-[2200px]"
       img-class="object-contain! [filter:var(--card-splash-shadow)]"
     />
@@ -278,8 +283,8 @@ const ownerLine = computed(() =>
                 class="flex h-[40px] items-center gap-[6px] rounded-full bg-(--card-pill) px-[14px]"
                 :class="t.crowned ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]' : ''"
               >
-                <img
-                  v-if="t.crowned && crown"
+                <FadeImage
+                  v-if="t.crowned"
                   :src="crown"
                   alt="Crowned"
                   class="ml-[-6px] size-[30px]"
@@ -319,12 +324,7 @@ const ownerLine = computed(() =>
             class="relative size-[128px] shrink-0 overflow-hidden rounded-[16px]"
             :style="{ background: RARITY_GRADIENT[c.weapon.rarity ?? 0] ?? 'var(--card-cv-bg)' }"
           >
-            <img
-              v-if="weaponIcon(c.weapon.key, c.weapon.ascension)"
-              :src="weaponIcon(c.weapon.key, c.weapon.ascension)"
-              alt=""
-              class="size-[128px]"
-            />
+            <FadeImage :src="weaponIcon(c.weapon.key, c.weapon.ascension)" class="size-[128px]" />
           </span>
           <div class="flex min-w-0 flex-col gap-[8px]">
             <p class="truncate text-[30px] leading-[1.1] font-semibold" :title="c.weapon.name">
@@ -415,12 +415,9 @@ const ownerLine = computed(() =>
             class="flex items-center gap-[14px]"
             :title="setTitle(set)"
           >
-            <img
-              v-if="artifactSetIcon(set.setKey)"
-              :src="artifactSetIcon(set.setKey)"
-              alt=""
-              class="size-[44px] shrink-0"
-            />
+            <span class="size-[44px] shrink-0">
+              <FadeImage :src="artifactSetIcon(set.setKey)" class="size-full" />
+            </span>
             <span class="min-w-0 flex-[1_1_auto] truncate text-[23px]">{{ set.name }}</span>
             <span
               class="min-w-[36px] rounded-[10px] bg-(--card-set-on-bg) px-[10px] py-[2px] text-center text-[22px] font-bold text-(--card-set-on)"
@@ -431,20 +428,20 @@ const ownerLine = computed(() =>
           <p v-if="!c.artifactCount" class="text-[22px] text-(--card-muted)">No artifacts</p>
           <p
             v-else
-            class="flex items-baseline gap-[18px]"
+            class="flex items-baseline gap-[18px] text-[20px] whitespace-nowrap"
             :class="bonus.length ? 'border-t border-(--card-rule) pt-[10px]' : ''"
           >
-            <span class="text-[20px] text-(--card-muted)">Build</span>
+            <span class="text-(--card-muted)">Build</span>
             <span
-              class="ml-auto text-[22px] text-(--card-muted)"
+              class="ml-auto"
               title="Roll value: every substat roll as a % of its highest roll, added up"
-              >RV</span
+              ><span class="text-(--card-muted)">RV </span
+              ><span class="font-bold" :class="buildRvTone">{{ rv }}%</span></span
             >
-            <span class="text-[38px] leading-none font-bold" :class="buildRvTone">{{ rv }}%</span>
-            <span class="ml-[18px] text-[22px] text-(--card-muted)" title="Crit value">CV</span>
-            <span class="text-[38px] leading-none font-bold" :class="buildCvTone">{{
-              c.cv.toFixed(1)
-            }}</span>
+            <span title="Crit value"
+              ><span class="text-(--card-muted)">CV </span
+              ><span class="font-bold" :class="buildCvTone">{{ c.cv.toFixed(1) }}</span></span
+            >
           </p>
         </div>
       </section>
@@ -452,7 +449,7 @@ const ownerLine = computed(() =>
       <!-- Right: the five pieces fill the column -->
       <ol class="flex min-h-0 flex-col gap-[14px]" aria-label="Artifacts">
         <li
-          v-for="{ slot, piece, lines, cvTone, title } in pieces"
+          v-for="{ slot, piece, lines, cvTone, rvTone, title } in pieces"
           :key="slot"
           class="flex min-h-0 min-w-0 flex-[1_1_0]"
         >
@@ -466,12 +463,7 @@ const ownerLine = computed(() =>
               class="relative flex w-[136px] shrink-0 items-center justify-center self-stretch"
               :style="{ background: RARITY_GRADIENT[piece.rarity] ?? 'var(--card-cv-bg)' }"
             >
-              <img
-                v-if="artifactIcon(piece.setKey, piece.slotKey)"
-                :src="artifactIcon(piece.setKey, piece.slotKey)"
-                alt=""
-                class="size-[126px]"
-              />
+              <FadeImage :src="artifactIcon(piece.setKey, piece.slotKey)" class="size-[126px]" />
               <span
                 class="absolute right-[8px] bottom-[8px] rounded-[8px] bg-(--card-badge) px-[8px] py-px text-[17px] font-bold shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                 :class="piece.maxed ? 'text-(--card-secondary)' : 'text-talent-crown'"
@@ -491,6 +483,11 @@ const ownerLine = computed(() =>
                 class="self-start rounded-[6px] bg-(--card-cv-bg) px-[7px] py-px text-[16px] font-semibold whitespace-nowrap"
                 :class="cvTone"
                 >CV {{ piece.cv.toFixed(1) }}</span
+              >
+              <span
+                class="self-start rounded-[6px] bg-(--card-cv-bg) px-[7px] py-px text-[16px] font-semibold whitespace-nowrap"
+                :class="rvTone"
+                >RV {{ piece.rv }}%</span
               >
             </div>
             <span class="w-px self-stretch bg-(--card-divider)" aria-hidden="true" />
