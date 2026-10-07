@@ -3,7 +3,12 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
-import { isProvider, oauthErrorText, providerLabel } from '@/components/oauth/oauth'
+import {
+  isProvider,
+  loadSignInOptions,
+  oauthErrorText,
+  providerLabel,
+} from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
 import { useSession } from '@/stores/session'
@@ -17,6 +22,8 @@ const login = ref('')
 const password = ref('')
 const error = ref('')
 const busy = ref(false)
+/** "Forgot password?" only while the email features are on (else the nudge under the form). */
+const emailFeatures = ref(false)
 
 const next = computed(() =>
   typeof route.query.next === 'string' && route.query.next.startsWith('/app')
@@ -27,13 +34,14 @@ const next = computed(() =>
 /** `?link=discord`: from "I have an account" on /oauth; signing in also links that account. */
 const linking = computed(() => (isProvider(route.query.link) ? route.query.link : null))
 
-onMounted(() => {
+onMounted(async () => {
   // Back from Discord / Google with a problem: say it once, then drop it from the URL.
   const code = route.query.oauth_error
   if (typeof code === 'string') {
     error.value = oauthErrorText(code)
     void router.replace({ query: { ...route.query, oauth_error: undefined } })
   }
+  emailFeatures.value = (await loadSignInOptions()).emailFeatures
 })
 
 async function submit() {
@@ -97,6 +105,7 @@ async function submit() {
         <span class="flex items-baseline justify-between gap-3">
           <span class="text-sm font-medium text-gray-400">Password</span>
           <RouterLink
+            v-if="emailFeatures"
             :to="{ name: 'forgot-password' }"
             class="text-sm text-paimon hover:underline"
             title="Reset it by email, or ask the admin"
@@ -122,7 +131,7 @@ async function submit() {
         {{ linking ? 'Sign in and link' : 'Sign in' }}
       </button>
     </form>
-    <OAuthButtons v-if="!linking" :next="next" />
+    <OAuthButtons v-if="!linking" :next="next" nudge />
     <template #footer>
       <template v-if="linking">
         <RouterLink

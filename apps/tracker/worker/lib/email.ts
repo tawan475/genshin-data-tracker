@@ -5,12 +5,19 @@
  * domain is set up, and then nothing is sent: `emailEnabled` is false, the
  * settings say so, and "forgot password" still answers the same way.
  *
+ * Above that sits one switch, the EMAIL_FEATURES var (paused, i.e. off,
+ * unless it is "1"): off, no mail goes out even with the binding, an email
+ * can't be added or changed, and the mail routes answer 404 (routes/recovery,
+ * routes/auth). Admin reset links work either way.
+ *
  * Mails carry one-time tokens: never log a message, only its outcome.
  */
 
 /** Optional parts of the environment (not in wrangler.jsonc yet, so not in `Env`). */
 interface EmailEnv {
   EMAIL?: SendEmail
+  /** "1" turns the email features on; anything else (or unset) pauses them. */
+  EMAIL_FEATURES?: string
   /** Sender address on the onboarded domain. */
   EMAIL_FROM?: string
   /** The site's origin, for links in mails. */
@@ -23,7 +30,12 @@ const DEFAULT_FROM = 'no-reply@475.dev'
 
 const emailEnv = (env: Env) => env as unknown as EmailEnv
 
+/** Whether the email features are on (EMAIL_FEATURES = "1"); paused otherwise. */
+export const emailFeatures = (env: Env): boolean => emailEnv(env).EMAIL_FEATURES === '1'
+
+/** The mail binding, while the email features are on. */
 export function emailBinding(env: Env): SendEmail | undefined {
+  if (!emailFeatures(env)) return undefined
   const binding = emailEnv(env).EMAIL
   // A binding is an object (an RPC stub under `vite dev`); a stray string var is not one.
   return binding && typeof binding !== 'string' ? binding : undefined

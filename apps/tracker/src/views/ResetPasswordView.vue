@@ -2,6 +2,7 @@
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, linkToken } from '@gdt/shared'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { loadSignInOptions } from '@/components/oauth/oauth'
 import LinkProblem from '@/components/public/LinkProblem.vue'
 import { linkProblem, type LinkProblem as Problem } from '@/components/public/link-problem'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
@@ -29,6 +30,8 @@ const confirm = ref('')
 const touched = ref(false)
 const busy = ref(false)
 const error = ref('')
+/** "Request a new link" only while the email features are on. */
+const emailFeatures = ref(false)
 
 // The same rules as signing up.
 const errors = computed(() => ({
@@ -47,6 +50,7 @@ const isLinkError = (cause: unknown) =>
   ['token_expired', 'token_used', 'token_invalid'].includes(cause.code)
 
 onMounted(async () => {
+  void loadSignInOptions().then((options) => (emailFeatures.value = options.emailFeatures))
   if (!linkToken.safeParse(token).success) {
     problem.value = linkProblem(new ApiRequestError(400, 'token_invalid', ''))
     return
@@ -93,7 +97,7 @@ const title = computed(() => problem.value?.title ?? 'New password')
     <LinkProblem
       v-if="problem"
       :problem="problem"
-      :retry="{ name: 'forgot-password' }"
+      :retry="emailFeatures ? { name: 'forgot-password' } : undefined"
       retry-label="Request a new link"
     />
     <div v-else-if="username === null" class="flex justify-center py-6" aria-busy="true">

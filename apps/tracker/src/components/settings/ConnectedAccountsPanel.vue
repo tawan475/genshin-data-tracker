@@ -8,7 +8,7 @@ import {
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
-import { isProvider, oauthErrorText, providerLabel } from '@/components/oauth/oauth'
+import { isProvider, oauthErrorText, providerLabel, providerNames } from '@/components/oauth/oauth'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { ApiRequestError, api } from '@/api'
@@ -19,7 +19,9 @@ import { useSession } from '@/stores/session'
 /**
  * Discord / Google sign-in: Link (a round trip to the provider, back here)
  * and Unlink, which the server refuses while it is the only way in. Hidden
- * while the server has no provider and nothing is linked.
+ * while the server has no provider and nothing is linked. While the email
+ * features are paused there is no "forgot password", so a user with nothing
+ * linked is nudged to link one.
  */
 const session = useSession()
 const feedback = useFeedback()
@@ -39,6 +41,13 @@ const rows = computed(() =>
     enabled: data.value?.providers.includes(provider) ?? false,
     identity: data.value?.identities.find((identity) => identity.provider === provider) ?? null,
   })),
+)
+
+/** Nothing linked and no email recovery: the providers to suggest, by name. */
+const nudge = computed(() =>
+  session.me?.emailFeatures === false && data.value?.identities.length === 0
+    ? providerNames(data.value.providers)
+    : '',
 )
 
 /** Unlinking must leave a way in: a password or another linked account. */
@@ -128,6 +137,13 @@ function details(identity: IdentityResponse): string {
 
 <template>
   <UiPanel v-if="rows.length" title="Connected accounts">
+    <p
+      v-if="nudge"
+      class="mb-3 text-sm text-text-muted"
+      title="If you forget your password, sign in with it instead"
+    >
+      Link {{ nudge }} to keep a way in
+    </p>
     <ul class="flex flex-col divide-y divide-border-subtle">
       <li
         v-for="row in rows"
@@ -150,7 +166,7 @@ function details(identity: IdentityResponse): string {
         <div class="flex flex-wrap items-center gap-2">
           <template v-if="row.identity">
             <UiButton
-              v-if="!session.me?.email && row.identity.email"
+              v-if="session.me?.emailFeatures && !session.me.email && row.identity.email"
               size="sm"
               variant="ghost"
               :disabled="busy !== null"

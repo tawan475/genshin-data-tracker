@@ -61,6 +61,10 @@
   // `vite dev` simulates it (vite.config.ts). Optional vars: EMAIL_FROM
   // (default no-reply@475.dev) and SITE_URL (the origin links point at,
   // default https://genshin-tracker.475.dev).
+  // The email features are paused unless the var EMAIL_FEATURES is "1": no
+  // email field, no "forgot password", no mail even with the binding; admin
+  // reset links still work. To turn them on, add with the binding:
+  //   "vars": { "EMAIL_FEATURES": "1" },
 
   // Daily housekeeping (worker/services/maintenance.ts), 02:23 in Bangkok.
   "triggers": { "crons": ["23 19 * * *"] },

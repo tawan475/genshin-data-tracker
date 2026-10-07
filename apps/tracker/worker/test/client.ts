@@ -1,5 +1,6 @@
 import type { Good, MeResponse } from '@gdt/shared'
-import { SELF } from 'cloudflare:test'
+import { createExecutionContext, env, SELF, waitOnExecutionContext } from 'cloudflare:test'
+import worker from '../index'
 
 export const ORIGIN = 'https://genshin-tracker.475.dev'
 
@@ -7,6 +8,27 @@ let clients = 0
 
 /** How a client reaches the Worker: SELF, or a direct call with a changed env (recovery tests). */
 export type Transport = (url: string, init: RequestInit) => Promise<Response>
+
+/**
+ * Calls the Worker directly with `overrides` in its env (vars wrangler.jsonc
+ * doesn't set), waiting for the work it does after responding.
+ */
+export function withEnv(overrides: Record<string, unknown>): Transport {
+  return async (url, init) => {
+    const ctx = createExecutionContext()
+    const bindings = { ...env, ...overrides } as unknown as Env
+    const response = await worker.fetch(new Request(url, init), bindings, ctx)
+    await waitOnExecutionContext(ctx)
+    return response
+  }
+}
+
+/**
+ * The email features on (EMAIL_FEATURES=1). SELF runs with them paused, as
+ * production does until the var is set.
+ */
+export const emailOn = (overrides: Record<string, unknown> = {}): Transport =>
+  withEnv({ EMAIL_FEATURES: '1', ...overrides })
 
 /** A browser stand-in: keeps cookies per path and sends the CSRF header. */
 export class Client {
@@ -62,8 +84,11 @@ export class Client {
 
 let counter = 0
 
-/** Registers a fresh user; returns a signed-in client and the credentials. */
-export async function signUp(): Promise<{
+/**
+ * Registers a fresh user (with an email, which only `emailOn()` keeps);
+ * returns a signed-in client and the credentials.
+ */
+export async function signUp(transport?: Transport): Promise<{
   client: Client
   username: string
   password: string
@@ -71,7 +96,7 @@ export async function signUp(): Promise<{
 }> {
   const username = `traveler${++counter}${crypto.randomUUID().slice(0, 6)}`
   const password = 'correct horse battery staple'
-  const client = new Client()
+  const client = new Client(transport)
   const me = await client.json<MeResponse>('/api/auth/register', {
     method: 'POST',
     json: { username, email: `${username}@example.com`, password },

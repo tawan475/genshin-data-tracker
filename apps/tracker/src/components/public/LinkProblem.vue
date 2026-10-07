@@ -4,8 +4,11 @@ import type { RouteLocationRaw } from 'vue-router'
 import { CircleAlert, MailWarning, TimerOff, Unlink } from 'lucide-vue-next'
 import type { LinkProblem } from './link-problem'
 
-/** A dead one-time link on a public page: what happened and the way to a new one. */
-const props = defineProps<{ problem: LinkProblem; retry: RouteLocationRaw; retryLabel: string }>()
+/**
+ * A dead one-time link on a public page: what happened and the way to a new
+ * one (none without `retry`: while email is paused, only an admin makes one).
+ */
+const props = defineProps<{ problem: LinkProblem; retry?: RouteLocationRaw; retryLabel?: string }>()
 
 const icon = computed(
   () =>
@@ -23,6 +26,8 @@ const icon = computed(
   <div class="flex flex-col items-center gap-6 text-center" role="alert">
     <component :is="icon" class="size-10 text-paimon" aria-hidden="true" />
     <p class="text-gray-200">{{ problem.text }}</p>
-    <RouterLink :to="retry" class="btn-glow w-full rounded-xl">{{ retryLabel }}</RouterLink>
+    <RouterLink v-if="retry" :to="retry" class="btn-glow w-full rounded-xl">{{
+      retryLabel
+    }}</RouterLink>
   </div>
 </template>

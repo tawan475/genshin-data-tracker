@@ -15,9 +15,14 @@ import { useSession } from '@/stores/session'
  * Who you are: user id, username, email; the last two edit in place. An
  * unconfirmed email has a Verify action (a confirmation link by mail; a new
  * email gets one by itself) while the server can send email.
+ *
+ * While the email features are paused (`emailFeatures`), only the username
+ * edits; an email set before shows read-only (it still signs in) with Remove.
  */
 const session = useSession()
 const feedback = useFeedback()
+
+const emailFeatures = computed(() => session.me?.emailFeatures === true)
 
 const editing = ref(false)
 const username = ref('')
@@ -38,7 +43,9 @@ function startEdit() {
 
 const usernameChanged = computed(() => username.value.trim() !== session.me?.username)
 const emailChanged = computed(
-  () => (email.value.trim().toLowerCase() || null) !== (session.me?.email ?? null),
+  () =>
+    emailFeatures.value &&
+    (email.value.trim().toLowerCase() || null) !== (session.me?.email ?? null),
 )
 
 const errors = computed(() => ({
@@ -47,7 +54,9 @@ const errors = computed(() => ({
     (usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _'),
   email:
     serverErrors.value.email ??
-    (!email.value.trim() || emailSchema.safeParse(email.value).success ? '' : 'Invalid email'),
+    (!emailFeatures.value || !email.value.trim() || emailSchema.safeParse(email.value).success
+      ? ''
+      : 'Invalid email'),
 }))
 const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
 const valid = computed(() => Object.values(errors.value).every((e) => !e))
@@ -98,6 +107,28 @@ async function sendConfirmation() {
   }
 }
 
+const removing = ref(false)
+
+/** While email is paused: the one change left to an email set before. */
+async function removeEmail() {
+  const ok = await feedback.confirm({
+    title: 'Remove email?',
+    detail: 'It will no longer sign you in.',
+    confirmLabel: 'Remove',
+    tone: 'danger',
+  })
+  if (!ok) return
+  removing.value = true
+  try {
+    await session.updateProfile({ email: null })
+    feedback.toast({ tone: 'success', title: 'Email removed' })
+  } catch (cause) {
+    feedback.error('Email not removed', cause)
+  } finally {
+    removing.value = false
+  }
+}
+
 const fields = { username, email }
 
 /** Typing in a field clears the server's complaint about it. */
@@ -117,15 +148,22 @@ function edit(field: keyof typeof fields, value: string) {
     </template>
 
     <dl v-if="session.me && !editing" class="flex flex-col divide-y divide-border-subtle">
-      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-3">
+      <div
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+      >
         <dt class="text-text-secondary">User ID</dt>
         <dd class="font-mono select-all">{{ session.me.id }}</dd>
       </div>
-      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
+      <div
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+      >
         <dt class="text-text-secondary">Username</dt>
         <dd class="min-w-0 truncate font-mono">{{ session.me.username }}</dd>
       </div>
-      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-3">
+      <div
+        v-if="emailFeatures"
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+      >
         <dt class="text-text-secondary">Email</dt>
         <dd v-if="session.me.email" class="flex min-w-0 flex-wrap items-center justify-end gap-2">
           <span class="min-w-0 truncate">{{ session.me.email }}</span>
@@ -164,6 +202,16 @@ function edit(field: keyof typeof fields, value: string) {
           —
         </dd>
       </div>
+      <div
+        v-else-if="session.me.email"
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
+      >
+        <dt class="text-text-secondary">Email</dt>
+        <dd class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+          <span class="min-w-0 truncate" title="Also signs you in">{{ session.me.email }}</span>
+          <UiButton size="sm" :loading="removing" @click="removeEmail"> Remove </UiButton>
+        </dd>
+      </div>
     </dl>
 
     <form
@@ -186,7 +234,13 @@ function edit(field: keyof typeof fields, value: string) {
           @update:model-value="edit('username', $event)"
         />
       </UiField>
-      <UiField v-slot="{ id, describedBy }" label="Email" optional :error="show('email')">
+      <UiField
+        v-if="emailFeatures"
+        v-slot="{ id, describedBy }"
+        label="Email"
+        optional
+        :error="show('email')"
+      >
         <UiInput
           :id="id"
           :model-value="email"

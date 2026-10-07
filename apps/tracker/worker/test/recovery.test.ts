@@ -8,7 +8,7 @@ import worker from '../index'
 import { randomToken, sha256Hex } from '../lib/crypto'
 import { FORGOT_PASSWORD_ANSWER } from '../routes/recovery'
 import { runMaintenance } from '../services/maintenance'
-import { Client, ORIGIN, signUp, type Transport } from './client'
+import { Client, ORIGIN, type Transport } from './client'
 
 const db = getDb(env.DB)
 const PASSWORD = 'correct horse battery staple'
@@ -32,13 +32,19 @@ class FakeMail {
 }
 
 /**
- * Calls the Worker directly, with `EMAIL` bound to `mail` (none: null) and
- * any other env changes, and waits for the work it does after responding.
+ * Calls the Worker directly, with the email features on (EMAIL_FEATURES=1),
+ * `EMAIL` bound to `mail` (none: null) and any other env changes, and waits
+ * for the work it does after responding.
  */
 function via(mail: FakeMail | null, overrides: Record<string, unknown> = {}): Transport {
   return async (url, init) => {
     const ctx = createExecutionContext()
-    const bindings = { ...env, ...(mail ? { EMAIL: mail } : {}), ...overrides } as unknown as Env
+    const bindings = {
+      ...env,
+      EMAIL_FEATURES: '1',
+      ...(mail ? { EMAIL: mail } : {}),
+      ...overrides,
+    } as unknown as Env
     const response = await worker.fetch(new Request(url, init), bindings, ctx)
     await waitOnExecutionContext(ctx)
     return response
@@ -310,9 +316,11 @@ describe('forgot password', () => {
   })
 
   it('without the email binding: the same answer, nothing sent, the app is told', async () => {
-    const { client, me } = await signUp() // through SELF: wrangler.jsonc has no EMAIL yet
-    expect(me.emailEnabled).toBe(false)
-    expect(await post(new Client(), '/api/auth/forgot-password', { login: me.username })).toEqual({
+    const { client, me } = await signUpWith(null) // wrangler.jsonc has no EMAIL yet
+    expect(me).toMatchObject({ emailEnabled: false, emailFeatures: true })
+    expect(
+      await post(new Client(via(null)), '/api/auth/forgot-password', { login: me.username }),
+    ).toEqual({
       status: 202,
       body: FORGOT_PASSWORD_ANSWER,
       code: undefined,
@@ -447,5 +455,161 @@ describe('password reset', () => {
     const left = (await linksOf(me.id, 'reset_password')).map((row) => row.tokenHash)
     expect(left).toEqual([await sha256Hex(recent)])
     expect(left).not.toContain(await sha256Hex(old))
+  })
+})
+
+describe('email features paused (EMAIL_FEATURES unset, as in production)', () => {
+  /** Paused, with a mail binding that would send if anything still asked it to. */
+  const paused = (mail: FakeMail) => via(mail, { EMAIL_FEATURES: undefined })
+
+  async function pausedUser(mail: FakeMail) {
+    const username = `pz${++counter}${crypto.randomUUID().slice(0, 6)}`
+    const client = new Client(paused(mail))
+    const me = await client.json<MeResponse>('/api/auth/register', {
+      method: 'POST',
+      json: { username, password: PASSWORD },
+    })
+    return { client, username, me }
+  }
+
+  async function patchProfile(client: Client, json: unknown) {
+    const response = await client.fetch('/api/auth/profile', { method: 'PATCH', json })
+    const body = (await response.json()) as Record<string, unknown>
+    return { status: response.status, body, code: (body.error as { code?: string })?.code }
+  }
+
+  it('sign-up drops an email; nothing is stored or mailed', async () => {
+    const mail = new FakeMail()
+    const username = `pz${++counter}${crypto.randomUUID().slice(0, 6)}`
+    const register = (json: object) =>
+      post(new Client(paused(mail)), '/api/auth/register', { password: PASSWORD, ...json })
+
+    const created = await register({ username, email: `${username}@example.com` })
+    expect(created).toMatchObject({
+      status: 201,
+      body: { username, email: null, emailEnabled: false, emailFeatures: false },
+    })
+    // Dropped, not refused: not even checked (a page cached from before still signs up).
+    const odd = await register({ username: `${username}b`, email: 'not-an-email' })
+    expect(odd).toMatchObject({ status: 201, body: { email: null } })
+    // The rest is checked as ever.
+    expect(await register({ username: 'x' })).toMatchObject({
+      status: 400,
+      code: 'invalid_request',
+    })
+    expect(await register({ username, email: null })).toMatchObject({ status: 409, code: 'taken' })
+
+    const [row] = await db.select().from(users).where(eq(users.usernameKey, username))
+    expect(row).toMatchObject({ email: null, emailVerified: false })
+    expect(await linksOf(row!.id, 'verify_email')).toHaveLength(0)
+    expect(mail.sent).toEqual([])
+  })
+
+  it('forgot-password and both verify-email routes are 404, even with a binding', async () => {
+    const mail = new FakeMail()
+    const { client, username, me } = await pausedUser(mail)
+    const email = `${username}@example.com`
+    await db.update(users).set({ email }).where(eq(users.id, me.id))
+    // A confirmation link from before the pause.
+    const token = randomToken(32)
+    await db.insert(authTokens).values({
+      userId: me.id,
+      kind: 'verify_email',
+      tokenHash: await sha256Hex(token),
+      email,
+      expiresAt: Date.now() + HOUR,
+    })
+
+    const gone = { status: 404, code: 'email_paused' }
+    expect(await post(client, '/api/auth/forgot-password', { login: username })).toMatchObject(gone)
+    expect(await post(client, '/api/auth/forgot-password', { login: email })).toMatchObject(gone)
+    expect(await post(client, '/api/auth/verify-email/send')).toMatchObject(gone)
+    expect(await post(client, '/api/auth/verify-email', { token })).toMatchObject(gone)
+    // Before anything else is asked for (a session, the CSRF header).
+    expect(await post(new Client(paused(mail)), '/api/auth/verify-email/send')).toMatchObject(gone)
+    const noCsrf = await paused(mail)(`${ORIGIN}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ login: username }),
+    })
+    expect(noCsrf.status).toBe(404)
+
+    expect(mail.sent).toEqual([])
+    expect(await linksOf(me.id, 'reset_password')).toHaveLength(0)
+    const [row] = await db.select().from(users).where(eq(users.id, me.id))
+    expect(row!.emailVerified).toBe(false)
+    // Untouched: once email is back, the link still confirms.
+    expect(await post(new Client(via(mail)), '/api/auth/verify-email', { token })).toMatchObject({
+      status: 200,
+      body: { email },
+    })
+  })
+
+  it('the profile can remove an email, not add or change one; it still signs in', async () => {
+    const mail = new FakeMail()
+    const { client, username, me } = await pausedUser(mail)
+    const email = `${username}@example.com`
+    const refused = { status: 403, code: 'email_paused' }
+
+    expect(await patchProfile(client, { email })).toMatchObject(refused)
+    // Refused as a whole: the username stays too.
+    expect(await patchProfile(client, { username: `${username}r`, email })).toMatchObject(refused)
+    expect((await client.json<MeResponse>('/api/auth/me')).username).toBe(username)
+
+    // An email set before the pause.
+    await db.update(users).set({ email, emailVerified: true }).where(eq(users.id, me.id))
+    expect(await patchProfile(client, { email: `${username}@example.org` })).toMatchObject(refused)
+    // The same address is no change, so the username can still go with it.
+    expect(await patchProfile(client, { username: `${username}r`, email })).toMatchObject({
+      status: 200,
+      body: { username: `${username}r`, email, emailFeatures: false, emailEnabled: false },
+    })
+    const login = () =>
+      post(new Client(paused(mail)), '/api/auth/login', { login: email, password: PASSWORD })
+    expect((await login()).status).toBe(200)
+
+    expect(await patchProfile(client, { email: null })).toMatchObject({
+      status: 200,
+      body: { email: null, emailVerified: false },
+    })
+    expect((await login()).status).toBe(401)
+    expect(await patchProfile(client, { email: '' })).toMatchObject({ status: 200 })
+    expect(mail.sent).toEqual([])
+  })
+
+  it('an admin reset link still sets the password and signs in; no notice is mailed', async () => {
+    const mail = new FakeMail()
+    const { client: oldSession, username, me } = await pausedUser(mail)
+    // A confirmed email and a binding: only the pause keeps the notice from going out.
+    await db
+      .update(users)
+      .set({ email: `${username}@example.com`, emailVerified: true })
+      .where(eq(users.id, me.id))
+    const token = await adminLink(me.id)
+
+    const browser = new Client(paused(mail))
+    expect(await post(browser, '/api/auth/reset-password/check', { token })).toMatchObject({
+      status: 200,
+      body: { username } satisfies ResetLinkResponse,
+    })
+    const reset = await post(browser, '/api/auth/reset-password', { token, password: NEW_PASSWORD })
+    expect(reset).toMatchObject({
+      status: 200,
+      body: { id: me.id, username, emailFeatures: false },
+    })
+    expect((await browser.json<MeResponse>('/api/auth/me')).id).toBe(me.id)
+    expect(await post(oldSession, '/api/auth/refresh')).toMatchObject({
+      status: 401,
+      code: 'session_revoked',
+    })
+    const login = await post(new Client(paused(mail)), '/api/auth/login', {
+      login: username,
+      password: NEW_PASSWORD,
+    })
+    expect(login.status).toBe(200)
+    expect(
+      await post(browser, '/api/auth/reset-password', { token, password: NEW_PASSWORD }),
+    ).toMatchObject({ status: 410, code: 'token_used' })
+    expect(mail.sent).toEqual([])
   })
 })

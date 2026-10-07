@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
+import { loadSignInOptions } from '@/components/oauth/oauth'
 import { setPublicPage } from '@/lib/theme'
 import { useAccounts } from '@/stores/accounts'
 import { useSession } from '@/stores/session'
@@ -21,6 +22,17 @@ const account = (path: string, name: string, title: string, load: () => Promise<
   component: load,
   meta: { auth: true, title },
 })
+
+/**
+ * The email pages while the email features are paused: back to sign-in. A
+ * reset link with its token still opens (admins hand those out).
+ */
+async function emailPage(to: RouteLocationNormalized) {
+  if (to.name === 'reset-password' && typeof to.query.token === 'string' && to.query.token) {
+    return true
+  }
+  return (await loadSignInOptions()).emailFeatures ? true : { name: 'login' }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,24 +63,28 @@ const router = createRouter({
       component: () => import('@/views/OAuthContinueView.vue'),
       meta: { guest: true, public: true, title: 'Continue' },
     },
-    // Account recovery: open signed in or not (links arrive by email).
+    // Account recovery: open signed in or not (links arrive by email, or from
+    // an admin). While email is paused, only a reset link with a token opens.
     {
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('@/views/ForgotPasswordView.vue'),
       meta: { public: true, title: 'Reset password' },
+      beforeEnter: emailPage,
     },
     {
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/views/ResetPasswordView.vue'),
       meta: { public: true, title: 'New password' },
+      beforeEnter: emailPage,
     },
     {
       path: '/verify-email',
       name: 'verify-email',
       component: () => import('@/views/VerifyEmailView.vue'),
       meta: { public: true, title: 'Confirm email' },
+      beforeEnter: emailPage,
     },
     {
       path: '/app',

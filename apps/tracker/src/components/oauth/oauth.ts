@@ -7,19 +7,35 @@ export function isProvider(value: unknown): value is OAuthProvider {
   return typeof value === 'string' && (OAUTH_PROVIDERS as readonly string[]).includes(value)
 }
 
-let providers: Promise<OAuthProvider[]> | null = null
-
-/** The server's sign-in providers (none until their secrets are set), asked once per page load. */
-export function loadProviders(): Promise<OAuthProvider[]> {
-  providers ??= api
-    .oauthProviders()
-    .then((response) => response.providers.filter(isProvider))
-    .catch(() => {
-      providers = null
-      return []
-    })
-  return providers
+/** What the signed-out pages offer: the server's providers, and whether email features are on. */
+export interface SignInOptions {
+  providers: OAuthProvider[]
+  emailFeatures: boolean
 }
+
+let options: Promise<SignInOptions> | null = null
+
+/**
+ * The server's sign-in options, asked once per page load: providers (none
+ * until their secrets are set) and the email switch (off when unsure).
+ */
+export function loadSignInOptions(): Promise<SignInOptions> {
+  options ??= api
+    .oauthProviders()
+    .then((response) => ({
+      providers: response.providers.filter(isProvider),
+      emailFeatures: response.emailFeatures === true,
+    }))
+    .catch(() => {
+      options = null
+      return { providers: [], emailFeatures: false }
+    })
+  return options
+}
+
+/** "Discord or Google": the providers named for a line of text. */
+export const providerNames = (providers: readonly OAuthProvider[]): string =>
+  providers.map(providerLabel).join(' or ')
 
 /** What a provider round trip's `?oauth_error=` code means, in a few words. */
 export function oauthErrorText(code: unknown): string {
