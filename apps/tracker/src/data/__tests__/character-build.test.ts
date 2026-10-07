@@ -6,10 +6,12 @@ import { computeStats, type PanelStats } from '@gdt/game-data/stats'
 import { describe, expect, it } from 'vitest'
 import {
   buildPanel,
+  damageBonuses,
   formatPanelValue,
   panelRows,
   setBonusLines,
   setBonusTitle,
+  shareUid,
   talentLevels,
   talentTitle,
   weaponLines,
@@ -37,9 +39,11 @@ function panel(overrides: Partial<PanelStats> = {}): PanelStats {
 
 const homa = { key: 'StaffOfHoma', level: 90, ascension: 6, refinement: 1 }
 
+const NO_DMG = { anemo: 0, geo: 0, electro: 0, dendro: 0, hydro: 0, pyro: 0, cryo: 0 }
+
 describe('panelRows', () => {
-  it('lists the Attributes screen in the game order, own element always', () => {
-    const rows = panelRows(panel(), 'pyro')
+  it("lists the Attributes screen in the game order, with the build's DMG bonus", () => {
+    const rows = panelRows(panel({ elementalDmg: { ...NO_DMG, pyro: 61.6 } }))
     expect(rows.map((r) => r.key)).toEqual([
       'hp',
       'atk',
@@ -60,39 +64,21 @@ describe('panelRows', () => {
       'Energy Recharge',
       'Pyro DMG Bonus',
     ])
-    expect(rows.at(-1)).toMatchObject({ value: 0, text: '0.0%', damage: 'pyro' })
+    expect(rows.at(-1)).toMatchObject({ value: 61.6, text: '61.6%', damage: 'pyro' })
   })
 
   it('splits HP, ATK and DEF into base and bonus', () => {
-    const [hp] = panelRows(panel(), 'pyro')
+    const [hp] = panelRows(panel())
     expect(hp).toMatchObject({ text: '18,663', base: 15552, bonus: 3111 })
   })
 
-  it('adds Healing Bonus before Energy Recharge, other DMG bonuses only above 0', () => {
-    const rows = panelRows(
-      panel({
-        healing: 15.4,
-        physicalDmg: 58.3,
-        elementalDmg: { anemo: 0, geo: 0, electro: 46.6, dendro: 0, hydro: 15, pyro: 0, cryo: 0 },
-      }),
-      'electro',
-    )
-    expect(rows.map((r) => r.key).slice(6)).toEqual([
-      'heal_',
-      'enerRech_',
-      'hydro_dmg_',
-      'electro_dmg_',
-      'physical_dmg_',
-    ])
-    expect(rows.find((r) => r.key === 'physical_dmg_')).toMatchObject({
-      text: '58.3%',
-      damage: 'physical',
-      label: 'Physical DMG Bonus',
-    })
+  it('adds Healing Bonus before Energy Recharge', () => {
+    const rows = panelRows(panel({ healing: 15.4 }))
+    expect(rows.map((r) => r.key).slice(6)).toEqual(['heal_', 'enerRech_'])
   })
 
-  it('lists no DMG bonus at 0 for a character without an element', () => {
-    expect(panelRows(panel(), null).map((r) => r.key)).not.toContain('pyro_dmg_')
+  it('has no DMG bonus row when every bonus is 0', () => {
+    expect(panelRows(panel()).some((r) => r.damage)).toBe(false)
   })
 
   it('formats like the game', () => {
@@ -103,12 +89,60 @@ describe('panelRows', () => {
   })
 })
 
+describe('damageBonuses', () => {
+  it("picks the bonus the build has, not the character's element (Diluc with a Cryo goblet)", () => {
+    // Crimson Witch 2-piece (Pyro 15%) plus a Cryo goblet and Blizzard Strayer 2-piece.
+    const diluc = panel({ elementalDmg: { ...NO_DMG, pyro: 15, cryo: 61.6 } })
+    expect(damageBonuses(diluc)).toEqual([{ kind: 'cryo', value: 61.6 }])
+    expect(
+      panelRows(diluc)
+        .filter((r) => r.damage)
+        .map((r) => r.label),
+    ).toEqual(['Cryo DMG Bonus'])
+  })
+
+  it('picks physical', () => {
+    const eula = panel({ physicalDmg: 83.3, elementalDmg: { ...NO_DMG, cryo: 15 } })
+    expect(damageBonuses(eula)).toEqual([{ kind: 'physical', value: 83.3 }])
+    expect(panelRows(eula).at(-1)).toMatchObject({
+      key: 'physical_dmg_',
+      label: 'Physical DMG Bonus',
+      text: '83.3%',
+    })
+  })
+
+  it("lists ties in the game's order", () => {
+    const tied = panel({ physicalDmg: 46.6, elementalDmg: { ...NO_DMG, electro: 46.6, hydro: 15 } })
+    expect(damageBonuses(tied).map((b) => b.kind)).toEqual(['electro', 'physical'])
+  })
+
+  it('is empty when every bonus is 0 (an EM goblet)', () => {
+    expect(damageBonuses(panel())).toEqual([])
+  })
+})
+
+describe('shareUid', () => {
+  it("is the account's UID", () => {
+    expect(shareUid('812345678', 700000001)).toBe('812345678')
+  })
+
+  it("falls back to the newest capture's gi_player.uid", () => {
+    expect(shareUid(null, 812345679)).toBe('812345679')
+    expect(shareUid('  ', 812345679)).toBe('812345679')
+    expect(shareUid(undefined, 1812345679)).toBe('1812345679')
+  })
+
+  it('is null when neither knows it', () => {
+    expect(shareUid(null, undefined)).toBeNull()
+    expect(shareUid(null, 0)).toBeNull()
+  })
+})
+
 describe('buildPanel', () => {
   const huTao = {
     key: 'HuTao',
     level: 90,
     ascension: 6,
-    element: 'pyro' as const,
     weapon: homa,
     artifacts: [null, null, null, null, null],
   }
@@ -155,7 +189,7 @@ describe('buildPanel', () => {
   })
 
   it('reads the plain Traveler like any Traveler', () => {
-    const traveler = { ...huTao, key: 'Traveler', element: null, weapon: null }
+    const traveler = { ...huTao, key: 'Traveler', weapon: null }
     expect(buildPanel(traveler)!.stats.hp).toBe(
       buildPanel({ ...traveler, key: 'TravelerAnemo' })!.stats.hp,
     )

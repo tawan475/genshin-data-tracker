@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useTemplateRef } from 'vue'
+import { useElementSize } from '@vueuse/core'
 import { Wrench } from 'lucide-vue-next'
 import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
@@ -29,19 +30,42 @@ import ConstellationIcons from './ConstellationIcons.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
 import NamecardBackdrop from './NamecardBackdrop.vue'
 import SetBonuses from './SetBonuses.vue'
+import ShareCard from './ShareCard.vue'
 import SplashArt from './SplashArt.vue'
 import TalentLevels from './TalentLevels.vue'
 import WeaponBlock from './WeaponBlock.vue'
+import { CARD_HEIGHT, CARD_WIDTH, type CardOwner } from './share-card'
 import { ELEMENT_GLOW } from './tokens'
 import { useConstellationBoosts } from './use-boosts'
 
 /**
- * Everything about one character, Enka-style: splash art with the
- * constellations, level, talents (C3/C5 included), weapon and the in-game
- * stat panel; then the five pieces with their sets and crit value, and the
- * character's history.
+ * Everything about one character. Wide (`showcase`): the share card itself
+ * (ShareCard, Enka-style), scaled to the width, as the page shows it and
+ * the PNG export draws it; then what is left to do and the history.
+ * Narrow: the same build stacked to read on a phone (splash art with the
+ * constellations, level, talents with C3/C5, weapon, the in-game stats,
+ * sets, the five pieces), and the card is rendered off screen only when
+ * an export asks for it (`offscreen`). `cardElement()` is the card's root
+ * for the export.
  */
-const props = defineProps<{ character: CharacterView; account: AccountRef }>()
+const props = defineProps<{
+  character: CharacterView
+  account: AccountRef
+  showcase: boolean
+  offscreen: boolean
+  cardTheme: 'light' | 'dark'
+  owner: CardOwner
+  takenAt: number | null
+}>()
+
+const card = useTemplateRef<InstanceType<typeof ShareCard>>('card')
+const frame = useTemplateRef<HTMLElement>('frame')
+const { width: frameWidth } = useElementSize(frame)
+const scale = computed(() => (frameWidth.value ? frameWidth.value / CARD_WIDTH : 0))
+
+defineExpose({
+  cardElement: (): HTMLElement | null => (card.value?.$el as HTMLElement | undefined) ?? null,
+})
 
 const c = computed(() => props.character)
 
@@ -72,122 +96,168 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
 
 <template>
   <div class="flex flex-col gap-5">
-    <section
-      class="relative overflow-hidden rounded-xl border border-border-default bg-surface-base"
-      aria-label="Build"
-    >
+    <template v-if="showcase">
       <div
-        class="pointer-events-none absolute inset-0 bg-linear-to-br via-transparent to-transparent"
-        :class="glow"
-      />
-      <NamecardBackdrop
-        :src="banner"
-        class="absolute inset-y-0 right-0 h-full w-full opacity-20 [mask-image:linear-gradient(to_left,black_25%,transparent)] md:w-3/4 dark:opacity-15"
-      />
-
-      <div
-        class="relative grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:grid-cols-[minmax(0,12fr)_minmax(0,13fr)_minmax(0,11fr)]"
+        ref="frame"
+        class="relative w-full overflow-hidden rounded-xl border border-border-default bg-surface-sunken"
+        :style="{ height: `${CARD_HEIGHT * scale}px` }"
       >
-        <!-- Splash art, constellations down its right edge -->
         <div
-          class="relative h-72 min-[480px]:h-80 md:row-span-2 md:h-auto md:min-h-[26rem] xl:row-span-1"
+          class="absolute top-0 left-0 origin-top-left"
+          :style="{ transform: `scale(${scale})` }"
         >
-          <SplashArt
-            :character-key="c.key"
-            :name="c.name"
-            :rarity="c.rarity"
-            class="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_75%,transparent)] md:[mask-image:linear-gradient(to_right,black_80%,transparent)]"
-            img-class="scale-[1.15] object-[50%_30%]"
+          <ShareCard
+            ref="card"
+            :character="c"
+            :panel="panel"
+            :talents="talents"
+            :theme="cardTheme"
+            :owner="owner"
+            :taken-at="takenAt"
           />
-          <ConstellationIcons
-            :character-key="c.key"
-            :value="c.constellation"
-            :element="c.element"
-            class="absolute top-1/2 right-3 -translate-y-1/2 md:right-1"
-          />
-        </div>
-
-        <!-- Who: name, level, friendship, constellation; talents; weapon -->
-        <div class="flex min-w-0 flex-col gap-4 p-4 sm:p-5 md:pl-3">
-          <header class="flex min-w-0 flex-col gap-1.5">
-            <p class="flex min-w-0 items-center gap-2">
-              <ElementIcon v-if="c.element" :element="c.element" size="lg" />
-              <span
-                class="min-w-0 truncate font-display text-2xl font-semibold sm:text-3xl"
-                :title="kind"
-                >{{ c.name }}</span
-              >
-            </p>
-            <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
-              <RarityStars v-if="c.rarity" :rarity="c.rarity" />
-              <span v-if="c.weaponType">{{ WEAPON_TYPE_LABELS[c.weaponType] }}</span>
-              <time
-                v-if="c.obtainedAt !== null"
-                :datetime="new Date(c.obtainedAt).toISOString()"
-                :title="`Obtained ${formatFullDateTime(c.obtainedAt)}`"
-                >{{ formatDate(c.obtainedAt) }}</time
-              >
-            </p>
-            <p class="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <LevelText
-                :level="c.level"
-                :ascension="c.ascension"
-                :target="TARGET_LEVEL"
-                class="text-lg font-medium"
-              />
-              <FriendshipBadge
-                v-if="c.friendship !== null"
-                :level="c.friendship"
-                class="text-sm text-text-secondary"
-              />
-              <ConstellationStars :value="c.constellation" :element="c.element" />
-            </p>
-          </header>
-          <TalentLevels :character-key="c.key" :levels="talents" :element="c.element" />
-          <WeaponBlock :weapon="c.weapon" :account-id="account.id" />
-        </div>
-
-        <!-- The in-game stat panel -->
-        <div
-          class="min-w-0 px-4 pb-4 sm:px-5 sm:pb-5 md:col-start-2 md:pl-3 xl:col-start-3 xl:row-start-1 xl:pt-5 xl:pl-0"
-        >
-          <BuildStats :panel="panel" />
         </div>
       </div>
-
-      <p
-        v-if="c.gaps.length"
-        class="relative flex flex-wrap items-center gap-1.5 border-t border-border-default bg-surface-base/70 px-4 py-2 sm:px-5"
-      >
+      <p v-if="c.gaps.length" class="flex flex-wrap items-center gap-1.5">
         <Wrench class="size-4 text-warning-text" aria-hidden="true" />
         <span class="sr-only">To do:</span>
         <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
       </p>
-    </section>
+    </template>
 
-    <section class="min-w-0" aria-labelledby="detail-artifacts">
-      <div class="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
-        <SetBonuses v-if="c.sets.length" :sets="c.sets" />
-        <span v-else class="text-sm text-text-muted">No artifacts</span>
-        <CritValue
-          v-if="c.artifactCount"
-          :value="c.cv"
-          scope="build"
-          label
-          class="text-sm"
-          :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
+    <template v-else>
+      <section
+        class="relative overflow-hidden rounded-xl border border-border-default bg-surface-base"
+        aria-label="Build"
+      >
+        <!-- The namecard in its own colours under a light scrim, and the element's tint -->
+        <NamecardBackdrop :src="banner" class="absolute inset-0 size-full" />
+        <div class="pointer-events-none absolute inset-0 bg-surface-base/55" />
+        <div
+          class="pointer-events-none absolute inset-0 bg-linear-to-br via-transparent to-transparent"
+          :class="glow"
+        />
+
+        <div class="relative grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <!-- Splash art, constellations down its right edge -->
+          <div class="relative h-72 min-[480px]:h-80 md:row-span-2 md:h-auto md:min-h-[26rem]">
+            <SplashArt
+              :character-key="c.key"
+              :name="c.name"
+              :rarity="c.rarity"
+              class="absolute inset-0 [mask-image:linear-gradient(to_bottom,black_75%,transparent)] md:[mask-image:linear-gradient(to_right,black_80%,transparent)]"
+              img-class="scale-[1.15] object-[50%_30%]"
+            />
+            <ConstellationIcons
+              :character-key="c.key"
+              :value="c.constellation"
+              :element="c.element"
+              class="absolute top-1/2 right-3 -translate-y-1/2 md:right-1"
+            />
+          </div>
+
+          <!-- Who: name, level, friendship, constellation; talents; weapon -->
+          <div class="flex min-w-0 flex-col gap-4 p-4 sm:p-5 md:pl-3">
+            <header class="flex min-w-0 flex-col gap-1.5">
+              <p class="flex min-w-0 items-center gap-2">
+                <ElementIcon v-if="c.element" :element="c.element" size="lg" />
+                <span
+                  class="min-w-0 truncate font-display text-2xl font-semibold sm:text-3xl"
+                  :title="kind"
+                  >{{ c.name }}</span
+                >
+              </p>
+              <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
+                <RarityStars v-if="c.rarity" :rarity="c.rarity" />
+                <span v-if="c.weaponType">{{ WEAPON_TYPE_LABELS[c.weaponType] }}</span>
+                <time
+                  v-if="c.obtainedAt !== null"
+                  :datetime="new Date(c.obtainedAt).toISOString()"
+                  :title="`Obtained ${formatFullDateTime(c.obtainedAt)}`"
+                  >{{ formatDate(c.obtainedAt) }}</time
+                >
+              </p>
+              <p class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <LevelText
+                  :level="c.level"
+                  :ascension="c.ascension"
+                  :target="TARGET_LEVEL"
+                  class="text-lg font-medium"
+                />
+                <FriendshipBadge
+                  v-if="c.friendship !== null"
+                  :level="c.friendship"
+                  class="text-sm text-text-secondary"
+                />
+                <ConstellationStars :value="c.constellation" :element="c.element" />
+              </p>
+            </header>
+            <TalentLevels :character-key="c.key" :levels="talents" :element="c.element" />
+            <WeaponBlock :weapon="c.weapon" :account-id="account.id" />
+          </div>
+
+          <!-- The in-game stat panel -->
+          <div class="min-w-0 px-4 pb-4 sm:px-5 sm:pb-5 md:col-start-2 md:pl-3">
+            <BuildStats :panel="panel" />
+          </div>
+        </div>
+
+        <p
+          v-if="c.gaps.length"
+          class="relative flex flex-wrap items-center gap-1.5 border-t border-border-default bg-surface-base/80 px-4 py-2 sm:px-5"
+        >
+          <Wrench class="size-4 text-warning-text" aria-hidden="true" />
+          <span class="sr-only">To do:</span>
+          <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
+        </p>
+      </section>
+
+      <section class="min-w-0" aria-labelledby="detail-artifacts">
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
+          <SetBonuses v-if="c.sets.length" :sets="c.sets" />
+          <span v-else class="text-sm text-text-muted">No artifacts</span>
+          <CritValue
+            v-if="c.artifactCount"
+            :value="c.cv"
+            scope="build"
+            label
+            class="text-sm"
+            :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
+          />
+        </div>
+        <div class="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2 md:grid-cols-3">
+          <ArtifactPiece
+            v-for="(slot, index) in SLOT_ORDER"
+            :key="slot"
+            :slot-key="slot"
+            :piece="c.artifacts[index] ?? null"
+          />
+        </div>
+      </section>
+
+      <!-- The share card, laid out off screen for an export (narrow screens don't show it) -->
+      <div
+        v-if="offscreen"
+        class="pointer-events-none fixed top-0"
+        :style="{
+          left: `-${CARD_WIDTH * 3}px`,
+          width: `${CARD_WIDTH}px`,
+          height: `${CARD_HEIGHT}px`,
+        }"
+        aria-hidden="true"
+        inert
+      >
+        <ShareCard
+          ref="card"
+          :character="c"
+          :panel="panel"
+          :talents="talents"
+          :theme="cardTheme"
+          :owner="owner"
+          :taken-at="takenAt"
         />
       </div>
-      <div class="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <ArtifactPiece
-          v-for="(slot, index) in SLOT_ORDER"
-          :key="slot"
-          :slot-key="slot"
-          :piece="c.artifacts[index] ?? null"
-        />
-      </div>
-    </section>
+    </template>
 
     <section aria-labelledby="detail-changes">
       <h3 id="detail-changes" class="mb-3 text-sm font-semibold text-text-secondary">History</h3>

@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import { TriangleAlert } from 'lucide-vue-next'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
-import { formatPanelValue, type BuildPanel, type StatRow } from '@/data/character-build'
+import {
+  formatPanelValue,
+  type BuildPanel,
+  type DamageKind,
+  type StatRow,
+} from '@/data/character-build'
+import { ELEMENT_TEXT } from './tokens'
 
 /**
- * The in-game Attributes screen (no team buffs), in its order. HP, ATK and
- * DEF split into base + bonus in the tooltip, like the game's white and
- * green numbers. `panel` null: the character is newer than the game data.
+ * The in-game Attributes screen (no team buffs), in its order, with the
+ * DMG bonus the build carries in its element's colour. HP, ATK and DEF
+ * split into base + bonus in the tooltip, like the game's white and green
+ * numbers. `panel` null: the character is newer than the game data.
  */
 const props = defineProps<{ panel: BuildPanel | null }>()
 
 const CRIT = new Set(['critRate_', 'critDMG_'])
+const DAMAGE_TEXT: Record<DamageKind, string> = { ...ELEMENT_TEXT, physical: 'text-physical' }
 
 function title(row: StatRow): string {
   const lines = [`${row.label} ${row.text}`]
@@ -46,7 +54,13 @@ function title(row: StatRow): string {
       >
         <dt
           class="flex min-w-0 items-center gap-1.5 truncate text-sm"
-          :class="CRIT.has(row.key) ? 'text-text-primary' : 'text-text-secondary'"
+          :class="
+            row.damage
+              ? DAMAGE_TEXT[row.damage]
+              : CRIT.has(row.key)
+                ? 'text-text-primary'
+                : 'text-text-secondary'
+          "
         >
           <ElementIcon
             v-if="row.damage && row.damage !== 'physical'"
@@ -59,7 +73,10 @@ function title(row: StatRow): string {
         </dt>
         <dd
           class="tabular shrink-0 font-mono"
-          :class="CRIT.has(row.key) ? 'font-semibold' : 'font-medium'"
+          :class="[
+            CRIT.has(row.key) ? 'font-semibold' : 'font-medium',
+            row.damage ? DAMAGE_TEXT[row.damage] : '',
+          ]"
         >
           {{ row.text }}
         </dd>
