@@ -45,7 +45,7 @@ const tone = computed(() =>
           class="hidden size-5 shrink-0 items-center justify-center rounded-full min-[400px]:inline-flex"
           :class="tone"
         >
-          <TalentGlyph :src="glyphs[t.key]" class="size-4" />
+          <TalentGlyph :key="glyphs[t.key]" :src="glyphs[t.key]" class="size-4" />
         </span>
         <span class="truncate">{{ LABELS[t.key] }}</span>
       </dt>

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import { characterIcon, characterSplash } from '@/lib/assets'
+import { isDecoded, markDecoded } from '@/lib/image-preload'
 
 /**
  * A character's wish splash art (the Traveler's follows the twin setting),
@@ -22,12 +23,17 @@ const props = defineProps<{
 }>()
 
 const src = computed(() => characterSplash(props.characterKey))
-const loaded = ref(false)
+// Shown at once when preloaded (lib/image-preload); else faded in once loaded.
+const loaded = ref(isDecoded(src.value))
 const failed = ref(false)
-watch(src, () => {
-  loaded.value = false
+watch(src, (url) => {
+  loaded.value = isDecoded(url)
   failed.value = false
 })
+function onLoad() {
+  markDecoded(src.value)
+  loaded.value = true
+}
 </script>
 
 <template>
@@ -42,7 +48,7 @@ watch(src, () => {
       class="pointer-events-none absolute inset-0 size-full object-cover transition-opacity duration-300 motion-reduce:transition-none"
       :class="imgClass"
       :style="loaded || eager ? undefined : { opacity: 0 }"
-      @load="loaded = true"
+      @load="onLoad"
       @error="failed = true"
     />
     <div v-else class="absolute inset-0 flex items-center justify-center">

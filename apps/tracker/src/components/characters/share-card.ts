@@ -5,12 +5,19 @@
  * the details show it scaled to their width.
  */
 
+import type { InjectionKey } from 'vue'
 import type { Element } from '@/data/game-meta'
 
 export const CARD_WIDTH = 1920
 export const CARD_HEIGHT = 1080
 /** The PNG is the card at 1×: 1920×1080. */
 export const CARD_SCALE = 1
+
+/**
+ * Provided true by a card drawn for the PNG export: its images show as soon
+ * as they load, without the page's fade-in (FadeImage, SplashArt).
+ */
+export const CARD_STILL: InjectionKey<boolean> = Symbol('card-still')
 
 /** What the card's foot shows of its owner; null parts are left out. */
 export interface CardOwner {
