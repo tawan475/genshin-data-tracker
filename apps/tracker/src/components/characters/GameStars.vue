@@ -5,11 +5,12 @@ import { computed } from 'vue'
  * Rarity as the game's character and weapon screens draw it: gold stars
  * with a darker gold edge for every rarity (`game-star` tokens), with a
  * slight shadow so they read on art. The count is the accessible name.
- * `size` sm / md / lg for text (14 / 16 / 20px); `px` any size.
+ * `size` sm / md / lg for text (14 / 16 / 20px); `px` any size; `gap` in
+ * px (a sixth of the size by default).
  */
 const props = withDefaults(
-  defineProps<{ rarity: number; size?: 'sm' | 'md' | 'lg'; px?: number }>(),
-  { size: 'md', px: undefined },
+  defineProps<{ rarity: number; size?: 'sm' | 'md' | 'lg'; px?: number; gap?: number }>(),
+  { size: 'md', px: undefined, gap: undefined },
 )
 const SIZE_PX = { sm: 14, md: 16, lg: 20 } as const
 const STAR =
@@ -20,7 +21,7 @@ const d = computed(() => props.px ?? SIZE_PX[props.size])
 <template>
   <span
     class="inline-flex items-center [filter:drop-shadow(0_1px_2px_rgba(80,50,0,0.5))]"
-    :style="{ gap: `${Math.round(d / 6)}px` }"
+    :style="{ gap: `${gap ?? Math.round(d / 6)}px` }"
     :aria-label="`${rarity} star`"
     role="img"
   >

@@ -8,15 +8,18 @@ import {
   weaponIcon,
 } from '@/lib/assets'
 import { preloadImages } from '@/lib/image-preload'
+import { EMBLEM_URL, qualityArt } from './share-card'
 import { constellationIcons, talentIcons } from './talent-icons'
 
 /**
  * Every image a character's details and share card show (namecard, splash
  * art, constellation and talent icons, element, weapon, the five pieces,
- * the set icons), once each, empty ones left out.
+ * the set icons, and the game's header art behind the weapon and pieces:
+ * their rarities' gradients and the emblem), once each, empty ones left out.
  */
 export function cardImageUrls(c: CharacterView): string[] {
   const talents = talentIcons(c.key)
+  const art = [c.weapon?.rarity, ...c.artifacts.map((piece) => piece?.rarity)].map(qualityArt)
   const urls = [
     characterSplash(c.key),
     characterBanner(c.key),
@@ -28,6 +31,8 @@ export function cardImageUrls(c: CharacterView): string[] {
     c.weapon ? weaponIcon(c.weapon.key, c.weapon.ascension) : '',
     ...c.artifacts.map((piece) => (piece ? artifactIcon(piece.setKey, piece.slotKey) : '')),
     ...c.sets.map((set) => artifactSetIcon(set.setKey)),
+    ...art,
+    art.some(Boolean) ? EMBLEM_URL : '',
   ]
   return [...new Set(urls.filter(Boolean))]
 }

@@ -51,6 +51,15 @@ export const GI_CDN_BASE = GI_CDN_HOST
 const coverage = shallowRef<ImageCoverage | null>(null)
 
 /**
+ * URL of UI art only gi-cdn serves, by the game's name: not item icons, so
+ * no game data list names them (gi-cdn publishes them by hand, its
+ * publish.json `extra`): the share card's rarity gradients and emblem.
+ */
+export function giCdnArt(name: string): string {
+  return `${GI_CDN_BASE}${name}.webp`
+}
+
+/**
  * URL of a game image by name: the host's, gi-cdn's for a name the host
  * lacks, or '' (no name, or no image anywhere).
  */
