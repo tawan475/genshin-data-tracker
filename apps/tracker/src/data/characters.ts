@@ -15,6 +15,7 @@ import {
 } from '@gdt/shared'
 import { keyToName } from '@/lib/format'
 import { maxLevel } from '@/utils/artifact-rolls'
+import { formatSetName } from '@/utils/artifact-stats'
 import { ARTIFACT_MAIN_STATS, ARTIFACT_SET_THRESHOLDS } from './artifact-stats'
 import { characterMeta, weaponMeta, type Element, type WeaponType } from './game-meta'
 import { WEAPON_TYPE_LABELS, itemName } from './weapons'
@@ -172,7 +173,7 @@ function countSets(pieces: readonly EquippedArtifact[]): SetCount[] {
       const thresholds = ARTIFACT_SET_THRESHOLDS[setKey] ?? DEFAULT_THRESHOLDS
       return {
         setKey,
-        name: itemName(setKey),
+        name: formatSetName(setKey),
         count,
         thresholds,
         active: thresholds.filter((t) => count >= t),

@@ -217,8 +217,8 @@ describe('talentLevels', () => {
 
   it('titles the sum', () => {
     const [, skill, burst] = talentLevels(talent, 6, { c3: 'burst', c5: 'skill' })
-    expect(talentTitle(burst!)).toBe('Elemental Burst 10 + 3 (C3) = 13 · crowned')
-    expect(talentTitle(skill!)).toBe('Elemental Skill 9 + 3 (C5) = 12')
+    expect(talentTitle(burst!)).toBe('Elemental Burst 10 → 13 (C3) · crowned')
+    expect(talentTitle(skill!)).toBe('Elemental Skill 9 → 12 (C5)')
   })
 })
 
