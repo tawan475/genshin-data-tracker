@@ -33,6 +33,7 @@ import {
   CARD_THEMES,
   CARD_WIDTH,
   RARITY_GRADIENT,
+  elementGlow,
   nameSize,
   type CardOwner,
 } from './share-card'
@@ -81,6 +82,8 @@ const HERO = 'text-(--card-hero) [text-shadow:var(--card-hero-shadow)]'
 
 const c = computed(() => props.character)
 const banner = computed(() => characterBanner(c.value.key))
+/** The element's glow behind the splash (none for a character without an element). */
+const glow = computed(() => (c.value.element ? elementGlow(c.value.element, props.theme) : 'none'))
 const glyphs = computed(() => talentIcons(c.value.key))
 const constellations = computed(() => constellationIcons(c.value.key))
 const crown = useCrownIcon()
@@ -172,28 +175,26 @@ const ownerLine = computed(() =>
     class="relative overflow-hidden bg-(--card-ground) font-sans text-(--card-text) [font-variant-numeric:tabular-nums]"
     :style="ROOT"
   >
-    <!-- One picture: the namecard full-bleed, a light scrim, the splash fading into it -->
+    <!-- One picture, back to front: the namecard blurred into atmosphere (it is only
+         840×400; oversized so the blur has no edge), a scrim, the element's glow, the
+         splash cut-out whole with its shadow, a full-width vignette. No boxes, no masks. -->
     <img
       v-if="banner"
       :src="banner"
       alt=""
-      class="pointer-events-none absolute inset-0 size-full object-cover [filter:var(--card-namecard-filter)]"
+      class="pointer-events-none absolute top-[-40px] left-[-60px] h-[1160px] w-[2040px] max-w-none object-cover [filter:var(--card-namecard-filter)]"
     />
     <div class="absolute inset-0 [background:var(--card-scrim)]" />
+    <div class="absolute inset-0" :style="{ background: glow }" />
     <SplashArt
       :character-key="c.key"
       :name="c.name"
       :rarity="c.rarity"
       eager
-      class="absolute top-[-30px] left-[-720px] h-[1140px] w-[2280px] [mask-image:linear-gradient(90deg,#000_0%,#000_58%,rgba(0,0,0,0.6)_64%,transparent_72%)]"
+      class="absolute top-[-20px] left-[-660px] h-[1100px] w-[2200px]"
+      img-class="object-contain! [filter:var(--card-splash-shadow)]"
     />
-    <!-- Legibility fades behind the name and the talents; they also fade out sideways (no edge) -->
-    <div
-      class="absolute bottom-0 left-0 h-[420px] w-[820px] [background:var(--card-fade-bottom)] [mask-image:linear-gradient(90deg,#000_55%,transparent)]"
-    />
-    <div
-      class="absolute top-0 left-0 h-[300px] w-[820px] [background:var(--card-fade-top)] [mask-image:linear-gradient(90deg,#000_55%,transparent)]"
-    />
+    <div class="absolute inset-0 [background:var(--card-vignette)]" />
 
     <div
       class="absolute inset-[44px_48px_40px_48px] grid grid-cols-[700px_528px_532px] grid-rows-[minmax(0,1fr)_36px] gap-x-[32px] gap-y-[16px]"
@@ -329,14 +330,6 @@ const ownerLine = computed(() =>
                 <span class="font-bold">{{ stat.text }}</span></span
               >
             </p>
-            <p
-              v-if="weapon?.passive.length"
-              class="truncate text-[17px] text-(--card-secondary)"
-              :title="weapon.passive.map((s) => `${s.label} +${s.text}`).join(', ')"
-            >
-              Passive
-              {{ weapon.passive.map((s) => `${formatStatShort(s.key)} +${s.text}`).join(' · ') }}
-            </p>
           </div>
         </div>
         <div
@@ -370,10 +363,12 @@ const ownerLine = computed(() =>
               </dt>
               <dd
                 v-if="row.base !== undefined && row.bonus"
-                class="text-[19px] whitespace-nowrap text-(--card-muted)"
+                class="text-[23px] font-medium whitespace-nowrap text-(--card-secondary)"
               >
                 {{ formatPanelValue(row.key, row.base) }}
-                <span class="text-(--card-bonus)">+{{ formatPanelValue(row.key, row.bonus) }}</span>
+                <span class="font-semibold text-(--card-bonus)"
+                  >+{{ formatPanelValue(row.key, row.bonus) }}</span
+                >
               </dd>
               <dd
                 class="min-w-[110px] text-right text-[30px] font-bold"
@@ -427,25 +422,25 @@ const ownerLine = computed(() =>
       <!-- Right: the five pieces fill the column -->
       <ol class="flex min-h-0 flex-col gap-[14px]" aria-label="Artifacts">
         <li
-          v-for="{ slot, piece, lines, rollCount, cvTone, title } in pieces"
+          v-for="{ slot, piece, lines, cvTone, title } in pieces"
           :key="slot"
           class="flex min-h-0 min-w-0 flex-[1_1_0]"
         >
           <article
             v-if="piece"
-            class="flex min-w-0 flex-1 items-center gap-[12px] overflow-hidden py-0 pr-[14px] pl-0"
+            class="flex min-w-0 flex-1 items-center gap-[16px] overflow-hidden py-0 pr-[20px] pl-0"
             :class="PANEL"
             :title="title"
           >
             <span
-              class="relative flex w-[150px] shrink-0 items-center justify-center self-stretch"
+              class="relative flex w-[136px] shrink-0 items-center justify-center self-stretch"
               :style="{ background: RARITY_GRADIENT[piece.rarity] ?? 'var(--card-cv-bg)' }"
             >
               <img
                 v-if="artifactIcon(piece.setKey, piece.slotKey)"
                 :src="artifactIcon(piece.setKey, piece.slotKey)"
                 alt=""
-                class="size-[136px]"
+                class="size-[126px]"
               />
               <span
                 class="absolute right-[8px] bottom-[8px] rounded-[8px] bg-(--card-badge) px-[8px] py-px text-[17px] font-bold shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
@@ -453,32 +448,27 @@ const ownerLine = computed(() =>
                 >+{{ piece.level }}</span
               >
             </span>
-            <div class="flex w-[118px] shrink-0 flex-col gap-[2px]">
+            <div class="flex w-[100px] shrink-0 flex-col gap-[4px]">
               <span class="text-[18px] whitespace-nowrap text-(--card-muted)">{{
                 formatStatShort(piece.mainStatKey)
               }}</span>
-              <span class="text-[38px] leading-[1.05] font-bold whitespace-nowrap">{{
+              <span class="text-[34px] leading-[1.05] font-bold whitespace-nowrap">{{
                 piece.mainStatValue === null
                   ? '—'
                   : formatStatValue(piece.mainStatKey, piece.mainStatValue)
               }}</span>
-              <span class="flex items-center gap-[5px] text-[15px] whitespace-nowrap">
-                <span
-                  class="rounded-[6px] bg-(--card-cv-bg) px-[6px] py-px font-semibold"
-                  :class="cvTone"
-                  >CV {{ piece.cv.toFixed(1) }}</span
-                >
-                <span class="text-(--card-muted)">{{ rollCount }} rolls</span>
-              </span>
+              <span
+                class="self-start rounded-[6px] bg-(--card-cv-bg) px-[7px] py-px text-[16px] font-semibold whitespace-nowrap"
+                :class="cvTone"
+                >CV {{ piece.cv.toFixed(1) }}</span
+              >
             </div>
             <span class="w-px self-stretch bg-(--card-divider)" aria-hidden="true" />
-            <div
-              class="flex min-w-0 flex-[1_1_auto] flex-col justify-around self-stretch py-[10px]"
-            >
+            <div class="flex min-w-0 flex-[1_1_auto] flex-col justify-around self-stretch py-[8px]">
               <p
                 v-for="n in 4"
                 :key="n"
-                class="flex h-[28px] items-center gap-[6px]"
+                class="flex h-[28px] items-center gap-[8px]"
                 :class="lines[n - 1]?.inactive ? 'opacity-45' : ''"
                 :title="
                   lines[n - 1] && !lines[n - 1]!.inactive
@@ -490,7 +480,7 @@ const ownerLine = computed(() =>
               >
                 <template v-if="lines[n - 1]">
                   <span
-                    class="min-w-0 flex-[1_1_auto] truncate text-[18px] text-(--card-secondary)"
+                    class="min-w-0 flex-[1_1_auto] truncate text-[19px] text-(--card-secondary)"
                     >{{ formatStatShort(lines[n - 1]!.key) }}</span
                   >
                   <span class="text-right text-[21px] font-semibold whitespace-nowrap">{{
