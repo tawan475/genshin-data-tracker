@@ -9,6 +9,7 @@ import UiModal from '@/components/ui/UiModal.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { shareUid } from '@/data/character-build'
+import { useFavoriteCharacters } from '@/data/favorite-characters'
 import type { CharacterView } from '@/data/characters'
 import {
   canCopyImage,
@@ -22,6 +23,7 @@ import { readJson, writeJson } from '@/lib/storage'
 import { resolvedTheme } from '@/lib/theme'
 import CardOptions from './CardOptions.vue'
 import CharacterDetail from './CharacterDetail.vue'
+import FavoriteStar from './FavoriteStar.vue'
 import { CARD_HEIGHT, CARD_SCALE, CARD_WIDTH, type CardOwner } from './share-card'
 import { useConstellationBoosts } from './use-boosts'
 
@@ -48,6 +50,9 @@ const props = defineProps<{
 const emit = defineEmits<{ close: []; step: [delta: -1 | 1] }>()
 
 const showcase = useMediaQuery('(min-width: 1024px)')
+
+// The favourite star beside the name: the page's own list (pinned first), by GOOD key.
+const { isFavorite, toggle: toggleFavorite } = useFavoriteCharacters(() => props.account.id)
 
 interface Prefs {
   theme?: 'light' | 'dark'
@@ -244,9 +249,16 @@ watch(
     @step="(delta) => emit('step', delta)"
   >
     <template #heading>
-      <h2 class="mr-auto min-w-0 flex-1 truncate text-lg font-semibold">
-        {{ character?.name ?? '' }}
-      </h2>
+      <div class="mr-auto flex min-w-0 flex-1 items-center gap-1">
+        <h2 class="min-w-0 truncate text-lg font-semibold">{{ character?.name ?? '' }}</h2>
+        <FavoriteStar
+          v-if="character"
+          :on="isFavorite(character.key)"
+          :name="character.name"
+          always
+          @toggle="toggleFavorite(character.key)"
+        />
+      </div>
       <div
         v-if="showcase"
         class="flex shrink-0 items-center gap-1.5"

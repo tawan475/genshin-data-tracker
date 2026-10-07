@@ -277,6 +277,15 @@ export function setBonusLines(setKey: string): SetBonusLine[] {
   }))
 }
 
+/**
+ * The build's roll value: the five pieces' RV added up (each substat roll
+ * as a % of that stat's highest roll, as the artifact pages show it; 1–4★
+ * pieces count against the same scale).
+ */
+export function buildRv(pieces: readonly ({ rv: number } | null)[]): number {
+  return pieces.reduce((sum, piece) => sum + (piece?.rv ?? 0), 0)
+}
+
 /** A set as the build lists it: the piece bonus it reaches (2 or 4). */
 export interface BonusSet<S> {
   set: S

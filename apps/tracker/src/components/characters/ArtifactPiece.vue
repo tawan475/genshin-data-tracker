@@ -4,11 +4,16 @@ import CritValue from '@/components/ui/CritValue.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import RollValue from '@/components/ui/RollValue.vue'
 import RollBars from '@/components/ui/RollBars.vue'
-import { SLOT_LABELS, itemName, type EquippedArtifact, type SlotKey } from '@/data/characters'
+import { SLOT_LABELS, type EquippedArtifact, type SlotKey } from '@/data/characters'
 import { artifactIcon } from '@/lib/assets'
 import { isCritCirclet } from '@/lib/crit-tiers'
 import { ROLL_QUALITY_LABEL, inferArtifactRolls, maxLevel } from '@/utils/artifact-rolls'
-import { formatRollValue, formatStatShort, formatStatValue } from '@/utils/artifact-stats'
+import {
+  formatRollValue,
+  formatSetName,
+  formatStatShort,
+  formatStatValue,
+} from '@/utils/artifact-stats'
 import { RARITY_TEXT } from './tokens'
 
 /** One equipped artifact (or its empty slot) in the character details, rolls included. */
@@ -39,7 +44,7 @@ function rollTitle(index: number, key: string): string {
     <header class="flex items-center gap-2.5">
       <GameIcon
         :src="artifactIcon(piece.setKey, piece.slotKey)"
-        :name="itemName(piece.setKey)"
+        :name="formatSetName(piece.setKey)"
         :rarity="piece.rarity"
       />
       <div class="min-w-0 flex-1">
@@ -56,8 +61,8 @@ function rollTitle(index: number, key: string): string {
           }}</span>
           <span class="sr-only">{{ piece.rarity }} star</span>
         </p>
-        <p class="truncate text-sm font-medium" :title="itemName(piece.setKey)">
-          {{ itemName(piece.setKey) }}
+        <p class="truncate text-sm font-medium" :title="formatSetName(piece.setKey)">
+          {{ formatSetName(piece.setKey) }}
         </p>
       </div>
     </header>

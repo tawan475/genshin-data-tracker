@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
   bonusSets,
+  buildRv,
   formatPanelValue,
   setBonusTitle,
   talentTitle,
@@ -14,7 +15,7 @@ import {
 } from '@/data/character-build'
 import { SLOT_LABELS, SLOT_ORDER, type CharacterView, type SetCount } from '@/data/characters'
 import { artifactIcon, artifactSetIcon, characterBanner, weaponIcon } from '@/lib/assets'
-import { CRIT_TIER_TEXT, cvTier, isCritCirclet } from '@/lib/crit-tiers'
+import { CRIT_TIER_TEXT, cvTier, isCritCirclet, rvTier } from '@/lib/crit-tiers'
 import { formatDate } from '@/lib/format'
 import { levelCap } from '@/lib/level'
 import { ROLL_QUALITY_LABEL, inferArtifactRolls, type InferredRoll } from '@/utils/artifact-rolls'
@@ -149,7 +150,10 @@ const pieces = computed(() =>
 )
 /** The sets listed: 2 pieces or more (a single piece grants nothing). */
 const bonus = computed(() => bonusSets(c.value.sets))
-const buildRolls = computed(() => pieces.value.reduce((sum, p) => sum + p.rollCount, 0))
+const rv = computed(() => buildRv(c.value.artifacts))
+const buildRvTone = computed(() =>
+  rv.value > 0 ? CRIT_TIER_TEXT[rvTier(rv.value, 'build')] : 'text-(--card-text)',
+)
 const buildCvTone = computed(() =>
   c.value.cv > 0 ? CRIT_TIER_TEXT[cvTier(c.value.cv, 'build')] : 'text-(--card-text)',
 )
@@ -410,8 +414,13 @@ const ownerLine = computed(() =>
             :class="bonus.length ? 'border-t border-(--card-rule) pt-[10px]' : ''"
           >
             <span class="text-[20px] text-(--card-muted)">Build</span>
-            <span class="text-[20px] text-(--card-muted)">{{ buildRolls }} rolls</span>
-            <span class="ml-auto text-[22px] text-(--card-muted)">CV</span>
+            <span
+              class="ml-auto text-[22px] text-(--card-muted)"
+              title="Roll value: every substat roll as a % of its highest roll, added up"
+              >RV</span
+            >
+            <span class="text-[38px] leading-none font-bold" :class="buildRvTone">{{ rv }}%</span>
+            <span class="ml-[18px] text-[22px] text-(--card-muted)" title="Crit value">CV</span>
             <span class="text-[38px] leading-none font-bold" :class="buildCvTone">{{
               c.cv.toFixed(1)
             }}</span>
