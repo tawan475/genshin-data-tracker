@@ -4,12 +4,15 @@ import type { PlannerFile } from '@gdt/game-data/format'
 import {
   characterRequirement,
   createRequirementCache,
+  emptyRequirement,
   type CharacterState,
+  type PlanGoal,
 } from '@gdt/game-data/planner-math'
 import type { Good, PlannerTarget } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
+import { allocateNeeds } from '../allocation'
 import { buildBoard, type GoalEntry } from '../model'
-import { needsWeekly, partReadiness } from '../upgrade'
+import { farmsNoWeekly, partReadiness } from '../upgrade'
 
 const planner = decodePlanner(plannerJson as unknown as PlannerFile)
 const T = (auto: number, skill: number, burst: number) => ({ auto, skill, burst })
@@ -128,13 +131,59 @@ describe('what a goal can level now', () => {
   })
 })
 
-describe('weekly boss materials', () => {
-  it('tells a cost that needs one from one that does not', () => {
-    // Bennett's talents 7 and 8 take Dvalin's Plume; Kazuha's levels none.
-    expect(needsWeekly(planner, bennett.character!.requirement)).toBe(true)
-    expect(needsWeekly(planner, kazuha.character!.requirement)).toBe(false)
-    expect(needsWeekly(planner, theCatch.weapons[0]!.requirement)).toBe(false)
-    expect(needsWeekly(planner, null)).toBe(false)
+describe('still to farm, but no weekly boss', () => {
+  const plume = planner.weeklyBossOf.get('DvalinsPlume')!
+  const goal = (id: string, items: Record<string, number>): PlanGoal => ({
+    id,
+    requirement: { ...emptyRequirement(), items: new Map(Object.entries(items)) },
+  })
+  // Two Plumes and five Philosophies: the books are always to farm.
+  const mine = goal('character:Bennett', { DvalinsPlume: 2, PhilosophiesOfResistance: 5 })
+  const counted = { active: true, materialsDone: false }
+  /** Bennett's readiness after the goals listed before it. */
+  const needsOf = (bag: Record<string, number>, above: PlanGoal[] = [], self = mine) =>
+    allocateNeeds(
+      planner,
+      [...above, self].map((g) => ({ id: g.id, goal: g, active: true })),
+      bag,
+      {},
+    ).get(self.id)
+  const qualifies = (bag: Record<string, number>, above: PlanGoal[] = [], self = mine) =>
+    farmsNoWeekly(counted, needsOf(bag, above, self))
+
+  it('counts weekly drops that are held', () => {
+    expect(qualifies({ DvalinsPlume: 2 })).toBe(true)
+  })
+
+  it('counts weekly drops Dream Solvent converts from the same boss', () => {
+    const other = plume.items.find((m) => m.key !== 'DvalinsPlume')!.key
+    const solvent = { [planner.items.dreamSolvent]: 2 * plume.solvent }
+    expect(qualifies({ [other]: 2, ...solvent })).toBe(true)
+    // Without the solvent they are still a weekly boss to fight.
+    expect(qualifies({ [other]: 2 })).toBe(false)
+  })
+
+  it('leaves the drops a goal above takes first to it', () => {
+    const above = goal('character:Venti', { DvalinsPlume: 2 })
+    expect(qualifies({ DvalinsPlume: 2 }, [above])).toBe(false)
+    expect(qualifies({ DvalinsPlume: 4 }, [above])).toBe(true)
+  })
+
+  it('wants something left to farm, and none of it weekly', () => {
+    const all = { DvalinsPlume: 2, PhilosophiesOfResistance: 5 }
+    expect(needsOf(all)?.chips).toEqual([])
+    expect(qualifies(all)).toBe(false)
+    // Short of the Plumes only (the books held): a weekly boss to fight.
+    expect(qualifies({ PhilosophiesOfResistance: 5 })).toBe(false)
+    // Levels only, nothing weekly at all, and short: in.
+    expect(qualifies({}, [], goal('character:Kazuha', { SeaGanoderma: 10 }))).toBe(true)
+  })
+
+  it('only for counted goals with something left to level', () => {
+    const needs = needsOf({ DvalinsPlume: 2 })
+    expect(farmsNoWeekly({ active: false, materialsDone: false }, needs)).toBe(false)
+    expect(farmsNoWeekly({ active: true, materialsDone: true }, needs)).toBe(false)
+    expect(farmsNoWeekly(counted, null)).toBe(false)
     expect(planner.materialsByKey.get('DvalinsPlume')?.kind).toBe('weekly')
   })
 })

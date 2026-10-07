@@ -33,8 +33,8 @@ const entry = (id: string, extra: Partial<GoalEntry> = {}): GoalEntry =>
     ...extra,
   }) as GoalEntry
 
-// a: in stock, can level, needs a weekly boss; b: can level a step, no weekly;
-// c: short, no weekly; d: paused (no upgrade), weekly; e: anemo, can level, no weekly.
+// a: in stock, can level; b: can level a step, still to farm without a weekly boss;
+// c: short, no weekly boss to farm; d: paused; e: anemo, can level, no weekly boss.
 const entries = [
   entry('a'),
   entry('b'),
@@ -45,13 +45,13 @@ const entries = [
 const facts: GoalFacts = {
   ready: new Set(['a']),
   upgrade: new Set(['a', 'b', 'e']),
-  weekly: new Set(['a', 'd']),
+  noWeekly: new Set(['b', 'c', 'e']),
 }
 const ids = (list: GoalEntry[]) => list.map((e) => e.id)
 const filters = (f: Partial<GoalFilters>): GoalFilters => ({ ...NO_GOAL_FILTERS, ...f })
 
-describe('the Upgrade now and No weekly toggles', () => {
-  it('keep the goals that can level now, those needing no weekly boss, or both', () => {
+describe('the Upgrade now and No weekly boss toggles', () => {
+  it('keep the goals that can level now, those to farm without a weekly boss, or both', () => {
     expect(ids(filterGoals(entries, filters({ upgrade: true }), facts))).toEqual(['a', 'b', 'e'])
     expect(ids(filterGoals(entries, filters({ noWeekly: true }), facts))).toEqual(['b', 'c', 'e'])
     expect(ids(filterGoals(entries, filters({ upgrade: true, noWeekly: true }), facts))).toEqual([
