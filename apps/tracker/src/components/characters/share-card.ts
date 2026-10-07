@@ -209,12 +209,12 @@ export const PIECE_GAP = 14
 export const PIECE_HEIGHT = (CARD_HEIGHT - 2 * CARD_PAD_Y - 4 * PIECE_GAP) / 5
 
 /**
- * A piece's band (left of its substats): 252px of the game's header art, the
- * icon (128px) 16px from its right edge, centred vertically.
+ * A piece's band (left of its substats): 276px of the game's header art, the
+ * icon (152px) 12px from its right edge, centred vertically.
  */
-export const BAND_WIDTH = 252
-export const BAND_ICON = 128
-export const BAND_ICON_RIGHT = 16
+export const BAND_WIDTH = 276
+export const BAND_ICON = 152
+export const BAND_ICON_RIGHT = 12
 export const BAND_EMBLEM = emblemBox(PIECE_HEIGHT, BAND_WIDTH - BAND_ICON_RIGHT - BAND_ICON / 2)
 /** The weapon's 128px tile: the icon fills it, so the knot sits on its centre. */
 export const WEAPON_TILE = 128
