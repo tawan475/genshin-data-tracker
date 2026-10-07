@@ -379,7 +379,7 @@ const shadow = '[text-shadow:0_1px_8px_var(--surface-base)]'
           :class="PANEL"
           :title="title"
         >
-          <div class="flex w-[150px] shrink-0 items-center gap-2.5">
+          <div class="flex w-[166px] shrink-0 items-center gap-2.5">
             <span
               class="relative flex size-16 shrink-0 items-center justify-center rounded-lg"
               :class="RARITY_SOFT[piece.rarity] ?? 'bg-surface-overlay'"
@@ -397,7 +397,7 @@ const shadow = '[text-shadow:0_1px_8px_var(--surface-base)]'
               >
             </span>
             <div class="flex min-w-0 flex-col">
-              <span class="truncate text-sm text-text-secondary">{{
+              <span class="text-sm whitespace-nowrap text-text-secondary">{{
                 formatStatShort(piece.mainStatKey)
               }}</span>
               <span class="tabular font-mono text-2xl leading-tight font-semibold">{{
