@@ -3,7 +3,6 @@ import {
   catalogFromRows,
   decodeBundle,
   decodeSnapshot,
-  encodeSectionBlob,
   inflateBundle,
   readBundle,
   storedSnapshotOf,
@@ -15,8 +14,8 @@ import {
 } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { describe, expect, it } from 'vitest'
-import { runMaintenance, TRASH_DAYS } from '../services/maintenance'
-import { repack, type RepackResult } from '../services/repack'
+import { COLLECT_SECTION_BLOBS, runMaintenance, TRASH_DAYS } from '../services/maintenance'
+import type { RepackResult } from '../services/repack'
 import {
   ORIGIN,
   bigGood,
@@ -26,7 +25,10 @@ import {
   signUp,
   type Client,
 } from './client'
-import { importV1 } from './v1-import'
+
+// Storage format v2 on the schema without v1 (migration 0017). The tests of
+// repack converting v1 rows, and of the two formats side by side, are in the
+// commit that brought storage v2: they need the v1 columns this schema lacks.
 
 const DIAG = 'test-diag-key-test-diag-key-test-diag-key'
 
@@ -47,8 +49,8 @@ async function setUp() {
   return { client, account, upload }
 }
 
-/** Captures that exercise every v1 shape: deltas of each kind, out of order, a relogin. */
-function v1Sequence(): [Good, number][] {
+/** Captures that exercise every section shape: deltas of each kind, out of order, a relogin. */
+function sequence(): [Good, number][] {
   const big = bigGood()
   const played = bigGood({
     artifacts: big.artifacts.map((a, i) => (i === 5 || i === 9 ? { ...a, lock: !a.lock } : a)),
@@ -80,7 +82,7 @@ function v1Sequence(): [Good, number][] {
   ]
 }
 
-/** Everything a reader can see of an account, as text, each in the form a client gets it. */
+/** Every snapshot's GOOD file as the server, an older app (GDT1) and this app (GDT2) get it. */
 async function exportsOf(client: Client, accountId: number) {
   const base = `/api/accounts/${accountId}`
   const list = await client.json<SnapshotResponse[]>(`${base}/snapshots`)
@@ -90,9 +92,6 @@ async function exportsOf(client: Client, accountId: number) {
   for (const { id } of list) {
     goods[id] = await (await client.fetch(`${base}/snapshots/${id}/good`)).text()
   }
-  const latest = await (await client.fetch(`${base}/latest/good`)).text()
-
-  // An app from before v2 storage: GDT1, inflated.
   const gdt1 = readBundle(await (await client.fetch(`${base}/bundle`)).arrayBuffer())
   const texts1 = await inflateBundle(gdt1.blobs)
   const files1 = Object.fromEntries(
@@ -107,7 +106,6 @@ async function exportsOf(client: Client, accountId: number) {
       ),
     ]),
   )
-  // This app: GDT2.
   const gdt2 = await decodeBundle(
     await (await client.fetch(`${base}/bundle?format=2`)).arrayBuffer(),
   )
@@ -123,16 +121,7 @@ async function exportsOf(client: Client, accountId: number) {
       ),
     ]),
   )
-  const account = await client.json<AccountResponse>(base)
-  return {
-    list: JSON.stringify(list),
-    catalog: JSON.stringify([...catalogRows].sort((a, b) => a[0] - b[0])),
-    goods,
-    latest,
-    files1,
-    files2,
-    summary: JSON.stringify(account.latest),
-  }
+  return { list: JSON.stringify(list), catalog: JSON.stringify(catalogRows), goods, files1, files2 }
 }
 
 async function adminRepack(query = 'limit=500', key = DIAG): Promise<Response> {
@@ -142,159 +131,41 @@ async function adminRepack(query = 'limit=500', key = DIAG): Promise<Response> {
   })
 }
 
-async function rowFormats(accountId: number) {
+async function chunkCount(accountId: number): Promise<number> {
   const row = await env.DB.prepare(
-    `SELECT sum(characters_ref IS NULL) AS v1, sum(characters_ref IS NOT NULL) AS v2,
-       (SELECT count(*) FROM blobs WHERE account_id = ?1) AS legacyBlobs,
-       (SELECT count(*) FROM artifacts WHERE account_id = ?1) AS legacyArtifacts,
-       (SELECT count(*) FROM artifact_chunks WHERE account_id = ?1) AS chunks
-     FROM snapshots WHERE account_id = ?1`,
+    'SELECT count(*) AS n FROM artifact_chunks WHERE account_id = ?1',
   )
     .bind(accountId)
-    .first<{
-      v1: number
-      v2: number
-      legacyBlobs: number
-      legacyArtifacts: number
-      chunks: number
-    }>()
-  return row!
+    .first<{ n: number }>()
+  return row!.n
 }
 
-describe('storage v2 conversion', () => {
-  it('repacks v1 data without changing a byte of what any reader sees', async () => {
+describe('storage v2 without v1', () => {
+  it('stores, serves and exports every snapshot the same to every reader', async () => {
     const { client, account, upload } = await setUp()
     const ids: number[] = []
-    for (const [good, at] of v1Sequence()) ids.push((await importV1(env.DB, account.id, good, at))!)
-    // One in the trash: it is converted too (it may be restored).
-    const trashed = (await importV1(env.DB, account.id, sampleGood(sampleExtras()), 6_000))!
-    await client.fetch(`/api/accounts/${account.id}/snapshots/${trashed}`, { method: 'DELETE' })
-    expect(await rowFormats(account.id)).toMatchObject({ v1: 6, v2: 0 })
-
-    const before = await exportsOf(client, account.id)
-    // v1 reads are what v1 wrote: a sanity check of the fixture.
-    expect(Object.keys(before.files1)).toHaveLength(5)
-    expect(before.files2).toEqual(before.files1)
-
-    const response = await adminRepack()
-    expect(response.status).toBe(200)
-    // The test database is shared by this file's tests: look at this account.
-    const result = (await response.json()) as RepackResult
-    expect(result.snapshots.converted).toBeGreaterThanOrEqual(6)
-    expect(result.snapshots.mismatched).toEqual([])
-    expect(result.catalog.mismatchedAccounts).toEqual([])
-    expect(result.remaining).toMatchObject({ snapshots: 0, legacyArtifacts: 0 })
-    expect(result.d1.rowsWritten).toBeGreaterThan(0)
-    expect(result.d1.roundTrips).toBeGreaterThan(0)
-    // A full section that changed (the levelled characters) is stored against
-    // the previous one as its dictionary, as an import would.
-    const anchored = await env.DB.prepare(
-      `SELECT count(*) AS n FROM section_blobs
-       WHERE account_id = ?1 AND base_id IS NOT NULL AND kind & 16 = 0`,
-    )
-      .bind(account.id)
-      .first<{ n: number }>()
-    expect(anchored!.n).toBeGreaterThan(0)
-    expect(await rowFormats(account.id)).toMatchObject({
-      v1: 0,
-      v2: 6,
-      legacyBlobs: 0,
-      legacyArtifacts: 0,
-    })
-
-    const after = await exportsOf(client, account.id)
-    expect(after.goods).toEqual(before.goods)
-    expect(after.latest).toBe(before.latest)
-    expect(after.files1).toEqual(before.files1)
-    expect(after.files2).toEqual(before.files1)
-    expect(after.catalog).toBe(before.catalog)
-    expect(after.list).toBe(before.list)
-    expect(after.summary).toBe(before.summary)
-
-    // Re-uploading a converted capture is still a no-op; a new one stores v2.
-    const [[played]] = [v1Sequence()[1]!]
-    expect(await upload(played, 3_000)).toMatchObject({ status: 'unchanged', snapshotId: ids[1] })
-    const next = bigGood({ materials: { ...played.materials, Mora: 77 } })
-    const created = await upload(next, 7_000)
-    expect(created.status).toBe('created')
-    expect(
-      JSON.parse((await exportsOf(client, account.id)).goods[created.snapshotId]!),
-    ).toMatchObject({
-      materials: { Mora: 77 },
-    })
-
-    // Collection keeps every section something needs; a second repack has nothing to do.
-    await runMaintenance(env.DB)
-    const collected = await exportsOf(client, account.id)
-    expect(collected.goods[ids[3]!]).toBe(before.goods[ids[3]!])
-    const again = (await (await adminRepack()).json()) as RepackResult
-    expect(again.snapshots.converted).toBe(0)
-    expect(again.catalog.moved).toBe(0)
-  })
-
-  it('refuses rows whose re-encoded form does not decode to the same data', async () => {
-    const { client, account } = await setUp()
-    const ids: number[] = []
-    for (const [good, at] of v1Sequence().slice(0, 2)) {
-      ids.push((await importV1(env.DB, account.id, good, at))!)
+    for (const [good, at] of sequence()) {
+      const result = await upload(good, at)
+      expect(result.status).toBe('created')
+      ids.push(result.snapshotId)
     }
-    const before = await exportsOf(client, account.id)
-    // A broken encoder: it stores a different Mora than it was given.
-    const result = await repack(env.DB, {
-      limit: 100,
-      encodeSection: (kind, value, delta, base) => {
-        if (kind === 'materials' && !delta) {
-          const m = (value as { m: [number | string, number][] }).m
-          value = { m: m.map(([k, n], i) => [k, i === 0 ? n + 1 : n]) }
-        }
-        return encodeSectionBlob(kind, value, delta, base)
-      },
-    })
-    expect(result.snapshots.mismatched).toEqual(expect.arrayContaining(ids))
-    expect(await rowFormats(account.id)).toMatchObject({ v1: 2, v2: 0 })
-    const after = await exportsOf(client, account.id)
-    expect(after.goods).toEqual(before.goods)
-    // A working encoder then converts them.
-    expect((await repack(env.DB, { limit: 1000 })).snapshots.mismatched).toEqual([])
-    expect(await rowFormats(account.id)).toMatchObject({ v1: 0, v2: 2 })
-    expect((await exportsOf(client, account.id)).goods).toEqual(before.goods)
-  })
-
-  it('reads accounts holding both formats, before and after repack', async () => {
-    const { client, account, upload } = await setUp()
-    const [first, second, , relogin] = v1Sequence()
-    await importV1(env.DB, account.id, first![0], first![1])
-    await importV1(env.DB, account.id, second![0], second![1])
-    // New imports on top of v1 data are v2.
-    expect((await upload(relogin![0], relogin![1])).status).toBe('created')
-    expect(
-      (
-        await upload(
-          { ...relogin![0], gi_player: { ...relogin![0].gi_player!, resin: 150 } },
-          4_500,
-        )
-      ).status,
-    ).toBe('created')
-    expect(await rowFormats(account.id)).toMatchObject({ v1: 2, v2: 2 })
-    const before = await exportsOf(client, account.id)
-    expect(Object.keys(before.files2)).toHaveLength(4)
-    expect(before.files2).toEqual(before.files1)
-    for (const id of Object.keys(before.files1)) {
-      expect(before.files1[Number(id)]).toBe(before.goods[Number(id)])
+    const all = await exportsOf(client, account.id)
+    for (const [i, [good, at]] of sequence().entries()) {
+      expect(all.files1[ids[i]!], `capture ${i}`).toBe(all.goods[ids[i]!])
+      expect(all.files2[ids[i]!], `capture ${i}`).toBe(all.goods[ids[i]!])
+      expect(JSON.parse(all.goods[ids[i]!]!)).toMatchObject({
+        timestamp: at,
+        gi_player: good.gi_player,
+      })
     }
-    await adminRepack()
-    const after = await exportsOf(client, account.id)
-    expect(after.goods).toEqual(before.goods)
-    expect(after.files1).toEqual(before.files1)
-    expect(after.files2).toEqual(before.files1)
+    // A capture uploaded again is a no-op.
+    const [[played, at]] = [sequence()[1]!]
+    expect(await upload(played, at)).toMatchObject({ status: 'unchanged', snapshotId: ids[1] })
   })
 
   it('serves bundles of some sections, as the app pages ask for them', async () => {
     const { client, account, upload } = await setUp()
-    const [first, second, , relogin] = v1Sequence()
-    await importV1(env.DB, account.id, first![0], first![1])
-    for (const [good, at] of [second!, relogin!])
-      expect((await upload(good, at)).status).toBe('created')
+    for (const [good, at] of sequence()) expect((await upload(good, at)).status).toBe('created')
     const base = `/api/accounts/${account.id}/bundle?format=2`
     const full = await decodeBundle(await (await client.fetch(base)).arrayBuffer())
     const latest = full.snapshots.at(-1)!
@@ -330,9 +201,11 @@ describe('storage v2 conversion', () => {
       await upload({ ...good, artifacts: [...good.artifacts, extra] }, 1_000 + i)
     }
     const before = await exportsOf(client, account.id)
-    expect((await rowFormats(account.id)).chunks).toBe(6)
-    await adminRepack()
-    expect(await rowFormats(account.id)).toMatchObject({ chunks: 1, legacyArtifacts: 0 })
+    expect(await chunkCount(account.id)).toBe(6)
+    const result = (await (await adminRepack()).json()) as RepackResult
+    expect(result.remaining).toMatchObject({ snapshots: 0, legacyBlobs: 0, legacyArtifacts: 0 })
+    expect(result.d1.rowsWritten).toBeGreaterThan(0)
+    expect(await chunkCount(account.id)).toBe(1)
     const after = await exportsOf(client, account.id)
     expect(after.catalog).toBe(before.catalog)
     expect(after.goods).toEqual(before.goods)
@@ -359,7 +232,80 @@ describe('storage v2 conversion', () => {
       headers: { 'x-diag-key': DIAG },
     })
     expect(status.status).toBe(200)
-    expect(await status.json()).toMatchObject({ remaining: { snapshots: expect.any(Number) } })
-    expect((await adminRepack('limit=nope')).status).toBe(400)
+    expect(await status.json()).toEqual({
+      remaining: { snapshots: 0, legacyBlobs: 0, legacyArtifacts: 0, smallChunkAccounts: 0 },
+    })
+  })
+})
+
+/**
+ * Without the plain (account_id, taken_at) index that 0017 dropped, every
+ * per-account read of snapshots still goes through an index (the partial
+ * one over live rows, or the primary key); only maintenance reads the whole
+ * table, as it always did. The statements are the Worker's, by shape.
+ */
+describe('snapshot query plans', () => {
+  async function plan(sql: string, ...params: unknown[]): Promise<string> {
+    const { results } = await env.DB.prepare(`EXPLAIN QUERY PLAN ${sql}`)
+      .bind(...params)
+      .all<{ detail: string }>()
+    return results.map((row) => row.detail).join(' | ')
+  }
+  const LIVE = 'snapshots_account_taken_live_unique'
+
+  it.each([
+    [
+      'latest (import, recompute)',
+      `SELECT id FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+       ORDER BY taken_at DESC, id DESC LIMIT 1`,
+      [1],
+    ],
+    [
+      'same capture time',
+      `SELECT id FROM snapshots WHERE account_id = ?1 AND taken_at = ?2 AND deleted_at IS NULL`,
+      [1, 2],
+    ],
+    [
+      'snapshot list',
+      `SELECT id, meta FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+       ORDER BY taken_at DESC, id DESC`,
+      [1],
+    ],
+    [
+      'bundle',
+      `SELECT id, meta FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+       AND (?2 IS NULL OR id IN (SELECT value FROM json_each(?2))) ORDER BY taken_at, id LIMIT ?3`,
+      [1, null, 10],
+    ],
+    [
+      'one GOOD file',
+      `SELECT id, meta FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
+       AND (?2 IS NULL OR id = ?2) ORDER BY taken_at DESC, id DESC LIMIT 1`,
+      [1, 5],
+    ],
+    [
+      'delete some',
+      `UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND deleted_at IS NULL
+       AND id IN (SELECT value FROM json_each(?2))`,
+      [1, '[1,2]', 9],
+    ],
+  ] as const)('%s reads through an index', async (_, sql, params) => {
+    const detail = await plan(sql, ...params)
+    expect(detail).toMatch(new RegExp(`${LIVE}|INTEGER PRIMARY KEY|USING INDEX`))
+    expect(detail).not.toMatch(/SCAN snapshots(?! USING)/)
+  })
+
+  it('reads by primary key where rows are joined by id', async () => {
+    expect(
+      await plan(
+        `SELECT s.meta FROM genshin_accounts AS a
+         LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id WHERE a.user_id = ?1`,
+        1,
+      ),
+    ).toMatch(/SEARCH s USING INTEGER PRIMARY KEY/)
+  })
+
+  it('scans the whole table only in maintenance', async () => {
+    expect(await plan(COLLECT_SECTION_BLOBS)).toMatch(/SCAN/)
   })
 })

@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest'
 import { getDb } from '../db/client'
 import {
   achievementMarks,
-  blobs,
   genshinAccounts,
   plannerTargets,
+  sectionBlobs,
   snapshots,
   users,
 } from '../db/schema'
@@ -31,34 +31,19 @@ async function seedAccount() {
   return account!
 }
 
-const summary = {
-  characters: 0,
-  weapons: 0,
-  artifacts: 0,
-  materials: 0,
-  mora: 0,
-  primogem: 0,
-  artifact3: 0,
-  artifact4: 0,
-}
-
 function snapshotRow(accountId: number, takenAt: number) {
   return {
     accountId,
     takenAt,
     lastSeenAt: takenAt,
-    format: 'GOOD',
-    version: 3,
-    source: 'test',
     rawSize: 1,
     storedSize: 1,
-    contentHash: 'c',
-    charactersHash: 'a',
-    weaponsHash: 'b',
-    artifactsHash: 'c',
-    materialsHash: 'd',
-    materialsKeyframeHash: 'd',
-    summary,
+    contentKey: 1,
+    charactersRef: 1,
+    weaponsRef: 1,
+    artifactsRef: 1,
+    materialsRef: 1,
+    meta: new Uint8Array([0, 123, 125]),
   }
 }
 
@@ -79,12 +64,12 @@ describe('D1 schema', () => {
   it('stores and returns blob bytes unchanged', async () => {
     const account = await seedAccount()
     const data = new Uint8Array([0, 1, 2, 250, 255])
-    await db
-      .insert(blobs)
-      .values({ accountId: account.id, hash: 'h', kind: 'materials', data, rawSize: 5 })
-    const [row] = await db.select().from(blobs).where(eq(blobs.accountId, account.id))
+    const hash = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
+    await db.insert(sectionBlobs).values({ accountId: account.id, hash, kind: 4, data })
+    const [row] = await db.select().from(sectionBlobs).where(eq(sectionBlobs.accountId, account.id))
     expect(row!.data).toBeInstanceOf(Uint8Array)
     expect([...row!.data]).toEqual([...data])
+    expect([...row!.hash]).toEqual([...hash])
   })
 
   it('allows one live snapshot per capture time, but re-import after a delete', async () => {
