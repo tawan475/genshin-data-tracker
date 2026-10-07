@@ -22,7 +22,7 @@ export const me = new Hono<AppEnv>()
     if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
     const settings = deepMerge(user.settings, patch)
     await db.update(users).set({ settings }).where(eq(users.id, user.id))
-    return c.json(toMe({ ...user, settings }))
+    return c.json(toMe({ ...user, settings }, c.env))
   })
 
   /**

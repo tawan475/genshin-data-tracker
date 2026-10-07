@@ -41,10 +41,22 @@
   "ratelimits": [
     { "name": "AUTH_LIMITER", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } },
     { "name": "IMPORT_LIMITER", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    // Requests that can send email (forgot password per IP, confirmations per user).
+    { "name": "RECOVERY_LIMITER", "namespace_id": "1003", "simple": { "limit": 5, "period": 60 } },
   ],
 
   // Secrets (wrangler secret put): JWT_SECRET, PASSWORD_PEPPER — each at least
   // 32 random characters. Local dev reads them from .dev.vars.
+
+  // Email (worker/lib/email.ts): confirmation and reset links go out through
+  // Cloudflare Email Service, a `send_email` binding named EMAIL. It stays out
+  // of this file until 475.dev is onboarded to Email Sending (README, "Account
+  // recovery"); without it nothing is sent and the app says email is not
+  // available. Then add:
+  //   "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["no-reply@475.dev"] }],
+  // `vite dev` simulates it (vite.config.ts). Optional vars: EMAIL_FROM
+  // (default no-reply@475.dev) and SITE_URL (the origin links point at,
+  // default https://genshin-tracker.475.dev).
 
   // Daily housekeeping (worker/services/maintenance.ts), 02:23 in Bangkok.
   "triggers": { "crons": ["23 19 * * *"] },

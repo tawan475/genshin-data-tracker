@@ -76,7 +76,10 @@ export const health = new Hono<AppEnv>().get('/', async (c) => {
         }),
       ),
       bindings: Object.fromEntries(
-        ['DB', 'AUTH_LIMITER', 'IMPORT_LIMITER'].map((name) => [name, env[name] != null]),
+        ['DB', 'AUTH_LIMITER', 'IMPORT_LIMITER', 'RECOVERY_LIMITER', 'EMAIL'].map((name) => [
+          name,
+          env[name] != null,
+        ]),
       ),
       colo: (c.req.raw as { cf?: { colo?: string } }).cf?.colo ?? null,
     }

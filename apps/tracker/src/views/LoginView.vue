@@ -61,7 +61,16 @@ async function submit() {
         />
       </label>
       <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-gray-400">Password</span>
+        <span class="flex items-baseline justify-between gap-3">
+          <span class="text-sm font-medium text-gray-400">Password</span>
+          <RouterLink
+            :to="{ name: 'forgot-password' }"
+            class="text-sm text-paimon hover:underline"
+            title="Reset it by email, or ask the admin"
+          >
+            Forgot password?
+          </RouterLink>
+        </span>
         <input
           v-model="password"
           class="glass-input"

@@ -50,7 +50,8 @@ export const users = sqliteTable(
     usernameKey: text('username_key').notNull().unique(),
     /**
      * Optional, lowercased; unique when set (SQLite allows many NULLs).
-     * Unverified until an email flow exists: never link accounts by it.
+     * `email_verified` is set by a confirmation link (auth_tokens) and
+     * cleared when the email changes: never link accounts by an unverified one.
      */
     email: text('email').unique(),
     emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
@@ -334,4 +335,34 @@ export const inventoryAdjustments = sqliteTable(
     updatedAt: timestamp('updated_at'),
   },
   (t) => [primaryKey({ columns: [t.accountId, t.key] })],
+)
+
+/**
+ * One-time links (migration 0014): email confirmation (`verify_email`, 24 h)
+ * and password reset (`reset_password`, 30 min by mail, 24 h when an admin
+ * makes one with scripts/admin-reset-link.mjs). Only the SHA-256 of the token
+ * is stored; the link carries the token. `email` is the address it was mailed
+ * to (NULL for an admin's link): a confirmation only counts while the user's
+ * email is still that address, and the per-hour mail limit counts these rows.
+ * Kept a day past expiry (so a late click says "expired"), then purged by
+ * maintenance.
+ */
+export const authTokens = sqliteTable(
+  'auth_tokens',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['verify_email', 'reset_password'] }).notNull(),
+    tokenHash: text('token_hash').notNull(),
+    email: text('email'),
+    expiresAt: integer('expires_at').notNull(),
+    usedAt: integer('used_at'),
+    createdAt: timestamp('created_at'),
+  },
+  (t) => [
+    uniqueIndex('auth_tokens_token_hash_unique').on(t.tokenHash),
+    index('auth_tokens_user_kind_idx').on(t.userId, t.kind),
+  ],
 )

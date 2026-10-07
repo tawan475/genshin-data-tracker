@@ -18,8 +18,10 @@ import type {
   PlannerStateResponse,
   PlannerTargetsResponse,
   PlannerTasksResponse,
+  ResetLinkResponse,
   SnapshotResponse,
   UserSettingsPatch,
+  VerifyEmailResponse,
 } from '@gdt/shared'
 import type { plannerStatePatch, plannerTargetsPatch, plannerTasksPatch } from '@gdt/shared'
 import type { z } from 'zod'
@@ -50,6 +52,34 @@ export const api = {
     requestJson<MeResponse>('/api/auth/profile', { method: 'PATCH', json: body }),
   changePassword: (body: { currentPassword: string; newPassword: string }) =>
     requestJson<void>('/api/auth/password', { method: 'POST', json: body }),
+  /** Mails a confirmation link for the signed-in user's email. */
+  sendVerifyEmail: () => requestJson<void>('/api/auth/verify-email/send', { method: 'POST' }),
+  verifyEmail: (token: string) =>
+    requestJson<VerifyEmailResponse>('/api/auth/verify-email', {
+      method: 'POST',
+      json: { token },
+      noRefresh: true,
+    }),
+  /** Always the same answer: whether a link went out is never told. */
+  forgotPassword: (login: string) =>
+    requestJson<unknown>('/api/auth/forgot-password', {
+      method: 'POST',
+      json: { login },
+      noRefresh: true,
+    }),
+  checkResetLink: (token: string) =>
+    requestJson<ResetLinkResponse>('/api/auth/reset-password/check', {
+      method: 'POST',
+      json: { token },
+      noRefresh: true,
+    }),
+  /** Sets the password and signs this browser in. */
+  resetPassword: (token: string, password: string) =>
+    requestJson<MeResponse>('/api/auth/reset-password', {
+      method: 'POST',
+      json: { token, password },
+      noRefresh: true,
+    }),
   updateUserSettings: (patch: UserSettingsPatch) =>
     requestJson<MeResponse>('/api/me/settings', { method: 'PATCH', json: patch }),
   /** The user's Irminsul key for all accounts; replaces any old one. */

@@ -9,6 +9,7 @@ import { live } from './routes/live'
 import { me } from './routes/me'
 import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
+import { recovery } from './routes/recovery'
 import { runMaintenance } from './services/maintenance'
 
 const app = new Hono<AppEnv>().basePath('/api')
@@ -24,6 +25,7 @@ app.use(async (c, next) => {
 
 app.route('/health', health)
 app.route('/auth', auth)
+app.route('/auth', recovery)
 app.route('/me', me)
 app.route('/accounts', accounts)
 app.route('/accounts', progress)

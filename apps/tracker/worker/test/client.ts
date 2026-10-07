@@ -5,11 +5,16 @@ export const ORIGIN = 'https://genshin-tracker.475.dev'
 
 let clients = 0
 
+/** How a client reaches the Worker: SELF, or a direct call with a changed env (recovery tests). */
+export type Transport = (url: string, init: RequestInit) => Promise<Response>
+
 /** A browser stand-in: keeps cookies per path and sends the CSRF header. */
 export class Client {
   private cookies = new Map<string, { value: string; path: string }>()
   /** Each client is its own IP, so rate limits never couple unrelated tests. */
   private ip = `2001:db8::${(++clients).toString(16)}`
+
+  constructor(private readonly transport: Transport = (url, init) => SELF.fetch(url, init)) {}
 
   cookie(name: string): string | undefined {
     return this.cookies.get(name)?.value
@@ -29,7 +34,7 @@ export class Client {
       headers.set('content-type', 'application/json')
       body = JSON.stringify(init.json)
     }
-    const response = await SELF.fetch(ORIGIN + path, { ...init, headers, body })
+    const response = await this.transport(ORIGIN + path, { ...init, headers, body })
     for (const line of response.headers.getSetCookie()) {
       const [pair, ...attributes] = line.split(';').map((s) => s.trim())
       const [name, ...value] = pair!.split('=')

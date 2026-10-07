@@ -44,6 +44,25 @@ const router = createRouter({
       component: () => import('@/views/RegisterView.vue'),
       meta: { guest: true, public: true, title: 'Create account' },
     },
+    // Account recovery: open signed in or not (links arrive by email).
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('@/views/ForgotPasswordView.vue'),
+      meta: { public: true, title: 'Reset password' },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/views/ResetPasswordView.vue'),
+      meta: { public: true, title: 'New password' },
+    },
+    {
+      path: '/verify-email',
+      name: 'verify-email',
+      component: () => import('@/views/VerifyEmailView.vue'),
+      meta: { public: true, title: 'Confirm email' },
+    },
     {
       path: '/app',
       component: () => import('@/views/app/AppLayout.vue'),

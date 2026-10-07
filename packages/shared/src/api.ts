@@ -55,6 +55,18 @@ export const updateProfileRequest = z
     message: 'Nothing to change',
   })
 
+/** A one-time link's token: 32 random bytes, base64url (what `?token=` carries). */
+export const linkToken = z.string().regex(/^[A-Za-z0-9_-]{43}$/, 'Invalid link')
+
+/** `POST /api/auth/verify-email` and `/reset-password/check`. */
+export const linkTokenRequest = z.object({ token: linkToken })
+
+/** `POST /api/auth/forgot-password`: a username or email. */
+export const forgotPasswordRequest = z.object({ login: loginName })
+
+/** `POST /api/auth/reset-password`: the new password follows the sign-up rules. */
+export const resetPasswordRequest = z.object({ token: linkToken, password: passwordSchema })
+
 export const GENSHIN_SERVERS = ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] as const
 export type GenshinServer = (typeof GENSHIN_SERVERS)[number]
 
@@ -478,7 +490,30 @@ export interface MeResponse {
   settings: UserSettings
   /** Whether the user has an Irminsul key for all their accounts (the key itself is shown once). */
   hasImportKey: boolean
+  /**
+   * Whether this server can send email (confirmation and reset links). False
+   * until the Worker has its `EMAIL` binding.
+   */
+  emailEnabled: boolean
 }
+
+/** `POST /api/auth/verify-email`: the address now confirmed. */
+export interface VerifyEmailResponse {
+  email: string
+}
+
+/** `POST /api/auth/reset-password/check`: whose password the link resets. */
+export interface ResetLinkResponse {
+  username: string
+}
+
+/**
+ * Why a one-time link was refused (the `error.code`): never issued or
+ * malformed, past its time, or already used (or replaced by a newer reset).
+ * A confirmation link also fails with `email_changed` once the account's
+ * email is another address.
+ */
+export const LINK_ERROR_CODES = ['token_invalid', 'token_expired', 'token_used'] as const
 
 export interface AccountResponse {
   id: number
