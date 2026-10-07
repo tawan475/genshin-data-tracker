@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { TimerOff } from 'lucide-vue-next'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
-import { providerLabel } from '@/components/oauth/oauth'
+import { loadSignInOptions, providerLabel } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError, api } from '@/api'
 import { useSession } from '@/stores/session'
@@ -27,6 +27,8 @@ const touched = ref(false)
 const usernameTaken = ref(false)
 const error = ref('')
 const busy = ref(false)
+/** "Use as account email" only while the email features are on. */
+const emailFeatures = ref(false)
 
 const label = computed(() => (pending.value ? providerLabel(pending.value.provider) : ''))
 const usernameError = computed(() =>
@@ -38,6 +40,7 @@ const usernameError = computed(() =>
 )
 
 onMounted(async () => {
+  void loadSignInOptions().then((options) => (emailFeatures.value = options.emailFeatures))
   try {
     pending.value = await api.oauthPending()
     username.value = pending.value.username
@@ -57,7 +60,7 @@ async function create() {
   if (usernameError.value) return
   busy.value = true
   try {
-    await session.oauthRegister(username.value.trim(), useEmail.value)
+    await session.oauthRegister(username.value.trim(), emailFeatures.value && useEmail.value)
     await router.replace({ name: 'account-new' })
   } catch (cause) {
     const code = cause instanceof ApiRequestError ? cause.code : ''
@@ -126,7 +129,7 @@ async function cancel() {
           }}</span>
         </label>
         <label
-          v-if="pending.email"
+          v-if="emailFeatures && pending.email"
           class="flex cursor-pointer items-center gap-3 text-sm text-gray-300"
           title="It stays unconfirmed until you open the link mailed to it"
         >

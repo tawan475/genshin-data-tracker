@@ -30,7 +30,16 @@ import { ApiError } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { hashPassword } from '../lib/password'
 import { accountForUid } from '../services/accounts'
-import { Client, ORIGIN, bigGood, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
+import {
+  Client,
+  ORIGIN,
+  bigGood,
+  emailOn,
+  irminsulForm,
+  sampleExtras,
+  sampleGood,
+  signUp,
+} from './client'
 
 async function createAccount(client: Client) {
   return client.json<AccountCreatedResponse>('/api/accounts', {
@@ -85,7 +94,7 @@ describe('auth', () => {
   it('registers without an email, keeps email unique when given, and logs in by email', async () => {
     const password = 'correct horse battery staple'
     const register = (username: string, email?: string | null) =>
-      new Client().fetch('/api/auth/register', {
+      new Client(emailOn()).fetch('/api/auth/register', {
         method: 'POST',
         json: { username, ...(email === undefined ? {} : { email }), password },
       })
@@ -107,6 +116,7 @@ describe('auth', () => {
     expect((await register(`mail-b${tag}`, email.toLowerCase())).status).toBe(409)
     expect((await register(`mail-c${tag}`, 'not-an-email')).status).toBe(400)
 
+    // Signing in by email works while the email features are paused too (SELF).
     const login = await new Client().fetch('/api/auth/login', {
       method: 'POST',
       json: { login: email, password },
@@ -159,7 +169,7 @@ describe('auth', () => {
   })
 
   it('changes the username and email without asking for the password', async () => {
-    const { client, username, password } = await signUp()
+    const { client, username, password } = await signUp(emailOn())
     const update = (json: object) => client.fetch('/api/auth/profile', { method: 'PATCH', json })
     const code = async (response: Response) =>
       ((await response.json()) as { error: { code: string } }).error.code
@@ -190,7 +200,7 @@ describe('auth', () => {
     expect(((await cleared.json()) as { email: string | null }).email).toBeNull()
 
     // Someone else's names are refused, saying which one.
-    const other = await signUp()
+    const other = await signUp(emailOn())
     const takenName = await update({
       username: other.username.toUpperCase(),
     })

@@ -16,7 +16,7 @@ import type { z } from 'zod'
 import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import type { AppEnv } from '../env'
-import { emailEnabled, linkOrigin, sendMail, signInAddedMail } from '../lib/email'
+import { emailEnabled, emailFeatures, linkOrigin, sendMail, signInAddedMail } from '../lib/email'
 import { ApiError, clientIp, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
 import { clearPendingCookie, enabledProviders, isProvider } from '../lib/oauth'
 import { hashPassword, verifyPassword } from '../lib/password'
@@ -50,6 +50,7 @@ export function toMe(user: User, env: Env): MeResponse {
     settings: deepMerge(USER_SETTINGS_DEFAULTS, user.settings),
     hasImportKey: user.importKeyHash !== null,
     emailEnabled: emailEnabled(env),
+    emailFeatures: emailFeatures(env),
     hasPassword: user.passwordHash !== '',
   }
 }
@@ -83,6 +84,9 @@ async function findByLogin(c: Context<AppEnv>, login: string): Promise<User | un
 
 const invalidCredentials = () =>
   new ApiError(401, 'invalid_credentials', 'Wrong username, email or password')
+
+/** Sign-up while the email features are off: an `email` sent anyway is dropped, not refused. */
+const registerWithoutEmail = registerRequest.omit({ email: true })
 
 /**
  * Checks a username-or-email and password (rate limited per IP and per name;
@@ -123,9 +127,16 @@ export function notifySignInAdded(c: Context<AppEnv>, user: User, what: string):
 }
 
 export const auth = new Hono<AppEnv>()
+  /**
+   * While the email features are off, an `email` is ignored (not even
+   * validated): the app no longer asks for one, and a page cached from
+   * before still signs up, without it, rather than failing.
+   */
   .post('/register', async (c) => {
     await rateLimit(c.env.AUTH_LIMITER, `register:${clientIp(c)}`)
-    const body = await parseJson(c, registerRequest)
+    const body = emailFeatures(c.env)
+      ? await parseJson(c, registerRequest)
+      : { ...(await parseJson(c, registerWithoutEmail)), email: null }
     let user: User
     try {
       ;[user] = (await getDb(c.env.DB)
@@ -185,7 +196,11 @@ export const auth = new Hono<AppEnv>()
     return c.json(toMe(user, c.env))
   })
 
-  /** Changes the username and/or email (the user chose not to ask for the password here). */
+  /**
+   * Changes the username and/or email (the user chose not to ask for the
+   * password here). While the email features are off, the email can only be
+   * removed: another address is 403 `email_paused`.
+   */
   .patch('/profile', requireUser, async (c) => {
     const userId = c.get('userId')
     await rateLimit(c.env.AUTH_LIMITER, `profile:${userId}`)
@@ -199,6 +214,9 @@ export const auth = new Hono<AppEnv>()
       changes.usernameKey = body.username.toLowerCase()
     }
     if (body.email !== undefined && body.email !== user.email) {
+      if (body.email !== null && !emailFeatures(c.env)) {
+        throw new ApiError(403, 'email_paused', "An email can't be added or changed right now")
+      }
       changes.email = body.email
       // Verification belongs to the address, not the account.
       changes.emailVerified = false

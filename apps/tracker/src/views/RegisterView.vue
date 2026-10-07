@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, emailSchema, usernameSchema } from '@gdt/shared'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
+import { loadSignInOptions } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
 import { useSession } from '@/stores/session'
@@ -18,11 +19,20 @@ const confirm = ref('')
 const touched = ref(false)
 const serverError = ref('')
 const busy = ref(false)
+/** The optional email field shows only while the email features are on. */
+const emailFeatures = ref(false)
+
+onMounted(async () => {
+  emailFeatures.value = (await loadSignInOptions()).emailFeatures
+})
 
 // The same schemas the server validates with.
 const errors = computed(() => ({
   username: usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _',
-  email: !email.value.trim() || emailSchema.safeParse(email.value).success ? '' : 'Invalid email',
+  email:
+    !emailFeatures.value || !email.value.trim() || emailSchema.safeParse(email.value).success
+      ? ''
+      : 'Invalid email',
   password:
     password.value.length < MIN_PASSWORD_LENGTH
       ? `Min ${MIN_PASSWORD_LENGTH} characters`
@@ -40,12 +50,18 @@ async function submit() {
   if (!valid.value) return
   busy.value = true
   try {
-    await session.register(username.value.trim(), email.value.trim() || null, password.value)
+    await session.register(
+      username.value.trim(),
+      (emailFeatures.value && email.value.trim()) || null,
+      password.value,
+    )
     await router.replace({ name: 'account-new' })
   } catch (cause) {
     serverError.value =
       cause instanceof ApiRequestError && cause.code === 'taken'
-        ? 'Username or email taken'
+        ? emailFeatures.value
+          ? 'Username or email taken'
+          : 'Username taken'
         : cause instanceof Error
           ? cause.message
           : 'Sign-up failed'
@@ -77,7 +93,7 @@ async function submit() {
         />
         <span v-if="show('username')" class="text-sm text-red-300">{{ show('username') }}</span>
       </label>
-      <label class="flex flex-col gap-2">
+      <label v-if="emailFeatures" class="flex flex-col gap-2">
         <span class="text-sm font-medium text-gray-400"
           >Email <span class="text-gray-500">(optional)</span></span
         >

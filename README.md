@@ -236,6 +236,18 @@ zips are built in the browser; the server only rebuilds single GOOD files.
 
 ## Account recovery
 
+**Paused.** Email costs money, so the email features are off unless the Worker
+var `EMAIL_FEATURES` is `"1"` (unset in `wrangler.jsonc`, tests and `vite dev`;
+`EMAIL_FEATURES=1` in `.dev.vars` turns them on locally). While off: sign-up
+has no email field and the API ignores an `email`; Settings can't add or change
+one (`PATCH /api/auth/profile` answers 403 `email_paused`), only remove one set
+before, which still signs in; `forgot-password`, `verify-email/send` and
+`verify-email` answer 404 `email_paused` and their pages go to `/login`; no mail
+is sent even with the binding. The sign-in page and Settings → Connected
+accounts point at Discord / Google instead. **Admin reset** links keep working
+(`reset-password`, `reset-password/check`, `/reset-password?token=…`). To turn
+email on: the steps below, plus `"vars": { "EMAIL_FEATURES": "1" }`.
+
 One-time links (table `auth_tokens`, migration 0014; only the token's SHA-256
 is stored): email confirmation (24 h; sent at sign-up, on an email change and
 by Settings' Verify, at most 3 an hour) and password reset (30 min, mailed only
@@ -290,7 +302,8 @@ set, nothing changes. Code: `worker/lib/oauth.ts` (flow, cookies),
 - **Linked** provider account: signs its user in like a password login.
 - **Not linked**: never matched by email. `/oauth` offers a new account (no
   password; the username is suggested from the provider, the provider's email
-  can be set as the account's, unconfirmed, with a confirmation link mailed)
+  can be set as the account's, unconfirmed, with a confirmation link mailed,
+  while the email features are on)
   or "I have an account" (password sign-in that links it). The provider
   account waits in `gdt_oauth_pending` (15 minutes), never in a URL.
 - **Settings → Connected accounts**: Link (needs the session; the callback

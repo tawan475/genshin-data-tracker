@@ -31,6 +31,9 @@ const SECRETS = {
 /** Every provider secret unset (even if .dev.vars has some for local testing). */
 const NO_SECRETS = Object.fromEntries(Object.keys(SECRETS).map((name) => [name, undefined]))
 
+/** The providers with the email features on (EMAIL_FEATURES=1); they are paused by default. */
+const MAIL_ON = { ...SECRETS, EMAIL_FEATURES: '1' }
+
 /** Stands in for the send_email binding. */
 class FakeMail {
   sent: EmailMessageBuilder[] = []
@@ -40,11 +43,14 @@ class FakeMail {
   }
 }
 
-/** Calls the Worker directly with these env changes and waits for its after-response work. */
+/**
+ * Calls the Worker directly with these env changes and waits for its
+ * after-response work. Email features paused unless the overrides say "1".
+ */
 function via(overrides: Record<string, unknown> = SECRETS): Transport {
   return async (url, init) => {
     const ctx = createExecutionContext()
-    const bindings = { ...env, ...overrides } as unknown as Env
+    const bindings = { ...env, EMAIL_FEATURES: undefined, ...overrides } as unknown as Env
     const response = await worker.fetch(new Request(url, init), bindings, ctx)
     await waitOnExecutionContext(ctx)
     return response
@@ -246,7 +252,7 @@ let counter = 0
 
 async function passwordUser(mail?: FakeMail) {
   const username = `pw${++counter}${crypto.randomUUID().slice(0, 6)}`
-  const client = new Client(via(mail ? { ...SECRETS, EMAIL: mail } : SECRETS))
+  const client = new Client(via(mail ? { ...MAIL_ON, EMAIL: mail } : MAIL_ON))
   const me = await client.json<MeResponse>('/api/auth/register', {
     method: 'POST',
     json: { username, email: `${username}@example.com`, password: PASSWORD },
@@ -274,6 +280,7 @@ describe('configuration', () => {
     const client = new Client(via(NO_SECRETS))
     expect(await client.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: [],
+      emailFeatures: false,
     })
     const start = await post(client, '/api/auth/oauth/discord/start', {})
     expect(start).toMatchObject({ status: 404, code: 'provider_unavailable' })
@@ -283,6 +290,7 @@ describe('configuration', () => {
     const half = new Client(via({ ...NO_SECRETS, GOOGLE_CLIENT_ID: 'only-the-id' }))
     expect(await half.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: [],
+      emailFeatures: false,
     })
     expect(providers.requests).toEqual([])
   })
@@ -291,6 +299,7 @@ describe('configuration', () => {
     const client = new Client(via({ ...NO_SECRETS, OAUTH_DEV_MOCK: '1' }))
     expect(await client.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: [],
+      emailFeatures: false,
     })
   })
 
@@ -298,7 +307,11 @@ describe('configuration', () => {
     const client = new Client(via())
     expect(await client.json<OAuthProvidersResponse>('/api/auth/oauth/providers')).toEqual({
       providers: ['discord', 'google'],
+      emailFeatures: false,
     })
+    expect(
+      await new Client(via(MAIL_ON)).json<OAuthProvidersResponse>('/api/auth/oauth/providers'),
+    ).toEqual({ providers: ['discord', 'google'], emailFeatures: true })
     const discord = new URL(await startSignIn(client, 'discord'))
     expect(discord.origin + discord.pathname).toBe('https://discord.com/oauth2/authorize')
     expect(Object.fromEntries(discord.searchParams)).toMatchObject({
@@ -376,7 +389,7 @@ describe('sign in', () => {
     // A provider account with the existing user's (confirmed) email still links nothing.
     await db.update(users).set({ emailVerified: true }).where(eq(users.id, existing.id))
     const who = account({ email: existing.email })
-    const client = new Client(via({ ...SECRETS, EMAIL: mail }))
+    const client = new Client(via({ ...MAIL_ON, EMAIL: mail }))
     const landed = await roundTrip(client, 'google', who)
     // Only a fixed path: the identity is in the cookie, never in the URL.
     expect(landed).toBe('/oauth')
@@ -433,7 +446,7 @@ describe('sign in', () => {
   it('a new account can take the provider email, unconfirmed, with a confirmation mailed', async () => {
     const mail = new FakeMail()
     const who = account()
-    const client = new Client(via({ ...SECRETS, EMAIL: mail }))
+    const client = new Client(via({ ...MAIL_ON, EMAIL: mail }))
     expect(await roundTrip(client, 'discord', who)).toBe('/oauth')
     const pending = await client.json<OAuthPendingResponse>('/api/auth/oauth/pending')
     const created = await post(client, '/api/auth/oauth/pending/register', {
@@ -444,6 +457,30 @@ describe('sign in', () => {
     // Discord said verified; that does not confirm it here.
     expect(created.body).toMatchObject({ email: who.email, emailVerified: false })
     expect(mail.sent.map((m) => [m.to, m.subject])).toEqual([[who.email, 'Confirm your email']])
+  })
+
+  it('while email is paused: no provider email for a new account, no notice on linking', async () => {
+    const mail = new FakeMail()
+    const client = new Client(via({ ...SECRETS, EMAIL: mail }))
+    expect(await roundTrip(client, 'discord', account())).toBe('/oauth')
+    const pending = await client.json<OAuthPendingResponse>('/api/auth/oauth/pending')
+    const created = await post(client, '/api/auth/oauth/pending/register', {
+      username: pending.username,
+      useEmail: true,
+    })
+    expect(created).toMatchObject({ status: 201, body: { email: null, emailFeatures: false } })
+
+    // A confirmed email and a binding: only the pause keeps the notice from going out.
+    const { username, me } = await passwordUser()
+    await db.update(users).set({ emailVerified: true }).where(eq(users.id, me.id))
+    const linking = new Client(via({ ...SECRETS, EMAIL: mail }))
+    expect(await roundTrip(linking, 'google', account())).toBe('/oauth')
+    const linked = await post(linking, '/api/auth/oauth/pending/login', {
+      login: username,
+      password: PASSWORD,
+    })
+    expect(linked.body).toMatchObject({ linked: 'google', problem: null })
+    expect(mail.sent).toEqual([])
   })
 
   it('a passwordless account never signs in with a password', async () => {
@@ -463,7 +500,7 @@ describe('sign in', () => {
     await db.update(users).set({ emailVerified: true }).where(eq(users.id, me.id))
     mail.sent.length = 0
     const who = account()
-    const client = new Client(via({ ...SECRETS, EMAIL: mail }))
+    const client = new Client(via({ ...MAIL_ON, EMAIL: mail }))
     expect(await roundTrip(client, 'discord', who)).toBe('/oauth')
 
     const wrong = await post(client, '/api/auth/oauth/pending/login', {
@@ -768,7 +805,7 @@ describe('unlink and passwords', () => {
       .update(users)
       .set({ email: `${me.username}@example.com`.toLowerCase(), emailVerified: true })
       .where(eq(users.id, me.id))
-    const mailing = new Client(via({ ...SECRETS, EMAIL: mail }))
+    const mailing = new Client(via({ ...MAIL_ON, EMAIL: mail }))
     // (Same session, carried over to a transport with email.)
     for (const name of ['gdt_at', 'gdt_rt']) {
       mailing.setCookie(name, client.cookie(name)!, name === 'gdt_at' ? '/api' : '/api/auth')

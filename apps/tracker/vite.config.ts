@@ -72,7 +72,8 @@ function serviceWorker(): Plugin {
  * `vite dev` only, so the account flows work locally. Builds never get these:
  * - a simulated `send_email` binding (Miniflare logs each mail and saves its
  *   text and HTML to a file; nothing is sent). The deployed Worker has EMAIL
- *   once wrangler.jsonc does (see there).
+ *   once wrangler.jsonc does (see there). Like production, the email features
+ *   stay paused unless `.dev.vars` has `EMAIL_FEATURES=1`.
  * - OAUTH_DEV_MOCK: "Continue with Discord / Google" go to the fake provider
  *   in dev/oauth-mock.ts. `OAUTH_DEV_MOCK=0` in .dev.vars turns it off.
  */

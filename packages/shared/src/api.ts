@@ -25,7 +25,7 @@ export const passwordSchema = z
 
 export const registerRequest = z.object({
   username: usernameSchema,
-  /** Optional; empty means none. */
+  /** Optional; empty means none. Ignored while the email features are off. */
   email: emailSchema.nullish().or(z.literal('').transform(() => null)),
   password: passwordSchema,
 })
@@ -45,7 +45,8 @@ export const changePasswordRequest = z.object({
 
 /**
  * Changes the login names. Omitted fields stay as they are; an empty or null
- * email removes it.
+ * email removes it. While the email features are off, an email can only be
+ * removed (another address is 403 `email_paused`).
  */
 export const updateProfileRequest = z
   .object({
@@ -98,7 +99,10 @@ export const oauthStartRequest = z.object({ next: appPath.optional() })
 /** `POST /api/auth/oauth/pending/register`: a new account for the pending identity. */
 export const oauthRegisterRequest = z.object({
   username: usernameSchema,
-  /** Also set the provider's email as the account's (unconfirmed, a link is mailed). */
+  /**
+   * Also set the provider's email as the account's (unconfirmed, a link is
+   * mailed). Ignored while the email features are off.
+   */
   useEmail: z.boolean().default(false),
 })
 
@@ -532,16 +536,27 @@ export interface MeResponse {
   hasImportKey: boolean
   /**
    * Whether this server can send email (confirmation and reset links). False
-   * until the Worker has its `EMAIL` binding.
+   * until the Worker has its `EMAIL` binding, and while `emailFeatures` is off.
    */
   emailEnabled: boolean
+  /**
+   * Whether the email features are on (Worker var `EMAIL_FEATURES` = "1"):
+   * adding or changing an email, confirming it, "forgot password". Off, an
+   * existing email still signs in and can be removed; admin reset links work.
+   */
+  emailFeatures: boolean
   /** False for an account made with Discord or Google: it signs in with those until it sets one. */
   hasPassword: boolean
 }
 
-/** `GET /api/auth/oauth/providers`: the sign-in providers this server has. */
+/**
+ * `GET /api/auth/oauth/providers`: the sign-in options this server has, for
+ * the signed-out pages: its providers, and whether the email features are on
+ * (`MeResponse.emailFeatures`).
+ */
 export interface OAuthProvidersResponse {
   providers: OAuthProvider[]
+  emailFeatures: boolean
 }
 
 /** `POST /api/auth/oauth/:provider/start`: where to send the browser. */

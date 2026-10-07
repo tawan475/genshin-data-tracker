@@ -2,7 +2,8 @@
  * Sign in with Discord / Google, under /api/auth/oauth (flow and cookies:
  * lib/oauth; rows: services/identities).
  *
- * - `GET /providers`: the providers this server has (none without secrets).
+ * - `GET /providers`: the providers this server has (none without secrets),
+ *   and whether the email features are on (for the signed-out pages).
  * - `POST /:provider/start {next?}`: signed out; answers the provider URL to
  *   send the browser to and sets the state cookie.
  * - `POST /:provider/link` (signed in): the same, to link the provider to
@@ -16,7 +17,8 @@
  *   it, in the same session → Settings. Failures go back to /login (Settings
  *   when linking) with `?oauth_error=<code>` (OAUTH_ERROR_CODES), nothing
  *   more.
- * - `GET /pending`, `POST /pending/register {username, useEmail}`,
+ * - `GET /pending`, `POST /pending/register {username, useEmail}` (`useEmail`
+ *   is ignored while the email features are off),
  *   `POST /pending/login {login, password}`, `DELETE /pending`: the pending
  *   identity's page.
  *
@@ -43,6 +45,7 @@ import { Hono, type Context, type MiddlewareHandler } from 'hono'
 import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import type { AppEnv } from '../env'
+import { emailFeatures } from '../lib/email'
 import { ApiError, clientIp, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
 import {
   OAuthFailure,
@@ -124,6 +127,7 @@ export const oauth = new Hono<AppEnv>()
     c.header('Cache-Control', 'no-store')
     return c.json({
       providers: enabledProviders(c.env, c.req.url),
+      emailFeatures: emailFeatures(c.env),
     } satisfies OAuthProvidersResponse)
   })
 
@@ -240,8 +244,11 @@ export const oauth = new Hono<AppEnv>()
     const identity = await readPendingCookie(c)
     if (!identity) throw pendingExpired()
     // The provider's email is only offered, never trusted: set like a typed one,
-    // unconfirmed, with a confirmation link mailed.
-    const email = body.useEmail ? (emailSchema.safeParse(identity.email).data ?? null) : null
+    // unconfirmed, with a confirmation link mailed. Not while email is paused.
+    const email =
+      body.useEmail && emailFeatures(c.env)
+        ? (emailSchema.safeParse(identity.email).data ?? null)
+        : null
     let user: typeof users.$inferSelect
     try {
       user = await createUserWithIdentity(c.env.DB, { username: body.username, email }, identity)

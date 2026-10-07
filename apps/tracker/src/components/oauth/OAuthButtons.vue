@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import type { OAuthProvider } from '@gdt/shared'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { api } from '@/api'
 import ProviderMark from './ProviderMark.vue'
-import { loadProviders, providerLabel } from './oauth'
+import { loadSignInOptions, providerLabel, providerNames } from './oauth'
 
 /**
  * "Continue with Discord / Google" on the sign-in and sign-up cards: only the
  * providers the server has, so nothing shows until their secrets are set.
+ * `nudge` (sign-in): while the email features are paused, a line points
+ * whoever can't sign in at these instead of "forgot password".
  */
-const props = defineProps<{ next?: string }>()
+const props = defineProps<{ next?: string; nudge?: boolean }>()
 
 const providers = ref<OAuthProvider[]>([])
+const emailFeatures = ref(true)
+const showNudge = computed(() => props.nudge && !emailFeatures.value)
 const busy = ref<OAuthProvider | null>(null)
 const error = ref('')
 
@@ -23,7 +27,9 @@ function onPageShow(event: PageTransitionEvent) {
 
 onMounted(async () => {
   window.addEventListener('pageshow', onPageShow)
-  providers.value = await loadProviders()
+  const options = await loadSignInOptions()
+  providers.value = options.providers
+  emailFeatures.value = options.emailFeatures
 })
 onBeforeUnmount(() => window.removeEventListener('pageshow', onPageShow))
 
@@ -47,6 +53,13 @@ async function go(provider: OAuthProvider) {
       or
       <span class="h-px flex-1 bg-white/10" />
     </div>
+    <p
+      v-if="showNudge"
+      class="text-center text-sm text-gray-400"
+      title="If you linked it in Settings. Otherwise, ask the admin for a reset link."
+    >
+      Can't sign in? Continue with {{ providerNames(providers) }}
+    </p>
     <button
       v-for="provider in providers"
       :key="provider"
