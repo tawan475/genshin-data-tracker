@@ -12,6 +12,9 @@
  *   ones go then too.
  * - Upload days (the daily upload quota's counts) older than UPLOAD_DAYS_KEPT
  *   are purged.
+ * - Session rows (user_sessions, with their IPs) are deleted SESSION_KEEP_DAYS
+ *   after they ended (revoked or expired); sign-up IPs are cleared
+ *   SIGNUP_IP_DAYS after the sign-up (the country stays).
  * - When REPACK_CRON_LIMIT is set (a number), up to that many v1 rows are
  *   converted to storage format v2 (services/repack.ts). Off by default: the
  *   first conversion is started by hand, after a backup.
@@ -26,6 +29,8 @@ import { REFS_SQL, withLegacySchema } from './storage'
 import { UPLOAD_DAYS_KEPT, utcDay } from './upload-limits'
 
 export const TRASH_DAYS = 30
+export const SESSION_KEEP_DAYS = 7
+export const SIGNUP_IP_DAYS = 90
 
 export interface MaintenanceResult {
   snapshots: number
@@ -33,6 +38,8 @@ export interface MaintenanceResult {
   blobs: number
   tokens: number
   uploadDays: number
+  sessions: number
+  signupIps: number
   repack?: RepackResult
 }
 
@@ -53,25 +60,37 @@ export async function runMaintenance(
   options: { repackLimit?: number } = {},
 ): Promise<MaintenanceResult> {
   // One batch: a failure (the v1 tables gone, say) leaves nothing half done.
-  const [snapshots, sections, tokens, uploadDays, legacy] = await withLegacySchema((withV1) =>
-    d1.batch([
-      d1
-        .prepare('DELETE FROM snapshots WHERE deleted_at IS NOT NULL AND deleted_at < ?1')
-        .bind(now - TRASH_DAYS * 86_400_000),
-      d1.prepare(COLLECT_SECTION_BLOBS),
-      d1.prepare('DELETE FROM auth_tokens WHERE expires_at < ?1').bind(now - KEEP_EXPIRED_MS),
-      d1
-        .prepare('DELETE FROM user_upload_days WHERE day < ?1')
-        .bind(utcDay(now - UPLOAD_DAYS_KEPT * 86_400_000)),
-      ...(withV1 ? [d1.prepare(COLLECT_LEGACY_BLOBS)] : []),
-    ]),
-  )
+  const sessionsEnded = now - SESSION_KEEP_DAYS * 86_400_000
+  const [snapshots, sections, tokens, uploadDays, sessions, signupIps, legacy] =
+    await withLegacySchema((withV1) =>
+      d1.batch([
+        d1
+          .prepare('DELETE FROM snapshots WHERE deleted_at IS NOT NULL AND deleted_at < ?1')
+          .bind(now - TRASH_DAYS * 86_400_000),
+        d1.prepare(COLLECT_SECTION_BLOBS),
+        d1.prepare('DELETE FROM auth_tokens WHERE expires_at < ?1').bind(now - KEEP_EXPIRED_MS),
+        d1
+          .prepare('DELETE FROM user_upload_days WHERE day < ?1')
+          .bind(utcDay(now - UPLOAD_DAYS_KEPT * 86_400_000)),
+        d1
+          .prepare('DELETE FROM user_sessions WHERE revoked_at < ?1 OR expires_at < ?1')
+          .bind(sessionsEnded),
+        d1
+          .prepare(
+            'UPDATE users SET signup_ip = NULL WHERE signup_ip IS NOT NULL AND created_at < ?1',
+          )
+          .bind(now - SIGNUP_IP_DAYS * 86_400_000),
+        ...(withV1 ? [d1.prepare(COLLECT_LEGACY_BLOBS)] : []),
+      ]),
+    )
   const result: MaintenanceResult = {
     snapshots: snapshots!.meta.changes,
     // Rows returned: meta.changes would also count the counter trigger's updates.
     blobs: sections!.results.length + (legacy?.results.length ?? 0),
     tokens: tokens!.meta.changes,
     uploadDays: uploadDays!.meta.changes,
+    sessions: sessions!.meta.changes,
+    signupIps: signupIps!.meta.changes,
   }
   if (options.repackLimit && options.repackLimit > 0) {
     result.repack = await repack(d1, { limit: options.repackLimit })

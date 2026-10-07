@@ -609,6 +609,31 @@ export interface IdentitiesResponse {
 }
 
 /**
+ * How a session signed in: a password, Discord or Google, a reset link, or
+ * `legacy` (signed in before sessions were listed; how is not known).
+ */
+export const SESSION_METHODS = ['password', 'discord', 'google', 'reset', 'legacy'] as const
+export type SessionMethod = (typeof SESSION_METHODS)[number]
+
+/**
+ * A signed-in device, as `GET /api/auth/sessions` lists them (newest
+ * activity first). `ip`, `country` (ISO 3166 alpha-2) and `city` are where it
+ * was last seen; the place is unknown (null) off Cloudflare.
+ */
+export interface SessionResponse {
+  id: number
+  /** This device: the session the request came with. */
+  current: boolean
+  method: SessionMethod
+  userAgent: string | null
+  ip: string | null
+  country: string | null
+  city: string | null
+  createdAt: number
+  lastSeenAt: number
+}
+
+/**
  * `?oauth_error=` codes a provider round trip comes back with (to /login, or
  * to Settings when linking): `unavailable` (provider off), `state` (no or a
  * wrong state: started in another browser, or reloaded), `expired` (over 10
@@ -728,6 +753,13 @@ export type LiveEvent =
   | { type: 'data'; accountId: number; dataVersion: number | null; takenAt?: number }
   | { type: 'accounts' }
   | { type: 'planner'; accountId: number; tab?: string }
+
+/**
+ * The close code of a live socket whose session was ended (that device was
+ * signed out, or every device): the page checks its session with a refresh
+ * and reconnects only if that works.
+ */
+export const LIVE_SESSION_ENDED_CLOSE = 4003
 
 /** An account as the live `hello` describes it. */
 export interface LiveAccount {

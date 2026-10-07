@@ -150,13 +150,32 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   (19 MiB, 2 passes; `PASSWORD_PEPPER` is Argon2's secret input), stored as a
   PHC string; a login under older parameters rehashes. About 200 ms CPU per
   sign-in on Workers. Unknown logins still spend a full hash.
-- **Sessions.** Two HS256 JWTs in HttpOnly cookies, told apart by a `typ`
-  claim: access `gdt_at` (15 min, path `/api`, verified without D1) and refresh
-  `gdt_rt` (30 days, path `/api/auth`, SameSite Strict) carrying
-  `users.token_version`. A refresh reads that one column and reissues both, so
-  there is no sessions table. Password change and `POST /api/auth/logout-all`
-  bump the version, killing every refresh token; plain logout only clears this
-  device's cookies. Cookie-authed writes need `x-gdt-csrf: 1`.
+- **Sessions** (`worker/lib/session.ts`). Two HS256 JWTs in HttpOnly cookies,
+  told apart by a `typ` claim: access `gdt_at` (15 min, path `/api`, verified
+  without D1) and refresh `gdt_rt` (30 days, path `/api/auth`, SameSite
+  Strict). Both carry `sid`, the device's row in `user_sessions` (migration
+  0019: method password / discord / google / reset / legacy, user agent, IP
+  and first IP, `request.cf` country and city, created, last seen, expiry,
+  revoked), and `users.token_version`. A refresh is one `UPDATE … RETURNING`
+  of that row (active, unexpired, version current); it slides the expiry and
+  records where the device is now (`session_revoked` otherwise). Every
+  sign-in makes a row (ending the session this browser held before, and past
+  30 active sessions the least recently seen). `GET /api/auth/sessions` lists
+  them (with `current`), `DELETE /api/auth/sessions/:id` signs one device out
+  (its own: a logout), `POST /api/auth/sessions/revoke-others` signs out every
+  other device (bumps the version, so devices without a row go too) and
+  keeps this one. Logout ends this device's row (a copied refresh token is
+  refused); a password change and a reset keep this device and end the rest;
+  `logout-all` ends all. Routes behind `requireActiveSession` (password,
+  profile, sessions, identities, OAuth link, import-key creation; the staff
+  routes) check the row in D1; everything else stays JWT-only, so a
+  signed-out device can still read data until its access token runs out
+  (≤15 minutes) — but its live socket closes at once. A token without `sid`
+  (signed in before rows existed) gets one deduped `legacy` row at its next
+  refresh, unless issued after `LEGACY_CUTOFF_S`; that path is deleted after
+  2026-11-20. `users` also keeps `signup_ip`, `signup_country` and
+  `last_active_at` (written at most hourly). Cookie-authed writes need
+  `x-gdt-csrf: 1`.
 - **Irminsul contract** (`irminsul/src/monitor.rs`): `POST
   /api/genshin-accounts-public/import-by-key` (multipart `file` + optional
   `timestamp`, header `x-import-key`) and `GET .../verify-key`. Any 2xx is
@@ -218,11 +237,15 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   of a catch-up read; dashboard import runs uploading with `x-gdt-live: quiet`
   and announcing once at the end (`POST /api/accounts/:id/announce`); a ping
   every 5 minutes only while some tab is visible. Sockets outlive the 15-minute
-  access token: each keeps its session's token version (the access token's
-  `ver`), and ending sessions (sign out everywhere, a password change) tells
-  the hub, awaited, to close older ones (4003); connects with an older version
-  are refused, and import events carry the current one too. Signing one
-  browser out closes its socket from the page.
+  access token: each keeps its session's token version and `sid` (the access
+  token's `ver` and `sid`). Ending sessions (sign out everywhere, a password
+  change) tells the hub, awaited, to close older ones (4003; the device that
+  kept its session stays connected); ending one session (`revokeSession`)
+  closes that session's sockets. Connects with an older version or a revoked
+  row are refused (the connect's one round trip joins the row; a set of
+  sessions revoked in the last minute covers a connect already past that
+  read), and import events carry the current version too. On a 4003 the page
+  refreshes and signs out if that is refused.
 - **Diagnostics.** `GET /api/health` is public (status, build, D1, migrations).
   With `x-diag-key: <DIAG_KEY>` it adds the private tier — every secret with its
   value, bindings, error detail — and imports add `Server-Timing` and
@@ -247,8 +270,9 @@ zips are built in the browser; the server only rebuilds single GOOD files.
 - **Maintenance** runs daily (cron): snapshots deleted more than 30 days ago
   are purged, unreferenced sections (v1 and v2, bases kept while anything
   needs them) are collected, upload-quota days older than 90 days are
-  dropped, and with `REPACK_CRON_LIMIT` set, v1 rows are repacked (see
-  Storage model).
+  dropped, session rows (IPs included) go 7 days after they ended, sign-up
+  IPs 90 days after the sign-up, and with `REPACK_CRON_LIMIT` set, v1 rows
+  are repacked (see Storage model).
   Account counters are kept exact by triggers (migration 0002).
 
 ## Account recovery

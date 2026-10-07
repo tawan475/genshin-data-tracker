@@ -15,7 +15,9 @@
  * - Every connect opens with a `hello` (each account's version and names), so
  *   pushes missed while there was no socket cost one list read only when
  *   something did change. A socket outlives the access token; the hub closes
- *   it when the session ends (or this browser signs out).
+ *   it when the session ends (4003: this device or every device was signed
+ *   out), and the tab then checks its session with a refresh: over, the app
+ *   signs out; still on, it reconnects at once.
  * - Reconnects back off from 1 s to 30 s (then 5 min after ten failures).
  *   While the socket cannot connect, visible tabs read the list every two
  *   minutes between them.
@@ -33,10 +35,10 @@
  *   nothing for seen-again captures, backfills or deletes.
  */
 
-import type { AccountResponse, LiveEvent } from '@gdt/shared'
+import { LIVE_SESSION_ENDED_CLOSE, type AccountResponse, type LiveEvent } from '@gdt/shared'
 import { onScopeDispose, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { TAB_ID, api } from '@/api'
+import { TAB_ID, api, checkSession } from '@/api'
 import { formatDateTime } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -268,8 +270,26 @@ export function useLiveUpdates(): void {
       post({ type: 'event', event })
       onEvent(event)
     })
-    ws.addEventListener('close', () => {
-      if (socket === ws) dropped()
+    ws.addEventListener('close', (event) => {
+      if (socket !== ws) return
+      if (event.code === LIVE_SESSION_ENDED_CLOSE) sessionClosed()
+      else dropped()
+    })
+  }
+
+  /**
+   * The hub closed the socket because its session ended. A refresh tells
+   * whether this device's did: over, the signed-out handler stops all this;
+   * still on (another device changed the password, say), reconnect now.
+   */
+  function sessionClosed() {
+    socket = null
+    opened = false
+    clearTimeout(pongTimer)
+    pongTimer = undefined
+    setLink(false)
+    void checkSession().then((alive) => {
+      if (alive && running) connect()
     })
   }
 

@@ -82,6 +82,15 @@ export const users = sqliteTable(
      * one user; NULL: the site's default. Added in 0018.
      */
     storageQuota: integer('storage_quota'),
+    /**
+     * Where the account was made from (`cf-connecting-ip`, `request.cf`
+     * country), so a wave of sign-ups from one address shows. Maintenance
+     * clears the IP 90 days after sign-up. Added in 0019.
+     */
+    signupIp: text('signup_ip'),
+    signupCountry: text('signup_country'),
+    /** Epoch ms of the last sign-in or refresh, written at most hourly. Added in 0019. */
+    lastActiveAt: integer('last_active_at'),
   },
   (t) => [
     uniqueIndex('users_import_key_hash_unique')
@@ -397,6 +406,39 @@ export const authTokens = sqliteTable(
     uniqueIndex('auth_tokens_token_hash_unique').on(t.tokenHash),
     index('auth_tokens_user_kind_idx').on(t.userId, t.kind),
   ],
+)
+
+/**
+ * Signed-in devices (migration 0019; lib/session): one row per sign-in,
+ * named by the `sid` both session JWTs carry. A refresh slides the row
+ * (`last_seen_at`, `expires_at`, which equals the refresh JWT's, and where it
+ * came from); signing one device out sets `revoked_at`, which refresh and the
+ * sensitive routes check. `method`: how it signed in (`legacy`: a refresh
+ * token from before rows existed). The IPs are `cf-connecting-ip`, the place
+ * `request.cf` (null in dev and tests). Maintenance deletes a row 7 days
+ * after it ended. Not `sessions`: migration 0004 dropped a table of that name.
+ */
+export const userSessions = sqliteTable(
+  'user_sessions',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    method: text('method', {
+      enum: ['password', 'discord', 'google', 'reset', 'legacy'],
+    }).notNull(),
+    userAgent: text('user_agent'),
+    ip: text('ip'),
+    createdIp: text('created_ip'),
+    country: text('country'),
+    city: text('city'),
+    createdAt: timestamp('created_at'),
+    lastSeenAt: integer('last_seen_at').notNull(),
+    expiresAt: integer('expires_at').notNull(),
+    revokedAt: integer('revoked_at'),
+  },
+  (t) => [index('user_sessions_user_revoked_idx').on(t.userId, t.revokedAt)],
 )
 
 /**

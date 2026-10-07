@@ -10,7 +10,7 @@
  * - The redirect URI is fixed: this site's origin as `linkOrigin` decides it
  *   (SITE_URL or production, or loopback under `vite dev`), never the raw Host.
  * - `state`, the PKCE verifier, the nonce and what the round trip is for
- *   (sign in, or link to user N at session version V) travel in one cookie,
+ *   (sign in, or link to user N in session S at version V) travel in one cookie,
  *   `gdt_oauth`: an HS256 JWT under a key derived from JWT_SECRET (so it can
  *   never pass for a session token, nor one for it), HttpOnly, Secure,
  *   SameSite Lax (the provider's redirect back is a cross-site navigation),
@@ -175,9 +175,10 @@ export interface OAuthFlow {
   /** Google only. */
   nonce?: string
   intent: 'signin' | 'link'
-  /** Linking: the user who started it and their session's token version. */
+  /** Linking: the user who started it, their session's token version and session row. */
   uid?: number
   ver?: number
+  sid?: number
   /** Signing in: where to land. */
   next?: string
   redirectUri: string
@@ -270,7 +271,7 @@ async function s256(verifier: string): Promise<string> {
 /** A fresh flow: random state, verifier (43 characters) and, for Google, nonce. */
 export function newFlow(
   config: ProviderConfig,
-  intent: Pick<OAuthFlow, 'intent' | 'uid' | 'ver' | 'next'>,
+  intent: Pick<OAuthFlow, 'intent' | 'uid' | 'ver' | 'sid' | 'next'>,
 ): OAuthFlow {
   return {
     provider: config.provider,

@@ -13,7 +13,7 @@
  * - `POST /reset-password/check {token}`: whose password the link resets.
  * - `POST /reset-password {token, password}`: sets the password, ends every
  *   session (token_version) and every other open reset link, mails a notice
- *   to a confirmed email, and signs this browser in.
+ *   to a confirmed email, and signs this browser in (a `reset` session).
  *
  * While the email features are off (EMAIL_FEATURES, lib/email), the first
  * three answer 404 `email_paused`; the reset routes stay, for admin links.
@@ -39,7 +39,7 @@ import type { AppEnv } from '../env'
 import { emailFeatures, linkOrigin, passwordChangedMail, sendMail } from '../lib/email'
 import { ApiError, clientIp, parseJson, rateLimit } from '../lib/http'
 import { hashPassword } from '../lib/password'
-import { CSRF_HEADER, requireUser, revokeAllSessions, startSession } from '../lib/session'
+import { CSRF_HEADER, createSession, requireUser, revokeAllSessions } from '../lib/session'
 import {
   MAILS_PER_HOUR,
   claimLink,
@@ -158,9 +158,9 @@ export const recovery = new Hono<AppEnv>()
     const link = await openLink(c.env.DB, 'reset_password', body.token)
     const passwordHash = hashPassword(body.password, pepper(c))
     await claim(c.env.DB, 'reset_password', body.token, link)
-    const session = await revokeAllSessions(c, link.userId, { passwordHash })
+    const session = await revokeAllSessions(c, link.userId, { set: { passwordHash } })
     await closeResetLinks(c.env.DB, link.userId)
-    await startSession(c, session)
+    await createSession(c, session, 'reset')
     const [user] = await getDb(c.env.DB).select().from(users).where(eq(users.id, link.userId))
     if (!user) throw linkError('token_invalid')
     if (user.email && user.emailVerified) {

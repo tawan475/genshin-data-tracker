@@ -6,17 +6,17 @@
  *   and whether the email features are on (for the signed-out pages).
  * - `POST /:provider/start {next?}`: signed out; answers the provider URL to
  *   send the browser to and sets the state cookie.
- * - `POST /:provider/link` (signed in): the same, to link the provider to
- *   this user. It renews the session, so the access cookie the callback
- *   checks is fresh.
+ * - `POST /:provider/link` (signed in, an active session): the same, to
+ *   link the provider to this user. It renews the session's tokens, so the
+ *   access cookie the callback checks is fresh.
  * - `GET /:provider/callback`: where the provider sends the browser back.
  *   Checks state, exchanges the code, then: a linked identity signs its user
  *   in (a session like password login) → /app; an unlinked one is kept in the
  *   pending cookie → /oauth (create an account, or sign in to link it); a
  *   link adds it to the signed-in user, who must still be the one who started
- *   it, in the same session → Settings. Failures go back to /login (Settings
- *   when linking) with `?oauth_error=<code>` (OAUTH_ERROR_CODES), nothing
- *   more.
+ *   it, in the same session, still active → Settings. Failures go back to
+ *   /login (Settings when linking) with `?oauth_error=<code>`
+ *   (OAUTH_ERROR_CODES), nothing more.
  * - `GET /pending`, `POST /pending/register {username, useEmail}` (`useEmail`
  *   is ignored while the email features are off),
  *   `POST /pending/login {login, password}`, `DELETE /pending`: the pending
@@ -40,10 +40,10 @@ import {
   type OAuthProvidersResponse,
   type OAuthStartResponse,
 } from '@gdt/shared'
-import { eq } from 'drizzle-orm'
+import { and, eq, gt, isNull } from 'drizzle-orm'
 import { Hono, type Context, type MiddlewareHandler } from 'hono'
 import { getDb } from '../db/client'
-import { users } from '../db/schema'
+import { userSessions, users } from '../db/schema'
 import type { AppEnv } from '../env'
 import { emailFeatures } from '../lib/email'
 import { ApiError, clientIp, isUniqueViolation, notFound, parseJson, rateLimit } from '../lib/http'
@@ -64,7 +64,14 @@ import {
   type OAuthFlow,
   type PendingIdentity,
 } from '../lib/oauth'
-import { CSRF_HEADER, readAccessSession, requireUser, startSession } from '../lib/session'
+import {
+  CSRF_HEADER,
+  createSession,
+  issueTokens,
+  readAccessSession,
+  requestOrigin,
+  requireActiveSession,
+} from '../lib/session'
 import {
   createUserWithIdentity,
   linkIdentity,
@@ -141,7 +148,8 @@ export const oauth = new Hono<AppEnv>()
     return c.json({ url: await authorizationUrl(config, flow) } satisfies OAuthStartResponse)
   })
 
-  .post('/:provider/link', requireUser, async (c) => {
+  // An ended session (this device signed out, or every device) can't start a link.
+  .post('/:provider/link', requireActiveSession, async (c) => {
     const provider = providerParam(c)
     await rateLimit(c.env.AUTH_LIMITER, `oauth:${clientIp(c)}`)
     const config = configOrThrow(c, provider)
@@ -149,12 +157,10 @@ export const oauth = new Hono<AppEnv>()
       .select({ id: users.id, tokenVersion: users.tokenVersion })
       .from(users)
       .where(eq(users.id, c.get('userId')))
-    // A session ended elsewhere (sign out everywhere) can't start a link.
-    if (!user || user.tokenVersion !== c.get('tokenVersion')) {
-      throw new ApiError(401, 'session_revoked', 'Session ended, sign in again')
-    }
-    const flow = newFlow(config, { intent: 'link', uid: user.id, ver: user.tokenVersion })
-    await startSession(c, user)
+    if (!user) throw new ApiError(401, 'session_revoked', 'Session ended, sign in again')
+    const sid = c.get('sessionId')!
+    const flow = newFlow(config, { intent: 'link', uid: user.id, ver: user.tokenVersion, sid })
+    await issueTokens(c, user, sid)
     await setFlowCookie(c, flow)
     return c.json({ url: await authorizationUrl(config, flow) } satisfies OAuthStartResponse)
   })
@@ -181,13 +187,28 @@ export const oauth = new Hono<AppEnv>()
     if (!config) return fail(c, intent, 'unavailable')
 
     // Linking: the user who started it must still be signed in here, in the
-    // same session (not signed out everywhere since). Checked before the code
-    // is spent.
+    // same session, and it still active (not signed out since, here or from
+    // another device). Checked before the code is spent.
     let linkUser: typeof users.$inferSelect | undefined
     if (flow.intent === 'link') {
       const session = await readAccessSession(c)
-      if (!session || session.userId !== flow.uid) return fail(c, intent, 'session')
-      ;[linkUser] = await getDb(c.env.DB).select().from(users).where(eq(users.id, flow.uid))
+      if (!session || session.userId !== flow.uid || session.sid !== (flow.sid ?? 0)) {
+        return fail(c, intent, 'session')
+      }
+      const [row] = await getDb(c.env.DB)
+        .select({ user: users })
+        .from(users)
+        .innerJoin(
+          userSessions,
+          and(
+            eq(userSessions.id, session.sid),
+            eq(userSessions.userId, users.id),
+            isNull(userSessions.revokedAt),
+            gt(userSessions.expiresAt, Date.now()),
+          ),
+        )
+        .where(eq(users.id, flow.uid))
+      linkUser = row?.user
       if (!linkUser || linkUser.tokenVersion !== session.tokenVersion) {
         return fail(c, intent, 'session')
       }
@@ -212,7 +233,7 @@ export const oauth = new Hono<AppEnv>()
     const user = await signInUser(c.env.DB, identity)
     if (user) {
       clearPendingCookie(c)
-      await startSession(c, user)
+      await createSession(c, user, identity.provider)
       return c.redirect(flow.next ?? '/app', 302)
     }
     await setPendingCookie(c, identity)
@@ -249,9 +270,14 @@ export const oauth = new Hono<AppEnv>()
       body.useEmail && emailFeatures(c.env)
         ? (emailSchema.safeParse(identity.email).data ?? null)
         : null
+    const origin = requestOrigin(c)
     let user: typeof users.$inferSelect
     try {
-      user = await createUserWithIdentity(c.env.DB, { username: body.username, email }, identity)
+      user = await createUserWithIdentity(
+        c.env.DB,
+        { username: body.username, email, signupIp: origin.ip, signupCountry: origin.country },
+        identity,
+      )
     } catch (error) {
       if (isUniqueViolation(error, 'users.username_key')) {
         throw new ApiError(409, 'username_taken', 'That username is taken')
@@ -266,7 +292,7 @@ export const oauth = new Hono<AppEnv>()
       throw error
     }
     clearPendingCookie(c)
-    await startSession(c, user)
+    await createSession(c, user, identity.provider)
     confirmEmailLater(c, user)
     return c.json(toMe(user, c.env), 201)
   })
@@ -283,7 +309,7 @@ export const oauth = new Hono<AppEnv>()
       ? await linkTo(c, user, identity, { signedIn: true })
       : 'expired'
     clearPendingCookie(c)
-    await startSession(c, user)
+    await createSession(c, user, 'password')
     return c.json({
       me: toMe(user, c.env),
       linked: problem ? null : identity!.provider,
