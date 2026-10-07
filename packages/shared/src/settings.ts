@@ -26,7 +26,15 @@ export interface AccountSettings {
    * the capture's count.
    */
   resin: ManualResin | null
+  /**
+   * Characters pinned to the top of the Characters page, as GOOD keys (each
+   * Traveler by its element key, `TravelerAnemo`). Order carries no meaning.
+   */
+  favoriteCharacters: string[]
 }
+
+/** At most this many favourite characters (more than the game has). */
+export const MAX_FAVORITE_CHARACTERS = 200
 
 export interface ManualResin {
   value: number
@@ -62,6 +70,7 @@ export interface AccountSettingsPatch {
   wl?: number | null
   planner?: Partial<PlannerSettings>
   resin?: ManualResin | null
+  favoriteCharacters?: string[]
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
@@ -83,6 +92,7 @@ export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   wl: null,
   planner: { azoth: false, passives: true, refreshes: 0, resinSteps: [-40, 60], crafting: true },
   resin: null,
+  favoriteCharacters: [],
 }
 
 /**

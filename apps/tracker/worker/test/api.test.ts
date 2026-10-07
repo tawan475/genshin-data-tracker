@@ -613,6 +613,71 @@ describe('accounts and imports', () => {
     const bad = await client.fetch(path, { method: 'PATCH', json: { traveler: 'X' } })
     expect(bad.status).toBe(400)
   })
+
+  it('stores favourite characters as the whole list, none by default', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    const path = `/api/accounts/${account.id}/settings`
+    type S = { settings: { favoriteCharacters: string[]; traveler: string } }
+
+    expect((await client.json<S>(path)).settings.favoriteCharacters).toEqual([])
+    const saved = await client.json<S>(path, {
+      method: 'PATCH',
+      json: { favoriteCharacters: ['Furina', 'TravelerAnemo'] },
+    })
+    expect(saved.settings.favoriteCharacters).toEqual(['Furina', 'TravelerAnemo'])
+    // Other settings leave them alone; a new list replaces the old one.
+    await client.json<S>(path, { method: 'PATCH', json: { traveler: 'M' } })
+    expect((await client.json<S>(path)).settings.favoriteCharacters).toEqual([
+      'Furina',
+      'TravelerAnemo',
+    ])
+    const replaced = await client.json<S>(path, {
+      method: 'PATCH',
+      json: { favoriteCharacters: ['TravelerAnemo'] },
+    })
+    expect(replaced.settings).toMatchObject({
+      favoriteCharacters: ['TravelerAnemo'],
+      traveler: 'M',
+    })
+
+    for (const favoriteCharacters of [
+      ['Furina', 'Furina'],
+      ['Hu Tao'],
+      ['x'.repeat(65)],
+      Array.from({ length: 201 }, (_, i) => `Character${i}`),
+      'Furina',
+    ]) {
+      const response = await client.fetch(path, { method: 'PATCH', json: { favoriteCharacters } })
+      expect(response.status, JSON.stringify(favoriteCharacters).slice(0, 40)).toBe(400)
+    }
+    expect((await client.json<S>(path)).settings.favoriteCharacters).toEqual(['TravelerAnemo'])
+  })
+
+  it('reads settings stored before a field existed with its default', async () => {
+    const { client } = await signUp()
+    const { account } = await createAccount(client)
+    // A row as an older version of the app wrote it: no favourites, no resin.
+    await getDb(env.DB)
+      .update(genshinAccounts)
+      .set({ settings: { traveler: 'M', ar: 57, planner: { azoth: true } } })
+      .where(eq(genshinAccounts.id, account.id))
+    const path = `/api/accounts/${account.id}/settings`
+    type S = { settings: { favoriteCharacters: string[]; traveler: string; ar: number } }
+    const { settings } = await client.json<S>(path)
+    expect(settings).toMatchObject({
+      traveler: 'M',
+      ar: 57,
+      favoriteCharacters: [],
+      resin: null,
+      planner: { azoth: true, passives: true },
+    })
+    const after = await client.json<S>(path, {
+      method: 'PATCH',
+      json: { favoriteCharacters: ['HuTao'] },
+    })
+    expect(after.settings).toMatchObject({ traveler: 'M', ar: 57, favoriteCharacters: ['HuTao'] })
+  })
 })
 
 describe('user import key', () => {

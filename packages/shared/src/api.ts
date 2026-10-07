@@ -5,6 +5,7 @@
 
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
+import { MAX_FAVORITE_CHARACTERS } from './settings'
 import type { AccountSettings, SnapshotSummary, UserSettings } from './index'
 
 export const usernameSchema = z
@@ -138,6 +139,9 @@ export const snapshotIdsRequest = z.object({
   ids: z.array(z.number().int().positive()).min(1).max(1000),
 })
 
+/** A GOOD key (character, weapon or material), as irminsul writes them. */
+export const goodKeySchema = z.string().regex(/^[A-Za-z0-9]{1,64}$/, 'Not a GOOD key')
+
 export const userSettingsPatch = z
   .object({ theme: z.enum(['system', 'light', 'dark']), use24Hour: z.boolean() })
   .partial()
@@ -188,14 +192,16 @@ export const accountSettingsPatch = z
       })
       .strict()
       .nullable(),
+    /** Characters pinned first on the Characters page: the whole list, each key once. */
+    favoriteCharacters: z
+      .array(goodKeySchema)
+      .max(MAX_FAVORITE_CHARACTERS)
+      .refine((keys) => new Set(keys).size === keys.length, 'Each key once'),
   })
   .partial()
   .strict()
 
 // ------------------------------------------------------------ progress
-
-/** A GOOD key (character, weapon or material), as irminsul writes them. */
-export const goodKeySchema = z.string().regex(/^[A-Za-z0-9]{1,64}$/, 'Not a GOOD key')
 
 const achievementIds = z.array(z.number().int().positive()).max(5000)
 
@@ -695,10 +701,12 @@ export interface ImportedAccount {
  *   a delete); `dataVersion` is the account's new version, `takenAt` the
  *   capture time for an import.
  * - `accounts`: an account was added, renamed or removed.
- * - `planner`: an account's planner goals or hand edits changed; `tab` is the
- *   tab that sent the change (`x-gdt-tab`), which already has it.
+ * - `planner`: an account's planner goals, hand edits or settings changed
+ *   (favourite characters included); `tab` is the tab that sent the change
+ *   (`x-gdt-tab`), which already has it.
  * Events only say that something changed; the app re-reads the account list
- * (or, for `planner`, an open Planner re-reads its goals and edits).
+ * (or, for `planner`, an open Planner re-reads its goals and edits, and the
+ * Characters page its favourites).
  */
 export type LiveEvent =
   | { type: 'hello'; accounts: LiveAccount[] }

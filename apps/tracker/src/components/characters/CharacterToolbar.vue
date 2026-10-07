@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LayoutGrid, List, Search } from 'lucide-vue-next'
+import { LayoutGrid, List, Search, Star } from 'lucide-vue-next'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -32,6 +32,8 @@ defineProps<{
   sorts: SortOption[]
   elementCounts: ReadonlyMap<Element | null, number>
   rarityCounts: ReadonlyMap<number | null, number>
+  /** Favourites matching the other filters; null hides the chip (none yet). */
+  favoriteCount: number | null
   /** Matches / roster size, shown while filtering. */
   shown: number
   total: number
@@ -91,8 +93,24 @@ function toggleRarity(r: 5 | 4) {
     <div
       class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
-      aria-label="Element and rarity"
+      aria-label="Favorites, element and rarity"
     >
+      <template v-if="favoriteCount !== null">
+        <FilterChip
+          :pressed="filters.favorites"
+          :count="favoriteCount"
+          title="Favorites"
+          @toggle="filters.favorites = !filters.favorites"
+        >
+          <Star
+            class="size-4 fill-game-star text-game-star-edge"
+            :stroke-width="1.5"
+            aria-hidden="true"
+          />
+          <span class="sr-only">Favorites</span>
+        </FilterChip>
+        <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />
+      </template>
       <FilterChip
         v-for="e in ELEMENTS"
         :key="e"

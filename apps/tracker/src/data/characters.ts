@@ -412,6 +412,8 @@ export interface CharacterFilters {
   weaponType: WeaponType | 'all'
   build: BuildFilter
   talents: TalentFilter
+  /** Only the favourites. */
+  favorites: boolean
 }
 
 export const NO_CHARACTER_FILTERS: CharacterFilters = {
@@ -421,6 +423,7 @@ export const NO_CHARACTER_FILTERS: CharacterFilters = {
   weaponType: 'all',
   build: 'all',
   talents: 'all',
+  favorites: false,
 }
 
 export function hasCharacterFilters(f: CharacterFilters): boolean {
@@ -430,8 +433,20 @@ export function hasCharacterFilters(f: CharacterFilters): boolean {
     f.rarity !== 'all' ||
     f.weaponType !== 'all' ||
     f.build !== 'all' ||
-    f.talents !== 'all'
+    f.talents !== 'all' ||
+    f.favorites
   )
+}
+
+/** Favourite characters' keys (account setting `favoriteCharacters`). */
+export type Favorites = ReadonlySet<string>
+
+const NO_FAVORITES: Favorites = new Set()
+
+/** `list` with `key` in it (`on`) or not, each key once, the others in their order. */
+export function withFavorite(list: readonly string[], key: string, on: boolean): string[] {
+  const rest = list.filter((k) => k !== key)
+  return on ? [...rest, key] : rest
 }
 
 function buildMatches(c: CharacterView, build: BuildFilter): boolean {
@@ -457,10 +472,12 @@ export function filterCharacters(
   list: readonly CharacterView[],
   f: CharacterFilters,
   except?: CharacterFacet,
+  favorites: Favorites = NO_FAVORITES,
 ): CharacterView[] {
   const words = normalizeSearch(f.query).split(' ').filter(Boolean)
   return list.filter(
     (c) =>
+      (!f.favorites || favorites.has(c.key)) &&
       (except === 'element' || f.element === 'all' || c.element === f.element) &&
       (except === 'rarity' || f.rarity === 'all' || c.rarity === f.rarity) &&
       (f.weaponType === 'all' || c.weaponType === f.weaponType) &&
@@ -476,9 +493,10 @@ export function facetCounts<K>(
   f: CharacterFilters,
   facet: CharacterFacet,
   value: (c: CharacterView) => K,
+  favorites: Favorites = NO_FAVORITES,
 ): Map<K, number> {
   const counts = new Map<K, number>()
-  for (const c of filterCharacters(list, f, facet)) {
+  for (const c of filterCharacters(list, f, facet, favorites)) {
     const k = value(c)
     counts.set(k, (counts.get(k) ?? 0) + 1)
   }
@@ -509,17 +527,21 @@ const unknownFor: Partial<Record<CharacterSort, (c: CharacterView) => boolean>> 
 /**
  * Sorts by `sort` in `direction`; ties fall back to level (high first), then
  * rarity, then name, so the order is stable and meaningful either way.
+ * `pinned` (the favourites) come first whatever the sort, in that same order
+ * among themselves; the rest follow.
  */
 export function sortCharacters(
   list: readonly CharacterView[],
   sort: CharacterSort,
   direction: SortDirection,
+  pinned: Favorites = NO_FAVORITES,
 ): CharacterView[] {
   const sign = direction === 'asc' ? 1 : -1
   const primary = compareBy[sort]
   const unknown = unknownFor[sort]
   return [...list].sort(
     (a, b) =>
+      Number(pinned.has(b.key)) - Number(pinned.has(a.key)) ||
       (unknown ? Number(unknown(a)) - Number(unknown(b)) : 0) ||
       sign * primary(a, b) ||
       compareBy.level(b, a) ||
