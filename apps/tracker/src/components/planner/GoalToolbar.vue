@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Search } from 'lucide-vue-next'
+import { CalendarOff, CircleArrowUp, Search } from 'lucide-vue-next'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -8,14 +8,23 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { ELEMENTS, ELEMENT_LABELS, WEAPON_TYPES, WEAPON_TYPE_LABELS } from '@/data/characters'
 import type { Element } from '@/data/game-meta'
-import { GOAL_SORTS, type GoalFilters, type GoalSort, type GoalStatus } from './goal-list'
+import {
+  GOAL_SORTS,
+  type GoalFilters,
+  type GoalSort,
+  type GoalStatus,
+  type GoalToggle,
+} from './goal-list'
 
 /**
- * Search, sort and the goal filters: status (all / in stock / counted /
- * paused), element and rarity chips with counts, weapon type.
+ * Search, sort and the goal filters: the Upgrade now and No weekly toggles
+ * (first: they are remembered, and a phone's chip row scrolls), status
+ * (all / in stock / counted / paused), element and rarity chips with
+ * counts, weapon type.
  */
 defineProps<{
   statusCounts: ReadonlyMap<GoalStatus, number>
+  toggleCounts: Readonly<Record<GoalToggle, number>>
   elementCounts: ReadonlyMap<Element | null, number>
   rarityCounts: ReadonlyMap<number | null, number>
   /** Rarities to offer, highest first. */
@@ -33,6 +42,20 @@ const STATUSES: { value: GoalStatus; label: string; title?: string }[] = [
   { value: 'off', label: 'Paused', title: 'Left out of the totals' },
 ]
 
+const TOGGLES: { value: GoalToggle; label: string; title: string }[] = [
+  {
+    value: 'upgrade',
+    label: 'Upgrade now',
+    title:
+      'Counted goals that can level now with the bag, each on its own: Ready, Ready alone, or a part (Level, Talents, a weapon) or its next step',
+  },
+  {
+    value: 'noWeekly',
+    label: 'No weekly',
+    title: 'Goals whose remaining cost needs no weekly boss material',
+  },
+]
+
 const weaponOptions = [
   { value: 'all' as const, label: 'Weapon' },
   ...WEAPON_TYPES.map((w) => ({ value: w, label: WEAPON_TYPE_LABELS[w] })),
@@ -41,6 +64,9 @@ const sortOptions = GOAL_SORTS.map((s) => ({ value: s.value, label: s.label }))
 
 function setStatus(value: GoalStatus) {
   filters.value.status = filters.value.status === value ? 'all' : value
+}
+function toggle(t: GoalToggle) {
+  filters.value[t] = !filters.value[t]
 }
 function toggleElement(e: Element) {
   filters.value.element = filters.value.element === e ? 'all' : e
@@ -81,8 +107,26 @@ function toggleRarity(r: number) {
     <div
       class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
-      aria-label="Status, element and rarity"
+      aria-label="Upgrade now, weekly bosses, status, element and rarity"
     >
+      <!-- The toggles lead: on a phone the row scrolls, and they are the ones remembered. -->
+      <FilterChip
+        v-for="t in TOGGLES"
+        :key="t.value"
+        :pressed="filters[t.value]"
+        :count="toggleCounts[t.value]"
+        :title="t.title"
+        @toggle="toggle(t.value)"
+      >
+        <CircleArrowUp
+          v-if="t.value === 'upgrade'"
+          class="size-4 text-success-text"
+          aria-hidden="true"
+        />
+        <CalendarOff v-else class="size-4" aria-hidden="true" />
+        {{ t.label }}
+      </FilterChip>
+      <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />
       <FilterChip
         v-for="s in STATUSES"
         :key="s.value"

@@ -13,6 +13,7 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import CraftCard from './CraftCard.vue'
+import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
 import { formatCountdown, formatSeconds } from './farm-format'
 import { sameValue } from './keep-unchanged'
@@ -35,8 +36,9 @@ import {
  * normal bosses and ley lines at the account's daily resin, Condensed
  * Resin, weeks of weekly bosses), then
  * - Today: what can be farmed on the server's day, by what a run costs
- *   (nothing, 20, 40, 30/60), with crafting among the no-resin cards, then
- *   the artifact domains of the sets the goals want;
+ *   (nothing, 20, 40, 30/60), with the crafting checklist first among the
+ *   no-resin cards (its steps record into the bag: `crafted`), then the
+ *   artifact domains of the sets the goals want;
  * - Schedule: the other day pairs' domains.
  * Every card lists what is still missing and who needs it.
  */
@@ -45,6 +47,8 @@ const props = defineProps<{
   totals: PlanTotals
   plan: FarmPlan
   steps: readonly PlanStep[]
+  /** The planner's bag (what the crafting steps can use now). */
+  bag: Readonly<Record<string, number>>
   drops: DropRates | null
   ar: number | null
   wl: number | null
@@ -59,7 +63,7 @@ const props = defineProps<{
 }>()
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
-const emit = defineEmits<{ settings: [] }>()
+const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]] }>()
 
 const VIEWS = [
   { value: 'today' as const, label: 'Today' },
@@ -149,7 +153,7 @@ const forgeTitle = computed(() => {
 })
 
 const dayLabel = (days: readonly number[]) => days.map((d) => WEEKDAY_LABELS[d]).join(' · ')
-/** Today's sections, with a no-resin one for the crafting card when nothing else needs it. */
+/** Today's sections, with a no-resin one (first) for the crafting card when nothing else needs it. */
 const shown = computed(() => {
   const list = sections.value
   if (props.steps.length === 0 || list.some((s) => s.key === 'free')) return list
@@ -170,7 +174,7 @@ const visible = computed(() => {
     if (budget <= 0) return []
     const cards = s.cards.slice(0, Math.max(0, budget - 1))
     budget -= s.cards.length + 1
-    return [{ ...s, cards, whole: cards.length === s.cards.length }]
+    return [{ ...s, cards }]
   })
 })
 watch(view, (value) => {
@@ -287,6 +291,25 @@ watch(view, (value) => {
           <span class="font-normal text-text-muted">{{ s.label }}</span>
         </h2>
         <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
+          <CraftCard
+            v-if="s.key === 'free' && steps.length"
+            class="col-span-full"
+            :planner="planner"
+            :steps="steps"
+            :bag="bag"
+            @done="(rows) => emit('crafted', rows)"
+          >
+            <button
+              v-if="forge && !oreCard"
+              type="button"
+              class="min-h-8 rounded-lg border border-accent-text px-2 text-xs font-medium text-accent-text"
+              aria-pressed="true"
+              :title="forgeTitle"
+              @click="forge = false"
+            >
+              Forge from chunks
+            </button>
+          </CraftCard>
           <FarmCard v-for="card in s.cards" :key="card.id" :card="card">
             <button
               v-if="card.kind === 'ore'"
@@ -304,22 +327,6 @@ watch(view, (value) => {
               Forge from chunks
             </button>
           </FarmCard>
-          <CraftCard
-            v-if="s.key === 'free' && s.whole && steps.length"
-            :planner="planner"
-            :steps="steps"
-          >
-            <button
-              v-if="forge && !oreCard"
-              type="button"
-              class="rounded-md border border-accent-text px-2 py-0.5 text-xs font-medium text-accent-text"
-              aria-pressed="true"
-              :title="forgeTitle"
-              @click="forge = false"
-            >
-              Forge from chunks
-            </button>
-          </CraftCard>
         </div>
       </section>
     </template>

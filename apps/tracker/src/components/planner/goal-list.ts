@@ -1,7 +1,9 @@
 /**
  * The Goals tab's toolbar: search, status, element / rarity / weapon type
- * filters (chips count "matches if you pick this", like the Characters page)
- * and the sort orders. Pure functions over the board's entries.
+ * filters, the "Upgrade now" and "No weekly" toggles (chips count "matches
+ * if you pick this", like the Characters page) and the sort orders. Pure
+ * functions over the board's entries and what the page knows of each
+ * (`GoalFacts`).
  */
 
 import type { WeaponType } from '@gdt/game-data'
@@ -18,6 +20,10 @@ export interface GoalFilters {
   element: Element | 'all'
   rarity: number | 'all'
   weaponType: WeaponType | 'all'
+  /** Only counted goals that can level now (upgrade.ts: a part, or its next step). */
+  upgrade: boolean
+  /** Only goals whose remaining cost needs no weekly boss material. */
+  noWeekly: boolean
 }
 
 export const NO_GOAL_FILTERS: GoalFilters = {
@@ -26,9 +32,37 @@ export const NO_GOAL_FILTERS: GoalFilters = {
   element: 'all',
   rarity: 'all',
   weaponType: 'all',
+  upgrade: false,
+  noWeekly: false,
 }
 
-export type GoalFacet = 'status' | 'element' | 'rarity'
+/** What the filters know of each goal, by entry id. */
+export interface GoalFacts {
+  /** Counted goals the bag covers on their own (In stock). */
+  ready: ReadonlySet<string>
+  /** Counted goals with a part that can level now (Upgrade now). */
+  upgrade: ReadonlySet<string>
+  /** Goals whose remaining cost needs a weekly boss material. */
+  weekly: ReadonlySet<string>
+}
+
+export type GoalToggle = 'upgrade' | 'noWeekly'
+
+export type GoalFacet = 'status' | 'element' | 'rarity' | GoalToggle
+
+const TOGGLES: readonly GoalToggle[] = ['upgrade', 'noWeekly']
+
+/** The toggles as stored ("upgrade,noWeekly"; null when none is on). */
+export function goalTogglesValue(f: Pick<GoalFilters, GoalToggle>): string | null {
+  const on = TOGGLES.filter((t) => f[t])
+  return on.length ? on.join(',') : null
+}
+
+/** The stored toggles back (unknown words ignored). */
+export function parseGoalToggles(raw: string | null): Pick<GoalFilters, GoalToggle> {
+  const words = new Set((raw ?? '').split(','))
+  return { upgrade: words.has('upgrade'), noWeekly: words.has('noWeekly') }
+}
 
 export type GoalSort = 'name' | 'missing' | 'favorites' | 'priority'
 
@@ -54,12 +88,15 @@ function statusMatches(status: GoalStatus, active: boolean, ready: boolean): boo
 export function filterGoals(
   entries: readonly GoalEntry[],
   f: GoalFilters,
-  ready: ReadonlySet<string>,
+  facts: GoalFacts,
   except?: GoalFacet,
 ): GoalEntry[] {
   const words = normalizeSearch(f.query).split(' ').filter(Boolean)
   return entries.filter((e) => {
-    if (except !== 'status' && !statusMatches(f.status, e.active, ready.has(e.id))) return false
+    if (except !== 'status' && !statusMatches(f.status, e.active, facts.ready.has(e.id)))
+      return false
+    if (except !== 'upgrade' && f.upgrade && !facts.upgrade.has(e.id)) return false
+    if (except !== 'noWeekly' && f.noWeekly && facts.weekly.has(e.id)) return false
     if (except !== 'element' && f.element !== 'all' && e.element !== f.element) return false
     if (except !== 'rarity' && f.rarity !== 'all' && e.rarity !== f.rarity) return false
     if (f.weaponType !== 'all' && e.weaponType !== f.weaponType) return false
@@ -73,18 +110,28 @@ export function filterGoals(
 export function goalFacetCounts<K>(
   entries: readonly GoalEntry[],
   f: GoalFilters,
-  ready: ReadonlySet<string>,
-  facet: GoalFacet,
+  facts: GoalFacts,
+  facet: Exclude<GoalFacet, GoalToggle>,
   value: (e: GoalEntry) => K | readonly K[],
 ): Map<K, number> {
   const counts = new Map<K, number>()
-  for (const e of filterGoals(entries, f, ready, facet)) {
+  for (const e of filterGoals(entries, f, facts, facet)) {
     const v = value(e)
     for (const k of Array.isArray(v) ? (v as readonly K[]) : [v as K]) {
       counts.set(k, (counts.get(k) ?? 0) + 1)
     }
   }
   return counts
+}
+
+/** How many entries a toggle would leave, with every other filter applied (on or off). */
+export function goalToggleCount(
+  entries: readonly GoalEntry[],
+  f: GoalFilters,
+  facts: GoalFacts,
+  toggle: GoalToggle,
+): number {
+  return filterGoals(entries, { ...f, [toggle]: true }, facts).length
 }
 
 /** Status values an entry counts toward (`all` always). */
@@ -94,13 +141,17 @@ export function entryStatuses(e: GoalEntry, ready: ReadonlySet<string>): GoalSta
   return list
 }
 
-/** Extra item needs pass the search and status filters; element, rarity or weapon filters hide them. */
+/**
+ * Extra item needs pass the search and status filters; element, rarity or
+ * weapon filters and the toggles (levels, weekly bosses) hide them.
+ */
 export function filterItems(
   items: readonly ItemGoalView[],
   f: GoalFilters,
   inStock: (item: ItemGoalView) => boolean,
 ): ItemGoalView[] {
   if (f.element !== 'all' || f.rarity !== 'all' || f.weaponType !== 'all') return []
+  if (f.upgrade || f.noWeekly) return []
   const words = normalizeSearch(f.query).split(' ').filter(Boolean)
   return items.filter((i) => {
     if (!statusMatches(f.status, i.target.active, inStock(i))) return false

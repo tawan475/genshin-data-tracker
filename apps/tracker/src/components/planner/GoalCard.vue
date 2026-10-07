@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import {
   ArrowRight,
   Check,
+  ChevronUp,
   CircleArrowUp,
   Eye,
   EyeOff,
@@ -12,29 +13,41 @@ import {
   PencilLine,
   Star,
 } from 'lucide-vue-next'
-import ElementIcon from '@/components/ui/ElementIcon.vue'
+import NamecardBackdrop from '@/components/characters/NamecardBackdrop.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
-import { artifactSetIcon, characterIcon, gameIcon, materialIcon, weaponIcon } from '@/lib/assets'
+import {
+  artifactSetIcon,
+  characterBanner,
+  characterIcon,
+  gameIcon,
+  materialIcon,
+  weaponIcon,
+} from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { formatSetName } from '@/utils/artifact-stats'
 import { characterParts, weaponPart, type DonePart } from './done'
 import { ARTIFACTS_LEFT, READINESS } from './farm-format'
+import GoalPortrait from './GoalPortrait.vue'
 import { fromTouch, useItemPopover } from './item-popover'
 import { materialSoft } from './material-soft'
 import { levelLabel, type GoalEntry, type NextHint, type WeaponGoalView } from './model'
 import type { GoalNeeds, NeedChip } from './needs'
+import type { PartReady } from './upgrade'
 
 /**
  * One goal on the Goals tab: a character (Level, Talents) with its weapon
- * goals, or a weapon on its own. Each part reads current → goal and has a
+ * goals, or a weapon on its own. The header leads with a large portrait
+ * (GoalPortrait: rarity, element, constellation) over the character's
+ * namecard, then the name and the card's readiness: ready with every goal,
+ * ready on its own, or short. Each part reads current → goal and has a
  * Done (it spends the materials, see DoneDialog); a part set by hand shows
- * the pencil. Under them, what the goal is still short of as tappable
- * chips (the inventory editor) and its readiness: ready with every goal,
- * ready on its own, or short. An artifact goal is a row of its own (sets
- * still farmed, slots done; it opens the editor's Artifacts tab). The
- * header opens the editor; the star marks a favorite, the eye counts it in
- * the totals or not.
+ * the pencil, and one the bag can level now a mark (upgrade.ts: the whole
+ * part, or its next step). Under them, what the goal is still short of as
+ * tappable chips (the inventory editor). An artifact goal is a row of its
+ * own (sets still farmed, slots done; it opens the editor's Artifacts tab).
+ * The header opens the editor; the star marks a favorite, the eye counts
+ * it in the totals or not.
  *
  * In priority order (`order`) a handle with the card's place leads the
  * header: drag it (mouse, finger) or use the arrow keys on it. While
@@ -47,6 +60,8 @@ const props = defineProps<{
   ar: number | null
   /** What can be levelled now, when only part of the goal can. */
   hint: NextHint | null
+  /** The parts the bag can level now, by Done part id (null: none). */
+  parts?: ReadonlyMap<string, PartReady> | null
   /** Readiness and missing materials (null for a done goal). */
   needs: GoalNeeds | null
   /** The card's cost as one goal, for the inventory editor's "Goal" counts. */
@@ -95,6 +110,8 @@ interface Row {
   title: string
   edited: boolean
   part: DonePart | null
+  /** The bag can level it now: all of it, or its next step. */
+  ready: PartReady | null
 }
 
 const rows = computed<Row[]>(() => {
@@ -113,6 +130,7 @@ const rows = computed<Row[]>(() => {
       title: `Level ${ch.current.level} (A${ch.current.ascension}) → ${ch.target.level} (A${ch.target.ascension})`,
       edited: ch.edited && pairDiffers(ch.current, ch.captured),
       part: levelPart,
+      ready: readyOf(levelPart),
     })
     const boosted = talentText(ch.boosted.current) !== talentText(ch.current.talents)
     list.push({
@@ -127,6 +145,7 @@ const rows = computed<Row[]>(() => {
           (t) => ch.current.talents[t] !== ch.captured.talents[t],
         ),
       part: talentPart,
+      ready: readyOf(talentPart),
     })
   }
   for (const w of props.entry.weapons) {
@@ -145,10 +164,20 @@ const rows = computed<Row[]>(() => {
       title: `${w.name}: level ${w.current.level} (A${w.current.ascension}) → ${w.target.level} (A${w.target.ascension}), R${w.current.refinement} → R${w.target.refinement}`,
       edited: w.edited,
       part,
+      ready: readyOf(part),
     })
   }
   return list
 })
+
+function readyOf(part: DonePart | null): PartReady | null {
+  return (part && props.parts?.get(part.id)) ?? null
+}
+
+const READY_TITLE: Record<PartReady, string> = {
+  full: 'can do now with the bag',
+  step: 'its next step can be done now with the bag',
+}
 
 function pairDiffers(
   a: { level: number; ascension: number },
@@ -158,14 +187,27 @@ function pairDiffers(
 }
 
 const portrait = computed(() => {
-  if (c.value)
+  const ch = c.value
+  if (ch)
     return {
-      src: c.value.custom ? '' : characterIcon(c.value.key),
-      name: c.value.name,
-      rarity: c.value.rarity,
+      src: ch.custom ? '' : characterIcon(ch.key),
+      name: ch.name,
+      rarity: ch.rarity,
+      element: ch.element,
+      tag: ch.owned || ch.constellation ? `C${ch.constellation}` : '',
+      tagTitle: `Constellation ${ch.constellation}`,
+      banner: ch.custom ? '' : characterBanner(ch.key),
     }
   const w = props.entry.weapons[0]!
-  return { src: weaponIcon(w.key, w.target.ascension), name: w.name, rarity: w.rarity }
+  return {
+    src: weaponIcon(w.key, w.target.ascension),
+    name: w.name,
+    rarity: w.rarity,
+    element: null,
+    tag: `R${w.current.refinement}`,
+    tagTitle: `Refinement ${w.current.refinement}`,
+    banner: '',
+  }
 })
 
 const status = computed(() => {
@@ -220,95 +262,99 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
     ]"
     :data-goal-card="entry.id"
   >
-    <div class="flex items-start gap-1 p-3 pr-1.5 pb-2" :class="order ? 'pl-1' : ''">
-      <button
-        v-if="order"
-        type="button"
-        class="-my-1 inline-flex w-8 shrink-0 cursor-grab touch-none flex-col items-center justify-center gap-0.5 self-stretch rounded-md text-text-muted transition-colors select-none hover:bg-surface-overlay hover:text-text-primary active:cursor-grabbing"
-        :data-goal-handle="entry.id"
-        :aria-label="`${entry.name}: place ${order.rank}, move with the arrow keys`"
-        :title="`#${order.rank} · drag, or arrow keys`"
-        @pointerdown="emit('grab', $event)"
-        @keydown="emit('nudge', $event)"
-      >
-        <span class="tabular font-mono text-xs">{{ order.rank }}</span>
-        <GripVertical class="size-4" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        :aria-haspopup="selecting ? undefined : 'dialog'"
-        :aria-pressed="selecting ? selected : undefined"
-        class="flex min-w-0 flex-1 items-center gap-3 text-left"
-        :class="entry.active ? '' : 'opacity-50'"
-        @click="selecting ? emit('select') : emit('open')"
-      >
-        <span class="relative shrink-0">
-          <GameIcon
+    <div class="relative overflow-hidden rounded-t-xl">
+      <NamecardBackdrop
+        v-if="portrait.banner"
+        :src="portrait.banner"
+        lazy
+        class="absolute inset-y-0 right-0 h-full w-4/5 opacity-30 [mask-image:linear-gradient(to_left,black_30%,transparent_95%)] dark:opacity-20"
+      />
+      <div class="relative flex items-stretch gap-1 p-3 pr-1.5" :class="order ? 'pl-1' : ''">
+        <button
+          v-if="order"
+          type="button"
+          class="-my-1 inline-flex w-8 shrink-0 cursor-grab touch-none flex-col items-center justify-center gap-0.5 self-stretch rounded-md text-text-muted transition-colors select-none hover:bg-surface-overlay hover:text-text-primary active:cursor-grabbing"
+          :data-goal-handle="entry.id"
+          :aria-label="`${entry.name}: place ${order.rank}, move with the arrow keys`"
+          :title="`#${order.rank} · drag, or arrow keys`"
+          @pointerdown="emit('grab', $event)"
+          @keydown="emit('nudge', $event)"
+        >
+          <span class="tabular font-mono text-xs">{{ order.rank }}</span>
+          <GripVertical class="size-4" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          :aria-haspopup="selecting ? undefined : 'dialog'"
+          :aria-pressed="selecting ? selected : undefined"
+          class="flex min-w-0 flex-1 items-center gap-3 text-left"
+          :class="entry.active ? '' : 'opacity-50'"
+          @click="selecting ? emit('select') : emit('open')"
+        >
+          <GoalPortrait
             :src="portrait.src"
             :name="portrait.name"
-            :rarity="portrait.rarity ?? undefined"
-            size="md"
-            :class="c?.custom ? 'outline-1 outline-border-strong outline-dashed' : ''"
+            :rarity="portrait.rarity"
+            :element="portrait.element"
+            :tag="portrait.tag"
+            :tag-title="portrait.tagTitle"
+            :custom="!!c?.custom"
+            :picked="selecting ? !!selected : null"
           />
-          <span
-            v-if="selecting"
-            class="absolute -top-1 -left-1 inline-flex size-5 items-center justify-center rounded-full border-2"
-            :class="
-              selected
-                ? 'border-accent bg-accent text-accent-ink'
-                : 'border-border-strong bg-surface-raised'
-            "
-            aria-hidden="true"
-          >
-            <Check v-if="selected" class="size-3" />
-          </span>
-        </span>
-        <span class="flex min-w-0 flex-1 flex-col items-start gap-1">
-          <span class="flex w-full min-w-0 items-center gap-2">
-            <ElementIcon v-if="c?.element" :element="c.element" />
-            <span class="min-w-0 truncate font-display text-base font-semibold">{{
-              entry.name
-            }}</span>
+          <span class="flex min-w-0 flex-1 flex-col items-start gap-1.5">
             <span
-              v-if="c?.custom"
-              class="shrink-0 text-xs text-text-muted"
-              title="Custom character: not in the game data yet"
-              >Custom</span
+              class="line-clamp-2 font-display text-lg leading-tight font-semibold break-words"
+              >{{ entry.name }}</span
             >
+            <span class="flex flex-wrap items-center gap-1.5">
+              <span
+                v-if="status"
+                class="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-xs font-medium"
+                :class="status.badge"
+                :title="status.meaning"
+              >
+                <span class="size-2 rounded-full" :class="status.dot" aria-hidden="true" />
+                {{ status.label }}
+              </span>
+              <span
+                v-if="c?.custom"
+                class="text-xs text-text-muted"
+                title="Custom character: not in the game data yet"
+                >Custom</span
+              >
+            </span>
           </span>
-          <span
-            v-if="status"
-            class="inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-xs font-medium"
-            :class="status.badge"
+        </button>
+        <div class="flex shrink-0 flex-col items-center justify-center gap-0.5">
+          <button
+            v-if="c"
+            type="button"
+            class="inline-flex size-9 items-center justify-center rounded-md transition-colors hover:bg-surface-overlay"
+            :class="entry.favorite ? 'text-rarity-5' : 'text-text-muted hover:text-text-primary'"
+            :aria-pressed="entry.favorite"
+            :aria-label="`${entry.name}: favorite`"
+            :title="entry.favorite ? 'Favorite' : 'Not a favorite'"
+            @click="emit('favorite')"
           >
-            <span class="size-2 rounded-full" :class="status.dot" aria-hidden="true" />
-            {{ status.label }}
-          </span>
-        </span>
-      </button>
-      <button
-        v-if="c"
-        type="button"
-        class="inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-surface-overlay"
-        :class="entry.favorite ? 'text-rarity-5' : 'text-text-muted hover:text-text-primary'"
-        :aria-pressed="entry.favorite"
-        :aria-label="`${entry.name}: favorite`"
-        :title="entry.favorite ? 'Favorite' : 'Not a favorite'"
-        @click="emit('favorite')"
-      >
-        <Star class="size-5" :fill="entry.favorite ? 'currentColor' : 'none'" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        class="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
-        :aria-pressed="entry.active"
-        :aria-label="`${entry.name}: ${activeLabel}`"
-        :title="activeLabel"
-        @click="emit('toggle')"
-      >
-        <Eye v-if="entry.active" class="size-5" aria-hidden="true" />
-        <EyeOff v-else class="size-5" aria-hidden="true" />
-      </button>
+            <Star
+              class="size-5"
+              :fill="entry.favorite ? 'currentColor' : 'none'"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            class="inline-flex size-9 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
+            :aria-pressed="entry.active"
+            :aria-label="`${entry.name}: ${activeLabel}`"
+            :title="activeLabel"
+            @click="emit('toggle')"
+          >
+            <Eye v-if="entry.active" class="size-5" aria-hidden="true" />
+            <EyeOff v-else class="size-5" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
     </div>
 
     <ul
@@ -356,12 +402,21 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
         <button
           v-if="row.part"
           type="button"
-          class="ml-auto inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg border border-border-strong px-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
-          :aria-label="`${entry.name}: ${row.label} done`"
+          class="relative ml-auto inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg border border-border-strong px-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
+          :aria-label="`${entry.name}: ${row.label} done${row.ready ? ` (${READY_TITLE[row.ready]})` : ''}`"
+          :title="row.ready ? READY_TITLE[row.ready] : undefined"
           @click="emit('done', row.part, { label: row.label, from: row.from, to: row.to ?? '' })"
         >
           <Check class="size-4" aria-hidden="true" />
           Done
+          <span
+            v-if="row.ready"
+            class="absolute -top-2 -right-2 inline-flex rounded-full bg-surface-raised text-success-text shadow-sm ring-1 ring-border-default"
+            aria-hidden="true"
+          >
+            <CircleArrowUp v-if="row.ready === 'full'" class="size-4" />
+            <ChevronUp v-else class="size-4" />
+          </span>
         </button>
         <Check
           v-else
