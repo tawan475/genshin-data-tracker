@@ -2,7 +2,12 @@
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
-import { HUMAN_CHECK_NEEDED, siteKeyAfter } from '@/components/auth/human-check'
+import {
+  HUMAN_CHECK_NEEDED,
+  HUMAN_CHECK_WAIT,
+  humanCheckPassed,
+  siteKeyAfter,
+} from '@/components/auth/human-check'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import {
@@ -26,9 +31,12 @@ const error = ref('')
 const busy = ref(false)
 /** "Forgot password?" only while the email features are on (else the nudge under the form). */
 const emailFeatures = ref(false)
-/** The human check's site key while the server has it on. */
-const siteKey = ref<string | null>(null)
+/** The human check's site key while the server has it on (null: off; undefined: not asked yet). */
+const siteKey = ref<string | null | undefined>(undefined)
 const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
+/** HumanCheck holds a fresh token. */
+const humanReady = ref(false)
+const humanOk = computed(() => humanCheckPassed(siteKey.value, humanReady.value))
 
 const next = computed(() =>
   typeof route.query.next === 'string' && route.query.next.startsWith('/app')
@@ -136,11 +144,19 @@ async function submit() {
         />
       </label>
       <div class="mt-2 flex flex-col">
-        <HumanCheck v-if="siteKey" :key="siteKey" ref="human" :site-key="siteKey" action="login" />
+        <HumanCheck
+          v-if="siteKey"
+          :key="siteKey"
+          ref="human"
+          v-model:ready="humanReady"
+          :site-key="siteKey"
+          action="login"
+        />
         <button
           type="submit"
           class="btn-glow w-full rounded-xl"
-          :disabled="busy || !login || !password"
+          :disabled="busy || !login || !password || !humanOk"
+          :title="humanOk ? undefined : HUMAN_CHECK_WAIT"
         >
           <UiSpinner v-if="busy" class="size-4" />
           {{ linking ? 'Sign in and link' : 'Sign in' }}

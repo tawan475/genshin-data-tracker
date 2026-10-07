@@ -399,6 +399,12 @@ the app learns the site key from `GET /api/auth/oauth/providers`
   goes on (logged). A rejected secret logs `turnstile_secret_rejected`.
 - Sign-in checks in this order: per-IP limit, human check, per-name limit,
   Argon2, so a bot without a token can't use up a name's budget.
+- The submit button stays disabled (greyed, tooltip "Checking you're
+  human…") until the widget holds a fresh token: while it loads, while a
+  challenge shows, once a token expires and after each submit (a token works
+  once). With the check off it is enabled as soon as the page knows. A
+  blocked script or a failed run says so above the button
+  (`human-check-state.ts` holds this logic, with tests).
 
 **Setup:**
 

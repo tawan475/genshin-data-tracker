@@ -4,7 +4,12 @@ import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { TimerOff } from 'lucide-vue-next'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
-import { HUMAN_CHECK_NEEDED, siteKeyAfter } from '@/components/auth/human-check'
+import {
+  HUMAN_CHECK_NEEDED,
+  HUMAN_CHECK_WAIT,
+  humanCheckPassed,
+  siteKeyAfter,
+} from '@/components/auth/human-check'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import { loadSignInOptions, providerLabel } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
@@ -31,9 +36,15 @@ const error = ref('')
 const busy = ref(false)
 /** "Use as account email" only while the email features are on. */
 const emailFeatures = ref(false)
-/** The human check's site key while the server has it on: a new account takes one. */
-const siteKey = ref<string | null>(null)
+/**
+ * The human check's site key while the server has it on: a new account takes
+ * one (null: off; undefined: not asked yet).
+ */
+const siteKey = ref<string | null | undefined>(undefined)
 const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
+/** HumanCheck holds a fresh token. */
+const humanReady = ref(false)
+const humanOk = computed(() => humanCheckPassed(siteKey.value, humanReady.value))
 
 const label = computed(() => (pending.value ? providerLabel(pending.value.provider) : ''))
 const usernameError = computed(() =>
@@ -160,10 +171,16 @@ async function cancel() {
             v-if="siteKey"
             :key="siteKey"
             ref="human"
+            v-model:ready="humanReady"
             :site-key="siteKey"
             action="register"
           />
-          <button type="submit" class="btn-glow w-full rounded-xl" :disabled="busy">
+          <button
+            type="submit"
+            class="btn-glow w-full rounded-xl"
+            :disabled="busy || !humanOk"
+            :title="humanOk ? undefined : HUMAN_CHECK_WAIT"
+          >
             <UiSpinner v-if="busy" class="size-4" />
             Create account
           </button>
