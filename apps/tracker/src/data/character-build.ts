@@ -74,13 +74,34 @@ function row(key: string, value: number, extra: Partial<StatRow> = {}): StatRow 
   return { key, label: statLabel(key), value, text: formatPanelValue(key, value), ...extra }
 }
 
+/** A DMG bonus the build has: an element's or physical, as displayed (percent). */
+export interface DamageBonus {
+  kind: DamageKind
+  value: number
+}
+
+/**
+ * The DMG bonus the build actually carries: the highest of the seven
+ * elemental bonuses and physical (a Cryo goblet on Diluc is Cryo), all of
+ * them when tied, in the game's order; none when every one is 0. Not tied
+ * to the character's element.
+ */
+export function damageBonuses(panel: PanelStats): DamageBonus[] {
+  const all = DAMAGE_ORDER.map((kind) => ({
+    kind,
+    value: kind === 'physical' ? panel.physicalDmg : panel.elementalDmg[kind],
+  }))
+  const top = Math.max(...all.map((b) => b.value))
+  return top > 0 ? all.filter((b) => b.value === top) : []
+}
+
 /**
  * The Attributes screen's rows in the game's order: Max HP, ATK, DEF,
  * Elemental Mastery, CRIT Rate, CRIT DMG, Healing Bonus (only when there
- * is some), Energy Recharge, then the DMG bonuses: the character's own
- * element always, any other element or physical only when above 0.
+ * is some), Energy Recharge, then the build's DMG bonus (damageBonuses:
+ * the highest, whatever the character's element; none at 0).
  */
-export function panelRows(panel: PanelStats, element: Element | null): StatRow[] {
+export function panelRows(panel: PanelStats): StatRow[] {
   const split = (key: 'hp' | 'atk' | 'def') =>
     row(key, panel[key], { base: panel.base[key], bonus: panel[key] - panel.base[key] })
   const rows = [
@@ -93,16 +114,14 @@ export function panelRows(panel: PanelStats, element: Element | null): StatRow[]
   ]
   if (panel.healing > 0) rows.push(row('heal_', panel.healing))
   rows.push(row('enerRech_', panel.er))
-  for (const kind of DAMAGE_ORDER) {
-    const value = kind === 'physical' ? panel.physicalDmg : panel.elementalDmg[kind]
-    if (value > 0 || kind === element) rows.push(row(`${kind}_dmg_`, value, { damage: kind }))
+  for (const { kind, value } of damageBonuses(panel)) {
+    rows.push(row(`${kind}_dmg_`, value, { damage: kind }))
   }
   return rows
 }
 
 /** What the build panel reads of a roster entry (data/characters.ts CharacterView). */
 export interface BuildInput extends StatCharacter {
-  element: Element | null
   weapon: StatWeapon | null
   artifacts: readonly (StatArtifact | null)[]
 }
@@ -128,10 +147,26 @@ export function buildPanel(input: BuildInput): BuildPanel | null {
   )
   return {
     stats,
-    rows: panelRows(stats, input.element),
+    rows: panelRows(stats),
     weaponMissing: input.weapon !== null && known === null,
     allDmg: stats.other.dmg_ ?? 0,
   }
+}
+
+// -------------------------------------------------------------------- owner
+
+/**
+ * The UID a share card shows: the account's, else the one the newest
+ * capture carries (irminsul's `gi_player.uid`; accounts made by a user
+ * import key often have none set). null when neither knows it.
+ */
+export function shareUid(
+  accountUid: string | null | undefined,
+  playerUid: number | null | undefined,
+): string | null {
+  const own = accountUid?.trim()
+  if (own) return own
+  return playerUid && playerUid > 0 ? String(playerUid) : null
 }
 
 // ---------------------------------------------------------------- talents

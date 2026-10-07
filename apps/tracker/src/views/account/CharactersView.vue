@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ImageDown, SearchX, Upload, Users } from 'lucide-vue-next'
+import { SearchX, Upload, Users } from 'lucide-vue-next'
 import CharacterCard from '@/components/characters/CharacterCard.vue'
 import CharacterTable from '@/components/characters/CharacterTable.vue'
 import CharacterToolbar from '@/components/characters/CharacterToolbar.vue'
@@ -10,7 +10,6 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
-import UiModal from '@/components/ui/UiModal.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadLatestInventory } from '@/data/account-data'
@@ -32,12 +31,9 @@ import { characterBanner } from '@/lib/assets'
 import { readJson, writeJson } from '@/lib/storage'
 import { useAccount } from './context'
 
-// The details and the share card carry the game's stat tables: loaded on first open.
-const CharacterDetail = defineAsyncComponent(
-  () => import('@/components/characters/CharacterDetail.vue'),
-)
-const ShareCardModal = defineAsyncComponent(
-  () => import('@/components/characters/ShareCardModal.vue'),
+// The details (also the share card) carry the game's stat tables: loaded on first open.
+const CharacterModal = defineAsyncComponent(
+  () => import('@/components/characters/CharacterModal.vue'),
 )
 
 const account = useAccount()
@@ -165,12 +161,16 @@ function step(delta: -1 | 1) {
   if (next) open(next.key)
 }
 
-// The share card (a PNG of the open build) opens over the details.
-const sharing = ref(false)
-watch(selectedKey, (key) => {
-  if (key === null) sharing.value = false
-})
-const adventureRank = computed(() => inventory.data.value?.good.gi_player?.ar ?? null)
+// Mounted from the first open on, so closing it hands focus back like any dialog.
+const detailsUsed = ref(false)
+watch(
+  selected,
+  (character) => {
+    if (character) detailsUsed.value = true
+  },
+  { immediate: true },
+)
+const player = computed(() => inventory.data.value?.good.gi_player ?? null)
 
 // Fetch the neighbours' namecards ahead, so the next one is ready when stepping.
 watch(selectedIndex, (index) => {
@@ -274,42 +274,16 @@ watch(selectedIndex, (index) => {
       />
     </template>
 
-    <UiModal
-      :open="selected !== null"
-      :title="selected?.name ?? ''"
-      size="detail"
-      :index="selectedIndex >= 0 ? selectedIndex : undefined"
-      :total="stepList.length"
-      loop
-      @close="close"
-      @step="step"
-    >
-      <template #heading>
-        <h2 class="mr-auto min-w-0 flex-1 truncate text-lg font-semibold">
-          {{ selected?.name ?? '' }}
-        </h2>
-        <UiButton
-          size="sm"
-          variant="ghost"
-          class="shrink-0"
-          title="Share card (PNG)"
-          @click="sharing = true"
-        >
-          <ImageDown class="size-4" aria-hidden="true" />
-          <span class="sr-only sm:not-sr-only">Card</span>
-        </UiButton>
-      </template>
-      <CharacterDetail v-if="selected" :character="selected" :account="account" />
-    </UiModal>
-
-    <ShareCardModal
-      v-if="selected"
-      :open="sharing"
+    <CharacterModal
+      v-if="detailsUsed"
       :character="selected"
       :account="account"
-      :ar="adventureRank"
-      :taken-at="account.latest?.takenAt ?? null"
-      @close="sharing = false"
+      :player-uid="player?.uid ?? null"
+      :ar="player?.ar ?? null"
+      :index="selectedIndex >= 0 ? selectedIndex : undefined"
+      :total="stepList.length"
+      @close="close"
+      @step="step"
     />
   </div>
 </template>
