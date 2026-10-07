@@ -3,10 +3,10 @@ import { computed } from 'vue'
 import { Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
-import RarityStars from '@/components/ui/RarityStars.vue'
 import { weaponLines } from '@/data/character-build'
 import { TARGET_LEVEL, type EquippedWeapon } from '@/data/characters'
 import { weaponIcon } from '@/lib/assets'
+import GameStars from './GameStars.vue'
 import RefinementPips from './RefinementPips.vue'
 
 /**
@@ -46,7 +46,7 @@ const passiveTitle = computed(() =>
       <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <LevelText :level="weapon.level" :ascension="weapon.ascension" :target="TARGET_LEVEL" />
         <RefinementPips :value="weapon.refinement" />
-        <RarityStars v-if="weapon.rarity" :rarity="weapon.rarity" />
+        <GameStars v-if="weapon.rarity" :rarity="weapon.rarity" />
         <span v-if="weapon.lock" class="inline-flex text-text-muted" title="Locked">
           <Lock class="size-3.5" aria-hidden="true" />
           <span class="sr-only">Locked</span>

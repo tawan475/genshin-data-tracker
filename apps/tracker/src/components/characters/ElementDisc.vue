@@ -6,7 +6,7 @@ import type { Element } from '@/data/game-meta'
 /**
  * A white game glyph (talent, constellation) on a dark translucent disc
  * with the element's ring and a soft glow, as the game and Enka draw them:
- * the same in either theme. `locked` dims it and adds a lock. A plain
+ * the same in either theme. The glyph fills about three quarters of it. `locked` dims it and adds a lock. A plain
  * <img>, no CSS mask, so the share card's PNG export draws it.
  */
 const props = withDefaults(
@@ -22,7 +22,6 @@ const props = withDefaults(
 )
 
 const SIZE = { md: 'size-9', lg: 'size-12', xl: 'size-16' } as const
-const ICON = { md: 'size-6', lg: 'size-8', xl: 'size-11' } as const
 
 // Locked: a thin neutral ring. Unlocked: the element's ring and a soft glow,
 // both as one box-shadow in the element's token colour (a ring utility is a
@@ -48,8 +47,8 @@ const glow = computed(() => {
       v-if="src"
       :src="src"
       alt=""
-      class="pointer-events-none"
-      :class="[ICON[size], locked ? 'opacity-35' : '']"
+      class="pointer-events-none size-[74%]"
+      :class="locked ? 'opacity-35' : ''"
     />
     <span
       v-else

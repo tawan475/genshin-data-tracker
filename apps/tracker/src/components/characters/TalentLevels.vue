@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Crown } from 'lucide-vue-next'
 import { talentTitle, type TalentLevel } from '@/data/character-build'
 import type { Element } from '@/data/game-meta'
 import TalentGlyph from './TalentGlyph.vue'
 import { talentIcons } from './talent-icons'
 import { ELEMENT_SOFT, ELEMENT_TEXT } from './tokens'
+import { useCrownIcon } from './use-boosts'
 
 /**
  * Attack, skill and burst as three tiles: the talent's icon and name, its
  * level as the game shows it and, raised by C3 / C5, the book level before
- * it ("10 → 13", Enka's way). A crowned talent (base 10) is gold.
+ * it ("10 → 13", Enka's way, in the accent). A crowned talent (base 10)
+ * is gold with the game's Crown of Insight.
  */
 const props = defineProps<{
   characterKey: string
@@ -21,6 +22,7 @@ const props = defineProps<{
 const LABELS = { auto: 'Attack', skill: 'Skill', burst: 'Burst' } as const
 
 const glyphs = computed(() => talentIcons(props.characterKey))
+const crown = useCrownIcon()
 const tone = computed(() =>
   props.element
     ? `${ELEMENT_SOFT[props.element]} ${ELEMENT_TEXT[props.element]}`
@@ -59,10 +61,11 @@ const tone = computed(() =>
           :class="t.from ? 'text-accent-text' : t.crowned ? 'text-rarity-5' : ''"
           >{{ t.level }}</span
         >
-        <Crown
-          v-if="t.crowned"
-          class="size-3.5 shrink-0 self-center text-rarity-5 sm:size-4"
-          aria-label="Crowned"
+        <img
+          v-if="t.crowned && crown"
+          :src="crown"
+          alt="Crowned"
+          class="size-5 shrink-0 self-center sm:size-6"
         />
       </dd>
     </div>

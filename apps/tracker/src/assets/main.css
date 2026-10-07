@@ -52,6 +52,8 @@
   --rarity-3: #2563eb;
   --rarity-2: #15803d;
   --rarity-1: #64748b;
+  /* The game's own star gold (character and weapon screens, every rarity), in both themes. */
+  --game-star: #ffcc32;
   --element-pyro: #ea580c;
   --element-hydro: #0284c7;
   --element-anemo: #0d9488;
@@ -181,6 +183,7 @@
   --color-rarity-3: var(--rarity-3);
   --color-rarity-2: var(--rarity-2);
   --color-rarity-1: var(--rarity-1);
+  --color-game-star: var(--game-star);
   --color-pyro: var(--element-pyro);
   --color-hydro: var(--element-hydro);
   --color-anemo: var(--element-anemo);
