@@ -129,8 +129,11 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
         class="relative overflow-hidden rounded-xl border border-border-default bg-surface-base"
         aria-label="Build"
       >
-        <!-- The namecard in its own colours under a light scrim, and the element's tint -->
-        <NamecardBackdrop :src="banner" class="absolute inset-0 size-full" />
+        <!-- The namecard blurred into atmosphere (it is small), a light scrim, the element's tint -->
+        <NamecardBackdrop
+          :src="banner"
+          class="absolute inset-0 size-full scale-110 blur-[10px] saturate-[1.15]"
+        />
         <div class="pointer-events-none absolute inset-0 bg-surface-base/55" />
         <div
           class="pointer-events-none absolute inset-0 bg-linear-to-br via-transparent to-transparent"

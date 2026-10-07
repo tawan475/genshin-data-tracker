@@ -5,6 +5,8 @@
  * the details show it scaled to their width.
  */
 
+import type { Element } from '@/data/game-meta'
+
 export const CARD_WIDTH = 1920
 export const CARD_HEIGHT = 1080
 /** The PNG is the card at 1×: 1920×1080. */
@@ -36,11 +38,12 @@ export const CARD_THEMES: Record<CardTheme, Record<string, string>> = {
     '--card-hero-shadow': '0 2px 10px rgba(0,0,0,0.65), 0 1px 2px rgba(0,0,0,0.6)',
     '--card-chip': 'rgba(15,23,42,0.6)',
     '--card-chip-ring': 'inset 0 0 0 1px rgba(255,255,255,0.18)',
-    '--card-namecard-filter': 'saturate(1.1)',
+    '--card-namecard-filter': 'blur(10px) saturate(1.2) brightness(0.78)',
     '--card-scrim':
-      'linear-gradient(90deg, rgba(8,11,22,0.10) 0%, rgba(8,11,22,0.28) 42%, rgba(8,11,22,0.42) 100%)',
-    '--card-fade-bottom': 'linear-gradient(0deg, rgba(8,11,22,0.70) 0%, rgba(8,11,22,0) 100%)',
-    '--card-fade-top': 'linear-gradient(180deg, rgba(8,11,22,0.45) 0%, rgba(8,11,22,0) 100%)',
+      'linear-gradient(90deg, rgba(8,11,22,0.10) 0%, rgba(8,11,22,0.30) 45%, rgba(8,11,22,0.50) 100%)',
+    '--card-splash-shadow': 'drop-shadow(0 18px 40px rgba(0,0,0,0.45))',
+    '--card-vignette':
+      'linear-gradient(0deg, rgba(8,11,22,0.72) 0%, rgba(8,11,22,0) 32%), linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(8,11,22,0) 26%)',
     '--card-panel': 'rgba(12,17,32,0.66)',
     '--card-panel-shadow': '0 8px 24px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.09)',
     '--card-pill': 'rgba(10,14,26,0.82)',
@@ -67,13 +70,12 @@ export const CARD_THEMES: Record<CardTheme, Record<string, string>> = {
     '--card-hero-shadow': '0 1px 0 rgba(255,255,255,0.85), 0 0 14px rgba(255,255,255,0.75)',
     '--card-chip': 'rgba(255,255,255,0.8)',
     '--card-chip-ring': 'inset 0 0 0 1px rgba(15,23,42,0.12)',
-    '--card-namecard-filter': 'saturate(1.05) brightness(1.08)',
+    '--card-namecard-filter': 'blur(10px) saturate(1.15) brightness(1.12)',
     '--card-scrim':
-      'linear-gradient(90deg, rgba(248,250,252,0.10) 0%, rgba(248,250,252,0.30) 42%, rgba(248,250,252,0.45) 100%)',
-    '--card-fade-bottom':
-      'linear-gradient(0deg, rgba(248,250,252,0.70) 0%, rgba(248,250,252,0) 100%)',
-    '--card-fade-top':
-      'linear-gradient(180deg, rgba(248,250,252,0.55) 0%, rgba(248,250,252,0) 100%)',
+      'linear-gradient(90deg, rgba(248,250,252,0.20) 0%, rgba(248,250,252,0.32) 45%, rgba(248,250,252,0.50) 100%)',
+    '--card-splash-shadow': 'drop-shadow(0 18px 40px rgba(15,23,42,0.22))',
+    '--card-vignette':
+      'linear-gradient(0deg, rgba(248,250,252,0.62) 0%, rgba(248,250,252,0) 30%), linear-gradient(180deg, rgba(248,250,252,0.50) 0%, rgba(248,250,252,0) 26%)',
     '--card-panel': 'rgba(255,255,255,0.80)',
     '--card-panel-shadow': '0 1px 2px rgba(15,23,42,0.06), inset 0 0 0 1px rgba(15,23,42,0.07)',
     '--card-pill': 'rgba(255,255,255,0.92)',
@@ -91,6 +93,28 @@ export const CARD_THEMES: Record<CardTheme, Record<string, string>> = {
     '--disc-bg': 'rgba(30,41,59,0.88)',
     '--disc-glow': '0 4px 14px rgba(15,23,42,0.25)',
   },
+}
+
+/**
+ * The element colours the card's glow is drawn in: the app's dark-theme
+ * element tokens, in both card themes (the design's choice: the light
+ * tokens are darkened for text and would muddy the art).
+ */
+const ELEMENT_GLOW_RGB: Record<Element, string> = {
+  pyro: '251,146,60',
+  hydro: '56,189,248',
+  anemo: '45,212,191',
+  electro: '192,132,252',
+  dendro: '163,230,53',
+  cryo: '103,232,249',
+  geo: '250,204,21',
+}
+
+/** The element's glow behind the splash, centred under the character. */
+export function elementGlow(element: Element, theme: CardTheme): string {
+  const rgb = ELEMENT_GLOW_RGB[element]
+  const core = theme === 'light' ? 0.32 : 0.3
+  return `radial-gradient(ellipse 620px 760px at 340px 560px, rgba(${rgb},${core}) 0%, rgba(${rgb},0.10) 45%, rgba(${rgb},0) 75%)`
 }
 
 /** Item backdrops by rarity, as the game's item frames (both themes). */
