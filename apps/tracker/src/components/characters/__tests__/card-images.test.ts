@@ -51,18 +51,49 @@ describe('cardImageUrls', () => {
         'Skill_E_Hutao_01.webp',
         expect.stringMatching(/^UI_EquipIcon_Pole_Homa(_Awaken)?\.webp$/),
         expect.stringMatching(/^UI_RelicIcon_15006_\d\.webp$/),
+        // The header art behind the 5★ weapon and pieces: one gradient, the emblem.
+        'UI_QUALITY_ORANGE.webp',
+        'UI_ImgSign_ItemTips.webp',
       ]),
     )
     // 6 constellations, 3 talents, splash, namecard, element, weapon, 2 pieces (+ a set icon,
-    // which may be one of them): never more than that.
-    expect(urls.length).toBeGreaterThanOrEqual(14)
-    expect(urls.length).toBeLessThanOrEqual(16)
+    // which may be one of them), the gradient and the emblem: never more than that.
+    expect(urls.length).toBeGreaterThanOrEqual(16)
+    expect(urls.length).toBeLessThanOrEqual(18)
+  })
+
+  it("adds each rarity's gradient once", () => {
+    const [huTao] = buildRoster(
+      good({
+        weapons: [
+          {
+            key: 'DragonsBane',
+            level: 90,
+            ascension: 6,
+            refinement: 5,
+            location: 'HuTao',
+            lock: true,
+          },
+        ],
+        artifacts: [
+          ...good().artifacts,
+          { ...good().artifacts[0]!, slotKey: 'sands', rarity: 4, mainStatKey: 'eleMas' },
+        ],
+      }),
+    ).characters
+    const names = cardImageUrls(huTao!).map((url) => url.split('/').pop())
+    expect(names.filter((name) => name?.startsWith('UI_QUALITY_')).sort()).toEqual([
+      'UI_QUALITY_ORANGE.webp',
+      'UI_QUALITY_PURPLE.webp',
+    ])
+    expect(names.filter((name) => name === 'UI_ImgSign_ItemTips.webp')).toHaveLength(1)
   })
 
   it('skips what a character lacks (no weapon, no pieces, newer than the data)', () => {
     const [noGear] = buildRoster(good({ weapons: [], artifacts: [] })).characters
     expect(cardImageUrls(noGear!).some((url) => url.includes('EquipIcon'))).toBe(false)
     expect(cardImageUrls(noGear!).some((url) => url.includes('RelicIcon'))).toBe(false)
+    expect(cardImageUrls(noGear!).some((url) => /UI_QUALITY_|UI_ImgSign_/.test(url))).toBe(false)
     const [unknown] = buildRoster(
       good({
         characters: [

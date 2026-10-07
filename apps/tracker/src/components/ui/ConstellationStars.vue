@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { CONSTELLATION_MAX_STYLE, isMaxConstellation } from '@/components/characters/max-badges'
 import { ELEMENT_TEXT } from '@/components/characters/tokens'
 import type { Element } from '@/data/game-meta'
 
 /**
  * Constellation as in game: six four-pointed stars, filled in the element's
  * colour up to the level, outlined after it, then "C4". `size` md is 16px
- * stars (cards), lg 20px (details). The tooltip names the unlocked ones
+ * stars (cards), lg 20px (details); "C6" is the game's gold chip
+ * (characters/max-badges). The tooltip names the unlocked ones
  * when `names` (C1–C6) is given, else says "Constellation 4 of 6".
  */
 const props = withDefaults(
@@ -57,8 +59,12 @@ const title = computed(() => {
     </span>
     <span
       v-if="label"
-      class="tabular font-mono text-text-secondary"
-      :class="size === 'lg' ? 'text-base' : 'text-sm'"
+      class="tabular font-mono"
+      :class="[
+        size === 'lg' ? 'text-base' : 'text-sm',
+        isMaxConstellation(level) ? 'rounded-full px-1.5 font-bold' : 'text-text-secondary',
+      ]"
+      :style="isMaxConstellation(level) ? CONSTELLATION_MAX_STYLE : undefined"
       aria-hidden="true"
       >C{{ level }}</span
     >

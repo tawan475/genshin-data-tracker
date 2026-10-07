@@ -30,14 +30,23 @@ import ElementDisc from './ElementDisc.vue'
 import GameStars from './GameStars.vue'
 import FadeImage from './FadeImage.vue'
 import SplashArt from './SplashArt.vue'
+import { CONSTELLATION_MAX_STYLE, isMaxConstellation, refinementStyle } from './max-badges'
 import {
+  BAND_CV_ON,
+  BAND_EMBLEM,
+  BAND_TIER_COLOR,
   CARD_HEIGHT,
   CARD_STILL,
   CARD_THEMES,
   CARD_WIDTH,
+  EMBLEM_URL,
   RARITY_GRADIENT,
+  SPLASH_LEFT,
+  WEAPON_EMBLEM,
   elementGlow,
+  emblemStyle,
   nameSize,
+  qualityArt,
   type CardOwner,
 } from './share-card'
 import { constellationIcons, talentIcons } from './talent-icons'
@@ -50,7 +59,10 @@ import { useCrownIcon } from './use-boosts'
  * friendship and stars, the constellations down the left column's edge, the
  * talents with the owner and the capture date and site at its foot; weapon,
  * the in-game stats and the sets in the middle; the five pieces on the
- * right, both running to the bottom edge.
+ * right, both running to the bottom edge. The weapon's tile and each
+ * piece's band (main stat, stars, CV and RV left of the icon) carry the
+ * game's item header art: its rarity's gradient under the emblem
+ * (share-card QUALITY_ART, EMBLEM; from gi-cdn), alike in both themes.
  * The wide character details show it scaled to their width, and the PNG is
  * this card at 1× (lib/share-image).
  *
@@ -86,6 +98,9 @@ const PANEL =
   'rounded-[22px] bg-(--card-panel) shadow-(--card-panel-shadow) backdrop-blur-[16px] backdrop-saturate-[1.2]'
 /** Text on the art: the hero colour with its shadow (dark text with a white glow on light cards). */
 const HERO = 'text-(--card-hero) [text-shadow:var(--card-hero-shadow)]'
+/** The emblem's place over a piece's band and over the weapon's tile (share-card emblemBox). */
+const BAND_EMBLEM_STYLE = emblemStyle(BAND_EMBLEM)
+const WEAPON_EMBLEM_STYLE = emblemStyle(WEAPON_EMBLEM)
 
 const c = computed(() => props.character)
 const banner = computed(() => characterBanner(c.value.key))
@@ -122,12 +137,28 @@ function talentTone(t: TalentLevel): string {
   return t.crowned ? 'text-talent-crown' : t.from ? 'text-talent-boost' : 'text-(--card-text)'
 }
 
+/**
+ * A pill's colour on a band (BAND_TIER_COLOR): akasha's tiers are 5★ scales,
+ * so 1–4★ pieces stay untiered; a CV above 0 below the first tier is white.
+ */
+function bandCv(rarity: number, cv: number, critCirclet: boolean) {
+  const tier = rarity < 5 ? 0 : cvTier(cv, 'artifact', critCirclet)
+  return {
+    color: tier ? BAND_TIER_COLOR[tier] : cv > 0 ? BAND_CV_ON : BAND_TIER_COLOR[0],
+    top: tier === 6,
+  }
+}
+function bandRv(rarity: number, rv: number) {
+  const tier = rarity < 5 || rv <= 0 ? 0 : rvTier(rv)
+  return { color: BAND_TIER_COLOR[tier], top: tier === 6 }
+}
+
 /** Four substat lines per piece, empty ones kept, so the rows line up across the five. */
 const pieces = computed(() =>
   SLOT_ORDER.map((slot, index) => {
     const piece = c.value.artifacts[index] ?? null
     if (!piece) {
-      return { slot, piece, lines: [], cvTone: '', rvTone: '', title: SLOT_LABELS[slot] }
+      return { slot, piece, lines: [], cv: null, rv: null, title: SLOT_LABELS[slot] }
     }
     const rolls = inferArtifactRolls(piece)
     const lines: {
@@ -143,17 +174,14 @@ const pieces = computed(() =>
       piece.totalRolls && piece.totalRolls > 0
         ? piece.totalRolls
         : rolls.reduce((sum, r) => sum + r.length, 0)
-    // akasha's tiers are 5★ scales: 1–4★ pieces and a CV of 0 stay muted.
-    const tier = cvTier(piece.cv, 'artifact', isCritCirclet(piece.slotKey, piece.mainStatKey))
-    const cvTone = piece.rarity < 5 || piece.cv <= 0 ? 'text-(--card-muted)' : CRIT_TIER_TEXT[tier]
-    const rvTone =
-      piece.rarity < 5 || piece.rv <= 0 ? 'text-(--card-muted)' : CRIT_TIER_TEXT[rvTier(piece.rv)]
+    const cv = bandCv(piece.rarity, piece.cv, isCritCirclet(piece.slotKey, piece.mainStatKey))
+    const rv = bandRv(piece.rarity, piece.rv)
     const title = [
       formatSetName(piece.setKey),
       `${SLOT_LABELS[slot]} +${piece.level} · ${piece.rarity}★`,
       `CV ${piece.cv.toFixed(1)} · RV ${piece.rv}% · ${rollCount} rolls (the first ones and one per +4)`,
     ].join('\n')
-    return { slot, piece, lines, cvTone, rvTone, title }
+    return { slot, piece, lines, cv, rv, title }
   }),
 )
 /** The sets listed: 2 pieces or more (a single piece grants nothing). */
@@ -201,7 +229,8 @@ const ownerLine = computed(() =>
       :name="c.name"
       :rarity="c.rarity"
       :eager="still"
-      class="absolute top-[-20px] left-[-660px] h-[1100px] w-[2200px]"
+      class="absolute top-[-20px] h-[1100px] w-[2200px]"
+      :style="{ left: `${SPLASH_LEFT}px` }"
       img-class="object-contain! [filter:var(--card-splash-shadow)]"
     />
     <div class="absolute inset-0 [background:var(--card-vignette)]" />
@@ -227,7 +256,13 @@ const ownerLine = computed(() =>
               {{ c.name }}
             </h1>
             <span
-              class="ml-[6px] shrink-0 rounded-full bg-(--card-chip) px-[12px] py-[4px] text-[22px] font-bold text-(--card-hero) shadow-(--card-chip-ring)"
+              class="ml-[6px] shrink-0 rounded-full px-[12px] py-[4px] text-[22px] font-bold"
+              :class="
+                isMaxConstellation(c.constellation)
+                  ? ''
+                  : 'bg-(--card-chip) text-(--card-hero) shadow-(--card-chip-ring)'
+              "
+              :style="isMaxConstellation(c.constellation) ? CONSTELLATION_MAX_STYLE : undefined"
               :title="`Constellation ${c.constellation} of 6`"
               >C{{ c.constellation }}</span
             >
@@ -294,7 +329,7 @@ const ownerLine = computed(() =>
             </li>
           </ul>
           <div class="flex flex-col gap-[4px] pl-[4px]" :class="HERO">
-            <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[12px] text-[22px]">
+            <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[14px] text-[27px]">
               <template v-for="(part, index) in ownerLine" :key="index">
                 <span v-if="index" class="opacity-60">·</span>
                 <span class="truncate" :class="index === 0 && owner.name ? 'font-semibold' : ''">{{
@@ -302,7 +337,7 @@ const ownerLine = computed(() =>
                 }}</span>
               </template>
             </p>
-            <p class="flex items-center gap-[12px] text-[18px] whitespace-nowrap opacity-80">
+            <p class="flex items-center gap-[12px] text-[20px] whitespace-nowrap opacity-80">
               <template v-if="takenAt">
                 <span>{{ formatDate(takenAt) }}</span>
                 <span class="opacity-60">·</span>
@@ -320,11 +355,24 @@ const ownerLine = computed(() =>
           class="flex items-center gap-[20px] px-[22px] py-[18px]"
           :class="PANEL"
         >
+          <!-- The game's header art: the rarity's gradient, the emblem (48%), the icon -->
           <span
             class="relative size-[128px] shrink-0 overflow-hidden rounded-[16px]"
             :style="{ background: RARITY_GRADIENT[c.weapon.rarity ?? 0] ?? 'var(--card-cv-bg)' }"
           >
-            <FadeImage :src="weaponIcon(c.weapon.key, c.weapon.ascension)" class="size-[128px]" />
+            <template v-if="qualityArt(c.weapon.rarity)">
+              <FadeImage
+                :src="qualityArt(c.weapon.rarity)"
+                class="absolute inset-0 size-full max-w-none"
+              />
+              <span class="absolute opacity-48" :style="WEAPON_EMBLEM_STYLE">
+                <FadeImage :src="EMBLEM_URL" class="size-full max-w-none" />
+              </span>
+            </template>
+            <FadeImage
+              :src="weaponIcon(c.weapon.key, c.weapon.ascension)"
+              class="relative size-[128px]"
+            />
           </span>
           <div class="flex min-w-0 flex-col gap-[8px]">
             <p class="truncate text-[30px] leading-[1.1] font-semibold" :title="c.weapon.name">
@@ -338,7 +386,8 @@ const ownerLine = computed(() =>
                 ><span class="text-(--card-muted)">/{{ weaponCap }}</span></span
               >
               <span
-                class="rounded-[8px] bg-game-star px-[10px] py-[2px] font-bold text-public-ground"
+                class="rounded-[8px] px-[10px] py-[2px] font-bold"
+                :style="refinementStyle(c.weapon.refinement)"
                 :title="`Refinement ${c.weapon.refinement} of 5`"
                 >R{{ c.weapon.refinement }}</span
               >
@@ -449,49 +498,85 @@ const ownerLine = computed(() =>
       <!-- Right: the five pieces fill the column -->
       <ol class="flex min-h-0 flex-col gap-[14px]" aria-label="Artifacts">
         <li
-          v-for="{ slot, piece, lines, cvTone, rvTone, title } in pieces"
+          v-for="{ slot, piece, lines, cv, rv, title } in pieces"
           :key="slot"
           class="flex min-h-0 min-w-0 flex-[1_1_0]"
         >
           <article
             v-if="piece"
-            class="flex min-w-0 flex-1 items-center gap-[16px] overflow-hidden py-0 pr-[20px] pl-0"
+            class="flex min-w-0 flex-1 items-stretch overflow-hidden"
             :class="PANEL"
             :title="title"
           >
-            <span
-              class="relative flex w-[136px] shrink-0 items-center justify-center self-stretch"
+            <!-- The band: the game's header art (rarity gradient, emblem at 70%), a shade
+                 under the text, the icon, the level; the main stat, stars, CV and RV -->
+            <div
+              class="relative w-[252px] shrink-0 overflow-hidden"
               :style="{ background: RARITY_GRADIENT[piece.rarity] ?? 'var(--card-cv-bg)' }"
             >
-              <FadeImage :src="artifactIcon(piece.setKey, piece.slotKey)" class="size-[126px]" />
+              <template v-if="qualityArt(piece.rarity)">
+                <FadeImage
+                  :src="qualityArt(piece.rarity)"
+                  class="absolute inset-0 size-full max-w-none"
+                />
+                <span class="absolute opacity-70" :style="BAND_EMBLEM_STYLE">
+                  <FadeImage :src="EMBLEM_URL" class="size-full max-w-none" />
+                </span>
+              </template>
               <span
-                class="absolute right-[8px] bottom-[8px] rounded-[8px] bg-(--card-badge) px-[8px] py-px text-[17px] font-bold shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
-                :class="piece.maxed ? 'text-(--card-secondary)' : 'text-talent-crown'"
+                class="absolute inset-0 bg-[linear-gradient(90deg,rgba(40,20,8,0.22)_0%,rgba(40,20,8,0)_50%)]"
+                aria-hidden="true"
+              />
+              <span class="absolute inset-y-0 right-[16px] flex items-center">
+                <FadeImage
+                  :src="artifactIcon(piece.setKey, piece.slotKey)"
+                  class="size-[128px] [filter:drop-shadow(0_4px_10px_rgba(70,36,6,0.35))]"
+                />
+              </span>
+              <span
+                class="absolute right-[10px] bottom-[10px] rounded-[8px] bg-[rgba(30,16,4,0.55)] px-[8px] py-px text-[17px] font-bold text-white"
                 >+{{ piece.level }}</span
               >
-            </span>
-            <div class="flex w-[100px] shrink-0 flex-col gap-[4px]">
-              <span class="text-[18px] whitespace-nowrap text-(--card-muted)">{{
-                formatStatShort(piece.mainStatKey)
-              }}</span>
-              <span class="text-[34px] leading-[1.05] font-bold whitespace-nowrap">{{
-                piece.mainStatValue === null
-                  ? '—'
-                  : formatStatValue(piece.mainStatKey, piece.mainStatValue)
-              }}</span>
-              <span
-                class="self-start rounded-[6px] bg-(--card-cv-bg) px-[7px] py-px text-[16px] font-semibold whitespace-nowrap"
-                :class="cvTone"
-                >CV {{ piece.cv.toFixed(1) }}</span
+              <div
+                class="relative box-border flex h-full w-[132px] flex-col justify-center gap-[3px] py-[12px] pl-[18px]"
               >
-              <span
-                class="self-start rounded-[6px] bg-(--card-cv-bg) px-[7px] py-px text-[16px] font-semibold whitespace-nowrap"
-                :class="rvTone"
-                >RV {{ piece.rv }}%</span
-              >
+                <span
+                  class="text-[18px] font-medium whitespace-nowrap text-[rgba(255,248,235,0.95)] [text-shadow:0_1px_2px_rgba(70,36,6,0.6)]"
+                  >{{ formatStatShort(piece.mainStatKey) }}</span
+                >
+                <span
+                  class="text-[38px] leading-[1.05] font-bold whitespace-nowrap text-white [text-shadow:0_1px_3px_rgba(70,36,6,0.6)]"
+                  >{{
+                    piece.mainStatValue === null
+                      ? '—'
+                      : formatStatValue(piece.mainStatKey, piece.mainStatValue)
+                  }}</span
+                >
+                <GameStars
+                  :rarity="piece.rarity"
+                  :px="15"
+                  :gap="1"
+                  class="pt-[2px] pb-[4px] [filter:drop-shadow(0_1px_1px_rgba(70,36,6,0.5))]!"
+                />
+                <span class="flex flex-col items-start gap-[4px] text-[16px] whitespace-nowrap">
+                  <span
+                    class="rounded-[6px] bg-[rgba(30,16,4,0.5)] px-[7px] py-px font-semibold"
+                    :class="cv?.top ? 'cv-glow' : ''"
+                    :style="{ color: cv?.color }"
+                    >CV {{ piece.cv.toFixed(1) }}</span
+                  >
+                  <span
+                    class="rounded-[6px] bg-[rgba(30,16,4,0.5)] px-[7px] py-px font-semibold"
+                    :class="rv?.top ? 'cv-glow' : ''"
+                    :style="{ color: rv?.color }"
+                    >RV {{ piece.rv }}%</span
+                  >
+                </span>
+              </div>
             </div>
-            <span class="w-px self-stretch bg-(--card-divider)" aria-hidden="true" />
-            <div class="flex min-w-0 flex-[1_1_auto] flex-col justify-around self-stretch py-[8px]">
+            <div
+              class="flex min-w-0 flex-[1_1_auto] flex-col justify-around py-[8px] pr-[12px] pl-[18px]"
+            >
               <p
                 v-for="n in 4"
                 :key="n"
