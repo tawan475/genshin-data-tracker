@@ -51,7 +51,7 @@ import {
   type LinkKind,
   type OpenLink,
 } from '../services/auth-tokens'
-import { pepper, toMe } from './auth'
+import { meOf, pepper, suspendedError } from './auth'
 
 const requireCsrf: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (c.req.header(CSRF_HEADER) !== '1') {
@@ -156,6 +156,12 @@ export const recovery = new Hono<AppEnv>()
     // Checked before the ~200 ms hash, and hashed before the link is used up,
     // so a server fault (no pepper) leaves the link working.
     const link = await openLink(c.env.DB, 'reset_password', body.token)
+    const [owner] = await getDb(c.env.DB)
+      .select({ suspendedAt: users.suspendedAt })
+      .from(users)
+      .where(eq(users.id, link.userId))
+    // A suspended user can't sign in this way either; the link stays unused.
+    if (owner?.suspendedAt != null) throw suspendedError()
     const passwordHash = hashPassword(body.password, pepper(c))
     await claim(c.env.DB, 'reset_password', body.token, link)
     const session = await revokeAllSessions(c, link.userId, { set: { passwordHash } })
@@ -171,5 +177,5 @@ export const recovery = new Hono<AppEnv>()
         ),
       )
     }
-    return c.json(toMe(user, c.env))
+    return c.json(await meOf(c, user))
   })

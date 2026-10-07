@@ -11,6 +11,7 @@ import { api } from '@/api'
 import { updatesHeld } from '@/live/holds'
 import { onPlannerChange } from '@/live/planner-changes'
 import { useFeedback } from '@/stores/feedback'
+import { useReadOnly } from '@/views/account/context'
 import { withFavorite, type Favorites } from './characters'
 
 /**
@@ -81,6 +82,10 @@ export interface FavoriteCharacters {
 
 /** The favourite characters of `accountId`, kept fresh while the calling scope lives. */
 export function useFavoriteCharacters(accountId: MaybeRefOrGetter<number>): FavoriteCharacters {
+  // Staff Inspect: the owner's favourites are not read (account settings are theirs).
+  if (useReadOnly()) {
+    return { favorites: computed(() => new Set()), isFavorite: () => false, toggle: async () => {} }
+  }
   const feedback = useFeedback()
   const id = () => toValue(accountId)
 

@@ -38,11 +38,13 @@ import {
   type WeaponView,
 } from '@/data/weapons'
 import { readJson, writeJson } from '@/lib/storage'
-import { useAccount } from './context'
+import { useAccount, useReadOnly } from './context'
 
 const LIST_PAGE = 100
 
 const account = useAccount()
+/** Staff Inspect: nothing here links to the owner's own pages. */
+const readOnly = useReadOnly()
 const inventory = useResource(
   () => account.value,
   (a) => loadLatestInventory(a),
@@ -243,7 +245,7 @@ function close() {
     <UiPanel v-else-if="inventory.data.value === null || (armory && armory.total === 0)" flush>
       <UiEmpty :title="inventory.data.value === null ? 'No snapshots yet' : 'No weapons'">
         <template #icon><Swords aria-hidden="true" /></template>
-        <UiButton variant="primary" :to="{ name: 'account-import' }">
+        <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
           <Upload class="size-4" aria-hidden="true" />
           Import
         </UiButton>

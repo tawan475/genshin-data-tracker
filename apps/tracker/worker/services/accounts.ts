@@ -156,7 +156,13 @@ export interface KeyAccount {
   server: GenshinServer | null
 }
 
-export type ImportKeyOwner =
+/**
+ * Why staff stopped the owner's uploads: a suspended user's key is refused
+ * outright, a blocked one only for uploads (routes/public).
+ */
+export type KeyBlock = 'suspended' | 'uploads_blocked' | null
+
+export type ImportKeyOwner = { blocked: KeyBlock } & (
   | { scope: 'account'; account: KeyAccount; userId: number }
   | {
       scope: 'user'
@@ -164,6 +170,26 @@ export type ImportKeyOwner =
       /** All of the user's accounts: few rows, and read in the same round trip. */
       accounts: KeyAccount[]
     }
+)
+
+/** 403 for a stopped user's upload (irminsul shows the message). */
+export function uploadsRefused(block: 'suspended' | 'uploads_blocked'): ApiError {
+  return block === 'suspended'
+    ? new ApiError(403, 'account_suspended', 'This account is suspended')
+    : new ApiError(
+        403,
+        'uploads_blocked',
+        'Uploads to this account are blocked. Ask on Discord if you think it is a mistake.',
+      )
+}
+
+function blockOf(row: { suspended_at?: unknown; uploads_blocked_at?: unknown }): KeyBlock {
+  if (row.suspended_at !== null && row.suspended_at !== undefined) return 'suspended'
+  if (row.uploads_blocked_at !== null && row.uploads_blocked_at !== undefined) {
+    return 'uploads_blocked'
+  }
+  return null
+}
 
 /**
  * Who an import key (by hash) belongs to: an account first, then a user. One
@@ -176,10 +202,16 @@ export async function findImportKeyOwner(
   const [account, user, accounts] = await d1.batch<Record<string, unknown>>([
     d1
       .prepare(
-        'SELECT id, name, uid, server, user_id FROM genshin_accounts WHERE import_key_hash = ?1',
+        `SELECT a.id, a.name, a.uid, a.server, a.user_id, u.suspended_at, u.uploads_blocked_at
+         FROM genshin_accounts AS a JOIN users AS u ON u.id = a.user_id
+         WHERE a.import_key_hash = ?1`,
       )
       .bind(hash),
-    d1.prepare('SELECT id, username FROM users WHERE import_key_hash = ?1').bind(hash),
+    d1
+      .prepare(
+        'SELECT id, username, suspended_at, uploads_blocked_at FROM users WHERE import_key_hash = ?1',
+      )
+      .bind(hash),
     d1
       .prepare(
         `SELECT a.id, a.name, a.uid, a.server FROM users AS u
@@ -188,14 +220,24 @@ export async function findImportKeyOwner(
       )
       .bind(hash),
   ])
-  const ownAccount = account!.results[0] as (KeyAccount & { user_id: number }) | undefined
+  const ownAccount = account!.results[0] as
+    | (KeyAccount & { user_id: number; suspended_at: unknown; uploads_blocked_at: unknown })
+    | undefined
   if (ownAccount) {
-    const { user_id: userId, ...rest } = ownAccount
-    return { scope: 'account', account: rest, userId }
+    const { user_id: userId, suspended_at, uploads_blocked_at, ...rest } = ownAccount
+    return {
+      scope: 'account',
+      account: rest,
+      userId,
+      blocked: blockOf({ suspended_at, uploads_blocked_at }),
+    }
   }
-  const owner = user!.results[0] as { id: number; username: string } | undefined
+  const owner = user!.results[0] as
+    | { id: number; username: string; suspended_at: unknown; uploads_blocked_at: unknown }
+    | undefined
   if (!owner) return null
   return {
+    blocked: blockOf(owner),
     scope: 'user',
     user: { id: owner.id, username: owner.username },
     accounts: accounts!.results as unknown as KeyAccount[],

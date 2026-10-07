@@ -43,7 +43,7 @@ import { useResource } from '@/data/use-resource'
 import { formatDate, formatDateTime, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { preloadMaterialNames, preloadMaterialRarities } from '@/utils/materials'
-import { useAccount } from './context'
+import { useAccount, useReadOnly } from './context'
 
 /**
  * Materials: the wallet (currencies) on top, tracked materials as small
@@ -55,6 +55,8 @@ import { useAccount } from './context'
  * opens the detail view with its history.
  */
 const account = useAccount()
+/** Staff Inspect: no Planner, no saved charts, no import. */
+const readOnly = useReadOnly()
 const icon = useMaterialIcons()
 const graph = useMaterialsGraph(() => account.value.id)
 
@@ -129,13 +131,14 @@ const newest = computed(() => {
 
 // ------------------------------------------------------------------ inventory editor
 
-const planning = usePlannerModel(account)
+const planning = readOnly ? null : usePlannerModel(account)
 const editor = shallowRef<{ key: string; anchor: HTMLElement; touch: boolean } | null>(null)
 const editorOpen = ref(false)
 
 /** Counts set by hand that differ from the capture's (the bag shows them). */
 const edited = computed(() => {
   const map = new Map<string, number>()
+  if (!planning) return map
   const bag = planning.bag.value
   const good = planning.good.value
   const edits = planning.state.adjustments.value
@@ -149,8 +152,8 @@ const edited = computed(() => {
 })
 
 function openTile(key: string, anchor: HTMLElement, touch: boolean) {
-  const known = planning.planner.value?.materialsByKey.has(key)
-  if (known && planning.bag.value && planning.totals.value) {
+  const known = planning?.planner.value?.materialsByKey.has(key)
+  if (planning && known && planning.bag.value && planning.totals.value) {
     editor.value = { key, anchor, touch }
     editorOpen.value = true
   } else detailKey.value = key
@@ -215,7 +218,7 @@ const importTo = computed(() => ({
   <UiPanel v-if="!account.latest" flush>
     <UiEmpty title="No snapshots yet">
       <template #icon><Package aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="importTo">
+      <UiButton v-if="!readOnly" variant="primary" :to="importTo">
         <Upload class="size-4" aria-hidden="true" />
         Import
       </UiButton>
@@ -275,7 +278,7 @@ const importTo = computed(() => ({
     />
 
     <ItemPopover
-      v-if="planning.planner.value && planning.bag.value && planning.good.value"
+      v-if="planning && planning.planner.value && planning.bag.value && planning.good.value"
       :open="editorOpen"
       :anchor="editor?.anchor ?? null"
       :item-key="editor?.key ?? null"

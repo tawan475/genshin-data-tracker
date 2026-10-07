@@ -16,7 +16,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "deploy": "pnpm build && wrangler deploy",
     "icons": "node scripts/make-icons.mjs",
-    "admin:reset-link": "node scripts/admin-reset-link.mjs"
+    "admin:reset-link": "node scripts/admin-reset-link.mjs",
+    "admin:grant": "node scripts/admin-grant.mjs"
   },
   "dependencies": {
     "@gdt/game-data": "github:tawan475/genshin-game-data#v7.1.5",

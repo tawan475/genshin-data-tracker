@@ -1,3 +1,4 @@
+import type { InspectView, PermissionNode } from '@gdt/shared'
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 import { loadSignInOptions } from '@/components/oauth/oauth'
 import { setPublicPage } from '@/lib/theme'
@@ -13,6 +14,12 @@ declare module 'vue-router' {
     /** A public page (PublicFrame): the whole document is dark while it shows. */
     public?: boolean
     title?: string
+    /** A staff node the page needs: without it the page is Not found (the Worker 404s too). */
+    permission?: PermissionNode
+    /** A staff page: the sidebar lists the staff pages. */
+    staff?: boolean
+    /** Inspect: which page of someone's account (logged when opened). */
+    inspect?: InspectView
   }
 }
 
@@ -21,6 +28,28 @@ const account = (path: string, name: string, title: string, load: () => Promise<
   name,
   component: load,
   meta: { auth: true, title },
+})
+
+const staffPage = (
+  path: string,
+  name: string,
+  title: string,
+  permission: PermissionNode,
+  load: () => Promise<unknown>,
+) => ({ path, name, component: load, meta: { auth: true, staff: true, title, permission } })
+
+/** Someone's account page, read-only, under Inspect (the owner's views, reused). */
+const inspectPage = (view: InspectView, title: string, load: () => Promise<unknown>) => ({
+  path: view,
+  name: `staff-inspect-${view}`,
+  component: load,
+  meta: {
+    auth: true,
+    staff: true,
+    title: `Inspect · ${title}`,
+    permission: 'data.inspect' as const,
+    inspect: view,
+  },
 })
 
 /**
@@ -110,6 +139,84 @@ const router = createRouter({
           name: 'settings',
           component: () => import('@/views/app/SettingsView.vue'),
           meta: { auth: true, title: 'Settings' },
+        },
+        {
+          path: 'staff',
+          component: () => import('@/views/staff/StaffLayout.vue'),
+          meta: { auth: true, staff: true, permission: 'staff.view' },
+          children: [
+            staffPage(
+              '',
+              'staff-overview',
+              'Overview',
+              'staff.view',
+              () => import('@/views/staff/StaffOverviewView.vue'),
+            ),
+            staffPage(
+              'users',
+              'staff-users',
+              'Users',
+              'users.view',
+              () => import('@/views/staff/StaffUsersView.vue'),
+            ),
+            staffPage(
+              'users/:userId(\\d+)',
+              'staff-user',
+              'User',
+              'users.view',
+              () => import('@/views/staff/StaffUserView.vue'),
+            ),
+            staffPage(
+              'storage',
+              'staff-storage',
+              'Storage',
+              'data.storage',
+              () => import('@/views/staff/StaffStorageView.vue'),
+            ),
+            staffPage(
+              'roles',
+              'staff-roles',
+              'Roles',
+              'roles.manage',
+              () => import('@/views/staff/StaffRolesView.vue'),
+            ),
+            staffPage(
+              'audit',
+              'staff-audit',
+              'Audit',
+              'audit.view',
+              () => import('@/views/staff/StaffAuditView.vue'),
+            ),
+            {
+              path: 'inspect/:accountId(\\d+)',
+              component: () => import('@/views/staff/StaffInspectLayout.vue'),
+              meta: { auth: true, staff: true, permission: 'data.inspect' },
+              children: [
+                { path: '', redirect: { name: 'staff-inspect-characters' } },
+                inspectPage(
+                  'characters',
+                  'Characters',
+                  () => import('@/views/account/CharactersView.vue'),
+                ),
+                inspectPage('weapons', 'Weapons', () => import('@/views/account/WeaponsView.vue')),
+                inspectPage(
+                  'artifacts',
+                  'Artifacts',
+                  () => import('@/views/account/ArtifactsView.vue'),
+                ),
+                inspectPage(
+                  'materials',
+                  'Materials',
+                  () => import('@/views/account/MaterialsView.vue'),
+                ),
+                inspectPage(
+                  'snapshots',
+                  'Snapshots',
+                  () => import('@/views/account/SnapshotsView.vue'),
+                ),
+              ],
+            },
+          ],
         },
         {
           path: 'a/:accountId(\\d+)',
@@ -204,6 +311,16 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: to.fullPath !== '/app' ? { next: to.fullPath } : {} }
   }
   if (to.meta.guest && session.status === 'signed-in') return { name: 'home' }
+  // A staff page without its node doesn't exist, as far as this user can tell.
+  if (to.matched.some((r) => r.meta.permission && !session.can(r.meta.permission))) {
+    return {
+      name: 'not-found',
+      params: { pathMatch: to.path.slice(1).split('/') },
+      query: to.query,
+      hash: to.hash,
+      replace: true,
+    }
+  }
   if (to.meta.auth) await useAccounts().ensureLoaded()
 })
 

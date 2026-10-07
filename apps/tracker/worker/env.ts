@@ -1,3 +1,5 @@
+import type { StaffActor } from './lib/staff'
+
 export interface AppEnv {
   Bindings: Env
   Variables: {
@@ -13,5 +15,7 @@ export interface AppEnv {
      * requireActiveSession checks that the row is still active.
      */
     sessionId: number | null
+    /** The staff member making a /api/staff request (set by requireStaff). */
+    staff: StaffActor
   }
 }

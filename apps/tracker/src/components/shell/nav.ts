@@ -1,9 +1,13 @@
+import type { PermissionNode } from '@gdt/shared'
 import {
   ClipboardList,
   Gem,
+  HardDrive,
   History,
   LayoutDashboard,
   Package,
+  ScrollText,
+  Shield,
   Swords,
   Trophy,
   TrendingUp,
@@ -34,4 +38,30 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-snapshots', label: 'Snapshots', icon: History },
   { name: 'account-import', label: 'Import', icon: Upload },
   { name: 'account-settings', label: 'Manage', icon: UserCog },
+]
+
+export interface StaffSection extends AccountSection {
+  /** The node the page needs (the Worker checks it again). */
+  permission: PermissionNode
+}
+
+/** The staff dashboard's pages, shown to whoever holds their node. */
+export const STAFF_SECTIONS: StaffSection[] = [
+  {
+    name: 'staff-overview',
+    label: 'Overview',
+    icon: LayoutDashboard,
+    permission: 'staff.view',
+    primary: true,
+  },
+  { name: 'staff-users', label: 'Users', icon: Users, permission: 'users.view', primary: true },
+  {
+    name: 'staff-storage',
+    label: 'Storage',
+    icon: HardDrive,
+    permission: 'data.storage',
+    primary: true,
+  },
+  { name: 'staff-roles', label: 'Roles', icon: Shield, permission: 'roles.manage' },
+  { name: 'staff-audit', label: 'Audit', icon: ScrollText, permission: 'audit.view' },
 ]

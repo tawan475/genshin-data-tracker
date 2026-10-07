@@ -6,6 +6,7 @@ import LevelText from '@/components/ui/LevelText.vue'
 import { weaponLines } from '@/data/character-build'
 import { TARGET_LEVEL, type EquippedWeapon } from '@/data/characters'
 import { weaponIcon } from '@/lib/assets'
+import { useAccountRoute } from '@/views/account/context'
 import GameStars from './GameStars.vue'
 import RefinementPips from './RefinementPips.vue'
 
@@ -15,6 +16,7 @@ import RefinementPips from './RefinementPips.vue'
  * in the tooltip. The name opens the Weapons page on it.
  */
 const props = defineProps<{ weapon: EquippedWeapon | null; accountId: number }>()
+const routeName = useAccountRoute()
 
 const lines = computed(() => (props.weapon ? weaponLines(props.weapon) : null))
 const passiveTitle = computed(() =>
@@ -38,7 +40,11 @@ const passiveTitle = computed(() =>
     />
     <div class="flex min-w-0 flex-1 flex-col gap-1">
       <RouterLink
-        :to="{ name: 'account-weapons', params: { accountId }, query: { w: weapon.key } }"
+        :to="{
+          name: routeName('account-weapons'),
+          params: { accountId },
+          query: { w: weapon.key },
+        }"
         class="truncate font-medium hover:text-accent-text"
         :title="weapon.name"
         >{{ weapon.name }}</RouterLink

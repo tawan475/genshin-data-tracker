@@ -81,7 +81,15 @@ import {
   signInUser,
   suggestUsername,
 } from '../services/identities'
-import { confirmEmailLater, notifySignInAdded, passwordSignIn, toMe } from './auth'
+import { signupMode } from '../services/staff-deps'
+import {
+  assertSignupsOpen,
+  confirmEmailLater,
+  meOf,
+  notifySignInAdded,
+  passwordSignIn,
+  toMe,
+} from './auth'
 
 const requireCsrf: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (c.req.header(CSRF_HEADER) !== '1') {
@@ -133,12 +141,13 @@ async function linkTo(
 }
 
 export const oauth = new Hono<AppEnv>()
-  .get('/providers', (c) => {
+  .get('/providers', async (c) => {
     c.header('Cache-Control', 'no-store')
     return c.json({
       providers: enabledProviders(c.env, c.req.url),
       emailFeatures: emailFeatures(c.env),
       turnstileSiteKey: turnstileConfig(c.env)?.siteKey ?? null,
+      signups: await signupMode(c.env.DB),
     } satisfies OAuthProvidersResponse)
   })
 
@@ -235,6 +244,10 @@ export const oauth = new Hono<AppEnv>()
     }
 
     const user = await signInUser(c.env.DB, identity)
+    if (user?.suspendedAt != null) {
+      clearPendingCookie(c)
+      return fail(c, intent, 'suspended')
+    }
     if (user) {
       clearPendingCookie(c)
       await createSession(c, user, identity.provider)
@@ -265,6 +278,7 @@ export const oauth = new Hono<AppEnv>()
   /** A new account for the pending identity: no password, signed in. */
   .post('/pending/register', requireCsrf, async (c) => {
     await rateLimit(c.env.AUTH_LIMITER, `register:${clientIp(c)}`)
+    await assertSignupsOpen(c, 'oauth')
     const body = await parseJson(c, oauthRegisterRequest)
     await requireHuman(c, body.turnstile, ['register'])
     const identity = await readPendingCookie(c)
@@ -316,7 +330,7 @@ export const oauth = new Hono<AppEnv>()
     clearPendingCookie(c)
     await createSession(c, user, 'password')
     return c.json({
-      me: toMe(user, c.env),
+      me: await meOf(c, user),
       linked: problem ? null : identity!.provider,
       problem,
     } satisfies OAuthLinkLoginResponse)

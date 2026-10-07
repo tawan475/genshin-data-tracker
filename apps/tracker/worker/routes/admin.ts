@@ -1,7 +1,8 @@
 /**
  * Operator routes, only with `x-diag-key` equal to the DIAG_KEY secret (a
  * session never opens them; anything else is a 404, as if they did not
- * exist).
+ * exist). The key never goes near a browser (with it, /api/health shows
+ * secrets): the staff dashboard is routes/staff.ts, on sessions and roles.
  *
  * GET  /api/admin/repack                 how much is left in storage format v1
  * POST /api/admin/repack?limit=N&after=I converts up to N v1 snapshot rows
@@ -30,7 +31,7 @@ function count(raw: string | undefined, fallback: number, max: number): number {
 }
 
 export const admin = new Hono<AppEnv>()
-  .use(async (c, next) => {
+  .use('/repack', async (c, next) => {
     c.header('Cache-Control', 'no-store')
     if (!diagKeyOk(c.req.header('x-diag-key'), c.env.DIAG_KEY)) {
       throw new ApiError(404, 'not_found', 'Not found')

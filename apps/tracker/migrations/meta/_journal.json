@@ -141,6 +141,13 @@
       "when": 1791402137542,
       "tag": "0019_user_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1791404263623,
+      "tag": "0020_staff_roles",
+      "breakpoints": true
     }
   ]
 }

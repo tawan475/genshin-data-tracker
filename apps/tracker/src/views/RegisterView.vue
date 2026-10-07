@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, emailSchema, usernameSchema } from '@gdt/shared'
+import {
+  MAX_PASSWORD_LENGTH,
+  MIN_PASSWORD_LENGTH,
+  emailSchema,
+  usernameSchema,
+  type SignupMode,
+} from '@gdt/shared'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
@@ -26,11 +32,14 @@ const emailFeatures = ref(false)
 /** The human check's site key while the server has it on. */
 const siteKey = ref<string | null>(null)
 const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
+/** The staff switch: `oauth` leaves only Discord / Google, `closed` nothing. */
+const signups = ref<SignupMode>('open')
 
 onMounted(async () => {
   const options = await loadSignInOptions()
   emailFeatures.value = options.emailFeatures
   siteKey.value = options.turnstileSiteKey
+  signups.value = options.signups
 })
 
 // The same schemas the server validates with.
@@ -94,7 +103,18 @@ async function submit() {
     >
       {{ serverError }}
     </p>
-    <form class="flex flex-col gap-4" novalidate @submit.prevent="submit">
+    <p
+      v-if="signups !== 'open'"
+      class="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/15 p-3 text-sm text-amber-200"
+      role="status"
+    >
+      {{
+        signups === 'oauth'
+          ? 'Sign up with Discord or Google for now'
+          : 'Sign-ups are closed for now'
+      }}
+    </p>
+    <form v-if="signups === 'open'" class="flex flex-col gap-4" novalidate @submit.prevent="submit">
       <label class="flex flex-col gap-2">
         <span class="text-sm font-medium text-gray-400">Username</span>
         <input
@@ -156,7 +176,7 @@ async function submit() {
         </button>
       </div>
     </form>
-    <OAuthButtons />
+    <OAuthButtons v-if="signups !== 'closed'" />
     <template #footer>
       Have an account?
       <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">

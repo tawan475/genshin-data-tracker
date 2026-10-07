@@ -6,7 +6,7 @@
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
 import { MAX_FAVORITE_CHARACTERS } from './settings'
-import type { AccountSettings, SnapshotSummary, UserSettings } from './index'
+import type { AccountSettings, SignupMode, SnapshotSummary, UserSettings } from './index'
 
 export const usernameSchema = z
   .string()
@@ -559,19 +559,26 @@ export interface MeResponse {
   emailFeatures: boolean
   /** False for an account made with Discord or Google: it signs in with those until it sets one. */
   hasPassword: boolean
+  /**
+   * Staff permission nodes from the user's roles (`*`: all of them); empty
+   * for everyone else. The app hides what it can't use; the Worker checks
+   * every staff request again.
+   */
+  permissions: string[]
 }
 
 /**
  * `GET /api/auth/oauth/providers`: the sign-in options this server has, for
  * the signed-out pages: its providers, whether the email features are on
- * (`MeResponse.emailFeatures`), and the human check's site key (null while
+ * (`MeResponse.emailFeatures`), the human check's site key (null while
  * it is off): sign-up, sign-in and the OAuth sign-up then send a
- * `turnstile` token.
+ * `turnstile` token; and who may sign up (the staff switch).
  */
 export interface OAuthProvidersResponse {
   providers: OAuthProvider[]
   emailFeatures: boolean
   turnstileSiteKey: string | null
+  signups: SignupMode
 }
 
 /** `POST /api/auth/oauth/:provider/start`: where to send the browser. */
@@ -655,7 +662,8 @@ export interface SessionResponse {
  * minutes), `denied` (cancelled at the provider), `failed` (the provider's
  * answer was refused), `session` (signed out or another user while linking),
  * `taken` (linked to another user), `already` (another account of that
- * provider is linked here), `rate_limited`.
+ * provider is linked here), `rate_limited`, `suspended` (the user it signs in
+ * to is suspended).
  */
 export const OAUTH_ERROR_CODES = [
   'unavailable',
@@ -667,6 +675,7 @@ export const OAUTH_ERROR_CODES = [
   'taken',
   'already',
   'rate_limited',
+  'suspended',
 ] as const
 export type OAuthErrorCode = (typeof OAUTH_ERROR_CODES)[number]
 

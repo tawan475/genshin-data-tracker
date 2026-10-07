@@ -11,17 +11,22 @@ import { formatBytes, formatNumber } from '@/lib/format'
  * account runs, and shows that export's progress. The bar is deliberately
  * inverse (dark slate in both themes), which no surface token covers.
  */
-const props = defineProps<{
-  selected: number
-  total: number
-  /** Selected snapshots the date filter hides. */
-  hidden: number
-  /** This account's running export. */
-  job: Readonly<ExportJob> | null
-  /** Another account's export is running; only one runs at a time. */
-  blocked: boolean
-  deleting: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    selected: number
+    total: number
+    /** Selected snapshots the date filter hides. */
+    hidden: number
+    /** This account's running export. */
+    job: Readonly<ExportJob> | null
+    /** Another account's export is running; only one runs at a time. */
+    blocked: boolean
+    deleting: boolean
+    /** Offer Download (not on staff Inspect: the files are the owner's). */
+    downloadable?: boolean
+  }>(),
+  { downloadable: true },
+)
 const emit = defineEmits<{ download: []; delete: []; clear: []; cancel: [] }>()
 
 const progress = computed(() => {
@@ -88,6 +93,7 @@ const progress = computed(() => {
           </UiButton>
           <template v-else>
             <UiButton
+              v-if="downloadable"
               variant="secondary"
               size="sm"
               :disabled="blocked || deleting"

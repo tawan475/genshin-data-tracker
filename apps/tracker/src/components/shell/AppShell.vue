@@ -12,6 +12,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
+  ShieldCheck,
   Sun,
   Upload,
   X,
@@ -22,8 +23,9 @@ import { resolvedTheme } from '@/lib/theme'
 import { lastAccountId, useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
+import { useStaff } from '@/stores/staff'
 import AccountSwitcher from './AccountSwitcher.vue'
-import { ACCOUNT_SECTIONS } from './nav'
+import { ACCOUNT_SECTIONS, STAFF_SECTIONS } from './nav'
 import { NAV_COLLAPSED_KEY, useNavCollapse } from './nav-collapse'
 import SectionLabel from './SectionLabel.vue'
 
@@ -38,7 +40,22 @@ const router = useRouter()
 const session = useSession()
 const accounts = useAccounts()
 const feedback = useFeedback()
+const staff = useStaff()
 const drawer = ref(false)
+
+/** A staff page: the sidebar lists the staff pages instead of the account's. */
+const staffMode = computed(() => route.meta.staff === true)
+const staffSections = computed(() =>
+  STAFF_SECTIONS.filter((s) => session.can(s.permission)).map((s) => ({
+    ...s,
+    to: { name: s.name },
+  })),
+)
+/** Which staff page a route belongs to (a user's page is under Users). */
+const staffActive = (name: string) =>
+  route.name === name ||
+  (name === 'staff-users' &&
+    (route.name === 'staff-user' || String(route.name ?? '').startsWith('staff-inspect')))
 
 watch(
   () => route.fullPath,
@@ -71,7 +88,8 @@ watch(narrow, (value) => {
 onBeforeUnmount(() => clearTimeout(settle))
 
 const currentId = computed<number | null>(() => {
-  const param = Number(route.params.accountId)
+  // Inspect's account is someone else's: the switcher keeps the user's own.
+  const param = staffMode.value ? NaN : Number(route.params.accountId)
   if (Number.isSafeInteger(param) && param > 0) return param
   const last = lastAccountId()
   return last && accounts.byId.has(last) ? last : (accounts.list[0]?.id ?? null)
@@ -86,7 +104,11 @@ const sections = computed(() =>
       }))
     : [],
 )
-const primary = computed(() => sections.value.filter((s) => s.primary))
+const primary = computed(() =>
+  staffMode.value
+    ? staffSections.value.filter((s) => s.primary)
+    : sections.value.filter((s) => s.primary),
+)
 const title = computed(() => route.meta.title ?? '')
 
 // Flips what is painted; from "system" it pins the opposite theme.
@@ -105,7 +127,8 @@ async function signOut() {
   await router.push({ name: 'login' })
 }
 
-const isActive = (name: string) => route.name === name
+const isActive = (name: string) =>
+  name.startsWith('staff-') ? staffActive(name) : route.name === name
 const navClass = (active: boolean) =>
   active
     ? 'bg-surface-overlay text-text-primary'
@@ -168,7 +191,25 @@ const footButton =
         class="flex flex-1 flex-col gap-7 overflow-x-hidden overflow-y-auto py-6 pl-4"
         :class="narrow ? 'pr-[calc(1rem_-_10px)] [scrollbar-gutter:stable]' : 'pr-4'"
       >
-        <div>
+        <div v-if="staffMode">
+          <SectionLabel label="Staff" :collapsed="narrow" />
+          <nav class="space-y-0.5" aria-label="Staff">
+            <RouterLink
+              v-for="section in staffSections"
+              :key="section.name"
+              :to="section.to"
+              class="flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium transition-colors"
+              :class="navClass(isActive(section.name))"
+              :aria-current="isActive(section.name) ? 'page' : undefined"
+              :title="narrow ? section.label : undefined"
+            >
+              <component :is="section.icon" class="size-5 shrink-0" aria-hidden="true" />
+              <span :class="labelClass">{{ section.label }}</span>
+            </RouterLink>
+          </nav>
+        </div>
+
+        <div v-else>
           <SectionLabel label="Account" :collapsed="narrow" />
           <AccountSwitcher :current-id="currentId" :collapsed="narrow" />
           <nav v-if="sections.length" class="mt-3 space-y-0.5" aria-label="Account">
@@ -199,6 +240,17 @@ const footButton =
             >
               <LayoutGrid class="size-5 shrink-0" aria-hidden="true" />
               <span :class="labelClass">Accounts</span>
+            </RouterLink>
+            <RouterLink
+              v-if="session.can('staff.view')"
+              :to="{ name: 'staff-overview' }"
+              class="flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium"
+              :class="navClass(staffMode)"
+              :aria-current="route.name === 'staff-overview' ? 'page' : undefined"
+              :title="narrow ? 'Staff' : undefined"
+            >
+              <ShieldCheck class="size-5 shrink-0" aria-hidden="true" />
+              <span :class="labelClass">Staff</span>
             </RouterLink>
             <div class="flex" :class="compact ? 'flex-col gap-0.5' : 'items-center gap-1'">
               <RouterLink
@@ -267,7 +319,22 @@ const footButton =
           <Menu class="size-5" aria-hidden="true" />
         </UiIconButton>
         <span class="truncate text-lg font-semibold">{{ title }}</span>
-        <template v-if="current">
+        <template v-if="staffMode">
+          <template v-if="staff.topRole">
+            <div class="hidden h-4 w-px bg-border-strong sm:block" />
+            <span
+              class="hidden min-w-0 items-center gap-2 text-sm font-medium text-text-muted sm:flex"
+              title="Your highest role"
+            >
+              <span
+                class="size-2 shrink-0 rounded-full"
+                :style="{ backgroundColor: staff.topRole.color }"
+              />
+              <span class="truncate">{{ staff.topRole.name }}</span>
+            </span>
+          </template>
+        </template>
+        <template v-else-if="current">
           <div class="hidden h-4 w-px bg-border-strong sm:block" />
           <span
             class="hidden min-w-0 items-center gap-2 text-sm font-medium text-text-muted sm:flex"
@@ -277,7 +344,7 @@ const footButton =
           </span>
         </template>
         <RouterLink
-          v-if="currentId"
+          v-if="currentId && !staffMode"
           :to="{ name: 'account-import', params: { accountId: currentId } }"
           class="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-sm font-medium text-accent-ink shadow-sm shadow-accent/30 hover:bg-accent-hover"
         >
@@ -296,7 +363,7 @@ const footButton =
     <nav
       v-if="primary.length"
       class="fixed inset-x-0 bottom-0 z-30 flex border-t border-border-default bg-surface-nav/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
-      aria-label="Account"
+      :aria-label="staffMode ? 'Staff' : 'Account'"
     >
       <RouterLink
         v-for="section in primary"

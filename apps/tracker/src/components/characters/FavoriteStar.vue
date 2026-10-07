@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Star } from 'lucide-vue-next'
+import { useReadOnly } from '@/views/account/context'
 
 /**
  * The favourite toggle: a star, the game's gold when on. Off, it shows on
@@ -9,10 +10,13 @@ import { Star } from 'lucide-vue-next'
  */
 defineProps<{ on: boolean; name: string; always?: boolean }>()
 defineEmits<{ toggle: [] }>()
+/** Not on staff Inspect pages: favourites are the owner's. */
+const readOnly = useReadOnly()
 </script>
 
 <template>
   <button
+    v-if="!readOnly"
     type="button"
     :aria-pressed="on"
     :aria-label="`Favorite ${name}`"

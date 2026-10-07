@@ -7,7 +7,7 @@ import type { AppEnv } from '../env'
 import { ApiError, parseJson } from '../lib/http'
 import { requireActiveSession, requireUser } from '../lib/session'
 import { newImportKey } from '../services/accounts'
-import { toMe } from './auth'
+import { meOf } from './auth'
 
 export const me = new Hono<AppEnv>()
   .use(requireUser)
@@ -22,7 +22,7 @@ export const me = new Hono<AppEnv>()
     if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
     const settings = deepMerge(user.settings, patch)
     await db.update(users).set({ settings }).where(eq(users.id, user.id))
-    return c.json(toMe({ ...user, settings }, c.env))
+    return c.json(await meOf(c, { ...user, settings }))
   })
 
   /**
