@@ -1,6 +1,8 @@
 import { ApiRequestError } from '@/api'
 import { loadSignInOptions } from '@/components/oauth/oauth'
 
+export { HUMAN_CHECK_WAIT, humanCheckPassed } from './human-check-state'
+
 /** What a form says when the server asked for a human check it didn't render. */
 export const HUMAN_CHECK_NEEDED = 'Human check needed. Try again.'
 

@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { loadTurnstile, type TurnstileApi } from '@/lib/turnstile'
+import {
+  HUMAN_CHECK_FAILED,
+  HUMAN_CHECK_RETRYING,
+  createHumanCheckState,
+} from './human-check-state'
 
 /**
  * The human check (Cloudflare Turnstile) for one form: rendered at once,
  * invisible unless Cloudflare wants an interaction (appearance
  * interaction-only), so most people only see the form. Put it right above
  * the submit button, in the button's own wrapper: it takes no room (and adds
- * no gap) until a challenge shows. `token()` gives the form a fresh token
- * (waiting while it's being made, however long an interactive challenge
- * takes); call `reset()` after every submit, refused or not, since a token
- * works once. Fails fast with a message when the script is blocked. Never
- * hidden with display: none (the widget would not run).
+ * no gap) until a challenge or a problem shows. `v-model:ready` is true while
+ * a fresh token is held: keep the submit button disabled until then.
+ * `token()` gives the form that token (or waits for the next one, however
+ * long an interactive challenge takes); call `reset()` after every submit,
+ * refused or not, since a token works once. A blocked script says so here.
+ * Never hidden with display: none (the widget would not run).
  */
 const props = withDefaults(
   defineProps<{
@@ -22,9 +28,7 @@ const props = withDefaults(
   { theme: 'dark' },
 )
 
-/** Without an interactive challenge, a token takes moments; past this something is wrong. */
-const QUIET_TIMEOUT_MS = 20_000
-const FAILED = 'Human check failed. Try again.'
+const ready = defineModel<boolean>('ready', { default: false })
 
 const container = ref<HTMLElement | null>(null)
 /** A challenge is on screen: space it from the button. */
@@ -32,30 +36,19 @@ const shown = ref(false)
 let resize: ResizeObserver | null = null
 let api: TurnstileApi | null = null
 let widgetId: string | null = null
-let current: string | null = null
-/** Set when the script could not load: every `token()` fails with it. */
-let blocked: string | null = null
-/** The last run failed: the next `token()` starts a new one. */
-let failed = false
-/** Cloudflare is showing a challenge: wait for the person, however long. */
-let interactive = false
 
-interface Waiter {
-  resolve: (token: string) => void
-  reject: (error: Error) => void
-  timer: ReturnType<typeof setTimeout>
-}
-let waiters: Waiter[] = []
+const state = createHumanCheckState(() => {
+  if (api && widgetId) api.reset(widgetId)
+})
+const problem = state.problem
 
-function settle(outcome: { token: string } | { error: string }) {
-  const pending = waiters
-  waiters = []
-  for (const waiter of pending) {
-    clearTimeout(waiter.timer)
-    if ('token' in outcome) waiter.resolve(outcome.token)
-    else waiter.reject(new Error(outcome.error))
-  }
-}
+watch(
+  state.ready,
+  (value) => {
+    ready.value = value
+  },
+  { immediate: true },
+)
 
 onMounted(async () => {
   if (container.value) {
@@ -67,8 +60,7 @@ onMounted(async () => {
   try {
     api = await loadTurnstile()
   } catch (error) {
-    blocked = error instanceof Error ? error.message : FAILED
-    settle({ error: blocked })
+    state.blocked(error instanceof Error ? error.message : HUMAN_CHECK_FAILED)
     return
   }
   if (!container.value) return
@@ -82,77 +74,36 @@ onMounted(async () => {
       'response-field': false,
       'refresh-expired': 'auto',
       retry: 'auto',
-      callback: (token) => {
-        current = token
-        failed = false
-        interactive = false
-        settle({ token })
-      },
-      'expired-callback': () => {
-        current = null
-      },
-      'error-callback': () => {
-        current = null
-        failed = true
-        interactive = false
-        settle({ error: FAILED })
-      },
-      'timeout-callback': () => {
-        current = null
-        failed = true
-        interactive = false
-        settle({ error: FAILED })
-      },
-      'before-interactive-callback': () => {
-        interactive = true
-      },
-      'after-interactive-callback': () => {
-        interactive = false
-      },
+      callback: (token) => state.issued(token),
+      'expired-callback': () => state.expired(),
+      'error-callback': () => state.errored(),
+      'timeout-callback': () => state.timedOut(),
+      'before-interactive-callback': () => state.challenge(true),
+      'after-interactive-callback': () => state.challenge(false),
     }) ?? null
 })
 
 onBeforeUnmount(() => {
   resize?.disconnect()
-  settle({ error: FAILED })
+  state.dispose()
+  ready.value = false
   if (api && widgetId) api.remove(widgetId)
   widgetId = null
 })
 
-/** A token for one submit: the one ready, or the next one made. */
-function token(): Promise<string> {
-  if (blocked) return Promise.reject(new Error(blocked))
-  if (current) return Promise.resolve(current)
-  if (failed) reset()
-  return new Promise<string>((resolve, reject) => {
-    const waiter: Waiter = {
-      resolve,
-      reject,
-      timer: setTimeout(function expire() {
-        // A challenge on screen waits for the person; a silent run that hangs fails.
-        if (interactive) {
-          waiter.timer = setTimeout(expire, QUIET_TIMEOUT_MS)
-          return
-        }
-        waiters = waiters.filter((w) => w !== waiter)
-        reject(new Error(FAILED))
-      }, QUIET_TIMEOUT_MS),
-    }
-    waiters.push(waiter)
-  })
-}
-
-/** Spends the token: the widget makes a new one for the next submit. */
-function reset() {
-  current = null
-  failed = false
-  interactive = false
-  if (api && widgetId) api.reset(widgetId)
-}
-
-defineExpose({ token, reset })
+defineExpose({ token: state.token, reset: state.reset })
 </script>
 
 <template>
-  <div ref="container" class="flex justify-center" :class="{ 'mb-4': shown }" />
+  <div class="flex flex-col">
+    <div ref="container" class="flex justify-center" :class="{ 'mb-4': shown }" />
+    <p
+      v-if="problem"
+      class="mb-4 text-center text-sm text-red-300"
+      role="alert"
+      :title="problem === HUMAN_CHECK_RETRYING ? 'Reload the page if it stays' : undefined"
+    >
+      {{ problem }}
+    </p>
+  </div>
 </template>
