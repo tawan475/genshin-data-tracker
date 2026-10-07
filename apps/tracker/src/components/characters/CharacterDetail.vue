@@ -4,13 +4,14 @@ import { useElementSize } from '@vueuse/core'
 import { Wrench } from 'lucide-vue-next'
 import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
+import RollValue from '@/components/ui/RollValue.vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import type { AccountRef } from '@/data/account-data'
-import { buildPanel, talentLevels } from '@/data/character-build'
+import { buildPanel, buildRv, talentLevels } from '@/data/character-build'
 import {
   ELEMENT_LABELS,
   SLOT_ORDER,
@@ -219,14 +220,15 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
           <SetBonuses v-if="c.artifactCount" :sets="c.sets" />
           <span v-else class="text-sm text-text-muted">No artifacts</span>
-          <CritValue
-            v-if="c.artifactCount"
-            :value="c.cv"
-            scope="build"
-            label
-            class="ml-auto text-sm"
-            :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
-          />
+          <span v-if="c.artifactCount" class="ml-auto flex items-baseline gap-3 text-sm">
+            <RollValue :value="buildRv(c.artifacts)" scope="build" label />
+            <CritValue
+              :value="c.cv"
+              scope="build"
+              label
+              :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
+            />
+          </span>
         </div>
         <div class="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2 md:grid-cols-3">
           <ArtifactPiece

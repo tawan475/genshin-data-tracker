@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   bonusSets,
   buildPanel,
+  buildRv,
   damageBonuses,
   formatPanelValue,
   panelRows,
@@ -247,6 +248,13 @@ describe('weaponLines', () => {
 
   it('is null for a weapon newer than the data', () => {
     expect(weaponLines({ ...homa, key: 'SomeNewSpear' })).toBeNull()
+  })
+})
+
+describe('buildRv', () => {
+  it("adds up the worn pieces' RV, empty slots as 0", () => {
+    expect(buildRv([{ rv: 120 }, null, { rv: 80 }, { rv: 300 }, null])).toBe(500)
+    expect(buildRv([null, null, null, null, null])).toBe(0)
   })
 })
 

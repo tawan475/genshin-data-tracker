@@ -11,6 +11,9 @@
  *   350 / 450 / 550 / 650 / 750 / 900. akasha adds up the rolls of the
  *   stats it counts for the character (CRIT by default); ours counts every
  *   substat, i.e. akasha with all four lines counted.
+ * - A build's RV (five pieces' RV added up, every substat): the same
+ *   scale per piece, so five times it: 1750 / 2250 / … / 4500. (One
+ *   piece's bounds would put every built character in the top tier.)
  *
  * Tier 0 is grey (including no crit at all), 6 the top. The colours are the
  * `cv-0`…`cv-6` tokens in main.css, in akasha's hue order.
@@ -22,6 +25,7 @@ export type CritTier = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export const ARTIFACT_CV_TIERS = [15, 25, 35, 45, 50, 54.4] as const
 export const BUILD_CV_TIERS = [180, 200, 220, 240, 260, 300] as const
 export const RV_TIERS = [350, 450, 550, 650, 750, 900] as const
+export const BUILD_RV_TIERS = [1750, 2250, 2750, 3250, 3750, 4500] as const
 
 /** What akasha adds to a CRIT circlet's CV before tiering it. */
 export const CRIT_CIRCLET_BONUS = 7.77
@@ -48,8 +52,8 @@ export function cvTier(cv: number, scope: CvScope = 'artifact', critCirclet = fa
   return tierOf(shown(critCirclet ? cv + CRIT_CIRCLET_BONUS : cv), ARTIFACT_CV_TIERS)
 }
 
-export function rvTier(rv: number): CritTier {
-  return Number.isFinite(rv) ? tierOf(rv, RV_TIERS) : 0
+export function rvTier(rv: number, scope: CvScope = 'artifact'): CritTier {
+  return Number.isFinite(rv) ? tierOf(rv, scope === 'build' ? BUILD_RV_TIERS : RV_TIERS) : 0
 }
 
 /** Text colour per tier; literal class names so Tailwind sees them. */

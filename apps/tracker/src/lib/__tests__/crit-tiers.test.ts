@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   ARTIFACT_CV_TIERS,
   BUILD_CV_TIERS,
+  BUILD_RV_TIERS,
   CRIT_TIER_TEXT,
   RV_TIERS,
   cvTier,
@@ -52,14 +53,19 @@ describe('build CV tiers', () => {
 
 describe('RV tiers', () => {
   it('uses akasha’s roll-value bounds', () => {
-    const tiers = [0, 340, 350, 450, 540, 550, 650, 740, 750, 890, 900].map(rvTier)
+    const tiers = [0, 340, 350, 450, 540, 550, 650, 740, 750, 890, 900].map((rv) => rvTier(rv))
     expect(tiers).toEqual([0, 0, 1, 2, 2, 3, 4, 4, 5, 5, 6])
+  })
+
+  it('tiers a build (five pieces added up) per piece', () => {
+    const tiers = [0, 1740, 1750, 2840, 3170, 3750, 4500].map((rv) => rvTier(rv, 'build'))
+    expect(tiers).toEqual([0, 0, 1, 3, 3, 5, 6])
   })
 })
 
 describe('tier tables', () => {
   it('has six rising bounds per scale and a colour per tier', () => {
-    for (const bounds of [ARTIFACT_CV_TIERS, BUILD_CV_TIERS, RV_TIERS]) {
+    for (const bounds of [ARTIFACT_CV_TIERS, BUILD_CV_TIERS, RV_TIERS, BUILD_RV_TIERS]) {
       expect(bounds).toHaveLength(6)
       expect([...bounds].sort((a, b) => a - b)).toEqual([...bounds])
     }
