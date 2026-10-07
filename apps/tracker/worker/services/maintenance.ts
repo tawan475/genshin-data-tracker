@@ -7,20 +7,25 @@
  *   section or as the base of a delta, are garbage-collected. Sections are
  *   shared between snapshots, which is why a delete cannot free them on the
  *   spot.
+ * - One-time links (auth_tokens) are purged a day after they expired; used
+ *   ones go then too.
  *
  * Account counters stay exact through all of this: the triggers from
  * migration 0002 adjust them for every row actually deleted.
  */
+
+import { KEEP_EXPIRED_MS } from './auth-tokens'
 
 export const TRASH_DAYS = 30
 
 export interface MaintenanceResult {
   snapshots: number
   blobs: number
+  tokens: number
 }
 
 export async function runMaintenance(d1: D1Database, now = Date.now()): Promise<MaintenanceResult> {
-  const [snapshots, blobs] = await d1.batch([
+  const [snapshots, blobs, tokens] = await d1.batch([
     d1
       .prepare('DELETE FROM snapshots WHERE deleted_at IS NOT NULL AND deleted_at < ?1')
       .bind(now - TRASH_DAYS * 86_400_000),
@@ -33,9 +38,11 @@ export async function runMaintenance(d1: D1Database, now = Date.now()): Promise<
            s.achievement_times_base_hash)
        )`,
     ),
+    d1.prepare('DELETE FROM auth_tokens WHERE expires_at < ?1').bind(now - KEEP_EXPIRED_MS),
   ])
   return {
     snapshots: snapshots!.meta.changes,
     blobs: blobs!.meta.changes,
+    tokens: tokens!.meta.changes,
   }
 }

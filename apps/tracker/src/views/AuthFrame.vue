@@ -11,7 +11,7 @@ defineProps<{ title: string }>()
       <div class="glass-panel w-full max-w-md bg-slate-900/80 p-8 sm:p-10">
         <h1 class="mb-8 text-center text-3xl font-bold">{{ title }}</h1>
         <slot />
-        <p class="mt-6 text-center text-sm text-gray-400">
+        <p v-if="$slots.footer" class="mt-6 text-center text-sm text-gray-400">
           <slot name="footer" />
         </p>
       </div>

@@ -1,0 +1,163 @@
+/**
+ * Transactional email through Cloudflare Email Service: a `send_email` binding
+ * named EMAIL (Workers Paid; the sender's domain must be onboarded to Email
+ * Sending). The binding is optional. wrangler.jsonc leaves it out until the
+ * domain is set up, and then nothing is sent: `emailEnabled` is false, the
+ * settings say so, and "forgot password" still answers the same way.
+ *
+ * Mails carry one-time tokens: never log a message, only its outcome.
+ */
+
+/** Optional parts of the environment (not in wrangler.jsonc yet, so not in `Env`). */
+interface EmailEnv {
+  EMAIL?: SendEmail
+  /** Sender address on the onboarded domain. */
+  EMAIL_FROM?: string
+  /** The site's origin, for links in mails. */
+  SITE_URL?: string
+}
+
+export const BRAND = 'Genshin Tracker'
+export const SITE_ORIGIN = 'https://genshin-tracker.475.dev'
+const DEFAULT_FROM = 'no-reply@475.dev'
+
+const emailEnv = (env: Env) => env as unknown as EmailEnv
+
+export function emailBinding(env: Env): SendEmail | undefined {
+  const binding = emailEnv(env).EMAIL
+  // A binding is an object (an RPC stub under `vite dev`); a stray string var is not one.
+  return binding && typeof binding !== 'string' ? binding : undefined
+}
+
+export const emailEnabled = (env: Env): boolean => emailBinding(env) !== undefined
+
+function originOf(url: string | undefined): string | null {
+  if (!url) return null
+  try {
+    const { origin, protocol } = new URL(url)
+    return protocol === 'https:' || protocol === 'http:' ? origin : null
+  } catch {
+    return null
+  }
+}
+
+const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+/**
+ * The origin links in a mail point at. The request's own origin only when it
+ * is this site (SITE_URL, else the production origin) or loopback (`vite
+ * dev`): a forged Host must never put a reset token in a link to someone
+ * else's server. A loopback link sends the token to the reader's own machine,
+ * which is why it is safe to allow.
+ */
+export function linkOrigin(env: Env, requestUrl: string): string {
+  const site = originOf(emailEnv(env).SITE_URL) ?? SITE_ORIGIN
+  const request = originOf(requestUrl)
+  if (request === site || request === SITE_ORIGIN) return request
+  if (request && LOOPBACK.has(new URL(request).hostname)) return request
+  return site
+}
+
+export interface Mail {
+  to: string
+  subject: string
+  text: string
+  html: string
+}
+
+export type SendResult = 'sent' | 'unavailable' | 'failed'
+
+/** Sends one mail. Never throws: a failure is logged (its code only) and reported. */
+export async function sendMail(env: Env, mail: Mail): Promise<SendResult> {
+  const binding = emailBinding(env)
+  if (!binding) return 'unavailable'
+  try {
+    await binding.send({
+      from: { name: BRAND, email: emailEnv(env).EMAIL_FROM || DEFAULT_FROM },
+      to: mail.to,
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
+    })
+    return 'sent'
+  } catch (error) {
+    const code = (error as { code?: unknown })?.code
+    console.error(
+      'email send failed',
+      typeof code === 'string' ? code : String(error).slice(0, 120),
+    )
+    return 'failed'
+  }
+}
+
+const escapeHtml = (text: string) =>
+  text.replace(
+    /[&<>"']/g,
+    (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!,
+  )
+
+/** A short mail: lines of text, an optional button link, a quiet footnote. */
+function compose(
+  to: string,
+  subject: string,
+  lines: string[],
+  link: { href: string; label: string } | null,
+  note: string,
+): Mail {
+  const text = [...lines, ...(link ? ['', link.href] : []), '', note, '', `— ${BRAND}`].join('\n')
+  const paragraphs = lines
+    .map((line) => `<p style="margin:0 0 16px">${escapeHtml(line)}</p>`)
+    .join('')
+  const button = link
+    ? `<p style="margin:24px 0"><a href="${escapeHtml(link.href)}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:8px">${escapeHtml(link.label)}</a></p>` +
+      `<p style="margin:0 0 16px;font-size:13px;color:#64748b;word-break:break-all">${escapeHtml(link.href)}</p>`
+    : ''
+  const html =
+    `<!doctype html><html><body style="margin:0;padding:24px;background:#f8fafc;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#0f172a;font-size:15px;line-height:1.5">` +
+    `<div style="max-width:480px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:28px">` +
+    `<p style="margin:0 0 20px;font-weight:700;font-size:17px"><span style="color:#f59e0b">&#10022;</span> ${BRAND}</p>` +
+    paragraphs +
+    button +
+    `<p style="margin:16px 0 0;font-size:13px;color:#64748b">${escapeHtml(note)}</p>` +
+    `</div></body></html>`
+  return { to, subject, text, html }
+}
+
+/**
+ * Goes to an address nobody has confirmed yet, which anyone can type in: so
+ * it carries nothing they chose (not even the username), only fixed text.
+ */
+export function verifyEmailMail(to: string, origin: string, token: string): Mail {
+  return compose(
+    to,
+    'Confirm your email',
+    [`Confirm this email for your ${BRAND} account.`],
+    { href: `${origin}/verify-email?token=${token}`, label: 'Confirm email' },
+    "The link works once, for 24 hours. Didn't ask for it? Ignore this email.",
+  )
+}
+
+export function resetPasswordMail(
+  to: string,
+  origin: string,
+  token: string,
+  username: string,
+): Mail {
+  return compose(
+    to,
+    'Reset your password',
+    [`Set a new password for ${username} on ${BRAND}.`],
+    { href: `${origin}/reset-password?token=${token}`, label: 'Reset password' },
+    "The link works once, for 30 minutes. Didn't ask for it? Ignore this email; your password stays as it is.",
+  )
+}
+
+export function passwordChangedMail(to: string, origin: string, username: string): Mail {
+  return compose(
+    to,
+    'Your password was changed',
+    [`The password for ${username} on ${BRAND} was just changed, and every device was signed out.`],
+    { href: `${origin}/forgot-password`, label: "Wasn't you? Reset it" },
+    'Sent to the confirmed email of this account.',
+  )
+}

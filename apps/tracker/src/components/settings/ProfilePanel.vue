@@ -7,11 +7,15 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
-import { ApiRequestError } from '@/api'
+import { ApiRequestError, api } from '@/api'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
-/** Who you are: user id, username, email; the last two edit in place. */
+/**
+ * Who you are: user id, username, email; the last two edit in place. An
+ * unconfirmed email has a Verify action (a confirmation link by mail; a new
+ * email gets one by itself) while the server can send email.
+ */
 const session = useSession()
 const feedback = useFeedback()
 
@@ -54,12 +58,17 @@ async function save() {
   if (!valid.value || (!usernameChanged.value && !emailChanged.value)) return
   busy.value = true
   try {
+    const sentTo = emailChanged.value ? email.value.trim().toLowerCase() : ''
     await session.updateProfile({
       ...(usernameChanged.value ? { username: username.value.trim() } : {}),
       ...(emailChanged.value ? { email: email.value.trim() || null } : {}),
     })
     editing.value = false
-    feedback.toast({ tone: 'success', title: 'Profile updated' })
+    feedback.toast({
+      tone: 'success',
+      title: 'Profile updated',
+      detail: sentTo && session.me?.emailEnabled ? `Confirmation sent to ${sentTo}` : undefined,
+    })
   } catch (cause) {
     const code = cause instanceof ApiRequestError ? cause.code : ''
     if (code === 'username_taken') serverErrors.value = { username: 'Taken' }
@@ -67,6 +76,25 @@ async function save() {
     else feedback.error('Profile not saved', cause)
   } finally {
     busy.value = false
+  }
+}
+
+const sending = ref(false)
+
+async function sendConfirmation() {
+  const to = session.me?.email
+  if (!to) return
+  sending.value = true
+  try {
+    await api.sendVerifyEmail()
+    feedback.toast({ tone: 'success', title: 'Link sent', detail: `Check ${to}` })
+  } catch (cause) {
+    // Confirmed in another tab meanwhile: just show it.
+    if (cause instanceof ApiRequestError && cause.code === 'already_verified') {
+      session.emailConfirmed(to)
+    } else feedback.error('Link not sent', cause)
+  } finally {
+    sending.value = false
   }
 }
 
@@ -99,13 +127,42 @@ function edit(field: keyof typeof fields, value: string) {
       </div>
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-3">
         <dt class="text-text-secondary">Email</dt>
-        <dd v-if="session.me.email" class="flex min-w-0 items-center gap-2">
+        <dd v-if="session.me.email" class="flex min-w-0 flex-wrap items-center justify-end gap-2">
           <span class="min-w-0 truncate">{{ session.me.email }}</span>
-          <UiBadge :tone="session.me.emailVerified ? 'success' : 'warning'">
+          <UiBadge
+            :tone="session.me.emailVerified ? 'success' : 'warning'"
+            :title="
+              session.me.emailVerified ? 'Can receive password reset links' : 'Not confirmed yet'
+            "
+          >
             {{ session.me.emailVerified ? 'Verified' : 'Unverified' }}
           </UiBadge>
+          <template v-if="!session.me.emailVerified">
+            <UiButton
+              v-if="session.me.emailEnabled"
+              size="sm"
+              :loading="sending"
+              title="Mail a confirmation link (valid 24 hours)"
+              @click="sendConfirmation"
+            >
+              Verify
+            </UiButton>
+            <span
+              v-else
+              class="text-sm text-text-muted"
+              title="This server can't send email yet, so emails can't be confirmed and reset links can't be sent"
+            >
+              Email not available yet
+            </span>
+          </template>
         </dd>
-        <dd v-else class="text-text-muted">—</dd>
+        <dd
+          v-else
+          class="text-text-muted"
+          title="Add and confirm an email to reset a lost password"
+        >
+          —
+        </dd>
       </div>
     </dl>
 

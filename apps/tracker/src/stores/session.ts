@@ -82,6 +82,17 @@ export const useSession = defineStore('session', () => {
     await api.changePassword({ currentPassword, newPassword })
   }
 
+  /** Sets a new password from a reset link; the server signs this browser in. */
+  async function resetPassword(token: string, password: string) {
+    adopt(await api.resetPassword(token, password))
+    loading = Promise.resolve()
+  }
+
+  /** A confirmation link was used (maybe in this browser's session): show it confirmed. */
+  function emailConfirmed(email: string) {
+    if (me.value?.email === email) me.value = { ...me.value, emailVerified: true }
+  }
+
   /** Applies the change at once and rolls it back if the server refuses it. */
   async function updateSettings(patch: Partial<UserSettings>) {
     const before = me.value
@@ -117,6 +128,8 @@ export const useSession = defineStore('session', () => {
     logoutAll,
     updateProfile,
     changePassword,
+    resetPassword,
+    emailConfirmed,
     updateSettings,
     newImportKey,
     revokeImportKey,

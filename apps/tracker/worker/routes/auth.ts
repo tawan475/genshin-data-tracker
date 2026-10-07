@@ -12,6 +12,7 @@ import { Hono, type Context } from 'hono'
 import { getDb } from '../db/client'
 import { users } from '../db/schema'
 import type { AppEnv } from '../env'
+import { emailEnabled, linkOrigin } from '../lib/email'
 import { ApiError, clientIp, isUniqueViolation, parseJson, rateLimit } from '../lib/http'
 import { hashPassword, verifyPassword } from '../lib/password'
 import {
@@ -21,11 +22,12 @@ import {
   revokeAllSessions,
   startSession,
 } from '../lib/session'
+import { closeResetLinks, mailVerification } from '../services/auth-tokens'
 
 type User = typeof users.$inferSelect
 
 /** Argon2's secret input; see lib/password. */
-function pepper(c: Context<AppEnv>): string {
+export function pepper(c: Context<AppEnv>): string {
   const secret = c.env.PASSWORD_PEPPER
   if (!secret || secret.length < 32) {
     throw new ApiError(500, 'misconfigured', 'Server is missing PASSWORD_PEPPER')
@@ -33,7 +35,7 @@ function pepper(c: Context<AppEnv>): string {
   return secret
 }
 
-export function toMe(user: User): MeResponse {
+export function toMe(user: User, env: Env): MeResponse {
   return {
     id: user.id,
     username: user.username,
@@ -41,7 +43,26 @@ export function toMe(user: User): MeResponse {
     emailVerified: user.emailVerified,
     settings: deepMerge(USER_SETTINGS_DEFAULTS, user.settings),
     hasImportKey: user.importKeyHash !== null,
+    emailEnabled: emailEnabled(env),
   }
+}
+
+/**
+ * Mails a confirmation link for a just-set email after the response. Best
+ * effort: skipped past the per-IP limit (sign-ups could otherwise mail any
+ * number of strangers), and Settings can always send another.
+ */
+function confirmEmailLater(c: Context<AppEnv>, user: User): void {
+  if (!user.email || user.emailVerified || !emailEnabled(c.env)) return
+  const target = { id: user.id, email: user.email }
+  const origin = linkOrigin(c.env, c.req.url)
+  const limiter = c.env.RECOVERY_LIMITER
+  c.executionCtx.waitUntil(
+    (async () => {
+      if (limiter && !(await limiter.limit({ key: `confirm:${clientIp(c)}` })).success) return
+      await mailVerification(c.env, target, origin)
+    })().catch((error: unknown) => console.error('verify-email mail', String(error).slice(0, 120))),
+  )
 }
 
 async function findByLogin(c: Context<AppEnv>, login: string): Promise<User | undefined> {
@@ -78,7 +99,8 @@ export const auth = new Hono<AppEnv>()
       throw error
     }
     await startSession(c, user)
-    return c.json(toMe(user), 201)
+    confirmEmailLater(c, user)
+    return c.json(toMe(user, c.env), 201)
   })
 
   .post('/login', async (c) => {
@@ -96,7 +118,7 @@ export const auth = new Hono<AppEnv>()
         .where(eq(users.id, user.id))
     }
     await startSession(c, user)
-    return c.json(toMe(user))
+    return c.json(toMe(user, c.env))
   })
 
   .post('/refresh', async (c) => {
@@ -123,7 +145,7 @@ export const auth = new Hono<AppEnv>()
       .from(users)
       .where(eq(users.id, c.get('userId')))
     if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
-    return c.json(toMe(user))
+    return c.json(toMe(user, c.env))
   })
 
   /** Changes the username and/or email (the user chose not to ask for the password here). */
@@ -144,14 +166,19 @@ export const auth = new Hono<AppEnv>()
       // Verification belongs to the address, not the account.
       changes.emailVerified = false
     }
-    if (Object.keys(changes).length === 0) return c.json(toMe(user))
+    if (Object.keys(changes).length === 0) return c.json(toMe(user, c.env))
     try {
       const [updated] = (await db
         .update(users)
         .set(changes)
         .where(eq(users.id, userId))
         .returning()) as [User]
-      return c.json(toMe(updated))
+      if (changes.email !== undefined) {
+        // Reset links mailed to the old address die with it; the new one gets a confirmation.
+        await closeResetLinks(c.env.DB, userId, { mailedOnly: true })
+        confirmEmailLater(c, updated)
+      }
+      return c.json(toMe(updated, c.env))
     } catch (error) {
       if (isUniqueViolation(error, 'users.username_key')) {
         throw new ApiError(409, 'username_taken', 'That username is taken')
@@ -163,7 +190,10 @@ export const auth = new Hono<AppEnv>()
     }
   })
 
-  /** Changing the password signs every other device out; this one stays signed in. */
+  /**
+   * Changing the password signs every other device out (this one stays signed
+   * in) and ends any open reset link.
+   */
   .post('/password', requireUser, async (c) => {
     const userId = c.get('userId')
     await rateLimit(c.env.AUTH_LIMITER, `password:${userId}`)
@@ -175,6 +205,7 @@ export const auth = new Hono<AppEnv>()
     const updated = await revokeAllSessions(c, userId, {
       passwordHash: hashPassword(body.newPassword, pepper(c)),
     })
+    await closeResetLinks(c.env.DB, userId)
     await startSession(c, updated)
     return c.body(null, 204)
   })

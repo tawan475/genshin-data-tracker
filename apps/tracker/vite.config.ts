@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process'
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 
-import { cloudflare } from '@cloudflare/vite-plugin'
+import { cloudflare, type PluginConfig } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig, type Plugin } from 'vite'
@@ -67,15 +67,25 @@ function serviceWorker(): Plugin {
   }
 }
 
+/**
+ * `vite dev` only: a simulated `send_email` binding, so the email flows work
+ * locally (Miniflare logs each mail and saves its text and HTML to a file;
+ * nothing is sent). Builds never get it: the deployed Worker has EMAIL once
+ * wrangler.jsonc does (see there).
+ */
+const devEmail: PluginConfig = {
+  config: (worker) => (worker.send_email?.length ? undefined : { send_email: [{ name: 'EMAIL' }] }),
+}
+
 // https://vite.dev/config/
 // The Cloudflare plugin runs worker/index.ts in workerd during `vite dev` and
 // builds the SPA plus the Worker together for `wrangler deploy`.
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     vue(),
     vueDevTools(),
     tailwindcss(),
-    cloudflare(),
+    cloudflare(command === 'serve' ? devEmail : {}),
     imageHostPreconnect(),
     serviceWorker(),
   ],
@@ -112,4 +122,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-})
+}))

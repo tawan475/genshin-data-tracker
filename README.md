@@ -199,6 +199,43 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   are purged, unreferenced sections are collected.
   Account counters are kept exact by triggers (migration 0002).
 
+## Account recovery
+
+One-time links (table `auth_tokens`, migration 0014; only the token's SHA-256
+is stored): email confirmation (24 h; sent at sign-up, on an email change and
+by Settings' Verify, at most 3 an hour) and password reset (30 min, mailed only
+to a **confirmed** email, at most 3 an hour per account). "Forgot password"
+answers the same at once whatever was typed; the lookup and mail run after the
+response. A reset sets the password, bumps `token_version` (every session and
+live socket ends), uses up the user's other reset links, mails a notice and
+signs that browser in. Changing the password in Settings also ends open reset
+links. Routes: `worker/routes/recovery.ts`.
+
+**Email** goes out through Cloudflare Email Service (Workers Paid). Until the
+binding exists nothing is sent and Settings says email isn't available; to
+turn it on:
+
+1. Dashboard → Compute → Email Service → Email Sending → Onboard Domain →
+   `475.dev`. Cloudflare adds the records itself (MX + SPF on
+   `cf-bounce.475.dev`, DKIM `cf-bounce._domainkey`, DMARC `_dmarc`); wait for
+   them to verify.
+2. Add to `apps/tracker/wrangler.jsonc`:
+   `"send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["no-reply@475.dev"] }]`
+   (optional vars: `EMAIL_FROM`, `SITE_URL`), run `pnpm --filter @gdt/tracker
+   cf-typegen`, push.
+
+`vite dev` simulates the binding: each mail is logged in the dev server's
+output with the path of its text and HTML files, nothing is sent.
+
+**Admin reset** (also for users without an email): prints a link valid for 24
+hours that sets a new password once; send it privately (e.g. on Discord). The
+admin never sees or sets the password.
+
+```bash
+pnpm --filter @gdt/tracker admin:reset-link <username|email>           # production D1
+pnpm --filter @gdt/tracker admin:reset-link <username|email> --local   # dev database, localhost link
+```
+
 ## Scripts
 
 ```bash
