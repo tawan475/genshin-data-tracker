@@ -207,7 +207,6 @@ const moreCount = computed(() => {
     Number(f.levelMin > LEVEL_MIN || f.levelMax < LEVEL_MAX) +
     Number(f.lock !== 'any') +
     Number(f.equipped !== 'any') +
-    Number(f.owners.length > 0) +
     Number(f.astral !== 'any') +
     Number(f.elixir !== 'any')
   )
@@ -374,6 +373,21 @@ function clearAll() {
           </span>
           <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
         </UiButton>
+        <UiButton
+          class="min-w-0 flex-1 sm:flex-none"
+          :class="filters.owners.length ? 'border-accent-text!' : ''"
+          :title="`Equipped by: ${ownersTitle}`"
+          aria-haspopup="dialog"
+          aria-label="Equipped by"
+          @click="ownersOpen = true"
+        >
+          <UserRound class="size-4 shrink-0" aria-hidden="true" />
+          <span class="max-sm:sr-only">Character</span>
+          <span v-if="filters.owners.length" class="tabular font-mono text-accent-text">
+            {{ filters.owners.length }}
+          </span>
+          <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
+        </UiButton>
         <label class="shrink-0" :title="sortTitle">
           <span class="sr-only">Sort by</span>
           <UiSelect v-model="sort" :options="sortOptions" class="w-32" />
@@ -487,7 +501,7 @@ function clearAll() {
         class="shrink-0 px-3"
         :aria-expanded="moreOpen"
         :aria-controls="moreId"
-        title="Main stat, substats, lines, level, lock, location, wearer, astral mark, elixir"
+        title="Main stat, substats, lines, level, lock, location, astral mark, elixir"
         @click="moreOpen = !moreOpen"
       >
         <SlidersHorizontal class="size-4" aria-hidden="true" />
@@ -551,25 +565,6 @@ function clearAll() {
         <div class="flex flex-col gap-1.5">
           <span class="text-sm font-medium text-text-secondary" aria-hidden="true">Location</span>
           <UiSegmented v-model="equipped" :options="EQUIP_OPTIONS" label="Location" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <span class="text-sm font-medium text-text-secondary" aria-hidden="true"
-            >Equipped by</span
-          >
-          <UiButton
-            :class="filters.owners.length ? 'border-accent-text!' : ''"
-            :title="ownersTitle"
-            aria-haspopup="dialog"
-            aria-label="Equipped by"
-            @click="ownersOpen = true"
-          >
-            <UserRound class="size-4 shrink-0" aria-hidden="true" />
-            <span v-if="filters.owners.length" class="tabular font-mono text-accent-text">
-              {{ filters.owners.length }}
-            </span>
-            <span v-else>Anyone</span>
-            <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
-          </UiButton>
         </div>
         <div class="flex flex-col gap-1.5">
           <span class="text-sm font-medium text-text-secondary" aria-hidden="true"
