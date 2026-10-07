@@ -34,14 +34,14 @@ export interface MaintenanceResult {
 
 /**
  * v2 sections no snapshot row names, directly or as the base (or the base's
- * dictionary) of one it names.
+ * dictionary) of one it names; a row per blob deleted.
  */
 export const COLLECT_SECTION_BLOBS = `WITH RECURSIVE live(id) AS (
     SELECT j.value FROM snapshots AS s, json_each(json_array(${REFS_SQL})) AS j
     WHERE j.value IS NOT NULL
     UNION SELECT b.base_id FROM section_blobs AS b JOIN live ON b.id = live.id
       WHERE b.base_id IS NOT NULL)
-  DELETE FROM section_blobs WHERE id NOT IN (SELECT id FROM live)`
+  DELETE FROM section_blobs WHERE id NOT IN (SELECT id FROM live) RETURNING 1`
 
 export async function runMaintenance(
   d1: D1Database,
@@ -61,7 +61,8 @@ export async function runMaintenance(
   )
   const result: MaintenanceResult = {
     snapshots: snapshots!.meta.changes,
-    blobs: sections!.meta.changes + (legacy?.meta.changes ?? 0),
+    // Rows returned: meta.changes would also count the counter trigger's updates.
+    blobs: sections!.results.length + (legacy?.results.length ?? 0),
     tokens: tokens!.meta.changes,
   }
   if (options.repackLimit && options.repackLimit > 0) {

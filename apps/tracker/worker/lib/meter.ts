@@ -33,6 +33,55 @@ export class D1Meter {
   }
 
   /**
+   * `d1` with every query and batch counted here: for code that makes many
+   * D1 calls of its own (repack), whose cost the caller reports.
+   */
+  wrap(d1: D1Database): D1Database {
+    const count = (results: D1Result[]) => {
+      this.roundTrips++
+      for (const result of results) {
+        this.rowsRead += result.meta.rows_read ?? 0
+        this.rowsWritten += result.meta.rows_written ?? 0
+        this.sqlMs += result.meta.duration ?? 0
+      }
+    }
+    const statement = (inner: D1PreparedStatement): D1PreparedStatement => {
+      const wrapped = {
+        inner,
+        bind: (...values: unknown[]) => statement(inner.bind(...values)),
+        all: async () => {
+          const result = await inner.all()
+          count([result])
+          return result
+        },
+        run: async () => {
+          const result = await inner.run()
+          count([result])
+          return result
+        },
+        first: async () => {
+          const result = await inner.all()
+          count([result])
+          return result.results[0] ?? null
+        },
+        raw: () => inner.raw(),
+      }
+      return wrapped as unknown as D1PreparedStatement
+    }
+    return {
+      prepare: (sql: string) => statement(d1.prepare(sql)),
+      batch: async (statements: D1PreparedStatement[]) => {
+        const results = await d1.batch(
+          statements.map((s) => (s as unknown as { inner?: D1PreparedStatement }).inner ?? s),
+        )
+        count(results)
+        return results
+      },
+      exec: (sql: string) => d1.exec(sql),
+    } as unknown as D1Database
+  }
+
+  /**
    * Adds Server-Timing and x-gdt-d1 headers, but only for a request carrying
    * the diag key (as aru.gg does): costs are diagnostics, not public data.
    */

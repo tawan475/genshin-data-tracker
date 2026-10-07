@@ -23,6 +23,7 @@ import {
   artifactIdentityText,
   contentKey,
   decodeCatalogChunk,
+  blobUsesBase,
   decodeSnapshotMeta,
   encodeCatalogChunk,
   encodeSectionBlob,
@@ -45,6 +46,7 @@ import {
   type SnapshotSummary,
   type Slot,
 } from '@gdt/shared'
+import { D1Meter } from '../lib/meter'
 import { CATALOG_CHUNK_SIZE, catalogChunkStatements, insertBlobStatement } from './import'
 import { REF_COLUMNS, toBytes, withLegacySchema } from './storage'
 
@@ -66,6 +68,8 @@ export interface RepackResult {
   /** Pass as `after` to continue past rows that did not convert. */
   next: number
   remaining: RepackRemaining
+  /** What this run cost in D1 (what it bills): to size `limit`. */
+  d1: { roundTrips: number; rowsRead: number; rowsWritten: number; sqlMs: number }
 }
 
 /**
@@ -108,9 +112,11 @@ export interface RepackOptions {
 }
 
 export async function repack(
-  d1: D1Database,
+  database: D1Database,
   { limit, after = 0, encodeSection = encodeSectionBlob }: RepackOptions,
 ): Promise<RepackResult> {
+  const meter = new D1Meter()
+  const d1 = meter.wrap(database)
   // Once the v1 columns are dropped there is no v1 row left to convert.
   const snapshots = await withLegacySchema((legacy) =>
     legacy
@@ -128,20 +134,29 @@ export async function repack(
     legacyBlobsDeleted,
     next: snapshots.next,
     remaining: await repackStatus(d1),
+    d1: {
+      roundTrips: meter.roundTrips,
+      rowsRead: meter.rowsRead,
+      rowsWritten: meter.rowsWritten,
+      sqlMs: Math.round(meter.sqlMs),
+    },
   }
 }
 
-/** v1 blobs no v1 snapshot row (live or in the trash) names any more. */
+/**
+ * v1 blobs no v1 snapshot row (live or in the trash) names any more; a row
+ * per blob deleted (meta.changes would also count the counter trigger's).
+ */
 export const COLLECT_LEGACY_BLOBS = `DELETE FROM blobs WHERE NOT EXISTS (
   SELECT 1 FROM snapshots s WHERE s.account_id = blobs.account_id AND blobs.hash IN (
     s.characters_hash, s.weapons_hash, s.artifacts_hash, s.materials_hash,
     s.materials_keyframe_hash, s.achievements_hash, s.player_hash,
     s.achievement_times_hash, s.character_extras_hash, s.artifacts_base_hash,
     s.achievement_times_base_hash)
-)`
+) RETURNING 1`
 
 async function collectLegacyBlobs(d1: D1Database): Promise<number> {
-  return (await d1.prepare(COLLECT_LEGACY_BLOBS).run()).meta.changes
+  return (await d1.prepare(COLLECT_LEGACY_BLOBS).all()).results.length
 }
 
 // ---------------------------------------------------------------- snapshots
@@ -198,6 +213,8 @@ interface Target {
   raw: RawBlob
   /** For a blob this run writes: its insert, base given by hash or id. */
   write: { hash: string; code: number; base: BlobRef | null; data: Uint8Array } | null
+  /** The blob it needs to decode (a delta's base, or its dictionary), when this run knows it. */
+  base: Target | null
 }
 
 async function repackSnapshots(
@@ -291,12 +308,22 @@ async function repackAccountSnapshots(
     }
     raw.set(blob.id, blob)
     const hash = (row.hash as string).toLowerCase()
-    targets.set(hash, { hash, id: blob.id, raw: blob, write: null })
+    targets.set(hash, { hash, id: blob.id, raw: blob, write: null, base: null })
   }
   const decoder = new BlobDecoder((id) => raw.get(id))
   let provisional = 0
+  /**
+   * The last standalone full section of each kind this run stored: what the
+   * next one is compressed against while that halves it (as an import does,
+   * see planSnapshotV2), so converted history is about as compact as new.
+   */
+  const anchors = new Map<SectionKind, Target>()
 
-  /** The v2 blob of a v1 section (and of its base first), reused or planned. */
+  /**
+   * The v2 blob of a v1 section, reused or planned. `base` is a delta's base
+   * (a v1 delta stays a delta of the same content); a full section may get
+   * an anchor as its dictionary instead.
+   */
   const targetOf = (
     kind: SectionKind,
     hash: string,
@@ -307,12 +334,21 @@ async function repackAccountSnapshots(
     const found = targets.get(short)
     if (found) return found
     const delta = base !== null
-    const encoded = encodeSection(kind, value, delta, base ? decoder.decode(base.id) : null)
+    let encoded = encodeSection(kind, value, delta, base ? decoder.decode(base.id) : null)
+    let dictionary: Target | null = base
+    if (!delta) {
+      const anchor = anchors.get(kind) ?? null
+      const against = anchor ? encodeSection(kind, value, false, decoder.decode(anchor.id)) : null
+      if (against && blobUsesBase(against.data) && against.data.length * 2 <= encoded.data.length) {
+        encoded = against
+        dictionary = anchor
+      }
+    }
     const id = --provisional
     const blob: RawBlob = {
       id,
       code: kindCode(kind, delta),
-      baseId: base ? base.id : null,
+      baseId: dictionary ? dictionary.id : null,
       data: encoded.data,
     }
     raw.set(id, blob)
@@ -323,24 +359,40 @@ async function repackAccountSnapshots(
       write: {
         hash: short,
         code: blob.code,
-        base: base ? (base.write ? { hash: base.hash } : { id: base.id }) : null,
+        base: dictionary
+          ? dictionary.write
+            ? { hash: dictionary.hash }
+            : { id: dictionary.id }
+          : null,
         data: encoded.data,
       },
+      base: dictionary,
     }
     targets.set(short, target)
+    if (!delta && !dictionary) anchors.set(kind, target)
     return target
   }
 
   let statements: D1PreparedStatement[] = []
-  let pending = 0
+  /** Positions of the row updates in `statements`, and their snapshot ids. */
+  let updates: [number, number][] = []
   const written = new Set<string>()
   let converted = 0
   const mismatched: number[] = []
+  const skipped: number[] = []
   // Each row is written with the blobs it needs; a few rows share a batch.
+  // A row whose update changed nothing (it changed in between, or a section
+  // it names was not there) is left for the next run.
   const flush = async () => {
-    if (statements.length > 0) await d1.batch(statements)
+    if (statements.length > 0) {
+      const results = await d1.batch(statements)
+      for (const [index, snapshotId] of updates) {
+        if ((results[index]?.meta.changes ?? 0) > 0) converted++
+        else skipped.push(snapshotId)
+      }
+    }
     statements = []
-    pending = 0
+    updates = []
   }
   for (const row of rows) {
     const plan = planRow(row, v1, players, targetOf, decoder)
@@ -350,17 +402,22 @@ async function repackAccountSnapshots(
       continue
     }
     // Bases before the blobs that name them; each blob once.
-    for (const target of plan.writes) {
-      if (written.has(target.hash)) continue
+    const write = (target: Target) => {
+      if (!target.write || written.has(target.hash)) return
+      if (target.base) write(target.base)
       written.add(target.hash)
-      statements.push(insertBlobStatement(d1, accountId, target.write!))
+      statements.push(insertBlobStatement(d1, accountId, target.write))
     }
+    for (const target of plan.writes) write(target)
+    updates.push([statements.length, row.id])
     statements.push(convertRowStatement(d1, accountId, row, plan))
-    converted++
-    if (++pending >= ROWS_PER_BATCH) await flush()
+    if (updates.length >= ROWS_PER_BATCH) await flush()
   }
   await flush()
-  return { converted, mismatched }
+  for (const snapshotId of skipped) {
+    console.warn('repack_skipped', JSON.stringify({ snapshotId, accountId }))
+  }
+  return { converted, mismatched: [...mismatched, ...skipped] }
 }
 
 interface RowPlan {
