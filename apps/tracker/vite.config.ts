@@ -76,11 +76,20 @@ function serviceWorker(): Plugin {
  *   stay paused unless `.dev.vars` has `EMAIL_FEATURES=1`.
  * - OAUTH_DEV_MOCK: "Continue with Discord / Google" go to the fake provider
  *   in dev/oauth-mock.ts. `OAUTH_DEV_MOCK=0` in .dev.vars turns it off.
+ * - The human check (worker/lib/turnstile.ts) with Cloudflare's always-pass
+ *   test keys: the real widget, invisible, every token accepted. Keys in
+ *   .dev.vars override them (site key 3x00000000000000000000FF forces an
+ *   interactive challenge); empty ones turn the check off.
  */
 const devWorker: PluginConfig = {
   config: (worker) => ({
     ...(worker.send_email?.length ? {} : { send_email: [{ name: 'EMAIL' }] }),
-    vars: { ...worker.vars, OAUTH_DEV_MOCK: '1' },
+    vars: {
+      ...worker.vars,
+      OAUTH_DEV_MOCK: '1',
+      TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+      TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
+    },
   }),
 }
 

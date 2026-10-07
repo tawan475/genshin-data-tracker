@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import HumanCheck from '@/components/auth/HumanCheck.vue'
+import { HUMAN_CHECK_NEEDED, siteKeyAfter } from '@/components/auth/human-check'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import {
@@ -24,6 +26,9 @@ const error = ref('')
 const busy = ref(false)
 /** "Forgot password?" only while the email features are on (else the nudge under the form). */
 const emailFeatures = ref(false)
+/** The human check's site key while the server has it on. */
+const siteKey = ref<string | null>(null)
+const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
 
 const next = computed(() =>
   typeof route.query.next === 'string' && route.query.next.startsWith('/app')
@@ -41,15 +46,18 @@ onMounted(async () => {
     error.value = oauthErrorText(code)
     void router.replace({ query: { ...route.query, oauth_error: undefined } })
   }
-  emailFeatures.value = (await loadSignInOptions()).emailFeatures
+  const options = await loadSignInOptions()
+  emailFeatures.value = options.emailFeatures
+  siteKey.value = options.turnstileSiteKey
 })
 
 async function submit() {
   error.value = ''
   busy.value = true
   try {
+    const turnstile = siteKey.value ? await human.value?.token() : undefined
     if (linking.value) {
-      const result = await session.oauthLinkLogin(login.value.trim(), password.value)
+      const result = await session.oauthLinkLogin(login.value.trim(), password.value, turnstile)
       // Linked, or why not: Settings says which and can link it again.
       await router.replace({
         name: 'settings',
@@ -57,16 +65,21 @@ async function submit() {
       })
       return
     }
-    await session.login(login.value.trim(), password.value)
+    await session.login(login.value.trim(), password.value, turnstile)
     await router.replace(next.value ?? '/app')
   } catch (cause) {
-    error.value =
-      cause instanceof ApiRequestError && cause.code === 'invalid_credentials'
+    const key = await siteKeyAfter(cause)
+    if (key) siteKey.value = key
+    error.value = key
+      ? HUMAN_CHECK_NEEDED
+      : cause instanceof ApiRequestError && cause.code === 'invalid_credentials'
         ? 'Wrong username or password'
         : cause instanceof Error
           ? cause.message
           : 'Sign-in failed'
   } finally {
+    // A token works once, whatever the answer.
+    human.value?.reset()
     busy.value = false
   }
 }
@@ -122,14 +135,17 @@ async function submit() {
           required
         />
       </label>
-      <button
-        type="submit"
-        class="btn-glow mt-2 w-full rounded-xl"
-        :disabled="busy || !login || !password"
-      >
-        <UiSpinner v-if="busy" class="size-4" />
-        {{ linking ? 'Sign in and link' : 'Sign in' }}
-      </button>
+      <div class="mt-2 flex flex-col">
+        <HumanCheck v-if="siteKey" :key="siteKey" ref="human" :site-key="siteKey" action="login" />
+        <button
+          type="submit"
+          class="btn-glow w-full rounded-xl"
+          :disabled="busy || !login || !password"
+        >
+          <UiSpinner v-if="busy" class="size-4" />
+          {{ linking ? 'Sign in and link' : 'Sign in' }}
+        </button>
+      </div>
     </form>
     <OAuthButtons v-if="!linking" :next="next" nudge />
     <template #footer>

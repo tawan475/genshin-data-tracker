@@ -54,6 +54,9 @@
   // and GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET turn on "Continue with
   // Discord / Google"; a provider without both stays off and hidden (README,
   // "Sign in with Discord / Google"). `vite dev` uses a fake provider instead.
+  // Optional (worker/lib/turnstile.ts): TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY
+  // turn on the human check on sign-up and sign-in; with one only it stays off
+  // (README, "Human check"). `vite dev` uses Cloudflare's test keys.
 
   // Email (worker/lib/email.ts): confirmation and reset links go out through
   // Cloudflare Email Service, a `send_email` binding named EMAIL. It stays out

@@ -23,11 +23,18 @@ export const passwordSchema = z
   .min(MIN_PASSWORD_LENGTH, `At least ${MIN_PASSWORD_LENGTH} characters`)
   .max(MAX_PASSWORD_LENGTH, `At most ${MAX_PASSWORD_LENGTH} characters`)
 
+/**
+ * The human check's token (Cloudflare Turnstile), on the forms that ask for
+ * one while the server has it on (`OAuthProvidersResponse.turnstileSiteKey`).
+ */
+export const turnstileToken = z.string().max(2048).optional()
+
 export const registerRequest = z.object({
   username: usernameSchema,
   /** Optional; empty means none. Ignored while the email features are off. */
   email: emailSchema.nullish().or(z.literal('').transform(() => null)),
   password: passwordSchema,
+  turnstile: turnstileToken,
 })
 
 /** Username or email. */
@@ -36,7 +43,11 @@ export const loginName = z.string().trim().toLowerCase().min(1).max(254)
 /** An existing password: only bounded, since older rules may have allowed it. */
 const anyPassword = z.string().min(1).max(MAX_PASSWORD_LENGTH)
 
-export const loginRequest = z.object({ login: loginName, password: anyPassword })
+export const loginRequest = z.object({
+  login: loginName,
+  password: anyPassword,
+  turnstile: turnstileToken,
+})
 
 export const changePasswordRequest = z.object({
   currentPassword: anyPassword,
@@ -104,6 +115,7 @@ export const oauthRegisterRequest = z.object({
    * mailed). Ignored while the email features are off.
    */
   useEmail: z.boolean().default(false),
+  turnstile: turnstileToken,
 })
 
 export const GENSHIN_SERVERS = ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] as const
@@ -551,12 +563,15 @@ export interface MeResponse {
 
 /**
  * `GET /api/auth/oauth/providers`: the sign-in options this server has, for
- * the signed-out pages: its providers, and whether the email features are on
- * (`MeResponse.emailFeatures`).
+ * the signed-out pages: its providers, whether the email features are on
+ * (`MeResponse.emailFeatures`), and the human check's site key (null while
+ * it is off): sign-up, sign-in and the OAuth sign-up then send a
+ * `turnstile` token.
  */
 export interface OAuthProvidersResponse {
   providers: OAuthProvider[]
   emailFeatures: boolean
+  turnstileSiteKey: string | null
 }
 
 /** `POST /api/auth/oauth/:provider/start`: where to send the browser. */

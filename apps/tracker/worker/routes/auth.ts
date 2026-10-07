@@ -29,6 +29,7 @@ import {
 } from '../lib/http'
 import { clearPendingCookie, enabledProviders, isProvider } from '../lib/oauth'
 import { hashPassword, verifyPassword } from '../lib/password'
+import { requireHuman } from '../lib/turnstile'
 import {
   browserSession,
   clearSessionCookies,
@@ -103,15 +104,17 @@ const invalidCredentials = () =>
 const registerWithoutEmail = registerRequest.omit({ email: true })
 
 /**
- * Checks a username-or-email and password (rate limited per IP and per name;
- * an account without a password never matches), upgrading an old hash.
- * Starts no session: the caller does.
+ * Checks a username-or-email and password (rate limited per IP, the human
+ * check, then per name, so a bot without a token can't use up someone's
+ * budget; an account without a password never matches), upgrading an old
+ * hash. Starts no session: the caller does.
  */
 export async function passwordSignIn(
   c: Context<AppEnv>,
   body: z.output<typeof loginRequest>,
 ): Promise<User> {
   await rateLimit(c.env.AUTH_LIMITER, `login:${clientIp(c)}`)
+  await requireHuman(c, body.turnstile, ['login'])
   await rateLimit(c.env.AUTH_LIMITER, `login:${body.login}`)
   const user = await findByLogin(c, body.login)
   const check = verifyPassword(body.password, user?.passwordHash, pepper(c))
@@ -151,6 +154,8 @@ export const auth = new Hono<AppEnv>()
     const body = emailFeatures(c.env)
       ? await parseJson(c, registerRequest)
       : { ...(await parseJson(c, registerWithoutEmail)), email: null }
+    // Before the ~200 ms hash and the insert.
+    await requireHuman(c, body.turnstile, ['register'])
     const origin = requestOrigin(c)
     let user: User
     try {

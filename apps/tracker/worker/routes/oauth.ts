@@ -3,7 +3,8 @@
  * lib/oauth; rows: services/identities).
  *
  * - `GET /providers`: the providers this server has (none without secrets),
- *   and whether the email features are on (for the signed-out pages).
+ *   whether the email features are on, and the human check's site key (null
+ *   while off), for the signed-out pages.
  * - `POST /:provider/start {next?}`: signed out; answers the provider URL to
  *   send the browser to and sets the state cookie.
  * - `POST /:provider/link` (signed in, an active session): the same, to
@@ -17,10 +18,11 @@
  *   it, in the same session, still active → Settings. Failures go back to
  *   /login (Settings when linking) with `?oauth_error=<code>`
  *   (OAUTH_ERROR_CODES), nothing more.
- * - `GET /pending`, `POST /pending/register {username, useEmail}` (`useEmail`
- *   is ignored while the email features are off),
- *   `POST /pending/login {login, password}`, `DELETE /pending`: the pending
- *   identity's page.
+ * - `GET /pending`, `POST /pending/register {username, useEmail, turnstile?}`
+ *   (`useEmail` is ignored while the email features are off; a new account,
+ *   so it takes the human check, lib/turnstile),
+ *   `POST /pending/login {login, password, turnstile?}` (a password sign-in,
+ *   checked like /login), `DELETE /pending`: the pending identity's page.
  *
  * Linking and unlinking end no session. Start and callback share a per-IP
  * rate limit; the pending forms use sign-up's and sign-in's.
@@ -72,6 +74,7 @@ import {
   requestOrigin,
   requireActiveSession,
 } from '../lib/session'
+import { requireHuman, turnstileConfig } from '../lib/turnstile'
 import {
   createUserWithIdentity,
   linkIdentity,
@@ -135,6 +138,7 @@ export const oauth = new Hono<AppEnv>()
     return c.json({
       providers: enabledProviders(c.env, c.req.url),
       emailFeatures: emailFeatures(c.env),
+      turnstileSiteKey: turnstileConfig(c.env)?.siteKey ?? null,
     } satisfies OAuthProvidersResponse)
   })
 
@@ -262,6 +266,7 @@ export const oauth = new Hono<AppEnv>()
   .post('/pending/register', requireCsrf, async (c) => {
     await rateLimit(c.env.AUTH_LIMITER, `register:${clientIp(c)}`)
     const body = await parseJson(c, oauthRegisterRequest)
+    await requireHuman(c, body.turnstile, ['register'])
     const identity = await readPendingCookie(c)
     if (!identity) throw pendingExpired()
     // The provider's email is only offered, never trusted: set like a typed one,

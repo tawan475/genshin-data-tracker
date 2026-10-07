@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { usernameSchema, type OAuthPendingResponse } from '@gdt/shared'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { TimerOff } from 'lucide-vue-next'
+import HumanCheck from '@/components/auth/HumanCheck.vue'
+import { HUMAN_CHECK_NEEDED, siteKeyAfter } from '@/components/auth/human-check'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import { loadSignInOptions, providerLabel } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
@@ -29,6 +31,9 @@ const error = ref('')
 const busy = ref(false)
 /** "Use as account email" only while the email features are on. */
 const emailFeatures = ref(false)
+/** The human check's site key while the server has it on: a new account takes one. */
+const siteKey = ref<string | null>(null)
+const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
 
 const label = computed(() => (pending.value ? providerLabel(pending.value.provider) : ''))
 const usernameError = computed(() =>
@@ -40,7 +45,10 @@ const usernameError = computed(() =>
 )
 
 onMounted(async () => {
-  void loadSignInOptions().then((options) => (emailFeatures.value = options.emailFeatures))
+  void loadSignInOptions().then((options) => {
+    emailFeatures.value = options.emailFeatures
+    siteKey.value = options.turnstileSiteKey
+  })
   try {
     pending.value = await api.oauthPending()
     username.value = pending.value.username
@@ -60,11 +68,20 @@ async function create() {
   if (usernameError.value) return
   busy.value = true
   try {
-    await session.oauthRegister(username.value.trim(), emailFeatures.value && useEmail.value)
+    const turnstile = siteKey.value ? await human.value?.token() : undefined
+    await session.oauthRegister(
+      username.value.trim(),
+      emailFeatures.value && useEmail.value,
+      turnstile,
+    )
     await router.replace({ name: 'account-new' })
   } catch (cause) {
     const code = cause instanceof ApiRequestError ? cause.code : ''
-    if (code === 'username_taken') usernameTaken.value = true
+    const key = await siteKeyAfter(cause)
+    if (key) {
+      siteKey.value = key
+      error.value = HUMAN_CHECK_NEEDED
+    } else if (code === 'username_taken') usernameTaken.value = true
     else if (code === 'email_taken') {
       useEmail.value = false
       error.value = 'That email belongs to another account'
@@ -72,6 +89,8 @@ async function create() {
     else if (code === 'identity_taken') error.value = 'Already linked. Sign in with it.'
     else error.value = cause instanceof Error ? cause.message : 'Sign-up failed'
   } finally {
+    // A token works once, whatever the answer.
+    human.value?.reset()
     busy.value = false
   }
 }
@@ -136,10 +155,19 @@ async function cancel() {
           <input v-model="useEmail" type="checkbox" class="size-4 accent-amber-500" />
           Use as account email
         </label>
-        <button type="submit" class="btn-glow mt-2 w-full rounded-xl" :disabled="busy">
-          <UiSpinner v-if="busy" class="size-4" />
-          Create account
-        </button>
+        <div class="mt-2 flex flex-col">
+          <HumanCheck
+            v-if="siteKey"
+            :key="siteKey"
+            ref="human"
+            :site-key="siteKey"
+            action="register"
+          />
+          <button type="submit" class="btn-glow w-full rounded-xl" :disabled="busy">
+            <UiSpinner v-if="busy" class="size-4" />
+            Create account
+          </button>
+        </div>
       </form>
 
       <div class="my-6 flex items-center gap-3 text-xs tracking-wider text-gray-500 uppercase">

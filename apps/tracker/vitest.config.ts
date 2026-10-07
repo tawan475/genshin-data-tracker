@@ -18,6 +18,10 @@ export default defineConfig(async () => {
             JWT_SECRET: 'test-jwt-secret-test-jwt-secret-0123456789',
             PASSWORD_PEPPER: 'test-pepper-test-pepper-test-pepper-0123',
             DIAG_KEY: 'test-diag-key-test-diag-key-test-diag-key',
+            // The human check is off (as in production until both are set),
+            // whatever .dev.vars says; its tests turn it on per request.
+            TURNSTILE_SITE_KEY: '',
+            TURNSTILE_SECRET_KEY: '',
           },
         },
       }),

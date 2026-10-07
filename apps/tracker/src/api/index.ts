@@ -46,13 +46,19 @@ export interface AccountInput {
 
 export const api = {
   // ------------------------------------------------------------------ auth
-  login: (login: string, password: string) =>
+  /** `turnstile`: the human check's token, while the server has it on. */
+  login: (login: string, password: string, turnstile?: string) =>
     requestJson<MeResponse>('/api/auth/login', {
       method: 'POST',
-      json: { login, password },
+      json: { login, password, turnstile },
       noRefresh: true,
     }),
-  register: (body: { username: string; email: string | null; password: string }) =>
+  register: (body: {
+    username: string
+    email: string | null
+    password: string
+    turnstile?: string
+  }) =>
     requestJson<MeResponse>('/api/auth/register', { method: 'POST', json: body, noRefresh: true }),
   logout: () => requestJson<void>('/api/auth/logout', { method: 'POST', noRefresh: true }),
   logoutAll: () => requestJson<void>('/api/auth/logout-all', { method: 'POST' }),
@@ -112,17 +118,17 @@ export const api = {
     requestJson<OAuthPendingResponse>('/api/auth/oauth/pending', { noRefresh: true }),
   oauthCancel: () =>
     requestJson<void>('/api/auth/oauth/pending', { method: 'DELETE', noRefresh: true }),
-  oauthRegister: (body: { username: string; useEmail: boolean }) =>
+  oauthRegister: (body: { username: string; useEmail: boolean; turnstile?: string }) =>
     requestJson<MeResponse>('/api/auth/oauth/pending/register', {
       method: 'POST',
       json: body,
       noRefresh: true,
     }),
   /** Signs in with a password and links the pending provider account. */
-  oauthLinkLogin: (login: string, password: string) =>
+  oauthLinkLogin: (login: string, password: string, turnstile?: string) =>
     requestJson<OAuthLinkLoginResponse>('/api/auth/oauth/pending/login', {
       method: 'POST',
-      json: { login, password },
+      json: { login, password, turnstile },
       noRefresh: true,
     }),
   identities: () => requestJson<IdentitiesResponse>('/api/auth/identities'),

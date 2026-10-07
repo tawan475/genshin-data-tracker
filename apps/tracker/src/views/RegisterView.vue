@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, emailSchema, usernameSchema } from '@gdt/shared'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
+import HumanCheck from '@/components/auth/HumanCheck.vue'
+import { HUMAN_CHECK_NEEDED, siteKeyAfter } from '@/components/auth/human-check'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import { loadSignInOptions } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
@@ -21,9 +23,14 @@ const serverError = ref('')
 const busy = ref(false)
 /** The optional email field shows only while the email features are on. */
 const emailFeatures = ref(false)
+/** The human check's site key while the server has it on. */
+const siteKey = ref<string | null>(null)
+const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
 
 onMounted(async () => {
-  emailFeatures.value = (await loadSignInOptions()).emailFeatures
+  const options = await loadSignInOptions()
+  emailFeatures.value = options.emailFeatures
+  siteKey.value = options.turnstileSiteKey
 })
 
 // The same schemas the server validates with.
@@ -50,15 +57,20 @@ async function submit() {
   if (!valid.value) return
   busy.value = true
   try {
+    const turnstile = siteKey.value ? await human.value?.token() : undefined
     await session.register(
       username.value.trim(),
       (emailFeatures.value && email.value.trim()) || null,
       password.value,
+      turnstile,
     )
     await router.replace({ name: 'account-new' })
   } catch (cause) {
-    serverError.value =
-      cause instanceof ApiRequestError && cause.code === 'taken'
+    const key = await siteKeyAfter(cause)
+    if (key) siteKey.value = key
+    serverError.value = key
+      ? HUMAN_CHECK_NEEDED
+      : cause instanceof ApiRequestError && cause.code === 'taken'
         ? emailFeatures.value
           ? 'Username or email taken'
           : 'Username taken'
@@ -66,6 +78,8 @@ async function submit() {
           ? cause.message
           : 'Sign-up failed'
   } finally {
+    // A token works once, whatever the answer.
+    human.value?.reset()
     busy.value = false
   }
 }
@@ -128,10 +142,19 @@ async function submit() {
         />
         <span v-if="show('confirm')" class="text-sm text-red-300">{{ show('confirm') }}</span>
       </label>
-      <button type="submit" class="btn-glow mt-2 w-full rounded-xl" :disabled="busy">
-        <UiSpinner v-if="busy" class="size-4" />
-        Create account
-      </button>
+      <div class="mt-2 flex flex-col">
+        <HumanCheck
+          v-if="siteKey"
+          :key="siteKey"
+          ref="human"
+          :site-key="siteKey"
+          action="register"
+        />
+        <button type="submit" class="btn-glow w-full rounded-xl" :disabled="busy">
+          <UiSpinner v-if="busy" class="size-4" />
+          Create account
+        </button>
+      </div>
     </form>
     <OAuthButtons />
     <template #footer>
