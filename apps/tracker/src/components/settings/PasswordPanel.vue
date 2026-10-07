@@ -9,9 +9,15 @@ import { ApiRequestError } from '@/api'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
-/** Change password. The server signs every other device out; this one stays signed in. */
+/**
+ * Change password: the server signs every other device out; this one stays
+ * signed in. An account made with Discord or Google has none yet: it sets
+ * one with just the session.
+ */
 const session = useSession()
 const feedback = useFeedback()
+
+const setting = computed(() => session.me?.hasPassword === false)
 
 const current = ref('')
 const next = ref('')
@@ -22,13 +28,17 @@ const formError = ref('')
 const busy = ref(false)
 const form = ref<HTMLFormElement>()
 
-const currentError = computed(
-  () => currentServerError.value || (current.value ? '' : 'Enter your current password'),
+const currentError = computed(() =>
+  setting.value
+    ? ''
+    : currentServerError.value || (current.value ? '' : 'Enter your current password'),
 )
 const nextError = computed(() => {
   if (next.value.length < MIN_PASSWORD_LENGTH) return `At least ${MIN_PASSWORD_LENGTH} characters`
   if (next.value.length > MAX_PASSWORD_LENGTH) return `At most ${MAX_PASSWORD_LENGTH} characters`
-  if (next.value === current.value) return 'Choose a password different from the current one'
+  if (!setting.value && next.value === current.value) {
+    return 'Choose a password different from the current one'
+  }
   return ''
 })
 const confirmError = computed(() => (confirm.value !== next.value ? 'Passwords do not match' : ''))
@@ -57,16 +67,22 @@ async function submit() {
   if (!valid.value) return
   busy.value = true
   try {
-    await session.changePassword(current.value, next.value)
+    const first = setting.value
+    if (first) await session.setPassword(next.value)
+    else await session.changePassword(current.value, next.value)
     current.value = ''
     next.value = ''
     confirm.value = ''
     touched.value = false
-    feedback.toast({
-      tone: 'success',
-      title: 'Password changed',
-      detail: 'Every other device was signed out. This one stays signed in.',
-    })
+    feedback.toast(
+      first
+        ? { tone: 'success', title: 'Password set', detail: 'You can sign in with it too.' }
+        : {
+            tone: 'success',
+            title: 'Password changed',
+            detail: 'Every other device was signed out. This one stays signed in.',
+          },
+    )
   } catch (cause) {
     if (cause instanceof ApiRequestError && cause.code === 'invalid_credentials') {
       currentServerError.value = 'Current password is wrong'
@@ -81,7 +97,7 @@ async function submit() {
 </script>
 
 <template>
-  <UiPanel title="Password">
+  <UiPanel :title="setting ? 'Set password' : 'Password'">
     <form ref="form" class="flex max-w-md flex-col gap-4" novalidate @submit.prevent="submit">
       <!-- Lets password managers file the new password under the right login. -->
       <input
@@ -95,6 +111,7 @@ async function submit() {
         aria-hidden="true"
       />
       <UiField
+        v-if="!setting"
         v-slot="{ id, describedBy }"
         label="Current password"
         :error="touched ? currentError : ''"
@@ -113,7 +130,7 @@ async function submit() {
       </UiField>
       <UiField
         v-slot="{ id, describedBy }"
-        label="New password"
+        :label="setting ? 'Password' : 'New password'"
         :hint="`At least ${MIN_PASSWORD_LENGTH} characters`"
         :error="touched ? nextError : ''"
       >
@@ -130,7 +147,7 @@ async function submit() {
       </UiField>
       <UiField
         v-slot="{ id, describedBy }"
-        label="Confirm new password"
+        :label="setting ? 'Confirm password' : 'Confirm new password'"
         :error="touched ? confirmError : ''"
       >
         <UiInput
@@ -146,7 +163,9 @@ async function submit() {
       </UiField>
       <p v-if="formError" class="text-sm text-danger-text" role="alert">{{ formError }}</p>
       <div class="flex flex-wrap items-center gap-3">
-        <UiButton type="submit" variant="primary" :loading="busy"> Change password </UiButton>
+        <UiButton type="submit" variant="primary" :loading="busy">
+          {{ setting ? 'Set password' : 'Change password' }}
+        </UiButton>
       </div>
     </form>
   </UiPanel>

@@ -9,6 +9,7 @@ import { defineConfig, type Plugin } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 import { GI_CDN_HOST, IMAGE_HOST } from '@gdt/game-data/image-url'
+import { oauthMock } from './dev/oauth-mock.ts'
 import pkg from './package.json' with { type: 'json' }
 
 function git(command: string): string {
@@ -68,13 +69,18 @@ function serviceWorker(): Plugin {
 }
 
 /**
- * `vite dev` only: a simulated `send_email` binding, so the email flows work
- * locally (Miniflare logs each mail and saves its text and HTML to a file;
- * nothing is sent). Builds never get it: the deployed Worker has EMAIL once
- * wrangler.jsonc does (see there).
+ * `vite dev` only, so the account flows work locally. Builds never get these:
+ * - a simulated `send_email` binding (Miniflare logs each mail and saves its
+ *   text and HTML to a file; nothing is sent). The deployed Worker has EMAIL
+ *   once wrangler.jsonc does (see there).
+ * - OAUTH_DEV_MOCK: "Continue with Discord / Google" go to the fake provider
+ *   in dev/oauth-mock.ts. `OAUTH_DEV_MOCK=0` in .dev.vars turns it off.
  */
-const devEmail: PluginConfig = {
-  config: (worker) => (worker.send_email?.length ? undefined : { send_email: [{ name: 'EMAIL' }] }),
+const devWorker: PluginConfig = {
+  config: (worker) => ({
+    ...(worker.send_email?.length ? {} : { send_email: [{ name: 'EMAIL' }] }),
+    vars: { ...worker.vars, OAUTH_DEV_MOCK: '1' },
+  }),
 }
 
 // https://vite.dev/config/
@@ -85,7 +91,9 @@ export default defineConfig(({ command }) => ({
     vue(),
     vueDevTools(),
     tailwindcss(),
-    cloudflare(command === 'serve' ? devEmail : {}),
+    // `vite dev` only: the fake Discord / Google at /__oauth-mock.
+    oauthMock(),
+    cloudflare(command === 'serve' ? devWorker : {}),
     imageHostPreconnect(),
     serviceWorker(),
   ],

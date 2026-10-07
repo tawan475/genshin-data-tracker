@@ -47,6 +47,10 @@
 
   // Secrets (wrangler secret put): JWT_SECRET, PASSWORD_PEPPER — each at least
   // 32 random characters. Local dev reads them from .dev.vars.
+  // Optional (worker/lib/oauth.ts): DISCORD_CLIENT_ID + DISCORD_CLIENT_SECRET
+  // and GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET turn on "Continue with
+  // Discord / Google"; a provider without both stays off and hidden (README,
+  // "Sign in with Discord / Google"). `vite dev` uses a fake provider instead.
 
   // Email (worker/lib/email.ts): confirmation and reset links go out through
   // Cloudflare Email Service, a `send_email` binding named EMAIL. It stays out

@@ -20,6 +20,12 @@ export class Client {
     return this.cookies.get(name)?.value
   }
 
+  /** Puts a cookie in the jar (or takes it out with `null`), as tests of tampering need. */
+  setCookie(name: string, value: string | null, path = '/'): void {
+    if (value === null) this.cookies.delete(name)
+    else this.cookies.set(name, { value, path })
+  }
+
   async fetch(path: string, init: RequestInit & { json?: unknown } = {}): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('x-gdt-csrf', '1')

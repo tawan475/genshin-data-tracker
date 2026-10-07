@@ -157,6 +157,23 @@ export async function revokeAllSessions(
   return { id: user.id, tokenVersion: user.tokenVersion }
 }
 
+/**
+ * Who the access cookie says is signed in, with its token version (null in a
+ * token issued before it carried one); not checked against D1. For the OAuth
+ * callback, a top-level navigation back from the provider: the SameSite Lax
+ * access cookie comes along, the Strict refresh cookie does not.
+ */
+export async function readAccessSession(
+  c: Context<AppEnv>,
+): Promise<{ userId: number; tokenVersion: number | null } | null> {
+  const payload = await readToken(c, ACCESS_COOKIE, 'access')
+  if (!payload) return null
+  return {
+    userId: Number(payload.sub),
+    tokenVersion: typeof payload.ver === 'number' ? payload.ver : null,
+  }
+}
+
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
 /** Requires a valid access cookie; sets `userId`. */

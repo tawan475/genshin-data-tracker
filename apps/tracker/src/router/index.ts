@@ -44,6 +44,13 @@ const router = createRouter({
       component: () => import('@/views/RegisterView.vue'),
       meta: { guest: true, public: true, title: 'Create account' },
     },
+    // Back from Discord / Google with an account no user has linked yet.
+    {
+      path: '/oauth',
+      name: 'oauth-continue',
+      component: () => import('@/views/OAuthContinueView.vue'),
+      meta: { guest: true, public: true, title: 'Continue' },
+    },
     // Account recovery: open signed in or not (links arrive by email).
     {
       path: '/forgot-password',

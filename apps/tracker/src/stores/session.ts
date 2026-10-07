@@ -1,4 +1,9 @@
-import { USER_SETTINGS_DEFAULTS, type MeResponse, type UserSettings } from '@gdt/shared'
+import {
+  USER_SETTINGS_DEFAULTS,
+  type MeResponse,
+  type OAuthLinkLoginResponse,
+  type UserSettings,
+} from '@gdt/shared'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, onSignedOut } from '@/api'
@@ -59,6 +64,20 @@ export const useSession = defineStore('session', () => {
     loading = Promise.resolve()
   }
 
+  /** A new account for the provider account waiting on /oauth; signs in. */
+  async function oauthRegister(username: string, useEmail: boolean) {
+    adopt(await api.oauthRegister({ username, useEmail }))
+    loading = Promise.resolve()
+  }
+
+  /** Signs in with a password and links the waiting provider account (unless `problem`). */
+  async function oauthLinkLogin(login: string, password: string): Promise<OAuthLinkLoginResponse> {
+    const result = await api.oauthLinkLogin(login, password)
+    adopt(result.me)
+    loading = Promise.resolve()
+    return result
+  }
+
   async function logout() {
     try {
       await api.logout()
@@ -80,6 +99,11 @@ export const useSession = defineStore('session', () => {
 
   async function changePassword(currentPassword: string, newPassword: string) {
     await api.changePassword({ currentPassword, newPassword })
+  }
+
+  /** A first password (the account was made with Discord or Google). */
+  async function setPassword(password: string) {
+    adopt(await api.setPassword(password))
   }
 
   /** Sets a new password from a reset link; the server signs this browser in. */
@@ -124,10 +148,13 @@ export const useSession = defineStore('session', () => {
     ensureLoaded,
     login,
     register,
+    oauthRegister,
+    oauthLinkLogin,
     logout,
     logoutAll,
     updateProfile,
     changePassword,
+    setPassword,
     resetPassword,
     emailConfirmed,
     updateSettings,

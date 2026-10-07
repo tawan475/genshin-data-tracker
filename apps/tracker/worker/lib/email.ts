@@ -152,6 +152,20 @@ export function resetPasswordMail(
   )
 }
 
+/**
+ * A new way into the account: a linked Discord / Google account, or a first
+ * password. Only to a confirmed email.
+ */
+export function signInAddedMail(to: string, origin: string, username: string, what: string): Mail {
+  return compose(
+    to,
+    `${what} added to your account`,
+    [`${what} can now be used to sign in to ${username} on ${BRAND}.`],
+    { href: `${origin}/app/settings`, label: "Wasn't you? Review it" },
+    'Sent to the confirmed email of this account.',
+  )
+}
+
 export function passwordChangedMail(to: string, origin: string, username: string): Mail {
   return compose(
     to,
