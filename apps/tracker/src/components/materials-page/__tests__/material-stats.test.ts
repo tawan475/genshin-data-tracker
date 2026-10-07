@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { DAY, HOUR } from '@/data/chart-range'
 import type { MaterialsHistory } from '@/data/materials-history'
-import { chartPoints, flowBetween, frameChange, frameStart, rangeFrame } from '../material-stats'
+import {
+  chartPoints,
+  flowBetween,
+  frameChange,
+  frameStart,
+  isChangePeriod,
+  rangeFrame,
+  referenceFor,
+} from '../material-stats'
 
 const at = (y: number, m: number, d: number, h = 0, min = 0) =>
   new Date(y, m - 1, d, h, min).getTime()
@@ -66,5 +74,38 @@ describe('materials chart range', () => {
     // 3 days: every snapshot.
     const days = rangeFrame(h, '3d')
     expect(days.indices.length).toBe(days.count)
+  })
+})
+
+describe('change since', () => {
+  const end = at(2026, 10, 5, 14, 20)
+  // Captures 40 days, 8 days, 2 days, 5 hours and 30 minutes before the newest.
+  const times = [40 * DAY, 8 * DAY, 2 * DAY, 5 * HOUR, 30 * 60_000, 0].map((ago) => end - ago)
+  const h = history(times, [1, 2, 3, 4, 5, 6])
+  const index = (period: Parameters<typeof referenceFor>[1]) => referenceFor(h, period)?.index
+
+  it('compares with the count held when the range starts', () => {
+    expect(index('last')).toBe(4)
+    // An hour back the count was the one captured 5 hours before the newest.
+    expect(index('1h')).toBe(3)
+    expect(index('3h')).toBe(3)
+    expect(index('6h')).toBe(2)
+    expect(index('1d')).toBe(2)
+    expect(index('3d')).toBe(1)
+    expect(index('7d')).toBe(1)
+    expect(index('14d')).toBe(0)
+    expect(index('all')).toBe(0)
+  })
+
+  it('never compares the newest capture with itself, and needs two', () => {
+    const close = history([end - 10 * 60_000, end], [1, 2])
+    expect(referenceFor(close, '1h')?.index).toBe(0)
+    expect(referenceFor(history([end], [1]), '1d')).toBeNull()
+  })
+
+  it('reads stored choices, old ones included', () => {
+    for (const value of ['last', '7d', '30d', '1h', '14d', 'all'])
+      expect(isChangePeriod(value)).toBe(true)
+    for (const value of ['90d', '', null, 7]) expect(isChangePeriod(value)).toBe(false)
   })
 })

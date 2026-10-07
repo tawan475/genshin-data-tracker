@@ -24,7 +24,7 @@ import {
 import {
   changesSince,
   isChangePeriod,
-  PERIOD_OPTIONS,
+  CHANGE_SINCE_OPTIONS,
   rangeFrame,
   referenceFor,
   type ChangePeriod,
@@ -36,7 +36,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
-import UiSegmented from '@/components/ui/UiSegmented.vue'
+import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadMaterialsHistory, type MaterialsHistory } from '@/data/materials'
 import { useResource } from '@/data/use-resource'
@@ -202,7 +202,12 @@ const importTo = computed(() => ({
     </template>
     <template v-if="history" #actions>
       <span :title="`Changes ${hint}`">
-        <UiSegmented v-model="period" :options="PERIOD_OPTIONS" label="Change since" />
+        <UiSelect
+          v-model="period"
+          :options="CHANGE_SINCE_OPTIONS"
+          aria-label="Change since"
+          class="w-[5.75rem] shrink-0"
+        />
       </span>
     </template>
   </PageHeader>

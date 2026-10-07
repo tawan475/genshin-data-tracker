@@ -10,7 +10,15 @@
  * functions read such a dip as the count it interrupts.
  */
 
-import { pointBucket, rangeStart, type ChartRange } from '@/data/chart-range'
+import type { SelectGroup, SelectOption } from '@/components/ui/UiSelect.vue'
+import {
+  CHART_RANGE_GROUPS,
+  isChartRange,
+  pointBucket,
+  rangeLabel,
+  rangeStart,
+  type ChartRange,
+} from '@/data/chart-range'
 import {
   chartFrame,
   indexAtOrBefore,
@@ -19,19 +27,29 @@ import {
   type MaterialsHistory,
 } from '@/data/materials-history'
 
-const DAY = 86_400_000
-
 /** What a change is measured against: the previous snapshot, or one ~7 / 30 days older. */
-export type ChangePeriod = 'last' | '7d' | '30d'
+export type ChangePeriod = 'last' | ChartRange
 
+/** The detail dialog's three change figures. */
 export const PERIOD_OPTIONS: { value: ChangePeriod; label: string }[] = [
   { value: 'last', label: 'Last' },
   { value: '7d', label: '7d' },
   { value: '30d', label: '30d' },
 ]
 
+/** The page's "Change since" select: the previous capture, then the charts' ranges. */
+export const CHANGE_SINCE_OPTIONS: (SelectOption<ChangePeriod> | SelectGroup<ChangePeriod>)[] = [
+  { value: 'last', label: 'Last' },
+  ...CHART_RANGE_GROUPS.flatMap(
+    (group): (SelectOption<ChangePeriod> | SelectGroup<ChangePeriod>)[] => {
+      const options = group.ranges.map((value) => ({ value, label: rangeLabel(value) }))
+      return group.label ? [{ group: group.label, options }] : options
+    },
+  ),
+]
+
 export function isChangePeriod(value: unknown): value is ChangePeriod {
-  return value === 'last' || value === '7d' || value === '30d'
+  return value === 'last' || isChartRange(value)
 }
 
 // ------------------------------------------------------------------ values
@@ -100,9 +118,10 @@ export interface Reference {
 }
 
 /**
- * The snapshot a period compares the newest one with. Days count back from
- * the newest snapshot (not from today); a history shorter than the period
- * falls back to its first snapshot. Null with fewer than two snapshots.
+ * The snapshot a period compares the newest one with: the previous one, or
+ * the last taken at or before the range's start, counted back from the
+ * newest snapshot (not from now, like the charts); a history shorter than
+ * the period falls back to its first snapshot. Null with fewer than two.
  */
 export function referenceFor(history: MaterialsHistory, period: ChangePeriod): Reference | null {
   const { times } = history
@@ -110,8 +129,8 @@ export function referenceFor(history: MaterialsHistory, period: ChangePeriod): R
   if (n < 2) return null
   let index = n - 2
   if (period !== 'last') {
-    const days = period === '7d' ? 7 : 30
-    index = Math.max(0, indexAtOrBefore(times, times[n - 1]! - days * DAY))
+    const start = rangeStart(period, times[n - 1]!)
+    index = Math.min(n - 2, Math.max(0, indexAtOrBefore(times, start)))
   }
   return { index, takenAt: times[index]! }
 }
