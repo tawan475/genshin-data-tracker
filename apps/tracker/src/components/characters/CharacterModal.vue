@@ -272,7 +272,13 @@ watch(
             aria-hidden="true"
           />
         </UiIconButton>
-        <UiButton size="sm" variant="primary" :title="actionState('png').title" @click="download">
+        <UiButton
+          size="sm"
+          variant="primary"
+          class="w-[104px]"
+          :title="actionState('png').title"
+          @click="download"
+        >
           <UiSpinner v-if="!actionState('png').icon" class="size-4" />
           <component
             :is="actionState('png').icon"

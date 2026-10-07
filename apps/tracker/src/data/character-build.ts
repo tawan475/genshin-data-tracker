@@ -222,9 +222,9 @@ export function talentLevels(
   })
 }
 
-/** "Elemental Skill 10 + 3 (C3) = 13 · crowned". */
+/** "Elemental Skill 9 → 12 (C3)", "Elemental Burst 10 → 13 (C5) · crowned". */
 export function talentTitle(t: TalentLevel): string {
-  const value = t.from ? `${t.base} + 3 (C${t.from}) = ${t.level}` : `${t.level}`
+  const value = t.from ? `${t.base} → ${t.level} (C${t.from})` : `${t.level}`
   return `${TALENT_LABELS[t.key]} ${value}${t.crowned ? ' · crowned' : ''}`
 }
 
