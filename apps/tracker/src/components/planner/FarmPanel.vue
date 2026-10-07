@@ -5,8 +5,8 @@ import type { FarmingData } from '@gdt/game-data/farming'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { FarmPlan } from '@gdt/game-data/planner-estimate'
 import { WEEKDAY_LABELS, type PlanTotals } from '@gdt/game-data/planner-math'
-import { computed, watch } from 'vue'
-import { CalendarOff, Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import { CalendarOff, ChevronDown, Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -14,6 +14,7 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
+import { readStorage, writeStorage } from '@/lib/storage'
 import CraftCard from './CraftCard.vue'
 import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
@@ -183,6 +184,22 @@ const shown = computed(() => {
 })
 const nothing = computed(() => shown.value.length === 0)
 
+/** Today's resin groups folded to their heading (per device), like the Materials bag's tabs. */
+const FOLDED_KEY = 'planner:farm-folded'
+const folded = ref(new Set((readStorage(FOLDED_KEY) ?? '').split(',').filter(Boolean)))
+function toggleFold(key: string) {
+  const next = new Set(folded.value)
+  if (!next.delete(key)) next.add(key)
+  folded.value = next
+  writeStorage(FOLDED_KEY, next.size ? [...next].join(',') : null)
+}
+/** The cards a folded group hides (the crafting checklist counts as one). */
+const hiddenCount = (key: string) => {
+  const s = shown.value.find((x) => x.key === key)
+  const craft = key === 'free' && props.crafting && props.steps.length ? 1 : 0
+  return (s?.cards.length ?? 0) + craft
+}
+
 /**
  * Cards mounted so far, the first ones at once and the rest over the next
  * frames (many goals make many cards); a section shows once its first card does.
@@ -327,14 +344,36 @@ watch(view, (value) => {
         class="mt-1 flex flex-col gap-1.5"
         :aria-label="`${s.label}: ${s.resin} resin`"
       >
-        <h2 class="flex items-center gap-1.5 text-sm font-semibold">
-          <span class="size-5 shrink-0">
-            <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
-          </span>
-          <span class="tabular font-mono">{{ s.resin }}</span>
-          <span class="font-normal text-text-muted">{{ s.label }}</span>
+        <h2 class="text-sm font-semibold">
+          <button
+            type="button"
+            class="-mx-1 flex min-h-8 w-[calc(100%+0.5rem)] items-center gap-1.5 rounded-md px-1 text-left transition-colors hover:bg-surface-overlay"
+            :aria-expanded="!folded.has(s.key)"
+            :title="folded.has(s.key) ? 'Show' : 'Fold'"
+            @click="toggleFold(s.key)"
+          >
+            <ChevronDown
+              class="size-4 shrink-0 text-text-muted transition-transform"
+              :class="folded.has(s.key) ? '-rotate-90' : ''"
+              aria-hidden="true"
+            />
+            <span class="size-5 shrink-0">
+              <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+            </span>
+            <span class="tabular font-mono">{{ s.resin }}</span>
+            <span class="font-normal text-text-muted">{{ s.label }}</span>
+            <span
+              v-if="folded.has(s.key)"
+              class="tabular rounded-md bg-surface-overlay px-1.5 font-mono text-xs font-normal text-text-secondary"
+              :title="`${hiddenCount(s.key)} hidden`"
+              >{{ hiddenCount(s.key) }}</span
+            >
+          </button>
         </h2>
-        <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
+        <div
+          v-if="!folded.has(s.key)"
+          class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3"
+        >
           <CraftCard
             v-if="s.key === 'free' && crafting && steps.length"
             class="col-span-full"
