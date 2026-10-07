@@ -6,6 +6,9 @@ import type { BagTabInfo } from '@gdt/game-data/bag'
 import {
   ArrowDown,
   ArrowUp,
+  ChevronDown,
+  ChevronsDownUp,
+  ChevronsUpDown,
   LayoutGrid,
   List,
   Package,
@@ -17,6 +20,7 @@ import { RARITY_SOFT } from '@/components/characters/tokens'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
@@ -27,6 +31,7 @@ import { materialMatcher, matchRank } from '@/utils/materials'
 import DeltaText from './DeltaText.vue'
 import MaterialIcon from './MaterialIcon.vue'
 import MaterialTile from './MaterialTile.vue'
+import { bagSections, parseFolded } from './bag-sections'
 import { tabDisplay } from './bag-tabs'
 import type { MaterialItem } from './material-items'
 import { compareInGame, tabsHolding, type TabKey } from './material-meta'
@@ -83,6 +88,7 @@ const SORT_OPTIONS: { value: Sort; label: string }[] = [
 const SORT_KEY = 'materials:sort'
 const VIEW_KEY = 'materials:view'
 const TAB_KEY = 'materials:tab'
+const FOLDED_KEY = 'materials:folded'
 
 const storedSort = readStorage(SORT_KEY)
 const sort = ref<Sort>(
@@ -109,6 +115,18 @@ onMounted(async () => {
   const at = chip.getBoundingClientRect()
   if (at.left < box.left || at.right > box.right) row.scrollLeft += at.left - box.left - 16
 })
+
+/** Tabs folded to their heading on All (per device). */
+const folded = ref(parseFolded(readStorage(FOLDED_KEY)))
+function saveFolded(next: Set<TabKey>) {
+  folded.value = next
+  writeStorage(FOLDED_KEY, next.size ? [...next].join(',') : null)
+}
+function toggleFold(key: TabKey) {
+  const next = new Set(folded.value)
+  if (!next.delete(key)) next.add(key)
+  saveFolded(next)
+}
 
 const query = ref('')
 const show = ref<Show>('owned')
@@ -204,24 +222,30 @@ const filtered = computed(() => {
 const PAGE = { grid: 168, list: 90 }
 const limit = ref(PAGE[view.value])
 watch([query, show, activeTab, sort, view], () => (limit.value = PAGE[view.value]))
-const visible = computed(() => filtered.value.slice(0, limit.value))
-const more = computed(() => filtered.value.length - visible.value.length)
 
 /**
  * All, in the game's order: a heading per tab, as the game's tabs follow
- * one another. Any other sort, a search or one tab: one run.
+ * one another, each foldable. Any other sort, a search or one tab: one run.
  */
-const sections = computed(() => {
-  const grouped = activeTab.value === 'all' && sortBy.value === 'order' && !query.value.trim()
-  if (!grouped) return [{ id: 'all', tab: null, items: visible.value }]
-  const out: { id: string; tab: TabKey | null; items: MaterialItem[] }[] = []
-  for (const item of visible.value) {
-    const last = out[out.length - 1]
-    if (last?.tab === item.tab) last.items.push(item)
-    else out.push({ id: item.tab, tab: item.tab, items: [item] })
+const grouped = computed(
+  () => activeTab.value === 'all' && sortBy.value === 'order' && !query.value.trim(),
+)
+const paged = computed(() => {
+  if (grouped.value) return bagSections(filtered.value, folded.value, limit.value)
+  const items = filtered.value.slice(0, limit.value)
+  return {
+    sections: [{ tab: null, total: filtered.value.length, items, open: true }],
+    more: filtered.value.length - items.length,
   }
-  return out
 })
+const sections = computed(() => paged.value.sections)
+const more = computed(() => paged.value.more)
+
+/** The tabs shown on All, for folding or unfolding them all at once. */
+const allFolded = computed(() => tabKeys.value.every((key) => folded.value.has(key)))
+function foldAll() {
+  saveFolded(allFolded.value ? new Set() : new Set(tabKeys.value))
+}
 
 const NEAR_PX = 600
 const sentinel = useTemplateRef<HTMLElement>('sentinel')
@@ -242,7 +266,7 @@ useIntersectionObserver(
   },
   { rootMargin: `${NEAR_PX}px 0px` },
 )
-watch(limit, () => void fillIfNear())
+watch([limit, folded], () => void fillIfNear())
 
 function clearFilters() {
   query.value = ''
@@ -344,7 +368,7 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <div class="relative min-w-0 flex-1 basis-32">
+        <div class="relative min-w-0 flex-1 basis-20 sm:basis-32">
           <Search
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
@@ -365,8 +389,16 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
           :options="SORT_OPTIONS"
           aria-label="Sort"
           title="Sort"
-          class="w-32 sm:w-36"
+          class="w-28 sm:w-36"
         />
+        <UiIconButton
+          v-if="grouped && tabKeys.length > 1"
+          :label="allFolded ? 'Unfold every tab' : 'Fold every tab'"
+          @click="foldAll"
+        >
+          <ChevronsUpDown v-if="allFolded" class="size-5" aria-hidden="true" />
+          <ChevronsDownUp v-else class="size-5" aria-hidden="true" />
+        </UiIconButton>
       </div>
     </div>
 
@@ -384,84 +416,97 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
         <UiButton @click="clearFilters">Clear</UiButton>
       </UiEmpty>
 
-      <div v-else class="flex flex-col gap-5">
+      <div v-else class="flex flex-col gap-1">
         <section
           v-for="section in sections"
-          :key="section.id"
+          :key="section.tab ?? 'all'"
           :aria-label="section.tab ? tabDisplay(section.tab).name : undefined"
+          :class="section.open && section.tab ? 'pb-4' : ''"
         >
-          <h3
-            v-if="section.tab"
-            class="mb-2 flex items-center gap-2 text-sm font-medium"
-            :title="tabDisplay(section.tab).title"
-          >
-            <component
-              :is="tabDisplay(section.tab).icon"
-              class="size-4 shrink-0 text-text-muted"
-              aria-hidden="true"
-            />
-            <span class="truncate">{{ tabDisplay(section.tab).name }}</span>
-            <span class="tabular font-mono text-text-muted">{{
-              formatNumber(tabCounts.get(section.tab) ?? 0)
-            }}</span>
-            <span class="h-px min-w-4 flex-1 bg-border-default" aria-hidden="true" />
+          <h3 v-if="section.tab" class="text-sm font-medium" :class="section.open ? 'mb-2' : ''">
+            <button
+              type="button"
+              class="-mx-1 flex min-h-8 w-[calc(100%+0.5rem)] items-center gap-2 rounded-md px-1 text-left transition-colors hover:bg-surface-overlay"
+              :title="tabDisplay(section.tab).title"
+              :aria-expanded="section.open"
+              @click="toggleFold(section.tab)"
+            >
+              <ChevronDown
+                class="size-4 shrink-0 text-text-muted transition-transform"
+                :class="section.open ? '' : '-rotate-90'"
+                aria-hidden="true"
+              />
+              <component
+                :is="tabDisplay(section.tab).icon"
+                class="size-4 shrink-0 text-text-muted"
+                aria-hidden="true"
+              />
+              <span class="truncate">{{ tabDisplay(section.tab).name }}</span>
+              <span class="tabular font-mono text-text-muted">{{
+                formatNumber(section.total)
+              }}</span>
+              <span class="h-px min-w-4 flex-1 bg-border-default" aria-hidden="true" />
+            </button>
           </h3>
 
-          <!-- Icons: the in-game bag -->
-          <ul
-            v-if="view === 'grid'"
-            class="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] sm:gap-2"
-          >
-            <li v-for="item in section.items" :key="item.key" class="flex">
-              <MaterialTile
-                :name="item.name"
-                :src="icon(item.key)"
-                :rarity="item.rarity"
-                :count="countOf(item)"
-                :change="changeOf(item.key)"
-                :tracked="trackedSet.has(item.key)"
-                :edited="edited?.has(item.key) ?? false"
-                :label="tileTitle(item)"
-                @open="open(item.key, $event)"
-              />
-            </li>
-          </ul>
+          <!-- A folded tab shows only its heading -->
+          <template v-if="section.open">
+            <!-- Icons: the in-game bag -->
+            <ul
+              v-if="view === 'grid'"
+              class="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] sm:gap-2"
+            >
+              <li v-for="item in section.items" :key="item.key" class="flex">
+                <MaterialTile
+                  :name="item.name"
+                  :src="icon(item.key)"
+                  :rarity="item.rarity"
+                  :count="countOf(item)"
+                  :change="changeOf(item.key)"
+                  :tracked="trackedSet.has(item.key)"
+                  :edited="edited?.has(item.key) ?? false"
+                  :label="tileTitle(item)"
+                  @open="open(item.key, $event)"
+                />
+              </li>
+            </ul>
 
-          <!-- List: names, counts and changes -->
-          <ul v-else class="grid gap-x-6 sm:grid-cols-2 xl:grid-cols-3">
-            <li v-for="item in section.items" :key="item.key" class="min-w-0">
-              <button
-                type="button"
-                class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-overlay"
-                :title="tileTitle(item)"
-                @click="open(item.key, $event)"
-              >
-                <span
-                  class="relative size-10 shrink-0 rounded-lg p-0.5 text-xs"
-                  :class="[
-                    RARITY_SOFT[item.rarity ?? 0] ?? 'bg-surface-overlay',
-                    item.count === 0 ? 'opacity-40 grayscale' : '',
-                  ]"
+            <!-- List: names, counts and changes -->
+            <ul v-else class="grid gap-x-6 sm:grid-cols-2 xl:grid-cols-3">
+              <li v-for="item in section.items" :key="item.key" class="min-w-0">
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-overlay"
+                  :title="tileTitle(item)"
+                  @click="open(item.key, $event)"
                 >
-                  <MaterialIcon :src="icon(item.key)" :name="item.name" />
                   <span
-                    v-if="trackedSet.has(item.key)"
-                    class="absolute -top-0.5 -left-0.5 size-2 rounded-full bg-accent ring-2 ring-surface-raised"
-                    aria-hidden="true"
-                  />
-                </span>
-                <span class="min-w-0 flex-1 truncate text-sm">{{ item.name }}</span>
-                <span class="flex shrink-0 flex-col items-end">
-                  <span
-                    class="tabular font-mono text-sm font-semibold"
-                    :class="edited?.has(item.key) ? 'text-accent-text' : ''"
-                    >{{ formatNumber(countOf(item)) }}</span
+                    class="relative size-10 shrink-0 rounded-lg p-0.5 text-xs"
+                    :class="[
+                      RARITY_SOFT[item.rarity ?? 0] ?? 'bg-surface-overlay',
+                      item.count === 0 ? 'opacity-40 grayscale' : '',
+                    ]"
                   >
-                  <DeltaText :value="changeOf(item.key) || null" :hint="hint" class="text-xs" />
-                </span>
-              </button>
-            </li>
-          </ul>
+                    <MaterialIcon :src="icon(item.key)" :name="item.name" />
+                    <span
+                      v-if="trackedSet.has(item.key)"
+                      class="absolute -top-0.5 -left-0.5 size-2 rounded-full bg-accent ring-2 ring-surface-raised"
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span class="min-w-0 flex-1 truncate text-sm">{{ item.name }}</span>
+                  <span class="flex shrink-0 flex-col items-end">
+                    <span
+                      class="tabular font-mono text-sm font-semibold"
+                      :class="edited?.has(item.key) ? 'text-accent-text' : ''"
+                      >{{ formatNumber(countOf(item)) }}</span
+                    >
+                    <DeltaText :value="changeOf(item.key) || null" :hint="hint" class="text-xs" />
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </template>
         </section>
 
         <div v-if="more > 0" ref="sentinel" class="flex justify-center">
