@@ -277,6 +277,32 @@ export function setBonusLines(setKey: string): SetBonusLine[] {
   }))
 }
 
+/** A set as the build lists it: the piece bonus it reaches (2 or 4). */
+export interface BonusSet<S> {
+  set: S
+  /** The largest 2- or 4-piece threshold the worn count reaches. */
+  pieces: number
+}
+
+/**
+ * The sets a build lists: only those worn 2 pieces or more (a 4-piece, or
+ * 2 + 2), most pieces first, each with the bonus it reaches (5 worn read
+ * as 4, 3 as 2). A single piece is no set bonus, so it isn't listed; nor
+ * is a 1-piece bonus (the Prayers sets).
+ */
+export function bonusSets<S extends { count: number; thresholds: readonly number[] }>(
+  sets: readonly S[],
+): BonusSet<S>[] {
+  return sets
+    .filter((set) => set.count >= 2)
+    .map((set) => ({
+      set,
+      pieces: Math.max(0, ...set.thresholds.filter((t) => t >= 2 && t <= set.count)),
+    }))
+    .filter((entry) => entry.pieces > 0)
+    .sort((a, b) => b.pieces - a.pieces)
+}
+
 /** "2-piece: Pyro DMG Bonus +15.0%" lines for a set's tooltip (only bonuses that add stats). */
 export function setBonusTitle(setKey: string, active: readonly number[]): string[] {
   return setBonusLines(setKey)

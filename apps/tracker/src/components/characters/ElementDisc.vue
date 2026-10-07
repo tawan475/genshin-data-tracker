@@ -7,7 +7,8 @@ import type { Element } from '@/data/game-meta'
  * A white game glyph (talent, constellation) on a dark translucent disc with
  * the element's ring inside its edge and a soft glow in the element's
  * colour, as the game and Enka draw them; the same in either theme. The
- * glyph fills about three quarters of the disc. `locked` dims it, rings it
+ * glyph fills 88 % of the disc (the game's icons carry their own margin).
+ * `locked` dims it, rings it
  * thinly in grey and adds a lock. `px` sets any size (the share card's 84
  * and 112); `--disc-bg` / `--disc-glow` on an ancestor restyle the disc (the
  * share card's light theme). A plain <img>, no CSS mask, so the card's PNG
@@ -53,7 +54,7 @@ const lock = computed(() => `${Math.max(14, Math.round(diameter.value * 0.3))}px
       v-if="src"
       :src="src"
       alt=""
-      class="pointer-events-none size-[74%]"
+      class="pointer-events-none size-[88%]"
       :class="locked ? 'opacity-35' : ''"
     />
     <span

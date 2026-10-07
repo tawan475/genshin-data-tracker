@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
+  bonusSets,
   formatPanelValue,
   setBonusTitle,
   talentTitle,
@@ -143,6 +144,8 @@ const pieces = computed(() =>
     return { slot, piece, lines, rollCount, cvTone, title }
   }),
 )
+/** The sets listed: 2 pieces or more (a single piece grants nothing). */
+const bonus = computed(() => bonusSets(c.value.sets))
 const buildRolls = computed(() => pieces.value.reduce((sum, p) => sum + p.rollCount, 0))
 const buildCvTone = computed(() =>
   c.value.cv > 0 ? CRIT_TIER_TEXT[cvTier(c.value.cv, 'build')] : 'text-(--card-text)',
@@ -387,7 +390,7 @@ const ownerLine = computed(() =>
 
         <div class="flex flex-col gap-[12px] px-[24px] py-[18px]" :class="PANEL">
           <p
-            v-for="set in c.sets.slice(0, 3)"
+            v-for="{ set, pieces } in bonus"
             :key="set.setKey"
             class="flex items-center gap-[14px]"
             :title="setTitle(set)"
@@ -398,25 +401,18 @@ const ownerLine = computed(() =>
               alt=""
               class="size-[44px] shrink-0"
             />
+            <span class="min-w-0 flex-[1_1_auto] truncate text-[23px]">{{ set.name }}</span>
             <span
-              class="min-w-0 flex-[1_1_auto] truncate text-[23px]"
-              :class="set.active.length ? '' : 'text-(--card-secondary)'"
-              >{{ set.name }}</span
-            >
-            <span
-              class="min-w-[36px] rounded-[10px] px-[10px] py-[2px] text-center text-[22px] font-bold"
-              :class="
-                set.active.length
-                  ? 'bg-(--card-set-on-bg) text-(--card-set-on)'
-                  : 'bg-(--card-set-off-bg) text-(--card-muted)'
-              "
-              >{{ set.count }}</span
+              class="min-w-[36px] rounded-[10px] bg-(--card-set-on-bg) px-[10px] py-[2px] text-center text-[22px] font-bold text-(--card-set-on)"
+              :title="`${pieces}-piece bonus`"
+              >{{ pieces }}</span
             >
           </p>
-          <p v-if="!c.sets.length" class="text-[22px] text-(--card-muted)">No artifacts</p>
+          <p v-if="!c.artifactCount" class="text-[22px] text-(--card-muted)">No artifacts</p>
           <p
-            v-if="c.artifactCount"
-            class="flex items-baseline gap-[18px] border-t border-(--card-rule) pt-[10px]"
+            v-else
+            class="flex items-baseline gap-[18px]"
+            :class="bonus.length ? 'border-t border-(--card-rule) pt-[10px]' : ''"
           >
             <span class="text-[20px] text-(--card-muted)">Build</span>
             <span class="text-[20px] text-(--card-muted)">{{ buildRolls }} rolls</span>
@@ -437,27 +433,27 @@ const ownerLine = computed(() =>
         >
           <article
             v-if="piece"
-            class="flex min-w-0 flex-1 items-center gap-[12px] py-[12px] pr-[14px] pl-[12px]"
+            class="flex min-w-0 flex-1 items-center gap-[12px] overflow-hidden py-0 pr-[14px] pl-0"
             :class="PANEL"
             :title="title"
           >
             <span
-              class="relative size-[98px] shrink-0 rounded-[16px]"
+              class="relative flex w-[150px] shrink-0 items-center justify-center self-stretch"
               :style="{ background: RARITY_GRADIENT[piece.rarity] ?? 'var(--card-cv-bg)' }"
             >
               <img
                 v-if="artifactIcon(piece.setKey, piece.slotKey)"
                 :src="artifactIcon(piece.setKey, piece.slotKey)"
                 alt=""
-                class="size-[98px]"
+                class="size-[136px]"
               />
               <span
-                class="absolute right-[-6px] bottom-[-6px] rounded-[8px] bg-(--card-badge) px-[8px] py-px text-[17px] font-bold shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                class="absolute right-[8px] bottom-[8px] rounded-[8px] bg-(--card-badge) px-[8px] py-px text-[17px] font-bold shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
                 :class="piece.maxed ? 'text-(--card-secondary)' : 'text-talent-crown'"
                 >+{{ piece.level }}</span
               >
             </span>
-            <div class="flex w-[122px] shrink-0 flex-col gap-[2px]">
+            <div class="flex w-[118px] shrink-0 flex-col gap-[2px]">
               <span class="text-[18px] whitespace-nowrap text-(--card-muted)">{{
                 formatStatShort(piece.mainStatKey)
               }}</span>
@@ -466,9 +462,9 @@ const ownerLine = computed(() =>
                   ? '—'
                   : formatStatValue(piece.mainStatKey, piece.mainStatValue)
               }}</span>
-              <span class="flex items-center gap-[6px] text-[15px] whitespace-nowrap">
+              <span class="flex items-center gap-[5px] text-[15px] whitespace-nowrap">
                 <span
-                  class="rounded-[6px] bg-(--card-cv-bg) px-[7px] py-px font-semibold"
+                  class="rounded-[6px] bg-(--card-cv-bg) px-[6px] py-px font-semibold"
                   :class="cvTone"
                   >CV {{ piece.cv.toFixed(1) }}</span
                 >
@@ -476,11 +472,13 @@ const ownerLine = computed(() =>
               </span>
             </div>
             <span class="w-px self-stretch bg-(--card-divider)" aria-hidden="true" />
-            <div class="flex min-w-0 flex-[1_1_auto] flex-col justify-around self-stretch">
+            <div
+              class="flex min-w-0 flex-[1_1_auto] flex-col justify-around self-stretch py-[10px]"
+            >
               <p
                 v-for="n in 4"
                 :key="n"
-                class="flex h-[28px] items-center gap-[8px]"
+                class="flex h-[28px] items-center gap-[6px]"
                 :class="lines[n - 1]?.inactive ? 'opacity-45' : ''"
                 :title="
                   lines[n - 1] && !lines[n - 1]!.inactive
@@ -495,7 +493,7 @@ const ownerLine = computed(() =>
                     class="min-w-0 flex-[1_1_auto] truncate text-[18px] text-(--card-secondary)"
                     >{{ formatStatShort(lines[n - 1]!.key) }}</span
                   >
-                  <span class="min-w-[58px] text-right text-[21px] font-semibold">{{
+                  <span class="text-right text-[21px] font-semibold whitespace-nowrap">{{
                     formatStatValue(lines[n - 1]!.key, lines[n - 1]!.value)
                   }}</span>
                   <CardRollBars :rolls="lines[n - 1]!.inactive ? [] : lines[n - 1]!.rolls" />
