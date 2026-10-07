@@ -1,8 +1,10 @@
 /**
  * The seven element symbols as inline SVG (24×24, drawn in currentColor),
  * after the game's own: a flame, a drop, a swirl, a bolt, a leaf, a
- * snowflake and a gem. The game data has no element icon names yet, so
- * they are drawn here; ElementIcon colours them with the element token.
+ * snowflake and a gem. ElementIcon shows the game's icon and falls back on
+ * these, coloured with the element token, while there is none (before the
+ * coverage list loads, or game data whose element icons no host serves) or
+ * it fails to load.
  */
 
 import type { Element } from '@/data/game-meta'

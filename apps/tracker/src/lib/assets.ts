@@ -8,15 +8,16 @@
  * (`@gdt/game-data/image-url`, data/missing-images.json); the service worker
  * keeps either kind cache-first. The names come only from our own game data
  * (@gdt/game-data, compiled from the game's tables): `images` for
- * characters, weapons, artifacts and a few items, the material index for
- * materials, achievement categories for theirs. The Traveler's portrait
- * follows the account's twin setting.
+ * characters, weapons, artifacts, elements and a few items, the material
+ * index for materials, achievement categories for theirs. The Traveler's
+ * portrait follows the account's twin setting.
  */
 
 import {
   artifactImage,
   artifactSetImage,
   characterImages,
+  elementImage,
   itemImage,
   travelerArt,
   travelerIcon,
@@ -29,9 +30,11 @@ import { shallowRef } from 'vue'
 import {
   loadImageCoverage,
   loadMaterialIndex,
+  type Element as GameElement,
   type ImageCoverage,
   type MaterialIndex,
 } from '@gdt/game-data'
+import type { Element } from '@/data/game-meta'
 
 /**
  * The image host and gi-cdn, as the game data writes them (vite.config.ts
@@ -117,6 +120,27 @@ export async function loadGameIcons(): Promise<void> {
  */
 export function gameIcon(name: string): string {
   return coverage.value ? imageUrl(name) : ''
+}
+
+const GAME_ELEMENTS: Readonly<Record<Element, GameElement>> = {
+  anemo: 'Anemo',
+  geo: 'Geo',
+  electro: 'Electro',
+  dendro: 'Dendro',
+  hydro: 'Hydro',
+  pyro: 'Pyro',
+  cryo: 'Cryo',
+}
+
+/**
+ * An element's icon: the game's own, in the element's colours (the one it
+ * shows beside an element's name in text). As gameIcon: '' until
+ * loadGameIcons resolves, and '' while the game data names an icon no host
+ * serves (releases before its UI_Buff_Element02_* names), so ElementIcon
+ * draws its glyph.
+ */
+export function elementIcon(element: Element): string {
+  return gameIcon(elementImage(GAME_ELEMENTS[element]) ?? '')
 }
 
 /** Loaded lazily (large); call before rendering material icons. */
