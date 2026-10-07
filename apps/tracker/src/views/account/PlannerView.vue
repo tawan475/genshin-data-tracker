@@ -62,6 +62,7 @@ import {
   moveTo,
   reprioritize,
 } from '@/components/planner/allocation'
+import { allocatedTotals } from '@/components/planner/allocated-totals'
 import { newCustomKey, replaceCustom } from '@/components/planner/custom-character'
 import { craftChanges, rowText, type CraftRow } from '@/components/planner/crafting'
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
@@ -198,18 +199,6 @@ const {
   addCount,
 } = usePlannerModel(account, { tasks: true })
 const settingsOpen = ref(false)
-
-const plan = computed(() =>
-  planner.value && totals.value
-    ? farmPlan(planner.value, totals.value, drops.value, {
-        ar: ar.value,
-        wl: wl.value,
-      })
-    : null,
-)
-const steps = computed(() =>
-  planner.value && totals.value ? craftingSteps(planner.value, totals.value) : [],
-)
 
 // A clock for today's domains, the reset countdown and the resin estimate.
 const now = ref(Date.now())
@@ -431,14 +420,54 @@ const facts = computed<GoalFacts>(() => {
   return { ready: ready.value, upgrade: new Set(parts.value.keys()), noWeekly }
 })
 
+// ------------------------------------------------------------------ farm
+
+/**
+ * The cards the Farm view plans for: every counted one, or with No weekly
+ * boss on (the Goals toolbar's toggle, shared) only those still to farm
+ * without a weekly boss, in priority order.
+ */
+const farmFor = computed(() =>
+  filters.noWeekly ? order.value.filter((e) => facts.value.noWeekly.has(e.id)) : null,
+)
+
+/**
+ * What the Farm view farms for: the totals of every goal, or the share of
+ * the cards it plans for, each after the counted goals above it
+ * (allocated-totals.ts reads the allocation `needs` just ran: the goals
+ * left out keep what they take, so the numbers are the cards' own).
+ */
+const farmTotals = computed(() => {
+  const all = totals.value
+  const p = planner.value
+  if (!farmFor.value || !all || !p) return all
+  // Runs the allocation first (and recomputes with it): allocationMemo then holds this one.
+  void needs.value
+  return allocatedTotals(p, allocationMemo, new Set(farmFor.value.map((e) => e.id)))
+})
+
+const plan = computed(() =>
+  planner.value && farmTotals.value
+    ? farmPlan(planner.value, farmTotals.value, drops.value, {
+        ar: ar.value,
+        wl: wl.value,
+      })
+    : null,
+)
+const steps = computed(() =>
+  planner.value && farmTotals.value ? craftingSteps(planner.value, farmTotals.value) : [],
+)
+
 /** Artifact sets the counted character goals still want (Today's artifact domains). */
-const artifactWants = computed<ArtifactWant[]>(() =>
-  (board.value?.entries ?? []).flatMap((e) => {
+const artifactWants = computed<ArtifactWant[]>(() => {
+  const only = farmFor.value ? new Set(farmFor.value.map((e) => e.id)) : null
+  return (board.value?.entries ?? []).flatMap((e) => {
     const c = e.character
+    if (only && !only.has(e.id)) return []
     const open = c?.target.active ? (c.artifacts?.open ?? []) : []
     return c && open.length && !c.artifacts?.complete ? [{ goal: c.id, sets: open }] : []
-  }),
-)
+  })
+})
 
 /** Extra item needs the bag covers on their own. */
 const itemsInStock = computed(() => {
@@ -1446,8 +1475,9 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         <FarmPanel
           v-model:view="farmView"
           v-model:forge="forge"
+          v-model:no-weekly="filters.noWeekly"
           :planner="planner"
-          :totals="totals"
+          :totals="farmTotals ?? totals"
           :plan="plan"
           :steps="steps"
           :bag="bag"
@@ -1460,6 +1490,8 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :farming="farming"
           :artifacts="artifactWants"
           :crafting="settings.planner.crafting !== false"
+          :no-weekly-count="facts.noWeekly.size"
+          :plan-for="farmFor"
           @settings="settingsOpen = true"
           @crafted="crafted"
           @hide-crafting="hideCrafting"

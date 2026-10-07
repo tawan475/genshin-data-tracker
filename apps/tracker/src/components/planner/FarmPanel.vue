@@ -6,17 +6,22 @@ import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { FarmPlan } from '@gdt/game-data/planner-estimate'
 import { WEEKDAY_LABELS, type PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, watch } from 'vue'
-import { Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
+import { CalendarOff, Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
+import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
-import { materialIcon } from '@/lib/assets'
+import { characterIcon, materialIcon, weaponIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
 import CraftCard from './CraftCard.vue'
 import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
 import { formatCountdown, formatSeconds } from './farm-format'
+import { useGoalActions } from './goal-actions'
+import GoalPortrait from './GoalPortrait.vue'
 import { sameValue } from './keep-unchanged'
+import type { GoalEntry } from './model'
 import { useProgressive } from './use-progressive'
 import {
   REFRESH_RESIN,
@@ -41,6 +46,11 @@ import {
  *   artifact domains of the sets the goals want;
  * - Schedule: the other day pairs' domains.
  * Every card lists what is still missing and who needs it.
+ *
+ * "No weekly boss" (beside Today / Schedule; the Goals toolbar's toggle,
+ * one value) narrows all of it to the goals still to farm without a weekly
+ * boss (`planFor`; the page hands their share in `totals` and `plan`),
+ * shown as a row of portraits; with none, an empty state turns it off.
  */
 const props = defineProps<{
   planner: PlannerData
@@ -62,10 +72,46 @@ const props = defineProps<{
   artifacts: readonly ArtifactWant[]
   /** Show the Crafting checklist (a planner setting). */
   crafting: boolean
+  /** Counted goals still to farm without a weekly boss. */
+  noWeeklyCount: number
+  /** With No weekly boss on, the cards the plan is for (priority order); null when off. */
+  planFor: readonly GoalEntry[] | null
 }>()
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
+const noWeekly = defineModel<boolean>('noWeekly', { required: true })
+const actions = useGoalActions()
 const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]]; hideCrafting: [] }>()
+
+const NO_WEEKLY_TITLE =
+  'Only the goals still to farm without a weekly boss: their drops are held or convertible (after the goals above)'
+
+/** The plan's goals as portraits (No weekly boss on). */
+const people = computed(() =>
+  (props.planFor ?? []).map((e) => {
+    const c = e.character
+    const w = e.weapons[0]
+    return c
+      ? {
+          id: e.id,
+          name: e.name,
+          src: c.custom ? '' : characterIcon(c.key),
+          rarity: c.rarity,
+          element: c.element,
+          custom: !!c.custom,
+        }
+      : {
+          id: e.id,
+          name: e.name,
+          src: w ? weaponIcon(w.key, w.target.ascension) : '',
+          rarity: w?.rarity ?? null,
+          element: null,
+          custom: false,
+        }
+  }),
+)
+/** No weekly boss is on and leaves no goal. */
+const noneLeft = computed(() => props.planFor !== null && props.planFor.length === 0)
 
 const VIEWS = [
   { value: 'today' as const, label: 'Today' },
@@ -187,6 +233,7 @@ watch(view, (value) => {
 <template>
   <div class="flex flex-col gap-3">
     <section
+      v-if="!noneLeft"
       class="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 shadow-sm"
       aria-label="Totals"
     >
@@ -252,7 +299,18 @@ watch(view, (value) => {
     </section>
 
     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-      <UiSegmented v-model="view" :options="VIEWS" label="Farm view" />
+      <span class="flex flex-wrap items-center gap-2">
+        <UiSegmented v-model="view" :options="VIEWS" label="Farm view" />
+        <FilterChip
+          :pressed="noWeekly"
+          :count="noWeeklyCount"
+          :title="NO_WEEKLY_TITLE"
+          @toggle="noWeekly = !noWeekly"
+        >
+          <CalendarOff class="size-4" aria-hidden="true" />
+          No weekly boss
+        </FilterChip>
+      </span>
       <span
         class="tabular inline-flex items-center gap-1 font-mono text-sm text-text-secondary"
         :title="dayTitle"
@@ -264,8 +322,45 @@ watch(view, (value) => {
       </span>
     </div>
 
+    <ul
+      v-if="people.length"
+      class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 py-1 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
+      aria-label="The plan is for"
+      title="The plan is for these goals"
+    >
+      <li v-for="p in people" :key="p.id" class="shrink-0">
+        <component
+          :is="actions ? 'button' : 'span'"
+          :type="actions ? 'button' : undefined"
+          class="block rounded-xl transition-transform hover:scale-105 focus-visible:scale-105"
+          :title="actions ? `${p.name} · open` : p.name"
+          :aria-label="p.name"
+          @click="actions?.open(p.id)"
+        >
+          <GoalPortrait
+            size="sm"
+            :src="p.src"
+            :name="p.name"
+            :rarity="p.rarity"
+            :element="p.element"
+            :custom="p.custom"
+          />
+        </component>
+      </li>
+    </ul>
+
+    <div
+      v-if="noneLeft"
+      class="rounded-xl border border-border-default bg-surface-raised shadow-sm"
+    >
+      <UiEmpty title="Every goal still needs a weekly boss">
+        <template #icon><CalendarOff aria-hidden="true" /></template>
+        <UiButton @click="noWeekly = false">Show all goals</UiButton>
+      </UiEmpty>
+    </div>
+
     <p
-      v-if="plan.assumed.ar || plan.assumed.wl"
+      v-else-if="plan.assumed.ar || plan.assumed.wl"
       class="-mt-2 flex flex-wrap items-center gap-2 text-sm text-text-muted"
     >
       <Info class="size-4" aria-hidden="true" />
@@ -273,7 +368,7 @@ watch(view, (value) => {
       <UiButton variant="ghost" size="sm" @click="emit('settings')">Set</UiButton>
     </p>
 
-    <template v-if="view === 'today'">
+    <template v-if="!noneLeft && view === 'today'">
       <p v-if="nothing" class="flex items-center justify-center gap-2 py-8 text-text-secondary">
         <PartyPopper class="size-5" aria-hidden="true" />
         Nothing to farm
@@ -334,7 +429,7 @@ watch(view, (value) => {
       </section>
     </template>
 
-    <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div v-else-if="!noneLeft" class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <section
         v-for="pair in schedule"
         :key="pair.days.join()"

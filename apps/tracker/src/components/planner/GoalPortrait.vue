@@ -9,20 +9,26 @@ import type { Element } from '@/data/game-meta'
  * rarity's gradient, the element in a corner disc and a corner tag
  * ("C1" for a character's constellation, "R5" for a weapon's refinement).
  * A custom character (no picture) gets its initials in a dashed frame.
- * While picking cards, a tick sits on it. 64 px on phones, 72 from `sm`.
+ * While picking cards, a tick sits on it. 64 px on phones, 72 from `sm`;
+ * `size` sm is 48 / 56 px without the corner tag (a row of them).
  */
-const props = defineProps<{
-  src: string
-  name: string
-  rarity: number | null
-  element?: Element | null
-  /** "C1", "R5" (none: nothing). */
-  tag?: string
-  tagTitle?: string
-  custom?: boolean
-  /** Picking cards: null when not, else whether this one is picked. */
-  picked?: boolean | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    src: string
+    name: string
+    rarity: number | null
+    element?: Element | null
+    /** "C1", "R5" (none: nothing). */
+    tag?: string
+    tagTitle?: string
+    custom?: boolean
+    /** Picking cards: null when not, else whether this one is picked. */
+    picked?: boolean | null
+    size?: 'md' | 'sm'
+  }>(),
+  // A boolean prop left out would read false (picking, nothing picked): null is "not picking".
+  { element: null, tag: '', tagTitle: undefined, picked: null, size: 'md' },
+)
 
 const failed = ref(false)
 watch(
@@ -51,7 +57,10 @@ const initials = computed(() =>
 </script>
 
 <template>
-  <span class="relative size-16 shrink-0 sm:size-18">
+  <span
+    class="relative inline-block shrink-0"
+    :class="size === 'sm' ? 'size-12 sm:size-14' : 'size-16 sm:size-18'"
+  >
     <span
       class="block size-full overflow-hidden rounded-xl bg-linear-to-br"
       :class="[
@@ -77,7 +86,7 @@ const initials = computed(() =>
       >
     </span>
     <span
-      v-if="tag"
+      v-if="tag && size !== 'sm'"
       class="tabular absolute top-1 left-1 rounded bg-surface-raised/85 px-1 font-mono text-[0.625rem] leading-4 font-semibold text-text-primary shadow-sm"
       :title="tagTitle"
       >{{ tag }}</span
@@ -89,7 +98,7 @@ const initials = computed(() =>
       <ElementIcon :element="element" />
     </span>
     <span
-      v-if="picked !== null && picked !== undefined"
+      v-if="picked !== null"
       class="absolute -top-1 -left-1 inline-flex size-5 items-center justify-center rounded-full border-2"
       :class="
         picked
