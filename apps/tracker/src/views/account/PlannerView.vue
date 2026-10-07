@@ -886,6 +886,23 @@ async function crafted(rows: CraftRow[]) {
   )
 }
 
+/** Most craft on demand when levelling: the checklist goes, Planner settings bring it back. */
+function hideCrafting() {
+  void saveSettings({ planner: { crafting: false } })
+  feedback.toast(
+    {
+      tone: 'info',
+      title: 'Crafting hidden',
+      hint: 'Planner settings: Crafting checklist',
+      action: {
+        label: 'Undo',
+        run: () => void saveSettings({ planner: { crafting: true } }),
+      },
+    },
+    8000,
+  )
+}
+
 // ------------------------------------------------------------------ editor
 // The open goal lives in the URL (?goal=character:HuTao): Back closes it.
 
@@ -1442,8 +1459,10 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :resin-held="resinHeld"
           :farming="farming"
           :artifacts="artifactWants"
+          :crafting="settings.planner.crafting !== false"
           @settings="settingsOpen = true"
           @crafted="crafted"
+          @hide-crafting="hideCrafting"
         />
       </div>
 

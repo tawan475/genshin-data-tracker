@@ -43,6 +43,8 @@ export interface PlannerSettings {
   refreshes: number
   /** The resin tracker's quick buttons: amounts to add (−40 spends a boss run). */
   resinSteps: number[]
+  /** Show the Crafting checklist on the Farm view (most craft on demand, so it can be hidden). */
+  crafting: boolean
 }
 
 export interface UserSettings {
@@ -79,7 +81,7 @@ export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   traveler: 'F',
   ar: null,
   wl: null,
-  planner: { azoth: false, passives: true, refreshes: 0, resinSteps: [-40, 60] },
+  planner: { azoth: false, passives: true, refreshes: 0, resinSteps: [-40, 60], crafting: true },
   resin: null,
 }
 

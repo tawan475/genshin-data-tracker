@@ -2,10 +2,21 @@
 import type { PlannerData } from '@gdt/game-data'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
 import { computed, ref } from 'vue'
-import { ArrowRight, Check, CheckCheck, ChevronsUp, Clock, Hammer, Repeat2 } from 'lucide-vue-next'
+import {
+  ArrowRight,
+  Check,
+  CheckCheck,
+  ChevronDown,
+  ChevronsUp,
+  Clock,
+  EyeOff,
+  Hammer,
+  Repeat2,
+} from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { materialName } from '@/utils/materials'
 import {
   CRAFT_LABEL,
@@ -32,6 +43,10 @@ import { materialSoft } from './material-soft'
  * Each step's tick (and "All" in the header) records it as done in the
  * planner's bag, input and costs out and product in, with an Undo; a step
  * that needs what an earlier one makes waits for it.
+ *
+ * Most players craft on demand while levelling, so the card starts folded to
+ * its header (the totals), remembered per device, and can be hidden
+ * (`hide`: a planner setting, which brings it back).
  */
 const props = defineProps<{
   planner: PlannerData
@@ -39,7 +54,14 @@ const props = defineProps<{
   /** The planner's bag (capture plus hand edits). */
   bag: Readonly<Record<string, number>>
 }>()
-const emit = defineEmits<{ done: [rows: CraftRow[]] }>()
+const emit = defineEmits<{ done: [rows: CraftRow[]]; hide: [] }>()
+
+const OPEN_KEY = 'planner:crafting-open'
+const open = ref(readStorage(OPEN_KEY) === '1')
+function toggleOpen() {
+  open.value = !open.value
+  writeStorage(OPEN_KEY, open.value ? '1' : null)
+}
 
 /** Rows shown folded: three on a phone, six (two columns) from `sm` up. */
 const SHOWN = 6
@@ -122,34 +144,52 @@ const allLabel = computed(() =>
     aria-label="Crafting"
   >
     <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-      <h3 class="text-sm leading-7 font-semibold">Crafting</h3>
-      <span class="tabular font-mono text-xs text-text-secondary"
-        >{{ formatNumber(rows.length) }} {{ rows.length === 1 ? 'step' : 'steps' }}</span
-      >
-      <span
-        v-for="c in totals.costs"
-        :key="c.key"
-        class="tabular inline-flex items-center gap-0.5 font-mono text-xs text-text-secondary"
-        :title="`${costText(c)} in all`"
-      >
-        <span class="size-4 shrink-0">
-          <MaterialIcon :src="icon(c.key)" :name="materialName(c.key)" />
-        </span>
-        {{ formatCompact(c.count) }}
-        <span class="sr-only">{{ materialName(c.key) }}</span>
-      </span>
-      <span
-        v-if="totals.seconds"
-        class="tabular inline-flex items-center gap-0.5 font-mono text-xs text-text-secondary"
-        :title="`Forging time ${formatSeconds(totals.seconds)} (the forge's queue aside)`"
-      >
-        <Clock class="size-3.5" aria-hidden="true" />
-        {{ formatSeconds(totals.seconds) }}
-        <span class="sr-only">forging</span>
-      </span>
+      <h3 class="min-w-0">
+        <button
+          type="button"
+          class="-my-1 -ml-1 flex min-h-9 flex-wrap items-center gap-x-2.5 gap-y-1 rounded-lg px-1 text-left transition-colors hover:bg-surface-overlay"
+          :aria-expanded="open"
+          :title="open ? 'Fold' : 'What the plan converts, crafts and forges'"
+          @click="toggleOpen"
+        >
+          <span class="inline-flex items-center gap-1 text-sm leading-7 font-semibold">
+            <ChevronDown
+              class="size-4 shrink-0 text-text-muted transition-transform"
+              :class="open ? '' : '-rotate-90'"
+              aria-hidden="true"
+            />
+            Crafting
+          </span>
+          <span class="tabular font-mono text-xs font-normal text-text-secondary"
+            >{{ formatNumber(rows.length) }} {{ rows.length === 1 ? 'step' : 'steps' }}</span
+          >
+          <span
+            v-for="c in totals.costs"
+            :key="c.key"
+            class="tabular inline-flex items-center gap-0.5 font-mono text-xs text-text-secondary"
+            :title="`${costText(c)} in all`"
+          >
+            <span class="size-4 shrink-0">
+              <MaterialIcon :src="icon(c.key)" :name="materialName(c.key)" />
+            </span>
+            {{ formatCompact(c.count) }}
+            <span class="sr-only">{{ materialName(c.key) }}</span>
+          </span>
+          <span
+            v-if="totals.seconds"
+            class="tabular inline-flex items-center gap-0.5 font-mono text-xs text-text-secondary"
+            :title="`Forging time ${formatSeconds(totals.seconds)} (the forge's queue aside)`"
+          >
+            <Clock class="size-3.5" aria-hidden="true" />
+            {{ formatSeconds(totals.seconds) }}
+            <span class="sr-only">forging</span>
+          </span>
+        </button>
+      </h3>
       <span class="ml-auto inline-flex items-center gap-1.5">
         <slot />
         <button
+          v-if="open"
           type="button"
           class="inline-flex min-h-9 items-center gap-1 rounded-lg border border-border-strong px-2 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-transparent"
           :aria-disabled="allShort.length > 0 || undefined"
@@ -160,99 +200,113 @@ const allLabel = computed(() =>
           <CheckCheck class="size-4" aria-hidden="true" />
           <span class="max-sm:sr-only">All done</span>
         </button>
+        <button
+          type="button"
+          class="inline-flex size-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-primary"
+          title="Hide crafting (Planner settings bring it back)"
+          aria-label="Hide crafting"
+          @click="emit('hide')"
+        >
+          <EyeOff class="size-4" aria-hidden="true" />
+        </button>
       </span>
     </div>
 
-    <section
-      v-for="g in shownGroups"
-      :key="g.kind"
-      class="flex flex-col gap-1"
-      :class="g.rows.every(phoneOnly) ? 'max-sm:hidden' : ''"
-      :aria-label="CRAFT_LABEL[g.kind]"
-    >
-      <h4
-        class="flex items-center gap-1 text-xs font-medium text-text-muted"
-        :title="KIND_TITLE[g.kind]"
+    <template v-if="open">
+      <section
+        v-for="g in shownGroups"
+        :key="g.kind"
+        class="flex flex-col gap-1"
+        :class="g.rows.every(phoneOnly) ? 'max-sm:hidden' : ''"
+        :aria-label="CRAFT_LABEL[g.kind]"
       >
-        <component :is="KIND_ICON[g.kind]" class="size-3.5" aria-hidden="true" />
-        {{ CRAFT_LABEL[g.kind] }}
-      </h4>
-      <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
-        <li
-          v-for="row in g.rows"
-          :key="row.id"
-          class="flex min-w-0 items-center gap-1.5 rounded-lg bg-surface-overlay/60 py-1 pr-1 pl-1"
-          :class="phoneOnly(row) ? 'max-sm:hidden' : ''"
-          :title="row.title"
+        <h4
+          class="flex items-center gap-1 text-xs font-medium text-text-muted"
+          :title="KIND_TITLE[g.kind]"
         >
-          <!-- Phones name the input on the row's second line; the picture pair needs the width. -->
-          <span
-            class="size-9 shrink-0 overflow-hidden rounded-md text-[0.625rem] max-sm:hidden"
-            :class="soft(row.input.key)"
+          <component :is="KIND_ICON[g.kind]" class="size-3.5" aria-hidden="true" />
+          {{ CRAFT_LABEL[g.kind] }}
+        </h4>
+        <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
+          <li
+            v-for="row in g.rows"
+            :key="row.id"
+            class="flex min-w-0 items-center gap-1.5 rounded-lg bg-surface-overlay/60 py-1 pr-1 pl-1"
+            :class="phoneOnly(row) ? 'max-sm:hidden' : ''"
+            :title="row.title"
           >
-            <MaterialIcon :src="icon(row.input.key)" :name="materialName(row.input.key)" />
-          </span>
-          <ArrowRight class="size-3.5 shrink-0 text-text-muted max-sm:hidden" aria-hidden="true" />
-          <span
-            class="size-9 shrink-0 overflow-hidden rounded-md text-[0.625rem]"
-            :class="soft(row.output.key)"
-          >
-            <MaterialIcon :src="icon(row.output.key)" :name="materialName(row.output.key)" />
-          </span>
-          <span class="flex min-w-0 flex-1 flex-col gap-0.5 leading-tight" aria-hidden="true">
-            <span class="line-clamp-2 text-sm break-words">
-              <span class="tabular font-mono font-semibold">{{
-                formatNumber(row.output.count)
-              }}</span>
-              {{ materialName(row.output.key) }}
+            <!-- Phones name the input on the row's second line; the picture pair needs the width. -->
+            <span
+              class="size-9 shrink-0 overflow-hidden rounded-md text-[0.625rem] max-sm:hidden"
+              :class="soft(row.input.key)"
+            >
+              <MaterialIcon :src="icon(row.input.key)" :name="materialName(row.input.key)" />
             </span>
-            <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-muted">
-              <span class="min-w-0 break-words"
-                >from <span class="tabular font-mono">{{ formatNumber(row.input.count) }}</span>
-                {{ materialName(row.input.key) }}</span
-              >
-              <span
-                v-for="c in row.costs"
-                :key="c.key"
-                class="tabular inline-flex shrink-0 items-center gap-0.5 font-mono text-text-secondary"
-              >
-                <span class="size-3.5 shrink-0">
-                  <MaterialIcon :src="icon(c.key)" :name="materialName(c.key)" />
+            <ArrowRight
+              class="size-3.5 shrink-0 text-text-muted max-sm:hidden"
+              aria-hidden="true"
+            />
+            <span
+              class="size-9 shrink-0 overflow-hidden rounded-md text-[0.625rem]"
+              :class="soft(row.output.key)"
+            >
+              <MaterialIcon :src="icon(row.output.key)" :name="materialName(row.output.key)" />
+            </span>
+            <span class="flex min-w-0 flex-1 flex-col gap-0.5 leading-tight" aria-hidden="true">
+              <span class="line-clamp-2 text-sm break-words">
+                <span class="tabular font-mono font-semibold">{{
+                  formatNumber(row.output.count)
+                }}</span>
+                {{ materialName(row.output.key) }}
+              </span>
+              <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-muted">
+                <span class="min-w-0 break-words"
+                  >from <span class="tabular font-mono">{{ formatNumber(row.input.count) }}</span>
+                  {{ materialName(row.input.key) }}</span
+                >
+                <span
+                  v-for="c in row.costs"
+                  :key="c.key"
+                  class="tabular inline-flex shrink-0 items-center gap-0.5 font-mono text-text-secondary"
+                >
+                  <span class="size-3.5 shrink-0">
+                    <MaterialIcon :src="icon(c.key)" :name="materialName(c.key)" />
+                  </span>
+                  {{ formatCompact(c.count) }}
                 </span>
-                {{ formatCompact(c.count) }}
-              </span>
-              <span
-                v-if="row.seconds"
-                class="tabular inline-flex shrink-0 items-center gap-0.5 font-mono text-text-secondary"
-              >
-                <Clock class="size-3" />
-                {{ formatSeconds(row.seconds) }}
+                <span
+                  v-if="row.seconds"
+                  class="tabular inline-flex shrink-0 items-center gap-0.5 font-mono text-text-secondary"
+                >
+                  <Clock class="size-3" />
+                  {{ formatSeconds(row.seconds) }}
+                </span>
               </span>
             </span>
-          </span>
-          <span class="sr-only">{{ row.title }}</span>
-          <button
-            type="button"
-            class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-border-strong text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-transparent"
-            :aria-disabled="row.short.length > 0 || undefined"
-            :title="doneLabel(row)"
-            :aria-label="doneLabel(row)"
-            @click="row.short.length || emit('done', [row])"
-          >
-            <Check class="size-4" aria-hidden="true" />
-          </button>
-        </li>
-      </ul>
-    </section>
+            <span class="sr-only">{{ row.title }}</span>
+            <button
+              type="button"
+              class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-border-strong text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-transparent"
+              :aria-disabled="row.short.length > 0 || undefined"
+              :title="doneLabel(row)"
+              :aria-label="doneLabel(row)"
+              @click="row.short.length || emit('done', [row])"
+            >
+              <Check class="size-4" aria-hidden="true" />
+            </button>
+          </li>
+        </ul>
+      </section>
 
-    <button
-      type="button"
-      class="self-start rounded-md px-1.5 py-0.5 text-xs font-medium text-accent-text hover:bg-surface-overlay"
-      :class="moreClass"
-      :aria-expanded="all"
-      @click="all = !all"
-    >
-      {{ all ? 'Fewer' : `All ${formatNumber(rows.length)}` }}
-    </button>
+      <button
+        type="button"
+        class="self-start rounded-md px-1.5 py-0.5 text-xs font-medium text-accent-text hover:bg-surface-overlay"
+        :class="moreClass"
+        :aria-expanded="all"
+        @click="all = !all"
+      >
+        {{ all ? 'Fewer' : `All ${formatNumber(rows.length)}` }}
+      </button>
+    </template>
   </article>
 </template>
