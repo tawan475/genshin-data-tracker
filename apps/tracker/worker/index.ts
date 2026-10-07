@@ -3,6 +3,7 @@ import { secureHeaders } from 'hono/secure-headers'
 import type { AppEnv } from './env'
 import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
+import { admin } from './routes/admin'
 import { auth } from './routes/auth'
 import { health } from './routes/health'
 import { live } from './routes/live'
@@ -33,6 +34,7 @@ app.route('/accounts', accounts)
 app.route('/accounts', progress)
 app.route('/genshin-accounts-public', publicImport)
 app.route('/live', live)
+app.route('/admin', admin)
 
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
 
@@ -47,8 +49,12 @@ export { LiveHub } from './services/live'
 export default {
   fetch: app.fetch,
   async scheduled(_controller, env, ctx) {
+    // Optional var (wrangler.jsonc "vars" or the dashboard): v1 rows to repack per day.
+    const repackLimit = Number((env as { REPACK_CRON_LIMIT?: string }).REPACK_CRON_LIMIT ?? 0) || 0
     ctx.waitUntil(
-      runMaintenance(env.DB).then((result) => console.log('maintenance', JSON.stringify(result))),
+      runMaintenance(env.DB, Date.now(), { repackLimit }).then((result) =>
+        console.log('maintenance', JSON.stringify(result)),
+      ),
     )
   },
 } satisfies ExportedHandler<Env>

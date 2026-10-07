@@ -180,6 +180,12 @@ const PLAYER_FIELDS: readonly [keyof GiPlayer, number, number][] = [
   ['maxStamina', 1, 100_000],
 ]
 
+/** The order of a stored player section's keys: PLAYER_FIELDS, then `gameData`. */
+export const PLAYER_KEY_ORDER: readonly string[] = [
+  ...PLAYER_FIELDS.map(([field]) => field),
+  'gameData',
+]
+
 function toPlayer(raw: unknown): GiPlayer | null {
   if (!isObject(raw)) return null
   const player: Record<string, number | string> = {}

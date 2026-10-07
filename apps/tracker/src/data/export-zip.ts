@@ -1,5 +1,5 @@
 /**
- * Building a zip of GOOD files from a GDT1 bundle. Pure (no DOM, no fetch):
+ * Building a zip of GOOD files from a decoded bundle. Pure (no DOM, no fetch):
  * the export worker drives it, and it can be exercised from Node.
  *
  * Snapshots are decoded and deflated one at a time and the archive leaves as
@@ -51,7 +51,7 @@ export function zipEntryNames(
   return names
 }
 
-/** Rebuilds one snapshot's GOOD file from inflated bundle sections. */
+/** Rebuilds one snapshot's GOOD file from decoded bundle sections. */
 export function decodeFromSections(
   snapshot: BundleSnapshot,
   texts: ReadonlyMap<string, string>,

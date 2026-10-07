@@ -71,42 +71,75 @@ own lazy chunk.
 
 ## Storage model
 
-A snapshot row holds metadata, a small summary and the hashes of its sections
-(characters, weapons, artifacts, materials, achievements). Sections are
-canonical JSON, deflated and stored once per account in `blobs`, so an
-unchanged section costs nothing. Artifacts live in an immutable per-account
-catalog; each snapshot records which catalog entries it held and their
-location/lock state at the time. Materials, artifacts and achievement times
-are usually stored as a delta against a full base section of the latest
-snapshot (for materials, the keyframe), never against another delta; a new
-base is stored once the delta passes √(2·25 B·base size), the cheapest point
-in the cost model in `sections.ts` (migration 0009 added the base columns;
-older rows are all full sections). The content hash is always taken over the
-full forms. The format is defined in `packages/shared/src/codec` and must stay
-decodable forever: only append.
+A snapshot row holds its capture times, sizes, the first 47 bits of its
+content hash, the ids of its eight sections (characters, weapons, artifacts,
+materials, achievements and irminsul's player, achievement times and
+character extras) and `meta`: the summary the list views show, the GOOD
+header and the player values that move with every login (resin, AR EXP).
+Sections are stored once per account in `section_blobs` under the first 8
+bytes of their content address, with an integer id. Artifacts live in an
+immutable per-account catalog, packed many to a row in `artifact_chunks`
+(about 10 bytes a piece); each snapshot records which catalog entries it
+held and their location/lock state at the time.
+
+A section blob is a format byte and a payload: canonical JSON or a binary
+layout (varints, column by column, zigzag deltas; checked by decoding it back
+before it is trusted), stored as is or DEFLATEd (fflate), optionally with its
+*base* section as the preset dictionary. Materials, artifacts and achievement
+times are usually stored as a delta against a full base section of the
+latest snapshot (for materials, the keyframe), never against another delta;
+any full section is compressed against the account's previous standalone
+section of its kind while that halves it. A new base is stored once the
+delta passes √(2·25 B·base size), the cheapest point in the cost model in
+`sections.ts` (re-measured for v2 in `store-v2.ts`). So decoding needs at
+most three blobs. The content hash is still taken over the canonical JSON of
+the full forms, so a capture uploaded again is recognised whatever its
+storage. The formats are defined in `packages/shared/src/codec`
+(`section-blob.ts`, `section-binary.ts`, `snapshot-meta.ts`,
+`catalog-binary.ts`, `store-v2.ts`) and must stay decodable forever: only
+add new format values.
+
+**Storage v1** (migration 0016 and before): rows named sections by 32-digit
+hex hashes in `blobs` (deflated JSON) and kept the summary as JSON; the
+catalog was one `artifacts` row per piece. Readers understand both. Repack
+converts v1 to v2, a batch at a time: each row's sections are re-encoded,
+decoded back and compared with the v1 decode, and only an exact match is
+written (with the row, in one batch); the catalog moves into chunks the same
+way. `GET /api/admin/repack` says what is left, `POST
+/api/admin/repack?limit=100` converts (both need `x-diag-key`; `after` skips
+rows that did not convert, which the answer lists and the log names by id).
+The daily maintenance repacks too when the `REPACK_CRON_LIMIT` var is set.
+Migration `0017_drop_storage_v1` (its own commit, shipped only once repack
+reports nothing left) drops the v1 columns, the `blobs` table and the
+redundant `(account_id, taken_at)` index; it refuses to run while a v1 row
+remains, and the Worker already runs on either schema. `artifacts` stays:
+imports insert new pieces there to get their ids (AUTOINCREMENT) and move
+them into a chunk in the same batch as the snapshot.
 
 irminsul's own top-level keys are sections of their own, each optional and
-range-checked again on import: `gi_player` (AR, World Level, resin, UID… as
-read at login) as `player`, `gi_achievement_times` (finish times, unix
-seconds) as `achievementTimes`, `gi_characters` (friendship, obtained date)
-as `characterExtras` (migration 0006 added their hash columns). Each dedupes
-on its own: the player section changes per login, the other two rarely. A
-file without them stores and hashes exactly as before they existed, and
-exports (GOOD rebuild, zip) write them back after `timestamp`. The app uses
-them for the achievements' real completion times, friendship and obtained
-dates on Characters, and the planner's AR/WL (when the settings are empty)
-and resin.
+range-checked again on import: `gi_player` (AR, World Level, UID… as read at
+login) as `player`, `gi_achievement_times` (finish times, unix seconds) as
+`achievementTimes`, `gi_characters` (friendship, obtained date) as
+`characterExtras`. A file without them stores and hashes exactly as before
+they existed, and exports (GOOD rebuild, zip) write them back after
+`timestamp`. The app uses them for the achievements' real completion times,
+friendship and obtained dates on Characters, and the planner's AR/WL (when
+the settings are empty) and resin.
 
 Character, weapon and material keys are stored as ids from the static,
-append-only dictionary in `packages/shared/src/dictionary`. Add new keys with
-`pnpm --filter @gdt/shared dictionary --material new-keys.json` (never edit the
-lists by hand; a test pins them). Keys the dictionary lacks are stored as
-strings, so imports never fail on new game content.
+append-only dictionary in `packages/shared/src/dictionary`; artifact sets,
+slots and stats likewise for the catalog. Add new keys with
+`pnpm --filter @gdt/shared dictionary --material new-keys.json` (or
+`--artifactSet`; never edit the lists by hand; a test pins them). Keys the
+dictionary lacks are stored as strings, so imports never fail on new game
+content.
 
 Reads are built for the browser to do the work: `/api/accounts/:id/catalog`
-(every artifact, compact rows), `/api/accounts/:id/bundle` (stored sections,
-untouched, in the binary GDT1 format of `packages/shared/src/codec/bundle.ts`)
-and `/api/accounts/:id/snapshots` (summaries). Each revalidates with an ETag on
+(every artifact, compact rows), `/api/accounts/:id/bundle?format=2` (stored
+sections, untouched, in the binary GDT2 format of
+`packages/shared/src/codec/bundle.ts`; without `format` an app from before v2
+gets GDT1, the v2 sections decoded into the v1 form for it) and
+`/api/accounts/:id/snapshots` (summaries). Each revalidates with an ETag on
 the account's `data_version`, so a reload costs one indexed read. Bulk export
 zips are built in the browser; the server only rebuilds single GOOD files.
 
@@ -196,7 +229,9 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `planner` live event naming the tab that made them (`x-gdt-tab`). Account
   settings also hold `traveler` (`F`/`M`), which picks the Traveler's portrait.
 - **Maintenance** runs daily (cron): snapshots deleted more than 30 days ago
-  are purged, unreferenced sections are collected.
+  are purged, unreferenced sections (v1 and v2, bases kept while anything
+  needs them) are collected, and with `REPACK_CRON_LIMIT` set, v1 rows are
+  repacked (see Storage model).
   Account counters are kept exact by triggers (migration 0002).
 
 ## Account recovery

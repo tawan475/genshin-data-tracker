@@ -33,8 +33,9 @@ import {
 
 /**
  * Small per-snapshot figures computed once at import, so the dashboard and
- * analysis views never have to open a snapshot's sections. Stored as JSON:
- * new fields can be added without a migration (older rows just lack them).
+ * analysis views never have to open a snapshot's sections. Stored in the
+ * row's `meta` (snapshot-meta.ts; v1 rows: JSON): a new field means a new
+ * meta format byte there (older rows just lack the field).
  */
 export interface SnapshotSummary {
   characters: number

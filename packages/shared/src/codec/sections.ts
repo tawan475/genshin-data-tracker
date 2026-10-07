@@ -1,8 +1,10 @@
 /**
  * The stored form of each part of a snapshot. Every section is canonical JSON
- * (sorted, defaults trimmed, keys as dictionary ids) that the server deflates
- * once and stores under a hash of its text, so an unchanged section is stored
- * once no matter how many snapshots share it.
+ * (sorted, defaults trimmed, keys as dictionary ids) stored once under a hash
+ * of its text, so an unchanged section is stored once no matter how many
+ * snapshots share it. Storage v1 kept that text deflated; v2 keeps a binary
+ * layout of the same value (section-blob.ts, store-v2.ts), but the canonical
+ * JSON is still what is hashed and what every reader gets back.
  *
  * These shapes are a storage format: data written today must decode forever.
  * Only ever add new optional trailing fields.

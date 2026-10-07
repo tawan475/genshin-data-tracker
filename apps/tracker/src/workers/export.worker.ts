@@ -7,15 +7,10 @@
  * as a single classic script.
  */
 
-import {
-  catalogFromRows,
-  inflateBundle,
-  readBundle,
-  sectionHashesOf,
-  type CatalogRow,
-} from '@gdt/shared'
+import { catalogFromRows, openBundle, sectionHashesOf, type CatalogRow } from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { request } from '@/api/http'
+import { BUNDLE_FORMAT } from '@/api/format'
 import type { ExportCommand, ExportEvent, ExportStart } from '@/data/export-protocol'
 import { decodeFromSections, writeGoodZip } from '@/data/export-zip'
 
@@ -69,9 +64,9 @@ async function readBody(response: Response, onBytes: (count: number) => void) {
 }
 
 async function run({ accountId, ids, level }: ExportStart) {
-  const query = ids && ids.length <= MAX_IDS_IN_URL ? `?ids=${ids.join(',')}` : ''
+  const query = ids && ids.length <= MAX_IDS_IN_URL ? `&ids=${ids.join(',')}` : ''
   const [bundleResponse, catalogResponse] = await Promise.all([
-    request(`/api/accounts/${accountId}/bundle${query}`),
+    request(`/api/accounts/${accountId}/bundle?format=${BUNDLE_FORMAT}${query}`),
     request(`/api/accounts/${accountId}/catalog`),
   ])
   const lengths = [knownLength(bundleResponse), knownLength(catalogResponse)]
@@ -88,17 +83,16 @@ async function run({ accountId, ids, level }: ExportStart) {
     readBody(catalogResponse, onBytes),
   ])
 
-  const { manifest, blobs } = readBundle(bundleBytes)
+  const bundle = openBundle(bundleBytes)
   const wanted = ids ? new Set(ids) : null
   const snapshots = wanted
-    ? manifest.snapshots.filter((snapshot) => wanted.has(snapshot.id))
-    : manifest.snapshots
+    ? bundle.snapshots.filter((snapshot) => wanted.has(snapshot.id))
+    : bundle.snapshots
   if (snapshots.length === 0) {
     throw new Error('Snapshots no longer exist')
   }
   // Every section the selection decodes: bases and irminsul's extras included.
-  const needed = new Set(snapshots.flatMap(sectionHashesOf))
-  const texts = await inflateBundle(new Map([...blobs].filter(([hash]) => needed.has(hash))))
+  const texts = await bundle.sections.many(new Set(snapshots.flatMap(sectionHashesOf)))
   const rows = JSON.parse(new TextDecoder().decode(catalogBytes)) as CatalogRow[]
   const catalog = catalogFromRows(rows)
 
