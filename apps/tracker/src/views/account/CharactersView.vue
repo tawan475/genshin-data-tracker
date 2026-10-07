@@ -26,6 +26,7 @@ import {
   type CharacterSort,
   type SortDirection,
 } from '@/data/characters'
+import { useFavoriteCharacters } from '@/data/favorite-characters'
 import { useResource } from '@/data/use-resource'
 import { characterBanner } from '@/lib/assets'
 import { readJson, writeJson } from '@/lib/storage'
@@ -71,12 +72,31 @@ watch(
   { immediate: true },
 )
 
+// Favourites come first under every sort (and filter like the rest).
+const { favorites, toggle: toggleFavorite } = useFavoriteCharacters(() => account.value.id)
+
 const all = computed(() => roster.value?.characters ?? [])
 const shown = computed(() =>
-  sortCharacters(filterCharacters(all.value, filters), sort.value, direction.value),
+  sortCharacters(
+    filterCharacters(all.value, filters, undefined, favorites.value),
+    sort.value,
+    direction.value,
+    favorites.value,
+  ),
 )
-const elementCounts = computed(() => facetCounts(all.value, filters, 'element', (c) => c.element))
-const rarityCounts = computed(() => facetCounts(all.value, filters, 'rarity', (c) => c.rarity))
+const elementCounts = computed(() =>
+  facetCounts(all.value, filters, 'element', (c) => c.element, favorites.value),
+)
+const rarityCounts = computed(() =>
+  facetCounts(all.value, filters, 'rarity', (c) => c.rarity, favorites.value),
+)
+/** Favourites the other filters keep; the chip hides until there is one. */
+const favoriteCount = computed(() =>
+  favorites.value.size === 0 && !filters.favorites
+    ? null
+    : filterCharacters(all.value, { ...filters, favorites: true }, undefined, favorites.value)
+        .length,
+)
 
 const strip = computed<StripItem[]>(() => {
   const r = roster.value
@@ -241,6 +261,7 @@ watch(selectedIndex, (index) => {
         :sorts="sorts"
         :element-counts="elementCounts"
         :rarity-counts="rarityCounts"
+        :favorite-count="favoriteCount"
         :shown="shown.length"
         :total="roster.total"
         :filtered="filtered"
@@ -260,7 +281,12 @@ watch(selectedIndex, (index) => {
         aria-label="Characters"
       >
         <li v-for="c in shown" :key="c.key" class="flex">
-          <CharacterCard :character="c" @open="open(c.key)" />
+          <CharacterCard
+            :character="c"
+            :favorite="favorites.has(c.key)"
+            @open="open(c.key)"
+            @favorite="toggleFavorite(c.key)"
+          />
         </li>
       </ul>
 
@@ -270,7 +296,9 @@ watch(selectedIndex, (index) => {
         v-model:direction="direction"
         :characters="shown"
         :friendship="roster.hasFriendship"
+        :favorites="favorites"
         @open="open"
+        @favorite="toggleFavorite"
       />
     </template>
 

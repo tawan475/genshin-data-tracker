@@ -4,7 +4,9 @@ import {
   ACCOUNT_SETTINGS_DEFAULTS,
   CHARACTERS,
   DictionaryOutdatedError,
+  MAX_FAVORITE_CHARACTERS,
   WEAPONS,
+  accountSettingsPatch,
   calculateCV,
   calculateRV,
   deepMerge,
@@ -76,6 +78,34 @@ describe('deepMerge', () => {
     })
     expect(merged.materialsGraph).toEqual({ selectedKeys: ['Mora'], groupBy: 'month', limit: 365 })
     expect(ACCOUNT_SETTINGS_DEFAULTS.materialsGraph.groupBy).toBe('day')
+  })
+})
+
+describe('account settings: favourite characters', () => {
+  const parse = (favoriteCharacters: unknown) =>
+    accountSettingsPatch.safeParse({ favoriteCharacters }).success
+
+  it('defaults to none, so a stored row without them reads as none', () => {
+    expect(ACCOUNT_SETTINGS_DEFAULTS.favoriteCharacters).toEqual([])
+    expect(deepMerge(ACCOUNT_SETTINGS_DEFAULTS, { traveler: 'M' }).favoriteCharacters).toEqual([])
+    expect(
+      deepMerge(ACCOUNT_SETTINGS_DEFAULTS, { favoriteCharacters: ['Furina'] }).favoriteCharacters,
+    ).toEqual(['Furina'])
+  })
+
+  it('takes GOOD keys, each once, up to the cap', () => {
+    expect(parse([])).toBe(true)
+    expect(parse(['HuTao', 'TravelerAnemo', 'Furina'])).toBe(true)
+    const many = Array.from({ length: MAX_FAVORITE_CHARACTERS }, (_, i) => `Character${i}`)
+    expect(parse(many)).toBe(true)
+    expect(parse([...many, 'OneMore'])).toBe(false)
+    expect(parse(['HuTao', 'HuTao'])).toBe(false)
+  })
+
+  it('refuses anything that is not a GOOD key', () => {
+    for (const bad of [[''], ['Hu Tao'], ['x'.repeat(65)], ['<b>'], [1], 'HuTao', null]) {
+      expect(parse(bad), JSON.stringify(bad)).toBe(false)
+    }
   })
 })
 

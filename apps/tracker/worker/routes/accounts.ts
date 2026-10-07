@@ -158,7 +158,8 @@ export const accounts = new Hono<AppEnv>()
       ),
       listenerStatement(c.env.DB, id),
     ])
-    // The planner reads AR/WL, its options and the resin set by hand: open ones follow.
+    // The planner reads AR/WL, its options and the resin set by hand, the Characters
+    // page the favourites: open ones follow.
     notifyUser(
       c,
       c.get('userId'),

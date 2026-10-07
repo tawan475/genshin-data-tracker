@@ -13,6 +13,7 @@ import {
 } from '@/data/characters'
 import { artifactSetIcon, characterIcon, weaponIcon } from '@/lib/assets'
 import { formatLevel } from '@/lib/level'
+import FavoriteStar from './FavoriteStar.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
 import SortHeader from './SortHeader.vue'
 import SlotPips from './SlotPips.vue'
@@ -20,14 +21,17 @@ import TalentChips from './TalentChips.vue'
 
 /**
  * The roster as a dense list: one row per character, sortable headers. Rows
- * open the details like the cards do. Columns drop away on narrow screens.
+ * open the details like the cards do; the first column is the favourite
+ * star. Columns drop away on narrow screens (Crit only on the widest, so the
+ * name keeps room beside the sidebar and the friendship column).
  */
-defineProps<{
+const props = defineProps<{
   characters: CharacterView[]
   /** Show the friendship column (the snapshot has irminsul's values). */
   friendship?: boolean
+  favorites?: ReadonlySet<string>
 }>()
-defineEmits<{ open: [key: string] }>()
+defineEmits<{ open: [key: string]; favorite: [key: string] }>()
 const sort = defineModel<CharacterSort>('sort', { required: true })
 const direction = defineModel<SortDirection>('direction', { required: true })
 
@@ -46,6 +50,7 @@ function ariaSort(key: CharacterSort) {
 }
 
 const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
+const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
 </script>
 
 <template>
@@ -53,7 +58,10 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
     <table class="w-full table-fixed text-sm">
       <thead class="border-b border-border-default bg-surface-overlay/50 text-text-secondary">
         <tr>
-          <th scope="col" class="px-3 py-2 text-left" :aria-sort="ariaSort('name')">
+          <th scope="col" class="w-8 py-2 pl-1">
+            <span class="sr-only">Favorite</span>
+          </th>
+          <th scope="col" class="py-2 pr-2 pl-1 text-left" :aria-sort="ariaSort('name')">
             <SortHeader
               label="Name"
               :active="sort === 'name'"
@@ -116,7 +124,7 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
           </th>
           <th
             scope="col"
-            class="hidden w-28 px-2 py-2 text-right font-medium xl:table-cell"
+            class="hidden w-28 px-2 py-2 text-right font-medium 2xl:table-cell"
             title="CRIT Rate / CRIT DMG from artifacts"
           >
             Crit
@@ -137,10 +145,13 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
         <tr
           v-for="c in characters"
           :key="c.key"
-          class="cursor-pointer transition-colors hover:bg-surface-overlay/60"
+          class="group/fav cursor-pointer transition-colors hover:bg-surface-overlay/60"
           @click="$emit('open', c.key)"
         >
-          <td class="px-3 py-1.5">
+          <td class="py-1.5 pl-1">
+            <FavoriteStar :on="isFavorite(c)" :name="c.name" @toggle="$emit('favorite', c.key)" />
+          </td>
+          <td class="py-1.5 pr-2 pl-1">
             <button
               type="button"
               aria-haspopup="dialog"
@@ -205,7 +216,7 @@ const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
             </span>
           </td>
           <td
-            class="tabular hidden px-2 py-1.5 text-right font-mono text-text-secondary xl:table-cell"
+            class="tabular hidden px-2 py-1.5 text-right font-mono text-text-secondary 2xl:table-cell"
           >
             <template v-if="c.artifactCount">{{ c.critRate }} / {{ c.critDmg }}</template>
             <template v-else>—</template>
