@@ -10,11 +10,14 @@ import {
   EMBLEM_URL,
   PIECE_HEIGHT,
   QUALITY_ART,
+  SPLASH_BOX_SCALE,
+  SPLASH_FULL,
   SPLASH_LEFT,
   SPLASH_NUDGE,
   WEAPON_EMBLEM,
   emblemBox,
   qualityArt,
+  splashFull,
   splashPlace,
 } from '../share-card'
 
@@ -101,5 +104,29 @@ describe('the splash art', () => {
     for (const key of Object.keys(SPLASH_NUDGE)) {
       expect(characterMeta(key), key).toBeDefined()
     }
+  })
+})
+
+describe('the uncut wish art', () => {
+  it('only names characters the game data knows, on gi-cdn', () => {
+    for (const key of Object.keys(SPLASH_FULL)) {
+      expect(characterMeta(key), key).toBeDefined()
+      expect(splashFull(key)?.src).toBe(`${GI_CDN_BASE}FullWish_${key}.webp`)
+    }
+    expect(splashFull('Bennett')).toBeNull()
+  })
+
+  it("places the art in box px: its frame scaled by the box's 2200/2048", () => {
+    const k = SPLASH_BOX_SCALE
+    expect(k).toBeCloseTo(2200 / 2048)
+    const m = SPLASH_FULL.Mavuika!
+    expect(splashFull('Mavuika')!.style).toEqual({
+      left: `${m.x * k}px`,
+      top: `${m.y * k}px`,
+      width: `${m.width * m.scale * k}px`,
+      height: `${m.height * m.scale * k}px`,
+    })
+    // Mavuika's full art continues below the game art's cut (its 1024px frame).
+    expect(m.y + m.height * m.scale).toBeGreaterThan(1024)
   })
 })

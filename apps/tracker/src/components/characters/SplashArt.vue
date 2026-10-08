@@ -20,9 +20,14 @@ const props = defineProps<{
   imgClass?: string
   /** Show the picture at once (the share card waits for it before exporting). */
   eager?: boolean
+  /**
+   * Another picture of the character placed in the box (share-card
+   * `splashFull`: the uncut art, positioned in px); it may reach past the box.
+   */
+  full?: { src: string; style: Record<string, string> } | null
 }>()
 
-const src = computed(() => characterSplash(props.characterKey))
+const src = computed(() => props.full?.src ?? characterSplash(props.characterKey))
 // Shown at once when preloaded (lib/image-preload); else faded in once loaded.
 const loaded = ref(isDecoded(src.value))
 const failed = ref(false)
@@ -37,7 +42,7 @@ function onLoad() {
 </script>
 
 <template>
-  <div class="overflow-hidden">
+  <div :class="full ? 'overflow-visible' : 'overflow-hidden'">
     <img
       v-if="src && !failed"
       :key="src"
@@ -45,9 +50,9 @@ function onLoad() {
       alt=""
       aria-hidden="true"
       decoding="async"
-      class="pointer-events-none absolute inset-0 size-full object-cover transition-opacity duration-300 motion-reduce:transition-none"
-      :class="imgClass"
-      :style="loaded || eager ? undefined : { opacity: 0 }"
+      class="pointer-events-none absolute transition-opacity duration-300 motion-reduce:transition-none"
+      :class="full ? ['max-w-none', imgClass] : ['inset-0 size-full object-cover', imgClass]"
+      :style="[full?.style, loaded || eager ? {} : { opacity: 0 }]"
       @load="onLoad"
       @error="failed = true"
     />

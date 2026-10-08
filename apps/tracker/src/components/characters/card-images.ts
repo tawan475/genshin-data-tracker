@@ -8,7 +8,7 @@ import {
   weaponIcon,
 } from '@/lib/assets'
 import { preloadImages } from '@/lib/image-preload'
-import { EMBLEM_URL, qualityArt } from './share-card'
+import { EMBLEM_URL, qualityArt, splashFull } from './share-card'
 import { constellationIcons, talentIcons } from './talent-icons'
 
 /**
@@ -21,7 +21,7 @@ export function cardImageUrls(c: CharacterView): string[] {
   const talents = talentIcons(c.key)
   const art = [c.weapon?.rarity, ...c.artifacts.map((piece) => piece?.rarity)].map(qualityArt)
   const urls = [
-    characterSplash(c.key),
+    splashFull(c.key)?.src ?? characterSplash(c.key),
     characterBanner(c.key),
     ...constellationIcons(c.key),
     talents.auto,
