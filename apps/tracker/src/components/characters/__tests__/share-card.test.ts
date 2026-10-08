@@ -30,14 +30,14 @@ describe('the emblem over the header art', () => {
     expect(box.top + box.height).toBeCloseTo(200)
   })
 
-  it("is the design's on a piece's band: a 187.2px panel, the icon centred at x 188", () => {
+  it("is the design's on a piece's band: a 187.2px panel, the icon centred at x 184", () => {
     expect(PIECE_HEIGHT).toBeCloseTo(187.2)
-    expect(BAND_WIDTH - BAND_ICON_RIGHT - BAND_ICON / 2).toBe(188)
+    expect(BAND_WIDTH - BAND_ICON_RIGHT - BAND_ICON / 2).toBe(184)
     expect(BAND_EMBLEM.scale).toBeCloseTo(187.2 / 232)
     expect(BAND_EMBLEM.scale).toBeCloseTo(0.807, 3)
     expect(BAND_EMBLEM.width).toBeCloseTo(413.1, 1)
     expect(BAND_EMBLEM.height).toBeCloseTo(206.6, 1)
-    expect(BAND_EMBLEM.left).toBeCloseTo(-127.6, 1)
+    expect(BAND_EMBLEM.left).toBeCloseTo(-131.6, 1)
     expect(BAND_EMBLEM.top).toBeCloseTo(-19.4, 1)
   })
 

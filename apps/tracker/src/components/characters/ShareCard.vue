@@ -527,10 +527,10 @@ const ownerLine = computed(() =>
                 class="absolute inset-0 bg-[linear-gradient(90deg,rgba(40,20,8,0.22)_0%,rgba(40,20,8,0)_50%)]"
                 aria-hidden="true"
               />
-              <span class="absolute inset-y-0 right-[12px] flex items-center">
+              <span class="absolute inset-y-0 right-[8px] flex items-center">
                 <FadeImage
                   :src="artifactIcon(piece.setKey, piece.slotKey)"
-                  class="size-[152px] [filter:drop-shadow(0_4px_10px_rgba(70,36,6,0.35))]"
+                  class="size-[168px] [filter:drop-shadow(0_4px_10px_rgba(70,36,6,0.35))]"
                 />
               </span>
               <span
