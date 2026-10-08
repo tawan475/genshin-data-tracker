@@ -345,6 +345,7 @@ export function artifactTotals(character: CharacterView): { key: string; value: 
 // ------------------------------------------------------------ filter & sort
 
 export type CharacterSort =
+  | 'default'
   | 'level'
   | 'constellation'
   | 'talents'
@@ -363,6 +364,8 @@ export interface SortOption {
 }
 
 export const CHARACTER_SORTS: SortOption[] = [
+  // The game's order: level (high first), element, date obtained (oldest first).
+  { value: 'default', label: 'Default', natural: 'desc' },
   { value: 'level', label: 'Level', natural: 'desc' },
   { value: 'constellation', label: 'Constellation', natural: 'desc' },
   { value: 'talents', label: 'Talents', natural: 'desc' },
@@ -505,7 +508,17 @@ export function facetCounts<K>(
 
 const elementRank = (e: Element | null) => (e ? ELEMENTS.indexOf(e) : ELEMENTS.length)
 
+/** Oldest obtained first, unknown dates last (a tie-break, whatever the direction). */
+const obtainedOrder = (a: CharacterView, b: CharacterView) =>
+  (a.obtainedAt ?? Number.MAX_SAFE_INTEGER) - (b.obtainedAt ?? Number.MAX_SAFE_INTEGER)
+
 const compareBy: Record<CharacterSort, (a: CharacterView, b: CharacterView) => number> = {
+  // Descending is the game's order: level high first, then element and date obtained in order.
+  default: (a, b) =>
+    a.level - b.level ||
+    a.ascension - b.ascension ||
+    elementRank(b.element) - elementRank(a.element) ||
+    obtainedOrder(b, a),
   level: (a, b) => a.level - b.level || a.ascension - b.ascension,
   constellation: (a, b) => a.constellation - b.constellation,
   talents: (a, b) => a.talentTotal - b.talentTotal,
@@ -523,10 +536,6 @@ const unknownFor: Partial<Record<CharacterSort, (c: CharacterView) => boolean>> 
   friendship: (c) => c.friendship === null,
   obtained: (c) => c.obtainedAt === null,
 }
-
-/** Obtained first first, unknown dates last (a tie-break, whatever the direction). */
-const obtainedOrder = (a: CharacterView, b: CharacterView) =>
-  (a.obtainedAt ?? Number.MAX_SAFE_INTEGER) - (b.obtainedAt ?? Number.MAX_SAFE_INTEGER)
 
 /**
  * Sorts by `sort` in `direction`; ties fall back to the game's own order:

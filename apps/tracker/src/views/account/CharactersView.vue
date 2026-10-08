@@ -54,14 +54,29 @@ const roster = computed(() =>
 const filters = reactive<CharacterFilters>({ ...NO_CHARACTER_FILTERS })
 const filtered = computed(() => hasCharacterFilters(filters))
 
-const saved = readJson<{ sort?: string; direction?: string; view?: string }>('characters:sort', {})
-const sort = ref<CharacterSort>(
-  CHARACTER_SORTS.some((s) => s.value === saved.sort) ? (saved.sort as CharacterSort) : 'level',
+/**
+ * The sort and view, per device. `v: 2` came with the Default sort (the
+ * game's order): a sort saved before it starts on Default once.
+ */
+const saved = readJson<{ sort?: string; direction?: string; view?: string; v?: number }>(
+  'characters:sort',
+  {},
 )
-const direction = ref<SortDirection>(saved.direction === 'asc' ? 'asc' : 'desc')
+const savedSort = saved.v === 2 ? saved : {}
+const sort = ref<CharacterSort>(
+  CHARACTER_SORTS.some((s) => s.value === savedSort.sort)
+    ? (savedSort.sort as CharacterSort)
+    : 'default',
+)
+const direction = ref<SortDirection>(savedSort.direction === 'asc' ? 'asc' : 'desc')
 const view = ref<'grid' | 'list'>(saved.view === 'list' ? 'list' : 'grid')
 watch([sort, direction, view], () =>
-  writeJson('characters:sort', { sort: sort.value, direction: direction.value, view: view.value }),
+  writeJson('characters:sort', {
+    sort: sort.value,
+    direction: direction.value,
+    view: view.value,
+    v: 2,
+  }),
 )
 
 /** Friendship and obtained date only when this roster knows them. */
@@ -69,7 +84,7 @@ const sorts = computed(() => (roster.value ? characterSorts(roster.value) : CHAR
 watch(
   sorts,
   (list) => {
-    if (roster.value && !list.some((s) => s.value === sort.value)) sort.value = 'level'
+    if (roster.value && !list.some((s) => s.value === sort.value)) sort.value = 'default'
   },
   { immediate: true },
 )

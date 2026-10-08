@@ -151,6 +151,13 @@ describe("ties, in the game's order", () => {
     expect(keys(sortCharacters(list, 'level', 'asc'))).toEqual(['Diluc', ...order.slice(0, 4)])
   })
 
+  it("is the Default sort: the game's order, turned round whole when ascending", () => {
+    const order = ['Xiangling', 'HuTao', 'Bennett', 'Furina', 'Diluc']
+    expect(CHARACTER_SORTS[0]?.value).toBe('default')
+    expect(keys(sortCharacters(list, 'default', 'desc'))).toEqual(order)
+    expect(keys(sortCharacters(list, 'default', 'asc'))).toEqual([...order].reverse())
+  })
+
   it('orders one element by level, then date obtained', () => {
     expect(keys(sortCharacters(list, 'element', 'asc'))).toEqual([
       'Xiangling',
