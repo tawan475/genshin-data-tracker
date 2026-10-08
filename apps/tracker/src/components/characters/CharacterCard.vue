@@ -18,7 +18,6 @@ import { formatLevel } from '@/lib/level'
 import FavoriteStar from './FavoriteStar.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
 import NamecardBackdrop from './NamecardBackdrop.vue'
-import SlotPips from './SlotPips.vue'
 import TalentChips from './TalentChips.vue'
 
 /**
@@ -136,7 +135,6 @@ const weaponTitle = computed(() => {
             <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" />
             <span class="tabular font-mono">{{ set.count }}</span>
           </span>
-          <SlotPips v-if="c.artifactCount < 5" :count="c.artifactCount" />
         </span>
 
         <CritValue
