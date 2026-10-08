@@ -28,6 +28,18 @@
   --scrollbar-thumb: #cbd5e1; /* slate-300 */
   --scrollbar-thumb-hover: #64748b; /* slate-500: 3:1+ while grabbed */
   --text-primary: #0f172a; /* slate-900 */
+  /* The artifact card (ArtifactCard): the game's detail panel, cream here.
+     Variables, not dark: classes, so a card themed apart from the page (the
+     dialog's preview, the share PNG) takes its own nearest theme. */
+  --artifact-body: #ece5d8;
+  --artifact-ink: #495366;
+  --artifact-muted: #7a8295;
+  --artifact-set: #5c9d48;
+  --artifact-foot: #f3e6cc;
+  --artifact-track: rgb(15 23 42 / 0.1);
+  --artifact-ring: rgb(0 0 0 / 0.15);
+  /* Text on the art band: the site's off-white, warmed for the art (never #fff). */
+  --artifact-band-ink: #f4eee4;
   --text-secondary: #475569; /* slate-600 */
   --text-muted: #64748b; /* slate-500 */
   --accent: #4f46e5; /* indigo-600 */
@@ -98,6 +110,14 @@
   --scrollbar-thumb: #475569; /* slate-600 */
   --scrollbar-thumb-hover: #64748b; /* slate-500 */
   --text-primary: #f1f5f9;
+  --artifact-body: #1b2131;
+  --artifact-ink: #dde2ea;
+  --artifact-muted: #8b93a7;
+  --artifact-set: #8fd46e;
+  --artifact-foot: #242b3e;
+  --artifact-track: rgb(255 255 255 / 0.1);
+  --artifact-ring: rgb(255 255 255 / 0.1);
+  --artifact-band-ink: #f4eee4;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --accent: #6366f1; /* indigo-500; white on it is 4.47:1 */
