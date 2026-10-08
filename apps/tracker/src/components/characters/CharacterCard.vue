@@ -56,15 +56,17 @@ const weaponTitle = computed(() => {
       type="button"
       aria-haspopup="dialog"
       :aria-label="label"
-      class="group flex w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised text-left shadow-sm transition-colors hover:border-border-strong"
+      class="group relative flex w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised text-left shadow-sm transition-colors hover:border-border-strong"
       @click="$emit('open')"
     >
+      <!-- The namecard under the whole card, the foot included (its bar blurs it);
+           lighter and livelier on the light theme. -->
+      <NamecardBackdrop
+        :src="characterBanner(c.key)"
+        lazy
+        class="absolute inset-y-0 right-0 h-full w-full opacity-40 brightness-[1.15] saturate-[1.2] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-25 dark:brightness-100 dark:saturate-100"
+      />
       <div class="relative w-full">
-        <NamecardBackdrop
-          :src="characterBanner(c.key)"
-          lazy
-          class="absolute inset-y-0 right-0 h-full w-full opacity-30 [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-25"
-        />
         <div class="relative flex w-full items-start gap-3 p-3">
           <GameIcon
             :src="characterIcon(c.key)"
@@ -102,7 +104,7 @@ const weaponTitle = computed(() => {
       </div>
 
       <div
-        class="mt-auto flex w-full items-center gap-2 border-t border-border-subtle px-3 py-2 text-sm"
+        class="relative mt-auto flex w-full items-center gap-2 border-t border-border-subtle/70 bg-surface-raised/70 px-3 py-2 text-sm backdrop-blur-md"
       >
         <span v-if="c.weapon" class="flex shrink-0 items-center gap-1.5" :title="weaponTitle">
           <GameIcon
