@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
+import { refDebounced, useMediaQuery } from '@vueuse/core'
 import { Backpack, Gem, Layers, LayoutGrid, Rows3, SearchX, Upload } from 'lucide-vue-next'
 import ArtifactBag from '@/components/artifacts/ArtifactBag.vue'
 import { useProgressive } from '@/components/planner/use-progressive'
 import ArtifactCard from '@/components/artifacts/ArtifactCard.vue'
 import ArtifactDetail from '@/components/artifacts/ArtifactDetail.vue'
+import ArtifactShareCard from '@/components/artifacts/ArtifactShareCard.vue'
+import {
+  ARTIFACT_SHARE_HEIGHT,
+  ARTIFACT_SHARE_SCALE,
+  ARTIFACT_SHARE_WIDTH,
+} from '@/components/artifacts/card-style'
+import type { CardOwner } from '@/components/characters/share-card'
+import ShareActions from '@/components/share/ShareActions.vue'
+import ShareMenu from '@/components/share/ShareMenu.vue'
 import ArtifactSetBreakdown from '@/components/artifacts/ArtifactSetBreakdown.vue'
 import ArtifactSetsTable from '@/components/artifacts/ArtifactSetsTable.vue'
 import ArtifactTable from '@/components/artifacts/ArtifactTable.vue'
@@ -55,7 +64,10 @@ import {
   saveView,
 } from '@/data/artifact-prefs'
 import { useResource } from '@/data/use-resource'
+import { shareUid } from '@/data/character-build'
 import { readJson, writeJson } from '@/lib/storage'
+import { resolvedTheme } from '@/lib/theme'
+import { useCardExport } from '@/lib/use-card-export'
 import { formatNumber } from '@/lib/format'
 import { useAccount, useReadOnly } from './context'
 
@@ -357,6 +369,52 @@ const stepList = computed<ArtifactRow[]>(() => {
 const openIndex = computed(() => (openRow.value ? stepList.value.indexOf(openRow.value) : -1))
 const openRank = computed(() => (openRow.value ? cvRank(rows.value, openRow.value) : undefined))
 
+// ----------------------------------------------------------------- share
+// The open artifact's share picture (ArtifactShareCard), with the character
+// card's options (one remembered set, `share-card`) and its export
+// (lib/use-card-export): PNG / Copy / Share in the dialog's header.
+
+interface SharePrefs {
+  theme?: 'light' | 'dark'
+  name?: boolean
+  uid?: boolean
+}
+const sharePrefs = readJson<SharePrefs>('share-card', {})
+const shareTheme = ref<'light' | 'dark'>(sharePrefs.theme ?? resolvedTheme.value)
+const shareName = ref(sharePrefs.name ?? true)
+const shareUidOn = ref(sharePrefs.uid ?? false)
+watch([shareTheme, shareName, shareUidOn], () =>
+  writeJson('share-card', {
+    ...readJson<SharePrefs>('share-card', {}),
+    theme: shareTheme.value,
+    name: shareName.value,
+    uid: shareUidOn.value,
+  }),
+)
+const wide = useMediaQuery('(min-width: 1024px)')
+const player = computed(() => inventory.data.value?.good.gi_player ?? null)
+const shareOwner = computed<CardOwner>(() => ({
+  name: shareName.value ? account.value.name : null,
+  uid: shareUidOn.value ? shareUid(account.value.uid, player.value?.uid ?? null) : null,
+  ar: player.value?.ar ?? null,
+}))
+const exportArtifact = useTemplateRef<InstanceType<typeof ArtifactShareCard>>('exportArtifact')
+const artifactExport = useCardExport({
+  width: ARTIFACT_SHARE_WIDTH,
+  height: ARTIFACT_SHARE_HEIGHT,
+  scale: ARTIFACT_SHARE_SCALE,
+  node: () => exportArtifact.value?.$el as HTMLElement | undefined,
+  open: () => openRow.value !== null,
+  state: () => [openRow.value, shareTheme.value, shareOwner.value],
+  filename: () =>
+    openRow.value
+      ? `${openRow.value.artifact.setKey}-${openRow.value.artifact.slotKey}-genshin-tracker.png`
+      : 'artifact-genshin-tracker.png',
+  title: () => openRow.value?.setName ?? 'Artifact',
+  pngLabel: `Download ${ARTIFACT_SHARE_WIDTH * ARTIFACT_SHARE_SCALE} × ${ARTIFACT_SHARE_HEIGHT * ARTIFACT_SHARE_SCALE} PNG`,
+})
+const shareFrame = artifactExport.frame
+
 function step(delta: number) {
   const index = openIndex.value + delta
   const next = stepList.value[index]
@@ -566,11 +624,43 @@ const GRID =
     @close="openId = null"
     @step="step"
   >
+    <template #heading>
+      <h2 class="mr-auto min-w-0 flex-1 truncate text-lg font-semibold">
+        {{ openRow?.setName ?? '' }}
+      </h2>
+      <template v-if="openRow">
+        <ShareActions
+          v-if="wide"
+          v-model:theme="shareTheme"
+          v-model:name="shareName"
+          v-model:uid="shareUidOn"
+          :exporter="artifactExport"
+        />
+        <ShareMenu
+          v-else
+          v-model:theme="shareTheme"
+          v-model:name="shareName"
+          v-model:uid="shareUidOn"
+          :exporter="artifactExport"
+          :size="`${ARTIFACT_SHARE_WIDTH * ARTIFACT_SHARE_SCALE} × ${ARTIFACT_SHARE_HEIGHT * ARTIFACT_SHARE_SCALE} PNG`"
+        />
+      </template>
+    </template>
     <ArtifactDetail
       v-if="openRow"
       :row="openRow"
       :rank="openRank"
       :is-new="isNewPiece(openRow, previous)"
     />
+    <!-- The picture the export draws: in a hidden fixed-size iframe, never on the page -->
+    <Teleport v-if="shareFrame && openRow" :to="shareFrame.mount">
+      <ArtifactShareCard
+        ref="exportArtifact"
+        :row="openRow"
+        :theme="shareTheme"
+        :owner="shareOwner"
+        :taken-at="account.latest?.takenAt ?? null"
+      />
+    </Teleport>
   </UiModal>
 </template>
