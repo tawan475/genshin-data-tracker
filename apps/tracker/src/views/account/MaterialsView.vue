@@ -1,3 +1,24 @@
+<script lang="ts">
+import type { AccountRef } from '@/data/account-data'
+import {
+  loadMaterialsHistory as loadHistory,
+  type MaterialsHistory as History,
+} from '@/data/materials'
+import { loadMaterialMeta as loadMeta } from '@/components/materials-page/material-meta'
+import { preloadMaterialRarities as preloadRarities } from '@/utils/materials'
+
+type MaterialsLoad = { accountId: number; history: History | null }
+/** The page's loads, kept across visits (a few accounts' worth). */
+const materialsLoads = new Map<string, Promise<MaterialsLoad>>()
+async function loadMaterials(
+  a: AccountRef & { latest: { id: number } | null },
+): Promise<MaterialsLoad> {
+  if (!a.latest) return { accountId: a.id, history: null }
+  const [history] = await Promise.all([loadHistory(a), loadMeta(), preloadRarities()])
+  return { accountId: a.id, history }
+}
+</script>
+
 <script setup lang="ts">
 import { computed, ref, shallowRef, watch } from 'vue'
 import { Clock, Package, Upload } from 'lucide-vue-next'
@@ -67,16 +88,20 @@ void preloadMaterialNames()
 // Tagged with the account id, so switching accounts shows a skeleton rather
 // than the previous account's materials while the next one loads. The index
 // (rarities) is the chunk the bag's order already waits for.
+// One promise per account data version, so coming back to the page shows the
+// bag on its first frame (use-resource reads a settled promise at once).
 const resource = useResource(
   () => account.value,
-  async (a): Promise<{ accountId: number; history: MaterialsHistory | null }> => {
-    if (!a.latest) return { accountId: a.id, history: null }
-    const [history] = await Promise.all([
-      loadMaterialsHistory(a),
-      loadMaterialMeta(),
-      preloadMaterialRarities(),
-    ])
-    return { accountId: a.id, history }
+  (a) => {
+    const key = `${(a as AccountRef).source ?? 'own'}:${a.id}:${a.dataVersion}`
+    let entry = materialsLoads.get(key)
+    if (!entry) {
+      entry = loadMaterials(a)
+      entry.catch(() => materialsLoads.delete(key))
+      materialsLoads.set(key, entry)
+      while (materialsLoads.size > 8) materialsLoads.delete(materialsLoads.keys().next().value!)
+    }
+    return entry
   },
 )
 const history = computed(() => {

@@ -330,7 +330,8 @@
 }
 
 /* A theme switch lands in one step (lib/theme.ts): no element transitions
-   across it, and the whole page crossfades (View Transitions). */
+   across it, and the whole page crossfades (View Transitions); moving
+   between pages crossfades the same way (router/index.ts). */
 html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
@@ -339,7 +340,8 @@ html.theme-switching *::after {
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 220ms;
+  animation-duration: 180ms;
+  animation-timing-function: ease-out;
 }
 
 /* Rows that scroll sideways by design (chip rows, stat strips, wide old
