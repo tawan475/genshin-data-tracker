@@ -11,6 +11,7 @@ import { isCritCirclet } from '@/lib/crit-tiers'
 import { EMBLEM_URL, RARITY_GRADIENT, qualityArt } from '@/lib/item-art'
 import { ROLL_QUALITY_BG, ROLL_QUALITY_FILL, maxLevel } from '@/utils/artifact-rolls'
 import {
+  formatRollValue,
   formatSlotFullName,
   formatStatName,
   formatStatShort,
@@ -38,12 +39,18 @@ import { artifactPieceName } from './piece-name'
  * are 5★ scales) with the CV it should reach at max; then the substats with
  * their roll bars beside the values, the set in the game's green and the
  * game's "Equipped" bar with the wearer's side portrait, the lock, astral
- * mark and elixir. The body is the game's cream on the light theme and deep
+ * mark and elixir (a piece no one wears has no bar: its marks end the set's
+ * line). The body is the game's cream on the light theme and deep
  * slate on the dark. Words live in tooltips and the detail dialog. A
  * transparent button covers the card, so the whole card is one click target
  * and its focus ring outlines the card.
  */
-const props = defineProps<{ row: ArtifactRow; isNew?: boolean }>()
+const props = defineProps<{
+  row: ArtifactRow
+  isNew?: boolean
+  /** A picture, not a control (the dialog's preview, the share PNG): no click target. */
+  still?: boolean
+}>()
 const emit = defineEmits<{ open: [id: number] }>()
 
 const artifact = computed(() => props.row.artifact)
@@ -68,6 +75,18 @@ const barsWidth = computed(() => {
   const most = Math.max(1, ...props.row.rolls.map((r) => r.length))
   return `${most * 0.375 + (most - 1) * 0.125}rem`
 })
+/** A substat's tooltip: its value, then each roll on its own line (7.77%, 7.77%, 5.44%). */
+function breakdown(index: number): string {
+  const substat = artifact.value.substats[index]!
+  const rolls = props.row.rolls[index] ?? []
+  return [
+    `${formatStatShort(substat.key)} ${formatStatValue(substat.key, substat.value)}`,
+    ...rolls.map((roll) => formatRollValue(substat.key, roll.value)),
+  ].join('\n')
+}
+function open() {
+  if (!props.still) emit('open', props.row.id)
+}
 /** The side portrait; the round one where the data has no side art (or it fails). */
 const sideFailed = ref(false)
 const wearer = computed(() => {
@@ -130,7 +149,7 @@ const wearer = computed(() => {
         <p
           data-theme="dark"
           class="relative z-10 mt-0.5 flex cursor-pointer items-center gap-1.5 font-mono text-xs font-semibold [text-shadow:none]"
-          @click="emit('open', row.id)"
+          @click="open"
         >
           <span :class="BAND_CHIP" class="text-white">+{{ artifact.level }}</span>
           <span :class="BAND_CHIP"
@@ -159,6 +178,7 @@ const wearer = computed(() => {
     </div>
 
     <!-- The substats: the value beside its roll bars -->
+    <!-- Above the card's button (z-10): each row's roll breakdown shows on hover; a click still opens it -->
     <ul
       class="flex flex-1 flex-col py-1.5 pr-2.5 pl-3 text-sm leading-6 font-semibold"
       aria-hidden="true"
@@ -166,7 +186,10 @@ const wearer = computed(() => {
       <li
         v-for="(substat, index) in artifact.substats"
         :key="substat.key"
-        class="flex items-center gap-2"
+        class="relative z-10 flex items-center gap-2"
+        :class="still ? '' : 'cursor-pointer'"
+        :title="breakdown(index)"
+        @click="open"
       >
         <span :class="CARD_MUTED">·</span>
         <span class="min-w-0 flex-1 truncate">{{ formatStatShort(substat.key) }}</span>
@@ -201,24 +224,31 @@ const wearer = computed(() => {
       </li>
     </ul>
 
-    <p class="truncate px-3 pb-1.5 text-sm font-semibold" :class="CARD_SET" aria-hidden="true">
-      {{ row.setName }}
+    <!-- The set; the marks end its line when no one wears the piece (no empty bar) -->
+    <p class="flex items-center gap-2 px-3 pb-1.5 text-sm font-semibold" aria-hidden="true">
+      <span class="min-w-0 flex-1 truncate" :class="CARD_SET">{{ row.setName }}</span>
+      <span v-if="!row.ownerName" class="flex shrink-0 items-center gap-1.5">
+        <FlaskConical v-if="artifact.elixerCrafted" class="size-4" :class="CARD_MUTED" />
+        <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-[#e0a417]" />
+        <Lock v-if="artifact.lock" class="size-4 text-[#e8704a]" stroke-width="2.6" />
+      </span>
     </p>
 
     <!-- The game's "Equipped" bar: the wearer's side portrait pokes out of it -->
     <div
-      class="relative flex h-9 shrink-0 items-center gap-2 pr-3 text-sm font-semibold"
-      :class="[CARD_FOOT, row.ownerName ? 'pl-15' : 'pl-3']"
+      v-if="row.ownerName"
+      class="relative flex h-9 shrink-0 items-center gap-2 pr-3 pl-15 text-sm font-semibold"
+      :class="CARD_FOOT"
       aria-hidden="true"
     >
       <img
-        v-if="row.ownerName && wearer"
+        v-if="wearer"
         :src="wearer"
         alt=""
         class="absolute bottom-0 left-1.5 size-13 object-contain object-bottom [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.25))]"
         @error="sideFailed = true"
       />
-      <span v-if="row.ownerName" class="min-w-0 truncate">Equipped: {{ row.ownerName }}</span>
+      <span class="min-w-0 truncate">Equipped: {{ row.ownerName }}</span>
       <span class="ml-auto flex shrink-0 items-center gap-1.5">
         <FlaskConical v-if="artifact.elixerCrafted" class="size-4" :class="CARD_MUTED" />
         <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-[#e0a417]" />
@@ -227,6 +257,7 @@ const wearer = computed(() => {
     </div>
 
     <button
+      v-if="!still"
       type="button"
       class="absolute inset-0 rounded-xl"
       :title="

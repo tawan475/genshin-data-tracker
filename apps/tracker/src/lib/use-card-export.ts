@@ -13,10 +13,15 @@ import {
 export type ExportAction = 'png' | 'copy' | 'share'
 
 export interface CardExportOptions {
-  /** The PNG's size in CSS pixels (the hidden frame's viewport) and its scale. */
+  /**
+   * The hidden frame's viewport in CSS pixels and the PNG's scale; the PNG is
+   * that size too unless `measure` says otherwise.
+   */
   width: number
   height: number
   scale: number
+  /** The PNG's size in CSS pixels from the laid-out card (a card whose height varies). */
+  measure?: (node: HTMLElement) => { width: number; height: number }
   /** The card the export draws, rendered into `frame.mount` (a Teleport). */
   node: () => HTMLElement | undefined
   /** Whether there is a card to draw (false closes the frame). */
@@ -103,11 +108,8 @@ export function useCardExport(options: CardExportOptions) {
       if (!node) throw new Error('No card')
       await imagesLoaded(node)
       await target.fontsReady()
-      const drawn = await renderPng(node, {
-        width: options.width,
-        height: options.height,
-        scale: options.scale,
-      })
+      const size = options.measure?.(node) ?? { width: options.width, height: options.height }
+      const drawn = await renderPng(node, { ...size, scale: options.scale })
       if (id === generation) {
         missing.value = drawn.missing
         ready.value = true
