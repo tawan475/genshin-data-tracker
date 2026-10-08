@@ -89,6 +89,25 @@ export const emblemStyle = (box: EmblemBox): Record<string, string> => ({
 })
 
 /**
+ * The emblem on a band `height` px tall whose item icon, `size` px, sits
+ * `right` px from the band's right edge, centred vertically: the knot on the
+ * icon's centre, anchored from the right (for bands whose width varies).
+ */
+export function emblemFromRight(
+  height: number,
+  right: number,
+  size: number,
+): Record<string, string> {
+  const box = emblemBox(height, 0)
+  return {
+    right: `${right + size / 2 - (EMBLEM.width - EMBLEM.knotX) * box.scale}px`,
+    top: `${box.top}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
+  }
+}
+
+/**
  * The game's bag cell background for a rarity (`UI_QualityBg_<n>`, 80×98:
  * the gradient with the knot, rounded corners in its alpha), or its 50×50
  * square (`small`, `…s`) for icons and portraits; '' without a rarity.

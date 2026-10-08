@@ -86,6 +86,16 @@ export function characterIcon(key: string): string {
 }
 
 /**
+ * The character's side portrait (the round party icon that pokes out of the
+ * game's "Equipped" bars); the Traveler's follows the twin setting. '' for a
+ * character newer than the game data.
+ */
+export function characterSideIcon(key: string): string {
+  if (isTraveler(key)) return imageUrl(travelerArt(traveler.value).side)
+  return imageUrl(characterImages(key)?.side)
+}
+
+/**
  * The character's wish splash art (full body, 2048×1024 on transparency);
  * the Traveler's follows the twin setting. '' for a character newer than
  * the game data.
