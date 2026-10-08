@@ -340,6 +340,10 @@ describe('storage quota', () => {
 
 describe('import key burst', () => {
   it('takes 20 uploads a minute per key, then 429; verify-key keeps working', async () => {
+    // The local limiter counts in 60 s windows on the wall clock: start in a
+    // fresh one, or the window can roll over mid-burst and let the 21st through.
+    const left = 60_000 - (Date.now() % 60_000)
+    if (left < 20_000) await new Promise((done) => setTimeout(done, left + 200))
     const { importKey } = await setup()
     const other = await setup()
     for (let i = 0; i < 20; i++) {
@@ -356,7 +360,7 @@ describe('import key burst', () => {
     expect(verify.status).toBe(200)
     // Per key: another key is not affected.
     expect((await importByKey(other.importKey, sampleGood(), 1_000)).response.status).toBe(201)
-  })
+  }, 60_000)
 })
 
 describe('D1 cost of the limits', () => {
