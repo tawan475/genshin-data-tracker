@@ -1,4 +1,5 @@
 import type { InspectView, PermissionNode } from '@gdt/shared'
+import { nextTick } from 'vue'
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 import { loadSignInOptions } from '@/components/oauth/oauth'
 import { setPublicPage } from '@/lib/theme'
@@ -324,13 +325,47 @@ router.beforeEach(async (to) => {
   if (to.meta.auth) await useAccounts().ensureLoaded()
 })
 
+/**
+ * Moving between pages crossfades the old page into the new one (View
+ * Transitions) instead of swapping it at once: the old page stays on screen
+ * until the new one has rendered (its code and, when cached, its data are in
+ * by then: AccountLayout preloads both), then fades out over it. Not for
+ * query changes on one page (filters, an open dialog), nor with reduced
+ * motion or without the API.
+ */
+let finishTransition: (() => void) | null = null
+router.beforeResolve((to, from) => {
+  if (!from.matched.length || to.path === from.path) return
+  if (!('startViewTransition' in document)) return
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  return new Promise<void>((resolve) => {
+    const transition = document.startViewTransition(
+      () =>
+        new Promise<void>((done) => {
+          finishTransition = done
+          resolve()
+        }),
+    )
+    // A transition skipped or aborted must never hold the navigation.
+    transition.ready.catch(() => resolve())
+  })
+})
+
 router.afterEach((to) => {
+  if (finishTransition) {
+    const finish = finishTransition
+    finishTransition = null
+    // The new page renders on the next tick; the fade starts from there.
+    void nextTick().then(finish)
+  }
   setPublicPage(to.meta.public === true)
   document.title = to.meta.title ? `${to.meta.title} · GI Tracker` : 'GI Tracker'
 })
 
 /** After a deploy, an open tab may ask for a chunk that no longer exists: reload once. */
 router.onError((error, to) => {
+  finishTransition?.()
+  finishTransition = null
   const message = String((error as Error)?.message ?? error)
   if (
     !/dynamically imported module|Importing a module script failed|Failed to fetch/i.test(message)
