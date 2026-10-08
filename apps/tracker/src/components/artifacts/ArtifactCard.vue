@@ -1,25 +1,47 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { FlaskConical, Lock, Sparkle } from 'lucide-vue-next'
+import GameStars from '@/components/characters/GameStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
-import GameIcon from '@/components/ui/GameIcon.vue'
-import RarityStars from '@/components/ui/RarityStars.vue'
-import RollBars from '@/components/ui/RollBars.vue'
 import RollValue from '@/components/ui/RollValue.vue'
-import UiBadge from '@/components/ui/UiBadge.vue'
 import { artifactLabel, type ArtifactRow } from '@/data/artifacts'
-import { artifactIcon, characterIcon } from '@/lib/assets'
+import { mainStatValue } from '@/data/characters'
+import { artifactIcon, characterIcon, characterSideIcon } from '@/lib/assets'
 import { isCritCirclet } from '@/lib/crit-tiers'
-import { formatStatName, formatStatShort, formatStatValue } from '@/utils/artifact-stats'
-import { maxLevel } from '@/utils/artifact-rolls'
+import { EMBLEM_URL, RARITY_GRADIENT, qualityArt } from '@/lib/item-art'
+import { ROLL_QUALITY_BG, ROLL_QUALITY_FILL, maxLevel } from '@/utils/artifact-rolls'
+import {
+  formatSlotFullName,
+  formatStatName,
+  formatStatShort,
+  formatStatValue,
+} from '@/utils/artifact-stats'
+import {
+  BAND_CHIP,
+  BAND_EMBLEM_STYLE,
+  BAND_HEIGHT,
+  BAND_ICON,
+  BAND_ICON_RIGHT,
+  BAND_TEXT,
+  CARD_BODY,
+  CARD_FOOT,
+  CARD_MUTED,
+  CARD_SET,
+} from './card-style'
+import { artifactPieceName } from './piece-name'
 
 /**
- * One artifact in the grid: set and main stat, CV/RV in the corner (tier
- * colours for 5★; plain below, as the tiers are 5★ scales) with the CV it
- * should reach at max under it, substats with roll bars, and who wears it.
- * Words live in tooltips and the detail dialog. A transparent button covers
- * the card, so the whole card is one click target and its focus ring
- * outlines the card.
+ * One artifact in the grid, after the game's artifact detail panel (the
+ * user's pick of the designs): the art band (the rarity's header art with the
+ * emblem behind the piece) carries its name, slot and stars, the main stat
+ * in bold, and +20 / CV / RV (tier colours for 5★; plain below, as the tiers
+ * are 5★ scales) with the CV it should reach at max; then the substats with
+ * their roll bars beside the values, the set in the game's green and the
+ * game's "Equipped" bar with the wearer's side portrait, the lock, astral
+ * mark and elixir. The body is the game's cream on the light theme and deep
+ * slate on the dark. Words live in tooltips and the detail dialog. A
+ * transparent button covers the card, so the whole card is one click target
+ * and its focus ring outlines the card.
  */
 const props = defineProps<{ row: ArtifactRow; isNew?: boolean }>()
 const emit = defineEmits<{ open: [id: number] }>()
@@ -28,99 +50,188 @@ const artifact = computed(() => props.row.artifact)
 const inactive = computed(() => artifact.value.unactivatedSubstats ?? [])
 const plain = computed(() => artifact.value.rarity < 5)
 const label = computed(() => artifactLabel(props.row, props.isNew))
+const crit = computed(() => isCritCirclet(artifact.value.slotKey, artifact.value.mainStatKey))
 const potential = computed(() => props.row.potential)
 const potentialTitle = computed(
   () =>
-    `Expected at +${maxLevel(artifact.value.rarity)} · best case ${potential.value.bestCv.toFixed(1)}`,
+    `Expected CV at +${maxLevel(artifact.value.rarity)} · best case ${potential.value.bestCv.toFixed(1)}`,
 )
+const name = computed(
+  () => artifactPieceName(artifact.value.setKey, artifact.value.slotKey) ?? props.row.setName,
+)
+const mainValue = computed(() => {
+  const value = mainStatValue(artifact.value)
+  return value === null ? '—' : formatStatValue(artifact.value.mainStatKey, value)
+})
+/** The bars' slot fits this piece's most-rolled substat, so no empty slot pads the right. */
+const barsWidth = computed(() => {
+  const most = Math.max(1, ...props.row.rolls.map((r) => r.length))
+  return `${most * 0.375 + (most - 1) * 0.125}rem`
+})
+/** The side portrait; the round one where the data has no side art (or it fails). */
+const sideFailed = ref(false)
+const wearer = computed(() => {
+  const key = artifact.value.location
+  if (!key) return ''
+  const side = sideFailed.value ? '' : characterSideIcon(key)
+  return side || characterIcon(key)
+})
 </script>
 
 <template>
   <article
-    class="relative flex min-w-0 flex-col rounded-xl border border-border-default bg-surface-raised shadow-sm transition-colors hover:border-border-strong"
+    class="relative flex min-w-0 flex-col overflow-hidden rounded-xl shadow-sm ring-1 ring-black/15 dark:ring-white/10"
+    :class="CARD_BODY"
   >
-    <div class="flex items-start gap-3 p-3 pb-2.5" aria-hidden="true">
-      <GameIcon
-        :src="artifactIcon(artifact.setKey, artifact.slotKey)"
-        :name="row.setName"
-        :rarity="artifact.rarity"
-        size="lg"
+    <!-- The art band -->
+    <div
+      class="relative shrink-0 overflow-hidden"
+      :style="{
+        height: `${BAND_HEIGHT}px`,
+        background: RARITY_GRADIENT[artifact.rarity] ?? '#72778b',
+      }"
+      aria-hidden="true"
+    >
+      <img
+        v-if="qualityArt(artifact.rarity)"
+        :src="qualityArt(artifact.rarity)"
+        alt=""
+        class="absolute inset-0 size-full"
       />
-      <div class="min-w-0 flex-1">
-        <p class="truncate text-sm text-text-secondary">{{ row.setName }}</p>
-        <p class="truncate leading-snug font-medium">{{ formatStatName(artifact.mainStatKey) }}</p>
-        <p class="flex items-center gap-2">
-          <RarityStars :rarity="artifact.rarity" />
-          <span class="tabular font-mono text-sm text-text-secondary">+{{ artifact.level }}</span>
-          <UiBadge v-if="isNew" tone="accent" title="Not in the previous capture">New</UiBadge>
+      <img
+        :src="EMBLEM_URL"
+        alt=""
+        class="absolute max-w-none opacity-60"
+        :style="BAND_EMBLEM_STYLE"
+      />
+      <img
+        :src="artifactIcon(artifact.setKey, artifact.slotKey)"
+        alt=""
+        class="absolute top-1/2 -translate-y-1/2 [filter:drop-shadow(0_3px_6px_rgba(70,36,6,0.35))]"
+        :style="{
+          right: `${BAND_ICON_RIGHT}px`,
+          width: `${BAND_ICON}px`,
+          height: `${BAND_ICON}px`,
+        }"
+      />
+      <div class="relative flex h-full flex-col justify-center gap-0.5 px-3" :class="BAND_TEXT">
+        <p class="truncate text-[0.9375rem] leading-tight font-semibold">{{ name }}</p>
+        <p class="flex items-center gap-2 text-xs text-white/90">
+          <span class="truncate">{{ formatSlotFullName(artifact.slotKey) }}</span>
+          <GameStars :rarity="artifact.rarity" :px="11" :gap="0" class="shrink-0" />
         </p>
-      </div>
-      <!-- Above the card's button, so the numbers' tooltips show; a click still opens it. -->
-      <div
-        class="tabular relative z-10 shrink-0 cursor-pointer text-right font-mono leading-tight"
-        @click="emit('open', row.id)"
-      >
-        <CritValue
-          :value="row.cv"
-          :crit-circlet="isCritCirclet(artifact.slotKey, artifact.mainStatKey)"
-          :plain="plain"
-          class="block text-lg font-semibold"
-        />
-        <p class="text-xs text-text-muted">CV</p>
-        <RollValue :value="row.rv" :plain="plain" class="mt-0.5 block text-sm" />
+        <p class="flex max-w-[calc(100%-5rem)] items-baseline gap-2 leading-tight">
+          <span class="truncate text-[0.9375rem] font-bold">{{
+            formatStatName(artifact.mainStatKey)
+          }}</span>
+          <span class="tabular text-xl font-bold">{{ mainValue }}</span>
+        </p>
+        <!-- Above the card's button, so the numbers' tooltips show; a click still opens it. -->
         <p
-          v-if="potential.left > 0 && potential.expectedCv > row.cv"
-          class="mt-0.5 text-xs whitespace-nowrap text-text-muted"
-          :title="potentialTitle"
+          data-theme="dark"
+          class="relative z-10 mt-0.5 flex cursor-pointer items-center gap-1.5 font-mono text-xs font-semibold [text-shadow:none]"
+          @click="emit('open', row.id)"
         >
-          → ~{{ Math.round(potential.expectedCv) }}
+          <span :class="BAND_CHIP" class="text-white">+{{ artifact.level }}</span>
+          <span :class="BAND_CHIP"
+            ><span class="font-sans text-white/70">CV </span
+            ><CritValue :value="row.cv" :crit-circlet="crit" :plain="plain"
+          /></span>
+          <span :class="BAND_CHIP"
+            ><span class="font-sans text-white/70">RV </span
+            ><RollValue :value="row.rv" :plain="plain"
+          /></span>
+          <span
+            v-if="potential.left > 0 && potential.expectedCv > row.cv"
+            :class="BAND_CHIP"
+            class="text-white/80"
+            :title="potentialTitle"
+            >→ ~{{ Math.round(potential.expectedCv) }}</span
+          >
+          <span
+            v-if="isNew"
+            class="rounded-[4px] bg-accent px-1.5 font-sans leading-5 text-accent-ink"
+            title="Not in the previous capture"
+            >New</span
+          >
         </p>
       </div>
     </div>
 
-    <ul class="flex flex-1 flex-col gap-1 px-3 pb-3 text-sm" aria-hidden="true">
+    <!-- The substats: the value beside its roll bars -->
+    <ul
+      class="flex flex-1 flex-col py-1.5 pr-2.5 pl-3 text-sm leading-6 font-semibold"
+      aria-hidden="true"
+    >
       <li
         v-for="(substat, index) in artifact.substats"
         :key="substat.key"
         class="flex items-center gap-2"
       >
-        <span class="min-w-0 flex-1 truncate text-text-secondary">
-          {{ formatStatShort(substat.key) }}
-        </span>
+        <span :class="CARD_MUTED">·</span>
+        <span class="min-w-0 flex-1 truncate">{{ formatStatShort(substat.key) }}</span>
         <span class="tabular font-mono">{{ formatStatValue(substat.key, substat.value) }}</span>
-        <RollBars :rolls="row.rolls[index] ?? []" />
+        <span class="flex h-4 shrink-0 items-stretch gap-0.5" :style="{ width: barsWidth }">
+          <span
+            v-for="(roll, k) in row.rolls[index] ?? []"
+            :key="k"
+            class="relative w-1.5 overflow-hidden rounded-[2px] bg-black/10 dark:bg-white/10"
+          >
+            <span
+              class="absolute inset-x-0 bottom-0 rounded-[2px]"
+              :class="ROLL_QUALITY_BG[roll.quality]"
+              :style="{ height: ROLL_QUALITY_FILL[roll.quality] }"
+            />
+          </span>
+        </span>
       </li>
       <li
         v-for="substat in inactive"
         :key="`inactive-${substat.key}`"
-        class="flex items-center gap-2 text-text-muted opacity-60"
+        class="flex items-center gap-2 opacity-55"
+        title="Activates at +4"
       >
+        <span :class="CARD_MUTED">·</span>
         <span class="min-w-0 flex-1 truncate">{{ formatStatShort(substat.key) }}</span>
         <span class="tabular font-mono">{{ formatStatValue(substat.key, substat.value) }}</span>
-        <span class="h-4 w-12 shrink-0 rounded-sm border border-dashed border-border-strong" />
+        <span
+          class="h-4 shrink-0 rounded-[2px] border border-dashed border-current"
+          :style="{ width: barsWidth }"
+        />
       </li>
     </ul>
 
+    <p class="truncate px-3 pb-1.5 text-sm font-semibold" :class="CARD_SET" aria-hidden="true">
+      {{ row.setName }}
+    </p>
+
+    <!-- The game's "Equipped" bar: the wearer's side portrait pokes out of it -->
     <div
-      class="flex min-h-11 items-center gap-2 border-t border-border-subtle px-3 py-1.5 text-sm"
+      class="relative flex h-9 shrink-0 items-center gap-2 pr-3 text-sm font-semibold"
+      :class="[CARD_FOOT, row.ownerName ? 'pl-15' : 'pl-3']"
       aria-hidden="true"
     >
-      <template v-if="row.ownerName">
-        <GameIcon :src="characterIcon(artifact.location)" :name="row.ownerName" size="xs" />
-        <span class="min-w-0 truncate text-text-secondary">{{ row.ownerName }}</span>
-      </template>
-      <span v-else class="text-text-muted">—</span>
-      <span class="ml-auto flex shrink-0 items-center gap-1.5 text-text-muted">
-        <FlaskConical v-if="artifact.elixerCrafted" class="size-4" />
-        <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-rarity-5" />
-        <Lock v-if="artifact.lock" class="size-4" />
+      <img
+        v-if="row.ownerName && wearer"
+        :src="wearer"
+        alt=""
+        class="absolute bottom-0 left-1.5 size-13 object-contain object-bottom [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.25))]"
+        @error="sideFailed = true"
+      />
+      <span v-if="row.ownerName" class="min-w-0 truncate">Equipped: {{ row.ownerName }}</span>
+      <span class="ml-auto flex shrink-0 items-center gap-1.5">
+        <FlaskConical v-if="artifact.elixerCrafted" class="size-4" :class="CARD_MUTED" />
+        <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-[#e0a417]" />
+        <Lock v-if="artifact.lock" class="size-4 text-[#e8704a]" stroke-width="2.6" />
       </span>
     </div>
 
     <button
       type="button"
       class="absolute inset-0 rounded-xl"
-      :title="row.ownerName ? `${row.setName} · ${row.ownerName}` : row.setName"
+      :title="
+        row.ownerName ? `${name} · ${row.setName} · ${row.ownerName}` : `${name} · ${row.setName}`
+      "
       :aria-label="label"
       aria-haspopup="dialog"
       @click="emit('open', row.id)"
