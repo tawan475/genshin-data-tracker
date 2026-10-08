@@ -64,7 +64,8 @@ const c = computed(() => props.character)
 const owner = computed<CardOwner>(() => ({
   name: showName.value ? props.account.name : null,
   uid: showUid.value ? shareUid(props.account.uid, props.playerUid) : null,
-  ar: props.ar,
+  // The AR belongs with the name: hidden when the name is.
+  ar: showName.value ? props.ar : null,
 }))
 const takenAt = computed(() => props.account.latest?.takenAt ?? null)
 const boosts = useConstellationBoosts(() => c.value?.key ?? '')
