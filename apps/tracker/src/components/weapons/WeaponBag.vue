@@ -90,7 +90,7 @@ const copies = (n: number) => `${formatNumber(n)} ${n === 1 ? 'copy' : 'copies'}
         <span class="h-px flex-1 bg-border-default" aria-hidden="true" />
       </h2>
       <ul
-        class="grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] gap-2"
+        class="grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] gap-3 pt-1.5 sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] sm:gap-4"
       >
         <li v-for="row in section.rows" :key="row.id" class="flex">
           <WeaponTile :row="row" :selected="row.id === selected" @open="$emit('open', row)" />

@@ -44,6 +44,7 @@ const potentialTitle = computed(
         :src="artifactIcon(artifact.setKey, artifact.slotKey)"
         :name="row.setName"
         :rarity="artifact.rarity"
+        size="lg"
       />
       <div class="min-w-0 flex-1">
         <p class="truncate text-sm text-text-secondary">{{ row.setName }}</p>

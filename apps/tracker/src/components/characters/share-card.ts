@@ -7,7 +7,7 @@
 
 import type { InjectionKey } from 'vue'
 import type { Element } from '@/data/game-meta'
-import { giCdnArt } from '@/lib/assets'
+import { emblemBox } from '@/lib/item-art'
 import type { CritTier } from '@/lib/crit-tiers'
 
 export const CARD_WIDTH = 1920
@@ -126,77 +126,18 @@ export function elementGlow(element: Element, theme: CardTheme): string {
   return `radial-gradient(ellipse 620px 760px at 340px 560px, rgba(${rgb},${core}) 0%, rgba(${rgb},0.10) 45%, rgba(${rgb},0) 75%)`
 }
 
-/**
- * Item backdrops by rarity, close to the game's art below (both themes):
- * what shows behind it while it loads, or if gi-cdn can't serve it.
- */
-export const RARITY_GRADIENT: Record<number, string> = {
-  5: 'linear-gradient(150deg, #8a5a34 0%, #c98a46 100%)',
-  4: 'linear-gradient(150deg, #5a4b84 0%, #9b74c9 100%)',
-  3: 'linear-gradient(150deg, #3f5a7e 0%, #5c8ec2 100%)',
-  2: 'linear-gradient(150deg, #3f6150 0%, #5f9474 100%)',
-  1: 'linear-gradient(150deg, #545a66 0%, #828999 100%)',
-}
-
-/**
- * The game's item detail header, drawn behind the weapon and each artifact
- * piece: its rarity gradient (a 32×32 texture, stretched over the whole
- * box) under the emblem, both from gi-cdn (publish.json `extra` there).
- * Rarity → `UI_QUALITY_<colour>`, the game's quality names (1★ is WHITE;
- * NONE, the same grey, is for items without a rarity).
- */
-export const QUALITY_ART: Readonly<Record<number, string>> = {
-  5: 'UI_QUALITY_ORANGE',
-  4: 'UI_QUALITY_PURPLE',
-  3: 'UI_QUALITY_BLUE',
-  2: 'UI_QUALITY_GREEN',
-  1: 'UI_QUALITY_WHITE',
-}
-
-/** URL of a rarity's gradient; '' for no rarity (the box keeps its plain backdrop). */
-export function qualityArt(rarity: number | null | undefined): string {
-  const name = rarity ? QUALITY_ART[rarity] : undefined
-  return name ? giCdnArt(name) : ''
-}
-
-/**
- * The emblem over the gradient: white on transparency, 512×256, its knot
- * centred at (391.1, 140). The game's file is cut off at its foot, so it is
- * placed with its foot on the box's foot, which hides the cut.
- */
-export const EMBLEM = {
-  name: 'UI_ImgSign_ItemTips',
-  width: 512,
-  height: 256,
-  knotX: 391.1,
-  knotY: 140,
-}
-export const EMBLEM_URL = giCdnArt(EMBLEM.name)
-
-export interface EmblemBox {
-  scale: number
-  left: number
-  top: number
-  width: number
-  height: number
-}
-
-/**
- * Where the emblem goes in a box `height` px tall (px, from its top left):
- * its knot on (`centreX`, `centreY`) — the item icon's centre — and its foot
- * on the box's foot. So scale = (height − centreY) / (256 − 140): with the
- * icon centred vertically, height / 232.
- */
-export function emblemBox(height: number, centreX: number, centreY = height / 2): EmblemBox {
-  const scale = (height - centreY) / (EMBLEM.height - EMBLEM.knotY)
-  return {
-    scale,
-    left: centreX - EMBLEM.knotX * scale,
-    top: height - EMBLEM.height * scale,
-    width: EMBLEM.width * scale,
-    height: EMBLEM.height * scale,
-  }
-}
+// The game's item art (rarity gradients, the emblem) is shared with the
+// app's item tiles: lib/item-art.
+export {
+  EMBLEM,
+  EMBLEM_URL,
+  QUALITY_ART,
+  RARITY_GRADIENT,
+  emblemBox,
+  emblemStyle,
+  qualityArt,
+  type EmblemBox,
+} from '@/lib/item-art'
 
 /** The card's frame: its padding top and bottom, and the gap between the five pieces. */
 export const CARD_PAD_Y = 44
@@ -219,14 +160,6 @@ export const BAND_EMBLEM = emblemBox(PIECE_HEIGHT, BAND_WIDTH - BAND_ICON_RIGHT 
 /** The weapon's 128px tile: the icon fills it, so the knot sits on its centre. */
 export const WEAPON_TILE = 128
 export const WEAPON_EMBLEM = emblemBox(WEAPON_TILE, WEAPON_TILE / 2)
-
-/** An emblem box as an absolutely positioned element's style. */
-export const emblemStyle = (box: EmblemBox): Record<string, string> => ({
-  left: `${box.left}px`,
-  top: `${box.top}px`,
-  width: `${box.width}px`,
-  height: `${box.height}px`,
-})
 
 /**
  * CV / RV colours of the pills on the band: they sit on a dark chip over the

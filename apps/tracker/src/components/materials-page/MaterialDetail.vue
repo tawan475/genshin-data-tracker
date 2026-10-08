@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Coins, Pin, PinOff } from 'lucide-vue-next'
-import { RARITY_SOFT } from '@/components/characters/tokens'
+import ItemArt from '@/components/ui/ItemArt.vue'
 import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { MAX_SERIES } from '@/components/materials/use-materials-graph'
@@ -127,9 +127,9 @@ const place = computed(() => {
     <div v-if="item" class="flex flex-col gap-5">
       <div class="flex items-center gap-3 sm:gap-4">
         <span
-          class="size-14 shrink-0 rounded-xl p-1 text-xl sm:size-16"
-          :class="RARITY_SOFT[item.rarity ?? 0] ?? 'bg-surface-overlay'"
+          class="relative size-14 shrink-0 overflow-hidden rounded-xl bg-surface-overlay p-1 text-xl sm:size-16"
         >
+          <ItemArt :rarity="item.rarity" small />
           <MaterialIcon :src="icon(item.key)" :name="item.name" />
         </span>
         <div class="flex min-w-0 flex-1 flex-col">
