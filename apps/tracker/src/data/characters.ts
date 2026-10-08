@@ -524,9 +524,14 @@ const unknownFor: Partial<Record<CharacterSort, (c: CharacterView) => boolean>> 
   obtained: (c) => c.obtainedAt === null,
 }
 
+/** Obtained first first, unknown dates last (a tie-break, whatever the direction). */
+const obtainedOrder = (a: CharacterView, b: CharacterView) =>
+  (a.obtainedAt ?? Number.MAX_SAFE_INTEGER) - (b.obtainedAt ?? Number.MAX_SAFE_INTEGER)
+
 /**
- * Sorts by `sort` in `direction`; ties fall back to level (high first), then
- * rarity, then name, so the order is stable and meaningful either way.
+ * Sorts by `sort` in `direction`; ties fall back to the game's own order:
+ * level (high first), element (the game's order), date obtained (oldest
+ * first), then rarity and name for rosters without dates.
  * `pinned` (the favourites) come first whatever the sort, in that same order
  * among themselves; the rest follow.
  */
@@ -545,6 +550,8 @@ export function sortCharacters(
       (unknown ? Number(unknown(a)) - Number(unknown(b)) : 0) ||
       sign * primary(a, b) ||
       compareBy.level(b, a) ||
+      compareBy.element(a, b) ||
+      obtainedOrder(a, b) ||
       compareBy.rarity(b, a) ||
       compareBy.name(a, b),
   )
