@@ -16,7 +16,7 @@ import {
   SearchX,
   Upload,
 } from 'lucide-vue-next'
-import { RARITY_SOFT } from '@/components/characters/tokens'
+import ItemArt from '@/components/ui/ItemArt.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
@@ -454,7 +454,7 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
             <!-- Icons: the in-game bag -->
             <ul
               v-if="view === 'grid'"
-              class="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] sm:gap-2"
+              class="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] sm:gap-3"
             >
               <li v-for="item in section.items" :key="item.key" class="flex">
                 <MaterialTile
@@ -481,12 +481,12 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
                   @click="open(item.key, $event)"
                 >
                   <span
-                    class="relative size-10 shrink-0 rounded-lg p-0.5 text-xs"
-                    :class="[
-                      RARITY_SOFT[item.rarity ?? 0] ?? 'bg-surface-overlay',
-                      item.count === 0 ? 'opacity-40 grayscale' : '',
-                    ]"
+                    class="relative size-10 shrink-0 rounded-lg bg-surface-overlay p-0.5 text-xs"
+                    :class="item.count === 0 ? 'opacity-40 grayscale' : ''"
                   >
+                    <span class="absolute inset-0 overflow-hidden rounded-lg">
+                      <ItemArt :rarity="item.rarity" small />
+                    </span>
                     <MaterialIcon :src="icon(item.key)" :name="item.name" />
                     <span
                       v-if="trackedSet.has(item.key)"

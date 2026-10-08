@@ -153,7 +153,7 @@ onBeforeUnmount(() => {
       </h2>
       <template v-if="g.isOpen">
         <ul
-          class="grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] gap-2 pt-1 pb-2 sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))]"
+          class="grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] gap-3 pt-2 pb-2 sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] sm:gap-4"
         >
           <li
             v-for="row in g.shown"

@@ -33,21 +33,19 @@ defineEmits<{ open: [event: MouseEvent] }>()
     @open="$emit('open', $event)"
   >
     <template v-if="tracked" #top-left>
-      <span class="size-2 rounded-full bg-accent ring-2 ring-surface-raised" />
+      <span class="size-[9cqw] rounded-full bg-accent ring-[1.5cqw] ring-white/85" />
     </template>
     <template v-if="change" #top-right>
       <span
-        class="tabular rounded bg-surface-raised/90 px-1 font-mono text-[0.6875rem] leading-4 font-semibold shadow-sm"
-        :class="change > 0 ? 'text-success-text' : 'text-danger-text'"
+        class="tabular rounded-[3cqw] bg-[#3b4255]/90 px-[2.5cqw] py-[1cqw] text-[11cqw] leading-none font-semibold"
+        :class="change > 0 ? 'text-[#7ee2a8]' : 'text-[#ff9b8a]'"
         >{{ formatSigned(change) }}</span
       >
     </template>
     <template #footer>
-      <span
-        class="tabular block text-center font-mono font-semibold"
-        :class="edited ? 'text-accent-text' : ''"
-        >{{ formatCompact(count) }}</span
-      >
+      <span class="tabular" :class="edited ? 'text-accent-text' : ''">{{
+        formatCompact(count)
+      }}</span>
     </template>
   </ItemTile>
 </template>

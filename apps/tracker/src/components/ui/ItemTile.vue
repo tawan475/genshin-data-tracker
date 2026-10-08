@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import ItemArt from './ItemArt.vue'
 
 /**
- * One item in a bag grid, drawn as the game's inventory draws it: the
- * picture on its rarity's colour, a corner slot in each corner over it
- * (`top-left`, `top-right`, `bottom-left`, `bottom-right`), optional stars
- * along its foot and a footer line (`footer`, then `footer-end` on the
- * right). The whole tile is one button; `label` is its accessible name and
- * tooltip, so the slots stay visual. `selected` rings it in the accent.
- * The Weapons, Artifacts and Materials bags draw their tiles with it.
+ * One item in a bag grid, drawn as the game's bag draws its cells: the
+ * game's 80×98 cell art for the rarity (ItemArt: gradient and knot), the
+ * picture in its top square, gold stars on the art's foot (`stars`) and the
+ * cream strip below with `footer` centred (`footer-end` on its right), in
+ * light-theme colours in both themes. A corner slot in each corner over the
+ * picture (`top-left`, `top-right`, `bottom-left`, `bottom-right`; the pieces
+ * in item-tile.ts). Everything is sized in `cqw` (the tile is its own
+ * container), so it scales like the game's cell. The whole tile is one
+ * button; `label` is its accessible name and tooltip, so the slots stay
+ * visual. `selected` gives it the game's white glow. The Weapons, Artifacts
+ * and Materials bags draw their tiles with it.
  */
 const props = defineProps<{
   src: string
@@ -27,22 +32,10 @@ watch(
   () => (failed.value = false),
 )
 
-// Literal class names so Tailwind sees them.
-const BACKDROP: Record<number, string> = {
-  5: 'from-rarity-5/45 to-rarity-5/10',
-  4: 'from-rarity-4/45 to-rarity-4/10',
-  3: 'from-rarity-3/40 to-rarity-3/10',
-  2: 'from-rarity-2/40 to-rarity-2/10',
-  1: 'from-rarity-1/40 to-rarity-1/10',
-}
-const STAR_TEXT: Record<number, string> = {
-  5: 'text-rarity-5',
-  4: 'text-rarity-4',
-  3: 'text-rarity-3',
-  2: 'text-rarity-2',
-  1: 'text-rarity-1',
-}
-const CORNER = 'absolute flex items-center gap-0.5'
+/** The game's star (GameStars' shape). */
+const STAR =
+  'M12 1.8l2.95 6.6 7.2.75-5.4 4.85 1.53 7.08L12 17.4l-6.28 3.68 1.53-7.08-5.4-4.85 7.2-.75z'
+const CORNER = 'absolute flex items-center gap-[2cqw]'
 
 function initials(name: string): string {
   return name
@@ -62,55 +55,75 @@ function initials(name: string): string {
     aria-haspopup="dialog"
     :aria-label="label"
     :title="label"
-    class="group flex w-full min-w-0 flex-col overflow-hidden rounded-lg border bg-surface-raised text-left shadow-sm transition hover:-translate-y-px hover:border-accent hover:shadow-md"
-    :class="selected ? 'border-accent ring-2 ring-accent' : 'border-border-default'"
+    class="group @container relative block w-full min-w-0 text-left transition-transform hover:-translate-y-px focus-visible:outline-none"
     @click="$emit('open', $event)"
   >
     <span
-      class="relative block aspect-square w-full bg-linear-to-br"
-      :class="rarity ? BACKDROP[rarity] : 'from-surface-overlay to-surface-sunken'"
+      class="relative block aspect-[80/98] w-full rounded-[7cqw] transition-[box-shadow,filter] group-hover:brightness-105 group-focus-visible:ring-[1.2cqw] group-focus-visible:ring-accent"
+      :class="[
+        rarity ? '' : 'bg-linear-to-br from-surface-overlay to-surface-sunken',
+        selected ? 'ring-[1.2cqw] ring-white shadow-[0_0_5cqw_rgba(255,255,255,0.75)]' : '',
+      ]"
       aria-hidden="true"
     >
+      <ItemArt :rarity="rarity" class="rounded-[7cqw]" />
       <img
         v-if="src && !failed"
         loading="lazy"
         decoding="async"
         :src="src"
         alt=""
-        class="absolute inset-0 size-full object-contain p-1.5"
+        class="absolute inset-x-0 top-0 aspect-square w-full object-contain p-[3cqw]"
         @error="failed = true"
       />
       <span
         v-else
-        class="absolute inset-0 flex items-center justify-center font-mono text-sm text-text-muted"
+        class="absolute inset-x-0 top-0 flex aspect-square w-full items-center justify-center font-mono text-[16cqw] text-text-muted"
         >{{ initials(name) }}</span
       >
-      <span v-if="$slots['top-left']" :class="CORNER" class="top-1 left-1 flex-col items-start">
-        <slot name="top-left" />
-      </span>
-      <span v-if="$slots['top-right']" :class="CORNER" class="top-1 right-1">
-        <slot name="top-right" />
-      </span>
-      <span v-if="$slots['bottom-left']" :class="CORNER" class="bottom-1 left-1">
-        <slot name="bottom-left" />
-      </span>
-      <span v-if="$slots['bottom-right']" :class="CORNER" class="right-1 bottom-1">
-        <slot name="bottom-right" />
-      </span>
       <span
         v-if="stars && rarity"
-        class="absolute inset-x-0 bottom-0 text-center text-[0.625rem] leading-none tracking-tighter drop-shadow-sm"
-        :class="STAR_TEXT[rarity]"
-        >{{ '★'.repeat(rarity) }}</span
+        class="absolute inset-x-0 bottom-[19.5cqw] flex justify-center [filter:drop-shadow(0_0.5cqw_0.6cqw_rgba(60,35,0,0.55))]"
       >
-    </span>
-    <span
-      v-if="$slots.footer || $slots['footer-end']"
-      class="flex items-center gap-1 border-t border-border-default px-1 text-xs leading-5"
-      aria-hidden="true"
-    >
-      <span class="min-w-0 flex-1 truncate"><slot name="footer" /></span>
-      <slot name="footer-end" />
+        <svg
+          v-for="n in rarity"
+          :key="n"
+          viewBox="0 0 24 24"
+          class="size-[15.5cqw] shrink-0"
+          aria-hidden="true"
+        >
+          <path
+            :d="STAR"
+            fill="var(--game-star)"
+            stroke="var(--game-star-edge)"
+            stroke-width="0.8"
+          />
+        </svg>
+      </span>
+      <span
+        data-theme="light"
+        class="absolute inset-x-0 bottom-0 flex h-[20.5cqw] items-center gap-[2cqw] rounded-b-[7cqw] bg-[#e9e5dc] px-[5cqw] text-[13.5cqw] leading-none font-semibold text-[#495366]"
+        :class="$slots['footer-end'] ? 'justify-between' : 'justify-center'"
+      >
+        <span v-if="$slots.footer" class="min-w-0 truncate"><slot name="footer" /></span>
+        <slot name="footer-end" />
+      </span>
+      <span
+        v-if="$slots['top-left']"
+        :class="CORNER"
+        class="top-[4cqw] left-[4cqw] flex-col items-start"
+      >
+        <slot name="top-left" />
+      </span>
+      <span v-if="$slots['top-right']" :class="CORNER" class="top-[4cqw] right-[4cqw]">
+        <slot name="top-right" />
+      </span>
+      <span v-if="$slots['bottom-left']" :class="CORNER" class="bottom-[24cqw] left-[4cqw]">
+        <slot name="bottom-left" />
+      </span>
+      <span v-if="$slots['bottom-right']" :class="CORNER" class="right-[4cqw] bottom-[24cqw]">
+        <slot name="bottom-right" />
+      </span>
     </span>
   </button>
 </template>

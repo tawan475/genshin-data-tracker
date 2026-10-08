@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import ItemArt from './ItemArt.vue'
 
 /**
- * A game image (see `@/lib/assets`) with a rarity-tinted backdrop. Falls back to
- * the item's initials when there is no URL or the image fails, so a missing
- * icon never leaves a broken-image glyph.
+ * A game image (see `@/lib/assets`) on the game's square cell art for its
+ * rarity (ItemArt `small`: the gradient with the knot). Falls back to the
+ * item's initials when there is no URL or the image fails, so a missing icon
+ * never leaves a broken-image glyph.
  */
 const props = withDefaults(
   defineProps<{ src: string; name: string; rarity?: number; size?: 'xs' | 'sm' | 'md' | 'lg' }>(),
@@ -16,13 +18,6 @@ watch(
   () => (failed.value = false),
 )
 
-const backdrop: Record<number, string> = {
-  5: 'bg-rarity-5/20',
-  4: 'bg-rarity-4/20',
-  3: 'bg-rarity-3/20',
-  2: 'bg-rarity-2/20',
-  1: 'bg-rarity-1/20',
-}
 const initials = computed(() =>
   props.name
     .replace(/[^A-Za-z0-9 ]/g, '')
@@ -40,9 +35,10 @@ const initials = computed(() =>
     class="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-lg"
     :class="[
       { xs: 'size-7', sm: 'size-9', md: 'size-12', lg: 'size-16' }[size],
-      rarity ? backdrop[rarity] : 'bg-surface-sunken',
+      'bg-surface-sunken',
     ]"
   >
+    <ItemArt :rarity="rarity" small />
     <!-- loading/decoding before src: a lazy image off screen then isn't fetched or decoded.
          Keyed by src: a new picture gets a new <img>, so the old one never lingers while it loads. -->
     <img
@@ -52,9 +48,11 @@ const initials = computed(() =>
       decoding="async"
       :src="src"
       :alt="name"
-      class="size-full object-contain"
+      class="relative size-full object-contain"
       @error="failed = true"
     />
-    <span v-else class="font-mono text-sm text-text-muted" :title="name">{{ initials }}</span>
+    <span v-else class="relative font-mono text-sm text-text-muted" :title="name">{{
+      initials
+    }}</span>
   </span>
 </template>

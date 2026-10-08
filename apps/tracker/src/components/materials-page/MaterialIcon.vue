@@ -49,12 +49,12 @@ const initials = computed(() =>
     :src="src"
     alt=""
     draggable="false"
-    class="size-full object-contain"
+    class="relative size-full object-contain"
     @error="onError"
   />
   <span
     v-else
-    class="flex size-full items-center justify-center font-semibold text-text-muted select-none"
+    class="relative flex size-full items-center justify-center font-semibold text-text-muted select-none"
     aria-hidden="true"
     >{{ initials }}</span
   >

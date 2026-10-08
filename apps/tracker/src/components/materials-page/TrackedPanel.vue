@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Plus, X } from 'lucide-vue-next'
-import { RARITY_SOFT } from '@/components/characters/tokens'
+import ItemArt from '@/components/ui/ItemArt.vue'
 import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { MAX_SERIES } from '@/components/materials/use-materials-graph'
@@ -104,9 +104,9 @@ const rows = computed(() =>
             @click="emit('open', row.key)"
           >
             <span
-              class="size-10 shrink-0 rounded-lg p-0.5 text-xs"
-              :class="RARITY_SOFT[row.rarity ?? 0] ?? 'bg-surface-overlay'"
+              class="relative size-10 shrink-0 overflow-hidden rounded-lg bg-surface-overlay p-0.5 text-xs"
             >
+              <ItemArt :rarity="row.rarity" small />
               <MaterialIcon :src="icon(row.key)" :name="row.name" />
             </span>
             <span class="flex min-w-0 flex-col">
