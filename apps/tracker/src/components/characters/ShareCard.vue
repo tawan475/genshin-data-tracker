@@ -48,6 +48,7 @@ import {
   emblemStyle,
   nameSize,
   qualityArt,
+  splashFull,
   splashPlace,
   type CardOwner,
 } from './share-card'
@@ -260,6 +261,7 @@ const ownerLine = computed(() =>
       :eager="still"
       class="absolute h-[1100px] w-[2200px]"
       :style="{ left: `${splash.left}px`, top: `${splash.top}px` }"
+      :full="splashFull(c.key)"
       img-class="object-contain! [filter:var(--card-splash-shadow)]"
     />
     <div class="absolute inset-0 [background:var(--card-vignette)]" />

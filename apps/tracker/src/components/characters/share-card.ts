@@ -7,6 +7,7 @@
 
 import type { InjectionKey } from 'vue'
 import type { Element } from '@/data/game-meta'
+import { giCdnArt } from '@/lib/assets'
 import { emblemBox } from '@/lib/item-art'
 import type { CritTier } from '@/lib/crit-tiers'
 
@@ -263,6 +264,52 @@ export const SPLASH_NUDGE: Readonly<Record<string, { down: number; right: number
     ...nudge(4, ['Manekin', 'Manekina'], -4),
     ...nudge(25, ['Traveler']),
   ])
+
+/**
+ * Uncut wish art for the characters whose game wish image (2048×1024) is cut
+ * where the card shows it: the Genshin Impact Fandom wiki's "Character Full
+ * Wish Artwork" (the client has no uncut version), hosted on gi-cdn as
+ * `FullWish_<Key>`. Each is placed over the game art's frame so the
+ * character sits exactly where the game art put it (and its nudge still
+ * applies): `scale` game pixels per wiki pixel, its top-left at (`x`, `y`)
+ * in game pixels. Fitted by matching features between the two images
+ * (SIFT + RANSAC, no rotation; 2026-10-09). Columbina, Zibai and Lohen are
+ * cut too, but the wiki's art is the same frame as the game's.
+ */
+export const SPLASH_FULL: Readonly<
+  Record<string, { width: number; height: number; scale: number; x: number; y: number }>
+> = {
+  Mavuika: { width: 1280, height: 1280, scale: 1.42819, x: 139.48, y: -312.45 },
+  Arlecchino: { width: 1460, height: 1120, scale: 1.23159, x: 171.81, y: -255.22 },
+  Mualani: { width: 1280, height: 1280, scale: 1.04168, x: 289.94, y: -147.86 },
+  Chiori: { width: 1280, height: 1280, scale: 1.08397, x: 333.66, y: -145.96 },
+  Citlali: { width: 1280, height: 1280, scale: 1.01251, x: 366.99, y: -129.98 },
+  Xianyun: { width: 1280, height: 1280, scale: 1.15153, x: 260.91, y: -161.4 },
+}
+
+/** The splash box's px per game wish-art px (the 2048×1024 art fills the 2200×1100 box). */
+export const SPLASH_BOX_SCALE = 2200 / 2048
+
+/**
+ * A character's uncut art and where it goes inside the splash box (px), or
+ * null where the game's own art is used.
+ */
+export function splashFull(
+  characterKey: string,
+): { src: string; style: Record<string, string> } | null {
+  const full = SPLASH_FULL[characterKey]
+  if (!full) return null
+  const k = SPLASH_BOX_SCALE
+  return {
+    src: giCdnArt(`FullWish_${characterKey}`),
+    style: {
+      left: `${full.x * k}px`,
+      top: `${full.y * k}px`,
+      width: `${full.width * full.scale * k}px`,
+      height: `${full.height * full.scale * k}px`,
+    },
+  }
+}
 
 /** Where a character's splash box goes on the card (px): the shared spot plus its nudge. */
 export function splashPlace(characterKey: string): { left: number; top: number } {
