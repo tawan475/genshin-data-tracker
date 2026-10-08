@@ -68,9 +68,9 @@ describe('favourites first', () => {
       'Nahida',
       'Bennett',
       'TravelerAnemo',
-      // Level ties fall back to rarity, then name.
-      'Furina',
+      // Level ties fall back to the game's element order (Pyro before Hydro).
       'HuTao',
+      'Furina',
       'Xiangling',
     ])
     expect(keys(sortCharacters(roster.characters, 'level', 'asc', favorites))).toEqual([
@@ -78,8 +78,8 @@ describe('favourites first', () => {
       'Bennett',
       'Nahida',
       'Xiangling',
-      'Furina',
       'HuTao',
+      'Furina',
     ])
   })
 
@@ -123,6 +123,42 @@ describe('favourites first', () => {
     expect(filterCharacters(roster.characters, filters)).toEqual([])
     const elements = facetCounts(roster.characters, filters, 'element', (c) => c.element, favorites)
     expect(Object.fromEntries(elements)).toEqual({ pyro: 1, dendro: 1, anemo: 1 })
+  })
+})
+
+describe("ties, in the game's order", () => {
+  const level90: Good = {
+    ...good,
+    characters: [
+      character('Furina', 90, 0, 9),
+      character('Bennett', 90, 6, 9),
+      character('HuTao', 90, 1, 10),
+      character('Xiangling', 90, 6, 9),
+      character('Diluc', 80, 0, 6),
+    ],
+    gi_characters: {
+      HuTao: { obtainedAt: 1_700_000_000 },
+      Xiangling: { obtainedAt: 1_610_000_000 },
+      Furina: { obtainedAt: 1_650_000_000 },
+    },
+  }
+  const list = buildRoster(level90).characters
+
+  it('breaks a level tie by element, then by date obtained (oldest first, unknown last)', () => {
+    const order = ['Xiangling', 'HuTao', 'Bennett', 'Furina', 'Diluc']
+    expect(keys(sortCharacters(list, 'level', 'desc'))).toEqual(order)
+    // The direction turns the levels round, not the ties.
+    expect(keys(sortCharacters(list, 'level', 'asc'))).toEqual(['Diluc', ...order.slice(0, 4)])
+  })
+
+  it('orders one element by level, then date obtained', () => {
+    expect(keys(sortCharacters(list, 'element', 'asc'))).toEqual([
+      'Xiangling',
+      'HuTao',
+      'Bennett',
+      'Diluc',
+      'Furina',
+    ])
   })
 })
 
