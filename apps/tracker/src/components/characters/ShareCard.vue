@@ -25,13 +25,14 @@ import {
   formatStatShort,
   formatStatValue,
 } from '@/utils/artifact-stats'
-import { LIGHT_ART, artTone, type ArtTone } from './art-tone'
+import { LIGHT_ART, type ArtTone } from './art-tone'
 import CardRollBars from './CardRollBars.vue'
 import ElementDisc from './ElementDisc.vue'
 import GameStars from './GameStars.vue'
 import FadeImage from './FadeImage.vue'
 import SplashArt from './SplashArt.vue'
 import { CONSTELLATION_MAX_STYLE, isMaxConstellation, refinementStyle } from './max-badges'
+import { artTone } from './measure-art'
 import {
   BAND_CV_ON,
   BAND_EMBLEM,
