@@ -99,7 +99,7 @@ const wearer = computed(() => {
 
 <template>
   <article
-    class="relative flex min-w-0 flex-col overflow-hidden rounded-xl shadow-sm ring-1 ring-black/15 dark:ring-white/10"
+    class="relative flex min-w-0 flex-col overflow-hidden rounded-xl shadow-sm ring-1 ring-(--artifact-ring)"
     :class="CARD_BODY"
   >
     <!-- The art band -->
@@ -135,7 +135,7 @@ const wearer = computed(() => {
       />
       <div class="relative flex h-full flex-col justify-center gap-0.5 px-3" :class="BAND_TEXT">
         <p class="truncate text-[0.9375rem] leading-tight font-semibold">{{ name }}</p>
-        <p class="flex items-center gap-2 text-xs text-white/90">
+        <p class="flex items-center gap-2 text-xs text-(--artifact-band-ink)/90">
           <span class="truncate">{{ formatSlotFullName(artifact.slotKey) }}</span>
           <GameStars :rarity="artifact.rarity" :px="11" :gap="0" class="shrink-0" />
         </p>
@@ -151,19 +151,19 @@ const wearer = computed(() => {
           class="relative z-10 mt-0.5 flex cursor-pointer items-center gap-1.5 font-mono text-xs font-semibold [text-shadow:none]"
           @click="open"
         >
-          <span :class="BAND_CHIP" class="text-white">+{{ artifact.level }}</span>
+          <span :class="BAND_CHIP" class="text-(--artifact-band-ink)">+{{ artifact.level }}</span>
           <span :class="BAND_CHIP"
-            ><span class="font-sans text-white/70">CV </span
+            ><span class="font-sans text-(--artifact-band-ink)/70">CV </span
             ><CritValue :value="row.cv" :crit-circlet="crit" :plain="plain"
           /></span>
           <span :class="BAND_CHIP"
-            ><span class="font-sans text-white/70">RV </span
+            ><span class="font-sans text-(--artifact-band-ink)/70">RV </span
             ><RollValue :value="row.rv" :plain="plain"
           /></span>
           <span
             v-if="potential.left > 0 && potential.expectedCv > row.cv"
             :class="BAND_CHIP"
-            class="text-white/80"
+            class="text-(--artifact-band-ink)/80"
             :title="potentialTitle"
             >→ ~{{ Math.round(potential.expectedCv) }}</span
           >
@@ -198,7 +198,7 @@ const wearer = computed(() => {
           <span
             v-for="(roll, k) in row.rolls[index] ?? []"
             :key="k"
-            class="relative w-1.5 overflow-hidden rounded-[2px] bg-black/10 dark:bg-white/10"
+            class="relative w-1.5 overflow-hidden rounded-[2px] bg-(--artifact-track)"
           >
             <span
               class="absolute inset-x-0 bottom-0 rounded-[2px]"
