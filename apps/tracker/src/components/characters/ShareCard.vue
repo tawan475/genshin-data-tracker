@@ -41,12 +41,12 @@ import {
   CARD_WIDTH,
   EMBLEM_URL,
   RARITY_GRADIENT,
-  SPLASH_LEFT,
   WEAPON_EMBLEM,
   elementGlow,
   emblemStyle,
   nameSize,
   qualityArt,
+  splashPlace,
   type CardOwner,
 } from './share-card'
 import { constellationIcons, talentIcons } from './talent-icons'
@@ -103,6 +103,7 @@ const BAND_EMBLEM_STYLE = emblemStyle(BAND_EMBLEM)
 const WEAPON_EMBLEM_STYLE = emblemStyle(WEAPON_EMBLEM)
 
 const c = computed(() => props.character)
+const splash = computed(() => splashPlace(c.value.key))
 const banner = computed(() => characterBanner(c.value.key))
 /** The element's glow behind the splash (none for a character without an element). */
 const glow = computed(() => (c.value.element ? elementGlow(c.value.element, props.theme) : 'none'))
@@ -229,8 +230,8 @@ const ownerLine = computed(() =>
       :name="c.name"
       :rarity="c.rarity"
       :eager="still"
-      class="absolute top-[-20px] h-[1100px] w-[2200px]"
-      :style="{ left: `${SPLASH_LEFT}px` }"
+      class="absolute h-[1100px] w-[2200px]"
+      :style="{ left: `${splash.left}px`, top: `${splash.top}px` }"
       img-class="object-contain! [filter:var(--card-splash-shadow)]"
     />
     <div class="absolute inset-0 [background:var(--card-vignette)]" />

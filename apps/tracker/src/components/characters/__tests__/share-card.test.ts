@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { characterMeta } from '@/data/game-meta'
 import { GI_CDN_BASE } from '@/lib/assets'
 import {
   BAND_EMBLEM,
@@ -10,9 +11,11 @@ import {
   PIECE_HEIGHT,
   QUALITY_ART,
   SPLASH_LEFT,
+  SPLASH_NUDGE,
   WEAPON_EMBLEM,
   emblemBox,
   qualityArt,
+  splashPlace,
 } from '../share-card'
 
 describe('the emblem over the header art', () => {
@@ -74,5 +77,29 @@ describe('rarity gradients', () => {
 describe('the splash art', () => {
   it("moves left by 7.5% of the character column's 700px", () => {
     expect(SPLASH_LEFT).toBeCloseTo(-712.5)
+  })
+
+  it('sits at the shared spot without a nudge', () => {
+    expect(splashPlace('Bennett')).toEqual({ left: SPLASH_LEFT, top: -20 })
+  })
+
+  it("moves down in % of the card's 1080px and sideways in % of the 700px column", () => {
+    expect(splashPlace('Zhongli').top).toBeCloseTo(-20 + 54)
+    expect(splashPlace('Nahida').top).toBeCloseTo(-20 - 108)
+    expect(splashPlace('Yanfei')).toEqual({ left: SPLASH_LEFT + 49, top: -20 + 0.08 * 1080 })
+    expect(splashPlace('HuTao').left).toBeCloseTo(SPLASH_LEFT - 21)
+    expect(splashPlace('Manekina').left).toBeCloseTo(SPLASH_LEFT - 28)
+  })
+
+  it('gives every Traveler the same nudge', () => {
+    for (const key of ['Traveler', 'TravelerAnemo', 'TravelerHydro']) {
+      expect(splashPlace(key).top).toBeCloseTo(-20 + 270)
+    }
+  })
+
+  it('only names characters the game data knows', () => {
+    for (const key of Object.keys(SPLASH_NUDGE)) {
+      expect(characterMeta(key), key).toBeDefined()
+    }
   })
 })
