@@ -6,7 +6,8 @@ import ItemArt from './ItemArt.vue'
  * One item in a bag grid, drawn as the game's bag draws its cells: the
  * game's 80×98 cell art for the rarity (ItemArt: gradient and knot), the
  * picture in its top square, gold stars on the art's foot (`stars`) and the
- * cream strip below with `footer` centred (`footer-end` on its right), in
+ * cream strip below, curling up into the art's bottom-right corner as the
+ * game's does, with `footer` centred (`footer-end` on its right), in
  * light-theme colours in both themes. A corner slot in each corner over the
  * picture (`top-left`, `top-right`, `bottom-left`, `bottom-right`; the pieces
  * in item-tile.ts). Everything is sized in `cqw` (the tile is its own
@@ -100,9 +101,14 @@ function initials(name: string): string {
           />
         </svg>
       </span>
+      <!-- The strip's curl: the art's bottom-right corner rounds into the cream
+           (the game's UI_ItemSlot_TextBg), a quarter circle cut out of a square. -->
+      <span
+        class="absolute right-0 bottom-[20.4cqw] size-[19cqw] bg-[radial-gradient(circle_19cqw_at_0_0,transparent_97%,#e9e5dc_100%)]"
+      />
       <span
         data-theme="light"
-        class="absolute inset-x-0 bottom-0 flex h-[20.5cqw] items-center gap-[2cqw] rounded-b-[7cqw] bg-[#e9e5dc] px-[5cqw] text-[13.5cqw] leading-none font-semibold text-[#495366]"
+        class="absolute inset-x-0 bottom-0 flex h-[20.5cqw] items-center gap-[2cqw] rounded-b-[7cqw] bg-[#e9e5dc] px-[5cqw] text-[15.5cqw] leading-none font-bold text-[#4a5366]"
         :class="$slots['footer-end'] ? 'justify-between' : 'justify-center'"
       >
         <span v-if="$slots.footer" class="min-w-0 truncate"><slot name="footer" /></span>

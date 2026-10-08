@@ -2,9 +2,13 @@
 import ItemTile from '@/components/ui/ItemTile.vue'
 import { formatCompact, formatSigned } from '@/lib/format'
 
+/** The game writes counts plain ("7453"); only the very large ones are shortened here. */
+const bagCount = (n: number) => (n < 100_000 ? String(n) : formatCompact(n))
+
 /**
  * One material in the bag, as the game draws it: the picture on its
- * rarity's colour, the count along the foot (in the accent when set by hand
+ * rarity's cell with its stars, the count along the foot (plain, as the game
+ * writes it; shortened from 100,000) (in the accent when set by hand
  * on the Planner). Over the picture: the change in the period (top right)
  * and a dot when it is tracked (top left). Dimmed at 0. Words in `label`.
  */
@@ -29,6 +33,7 @@ defineEmits<{ open: [event: MouseEvent] }>()
     :name="name"
     :rarity="rarity"
     :label="label"
+    stars
     :class="count === 0 ? 'opacity-50 grayscale' : ''"
     @open="$emit('open', $event)"
   >
@@ -43,9 +48,7 @@ defineEmits<{ open: [event: MouseEvent] }>()
       >
     </template>
     <template #footer>
-      <span class="tabular" :class="edited ? 'text-accent-text' : ''">{{
-        formatCompact(count)
-      }}</span>
+      <span class="tabular" :class="edited ? 'text-accent-text' : ''">{{ bagCount(count) }}</span>
     </template>
   </ItemTile>
 </template>
