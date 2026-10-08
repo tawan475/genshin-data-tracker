@@ -38,8 +38,8 @@
   --artifact-foot: #f3e6cc;
   --artifact-track: rgb(15 23 42 / 0.1);
   --artifact-ring: rgb(0 0 0 / 0.15);
-  /* Text on the art band: the site's off-white, warmed for the art (never #fff). */
-  --artifact-band-ink: #f4eee4;
+  /* Text on the art band: the site's off-white (never #fff). */
+  --artifact-band-ink: #f1f5f9;
   --text-secondary: #475569; /* slate-600 */
   --text-muted: #64748b; /* slate-500 */
   --accent: #4f46e5; /* indigo-600 */
@@ -117,7 +117,7 @@
   --artifact-foot: #242b3e;
   --artifact-track: rgb(255 255 255 / 0.1);
   --artifact-ring: rgb(255 255 255 / 0.1);
-  --artifact-band-ink: #f4eee4;
+  --artifact-band-ink: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --accent: #6366f1; /* indigo-500; white on it is 4.47:1 */
