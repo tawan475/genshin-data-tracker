@@ -99,6 +99,9 @@ const ROOT = computed(() => ({
 /** The panels' glass, as the design: translucent fill, shadow and hairline, blur. */
 const PANEL =
   'rounded-[22px] bg-(--card-panel) shadow-(--card-panel-shadow) backdrop-blur-[16px] backdrop-saturate-[1.2]'
+/** Small text on the art: the theme's chip (translucent, blurred) and hero colour, no shadow. */
+const CHIP_TEXT =
+  'bg-(--card-chip) text-(--card-hero) shadow-(--card-chip-ring) backdrop-blur-[10px]'
 /** Text on the art: the hero colour with its shadow (dark text with a white glow on light cards). */
 const HERO = 'text-(--card-hero) [text-shadow:var(--card-hero-shadow)]'
 /** The emblem's place over a piece's band and over the weapon's tile (share-card emblemBox). */
@@ -109,9 +112,9 @@ const c = computed(() => props.character)
 const splash = computed(() => splashPlace(c.value.key))
 const banner = computed(() => characterBanner(c.value.key))
 /**
- * A light card writes the text on the art dark with a white glow; where the
- * namecard is dark behind it (art-tone), that text takes the dark card's
- * white instead: the header and the owner lines each by their own region.
+ * A light card writes its name dark with a white glow; where the namecard is
+ * dark behind it (art-tone), the name takes the dark card's white instead.
+ * The smaller lines sit on backings in the card's theme (CHIP_TEXT).
  */
 const tone = ref<ArtTone>(LIGHT_ART)
 watch(
@@ -130,9 +133,6 @@ const ON_DARK_ART = {
 }
 const headerStyle = computed(() =>
   props.theme === 'light' && tone.value.top ? ON_DARK_ART : undefined,
-)
-const ownerStyle = computed(() =>
-  props.theme === 'light' && tone.value.bottom ? ON_DARK_ART : undefined,
 )
 /** The element's glow behind the splash (none for a character without an element). */
 const glow = computed(() => (c.value.element ? elementGlow(c.value.element, props.theme) : 'none'))
@@ -271,7 +271,7 @@ const ownerLine = computed(() =>
     >
       <!-- Left: who, the constellations down its right edge, the talents at its foot -->
       <section class="relative flex min-h-0 flex-col justify-between" aria-label="Character">
-        <div class="flex flex-col gap-[10px]" :style="headerStyle">
+        <div class="flex flex-col gap-[10px]">
           <div class="flex min-w-0 items-center gap-[18px]">
             <ElementIcon
               v-if="c.element"
@@ -282,7 +282,7 @@ const ownerLine = computed(() =>
             <h1
               class="m-0 min-w-0 truncate leading-none font-bold tracking-[-0.5px]"
               :class="HERO"
-              :style="{ fontSize: `${nameSize(c.name)}px` }"
+              :style="{ fontSize: `${nameSize(c.name)}px`, ...headerStyle }"
             >
               {{ c.name }}
             </h1>
@@ -298,7 +298,12 @@ const ownerLine = computed(() =>
               >C{{ c.constellation }}</span
             >
           </div>
-          <p class="flex items-baseline gap-[22px] pl-[4px] text-[30px]" :class="HERO">
+          <!-- Small text on the art sits on a translucent backing in the card's
+               theme, so it reads over any art (light or dark, the splash or the namecard) -->
+          <p
+            class="flex items-baseline gap-[22px] self-start rounded-full px-[18px] py-[4px] text-[28px]"
+            :class="CHIP_TEXT"
+          >
             <span :title="`Level ${c.level} of ${cap} · Ascension ${c.ascension}`"
               ><span class="font-normal opacity-85">Lv.&nbsp;</span>
               <span class="font-bold">{{ c.level }}</span
@@ -359,7 +364,10 @@ const ownerLine = computed(() =>
               </span>
             </li>
           </ul>
-          <div class="flex flex-col gap-[4px] pl-[4px]" :class="HERO" :style="ownerStyle">
+          <div
+            class="flex flex-col gap-[2px] self-start rounded-[18px] px-[18px] py-[10px]"
+            :class="CHIP_TEXT"
+          >
             <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[14px] text-[27px]">
               <template v-for="(part, index) in ownerLine" :key="index">
                 <span v-if="index" class="opacity-60">·</span>
