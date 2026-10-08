@@ -6,7 +6,8 @@
  * it takes the dark card's white text instead (ShareCard).
  *
  * Measured on the namecard itself (840×400; nanoka and gi-cdn send CORS, so a
- * canvas can read it), as the mean relative luminance of the region, 0–1.
+ * canvas can read it: measure-art.ts), as the mean relative luminance of the
+ * region, 0–1. This module is the pure part (tested without a DOM).
  */
 
 export interface ArtTone {
@@ -46,36 +47,4 @@ export function regionLuminance(
     }
   }
   return count ? sum / count / 255 : 1
-}
-
-const cache = new Map<string, Promise<ArtTone>>()
-
-/** The namecard's tone, once per URL; light (nothing changes) when it can't be read. */
-export function artTone(url: string): Promise<ArtTone> {
-  let tone = cache.get(url)
-  if (!tone) {
-    tone = measure(url).catch(() => LIGHT_ART)
-    cache.set(url, tone)
-  }
-  return tone
-}
-
-async function measure(url: string): Promise<ArtTone> {
-  const img = new Image()
-  img.crossOrigin = 'anonymous'
-  img.src = url
-  await img.decode()
-  const width = 84
-  const height = 40
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })
-  if (!ctx) return LIGHT_ART
-  ctx.drawImage(img, 0, 0, width, height)
-  const { data } = ctx.getImageData(0, 0, width, height)
-  return {
-    top: regionLuminance(data, width, height, TOP_REGION) < DARK_ART,
-    bottom: regionLuminance(data, width, height, BOTTOM_REGION) < DARK_ART,
-  }
 }
