@@ -9,7 +9,14 @@ import ItemArt from './ItemArt.vue'
  * never leaves a broken-image glyph.
  */
 const props = withDefaults(
-  defineProps<{ src: string; name: string; rarity?: number; size?: 'xs' | 'sm' | 'md' | 'lg' }>(),
+  defineProps<{
+    src: string
+    name: string
+    rarity?: number
+    size?: 'xs' | 'sm' | 'md' | 'lg'
+    /** Load now rather than near the viewport (a page that shows them all, e.g. the roster). */
+    eager?: boolean
+  }>(),
   { size: 'md' },
 )
 const failed = ref(false)
@@ -44,7 +51,7 @@ const initials = computed(() =>
     <img
       v-if="src && !failed"
       :key="src"
-      loading="lazy"
+      :loading="eager ? 'eager' : 'lazy'"
       decoding="async"
       :src="src"
       :alt="name"
