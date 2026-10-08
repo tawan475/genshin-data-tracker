@@ -34,28 +34,44 @@ export function resolveTheme(choice: ThemePreference): Theme {
 const THEME_COLOR = { light: '#f8fafc', dark: '#0f172a', public: '#0f131f' } as const
 
 /**
- * How long the colour-only transitions stay on after a theme flip. The class
- * swaps every element's transitions for colour ones, so it must not outlive
- * the fade: left on, it cut every later non-colour transition (drawers, the
- * collapsing nav).
+ * Paints `theme`. A switch the user sees (`animate`: their toggle, or the OS
+ * flipping while they follow it) crossfades a snapshot of the whole page
+ * (View Transitions): the new theme lands in one step, so no element is ever
+ * caught half-way, and the cost doesn't grow with the page (a per-element
+ * colour fade left big pages, e.g. a large artifact list, light-on-light for
+ * a while). Without View Transitions, or with reduced motion, it switches at
+ * once.
  */
-const THEME_FADE_MS = 300
-let fadeTimer: ReturnType<typeof setTimeout> | undefined
-
-function paint(theme: Theme): void {
+function paint(theme: Theme, animate = false): void {
   const root = document.documentElement
   const painted = publicPage ? 'dark' : theme
-  if (root.dataset.theme !== painted) {
-    root.classList.add('theme-transitions')
+  const apply = () => {
+    // No element fades its own colours across the switch (hover transitions
+    // would start from the old theme): transitions are off for this one frame.
+    root.classList.add('theme-switching')
     root.dataset.theme = painted
-    clearTimeout(fadeTimer)
-    fadeTimer = setTimeout(() => root.classList.remove('theme-transitions'), THEME_FADE_MS)
+    root.toggleAttribute('data-public', publicPage)
+    void getComputedStyle(root).color
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => root.classList.remove('theme-switching')),
+    )
   }
-  root.toggleAttribute('data-public', publicPage)
+  if (root.dataset.theme === painted) apply()
+  else if (animate && 'startViewTransition' in document && !reducedMotion()) {
+    document.startViewTransition(apply)
+  } else apply()
   resolvedTheme.value = theme
   const color = THEME_COLOR[publicPage ? 'public' : painted]
   const meta = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
   meta.forEach((m) => (m.content = color))
+}
+
+function reducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  } catch {
+    return false
+  }
 }
 
 /** Called on every navigation: public routes hold the document dark, others restore the theme. */
@@ -68,13 +84,13 @@ export function setPublicPage(on: boolean): void {
 export function applyTheme(choice: ThemePreference): void {
   preference = choice
   writeStorage('theme', choice === 'system' ? null : choice)
-  paint(resolveTheme(choice))
+  paint(resolveTheme(choice), true)
 }
 
 // While following the OS, repaint when it switches.
 try {
   darkQuery().addEventListener('change', () => {
-    if (preference === 'system') paint(resolveTheme('system'))
+    if (preference === 'system') paint(resolveTheme('system'), true)
   })
 } catch {
   // Very old browsers: the theme just won't follow live OS changes.

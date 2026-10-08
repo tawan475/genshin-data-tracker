@@ -419,10 +419,8 @@ const footButton =
 </template>
 
 <style scoped>
-/* Plain (unlayered) rules, specific enough to outrank main.css's
-   `html.theme-transitions body *`, which after a theme switch would cut every
-   transition down to colour fades and make the rail jump. The reduced-motion
-   rule there still wins (it is !important). */
+/* The rail's own transitions (main.css's reduced-motion rule still wins: it
+   is !important). */
 .nav-rail {
   transition-property: width, translate, background-color, border-color;
   transition-duration: 200ms;

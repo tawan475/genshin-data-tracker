@@ -309,12 +309,17 @@
   }
 }
 
-html.theme-transitions body,
-html.theme-transitions body * {
-  transition:
-    background-color 200ms ease,
-    border-color 200ms ease,
-    color 200ms ease;
+/* A theme switch lands in one step (lib/theme.ts): no element transitions
+   across it, and the whole page crossfades (View Transitions). */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
 }
 
 /* Rows that scroll sideways by design (chip rows, stat strips, wide old
