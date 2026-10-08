@@ -26,7 +26,11 @@ const CACHE = `gdt-${BUILD}`
 /** Image hosts: nanoka, and gi-cdn for the few names nanoka lacks. */
 const IMAGE_HOSTS = __IMAGE_HOSTS__
 const IMAGES = 'gdt-images-v2'
-const MAX_IMAGES = 2500
+/**
+ * Kept with no expiry (nanoka's own `max-age=120` doesn't matter here), up to
+ * this many: a large account's weapons, artifacts, materials and splashes fit.
+ */
+const MAX_IMAGES = 8000
 const KEEP = [IMAGES]
 
 self.addEventListener('install', (event) => {
