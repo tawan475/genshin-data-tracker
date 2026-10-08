@@ -59,12 +59,13 @@ const weaponTitle = computed(() => {
       class="group relative flex w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised text-left shadow-sm transition-colors hover:border-border-strong"
       @click="$emit('open')"
     >
-      <!-- The namecard under the whole card, the foot included (its bar blurs it);
-           lighter and livelier on the light theme. -->
+      <!-- The namecard under the whole card, as bright in both themes; the foot
+           shows a blurred copy of it (a filtered image is drawn once, unlike a
+           backdrop blur, which repaints on every scroll frame). Loaded up front:
+           the roster shows every card. -->
       <NamecardBackdrop
         :src="characterBanner(c.key)"
-        lazy
-        class="absolute inset-y-0 right-0 h-full w-full opacity-40 brightness-[1.15] saturate-[1.2] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-25 dark:brightness-100 dark:saturate-100"
+        class="absolute inset-y-0 right-0 h-full w-full opacity-50 brightness-[1.2] saturate-[1.25] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-55"
       />
       <div class="relative w-full">
         <div class="relative flex w-full items-start gap-3 p-3">
@@ -73,6 +74,7 @@ const weaponTitle = computed(() => {
             :name="c.name"
             :rarity="c.rarity ?? undefined"
             size="lg"
+            eager
           />
           <div class="flex min-w-0 flex-1 flex-col gap-1.5">
             <div class="flex items-center gap-1.5">
@@ -104,14 +106,20 @@ const weaponTitle = computed(() => {
       </div>
 
       <div
-        class="relative mt-auto flex w-full items-center gap-2 border-t border-border-subtle/70 bg-surface-raised/70 px-3 py-2 text-sm backdrop-blur-md"
+        class="relative isolate mt-auto flex w-full items-center gap-2 overflow-hidden border-t border-border-subtle/70 px-3 py-2 text-sm"
       >
+        <span class="absolute inset-0 -z-10 bg-surface-raised/75" aria-hidden="true" />
+        <NamecardBackdrop
+          :src="characterBanner(c.key)"
+          class="absolute right-0 bottom-0 -z-10 h-[calc(100%+6rem)] w-full opacity-35 blur-md [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-30"
+        />
         <span v-if="c.weapon" class="flex shrink-0 items-center gap-1.5" :title="weaponTitle">
           <GameIcon
             :src="weaponIcon(c.weapon.key, c.weapon.ascension)"
             :name="c.weapon.name"
             :rarity="c.weapon.rarity ?? undefined"
             size="xs"
+            eager
           />
           <span class="tabular font-mono">R{{ c.weapon.refinement }}</span>
           <LevelText
@@ -134,7 +142,7 @@ const weaponTitle = computed(() => {
             class="flex shrink-0 items-center gap-1"
             :title="`${set.name} ×${set.count}`"
           >
-            <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" />
+            <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" eager />
             <span class="tabular font-mono">{{ set.count }}</span>
           </span>
         </span>
