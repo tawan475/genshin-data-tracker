@@ -59,13 +59,14 @@ const weaponTitle = computed(() => {
       class="group relative flex w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised text-left shadow-sm transition-colors hover:border-border-strong"
       @click="$emit('open')"
     >
-      <!-- The namecard under the whole card, as bright in both themes; the foot
+      <!-- The namecard under the whole card (light: lighter and softer; dark: a
+           little dimmer, the user's tuning); the foot
            shows a blurred copy of it (a filtered image is drawn once, unlike a
            backdrop blur, which repaints on every scroll frame). Loaded up front:
            the roster shows every card. -->
       <NamecardBackdrop
         :src="characterBanner(c.key)"
-        class="absolute inset-y-0 right-0 h-full w-full opacity-50 brightness-[1.2] saturate-[1.25] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-55"
+        class="absolute inset-y-0 right-0 h-full w-full opacity-45 brightness-[1.35] saturate-[1.1] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-40 dark:brightness-[1.1]"
       />
       <div class="relative w-full">
         <div class="relative flex w-full items-start gap-3 p-3">
