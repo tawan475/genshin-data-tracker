@@ -253,6 +253,93 @@ export const BAND_CV_ON = '#ffffff'
  */
 export const CHARACTER_COLUMN = 700
 export const SPLASH_LEFT = -660 - 0.075 * CHARACTER_COLUMN
+/** The splash box's top: 20px above the card. */
+export const SPLASH_TOP = -20
+
+/** Characters whose splash moves by the same amount, in % (see SPLASH_NUDGE). */
+const nudge = (down: number, keys: readonly string[], right = 0) =>
+  keys.map((key) => [key, { down, right }] as const)
+
+/**
+ * The user's own fixes, by eye, for splashes that sit too high or off centre
+ * on the card: `down` in % of the card's height (1080px; negative moves up),
+ * `right` in % of the character column (700px; negative moves left). Every
+ * Traveler (any element, either twin) takes `Traveler`'s.
+ */
+export const SPLASH_NUDGE: Readonly<Record<string, { down: number; right: number }>> =
+  Object.fromEntries([
+    ...nudge(-10, ['Mavuika', 'Nahida']),
+    ...nudge(4, ['Prune']),
+    ...nudge(5, [
+      'Lauma',
+      'Chasca',
+      'Ineffa',
+      'Collei',
+      'KaedeharaKazuha',
+      'Varesa',
+      'Durin',
+      'Jahoda',
+      'Kaveh',
+      'Arlecchino',
+      'Nefer',
+      'Ororon',
+      'Dahlia',
+      'Skirk',
+      'Escoffier',
+      'Ifa',
+      'LanYan',
+      'Zhongli',
+      'Xilonen',
+      'Mualani',
+      'Tighnari',
+      'Mika',
+      'Kirara',
+      'Faruzan',
+      'Yelan',
+      'YaeMiko',
+      'Aloy',
+      'Diluc',
+      'KamisatoAyaka',
+      'Keqing',
+      'Rosaria',
+      'Ganyu',
+      'Ningguang',
+      'Sucrose',
+      'Xingqiu',
+      'Xiangling',
+      'Barbara',
+      'Beidou',
+      'Noelle',
+      'Fischl',
+    ]),
+    ...nudge(6, ['Vesna']),
+    ...nudge(7, ['Linnea', 'Dehya', 'Varka', 'Flins', 'Zibai', 'Emilie', 'Neuvillette']),
+    ...nudge(8, [
+      'Lohen',
+      'Kachina',
+      'RaidenShogun',
+      'KujouSara',
+      'Razor',
+      'Jean',
+      'Mona',
+      'Lisa',
+      'Kaeya',
+    ]),
+    ...nudge(8, ['Yanfei'], 7),
+    ...nudge(5, ['HuTao'], -3),
+    ...nudge(4, ['Manekin', 'Manekina'], -4),
+    ...nudge(25, ['Traveler']),
+  ])
+
+/** Where a character's splash box goes on the card (px): the shared spot plus its nudge. */
+export function splashPlace(characterKey: string): { left: number; top: number } {
+  const key = characterKey.startsWith('Traveler') ? 'Traveler' : characterKey
+  const n = SPLASH_NUDGE[key]
+  return {
+    left: SPLASH_LEFT + ((n?.right ?? 0) / 100) * CHARACTER_COLUMN,
+    top: SPLASH_TOP + ((n?.down ?? 0) / 100) * CARD_HEIGHT,
+  }
+}
 
 /** The name's size on the card: 80px, smaller for long names so it fits its column. */
 export function nameSize(name: string): number {
