@@ -25,7 +25,10 @@ export const BAND_CHIP = 'rounded-[4px] bg-[rgba(30,16,4,0.55)] px-1.5 leading-5
 /** Text on the art band. */
 export const BAND_TEXT = 'text-white [text-shadow:0_1px_2px_rgba(70,36,6,0.55)]'
 
-/** The share picture (ArtifactShareCard): 720 × 620 CSS pixels, exported at 1.5× (1080 × 930). */
-export const ARTIFACT_SHARE_WIDTH = 720
-export const ARTIFACT_SHARE_HEIGHT = 620
-export const ARTIFACT_SHARE_SCALE = 1.5
+/**
+ * The share picture (ArtifactShareCard): the card alone, 400 CSS pixels wide
+ * and as tall as it lays out (the frame leaves it room), at 2.7× (1080 wide).
+ */
+export const ARTIFACT_SHARE_WIDTH = 400
+export const ARTIFACT_SHARE_FRAME_HEIGHT = 900
+export const ARTIFACT_SHARE_SCALE = 2.7

@@ -31,6 +31,8 @@ const props = defineProps<{
   /** CV position among pieces of the same slot and rarity. */
   rank?: { position: number; of: number }
   isNew?: boolean
+  /** Shown beside its card (the dialog's preview): no header or wearer line of its own. */
+  withCard?: boolean
 }>()
 
 const artifact = computed(() => props.row.artifact)
@@ -57,7 +59,7 @@ const rankTitle = computed(() =>
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex items-start gap-4">
+    <div v-if="!withCard" class="flex items-start gap-4">
       <GameIcon
         :src="artifactIcon(artifact.setKey, artifact.slotKey)"
         :name="row.setName"
@@ -167,7 +169,10 @@ const rankTitle = computed(() =>
       </dl>
     </section>
 
-    <ul class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary">
+    <ul
+      v-if="!withCard"
+      class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary"
+    >
       <li class="flex items-center gap-2">
         <template v-if="owner">
           <GameIcon

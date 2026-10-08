@@ -15,10 +15,10 @@ import type { CardExport } from '@/lib/use-card-export'
  * PNG. Opening it starts drawing the PNG.
  */
 const theme = defineModel<'light' | 'dark'>('theme', { required: true })
-const showName = defineModel<boolean>('name', { required: true })
-const showUid = defineModel<boolean>('uid', { required: true })
+const showName = defineModel<boolean>('name', { default: false })
+const showUid = defineModel<boolean>('uid', { default: false })
 
-const props = defineProps<{ exporter: CardExport; size: string }>()
+const props = defineProps<{ exporter: CardExport; size: string; themeOnly?: boolean }>()
 const anchor = useTemplateRef<HTMLElement>('anchor')
 const open = ref(false)
 function openMenu() {
@@ -35,7 +35,12 @@ function openMenu() {
   </span>
   <UiPopover :open="open" :anchor="anchor" label="Share card" :focus="false" @close="open = false">
     <div class="flex flex-col gap-4 p-4">
-      <CardOptions v-model:theme="theme" v-model:name="showName" v-model:uid="showUid" />
+      <CardOptions
+        v-model:theme="theme"
+        v-model:name="showName"
+        v-model:uid="showUid"
+        :theme-only="themeOnly"
+      />
       <p
         class="flex h-5 items-center gap-1.5 text-sm"
         :class="

@@ -9,12 +9,13 @@ import UiSwitch from '@/components/ui/UiSwitch.vue'
  * name and the UID. `compact` lays them out for the details header (icon
  * theme switch, two toggle chips); otherwise as a form (the phone menu).
  * Arrow keys stay here: in the details they would also step to the next
- * character.
+ * character. `themeOnly` leaves out the name and UID (a card that shows
+ * neither, the artifact's).
  */
-defineProps<{ compact?: boolean }>()
+defineProps<{ compact?: boolean; themeOnly?: boolean }>()
 const theme = defineModel<'light' | 'dark'>('theme', { required: true })
-const name = defineModel<boolean>('name', { required: true })
-const uid = defineModel<boolean>('uid', { required: true })
+const name = defineModel<boolean>('name', { default: false })
+const uid = defineModel<boolean>('uid', { default: false })
 
 const themes = [
   { value: 'dark' as const, label: 'Dark card', icon: Moon },
@@ -33,13 +34,19 @@ const themes = [
   >
     <UiSegmented v-model="theme" :options="themes" label="Card theme" icon-only />
     <FilterChip
+      v-if="!themeOnly"
       :pressed="name"
       class="min-h-8! px-2.5!"
       title="Show the account name"
       @toggle="name = !name"
       >Name</FilterChip
     >
-    <FilterChip :pressed="uid" class="min-h-8! px-2.5!" title="Show the UID" @toggle="uid = !uid"
+    <FilterChip
+      v-if="!themeOnly"
+      :pressed="uid"
+      class="min-h-8! px-2.5!"
+      title="Show the UID"
+      @toggle="uid = !uid"
       >UID</FilterChip
     >
   </div>
@@ -58,7 +65,9 @@ const themes = [
       size="md"
       class="self-start"
     />
-    <UiSwitch v-model="name" label="Name" />
-    <UiSwitch v-model="uid" label="UID" />
+    <template v-if="!themeOnly">
+      <UiSwitch v-model="name" label="Name" />
+      <UiSwitch v-model="uid" label="UID" />
+    </template>
   </div>
 </template>
