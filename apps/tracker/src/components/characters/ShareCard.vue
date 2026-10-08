@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide } from 'vue'
+import { computed, provide, ref, watch } from 'vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
   bonusSets,
@@ -25,6 +25,7 @@ import {
   formatStatShort,
   formatStatValue,
 } from '@/utils/artifact-stats'
+import { LIGHT_ART, artTone, type ArtTone } from './art-tone'
 import CardRollBars from './CardRollBars.vue'
 import ElementDisc from './ElementDisc.vue'
 import GameStars from './GameStars.vue'
@@ -105,6 +106,32 @@ const WEAPON_EMBLEM_STYLE = emblemStyle(WEAPON_EMBLEM)
 const c = computed(() => props.character)
 const splash = computed(() => splashPlace(c.value.key))
 const banner = computed(() => characterBanner(c.value.key))
+/**
+ * A light card writes the text on the art dark with a white glow; where the
+ * namecard is dark behind it (art-tone), that text takes the dark card's
+ * white instead: the header and the owner lines each by their own region.
+ */
+const tone = ref<ArtTone>(LIGHT_ART)
+watch(
+  banner,
+  (url) => {
+    tone.value = LIGHT_ART
+    if (url) void artTone(url).then((t) => banner.value === url && (tone.value = t))
+  },
+  { immediate: true },
+)
+const ON_DARK_ART = {
+  '--card-hero': CARD_THEMES.dark['--card-hero'],
+  '--card-hero-shadow': CARD_THEMES.dark['--card-hero-shadow'],
+  '--card-chip': CARD_THEMES.dark['--card-chip'],
+  '--card-chip-ring': CARD_THEMES.dark['--card-chip-ring'],
+}
+const headerStyle = computed(() =>
+  props.theme === 'light' && tone.value.top ? ON_DARK_ART : undefined,
+)
+const ownerStyle = computed(() =>
+  props.theme === 'light' && tone.value.bottom ? ON_DARK_ART : undefined,
+)
 /** The element's glow behind the splash (none for a character without an element). */
 const glow = computed(() => (c.value.element ? elementGlow(c.value.element, props.theme) : 'none'))
 const glyphs = computed(() => talentIcons(c.value.key))
@@ -241,7 +268,7 @@ const ownerLine = computed(() =>
     >
       <!-- Left: who, the constellations down its right edge, the talents at its foot -->
       <section class="relative flex min-h-0 flex-col justify-between" aria-label="Character">
-        <div class="flex flex-col gap-[10px]">
+        <div class="flex flex-col gap-[10px]" :style="headerStyle">
           <div class="flex min-w-0 items-center gap-[18px]">
             <ElementIcon
               v-if="c.element"
@@ -329,7 +356,7 @@ const ownerLine = computed(() =>
               </span>
             </li>
           </ul>
-          <div class="flex flex-col gap-[4px] pl-[4px]" :class="HERO">
+          <div class="flex flex-col gap-[4px] pl-[4px]" :class="HERO" :style="ownerStyle">
             <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[14px] text-[27px]">
               <template v-for="(part, index) in ownerLine" :key="index">
                 <span v-if="index" class="opacity-60">·</span>
