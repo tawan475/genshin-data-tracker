@@ -4,6 +4,7 @@ import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { useChartRange } from '@/components/charts/use-chart-range'
 import ChangeValue from '@/components/overview/ChangeValue.vue'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
@@ -24,27 +25,66 @@ import {
   periodTotals,
   SNAPSHOT_BAR_WIDTH,
   snapshotTotals,
-  type CurrencyKey,
+  FIGURE_KEYS,
+  type FigureKey,
   type PeriodTotals,
   type ProgressionGroup,
 } from './progression-series'
 
 /**
- * Mora and primogems: the value as a stepped line and the gains and losses
- * under it as columns, per snapshot (each capture that changed the figure,
- * under its step on the same time axis) or per period. Group-by and range
- * are remembered on this device; until a grouping is picked, ranges up to a
- * week show snapshots and longer ones days. A period too coarse for the
- * range is greyed out and the next finer one shown (6h is per hour), the
- * choice coming back with a longer range. `captures` is undefined while the
+ * A report card of the figures picked on it (mora, primogems, artifacts, 4★ /
+ * 3★ artifacts, characters, weapons): each figure's value as a stepped line
+ * and its gains and losses under it as columns, per snapshot (each capture
+ * that changed the figure, under its step on the same time axis) or per
+ * period. The figures, group-by and range are remembered on this device per
+ * card (`storage`); until a grouping is picked, ranges up to a week show
+ * snapshots and longer ones days. A period too coarse for the range is
+ * greyed out and the next finer one shown (6h is per hour), the choice
+ * coming back with a longer range. `captures` is undefined while the
  * history loads.
  */
-const props = defineProps<{ captures: Capture[] | undefined }>()
+const props = withDefaults(
+  defineProps<{
+    captures: Capture[] | undefined
+    title?: string
+    /** Storage key prefix for this card's choices (figures, group-by, range). */
+    storage?: string
+    /** Figures shown until some are picked. */
+    defaults?: readonly FigureKey[]
+    /** The grouping until one is picked (else per snapshot up to a week, per day beyond). */
+    defaultGroup?: ProgressionGroup
+  }>(),
+  {
+    title: 'Detailed progression',
+    storage: 'progression',
+    defaults: () => ['mora', 'primogem'],
+    defaultGroup: undefined,
+  },
+)
 
-const CHARTS: { key: CurrencyKey; title: string; color: TimelineSeries['color'] }[] = [
-  { key: 'mora', title: 'Mora', color: 2 },
-  { key: 'primogem', title: 'Primogems', color: 4 },
-]
+const FIGURES: Record<FigureKey, { title: string; color: TimelineSeries['color'] }> = {
+  mora: { title: 'Mora', color: 2 },
+  primogem: { title: 'Primogems', color: 4 },
+  artifacts: { title: 'Artifacts', color: 5 },
+  artifact4: { title: '4★ Artifact', color: 6 },
+  artifact3: { title: '3★ Artifact', color: 3 },
+  characters: { title: 'Characters', color: 1 },
+  weapons: { title: 'Weapons', color: 3 },
+}
+
+/** The figures picked on this card (in FIGURE_KEYS order), remembered per device. */
+const FIGURES_KEY = `${props.storage}-figures`
+const storedFigures = (readStorage(FIGURES_KEY) ?? '')
+  .split(',')
+  .filter((key): key is FigureKey => (FIGURE_KEYS as readonly string[]).includes(key))
+const picked = ref<FigureKey[]>(storedFigures.length ? storedFigures : [...props.defaults])
+function toggleFigure(key: FigureKey) {
+  const on = picked.value.includes(key)
+  if (on && picked.value.length === 1) return // at least one
+  picked.value = FIGURE_KEYS.filter((k) => (k === key ? !on : picked.value.includes(k)))
+  writeStorage(FIGURES_KEY, picked.value.join(','))
+}
+const CHARTS = computed(() => picked.value.map((key) => ({ key, ...FIGURES[key] })))
 
 const PER: Record<ProgressionGroup, { label: string; one: string; many: string }> = {
   snapshot: { label: 'Per snapshot', one: 'snapshot', many: 'snapshots' },
@@ -62,14 +102,14 @@ const GROUPS: SegmentedOption<ProgressionGroup>[] = [
 /** Room after both plots for half the widest snapshot bar, at the newest capture. */
 const PAD_RIGHT = SNAPSHOT_BAR_WIDTH.max / 2
 
-const GROUP_KEY = 'progression-group-by'
+const GROUP_KEY = `${props.storage}-group-by`
 const storedGroup = readStorage(GROUP_KEY)
 /** The grouping picked on this device; none until the control is used. */
 const chosenGroup = ref<ProgressionGroup | null>(
-  GROUPS.find((o) => o.value === storedGroup)?.value ?? null,
+  GROUPS.find((o) => o.value === storedGroup)?.value ?? props.defaultGroup ?? null,
 )
 watch(chosenGroup, (value) => value && writeStorage(GROUP_KEY, value))
-const range = useChartRange('progression-range')
+const range = useChartRange(`${props.storage}-range`)
 
 /** The grouping in use: the choice (or default), or a finer period when the range is too short for it. */
 const groupBy = computed<ProgressionGroup>({
@@ -114,12 +154,12 @@ const perSnapshot = computed(() =>
 )
 
 /** Whichever grouping is in use, or null without currency data. */
-const shown = computed<{ lines: Record<CurrencyKey, Point[]>; truncated: boolean } | null>(
+const shown = computed<{ lines: Record<FigureKey, Point[]>; truncated: boolean } | null>(
   () => perSnapshot.value ?? periodic.value,
 )
 
 interface ChartView {
-  key: CurrencyKey
+  key: FigureKey
   title: string
   value: string
   net: number
@@ -154,7 +194,7 @@ const periodLabels = computed(() => {
 
 /** The window both charts cover, for the range tooltip and the charts' accessible names. */
 const span = computed(() => {
-  const line = shown.value?.lines.mora
+  const line = shown.value?.lines[picked.value[0] ?? 'mora']
   const first = line?.[0]
   const last = line?.[line.length - 1]
   return first && last ? formatWindow(first.x, last.x, !clock24()) : ''
@@ -171,7 +211,7 @@ const perDetail = computed(() => {
 })
 
 /** The bars and totals of one figure, per period or per snapshot. */
-function barsOf(key: CurrencyKey): { bars: ChangeBar[]; totals: PeriodTotals } | null {
+function barsOf(key: FigureKey): { bars: ChangeBar[]; totals: PeriodTotals } | null {
   const s = perSnapshot.value
   if (s) {
     return {
@@ -201,7 +241,7 @@ function barsOf(key: CurrencyKey): { bars: ChangeBar[]; totals: PeriodTotals } |
 const charts = computed<ChartView[]>(() => {
   const lines = shown.value?.lines
   if (!lines) return []
-  return CHARTS.flatMap((def) => {
+  return CHARTS.value.flatMap((def) => {
     const figure = barsOf(def.key)
     if (!figure) return []
     const { bars, totals } = figure
@@ -230,7 +270,7 @@ const charts = computed<ChartView[]>(() => {
  * snapshot bars stand under their steps.
  */
 const axisFits = reactive<Record<string, number>>({})
-const yAxisWidth = (key: CurrencyKey) =>
+const yAxisWidth = (key: FigureKey) =>
   Math.max(axisFits[`${key}-line`] ?? 0, axisFits[`${key}-bars`] ?? 0)
 function fitAxis(id: string, width: number) {
   if (axisFits[id] !== width) axisFits[id] = width
@@ -238,7 +278,7 @@ function fitAxis(id: string, width: number) {
 </script>
 
 <template>
-  <UiPanel title="Detailed progression">
+  <UiPanel :title="title">
     <template #actions>
       <div
         ref="groupRow"
@@ -248,6 +288,22 @@ function fitAxis(id: string, width: number) {
       </div>
       <ChartRangeSelect v-model="range" :detail="span || undefined" />
     </template>
+
+    <!-- Which figures this card charts -->
+    <div
+      class="scroll-hide scroll-fade-x -mt-1 mb-4 flex gap-1.5 overflow-x-auto sm:scroll-fade-none sm:flex-wrap"
+      role="group"
+      aria-label="Figures"
+    >
+      <FilterChip
+        v-for="key in FIGURE_KEYS"
+        :key="key"
+        :pressed="picked.includes(key)"
+        :title="picked.includes(key) && picked.length === 1 ? 'At least one' : undefined"
+        @toggle="toggleFigure(key)"
+        >{{ FIGURES[key].title }}</FilterChip
+      >
+    </div>
 
     <div v-if="!captures" class="grid gap-8 lg:grid-cols-2" role="status">
       <span class="sr-only">Loading progression</span>
@@ -261,7 +317,7 @@ function fitAxis(id: string, width: number) {
       </div>
     </div>
 
-    <p v-else-if="!shown" class="py-6 text-center text-text-secondary">No currency data</p>
+    <p v-else-if="!shown" class="py-6 text-center text-text-secondary">No data</p>
 
     <div v-else class="grid gap-8 lg:grid-cols-2">
       <section
