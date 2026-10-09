@@ -38,7 +38,7 @@ import {
  * 3★ artifacts, characters, weapons): each figure's value as a stepped line
  * and its gains and losses under it as columns, per snapshot (each capture
  * that changed the figure, under its step on the same time axis) or per
- * period. The figures (picked under the cog beside the range), group-by and
+ * period. The figures (picked under the cog left of the controls), group-by and
  * range are remembered on this device per
  * card (`storage`); until a grouping is picked, ranges up to a week show
  * snapshots and longer ones days. A period too coarse for the range is
@@ -285,15 +285,15 @@ function fitAxis(id: string, width: number) {
 <template>
   <UiPanel :title="title">
     <template #actions>
+      <UiIconButton label="Figures" :active="picking" @click="picking = !picking">
+        <Settings class="size-5" aria-hidden="true" />
+      </UiIconButton>
       <div
         ref="groupRow"
         class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto sm:scroll-fade-none sm:overflow-visible"
       >
         <UiSegmented v-model="groupBy" :options="groupOptions" label="Group by" />
       </div>
-      <UiIconButton label="Figures" :active="picking" @click="picking = !picking">
-        <Settings class="size-5" aria-hidden="true" />
-      </UiIconButton>
       <ChartRangeSelect v-model="range" :detail="span || undefined" />
     </template>
 
