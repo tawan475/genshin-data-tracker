@@ -47,6 +47,7 @@ import {
   elementGlow,
   emblemStyle,
   nameSize,
+  chipBackground,
   qualityArt,
   splashFull,
   splashPlace,
@@ -90,6 +91,9 @@ provide(CARD_STILL, props.still)
 /** Tailwind's rem-based spacing pinned to 4px, so stray utilities don't follow the page's root size. */
 const ROOT = computed(() => ({
   ...CARD_THEMES[props.theme],
+  ...(chipBackground(props.character.key, props.theme)
+    ? { '--card-chip': chipBackground(props.character.key, props.theme) }
+    : {}),
   '--spacing': '4px',
   fontSize: '16px',
   width: `${CARD_WIDTH}px`,
@@ -368,7 +372,7 @@ const ownerLine = computed(() =>
             class="flex flex-col gap-[2px] self-start rounded-[18px] px-[18px] py-[10px]"
             :class="CHIP_TEXT"
           >
-            <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[14px] text-[27px]">
+            <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[12px] text-[22px]">
               <template v-for="(part, index) in ownerLine" :key="index">
                 <span v-if="index" class="opacity-60">·</span>
                 <span class="truncate" :class="index === 0 && owner.name ? 'font-semibold' : ''">{{
@@ -376,7 +380,7 @@ const ownerLine = computed(() =>
                 }}</span>
               </template>
             </p>
-            <p class="flex items-center gap-[12px] text-[20px] whitespace-nowrap opacity-80">
+            <p class="flex items-center gap-[10px] text-[16px] whitespace-nowrap opacity-80">
               <template v-if="takenAt">
                 <span>{{ formatDate(takenAt) }}</span>
                 <span class="opacity-60">·</span>

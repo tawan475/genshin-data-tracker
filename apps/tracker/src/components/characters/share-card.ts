@@ -311,6 +311,24 @@ export function splashFull(
   }
 }
 
+/**
+ * The backing behind the card's small text on the art (level / friendship,
+ * owner lines): `--card-chip`, the theme's colour at its opacity, more opaque
+ * for the characters whose art fights the text (the user's list).
+ */
+const CHIP_RGB: Record<CardTheme, string> = { dark: '15,23,42', light: '255,255,255' }
+const CHIP_ALPHA: Record<CardTheme, number> = { dark: 0.6, light: 0.8 }
+export const CHIP_OPAQUE: Readonly<Record<string, number>> = {
+  Mavuika: 0.92,
+}
+
+/** The card's `--card-chip` for a character, when it overrides the theme's. */
+export function chipBackground(characterKey: string, theme: CardTheme): string | undefined {
+  const alpha = CHIP_OPAQUE[characterKey]
+  if (alpha === undefined) return undefined
+  return `rgba(${CHIP_RGB[theme]},${Math.max(alpha, CHIP_ALPHA[theme])})`
+}
+
 /** Where a character's splash box goes on the card (px): the shared spot plus its nudge. */
 export function splashPlace(characterKey: string): { left: number; top: number } {
   const key = characterKey.startsWith('Traveler') ? 'Traveler' : characterKey

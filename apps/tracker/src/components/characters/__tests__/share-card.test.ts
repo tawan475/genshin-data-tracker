@@ -3,6 +3,7 @@ import { characterMeta } from '@/data/game-meta'
 import { GI_CDN_BASE } from '@/lib/assets'
 import {
   BAND_EMBLEM,
+  CHIP_OPAQUE,
   BAND_ICON,
   BAND_ICON_RIGHT,
   BAND_WIDTH,
@@ -15,6 +16,7 @@ import {
   SPLASH_LEFT,
   SPLASH_NUDGE,
   WEAPON_EMBLEM,
+  chipBackground,
   emblemBox,
   qualityArt,
   splashFull,
@@ -128,5 +130,14 @@ describe('the uncut wish art', () => {
     })
     // Mavuika's full art continues below the game art's cut (its 1024px frame).
     expect(m.y + m.height * m.scale).toBeGreaterThan(1024)
+  })
+})
+
+describe('the small text backing', () => {
+  it("is the theme's own unless a character overrides it, never fainter", () => {
+    expect(chipBackground('Bennett', 'dark')).toBeUndefined()
+    expect(chipBackground('Mavuika', 'dark')).toBe('rgba(15,23,42,0.92)')
+    expect(chipBackground('Mavuika', 'light')).toBe('rgba(255,255,255,0.92)')
+    for (const key of Object.keys(CHIP_OPAQUE)) expect(characterMeta(key), key).toBeDefined()
   })
 })
