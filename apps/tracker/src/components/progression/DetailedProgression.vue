@@ -4,7 +4,9 @@ import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { useChartRange } from '@/components/charts/use-chart-range'
 import ChangeValue from '@/components/overview/ChangeValue.vue'
+import { Settings } from 'lucide-vue-next'
 import FilterChip from '@/components/ui/FilterChip.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
@@ -36,7 +38,8 @@ import {
  * 3★ artifacts, characters, weapons): each figure's value as a stepped line
  * and its gains and losses under it as columns, per snapshot (each capture
  * that changed the figure, under its step on the same time axis) or per
- * period. The figures, group-by and range are remembered on this device per
+ * period. The figures (picked under the cog beside the range), group-by and
+ * range are remembered on this device per
  * card (`storage`); until a grouping is picked, ranges up to a week show
  * snapshots and longer ones days. A period too coarse for the range is
  * greyed out and the next finer one shown (6h is per hour), the choice
@@ -85,6 +88,8 @@ function toggleFigure(key: FigureKey) {
   writeStorage(FIGURES_KEY, picked.value.join(','))
 }
 const CHARTS = computed(() => picked.value.map((key) => ({ key, ...FIGURES[key] })))
+/** The figure chips show only while the cog beside the range is on. */
+const picking = ref(false)
 
 const PER: Record<ProgressionGroup, { label: string; one: string; many: string }> = {
   snapshot: { label: 'Per snapshot', one: 'snapshot', many: 'snapshots' },
@@ -286,11 +291,15 @@ function fitAxis(id: string, width: number) {
       >
         <UiSegmented v-model="groupBy" :options="groupOptions" label="Group by" />
       </div>
+      <UiIconButton label="Figures" :active="picking" @click="picking = !picking">
+        <Settings class="size-5" aria-hidden="true" />
+      </UiIconButton>
       <ChartRangeSelect v-model="range" :detail="span || undefined" />
     </template>
 
-    <!-- Which figures this card charts -->
+    <!-- Which figures this card charts (behind the cog) -->
     <div
+      v-if="picking"
       class="scroll-hide scroll-fade-x -mt-1 mb-4 flex gap-1.5 overflow-x-auto sm:scroll-fade-none sm:flex-wrap"
       role="group"
       aria-label="Figures"
