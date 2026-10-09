@@ -98,6 +98,8 @@ const nextMonth = () => {
   if (selected.value && canNext.value) selected.value = shift(selected.value, 1)
 }
 
+/** The month's days, newest first (each day's change is still against the day before). */
+const newestFirst = computed(() => [...(monthlyAnalysisData.value?.rows ?? [])].reverse())
 const monthlyAnalysisData = computed(() => {
   const month = selected.value
   const loaded = materials.value
@@ -218,7 +220,7 @@ const jumps = computed(() => {
         </thead>
         <tbody class="divide-y divide-border-subtle transition-colors">
           <tr
-            v-for="row in monthlyAnalysisData.rows"
+            v-for="row in newestFirst"
             :key="row.date"
             class="hover:bg-surface-overlay/60 transition-colors"
           >
