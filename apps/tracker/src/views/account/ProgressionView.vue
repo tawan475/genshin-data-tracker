@@ -70,7 +70,11 @@ const importRoute = computed(() => ({
   <UiError v-else-if="error && !list" title="History unavailable" :error="error" @retry="reload" />
 
   <div v-else class="flex flex-col gap-6">
-    <DetailedProgression :captures="captures" />
+    <DetailedProgression
+      :captures="captures"
+      :defaults="['mora', 'artifacts']"
+      default-group="snapshot"
+    />
     <MonthlyAnalysisCard :snapshots="list" class="min-w-0" />
   </div>
 </template>

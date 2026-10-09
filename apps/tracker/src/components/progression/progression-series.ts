@@ -1,5 +1,6 @@
 /**
- * Mora and primogems for the progression charts: a stepped line through the
+ * The progression charts' figures (mora, primogems, artifact and item
+ * counts; the card shows the ones picked): a stepped line through the
  * captures, and the change under it either per period (hour / day / month /
  * year: each period's closing value against the period before) or per
  * snapshot (each capture that changed a figure against the capture before,
@@ -32,8 +33,27 @@ import { periodStart } from '@/data/materials-history'
 import { currencyMissing, type Capture, type Point } from '@/data/overview'
 import { nextPeriod } from '@/data/progression'
 
-export type CurrencyKey = 'mora' | 'primogem'
-export const CURRENCY_KEYS: readonly CurrencyKey[] = ['mora', 'primogem']
+/** A figure the progression card can chart: a snapshot summary count. */
+export type FigureKey =
+  | 'mora'
+  | 'primogem'
+  | 'artifacts'
+  | 'artifact4'
+  | 'artifact3'
+  | 'characters'
+  | 'weapons'
+export const FIGURE_KEYS: readonly FigureKey[] = [
+  'mora',
+  'primogem',
+  'artifacts',
+  'artifact4',
+  'artifact3',
+  'characters',
+  'weapons',
+]
+/** The figures' old name (mora and primogems were the only ones). */
+export type CurrencyKey = FigureKey
+export const CURRENCY_KEYS = FIGURE_KEYS
 
 /** The bar charts' grouping: every capture, or a period. */
 export type ProgressionGroup = 'snapshot' | TimelineGroupBy
@@ -61,7 +81,12 @@ const LONGEST: Record<TimelineGroupBy, number> = {
   year: 366 * DAY + 3_600_000,
 }
 
-type Figures = Record<CurrencyKey, number>
+type Figures = Record<FigureKey, number>
+
+/** A record with one entry per figure. */
+function perFigure<T>(make: (key: FigureKey) => T): Record<FigureKey, T> {
+  return Object.fromEntries(FIGURE_KEYS.map((key) => [key, make(key)])) as Record<FigureKey, T>
+}
 
 export interface Period {
   /** Local start of the period (epoch ms). */
@@ -81,7 +106,7 @@ export interface Progression {
    * Stepped line per figure from the value held at the range start: every
    * capture, or the closing capture per `lineBucket`.
    */
-  lines: Record<CurrencyKey, Point[]>
+  lines: Record<FigureKey, Point[]>
   lineBucket: PointBucket | TimelineGroupBy
   /** What the first period is measured against. */
   open: Figures
@@ -90,7 +115,7 @@ export interface Progression {
 }
 
 function figures(capture: Capture): Figures {
-  return { mora: capture.summary.mora, primogem: capture.summary.primogem }
+  return perFigure((key) => capture.summary[key])
 }
 
 /** First index whose `at` is >= `from`. */
@@ -127,11 +152,8 @@ function linePoints(
   x0: number,
   open: Figures,
   by: PointBucket | TimelineGroupBy,
-): Record<CurrencyKey, Point[]> {
-  const lines: Record<CurrencyKey, Point[]> = {
-    mora: [{ x: x0, y: open.mora }],
-    primogem: [{ x: x0, y: open.primogem }],
-  }
+): Record<FigureKey, Point[]> {
+  const lines = perFigure<Point[]>((key) => [{ x: x0, y: open[key] }])
   let period = Number.NaN
   for (let i = index; i < captures.length; i++) {
     const capture = captures[i]!
@@ -144,7 +166,7 @@ function linePoints(
     }
     period = p
   }
-  return { mora: dedupe(lines.mora), primogem: dedupe(lines.primogem) }
+  return perFigure((key) => dedupe(lines[key]))
 }
 
 /**
@@ -197,7 +219,7 @@ export function buildProgression(
       start,
       captures: count,
       close,
-      change: { mora: close.mora - previous.mora, primogem: close.primogem - previous.primogem },
+      change: perFigure((key) => close[key] - previous[key]),
     })
     previous = close
   })
@@ -226,7 +248,7 @@ export function captureChanges(
   captures: readonly Capture[],
   index: number,
   open: number,
-  key: CurrencyKey,
+  key: FigureKey,
 ): CaptureChange[] {
   const changes: CaptureChange[] = []
   let previous = open
@@ -241,9 +263,9 @@ export function captureChanges(
 
 export interface SnapshotProgression {
   /** Per figure, oldest first: one bar per capture that changed it. */
-  changes: Record<CurrencyKey, CaptureChange[]>
+  changes: Record<FigureKey, CaptureChange[]>
   /** Every capture as a stepped line from the value held at `domain[0]`. */
-  lines: Record<CurrencyKey, Point[]>
+  lines: Record<FigureKey, Point[]>
   /** The time axis the line and the bars share: the line's start to the newest capture. */
   domain: [number, number]
   /** What the first change is measured against. */
@@ -274,12 +296,12 @@ export function buildSnapshotProgression(
   let baseline = index > 0 ? captures[index - 1]! : null
   let x0 = baseline ? from : first.at
 
-  // Captures in the range that changed either figure, for the cap.
+  // Captures in the range that changed any figure, for the cap.
   const changed: number[] = []
   let previous = figures(baseline ?? first)
   for (let i = index; i < captures.length; i++) {
     const current = figures(captures[i]!)
-    if (current.mora !== previous.mora || current.primogem !== previous.primogem) changed.push(i)
+    if (FIGURE_KEYS.some((key) => current[key] !== previous[key])) changed.push(i)
     previous = current
   }
   const truncated = changed.length > MAX_PERIODS
@@ -291,10 +313,7 @@ export function buildSnapshotProgression(
 
   const open = figures(baseline ?? first)
   return {
-    changes: {
-      mora: captureChanges(captures, index, open.mora, 'mora'),
-      primogem: captureChanges(captures, index, open.primogem, 'primogem'),
-    },
+    changes: perFigure((key) => captureChanges(captures, index, open[key], key)),
     lines: linePoints(captures, index, x0, open, 'raw'),
     domain: [x0, last.at],
     open,
@@ -326,7 +345,7 @@ export interface PeriodTotals {
   spent: number
 }
 
-export function periodTotals(progression: Progression, key: CurrencyKey): PeriodTotals {
+export function periodTotals(progression: Progression, key: FigureKey): PeriodTotals {
   let gained = 0
   let spent = 0
   for (const period of progression.periods) {
@@ -338,7 +357,7 @@ export function periodTotals(progression: Progression, key: CurrencyKey): Period
   return { last, net: last - progression.open[key], gained, spent }
 }
 
-export function snapshotTotals(progression: SnapshotProgression, key: CurrencyKey): PeriodTotals {
+export function snapshotTotals(progression: SnapshotProgression, key: FigureKey): PeriodTotals {
   let gained = 0
   let spent = 0
   for (const { change } of progression.changes[key]) {

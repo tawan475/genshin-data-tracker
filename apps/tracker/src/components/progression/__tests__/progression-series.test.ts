@@ -108,7 +108,7 @@ describe('per snapshot', () => {
     // The range is the hour up to the newest capture, not snapped to 22:00.
     const from = last - HOUR
     expect(s.domain).toEqual([from, last])
-    expect(s.open).toEqual({ mora: 1_000, primogem: 10 })
+    expect(s.open).toMatchObject({ mora: 1_000, primogem: 10 })
     expect(s.truncated).toBe(false)
     for (const key of ['mora', 'primogem'] as const) {
       const line = s.lines[key]
@@ -135,7 +135,7 @@ describe('per snapshot', () => {
   it('carries the value in when nothing changed in the range', () => {
     const quiet = [...captures, { at: last + 3 * HOUR, summary: summary(1_200, 30) }]
     const s = buildSnapshotProgression(quiet, '1h')!
-    expect(s.changes).toEqual({ mora: [], primogem: [] })
+    for (const changes of Object.values(s.changes)) expect(changes).toEqual([])
     expect(s.lines.mora).toEqual([
       { x: last + 2 * HOUR, y: 1_200 },
       { x: last + 3 * HOUR, y: 1_200 },
@@ -173,5 +173,25 @@ describe('per snapshot', () => {
     expect(defaultGroup('7d')).toBe('snapshot')
     expect(defaultGroup('14d')).toBe('day')
     expect(defaultGroup('all')).toBe('day')
+  })
+})
+
+describe('any figure, not only currency', () => {
+  it('charts artifact counts per snapshot: a bar for each capture that changed them', () => {
+    const t = (h: number) => at(2026, 10, 9, h)
+    const withArtifacts = (artifacts: number): SnapshotSummary => ({
+      ...summary(1_000, 10),
+      artifacts,
+    })
+    const captures: Capture[] = [
+      { at: t(1), summary: withArtifacts(100) },
+      { at: t(2), summary: withArtifacts(100) },
+      { at: t(3), summary: withArtifacts(104) },
+      { at: t(4), summary: withArtifacts(101) },
+    ]
+    const s = buildSnapshotProgression(captures, '1d')!
+    expect(s.changes.artifacts.map((c) => c.change)).toEqual([4, -3])
+    expect(snapshotTotals(s, 'artifacts')).toEqual({ last: 101, net: 1, gained: 4, spent: 3 })
+    expect(s.changes.mora).toEqual([])
   })
 })
