@@ -82,9 +82,10 @@ const analysis = computed(() => (month.value ? monthlyAnalysis(props.days, month
 
 const columns = MONTHLY_KEYS.map((key) => ({ key, label: COLUMNS[key].label }))
 
-// Display strings are prepared here so the template only reads them.
+// Display strings are prepared here so the template only reads them. Newest
+// day first (the user's call); each day's change is still against the day before.
 const rows = computed(() =>
-  monthRows(analysis.value?.days ?? []).map((row) => {
+  [...monthRows(analysis.value?.days ?? [])].reverse().map((row) => {
     if (row.kind === 'gap') {
       return {
         key: row.key,
