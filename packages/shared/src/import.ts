@@ -34,6 +34,11 @@ export const GOOD_LIMITS = {
    * achievements.json) × 1.5. Also for `gi_achievement_times`.
    */
   achievements: 3_020,
+  /**
+   * Entries in `gi_anecdotes`: 161 anecdotes in the 7.1 game data
+   * (`@gdt/game-data` anecdotes.json) × about 12 (irminsul's bound too).
+   */
+  anecdotes: 2_000,
   /** An artifact has at most 4 substats (and unactivated ones). */
   substats: 6,
   /**

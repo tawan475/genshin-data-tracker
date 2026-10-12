@@ -125,6 +125,15 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
         ...(rand() < 0.2 ? { someNewField: int(rand, -5, 5) } : {}),
         gameData: '792978e5503ecfba73dcb3562ed44a0d35a2abe2',
       }
+    case 'anecdotes':
+      return {
+        i: sortedIds(n),
+        s: Array.from({ length: n }, () => int(rand, 0, 15)),
+        c: Array.from({ length: n }, () => int(rand, 0, 100_000)),
+        a: sortedIds(int(rand, 0, 8)),
+        ...(rand() < 0.7 ? { r: [int(rand, 0, 100), int(rand, 0, 9), 10] } : {}),
+        ...(rand() < 0.5 ? { w: [rand() < 0.5 ? 0 : 9801, int(rand, 0, 2e9)] } : {}),
+      }
   }
 }
 
@@ -248,6 +257,7 @@ describe('section blobs', () => {
       player: 6,
       achievementTimes: 7,
       characterExtras: 8,
+      anecdotes: 9,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -302,6 +312,7 @@ describe('section blobs', () => {
       'player',
       'achievementTimes',
       'characterExtras',
+      'anecdotes',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')
@@ -493,6 +504,7 @@ async function v1File(
         player: encoded.player?.json ?? null,
         achievementTimes: encoded.achievementTimes?.json ?? null,
         characterExtras: encoded.characterExtras?.json ?? null,
+        anecdotes: encoded.anecdotes?.json ?? null,
       },
       catalog,
       MATERIALS,
@@ -651,6 +663,7 @@ class V2Store {
       achievementTimes: refs.achievementTimes ?? null,
       achievementTimesBase: deltaBase(refs.achievementTimes ?? null),
       characterExtras: refs.characterExtras ?? null,
+      anecdotes: refs.anecdotes ?? null,
       ...(Object.keys(vars).length > 0 ? { playerVars: vars } : {}),
     }
     // The blobs the snapshot needs, bases included, as the server sends them.

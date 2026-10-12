@@ -5,19 +5,24 @@ import {
   DELTA_GROWTH_BYTES,
   artifactRows,
   decodeAchievementTimes,
+  decodeAnecdotes,
   decodeArtifacts,
+  decodeSectionBlob,
   decodeSnapshot,
   deflateRaw,
   deltaPaysOff,
   encodeAchievementTimes,
   encodeAchievementTimesDelta,
+  encodeAnecdotes,
   encodeArtifactsDelta,
+  encodeSectionBlob,
   encodeSnapshot,
   extraSectionsOf,
   GOOD_LIMITS,
   GoodFormatError,
   GoodLimitError,
   inflateRaw,
+  kindCode,
   normalizeGood,
   prepareSnapshot,
   sectionHashesOf,
@@ -115,6 +120,7 @@ async function storedOf(
     achievementTimes: await optionalViaStorage(encoded.achievementTimes),
     achievementTimesBase: await base(encoded.achievementTimesBase),
     characterExtras: await optionalViaStorage(encoded.characterExtras),
+    anecdotes: await optionalViaStorage(encoded.anecdotes),
   }
 }
 
@@ -247,6 +253,7 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
     )
   }
   if (good.characterExtras) expected.gi_characters = Object.fromEntries(good.characterExtras)
+  if (good.anecdotes) expected.gi_anecdotes = good.anecdotes
   return expected
 }
 
@@ -433,6 +440,7 @@ describe('snapshot codec', () => {
       ['achievements', { gi_achievements: times(GOOD_LIMITS.achievements + 1) }],
       ['achievement times', { gi_achievement_times: keyed(GOOD_LIMITS.achievements + 1) }],
       ['character extras', { gi_characters: keyed(GOOD_LIMITS.characters + 1) }],
+      ['anecdotes', { gi_anecdotes: { anecdotes: keyed(GOOD_LIMITS.anecdotes + 1) } }],
     ]
     for (const [what, fields] of over) {
       await limitError({ ...sample, ...fields }, 'too_many_items', new RegExp(` ${what}; at most`))
@@ -1146,5 +1154,190 @@ describe.skipIf(!samplesDir)('real GOOD exports', () => {
         `${kb(deltas.storedBytes)} KB each with deltas (${kb(inFull.storedBytes)} KB in full), ` +
         `catalog ${deltas.catalog.ids.size} artifacts`,
     )
+  })
+})
+
+// ------------------------------------------------------------- gi_anecdotes
+
+const anecdotes = {
+  gi_anecdotes: {
+    anecdotes: {
+      '101604': { state: 0, finishCount: 3 },
+      '100001': { state: 3, finishCount: 1 },
+      '109201': { state: 2, finishCount: 0 },
+    },
+    unlockedAreas: [8, 1, 2, 3, 4, 5, 6, 7],
+    reward: { index: 12, progress: 4, target: 10 },
+    wish: { npcId: 9801, lastWishTime: 1_791_000_000 },
+  },
+} satisfies Partial<Good>
+
+describe("irminsul's gi_anecdotes", () => {
+  it('round-trips, ids ascending and areas sorted, after the other extra keys', async () => {
+    const input = { ...sample, ...extras, ...anecdotes }
+    const { encoded, decoded } = await roundTrip(input)
+    expect(extraSectionsOf(encoded).map((s) => s.kind)).toEqual([
+      'player',
+      'achievementTimes',
+      'characterExtras',
+      'anecdotes',
+    ])
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_anecdotes).toEqual({
+      anecdotes: {
+        '100001': { state: 3, finishCount: 1 },
+        '101604': { state: 0, finishCount: 3 },
+        '109201': { state: 2, finishCount: 0 },
+      },
+      unlockedAreas: [1, 2, 3, 4, 5, 6, 7, 8],
+      reward: { index: 12, progress: 4, target: 10 },
+      wish: { npcId: 9801, lastWishTime: 1_791_000_000 },
+    })
+    expect(Object.keys(decoded.gi_anecdotes!.anecdotes)).toEqual(['100001', '101604', '109201'])
+    expect(Object.keys(decoded).slice(-2)).toEqual(['gi_characters', 'gi_anecdotes'])
+    // Alone, and without a reward, a wished NPC or any anecdote met.
+    const bare = {
+      ...sample,
+      gi_anecdotes: { anecdotes: {}, unlockedAreas: [1], wish: { lastWishTime: 0 } },
+    }
+    const alone = await roundTrip(bare)
+    expect(alone.decoded.gi_anecdotes).toEqual(bare.gi_anecdotes)
+    expect(Object.keys(alone.decoded).at(-1)).toBe('gi_anecdotes')
+  })
+
+  it('keeps the content hash of a file without them, and knows the one from before them', async () => {
+    const catalog = new Catalog()
+    const plain = await roundTrip(sample, catalog)
+    const withExtras = await roundTrip({ ...sample, ...extras }, catalog)
+    const both = await roundTrip({ ...sample, ...extras, ...anecdotes }, catalog)
+    const only = await roundTrip({ ...sample, ...anecdotes }, catalog)
+
+    // Without them: as before (the codec's older hashes are pinned above).
+    expect(plain.encoded.preAnecdotesContentHash).toBe(plain.encoded.contentHash)
+    expect(withExtras.encoded.preAnecdotesContentHash).toBe(withExtras.encoded.contentHash)
+    // With them: another inventory, which also knows the hash it had before them.
+    expect(both.encoded.contentHash).not.toBe(withExtras.encoded.contentHash)
+    expect(both.encoded.preAnecdotesContentHash).toBe(withExtras.encoded.contentHash)
+    expect(both.encoded.legacyContentHash).toBe(plain.encoded.contentHash)
+    expect(only.encoded.contentHash).not.toBe(plain.encoded.contentHash)
+    expect(only.encoded.contentHash).not.toBe(both.encoded.contentHash)
+    expect(only.encoded.preAnecdotesContentHash).toBe(plain.encoded.contentHash)
+    expect(only.encoded.legacyContentHash).toBe(plain.encoded.contentHash)
+
+    // The order of the file's ids and areas doesn't matter.
+    const shuffled = await roundTrip(
+      {
+        ...sample,
+        ...extras,
+        gi_anecdotes: {
+          ...anecdotes.gi_anecdotes,
+          anecdotes: Object.fromEntries(Object.entries(anecdotes.gi_anecdotes.anecdotes).reverse()),
+          unlockedAreas: [3, 3, 2, 1, 8, 7, 6, 5, 4],
+        },
+      },
+      catalog,
+    )
+    expect(shuffled.encoded.anecdotes!.hash).toBe(both.encoded.anecdotes!.hash)
+    expect(shuffled.encoded.contentHash).toBe(both.encoded.contentHash)
+  })
+
+  it('drops what is outside the contract and keeps its edges', () => {
+    const good = normalizeGood({
+      ...sample,
+      gi_anecdotes: {
+        anecdotes: {
+          '100000': { state: 0, finishCount: 0 }, // the edges
+          '199999': { state: 15, finishCount: 100_000 },
+          '100002': { finishCount: 1 }, // state omitted on the wire = 0
+          '99999': { state: 3, finishCount: 1 },
+          '200000': { state: 3, finishCount: 1 },
+          '0100003': { state: 3, finishCount: 1 },
+          abc: { state: 3, finishCount: 1 },
+          '100004': { state: 16, finishCount: 1 },
+          '100005': { state: 3, finishCount: -1 },
+          '100006': { state: 3, finishCount: 100_001 },
+          '100007': { state: 1.5, finishCount: 1 },
+          '100008': 'done',
+        },
+        unlockedAreas: [0, 1, 64, 65, 2, 2, 'x', 1.5],
+        reward: { index: 1, progress: 4 }, // no target
+        wish: { npcId: 0, lastWishTime: 1_791_000_000 },
+      },
+    })
+    expect(good.anecdotes).toEqual({
+      anecdotes: {
+        '100000': { state: 0, finishCount: 0 },
+        '100002': { state: 0, finishCount: 1 },
+        '199999': { state: 15, finishCount: 100_000 },
+      },
+      unlockedAreas: [1, 2, 64],
+      wish: { lastWishTime: 1_791_000_000 },
+    })
+    const reward = normalizeGood({
+      ...sample,
+      gi_anecdotes: {
+        anecdotes: {},
+        unlockedAreas: [],
+        reward: { index: 0, progress: 1000, target: 1 },
+        wish: { npcId: 9801, lastWishTime: -1 },
+      },
+    })
+    expect(reward.anecdotes).toEqual({
+      anecdotes: {},
+      unlockedAreas: [],
+      reward: { index: 0, progress: 1000, target: 1 },
+    })
+    // Nothing left: no section at all.
+    for (const raw of [
+      { anecdotes: { '1': { state: 3, finishCount: 1 } }, unlockedAreas: [99] },
+      { anecdotes: {}, unlockedAreas: [] },
+      [1, 2],
+      'yes',
+      null,
+    ]) {
+      expect(normalizeGood({ ...sample, gi_anecdotes: raw }).anecdotes).toBeNull()
+    }
+  })
+
+  it('stores the section in its binary layout and gives it back exactly', () => {
+    const value = encodeAnecdotes(normalizeGood({ ...sample, ...anecdotes }).anecdotes!)
+    expect(value).toEqual({
+      i: [100001, 1603, 7597],
+      s: [3, 0, 2],
+      c: [1, 3, 0],
+      a: [1, 2, 3, 4, 5, 6, 7, 8],
+      r: [12, 4, 10],
+      w: [9801, 1_791_000_000],
+    })
+    for (const v of [value, { i: [], s: [], c: [], a: [] }, { ...value, r: undefined }]) {
+      const clean = JSON.parse(JSON.stringify(v))
+      const blob = encodeSectionBlob('anecdotes', clean, false, null)
+      // Layout nibble 1: the binary layout, not the JSON fallback.
+      expect(blob.payload[0]).toBe(0x10)
+      const back = decodeSectionBlob(kindCode('anecdotes', false), blob.data, null, null)
+      expect(JSON.stringify(back.value)).toBe(JSON.stringify(clean))
+      expect(decodeAnecdotes(back.value as typeof value)).toEqual(decodeAnecdotes(clean))
+    }
+  })
+
+  it('reads bundle entries written before anecdotes were kept', async () => {
+    const { encoded } = await roundTrip(sample)
+    const entry: BundleSnapshot = {
+      id: 1,
+      takenAt: 1_700_000_000_000,
+      lastSeenAt: 1_700_000_000_000,
+      format: 'GOOD',
+      version: 3,
+      source: 'Irminsul',
+      characters: encoded.characters.hash,
+      weapons: encoded.weapons.hash,
+      artifacts: encoded.artifacts.hash,
+      materials: encoded.materials.hash,
+      materialsKeyframe: encoded.materials.hash,
+      achievements: encoded.achievements!.hash,
+    }
+    expect(sectionHashesOf(entry)).toHaveLength(6)
+    const stored = storedSnapshotOf(entry, (hash) => sectionJson.get(hash)!)
+    expect(stored.anecdotes).toBeNull()
   })
 })

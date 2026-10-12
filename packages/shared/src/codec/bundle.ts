@@ -53,6 +53,7 @@ export interface BundleSnapshot {
   player?: string | null
   achievementTimes?: string | null
   characterExtras?: string | null
+  anecdotes?: string | null
   // The full sections `artifacts` and `achievementTimes` are deltas of; null
   // when they are stored in full (and absent from bundles written before
   // they could be deltas).
@@ -87,6 +88,8 @@ export interface BundleSnapshotV2 {
   achievementTimes: BundleKey | null
   achievementTimesBase: BundleKey | null
   characterExtras: BundleKey | null
+  /** Absent from manifests written before anecdotes were kept. */
+  anecdotes?: BundleKey | null
   /** The player values a v2 player section leaves out (absent: none). */
   playerVars?: PlayerVars
 }
@@ -242,6 +245,7 @@ export function v1SnapshotOf(snapshot: BundleSnapshotV2): {
       achievementTimes: optionalKey(snapshot.achievementTimes),
       achievementTimesBase: optionalKey(snapshot.achievementTimesBase),
       characterExtras: optionalKey(snapshot.characterExtras),
+      anecdotes: optionalKey(snapshot.anecdotes),
     },
     player:
       merged !== null && merged !== player ? [merged, player!, snapshot.playerVars ?? {}] : null,
@@ -392,6 +396,7 @@ export function storedSnapshotOf(
     achievementTimes: optional(snapshot.achievementTimes),
     achievementTimesBase: optional(snapshot.achievementTimesBase),
     characterExtras: optional(snapshot.characterExtras),
+    anecdotes: optional(snapshot.anecdotes),
   }
 }
 
@@ -412,6 +417,7 @@ export function sectionHashesOf(snapshot: BundleSnapshot): string[] {
     snapshot.achievementTimes,
     snapshot.achievementTimesBase,
     snapshot.characterExtras,
+    snapshot.anecdotes,
   ].filter((hash): hash is string => !!hash)
 }
 

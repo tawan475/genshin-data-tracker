@@ -1,5 +1,6 @@
 import type { PermissionNode } from '@gdt/shared'
 import {
+  BookOpen,
   ClipboardList,
   Gem,
   HardDrive,
@@ -35,6 +36,7 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-materials', label: 'Materials', icon: Package, primary: true },
   { name: 'account-planner', label: 'Planner', icon: ClipboardList, primary: true },
   { name: 'account-achievements', label: 'Achievements', icon: Trophy },
+  { name: 'account-anecdotes', label: 'Anecdotes', icon: BookOpen },
   { name: 'account-snapshots', label: 'Snapshots', icon: History },
   { name: 'account-import', label: 'Import', icon: Upload },
   { name: 'account-settings', label: 'Manage', icon: UserCog },

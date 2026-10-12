@@ -72,9 +72,9 @@ own lazy chunk.
 ## Storage model
 
 A snapshot row holds its capture times, sizes, the first 47 bits of its
-content hash, the ids of its eight sections (characters, weapons, artifacts,
-materials, achievements and irminsul's player, achievement times and
-character extras) and `meta`: the summary the list views show, the GOOD
+content hash, the ids of its nine sections (characters, weapons, artifacts,
+materials, achievements and irminsul's player, achievement times, character
+extras and anecdotes) and `meta`: the summary the list views show, the GOOD
 header and the player values that move with every login (resin, AR EXP).
 Sections are stored once per account in `section_blobs` under the first 8
 bytes of their content address, with an integer id. Artifacts live in an
@@ -120,11 +120,14 @@ irminsul's own top-level keys are sections of their own, each optional and
 range-checked again on import: `gi_player` (AR, World Level, UID… as read at
 login) as `player`, `gi_achievement_times` (finish times, unix seconds) as
 `achievementTimes`, `gi_characters` (friendship, obtained date) as
-`characterExtras`. A file without them stores and hashes exactly as before
+`characterExtras`, `gi_anecdotes` (the Travel Accounts book: state and finish
+count per met anecdote, unlocked areas, stamp progress) as `anecdotes`. A file
+without them stores and hashes exactly as before
 they existed, and exports (GOOD rebuild, zip) write them back after
 `timestamp`. The app uses them for the achievements' real completion times,
-friendship and obtained dates on Characters, and the planner's AR/WL (when
-the settings are empty) and resin.
+friendship and obtained dates on Characters, the planner's AR/WL (when the
+settings are empty) and resin, and the Anecdotes checklist (captured progress
+plus hand marks in `anecdote_marks`).
 
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`; artifact sets,

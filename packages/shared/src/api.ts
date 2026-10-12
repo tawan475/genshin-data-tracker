@@ -229,6 +229,17 @@ export const achievementMarksPatch = z
   .object({ done: achievementIds.default([]), undone: achievementIds.default([]) })
   .refine((body) => body.done.length + body.undone.length > 0, { message: 'Nothing to change' })
 
+const anecdoteIds = z.array(z.number().int().min(100_000).max(199_999)).max(2000)
+
+/**
+ * Anecdotes marked done by hand (captured ones come from snapshots). Ids are
+ * the game's anecdote ids, the same as `gi_anecdotes`; a checklist marks a
+ * variant's base.
+ */
+export const anecdoteMarksPatch = z
+  .object({ done: anecdoteIds.default([]), undone: anecdoteIds.default([]) })
+  .refine((body) => body.done.length + body.undone.length > 0, { message: 'Nothing to change' })
+
 const talentLevel = z.number().int().min(1).max(10)
 
 /** Free text on a goal (plain text, shown as is). */
@@ -766,11 +777,11 @@ export interface ImportedAccount {
  *   capture time for an import.
  * - `accounts`: an account was added, renamed or removed.
  * - `planner`: an account's planner goals, hand edits or settings changed
- *   (favourite characters included); `tab` is the tab that sent the change
- *   (`x-gdt-tab`), which already has it.
+ *   (favourite characters and anecdote marks included); `tab` is the tab
+ *   that sent the change (`x-gdt-tab`), which already has it.
  * Events only say that something changed; the app re-reads the account list
- * (or, for `planner`, an open Planner re-reads its goals and edits, and the
- * Characters page its favourites).
+ * (or, for `planner`, an open Planner re-reads its goals and edits, the
+ * Characters page its favourites and the Anecdotes page its marks).
  */
 export type LiveEvent =
   | { type: 'hello'; accounts: LiveAccount[] }
@@ -831,6 +842,11 @@ export interface AccountSettingsResponse {
 
 export interface AchievementMarksResponse {
   /** Achievement ids marked done by hand, ascending. */
+  done: number[]
+}
+
+export interface AnecdoteMarksResponse {
+  /** Anecdote ids marked done by hand, ascending. */
   done: number[]
 }
 

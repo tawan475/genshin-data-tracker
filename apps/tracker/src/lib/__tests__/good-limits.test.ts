@@ -6,6 +6,7 @@
  */
 
 import achievementsJson from '@gdt/game-data/data/achievements.json'
+import anecdotesJson from '@gdt/game-data/data/anecdotes.json'
 import catalogJson from '@gdt/game-data/data/catalog.json'
 import materialsJson from '@gdt/game-data/data/materials.json'
 import { GOOD_LIMITS } from '@gdt/shared'
@@ -19,6 +20,7 @@ describe('GOOD_LIMITS', () => {
       ['characters', Object.keys(catalogJson.characters).length],
       ['materialKeys', Object.keys(materialsJson.materials).length],
       ['achievements', achievementsJson.rows.length],
+      ['anecdotes', anecdotesJson.anecdotes.length],
     ]
     for (const [cap, count] of counts) {
       expect(count, cap).toBeGreaterThan(0)

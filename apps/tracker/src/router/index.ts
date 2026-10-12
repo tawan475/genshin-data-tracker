@@ -273,6 +273,12 @@ const router = createRouter({
               () => import('@/views/account/AchievementsView.vue'),
             ),
             account(
+              'anecdotes',
+              'account-anecdotes',
+              'Anecdotes',
+              () => import('@/views/account/AnecdotesView.vue'),
+            ),
+            account(
               'snapshots',
               'account-snapshots',
               'Snapshots',

@@ -128,6 +128,14 @@ export function syntheticGood(seed = 1): Good {
   for (const key of owners) {
     extras[key] = { friendship: int(rand, 1, 10), obtainedAt: 1_601_000_000 + int(rand, 0, 1e8) }
   }
+  // About 140 met anecdotes (7.1 has 161): nearly all recorded, two loops idle again.
+  const anecdotes: Record<string, { state: number; finishCount: number }> = {}
+  for (let series = 1000; series < 1094; series++) {
+    for (let n = 1; n <= int(rand, 1, 2); n++) {
+      anecdotes[String(series * 100 + n)] =
+        rand() < 0.97 ? { state: 3, finishCount: 1 } : { state: 0, finishCount: int(rand, 1, 3) }
+    }
+  }
   return {
     format: 'GOOD',
     version: 3,
@@ -151,6 +159,12 @@ export function syntheticGood(seed = 1): Good {
     },
     gi_achievement_times: times,
     gi_characters: extras,
+    gi_anecdotes: {
+      anecdotes,
+      unlockedAreas: [1, 2, 3, 4, 5, 6, 7, 8],
+      reward: { index: 12, progress: 4, target: 10 },
+      wish: { npcId: 9801, lastWishTime: 1_789_000_000 },
+    },
   }
 }
 
@@ -201,6 +215,16 @@ export function playOn(good: Good, step: number): Good {
     times = { ...times, [String(id)]: 1_790_000_000 + step * 3600 }
   }
   const extras = good.gi_characters ?? {}
+  let anecdotes = good.gi_anecdotes
+  if (anecdotes && rand() < 0.05) {
+    const id = String(109_900 + (step % 99))
+    const reward = anecdotes.reward ?? { index: 0, progress: 0, target: 10 }
+    anecdotes = {
+      ...anecdotes,
+      anecdotes: { ...anecdotes.anecdotes, [id]: { state: 3, finishCount: 1 } },
+      reward: { ...reward, progress: (reward.progress + 1) % 10 },
+    }
+  }
   return {
     ...good,
     artifacts,
@@ -219,6 +243,7 @@ export function playOn(good: Good, step: number): Good {
           )
         : extras,
     gi_player: { ...good.gi_player!, resin: int(rand, 0, 200) },
+    ...(anecdotes ? { gi_anecdotes: anecdotes } : {}),
     timestamp: (good.timestamp ?? 0) + 3_600_000,
   }
 }

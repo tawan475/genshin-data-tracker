@@ -12,7 +12,14 @@
 
 import type { ArtifactIdentity, ArtifactState } from '../artifact'
 import { CHARACTERS, WEAPONS, fromRef, toRef, type KeyDictionary, type KeyRef } from '../dictionary'
-import type { GiCharacter, GiPlayer, GoodArtifact, GoodCharacter, GoodWeapon } from '../good'
+import type {
+  GiAnecdotes,
+  GiCharacter,
+  GiPlayer,
+  GoodArtifact,
+  GoodCharacter,
+  GoodWeapon,
+} from '../good'
 import { sha256Hex128 } from '../hash'
 import { compareTuples, deltaDecode, deltaEncode, trimDefaults } from './order'
 
@@ -28,6 +35,7 @@ export type SectionKind =
   | 'player'
   | 'achievementTimes'
   | 'characterExtras'
+  | 'anecdotes'
 
 export interface Section {
   kind: SectionKind
@@ -456,4 +464,59 @@ export function decodeCharacterExtras(rows: readonly KeyRef[][]): Map<string, Gi
     extras.set(fromRef(CHARACTERS, row[0]!), extra)
   }
   return extras
+}
+
+// ----------------------------------------------------------------- anecdotes
+// irminsul's `gi_anecdotes`: `i` = delta-encoded sorted anecdote ids, `s` and
+// `c` = each one's state and finish count, `a` = the unlocked areas (sorted),
+// `r` = the reward track [index, progress, target] and `w` = the last wish
+// [npc id (0: none), unix seconds], each only when the capture had it. About
+// 160 entries that rarely change, so it is always stored in full (v2
+// compresses it against the previous one).
+
+export interface AnecdotesSection {
+  i: number[]
+  s: number[]
+  c: number[]
+  a: number[]
+  r?: [index: number, progress: number, target: number]
+  w?: [npcId: number, lastWishTime: number]
+}
+
+export function encodeAnecdotes(anecdotes: GiAnecdotes): AnecdotesSection {
+  const entries = Object.entries(anecdotes.anecdotes)
+    .map(([id, entry]) => [Number(id), entry] as const)
+    .sort((a, b) => a[0] - b[0])
+  const section: AnecdotesSection = {
+    i: deltaEncode(entries.map((e) => e[0])),
+    s: entries.map((e) => e[1].state),
+    c: entries.map((e) => e[1].finishCount),
+    a: [...anecdotes.unlockedAreas].sort((a, b) => a - b),
+  }
+  const { reward, wish } = anecdotes
+  if (reward) section.r = [reward.index, reward.progress, reward.target]
+  if (wish) section.w = [wish.npcId ?? 0, wish.lastWishTime]
+  return section
+}
+
+export function decodeAnecdotes(section: AnecdotesSection): GiAnecdotes {
+  const ids = deltaDecode(section.i)
+  const anecdotes: GiAnecdotes = {
+    anecdotes: Object.fromEntries(
+      ids.map((id, index) => [
+        String(id),
+        { state: section.s[index] ?? 0, finishCount: section.c[index] ?? 0 },
+      ]),
+    ),
+    unlockedAreas: [...section.a],
+  }
+  if (section.r) {
+    const [index, progress, target] = section.r
+    anecdotes.reward = { index, progress, target }
+  }
+  if (section.w) {
+    const [npcId, lastWishTime] = section.w
+    anecdotes.wish = npcId > 0 ? { npcId, lastWishTime } : { lastWishTime }
+  }
+  return anecdotes
 }

@@ -6,6 +6,7 @@
 import type {
   AchievementMarksResponse,
   AccountCreatedResponse,
+  AnecdoteMarksResponse,
   AccountResponse,
   AccountSettingsPatch,
   AccountSettingsResponse,
@@ -198,6 +199,15 @@ export const api = {
   /** `done` is applied before `undone`. Answers with the full list. */
   updateAchievementMarks: (id: number, body: { done?: number[]; undone?: number[] }) =>
     requestJson<AchievementMarksResponse>(`/api/accounts/${id}/achievement-marks`, {
+      method: 'PATCH',
+      json: body,
+    }),
+  /** Anecdote ids marked done by hand (captured ones come from snapshots). */
+  anecdoteMarks: (id: number) =>
+    requestJson<AnecdoteMarksResponse>(`/api/accounts/${id}/anecdote-marks`),
+  /** `done` is applied before `undone`. Answers with the full list. */
+  updateAnecdoteMarks: (id: number, body: { done?: number[]; undone?: number[] }) =>
+    requestJson<AnecdoteMarksResponse>(`/api/accounts/${id}/anecdote-marks`, {
       method: 'PATCH',
       json: body,
     }),

@@ -364,6 +364,63 @@ const playerLayout: Layout = {
   },
 }
 
+// anecdotes: flags (bit 0 = has `r`, bit 1 = has `w`), the entry count, the
+// id column (already delta-coded in the value), states, finish counts, the
+// areas, then `r` and `w` when present. Every number is unsigned.
+
+const HAS_REWARD = 1
+const HAS_WISH = 2
+
+const anecdotesLayout: Layout = {
+  variants: [0],
+  encode(w, { value, delta }) {
+    if (delta) throw new TypeError('Anecdotes have no deltas')
+    const v = fields(value, ['i', 's', 'c', 'a', 'r', 'w'], ['r', 'w'])
+    const ids = array(v.i)
+    const states = array(v.s)
+    const counts = array(v.c)
+    const areas = array(v.a)
+    if (states.length !== ids.length || counts.length !== ids.length) {
+      throw new RangeError('Columns differ in length')
+    }
+    const reward = v.r === undefined ? null : array(v.r)
+    const wish = v.w === undefined ? null : array(v.w)
+    if (reward && reward.length !== 3) throw new RangeError('Not a [index, progress, target]')
+    if (wish && wish.length !== 2) throw new RangeError('Not a [npc, time]')
+    w.byte((reward ? HAS_REWARD : 0) | (wish ? HAS_WISH : 0)).uint(ids.length)
+    for (const id of ids) w.uint(uint(id))
+    for (const state of states) w.uint(uint(state))
+    for (const count of counts) w.uint(uint(count))
+    w.uint(areas.length)
+    for (const area of areas) w.uint(uint(area))
+    for (const n of reward ?? []) w.uint(uint(n))
+    for (const n of wish ?? []) w.uint(uint(n))
+  },
+  decode(r) {
+    const flags = r.byte()
+    if ((flags & ~(HAS_REWARD | HAS_WISH)) !== 0) {
+      throw new CorruptDataError(`Unknown anecdotes flags ${flags}`)
+    }
+    const count = r.uint()
+    if (count > r.remaining) throw new CorruptDataError('Count past the data')
+    const column = (n: number) => {
+      const out: number[] = []
+      for (let k = 0; k < n; k++) out.push(r.uint())
+      return out
+    }
+    const i = column(count)
+    const s = column(count)
+    const c = column(count)
+    const areaCount = r.uint()
+    if (areaCount > r.remaining) throw new CorruptDataError('Count past the data')
+    const a = column(areaCount)
+    const section: Record<string, unknown> = { i, s, c, a }
+    if (flags & HAS_REWARD) section.r = column(3)
+    if (flags & HAS_WISH) section.w = column(2)
+    return section
+  },
+}
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -373,6 +430,7 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   achievements: achievementsLayout,
   achievementTimes: achievementTimesLayout,
   player: playerLayout,
+  anecdotes: anecdotesLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */

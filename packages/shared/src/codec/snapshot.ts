@@ -7,6 +7,7 @@ import { normalizeGood, type NormalizedGood, type NormalizeOptions } from './nor
 import {
   decodeAchievements,
   decodeAchievementTimes,
+  decodeAnecdotes,
   decodeArtifacts,
   decodeCharacterExtras,
   decodeCharacters,
@@ -17,6 +18,7 @@ import {
   encodeAchievements,
   encodeAchievementTimes,
   encodeAchievementTimesDelta,
+  encodeAnecdotes,
   encodeArtifacts,
   encodeArtifactsDelta,
   encodeCharacterExtras,
@@ -100,6 +102,7 @@ export interface ExtraSections {
   player: Section | null
   achievementTimes: Section | null
   characterExtras: Section | null
+  anecdotes: Section | null
 }
 
 export interface EncodedSnapshot extends ExtraSections {
@@ -128,6 +131,12 @@ export interface EncodedSnapshot extends ExtraSections {
    * stored before the extras were kept, so re-uploading it stays a no-op.
    */
   legacyContentHash: string
+  /**
+   * The content hash with the anecdotes left out (equal to `contentHash`
+   * when there are none): what this capture has if it was stored before
+   * `gi_anecdotes` was kept, so re-uploading it stays a no-op.
+   */
+  preAnecdotesContentHash: string
 }
 
 /** The sections that do not depend on catalog ids, materials in full. */
@@ -140,9 +149,12 @@ export interface StaticSections extends ExtraSections {
 
 /** The extra sections that are present, in a fixed order. */
 export function extraSectionsOf(sections: ExtraSections): Section[] {
-  return [sections.player, sections.achievementTimes, sections.characterExtras].filter(
-    (s): s is Section => s !== null,
-  )
+  return [
+    sections.player,
+    sections.achievementTimes,
+    sections.characterExtras,
+    sections.anecdotes,
+  ].filter((s): s is Section => s !== null)
 }
 
 /**
@@ -155,20 +167,29 @@ export async function encodeStaticSections(
   materialsDictionary: KeyDictionary,
 ): Promise<StaticSections> {
   const { good } = prepared
-  const [characters, weapons, materials, achievements, player, achievementTimes, characterExtras] =
-    await Promise.all([
-      makeSection('characters', encodeCharacters(good.characters)),
-      makeSection('weapons', encodeWeapons(good.weapons)),
-      makeSection('materials', encodeMaterialsFull(good.materials, materialsDictionary)),
-      good.achievements ? makeSection('achievements', encodeAchievements(good.achievements)) : null,
-      good.player ? makeSection('player', good.player) : null,
-      good.achievementTimes
-        ? makeSection('achievementTimes', encodeAchievementTimes(good.achievementTimes))
-        : null,
-      good.characterExtras
-        ? makeSection('characterExtras', encodeCharacterExtras(good.characterExtras))
-        : null,
-    ])
+  const [
+    characters,
+    weapons,
+    materials,
+    achievements,
+    player,
+    achievementTimes,
+    characterExtras,
+    anecdotes,
+  ] = await Promise.all([
+    makeSection('characters', encodeCharacters(good.characters)),
+    makeSection('weapons', encodeWeapons(good.weapons)),
+    makeSection('materials', encodeMaterialsFull(good.materials, materialsDictionary)),
+    good.achievements ? makeSection('achievements', encodeAchievements(good.achievements)) : null,
+    good.player ? makeSection('player', good.player) : null,
+    good.achievementTimes
+      ? makeSection('achievementTimes', encodeAchievementTimes(good.achievementTimes))
+      : null,
+    good.characterExtras
+      ? makeSection('characterExtras', encodeCharacterExtras(good.characterExtras))
+      : null,
+    good.anecdotes ? makeSection('anecdotes', encodeAnecdotes(good.anecdotes)) : null,
+  ])
   return {
     characters,
     weapons,
@@ -177,6 +198,7 @@ export async function encodeStaticSections(
     player,
     achievementTimes,
     characterExtras,
+    anecdotes,
   }
 }
 
@@ -207,11 +229,16 @@ export async function completeSnapshot(
     sections.achievements?.hash ?? '',
   ]
   const legacyContentHash = await sha256Hex128(base.join(':'))
-  // Appended only when present, so a file without them keeps its old hash.
+  // Appended only when present, so a file without them keeps its old hash;
+  // the anecdotes (kept later) after the first three, the same way.
   const extras = [sections.player, sections.achievementTimes, sections.characterExtras]
-  const contentHash = extras.some((s) => s !== null)
-    ? await sha256Hex128([...base, ...extras.map((s) => s?.hash ?? '')].join(':'))
+  const withExtras = [...base, ...extras.map((s) => s?.hash ?? '')]
+  const preAnecdotesContentHash = extras.some((s) => s !== null)
+    ? await sha256Hex128(withExtras.join(':'))
     : legacyContentHash
+  const contentHash = sections.anecdotes
+    ? await sha256Hex128([...withExtras, sections.anecdotes.hash].join(':'))
+    : preAnecdotesContentHash
   return {
     ...sections,
     artifacts,
@@ -220,6 +247,7 @@ export async function completeSnapshot(
     achievementTimesBase: null,
     contentHash,
     legacyContentHash,
+    preAnecdotesContentHash,
   }
 }
 
@@ -343,6 +371,7 @@ export interface StoredSnapshot {
   /** Required when `achievementTimes` is a delta; absent or null when it is full. */
   achievementTimesBase?: string | null
   characterExtras?: string | null
+  anecdotes?: string | null
 }
 
 const parseOrNull = <T>(text: string | null | undefined): T | null =>
@@ -391,5 +420,6 @@ export function decodeSnapshot(
       decodeCharacterExtras(JSON.parse(stored.characterExtras)),
     )
   }
+  if (stored.anecdotes) good.gi_anecdotes = decodeAnecdotes(JSON.parse(stored.anecdotes))
   return good
 }

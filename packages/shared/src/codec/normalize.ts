@@ -1,6 +1,14 @@
 import type { ArtifactIdentity, ArtifactState } from '../artifact'
 import type { KeyDictionary } from '../dictionary'
-import type { GiCharacter, GiPlayer, GoodCharacter, GoodSubstat, GoodWeapon } from '../good'
+import type {
+  GiAnecdote,
+  GiAnecdotes,
+  GiCharacter,
+  GiPlayer,
+  GoodCharacter,
+  GoodSubstat,
+  GoodWeapon,
+} from '../good'
 import { GOOD_LIMITS } from '../import'
 
 export interface ArtifactOccurrence {
@@ -29,6 +37,11 @@ export interface NormalizedGood {
   achievementTimes: [number, number][] | null
   /** `gi_characters`: GOOD key -> values that pass their check, sorted by key. */
   characterExtras: Map<string, GiCharacter> | null
+  /**
+   * `gi_anecdotes`, the parts that pass their checks: entries by ascending
+   * id, areas sorted and unique, `reward` / `wish` only when whole.
+   */
+  anecdotes: GiAnecdotes | null
 }
 
 export class GoodFormatError extends Error {
@@ -96,6 +109,7 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     player: toPlayer(input.gi_player),
     achievementTimes: toAchievementTimes(input.gi_achievement_times),
     characterExtras: toCharacterExtras(input.gi_characters),
+    anecdotes: toAnecdotes(input.gi_anecdotes),
   }
   checkKeys(good, options)
   return good
@@ -116,6 +130,11 @@ function checkCounts(input: Json, achievements: unknown[] | null): void {
     ['achievements', count(achievements), GOOD_LIMITS.achievements],
     ['achievement times', count(input.gi_achievement_times), GOOD_LIMITS.achievements],
     ['character extras', count(input.gi_characters), GOOD_LIMITS.characters],
+    [
+      'anecdotes',
+      count(isObject(input.gi_anecdotes) ? input.gi_anecdotes.anecdotes : null),
+      GOOD_LIMITS.anecdotes,
+    ],
   ]
   for (const [what, n, max] of caps) {
     if (n > max) {
@@ -323,6 +342,65 @@ function toCharacterExtras(raw: unknown): Map<string, GiCharacter> | null {
     if (extra.friendship !== undefined || extra.obtainedAt !== undefined) extras.set(key, extra)
   }
   return extras.size > 0 ? extras : null
+}
+
+/** The ranges irminsul's `gi_anecdotes` contract gives (and keeps to on its side). */
+const ANECDOTE_ID = [100_000, 199_999] as const
+const ANECDOTE_STATE = [0, 15] as const
+const ANECDOTE_FINISH_COUNT = [0, 100_000] as const
+const ANECDOTE_AREA = [1, 64] as const
+/** Areas the book can have: the 7.1 game has 8. */
+const MAX_ANECDOTE_AREAS = 64
+/** A reward exchange per 10 recorded anecdotes; the game keeps 1,000 unclaimed. */
+const ANECDOTE_REWARD_INDEX = [0, 100_000] as const
+const ANECDOTE_REWARD_PROGRESS = [0, 1_000] as const
+const ANECDOTE_REWARD_TARGET = [1, 1_000] as const
+/** The AnecdoteExtra NPC ids are 98xx; room for more. */
+const ANECDOTE_NPC = [1, 999_999] as const
+
+function toAnecdotes(raw: unknown): GiAnecdotes | null {
+  if (!isObject(raw)) return null
+  const entries: [number, GiAnecdote][] = []
+  if (isObject(raw.anecdotes)) {
+    for (const [key, value] of Object.entries(raw.anecdotes)) {
+      if (!/^[1-9]\d{5}$/.test(key) || !isObject(value)) continue
+      const id = Number(key)
+      if (!isIntIn(id, ...ANECDOTE_ID)) continue
+      // `state` omitted on the wire is 0; irminsul writes it anyway.
+      const state = value.state === undefined ? 0 : value.state
+      const finishCount = value.finishCount === undefined ? 0 : value.finishCount
+      if (!isIntIn(state, ...ANECDOTE_STATE)) continue
+      if (!isIntIn(finishCount, ...ANECDOTE_FINISH_COUNT)) continue
+      entries.push([id, { state, finishCount }])
+    }
+  }
+  entries.sort((a, b) => a[0] - b[0])
+  const areas = Array.isArray(raw.unlockedAreas)
+    ? [...new Set(raw.unlockedAreas.filter((v): v is number => isIntIn(v, ...ANECDOTE_AREA)))]
+        .sort((a, b) => a - b)
+        .slice(0, MAX_ANECDOTE_AREAS)
+    : []
+  const anecdotes: GiAnecdotes = {
+    anecdotes: Object.fromEntries(entries.map(([id, entry]) => [String(id), entry])),
+    unlockedAreas: areas,
+  }
+  const reward = raw.reward
+  if (
+    isObject(reward) &&
+    isIntIn(reward.index, ...ANECDOTE_REWARD_INDEX) &&
+    isIntIn(reward.progress, ...ANECDOTE_REWARD_PROGRESS) &&
+    isIntIn(reward.target, ...ANECDOTE_REWARD_TARGET)
+  ) {
+    anecdotes.reward = { index: reward.index, progress: reward.progress, target: reward.target }
+  }
+  const wish = raw.wish
+  if (isObject(wish) && isIntIn(wish.lastWishTime, 0, LATEST_GAME_TIME)) {
+    anecdotes.wish = isIntIn(wish.npcId, ...ANECDOTE_NPC)
+      ? { npcId: wish.npcId, lastWishTime: wish.lastWishTime }
+      : { lastWishTime: wish.lastWishTime }
+  }
+  const empty = entries.length === 0 && areas.length === 0 && !anecdotes.reward && !anecdotes.wish
+  return empty ? null : anecdotes
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

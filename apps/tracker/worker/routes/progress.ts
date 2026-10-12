@@ -1,14 +1,15 @@
 /**
- * Per-account progress the player sets by hand: achievements marked done,
- * planner goals, the planner's hand edits on top of the newest capture
+ * Per-account progress the player sets by hand: achievements and anecdotes
+ * marked done, planner goals, the planner's hand edits on top of the newest capture
  * (material counts, a goal's current state) and its tasks (built-in dailies
  * and weeklies, the player's own). None of it touches snapshots,
  * so `dataVersion` (and with it every cached bundle) stays put.
  *
  * Writes go through `json_each` so a bulk change (a Seelie import is a few
  * hundred rows) is one statement, and each request is a single D1 batch:
- * the writes followed by the read that answers it. Planner writes tell the
- * user's other tabs and devices (`planner` live event).
+ * the writes followed by the read that answers it. Planner writes and
+ * anecdote marks tell the user's other tabs and devices (`planner` live
+ * event).
  *
  * Planner goals live in two tables: `planner_targets` (characters, custom
  * characters, item needs: one per kind and key) and `planner_weapon_goals`
@@ -19,10 +20,12 @@
 
 import {
   achievementMarksPatch,
+  anecdoteMarksPatch,
   plannerStatePatch,
   plannerTargetsPatch,
   plannerTasksPatch,
   type AchievementMarksResponse,
+  type AnecdoteMarksResponse,
   type CurrentOverride,
   type InventoryAdjustment,
   type PlannerStateResponse,
@@ -41,6 +44,9 @@ import { listenerOf, listenerStatement, notifyUser, senderTab } from '../service
 
 const SELECT_MARKS =
   'SELECT achievement_id AS id FROM achievement_marks WHERE account_id = ?1 ORDER BY achievement_id'
+
+const SELECT_ANECDOTE_MARKS =
+  'SELECT anecdote_id AS id FROM anecdote_marks WHERE account_id = ?1 ORDER BY anecdote_id'
 
 /** Goals by kind and key; weapon goals in the order they were made (rowid). */
 const SELECT_TARGETS = `SELECT kind, NULL AS id, key, owner, target, updated_at AS updatedAt, 0 AS n
@@ -182,6 +188,57 @@ export const progress = new Hono<AppEnv>()
     const results = await d1.batch([...statements, d1.prepare(SELECT_MARKS).bind(id)])
     const rows = (results.at(-1)!.results ?? []) as { id: number }[]
     return c.json<AchievementMarksResponse>({ done: rows.map((r) => r.id) })
+  })
+
+  .get('/:id/anecdote-marks', async (c) => {
+    const id = idParam(c, 'id')
+    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    const { results } = await c.env.DB.prepare(SELECT_ANECDOTE_MARKS).bind(id).all<{ id: number }>()
+    return c.json<AnecdoteMarksResponse>({ done: results.map((r) => r.id) })
+  })
+
+  /** `done` is applied before `undone`, so an id in both ends up unmarked. */
+  .patch('/:id/anecdote-marks', async (c) => {
+    const id = idParam(c, 'id')
+    const body = await parseJson(c, anecdoteMarksPatch)
+    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    const d1 = c.env.DB
+    const statements: D1PreparedStatement[] = []
+    if (body.done.length > 0) {
+      statements.push(
+        // `WHERE true` resolves SQLite's INSERT … SELECT … ON CONFLICT parse ambiguity.
+        d1
+          .prepare(
+            `INSERT INTO anecdote_marks (account_id, anecdote_id, updated_at)
+             SELECT ?1, value, ?2 FROM json_each(?3) WHERE true
+             ON CONFLICT (account_id, anecdote_id) DO UPDATE SET updated_at = excluded.updated_at`,
+          )
+          .bind(id, Date.now(), JSON.stringify(body.done)),
+      )
+    }
+    if (body.undone.length > 0) {
+      statements.push(
+        d1
+          .prepare(
+            `DELETE FROM anecdote_marks
+             WHERE account_id = ?1 AND anecdote_id IN (SELECT value FROM json_each(?2))`,
+          )
+          .bind(id, JSON.stringify(body.undone)),
+      )
+    }
+    const results = await d1.batch([
+      ...statements,
+      d1.prepare(SELECT_ANECDOTE_MARKS).bind(id),
+      listenerStatement(d1, id),
+    ])
+    const rows = (results.at(-2)!.results ?? []) as { id: number }[]
+    notifyUser(
+      c,
+      c.get('userId'),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      listenerOf(results.at(-1)),
+    )
+    return c.json<AnecdoteMarksResponse>({ done: rows.map((r) => r.id) })
   })
 
   .get('/:id/planner-targets', async (c) => {

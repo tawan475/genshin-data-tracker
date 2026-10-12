@@ -148,6 +148,13 @@
       "when": 1791404263623,
       "tag": "0020_staff_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1791765037119,
+      "tag": "0021_anecdotes",
+      "breakpoints": true
     }
   ]
 }

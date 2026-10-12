@@ -77,6 +77,29 @@ export interface GiCharacter {
   obtainedAt?: number
 }
 
+/** One anecdote's entry in irminsul's `gi_anecdotes`. */
+export interface GiAnecdote {
+  /** The server's state: 3 = recorded, 2 = active now, 0 = idle (a loop done before). */
+  state: number
+  /** Times completed (above 1 only for the repeatable loops). */
+  finishCount: number
+}
+
+/**
+ * irminsul's `gi_anecdotes` (the game's "Travel Accounts"): every anecdote
+ * the player has met, by id. An absent id is not met yet, never "not done".
+ */
+export interface GiAnecdotes {
+  /** Keyed by the anecdote id as a decimal string. */
+  anecdotes: Record<string, GiAnecdote>
+  /** The book's tabs the player has, sorted. */
+  unlockedAreas: number[]
+  /** The stamp track: `progress` of `target` recorded toward reward number `index`. */
+  reward?: { index: number; progress: number; target: number }
+  /** The last wish (choosing whom to meet next), unix seconds; `npcId` absent when none. */
+  wish?: { npcId?: number; lastWishTime: number }
+}
+
 export interface Good {
   format: string
   version: number
@@ -94,6 +117,7 @@ export interface Good {
   gi_achievement_times?: Record<string, number>
   /** Keyed by the character's GOOD key (Traveler with its element). */
   gi_characters?: Record<string, GiCharacter>
+  gi_anecdotes?: GiAnecdotes
 }
 
 /**

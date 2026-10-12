@@ -201,6 +201,8 @@ function v1Sections(row: V1Row): Record<Slot, { hash: string; base: string | nul
     characterExtras: row.character_extras_hash
       ? { hash: row.character_extras_hash, base: null }
       : null,
+    // Kept only since v2: a v1 row never has them.
+    anecdotes: null,
   }
 }
 

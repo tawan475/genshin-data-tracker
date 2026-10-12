@@ -167,7 +167,7 @@ export const snapshots = sqliteTable(
     /** Bytes of the sections this snapshot newly stored (shared ones cost nothing). */
     storedSize: integer('stored_size').notNull(),
     deletedAt: integer('deleted_at'),
-    // Storage format v2 (@gdt/shared codec/store-v2.ts): the eight sections
+    // Storage format v2 (@gdt/shared codec/store-v2.ts): the nine sections
     // by `section_blobs.id`, NULL for an optional one the capture lacked.
     // The v1 columns (hex hashes, summary JSON, format/version/source) were
     // dropped by migration 0017 once repack had converted every row.
@@ -181,6 +181,8 @@ export const snapshots = sqliteTable(
     playerRef: integer('player_ref'),
     achievementTimesRef: integer('achievement_times_ref'),
     characterExtrasRef: integer('character_extras_ref'),
+    /** irminsul's `gi_anecdotes` (added in 0021). */
+    anecdotesRef: integer('anecdotes_ref'),
     /** Summary, GOOD header and per-login player values (codec/snapshot-meta.ts). */
     meta: bytes('meta'),
   },
@@ -278,6 +280,23 @@ export const artifacts = sqliteTable(
     createdAt: timestamp('created_at'),
   },
   (t) => [uniqueIndex('artifacts_account_hash_unique').on(t.accountId, t.hash)],
+)
+
+/**
+ * Anecdotes ("Travel Accounts") marked done by hand, by the game's anecdote
+ * id (a variant's base). Captured ones come from snapshots (`gi_anecdotes`);
+ * these cover what irminsul hasn't seen. Added in 0021.
+ */
+export const anecdoteMarks = sqliteTable(
+  'anecdote_marks',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    anecdoteId: integer('anecdote_id').notNull(),
+    updatedAt: timestamp('updated_at'),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.anecdoteId] })],
 )
 
 /**
