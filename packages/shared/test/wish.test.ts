@@ -352,6 +352,39 @@ describe('wish files', () => {
     expect(back.get(200)![0]!.item.key).toBe('Slingshot')
   })
 
+  it('reads every account of a paimon.moe backup, pulls without a code too', () => {
+    const backup = {
+      accounts: 'account2',
+      'wish-uid': UID,
+      server: 'Asia',
+      'wish-counter-weapon-event': {
+        total: 2,
+        pulls: [
+          { type: 'weapon', id: 'raven_bow', time: '2021-03-02 18:31:32', pity: 1 },
+          { type: 'weapon', id: 'wolfs_gravestone', time: '2021-03-02 18:31:32', pity: 2, rate: 0 },
+        ],
+      },
+      'account2-wish-uid': 822222222,
+      'account2-wish-counter-standard': {
+        pulls: [
+          { type: 'character', id: 'kuki_shinobu', time: '2024-06-27 00:46:20', code: '200' },
+        ],
+      },
+      'account2-wish-counter-setting': { firstTime: false },
+    }
+    const file = parseWishFile(JSON.stringify(backup))
+    expect(file.accounts.map((a) => [a.uid, a.records.length])).toEqual([
+      [UID, 2],
+      ['822222222', 1],
+    ])
+    const main = pullsOf(file.accounts[0]!.records).get(302)!
+    expect(main.map((p) => [p.item.name, p.gachaType, p.item.rank])).toEqual([
+      ['Raven Bow', 302, 3],
+      ["Wolf's Gravestone", 302, 5],
+    ])
+    expect(pullsOf(file.accounts[1]!.records).get(200)![0]!.item.name).toBe('Kuki Shinobu')
+  })
+
   it('refuses what it cannot read', () => {
     expect(() => parseWishFile('hello')).toThrow()
     expect(() => parseWishFile('{"foo":1}')).toThrow()

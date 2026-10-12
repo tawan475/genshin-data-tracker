@@ -136,7 +136,9 @@ async function signOut() {
 }
 
 const isActive = (name: string) =>
-  name.startsWith('staff-') ? staffActive(name) : route.name === name
+  name.startsWith('staff-')
+    ? staffActive(name)
+    : route.name === name || String(route.name ?? '').startsWith(`${name}-`)
 const navClass = (active: boolean) =>
   active
     ? 'bg-surface-overlay text-text-primary'

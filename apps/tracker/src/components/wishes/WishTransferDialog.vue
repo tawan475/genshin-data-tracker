@@ -11,6 +11,7 @@ import {
   type WishFileAccount,
 } from '@gdt/shared'
 import { api } from '@/api'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import type { WishHistory } from '@/data/wish-history'
@@ -51,19 +52,31 @@ const file = shallowRef<WishFile | null>(null)
 
 const uid = computed(() => props.account.uid?.trim() || null)
 
-/** The file's account for this one: its UID, or the only one when either has none. */
-const entry = computed<WishFileAccount | null>(() => {
-  const accounts = file.value?.accounts ?? []
-  const same = accounts.find((a) => a.uid && a.uid === uid.value)
-  if (same) return same
-  if (accounts.length === 1 && (!accounts[0]!.uid || !uid.value)) return accounts[0]!
-  return null
+/**
+ * Which of the file's accounts to import (paimon.moe backups can hold
+ * several): the one with this account's UID, the only one, or the user's
+ * pick. Another UID's history is never imported into this account.
+ */
+const picked = ref<number | null>(null)
+watch(file, (f) => {
+  const accounts = f?.accounts ?? []
+  const same = accounts.findIndex((a) => a.uid && a.uid === uid.value)
+  picked.value = same >= 0 ? same : accounts.length === 1 ? 0 : null
 })
+const entry = computed<WishFileAccount | null>(() =>
+  picked.value === null ? null : (file.value?.accounts[picked.value] ?? null),
+)
 const mismatch = computed(() => {
-  if (!file.value || entry.value) return ''
-  const uids = file.value.accounts.map((a) => a.uid).filter(Boolean)
-  return uids.length ? `File is UID ${uids.join(', ')}` : 'No records'
+  const e = entry.value
+  if (!file.value) return ''
+  if (file.value.accounts.length === 0) return 'No records'
+  if (e?.uid && uid.value && e.uid !== uid.value) {
+    return `That history is UID ${e.uid}; this account is UID ${uid.value}`
+  }
+  return ''
 })
+const accountLabel = (a: WishFileAccount, i: number) =>
+  a.uid ? `UID ${a.uid}` : `Account ${i + 1}`
 
 function reset() {
   fileName.value = ''
@@ -213,6 +226,22 @@ async function remove() {
               FORMAT_LABELS[file.format]
             }}</span>
           </p>
+          <div
+            v-if="file && file.accounts.length > 1"
+            role="radiogroup"
+            aria-label="Account in the file"
+            class="flex flex-wrap gap-2"
+          >
+            <FilterChip
+              v-for="(a, i) in file.accounts"
+              :key="i"
+              radio
+              :pressed="picked === i"
+              :count="a.records.length"
+              @toggle="picked = i"
+              >{{ accountLabel(a, i) }}</FilterChip
+            >
+          </div>
           <p v-if="failure || mismatch" class="text-sm text-danger-text" role="alert">
             {{ failure || mismatch }}
           </p>
@@ -223,7 +252,7 @@ async function remove() {
           </p>
         </div>
         <UiButton
-          v-if="entry"
+          v-if="entry && !mismatch"
           variant="primary"
           :loading="saving"
           :disabled="entry.records.length === 0"

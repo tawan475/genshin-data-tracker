@@ -11,6 +11,8 @@ import {
   bannerAt,
   bannerStats,
   eventBanners,
+  monthlyPulls,
+  pityHistogram,
   type BannerFile,
   type EventBanner,
   type EventKind,
@@ -38,7 +40,23 @@ function banners(
   featured5: string[],
   featured4: string[] = ['Bennett', 'Xingqiu', 'Diona'],
 ): Map<EventKind, EventBanner[]> {
-  return new Map([[kind, [{ kind, start: 0, end: 4e9, featured5, featured4, version: '9.9' }]]])
+  return new Map([
+    [
+      kind,
+      [
+        {
+          kind,
+          start: 0,
+          end: 4e9,
+          featured5,
+          featured4,
+          version: '9.9',
+          name: 'Test',
+          name400: '',
+        },
+      ],
+    ],
+  ])
 }
 
 describe('wish pity', () => {
@@ -87,7 +105,22 @@ describe('wish pity', () => {
       'lost',
       'lost',
     ])
-    expect(stats).toMatchObject({ guaranteed5: true, won5: 1, lost5: 3, lostStreak: 2 })
+    expect(stats.guaranteed5).toBe(true)
+    expect(stats.rate5).toMatchObject({
+      won: 1,
+      lost: 3,
+      rate: 0.25,
+      winStreak: 0,
+      loseStreak: 2,
+      maxWinStreak: 1,
+      maxLoseStreak: 2,
+    })
+    // paimon.moe's table: 5★ count, share of all pulls, average pity.
+    expect(stats.five.count).toBe(5)
+    expect(stats.five.share).toBeCloseTo(5 / pulls.length)
+    expect(stats.five.avgPity).toBeCloseTo((11 + 11 + 11 + 11 + 1) / 5)
+    expect(stats.runs).toMatchObject([{ pulls: pulls.length }])
+    expect(stats.runs[0]!.fives.length).toBe(5)
   })
 
   it('tracks the 4★ guarantee from the featured three', () => {
@@ -105,6 +138,9 @@ describe('wish pity', () => {
     })
     expect(stats.fours.map((r) => r.outcome).reverse()).toEqual(['lost', 'guaranteed', 'lost'])
     expect(stats.guaranteed4).toBe(true)
+    expect(stats.rate4).toMatchObject({ won: 0, lost: 2 })
+    expect(stats.fourCharacter.count).toBe(3)
+    expect(stats.fourWeapon.count).toBe(0)
   })
 
   it('reads the weapon banner as 75/25 between its two and the standard ones', () => {
@@ -129,7 +165,18 @@ describe('wish pity', () => {
     const outside: Map<EventKind, EventBanner[]> = new Map([
       [
         'character',
-        [{ kind: 'character', start: 0, end: 1, featured5: [], featured4: [], version: '' }],
+        [
+          {
+            kind: 'character',
+            start: 0,
+            end: 1,
+            featured5: [],
+            featured4: [],
+            version: '',
+            name: '',
+            name400: '',
+          },
+        ],
       ],
     ])
     const stats = bannerStats(301, history(301, [...filler(5), 'Diluc']), {
@@ -150,6 +197,28 @@ describe('wish pity', () => {
   })
 })
 
+describe('wish charts', () => {
+  it('counts pulls per month without gaps, and 5★ per pity', () => {
+    const jan = parseWishTime('2026-01-31 23:00:00')!
+    const pulls = history(200, [...filler(3), 'Diluc'], jan)
+    const apr = history(200, ['Bennett'], parseWishTime('2026-04-02 10:00:00')!)
+    const stats = bannerStats(200, [...pulls, { ...apr[0]!, id: 1_790_000_000_000_000_000n }], {
+      timezone: 8,
+      banners: null,
+    })
+    expect(monthlyPulls([stats])).toEqual([
+      { month: '2026-01', total: 4, five: 1, four: 0 },
+      { month: '2026-02', total: 0, five: 0, four: 0 },
+      { month: '2026-03', total: 0, five: 0, four: 0 },
+      { month: '2026-04', total: 1, five: 0, four: 1 },
+    ])
+    const hist = pityHistogram(stats.fives, 90)
+    expect(hist.length).toBe(90)
+    expect(hist[3]).toBe(1)
+    expect(hist.reduce((a, b) => a + b, 0)).toBe(1)
+  })
+})
+
 describe('banner data', () => {
   const file = bannerFile as unknown as BannerFile
 
@@ -158,7 +227,10 @@ describe('banner data', () => {
       const list = eventBanners(file, tz).get('character')!
       // 2026-09-30 noon on that server's clock.
       const at = parseWishTime('2026-09-30 12:00:00')! - tz * 3600
-      expect(bannerAt(list, at)?.featured5).toContain('Vesna')
+      const on = bannerAt(list, at)
+      expect(on?.featured5).toContain('Vesna')
+      expect(on?.name).toBe('When Warm Winds Cavort')
+      expect(on?.name400).toBe('Surging Ballad')
     }
   })
 

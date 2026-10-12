@@ -293,6 +293,12 @@ const router = createRouter({
               () => import('@/views/account/WishesView.vue'),
             ),
             account(
+              'wishes/:banner(character|weapon|standard|chronicled|beginners)',
+              'account-wishes-banner',
+              'Wish history',
+              () => import('@/views/account/WishBannerView.vue'),
+            ),
+            account(
               'snapshots',
               'account-snapshots',
               'Snapshots',

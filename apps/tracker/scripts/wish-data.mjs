@@ -56,6 +56,7 @@ const load = (file) => import(pathToFileURL(join(paimon, 'src/data', file)).href
 const { characters } = await load('characters.js')
 const { weaponList } = await load('weaponList.js')
 const { banners } = await load('banners.js')
+const { bannersDual } = await load('bannersDual.js')
 
 const planner = JSON.parse(
   readFileSync(join(tracker, 'node_modules/@gdt/game-data/data/planner.json'), 'utf8'),
@@ -115,11 +116,24 @@ const banner = (kind) => (b) => [
   keys(b.featured ?? []),
   keys(b.featuredRare ?? []),
   b.version ?? '',
+  b.name ?? '',
+  // A dual phase's second character banner (gacha_type 400).
+  (kind === 'character' && bannersDual[`${b.name} ${b.image}`]?.[1]?.name) || '',
 ]
 const out = {
   attribution:
     'Banner dates and featured items adapted from paimon.moe (https://github.com/MadeBaruna/paimon-moe), MIT License, Copyright (c) Made Baruna. Regenerate with apps/tracker/scripts/wish-data.mjs.',
-  columns: ['kind', 'start', 'end', 'serverTime', 'featured5', 'featured4', 'version'],
+  columns: [
+    'kind',
+    'start',
+    'end',
+    'serverTime',
+    'featured5',
+    'featured4',
+    'version',
+    'name',
+    'name400',
+  ],
   banners: [
     ...banners.characters.map(banner('character')),
     ...banners.weapons.map(banner('weapon')),

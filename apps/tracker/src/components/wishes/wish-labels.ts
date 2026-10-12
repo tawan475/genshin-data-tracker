@@ -1,15 +1,33 @@
 import { formatWishTime, type UigfGachaType, type WishItem } from '@gdt/shared'
-import type { Outcome } from '@/data/wish-history'
+import type { Outcome, PullRow } from '@/data/wish-history'
 import { characterIcon, weaponIcon } from '@/lib/assets'
 
-/** Banner tabs, in the order the game's Wish screen lists them. */
-export const WISH_BANNERS: readonly { banner: UigfGachaType; label: string; title: string }[] = [
-  { banner: 301, label: 'Character', title: 'Character Event Wish (both banners)' },
-  { banner: 302, label: 'Weapon', title: 'Weapon Event Wish' },
-  { banner: 500, label: 'Chronicled', title: 'Chronicled Wish' },
-  { banner: 200, label: 'Standard', title: 'Wanderlust Invocation' },
-  { banner: 100, label: "Beginners'", title: "Beginners' Wish" },
+export interface WishBannerInfo {
+  banner: UigfGachaType
+  /** The detail page's path segment. */
+  slug: string
+  label: string
+  title: string
+  /** Whether its 5★ has a 50/50 (75/25 on the weapon banner). */
+  rated: boolean
+}
+
+/** Banners in the game's Wish screen order. */
+export const WISH_BANNERS: readonly WishBannerInfo[] = [
+  { banner: 301, slug: 'character', label: 'Character', title: 'Character Event', rated: true },
+  { banner: 302, slug: 'weapon', label: 'Weapon', title: 'Weapon Event', rated: true },
+  { banner: 200, slug: 'standard', label: 'Standard', title: 'Standard', rated: false },
+  { banner: 500, slug: 'chronicled', label: 'Chronicled', title: 'Chronicled Wish', rated: false },
+  { banner: 100, slug: 'beginners', label: "Beginners'", title: "Beginners' Wish", rated: false },
 ]
+
+export function bannerBySlug(slug: unknown): WishBannerInfo | undefined {
+  return WISH_BANNERS.find((b) => b.slug === slug)
+}
+
+export function bannerInfo(banner: UigfGachaType): WishBannerInfo {
+  return WISH_BANNERS.find((b) => b.banner === banner)!
+}
 
 export function wishIcon(item: WishItem): string {
   if (!item.key) return ''
@@ -31,12 +49,22 @@ export const OUTCOME_TONE: Record<Outcome, 'success' | 'danger' | 'accent'> = {
   guaranteed: 'accent',
 }
 
-/** Tooltip of an outcome; the weapon banner's odds are 75/25. */
-export function outcomeTitle(outcome: Outcome, banner: UigfGachaType): string {
-  const odds = banner === 302 ? '75/25' : '50/50'
+export const oddsOf = (banner: UigfGachaType) => (banner === 302 ? '75/25' : '50/50')
+
+/** Tooltip of an outcome; the weapon banner's 5★ odds are 75/25. */
+export function outcomeTitle(outcome: Outcome, banner: UigfGachaType, rank = 5): string {
+  const odds = rank === 5 ? oddsOf(banner) : '50/50'
   if (outcome === 'won') return `Won the ${odds}`
   if (outcome === 'lost') return `Lost the ${odds}: the next one is featured`
   return `Featured, guaranteed after a lost ${odds}`
+}
+
+/** The banner a pull was made on, by name ('' outside the banner data). */
+export function runName(row: PullRow): string {
+  const on = row.on
+  if (!on) return ''
+  if (row.pull.gachaType === 400 && on.name400) return on.name400
+  return on.name
 }
 
 export const RARITY_TEXT: Record<number, string> = {
@@ -44,3 +72,17 @@ export const RARITY_TEXT: Record<number, string> = {
   4: 'text-rarity-4',
   3: 'text-text-secondary',
 }
+
+/** A 5★ pity's colour: early green, soft pity amber, late red. */
+export function pityTone(pity: number, soft: number): string {
+  if (pity < soft * 0.6) return 'text-success-text'
+  if (pity < soft) return 'text-text-primary'
+  if (pity < soft + 6) return 'text-warning-text'
+  return 'text-danger-text'
+}
+
+export const formatPercent = (share: number) =>
+  `${(share * 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`
+
+export const formatPity = (pity: number) =>
+  pity.toLocaleString('en-US', { maximumFractionDigits: 2 })

@@ -25,6 +25,7 @@
 
 import {
   decodeWishChunk,
+  formatWishTime,
   fromBase64,
   parseWishTime,
   type UigfGachaType,
@@ -68,11 +69,14 @@ export interface EventBanner {
   featured5: readonly string[]
   featured4: readonly string[]
   version: string
+  /** The banner's name; `name400` the second character banner's of a dual phase ('' if none). */
+  name: string
+  name400: string
 }
 
 export interface BannerFile {
   columns: string[]
-  banners: [EventKind, string, string, 0 | 1, string[], string[], string][]
+  banners: [EventKind, string, string, 0 | 1, string[], string[], string, string?, string?][]
 }
 
 /**
@@ -84,7 +88,17 @@ export function eventBanners(file: BannerFile, timezone: number): Map<EventKind,
   const out = new Map<EventKind, EventBanner[]>()
   const utc = (text: string, serverTime: boolean) =>
     (parseWishTime(text) ?? 0) - (serverTime ? timezone : 8) * 3600
-  for (const [kind, start, end, serverTime, featured5, featured4, version] of file.banners) {
+  for (const [
+    kind,
+    start,
+    end,
+    serverTime,
+    featured5,
+    featured4,
+    version,
+    name,
+    name400,
+  ] of file.banners) {
     const list = out.get(kind) ?? []
     list.push({
       kind,
@@ -94,6 +108,8 @@ export function eventBanners(file: BannerFile, timezone: number): Map<EventKind,
       featured5,
       featured4,
       version,
+      name: name ?? '',
+      name400: name400 ?? '',
     })
     out.set(kind, list)
   }
@@ -136,6 +152,45 @@ export interface PullRow {
   pity: number
   /** 50/50 (or 75/25) result; null where the banner has none or is not known. */
   outcome: Outcome | null
+  /** The event banner it was pulled on (character, weapon, chronicled), when known. */
+  on: EventBanner | null
+}
+
+/** A rarity's line of the summary table: how many, of all pulls, and their average pity. */
+export interface RarityLine {
+  count: number
+  /** Of all pulls of the banner, 0-1. */
+  share: number
+  avgPity: number
+}
+
+/** 50/50s (75/25 on the weapon banner) won and lost; guaranteed ones are neither. */
+export interface RateLine {
+  won: number
+  lost: number
+  /** won / (won + lost), null before the first. */
+  rate: number | null
+  /** Wins (or losses) in a row: now, and the longest. */
+  winStreak: number
+  maxWinStreak: number
+  loseStreak: number
+  maxLoseStreak: number
+}
+
+export interface MonthCount {
+  /** "2026-10" on the game's clock. */
+  month: string
+  total: number
+  five: number
+  four: number
+}
+
+/** One run of an event banner, as the account pulled on it. */
+export interface BannerRun {
+  banner: EventBanner
+  pulls: number
+  /** Its 5★, oldest first. */
+  fives: PullRow[]
 }
 
 export interface BannerStats {
@@ -147,16 +202,21 @@ export interface BannerStats {
   /** The next 5★ is a featured one; null: no 50/50 here, or not known. */
   guaranteed5: boolean | null
   guaranteed4: boolean | null
-  /** 50/50s won and lost (5★, outcome not guaranteed). */
-  won5: number
-  lost5: number
-  /** 50/50s lost in a row, up to the newest 5★. */
-  lostStreak: number
+  five: RarityLine
+  four: RarityLine
+  fourCharacter: RarityLine
+  fourWeapon: RarityLine
+  /** null on banners without a 50/50 (standard, beginners', chronicled). */
+  rate5: RateLine | null
+  rate4: RateLine | null
   /** Every pull, newest first. */
   rows: PullRow[]
   /** 5★ and 4★ pulls, newest first. */
   fives: PullRow[]
   fours: PullRow[]
+  months: MonthCount[]
+  /** Event banner runs pulled on, oldest first (event banner types only). */
+  runs: BannerRun[]
 }
 
 /** Hard pity per banner type (5★, 4★). */
@@ -168,9 +228,74 @@ export const HARD_PITY: Readonly<Record<UigfGachaType, [number, number]>> = {
   500: [90, 10],
 }
 
-const EVENT_KIND: Partial<Record<UigfGachaType, EventKind>> = {
+/** Where soft pity starts (the 5★ rate climbs from this pull). */
+export const SOFT_PITY: Readonly<Record<UigfGachaType, number>> = {
+  100: 74,
+  200: 74,
+  301: 74,
+  302: 63,
+  500: 74,
+}
+
+/**
+ * The average pulls a 5★ takes with soft pity, from the community's models
+ * of the game's rates (0.6% / 0.7% base, +6% / +7% a pull from soft pity):
+ * about 62.3 on character-type banners and 53.3 on the weapon banner.
+ */
+export const EXPECTED_PITY: Readonly<Record<UigfGachaType, number>> = {
+  100: 62.3,
+  200: 62.3,
+  301: 62.3,
+  302: 53.3,
+  500: 62.3,
+}
+
+/** Primogems a wish costs. */
+export const PRIMOS_PER_PULL = 160
+
+const RATE_KIND: Partial<Record<UigfGachaType, EventKind>> = {
   301: 'character',
   302: 'weapon',
+}
+const RUN_KIND: Partial<Record<UigfGachaType, EventKind>> = {
+  ...RATE_KIND,
+  500: 'chronicled',
+}
+
+function newRate(): RateLine {
+  return {
+    won: 0,
+    lost: 0,
+    rate: null,
+    winStreak: 0,
+    maxWinStreak: 0,
+    loseStreak: 0,
+    maxLoseStreak: 0,
+  }
+}
+
+function tally(rate: RateLine, outcome: Outcome | null): void {
+  if (outcome === 'won') {
+    rate.won++
+    rate.winStreak++
+    rate.loseStreak = 0
+    rate.maxWinStreak = Math.max(rate.maxWinStreak, rate.winStreak)
+  } else if (outcome === 'lost') {
+    rate.lost++
+    rate.loseStreak++
+    rate.winStreak = 0
+    rate.maxLoseStreak = Math.max(rate.maxLoseStreak, rate.loseStreak)
+  }
+  rate.rate = rate.won + rate.lost > 0 ? rate.won / (rate.won + rate.lost) : null
+}
+
+function line(rows: readonly PullRow[], total: number): RarityLine {
+  const sum = rows.reduce((s, r) => s + r.pity, 0)
+  return {
+    count: rows.length,
+    share: total > 0 ? rows.length / total : 0,
+    avgPity: rows.length > 0 ? sum / rows.length : 0,
+  }
 }
 
 export function bannerStats(
@@ -178,27 +303,29 @@ export function bannerStats(
   pulls: readonly WishPull[],
   options: { timezone: number; banners: ReadonlyMap<EventKind, readonly EventBanner[]> | null },
 ): BannerStats {
-  const kind = EVENT_KIND[banner]
-  const list = kind && options.banners ? (options.banners.get(kind) ?? []) : null
+  const runKind = RUN_KIND[banner]
+  const list = runKind && options.banners ? (options.banners.get(runKind) ?? []) : null
+  const rated = !!RATE_KIND[banner] && !!list
   let pity5 = 0
   let pity4 = 0
   // null: not known (a pull outside the banner data broke the chain).
-  let guaranteed5: boolean | null = list ? false : null
-  let guaranteed4: boolean | null = list ? false : null
-  let won5 = 0
-  let lost5 = 0
-  let lostStreak = 0
+  let guaranteed5: boolean | null = rated ? false : null
+  let guaranteed4: boolean | null = rated ? false : null
+  const rate5 = newRate()
+  const rate4 = newRate()
   const rows: PullRow[] = []
+  const months = new Map<string, MonthCount>()
+  const runs = new Map<EventBanner, BannerRun>()
   pulls.forEach((pull, i) => {
     pity5++
     pity4++
     const rank = pull.item.rank
+    const on = list ? bannerAt(list, pull.time - options.timezone * 3600) : null
     let pity = 0
     let outcome: Outcome | null = null
     if (rank === 5 || rank === 4) {
       pity = rank === 5 ? pity5 : pity4
-      if (list) {
-        const on = bannerAt(list, pull.time - options.timezone * 3600)
+      if (rated) {
         const featured = on ? (rank === 5 ? on.featured5 : on.featured4) : null
         const before = rank === 5 ? guaranteed5 : guaranteed4
         let after: boolean | null
@@ -213,33 +340,95 @@ export function bannerStats(
         }
         if (rank === 5) {
           guaranteed5 = after
-          if (outcome === 'won') {
-            won5++
-            lostStreak = 0
-          } else if (outcome === 'lost') {
-            lost5++
-            lostStreak++
-          }
-        } else guaranteed4 = after
+          tally(rate5, outcome)
+        } else {
+          guaranteed4 = after
+          tally(rate4, outcome)
+        }
       }
       if (rank === 5) pity5 = 0
       else pity4 = 0
     }
-    rows.push({ pull, number: i + 1, pity, outcome })
+    const row: PullRow = { pull, number: i + 1, pity, outcome, on }
+    rows.push(row)
+
+    const month = formatWishTime(pull.time).slice(0, 7)
+    const m = months.get(month) ?? { month, total: 0, five: 0, four: 0 }
+    m.total++
+    if (rank === 5) m.five++
+    else if (rank === 4) m.four++
+    months.set(month, m)
+
+    if (on) {
+      const run = runs.get(on) ?? { banner: on, pulls: 0, fives: [] }
+      run.pulls++
+      if (rank === 5) run.fives.push(row)
+      runs.set(on, run)
+    }
   })
-  rows.reverse()
+  const total = pulls.length
+  const fives = rows.filter((r) => r.pull.item.rank === 5)
+  const fours = rows.filter((r) => r.pull.item.rank === 4)
   return {
     banner,
-    total: pulls.length,
+    total,
     pity5,
     pity4,
     guaranteed5,
     guaranteed4,
-    won5,
-    lost5,
-    lostStreak,
-    rows,
-    fives: rows.filter((r) => r.pull.item.rank === 5),
-    fours: rows.filter((r) => r.pull.item.rank === 4),
+    five: line(fives, total),
+    four: line(fours, total),
+    fourCharacter: line(
+      fours.filter((r) => r.pull.item.kind === 'character'),
+      total,
+    ),
+    fourWeapon: line(
+      fours.filter((r) => r.pull.item.kind === 'weapon'),
+      total,
+    ),
+    rate5: rated ? rate5 : null,
+    rate4: rated ? rate4 : null,
+    rows: rows.reverse(),
+    fives: fives.reverse(),
+    fours: fours.reverse(),
+    months: [...months.values()],
+    runs: [...runs.values()],
   }
+}
+
+/** Pulls of every banner per month (game clock), oldest first, months without pulls included. */
+export function monthlyPulls(stats: readonly BannerStats[]): MonthCount[] {
+  const all = new Map<string, MonthCount>()
+  for (const s of stats) {
+    for (const m of s.months) {
+      const a = all.get(m.month) ?? { month: m.month, total: 0, five: 0, four: 0 }
+      a.total += m.total
+      a.five += m.five
+      a.four += m.four
+      all.set(m.month, a)
+    }
+  }
+  const keys = [...all.keys()].sort()
+  if (keys.length === 0) return []
+  const out: MonthCount[] = []
+  let [y, mo] = keys[0]!.split('-').map(Number) as [number, number]
+  const end = keys.at(-1)!
+  for (;;) {
+    const key = `${y}-${String(mo).padStart(2, '0')}`
+    out.push(all.get(key) ?? { month: key, total: 0, five: 0, four: 0 })
+    if (key >= end) break
+    mo++
+    if (mo > 12) {
+      mo = 1
+      y++
+    }
+  }
+  return out
+}
+
+/** How many pulls of `rows` took each pity, 1..hard (index 0 = pity 1). */
+export function pityHistogram(rows: readonly PullRow[], hard: number): number[] {
+  const out = new Array<number>(hard).fill(0)
+  for (const r of rows) if (r.pity >= 1 && r.pity <= hard) out[r.pity - 1]!++
+  return out
 }
