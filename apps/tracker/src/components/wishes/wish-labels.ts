@@ -1,6 +1,7 @@
-import { formatWishTime, type UigfGachaType, type WishItem } from '@gdt/shared'
+import { characterImages, weaponImages } from '@gdt/game-data/images'
+import { formatWishTime, toGoodKey, type UigfGachaType, type WishItem } from '@gdt/shared'
 import type { Outcome, PullRow } from '@/data/wish-history'
-import { characterIcon, weaponIcon } from '@/lib/assets'
+import { imageUrl } from '@/lib/assets'
 
 export interface WishBannerInfo {
   banner: UigfGachaType
@@ -29,9 +30,26 @@ export function bannerInfo(banner: UigfGachaType): WishBannerInfo {
   return WISH_BANNERS.find((b) => b.banner === banner)!
 }
 
+/**
+ * The game's icon name of a pulled item, from the game data's images by
+ * GOOD key: the item's own, or for an item kept as it came (a name the
+ * wish table doesn't know yet) its name's toGoodKey, as a character or a
+ * weapon. undefined when the game data has no picture for it.
+ */
+export function wishIconName(item: WishItem): string | undefined {
+  const key = item.key ?? toGoodKey(item.name)
+  if (!key) return undefined
+  const character = () => characterImages(key)?.icon
+  const weapon = () => weaponImages(key)?.[0]
+  return item.kind === 'weapon'
+    ? weapon()
+    : item.kind === 'character'
+      ? character()
+      : (character() ?? weapon())
+}
+
 export function wishIcon(item: WishItem): string {
-  if (!item.key) return ''
-  return item.kind === 'weapon' ? weaponIcon(item.key) : characterIcon(item.key)
+  return imageUrl(wishIconName(item))
 }
 
 /** The game's clock, to the minute ("2026-10-12 21:04"). */

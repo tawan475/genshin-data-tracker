@@ -1,8 +1,9 @@
 /**
  * Wish history routes.
  *
- * irminsul (`/api/wishes/*`, the contract in its docs: an import key now,
- * its sign-in token later, see lib/uploader.ts):
+ * irminsul (`/api/wishes/*`): its sign-in token (`Authorization: Bearer`,
+ * routed by the session's upload target) or an import key (`x-import-key`),
+ * resolved as uploads are (lib/uploader.ts):
  * - `GET /cursor?uid=`: the newest game id held per banner, so irminsul
  *   pages the game's history only until it reaches a pull the tracker has.
  *   A UID without an account answers `accountId: null` and no ids (a user
@@ -62,7 +63,7 @@ const uidQuery = (c: Context): string => {
 export const wishSync = new Hono<AppEnv>()
   .get('/cursor', async (c) => {
     const uid = uidQuery(c)
-    const owner = await uploaderOf(c, c.env.IMPORT_LIMITER)
+    const owner = await uploaderOf(c, c.env.IMPORT_LIMITER, 'wishes-cursor')
     const account = uploaderAccount(owner, uid)
     const meter = new D1Meter()
     const newest = account ? await wishCursor(c.env.DB, meter, account.id) : { ...EMPTY_NEWEST }
@@ -72,7 +73,7 @@ export const wishSync = new Hono<AppEnv>()
 
   .post('/import', async (c) => {
     limitBody(c, SYNC_BODY_LIMIT)
-    const owner = await uploaderOf(c, c.env.KEY_IMPORT_LIMITER)
+    const owner = await uploaderOf(c, c.env.KEY_IMPORT_LIMITER, 'wishes')
     const body = await parseJson(c, wishImportRequest)
     const meter = new D1Meter()
     const userId = uploaderUserId(owner)

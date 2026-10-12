@@ -286,7 +286,7 @@ API with the key the game hands out when Wish → History is opened (the key
 never reaches the tracker), or from a file.
 
 **Storage** (`@gdt/shared` `src/wish/`, `worker/services/wishes.ts`, migration
-0022). `wish_histories` holds an account's clock (hours from UTC, set by its
+0023). `wish_histories` holds an account's clock (hours from UTC, set by its
 first import) and a version (the ETag, and the guard concurrent imports
 check). `wish_chunks` holds the pulls per account and UIGF banner type (100,
 200, 301 with 400, 302, 500) in pull order, at most 512 to a row (`seq` 0, 1,
@@ -314,8 +314,10 @@ record that matches one replaces it. Any id below 10^18 that arrives is
 treated the same way. The sync cursor counts only real ids, so irminsul then
 fetches what the API still has and replaces the made-up ids.
 
-**API.** irminsul (import key in `x-import-key`, account- or user-scoped like
-uploads; a sign-in token later, `worker/lib/uploader.ts`):
+**API.** irminsul, signed in (`Authorization: Bearer`, routed by the
+session's upload target as `/api/irminsul/import` is) or with an import key
+(`x-import-key`, account- or user-scoped like uploads); one resolver for
+both, `worker/lib/uploader.ts`:
 `GET /api/wishes/cursor?uid=` → `{uid, accountId, newest: {"100"…"500": id |
 null}}` (the highest game id held per banner; a user key's unknown UID answers
 `accountId: null`; an account key of another UID is 409 `uid_mismatch`), and

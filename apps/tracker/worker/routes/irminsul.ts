@@ -21,10 +21,11 @@ import { Hono, type Context } from 'hono'
 import type { AppEnv } from '../env'
 import type { IrminsulClaims } from '../lib/irminsul-auth'
 import { irminsulSessionEnded, requireIrminsul } from '../lib/irminsul-auth'
-import { ApiError, rateLimit } from '../lib/http'
+import { rateLimit } from '../lib/http'
 import { readUpload } from '../lib/upload'
-import { uploadsRefused, type UploadOwner } from '../services/accounts'
-import { configUrl, loadSession, loadUploadSession, whoamiOf } from '../services/irminsul'
+import { uploadsRefused } from '../services/accounts'
+import { sessionOwner } from '../lib/uploader'
+import { configUrl, loadSession, whoamiOf } from '../services/irminsul'
 import { uploadAs } from '../services/upload-as'
 
 function claimsOf(c: Context<AppEnv>): IrminsulClaims {
@@ -48,25 +49,8 @@ export const irminsul = new Hono<AppEnv>()
   .post('/import', async (c) => {
     const claims = claimsOf(c)
     await rateLimit(c.env.KEY_IMPORT_LIMITER, `irminsul:${claims.sid}`)
-    const found = await loadUploadSession(c.env.DB, claims)
-    if (!found) throw irminsulSessionEnded()
-    const { session, accounts } = found
-    if (session.block) throw uploadsRefused(session.block)
+    const owner = await sessionOwner(c, claims)
     const where = configUrl(new URL(c.req.url).origin, claims.sid)
-    let owner: UploadOwner
-    if (session.upload_mode === 'account') {
-      const account = accounts.find((a) => a.id === session.upload_account_id)
-      if (!account) {
-        throw new ApiError(
-          409,
-          'upload_target_missing',
-          `The account this PC uploads to was deleted. Choose where uploads go: ${where}`,
-        )
-      }
-      owner = { scope: 'account', account, userId: claims.userId }
-    } else {
-      owner = { scope: 'user', user: { id: claims.userId, username: session.username }, accounts }
-    }
     return uploadAs(c, owner, await readUpload(c), {
       uidRequired: `This file has no UID (gi_player.uid), so it can't be matched to an account. Update Irminsul, or choose one account for this PC: ${where}`,
     })

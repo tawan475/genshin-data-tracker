@@ -5,7 +5,10 @@ import {
   fromBase64,
   isSyntheticWishId,
   parseWishFile,
+  toBase64Url,
   type AccountCreatedResponse,
+  type IrminsulTokenResponse,
+  type UploadTarget,
   type AccountResponse,
   type ImportKeyResponse,
   type WishCursorResponse,
@@ -15,7 +18,9 @@ import {
   type WishRecord,
 } from '@gdt/shared'
 import { env, SELF } from 'cloudflare:test'
+import { sign } from 'hono/jwt'
 import { describe, expect, it } from 'vitest'
+import { randomToken } from '../lib/crypto'
 import { syntheticWishRecords } from '../../../../packages/shared/test/wish-synthetic'
 import { utcDay } from '../services/upload-limits'
 import { Client, ORIGIN, signUp } from './client'
@@ -41,17 +46,24 @@ function costOf(response: Response) {
   ) as Record<string, number>
 }
 
-async function cursor(key: string, uid = UID) {
+/** An import key, or `{ bearer }`: a signed-in irminsul's access token. */
+type Credential = string | { bearer: string }
+const authOf = (credential: Credential): Record<string, string> =>
+  typeof credential === 'string'
+    ? { 'x-import-key': credential }
+    : { authorization: `Bearer ${credential.bearer}` }
+
+async function cursor(key: Credential, uid = UID) {
   const response = await SELF.fetch(`${ORIGIN}/api/wishes/cursor?uid=${uid}`, {
-    headers: { 'x-import-key': key, 'x-diag-key': DIAG },
+    headers: { ...authOf(key), 'x-diag-key': DIAG },
   })
   return { response, cost: costOf(response) }
 }
 
-async function sync(key: string, records: WishRecord[], body: Record<string, unknown> = {}) {
+async function sync(key: Credential, records: WishRecord[], body: Record<string, unknown> = {}) {
   const response = await SELF.fetch(`${ORIGIN}/api/wishes/import`, {
     method: 'POST',
-    headers: { 'x-import-key': key, 'x-diag-key': DIAG, 'content-type': 'application/json' },
+    headers: { ...authOf(key), 'x-diag-key': DIAG, 'content-type': 'application/json' },
     body: JSON.stringify({
       uid: UID,
       region: 'os_asia',
@@ -344,5 +356,110 @@ describe('wish history (website)', () => {
       json: { records: history.slice(0, 2) },
     })
     expect(response.status).toBe(403)
+  })
+})
+
+/** Signs irminsul in for `client`'s user (the /link page's Allow, then the code exchange). */
+async function signIn(client: Client, upload: UploadTarget = { mode: 'uid' }) {
+  const verifier = randomToken(32)
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
+  const redirect = 'http://127.0.0.1:53682/callback'
+  const { redirect: back } = await client.json<{ redirect: string }>('/api/oauth/authorize', {
+    method: 'POST',
+    json: {
+      client_id: 'irminsul',
+      redirect_uri: redirect,
+      state: 'state-0123456789abcdefghijklmnopqrstuvwxyz',
+      code_challenge: toBase64Url(new Uint8Array(digest)),
+      code_challenge_method: 'S256',
+      device: 'GAMING-PC',
+      upload,
+    },
+  })
+  const response = await SELF.fetch(`${ORIGIN}/api/oauth/token`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      client_id: 'irminsul',
+      code: new URL(back).searchParams.get('code'),
+      code_verifier: verifier,
+      redirect_uri: redirect,
+    }),
+  })
+  expect(response.status).toBe(200)
+  return (await response.json()) as IrminsulTokenResponse
+}
+
+describe('wish sync signed in (Bearer)', () => {
+  it("routes by the records' UID in uid mode, making the account, as uploads do", async () => {
+    const { client } = await signUp()
+    const tokens = await signIn(client)
+    const bearer = { bearer: tokens.access_token }
+    const before = await ok<WishCursorResponse>((await cursor(bearer)).response)
+    expect(before.accountId).toBeNull()
+    const records = newestFirst('302').slice(0, 25)
+    const body = await ok<WishImportResponse>((await sync(bearer, records)).response)
+    expect(body.added).toBe(25)
+    const accounts = await client.json<AccountResponse[]>('/api/accounts')
+    expect(accounts.map((a) => [a.id, a.uid])).toEqual([[body.accountId, UID]])
+    const after = await cursor(bearer)
+    expect((await ok<WishCursorResponse>(after.response)).newest['302']).toBe(records[0]!.id)
+    // The newest ids; the owner lookup (session + accounts) is one more, as for a key.
+    expect(after.cost['round-trips']).toBe(1)
+    const again = await sync(bearer, records)
+    expect(await ok<WishImportResponse>(again.response)).toMatchObject({ added: 0, known: 25 })
+    expect(again.cost['round-trips']).toBe(1)
+  })
+
+  it("uploads to the session's one account in account mode, refusing another UID", async () => {
+    const { client } = await signUp()
+    const { account } = await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: { name: 'Main', uid: UID, server: 'ASIA' },
+    })
+    const tokens = await signIn(client, { mode: 'account', account_id: account.id })
+    const bearer = { bearer: tokens.access_token }
+    const body = await ok<WishImportResponse>((await sync(bearer, history.slice(0, 10))).response)
+    expect(body).toMatchObject({ accountId: account.id, added: 10 })
+    const other = await sync(bearer, [], { uid: '822222222' })
+    expect(other.response.status).toBe(409)
+    expect(await errorOf(other.response)).toBe('uid_mismatch')
+    expect((await cursor(bearer, '822222222')).response.status).toBe(409)
+
+    // Its account deleted: nowhere to go until another target is chosen.
+    await client.fetch(`/api/accounts/${account.id}`, { method: 'DELETE' })
+    const gone = await sync(bearer, history.slice(0, 3))
+    expect(gone.response.status).toBe(409)
+    expect(await errorOf(gone.response)).toBe('upload_target_missing')
+  })
+
+  it('answers 401 token_expired and session_revoked, and refuses stopped users', async () => {
+    const { client, me } = await signUp()
+    const tokens = await signIn(client)
+    const sid = Number(/^gdt_irt_(\d+)_/.exec(tokens.refresh_token)![1])
+    const now = Math.floor(Date.now() / 1000)
+    const claims = { sub: String(me.id), sid, ver: 0, typ: 'irminsul', aud: 'irminsul' }
+    const expired = await sign({ ...claims, iat: now - 1000, exp: now - 10 }, env.JWT_SECRET)
+    const late = await cursor({ bearer: expired })
+    expect(late.response.status).toBe(401)
+    expect(await errorOf(late.response)).toBe('token_expired')
+    expect((await cursor({ bearer: 'not-a-token' })).response.status).toBe(401)
+
+    await env.DB.prepare('UPDATE user_sessions SET revoked_at = ?2 WHERE id = ?1')
+      .bind(sid, Date.now())
+      .run()
+    const ended = await sync({ bearer: tokens.access_token }, history.slice(0, 2))
+    expect(ended.response.status).toBe(401)
+    expect(await errorOf(ended.response)).toBe('session_revoked')
+
+    const other = await signUp()
+    const live = await signIn(other.client)
+    await env.DB.prepare('UPDATE users SET uploads_blocked_at = 1 WHERE id = ?1')
+      .bind(other.me.id)
+      .run()
+    const blocked = await sync({ bearer: live.access_token }, history.slice(0, 2))
+    expect(blocked.response.status).toBe(403)
+    expect(await errorOf(blocked.response)).toBe('uploads_blocked')
   })
 })

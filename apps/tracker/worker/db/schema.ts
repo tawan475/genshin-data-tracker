@@ -300,7 +300,7 @@ export const anecdoteMarks = sqliteTable(
 )
 
 /**
- * An account's wish history (migration 0022): the clock its pull times are
+ * An account's wish history (migration 0023): the clock its pull times are
  * on (hours from UTC, set by the first import) and a version that moves
  * with every change (the history's ETag, and what concurrent imports check
  * before they write). The pulls are in wish_chunks.

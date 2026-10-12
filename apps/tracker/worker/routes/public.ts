@@ -19,36 +19,11 @@
  */
 
 import type { VerifyKeyResponse } from '@gdt/shared'
-import { Hono, type Context } from 'hono'
+import { Hono } from 'hono'
 import type { AppEnv } from '../env'
-import { ApiError, clientIp, rateLimit } from '../lib/http'
 import { readUpload } from '../lib/upload'
-import {
-  findImportKeyOwner,
-  hashImportKey,
-  uploadsRefused,
-  type ImportKeyOwner,
-} from '../services/accounts'
+import { keyOwner } from '../lib/uploader'
 import { uploadAs } from '../services/upload-as'
-
-/** The key's owner; `limiter` is the per-minute budget of this route, per key. */
-async function keyOwner(
-  c: Context<AppEnv>,
-  limiter: RateLimit | undefined,
-): Promise<ImportKeyOwner> {
-  const key = c.req.header('x-import-key')
-  if (!key) throw new ApiError(401, 'missing_import_key', 'Missing x-import-key header')
-  const hash = await hashImportKey(key)
-  await rateLimit(limiter, `key:${hash}`)
-  const owner = await findImportKeyOwner(c.env.DB, hash)
-  if (!owner) {
-    await rateLimit(c.env.AUTH_LIMITER, `bad-key:${clientIp(c)}`)
-    throw new ApiError(401, 'invalid_import_key', 'Unknown import key')
-  }
-  // Staff stopped this user's uploads (the staff dashboard).
-  if (owner.blocked) throw uploadsRefused(owner.blocked)
-  return owner
-}
 
 export const publicImport = new Hono<AppEnv>()
   .get('/verify-key', async (c) => {
