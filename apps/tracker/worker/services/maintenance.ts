@@ -8,8 +8,8 @@
  *   v2 section blobs by id (one pass over the snapshot rows, no index needed).
  *   Sections are shared between snapshots, which is why a delete cannot free
  *   them on the spot.
- * - One-time links (auth_tokens) are purged a day after they expired; used
- *   ones go then too.
+ * - One-time links (auth_tokens) and irminsul's sign-in codes (oauth_codes)
+ *   are purged a day after they expired; used ones go then too.
  * - Upload days (the daily upload quota's counts) older than UPLOAD_DAYS_KEPT
  *   are purged.
  * - Session rows (user_sessions, with their IPs) are deleted SESSION_KEEP_DAYS
@@ -24,6 +24,7 @@
  */
 
 import { KEEP_EXPIRED_MS } from './auth-tokens'
+import { CODE_KEEP_MS } from './irminsul'
 import { COLLECT_LEGACY_BLOBS, repack, type RepackResult } from './repack'
 import { REFS_SQL, withLegacySchema } from './storage'
 import { UPLOAD_DAYS_KEPT, utcDay } from './upload-limits'
@@ -84,7 +85,7 @@ export async function runMaintenance(
 ): Promise<MaintenanceResult> {
   // One batch: a failure (the v1 tables gone, say) leaves nothing half done.
   const sessionsEnded = now - SESSION_KEEP_DAYS * 86_400_000
-  const [snapshots, sections, tokens, uploadDays, sessions, signupIps, legacy] =
+  const [snapshots, sections, tokens, codes, uploadDays, sessions, signupIps, legacy] =
     await withLegacySchema((withV1) =>
       d1.batch([
         d1
@@ -92,6 +93,7 @@ export async function runMaintenance(
           .bind(now - TRASH_DAYS * 86_400_000),
         d1.prepare(COLLECT_SECTION_BLOBS),
         d1.prepare('DELETE FROM auth_tokens WHERE expires_at < ?1').bind(now - KEEP_EXPIRED_MS),
+        d1.prepare('DELETE FROM oauth_codes WHERE expires_at < ?1').bind(now - CODE_KEEP_MS),
         d1
           .prepare('DELETE FROM user_upload_days WHERE day < ?1')
           .bind(utcDay(now - UPLOAD_DAYS_KEPT * 86_400_000)),
@@ -110,7 +112,7 @@ export async function runMaintenance(
     snapshots: snapshots!.meta.changes,
     // Rows returned: meta.changes would also count the counter trigger's updates.
     blobs: sections!.results.length + (legacy?.results.length ?? 0),
-    tokens: tokens!.meta.changes,
+    tokens: tokens!.meta.changes + codes!.meta.changes,
     uploadDays: uploadDays!.meta.changes,
     sessions: sessions!.meta.changes,
     signupIps: signupIps!.meta.changes,

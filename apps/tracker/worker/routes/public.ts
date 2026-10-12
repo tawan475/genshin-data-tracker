@@ -18,22 +18,18 @@
  * owner's daily and storage quotas (429 / 413, services/upload-limits.ts).
  */
 
-import type { ImportResponse, PreparedSnapshot, VerifyKeyResponse } from '@gdt/shared'
+import type { VerifyKeyResponse } from '@gdt/shared'
 import { Hono, type Context } from 'hono'
 import type { AppEnv } from '../env'
 import { ApiError, clientIp, rateLimit } from '../lib/http'
-import { D1Meter } from '../lib/meter'
 import { readUpload } from '../lib/upload'
 import {
-  accountForUid,
   findImportKeyOwner,
   hashImportKey,
   uploadsRefused,
   type ImportKeyOwner,
-  type KeyAccount,
 } from '../services/accounts'
-import { importSnapshot, parseUpload } from '../services/import'
-import { notifyUser } from '../services/live'
+import { uploadAs } from '../services/upload-as'
 
 /** The key's owner; `limiter` is the per-minute budget of this route, per key. */
 async function keyOwner(
@@ -81,58 +77,8 @@ export const publicImport = new Hono<AppEnv>()
 
   .post('/import-by-key', async (c) => {
     const owner = await keyOwner(c, c.env.KEY_IMPORT_LIMITER)
-    const upload = await readUpload(c)
-    const meter = new D1Meter()
-    let account: KeyAccount
-    let userId: number
-    let created = false
-    let parsed: PreparedSnapshot | undefined
-    if (owner.scope === 'account') {
-      account = owner.account
-      userId = owner.userId
-    } else {
-      userId = owner.user.id
-      parsed = await parseUpload(upload.text)
-      const uid = parsed.good.player?.uid
-      if (uid === undefined) {
-        throw new ApiError(
-          422,
-          'uid_required',
-          "This file has no UID (gi_player.uid), so your all-accounts key can't tell which account it is. Update Irminsul, or use the account's own import key.",
-        )
-      }
-      ;({ account, created } = await accountForUid(
-        c.env.DB,
-        meter,
-        owner.user.id,
-        String(uid),
-        owner.accounts,
-      ))
-    }
-    const { response, dataVersion, listener } = await importSnapshot(
-      c.env.DB,
-      account,
-      upload,
-      meter,
-      parsed,
-    ).catch((error: unknown) => {
-      // The account this upload made stays, whatever happened to the file.
-      if (created) notifyUser(c, userId, { type: 'accounts' })
-      throw error
+    return uploadAs(c, owner, await readUpload(c), {
+      uidRequired:
+        "This file has no UID (gi_player.uid), so your all-accounts key can't tell which account it is. Update Irminsul, or use the account's own import key.",
     })
-    meter.report(c)
-    // Only when someone listens (read in the import's own batch). A new
-    // account is in the list now even when its first file changed nothing.
-    if (dataVersion !== null || created) {
-      notifyUser(
-        c,
-        userId,
-        { type: 'data', accountId: account.id, dataVersion, takenAt: response.takenAt },
-        listener,
-      )
-    }
-    return c.json<ImportResponse>(
-      { ...response, account: { id: account.id, name: account.name, uid: account.uid, created } },
-      response.status === 'created' ? 201 : 200,
-    )
   })

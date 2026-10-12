@@ -162,7 +162,11 @@ export interface KeyAccount {
  */
 export type KeyBlock = 'suspended' | 'uploads_blocked' | null
 
-export type ImportKeyOwner = { blocked: KeyBlock } & (
+/**
+ * Who an upload is for (an import key's owner, or a signed-in irminsul's
+ * session): one account, or the user's account by the file's UID.
+ */
+export type UploadOwner =
   | { scope: 'account'; account: KeyAccount; userId: number }
   | {
       scope: 'user'
@@ -170,7 +174,8 @@ export type ImportKeyOwner = { blocked: KeyBlock } & (
       /** All of the user's accounts: few rows, and read in the same round trip. */
       accounts: KeyAccount[]
     }
-)
+
+export type ImportKeyOwner = { blocked: KeyBlock } & UploadOwner
 
 /** 403 for a stopped user's upload (irminsul shows the message). */
 export function uploadsRefused(block: 'suspended' | 'uploads_blocked'): ApiError {

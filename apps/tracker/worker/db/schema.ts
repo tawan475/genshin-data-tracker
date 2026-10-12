@@ -464,7 +464,7 @@ export const userSessions = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     method: text('method', {
-      enum: ['password', 'discord', 'google', 'reset', 'legacy'],
+      enum: ['password', 'discord', 'google', 'reset', 'legacy', 'irminsul'],
     }).notNull(),
     userAgent: text('user_agent'),
     ip: text('ip'),
@@ -475,8 +475,52 @@ export const userSessions = sqliteTable(
     lastSeenAt: integer('last_seen_at').notNull(),
     expiresAt: integer('expires_at').notNull(),
     revokedAt: integer('revoked_at'),
+    // irminsul sessions (method 'irminsul', migration 0022; lib/irminsul-auth,
+    // services/irminsul); NULL on browser rows.
+    /** The PC's name irminsul sent; `user_agent` is "Irminsul on <device>". */
+    deviceName: text('device_name'),
+    /** Where its uploads go: by the file's UID, or always `upload_account_id`. */
+    uploadMode: text('upload_mode', { enum: ['uid', 'account'] }),
+    /**
+     * The account in `account` mode. No foreign key (ADD COLUMN with one could
+     * make drizzle-kit rebuild the table): reads join it to the user's own
+     * accounts, and account ids are never reused (AUTOINCREMENT).
+     */
+    uploadAccountId: integer('upload_account_id'),
+    /** SHA-256 hex of the current refresh token: rotated on every refresh. */
+    refreshHash: text('refresh_hash'),
+    /** The one before: presenting it again (a stolen copy) ends the session. */
+    refreshPrevHash: text('refresh_prev_hash'),
   },
   (t) => [index('user_sessions_user_revoked_idx').on(t.userId, t.revokedAt)],
+)
+
+/**
+ * irminsul's one-time authorization codes (migration 0022; services/irminsul):
+ * made by `POST /api/oauth/authorize` when the user allows, exchanged once
+ * within 60 s by `POST /api/oauth/token` with the PKCE verifier. Only the
+ * code's SHA-256 is kept, with what the session it makes needs. `session_id`:
+ * the session the exchange made (a second exchange of the code ends it, RFC
+ * 6749 §4.1.2). Maintenance deletes rows a day after they expired.
+ */
+export const oauthCodes = sqliteTable(
+  'oauth_codes',
+  {
+    codeHash: text('code_hash').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    challenge: text('challenge').notNull(),
+    redirectUri: text('redirect_uri').notNull(),
+    deviceName: text('device_name').notNull(),
+    uploadMode: text('upload_mode', { enum: ['uid', 'account'] }).notNull(),
+    uploadAccountId: integer('upload_account_id'),
+    createdAt: timestamp('created_at'),
+    expiresAt: integer('expires_at').notNull(),
+    usedAt: integer('used_at'),
+    sessionId: integer('session_id'),
+  },
+  (t) => [index('oauth_codes_expires_idx').on(t.expiresAt)],
 )
 
 /**

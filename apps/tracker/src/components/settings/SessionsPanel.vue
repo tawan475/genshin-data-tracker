@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { SessionMethod, SessionResponse } from '@gdt/shared'
-import { computed, onMounted, ref, type Component } from 'vue'
-import { useRouter } from 'vue-router'
-import { History, KeyRound, LifeBuoy, LogOut } from 'lucide-vue-next'
+import type { SessionMethod, SessionResponse, UploadTarget } from '@gdt/shared'
+import { computed, nextTick, onMounted, ref, type Component } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { History, KeyRound, LifeBuoy, LogOut, Monitor } from 'lucide-vue-next'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSelect, { type SelectGroup, type SelectOption } from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { ApiRequestError, api } from '@/api'
 import { formatDateTime, formatRelative } from '@/lib/format'
@@ -19,12 +20,15 @@ import { useSession } from '@/stores/session'
  * The devices signed in to this account (each sign-in is one): where each
  * was last seen and when, with Sign out per device, for every other device,
  * and here. A device signed out elsewhere loses its live updates at once and
- * is signed out on its next request.
+ * is signed out on its next request. Irminsul's sessions also pick where
+ * their uploads go (irminsul's Configure button opens `?device=<id>`, which
+ * scrolls to that row).
  */
 const session = useSession()
 const accounts = useAccounts()
 const feedback = useFeedback()
 const router = useRouter()
+const route = useRoute()
 
 const sessions = ref<SessionResponse[] | null>(null)
 /** The session being signed out, 'others', or 'here'. */
@@ -37,6 +41,64 @@ const METHODS: Record<SessionMethod, { title: string; icon?: Component }> = {
   google: { title: 'Signed in with Google' },
   reset: { title: 'Signed in with a reset link', icon: LifeBuoy },
   legacy: { title: 'Signed in before devices were listed', icon: History },
+  irminsul: { title: 'Signed in from Irminsul', icon: Monitor },
+}
+
+/** The device irminsul's Configure button asked for (`?device=`), highlighted. */
+const focused = computed(() => {
+  const id = Number(route.query.device)
+  return Number.isSafeInteger(id) && id > 0 ? id : null
+})
+/** The irminsul session whose upload target is being saved. */
+const saving = ref<number | null>(null)
+
+/** Upload target options: by UID, or one of the accounts (a removed one only while chosen). */
+function targetOptions(row: SessionResponse): (SelectOption<string> | SelectGroup<string>)[] {
+  const options: (SelectOption<string> | SelectGroup<string>)[] = [
+    { value: 'uid', label: 'Auto: match the account by UID' },
+  ]
+  if (targetKey(row) === 'gone') options.push({ value: 'gone', label: 'Removed account' })
+  if (accounts.list.length) {
+    options.push({
+      group: 'Always this account',
+      options: accounts.list.map((a) => ({ value: String(a.id), label: accounts.displayName(a) })),
+    })
+  }
+  return options
+}
+
+/** The select's value for a row's target. */
+function targetKey(row: SessionResponse): string {
+  const upload = row.upload
+  if (!upload || upload.mode === 'uid') return 'uid'
+  return upload.accountId !== null && accounts.byId.has(upload.accountId)
+    ? String(upload.accountId)
+    : 'gone'
+}
+
+async function setTarget(row: SessionResponse, key: string) {
+  if (key === 'gone' || key === targetKey(row)) return
+  const upload: UploadTarget =
+    key === 'uid' ? { mode: 'uid' } : { mode: 'account', account_id: Number(key) }
+  saving.value = row.id
+  try {
+    const saved = await api.setSessionUpload(row.id, upload)
+    const held = sessions.value?.find((s) => s.id === row.id)
+    if (held) held.upload = saved.upload
+    feedback.toast({ tone: 'success', title: 'Upload target saved', hint: deviceName(row) })
+  } catch (cause) {
+    feedback.error('Upload target not saved', cause)
+    await load()
+  } finally {
+    saving.value = null
+  }
+}
+
+/** "Irminsul on <PC>" for irminsul, the browser and system otherwise. */
+function deviceName(row: SessionResponse): string {
+  return row.method === 'irminsul'
+    ? `Irminsul on ${row.deviceName || 'a PC'}`
+    : describeUserAgent(row.userAgent)
 }
 
 /** This device first, then the most recently seen. */
@@ -45,7 +107,7 @@ const rows = computed(() =>
     .sort((a, b) => Number(b.current) - Number(a.current) || b.lastSeenAt - a.lastSeenAt)
     .map((row) => ({
       ...row,
-      device: describeUserAgent(row.userAgent),
+      device: deviceName(row),
       place: [row.ip, [row.city, row.country].filter(Boolean).join(', ')]
         .filter(Boolean)
         .join(' · '),
@@ -60,7 +122,14 @@ async function load() {
   }
 }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  if (focused.value === null) return
+  await nextTick()
+  document
+    .getElementById(`device-${focused.value}`)
+    ?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+})
 
 function details(row: SessionResponse): string {
   return [
@@ -129,12 +198,18 @@ async function signOut() {
 </script>
 
 <template>
-  <UiPanel title="Devices">
+  <UiPanel id="devices" title="Devices">
     <ul v-if="sessions" class="flex flex-col divide-y divide-border-subtle">
       <li
         v-for="row in rows"
+        :id="`device-${row.id}`"
         :key="row.id"
-        class="flex items-center justify-between gap-x-4 gap-y-2 py-3 first:pt-0 last:pb-0"
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3 first:pt-0 last:pb-0"
+        :class="
+          row.id === focused
+            ? 'rounded-lg ring-2 ring-accent ring-offset-4 ring-offset-surface-raised'
+            : ''
+        "
       >
         <div class="flex min-w-0 items-center gap-3">
           <span class="shrink-0 text-text-muted" :title="METHODS[row.method].title">
@@ -159,6 +234,16 @@ async function signOut() {
             </p>
           </div>
         </div>
+        <UiSelect
+          v-if="row.method === 'irminsul'"
+          :model-value="targetKey(row)"
+          :options="targetOptions(row)"
+          :disabled="saving === row.id || busy !== null"
+          class="order-last w-full sm:order-none sm:w-64"
+          aria-label="Uploads go to"
+          title="Where this PC's uploads go"
+          @update:model-value="(key) => setTarget(row, key)"
+        />
         <UiButton
           v-if="!row.current"
           size="sm"

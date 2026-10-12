@@ -6,11 +6,13 @@ import {
   deleteSelfRequest,
   loginRequest,
   registerRequest,
+  sessionUploadRequest,
   setPasswordRequest,
   updateProfileRequest,
   type IdentitiesResponse,
   type MeResponse,
   type SessionResponse,
+  type SessionUpload,
 } from '@gdt/shared'
 import { and, desc, eq, gt, isNull, or } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
@@ -51,6 +53,16 @@ import { signupMode } from '../services/staff-deps'
 import { deleteUsers, isLastOwner } from '../services/user-delete'
 
 type User = typeof users.$inferSelect
+
+/** An irminsul session's upload target as the Devices panel shows it (null: a browser). */
+function sessionUpload(
+  mode: 'uid' | 'account' | null,
+  accountId: number | null,
+): SessionUpload | null {
+  if (mode === 'uid') return { mode: 'uid' }
+  if (mode === 'account') return { mode: 'account', accountId }
+  return null
+}
 
 /** Argon2's secret input; see lib/password. */
 export function pepper(c: Context<AppEnv>): string {
@@ -263,6 +275,9 @@ export const auth = new Hono<AppEnv>()
         city: userSessions.city,
         createdAt: userSessions.createdAt,
         lastSeenAt: userSessions.lastSeenAt,
+        deviceName: userSessions.deviceName,
+        uploadMode: userSessions.uploadMode,
+        uploadAccountId: userSessions.uploadAccountId,
       })
       .from(userSessions)
       .where(
@@ -273,7 +288,51 @@ export const auth = new Hono<AppEnv>()
         ),
       )
       .orderBy(desc(userSessions.lastSeenAt), desc(userSessions.id))
-    return c.json(rows.map((row): SessionResponse => ({ ...row, current: row.id === current })))
+    return c.json(
+      rows.map(
+        ({ uploadMode, uploadAccountId, ...row }): SessionResponse => ({
+          ...row,
+          current: row.id === current,
+          upload: sessionUpload(uploadMode, uploadAccountId),
+        }),
+      ),
+    )
+  })
+
+  /**
+   * Where an irminsul session's uploads go from now on (its next upload; the
+   * app reads the target again from whoami). 404 for any other session.
+   */
+  .patch('/sessions/:id', requireActiveSession, async (c) => {
+    const userId = c.get('userId')
+    const id = idParam(c, 'id')
+    await rateLimit(c.env.AUTH_LIMITER, `sessions:${userId}`)
+    const { upload } = await parseJson(c, sessionUploadRequest)
+    const accountId = upload.mode === 'account' ? upload.account_id : null
+    const d1 = c.env.DB
+    const [updated, owned] = await d1.batch<{ id: number }>([
+      d1
+        .prepare(
+          `UPDATE user_sessions SET upload_mode = ?3, upload_account_id = ?4
+           WHERE id = ?1 AND user_id = ?2 AND method = 'irminsul' AND revoked_at IS NULL
+             AND expires_at > ?5
+             AND (?4 IS NULL OR EXISTS (SELECT 1 FROM genshin_accounts WHERE id = ?4 AND user_id = ?2))
+           RETURNING id`,
+        )
+        .bind(id, userId, upload.mode, accountId, Date.now()),
+      d1
+        .prepare('SELECT id FROM genshin_accounts WHERE id = ?1 AND user_id = ?2')
+        .bind(accountId, userId),
+    ])
+    if (updated!.results.length === 0) {
+      if (accountId !== null && owned!.results.length === 0) {
+        throw new ApiError(400, 'invalid_account', 'That account is not yours', [
+          { path: 'upload.account_id', message: 'Not your account' },
+        ])
+      }
+      throw notFound('Session')
+    }
+    return c.json({ upload: sessionUpload(upload.mode, accountId) })
   })
 
   /**

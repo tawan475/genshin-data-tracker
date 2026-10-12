@@ -157,7 +157,7 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   told apart by a `typ` claim: access `gdt_at` (15 min, path `/api`, verified
   without D1) and refresh `gdt_rt` (30 days, path `/api/auth`, SameSite
   Strict). Both carry `sid`, the device's row in `user_sessions` (migration
-  0019: method password / discord / google / reset / legacy, user agent, IP
+  0019: method password / discord / google / reset / legacy / irminsul, user agent, IP
   and first IP, `request.cf` country and city, created, last seen, expiry,
   revoked), and `users.token_version`. A refresh is one `UPDATE … RETURNING`
   of that row (active, unexpired, version current); it slides the expiry and
@@ -380,6 +380,85 @@ set, nothing changes. Code: `worker/lib/oauth.ts` (flow, cookies),
 `vite dev` uses a fake Discord and Google (`dev/oauth-mock.ts`, pick who signs
 in); `OAUTH_DEV_MOCK=0` in `.dev.vars`, with the four secrets there, uses the
 real ones.
+
+## Sign in from irminsul
+
+irminsul (the desktop capture app) signs in with the tracker instead of a
+copied import key: OAuth 2.0 authorization code with PKCE (RFC 7636) for a
+public client answering on a loopback port (RFC 8252). The wire contract is
+shared with irminsul; responses only gain fields. Code:
+`worker/routes/irminsul-oauth.ts`, `worker/routes/irminsul.ts`,
+`worker/lib/irminsul-auth.ts`, `worker/services/irminsul.ts`; the page is
+`src/views/LinkView.vue`, the query check `parseLinkQuery` in
+`packages/shared/src/irminsul.ts`. Migration 0022.
+
+1. irminsul reads `GET /api/oauth/irminsul` (discovery: `authorize_url`
+   `<origin>/link`, `token_url`, `revoke_url`, `client_id: "irminsul"`,
+   `version: 1`, absolute URLs from the request's origin), listens on
+   `127.0.0.1:<free port>` and opens
+   `/link?client_id=irminsul&redirect_uri=http://127.0.0.1:<port>/callback&state=…&code_challenge=<S256>&code_challenge_method=S256&device=<PC name>`.
+2. `/link` checks the query first (client, a loopback `…/callback` redirect —
+   `127.0.0.1` or `localhost`, any port, nothing else — an S256 challenge, a
+   state); a bad link is an error card and is never followed. Signed out, the
+   router sends it to sign-in (`?next=/link…`; password, Discord / Google, the
+   human check, sign-up all come back). Then one consent card: "Irminsul on
+   <PC>", uploads go to **Auto: match the account by UID** (preselected) or
+   **Always this account**, Allow / Cancel. The page refuses to show inside a
+   frame, and `/link` is sent with `X-Frame-Options: DENY`.
+3. Allow is `POST /api/oauth/authorize` (session cookie, CSRF header, an active
+   session; 400 `invalid_request` / `invalid_redirect` / `invalid_account`, 403
+   `account_suspended`): a one-time code (`oauth_codes`, SHA-256 only, 60 s,
+   bound to the user, challenge, redirect, PC name and target), answered as
+   `{redirect: "<callback>?code=…&state=…"}`, where the page goes. Cancel goes
+   to `<callback>?error=access_denied&state=…`.
+4. irminsul exchanges it at `POST /api/oauth/token` (JSON or form-encoded)
+   `{grant_type: "authorization_code", client_id, code, code_verifier,
+   redirect_uri}`. The code is used up by the first try, right or wrong; a
+   second use ends the session the first made. It makes a `user_sessions` row
+   with `method = 'irminsul'`, `user_agent` "Irminsul on <PC>", `device_name`,
+   `upload_mode` (`uid` | `account`) and `upload_account_id`, and answers
+   `{token_type: "Bearer", access_token, expires_in: 900, refresh_token,
+   refresh_expires_in: 2592000, whoami}`. `grant_type: "refresh_token"` swaps
+   the refresh token for a new one (only its SHA-256 is kept,
+   `refresh_hash`) and slides the row's 30 days, in one `UPDATE … RETURNING`;
+   the token before the current one coming back (`refresh_prev_hash`) means a
+   copy is in other hands and ends the session. Errors are OAuth's `{error,
+   error_description}`: 400 `invalid_grant` (wrong, expired, used or rotated
+   away, signed out), `invalid_request`, `unsupported_grant_type`; 403
+   `account_suspended`.
+5. `GET /api/irminsul/whoami` and `POST /api/irminsul/import` take
+   `Authorization: Bearer <access>`. whoami answers the verify-key fields
+   (`accountId, accountName, uid, server, dashboardUrl`) plus `scope` (`uid` |
+   `account`), `user` and `configUrl`: `/app/settings?device=<sid>#devices`,
+   that session's row in Settings → Devices, the only place its target is
+   changed (`PATCH /api/auth/sessions/:id {upload: {mode: "uid"} | {mode:
+   "account", account_id}}`, irminsul rows only). The import is
+   `import-by-key`'s, shared code and all (`services/upload-as.ts`): uid mode
+   is a user key (by `gi_player.uid`, new UIDs make an account, 422
+   `uid_required` without one), account mode an account key (409
+   `upload_target_missing` once that account is deleted); the same file
+   limits, daily and storage quotas, warnings and live notify; 20 uploads a
+   minute per session (`KEY_IMPORT_LIMITER`). Both read the session row in the
+   one round trip a key's lookup costs: 401 `token_expired` (refresh, retry
+   once), 401 `session_revoked` (signed out), 403 `account_suspended` /
+   `uploads_blocked`.
+6. `POST /api/oauth/revoke {token}` (irminsul's Sign out) ends the session;
+   200 whatever the token (RFC 7009).
+
+The two worlds stay apart: irminsul's access token is a JWT with `typ` and
+`aud` `irminsul` that only the `/api/irminsul` routes read, from the header;
+those routes never read a cookie, and the cookie routes never read the header.
+Its refresh token is opaque (`gdt_irt_<sid>_<random>`). An irminsul session is
+a device like any other: Settings → Devices lists it ("Irminsul on <PC>",
+last seen, place, its target) with Sign out; "Sign out other devices", a
+password change, `logout-all`, a suspension and the 30-session cap end it;
+maintenance deletes its row 7 days after it ended, and codes a day after they
+expired.
+
+Import keys stay: released irminsul builds keep calling
+`/genshin-accounts-public/import-by-key` and `verify-key` (unchanged), other
+tools can build on keys, and irminsul keeps a saved key working until the user
+signs in.
 
 ## Human check (Turnstile)
 

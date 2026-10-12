@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { appPath } from '@gdt/shared'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
@@ -38,10 +39,9 @@ const human = useTemplateRef<InstanceType<typeof HumanCheck>>('human')
 const humanReady = ref(false)
 const humanOk = computed(() => humanCheckPassed(siteKey.value, humanReady.value))
 
+/** Where to go after signing in: a page of the app, or irminsul's /link (the server checks it the same way). */
 const next = computed(() =>
-  typeof route.query.next === 'string' && route.query.next.startsWith('/app')
-    ? route.query.next
-    : undefined,
+  appPath.safeParse(route.query.next).success ? (route.query.next as string) : undefined,
 )
 
 /** `?link=discord`: from "I have an account" on /oauth; signing in also links that account. */
@@ -176,7 +176,10 @@ async function submit() {
       </template>
       <template v-else>
         New?
-        <RouterLink :to="{ name: 'register' }" class="font-semibold text-paimon hover:underline">
+        <RouterLink
+          :to="{ name: 'register', query: next ? { next } : {} }"
+          class="font-semibold text-paimon hover:underline"
+        >
           Create an account
         </RouterLink>
       </template>

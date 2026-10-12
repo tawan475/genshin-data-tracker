@@ -45,8 +45,8 @@ const REFRESH_COOKIE = 'gdt_rt'
  * in. Its absence only means "don't bother asking"; the server never trusts it.
  */
 const HINT_COOKIE = 'gdt_s'
-const ACCESS_TTL_S = 15 * 60
-const REFRESH_TTL_S = 30 * 24 * 60 * 60
+export const ACCESS_TTL_S = 15 * 60
+export const REFRESH_TTL_S = 30 * 24 * 60 * 60
 
 /** Active sessions per user: signing in past it ends the least recently seen. */
 export const MAX_SESSIONS = 30
@@ -73,7 +73,7 @@ export interface SessionUser {
   tokenVersion: number
 }
 
-function jwtSecret(c: Context<AppEnv>): string {
+export function jwtSecret(c: Context<AppEnv>): string {
   const secret = c.env.JWT_SECRET
   if (!secret || secret.length < 32) {
     throw new ApiError(500, 'misconfigured', 'Server is missing JWT_SECRET')
@@ -235,15 +235,7 @@ export async function createSession(
         at,
         (now + REFRESH_TTL_S) * 1000,
       ),
-    d1
-      .prepare(
-        `UPDATE user_sessions SET revoked_at = ?2
-         WHERE user_id = ?1 AND revoked_at IS NULL AND expires_at > ?2 AND id NOT IN (
-           SELECT id FROM user_sessions WHERE user_id = ?1 AND revoked_at IS NULL AND expires_at > ?2
-           ORDER BY last_seen_at DESC, id DESC LIMIT ?3)
-         RETURNING id`,
-      )
-      .bind(user.id, at, MAX_SESSIONS),
+    pruneSessionsStatement(d1, user.id, at),
     d1
       .prepare('UPDATE users SET last_active_at = ?2 WHERE id = ?1 RETURNING live_since')
       .bind(user.id, at),
@@ -267,6 +259,22 @@ export async function createSession(
   await Promise.all(endedLive)
   await mint(c, user, sid, now)
   return sid
+}
+
+/**
+ * Ends the user's least recently seen sessions past MAX_SESSIONS (in the
+ * batch that adds one, after its INSERT); answers each ended row's id.
+ */
+export function pruneSessionsStatement(d1: D1Database, userId: number, at: number) {
+  return d1
+    .prepare(
+      `UPDATE user_sessions SET revoked_at = ?2
+       WHERE user_id = ?1 AND revoked_at IS NULL AND expires_at > ?2 AND id NOT IN (
+         SELECT id FROM user_sessions WHERE user_id = ?1 AND revoked_at IS NULL AND expires_at > ?2
+         ORDER BY last_seen_at DESC, id DESC LIMIT ?3)
+       RETURNING id`,
+    )
+    .bind(userId, at, MAX_SESSIONS)
 }
 
 /** Revokes one active session row; answers the user's `live_since` when it did. */

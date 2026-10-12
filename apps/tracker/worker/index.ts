@@ -6,6 +6,8 @@ import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
 import { auth } from './routes/auth'
 import { health } from './routes/health'
+import { irminsul } from './routes/irminsul'
+import { irminsulOAuth } from './routes/irminsul-oauth'
 import { live } from './routes/live'
 import { me } from './routes/me'
 import { oauth } from './routes/oauth'
@@ -34,6 +36,8 @@ app.route('/me', me)
 app.route('/accounts', accounts)
 app.route('/accounts', progress)
 app.route('/genshin-accounts-public', publicImport)
+app.route('/oauth', irminsulOAuth)
+app.route('/irminsul', irminsul)
 app.route('/live', live)
 app.route('/admin', admin)
 app.route('/staff', staff)

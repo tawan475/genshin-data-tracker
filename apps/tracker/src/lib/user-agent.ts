@@ -1,7 +1,8 @@
 /**
  * A browser's user agent as a person would name the device: "Chrome on
  * Windows", "Safari on iPhone". Only the common browsers and systems are
- * known; the rest read "Browser on Linux" or "Unknown device". A guess for a
+ * known; the rest read "Browser on Linux" or "Unknown device". irminsul's
+ * sessions read "Irminsul on <PC>" as stored. A guess for a
  * list of sessions, never for a decision (any client can send any string).
  */
 
@@ -35,6 +36,8 @@ function find(table: [RegExp, string][], userAgent: string): string | null {
 /** "Chrome on Windows"; "Firefox" without a known system; "Unknown device" without either. */
 export function describeUserAgent(userAgent: string | null | undefined): string {
   const ua = userAgent ?? ''
+  // An irminsul session's row names itself ("Irminsul on <PC>", the Worker's own text).
+  if (/^Irminsul on \S/.test(ua)) return ua
   const browser = find(BROWSERS, ua)
   const system = find(SYSTEMS, ua)
   if (browser && system) return `${browser} on ${system}`

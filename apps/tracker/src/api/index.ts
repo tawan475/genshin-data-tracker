@@ -17,6 +17,7 @@ import type {
   ImportKeyResponse,
   ImportResponse,
   MeResponse,
+  OAuthAuthorizeResponse,
   OAuthLinkLoginResponse,
   OAuthPendingResponse,
   OAuthProvider,
@@ -27,7 +28,9 @@ import type {
   PlannerTasksResponse,
   ResetLinkResponse,
   SessionResponse,
+  SessionUpload,
   SnapshotResponse,
+  UploadTarget,
   UserSettingsPatch,
   VerifyEmailResponse,
 } from '@gdt/shared'
@@ -143,6 +146,26 @@ export const api = {
   /** Signs every other device out; this one stays signed in. */
   revokeOtherSessions: () =>
     requestJson<void>('/api/auth/sessions/revoke-others', { method: 'POST' }),
+  /** Where an irminsul session's uploads go from now on. */
+  setSessionUpload: (id: number, upload: UploadTarget) =>
+    requestJson<{ upload: SessionUpload }>(`/api/auth/sessions/${id}`, {
+      method: 'PATCH',
+      json: { upload },
+    }),
+
+  // -------------------------------------------------------- irminsul sign-in
+  /** The /link page's Allow: answers the loopback callback (with the code) to go to. */
+  irminsulAuthorize: (body: {
+    redirect_uri: string
+    state: string
+    code_challenge: string
+    device: string
+    upload: UploadTarget
+  }) =>
+    requestJson<OAuthAuthorizeResponse>('/api/oauth/authorize', {
+      method: 'POST',
+      json: { client_id: 'irminsul', code_challenge_method: 'S256', ...body },
+    }),
   unlinkIdentity: (provider: OAuthProvider) =>
     requestJson<void>(`/api/auth/identities/${provider}`, { method: 'DELETE' }),
 

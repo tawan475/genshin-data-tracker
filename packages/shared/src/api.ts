@@ -6,7 +6,13 @@
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
 import { MAX_FAVORITE_CHARACTERS } from './settings'
-import type { AccountSettings, SignupMode, SnapshotSummary, UserSettings } from './index'
+import type {
+  AccountSettings,
+  SessionUpload,
+  SignupMode,
+  SnapshotSummary,
+  UserSettings,
+} from './index'
 
 export const usernameSchema = z
   .string()
@@ -95,11 +101,15 @@ export const OAUTH_PROVIDER_LABELS: Record<OAuthProvider, string> = {
   google: 'Google',
 }
 
-/** Where a sign-in may land afterwards: a path inside the app (printable ASCII only). */
+/**
+ * Where a sign-in may land afterwards: a path inside the app, or irminsul's
+ * consent page (/link), printable ASCII only.
+ */
 export const appPath = z
   .string()
-  .max(512)
-  .regex(/^\/app(?:[/?#][!-~]*)?$/)
+  // /link carries irminsul's query, its PC name percent-encoded (up to ~600).
+  .max(2048)
+  .regex(/^\/(?:app|link)(?:[/?#][!-~]*)?$/)
 
 /**
  * `POST /api/auth/oauth/:provider/start`: sign in (linking from Settings is
@@ -642,10 +652,19 @@ export interface IdentitiesResponse {
 }
 
 /**
- * How a session signed in: a password, Discord or Google, a reset link, or
- * `legacy` (signed in before sessions were listed; how is not known).
+ * How a session signed in: a password, Discord or Google, a reset link,
+ * `legacy` (signed in before sessions were listed; how is not known), or
+ * `irminsul` (the desktop app, signed in through /link; Bearer tokens, no
+ * cookies).
  */
-export const SESSION_METHODS = ['password', 'discord', 'google', 'reset', 'legacy'] as const
+export const SESSION_METHODS = [
+  'password',
+  'discord',
+  'google',
+  'reset',
+  'legacy',
+  'irminsul',
+] as const
 export type SessionMethod = (typeof SESSION_METHODS)[number]
 
 /**
@@ -664,6 +683,10 @@ export interface SessionResponse {
   city: string | null
   createdAt: number
   lastSeenAt: number
+  /** An irminsul session's PC name (null for a browser). */
+  deviceName?: string | null
+  /** Where an irminsul session's uploads go (null for a browser). */
+  upload?: SessionUpload | null
 }
 
 /**

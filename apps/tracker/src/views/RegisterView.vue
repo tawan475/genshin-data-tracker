@@ -2,12 +2,13 @@
 import {
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
+  appPath,
   emailSchema,
   usernameSchema,
   type SignupMode,
 } from '@gdt/shared'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
 import {
   HUMAN_CHECK_NEEDED,
@@ -24,6 +25,11 @@ import AuthFrame from './AuthFrame.vue'
 
 const session = useSession()
 const router = useRouter()
+const route = useRoute()
+/** Back to irminsul's /link (or another app page) after signing up, when sign-in sent us here. */
+const next = computed(() =>
+  appPath.safeParse(route.query.next).success ? (route.query.next as string) : undefined,
+)
 
 const username = ref('')
 const email = ref('')
@@ -81,7 +87,7 @@ async function submit() {
       password.value,
       turnstile,
     )
-    await router.replace({ name: 'account-new' })
+    await router.replace(next.value ?? { name: 'account-new' })
   } catch (cause) {
     const key = await siteKeyAfter(cause)
     if (key) siteKey.value = key
@@ -190,10 +196,13 @@ async function submit() {
         </button>
       </div>
     </form>
-    <OAuthButtons v-if="signups !== 'closed'" />
+    <OAuthButtons v-if="signups !== 'closed'" :next="next" />
     <template #footer>
       Have an account?
-      <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">
+      <RouterLink
+        :to="{ name: 'login', query: next ? { next } : {} }"
+        class="font-semibold text-paimon hover:underline"
+      >
         Sign in
       </RouterLink>
     </template>

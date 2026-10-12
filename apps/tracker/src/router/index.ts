@@ -93,6 +93,14 @@ const router = createRouter({
       component: () => import('@/views/OAuthContinueView.vue'),
       meta: { guest: true, public: true, title: 'Continue' },
     },
+    // irminsul's "Sign in with the tracker" (README "Sign in from irminsul"):
+    // signed out, sign-in comes first and returns here (`?next=`).
+    {
+      path: '/link',
+      name: 'link',
+      component: () => import('@/views/LinkView.vue'),
+      meta: { auth: true, public: true, title: 'Link Irminsul' },
+    },
     // Account recovery: open signed in or not (links arrive by email, or from
     // an admin). While email is paused, only a reset link with a token opens.
     {
