@@ -35,7 +35,7 @@ import { useAccount, useReadOnly } from './context'
 /**
  * Anecdotes ("Travel Accounts"): done = the newest capture that carried
  * irminsul's `gi_anecdotes`, plus the ones marked by hand. Area tabs with
- * done / total, then each NPC's anecdotes; hidden ones show once met.
+ * done / total, then each NPC's anecdotes (hidden ones too, marked).
  */
 const account = useAccount()
 const readOnly = useReadOnly()
@@ -139,7 +139,7 @@ const shownCount = computed(() => countShown(shownAreas.value))
 const listedCount = computed(() =>
   countShown(shownAreas.value.map((area) => ({ ...area, shown: area.groups }))),
 )
-/** Areas to draw: those with rows, or the one chosen (its empty state and hidden count). */
+/** Areas to draw: those with rows, or the one chosen (its empty state). */
 const drawnAreas = computed(() =>
   shownAreas.value
     .filter((area) => area.shown.length > 0 || filters.area !== null)
@@ -236,12 +236,6 @@ function unmark(id: number) {
                   : 'text-text-secondary'
               "
               >{{ formatNumber(area.done) }} / {{ formatNumber(area.total) }}</span
-            >
-            <span
-              v-if="area.hidden > 0"
-              class="tabular ml-auto font-mono text-sm text-text-muted"
-              title="Hidden anecdotes show once met"
-              >+{{ formatNumber(area.hidden) }} hidden</span
             >
           </header>
           <div

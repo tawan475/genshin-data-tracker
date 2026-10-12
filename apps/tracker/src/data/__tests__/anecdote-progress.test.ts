@@ -76,19 +76,23 @@ function capture(anecdotes: Record<string, { state: number; finishCount: number 
 }
 
 describe('anecdoteProgress', () => {
-  it('counts every anecdote but the variants, and lists hidden ones only once met', () => {
+  it('counts every anecdote but the variants, and lists hidden ones too', () => {
     const p = anecdoteProgress(DATA, NO_CAPTURED_ANECDOTES, new Set())
     expect(p.total).toBe(7)
     expect(p.done).toBe(0)
     const [mondstadt, snezhnaya] = p.areas
-    expect(mondstadt).toMatchObject({ area: 1, done: 0, total: 4, hidden: 0, unlocked: null })
+    expect(mondstadt).toMatchObject({ area: 1, done: 0, total: 4, unlocked: null })
     // The game's NPC order, then ids.
     expect(mondstadt!.groups.map((g) => [g.npc, g.entries.map((e) => e.anecdote.id)])).toEqual([
       [9802, [100104, 100105]],
       [9801, [100101, 100102]],
     ])
-    expect(snezhnaya).toMatchObject({ area: 2, done: 0, total: 3, hidden: 2 })
-    expect(snezhnaya!.groups.flatMap((g) => g.entries.map((e) => e.anecdote.id))).toEqual([100203])
+    expect(snezhnaya).toMatchObject({ area: 2, done: 0, total: 3 })
+    // Hidden ones are listed before they are met, not just counted.
+    expect(snezhnaya!.groups.flatMap((g) => g.entries.map((e) => e.anecdote.id))).toEqual([
+      100202, 100203, 100201,
+    ])
+    expect(byId(p, 100201)).toMatchObject({ met: false, source: null })
     expect(byId(p, 100102)!.ids).toEqual([100102, 100103])
   })
 
@@ -124,14 +128,13 @@ describe('anecdoteProgress', () => {
     expect(p.done).toBe(1)
   })
 
-  it('lists a hidden one once captured or marked, and counts the rest', () => {
+  it("takes a hidden one's state from the capture and the marks", () => {
     const p = anecdoteProgress(
       DATA,
       capture({ '100201': { state: 2, finishCount: 0 } }),
       new Set([100202]),
     )
     const snezhnaya = p.areas[1]!
-    expect(snezhnaya.hidden).toBe(0)
     expect(snezhnaya.groups.flatMap((g) => g.entries.map((e) => e.anecdote.id))).toEqual([
       100202, 100203, 100201,
     ])
@@ -161,11 +164,13 @@ describe('filterAnecdotes', () => {
 
   it('filters by area, completion and words, keeping toggled rows', () => {
     const all = filterAnecdotes(p, DEFAULT_ANECDOTE_FILTERS, TEXT)
-    expect(countShown(all)).toBe(5)
+    expect(countShown(all)).toBe(7)
     const missing = { ...DEFAULT_ANECDOTE_FILTERS, completion: 'missing' as const }
-    expect(ids(filterAnecdotes(p, missing, TEXT))).toEqual([100105, 100102, 100203])
+    expect(ids(filterAnecdotes(p, missing, TEXT))).toEqual([
+      100105, 100102, 100202, 100203, 100201,
+    ])
     expect(ids(filterAnecdotes(p, missing, TEXT, new Set([100101])))).toEqual([
-      100105, 100101, 100102, 100203,
+      100105, 100101, 100102, 100202, 100203, 100201,
     ])
     const done = { ...DEFAULT_ANECDOTE_FILTERS, completion: 'done' as const, area: 1 }
     expect(ids(filterAnecdotes(p, done, TEXT))).toEqual([100104, 100101])
@@ -174,9 +179,9 @@ describe('filterAnecdotes', () => {
       ids(filterAnecdotes(p, { ...DEFAULT_ANECDOTE_FILTERS, query: q }, TEXT))
     expect(query('fountain')).toEqual([100102])
     expect(query('color')).toEqual([])
-    expect(query('KAZUHA')).toEqual([100104, 100105, 100203])
+    expect(query('KAZUHA')).toEqual([100104, 100105, 100202, 100203])
     expect(query('100203')).toEqual([100203])
-    // Areas stay in the answer, empty or not (their header shows the hidden count).
+    // Areas stay in the answer, empty or not.
     expect(
       filterAnecdotes(p, { ...missing, query: 'fountain' }, TEXT).map((a) => a.shown.length),
     ).toEqual([1, 0])

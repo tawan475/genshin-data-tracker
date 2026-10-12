@@ -9,8 +9,7 @@
  *   one captured means the base is done; marks are made on the base.
  * - The server lists only anecdotes the player has met, so an id absent from
  *   the capture is "not met", never "not done". Hidden ones (surprise
- *   encounters) are listed once met (captured or marked) and otherwise only
- *   counted ("+N hidden").
+ *   encounters) are listed like the rest, marked as hidden.
  * - `state == 2` is active now; a repeatable loop shows how often it was done.
  */
 
@@ -86,11 +85,9 @@ export interface AreaProgress {
   unlocked: boolean | null
   /** Listed anecdotes by main NPC, in the game's NPC order. */
   groups: NpcGroup[]
-  /** Counted anecdotes done / in all (hidden ones not met included). */
+  /** Counted anecdotes done / in all. */
   done: number
   total: number
-  /** Hidden anecdotes not met yet: counted in `total`, not listed. */
-  hidden: number
 }
 
 export interface AnecdoteProgress {
@@ -118,7 +115,6 @@ export function anecdoteProgress(
   const npcOrder = new Map(data.npcs.map((npc, index) => [npc.id, index]))
 
   const byArea = new Map<number, Map<number, AnecdoteEntry[]>>()
-  const hiddenByArea = new Map<number, number>()
   const counts = new Map<number, { done: number; total: number }>()
   let active = 0
   for (const anecdote of data.counted) {
@@ -140,10 +136,6 @@ export function anecdoteProgress(
     count.total++
     if (entry.source) count.done++
     counts.set(anecdote.area, count)
-    if (anecdote.hidden && !entry.met) {
-      hiddenByArea.set(anecdote.area, (hiddenByArea.get(anecdote.area) ?? 0) + 1)
-      continue
-    }
     let npcs = byArea.get(anecdote.area)
     if (!npcs) byArea.set(anecdote.area, (npcs = new Map()))
     const list = npcs.get(anecdote.npc)
@@ -175,7 +167,6 @@ export function anecdoteProgress(
       groups,
       done: count.done,
       total: count.total,
-      hidden: hiddenByArea.get(area.id) ?? 0,
     }
   })
   const known = new Set(data.anecdotes.map((a) => a.id))
