@@ -101,7 +101,7 @@ const dialog = ref(false)
       <UiPanel v-if="history.total === 0" flush>
         <UiEmpty
           title="No wishes yet"
-          body="Run irminsul and open Wish → History in game: it syncs the last six months. Older history: import a UIGF or paimon.moe file."
+          body="Run irminsul and open Wish → History in game, or import with the game's wish link: either brings the last six months. Older history: a UIGF or paimon.moe file."
         >
           <template #icon><Sparkles aria-hidden="true" /></template>
           <UiButton v-if="!readOnly" variant="primary" @click="dialog = true">Import</UiButton>

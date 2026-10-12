@@ -14,6 +14,8 @@ import { api } from '@/api'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
+import UiSegmented from '@/components/ui/UiSegmented.vue'
+import WishLinkImport from './WishLinkImport.vue'
 import type { WishHistory } from '@/data/wish-history'
 import { saveBlob } from '@/data/export'
 import { formatNumber } from '@/lib/format'
@@ -51,6 +53,13 @@ const failure = ref('')
 const file = shallowRef<WishFile | null>(null)
 
 const uid = computed(() => props.account.uid?.trim() || null)
+
+/** How to import: the game's wish link (paimon.moe's way), or a file. */
+const mode = ref<'link' | 'file'>('link')
+const MODES = [
+  { value: 'link' as const, label: 'Wish link' },
+  { value: 'file' as const, label: 'File' },
+]
 
 /**
  * Which of the file's accounts to import (paimon.moe backups can hold
@@ -195,70 +204,80 @@ async function remove() {
   <UiModal :open="open" title="Import / export" @close="emit('close')">
     <div class="flex flex-col gap-5">
       <section v-if="!readOnly" class="flex flex-col gap-3" aria-label="Import">
-        <div
-          class="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
-          :class="dragging ? 'border-accent bg-surface-overlay' : 'border-border-strong'"
-          title="UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), a paimon.moe importer CSV, or paimon.moe's backup (Settings → Export)"
-          @dragenter.prevent="dragging = true"
-          @dragover.prevent
-          @dragleave.self="dragging = false"
-          @drop.prevent="onDrop"
-        >
-          <FileUp class="size-8 text-text-muted" aria-hidden="true" />
-          <p class="text-sm font-medium">UIGF or paimon.moe file</p>
-          <UiButton :loading="reading" @click="input?.click()">Browse</UiButton>
-          <input
-            ref="input"
-            type="file"
-            accept=".json,.csv,application/json,text/csv"
-            class="hidden"
-            tabindex="-1"
-            aria-hidden="true"
-            @change="onPick"
-          />
-        </div>
-
-        <div v-if="fileName" class="flex flex-col gap-2" aria-live="polite">
-          <p class="flex min-w-0 items-center gap-2 text-sm">
-            <FileJson class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
-            <span class="truncate font-medium">{{ fileName }}</span>
-            <span v-if="file" class="shrink-0 text-text-muted">{{
-              FORMAT_LABELS[file.format]
-            }}</span>
-          </p>
+        <UiSegmented v-model="mode" :options="MODES" label="Import from" />
+        <WishLinkImport
+          v-if="open && mode === 'link'"
+          :account="account"
+          :history="history"
+          @changed="emit('changed')"
+          @done="emit('close')"
+        />
+        <template v-else>
           <div
-            v-if="file && file.accounts.length > 1"
-            role="radiogroup"
-            aria-label="Account in the file"
-            class="flex flex-wrap gap-2"
+            class="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
+            :class="dragging ? 'border-accent bg-surface-overlay' : 'border-border-strong'"
+            title="UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), a paimon.moe importer CSV, or paimon.moe's backup (Settings → Export)"
+            @dragenter.prevent="dragging = true"
+            @dragover.prevent
+            @dragleave.self="dragging = false"
+            @drop.prevent="onDrop"
           >
-            <FilterChip
-              v-for="(a, i) in file.accounts"
-              :key="i"
-              radio
-              :pressed="picked === i"
-              :count="a.records.length"
-              @toggle="picked = i"
-              >{{ accountLabel(a, i) }}</FilterChip
-            >
+            <FileUp class="size-8 text-text-muted" aria-hidden="true" />
+            <p class="text-sm font-medium">UIGF or paimon.moe file</p>
+            <UiButton :loading="reading" @click="input?.click()">Browse</UiButton>
+            <input
+              ref="input"
+              type="file"
+              accept=".json,.csv,application/json,text/csv"
+              class="hidden"
+              tabindex="-1"
+              aria-hidden="true"
+              @change="onPick"
+            />
           </div>
-          <p v-if="failure || mismatch" class="text-sm text-danger-text" role="alert">
-            {{ failure || mismatch }}
-          </p>
-          <p v-else-if="entry" class="tabular font-mono text-sm text-text-secondary">
-            {{ formatNumber(entry.records.length) }} pulls{{
-              entry.uid ? ` · UID ${entry.uid}` : ''
-            }}
-          </p>
-        </div>
-        <UiButton
-          v-if="entry && !mismatch"
-          variant="primary"
-          :loading="saving"
-          :disabled="entry.records.length === 0"
-          @click="importFile"
-          >Import</UiButton
-        >
+
+          <div v-if="fileName" class="flex flex-col gap-2" aria-live="polite">
+            <p class="flex min-w-0 items-center gap-2 text-sm">
+              <FileJson class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
+              <span class="truncate font-medium">{{ fileName }}</span>
+              <span v-if="file" class="shrink-0 text-text-muted">{{
+                FORMAT_LABELS[file.format]
+              }}</span>
+            </p>
+            <div
+              v-if="file && file.accounts.length > 1"
+              role="radiogroup"
+              aria-label="Account in the file"
+              class="flex flex-wrap gap-2"
+            >
+              <FilterChip
+                v-for="(a, i) in file.accounts"
+                :key="i"
+                radio
+                :pressed="picked === i"
+                :count="a.records.length"
+                @toggle="picked = i"
+                >{{ accountLabel(a, i) }}</FilterChip
+              >
+            </div>
+            <p v-if="failure || mismatch" class="text-sm text-danger-text" role="alert">
+              {{ failure || mismatch }}
+            </p>
+            <p v-else-if="entry" class="tabular font-mono text-sm text-text-secondary">
+              {{ formatNumber(entry.records.length) }} pulls{{
+                entry.uid ? ` · UID ${entry.uid}` : ''
+              }}
+            </p>
+          </div>
+          <UiButton
+            v-if="entry && !mismatch"
+            variant="primary"
+            :loading="saving"
+            :disabled="entry.records.length === 0"
+            @click="importFile"
+            >Import</UiButton
+          >
+        </template>
       </section>
 
       <section class="flex flex-col gap-2" aria-label="Export">

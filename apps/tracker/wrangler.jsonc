@@ -46,6 +46,8 @@
     { "name": "RECOVERY_LIMITER", "namespace_id": "1003", "simple": { "limit": 5, "period": 60 } },
     // Uploads by import key (irminsul), per key.
     { "name": "KEY_IMPORT_LIMITER", "namespace_id": "1004", "simple": { "limit": 20, "period": 60 } },
+    // Wish link imports: pages fetched through the proxy, per user (a second apart each).
+    { "name": "WISH_PROXY_LIMITER", "namespace_id": "1005", "simple": { "limit": 120, "period": 60 } },
   ],
 
   // Secrets (wrangler secret put): JWT_SECRET, PASSWORD_PEPPER — each at least

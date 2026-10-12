@@ -331,6 +331,32 @@ the browser) and `DELETE /api/accounts/:id/wishes`. Imports that store
 something are checked against the quotas and the staff blocks, and send a
 `wishes` live event.
 
+**Wish link import** (the traditional way, as paimon.moe's; Import /
+export → Wish link). The game's Wish → History page carries an `authkey`
+that reads the history for about a day. PC: `apps/tracker/public/wish-url.ps1`
+(served from the site; the dialog copies `iex (irm '<origin>/wish-url.ps1')`
+with a TLS 1.2 prefix for Windows PowerShell 5.1) finds the game from its
+log (`output_log.txt` / `Player.log` under `AppData\LocalLow\miHoYo\Genshin
+Impact`, or the Chinese client's folder; the newest log wins), reads the
+newest `webCaches\<version>\Cache\Cache_Data\data_2` without locking it,
+takes the newest getGachaLog URL with an authkey (else the page's own; the
+pattern is `WISH_CACHE_URL_PATTERN` in `@gdt/shared` `src/wish/link.ts`, a
+test keeps the script on it), checks it with one API request and copies it.
+It sends nothing anywhere else. Phones and PlayStation: paimon.moe's steps
+(the copied error text or link). irminsul's Copy wish URL gives the same
+link. The browser then pages the API through `POST /api/wishes/fetch-page`
+(signed in, CSRF header, 120 pages a minute per user, `WISH_PROXY_LIMITER`):
+the Worker rebuilds every request from the link's credential alone
+(`wishApiUrl`: the two API hosts, `/gacha_info/api/getGachaLog`, only the
+parameters the API needs), so it fetches nothing else; it never stores or
+logs the key and answers with the API's own `{retcode, message, data}`. The
+browser (`src/data/wish-link-import.ts`) goes banner by banner (301 with 400,
+302, 500, 200, 100), 20 a page with `end_id`, a second between pages and two
+between banners, stops each banner at the newest pull already stored,
+retries failures and "too frequent", ends on an expired key, can be
+cancelled, refuses another UID's records, and saves through the website
+import.
+
 **Formats** (`src/wish/formats.ts`, all in the browser). Import: UIGF v4 (and
 v3/v2: `info.uid` + `list`), paimon.moe's importer CSV
 (`paimonmoe,importer,version,1,0`, rows `gacha_type,time,name,item_type,

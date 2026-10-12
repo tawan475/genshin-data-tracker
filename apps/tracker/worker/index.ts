@@ -15,6 +15,7 @@ import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
 import { recovery } from './routes/recovery'
 import { staff } from './routes/staff'
+import { wishProxy } from './routes/wish-proxy'
 import { wishAccounts, wishSync } from './routes/wishes'
 import { runMaintenance } from './services/maintenance'
 
@@ -38,6 +39,7 @@ app.route('/accounts', accounts)
 app.route('/accounts', progress)
 app.route('/accounts', wishAccounts)
 app.route('/wishes', wishSync)
+app.route('/wishes', wishProxy)
 app.route('/genshin-accounts-public', publicImport)
 app.route('/oauth', irminsulOAuth)
 app.route('/irminsul', irminsul)

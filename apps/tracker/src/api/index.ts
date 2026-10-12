@@ -245,6 +245,16 @@ export const api = {
       method: 'POST',
       json: body,
     }),
+  /** One page of the game's wish history API through the tracker's proxy (the wish link import). */
+  fetchWishPage: (
+    body: { url: string; gachaType: number; page: number; endId: string },
+    signal?: AbortSignal,
+  ) =>
+    requestJson<{
+      retcode: number
+      message: string
+      data: { list: WishRecord[]; region?: string } | null
+    }>('/api/wishes/fetch-page', { method: 'POST', json: body, signal }),
   deleteWishes: (id: number) =>
     requestJson<{ deleted: number }>(`/api/accounts/${id}/wishes`, { method: 'DELETE' }),
   plannerTargets: (id: number) =>
