@@ -1,6 +1,8 @@
 # Genshin Tracker: copies the wish history link the game left in its web cache.
 #
-#   iex (irm 'https://genshin-tracker.475.dev/wish-url.ps1')
+#   & ([scriptblock]::Create((irm 'https://genshin-tracker.475.dev/wish-url.ps1')))
+#
+# (Run in its own scope, so nothing it sets stays in your PowerShell window.)
 #
 # Open Wish -> History in game first (wait for it to load), then run this in
 # PowerShell on the same PC. What it does, and nothing else:

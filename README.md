@@ -334,7 +334,7 @@ something are checked against the quotas and the staff blocks, and send a
 **Wish link import** (the traditional way, as paimon.moe's; Import /
 export → Wish link). The game's Wish → History page carries an `authkey`
 that reads the history for about a day. PC: `apps/tracker/public/wish-url.ps1`
-(served from the site; the dialog copies `iex (irm '<origin>/wish-url.ps1')`
+(served from the site; the dialog copies `& ([scriptblock]::Create((irm '<origin>/wish-url.ps1')))`, run in its own scope
 with a TLS 1.2 prefix for Windows PowerShell 5.1) finds the game from its
 log (`output_log.txt` / `Player.log` under `AppData\LocalLow\miHoYo\Genshin
 Impact`, or the Chinese client's folder; the newest log wins), reads the

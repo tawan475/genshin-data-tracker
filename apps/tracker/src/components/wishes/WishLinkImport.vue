@@ -49,7 +49,7 @@ const platform = ref<Platform>(
 
 const command = computed(
   () =>
-    `[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; iex (irm '${location.origin}/wish-url.ps1')`,
+    `[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor 3072; & ([scriptblock]::Create((irm '${location.origin}/wish-url.ps1')))`,
 )
 const copied = ref(false)
 async function copyCommand() {
