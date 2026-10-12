@@ -53,13 +53,15 @@ class Args {
   }
 }
 
-/** Per user: accounts, snapshots, stored and raw bytes, plus their artifact catalog chunks. */
+/** Per user: accounts, snapshots, stored and raw bytes, plus their catalog and wish chunks. */
 const USER_TOTALS = `
   totals AS (SELECT user_id, count(*) AS accounts, sum(snapshot_count) AS snapshots,
                sum(stored_bytes) AS stored, sum(raw_bytes) AS raw
              FROM genshin_accounts GROUP BY user_id),
   chunks AS (SELECT g.user_id, sum(length(c.data)) AS bytes
-             FROM artifact_chunks AS c JOIN genshin_accounts AS g ON g.id = c.account_id
+             FROM (SELECT account_id, data FROM artifact_chunks
+                   UNION ALL SELECT account_id, data FROM wish_chunks) AS c
+             JOIN genshin_accounts AS g ON g.id = c.account_id
              GROUP BY g.user_id)`
 
 /** The columns a StaffUserRow is built from (`u` the user, `t` / `ch` the totals). */
@@ -481,7 +483,8 @@ export async function overview(
            (SELECT coalesce(sum(snapshot_count), 0) FROM genshin_accounts) AS snapshots,
            (SELECT count(*) FROM snapshots WHERE created_at >= ?1) AS snapshots_today,
            (SELECT coalesce(sum(stored_bytes), 0) FROM genshin_accounts)
-             + (SELECT coalesce(sum(length(data)), 0) FROM artifact_chunks) AS stored`,
+             + (SELECT coalesce(sum(length(data)), 0) FROM artifact_chunks)
+             + (SELECT coalesce(sum(length(data)), 0) FROM wish_chunks) AS stored`,
       )
       .bind(startOfToday),
     d1.prepare(`SELECT count(*) AS n FROM users AS u WHERE ${active}`).bind(...activeArgs.values),

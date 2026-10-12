@@ -802,15 +802,19 @@ export interface ImportedAccount {
  * - `planner`: an account's planner goals, hand edits or settings changed
  *   (favourite characters and anecdote marks included); `tab` is the tab
  *   that sent the change (`x-gdt-tab`), which already has it.
+ * - `wishes`: an account's wish history changed (an import added pulls, or
+ *   it was deleted); `tab` as for `planner`.
  * Events only say that something changed; the app re-reads the account list
  * (or, for `planner`, an open Planner re-reads its goals and edits, the
- * Characters page its favourites and the Anecdotes page its marks).
+ * Characters page its favourites and the Anecdotes page its marks; for
+ * `wishes`, an open Wish History page re-reads the history).
  */
 export type LiveEvent =
   | { type: 'hello'; accounts: LiveAccount[] }
   | { type: 'data'; accountId: number; dataVersion: number | null; takenAt?: number }
   | { type: 'accounts' }
   | { type: 'planner'; accountId: number; tab?: string }
+  | { type: 'wishes'; accountId: number; tab?: string }
 
 /**
  * The close code of a live socket whose session was ended (that device was
@@ -955,4 +959,89 @@ export type PlannerTask =
 export interface PlannerTasksResponse {
   /** Built-in ones first, custom ones by position (then as made). */
   tasks: PlannerTask[]
+}
+
+// ------------------------------------------------------------- wish history
+
+/** Records per `POST /api/wishes/import` (irminsul chunks above it). */
+export const WISH_IMPORT_MAX_RECORDS = 2_000
+/** Records per website import request (`POST /api/accounts/:id/wishes/import`). */
+export const WISH_SITE_IMPORT_MAX_RECORDS = 20_000
+
+const wishText = (max: number) =>
+  z
+    .union([z.string(), z.number()])
+    .transform((v) => String(v))
+    .pipe(z.string().max(max))
+
+/** One record as the game's history API lists it (extra fields are ignored). */
+export const wishRecordSchema = z.object({
+  id: wishText(24).optional(),
+  uid: wishText(12).optional(),
+  gacha_type: wishText(8),
+  time: wishText(32),
+  name: z.string().max(80),
+  item_type: wishText(32).optional(),
+  rank_type: wishText(4).optional(),
+  item_id: wishText(16).optional(),
+})
+
+const wishImportFields = {
+  /** Hours from UTC of the records' times; the account's (by UID) when left out. */
+  timezone: z.number().int().min(-12).max(14).optional(),
+  region: z.string().max(32).optional(),
+  lang: z.string().max(16).optional(),
+}
+
+/** `POST /api/wishes/import` (irminsul, import key or token). */
+export const wishImportRequest = z.object({
+  uid: z.string().regex(/^\d{9,10}$/, 'A UID is 9 or 10 digits'),
+  ...wishImportFields,
+  records: z.array(wishRecordSchema).max(WISH_IMPORT_MAX_RECORDS),
+})
+
+/** `POST /api/accounts/:id/wishes/import` (the website: a converted file). */
+export const wishSiteImportRequest = z.object({
+  /** The file's UID: records of another are skipped. */
+  uid: z
+    .string()
+    .regex(/^\d{9,10}$/)
+    .optional(),
+  ...wishImportFields,
+  records: z.array(wishRecordSchema).max(WISH_SITE_IMPORT_MAX_RECORDS),
+})
+
+/** Highest game id held per UIGF banner type ("301" includes 400), as decimal text. */
+export type WishNewest = Record<'100' | '200' | '301' | '302' | '500', string | null>
+
+/** `GET /api/wishes/cursor?uid=`. */
+export interface WishCursorResponse {
+  uid: string
+  /** null: no account has this UID yet (a user key makes one on import). */
+  accountId: number | null
+  newest: WishNewest
+}
+
+export interface WishImportResponse {
+  accountId: number
+  /** Records that were new. */
+  added: number
+  /** Records already held. */
+  known: number
+  /** Records left out (another UID's, or a banner type this server does not know). */
+  skipped?: number
+  /** Pulls without game ids (paimon.moe imports) that these records replaced. */
+  replaced?: number
+  newest: WishNewest
+}
+
+/** `GET /api/accounts/:id/wishes`: the stored chunks, decoded in the browser. */
+export interface WishHistoryResponse {
+  /** Hours from UTC of the stored times (null: no history yet). */
+  timezone: number | null
+  /** Moves on every change (the ETag). */
+  version: number
+  chunks: { banner: 100 | 200 | 301 | 302 | 500; data: string }[]
+  /** Bytes stored. */
+  bytes: number
 }

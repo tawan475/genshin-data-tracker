@@ -15,6 +15,7 @@ import { progress } from './routes/progress'
 import { publicImport } from './routes/public'
 import { recovery } from './routes/recovery'
 import { staff } from './routes/staff'
+import { wishAccounts, wishSync } from './routes/wishes'
 import { runMaintenance } from './services/maintenance'
 
 const app = new Hono<AppEnv>().basePath('/api')
@@ -35,6 +36,8 @@ app.route('/auth/oauth', oauth)
 app.route('/me', me)
 app.route('/accounts', accounts)
 app.route('/accounts', progress)
+app.route('/accounts', wishAccounts)
+app.route('/wishes', wishSync)
 app.route('/genshin-accounts-public', publicImport)
 app.route('/oauth', irminsulOAuth)
 app.route('/irminsul', irminsul)

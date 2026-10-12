@@ -33,6 +33,9 @@ import type {
   UploadTarget,
   UserSettingsPatch,
   VerifyEmailResponse,
+  WishHistoryResponse,
+  WishImportResponse,
+  WishRecord,
 } from '@gdt/shared'
 import { staffApi } from './staff'
 import type { plannerStatePatch, plannerTargetsPatch, plannerTasksPatch } from '@gdt/shared'
@@ -234,6 +237,16 @@ export const api = {
       method: 'PATCH',
       json: body,
     }),
+  /** The stored wish history (chunks the page decodes); the browser revalidates it by ETag. */
+  wishHistory: (id: number) => requestJson<WishHistoryResponse>(`/api/accounts/${id}/wishes`),
+  /** Records converted from a UIGF or paimon.moe file, merged by id. */
+  importWishes: (id: number, body: { uid?: string; timezone?: number; records: WishRecord[] }) =>
+    requestJson<WishImportResponse>(`/api/accounts/${id}/wishes/import`, {
+      method: 'POST',
+      json: body,
+    }),
+  deleteWishes: (id: number) =>
+    requestJson<{ deleted: number }>(`/api/accounts/${id}/wishes`, { method: 'DELETE' }),
   plannerTargets: (id: number) =>
     requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`),
   /** `remove` is applied before `upsert`. Answers with every goal. */

@@ -300,6 +300,45 @@ export const anecdoteMarks = sqliteTable(
 )
 
 /**
+ * An account's wish history (migration 0022): the clock its pull times are
+ * on (hours from UTC, set by the first import) and a version that moves
+ * with every change (the history's ETag, and what concurrent imports check
+ * before they write). The pulls are in wish_chunks.
+ */
+export const wishHistories = sqliteTable('wish_histories', {
+  accountId: integer('account_id')
+    .primaryKey()
+    .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+  timezone: integer('timezone').notNull(),
+  version: integer('version').notNull().default(0),
+  updatedAt: integer('updated_at').notNull(),
+})
+
+/**
+ * Wish pulls, per account and UIGF banner type (100, 200, 301 incl. 400,
+ * 302, 500), in pull order: chunk `seq` 0, 1, … of at most 512 pulls (all
+ * but the last full), each `@gdt/shared` encodeWishChunk bytes (format byte
+ * + deflate). An import rewrites only the chunks from the first that
+ * changed. `newest_id` is the highest game id in the chunk, zero-padded to
+ * 20 digits (text order = number order; NULL when it holds only pulls
+ * without game ids), for the sync cursor.
+ */
+export const wishChunks = sqliteTable(
+  'wish_chunks',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    banner: integer('banner').notNull(),
+    seq: integer('seq').notNull(),
+    count: integer('count').notNull(),
+    newestId: text('newest_id'),
+    data: bytes('data').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.accountId, t.banner, t.seq] })],
+)
+
+/**
  * Achievements marked done by hand. Captured completions come from snapshots
  * (`gi_achievements`); these cover what irminsul hasn't seen. Kept out of the
  * account's settings JSON, which rides along on every account request.

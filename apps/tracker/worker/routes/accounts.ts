@@ -303,7 +303,7 @@ export const accounts = new Hono<AppEnv>()
   })
 
 /** Whether staff suspended the user or blocked their uploads. */
-async function uploadBlock(
+export async function uploadBlock(
   d1: D1Database,
   userId: number,
 ): Promise<'suspended' | 'uploads_blocked' | null> {

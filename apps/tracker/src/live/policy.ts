@@ -158,7 +158,7 @@ export interface KnownAccounts {
  * re-reads the list.
  */
 export function eventNeedsFetch(event: LiveEvent, known: KnownAccounts): boolean {
-  if (event.type === 'planner') return false
+  if (event.type === 'planner' || event.type === 'wishes') return false
   if (event.type === 'hello') return helloDiffers(event.accounts, known)
   if (event.type !== 'data' || event.dataVersion === null) return true
   const version = known.knownVersion(event.accountId)

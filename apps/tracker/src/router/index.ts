@@ -287,6 +287,12 @@ const router = createRouter({
               () => import('@/views/account/AnecdotesView.vue'),
             ),
             account(
+              'wishes',
+              'account-wishes',
+              'Wish history',
+              () => import('@/views/account/WishesView.vue'),
+            ),
+            account(
               'snapshots',
               'account-snapshots',
               'Snapshots',

@@ -6,7 +6,8 @@
  *   in `user_upload_days` by the import's own write batch: 429
  *   `daily_upload_limit`, with Retry-After at the next UTC midnight;
  * - a storage quota: the stored sections of all the user's accounts plus
- *   their artifact catalog chunks (snapshot rows' small `meta` is left out:
+ *   their artifact catalog chunks and wish history chunks (snapshot rows'
+ *   small `meta` is left out:
  *   summing it would read every snapshot row on every import): 413
  *   `storage_quota`.
  * The defaults are UPLOAD_LIMIT_DEFAULTS; a `site_settings` row overrides one
@@ -78,7 +79,8 @@ const SETTING_KEYS_SQL = Object.values(UPLOAD_SETTING_KEYS)
 /**
  * The usage of the user who owns account ?1 on day ?2, and the overrides of
  * the limits, as one row: the user and account by key, the user's accounts
- * by the user index, their chunks by the account index, the day by key.
+ * by the user index, their chunks (catalog and wishes) by the account
+ * index, the day by key.
  */
 export function usageStatement(
   d1: D1Database,
@@ -92,6 +94,8 @@ export function usageStatement(
           WHERE g.user_id = u.id)
          + (SELECT coalesce(sum(length(c.data)), 0) FROM genshin_accounts AS g
             JOIN artifact_chunks AS c ON c.account_id = g.id WHERE g.user_id = u.id)
+         + (SELECT coalesce(sum(length(w.data)), 0) FROM genshin_accounts AS g
+            JOIN wish_chunks AS w ON w.account_id = g.id WHERE g.user_id = u.id)
            AS stored_bytes,
          coalesce(d.snapshots, 0) AS day_snapshots, coalesce(d.stored_bytes, 0) AS day_bytes,
          (SELECT json_group_object(s.key, s.value) FROM site_settings AS s
@@ -194,4 +198,26 @@ export function countUploadStatement(
          snapshots = snapshots + 1, stored_bytes = stored_bytes + excluded.stored_bytes`,
     )
     .bind(accountId, day, bytes, snapshot.takenAt, snapshot.contentKey)
+}
+
+/**
+ * Counts a wish import's newly stored bytes in the user's day (no snapshot),
+ * in the batch that stores them: only when that batch's version bump went
+ * through (`wish_histories.version` is now ?4).
+ */
+export function countWishBytesStatement(
+  d1: D1Database,
+  accountId: number,
+  day: string,
+  bytes: number,
+  version: number,
+): D1PreparedStatement {
+  return d1
+    .prepare(
+      `INSERT INTO user_upload_days (user_id, day, snapshots, stored_bytes)
+       SELECT a.user_id, ?2, 0, ?3 FROM genshin_accounts AS a
+       WHERE a.id = ?1 AND (SELECT version FROM wish_histories WHERE account_id = ?1) = ?4
+       ON CONFLICT (user_id, day) DO UPDATE SET stored_bytes = stored_bytes + excluded.stored_bytes`,
+    )
+    .bind(accountId, day, bytes, version)
 }

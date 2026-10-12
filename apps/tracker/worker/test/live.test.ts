@@ -330,6 +330,47 @@ describe('who is listening', () => {
   })
 })
 
+describe('wish history events', () => {
+  function syncWishes(key: string, records: unknown[]) {
+    return SELF.fetch(`${ORIGIN}/api/wishes/import`, {
+      method: 'POST',
+      headers: { 'x-import-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({ uid: '812345678', timezone: 8, records }),
+    })
+  }
+  const record = (id: string, time: string) => ({
+    id,
+    gacha_type: '200',
+    time,
+    name: 'Slingshot',
+    item_type: 'Weapon',
+    rank_type: '3',
+  })
+
+  it('tells the user when pulls arrive, and says nothing for known ones or with no page open', async () => {
+    const { client, me } = await signUp()
+    const { account, importKey } = await createAccount(client)
+    await sleep(100)
+    const idle = await notified(me.id)
+    expect(
+      (await syncWishes(importKey, [record('1790000000000000001', '2026-10-01 10:00:00')])).status,
+    ).toBe(200)
+    await sleep(100)
+    expect(await notified(me.id)).toBe(idle)
+
+    const tab = await openTab(client)
+    expect(
+      (await syncWishes(importKey, [record('1790000000000000002', '2026-10-01 10:01:00')])).status,
+    ).toBe(200)
+    expect(await tab.next()).toEqual<LiveEvent>({ type: 'wishes', accountId: account.id })
+    expect(
+      (await syncWishes(importKey, [record('1790000000000000002', '2026-10-01 10:01:00')])).status,
+    ).toBe(200)
+    await tab.quiet()
+    tab.socket.close(1000)
+  })
+})
+
 describe('ending sessions', () => {
   it('closes the sockets of every session when the user signs out everywhere', async () => {
     const { client, username, password } = await signUp()

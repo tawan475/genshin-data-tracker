@@ -47,6 +47,7 @@ import { onTabMessage, postToTabs, tabsCanTalk, type TabMessage } from './channe
 import { importingAccounts, onApplyPending, updatesHeld } from './holds'
 import { requestLeadership } from './leader'
 import { emitPlannerChange } from './planner-changes'
+import { emitWishChange } from './wish-changes'
 import {
   BURST_WINDOW_MS,
   FALLBACK_AFTER,
@@ -203,6 +204,11 @@ export function useLiveUpdates(): void {
     if (event.type === 'planner') {
       // Not about the account list: the open Planner re-reads its own data.
       if (event.tab !== TAB_ID) emitPlannerChange(event.accountId)
+      return
+    }
+    if (event.type === 'wishes') {
+      // Likewise: an open Wish History page re-reads the history.
+      if (event.tab !== TAB_ID) emitWishChange(event.accountId)
       return
     }
     const now = Date.now()
