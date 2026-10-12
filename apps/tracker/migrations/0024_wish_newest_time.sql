@@ -1,0 +1,1 @@
+ALTER TABLE `wish_chunks` ADD `newest_time` integer;

@@ -1020,6 +1020,13 @@ export interface WishCursorResponse {
   /** null: no account has this UID yet (a user key makes one on import). */
   accountId: number | null
   newest: WishNewest
+  /**
+   * Per banner the newest stored pull's time, "YYYY-MM-DD HH:MM:SS" on the
+   * account's server clock (as the game's records write times), counting
+   * pulls without game ids (from a paimon.moe / UIGF backup) too; null when
+   * none. irminsul stops paging at the first record older than it.
+   */
+  newestTime: WishNewest
 }
 
 export interface WishImportResponse {

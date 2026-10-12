@@ -113,6 +113,7 @@ describe('wish sync (irminsul)', () => {
       uid: UID,
       accountId: account.id,
       newest: { '100': null, '200': null, '301': null, '302': null, '500': null },
+      newestTime: { '100': null, '200': null, '301': null, '302': null, '500': null },
     })
 
     const first = await sync(importKey, history.slice(0, 1000))
@@ -126,6 +127,40 @@ describe('wish sync (irminsul)', () => {
       expect(after.newest[banner]).toBe(newestFirst(banner)[0]!.id)
     }
     expect(after).toEqual({ ...after, newest: rest.newest })
+    // The newest pull's time too, as the game's records write it (UTC+8 here).
+    for (const banner of ['301', '302', '200', '100', '500'] as const) {
+      expect(after.newestTime[banner]).toBe(newestFirst(banner)[0]!.time)
+    }
+  }, 60_000)
+
+  it("answers the newest time on the account's server clock, in one read", async () => {
+    const { importKey } = await setup()
+    const banner = newestFirst('302')
+    // Records on UTC (timezone 0) make the history's clock UTC; the server's is UTC+8.
+    await ok((await sync(importKey, banner.slice(0, 50), { timezone: 0 })).response)
+    const { response, cost } = await cursor(importKey)
+    const body = await ok<WishCursorResponse>(response)
+    const at = Date.parse(banner[0]!.time.replace(' ', 'T') + 'Z') + 8 * 3600_000
+    expect(body.newestTime['302']).toBe(new Date(at).toISOString().slice(0, 19).replace('T', ' '))
+    expect(body.newestTime['301']).toBeNull()
+    expect(cost['round-trips']).toBe(1)
+  }, 60_000)
+
+  it('reads the newest time from the last chunk where it predates the column', async () => {
+    const { importKey, account } = await setup()
+    const banner = newestFirst('301')
+    await ok((await sync(importKey, banner.slice(0, 700))).response)
+    await env.DB.prepare('UPDATE wish_chunks SET newest_time = NULL WHERE account_id = ?1')
+      .bind(account.id)
+      .run()
+    const { response, cost } = await cursor(importKey)
+    const body = await ok<WishCursorResponse>(response)
+    expect(body.newestTime['301']).toBe(banner[0]!.time)
+    expect(cost['round-trips']).toBe(2)
+    // An import that adds pulls writes the column again: back to one read.
+    await ok((await sync(importKey, banner.slice(0, 702))).response)
+    const healed = await cursor(importKey)
+    expect(healed.cost['round-trips']).toBe(1)
   }, 60_000)
 
   it('dedupes overlap and any order, and a no-op writes nothing', async () => {
@@ -346,6 +381,61 @@ describe('wish history (website)', () => {
     const after = (await stored(client, account.id)).get(302)!
     expect(after.length).toBe(120)
     expect(after.every((p) => !isSyntheticWishId(p.id))).toBe(true)
+  }, 60_000)
+
+  it('lets a sync after a backup stop at its newest pull, replacing the boundary ten-pull', async () => {
+    const { importKey, client, account } = await setup()
+    const records = newestFirst('301')
+    // A ten-pull (one second) with newer pulls after it, about 15 from the newest.
+    let k = 10
+    while (
+      !(
+        records[k - 1]!.time !== records[k]!.time &&
+        records.slice(k, k + 10).every((r) => r.time === records[k]!.time) &&
+        records[k + 10]!.time !== records[k]!.time
+      )
+    ) {
+      k++
+    }
+    // The backup: everything up to that ten-pull, as paimon.moe writes it (no ids).
+    const backup = records.slice(k)
+    const pulls = await (async () => {
+      await ok((await sync(importKey, backup)).response)
+      const held = (await stored(client, account.id)).get(301)!
+      await client.fetch(`/api/accounts/${account.id}/wishes`, { method: 'DELETE' })
+      return held
+    })()
+    const file = parseWishFile(buildPaimonCsv(pulls))
+    await ok(
+      await client.fetch(`/api/accounts/${account.id}/wishes/import`, {
+        method: 'POST',
+        json: { records: file.accounts[0]!.records },
+      }),
+    )
+    const before = await ok<WishCursorResponse>((await cursor(importKey)).response)
+    expect(before.newest['301']).toBeNull()
+    expect(before.newestTime['301']).toBe(records[k]!.time)
+
+    // irminsul pages until a record older than that time: the newer pulls and the ten-pull.
+    const page = records.filter((r) => r.time >= before.newestTime['301']!)
+    expect(page.length).toBe(k + 10)
+    const real = await ok<WishImportResponse>((await sync(importKey, page)).response)
+    expect(real).toMatchObject({ added: k + 10, replaced: 10 })
+
+    const after = (await stored(client, account.id)).get(301)!
+    expect(after.length).toBe(records.length)
+    // No duplicates: every record once, by time and name.
+    const clock = (t: number) => new Date(t * 1000).toISOString().slice(0, 19).replace('T', ' ')
+    const sorted = (list: string[]) => [...list].sort()
+    expect(sorted(after.map((p) => `${clock(p.time)}|${p.item.name}`))).toEqual(
+      sorted(records.map((r) => `${r.time}|${r.name}`)),
+    )
+    const reals = after.filter((p) => !isSyntheticWishId(p.id))
+    expect(reals.map((p) => p.id.toString()).sort()).toEqual(page.map((r) => r.id).sort())
+    expect(after.filter((p) => isSyntheticWishId(p.id)).length).toBe(records.length - k - 10)
+    const cursorAfter = await ok<WishCursorResponse>((await cursor(importKey)).response)
+    expect(cursorAfter.newest['301']).toBe(records[0]!.id)
+    expect(cursorAfter.newestTime['301']).toBe(records[0]!.time)
   }, 60_000)
 
   it('refuses a blocked user and another account', async () => {

@@ -319,7 +319,11 @@ session's upload target as `/api/irminsul/import` is) or with an import key
 (`x-import-key`, account- or user-scoped like uploads); one resolver for
 both, `worker/lib/uploader.ts`:
 `GET /api/wishes/cursor?uid=` → `{uid, accountId, newest: {"100"…"500": id |
-null}}` (the highest game id held per banner; a user key's unknown UID answers
+null}, newestTime: {"100"…"500": "YYYY-MM-DD HH:MM:SS" | null}}` (the highest
+game id held per banner, and the newest pull's time with backup pulls
+included, on the account's server clock like the game's records; from
+`wish_chunks.newest_time`, migration 0024, or the last chunk for chunks
+stored before it; a user key's unknown UID answers
 `accountId: null`; an account key of another UID is 409 `uid_mismatch`), and
 `POST /api/wishes/import` `{uid, timezone, region, lang, records}` (≤ 2,000
 records as the API lists them, any order, overlap fine; another UID's records

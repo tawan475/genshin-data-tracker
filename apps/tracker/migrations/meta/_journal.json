@@ -169,6 +169,13 @@
       "when": 1791807822091,
       "tag": "0023_wish_history",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1791832573557,
+      "tag": "0024_wish_newest_time",
+      "breakpoints": true
     }
   ]
 }

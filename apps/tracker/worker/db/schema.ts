@@ -321,7 +321,9 @@ export const wishHistories = sqliteTable('wish_histories', {
  * + deflate). An import rewrites only the chunks from the first that
  * changed. `newest_id` is the highest game id in the chunk, zero-padded to
  * 20 digits (text order = number order; NULL when it holds only pulls
- * without game ids), for the sync cursor.
+ * without game ids), for the sync cursor; `newest_time` its newest pull's
+ * time, wall-clock seconds on the history's clock, synthetic ids included
+ * (migration 0024; NULL on chunks written before it).
  */
 export const wishChunks = sqliteTable(
   'wish_chunks',
@@ -333,6 +335,7 @@ export const wishChunks = sqliteTable(
     seq: integer('seq').notNull(),
     count: integer('count').notNull(),
     newestId: text('newest_id'),
+    newestTime: integer('newest_time'),
     data: bytes('data').notNull(),
   },
   (t) => [primaryKey({ columns: [t.accountId, t.banner, t.seq] })],

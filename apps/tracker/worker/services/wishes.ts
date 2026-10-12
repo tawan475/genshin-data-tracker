@@ -22,6 +22,7 @@ import {
   chunkPulls,
   decodeWishChunk,
   encodeWishChunk,
+  formatWishTime,
   mergePulls,
   newestRealId,
   normalizeWishRecords,
@@ -91,14 +92,83 @@ export function newestOf(rows: readonly Record<string, unknown>[]): WishNewest {
   return newest
 }
 
-/** The highest game id held per banner (the sync cursor): one indexed read of the account's chunk rows. */
+/**
+ * The cursor's read: per banner the highest game id, the newest pull's time
+ * (synthetic ids included) and the history's clock, in one statement.
+ */
+const CURSOR_SQL = `SELECT banner, max(newest_id) AS newest, max(newest_time) AS newest_time,
+    (SELECT timezone FROM wish_histories WHERE account_id = ?1) AS timezone
+  FROM wish_chunks WHERE account_id = ?1 GROUP BY banner`
+
+/** A banner's last chunk, for chunks stored before `newest_time` existed. */
+const LEGACY_LAST_SQL = `SELECT c.banner, c.data FROM wish_chunks AS c
+  WHERE c.account_id = ?1 AND c.banner IN (SELECT value FROM json_each(?2))
+    AND c.seq = (SELECT max(m.seq) FROM wish_chunks AS m WHERE m.account_id = ?1 AND m.banner = c.banner)`
+
+const emptyNewest = (): WishNewest => ({
+  '100': null,
+  '200': null,
+  '301': null,
+  '302': null,
+  '500': null,
+})
+
+export interface WishCursor {
+  newest: WishNewest
+  /** "YYYY-MM-DD HH:MM:SS" on the account's server clock, null when none. */
+  newestTime: WishNewest
+}
+
+/**
+ * The sync cursor: per banner the highest game id held, and the newest
+ * pull's time (synthetic ids from a paimon.moe / UIGF backup included) on
+ * the account's server clock (the clock of the game's records), so irminsul
+ * can stop paging at what a backup brought too. One indexed read of the
+ * account's chunk rows; a banner whose chunks predate `newest_time` costs
+ * one more read of its last chunk, until an import rewrites it.
+ */
 export async function wishCursor(
   d1: D1Database,
   meter: D1Meter,
-  accountId: number,
-): Promise<WishNewest> {
-  const [rows] = await meter.batch(d1, 'cursor', [d1.prepare(NEWEST_SQL).bind(accountId)])
-  return newestOf(rows!.results)
+  account: { id: number; uid: string | null; server: GenshinServer | null },
+): Promise<WishCursor> {
+  const [rows] = await meter.batch(d1, 'cursor', [d1.prepare(CURSOR_SQL).bind(account.id)])
+  const results = rows!.results
+  const newest = newestOf(results)
+  const newestTime = emptyNewest()
+  if (results.length === 0) return { newest, newestTime }
+  const clock = Number(results[0]!.timezone ?? 8)
+  const server = serverTimezone(account.server ?? serverFromUid(account.uid ?? ''))
+  const times = new Map<UigfGachaType, number>()
+  const legacy: UigfGachaType[] = []
+  for (const row of results) {
+    const banner = Number(row.banner)
+    if (!isBanner(banner)) continue
+    if (typeof row.newest_time === 'number') times.set(banner, row.newest_time)
+    else legacy.push(banner)
+  }
+  if (legacy.length > 0) {
+    const [last] = await meter.batch(d1, 'cursor-legacy', [
+      d1.prepare(LEGACY_LAST_SQL).bind(account.id, JSON.stringify(legacy)),
+    ])
+    for (const row of last!.results) {
+      const banner = Number(row.banner)
+      if (!isBanner(banner)) continue
+      const pulls = decodeWishChunk(banner, toBytes(row.data))
+      if (pulls.length > 0) times.set(banner, newestTimeOf(pulls))
+    }
+  }
+  for (const [banner, time] of times) {
+    newestTime[String(banner) as keyof WishNewest] = formatWishTime(time + (server - clock) * 3600)
+  }
+  return { newest, newestTime }
+}
+
+/** The newest time among pulls (they are in pull order; max for safety). */
+function newestTimeOf(pulls: readonly WishPull[]): number {
+  let time = pulls[0]!.time
+  for (const p of pulls) if (p.time > time) time = p.time
+  return time
 }
 
 interface StoredChunk {
@@ -295,8 +365,8 @@ async function importOnce(
       statements.push(
         d1
           .prepare(
-            `INSERT INTO wish_chunks (account_id, banner, seq, count, newest_id, data)
-             SELECT ?1, ?2, ?3, ?4, ?5, ?6 WHERE ${VERSION_GUARD} = ?7`,
+            `INSERT INTO wish_chunks (account_id, banner, seq, count, newest_id, newest_time, data)
+             SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7 WHERE ${VERSION_GUARD} = ?8`,
           )
           .bind(
             accountId,
@@ -304,6 +374,7 @@ async function importOnce(
             chunk.seq,
             chunk.pulls.length,
             newest === null ? null : paddedWishId(newest),
+            newestTimeOf(chunk.pulls),
             chunk.data,
             version,
           ),
