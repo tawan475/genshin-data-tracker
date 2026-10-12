@@ -23,7 +23,7 @@ import { useAccount, useReadOnly } from './context'
  * (lifetime pulls and Primogems, 5★ / 4★ pity, the latest pulls), pulls
  * per month by rarity, and each banner's summary table with its 5★s.
  * Each banner's own page lists every pull. History arrives from irminsul
- * (after Wish → History is opened in game) or a UIGF / paimon.moe file;
+ * (Wish → History opened in game, once a day) or a UIGF / paimon.moe file;
  * live events re-read it.
  */
 const account = useAccount()
@@ -46,6 +46,14 @@ const detail = (slug: string) => ({
 
 const months = computed(() => (stats.value ? monthlyPulls([...stats.value.values()]) : []))
 const monthLabels = computed(() => months.value.map((m) => m.month))
+/** The chart fills the rest of the last card row (2 columns, then 3). */
+const chartSpan = computed(() => {
+  const n = shown.value.length
+  return [
+    n % 2 === 0 ? 'md:col-span-2' : '',
+    ['xl:col-span-3', 'xl:col-span-2', 'xl:col-span-1'][n % 3],
+  ]
+})
 const monthSeries = computed(() => [
   { label: '3★', values: months.value.map((m) => m.total - m.five - m.four), color: '--rarity-3' },
   { label: '4★', values: months.value.map((m) => m.four), color: '--rarity-4' },
@@ -68,6 +76,9 @@ function retry() {
 }
 
 const dialog = ref(false)
+
+const SYNC_HELP =
+  "Open Wish → History in game once a day (you can close it right away): irminsul syncs every banner, then each new wish while the key lasts (~24 h). The game's wish link brings the last six months too. Older than 6 months: import a paimon.moe backup or UIGF file."
 </script>
 
 <template>
@@ -79,11 +90,6 @@ const dialog = ref(false)
             <Clock class="size-4" aria-hidden="true" />
             <span class="tabular font-mono">{{ newest }}</span>
           </span>
-          <span
-            class="tabular font-mono"
-            :title="`Wishes worth: ${formatNumber(history!.total)} wishes in Primogems`"
-            >✦ {{ formatNumber(history!.total * PRIMOS_PER_PULL) }}</span
-          >
         </p>
       </template>
       <template v-if="ready && history?.total" #actions>
@@ -99,48 +105,62 @@ const dialog = ref(false)
 
     <template v-else-if="ready && history && stats">
       <UiPanel v-if="history.total === 0" flush>
-        <UiEmpty
-          title="No wishes yet"
-          body="Run irminsul and open Wish → History in game, or import with the game's wish link: either brings the last six months. Older history: a UIGF or paimon.moe file."
-        >
-          <template #icon><Sparkles aria-hidden="true" /></template>
-          <UiButton v-if="!readOnly" variant="primary" @click="dialog = true">Import</UiButton>
-        </UiEmpty>
+        <div :title="SYNC_HELP">
+          <UiEmpty
+            title="No wishes yet"
+            body="Open Wish → History in game once a day (you can close it right away), or import with the game's wish link. Older than 6 months: import a paimon.moe backup or UIGF file."
+          >
+            <template #icon><Sparkles aria-hidden="true" /></template>
+            <UiButton v-if="!readOnly" variant="primary" @click="dialog = true">Import</UiButton>
+          </UiEmpty>
+        </div>
       </UiPanel>
 
-      <div v-else class="flex flex-col gap-4 lg:gap-6">
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] gap-3">
+      <div v-else class="flex flex-col gap-4">
+        <div class="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
           <WishBannerCard
             v-for="b in shown"
             :key="b.info.banner"
             :stats="b.stats"
             :to="detail(b.info.slug)"
           />
+          <section
+            class="flex flex-col rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
+            :class="chartSpan"
+          >
+            <h2 class="mb-2 flex h-10 items-center text-lg font-semibold">Pulls per month</h2>
+            <WishBarChart
+              :labels="monthLabels"
+              :series="monthSeries"
+              label="Pulls per month by rarity"
+              :height="232"
+            />
+          </section>
         </div>
 
-        <UiPanel v-if="months.length > 1" title="Pulls per month">
-          <WishBarChart
-            :labels="monthLabels"
-            :series="monthSeries"
-            label="Pulls per month by rarity"
-            :height="200"
-          />
-        </UiPanel>
-
-        <div class="grid gap-4 lg:grid-cols-2 lg:gap-6">
+        <div class="gap-4 md:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
           <WishSummaryTable
             v-for="b in shown.filter((s) => s.stats.total > 0)"
             :key="b.info.banner"
             :stats="b.stats"
             :to="detail(b.info.slug)"
           />
+          <p
+            class="flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
+            :title="`${formatNumber(history.total)} wishes × ${PRIMOS_PER_PULL} Primogems`"
+          >
+            <span class="flex-1">Wishes worth</span>
+            <span class="tabular font-mono font-semibold"
+              >✦ {{ formatNumber(history.total * PRIMOS_PER_PULL) }}</span
+            >
+          </p>
         </div>
       </div>
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4 lg:gap-6">
-      <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] gap-3">
-        <UiSkeleton v-for="n in 4" :key="n" class="h-44" />
+    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4">
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <UiSkeleton v-for="n in 3" :key="n" class="h-80" />
       </div>
       <UiSkeleton class="h-64" />
     </div>

@@ -61,12 +61,6 @@ export const OUTCOME_LABEL: Record<Outcome, string> = {
   guaranteed: 'Guaranteed',
 }
 
-export const OUTCOME_TONE: Record<Outcome, 'success' | 'danger' | 'accent'> = {
-  won: 'success',
-  lost: 'danger',
-  guaranteed: 'accent',
-}
-
 export const oddsOf = (banner: UigfGachaType) => (banner === 302 ? '75/25' : '50/50')
 
 /** Tooltip of an outcome; the weapon banner's 5★ odds are 75/25. */
@@ -91,12 +85,16 @@ export const RARITY_TEXT: Record<number, string> = {
   3: 'text-text-secondary',
 }
 
-/** A 5★ pity's colour: early green, soft pity amber, late red. */
-export function pityTone(pity: number, soft: number): string {
-  if (pity < soft * 0.6) return 'text-success-text'
-  if (pity < soft) return 'text-text-primary'
-  if (pity < soft + 6) return 'text-warning-text'
-  return 'text-danger-text'
+/**
+ * A pity's colour as paimon.moe draws it: green when early, through amber,
+ * to red at hard pity (`hard`: 90 / 80 for a 5★, 10 for a 4★). Mixed from
+ * the theme's tokens, so it reads in both themes.
+ */
+export function pityColor(pity: number, hard: number): string {
+  const t = Math.min(1, Math.max(0, (pity - 1) / Math.max(1, hard - 1)))
+  return t < 0.5
+    ? `color-mix(in oklab, var(--warning-text) ${Math.round(t * 200)}%, var(--success-text))`
+    : `color-mix(in oklab, var(--danger-text) ${Math.round((t - 0.5) * 200)}%, var(--warning-text))`
 }
 
 export const formatPercent = (share: number) =>

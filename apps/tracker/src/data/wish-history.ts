@@ -432,3 +432,25 @@ export function pityHistogram(rows: readonly PullRow[], hard: number): number[] 
   for (const r of rows) if (r.pity >= 1 && r.pity <= hard) out[r.pity - 1]!++
   return out
 }
+
+/**
+ * paimon.moe's "#Roll": each pull's number within the banner run it was
+ * made on (1 = the run's first pull), for `rows` newest first as
+ * BannerStats gives them. A pull outside the banner data, or on a banner
+ * without runs (standard, beginners'), has its number on the banner.
+ */
+export function runPullNumbers(rows: readonly PullRow[]): Map<PullRow, number> {
+  const out = new Map<PullRow, number>()
+  const seen = new Map<EventBanner, number>()
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const row = rows[i]!
+    if (!row.on) {
+      out.set(row, row.number)
+      continue
+    }
+    const n = (seen.get(row.on) ?? 0) + 1
+    seen.set(row.on, n)
+    out.set(row, n)
+  }
+  return out
+}

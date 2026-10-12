@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, ArrowUpCircle } from 'lucide-vue-next'
-import FilterChip from '@/components/ui/FilterChip.vue'
+import { ArrowLeft, CircleArrowUp } from 'lucide-vue-next'
+import { formatWishTime, wishItemInfo } from '@gdt/shared'
 import PageHeader from '@/components/ui/PageHeader.vue'
-import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import UiStat from '@/components/ui/UiStat.vue'
 import WishBarChart from '@/components/wishes/WishBarChart.vue'
-import WishFiveChips from '@/components/wishes/WishFiveChips.vue'
-import WishRuns from '@/components/wishes/WishRuns.vue'
 import WishTable from '@/components/wishes/WishTable.vue'
 import { useWishHistory } from '@/components/wishes/use-wish-history'
 import { useWishStats } from '@/components/wishes/use-wish-stats'
@@ -29,16 +27,16 @@ import {
   PRIMOS_PER_PULL,
   SOFT_PITY,
   pityHistogram,
+  type BannerRun,
 } from '@/data/wish-history'
 import { formatNumber } from '@/lib/format'
 import { useAccount } from './context'
 
 /**
- * One banner's wish history, after paimon.moe's banner page and beyond it:
- * pulls and Primogems, both pities and what the next 5★ is, luck (the
- * average 5★ pity against the game's expected one), the spread of 5★
- * pities with the soft pity mark, each banner run with its 5★s, and every
- * pull in a searchable, paged table.
+ * One banner's wish history, as paimon.moe's banner page: every pull in a
+ * paged table, and beside it (above it on narrower screens) the pulls and
+ * both pities, the rarity split as a ring, the pulls per banner run and
+ * the spread of 5★ pities. Details are tooltips.
  */
 const account = useAccount()
 const route = useRoute()
@@ -51,38 +49,81 @@ const info = computed(() => bannerBySlug(route.params.banner) ?? WISH_BANNERS[0]
 const stats = computed(() => all.value?.get(info.value.banner) ?? null)
 const hard = computed(() => HARD_PITY[info.value.banner])
 const soft = computed(() => SOFT_PITY[info.value.banner])
-const expected = computed(() => EXPECTED_PITY[info.value.banner])
 
-function go(slug: string) {
-  void router.replace({ name: 'account-wishes-banner', params: { ...route.params, banner: slug } })
-}
+const banner = computed({
+  get: () => info.value.slug,
+  set: (slug: string) =>
+    void router.replace({
+      name: 'account-wishes-banner',
+      params: { ...route.params, banner: slug },
+    }),
+})
+/** Banners with pulls (and this one), for the switch. */
+const bannerOptions = computed(() =>
+  WISH_BANNERS.filter(
+    (b) => b.banner === info.value.banner || (all.value?.get(b.banner)?.total ?? 0) > 0,
+  ).map((b) => ({ value: b.slug, label: b.label, title: b.title })),
+)
 
-const nextFive = computed(() => {
+const fiveTitle = computed(() => {
   const s = stats.value
-  if (!s || !info.value.rated) return { value: '—', hint: 'No 50/50 on this banner' }
-  if (s.guaranteed5 === null) {
-    return { value: '?', hint: 'Not known: a pull is on a banner newer than the banner data' }
+  if (!s) return ''
+  const left = hard.value[0] - s.pity5
+  const parts = [
+    `${formatNumber(left)} to hard pity (${formatNumber(left * PRIMOS_PER_PULL)} Primogems)`,
+    `soft pity from ${soft.value}`,
+  ]
+  if (s.guaranteed5 === true) parts.push('next 5★ is featured')
+  else if (s.guaranteed5 === false) parts.push(`next 5★ is a ${oddsOf(s.banner)}`)
+  if (s.five.count) {
+    const diff = s.five.avgPity - EXPECTED_PITY[s.banner]
+    parts.push(
+      `average ${formatPity(Math.round(s.five.avgPity * 10) / 10)} (${diff <= 0 ? 'luckier' : 'unluckier'} than ${EXPECTED_PITY[s.banner]})`,
+    )
   }
-  const r = s.rate5!
-  const hint =
-    `${oddsOf(s.banner)} won ${formatNumber(r.won)} · lost ${formatNumber(r.lost)}` +
-    (r.rate !== null ? ` (${formatPercent(r.rate)})` : '') +
-    ` · streak now: ${r.winStreak > 0 ? `${r.winStreak} won` : `${r.loseStreak} lost`}` +
-    ` · longest: ${r.maxWinStreak} won, ${r.maxLoseStreak} lost` +
-    (s.banner === 301 ? ' · Capturing Radiance not tracked' : ' · Epitomized Path not tracked')
-  return { value: s.guaranteed5 ? 'Guaranteed' : oddsOf(s.banner), hint }
+  return parts.join(' · ')
 })
 
-const luck = computed(() => {
+/** The rarity ring: 5★, 4★ and 3★ shares as one conic gradient. */
+const split = computed(() => {
   const s = stats.value
-  if (!s?.five.count) return null
-  const diff = s.five.avgPity - expected.value
+  if (!s?.total) return null
+  const lines = [
+    { label: '5★', count: s.five.count, color: 'var(--rarity-5)', tone: 'text-rarity-5' },
+    { label: '4★', count: s.four.count, color: 'var(--rarity-4)', tone: 'text-rarity-4' },
+    {
+      label: '3★',
+      count: s.total - s.five.count - s.four.count,
+      color: 'var(--rarity-3)',
+      tone: 'text-rarity-3',
+    },
+  ]
+  let at = 0
+  const stops = lines.map((l) => {
+    const from = at
+    at += (l.count / s.total) * 100
+    return `${l.color} ${from}% ${at}%`
+  })
   return {
-    value: formatPity(Math.round(s.five.avgPity * 10) / 10),
-    tone: diff <= 0 ? ('success' as const) : ('warning' as const),
-    hint: `Average 5★ pity over ${formatNumber(s.five.count)}; the game's rates give about ${expected.value}: ${diff <= 0 ? 'luckier' : 'unluckier'} by ${formatPity(Math.abs(Math.round(diff * 10) / 10))}`,
+    lines: lines.map((l) => ({ ...l, share: formatPercent(l.count / s.total) })),
+    gradient: `conic-gradient(${stops.join(', ')})`,
   }
 })
+
+/** Banner runs pulled on, newest first. */
+const runs = computed(() => (stats.value ? [...stats.value.runs].reverse() : []))
+const most = computed(() => Math.max(1, ...runs.value.map((r) => r.pulls)))
+function runLabel(run: BannerRun): string {
+  const b = run.banner
+  if (info.value.banner === 302) {
+    return b.featured5.map((key) => wishItemInfo('weapon', key)?.name ?? key).join(' · ')
+  }
+  return b.name400 ? `${b.name} / ${b.name400}` : b.name
+}
+const day = (utc: number) => formatWishTime(utc + 8 * 3600).slice(0, 10)
+const runTitle = (run: BannerRun) =>
+  `${runLabel(run)}\n${run.banner.version} · ${day(run.banner.start)} → ${day(run.banner.end)}\n` +
+  `${formatNumber(run.pulls)} pulls · ${formatNumber(run.pulls * PRIMOS_PER_PULL)} Primogems`
 
 const histogram = computed(() =>
   stats.value ? pityHistogram(stats.value.fives, hard.value[0]) : [],
@@ -99,7 +140,17 @@ const histogramTitles = computed(() =>
   histogram.value.map((_, i) => `Pity ${i + 1}${i + 1 >= soft.value ? ' · soft pity' : ''}`),
 )
 
-const left = computed(() => (stats.value ? hard.value[0] - stats.value.pity5 : 0))
+/**
+ * Where the cards go: beside the table from 2xl (paimon.moe's side column),
+ * above it below that, the run list and pity spread under it on phones.
+ * Without runs (standard, beginners') the spread takes the runs' place.
+ */
+const layout = computed(() =>
+  runs.value.length
+    ? "[grid-template-areas:'stats_pie'_'table_table'_'runs_runs'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_runs'_'table_table_table'_'hist_hist_hist'] 2xl:grid-cols-[minmax(0,1fr)_auto_auto] 2xl:grid-rows-[auto_auto_auto_1fr] 2xl:[grid-template-areas:'table_stats_pie'_'table_runs_runs'_'table_hist_hist'_'table_._.']"
+    : "[grid-template-areas:'stats_pie'_'table_table'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_hist'_'table_table_table'] 2xl:grid-cols-[minmax(0,1fr)_auto_auto] 2xl:grid-rows-[auto_auto_1fr] 2xl:[grid-template-areas:'table_stats_pie'_'table_hist_hist'_'table_._.']",
+)
+
 const ready = computed(() => !!stats.value)
 const loadError = computed(() => wishes.error.value ?? statsError.value)
 function retry() {
@@ -110,33 +161,22 @@ function retry() {
 
 <template>
   <div>
-    <PageHeader :title="`Wish history · ${info.title}`">
-      <template #meta>
-        <UiButton
-          variant="ghost"
-          size="sm"
-          :to="{ name: 'account-wishes', params: { accountId: account.id } }"
-        >
-          <ArrowLeft class="size-4" aria-hidden="true" />Wishes
-        </UiButton>
-      </template>
-    </PageHeader>
+    <PageHeader :title="`Wish history · ${info.title}`" />
 
-    <div
-      role="radiogroup"
-      aria-label="Banner"
-      class="scroll-hide scroll-fade-x -mx-3 mb-4 flex items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0 lg:mb-6"
-    >
-      <FilterChip
-        v-for="b in WISH_BANNERS"
-        :key="b.banner"
-        radio
-        :pressed="info.banner === b.banner"
-        :count="all?.get(b.banner)?.total"
-        :title="b.title"
-        @toggle="go(b.slug)"
-        >{{ b.label }}</FilterChip
+    <div class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-3">
+      <UiIconButton
+        label="Wish history"
+        :to="{ name: 'account-wishes', params: { accountId: account.id } }"
       >
+        <ArrowLeft class="size-5" aria-hidden="true" />
+      </UiIconButton>
+      <h2 class="min-w-0 flex-1 truncate text-xl font-semibold">
+        <span class="hidden text-text-muted sm:inline">Wish history ·</span>
+        {{ info.title }}
+      </h2>
+      <div v-if="bannerOptions.length > 1" class="hidden md:block">
+        <UiSegmented v-model="banner" :options="bannerOptions" label="Banner" />
+      </div>
     </div>
 
     <UiError v-if="loadError && !ready" title="Load failed" :error="loadError" @retry="retry" />
@@ -146,124 +186,130 @@ function retry() {
         <UiEmpty title="No pulls on this banner" />
       </UiPanel>
 
-      <div v-else class="flex flex-col gap-4 lg:gap-6">
-        <div class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-          <UiStat
-            label="Pulls"
-            :value="stats.total"
-            exact
-            :detail="`${formatNumber(stats.total * PRIMOS_PER_PULL)} Primogems`"
-          />
-          <UiStat
-            label="5★ pity"
-            :value="`${stats.pity5} / ${hard[0]}`"
-            :hint="`${formatNumber(left)} to hard pity: ${formatNumber(left * PRIMOS_PER_PULL)} Primogems · soft pity from ${soft}`"
-            :tone="stats.pity5 >= soft ? 'warning' : undefined"
+      <div
+        v-else
+        class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3 sm:gap-4"
+        :class="layout"
+      >
+        <!-- Pulls and both pities, as paimon.moe's side tile. -->
+        <div
+          class="flex h-full flex-col items-center justify-center gap-0.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-center shadow-sm [grid-area:stats] sm:px-6"
+        >
+          <p
+            class="text-xs text-text-muted"
+            :title="`${formatNumber(stats.total * PRIMOS_PER_PULL)} Primogems`"
           >
-            <template v-if="stats.guaranteed5" #icon>
-              <ArrowUpCircle class="size-3.5 text-success-text" aria-label="Guaranteed" />
-            </template>
-          </UiStat>
-          <UiStat
-            :label="info.rated ? 'Next 5★' : '4★ pity'"
-            :value="info.rated ? nextFive.value : `${stats.pity4} / ${hard[1]}`"
-            :hint="info.rated ? nextFive.hint : `Guaranteed at ${hard[1]}`"
-            :tone="info.rated && stats.guaranteed5 ? 'success' : undefined"
-          />
-          <UiStat
-            label="Avg 5★ pity"
-            :value="luck?.value ?? '—'"
-            :hint="luck?.hint ?? 'No 5★ yet'"
-            :tone="luck?.tone"
-          />
+            Total
+          </p>
+          <p class="tabular font-mono text-xl font-semibold">{{ formatNumber(stats.total) }}</p>
+          <p class="mt-2 text-xs text-text-muted">5★ pity</p>
+          <p
+            class="tabular flex items-center gap-1 font-mono text-xl font-semibold text-rarity-5"
+            :title="fiveTitle"
+          >
+            <CircleArrowUp
+              v-if="stats.guaranteed5"
+              class="size-4"
+              aria-label="Next 5★ is featured"
+            />{{ stats.pity5 }}
+          </p>
+          <p class="mt-2 text-xs text-text-muted">4★ pity</p>
+          <p
+            class="tabular flex items-center gap-1 font-mono text-xl font-semibold text-rarity-4"
+            :title="`${hard[1] - stats.pity4} to a sure 4★`"
+          >
+            <CircleArrowUp
+              v-if="stats.guaranteed4"
+              class="size-4"
+              aria-label="Next 4★ is featured"
+            />{{ stats.pity4 }}
+          </p>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 lg:gap-6">
-          <UiPanel flush>
-            <template #header>
-              <div class="flex items-baseline gap-3">
-                <h2 class="text-base font-semibold">5★ pity</h2>
-                <span
-                  class="tabular font-mono text-sm text-text-muted"
-                  :title="`${formatNumber(stats.five.count)} 5★ · ${formatPercent(stats.five.share)} of pulls`"
-                  >{{ formatNumber(stats.five.count) }}</span
-                >
-              </div>
-            </template>
-            <div class="px-4 pt-3 pb-2">
-              <WishBarChart
-                :labels="histogramLabels"
-                :series="histogramSeries"
-                :titles="histogramTitles"
-                label="How many 5★ took each pity"
-                :height="160"
-              />
-            </div>
-          </UiPanel>
-
-          <UiPanel title="Rarities" flush>
-            <dl class="grid grid-cols-3 gap-2 p-4 text-center">
-              <div
-                v-for="line in [
-                  { label: '5★', l: stats.five, tone: 'text-rarity-5' },
-                  { label: '4★ character', l: stats.fourCharacter, tone: 'text-rarity-4' },
-                  { label: '4★ weapon', l: stats.fourWeapon, tone: 'text-rarity-4' },
-                ]"
-                :key="line.label"
-                class="rounded-lg bg-surface-overlay px-2 py-2"
-                :title="`${formatPercent(line.l.share)} of pulls · average pity ${formatPity(line.l.avgPity)}`"
-              >
-                <dt class="text-xs text-text-muted">{{ line.label }}</dt>
-                <dd class="tabular font-mono text-lg font-medium" :class="line.tone">
-                  {{ formatNumber(line.l.count) }}
-                </dd>
-                <dd class="tabular font-mono text-xs text-text-muted">
-                  {{ formatPercent(line.l.share) }}
-                </dd>
-                <dd class="tabular font-mono text-xs text-text-muted">
-                  ⌀ {{ line.l.count ? formatPity(line.l.avgPity) : '—' }}
-                </dd>
-              </div>
-            </dl>
-            <div v-if="stats.rate4" class="border-t border-border-default px-4 py-3 text-sm">
-              <p
-                class="flex justify-between text-text-secondary"
-                :title="`Won ${stats.rate4.won} · lost ${stats.rate4.lost} · longest: won ${stats.rate4.maxWinStreak}, lost ${stats.rate4.maxLoseStreak}`"
-              >
-                <span>4★ won 50/50</span>
-                <span class="tabular font-mono">{{
-                  stats.rate4.rate === null ? '—' : formatPercent(stats.rate4.rate)
-                }}</span>
-              </p>
-            </div>
-          </UiPanel>
-        </div>
-
-        <UiPanel v-if="stats.fives.length" flush>
-          <template #header>
-            <div class="flex items-baseline gap-3">
-              <h2 class="text-base font-semibold text-rarity-5">5★</h2>
-              <span class="tabular font-mono text-sm text-text-muted">{{
-                formatNumber(stats.five.count)
-              }}</span>
-            </div>
-          </template>
-          <div class="px-4 py-3">
-            <WishFiveChips :rows="stats.fives" :banner="stats.banner" :soft="soft" :limit="60" />
+        <!-- Rarity split. -->
+        <div
+          v-if="split"
+          class="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm [grid-area:pie] sm:p-4"
+        >
+          <div
+            class="relative size-24 shrink-0 rounded-full"
+            :style="{ background: split.gradient }"
+            role="img"
+            :aria-label="split.lines.map((l) => `${l.label} ${l.share}`).join(', ')"
+          >
+            <span class="absolute inset-4 rounded-full bg-surface-raised" />
           </div>
-        </UiPanel>
+          <dl class="grid w-full grid-cols-[auto_1fr_auto] gap-x-2 text-sm">
+            <template v-for="line in split.lines" :key="line.label">
+              <dt class="font-semibold" :class="line.tone">{{ line.label }}</dt>
+              <dd class="tabular text-right font-mono">{{ formatNumber(line.count) }}</dd>
+              <dd class="tabular text-right font-mono text-text-muted">{{ line.share }}</dd>
+            </template>
+          </dl>
+        </div>
 
-        <WishRuns v-if="stats.runs.length" :runs="stats.runs" :banner="stats.banner" :soft="soft" />
+        <!-- Pulls per banner run. -->
+        <section
+          v-if="runs.length"
+          class="min-w-0 self-stretch rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm [grid-area:runs] sm:p-4"
+        >
+          <h2 class="mb-2 text-sm font-semibold">Banners</h2>
+          <ul class="flex max-h-52 flex-col gap-2 overflow-y-auto pr-1">
+            <li
+              v-for="run in runs"
+              :key="run.banner.start + run.banner.name"
+              :title="runTitle(run)"
+            >
+              <div class="flex items-baseline gap-2 text-sm">
+                <span class="min-w-0 flex-1 truncate">{{ runLabel(run) }}</span>
+                <span class="tabular font-mono">{{ formatNumber(run.pulls) }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="h-1.5 flex-1 rounded-full bg-surface-sunken" aria-hidden="true">
+                  <span
+                    class="block h-full rounded-full bg-accent"
+                    :style="{ width: `${(run.pulls / most) * 100}%` }"
+                  />
+                </span>
+                <span v-if="run.fives.length" class="max-w-[60%] truncate text-xs text-rarity-5">{{
+                  run.fives.map((f) => `${f.pull.item.name} ${f.pity}`).join(' · ')
+                }}</span>
+              </div>
+            </li>
+          </ul>
+        </section>
 
-        <WishTable :rows="stats.rows" :banner="stats.banner" />
+        <!-- 5★ pity spread. -->
+        <section
+          v-if="stats.fives.length"
+          class="min-w-0 self-stretch rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm [grid-area:hist] sm:p-4"
+        >
+          <h2
+            class="mb-2 text-sm font-semibold"
+            :title="`${formatNumber(stats.five.count)} 5★ · soft pity from ${soft}`"
+          >
+            5★ pity
+          </h2>
+          <WishBarChart
+            :labels="histogramLabels"
+            :series="histogramSeries"
+            :titles="histogramTitles"
+            label="How many 5★ took each pity"
+            :height="140"
+          />
+        </section>
+
+        <div class="min-w-0 [grid-area:table]">
+          <WishTable :rows="stats.rows" :banner="stats.banner" />
+        </div>
       </div>
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4 lg:gap-6">
-      <div class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
-        <UiSkeleton v-for="n in 4" :key="n" class="h-[4.5rem]" />
+    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4">
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <UiSkeleton v-for="n in 3" :key="n" class="h-48" />
       </div>
-      <UiSkeleton class="h-64" />
+      <UiSkeleton class="h-96" />
     </div>
   </div>
 </template>

@@ -1,171 +1,182 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import { ArrowUpCircle, ChevronDown, List, Star } from 'lucide-vue-next'
-import { HARD_PITY, PRIMOS_PER_PULL, SOFT_PITY, type BannerStats } from '@/data/wish-history'
+import { ChevronDown, CircleArrowUp, List } from 'lucide-vue-next'
+import {
+  HARD_PITY,
+  PRIMOS_PER_PULL,
+  SOFT_PITY,
+  type BannerStats,
+  type PullRow,
+} from '@/data/wish-history'
 import FilterChip from '@/components/ui/FilterChip.vue'
-import GameIcon from '@/components/ui/GameIcon.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import { formatNumber } from '@/lib/format'
-import { RARITY_TEXT, bannerInfo, oddsOf, wishIcon, wishMinute } from './wish-labels'
+import { RARITY_TEXT, bannerInfo, oddsOf, wishMinute } from './wish-labels'
 
 /**
- * One banner on the overview, after paimon.moe's: lifetime pulls and their
- * Primogems, both pities toward their hard pity (an arrow when the next 5★
- * is guaranteed, a bar with the soft pity mark), and a fold with the latest
- * pulls (3★ off until asked for). The list icon opens the banner's page.
+ * One banner on the overview, as paimon.moe's counter: three inset tiles
+ * (lifetime pulls with their Primogems, 5★ pity, 4★ pity; an arrow before a
+ * pity whose next pull of that rarity is featured), and a chevron that opens
+ * the latest pulls as text (3★ off until asked for). The list icon opens the
+ * banner's page.
  */
 const props = defineProps<{ stats: BannerStats; to: RouteLocationRaw }>()
 
+const LATEST = 20
 const info = computed(() => bannerInfo(props.stats.banner))
 const hard = computed(() => HARD_PITY[props.stats.banner])
 const soft = computed(() => SOFT_PITY[props.stats.banner])
-const left = computed(() => hard.value[0] - props.stats.pity5)
 
 const open = ref(false)
 const ranks = reactive<Record<3 | 4 | 5, boolean>>({ 5: true, 4: true, 3: false })
-const recent = computed(() =>
-  props.stats.rows.filter((r) => ranks[r.pull.item.rank as 3 | 4 | 5] ?? true).slice(0, 12),
-)
+/** The newest LATEST of the chosen rarities, without filtering every pull. */
+const latest = computed(() => {
+  const out: PullRow[] = []
+  if (!open.value) return out
+  for (const row of props.stats.rows) {
+    if (!(ranks[row.pull.item.rank as 3 | 4 | 5] ?? true)) continue
+    out.push(row)
+    if (out.length === LATEST) break
+  }
+  return out
+})
 
-const pityTitle = computed(() => {
+const fiveTitle = computed(() => {
+  const left = hard.value[0] - props.stats.pity5
   const g = props.stats.guaranteed5
-  const next =
-    g === true
-      ? 'the next 5★ is featured (guaranteed)'
-      : g === false
-        ? `the next 5★ is a ${oddsOf(props.stats.banner)}`
-        : ''
   return [
-    `${formatNumber(left.value)} to hard pity: ${formatNumber(left.value * PRIMOS_PER_PULL)} Primogems`,
+    `${formatNumber(left)} to hard pity (${formatNumber(left * PRIMOS_PER_PULL)} Primogems)`,
     `soft pity from ${soft.value}`,
-    next,
+    g === true
+      ? 'next 5★ is featured'
+      : g === false
+        ? `next 5★ is a ${oddsOf(props.stats.banner)}`
+        : '',
   ]
     .filter(Boolean)
     .join(' · ')
 })
+
+const tiles = computed(() => [
+  {
+    label: 'Lifetime pulls',
+    sub: `✦ ${formatNumber(props.stats.total * PRIMOS_PER_PULL)}`,
+    value: props.stats.total,
+    tone: '',
+    up: false,
+    title: `${formatNumber(props.stats.total)} wishes · ${formatNumber(props.stats.total * PRIMOS_PER_PULL)} Primogems`,
+  },
+  {
+    label: '5★ pity',
+    sub: `Guaranteed at ${hard.value[0]}`,
+    value: props.stats.pity5,
+    tone: 'text-rarity-5',
+    up: !!props.stats.guaranteed5,
+    title: fiveTitle.value,
+  },
+  {
+    label: '4★ pity',
+    sub: `Guaranteed at ${hard.value[1]}`,
+    value: props.stats.pity4,
+    tone: 'text-rarity-4',
+    up: !!props.stats.guaranteed4,
+    title: `${hard.value[1] - props.stats.pity4} to a sure 4★${props.stats.guaranteed4 ? ' · next 4★ is featured' : ''}`,
+  },
+])
 </script>
 
 <template>
   <section
-    class="flex flex-col rounded-xl border border-border-default bg-surface-raised shadow-sm"
+    class="flex flex-col rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
   >
-    <header class="flex items-center justify-between gap-2 px-4 pt-3">
-      <h2 class="text-sm font-semibold text-text-secondary">{{ info.title }}</h2>
+    <header class="mb-2 flex items-center justify-between gap-2">
+      <h2 class="text-lg font-semibold">{{ info.title }}</h2>
       <UiIconButton :label="`${info.title}: every pull`" :to="to">
         <List class="size-5" aria-hidden="true" />
       </UiIconButton>
     </header>
-    <div class="flex flex-col gap-3 px-4 pb-3">
-      <div>
-        <p
-          class="tabular font-mono text-2xl font-medium"
-          :title="`${formatNumber(stats.total)} wishes`"
-        >
-          {{ formatNumber(stats.total) }}
-        </p>
-        <p class="tabular font-mono text-xs text-text-muted" title="Primogems">
-          ✦ {{ formatNumber(stats.total * PRIMOS_PER_PULL) }}
-        </p>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div :title="pityTitle">
-          <p class="flex items-center gap-1 text-xs text-text-secondary">
-            5★ pity
-            <ArrowUpCircle
-              v-if="stats.guaranteed5"
-              class="size-3.5 text-success-text"
-              aria-label="Guaranteed"
-            />
-          </p>
-          <p class="tabular font-mono text-lg font-medium">
-            <span :class="stats.pity5 >= soft ? 'text-warning-text' : ''">{{ stats.pity5 }}</span>
-            <span class="text-sm text-text-muted"> / {{ hard[0] }}</span>
-          </p>
-          <span class="relative mt-1 block h-1.5 rounded-full bg-surface-sunken" aria-hidden="true">
-            <span
-              class="block h-full rounded-full bg-rarity-5"
-              :style="{ width: `${Math.min(100, (stats.pity5 / hard[0]) * 100)}%` }"
-            />
-            <span
-              class="absolute top-[-2px] h-[calc(100%+4px)] w-px bg-text-muted"
-              :style="{ left: `${(soft / hard[0]) * 100}%` }"
-            />
-          </span>
-        </div>
-        <div :title="`Guaranteed at ${hard[1]}`">
-          <p class="flex items-center gap-1 text-xs text-text-secondary">
-            4★ pity
-            <ArrowUpCircle
-              v-if="stats.guaranteed4"
-              class="size-3.5 text-success-text"
-              aria-label="Next 4★ featured"
-            />
-          </p>
-          <p class="tabular font-mono text-lg font-medium">
-            {{ stats.pity4 }}<span class="text-sm text-text-muted"> / {{ hard[1] }}</span>
-          </p>
-          <span class="mt-1 block h-1.5 rounded-full bg-surface-sunken" aria-hidden="true">
-            <span
-              class="block h-full rounded-full bg-rarity-4"
-              :style="{ width: `${Math.min(100, (stats.pity4 / hard[1]) * 100)}%` }"
-            />
-          </span>
-        </div>
+
+    <div class="flex flex-col gap-2">
+      <div
+        v-for="tile in tiles"
+        :key="tile.label"
+        class="flex items-center gap-2 rounded-lg bg-surface-sunken px-4 py-2.5"
+        :title="tile.title"
+      >
+        <span class="flex min-w-0 flex-1 flex-col">
+          <span class="truncate text-sm">{{ tile.label }}</span>
+          <span class="tabular truncate text-xs text-text-muted">{{ tile.sub }}</span>
+        </span>
+        <CircleArrowUp
+          v-if="tile.up"
+          class="size-5 shrink-0"
+          :class="tile.tone"
+          aria-label="Next one is featured"
+        />
+        <span class="tabular font-mono text-3xl font-semibold" :class="tile.tone">{{
+          formatNumber(tile.value)
+        }}</span>
       </div>
     </div>
 
     <button
       type="button"
-      class="flex items-center justify-center gap-1 border-t border-border-default py-1.5 text-xs text-text-muted hover:bg-surface-overlay hover:text-text-primary"
+      class="mt-2 -mb-1 flex items-center justify-center rounded-lg py-0.5 text-text-muted hover:bg-surface-overlay hover:text-text-primary"
       :aria-expanded="open"
+      :aria-label="open ? 'Hide the latest pulls' : 'Show the latest pulls'"
+      :title="open ? 'Hide' : 'Latest pulls'"
       @click="open = !open"
     >
-      <span>Latest</span>
       <ChevronDown
-        class="size-4 transition-transform"
+        class="size-5 transition-transform"
         :class="open ? 'rotate-180' : ''"
         aria-hidden="true"
       />
     </button>
-    <div v-if="open" class="flex flex-col gap-2 border-t border-border-default px-3 py-2">
-      <div role="group" aria-label="Rarity" class="flex gap-1.5">
+
+    <div v-if="open" class="mt-2 flex flex-col gap-2">
+      <div role="group" aria-label="Rarity" class="flex gap-2">
         <FilterChip
           v-for="rank in [5, 4, 3] as const"
           :key="rank"
           :pressed="ranks[rank]"
           @toggle="ranks[rank] = !ranks[rank]"
         >
-          <Star class="size-3.5 fill-current" :class="RARITY_TEXT[rank]" aria-hidden="true" />
-          {{ rank }}<span class="sr-only"> star</span>
+          <span :class="RARITY_TEXT[rank]">{{ rank }}★</span>
         </FilterChip>
       </div>
-      <p v-if="recent.length === 0" class="py-2 text-center text-sm text-text-muted">None</p>
-      <ul v-else class="flex flex-col">
-        <li
-          v-for="row in recent"
-          :key="row.pull.id.toString()"
-          class="flex items-center gap-2 py-1"
-        >
-          <GameIcon
-            :src="wishIcon(row.pull.item)"
-            :name="row.pull.item.name"
-            :rarity="row.pull.item.rank || undefined"
-            size="xs"
-          />
-          <span class="min-w-0 flex-1 truncate text-sm" :class="RARITY_TEXT[row.pull.item.rank]">{{
-            row.pull.item.name
-          }}</span>
-          <time class="tabular hidden font-mono text-xs text-text-muted sm:inline">{{
-            wishMinute(row.pull.time).slice(0, 10)
-          }}</time>
-          <span
-            class="tabular w-6 text-right font-mono text-sm"
-            :class="RARITY_TEXT[row.pull.item.rank]"
-            >{{ row.pity || '' }}</span
-          >
-        </li>
-      </ul>
+      <p v-if="latest.length === 0" class="py-2 text-center text-sm text-text-muted">None</p>
+      <div v-else class="max-h-80 overflow-y-auto">
+        <table class="w-full table-fixed text-sm">
+          <thead class="sticky top-0 bg-surface-raised">
+            <tr class="text-left text-xs text-text-muted">
+              <th class="py-1 font-medium">Name</th>
+              <th class="w-32 px-2 py-1 font-medium">Time</th>
+              <th class="w-10 py-1 text-right font-medium">Pity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in latest"
+              :key="row.pull.id.toString()"
+              class="border-t border-border-default"
+            >
+              <td
+                class="truncate py-1 font-medium"
+                :class="RARITY_TEXT[row.pull.item.rank]"
+                :title="row.pull.item.name"
+              >
+                {{ row.pull.item.name }}
+              </td>
+              <td class="tabular px-2 py-1 font-mono text-xs whitespace-nowrap text-text-muted">
+                {{ wishMinute(row.pull.time) }}
+              </td>
+              <td class="tabular py-1 text-right font-mono">{{ row.pity || '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 </template>

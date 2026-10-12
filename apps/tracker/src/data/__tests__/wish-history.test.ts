@@ -13,6 +13,7 @@ import {
   eventBanners,
   monthlyPulls,
   pityHistogram,
+  runPullNumbers,
   type BannerFile,
   type EventBanner,
   type EventKind,
@@ -216,6 +217,27 @@ describe('wish charts', () => {
     expect(hist.length).toBe(90)
     expect(hist[3]).toBe(1)
     expect(hist.reduce((a, b) => a + b, 0)).toBe(1)
+  })
+  it("numbers pulls within their banner run (paimon.moe's #Roll)", () => {
+    const first: EventBanner = {
+      kind: 'character',
+      start: 0,
+      end: T0 + 120,
+      featured5: ['Diluc'],
+      featured4: [],
+      version: '9.8',
+      name: 'One',
+      name400: '',
+    }
+    const second: EventBanner = { ...first, start: T0 + 121, end: 4e9, version: '9.9', name: 'Two' }
+    const events = new Map<EventKind, EventBanner[]>([['character', [first, second]]])
+    // Three pulls on the first run (T0, +60, +120), two on the second.
+    const stats = bannerStats(301, history(301, filler(5)), { timezone: 0, banners: events })
+    const rolls = runPullNumbers(stats.rows)
+    expect(stats.rows.map((r) => rolls.get(r))).toEqual([2, 1, 3, 2, 1])
+    const standard = bannerStats(200, history(200, filler(3)), { timezone: 0, banners: null })
+    const plain = runPullNumbers(standard.rows)
+    expect(standard.rows.map((r) => plain.get(r))).toEqual([3, 2, 1])
   })
 })
 
