@@ -300,6 +300,34 @@ export function hasAnecdoteFilters(filters: AnecdoteFilters): boolean {
   return filters.completion !== 'all' || filters.query.trim() !== ''
 }
 
+/**
+ * A group's rows for the soft-hidden view (the default: completed ones out of
+ * the way but one tap from sight): what is still to do, and what is done.
+ * `kept` rows count as still to do, so a row ticked a moment ago stays where
+ * it was instead of folding away under the pointer.
+ */
+export function splitDone(
+  group: NpcGroup,
+  kept: ReadonlySet<number> = new Set(),
+): { open: AnecdoteEntry[]; finished: AnecdoteEntry[] } {
+  const open: AnecdoteEntry[] = []
+  const finished: AnecdoteEntry[] = []
+  for (const entry of group.entries) {
+    if (entry.source === null || kept.has(entry.anecdote.id)) open.push(entry)
+    else finished.push(entry)
+  }
+  return { open, finished }
+}
+
+/** Groups with something left to do first, finished ones after (each keeping data order). */
+export function unfinishedFirst<T extends NpcGroup>(
+  groups: readonly T[],
+  kept: ReadonlySet<number> = new Set(),
+): T[] {
+  const open = groups.filter((group) => splitDone(group, kept).open.length > 0)
+  return [...open, ...groups.filter((group) => !open.includes(group))]
+}
+
 /** Rows the filters leave, over every shown area. */
 export function countShown(areas: readonly ShownArea[]): number {
   return areas.reduce(

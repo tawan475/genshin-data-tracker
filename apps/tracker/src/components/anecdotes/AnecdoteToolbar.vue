@@ -27,6 +27,8 @@ defineProps<{
   filtered: boolean
 }>()
 const filters = defineModel<AnecdoteFilters>('filters', { required: true })
+/** Done rows in full instead of folded (the All view only; remembered per device). */
+const showDone = defineModel<boolean>('showDone', { required: true })
 defineEmits<{ clear: [] }>()
 
 const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
@@ -64,6 +66,13 @@ const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
           >{{ option.label }}</FilterChip
         >
       </div>
+      <FilterChip
+        v-if="filters.completion === 'all'"
+        :pressed="showDone"
+        title="Done anecdotes in full instead of folded under each NPC"
+        @toggle="showDone = !showDone"
+        >Show done</FilterChip
+      >
     </div>
 
     <div

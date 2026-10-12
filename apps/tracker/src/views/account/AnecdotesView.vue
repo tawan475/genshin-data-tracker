@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, shallowRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { CheckCheck, Clock, Info, SearchX } from 'lucide-vue-next'
 import { decodeAnecdotes as decodeAnecdotesSection, type AnecdotesSection } from '@gdt/shared'
 import { anecdoteText, loadAnecdotes } from '@gdt/game-data'
@@ -11,6 +11,7 @@ import {
   countShown,
   filterAnecdotes,
   hasAnecdoteFilters,
+  unfinishedFirst,
   type AnecdoteFilters,
   type CapturedAnecdotes,
 } from '@/data/anecdote-progress'
@@ -27,6 +28,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadBundle, type AccountRef } from '@/data/account-data'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useAccount, useReadOnly } from './context'
 
@@ -112,9 +114,20 @@ const newestCapture = computed(() => {
 
 const filters = reactive<AnecdoteFilters>({ ...DEFAULT_ANECDOTE_FILTERS })
 const filtered = computed(() => hasAnecdoteFilters(filters))
-/** Rows toggled since the filters last changed stay in view. */
+
+/**
+ * Done rows are soft-hidden in the All view: folded under each NPC, and NPCs
+ * with nothing left sorted last as their heading. "Show done" (per device)
+ * lists them in full; the Done filter always does.
+ */
+const SHOW_DONE_KEY = 'anecdotes:show-done'
+const showDone = ref(readStorage(SHOW_DONE_KEY) === '1')
+watch(showDone, (on) => writeStorage(SHOW_DONE_KEY, on ? '1' : null))
+const fold = computed(() => filters.completion === 'all' && !showDone.value)
+
+/** Rows toggled since the filters (or the folding) last changed stay where they were. */
 const kept = shallowRef<ReadonlySet<number>>(new Set())
-watch([filters, () => account.value.id], () => (kept.value = new Set()))
+watch([filters, () => account.value.id, showDone], () => (kept.value = new Set()))
 
 const shownAreas = computed(() => {
   const g = game.data.value
@@ -128,7 +141,11 @@ const listedCount = computed(() =>
 )
 /** Areas to draw: those with rows, or the one chosen (its empty state and hidden count). */
 const drawnAreas = computed(() =>
-  shownAreas.value.filter((area) => area.shown.length > 0 || filters.area !== null),
+  shownAreas.value
+    .filter((area) => area.shown.length > 0 || filters.area !== null)
+    .map((area) =>
+      fold.value ? { ...area, shown: unfinishedFirst(area.shown, kept.value) } : area,
+    ),
 )
 const empty = computed<'none' | 'unmet' | 'allDone' | 'noneDone' | null>(() => {
   if (shownCount.value > 0) return null
@@ -144,7 +161,7 @@ function clearFilters() {
 // ------------------------------------------------------------------ marking
 
 function keep(id: number) {
-  if (filters.completion === 'all') return
+  if (filters.completion === 'all' && !fold.value) return
   kept.value = new Set([...kept.value, id])
 }
 function mark(id: number) {
@@ -193,6 +210,7 @@ function unmark(id: number) {
       <div class="flex flex-col gap-4">
         <AnecdoteToolbar
           v-model:filters="filters"
+          v-model:show-done="showDone"
           :areas="areaTabs"
           :done="progress.done"
           :total="progress.total"
@@ -236,6 +254,8 @@ function unmark(id: number) {
               :group="group"
               :text="game.data.value.text"
               :read-only="readOnly"
+              :fold="fold"
+              :kept="kept"
               @mark="mark"
               @unmark="unmark"
             />

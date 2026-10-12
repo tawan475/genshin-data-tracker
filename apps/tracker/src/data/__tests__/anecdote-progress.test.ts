@@ -10,7 +10,9 @@ import {
   markTarget,
   plainText,
   shortTitle,
+  splitDone,
   textRuns,
+  unfinishedFirst,
   type AnecdoteEntry,
   type AnecdoteProgress,
 } from '../anecdote-progress'
@@ -178,6 +180,36 @@ describe('filterAnecdotes', () => {
     expect(
       filterAnecdotes(p, { ...missing, query: 'fountain' }, TEXT).map((a) => a.shown.length),
     ).toEqual([1, 0])
+  })
+})
+
+describe('soft-hiding done anecdotes', () => {
+  // Mondstadt: Kazuha's two both done (one captured, one marked); Noelle's
+  // first done, second not.
+  const p = anecdoteProgress(
+    DATA,
+    capture({ '100101': { state: 3, finishCount: 1 }, '100104': { state: 0, finishCount: 2 } }),
+    new Set([100105]),
+  )
+  const [kazuha, noelle] = p.areas[0]!.groups
+  const idsOf = (list: readonly AnecdoteEntry[]) => list.map((e) => e.anecdote.id)
+
+  it('folds the done rows of a group and keeps the rest', () => {
+    expect(kazuha!.npc).toBe(9802)
+    expect(idsOf(splitDone(noelle!).open)).toEqual([100102])
+    expect(idsOf(splitDone(noelle!).finished)).toEqual([100101])
+    expect(splitDone(kazuha!).open).toEqual([])
+    expect(idsOf(splitDone(kazuha!).finished)).toEqual([100104, 100105])
+    // A row ticked a moment ago stays out of the fold.
+    expect(idsOf(splitDone(kazuha!, new Set([100105])).open)).toEqual([100105])
+  })
+
+  it('puts groups with nothing left to do last, in data order otherwise', () => {
+    expect(unfinishedFirst([kazuha!, noelle!]).map((g) => g.npc)).toEqual([9801, 9802])
+    expect(unfinishedFirst([kazuha!, noelle!], new Set([100104])).map((g) => g.npc)).toEqual([
+      9802, 9801,
+    ])
+    expect(unfinishedFirst([noelle!]).map((g) => g.npc)).toEqual([9801])
   })
 })
 
