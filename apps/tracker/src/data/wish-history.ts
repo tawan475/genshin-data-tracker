@@ -440,34 +440,6 @@ export function monthlyPulls(stats: readonly BannerStats[]): MonthCount[] {
   )
 }
 
-/** A month's pulls by banner type: Character Event, Weapon Event, the rest. */
-export interface MonthSplit {
-  month: string
-  character: number
-  weapon: number
-  other: number
-  total: number
-}
-
-/** Pulls per month split by banner type, oldest first, months without pulls included. */
-export function monthlySplit(stats: readonly BannerStats[]): MonthSplit[] {
-  const all = new Map<string, MonthSplit>()
-  for (const s of stats) {
-    const part = s.banner === 301 ? 'character' : s.banner === 302 ? 'weapon' : 'other'
-    for (const m of s.months) {
-      const a = all.get(m.month) ?? { month: m.month, character: 0, weapon: 0, other: 0, total: 0 }
-      a[part] += m.total
-      a.total += m.total
-      all.set(m.month, a)
-    }
-  }
-  const keys = [...all.keys()].sort()
-  if (keys.length === 0) return []
-  return monthRange(keys[0]!, keys.at(-1)!).map(
-    (key) => all.get(key) ?? { month: key, character: 0, weapon: 0, other: 0, total: 0 },
-  )
-}
-
 /**
  * How a 5★ pity reads, for its colour: early (up to about two thirds of the
  * way to soft pity: 50 on the character banner, 43 on the weapon one),

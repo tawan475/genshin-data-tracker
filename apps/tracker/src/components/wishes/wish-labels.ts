@@ -17,8 +17,8 @@ export interface WishBannerInfo {
 export const WISH_BANNERS: readonly WishBannerInfo[] = [
   { banner: 301, slug: 'character', label: 'Character', title: 'Character Event', rated: true },
   { banner: 302, slug: 'weapon', label: 'Weapon', title: 'Weapon Event', rated: true },
-  { banner: 500, slug: 'chronicled', label: 'Chronicled', title: 'Chronicled Wish', rated: false },
   { banner: 200, slug: 'standard', label: 'Standard', title: 'Standard', rated: false },
+  { banner: 500, slug: 'chronicled', label: 'Chronicled', title: 'Chronicled Wish', rated: false },
   { banner: 100, slug: 'beginners', label: "Beginners'", title: "Beginners' Wish", rated: false },
 ]
 

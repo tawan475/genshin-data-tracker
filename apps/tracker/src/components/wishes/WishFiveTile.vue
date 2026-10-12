@@ -1,0 +1,51 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { UigfGachaType } from '@gdt/shared'
+import { HARD_PITY, pityBand, type PullRow } from '@/data/wish-history'
+import WishItemIcon from './WishItemIcon.vue'
+import { BAND_COLOR, OUTCOME_LABEL, oddsOf, runName, wishDay, wishMinute } from './wish-labels'
+
+/**
+ * One 5★: its icon ringed by the 50/50, the name, the pity in its band's
+ * colour over a thin bar against hard pity, and (`dated`) the day.
+ */
+const props = defineProps<{ row: PullRow; banner: UigfGachaType; dated?: boolean }>()
+
+const color = computed(() => BAND_COLOR[pityBand(props.row.pity, props.banner)])
+const width = computed(
+  () => `${Math.min(100, (props.row.pity / HARD_PITY[props.banner][0]) * 100)}%`,
+)
+const title = computed(() =>
+  [
+    `${props.row.pull.item.name} · pity ${props.row.pity}`,
+    props.row.outcome ? `${OUTCOME_LABEL[props.row.outcome]} (${oddsOf(props.banner)})` : '',
+    wishMinute(props.row.pull.time),
+    runName(props.row),
+  ]
+    .filter(Boolean)
+    .join('\n'),
+)
+</script>
+
+<template>
+  <div
+    class="flex min-w-0 items-center gap-2.5 rounded-lg bg-surface-sunken px-2.5 py-2"
+    :title="title"
+  >
+    <WishItemIcon :item="row.pull.item" :outcome="row.outcome" :size="dated ? 'lg' : 'md'" />
+    <span class="flex min-w-0 flex-1 flex-col gap-1">
+      <span class="flex min-w-0 items-baseline gap-1.5">
+        <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ row.pull.item.name }}</span>
+        <span class="tabular shrink-0 font-mono text-sm font-bold" :style="{ color }">{{
+          row.pity
+        }}</span>
+      </span>
+      <span class="h-1 rounded-full bg-surface-overlay" aria-hidden="true">
+        <span class="block h-full rounded-full" :style="{ width, background: color }" />
+      </span>
+      <span v-if="dated" class="tabular truncate font-mono text-xs text-text-muted">{{
+        wishDay(row.pull.time)
+      }}</span>
+    </span>
+  </div>
+</template>

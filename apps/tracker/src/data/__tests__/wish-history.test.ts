@@ -13,7 +13,6 @@ import {
   currentRun,
   eventBanners,
   monthlyPulls,
-  monthlySplit,
   pityBand,
   pityHistogram,
   runPullNumbers,
@@ -281,26 +280,6 @@ describe('wish overview figures', () => {
       loseStreak: 2,
       maxLoseStreak: 2,
     })
-  })
-
-  it('splits pulls per month by banner type, months without pulls included', () => {
-    const jan = parseWishTime('2026-01-10 12:00:00')!
-    const mar = parseWishTime('2026-03-05 12:00:00')!
-    const at = (banner: UigfGachaType, names: string[], start: number, id: bigint) =>
-      history(banner, names, start).map((p, i) => ({ ...p, id: id + BigInt(i) }))
-    const options = { timezone: 8, banners: null }
-    const stats = [
-      bannerStats(301, at(301, filler(3), jan, 1n), options),
-      bannerStats(302, at(302, filler(2), mar, 100n), options),
-      bannerStats(200, at(200, filler(1), mar, 200n), options),
-      bannerStats(500, at(500, filler(4), jan, 300n), options),
-    ]
-    expect(monthlySplit(stats)).toEqual([
-      { month: '2026-01', character: 3, weapon: 0, other: 4, total: 7 },
-      { month: '2026-02', character: 0, weapon: 0, other: 0, total: 0 },
-      { month: '2026-03', character: 0, weapon: 2, other: 1, total: 3 },
-    ])
-    expect(monthlySplit([])).toEqual([])
   })
 
   it('reads a 5★ pity as early, before soft pity, soft or late, per banner', () => {
