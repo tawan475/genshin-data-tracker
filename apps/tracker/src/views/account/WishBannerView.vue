@@ -141,14 +141,15 @@ const histogramTitles = computed(() =>
 )
 
 /**
- * Where the cards go: beside the table from 2xl (paimon.moe's side column),
- * above it below that, the run list and pity spread under it on phones.
+ * Where the cards go: above the table from md (the page is too narrow for a
+ * side column: from 2xl the cards' content-sized columns took the table's
+ * width on a real history), the run list and pity spread under it on phones.
  * Without runs (standard, beginners') the spread takes the runs' place.
  */
 const layout = computed(() =>
   runs.value.length
-    ? "[grid-template-areas:'stats_pie'_'table_table'_'runs_runs'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_runs'_'table_table_table'_'hist_hist_hist'] 2xl:grid-cols-[minmax(0,1fr)_auto_auto] 2xl:grid-rows-[auto_auto_auto_1fr] 2xl:[grid-template-areas:'table_stats_pie'_'table_runs_runs'_'table_hist_hist'_'table_._.']"
-    : "[grid-template-areas:'stats_pie'_'table_table'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_hist'_'table_table_table'] 2xl:grid-cols-[minmax(0,1fr)_auto_auto] 2xl:grid-rows-[auto_auto_1fr] 2xl:[grid-template-areas:'table_stats_pie'_'table_hist_hist'_'table_._.']",
+    ? "[grid-template-areas:'stats_pie'_'table_table'_'runs_runs'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_runs'_'table_table_table'_'hist_hist_hist']"
+    : "[grid-template-areas:'stats_pie'_'table_table'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_hist'_'table_table_table']",
 )
 
 const ready = computed(() => !!stats.value)
