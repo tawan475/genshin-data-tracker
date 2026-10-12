@@ -23,22 +23,37 @@ function loadBannerFile(): Promise<BannerFile> {
   return bannerFile
 }
 
-/** Every banner's figures, computed once per history (and per banner data). */
+/**
+ * Figures per history, shared by the pages: the overview and a banner's page
+ * opened after it reuse them instead of counting 18,000 pulls again.
+ */
+const computedStats = new WeakMap<WishHistory, Map<UigfGachaType, BannerStats>>()
+
+function statsOf(history: WishHistory, file: BannerFile): Map<UigfGachaType, BannerStats> {
+  let out = computedStats.get(history)
+  if (out) return out
+  const events = eventBanners(file, history.timezone)
+  out = new Map<UigfGachaType, BannerStats>()
+  for (const { banner } of WISH_BANNERS) {
+    out.set(
+      banner,
+      bannerStats(banner, history.banners.get(banner) ?? [], {
+        timezone: history.timezone,
+        banners: events,
+      }),
+    )
+  }
+  computedStats.set(history, out)
+  return out
+}
+
+/** Every banner's figures, computed once per history (the banner data loads once). */
 export function useWishStats(history: Ref<WishHistory | undefined>) {
   const file = useResource(() => 0, loadBannerFile)
   const stats = computed(() => {
     const h = history.value
     const f = file.data.value
-    if (!h || !f) return null
-    const events = eventBanners(f, h.timezone)
-    const out = new Map<UigfGachaType, BannerStats>()
-    for (const { banner } of WISH_BANNERS) {
-      out.set(
-        banner,
-        bannerStats(banner, h.banners.get(banner) ?? [], { timezone: h.timezone, banners: events }),
-      )
-    }
-    return out
+    return h && f ? statsOf(h, f) : null
   })
   return { stats, error: file.error, reload: file.reload }
 }

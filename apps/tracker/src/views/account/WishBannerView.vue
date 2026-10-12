@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, CircleArrowUp } from 'lucide-vue-next'
-import { formatWishTime, wishItemInfo } from '@gdt/shared'
+import { ArrowLeft } from 'lucide-vue-next'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
@@ -10,7 +9,9 @@ import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import WishBarChart from '@/components/wishes/WishBarChart.vue'
+import UiStat from '@/components/ui/UiStat.vue'
+import WishNowCard from '@/components/wishes/WishNowCard.vue'
+import WishRuns from '@/components/wishes/WishRuns.vue'
 import WishTable from '@/components/wishes/WishTable.vue'
 import { useWishHistory } from '@/components/wishes/use-wish-history'
 import { useWishStats } from '@/components/wishes/use-wish-stats'
@@ -21,22 +22,14 @@ import {
   formatPity,
   oddsOf,
 } from '@/components/wishes/wish-labels'
-import {
-  EXPECTED_PITY,
-  HARD_PITY,
-  PRIMOS_PER_PULL,
-  SOFT_PITY,
-  pityHistogram,
-  type BannerRun,
-} from '@/data/wish-history'
+import { EXPECTED_PITY, PRIMOS_PER_PULL, type BannerStats } from '@/data/wish-history'
 import { formatNumber } from '@/lib/format'
 import { useAccount } from './context'
 
 /**
- * One banner's wish history, as paimon.moe's banner page: every pull in a
- * paged table, and beside it (above it on narrower screens) the pulls and
- * both pities, the rarity split as a ring, the pulls per banner run and
- * the spread of 5★ pities. Details are tooltips.
+ * One banner's wish history: where it stands now (pity, the next 5★'s odds,
+ * the way to hard pity), four totals, the banner runs pulled on and every
+ * pull in a paged table. The switch moves between banners in place.
  */
 const account = useAccount()
 const route = useRoute()
@@ -47,8 +40,6 @@ const { stats: all, error: statsError, reload: reloadStats } = useWishStats(hist
 
 const info = computed(() => bannerBySlug(route.params.banner) ?? WISH_BANNERS[0]!)
 const stats = computed(() => all.value?.get(info.value.banner) ?? null)
-const hard = computed(() => HARD_PITY[info.value.banner])
-const soft = computed(() => SOFT_PITY[info.value.banner])
 
 const banner = computed({
   get: () => info.value.slug,
@@ -65,92 +56,76 @@ const bannerOptions = computed(() =>
   ).map((b) => ({ value: b.slug, label: b.label, title: b.title })),
 )
 
-const fiveTitle = computed(() => {
-  const s = stats.value
-  if (!s) return ''
-  const left = hard.value[0] - s.pity5
-  const parts = [
-    `${formatNumber(left)} to hard pity (${formatNumber(left * PRIMOS_PER_PULL)} Primogems)`,
-    `soft pity from ${soft.value}`,
-  ]
-  if (s.guaranteed5 === true) parts.push('next 5★ is featured')
-  else if (s.guaranteed5 === false) parts.push(`next 5★ is a ${oddsOf(s.banner)}`)
-  if (s.five.count) {
-    const diff = s.five.avgPity - EXPECTED_PITY[s.banner]
-    parts.push(
-      `average ${formatPity(Math.round(s.five.avgPity * 10) / 10)} (${diff <= 0 ? 'luckier' : 'unluckier'} than ${EXPECTED_PITY[s.banner]})`,
-    )
-  }
-  return parts.join(' · ')
-})
+interface Tile {
+  label: string
+  value: string | null
+  sub: string
+  tone: string
+  hint: string
+}
 
-/** The rarity ring: 5★, 4★ and 3★ shares as one conic gradient. */
-const split = computed(() => {
-  const s = stats.value
-  if (!s?.total) return null
-  const lines = [
-    { label: '5★', count: s.five.count, color: 'var(--rarity-5)', tone: 'text-rarity-5' },
-    { label: '4★', count: s.four.count, color: 'var(--rarity-4)', tone: 'text-rarity-4' },
+/** Pulls and the average 5★ pity; the 50/50s and the streak where there is one, else the 5★ and 4★ counts. */
+function tilesOf(s: BannerStats): Tile[] {
+  const expected = EXPECTED_PITY[s.banner]
+  const diff = Math.round((s.five.avgPity - expected) * 10) / 10
+  const odds = oddsOf(s.banner)
+  const out: Tile[] = [
     {
-      label: '3★',
-      count: s.total - s.five.count - s.four.count,
-      color: 'var(--rarity-3)',
-      tone: 'text-rarity-3',
+      label: 'Pulls',
+      value: formatNumber(s.total),
+      sub: `✦ ${formatNumber(s.total * PRIMOS_PER_PULL)}`,
+      tone: 'text-text-muted',
+      hint: `${formatNumber(s.total)} wishes × ${PRIMOS_PER_PULL} Primogems`,
+    },
+    {
+      label: 'Avg 5★ pity',
+      value: s.five.count ? formatPity(Math.round(s.five.avgPity * 10) / 10) : null,
+      sub: s.five.count
+        ? `${diff > 0 ? '+' : diff < 0 ? '−' : '±'}${formatPity(Math.abs(diff))} vs ${expected}`
+        : '',
+      tone: diff > 0 ? 'text-warning-text' : diff < 0 ? 'text-success-text' : 'text-text-muted',
+      hint: `${formatNumber(s.five.count)} 5★ · expected about ${expected} with soft pity`,
     },
   ]
-  let at = 0
-  const stops = lines.map((l) => {
-    const from = at
-    at += (l.count / s.total) * 100
-    return `${l.color} ${from}% ${at}%`
-  })
-  return {
-    lines: lines.map((l) => ({ ...l, share: formatPercent(l.count / s.total) })),
-    gradient: `conic-gradient(${stops.join(', ')})`,
+  const r = s.rate5
+  if (r) {
+    out.push(
+      {
+        label: `${odds} won`,
+        value: r.rate === null ? null : formatPercent(Math.round(r.rate * 1000) / 1000),
+        sub: `${formatNumber(r.won)} won · ${formatNumber(r.lost)} lost`,
+        tone: 'text-text-muted',
+        hint: `A featured 5★ when it was a ${odds} (guaranteed ones left out)`,
+      },
+      {
+        label: 'Win streak',
+        value: r.won + r.lost ? formatNumber(r.winStreak) : null,
+        sub: `best ${formatNumber(r.maxWinStreak)} · worst ${formatNumber(r.maxLoseStreak)} lost`,
+        tone: 'text-text-muted',
+        hint: `${odds}s won in a row now${r.loseStreak ? ` (lost ${r.loseStreak} in a row)` : ''}; the longest runs won and lost`,
+      },
+    )
+  } else {
+    out.push(
+      {
+        label: '5★',
+        value: formatNumber(s.five.count),
+        sub: formatPercent(s.five.share),
+        tone: 'text-text-muted',
+        hint: '5★ pulls and their share of all',
+      },
+      {
+        label: '4★',
+        value: formatNumber(s.four.count),
+        sub: formatPercent(s.four.share),
+        tone: 'text-text-muted',
+        hint: `4★ pulls and their share of all · average pity ${formatPity(Math.round(s.four.avgPity * 100) / 100)}`,
+      },
+    )
   }
-})
-
-/** Banner runs pulled on, newest first. */
-const runs = computed(() => (stats.value ? [...stats.value.runs].reverse() : []))
-const most = computed(() => Math.max(1, ...runs.value.map((r) => r.pulls)))
-function runLabel(run: BannerRun): string {
-  const b = run.banner
-  if (info.value.banner === 302) {
-    return b.featured5.map((key) => wishItemInfo('weapon', key)?.name ?? key).join(' · ')
-  }
-  return b.name400 ? `${b.name} / ${b.name400}` : b.name
+  return out
 }
-const day = (utc: number) => formatWishTime(utc + 8 * 3600).slice(0, 10)
-const runTitle = (run: BannerRun) =>
-  `${runLabel(run)}\n${run.banner.version} · ${day(run.banner.start)} → ${day(run.banner.end)}\n` +
-  `${formatNumber(run.pulls)} pulls · ${formatNumber(run.pulls * PRIMOS_PER_PULL)} Primogems`
-
-const histogram = computed(() =>
-  stats.value ? pityHistogram(stats.value.fives, hard.value[0]) : [],
-)
-const histogramLabels = computed(() => histogram.value.map((_, i) => String(i + 1)))
-const histogramSeries = computed(() => [
-  {
-    label: '5★',
-    values: histogram.value,
-    color: histogram.value.map((_, i) => (i + 1 >= soft.value ? '--rarity-5' : '--chart-1')),
-  },
-])
-const histogramTitles = computed(() =>
-  histogram.value.map((_, i) => `Pity ${i + 1}${i + 1 >= soft.value ? ' · soft pity' : ''}`),
-)
-
-/**
- * Where the cards go: above the table from md (the page is too narrow for a
- * side column: from 2xl the cards' content-sized columns took the table's
- * width on a real history), the run list and pity spread under it on phones.
- * Without runs (standard, beginners') the spread takes the runs' place.
- */
-const layout = computed(() =>
-  runs.value.length
-    ? "[grid-template-areas:'stats_pie'_'table_table'_'runs_runs'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_runs'_'table_table_table'_'hist_hist_hist']"
-    : "[grid-template-areas:'stats_pie'_'table_table'_'hist_hist'] md:grid-cols-[auto_auto_minmax(0,1fr)] md:[grid-template-areas:'stats_pie_hist'_'table_table_table']",
-)
+const tiles = computed(() => (stats.value ? tilesOf(stats.value) : []))
 
 const ready = computed(() => !!stats.value)
 const loadError = computed(() => wishes.error.value ?? statsError.value)
@@ -164,18 +139,18 @@ function retry() {
   <div>
     <PageHeader :title="`Wish history · ${info.title}`" />
 
-    <div class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-3">
+    <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-3 sm:mb-6">
       <UiIconButton
         label="Wish history"
         :to="{ name: 'account-wishes', params: { accountId: account.id } }"
       >
         <ArrowLeft class="size-5" aria-hidden="true" />
       </UiIconButton>
-      <h2 class="min-w-0 flex-1 truncate text-xl font-semibold">
-        <span class="hidden text-text-muted sm:inline">Wish history ·</span>
-        {{ info.title }}
-      </h2>
-      <div v-if="bannerOptions.length > 1" class="hidden md:block">
+      <h2 class="min-w-0 flex-1 truncate text-lg font-semibold">{{ info.title }}</h2>
+      <div
+        v-if="bannerOptions.length > 1"
+        class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto sm:scroll-fade-none"
+      >
         <UiSegmented v-model="banner" :options="bannerOptions" label="Banner" />
       </div>
     </div>
@@ -187,129 +162,39 @@ function retry() {
         <UiEmpty title="No pulls on this banner" />
       </UiPanel>
 
-      <div
-        v-else
-        class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3 sm:gap-4"
-        :class="layout"
-      >
-        <!-- Pulls and both pities, as paimon.moe's side tile. -->
-        <div
-          class="flex h-full flex-col items-center justify-center gap-0.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-center shadow-sm [grid-area:stats] sm:px-6"
-        >
-          <p
-            class="text-xs text-text-muted"
-            :title="`${formatNumber(stats.total * PRIMOS_PER_PULL)} Primogems`"
+      <div v-else class="flex flex-col gap-4 sm:gap-6">
+        <div class="flex flex-wrap gap-3.5">
+          <WishNowCard :stats="stats" class="min-w-0 flex-[999_1_560px]" />
+          <section
+            aria-label="Totals"
+            class="grid min-w-0 flex-[1_1_380px] grid-cols-2 gap-2.5 sm:gap-3.5"
           >
-            Total
-          </p>
-          <p class="tabular font-mono text-xl font-semibold">{{ formatNumber(stats.total) }}</p>
-          <p class="mt-2 text-xs text-text-muted">5★ pity</p>
-          <p
-            class="tabular flex items-center gap-1 font-mono text-xl font-semibold text-rarity-5"
-            :title="fiveTitle"
-          >
-            <CircleArrowUp
-              v-if="stats.guaranteed5"
-              class="size-4"
-              aria-label="Next 5★ is featured"
-            />{{ stats.pity5 }}
-          </p>
-          <p class="mt-2 text-xs text-text-muted">4★ pity</p>
-          <p
-            class="tabular flex items-center gap-1 font-mono text-xl font-semibold text-rarity-4"
-            :title="`${hard[1] - stats.pity4} to a sure 4★`"
-          >
-            <CircleArrowUp
-              v-if="stats.guaranteed4"
-              class="size-4"
-              aria-label="Next 4★ is featured"
-            />{{ stats.pity4 }}
-          </p>
-        </div>
-
-        <!-- Rarity split. -->
-        <div
-          v-if="split"
-          class="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm [grid-area:pie] sm:p-4"
-        >
-          <div
-            class="relative size-24 shrink-0 rounded-full"
-            :style="{ background: split.gradient }"
-            role="img"
-            :aria-label="split.lines.map((l) => `${l.label} ${l.share}`).join(', ')"
-          >
-            <span class="absolute inset-4 rounded-full bg-surface-raised" />
-          </div>
-          <dl class="grid w-full grid-cols-[auto_1fr_auto] gap-x-2 text-sm">
-            <template v-for="line in split.lines" :key="line.label">
-              <dt class="font-semibold" :class="line.tone">{{ line.label }}</dt>
-              <dd class="tabular text-right font-mono">{{ formatNumber(line.count) }}</dd>
-              <dd class="tabular text-right font-mono text-text-muted">{{ line.share }}</dd>
-            </template>
-          </dl>
-        </div>
-
-        <!-- Pulls per banner run. -->
-        <section
-          v-if="runs.length"
-          class="min-w-0 self-stretch rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm [grid-area:runs] sm:p-4"
-        >
-          <h2 class="mb-2 text-sm font-semibold">Banners</h2>
-          <ul class="flex max-h-52 flex-col gap-2 overflow-y-auto pr-1">
-            <li
-              v-for="run in runs"
-              :key="run.banner.start + run.banner.name"
-              :title="runTitle(run)"
+            <UiStat
+              v-for="tile in tiles"
+              :key="tile.label"
+              :label="tile.label"
+              :value="tile.value"
+              :hint="tile.hint"
             >
-              <div class="flex items-baseline gap-2 text-sm">
-                <span class="min-w-0 flex-1 truncate">{{ runLabel(run) }}</span>
-                <span class="tabular font-mono">{{ formatNumber(run.pulls) }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="h-1.5 flex-1 rounded-full bg-surface-sunken" aria-hidden="true">
-                  <span
-                    class="block h-full rounded-full bg-accent"
-                    :style="{ width: `${(run.pulls / most) * 100}%` }"
-                  />
-                </span>
-                <span v-if="run.fives.length" class="max-w-[60%] truncate text-xs text-rarity-5">{{
-                  run.fives.map((f) => `${f.pull.item.name} ${f.pity}`).join(' · ')
-                }}</span>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-        <!-- 5★ pity spread. -->
-        <section
-          v-if="stats.fives.length"
-          class="min-w-0 self-stretch rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm [grid-area:hist] sm:p-4"
-        >
-          <h2
-            class="mb-2 text-sm font-semibold"
-            :title="`${formatNumber(stats.five.count)} 5★ · soft pity from ${soft}`"
-          >
-            5★ pity
-          </h2>
-          <WishBarChart
-            :labels="histogramLabels"
-            :series="histogramSeries"
-            :titles="histogramTitles"
-            label="How many 5★ took each pity"
-            :height="140"
-          />
-        </section>
-
-        <div class="min-w-0 [grid-area:table]">
-          <WishTable :rows="stats.rows" :banner="stats.banner" />
+              <span v-if="tile.sub" class="tabular truncate font-mono text-xs" :class="tile.tone">{{
+                tile.sub
+              }}</span>
+            </UiStat>
+          </section>
         </div>
+
+        <WishRuns v-if="stats.runs.length" :stats="stats" />
+
+        <WishTable :rows="stats.rows" :banner="stats.banner" />
       </div>
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4">
-      <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <UiSkeleton v-for="n in 3" :key="n" class="h-48" />
+    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4 sm:gap-6">
+      <div class="flex flex-wrap gap-3.5">
+        <UiSkeleton class="h-56 min-w-0 flex-[999_1_560px]" />
+        <UiSkeleton class="h-56 min-w-0 flex-[1_1_380px]" />
       </div>
+      <UiSkeleton class="h-64" />
       <UiSkeleton class="h-96" />
     </div>
   </div>

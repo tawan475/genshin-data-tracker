@@ -1,31 +1,34 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { ArrowDown, ArrowUp, Search, Star } from 'lucide-vue-next'
+import { ArrowDown, ArrowUp, Search } from 'lucide-vue-next'
 import type { UigfGachaType } from '@gdt/shared'
-import { HARD_PITY, runPullNumbers, type PullRow } from '@/data/wish-history'
+import { HARD_PITY, pityBand, runPullNumbers, type PullRow } from '@/data/wish-history'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import UiBadge from '@/components/ui/UiBadge.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPager from '@/components/ui/UiPager.vue'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import {
+  BAND_COLOR,
   OUTCOME_LABEL,
   RARITY_TEXT,
   outcomeTitle,
-  pityColor,
   runName,
   wishIcon,
   wishMinute,
+  wishShortTime,
 } from './wish-labels'
 
 /**
- * Every pull of a banner as paimon.moe's detail table, a page at a time
- * (fast at 15,000 rows): time (click to flip the order), pity with the
- * 50/50 result as a star (filled: won, faded: guaranteed, hollow: lost),
- * the item, its rarity, its type, its number within the banner run and the
- * banner it was on. 4★ and 5★ rows carry their rarity's tint. Rarity chips
- * (3★ off until asked for) are remembered per device; search by name.
+ * Every pull of a banner, a page at a time (fast at 15,000 rows): its
+ * number within the banner run (paimon.moe's #Roll), the item with its type,
+ * the pity as a number and a bar (5★ coloured by how far into pity, 4★
+ * against 10), the 50/50 result, the banner and the game-clock time (click
+ * it to flip the order). 4★ and 5★ rows carry their rarity's tint. Rarity
+ * chips (3★ off until asked for) are remembered per device; search by name.
+ * Phones keep item, pity and result, with the time under the name.
  */
 const props = defineProps<{ rows: readonly PullRow[]; banner: UigfGachaType }>()
 
@@ -71,22 +74,38 @@ watch(pageCount, (count) => {
   if (page.value > count) page.value = count
 })
 
-/** paimon.moe's row tint: the rarity's colour glowing in from the left. */
-const TINT: Record<number, string> = {
-  5: 'bg-linear-to-r from-transparent via-rarity-5/20 via-15% to-transparent',
-  4: 'bg-linear-to-r from-transparent via-rarity-4/15 via-15% to-transparent',
-}
 const rated = computed(() => props.banner === 301 || props.banner === 302)
-/** A 5★ pity runs green to red as on paimon.moe; a 4★ one stays purple (10 is the norm). */
-const pityStyle = (row: PullRow) =>
-  row.pull.item.rank === 5 ? { color: pityColor(row.pity, HARD_PITY[props.banner][0]) } : undefined
+const runs = computed(() => props.banner === 301 || props.banner === 302 || props.banner === 500)
+const hard = computed(() => HARD_PITY[props.banner])
+
+/** The rarity's colour glowing in from the left, as paimon.moe tints them. */
+const TINT: Record<number, string> = {
+  5: 'bg-linear-to-r from-rarity-5/15 to-transparent to-55%',
+  4: 'bg-linear-to-r from-rarity-4/10 to-transparent to-45%',
+}
+const OUTCOME_TONE = { won: 'success', lost: 'danger', guaranteed: 'accent' } as const
+
+function pity(row: PullRow): { color: string; width: string } | null {
+  const rank = row.pull.item.rank
+  if (!row.pity || (rank !== 4 && rank !== 5)) return null
+  if (rank === 5) {
+    return {
+      color: BAND_COLOR[pityBand(row.pity, props.banner)],
+      width: `${Math.min(100, (row.pity / hard.value[0]) * 100)}%`,
+    }
+  }
+  return { color: 'var(--rarity-4)', width: `${Math.min(100, (row.pity / hard.value[1]) * 100)}%` }
+}
 const kind = (row: PullRow) =>
   row.pull.item.kind === 'weapon' ? 'Weapon' : row.pull.item.kind ? 'Character' : ''
 </script>
 
 <template>
-  <section class="rounded-xl border border-border-default bg-surface-raised shadow-sm">
-    <div class="flex flex-wrap items-center gap-2 border-b border-border-default p-3">
+  <section
+    aria-label="All wishes"
+    class="min-w-0 rounded-xl border border-border-default bg-surface-raised shadow-sm"
+  >
+    <div class="flex flex-wrap items-center gap-2 border-b border-border-default px-3 py-3 sm:px-4">
       <div role="group" aria-label="Rarity" class="flex gap-2">
         <FilterChip
           v-for="rank in [5, 4, 3] as const"
@@ -98,8 +117,8 @@ const kind = (row: PullRow) =>
           <span :class="RARITY_TEXT[rank]">{{ rank }}★</span>
         </FilterChip>
       </div>
-      <label class="relative min-w-0 basis-full sm:ml-auto sm:w-52 sm:basis-auto">
-        <span class="sr-only">Search</span>
+      <label class="relative min-w-0 basis-full sm:ml-auto sm:w-60 sm:basis-auto">
+        <span class="sr-only">Search wishes</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
@@ -119,10 +138,29 @@ const kind = (row: PullRow) =>
       No pulls match
     </p>
     <div v-else class="overflow-x-auto">
-      <table class="w-full text-sm">
+      <table class="tabular w-full font-mono text-sm">
         <thead>
           <tr class="text-left text-xs text-text-muted">
-            <th class="hidden py-2 pr-2 pl-4 font-medium sm:table-cell">
+            <th
+              scope="col"
+              class="hidden w-16 py-2.5 pr-2 pl-4 text-right font-medium sm:table-cell"
+              :title="runs ? 'Pull number on that banner run' : 'Pull number'"
+            >
+              #
+            </th>
+            <th scope="col" class="py-2.5 pr-2 pl-3 font-medium sm:pl-3">Item</th>
+            <th
+              scope="col"
+              class="px-2 py-2.5 font-medium sm:w-36"
+              :class="rated ? '' : 'pr-3 sm:pr-2'"
+            >
+              Pity
+            </th>
+            <th v-if="rated" scope="col" class="py-2.5 pr-3 pl-2 font-medium sm:pr-2">Result</th>
+            <th v-if="runs" scope="col" class="hidden px-2 py-2.5 font-medium lg:table-cell">
+              Banner
+            </th>
+            <th scope="col" class="hidden py-2.5 pr-4 pl-2 text-right font-medium sm:table-cell">
               <button
                 type="button"
                 class="inline-flex items-center gap-1 hover:text-text-primary"
@@ -138,24 +176,6 @@ const kind = (row: PullRow) =>
                 <span class="sr-only">{{ newestFirst ? 'newest first' : 'oldest first' }}</span>
               </button>
             </th>
-            <th class="py-2 pr-2 pl-4 text-center font-medium sm:pl-2">Pity</th>
-            <th class="px-2 py-2 font-medium">Name</th>
-            <th class="hidden px-2 py-2 text-center font-medium md:table-cell">
-              <Star class="inline size-3.5" aria-label="Rarity" />
-            </th>
-            <th class="hidden px-2 py-2 font-medium md:table-cell">Type</th>
-            <th
-              class="hidden px-2 py-2 text-center font-medium lg:table-cell"
-              :title="rated || banner === 500 ? 'Pull number on that banner' : 'Pull number'"
-            >
-              #Roll
-            </th>
-            <th
-              v-if="banner !== 200 && banner !== 100"
-              class="hidden py-2 pr-4 pl-2 font-medium lg:table-cell"
-            >
-              Banner
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -165,82 +185,76 @@ const kind = (row: PullRow) =>
             class="border-t border-border-default"
             :class="TINT[row.pull.item.rank] ?? ''"
           >
-            <td
-              class="tabular hidden py-1 pr-2 pl-4 font-mono whitespace-nowrap text-text-secondary sm:table-cell"
-            >
-              {{ wishMinute(row.pull.time) }}
+            <td class="hidden py-2 pr-2 pl-4 text-right text-text-muted sm:table-cell">
+              {{ formatNumber(rolls.get(row) ?? row.number) }}
             </td>
-            <td class="py-1 pr-2 pl-4 text-center whitespace-nowrap sm:pl-2">
-              <span
-                v-if="row.pity"
-                class="tabular inline-flex items-center gap-1 font-mono font-semibold"
-                :class="row.pull.item.rank === 5 ? '' : RARITY_TEXT[row.pull.item.rank]"
-                :style="pityStyle(row)"
-              >
-                <span class="w-6 text-right">{{ row.pity }}</span>
-                <span
-                  v-if="row.outcome"
-                  role="img"
-                  class="inline-flex"
-                  :aria-label="OUTCOME_LABEL[row.outcome]"
-                  :title="outcomeTitle(row.outcome, banner, row.pull.item.rank)"
-                >
-                  <Star
-                    class="size-3.5"
-                    :class="
-                      row.outcome === 'won'
-                        ? 'fill-current'
-                        : row.outcome === 'guaranteed'
-                          ? 'fill-current opacity-50'
-                          : ''
-                    "
-                    aria-hidden="true"
-                  />
-                </span>
-                <span v-else-if="rated" class="size-3.5" aria-hidden="true" />
-              </span>
-            </td>
-            <td class="px-2 py-1">
-              <div class="flex min-w-0 items-center gap-2">
+            <td class="py-2 pr-2 pl-3">
+              <div class="flex min-w-0 items-center gap-2.5">
                 <GameIcon
                   :src="wishIcon(row.pull.item)"
                   :name="row.pull.item.name"
                   :rarity="row.pull.item.rank || undefined"
                   size="xs"
-                  class="size-6! rounded-md"
                 />
                 <span class="flex min-w-0 flex-col">
-                  <span
-                    class="truncate"
-                    :class="[
-                      RARITY_TEXT[row.pull.item.rank] ?? '',
-                      row.pull.item.rank >= 4 ? 'font-semibold' : '',
-                    ]"
-                    >{{ row.pull.item.name }}</span
+                  <span class="flex min-w-0 items-baseline gap-2.5">
+                    <span
+                      class="max-w-32 truncate font-sans font-medium sm:max-w-56"
+                      :class="RARITY_TEXT[row.pull.item.rank] ?? ''"
+                      :title="row.pull.item.name"
+                      >{{ row.pull.item.name }}</span
+                    >
+                    <span class="hidden shrink-0 font-sans text-xs text-text-muted 2xl:inline">{{
+                      kind(row)
+                    }}</span>
+                  </span>
+                  <time
+                    class="text-xs whitespace-nowrap text-text-muted sm:hidden"
+                    :title="wishMinute(row.pull.time)"
+                    >{{ wishShortTime(row.pull.time) }}</time
                   >
-                  <time class="tabular font-mono text-xs text-text-muted sm:hidden">{{
-                    wishMinute(row.pull.time)
-                  }}</time>
                 </span>
               </div>
             </td>
-            <td
-              class="tabular hidden px-2 py-1 text-center font-mono text-text-secondary md:table-cell"
-            >
-              {{ row.pull.item.rank || '' }}
+            <td class="px-2 py-2" :class="rated ? '' : 'pr-3 sm:pr-2'">
+              <span v-if="pity(row)" class="flex items-center gap-2.5">
+                <span
+                  class="w-7 shrink-0 text-right font-semibold"
+                  :style="{ color: pity(row)!.color }"
+                  >{{ row.pity }}</span
+                >
+                <span
+                  class="hidden h-1.5 min-w-10 flex-1 rounded-full bg-surface-sunken sm:block"
+                  aria-hidden="true"
+                >
+                  <span
+                    class="block h-full rounded-full"
+                    :style="{ width: pity(row)!.width, background: pity(row)!.color }"
+                  />
+                </span>
+              </span>
             </td>
-            <td class="hidden px-2 py-1 text-text-secondary md:table-cell">{{ kind(row) }}</td>
-            <td
-              class="tabular hidden px-2 py-1 text-center font-mono text-text-secondary lg:table-cell"
-            >
-              {{ formatNumber(rolls.get(row) ?? row.number) }}
+            <td v-if="rated" class="py-2 pr-3 pl-2 sm:pr-2">
+              <UiBadge
+                v-if="row.outcome"
+                :tone="OUTCOME_TONE[row.outcome]"
+                :title="outcomeTitle(row.outcome, banner, row.pull.item.rank)"
+                >{{ OUTCOME_LABEL[row.outcome] }}</UiBadge
+              >
+              <span v-else-if="row.pull.item.rank >= 4" class="text-text-muted">—</span>
+            </td>
+            <td v-if="runs" class="hidden px-2 py-2 text-text-secondary lg:table-cell">
+              <span
+                class="block max-w-48 truncate font-sans 2xl:max-w-64"
+                :title="row.on ? `${runName(row)} · ${row.on.version}` : undefined"
+                >{{ runName(row) }}</span
+              >
             </td>
             <td
-              v-if="banner !== 200 && banner !== 100"
-              class="hidden max-w-56 truncate py-1 pr-4 pl-2 text-text-secondary lg:table-cell"
-              :title="row.on ? `${runName(row)} · ${row.on.version}` : undefined"
+              class="hidden py-2 pr-4 pl-2 text-right whitespace-nowrap text-text-muted sm:table-cell"
+              :title="wishMinute(row.pull.time)"
             >
-              {{ runName(row) }}
+              {{ wishShortTime(row.pull.time) }}
             </td>
           </tr>
         </tbody>
@@ -252,6 +266,7 @@ const kind = (row: PullRow) =>
         :page-count="pageCount"
         :total="filtered.length"
         :page-size="PAGE_SIZE"
+        label="Wish pages"
       />
     </div>
   </section>

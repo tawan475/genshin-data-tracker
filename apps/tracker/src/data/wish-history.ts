@@ -40,6 +40,8 @@ export interface WishHistory {
   banners: ReadonlyMap<UigfGachaType, readonly WishPull[]>
   total: number
   bytes: number
+  /** When new pulls were last stored (Unix ms), if the server says. */
+  updatedAt: number | null
 }
 
 export function decodeWishHistory(response: WishHistoryResponse): WishHistory {
@@ -54,7 +56,13 @@ export function decodeWishHistory(response: WishHistoryResponse): WishHistory {
     if (list) list.push(...pulls)
     else banners.set(chunk.banner, pulls)
   }
-  return { timezone: response.timezone ?? 8, banners, total, bytes: response.bytes }
+  return {
+    timezone: response.timezone ?? 8,
+    banners,
+    total,
+    bytes: response.bytes,
+    updatedAt: response.updatedAt ?? null,
+  }
 }
 
 // ------------------------------------------------------------------ banners
@@ -396,6 +404,23 @@ export function bannerStats(
   }
 }
 
+/** Every month from `first` to `last` ("2026-10"), both included. */
+function monthRange(first: string, last: string): string[] {
+  const out: string[] = []
+  let [y, mo] = first.split('-').map(Number) as [number, number]
+  for (;;) {
+    const key = `${y}-${String(mo).padStart(2, '0')}`
+    out.push(key)
+    if (key >= last) break
+    mo++
+    if (mo > 12) {
+      mo = 1
+      y++
+    }
+  }
+  return out
+}
+
 /** Pulls of every banner per month (game clock), oldest first, months without pulls included. */
 export function monthlyPulls(stats: readonly BannerStats[]): MonthCount[] {
   const all = new Map<string, MonthCount>()
@@ -410,20 +435,61 @@ export function monthlyPulls(stats: readonly BannerStats[]): MonthCount[] {
   }
   const keys = [...all.keys()].sort()
   if (keys.length === 0) return []
-  const out: MonthCount[] = []
-  let [y, mo] = keys[0]!.split('-').map(Number) as [number, number]
-  const end = keys.at(-1)!
-  for (;;) {
-    const key = `${y}-${String(mo).padStart(2, '0')}`
-    out.push(all.get(key) ?? { month: key, total: 0, five: 0, four: 0 })
-    if (key >= end) break
-    mo++
-    if (mo > 12) {
-      mo = 1
-      y++
+  return monthRange(keys[0]!, keys.at(-1)!).map(
+    (key) => all.get(key) ?? { month: key, total: 0, five: 0, four: 0 },
+  )
+}
+
+/** A month's pulls by banner type: Character Event, Weapon Event, the rest. */
+export interface MonthSplit {
+  month: string
+  character: number
+  weapon: number
+  other: number
+  total: number
+}
+
+/** Pulls per month split by banner type, oldest first, months without pulls included. */
+export function monthlySplit(stats: readonly BannerStats[]): MonthSplit[] {
+  const all = new Map<string, MonthSplit>()
+  for (const s of stats) {
+    const part = s.banner === 301 ? 'character' : s.banner === 302 ? 'weapon' : 'other'
+    for (const m of s.months) {
+      const a = all.get(m.month) ?? { month: m.month, character: 0, weapon: 0, other: 0, total: 0 }
+      a[part] += m.total
+      a.total += m.total
+      all.set(m.month, a)
     }
   }
-  return out
+  const keys = [...all.keys()].sort()
+  if (keys.length === 0) return []
+  return monthRange(keys[0]!, keys.at(-1)!).map(
+    (key) => all.get(key) ?? { month: key, character: 0, weapon: 0, other: 0, total: 0 },
+  )
+}
+
+/**
+ * How a 5★ pity reads, for its colour: early (up to about two thirds of the
+ * way to soft pity: 50 on the character banner, 43 on the weapon one),
+ * before soft pity, in soft pity's first six pulls (74-79, 63-68), or late.
+ */
+export type PityBand = 'early' | 'mid' | 'soft' | 'late'
+
+export function pityBand(pity: number, banner: UigfGachaType): PityBand {
+  const soft = SOFT_PITY[banner]
+  if (pity <= Math.round(soft * 0.68)) return 'early'
+  if (pity < soft) return 'mid'
+  if (pity < soft + 6) return 'soft'
+  return 'late'
+}
+
+/** The run of a banner open at `now` (UTC seconds), when the account pulled on it. */
+export function currentRun(runs: readonly BannerRun[], now: number): BannerRun | null {
+  for (let i = runs.length - 1; i >= 0; i--) {
+    const run = runs[i]!
+    if (run.banner.start <= now && now <= run.banner.end) return run
+  }
+  return null
 }
 
 /** How many pulls of `rows` took each pity, 1..hard (index 0 = pity 1). */

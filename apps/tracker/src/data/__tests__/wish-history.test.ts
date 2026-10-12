@@ -10,8 +10,11 @@ import bannerFile from '../wish-banners.json'
 import {
   bannerAt,
   bannerStats,
+  currentRun,
   eventBanners,
   monthlyPulls,
+  monthlySplit,
+  pityBand,
   pityHistogram,
   runPullNumbers,
   type BannerFile,
@@ -238,6 +241,110 @@ describe('wish charts', () => {
     const standard = bannerStats(200, history(200, filler(3)), { timezone: 0, banners: null })
     const plain = runPullNumbers(standard.rows)
     expect(standard.rows.map((r) => plain.get(r))).toEqual([3, 2, 1])
+  })
+})
+
+describe('wish overview figures', () => {
+  it('keeps win streaks through guaranteed pulls, and the longest win and loss runs', () => {
+    // won, won, lost, guaranteed, won, won, won, lost, lost(while guaranteed), won
+    const names = ['Furina', 'Furina', 'Diluc', 'Furina', 'Furina', 'Furina', 'Furina']
+    const pulls = history(301, [
+      ...names.flatMap((n) => [...filler(5), n]),
+      ...filler(5),
+      'Qiqi',
+      ...filler(5),
+      'Jean',
+      ...filler(5),
+      'Furina',
+    ])
+    const stats = bannerStats(301, pulls, {
+      timezone: 8,
+      banners: banners('character', ['Furina']),
+    })
+    expect(stats.fives.map((r) => r.outcome).reverse()).toEqual([
+      'won',
+      'won',
+      'lost',
+      'guaranteed',
+      'won',
+      'won',
+      'won',
+      'lost',
+      'lost',
+      'guaranteed',
+    ])
+    expect(stats.rate5).toMatchObject({
+      won: 5,
+      lost: 3,
+      winStreak: 0,
+      maxWinStreak: 3,
+      loseStreak: 2,
+      maxLoseStreak: 2,
+    })
+  })
+
+  it('splits pulls per month by banner type, months without pulls included', () => {
+    const jan = parseWishTime('2026-01-10 12:00:00')!
+    const mar = parseWishTime('2026-03-05 12:00:00')!
+    const at = (banner: UigfGachaType, names: string[], start: number, id: bigint) =>
+      history(banner, names, start).map((p, i) => ({ ...p, id: id + BigInt(i) }))
+    const options = { timezone: 8, banners: null }
+    const stats = [
+      bannerStats(301, at(301, filler(3), jan, 1n), options),
+      bannerStats(302, at(302, filler(2), mar, 100n), options),
+      bannerStats(200, at(200, filler(1), mar, 200n), options),
+      bannerStats(500, at(500, filler(4), jan, 300n), options),
+    ]
+    expect(monthlySplit(stats)).toEqual([
+      { month: '2026-01', character: 3, weapon: 0, other: 4, total: 7 },
+      { month: '2026-02', character: 0, weapon: 0, other: 0, total: 0 },
+      { month: '2026-03', character: 0, weapon: 2, other: 1, total: 3 },
+    ])
+    expect(monthlySplit([])).toEqual([])
+  })
+
+  it('reads a 5★ pity as early, before soft pity, soft or late, per banner', () => {
+    expect([1, 50, 51, 73, 74, 79, 80, 90].map((p) => pityBand(p, 301))).toEqual([
+      'early',
+      'early',
+      'mid',
+      'mid',
+      'soft',
+      'soft',
+      'late',
+      'late',
+    ])
+    expect([43, 44, 62, 63, 68, 69, 80].map((p) => pityBand(p, 302))).toEqual([
+      'early',
+      'mid',
+      'mid',
+      'soft',
+      'soft',
+      'late',
+      'late',
+    ])
+  })
+
+  it('finds the run open now, if the account pulled on it', () => {
+    const first: EventBanner = {
+      kind: 'character',
+      start: 0,
+      end: T0 + 120,
+      featured5: ['Diluc'],
+      featured4: [],
+      version: '9.8',
+      name: 'One',
+      name400: '',
+    }
+    const second: EventBanner = { ...first, start: T0 + 121, end: T0 + 9999, name: 'Two' }
+    const events = new Map<EventKind, EventBanner[]>([['character', [first, second]]])
+    const stats = bannerStats(301, history(301, filler(5)), { timezone: 0, banners: events })
+    expect(currentRun(stats.runs, T0 + 500)?.banner.name).toBe('Two')
+    expect(currentRun(stats.runs, T0 + 60)?.banner.name).toBe('One')
+    expect(currentRun(stats.runs, T0 + 10_000)).toBeNull()
+    // Pulled only on the first: the second being open is not a run of the account's.
+    const old = bannerStats(301, history(301, filler(2)), { timezone: 0, banners: events })
+    expect(currentRun(old.runs, T0 + 500)).toBeNull()
   })
 })
 

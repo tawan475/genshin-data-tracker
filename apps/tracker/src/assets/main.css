@@ -95,6 +95,8 @@
   --chart-5: #ec4899;
   --chart-6: #8b5cf6;
   --chart-grid: #e2e8f0;
+  /* A 5★ in soft pity's first pulls, between rarity-5 gold and danger red (wish history). */
+  --pity-soft: #ea580c; /* orange-600 */
 }
 
 [data-theme='dark'] {
@@ -164,6 +166,7 @@
   --chart-5: #f472b6;
   --chart-6: #a78bfa;
   --chart-grid: #334155;
+  --pity-soft: #fdba74; /* orange-300 */
 }
 
 @theme inline {

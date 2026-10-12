@@ -326,6 +326,7 @@ describe('wish history (website)', () => {
     const body = (await first.json()) as WishHistoryResponse
     expect(body.timezone).toBe(8)
     expect(body.bytes).toBeGreaterThan(0)
+    expect(body.updatedAt).toBeGreaterThan(Date.now() - 60_000)
     const again = await client.fetch(`/api/accounts/${account.id}/wishes`, {
       headers: { 'if-none-match': etag },
     })
@@ -337,7 +338,7 @@ describe('wish history (website)', () => {
     const deleted = await client.fetch(`/api/accounts/${account.id}/wishes`, { method: 'DELETE' })
     expect(deleted.status).toBe(200)
     const empty = await client.json<WishHistoryResponse>(`/api/accounts/${account.id}/wishes`)
-    expect(empty).toMatchObject({ timezone: null, chunks: [] })
+    expect(empty).toMatchObject({ timezone: null, chunks: [], updatedAt: null })
     // Not someone else's.
     const stranger = (await signUp()).client
     expect((await stranger.fetch(`/api/accounts/${account.id}/wishes`)).status).toBe(404)

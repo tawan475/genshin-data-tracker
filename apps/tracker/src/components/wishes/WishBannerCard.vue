@@ -1,182 +1,112 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import { ChevronDown, CircleArrowUp, List } from 'lucide-vue-next'
-import {
-  HARD_PITY,
-  PRIMOS_PER_PULL,
-  SOFT_PITY,
-  type BannerStats,
-  type PullRow,
-} from '@/data/wish-history'
-import FilterChip from '@/components/ui/FilterChip.vue'
-import UiIconButton from '@/components/ui/UiIconButton.vue'
+import GameIcon from '@/components/ui/GameIcon.vue'
+import { HARD_PITY, PRIMOS_PER_PULL, SOFT_PITY, type BannerStats } from '@/data/wish-history'
 import { formatNumber } from '@/lib/format'
-import { RARITY_TEXT, bannerInfo, oddsOf, wishMinute } from './wish-labels'
+import WishOddsChip from './WishOddsChip.vue'
+import WishPityTrack from './WishPityTrack.vue'
+import { OUTCOME_LABEL, bannerInfo, wishDay, wishIcon, wishMinute } from './wish-labels'
 
 /**
- * One banner on the overview, as paimon.moe's counter: three inset tiles
- * (lifetime pulls with their Primogems, 5★ pity, 4★ pity; an arrow before a
- * pity whose next pull of that rarity is featured), and a chevron that opens
- * the latest pulls as text (3★ off until asked for). The list icon opens the
- * banner's page.
+ * One banner on the overview, a link to its page: the 5★ pity big against
+ * hard pity, what the next 5★ is, the way there with soft pity shaded, the
+ * 4★ pity and the last 5★ (red pity when it lost the 50/50). The pulls left
+ * to hard pity and their Primogems are the tooltip. Phones keep the pities
+ * and the track.
  */
 const props = defineProps<{ stats: BannerStats; to: RouteLocationRaw }>()
 
-const LATEST = 20
 const info = computed(() => bannerInfo(props.stats.banner))
 const hard = computed(() => HARD_PITY[props.stats.banner])
 const soft = computed(() => SOFT_PITY[props.stats.banner])
+const last = computed(() => props.stats.fives[0] ?? null)
 
-const open = ref(false)
-const ranks = reactive<Record<3 | 4 | 5, boolean>>({ 5: true, 4: true, 3: false })
-/** The newest LATEST of the chosen rarities, without filtering every pull. */
-const latest = computed(() => {
-  const out: PullRow[] = []
-  if (!open.value) return out
-  for (const row of props.stats.rows) {
-    if (!(ranks[row.pull.item.rank as 3 | 4 | 5] ?? true)) continue
-    out.push(row)
-    if (out.length === LATEST) break
-  }
-  return out
-})
-
-const fiveTitle = computed(() => {
+const toHard = computed(() => {
   const left = hard.value[0] - props.stats.pity5
-  const g = props.stats.guaranteed5
-  return [
-    `${formatNumber(left)} to hard pity (${formatNumber(left * PRIMOS_PER_PULL)} Primogems)`,
-    `soft pity from ${soft.value}`,
-    g === true
-      ? 'next 5★ is featured'
-      : g === false
-        ? `next 5★ is a ${oddsOf(props.stats.banner)}`
-        : '',
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  return `${formatNumber(left)} to hard pity · ✦ ${formatNumber(left * PRIMOS_PER_PULL)} · soft pity from ${soft.value}`
 })
-
-const tiles = computed(() => [
-  {
-    label: 'Lifetime pulls',
-    sub: `✦ ${formatNumber(props.stats.total * PRIMOS_PER_PULL)}`,
-    value: props.stats.total,
-    tone: '',
-    up: false,
-    title: `${formatNumber(props.stats.total)} wishes · ${formatNumber(props.stats.total * PRIMOS_PER_PULL)} Primogems`,
-  },
-  {
-    label: '5★ pity',
-    sub: `Guaranteed at ${hard.value[0]}`,
-    value: props.stats.pity5,
-    tone: 'text-rarity-5',
-    up: !!props.stats.guaranteed5,
-    title: fiveTitle.value,
-  },
-  {
-    label: '4★ pity',
-    sub: `Guaranteed at ${hard.value[1]}`,
-    value: props.stats.pity4,
-    tone: 'text-rarity-4',
-    up: !!props.stats.guaranteed4,
-    title: `${hard.value[1] - props.stats.pity4} to a sure 4★${props.stats.guaranteed4 ? ' · next 4★ is featured' : ''}`,
-  },
-])
+const lastWhen = computed(() => {
+  const row = last.value
+  if (!row) return ''
+  const day = wishDay(row.pull.time)
+  return row.outcome ? `${day} · ${OUTCOME_LABEL[row.outcome].toLowerCase()}` : day
+})
 </script>
 
 <template>
-  <section
-    class="flex flex-col rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm sm:p-4"
+  <RouterLink
+    :to="to"
+    class="flex min-w-0 flex-col gap-2.5 rounded-xl border border-border-default bg-surface-raised px-4 py-3.5 shadow-sm transition-colors hover:border-border-strong sm:gap-3.5 sm:px-5 sm:py-4.5"
   >
-    <header class="mb-2 flex items-center justify-between gap-2">
-      <h2 class="text-lg font-semibold">{{ info.title }}</h2>
-      <UiIconButton :label="`${info.title}: every pull`" :to="to">
-        <List class="size-5" aria-hidden="true" />
-      </UiIconButton>
-    </header>
-
-    <div class="flex flex-col gap-2">
-      <div
-        v-for="tile in tiles"
-        :key="tile.label"
-        class="flex items-center gap-2 rounded-lg bg-surface-sunken px-4 py-2.5"
-        :title="tile.title"
+    <div class="flex min-w-0 items-baseline gap-2">
+      <h2 class="truncate text-base font-semibold" :title="info.title">{{ info.label }}</h2>
+      <span
+        class="tabular ml-auto shrink-0 font-mono text-xs text-text-muted"
+        :title="`✦ ${formatNumber(stats.total * PRIMOS_PER_PULL)} Primogems`"
+        >{{ formatNumber(stats.total) }} pulls</span
       >
-        <span class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate text-sm">{{ tile.label }}</span>
-          <span class="tabular truncate text-xs text-text-muted">{{ tile.sub }}</span>
-        </span>
-        <CircleArrowUp
-          v-if="tile.up"
-          class="size-5 shrink-0"
-          :class="tile.tone"
-          aria-label="Next one is featured"
-        />
-        <span class="tabular font-mono text-3xl font-semibold" :class="tile.tone">{{
-          formatNumber(tile.value)
-        }}</span>
-      </div>
     </div>
 
-    <button
-      type="button"
-      class="mt-2 -mb-1 flex items-center justify-center rounded-lg py-0.5 text-text-muted hover:bg-surface-overlay hover:text-text-primary"
-      :aria-expanded="open"
-      :aria-label="open ? 'Hide the latest pulls' : 'Show the latest pulls'"
-      :title="open ? 'Hide' : 'Latest pulls'"
-      @click="open = !open"
-    >
-      <ChevronDown
-        class="size-5 transition-transform"
-        :class="open ? 'rotate-180' : ''"
-        aria-hidden="true"
-      />
-    </button>
-
-    <div v-if="open" class="mt-2 flex flex-col gap-2">
-      <div role="group" aria-label="Rarity" class="flex gap-2">
-        <FilterChip
-          v-for="rank in [5, 4, 3] as const"
-          :key="rank"
-          :pressed="ranks[rank]"
-          @toggle="ranks[rank] = !ranks[rank]"
+    <div class="flex min-w-0 flex-col gap-2.5 sm:gap-3.5" :title="toHard">
+      <div class="flex min-w-0 flex-wrap items-end gap-x-2 gap-y-1 sm:gap-x-2.5">
+        <span
+          class="tabular font-mono text-[2rem] leading-none font-bold text-rarity-5 sm:text-[2.45rem]"
+          >{{ stats.pity5 }}</span
         >
-          <span :class="RARITY_TEXT[rank]">{{ rank }}★</span>
-        </FilterChip>
+        <span
+          class="tabular shrink-0 pb-1 font-mono text-sm whitespace-nowrap text-text-muted sm:text-base"
+          >/ {{ hard[0] }}</span
+        >
+        <span
+          class="tabular ml-2 shrink-0 pb-1 font-mono text-xs whitespace-nowrap text-rarity-4 sm:hidden"
+          >4★ {{ stats.pity4 }}/{{ hard[1] }}</span
+        >
+        <WishOddsChip :stats="stats" class="mb-1 ml-auto" />
       </div>
-      <p v-if="latest.length === 0" class="py-2 text-center text-sm text-text-muted">None</p>
-      <div v-else class="max-h-80 overflow-y-auto">
-        <table class="w-full table-fixed text-sm">
-          <thead class="sticky top-0 bg-surface-raised">
-            <tr class="text-left text-xs text-text-muted">
-              <th class="py-1 font-medium">Name</th>
-              <th class="w-32 px-2 py-1 font-medium">Time</th>
-              <th class="w-10 py-1 text-right font-medium">Pity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="row in latest"
-              :key="row.pull.id.toString()"
-              class="border-t border-border-default"
-            >
-              <td
-                class="truncate py-1 font-medium"
-                :class="RARITY_TEXT[row.pull.item.rank]"
-                :title="row.pull.item.name"
-              >
-                {{ row.pull.item.name }}
-              </td>
-              <td class="tabular px-2 py-1 font-mono text-xs whitespace-nowrap text-text-muted">
-                {{ wishMinute(row.pull.time) }}
-              </td>
-              <td class="tabular py-1 text-right font-mono">{{ row.pity || '' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <WishPityTrack :pity="stats.pity5" :hard="hard[0]" :soft="soft" />
     </div>
-  </section>
+
+    <div
+      class="hidden items-center gap-2.5 text-xs text-text-secondary sm:flex"
+      :title="`${hard[1] - stats.pity4} to a sure 4★${stats.guaranteed4 ? ' · next 4★ is featured' : ''}`"
+    >
+      <span class="font-semibold text-rarity-4">4★</span>
+      <span class="tabular font-mono">{{ stats.pity4 }} / {{ hard[1] }}</span>
+      <span class="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken" aria-hidden="true">
+        <span
+          class="block h-full rounded-full bg-rarity-4"
+          :style="{ width: `${Math.min(100, (stats.pity4 / hard[1]) * 100)}%` }"
+        />
+      </span>
+    </div>
+
+    <div class="hidden min-w-0 items-center gap-2.5 border-t border-border-default pt-3 sm:flex">
+      <template v-if="last">
+        <GameIcon
+          :src="wishIcon(last.pull.item)"
+          :name="last.pull.item.name"
+          :rarity="5"
+          size="sm"
+        />
+        <div class="flex min-w-0 flex-col">
+          <span class="truncate text-sm font-medium text-rarity-5" :title="last.pull.item.name">{{
+            last.pull.item.name
+          }}</span>
+          <span
+            class="tabular truncate font-mono text-xs text-text-muted"
+            :title="wishMinute(last.pull.time)"
+            >{{ lastWhen }}</span
+          >
+        </div>
+        <span
+          class="tabular ml-auto shrink-0 font-mono text-sm font-semibold"
+          :class="last.outcome === 'lost' ? 'text-danger-text' : 'text-text-primary'"
+          :title="`Pity ${last.pity}`"
+          >{{ last.pity }}</span
+        >
+      </template>
+      <span v-else class="flex h-9 items-center text-xs text-text-muted">No 5★ yet</span>
+    </div>
+  </RouterLink>
 </template>

@@ -1051,4 +1051,6 @@ export interface WishHistoryResponse {
   chunks: { banner: 100 | 200 | 301 | 302 | 500; data: string }[]
   /** Bytes stored. */
   bytes: number
+  /** When new pulls were last stored (Unix ms; null: no history yet). */
+  updatedAt?: number | null
 }

@@ -215,7 +215,7 @@ async function importOnce(
   // 1.
   const [historyResult, lastResult, usageResult, newestResult] = await meter.batch(d1, 'lookup', [
     d1
-      .prepare('SELECT timezone, version FROM wish_histories WHERE account_id = ?1')
+      .prepare('SELECT timezone, version, updated_at FROM wish_histories WHERE account_id = ?1')
       .bind(accountId),
     d1.prepare(LAST_CHUNKS_SQL).bind(accountId),
     usageStatement(d1, accountId, day),
@@ -405,7 +405,7 @@ export async function readWishHistory(
 ): Promise<WishHistoryResponse> {
   const [history, chunks] = await d1.batch<Record<string, unknown>>([
     d1
-      .prepare('SELECT timezone, version FROM wish_histories WHERE account_id = ?1')
+      .prepare('SELECT timezone, version, updated_at FROM wish_histories WHERE account_id = ?1')
       .bind(accountId),
     d1
       .prepare(
@@ -413,12 +413,20 @@ export async function readWishHistory(
       )
       .bind(accountId),
   ])
-  const row = history!.results[0] as { timezone: number; version: number } | undefined
+  const row = history!.results[0] as
+    | { timezone: number; version: number; updated_at: number }
+    | undefined
   let bytes = 0
   const list = chunks!.results.map((c) => {
     const data = toBytes(c.data)
     bytes += data.length
     return { banner: Number(c.banner) as UigfGachaType, data: toBase64(data) }
   })
-  return { timezone: row?.timezone ?? null, version: row?.version ?? 0, chunks: list, bytes }
+  return {
+    timezone: row?.timezone ?? null,
+    version: row?.version ?? 0,
+    chunks: list,
+    bytes,
+    updatedAt: row?.updated_at ?? null,
+  }
 }

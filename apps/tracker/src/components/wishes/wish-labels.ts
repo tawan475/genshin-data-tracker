@@ -1,6 +1,6 @@
 import { characterImages, weaponImages } from '@gdt/game-data/images'
 import { formatWishTime, toGoodKey, type UigfGachaType, type WishItem } from '@gdt/shared'
-import type { Outcome, PullRow } from '@/data/wish-history'
+import type { BannerRun, Outcome, PityBand, PullRow } from '@/data/wish-history'
 import { imageUrl } from '@/lib/assets'
 
 export interface WishBannerInfo {
@@ -17,8 +17,8 @@ export interface WishBannerInfo {
 export const WISH_BANNERS: readonly WishBannerInfo[] = [
   { banner: 301, slug: 'character', label: 'Character', title: 'Character Event', rated: true },
   { banner: 302, slug: 'weapon', label: 'Weapon', title: 'Weapon Event', rated: true },
-  { banner: 200, slug: 'standard', label: 'Standard', title: 'Standard', rated: false },
   { banner: 500, slug: 'chronicled', label: 'Chronicled', title: 'Chronicled Wish', rated: false },
+  { banner: 200, slug: 'standard', label: 'Standard', title: 'Standard', rated: false },
   { banner: 100, slug: 'beginners', label: "Beginners'", title: "Beginners' Wish", rated: false },
 ]
 
@@ -54,6 +54,49 @@ export function wishIcon(item: WishItem): string {
 
 /** The game's clock, to the minute ("2026-10-12 21:04"). */
 export const wishMinute = (time: number) => formatWishTime(time).slice(0, 16)
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const thisYear = () => new Date().getFullYear()
+
+/** A wall-clock day ("Oct 3"; "Oct 3, 2024" in another year), from seconds read as UTC. */
+export function wishDay(time: number, year = thisYear()): string {
+  const d = new Date(time * 1000)
+  const text = `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`
+  return d.getUTCFullYear() === year ? text : `${text}, ${d.getUTCFullYear()}`
+}
+
+/** A pull's game-clock time as the table shows it ("Oct 3, 13:34"). */
+export function wishShortTime(time: number, year = thisYear()): string {
+  return `${wishDay(time, year)}, ${formatWishTime(time).slice(11, 16)}`
+}
+
+/** A month key ("2026-10") as "Oct 2026". */
+export function monthName(month: string): string {
+  const [y, m] = month.split('-').map(Number) as [number, number]
+  return `${MONTHS[m - 1]} ${y}`
+}
+
+/**
+ * A banner run's dates on the data's clock (UTC+8): "Aug 12 – Sep 2", the
+ * year once at the end when it isn't this one, "Sep 23 – now" while open.
+ */
+export function runDates(run: BannerRun, open: boolean, year = thisYear()): string {
+  const start = run.banner.start + 8 * 3600
+  const end = run.banner.end + 8 * 3600
+  if (open) return `${wishDay(start, year)} – now`
+  const endYear = new Date(end * 1000).getUTCFullYear()
+  const startYear = new Date(start * 1000).getUTCFullYear()
+  const from = wishDay(start, startYear === endYear ? startYear : year)
+  return `${from} – ${wishDay(end, year)}`
+}
+
+/** A 5★ pity band's colour, from the theme's tokens (green, gold, orange, red). */
+export const BAND_COLOR: Record<PityBand, string> = {
+  early: 'var(--success-text)',
+  mid: 'var(--rarity-5)',
+  soft: 'var(--pity-soft)',
+  late: 'var(--danger-text)',
+}
 
 export const OUTCOME_LABEL: Record<Outcome, string> = {
   won: 'Won',
