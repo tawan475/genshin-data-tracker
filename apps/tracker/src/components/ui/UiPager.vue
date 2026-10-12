@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { formatNumber } from '@/lib/format'
+import UiButton from './UiButton.vue'
+import UiInput from './UiInput.vue'
+import UiModal from './UiModal.vue'
+import { pageFromInput, pagerItems } from './pager'
 
 /**
  * Page navigation under a long list: the range shown, then previous, page
- * numbers (first, last and the current page's neighbours) and next. On a
- * phone only the arrows and "page / pages" remain. Renders nothing for a
- * single page.
+ * numbers (first, last and the current page's neighbours) and next. A gap
+ * ("…") opens "Go to page" to jump anywhere; on a phone only the arrows and
+ * "page / pages" remain, and that opens it. Renders nothing for a single page.
  */
 const props = withDefaults(
   defineProps<{ pageCount: number; total: number; pageSize: number; label?: string }>(),
@@ -18,24 +22,32 @@ const page = defineModel<number>({ required: true })
 const from = computed(() => (props.total === 0 ? 0 : (page.value - 1) * props.pageSize + 1))
 const to = computed(() => Math.min(props.total, page.value * props.pageSize))
 
-/** 1 … 4 5 6 … 15, as numbers with null for a gap. */
-const items = computed<(number | null)[]>(() => {
-  const count = props.pageCount
-  const current = page.value
-  const out: (number | null)[] = []
-  for (let n = 1; n <= count; n++) {
-    if (n === 1 || n === count || Math.abs(n - current) <= 1) out.push(n)
-    else if (out[out.length - 1] !== null) out.push(null)
-  }
-  return out
-})
+const items = computed(() => pagerItems(props.pageCount, page.value))
 
 function go(n: number) {
   page.value = Math.min(props.pageCount, Math.max(1, n))
 }
 
+const jumpOpen = ref(false)
+const jumpText = ref('')
+const jumpTarget = computed(() => pageFromInput(jumpText.value, props.pageCount))
+const jumpInvalid = computed(() => jumpText.value.trim() !== '' && jumpTarget.value === null)
+
+function openJump() {
+  jumpText.value = ''
+  jumpOpen.value = true
+}
+
+function jump() {
+  if (jumpTarget.value === null) return
+  go(jumpTarget.value)
+  jumpOpen.value = false
+}
+
 const ARROW =
   'inline-flex size-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40 disabled:hover:bg-transparent'
+const GAP =
+  'hidden h-10 min-w-10 items-center justify-center rounded-lg px-2 text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-primary sm:inline-flex'
 </script>
 
 <template>
@@ -58,11 +70,25 @@ const ARROW =
       >
         <ChevronLeft class="size-5" aria-hidden="true" />
       </button>
-      <span class="tabular px-1 font-mono text-sm sm:hidden">{{ page }} / {{ pageCount }}</span>
+      <button
+        type="button"
+        class="tabular rounded-lg px-2 py-2 font-mono text-sm transition-colors hover:bg-surface-overlay sm:hidden"
+        title="Go to page"
+        @click="openJump"
+      >
+        {{ page }} / {{ pageCount }}
+      </button>
       <template v-for="(item, index) in items" :key="item ?? `gap-${index}`">
-        <span v-if="item === null" class="hidden px-1 text-text-muted sm:inline" aria-hidden="true">
+        <button
+          v-if="item === null"
+          type="button"
+          :class="GAP"
+          aria-label="Go to page"
+          title="Go to page"
+          @click="openJump"
+        >
           …
-        </span>
+        </button>
         <button
           v-else
           type="button"
@@ -89,5 +115,21 @@ const ARROW =
         <ChevronRight class="size-5" aria-hidden="true" />
       </button>
     </div>
+    <UiModal :open="jumpOpen" title="Go to page" @close="jumpOpen = false">
+      <form class="flex items-center gap-2" @submit.prevent="jump">
+        <UiInput
+          v-model="jumpText"
+          class="tabular font-mono"
+          inputmode="numeric"
+          autocomplete="off"
+          autofocus
+          :placeholder="`1–${pageCount}`"
+          :invalid="jumpInvalid"
+          :aria-label="`Page, 1 to ${pageCount}`"
+        />
+        <span class="tabular shrink-0 font-mono text-sm text-text-muted">/ {{ pageCount }}</span>
+        <UiButton type="submit" variant="primary" :disabled="jumpTarget === null">Go</UiButton>
+      </form>
+    </UiModal>
   </nav>
 </template>
