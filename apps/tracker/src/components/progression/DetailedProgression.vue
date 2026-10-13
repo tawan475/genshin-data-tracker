@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { useChartRange } from '@/components/charts/use-chart-range'
@@ -146,15 +146,20 @@ function revealGroup() {
 onMounted(revealGroup)
 watch(groupBy, revealGroup, { flush: 'post' })
 
+// The right edge is now: a minute clock moves it (and an hour range) on while the page is open.
+const now = ref(Date.now())
+const clock = setInterval(() => (now.value = Date.now()), 60_000)
+onBeforeUnmount(() => clearInterval(clock))
+
 const periodic = computed(() => {
   const group = groupBy.value
   return props.captures && group !== 'snapshot'
-    ? buildProgression(props.captures, group, range.value)
+    ? buildProgression(props.captures, group, range.value, now.value)
     : null
 })
 const perSnapshot = computed(() =>
   props.captures && groupBy.value === 'snapshot'
-    ? buildSnapshotProgression(props.captures, range.value)
+    ? buildSnapshotProgression(props.captures, range.value, now.value)
     : null,
 )
 

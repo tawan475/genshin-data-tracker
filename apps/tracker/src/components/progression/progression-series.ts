@@ -144,7 +144,8 @@ function dedupe(points: Point[]): Point[] {
 
 /**
  * Line points from the value held at `x0` through the captures from `index`
- * on: every capture, or the last one per period of `by`.
+ * on: every capture, or the last one per period of `by`, then held flat to
+ * `end` (now): the newest value is still the value until a capture says not.
  */
 function linePoints(
   captures: readonly Capture[],
@@ -152,6 +153,7 @@ function linePoints(
   x0: number,
   open: Figures,
   by: PointBucket | TimelineGroupBy,
+  end: number,
 ): Record<FigureKey, Point[]> {
   const lines = perFigure<Point[]>((key) => [{ x: x0, y: open[key] }])
   let period = Number.NaN
@@ -166,27 +168,37 @@ function linePoints(
     }
     period = p
   }
+  for (const key of CURRENCY_KEYS) {
+    const line = lines[key]
+    const held = line[line.length - 1]!
+    if (end > held.x) line.push({ x: end, y: held.y })
+  }
   return perFigure((key) => dedupe(lines[key]))
 }
 
+/** The chart's right edge: now, or the newest capture if the clock is behind it. */
+const chartEnd = (now: number, last: Capture) => Math.max(now, last.at)
+
 /**
- * `captures` as buildHistory returns them (oldest first). Ranges end at the
- * newest capture rather than now, like the overview's history, and snap to
- * whole periods of `groupBy`.
+ * `captures` as buildHistory returns them (oldest first). Ranges end at
+ * `now` (the right edge is always now; the line is held flat from the
+ * newest capture to it) and snap to whole periods of `groupBy`.
  */
 export function buildProgression(
   allCaptures: readonly Capture[],
   groupBy: TimelineGroupBy,
   range: ChartRange,
+  now: number = Date.now(),
 ): Progression | null {
   const captures = allCaptures.filter((c) => !currencyMissing(c.summary))
   const first = captures[0]
   const last = captures[captures.length - 1]
   if (!first || !last) return null
 
-  const wanted = Math.max(first.at, rangeStart(range, last.at))
-  const bounded = Math.max(wanted, last.at - MAX_PERIODS * LONGEST[groupBy])
-  const lastStart = periodStart(last.at, groupBy)
+  const end = chartEnd(now, last)
+  const wanted = Math.max(first.at, rangeStart(range, end))
+  const bounded = Math.max(wanted, end - MAX_PERIODS * LONGEST[groupBy])
+  const lastStart = periodStart(end, groupBy)
   let starts: number[] = []
   for (let t = periodStart(bounded, groupBy); t <= lastStart; t = nextPeriod(t, groupBy)) {
     starts.push(t)
@@ -200,8 +212,8 @@ export function buildProgression(
   const baseline = j > 0 ? captures[j - 1]! : null
   const open = figures(baseline ?? first)
   const x0 = baseline ? from : first.at
-  const lineBucket = finerBucket(pointBucket(last.at - x0), groupBy)
-  const lines = linePoints(captures, j, x0, open, lineBucket)
+  const lineBucket = finerBucket(pointBucket(end - x0), groupBy)
+  const lines = linePoints(captures, j, x0, open, lineBucket, end)
 
   const periods: Period[] = []
   let previous = open
@@ -266,7 +278,7 @@ export interface SnapshotProgression {
   changes: Record<FigureKey, CaptureChange[]>
   /** Every capture as a stepped line from the value held at `domain[0]`. */
   lines: Record<FigureKey, Point[]>
-  /** The time axis the line and the bars share: the line's start to the newest capture. */
+  /** The time axis the line and the bars share: the line's start to now. */
   domain: [number, number]
   /** What the first change is measured against. */
   open: Figures
@@ -276,7 +288,7 @@ export interface SnapshotProgression {
 
 /**
  * Per-snapshot changes over `range`, not snapped to periods ("1h" is the
- * hour up to the newest capture), and the line they sit under. As in
+ * hour up to now), and the line they sit under, held flat to now. As in
  * buildProgression, the value held when the range opens is carried in at
  * its start. When more than MAX_PERIODS captures in the range changed mora
  * or primogems, the newest that many are kept and the range starts at the
@@ -285,13 +297,15 @@ export interface SnapshotProgression {
 export function buildSnapshotProgression(
   allCaptures: readonly Capture[],
   range: ChartRange,
+  now: number = Date.now(),
 ): SnapshotProgression | null {
   const captures = allCaptures.filter((c) => !currencyMissing(c.summary))
   const first = captures[0]
   const last = captures[captures.length - 1]
   if (!first || !last) return null
 
-  const from = Math.max(first.at, rangeStart(range, last.at))
+  const end = chartEnd(now, last)
+  const from = Math.max(first.at, rangeStart(range, end))
   let index = lowerBound(captures, from)
   let baseline = index > 0 ? captures[index - 1]! : null
   let x0 = baseline ? from : first.at
@@ -314,8 +328,8 @@ export function buildSnapshotProgression(
   const open = figures(baseline ?? first)
   return {
     changes: perFigure((key) => captureChanges(captures, index, open[key], key)),
-    lines: linePoints(captures, index, x0, open, 'raw'),
-    domain: [x0, last.at],
+    lines: linePoints(captures, index, x0, open, 'raw', end),
+    domain: [x0, end],
     open,
     truncated,
   }

@@ -40,7 +40,7 @@ describe('progression over short ranges', () => {
   ]
 
   it('draws every capture in an hour, not one point per hour', () => {
-    const p = buildProgression(captures, 'hour', '1h')!
+    const p = buildProgression(captures, 'hour', '1h', last)!
     expect(p.lineBucket).toBe('raw')
     // The value held when the range opens, then all six captures.
     expect(p.lines.mora.map((point) => point.y)).toEqual([
@@ -63,14 +63,14 @@ describe('progression over short ranges', () => {
       daily.push({ at: at(2026, 1, 1, 9) + d * DAY, summary: summary(d * 10, 1) })
       daily.push({ at: at(2026, 1, 1, 21) + d * DAY, summary: summary(d * 10 + 5, 1) })
     }
-    const p = buildProgression(daily, 'month', 'all')!
+    const p = buildProgression(daily, 'month', 'all', daily.at(-1)!.at)!
     // Day closes under month bars: finer than the bars, lighter than every capture.
     expect(p.lineBucket).toBe('day')
     // The first capture as the opening value, then one close per day.
     expect(p.lines.mora.length).toBe(201)
     expect(p.lines.mora.at(-1)!.y).toBe(1_995)
 
-    const hourly = buildProgression(daily, 'hour', '30d')!
+    const hourly = buildProgression(daily, 'hour', '30d', daily.at(-1)!.at)!
     expect(hourly.lineBucket).toBe('hour')
   })
 })
@@ -104,7 +104,7 @@ describe('per snapshot', () => {
   })
 
   it('puts every bar under a step of the line, on the same time axis', () => {
-    const s = buildSnapshotProgression(captures, '1h')!
+    const s = buildSnapshotProgression(captures, '1h', last)!
     // The range is the hour up to the newest capture, not snapped to 22:00.
     const from = last - HOUR
     expect(s.domain).toEqual([from, last])
@@ -126,7 +126,7 @@ describe('per snapshot', () => {
   })
 
   it('starts all history at the first capture, which has nothing to change from', () => {
-    const s = buildSnapshotProgression(captures, 'all')!
+    const s = buildSnapshotProgression(captures, 'all', last)!
     expect(s.domain).toEqual([captures[0]!.at, last])
     expect(s.changes.mora.map((c) => c.at)).toEqual([at(2026, 10, 5, 22, 10), last])
     expect(snapshotTotals(s, 'mora').net).toBe(200)
@@ -134,7 +134,7 @@ describe('per snapshot', () => {
 
   it('carries the value in when nothing changed in the range', () => {
     const quiet = [...captures, { at: last + 3 * HOUR, summary: summary(1_200, 30) }]
-    const s = buildSnapshotProgression(quiet, '1h')!
+    const s = buildSnapshotProgression(quiet, '1h', last + 3 * HOUR)!
     for (const changes of Object.values(s.changes)) expect(changes).toEqual([])
     expect(s.lines.mora).toEqual([
       { x: last + 2 * HOUR, y: 1_200 },
@@ -149,7 +149,7 @@ describe('per snapshot', () => {
       // Mora changes every capture, primogems never.
       summary: summary(1_000 + i, 5),
     }))
-    const s = buildSnapshotProgression(many, 'all')!
+    const s = buildSnapshotProgression(many, 'all', many.at(-1)!.at)!
     expect(s.truncated).toBe(true)
     expect(s.changes.mora.length).toBe(MAX_PERIODS)
     const firstKept = many.length - MAX_PERIODS
@@ -189,9 +189,52 @@ describe('any figure, not only currency', () => {
       { at: t(3), summary: withArtifacts(104) },
       { at: t(4), summary: withArtifacts(101) },
     ]
-    const s = buildSnapshotProgression(captures, '1d')!
+    const s = buildSnapshotProgression(captures, '1d', t(4))!
     expect(s.changes.artifacts.map((c) => c.change)).toEqual([4, -3])
     expect(snapshotTotals(s, 'artifacts')).toEqual({ last: 101, net: 1, gained: 4, spent: 3 })
     expect(s.changes.mora).toEqual([])
+  })
+})
+
+describe('the right edge is now', () => {
+  const last = at(2026, 10, 12, 19, 20)
+  const now = at(2026, 10, 12, 23, 5)
+  const captures: Capture[] = [
+    { at: at(2026, 10, 12, 18, 20), summary: summary(49_070_000, 387) },
+    { at: at(2026, 10, 12, 19, 16), summary: summary(49_080_000, 427) },
+    { at: last, summary: summary(49_467_066, 427) },
+  ]
+
+  it('holds the newest value flat from the last capture to now', () => {
+    const s = buildSnapshotProgression(captures, '7d', now)!
+    expect(s.domain).toEqual([captures[0]!.at, now])
+    expect(s.lines.mora.at(-1)).toEqual({ x: now, y: 49_467_066 })
+    expect(s.lines.mora.at(-2)).toEqual({ x: last, y: 49_467_066 })
+    // The bars stay at their captures; nothing is invented at now.
+    expect(s.changes.mora.at(-1)!.at).toBe(last)
+  })
+
+  it('measures the range back from now, not from the last capture', () => {
+    // The last hour before 23:05 has no capture: a flat line at the value held.
+    const s = buildSnapshotProgression(captures, '1h', now)!
+    expect(s.domain).toEqual([now - HOUR, now])
+    expect(s.lines.mora).toEqual([
+      { x: now - HOUR, y: 49_467_066 },
+      { x: now, y: 49_467_066 },
+    ])
+    for (const changes of Object.values(s.changes)) expect(changes).toEqual([])
+  })
+
+  it('runs the periods up to now, empty ones carrying the value', () => {
+    const p = buildProgression(captures, 'hour', '1d', now)!
+    expect(p.periods.at(-1)!.start).toBe(at(2026, 10, 12, 23))
+    expect(p.periods.at(-1)!.captures).toBe(0)
+    expect(p.periods.at(-1)!.close.mora).toBe(49_467_066)
+    expect(p.lines.mora.at(-1)).toEqual({ x: now, y: 49_467_066 })
+  })
+
+  it('never ends before the newest capture when the clock is behind', () => {
+    const s = buildSnapshotProgression(captures, '7d', last - HOUR)!
+    expect(s.domain[1]).toBe(last)
   })
 })
