@@ -433,6 +433,22 @@ describe('sign in', () => {
     expect(row!.lastUsedAt).toBeGreaterThan(Date.now() - 60_000)
   })
 
+  it('unlinked: keeps where the sign-in was going for after "create account"', async () => {
+    // irminsul's consent page: Continue with Discord, then create an account.
+    const next = '/link?client_id=irminsul&state=abcdefghijklmnop'
+    const client = new Client(via())
+    const url = await startSignIn(client, 'discord', next)
+    const landed = location(await callback(client, 'discord', providers.approve(url, account())))
+    expect(landed).toBe('/oauth')
+    const pending = await client.json<OAuthPendingResponse>('/api/auth/oauth/pending')
+    expect(pending.next).toBe(next)
+    // Without one there is nowhere to go back to.
+    const plain = new Client(via())
+    expect(await roundTrip(plain, 'discord', account())).toBe('/oauth')
+    const none = await plain.json<OAuthPendingResponse>('/api/auth/oauth/pending')
+    expect(none.next).toBeNull()
+  })
+
   it('unlinked: never matched by email; the pending identity is offered, then a new account', async () => {
     const mail = new FakeMail()
     const { me: existing } = await passwordUser()

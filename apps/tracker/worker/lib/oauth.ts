@@ -194,6 +194,11 @@ export interface PendingIdentity {
   avatarUrl: string | null
   /** The provider's handle (Discord username, Google email name), for a username suggestion. */
   handle: string | null
+  /**
+   * Where the sign-in was going (an app path, checked when the flow started):
+   * kept across "create account" / "sign in to link", e.g. back to irminsul's /link.
+   */
+  next?: string
 }
 
 type Sealed<T> = { ok: true; value: T } | { ok: false; error: 'state' | 'expired' }

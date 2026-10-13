@@ -618,6 +618,8 @@ export interface OAuthPendingResponse {
   emailVerified: boolean
   /** A free username made from the provider's name, to start the form with. */
   username: string
+  /** Where the sign-in was going (an app path), to continue there once signed in. */
+  next?: string | null
 }
 
 /**

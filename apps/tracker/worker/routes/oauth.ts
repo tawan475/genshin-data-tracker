@@ -253,7 +253,7 @@ export const oauth = new Hono<AppEnv>()
       await createSession(c, user, identity.provider)
       return c.redirect(flow.next ?? '/app', 302)
     }
-    await setPendingCookie(c, identity)
+    await setPendingCookie(c, { ...identity, next: flow.next })
     return c.redirect('/oauth', 302)
   })
 
@@ -267,6 +267,7 @@ export const oauth = new Hono<AppEnv>()
       email: identity.email,
       emailVerified: identity.emailVerified,
       username: await suggestUsername(c.env.DB, identity),
+      next: identity.next ?? null,
     } satisfies OAuthPendingResponse)
   })
 

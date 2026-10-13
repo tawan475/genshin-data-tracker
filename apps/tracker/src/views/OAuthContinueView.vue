@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usernameSchema, type OAuthPendingResponse } from '@gdt/shared'
+import { appPath, usernameSchema, type OAuthPendingResponse } from '@gdt/shared'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { TimerOff } from 'lucide-vue-next'
@@ -27,6 +27,11 @@ const session = useSession()
 const router = useRouter()
 
 const pending = ref<OAuthPendingResponse | null>(null)
+/** Where the sign-in was going (irminsul's /link, a deep link), checked again here. */
+const next = computed(() => {
+  const path = pending.value?.next
+  return appPath.safeParse(path).success ? (path as string) : undefined
+})
 const gone = ref(false)
 const username = ref('')
 const useEmail = ref(false)
@@ -85,7 +90,7 @@ async function create() {
       emailFeatures.value && useEmail.value,
       turnstile,
     )
-    await router.replace({ name: 'account-new' })
+    await router.replace(next.value ?? { name: 'account-new' })
   } catch (cause) {
     const code = cause instanceof ApiRequestError ? cause.code : ''
     const key = await siteKeyAfter(cause)
@@ -193,7 +198,7 @@ async function cancel() {
         <span class="h-px flex-1 bg-white/10" />
       </div>
       <RouterLink
-        :to="{ name: 'login', query: { link: pending.provider } }"
+        :to="{ name: 'login', query: { link: pending.provider, ...(next ? { next } : {}) } }"
         class="btn-glass w-full rounded-xl"
         :title="`Sign in with your password to link ${label}`"
       >
