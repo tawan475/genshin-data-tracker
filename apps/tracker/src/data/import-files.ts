@@ -4,6 +4,7 @@
  */
 
 import { resolveImportTimestamp } from '@gdt/shared'
+import { captureTimeFromName } from './capture-time-name'
 
 export function isJsonFile(name: string): boolean {
   return /\.json$/i.test(name)
@@ -68,6 +69,11 @@ async function walk(entry: FileSystemEntry, out: CollectedFiles, depth: number):
 export interface CaptureTimeResult {
   /** Epoch ms, or null when the file carries no timestamp (the server then uses upload time). */
   takenAt: number | null
+  /**
+   * The time came from the file's name, not its contents: the upload must
+   * send it (the server only reads a time from the contents by itself).
+   */
+  fromName?: boolean
   /** Set when the file cannot be a GOOD export at all. */
   invalid?: string
 }
@@ -94,6 +100,7 @@ function toMs(token: string | undefined): number | null {
  * The capture time a GOOD file carries. Reads its last and first bytes first
  * (where exporters put `timestamp`); only when neither has it is the whole
  * file parsed, which also catches files that are not JSON before uploading.
+ * A file without one falls back to the date and time in its name.
  */
 export async function readCaptureTime(file: File): Promise<CaptureTimeResult> {
   const tail = await file.slice(Math.max(0, file.size - 512)).text()
@@ -128,7 +135,9 @@ export async function readCaptureTime(file: File): Promise<CaptureTimeResult> {
   }
   const raw = (parsed as { timestamp?: unknown }).timestamp
   const ms = raw === undefined ? Number.NaN : resolveImportTimestamp(undefined, raw, Number.NaN)
-  return { takenAt: Number.isNaN(ms) ? null : ms }
+  if (!Number.isNaN(ms)) return { takenAt: ms }
+  const fromName = captureTimeFromName(file.name)
+  return fromName === null ? { takenAt: null } : { takenAt: fromName, fromName: true }
 }
 
 /** Gzips a file for upload (about 13x smaller for GOOD JSON). */

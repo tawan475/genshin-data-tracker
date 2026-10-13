@@ -47,6 +47,8 @@ export interface ImportItem {
    * `undefined`: not read yet.
    */
   takenAt: number | null | undefined
+  /** `takenAt` came from the file's name (sent with the upload; the contents have no time). */
+  takenFromName: boolean
   status: ImportStatus
   /** Why it failed, or what it is waiting for. */
   message: string | null
@@ -189,6 +191,7 @@ export function addFiles(queue: ImportQueue, files: File[]): AddReport {
       path: file.webkitRelativePath || file.name,
       size: file.size,
       takenAt: undefined,
+      takenFromName: false,
       status: 'queued',
       message: null,
       retryable: false,
@@ -242,6 +245,7 @@ function readCaptureTimes(queue: ImportQueue): Promise<void> {
         try {
           const result = await readCaptureTime(item.file)
           item.takenAt = result.takenAt
+          item.takenFromName = result.fromName === true
           if (result.invalid && item.status === 'queued') fail(item, result.invalid)
         } catch {
           // Unreadable here (moved or deleted since it was picked): let the upload report it.
@@ -436,7 +440,9 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
       const { body, gzip } = await compressFile(item.file)
       noteRequest(queue.accountId)
       // Quiet: the live pages hear about the run once, when it ends (reloadAccount).
-      const result = await api.importGood(queue.accountId, body, { gzip, quiet: true })
+      // A time from the file's name rides along; one in the contents the server reads itself.
+      const timestamp = item.takenFromName ? (item.takenAt ?? undefined) : undefined
+      const result = await api.importGood(queue.accountId, body, { gzip, quiet: true, timestamp })
       item.status = result.status
       item.takenAt = result.takenAt
       item.sentBytes = body.size

@@ -46,8 +46,11 @@ const STATUS: Record<ImportStatus, { label: string; class: string }> = {
 
 function details(item: ImportItem): string {
   const parts = [item.path]
-  if (item.takenAt) parts.push(`Captured ${formatDateTime(item.takenAt)}`)
-  else if (item.takenAt === null) parts.push('No capture time: upload time used')
+  if (item.takenAt) {
+    parts.push(
+      `Captured ${formatDateTime(item.takenAt)}${item.takenFromName ? ' (from the file name)' : ''}`,
+    )
+  } else if (item.takenAt === null) parts.push('No capture time: upload time used')
   if (item.status === 'created' || item.status === 'unchanged') {
     parts.push(`${formatBytes(item.storedSize ?? 0)} stored`)
   }
