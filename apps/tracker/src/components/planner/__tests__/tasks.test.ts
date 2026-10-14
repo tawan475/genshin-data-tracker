@@ -375,6 +375,7 @@ describe('notice board events as tasks', () => {
     end: '2026-11-03T04:00',
     title: { en: 'Stygian Onslaught Event: Ley Line challenges', 'zh-CN': '「幽境危战」活动' },
     image: null,
+    tag: null,
     ...over,
   })
   const NOW = Date.UTC(2026, 9, 14, 4)

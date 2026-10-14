@@ -212,6 +212,33 @@ export function noticeKind(entry: BoardEntry): NoticeKind | null {
   return 'event'
 }
 
+/**
+ * Board events the planner leaves out, as Seelie's Events tab does: game
+ * modes and tracks that run all version (Genius Invokation TCG, Stygian
+ * Onslaught, the Battle Pass, the dedication rewards).
+ */
+const NOT_PLANNER =
+  /Genius Invokation TCG|Stygian Onslaught|Battle Pass|"Moontrace"|Rewards of Dedication/i
+
+/**
+ * Whether a board event belongs in the planner's Events (Seelie's choice):
+ * one that ends (permanent quests do not) and is not a game mode or track.
+ */
+export function plannerNotice(notice: { title: string; end: string | null }): boolean {
+  return notice.end !== null && !NOT_PLANNER.test(notice.title)
+}
+
+/** The small tag Seelie gives an event. */
+export type NoticeTag = 'checkin' | 'exploration' | 'quest'
+
+/** A board event's tag from its English title, null for a plain event. */
+export function noticeTag(title: string): NoticeTag | null {
+  if (/\bLog In\b|Check-?In/i.test(title)) return 'checkin'
+  if (/Exploration/i.test(title)) return 'exploration'
+  if (/Archon Quest|Story Quest|World Quest/i.test(title)) return 'quest'
+  return null
+}
+
 /** A notice's title without the board's long tail: `"Moontrace" Event Details` -> `Moontrace`. */
 export function noticeShortTitle(title: string): string {
   const quoted = /^[^"“「『]*["“「『]([^"”」』]{2,80})["”」』]/.exec(title)
@@ -322,6 +349,8 @@ export interface GameNotice {
   title: { en: string; 'zh-CN'?: string; 'zh-TW'?: string }
   /** The notice's banner image (HoYoverse's CDN), when it has one. */
   image: string | null
+  /** Seelie's small tag (Check-in, World Exploration, Quest), null for a plain event. */
+  tag: NoticeTag | null
 }
 
 /** The last game events sync (site_settings `events.sync`), for the staff page. */

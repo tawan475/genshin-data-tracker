@@ -18,6 +18,8 @@ import {
   bannerAbundance,
   mergeDomainWindows,
   noticeKind,
+  noticeTag,
+  plannerNotice,
   noticeText,
   noticeWindow,
   overflowingPost,
@@ -301,6 +303,15 @@ export async function lastEventsSync(d1: D1Database): Promise<EventsSyncStatus |
 
 // ------------------------------------------------------------- serving
 
+/** A stored row's English title ('' when unreadable). */
+function englishTitle(row: { titles: string }): string {
+  try {
+    return (JSON.parse(row.titles) as { en?: string }).en ?? ''
+  } catch {
+    return ''
+  }
+}
+
 /** A server local time as an instant on `server`. */
 const instant = (time: string, server: NoticeServer) =>
   Date.parse(`${time}:00Z`) - NOTICE_SERVER_OFFSETS[server] * 3_600_000
@@ -357,6 +368,7 @@ export async function gameEventsFor(
 
   const notices: GameNotice[] = rows
     .filter((r) => r.source === 'board')
+    .filter((r) => r.kind === 'wish' || plannerNotice({ title: englishTitle(r), end: r.end }))
     .filter(
       (r) =>
         (r.end === null || instant(r.end, server) > now) &&
@@ -377,6 +389,7 @@ export async function gameEventsFor(
         end: r.end,
         title: titles,
         image: r.image,
+        tag: r.kind === 'event' ? noticeTag(titles.en) : null,
       }
     })
     .sort((a, b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id))

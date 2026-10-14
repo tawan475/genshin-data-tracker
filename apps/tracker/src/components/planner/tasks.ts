@@ -340,6 +340,8 @@ export interface TaskRow {
   custom: { task: CustomTask; due: number; position: number } | null
   /** A domain event: its window, and when it starts/ends on the server (ms). */
   event: { window: DomainEventWindow; start: number; end: number } | null
+  /** Seelie's small tag before the name: `daily` (a domain event), `checkin`, `exploration`, `quest`. */
+  tag?: 'daily' | 'checkin' | 'exploration' | 'quest'
   /** A notice board event: done once per run; `end` null = open-ended. */
   notice: { notice: GameNotice; start: number; end: number | null } | null
   /** What is stored for it (a built-in task never touched has nothing). */
@@ -413,6 +415,7 @@ export function taskRows(
       custom: null,
       event: { window, start, end },
       notice: null,
+      tag: 'daily',
       stored: s ?? null,
     })
   }
@@ -447,6 +450,7 @@ export function taskRows(
       custom: null,
       event: null,
       notice: { notice, start, end },
+      tag: notice.tag ?? undefined,
       stored: s ?? null,
     })
   }

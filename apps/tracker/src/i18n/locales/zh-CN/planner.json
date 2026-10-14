@@ -513,7 +513,13 @@
     "startsIn": "{time}后开始",
     "eventStarts": "开始于 {time}",
     "eventEnds": "结束于 {time}",
-    "noEnd": "长期开放"
+    "noEnd": "长期开放",
+    "tags": {
+      "daily": "每日",
+      "checkin": "签到",
+      "exploration": "世界探索",
+      "quest": "任务"
+    }
   },
   "view": {
     "title": "养成规划",

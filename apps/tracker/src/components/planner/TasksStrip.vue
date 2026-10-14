@@ -11,7 +11,6 @@ import {
   ListChecks,
   Moon,
   Plus,
-  Sparkles,
   StickyNote,
 } from 'lucide-vue-next'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
@@ -100,6 +99,13 @@ const shown = computed(() =>
 const resting = computed(
   () => rows.value.filter((r) => !r.due && (tab.value === 'all' || r.kind === tab.value)).length,
 )
+/** Seelie-like tag pills, one tint per kind. */
+const TAG_TONE = {
+  daily: 'bg-amber-500/15 text-warning-text',
+  checkin: 'bg-accent/15 text-accent-text',
+  exploration: 'bg-emerald-500/15 text-success-text',
+  quest: 'bg-sky-500/15 text-sky-600 dark:text-sky-300',
+} as const
 const soon = computed(() => dueRows.value.filter((r) => r.tone === 'soon'))
 
 // ------------------------------------------------------------ labels
@@ -471,11 +477,12 @@ const summary = computed(() => {
           :title="row.note ? `${row.name} · ${row.note}` : row.name"
           @click="row.kind === 'custom' ? edit(row) : undefined"
         >
-          <Sparkles
-            v-if="row.kind === 'event'"
-            class="size-3.5 shrink-0 text-warning-text"
-            aria-hidden="true"
-          />
+          <span
+            v-if="row.tag"
+            class="shrink-0 rounded px-1.5 py-px text-[0.6875rem] font-medium"
+            :class="TAG_TONE[row.tag]"
+            >{{ $t(`planner.tasks.tags.${row.tag}`) }}</span
+          >
           <span class="truncate">{{ row.name }}</span>
           <StickyNote
             v-if="row.note && row.kind !== 'event'"

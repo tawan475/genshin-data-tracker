@@ -513,7 +513,13 @@
     "startsIn": "{time}後開始",
     "eventStarts": "開始於 {time}",
     "eventEnds": "結束於 {time}",
-    "noEnd": "長期開放"
+    "noEnd": "長期開放",
+    "tags": {
+      "daily": "每日",
+      "checkin": "簽到",
+      "exploration": "世界探索",
+      "quest": "任務"
+    }
   },
   "view": {
     "title": "養成規劃",

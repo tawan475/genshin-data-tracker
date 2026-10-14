@@ -4,6 +4,8 @@ import {
   mergeDomainWindows,
   noticeKind,
   noticeShortTitle,
+  noticeTag,
+  plannerNotice,
   noticeText,
   noticeWindow,
   overflowingPost,
@@ -220,5 +222,35 @@ describe('the board’s time marks', () => {
     expect(noticeText(html, 'AMERICA')).toBe(
       'Event Duration: 2026/10/11 21:00 – 2026/10/19 20:59 Banner: 2026/10/13 18:00',
     )
+  })
+})
+
+describe('what the planner lists (Seelie’s choice)', () => {
+  it('leaves out permanent quests, game modes and tracks; tags the rest', () => {
+    const keep = (title: string, end: string | null = '2026-11-03T15:00') =>
+      plannerNotice({ title, end })
+    expect(keep('"Predictive Victory Dynamics" Event: Predict the Outcome of Battles')).toBe(true)
+    expect(keep('"Rainbow’s End: Resplendent Starlight" Event: Log In to Claim Primogems')).toBe(
+      true,
+    )
+    expect(keep('"Swords and Secrets" World Quest Overview', null)).toBe(false)
+    expect(keep('"Genius Invokation TCG" Heated Battle Mode: Automatic Artistry')).toBe(false)
+    expect(keep('Stygian Onslaught Event: Disturbance-affected Ley Line challenges')).toBe(false)
+    expect(keep('"Moontrace" Event Details')).toBe(false)
+    expect(keep('"To Temper Thyself and Journey Far": Rewards of Dedication')).toBe(false)
+    expect(
+      noticeTag('"Rainbow’s End: Resplendent Starlight" Event: Log In to Claim Primogems'),
+    ).toBe('checkin')
+    expect(noticeTag('"The Godforsaken Frostlands" Event: Complete Exploration Missions')).toBe(
+      'exploration',
+    )
+    expect(
+      noticeTag(
+        'Complete the Archon Quest "A Rekviem for the Underworld" Within the Specified Duration',
+      ),
+    ).toBe('quest')
+    expect(
+      noticeTag('"Tabletop Troupe: A Gathering on Adventure’s Eve" Event: Invite a Character'),
+    ).toBeNull()
   })
 })

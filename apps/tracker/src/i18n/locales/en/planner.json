@@ -513,7 +513,13 @@
     "startsIn": "in {time}",
     "eventStarts": "Starts {time}",
     "eventEnds": "Ends {time}",
-    "noEnd": "No end date"
+    "noEnd": "No end date",
+    "tags": {
+      "daily": "Daily",
+      "checkin": "Check-in",
+      "exploration": "World Exploration",
+      "quest": "Quest"
+    }
   },
   "view": {
     "title": "Planner",
