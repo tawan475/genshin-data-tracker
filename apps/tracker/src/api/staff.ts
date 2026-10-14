@@ -4,6 +4,7 @@
  */
 
 import type {
+  DomainEventWindow,
   AuditKind,
   CatalogRow,
   InspectView,
@@ -56,6 +57,7 @@ export const staffApi = {
     dailySnapshots?: number | null
     dailyBytes?: number | null
     storageQuota?: number | null
+    domainEvents?: DomainEventWindow[] | null
   }) => requestJson<StaffSiteResponse>('/api/staff/site', { method: 'PATCH', json: patch }),
 
   users: (params: {

@@ -1,3 +1,4 @@
+import type { DomainEvent } from '@gdt/game-data/events'
 import { decodePlanner } from '@gdt/game-data'
 import dropsJson from '@gdt/game-data/data/drops.json'
 import plannerJson from '@gdt/game-data/data/planner.json'
@@ -103,7 +104,12 @@ describe('the game day on the server', () => {
 
   it('turns at 04:00 server time', () => {
     // Asia (UTC+8): Tuesday 03:30, still Monday, 30 minutes to the reset.
-    expect(farmDay(MON_1930Z, 'ASIA')).toEqual({ weekday: 1, msUntilReset: 30 * 60_000 })
+    expect(farmDay(MON_1930Z, 'ASIA')).toMatchObject({
+      weekday: 1,
+      domainDay: 1,
+      msUntilReset: 30 * 60_000,
+      msUntilEventEnd: null,
+    })
     // An hour later it is Tuesday in Asia, still Monday in America and Europe.
     expect(farmDay(MON_2030Z, 'ASIA').weekday).toBe(2)
     expect(farmDay(MON_2030Z, 'SAR').weekday).toBe(2)
@@ -114,8 +120,30 @@ describe('the game day on the server', () => {
   it('keeps Sunday until 04:00 Monday', () => {
     // America (UTC-5): Monday 03:59 is still Sunday; Asia is well into Monday.
     const at = Date.UTC(2026, 9, 5, 8, 59)
-    expect(farmDay(at, 'AMERICA')).toEqual({ weekday: 0, msUntilReset: 60_000 })
+    expect(farmDay(at, 'AMERICA')).toMatchObject({ weekday: 0, domainDay: 0, msUntilReset: 60_000 })
     expect(farmDay(at, 'ASIA').weekday).toBe(1)
+  })
+
+  it('opens every domain while Overflowing Abundance runs on the server', () => {
+    const abundance: DomainEvent = {
+      kind: 'abundance',
+      start: '2026-10-05T04:00',
+      end: '2026-10-12T04:00',
+      multiplier: 2,
+      dailyClaims: 3,
+      version: '7.1',
+      source: 'test',
+    }
+    // Tuesday in Asia, inside the run: the domains follow Sunday.
+    const day = farmDay(MON_2030Z, 'ASIA', [abundance])
+    expect(day).toMatchObject({ weekday: 2, domainDay: 0 })
+    expect(day.events.active).toEqual([abundance])
+    // Ends 2026-10-12 04:00 +08 = 2026-10-11 20:00 UTC.
+    expect(day.msUntilEventEnd).toBe(Date.UTC(2026, 9, 11, 20) - MON_2030Z)
+    const i = input()
+    expect(domainCards(i, day.domainDay).length).toBeGreaterThan(0)
+    // A multiplier-only event leaves the day alone.
+    expect(farmDay(MON_2030Z, 'ASIA', [{ ...abundance, kind: 'favor' }]).domainDay).toBe(2)
   })
 
   it('shows the domains of the server day', () => {

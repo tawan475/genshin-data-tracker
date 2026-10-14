@@ -70,6 +70,8 @@ import { craftChanges, rowText, type CraftRow } from '@/components/planner/craft
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
 import { READINESS } from '@/components/planner/farm-format'
 import { farmDay, type ArtifactWant } from '@/components/planner/farm-today'
+import type { DomainEvent } from '@gdt/game-data/events'
+import { loadAllDomainEvents } from '@/data/domain-events'
 import { provideGoalActions } from '@/components/planner/goal-actions'
 import {
   GOAL_SORTS,
@@ -226,7 +228,18 @@ const pinned = computed(() => {
   const at = /^\d+$/.test(raw) ? Number(raw) : Date.parse(raw)
   return Number.isFinite(at) ? at : null
 })
-const day = computed(() => farmDay(pinned.value ?? now.value, account.value.server))
+/** Every known domain event window (game data, staff, the server's schedule), re-read every 10 min. */
+const domainEvents = shallowRef<DomainEvent[]>([])
+watch(
+  [() => account.value.server, () => Math.floor(now.value / 600_000)],
+  ([server]) => {
+    void loadAllDomainEvents(server).then((list) => (domainEvents.value = list))
+  },
+  { immediate: true },
+)
+const day = computed(() =>
+  farmDay(pinned.value ?? now.value, account.value.server, domainEvents.value),
+)
 /** The capture's resin: irminsul's at login, else the snapshot's count. */
 const resin = computed(() => {
   const at = account.value.latest?.takenAt

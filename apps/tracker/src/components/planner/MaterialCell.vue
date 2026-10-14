@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { materialName } from '@/utils/materials'
 import type { MaterialLine } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
 import { t } from '@/i18n'
@@ -22,7 +23,7 @@ const openItem = useItemPopover()
 const title = computed(() => {
   const l = props.line
   const parts = [
-    l.material.name,
+    materialName(l.material.key),
     t('planner.popover.need', { n: formatNumber(l.need) }),
     t('planner.cell.have', { n: formatNumber(l.have) }),
   ]
@@ -70,7 +71,7 @@ function open(event: MouseEvent) {
         materialSoft(line.material.key, line.material.rarity),
       ]"
     >
-      <MaterialIcon :src="src" :name="line.material.name" />
+      <MaterialIcon :src="src" :name="materialName(line.material.key)" />
     </span>
     <span
       class="tabular font-mono leading-4 font-semibold"

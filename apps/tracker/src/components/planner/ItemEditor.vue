@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { materialName } from '@/utils/materials'
 import type { PlannerData } from '@gdt/game-data'
 import { itemRequirement, type PlanGoal, type PlanOptions } from '@gdt/game-data/planner-math'
 import type { Good, ItemTarget } from '@gdt/shared'
@@ -112,7 +113,7 @@ function removeItem() {
           class="size-14 shrink-0 overflow-hidden rounded-lg text-xs"
           :class="materialSoft(material.key, material.rarity)"
         >
-          <MaterialIcon :src="icon" :name="material.name" />
+          <MaterialIcon :src="icon" :name="materialName(material.key)" />
         </span>
         <label class="flex w-32 flex-col gap-1">
           <span class="text-sm text-text-secondary">{{ $t('planner.item.count') }}</span>
@@ -151,7 +152,7 @@ function removeItem() {
           :others="others"
           :inventory="good.materials"
           :options="options"
-          :label="material.name"
+          :label="materialName(material.key)"
         />
       </section>
     </div>

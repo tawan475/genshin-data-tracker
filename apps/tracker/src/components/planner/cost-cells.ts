@@ -6,6 +6,7 @@
  * under the tiles counts the tiles of each colour (`stockCounts`).
  */
 
+import { materialName } from '@/utils/materials'
 import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import { goalStatus, type StockStatus } from '@gdt/game-data/planner-goals'
 import {
@@ -78,12 +79,12 @@ export function costCells(input: CostInput): CostCell[] {
     extra = '',
   ): CostCell => ({
     key: material.key,
-    name: material.name,
+    name: materialName(material.key),
     icon: gameIcon(material.icon),
     rarity: materialRarity(material.key, material.rarity) ?? 0,
     count,
     status: s,
-    title: [`${material.name} ×${formatNumber(count)}`, STOCK_MEANING[s], extra]
+    title: [`${materialName(material.key)} ×${formatNumber(count)}`, STOCK_MEANING[s], extra]
       .filter(Boolean)
       .join(' · '),
   })

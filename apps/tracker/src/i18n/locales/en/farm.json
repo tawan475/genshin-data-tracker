@@ -195,5 +195,25 @@
     "hidden": "{n} hidden",
     "forge": "Forge from chunks",
     "pairTitle": "{runs} · {resin} resin · {days}"
+  },
+  "event": {
+    "names": {
+      "abundance": "Overflowing Abundance",
+      "mastery": "Overflowing Mastery",
+      "favor": "Overflowing Favor",
+      "wealth": "Overflowing Wealth",
+      "revelation": "Overflowing Revelation",
+      "leyLine": "Ley Line Overflow"
+    },
+    "rules": {
+      "abundance": "Every talent book and weapon material is open, with multiplied rewards",
+      "mastery": "Domains of Mastery give multiplied rewards",
+      "favor": "Domains of Blessing (artifacts) give multiplied rewards",
+      "wealth": "Blossoms of Wealth give multiplied rewards",
+      "revelation": "Blossoms of Revelation give multiplied rewards",
+      "leyLine": "Blossoms of Wealth and Revelation give multiplied rewards"
+    },
+    "claims": "×{times} with Original Resin, {n} times a day",
+    "endsIn": "ends in {time}"
   }
 }

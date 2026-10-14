@@ -5,17 +5,8 @@ import { detectLocale, isLocale, type Locale, type LocalePreference } from './lo
 /**
  * Choosing and showing the language in the browser (the DOM side of
  * i18n/index.ts): the device's saved pick, the browser's languages, the
- * preview gate, <html lang>.
+ * <html lang>.
  */
-
-/**
- * Until the switcher launches, other languages show only with the preview
- * flag (`gdt:i18n-preview` = 1) or in development; everyone else stays on
- * English whatever their browser says.
- */
-export function previewEnabled(): boolean {
-  return import.meta.env.DEV || readStorage('i18n-preview') === '1'
-}
 
 /** The preference saved on this device (`gdt:lang`), `system` when none. */
 export function storedPreference(): LocalePreference {
@@ -25,7 +16,6 @@ export function storedPreference(): LocalePreference {
 
 /** The language a preference shows. */
 export function resolveLocale(preference: LocalePreference): Locale {
-  if (!previewEnabled()) return 'en'
   return preference === 'system' ? detectLocale(navigator.languages ?? []) : preference
 }
 

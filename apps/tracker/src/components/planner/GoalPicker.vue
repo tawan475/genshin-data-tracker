@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { materialName } from '@/utils/materials'
 import type { MaterialKind, PlannerData } from '@gdt/game-data'
 import type { CustomCharacter, Good } from '@gdt/shared'
 import { computed, reactive, ref, watch } from 'vue'
@@ -193,16 +194,18 @@ function addCustom() {
             <button
               type="button"
               class="flex w-full flex-col items-center gap-1 rounded-lg p-1.5 text-center transition-colors hover:bg-surface-overlay"
-              :title="m.material.name"
+              :title="materialName(m.material.key)"
               @click="emit('item', m.material.key)"
             >
               <span
                 class="size-12 overflow-hidden rounded-lg text-xs"
                 :class="materialSoft(m.material.key, m.material.rarity)"
               >
-                <MaterialIcon :src="m.icon" :name="m.material.name" />
+                <MaterialIcon :src="m.icon" :name="materialName(m.material.key)" />
               </span>
-              <span class="line-clamp-2 text-xs leading-tight">{{ m.material.name }}</span>
+              <span class="line-clamp-2 text-xs leading-tight">{{
+                materialName(m.material.key)
+              }}</span>
               <span class="tabular font-mono text-[0.6875rem] text-text-muted">{{
                 formatCompact(m.have)
               }}</span>

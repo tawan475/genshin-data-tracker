@@ -154,6 +154,14 @@ function describe(row: AuditRow): string {
     case 'site.signups':
       parts.push(`${str(d.from)} → ${str(d.to)}`)
       break
+    case 'site.events':
+      parts.push(
+        t('staff.audit.events', {
+          from: formatNumber(Array.isArray(d.from) ? d.from.length : 0),
+          to: formatNumber(Array.isArray(d.to) ? d.to.length : 0),
+        }),
+      )
+      break
     case 'site.limits':
       parts.push(
         Object.entries(d)

@@ -8,6 +8,7 @@ import { NO_PLAYER } from '@/data/account-player'
 import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
 import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
+import { localizeFarming } from '@/i18n/localize-farming'
 import { loadGameIcons, loadMaterialIcons } from '@/lib/assets'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { updatesHeld } from '@/live/holds'
@@ -85,7 +86,11 @@ export function usePlannerModel(
   /** The newest capture (an empty one when there is none). */
   const good = computed(() => (data.value ? (data.value.inventory?.good ?? NO_CAPTURE) : null))
   const drops = computed(() => data.value?.drops ?? null)
-  const farming = computed(() => data.value?.farming ?? null)
+  // Names in the language on screen (rebuilt on a switch).
+  const farming = computed(() => {
+    const loaded = data.value?.farming
+    return loaded ? localizeFarming(loaded) : null
+  })
   const hasCapture = computed(() => !!data.value?.inventory)
 
   const store = usePlannerTargets(accountId)

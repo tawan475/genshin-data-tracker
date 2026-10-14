@@ -300,7 +300,8 @@
     "everyDevice": "Every device",
     "oneDevice": "One device",
     "limitDefault": "{key} default",
-    "bulk": "bulk of {n}"
+    "bulk": "bulk of {n}",
+    "events": "domain events {from} → {to}"
   },
   "user": {
     "title": "User",
@@ -449,5 +450,18 @@
     "onceTitle": "Sets a new password once, then stops working. Expires {date}; can't be shown again.",
     "once": "One use · 24 h · shown once",
     "done": "Done"
+  },
+  "events": {
+    "title": "Domain events",
+    "hint": "Overflowing Abundance and the other Overflowing events, for a run the game data has not caught up with. Server time, end exclusive (04:00 to 04:00); irminsul adds runs it sees by itself.",
+    "none": "None set",
+    "kind": "Event",
+    "start": "Starts (server time)",
+    "end": "Ends (server time)",
+    "claims": "Claims a day",
+    "source": "Where it was announced",
+    "add": "Add",
+    "remove": "Remove",
+    "saved": "Domain events saved"
   }
 }

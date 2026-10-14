@@ -6,9 +6,10 @@ import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { FarmPlan } from '@gdt/game-data/planner-estimate'
 import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, ref, watch } from 'vue'
-import { CalendarOff, ChevronDown, Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
+import { CalendarOff, ChevronDown, Clock, Info, Lock, PartyPopper, Sparkles } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
+import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
@@ -111,11 +112,13 @@ const input = computed<FarmInput>(() => ({
   artifacts: props.artifacts,
 }))
 const weekday = computed(() => props.day.weekday)
+/** The day the domains follow: Sunday while an event opens them all. */
+const domainDay = computed(() => props.day.domainDay)
 /** Cards equal to the last ones keep their objects: only the cards that changed re-render. */
 let lastCards = new Map<string, FarmCardData>()
 const sections = computed(() => {
   const next = new Map<string, FarmCardData>()
-  const list = todaySections(input.value, weekday.value).map((s) => ({
+  const list = todaySections(input.value, domainDay.value).map((s) => ({
     ...s,
     cards: s.cards.map((card) => {
       const old = lastCards.get(card.id)
@@ -127,7 +130,7 @@ const sections = computed(() => {
   lastCards = next
   return list
 })
-const schedule = computed(() => scheduleDays(input.value, weekday.value))
+const schedule = computed(() => scheduleDays(input.value, domainDay.value))
 const headline = computed(() => farmHeadline(props.plan, input.value.refreshes))
 
 // ------------------------------------------------------------ headline
@@ -182,12 +185,38 @@ const weeklyTitle = computed(() => {
 
 const dayTitle = computed(() =>
   [
-    weekday.value === 0
+    domainDay.value === 0
       ? t('farm.panel.serverDaySunday', { day: weekdayLong(weekday.value) })
       : t('farm.panel.serverDay', { day: weekdayLong(weekday.value) }),
     t('farm.panel.resetIn', { time: formatCountdown(props.day.msUntilReset) }),
   ].join(' · '),
 )
+
+// ------------------------------------------------------------ domain events
+
+/** The running event to show (the one that opens every domain first). */
+const event = computed(() => {
+  const active = props.day.events.active
+  return active.find((e) => e.kind === 'abundance') ?? active[0] ?? null
+})
+const eventTitle = computed(() => {
+  const e = event.value
+  if (!e) return ''
+  return [
+    t(`farm.event.rules.${e.kind}`),
+    e.multiplier && e.dailyClaims
+      ? t('farm.event.claims', {
+          times: formatNumber(e.multiplier),
+          n: formatNumber(e.dailyClaims),
+        })
+      : '',
+    props.day.msUntilEventEnd === null
+      ? ''
+      : t('farm.event.endsIn', { time: formatCountdown(props.day.msUntilEventEnd) }),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+})
 
 // ------------------------------------------------------------ forging
 
@@ -345,6 +374,11 @@ watch(view, (value) => {
           {{ $t('farm.panel.noWeekly') }}
         </FilterChip>
       </span>
+      <UiBadge v-if="event" tone="warning" :title="eventTitle">
+        <Sparkles class="size-3.5" aria-hidden="true" />
+        {{ $t(`farm.event.names.${event.kind}`) }}
+        <span class="sr-only">{{ eventTitle }}</span>
+      </UiBadge>
       <span
         class="tabular inline-flex items-center gap-1 font-mono text-sm text-text-secondary"
         :title="dayTitle"

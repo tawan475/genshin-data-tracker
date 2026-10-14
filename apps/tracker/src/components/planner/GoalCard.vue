@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { materialName } from '@/utils/materials'
 import type { PlannerData } from '@gdt/game-data'
 import type { PlanGoal } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
@@ -263,8 +264,8 @@ const chipIcon = (chip: NeedChip) =>
   chip.key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(chip.material.icon)
 const chipTitle = (chip: NeedChip) => {
   const name = chip.exp
-    ? t('planner.card.expSuffix', { name: chip.material.name })
-    : chip.material.name
+    ? t('planner.card.expSuffix', { name: materialName(chip.material.key) })
+    : materialName(chip.material.key)
   return t('planner.card.amount', { name, n: shortText(chip.count, chip.status === 'alone') })
 }
 const shortText = (n: number, after: boolean) =>
@@ -286,9 +287,12 @@ function focusTitle(f: FocusChip): string {
     ? t('planner.card.expAmount', {
         exp: expName(f.exp),
         points: formatNumber(f.points ?? 0),
-        item: t('farm.craft.item', { count: formatNumber(f.count), name: f.material.name }),
+        item: t('farm.craft.item', {
+          count: formatNumber(f.count),
+          name: materialName(f.material.key),
+        }),
       })
-    : t('planner.card.amount', { name: f.material.name, n: formatNumber(f.count) })
+    : t('planner.card.amount', { name: materialName(f.material.key), n: formatNumber(f.count) })
   const state =
     f.status === 'all' ? t('planner.card.enoughAfter') : shortText(f.short, f.status === 'alone')
   return `${amount} · ${state}`
@@ -551,7 +555,7 @@ const activeLabel = computed(() =>
               class="size-8 overflow-hidden rounded-md text-[0.625rem]"
               :class="materialSoft(f.material.key, f.material.rarity)"
             >
-              <MaterialIcon :src="gameIcon(f.material.icon)" :name="f.material.name" />
+              <MaterialIcon :src="gameIcon(f.material.icon)" :name="materialName(f.material.key)" />
             </span>
             <span class="tabular font-mono text-sm font-semibold text-text-primary">{{
               formatCompact(f.count)
@@ -584,7 +588,7 @@ const activeLabel = computed(() =>
               class="size-8 overflow-hidden rounded-md text-[0.625rem]"
               :class="materialSoft(chip.material.key, chip.material.rarity)"
             >
-              <MaterialIcon :src="chipIcon(chip)" :name="chip.material.name" />
+              <MaterialIcon :src="chipIcon(chip)" :name="materialName(chip.material.key)" />
             </span>
             <span
               class="tabular font-mono text-sm font-semibold"

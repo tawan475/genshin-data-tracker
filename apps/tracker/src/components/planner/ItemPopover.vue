@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { materialName } from '@/utils/materials'
 import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, reactive, watch } from 'vue'
@@ -237,11 +238,11 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
           class="size-10 shrink-0 overflow-hidden rounded-lg text-xs"
           :class="materialSoft(row.material.key, row.material.rarity)"
         >
-          <MaterialIcon :src="iconOf(row.material)" :name="row.material.name" />
+          <MaterialIcon :src="iconOf(row.material)" :name="materialName(row.material.key)" />
         </span>
         <span class="flex min-w-[6rem] flex-1 flex-col gap-0.5">
           <span class="line-clamp-2 text-sm leading-tight font-medium break-words">{{
-            row.material.name
+            materialName(row.material.key)
           }}</span>
           <span class="tabular flex flex-wrap gap-x-2 font-mono text-xs leading-4 text-text-muted">
             <template v-if="!expKind && row.need > 0">
@@ -271,7 +272,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
                 class="inline-flex size-5 items-center justify-center rounded hover:bg-surface-overlay"
                 :aria-label="
                   $t('planner.popover.backLabel', {
-                    name: row.material.name,
+                    name: materialName(row.material.key),
                     n: formatNumber(row.captured),
                   })
                 "
@@ -288,7 +289,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
             <button
               type="button"
               class="inline-flex size-9 items-center justify-center rounded-l-md border border-border-strong bg-surface-overlay text-text-secondary hover:text-text-primary disabled:opacity-40"
-              :aria-label="`${row.material.name} −1`"
+              :aria-label="`${materialName(row.material.key)} −1`"
               :disabled="row.have === 0"
               @click="set(row, row.have - 1)"
             >
@@ -300,7 +301,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
               inputmode="numeric"
               autocomplete="off"
               :autofocus="row.material.key === itemKey || undefined"
-              :aria-label="$t('planner.popover.held', { name: row.material.name })"
+              :aria-label="$t('planner.popover.held', { name: materialName(row.material.key) })"
               :title="keysHint"
               class="tabular h-9 w-16 border-y border-border-strong bg-surface-raised px-1 text-center font-mono text-sm text-text-primary focus:relative focus:z-10 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
               @input="onInput(row, $event)"
@@ -310,7 +311,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
             <button
               type="button"
               class="inline-flex size-9 items-center justify-center rounded-r-md border border-border-strong bg-surface-overlay text-text-secondary hover:text-text-primary"
-              :aria-label="`${row.material.name} +1`"
+              :aria-label="`${materialName(row.material.key)} +1`"
               @click="set(row, row.have + 1)"
             >
               <Plus class="size-4" aria-hidden="true" />
@@ -322,7 +323,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
             inputmode="numeric"
             autocomplete="off"
             :placeholder="$t('planner.popover.addPlaceholder')"
-            :aria-label="$t('planner.popover.addLabel', { name: row.material.name })"
+            :aria-label="$t('planner.popover.addLabel', { name: materialName(row.material.key) })"
             :title="$t('planner.popover.addTitle')"
             class="tabular h-9 w-12 rounded-md border border-border-default bg-surface-raised px-1 text-center font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
             @input="onGain(row, $event)"

@@ -195,5 +195,25 @@
     "hidden": "已隐藏 {n} 个",
     "forge": "用矿石锻造",
     "pairTitle": "{runs} · {resin} 树脂 · {days}"
+  },
+  "event": {
+    "names": {
+      "abundance": "盛材移涌",
+      "mastery": "精通移涌",
+      "favor": "祝圣移涌",
+      "wealth": "藏金移涌",
+      "revelation": "启示移涌",
+      "leyLine": "地脉移涌"
+    },
+    "rules": {
+      "abundance": "所有天赋培养素材与武器突破素材均开放，获得多倍奖励",
+      "mastery": "精通秘境获得多倍奖励",
+      "favor": "祝圣秘境（圣遗物）获得多倍奖励",
+      "wealth": "藏金之花获得多倍奖励",
+      "revelation": "启示之花获得多倍奖励",
+      "leyLine": "藏金之花与启示之花获得多倍奖励"
+    },
+    "claims": "使用原粹树脂时 ×{times}，每日 {n} 次",
+    "endsIn": "{time}后结束"
   }
 }

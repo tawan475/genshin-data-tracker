@@ -5,7 +5,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { t } from '@/i18n'
-import { applyLocale, previewEnabled } from '@/i18n/apply'
+import { applyLocale } from '@/i18n/apply'
 import type { LocalePreference } from '@/i18n/locale'
 import { setClockPreference } from '@/lib/format'
 import { applyTheme, type ThemePreference } from '@/lib/theme'
@@ -17,8 +17,7 @@ import { useSession } from '@/stores/session'
  * server answers; if the save fails, the previous value is put back here (the
  * store keeps the optimistic value) and a toast says so. The language also
  * applies and is remembered on this device at once (i18n/apply.ts); the
- * account's setting follows it to the user's other devices. Until the
- * switcher launches it shows only with the preview flag (`previewEnabled`).
+ * account's setting follows it to the user's other devices.
  */
 const session = useSession()
 const feedback = useFeedback()
@@ -36,7 +35,6 @@ const languages = computed<{ value: LocalePreference; label: string }[]>(() => [
   { value: 'zh-CN', label: '简体中文' },
   { value: 'zh-TW', label: '繁體中文' },
 ])
-const showLanguage = previewEnabled()
 
 const theme = computed<ThemePreference>({
   get: () => session.settings.theme,
@@ -95,10 +93,7 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
         <span class="text-base">{{ $t('settings.appearance.theme') }}</span>
         <UiSegmented v-model="theme" :options="themes" :label="$t('settings.appearance.theme')" />
       </div>
-      <div
-        v-if="showLanguage"
-        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3"
-      >
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
         <span class="text-base">{{ $t('settings.appearance.language') }}</span>
         <UiSegmented
           v-model="language"

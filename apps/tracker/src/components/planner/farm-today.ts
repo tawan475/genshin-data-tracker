@@ -47,7 +47,12 @@ import {
   type MaterialLine,
   type PlanTotals,
 } from '@gdt/game-data/planner-math'
+import type { DomainEvent } from '@gdt/game-data/events'
+import { domainEventsAt, type DomainEventsNow } from '@/data/domain-events-now'
 import { t } from '@/i18n'
+import { gameName } from '@/i18n/game-names'
+import { locale } from '@/i18n/locale'
+import { materialName } from '@/utils/materials'
 import { formatSetName } from '@/utils/artifact-stats'
 import { domainsForSet, type ArtifactDomain } from './artifact-domains'
 
@@ -76,13 +81,37 @@ export function resinDays(resin: number, refreshes = 0): number {
 export interface FarmDay {
   /** Game day on the server (0 = Sunday, as Date#getDay). */
   weekday: number
+  /**
+   * The day the domains follow: `weekday`, or Sunday (0) while an event opens
+   * every talent book and weapon material (Overflowing Abundance).
+   */
+  domainDay: number
   /** Until the 04:00 reset. */
   msUntilReset: number
+  /** The domain events running now on the server. */
+  events: DomainEventsNow
+  /** Until the earliest running event ends; null when none runs. */
+  msUntilEventEnd: number | null
 }
 
-/** The game day on the account's server at `now` (no server: the browser's zone). */
-export function farmDay(now: number, server: string | null | undefined): FarmDay {
-  return { weekday: serverWeekday(now, server), msUntilReset: msUntilReset(now, server) }
+/**
+ * The game day on the account's server at `now` (no server: the browser's
+ * zone), with the domain events running then (`events`: every known window).
+ */
+export function farmDay(
+  now: number,
+  server: string | null | undefined,
+  events: readonly DomainEvent[] = [],
+): FarmDay {
+  const weekday = serverWeekday(now, server)
+  const running = domainEventsAt(events, now, server)
+  return {
+    weekday,
+    domainDay: running.allDomainsOpen ? 0 : weekday,
+    msUntilReset: msUntilReset(now, server),
+    events: running,
+    msUntilEventEnd: running.endsAt === null ? null : Math.max(0, running.endsAt - now),
+  }
 }
 
 /** A domain family's day pair without Sunday ([1, 4], [2, 5], [3, 6]). */
@@ -252,6 +281,12 @@ const wlLock = (map: ReadonlyMap<number, unknown> | undefined) => {
   return wl === null ? t('farm.lock.locked') : t('farm.lock.wl', { wl })
 }
 
+/**
+ * A family as a domain card lists it: the planner data's English ("Freedom"),
+ * in another language its lowest tier's name, the game's own text.
+ */
+const familyName = (g: FarmGroup) => (locale.value === 'en' ? g.name : materialName(g.key))
+
 /** A domain entrance with only the families given (today's, or a day pair's). */
 export function domainCard(
   domain: FarmDomain,
@@ -263,11 +298,12 @@ export function domainCard(
   const lines = short.flatMap((g) => missingOnly(g.lines))
   const status = worst(short.map((g) => g.status))
   const entry = domain.entry
+  const entryName = gameName('domains', short[0]!.key, entry.name)
   return {
     id: `${domain.id}:${short.map((g) => g.key).join('+')}`,
     kind: 'domain',
-    name: entry.name || short.map((g) => g.name).join(' · '),
-    detail: entry.name ? short.map((g) => g.name).join(' · ') : '',
+    name: entryName || short.map(familyName).join(' · '),
+    detail: entryName ? short.map(familyName).join(' · ') : '',
     domain: entry.kind,
     resinPerRun: entry.tiers[0]?.resin ?? 0,
     run: sumRuns(
@@ -353,7 +389,7 @@ function weeklyCard(weekly: FarmWeekly, input: FarmInput): FarmCard | null {
   return {
     id: weekly.id,
     kind: 'weekly',
-    name: boss.name,
+    name: gameName('weeklyBosses', boss.key, boss.name),
     detail: '',
     domain: null,
     resinPerRun: input.drops?.weekly.discountResin ?? input.drops?.weekly.resin ?? 0,
@@ -415,7 +451,7 @@ function oreCard(input: FarmInput): FarmCard | null {
   return {
     id: 'ore',
     kind: 'ore',
-    name: line.material.name,
+    name: materialName(line.material.key),
     detail: '',
     domain: null,
     resinPerRun: 0,

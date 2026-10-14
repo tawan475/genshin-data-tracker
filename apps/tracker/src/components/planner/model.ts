@@ -57,7 +57,8 @@ import type { z } from 'zod'
 import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
 import { t } from '@/i18n'
-import { formatNumber, keyToName } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
+import { characterName as gameCharacterName } from '@/i18n/game-names'
 import { materialName } from '@/utils/materials'
 import {
   artifactProgress,
@@ -218,7 +219,7 @@ export interface Board {
 }
 
 export function characterName(key: string): string {
-  return keyToName(key)
+  return gameCharacterName(key)
 }
 
 export function weaponName(key: string): string {

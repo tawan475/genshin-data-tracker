@@ -27,10 +27,6 @@
       // device's pick, else the browser's. Same rules as i18n/locale.ts.
       ;(function () {
         try {
-          var preview =
-            localStorage.getItem('gdt:i18n-preview') === '1' ||
-            /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
-          if (!preview) return
           var lang = localStorage.getItem('gdt:lang')
           if (lang !== 'en' && lang !== 'zh-CN' && lang !== 'zh-TW') {
             lang = 'en'

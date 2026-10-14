@@ -88,7 +88,10 @@ function open(row: FocusRow, event: MouseEvent) {
               class="size-6 shrink-0 overflow-hidden rounded text-[0.5rem]"
               :class="materialSoft(row.material.key, row.material.rarity)"
             >
-              <MaterialIcon :src="gameIcon(row.material.icon)" :name="row.material.name" />
+              <MaterialIcon
+                :src="gameIcon(row.material.icon)"
+                :name="materialName(row.material.key)"
+              />
             </span>
             <span aria-hidden="true"
               ><span

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import gameData from '@gdt/game-data/data/meta.json'
-import type { SignupMode, StaffSiteResponse } from '@gdt/shared'
+import type { DomainEventWindow, SignupMode, StaffSiteResponse } from '@gdt/shared'
 import { computed, ref } from 'vue'
+import DomainEventsDialog from '@/components/staff/DomainEventsDialog.vue'
 import LimitsDialog, { type LimitsPatch } from '@/components/staff/LimitsDialog.vue'
 import MethodMarks from '@/components/staff/MethodMarks.vue'
 import StackedBars from '@/components/staff/StackedBars.vue'
@@ -90,6 +91,27 @@ async function saveLimits(patch: LimitsPatch) {
     saving.value = false
   }
 }
+
+const eventsOpen = ref(false)
+async function saveEvents(events: DomainEventWindow[]) {
+  saving.value = true
+  try {
+    site.value = await api.staff.updateSite({ domainEvents: events })
+    eventsOpen.value = false
+    feedback.toast({ tone: 'success', title: t('staff.events.saved') })
+  } catch (cause) {
+    feedback.error(t('staff.common.notSaved'), cause)
+  } finally {
+    saving.value = false
+  }
+}
+/** "Overflowing Abundance 10-13 04:00 → 10-20 04:00", one per window. */
+const eventLines = computed(() =>
+  (shownSite.value?.domainEvents ?? []).map(
+    (e) =>
+      `${t(`farm.event.names.${e.kind}`)} ${e.start.slice(5).replace('T', ' ')} → ${e.end.slice(5).replace('T', ' ')}`,
+  ),
+)
 
 const storedShare = computed(() => {
   const bytes = data.value?.storedBytes ?? 0
@@ -273,6 +295,25 @@ const emailTone = (state: StaffSiteResponse['email']) =>
                 {{ $t('staff.common.edit') }}
               </UiButton>
             </div>
+            <div class="flex items-center gap-3 py-2.5">
+              <dt
+                class="w-28 shrink-0 text-text-secondary sm:w-36"
+                :title="$t('staff.events.hint')"
+              >
+                {{ $t('staff.events.title') }}
+              </dt>
+              <dd class="tabular flex min-w-0 flex-1 flex-col gap-0.5">
+                <span v-for="line in eventLines" :key="line" class="truncate" :title="line">{{
+                  line
+                }}</span>
+                <span v-if="eventLines.length === 0" class="text-text-muted">{{
+                  $t('staff.events.none')
+                }}</span>
+              </dd>
+              <UiButton v-if="canSettings" variant="ghost" size="sm" @click="eventsOpen = true">
+                {{ $t('staff.common.edit') }}
+              </UiButton>
+            </div>
           </dl>
           <dl class="flex flex-col divide-y divide-border-subtle text-sm">
             <div class="flex items-center gap-3 py-2.5">
@@ -355,5 +396,12 @@ const emailTone = (state: StaffSiteResponse['email']) =>
     :busy="saving"
     @close="limitsOpen = false"
     @confirm="saveLimits"
+  />
+  <DomainEventsDialog
+    :open="eventsOpen"
+    :site="shownSite"
+    :busy="saving"
+    @close="eventsOpen = false"
+    @confirm="saveEvents"
   />
 </template>
