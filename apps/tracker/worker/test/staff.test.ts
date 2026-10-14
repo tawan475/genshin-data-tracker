@@ -852,7 +852,7 @@ describe('site settings, storage and the overview', () => {
       expect((await set({ domainEvents: [window] })).domainEvents).toEqual([window])
       const response = await new Client().fetch('/api/domain-events')
       expect(response.headers.get('cache-control')).toBe('public, max-age=300')
-      expect(await response.json()).toEqual({ events: [window] })
+      expect(await response.json()).toEqual({ events: [window], observed: {} })
       // The same list again changes and logs nothing.
       await set({ domainEvents: [window] })
 

@@ -8,14 +8,15 @@
  * of a new UID (422 `uid_required` for a file without one).
  */
 
-import type { ImportResponse, PreparedSnapshot } from '@gdt/shared'
+import type { ImportResponse } from '@gdt/shared'
 import type { Context } from 'hono'
 import type { AppEnv } from '../env'
 import { ApiError } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { accountForUid, type KeyAccount, type UploadOwner } from './accounts'
-import { importSnapshot, parseUpload, type Upload } from './import'
+import { importSnapshot, parseUpload, type ParsedUpload, type Upload } from './import'
 import { notifyUser } from './live'
+import { recordObservedEvents } from './observed-events'
 
 export async function uploadAs(
   c: Context<AppEnv>,
@@ -28,7 +29,7 @@ export async function uploadAs(
   let account: KeyAccount
   let userId: number
   let created = false
-  let parsed: PreparedSnapshot | undefined
+  let parsed: ParsedUpload | undefined
   if (owner.scope === 'account') {
     account = owner.account
     userId = owner.userId
@@ -45,7 +46,7 @@ export async function uploadAs(
       owner.accounts,
     ))
   }
-  const { response, dataVersion, listener } = await importSnapshot(
+  const { response, dataVersion, listener, observedEvents } = await importSnapshot(
     c.env.DB,
     account,
     upload,
@@ -57,6 +58,7 @@ export async function uploadAs(
     throw error
   })
   meter.report(c)
+  recordObservedEvents(c, account.uid, observedEvents)
   // Only when someone listens (read in the import's own batch). A new
   // account is in the list now even when its first file changed nothing.
   if (dataVersion !== null || created) {
