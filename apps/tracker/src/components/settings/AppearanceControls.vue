@@ -102,11 +102,14 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
       :class="signedIn ? 'py-3' : 'pb-1'"
     >
       <span class="text-base">{{ $t('settings.appearance.language') }}</span>
-      <UiSegmented
-        v-model="language"
-        :options="languages"
-        :label="$t('settings.appearance.language')"
-      />
+      <!-- Four languages outgrow a phone: they scroll sideways there. -->
+      <div class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto whitespace-nowrap">
+        <UiSegmented
+          v-model="language"
+          :options="languages"
+          :label="$t('settings.appearance.language')"
+        />
+      </div>
     </div>
     <div v-if="signedIn" class="pt-1">
       <UiSwitch v-model="use24Hour" :label="$t('settings.appearance.clock24')" />

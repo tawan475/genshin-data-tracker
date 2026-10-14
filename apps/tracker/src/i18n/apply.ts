@@ -1,4 +1,5 @@
 import { readStorage, writeStorage } from '@/lib/storage'
+import { quietTransition } from '@/lib/view-transition'
 import { i18n, setLocale } from './index'
 import { detectLocale, isLocale, type Locale, type LocalePreference } from './locale'
 
@@ -38,7 +39,7 @@ export async function applyLocale(
       document.documentElement.lang = target
     }
     if (animate && !reduced && 'startViewTransition' in document) {
-      document.startViewTransition(paint)
+      quietTransition(paint)
     } else {
       paint()
     }

@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { readStorage, writeStorage } from './storage'
+import { quietTransition } from './view-transition'
 
 /** What the user chose; `system` follows the OS and is the default. */
 export type ThemePreference = 'system' | 'light' | 'dark'
@@ -58,7 +59,7 @@ function paint(theme: Theme, animate = false): void {
   }
   if (root.dataset.theme === painted) apply()
   else if (animate && 'startViewTransition' in document && !reducedMotion()) {
-    document.startViewTransition(apply)
+    quietTransition(apply)
   } else apply()
   resolvedTheme.value = theme
   const color = THEME_COLOR[publicPage ? 'public' : painted]

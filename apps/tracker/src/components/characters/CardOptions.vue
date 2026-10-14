@@ -5,6 +5,7 @@ import { Moon, Sun } from 'lucide-vue-next'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
+import { quietTransition } from '@/lib/view-transition'
 
 /**
  * The share card's options: its theme, and whether it shows the account
@@ -31,7 +32,7 @@ function setTheme(next: 'light' | 'dark') {
     theme.value = next
     return
   }
-  document.startViewTransition(async () => {
+  quietTransition(async () => {
     theme.value = next
     await nextTick()
   })
