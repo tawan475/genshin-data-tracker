@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppearanceButton from '@/components/shell/AppearanceButton.vue'
 import { useSession } from '@/stores/session'
 
 /**
@@ -28,20 +29,23 @@ const session = useSession()
           <span class="text-3xl text-paimon drop-shadow-[0_0_10px_var(--paimon-glow)]">✦</span>
           <span>Genshin Tracker</span>
         </RouterLink>
-        <RouterLink
-          v-if="session.status === 'signed-in'"
-          :to="{ name: 'home' }"
-          class="rounded-full border border-white/10 px-6 py-2 font-semibold text-white transition hover:bg-white/10"
-        >
-          {{ $t('shell.public.dashboard') }}
-        </RouterLink>
-        <RouterLink
-          v-else
-          :to="{ name: 'login' }"
-          class="rounded-full border border-white/10 px-6 py-2 font-semibold text-white transition hover:bg-white/10"
-        >
-          {{ $t('common.signIn') }}
-        </RouterLink>
+        <div class="flex items-center gap-3">
+          <AppearanceButton tone="public" />
+          <RouterLink
+            v-if="session.status === 'signed-in'"
+            :to="{ name: 'home' }"
+            class="rounded-full border border-white/10 px-6 py-2 font-semibold text-white transition hover:bg-white/10"
+          >
+            {{ $t('shell.public.dashboard') }}
+          </RouterLink>
+          <RouterLink
+            v-else
+            :to="{ name: 'login' }"
+            class="rounded-full border border-white/10 px-6 py-2 font-semibold text-white transition hover:bg-white/10"
+          >
+            {{ $t('common.signIn') }}
+          </RouterLink>
+        </div>
       </div>
     </nav>
 

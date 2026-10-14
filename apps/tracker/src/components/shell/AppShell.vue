@@ -26,6 +26,7 @@ import { copyText } from '@/data/import-setup'
 import { useSession } from '@/stores/session'
 import { useStaff } from '@/stores/staff'
 import AccountSwitcher from './AccountSwitcher.vue'
+import AppearanceButton from './AppearanceButton.vue'
 import { t } from '@/i18n'
 import { ACCOUNT_SECTIONS, STAFF_SECTIONS, pageTitle } from './nav'
 import { NAV_COLLAPSED_KEY, useNavCollapse } from './nav-collapse'
@@ -391,14 +392,17 @@ const footButton =
             }}</span>
           </span>
         </template>
-        <RouterLink
-          v-if="currentId && !staffMode"
-          :to="{ name: 'account-import', params: { accountId: currentId } }"
-          class="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-sm font-medium text-accent-ink shadow-sm shadow-accent/30 hover:bg-accent-hover"
-        >
-          <Upload class="size-4" aria-hidden="true" />
-          <span class="hidden sm:inline">{{ $t('shell.import') }}</span>
-        </RouterLink>
+        <div class="ml-auto flex shrink-0 items-center gap-2">
+          <AppearanceButton />
+          <RouterLink
+            v-if="currentId && !staffMode"
+            :to="{ name: 'account-import', params: { accountId: currentId } }"
+            class="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-sm font-medium text-accent-ink shadow-sm shadow-accent/30 hover:bg-accent-hover"
+          >
+            <Upload class="size-4" aria-hidden="true" />
+            <span class="hidden sm:inline">{{ $t('shell.import') }}</span>
+          </RouterLink>
+        </div>
       </header>
 
       <main class="min-w-0 flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
