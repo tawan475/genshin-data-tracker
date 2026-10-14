@@ -123,6 +123,7 @@ export default defineConfig(({ command }) => ({
       'vue-chartjs',
       '@vueuse/core',
       'modern-screenshot',
+      'vue-i18n',
     ],
     // The game data (a git dependency, built ESM) is served as is: pre-bundling
     // would merge its per-file JSON chunks, and its subpath modules would each
@@ -132,6 +133,10 @@ export default defineConfig(({ command }) => ({
   // JSON imports are used whole; per-key named exports doubled the icon map's size.
   json: { namedExports: false },
   define: {
+    // vue-i18n: Composition API only, no devtools hooks in production.
+    __VUE_I18N_LEGACY_API__: false,
+    __VUE_I18N_FULL_INSTALL__: false,
+    __INTLIFY_PROD_DEVTOOLS__: false,
     __BUILD__: JSON.stringify(build),
     __MIGRATIONS__: JSON.stringify(migrations),
   },

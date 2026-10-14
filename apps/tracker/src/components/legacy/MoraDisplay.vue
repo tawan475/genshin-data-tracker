@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber } from '@/lib/format'
 import { materialIcon } from '@/lib/assets'
 
 defineProps<{
@@ -10,7 +11,7 @@ const mora = materialIcon('Mora')
 
 <template>
   <span class="inline-flex items-center gap-1 whitespace-nowrap">
-    <span>{{ amount.toLocaleString() }}</span>
+    <span>{{ formatNumber(amount) }}</span>
     <!-- Visually hidden text so copying works -->
     <span class="sr-only">&nbsp;mora</span>
     <img

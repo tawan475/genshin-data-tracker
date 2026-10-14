@@ -14,6 +14,7 @@
  */
 
 import type { TimelineGroupBy } from '@gdt/shared'
+import { dateLocale } from '@/lib/format'
 
 export type ChartRange =
   | '1h'
@@ -169,13 +170,14 @@ interface Formats {
   month: Intl.DateTimeFormat
 }
 
-const formatCache = new Map<boolean, Formats>()
+const formatCache = new Map<string, Formats>()
 
 function formats(hour12: boolean): Formats {
-  let f = formatCache.get(hour12)
+  const key = `${dateLocale() ?? ''}|${hour12}`
+  let f = formatCache.get(key)
   if (!f) {
     const make = (options: Intl.DateTimeFormatOptions) =>
-      new Intl.DateTimeFormat(undefined, options)
+      new Intl.DateTimeFormat(dateLocale(), options)
     f = {
       time: make({ hour: 'numeric', minute: '2-digit', hour12 }),
       hour: make({ month: 'short', day: 'numeric', hour: 'numeric', hour12 }),
@@ -183,7 +185,7 @@ function formats(hour12: boolean): Formats {
       dayTime: make({ month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12 }),
       month: make({ month: 'short', year: 'numeric' }),
     }
-    formatCache.set(hour12, f)
+    formatCache.set(key, f)
   }
   return f
 }
@@ -335,17 +337,18 @@ export function axisTicks(min: number, max: number, width: number, format: AxisF
 
 // ------------------------------------------------------------------- labels
 
-const edgeFormats = new Map<boolean, { dateTime: Intl.DateTimeFormat; date: Intl.DateTimeFormat }>()
+const edgeFormats = new Map<string, { dateTime: Intl.DateTimeFormat; date: Intl.DateTimeFormat }>()
 
 /**
  * One end of a chart's window: date and time when the window is a week or
  * shorter ("Oct 5, 2026, 3:10 PM"), the date alone beyond.
  */
 export function formatRangeEdge(ms: number, span: number, hour12: boolean): string {
-  let f = edgeFormats.get(hour12)
+  const key = `${dateLocale() ?? ''}|${hour12}`
+  let f = edgeFormats.get(key)
   if (!f) {
     f = {
-      dateTime: new Intl.DateTimeFormat(undefined, {
+      dateTime: new Intl.DateTimeFormat(dateLocale(), {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -353,9 +356,13 @@ export function formatRangeEdge(ms: number, span: number, hour12: boolean): stri
         minute: '2-digit',
         hour12,
       }),
-      date: new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+      date: new Intl.DateTimeFormat(dateLocale(), {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }),
     }
-    edgeFormats.set(hour12, f)
+    edgeFormats.set(key, f)
   }
   return span <= 8 * DAY ? f.dateTime.format(ms) : f.date.format(ms)
 }

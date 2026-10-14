@@ -5,7 +5,7 @@
  */
 
 import type { AccountResponse, GenshinServer, SnapshotResponse, SnapshotSummary } from '@gdt/shared'
-import { formatNumber } from '@/lib/format'
+import { dateLocale, formatNumber } from '@/lib/format'
 import { rangeStart, type ChartRange } from './chart-range'
 
 // ------------------------------------------------------------------ accounts
@@ -282,7 +282,7 @@ export function compareMonths(a: MonthRef, b: MonthRef): number {
 }
 
 export function monthLabel(ref: MonthRef): string {
-  return new Date(ref.year, ref.month, 1).toLocaleDateString(undefined, {
+  return new Date(ref.year, ref.month, 1).toLocaleDateString(dateLocale(), {
     month: 'long',
     year: 'numeric',
   })
@@ -359,12 +359,12 @@ export function monthlyAnalysis(
   const byKey = new Map<string, DayClose>()
   for (const day of days) byKey.set(day.key, day)
 
-  const longDay = new Intl.DateTimeFormat(undefined, {
+  const longDay = new Intl.DateTimeFormat(dateLocale(), {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   })
-  const shortDay = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' })
+  const shortDay = new Intl.DateTimeFormat(dateLocale(), { month: 'short', day: 'numeric' })
   const firstEver = days[0]?.key ?? ''
 
   const daysInMonth = new Date(ref.year, ref.month + 1, 0).getDate()

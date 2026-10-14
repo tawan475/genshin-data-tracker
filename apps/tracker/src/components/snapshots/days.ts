@@ -4,6 +4,9 @@
  */
 
 import type { SnapshotResponse } from '@gdt/shared'
+import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
+import { dateFormat } from '@/lib/format'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -21,20 +24,15 @@ export function daySpan(from: string, to: string): number {
   return Math.round((utc(to) - utc(from)) / 86_400_000) + 1
 }
 
-const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'short' })
-const fullDate = new Intl.DateTimeFormat(undefined, {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-})
-
-/** "Today", "Yesterday", or "Mon, Jul 13, 2026". */
+/** "Today", "Yesterday", or "Mon, Jul 13, 2026" (Chinese: the language's own date with its weekday). */
 export function dayLabel(key: string, now = Date.now()): string {
-  if (key === dayKey(now)) return 'Today'
-  if (key === dayKey(now - 86_400_000)) return 'Yesterday'
+  if (key === dayKey(now)) return t('format.today')
+  if (key === dayKey(now - 86_400_000)) return t('format.yesterday')
   const [y, m, d] = key.split('-').map(Number)
   const date = new Date(y!, m! - 1, d!)
-  return `${weekday.format(date)}, ${fullDate.format(date)}`
+  const full = { year: 'numeric', month: 'short', day: 'numeric' } as const
+  if (locale.value !== 'en') return dateFormat({ ...full, weekday: 'short' }).format(date)
+  return `${dateFormat({ weekday: 'short' }).format(date)}, ${dateFormat(full).format(date)}`
 }
 
 /** A duration in the largest units that keep it short: "41 s", "12 min", "2 h 5 min", "3 days". */
@@ -51,7 +49,7 @@ export function formatGap(ms: number): string {
 
 /** "Jun 20 – Jul 13, 2026" (the locale decides how to share the year). */
 export function rangeLabel(from: number, to: number): string {
-  return fullDate.formatRange(from, to)
+  return dateFormat({ year: 'numeric', month: 'short', day: 'numeric' }).formatRange(from, to)
 }
 
 export interface SnapshotEntry {

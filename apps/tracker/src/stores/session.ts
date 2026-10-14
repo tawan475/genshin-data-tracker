@@ -11,6 +11,7 @@ import { computed, ref } from 'vue'
 import { api, onSignedOut } from '@/api'
 import { setClockPreference } from '@/lib/format'
 import { applyTheme } from '@/lib/theme'
+import { applyLocale, storedPreference } from '@/i18n/apply'
 
 type Status = 'unknown' | 'signed-in' | 'signed-out'
 
@@ -44,6 +45,9 @@ export const useSession = defineStore('session', () => {
     if (user) {
       applyTheme(user.settings.theme)
       setClockPreference(user.settings.use24Hour)
+      // The account's language wins over this device's; `system` keeps the device's pick.
+      const language = user.settings.language ?? 'system'
+      void applyLocale(language === 'system' ? storedPreference() : language, { animate: true })
     }
   }
 

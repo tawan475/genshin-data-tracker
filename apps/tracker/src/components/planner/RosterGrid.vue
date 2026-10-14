@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import type { PlannerData } from '@gdt/game-data'
 import type { Good } from '@gdt/shared'
 import { computed, reactive } from 'vue'
@@ -55,7 +56,7 @@ const all = computed(() => {
       owned: owned.has(c.key),
       level: owned.get(c.key)?.level ?? null,
     }))
-    .sort((a, b) => Number(b.owned) - Number(a.owned) || a.name.localeCompare(b.name))
+    .sort((a, b) => Number(b.owned) - Number(a.owned) || compareText(a.name, b.name))
 })
 
 const shown = computed(() => {

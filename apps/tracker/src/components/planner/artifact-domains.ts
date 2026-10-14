@@ -4,6 +4,7 @@
  */
 
 import { artifactDomainsFor, type ArtifactDomain, type FarmingData } from '@gdt/game-data/farming'
+import { compareText } from '@/lib/search'
 
 export type { ArtifactDomain }
 
@@ -42,6 +43,6 @@ export function setPickerOrder(
       if ((d.rarities[i] ?? 5) >= 5) push(key)
     })
   }
-  ;[...all].sort((a, b) => name(a).localeCompare(name(b))).forEach(push)
+  ;[...all].sort((a, b) => compareText(name(a), name(b))).forEach(push)
   return out
 }

@@ -11,6 +11,7 @@
 
 import { loadMaterialIndex, type MaterialIndex } from '@gdt/game-data'
 import { loadBag, type Bag, type BagTab, type BagTabInfo } from '@gdt/game-data/bag'
+import { compareText } from '@/lib/search'
 
 /** An Inventory tab, or 'other' for keys the Inventory doesn't show. */
 export type TabKey = BagTab | 'other'
@@ -85,7 +86,7 @@ export function compareInGame(
     a.order - b.order ||
     (WALLET_RANK.get(a.key) ?? UNKNOWN) - (WALLET_RANK.get(b.key) ?? UNKNOWN) ||
     a.id - b.id ||
-    a.name.localeCompare(b.name)
+    compareText(a.name, b.name)
   )
 }
 

@@ -32,6 +32,7 @@ import {
 import { periodStart } from '@/data/materials-history'
 import { currencyMissing, type Capture, type Point } from '@/data/overview'
 import { nextPeriod } from '@/data/progression'
+import { dateLocale } from '@/lib/format'
 
 /** A figure the progression card can chart: a snapshot summary count. */
 export type FigureKey =
@@ -392,14 +393,15 @@ interface PeriodFormats {
   monthTitle: Intl.DateTimeFormat
 }
 
-const formatCache = new Map<boolean, PeriodFormats>()
+const formatCache = new Map<string, PeriodFormats>()
 
 /** Formatters per clock preference, built once (ticks are formatted thousands at a time). */
 function formats(hour12: boolean): PeriodFormats {
-  let f = formatCache.get(hour12)
+  const key = `${dateLocale() ?? ''}|${hour12}`
+  let f = formatCache.get(key)
   if (!f) {
     const make = (options: Intl.DateTimeFormatOptions) =>
-      new Intl.DateTimeFormat(undefined, options)
+      new Intl.DateTimeFormat(dateLocale(), options)
     f = {
       dayTick: make({ month: 'short', day: 'numeric' }),
       monthTick: make({ month: 'short', year: 'numeric' }),
@@ -408,7 +410,7 @@ function formats(hour12: boolean): PeriodFormats {
       dayTitle: make({ weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }),
       monthTitle: make({ month: 'long', year: 'numeric' }),
     }
-    formatCache.set(hour12, f)
+    formatCache.set(key, f)
   }
   return f
 }

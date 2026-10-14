@@ -6,6 +6,7 @@ import {
 } from '@gdt/game-data'
 import { shallowRef } from 'vue'
 import { keyToName } from '@/lib/format'
+import { normalizeSearch } from '@/lib/search'
 
 /**
  * A material's name: the game's ("Hero's Wit", `Basic Tent: "A Nap Beneath
@@ -97,13 +98,7 @@ export function materialRarity(key: string, fallback?: number | null): number | 
  * Lowercase, accents folded and symbols dropped ("Hero's Wit" is "heros
  * wit", "Sautéed" is "sauteed"; GOOD keys have none: "HerosWit").
  */
-function normalize(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-}
+const normalize = normalizeSearch
 
 /**
  * A search over material names: every word of the query must appear in the

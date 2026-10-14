@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber } from '@/lib/format'
 import type { SnapshotResponse } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import { CalendarX, ChevronLeft, ChevronRight } from 'lucide-vue-next'
@@ -243,7 +244,7 @@ const jumps = computed(() => {
                   :class="row.primogem.diff >= 0 ? 'text-success-text' : 'text-danger-text'"
                 >
                   &nbsp;({{ row.primogem.diff >= 0 ? '+' : ''
-                  }}{{ row.primogem.diff.toLocaleString() }})
+                  }}{{ formatNumber(row.primogem.diff) }})
                 </span>
               </div>
             </td>
@@ -258,7 +259,7 @@ const jumps = computed(() => {
                   class="text-xs font-medium transition-colors"
                   :class="row.mora.diff >= 0 ? 'text-success-text' : 'text-danger-text'"
                 >
-                  &nbsp;({{ row.mora.diff >= 0 ? '+' : '' }}{{ row.mora.diff.toLocaleString()
+                  &nbsp;({{ row.mora.diff >= 0 ? '+' : '' }}{{ formatNumber(row.mora.diff)
                   }}<span class="sr-only">&nbsp;mora</span>)
                 </span>
               </div>
@@ -275,7 +276,7 @@ const jumps = computed(() => {
                   :class="row.artifact.diffWorth >= 0 ? 'text-success-text' : 'text-danger-text'"
                 >
                   &nbsp;({{ row.artifact.diffWorth >= 0 ? '+' : ''
-                  }}{{ row.artifact.diffWorth.toLocaleString()
+                  }}{{ formatNumber(row.artifact.diffWorth)
                   }}<span class="sr-only">&nbsp;mora</span>)
                 </span>
               </div>
@@ -312,14 +313,14 @@ const jumps = computed(() => {
             <td class="px-3 py-3 align-top whitespace-nowrap">
               <div class="flex items-center gap-1.5 mb-1.5">
                 <span class="font-semibold text-text-primary transition-colors">{{
-                  row.extract.totalExp.toLocaleString()
+                  formatNumber(row.extract.totalExp)
                 }}</span>
                 <span
                   class="text-xs font-medium transition-colors"
                   :class="row.extract.diffExp >= 0 ? 'text-success-text' : 'text-danger-text'"
                 >
                   ({{ row.extract.diffExp >= 0 ? '+' : ''
-                  }}{{ row.extract.diffExp.toLocaleString() }})
+                  }}{{ formatNumber(row.extract.diffExp) }})
                 </span>
               </div>
 
@@ -374,7 +375,7 @@ const jumps = computed(() => {
                   "
                 >
                   &nbsp;({{ row.mora.diff + row.artifact.diffWorth >= 0 ? '+' : ''
-                  }}{{ (row.mora.diff + row.artifact.diffWorth).toLocaleString()
+                  }}{{ formatNumber(row.mora.diff + row.artifact.diffWorth)
                   }}<span class="sr-only">&nbsp;mora</span>)
                 </span>
               </div>

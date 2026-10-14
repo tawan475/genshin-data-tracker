@@ -23,6 +23,30 @@
           document.querySelector('meta[name="theme-color"]').content = pub ? '#0f131f' : '#0f172a'
         }
       })()
+      // Language before first paint (its font stack follows <html lang>): this
+      // device's pick, else the browser's. Same rules as i18n/locale.ts.
+      ;(function () {
+        try {
+          var preview =
+            localStorage.getItem('gdt:i18n-preview') === '1' ||
+            /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+          if (!preview) return
+          var lang = localStorage.getItem('gdt:lang')
+          if (lang !== 'en' && lang !== 'zh-CN' && lang !== 'zh-TW') {
+            lang = 'en'
+            var tags = navigator.languages || []
+            for (var i = 0; i < tags.length; i++) {
+              var tag = String(tags[i]).toLowerCase()
+              if (tag.indexOf('zh') === 0) {
+                lang = /hant|-tw|-hk|-mo/.test(tag) ? 'zh-TW' : 'zh-CN'
+                break
+              }
+              if (tag.indexOf('en') === 0) break
+            }
+          }
+          document.documentElement.lang = lang
+        } catch (_) {}
+      })()
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Genshin Tracker</title>

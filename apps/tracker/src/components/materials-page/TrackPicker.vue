@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, ref, watch } from 'vue'
 import { Check, Plus, Search } from 'lucide-vue-next'
 import ItemArt from '@/components/ui/ItemArt.vue'
@@ -45,7 +46,7 @@ const results = computed(() => {
           Number(b.wallet) - Number(a.wallet) ||
           change(b) - change(a) ||
           b.count - a.count ||
-          a.name.localeCompare(b.name),
+          compareText(a.name, b.name),
       )
       .slice(0, LIMIT)
   }
@@ -55,7 +56,7 @@ const results = computed(() => {
       (a, b) =>
         matchRank(a.name, q) - matchRank(b.name, q) ||
         b.count - a.count ||
-        a.name.localeCompare(b.name),
+        compareText(a.name, b.name),
     )
     .slice(0, LIMIT)
 })

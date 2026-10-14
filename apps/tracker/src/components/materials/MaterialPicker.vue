@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, ref, watch } from 'vue'
 import { Check, Plus } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
@@ -55,12 +56,12 @@ const results = computed(() => {
       (a, b) =>
         Math.abs(b.change) - Math.abs(a.change) ||
         b.count - a.count ||
-        a.name.localeCompare(b.name),
+        compareText(a.name, b.name),
     )
   }
   return items.value
     .filter((item) => match(item.name) || match(item.key))
-    .sort((a, b) => matchRank(a.name, q) - matchRank(b.name, q) || a.name.localeCompare(b.name))
+    .sort((a, b) => matchRank(a.name, q) - matchRank(b.name, q) || compareText(a.name, b.name))
 })
 const visible = computed(() => results.value.slice(0, shown.value))
 const remaining = computed(() => results.value.length - visible.value.length)

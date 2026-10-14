@@ -1,26 +1,63 @@
 /**
  * Formatting. "Say the real number": counts and sizes are exact or carry a
- * unit, never vague.
+ * unit, never vague. Everything follows the language on screen
+ * (i18n/locale): English numbers as en-US (as always), Chinese in its own
+ * locale (compact numbers in 万 / 亿); dates in English follow the browser's
+ * locale (as always), in Chinese the language's.
  */
 
-const integer = new Intl.NumberFormat('en-US')
-const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 })
+import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
 
-export function formatNumber(value: number): string {
-  return integer.format(value)
+/** The locale numbers are written in. */
+export function numberLocale(): string {
+  return locale.value === 'en' ? 'en-US' : locale.value
 }
 
-/** 72,164,464 -> "72.2M"; small numbers stay exact. */
+/** The locale dates are written in: the browser's in English, the language's otherwise. */
+export function dateLocale(): string | undefined {
+  return locale.value === 'en' ? undefined : locale.value
+}
+
+const numberFormats = new Map<string, Intl.NumberFormat>()
+/** An Intl.NumberFormat for the language on screen, built once per language and options. */
+export function numberFormat(options: Intl.NumberFormatOptions = {}): Intl.NumberFormat {
+  const key = `${numberLocale()}|${JSON.stringify(options)}`
+  let format = numberFormats.get(key)
+  if (!format) {
+    format = new Intl.NumberFormat(numberLocale(), options)
+    numberFormats.set(key, format)
+  }
+  return format
+}
+
+const dateFormats = new Map<string, Intl.DateTimeFormat>()
+/** An Intl.DateTimeFormat for the language on screen, built once per language and options. */
+export function dateFormat(options: Intl.DateTimeFormatOptions = {}): Intl.DateTimeFormat {
+  const key = `${dateLocale() ?? ''}|${JSON.stringify(options)}`
+  let format = dateFormats.get(key)
+  if (!format) {
+    format = new Intl.DateTimeFormat(dateLocale(), options)
+    dateFormats.set(key, format)
+  }
+  return format
+}
+
+const COMPACT = { notation: 'compact', maximumFractionDigits: 1 } as const
+
+export function formatNumber(value: number): string {
+  return numberFormat().format(value)
+}
+
+/** 72,164,464 -> "72.2M" (Chinese "7216.4万"); small numbers stay exact. */
 export function formatCompact(value: number): string {
-  return Math.abs(value) < 10_000 ? integer.format(value) : compact.format(value)
+  return Math.abs(value) < 10_000 ? formatNumber(value) : numberFormat(COMPACT).format(value)
 }
 
 export function formatSigned(value: number): string {
   if (value === 0) return '0'
   return `${value > 0 ? '+' : '−'}${formatCompact(Math.abs(value))}`
 }
-
-const compactTicks = new Map<number, Intl.NumberFormat>()
 
 /**
  * An axis tick, compact with as many decimals (up to three) as the `step`
@@ -30,18 +67,27 @@ const compactTicks = new Map<number, Intl.NumberFormat>()
 export function formatCompactTick(value: number, step: number): string {
   const abs = Math.abs(value)
   if (abs < 10_000 || !(step > 0)) return formatCompact(value)
-  const unit = abs >= 1e12 ? 1e12 : abs >= 1e9 ? 1e9 : abs >= 1e6 ? 1e6 : 1e3
+  // Chinese compact numbers step in 万 (1e4) and 亿 (1e8), English in K / M / B / T.
+  const unit =
+    locale.value === 'en'
+      ? abs >= 1e12
+        ? 1e12
+        : abs >= 1e9
+          ? 1e9
+          : abs >= 1e6
+            ? 1e6
+            : 1e3
+      : abs >= 1e12
+        ? 1e12
+        : abs >= 1e8
+          ? 1e8
+          : 1e4
   const scaled = step / unit
   let digits = 1
   while (digits < 3 && Math.abs(Math.round(scaled * 10 ** digits) - scaled * 10 ** digits) > 1e-6) {
     digits++
   }
-  let format = compactTicks.get(digits)
-  if (!format) {
-    format = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: digits })
-    compactTicks.set(digits, format)
-  }
-  return format.format(value)
+  return numberFormat({ notation: 'compact', maximumFractionDigits: digits }).format(value)
 }
 
 /** As formatCompactTick, signed ("+150K", "−1.25M"). */
@@ -80,11 +126,11 @@ export function clock24(): boolean {
 
 /** The original tracker's date-time: the browser's full locale format, with seconds. */
 export function formatFullDateTime(ms: number | string | Date): string {
-  return new Date(ms).toLocaleString(undefined, { hour12: !use24Hour })
+  return new Date(ms).toLocaleString(dateLocale(), { hour12: !use24Hour })
 }
 
 export function formatDateTime(ms: number): string {
-  return new Date(ms).toLocaleString(undefined, {
+  return new Date(ms).toLocaleString(dateLocale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -95,7 +141,7 @@ export function formatDateTime(ms: number): string {
 }
 
 export function formatDate(ms: number): string {
-  return new Date(ms).toLocaleDateString(undefined, {
+  return new Date(ms).toLocaleDateString(dateLocale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -103,7 +149,7 @@ export function formatDate(ms: number): string {
 }
 
 export function formatTime(ms: number): string {
-  return new Date(ms).toLocaleTimeString(undefined, {
+  return new Date(ms).toLocaleTimeString(dateLocale(), {
     hour: 'numeric',
     minute: '2-digit',
     hour12: !use24Hour,
@@ -112,7 +158,7 @@ export function formatTime(ms: number): string {
 
 /** "Oct 4": a date without its year. */
 export function formatMonthDay(ms: number): string {
-  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return new Date(ms).toLocaleDateString(dateLocale(), { month: 'short', day: 'numeric' })
 }
 
 /** Whether two times fall on the same local day. */
@@ -133,20 +179,33 @@ export function nowrap(text: string): string {
  */
 export function formatBetween(from: number, to: number): string {
   if (sameDay(from, to)) {
-    return `${nowrap(formatDate(to))}, between ${nowrap(formatTime(from))} and ${nowrap(formatTime(to))}`
+    return t('format.betweenTimes', {
+      date: nowrap(formatDate(to)),
+      from: nowrap(formatTime(from)),
+      to: nowrap(formatTime(to)),
+    })
   }
   const sameYear = new Date(from).getFullYear() === new Date(to).getFullYear()
   const start = sameYear ? formatMonthDay(from) : formatDate(from)
-  return `between ${nowrap(start)} and ${nowrap(formatDate(to))}`
+  return t('format.betweenDates', { from: nowrap(start), to: nowrap(formatDate(to)) })
 }
 
-const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+const relatives = new Map<string, Intl.RelativeTimeFormat>()
+function relativeFormat(): Intl.RelativeTimeFormat {
+  let format = relatives.get(locale.value)
+  if (!format) {
+    format = new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' })
+    relatives.set(locale.value, format)
+  }
+  return format
+}
 
 /** "3 hours ago", "yesterday", "in 2 days". */
 export function formatRelative(ms: number, now = Date.now()): string {
   const seconds = Math.round((ms - now) / 1000)
   const abs = Math.abs(seconds)
-  if (abs < 45) return 'just now'
+  const relative = relativeFormat()
+  if (abs < 45) return t('format.justNow')
   if (abs < 45 * 60) return relative.format(Math.round(seconds / 60), 'minute')
   if (abs < 22 * 3600) return relative.format(Math.round(seconds / 3600), 'hour')
   if (abs < 26 * 86400) return relative.format(Math.round(seconds / 86400), 'day')

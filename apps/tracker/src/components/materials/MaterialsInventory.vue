@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, ref, watch } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from 'lucide-vue-next'
@@ -114,7 +115,7 @@ const filtered = computed(() => {
 
   const sign = descending.value ? -1 : 1
   const key = sortKey.value
-  const byName = (a: Row, b: Row) => a.name.localeCompare(b.name)
+  const byName = (a: Row, b: Row) => compareText(a.name, b.name)
   return [...list].sort((a, b) => {
     if (key === 'name') return sign * byName(a, b)
     const av = a[key]

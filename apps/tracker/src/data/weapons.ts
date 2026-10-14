@@ -16,6 +16,8 @@ import type { Good } from '@gdt/shared'
 import { keyToName } from '@/lib/format'
 import { levelCap } from '@/lib/level'
 import { weaponGameId, weaponMaxLevel, weaponMeta, type WeaponType } from './game-meta'
+import { compareText, normalizeSearch } from '@/lib/search'
+import { labelTable } from '@/i18n/labels'
 
 export type { WeaponType }
 
@@ -93,13 +95,8 @@ export const WEAPON_TYPES: readonly WeaponType[] = [
   'catalyst',
 ]
 
-export const WEAPON_TYPE_LABELS: Record<WeaponType, string> = {
-  sword: 'Sword',
-  claymore: 'Claymore',
-  polearm: 'Polearm',
-  bow: 'Bow',
-  catalyst: 'Catalyst',
-}
+/** "Sword", "Claymore", … in the language on screen. */
+export const WEAPON_TYPE_LABELS = labelTable<WeaponType>('weaponType')
 
 export const MAX_REFINEMENT = 5
 
@@ -117,7 +114,7 @@ export function itemName(key: string): string {
   return keyToName(key).replace(SMALL_WORDS, (word) => word.toLowerCase())
 }
 
-const normalize = (text: string) => text.toLowerCase().replace(/[^a-z0-9 ]/g, '')
+const normalize = normalizeSearch
 
 /**
  * Spare copies feed equipped ones: a copy of refinement N adds N ranks. The
@@ -233,7 +230,7 @@ export function compareCopies(a: WeaponRow, b: WeaponRow): number {
     b.level - a.level ||
     b.refinement - a.refinement ||
     Number(b.lock) - Number(a.lock) ||
-    a.ownerName.localeCompare(b.ownerName)
+    compareText(a.ownerName, b.ownerName)
   )
 }
 
@@ -404,7 +401,7 @@ const compareRows: Record<WeaponSort, (a: WeaponRow, b: WeaponRow) => number> = 
   level: (a, b) => a.level - b.level || a.ascension - b.ascension,
   refinement: (a, b) => a.refinement - b.refinement,
   count: (a, b) => a.count - b.count,
-  name: (a, b) => a.name.localeCompare(b.name),
+  name: (a, b) => compareText(a.name, b.name),
   type: (a, b) => typeIndex(a.type) - typeIndex(b.type),
 }
 
@@ -423,7 +420,7 @@ export function sortWeapons(
       compareRows.name(a, b) ||
       Number(b.location !== '') - Number(a.location !== '') ||
       Number(b.lock) - Number(a.lock) ||
-      a.ownerName.localeCompare(b.ownerName),
+      compareText(a.ownerName, b.ownerName),
   )
 }
 
@@ -432,7 +429,7 @@ const compareGroups: Record<WeaponSort, (a: WeaponGroup, b: WeaponGroup) => numb
   level: (a, b) => compareRows.level(a.best, b.best),
   refinement: (a, b) => a.best.refinement - b.best.refinement,
   count: (a, b) => a.count - b.count,
-  name: (a, b) => a.name.localeCompare(b.name),
+  name: (a, b) => compareText(a.name, b.name),
   type: (a, b) => typeIndex(a.type) - typeIndex(b.type),
 }
 

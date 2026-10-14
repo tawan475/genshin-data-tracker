@@ -24,7 +24,7 @@ import { loadSnapshots } from '@/data/account-data'
 import { cancelExport, downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
 import { currencyMissing, dayKey } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
-import { clock24, formatBytes, formatFullDateTime, formatNumber } from '@/lib/format'
+import { clock24, dateLocale, formatBytes, formatFullDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -168,8 +168,9 @@ const tableLabels = computed<TableLabel[]>(() => [
 const formatKb = (bytes: number) => (bytes ? (bytes / 1024).toFixed(1) + ' KB' : '0 KB')
 
 /** The old full timestamp split in two lines: "7/13/2026" over "9:45:43 PM". */
-const dayLine = (ms: number) => new Date(ms).toLocaleDateString()
-const timeLine = (ms: number) => new Date(ms).toLocaleTimeString(undefined, { hour12: !clock24() })
+const dayLine = (ms: number) => new Date(ms).toLocaleDateString(dateLocale())
+const timeLine = (ms: number) =>
+  new Date(ms).toLocaleTimeString(dateLocale(), { hour12: !clock24() })
 
 // ------------------------------------------------------------------ selection
 

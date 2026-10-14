@@ -10,6 +10,7 @@ import type { WeaponType } from '@gdt/game-data'
 import type { Element } from '@/data/game-meta'
 import { normalizeSearch } from '@/data/characters'
 import type { GoalEntry, ItemGoalView } from './model'
+import { compareText } from '@/lib/search'
 
 /** `active` hides paused goals, `off` shows only them, `ready` those in stock. */
 export type GoalStatus = 'all' | 'ready' | 'active' | 'off'
@@ -178,7 +179,7 @@ export function sortGoals(
   missing: ReadonlyMap<string, number>,
 ): GoalEntry[] {
   const byName = (a: GoalEntry, b: GoalEntry) =>
-    Number(a.character === null) - Number(b.character === null) || a.name.localeCompare(b.name)
+    Number(a.character === null) - Number(b.character === null) || compareText(a.name, b.name)
   const compare: Record<GoalSort, (a: GoalEntry, b: GoalEntry) => number> = {
     name: () => 0,
     missing: (a, b) =>

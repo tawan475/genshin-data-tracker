@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, ref, watch } from 'vue'
 import { SearchX } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
@@ -39,7 +40,7 @@ const shown = computed(() => {
     : props.options
   // Most matches first. Ticking a set never changes the set counts (they
   // leave the set filter out), so the list holds still while you tick.
-  return [...list].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+  return [...list].sort((a, b) => b.count - a.count || compareText(a.name, b.name))
 })
 
 function toggle(key: string, on: boolean) {

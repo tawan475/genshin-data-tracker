@@ -59,6 +59,8 @@ export interface UserSettings {
   /** `system` follows the OS (the default). */
   theme: 'system' | 'light' | 'dark'
   use24Hour: boolean
+  /** The site's language: `system` follows the browser (the default). */
+  language: 'system' | 'en' | 'zh-CN' | 'zh-TW'
 }
 
 /** What a PATCH may carry: any subset, nested objects included. */
@@ -76,6 +78,7 @@ export interface AccountSettingsPatch {
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
   theme: 'system',
   use24Hour: false,
+  language: 'system',
 }
 
 export const MATERIALS_GRAPH_DEFAULTS: MaterialsGraphSettings = {

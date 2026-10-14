@@ -169,7 +169,11 @@ export const snapshotIdsRequest = z.object({
 export const goodKeySchema = z.string().regex(/^[A-Za-z0-9]{1,64}$/, 'Not a GOOD key')
 
 export const userSettingsPatch = z
-  .object({ theme: z.enum(['system', 'light', 'dark']), use24Hour: z.boolean() })
+  .object({
+    theme: z.enum(['system', 'light', 'dark']),
+    use24Hour: z.boolean(),
+    language: z.enum(['system', 'en', 'zh-CN', 'zh-TW']),
+  })
   .partial()
   .strict()
 

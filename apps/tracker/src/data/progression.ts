@@ -8,7 +8,7 @@
  */
 
 import type { SnapshotResponse, SnapshotSummary, TimelineGroupBy } from '@gdt/shared'
-import { clock24 } from '@/lib/format'
+import { clock24, dateLocale } from '@/lib/format'
 import { periodStart } from './materials-history'
 import { buildHistory } from './overview'
 
@@ -79,9 +79,9 @@ export function periodLabel(timestamp: number, groupBy: TimelineGroupBy): string
   const date = new Date(timestamp)
   if (groupBy === 'year') return String(date.getFullYear())
   if (groupBy === 'month')
-    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
+    return date.toLocaleDateString(dateLocale(), { year: 'numeric', month: 'short' })
   if (groupBy === 'hour') {
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString(dateLocale(), {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
@@ -89,5 +89,5 @@ export function periodLabel(timestamp: number, groupBy: TimelineGroupBy): string
       hour12: !clock24(),
     })
   }
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return date.toLocaleDateString(dateLocale(), { month: 'short', day: 'numeric' })
 }

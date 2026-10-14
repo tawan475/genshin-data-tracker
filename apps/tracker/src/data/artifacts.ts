@@ -9,6 +9,7 @@ import { keyToName } from '@/lib/format'
 import { inferArtifactRolls, maxLevel, type InferredRoll } from '@/utils/artifact-rolls'
 import { formatSetName, formatSlotName, formatStatName } from '@/utils/artifact-stats'
 import { artifactPotential, type Potential } from './artifact-potential'
+import { compareText } from '@/lib/search'
 
 export const SLOT_KEYS = ['flower', 'plume', 'sands', 'goblet', 'circlet'] as const
 export type SlotKey = (typeof SLOT_KEYS)[number]
@@ -443,13 +444,13 @@ const byCv: Compare = (a, b) => b.cv - a.cv
 const byRv: Compare = (a, b) => b.rv - a.rv
 const byLevel: Compare = (a, b) => b.artifact.level - a.artifact.level
 const byRarity: Compare = (a, b) => b.artifact.rarity - a.artifact.rarity
-const bySet: Compare = (a, b) => a.setName.localeCompare(b.setName) || a.slotIndex - b.slotIndex
+const bySet: Compare = (a, b) => compareText(a.setName, b.setName) || a.slotIndex - b.slotIndex
 const byRecent: Compare = (a, b) => b.catalogId - a.catalogId
 const byExpected: Compare = (a, b) =>
   b.potential.expectedCv - a.potential.expectedCv || b.potential.bestCv - a.potential.bestCv
 /** Equipped first, by wearer. */
 const byLocation: Compare = (a, b) =>
-  Number(b.equipped) - Number(a.equipped) || a.ownerName.localeCompare(b.ownerName)
+  Number(b.equipped) - Number(a.equipped) || compareText(a.ownerName, b.ownerName)
 const byLineCount: Compare = (a, b) =>
   b.lines +
   (b.artifact.unactivatedSubstats?.length ?? 0) -
@@ -544,7 +545,7 @@ export function summarizeSets(rows: readonly ArtifactRow[]): SetSummary[] {
   for (const summary of list) {
     summary.score = Number(summary.best.reduce((sum, row) => sum + (row?.cv ?? 0), 0).toFixed(1))
   }
-  return list.sort((a, b) => b.score - a.score || b.count - a.count || a.name.localeCompare(b.name))
+  return list.sort((a, b) => b.score - a.score || b.count - a.count || compareText(a.name, b.name))
 }
 
 /** Position by CV among pieces of the same slot and rarity (1 = highest). */

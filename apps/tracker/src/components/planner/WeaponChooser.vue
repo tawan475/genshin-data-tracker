@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import type { PlannerData, WeaponType } from '@gdt/game-data'
 import type { Good } from '@gdt/shared'
 import { computed, ref } from 'vue'
@@ -59,7 +60,7 @@ const rows = computed<Row[]>(() => {
       refinement: w.refinement,
     })
   })
-  const byRarity = (a: Row, b: Row) => b.rarity - a.rarity || a.name.localeCompare(b.name)
+  const byRarity = (a: Row, b: Row) => b.rarity - a.rarity || compareText(a.name, b.name)
   owned.sort(
     (a, b) =>
       Number(b.owner === props.holder) - Number(a.owner === props.holder) ||

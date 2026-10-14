@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { refDebounced, useMediaQuery } from '@vueuse/core'
 import { Backpack, Gem, Layers, LayoutGrid, Rows3, SearchX, Upload } from 'lucide-vue-next'
@@ -225,7 +226,7 @@ const matchSets = computed<SetOption[]>(() => {
   }
   return [...counts]
     .map(([key, count]) => ({ key, name: formatSetName(key), count }))
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .sort((a, b) => b.count - a.count || compareText(a.name, b.name))
 })
 
 const filtering = computed(() => activeFilterCount(applied.value) > 0)

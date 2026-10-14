@@ -1,0 +1,7 @@
+{
+  "justNow": "剛剛",
+  "betweenTimes": "{date} {from} 至 {to} 之間",
+  "betweenDates": "{from} 至 {to} 之間",
+  "today": "今天",
+  "yesterday": "昨天"
+}

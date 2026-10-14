@@ -1,31 +1,13 @@
 /**
- * Names and number formats for artifact stats, slots and sets (GOOD keys).
+ * Names and number formats for artifact stats, slots and sets (GOOD keys),
+ * in the language on screen (the `game` messages).
  */
 
 import { keyToName } from '@/lib/format'
 import { ARTIFACT_SET_NAMES } from '@/data/artifacts-sets'
+import { labelTable, labelsFor } from '@/i18n/labels'
 
-const STAT_NAMES: Readonly<Record<string, string>> = {
-  hp: 'HP',
-  hp_: 'HP%',
-  atk: 'ATK',
-  atk_: 'ATK%',
-  def: 'DEF',
-  def_: 'DEF%',
-  eleMas: 'Elemental Mastery',
-  enerRech_: 'Energy Recharge',
-  critRate_: 'CRIT Rate',
-  critDMG_: 'CRIT DMG',
-  heal_: 'Healing Bonus',
-  pyro_dmg_: 'Pyro DMG Bonus',
-  hydro_dmg_: 'Hydro DMG Bonus',
-  electro_dmg_: 'Electro DMG Bonus',
-  cryo_dmg_: 'Cryo DMG Bonus',
-  anemo_dmg_: 'Anemo DMG Bonus',
-  geo_dmg_: 'Geo DMG Bonus',
-  dendro_dmg_: 'Dendro DMG Bonus',
-  physical_dmg_: 'Physical DMG Bonus',
-}
+const STAT_NAMES = labelTable<string>('stat')
 
 /** Main stats in the game's order, for menus. */
 export const MAIN_STAT_ORDER: readonly string[] = [
@@ -49,19 +31,7 @@ export const MAIN_STAT_ORDER: readonly string[] = [
   'physical_dmg_',
 ]
 
-const STAT_SHORT: Readonly<Record<string, string>> = {
-  eleMas: 'EM',
-  enerRech_: 'ER',
-  heal_: 'Healing',
-  pyro_dmg_: 'Pyro',
-  hydro_dmg_: 'Hydro',
-  electro_dmg_: 'Electro',
-  cryo_dmg_: 'Cryo',
-  anemo_dmg_: 'Anemo',
-  geo_dmg_: 'Geo',
-  dendro_dmg_: 'Dendro',
-  physical_dmg_: 'Physical',
-}
+const STAT_SHORT = labelTable<string>('statShort')
 
 export function formatStatName(key: string): string {
   return STAT_NAMES[key] ?? keyToName(key)
@@ -88,17 +58,14 @@ export function formatSetName(setKey: string): string {
   return ARTIFACT_SET_NAMES[setKey] ?? keyToName(setKey)
 }
 
-export const SLOT_NAMES: Readonly<Record<string, string>> = {
-  flower: 'Flower of Life',
-  plume: 'Plume of Death',
-  sands: 'Sands of Eon',
-  goblet: 'Goblet of Eonothem',
-  circlet: 'Circlet of Logos',
-}
+export const SLOT_NAMES = labelTable<string>('slotFull')
 
 /** "Flower", "Plume", … (short, for cards and pills). */
 export function formatSlotName(slotKey: string): string {
-  return slotKey ? slotKey.charAt(0).toUpperCase() + slotKey.slice(1) : slotKey
+  return (
+    labelsFor('slot')[slotKey] ??
+    (slotKey ? slotKey.charAt(0).toUpperCase() + slotKey.slice(1) : slotKey)
+  )
 }
 
 export function formatSlotFullName(slotKey: string): string {
@@ -110,24 +77,14 @@ export function formatCv(cv: number): string {
   return cv.toFixed(1)
 }
 
-const STAT_TINY: Readonly<Record<string, string>> = {
-  critRate_: 'CR',
-  critDMG_: 'CD',
-  enerRech_: 'ER',
-  eleMas: 'EM',
-}
+const STAT_TINY = labelTable<string>('statTiny')
 
 /** Tightest label, for table cells: "CR", "CD", "ER", "EM", "ATK%", "HP". */
 export function formatStatTiny(key: string): string {
   return STAT_TINY[key] ?? formatStatShort(key)
 }
 
-const STAT_TILE: Readonly<Record<string, string>> = {
-  electro_dmg_: 'Elec',
-  dendro_dmg_: 'Dend',
-  physical_dmg_: 'Phys',
-  heal_: 'Heal',
-}
+const STAT_TILE = labelTable<string>('statTile')
 
 /** Shortest label, for bag tiles: "CR", "ATK%", "Pyro", "Elec", "Phys", "Heal". */
 export function formatStatTile(key: string): string {

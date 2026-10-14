@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber } from '@/lib/format'
 defineProps<{
   amount: number | string
   image: string
@@ -8,7 +9,7 @@ defineProps<{
 
 <template>
   <span class="inline-flex items-center gap-1 whitespace-nowrap">
-    <span>{{ typeof amount === 'number' ? amount.toLocaleString() : amount }}</span>
+    <span>{{ typeof amount === 'number' ? formatNumber(amount) : amount }}</span>
     <span class="sr-only">&nbsp;{{ name }}</span>
     <img
       :src="image"

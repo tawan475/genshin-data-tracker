@@ -1,0 +1,7 @@
+{
+  "justNow": "刚刚",
+  "betweenTimes": "{date} {from} 至 {to} 之间",
+  "betweenDates": "{from} 至 {to} 之间",
+  "today": "今天",
+  "yesterday": "昨天"
+}

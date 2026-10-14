@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { useIntersectionObserver } from '@vueuse/core'
@@ -208,7 +209,7 @@ const filtered = computed(() => {
   const compare = (a: MaterialItem, b: MaterialItem): number => {
     if (by === 'count') return b.count - a.count
     if (by === 'change') return Math.abs(changeOf(b.key)) - Math.abs(changeOf(a.key))
-    if (by === 'name') return a.name.localeCompare(b.name)
+    if (by === 'name') return compareText(a.name, b.name)
     return 0
   }
   return [...list].sort(

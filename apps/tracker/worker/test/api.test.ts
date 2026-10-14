@@ -91,8 +91,17 @@ describe('auth', () => {
   it('registers, reads /me, and refuses a duplicate name', async () => {
     const { client, username, me } = await signUp()
     expect(me.username).toBe(username)
-    expect(me.settings).toEqual({ theme: 'system', use24Hour: false })
+    expect(me.settings).toEqual({ theme: 'system', use24Hour: false, language: 'system' })
     expect((await client.json<{ id: number }>('/api/auth/me')).id).toBe(me.id)
+
+    // The language is a user setting like the theme; an unknown one is refused.
+    const patch = (json: unknown) => client.fetch('/api/me/settings', { method: 'PATCH', json })
+    const saved = await patch({ language: 'zh-TW' })
+    expect(saved.status).toBe(200)
+    expect(((await saved.json()) as { settings: { language: string } }).settings.language).toBe(
+      'zh-TW',
+    )
+    expect((await patch({ language: 'fr' })).status).toBe(400)
 
     const again = await new Client().fetch('/api/auth/register', {
       method: 'POST',

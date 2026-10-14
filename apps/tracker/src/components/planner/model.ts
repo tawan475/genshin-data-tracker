@@ -68,6 +68,7 @@ import {
 import { characterGoalId, customGoalId, itemGoalId, targetId, weaponGoalId } from './goal-ids'
 import { characterNow, weaponNow } from './hand-edits'
 import { assignWeaponCopies, type WeaponCopy } from './weapon-copies'
+import { compareText } from '@/lib/search'
 
 export type TargetInput = z.input<typeof plannerTargetInput>
 export type TargetsPatch = z.input<typeof plannerTargetsPatch>
@@ -391,7 +392,7 @@ export function buildBoard(
       })
     }
   }
-  items.sort((a, b) => a.name.localeCompare(b.name))
+  items.sort((a, b) => compareText(a.name, b.name))
 
   const pendingAr = (x: { done: boolean; requirement: Requirement | null }) =>
     x.done ? 0 : (x.requirement?.ar ?? 0)
@@ -449,7 +450,7 @@ export function buildBoard(
     (a, b) =>
       Number(a.done) - Number(b.done) ||
       Number(a.character === null) - Number(b.character === null) ||
-      a.name.localeCompare(b.name),
+      compareText(a.name, b.name),
   )
 
   const goals: PlanGoal[] = []

@@ -18,7 +18,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { api } from '@/api'
 import { useResource } from '@/data/use-resource'
-import { formatBytes, formatDateTime, formatFullDateTime, sameDay } from '@/lib/format'
+import { dateLocale, formatBytes, formatDateTime, formatFullDateTime, sameDay } from '@/lib/format'
 
 /** What staff did, newest first: every dashboard write and every look at someone's data. */
 const route = useRoute()
@@ -99,7 +99,7 @@ function describe(row: AuditRow): string {
     case 'data.delete': {
       const range =
         d.kind === 'range' && typeof d.from === 'number' && typeof d.to === 'number'
-          ? ` · ${new Date(d.from).toLocaleDateString()}–${new Date(d.to - 1).toLocaleDateString()}`
+          ? ` · ${new Date(d.from).toLocaleDateString(dateLocale())}–${new Date(d.to - 1).toLocaleDateString(dateLocale())}`
           : d.kind === 'trash'
             ? ' · trash'
             : ''
@@ -160,7 +160,7 @@ function describe(row: AuditRow): string {
 
 const when = (ms: number) =>
   sameDay(ms, Date.now())
-    ? new Date(ms).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    ? new Date(ms).toLocaleTimeString(dateLocale(), { hour: 'numeric', minute: '2-digit' })
     : formatDateTime(ms)
 
 const pageCount = computed(() =>

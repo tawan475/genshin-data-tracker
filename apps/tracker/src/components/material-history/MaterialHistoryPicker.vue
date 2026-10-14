@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compareText } from '@/lib/search'
 import { computed, ref, useTemplateRef } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { materialMatcher, materialName, matchRank } from '@/utils/materials'
@@ -38,7 +39,7 @@ const results = computed(() => {
     .sort(
       (a, b) =>
         (match ? matchRank(a.name, query) - matchRank(b.name, query) : 0) ||
-        a.name.localeCompare(b.name),
+        compareText(a.name, b.name),
     )
     .slice(0, MAX_RESULTS)
 })

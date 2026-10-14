@@ -19,6 +19,8 @@ import { formatSetName } from '@/utils/artifact-stats'
 import { ARTIFACT_MAIN_STATS, ARTIFACT_SET_THRESHOLDS } from './artifact-stats'
 import { characterMeta, weaponMeta, type Element, type WeaponType } from './game-meta'
 import { WEAPON_TYPE_LABELS, itemName } from './weapons'
+import { compareText, normalizeSearch } from '@/lib/search'
+import { labelTable } from '@/i18n/labels'
 
 export { WEAPON_TYPES, WEAPON_TYPE_LABELS, itemName } from './weapons'
 
@@ -27,13 +29,8 @@ export type { Element, WeaponType }
 export const SLOT_ORDER = ['flower', 'plume', 'sands', 'goblet', 'circlet'] as const
 export type SlotKey = (typeof SLOT_ORDER)[number]
 
-export const SLOT_LABELS: Record<SlotKey, string> = {
-  flower: 'Flower',
-  plume: 'Plume',
-  sands: 'Sands',
-  goblet: 'Goblet',
-  circlet: 'Circlet',
-}
+/** "Flower", "Plume", … in the language on screen. */
+export const SLOT_LABELS = labelTable<SlotKey>('slot')
 
 /** In-game order. */
 export const ELEMENTS: readonly Element[] = [
@@ -46,15 +43,8 @@ export const ELEMENTS: readonly Element[] = [
   'geo',
 ]
 
-export const ELEMENT_LABELS: Record<Element, string> = {
-  pyro: 'Pyro',
-  hydro: 'Hydro',
-  anemo: 'Anemo',
-  electro: 'Electro',
-  dendro: 'Dendro',
-  cryo: 'Cryo',
-  geo: 'Geo',
-}
+/** "Pyro", "Hydro", … in the language on screen. */
+export const ELEMENT_LABELS = labelTable<Element>('element')
 
 /** The level every build aims for (95 and 100 are extras). */
 export const TARGET_LEVEL = 90
@@ -148,9 +138,7 @@ export interface Roster {
 
 const DEFAULT_THRESHOLDS = [2, 4] as const
 
-export function normalizeSearch(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9 ]/g, '')
-}
+export { normalizeSearch }
 
 export function weaponInfo(key: string): { rarity: number | null; type: WeaponType | null } {
   const meta = weaponMeta(key)
@@ -179,7 +167,7 @@ function countSets(pieces: readonly EquippedArtifact[]): SetCount[] {
         active: thresholds.filter((t) => count >= t),
       }
     })
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .sort((a, b) => b.count - a.count || compareText(a.name, b.name))
 }
 
 function findGaps(
@@ -526,7 +514,7 @@ const compareBy: Record<CharacterSort, (a: CharacterView, b: CharacterView) => n
   rarity: (a, b) => (a.rarity ?? 0) - (b.rarity ?? 0),
   // Ascending follows the game's element order.
   element: (a, b) => elementRank(a.element) - elementRank(b.element),
-  name: (a, b) => a.name.localeCompare(b.name),
+  name: (a, b) => compareText(a.name, b.name),
   friendship: (a, b) => (a.friendship ?? 0) - (b.friendship ?? 0),
   obtained: (a, b) => (a.obtainedAt ?? 0) - (b.obtainedAt ?? 0),
 }

@@ -169,11 +169,26 @@
   --pity-soft: #fdba74; /* orange-300 */
 }
 
+/*
+ * Chinese text: Outfit has no Han glyphs, so they fall through to the
+ * system's own Chinese font (nothing extra downloads); Latin letters and
+ * digits stay in Outfit. Set from <html lang> (i18n/locale.ts).
+ */
+:root {
+  --font-cjk: ui-sans-serif;
+}
+:root:lang(zh-CN) {
+  --font-cjk: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC';
+}
+:root:lang(zh-TW) {
+  --font-cjk: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Source Han Sans TC';
+}
+
 @theme inline {
-  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Outfit', var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Outfit', var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
   /* Numbers stay in Outfit (tabular); ids and keys use a real monospace via font-code. */
-  --font-mono: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Outfit', var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
   --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-surface-base: var(--surface-base);
