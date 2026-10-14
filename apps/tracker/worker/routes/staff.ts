@@ -94,6 +94,7 @@ import {
   type Target,
 } from '../services/staff'
 import {
+  DOMAIN_EVENTS_KEY,
   LIMIT_DEFAULTS,
   SIGNUP_MODE_KEY,
   listUserSessions,
@@ -237,6 +238,7 @@ async function siteResponse(c: C): Promise<StaffSiteResponse> {
       applied: names.length,
       pending: expected.filter((name) => !names.includes(name)),
     },
+    domainEvents: site.domainEvents,
   }
 }
 
@@ -344,6 +346,18 @@ export const staff = new Hono<AppEnv>()
       statements.push(
         auditStatement(c.env.DB, actorOf(c), { action: 'site.limits', detail: changed }),
       )
+    }
+    if (body.domainEvents !== undefined) {
+      const next = body.domainEvents ?? []
+      if (JSON.stringify(next) !== JSON.stringify(before.domainEvents)) {
+        values[DOMAIN_EVENTS_KEY] = next.length > 0 ? JSON.stringify(next) : null
+        statements.push(
+          auditStatement(c.env.DB, actorOf(c), {
+            action: 'site.events',
+            detail: { from: before.domainEvents, to: next },
+          }),
+        )
+      }
     }
     if (statements.length > 0) {
       await c.env.DB.batch([

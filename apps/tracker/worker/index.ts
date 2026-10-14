@@ -5,6 +5,7 @@ import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
 import { auth } from './routes/auth'
+import { domainEvents } from './routes/domain-events'
 import { health } from './routes/health'
 import { irminsul } from './routes/irminsul'
 import { irminsulOAuth } from './routes/irminsul-oauth'
@@ -46,6 +47,7 @@ app.route('/irminsul', irminsul)
 app.route('/live', live)
 app.route('/admin', admin)
 app.route('/staff', staff)
+app.route('/domain-events', domainEvents)
 
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
 

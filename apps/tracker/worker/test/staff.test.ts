@@ -3,6 +3,7 @@ import {
   type AccountCreatedResponse,
   type AccountResponse,
   type MeResponse,
+  type DomainEventsResponse,
   type StaffAuditResponse,
   type StaffInspectResponse,
   type StaffOverviewResponse,
@@ -808,6 +809,77 @@ describe('site settings, storage and the overview', () => {
       'site.signups',
     ])
     expect(audit.rows[0]!.detail).toEqual({ from: 'oauth', to: 'open' })
+  })
+
+  it('domain event windows: staff set them, anyone reads them, every change is logged', async () => {
+    const admin = await member('Admin')
+    const support = await member('Support')
+    const window = {
+      kind: 'abundance',
+      start: '2026-10-13T04:00',
+      end: '2026-10-20T04:00',
+      multiplier: 2,
+      dailyClaims: 3,
+      version: '7.1',
+      source: 'in-game notice',
+    }
+    const read = () => new Client().json<DomainEventsResponse>('/api/domain-events')
+    expect(
+      await status(support.client, '/api/staff/site', {
+        method: 'PATCH',
+        json: { domainEvents: [window] },
+      }),
+    ).toBe(404)
+    const set = (json: unknown) =>
+      admin.client.json<StaffSiteResponse>('/api/staff/site', { method: 'PATCH', json })
+    try {
+      expect((await read()).events).toEqual([])
+      // Defaults fill what the form leaves out.
+      const site = await set({
+        domainEvents: [{ kind: 'favor', start: '2026-10-26T04:00', end: '2026-11-02T04:00' }],
+      })
+      expect(site.domainEvents).toEqual([
+        {
+          kind: 'favor',
+          start: '2026-10-26T04:00',
+          end: '2026-11-02T04:00',
+          multiplier: 2,
+          dailyClaims: null,
+          version: '',
+          source: '',
+        },
+      ])
+      expect((await set({ domainEvents: [window] })).domainEvents).toEqual([window])
+      const response = await new Client().fetch('/api/domain-events')
+      expect(response.headers.get('cache-control')).toBe('public, max-age=300')
+      expect(await response.json()).toEqual({ events: [window] })
+      // The same list again changes and logs nothing.
+      await set({ domainEvents: [window] })
+
+      for (const bad of [
+        [{ ...window, kind: 'mystery' }],
+        [{ ...window, start: '2026-10-13 04:00' }],
+        [{ ...window, end: '2026-10-01T04:00' }],
+        Array.from({ length: 21 }, () => window),
+      ]) {
+        expect(
+          await status(admin.client, '/api/staff/site', {
+            method: 'PATCH',
+            json: { domainEvents: bad },
+          }),
+        ).toBe(400)
+      }
+    } finally {
+      await set({ domainEvents: null })
+    }
+    expect((await read()).events).toEqual([])
+    const audit = await admin.client.json<StaffAuditResponse>('/api/staff/audit?kind=site')
+    expect(audit.rows.slice(0, 3).map((r) => r.action)).toEqual([
+      'site.events',
+      'site.events',
+      'site.events',
+    ])
+    expect(audit.rows[0]!.detail).toEqual({ from: [window], to: [] })
   })
 
   it('sets one user’s storage quota, which their uploads then meet', async () => {

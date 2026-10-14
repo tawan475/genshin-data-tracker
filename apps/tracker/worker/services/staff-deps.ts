@@ -6,7 +6,9 @@
  */
 
 import {
+  parseStaffDomainEvents,
   SIGNUP_MODES,
+  type DomainEventWindow,
   type SessionMethod,
   type SignupMode,
   type StaffSessionRow,
@@ -25,6 +27,12 @@ export const LIMIT_DEFAULTS = UPLOAD_LIMIT_DEFAULTS
 
 /** The `site_settings` key of the sign-up switch: `open`, `oauth` or `closed` (missing: open). */
 export const SIGNUP_MODE_KEY = 'signup.mode'
+
+/**
+ * The `site_settings` key of the domain event windows staff set (JSON, see
+ * `@gdt/shared` domain-events): runs the game data has not caught up with.
+ */
+export const DOMAIN_EVENTS_KEY = 'farm.events'
 
 // ------------------------------------------------------------------- sessions
 
@@ -104,9 +112,10 @@ export interface SiteSettings {
   /** Which limits a site_settings row overrides. */
   overridden: Record<keyof Limits, boolean>
   signupMode: SignupMode
+  domainEvents: DomainEventWindow[]
 }
 
-const SETTING_KEYS = [...Object.values(UPLOAD_SETTING_KEYS), SIGNUP_MODE_KEY]
+const SETTING_KEYS = [...Object.values(UPLOAD_SETTING_KEYS), SIGNUP_MODE_KEY, DOMAIN_EVENTS_KEY]
 
 export function siteSettingsStatement(d1: D1Database): D1PreparedStatement {
   return d1
@@ -131,7 +140,17 @@ export function readSiteSettingRows(rows: readonly Record<string, unknown>[]): S
     limits,
     overridden,
     signupMode: (SIGNUP_MODES as readonly string[]).includes(mode) ? (mode as SignupMode) : 'open',
+    domainEvents: parseStaffDomainEvents(values.get(DOMAIN_EVENTS_KEY)),
   }
+}
+
+/** The domain event windows staff set (none when unset or unreadable). */
+export async function staffDomainEvents(d1: D1Database): Promise<DomainEventWindow[]> {
+  const row = await d1
+    .prepare('SELECT value FROM site_settings WHERE key = ?1')
+    .bind(DOMAIN_EVENTS_KEY)
+    .first<{ value: string }>()
+  return parseStaffDomainEvents(row?.value)
 }
 
 export async function readSiteSettings(d1: D1Database): Promise<SiteSettings> {
