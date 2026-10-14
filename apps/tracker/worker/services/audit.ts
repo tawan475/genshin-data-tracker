@@ -10,7 +10,7 @@
  * `role.assign`, `role.unassign`, `role.create`, `role.update`,
  * `role.delete`, `role.reorder`, `data.inspect`, `data.block_uploads`,
  * `data.unblock_uploads`, `data.quota`, `data.reset_key`, `data.delete`,
- * `data.delete_account`, `site.signups`, `site.limits`.
+ * `data.delete_account`, `site.signups`, `site.limits`, `site.events`.
  */
 
 import type { AuditKind, AuditRow } from '@gdt/shared'

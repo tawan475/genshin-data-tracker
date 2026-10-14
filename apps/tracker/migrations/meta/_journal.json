@@ -176,6 +176,13 @@
       "when": 1791832573557,
       "tag": "0024_wish_newest_time",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1791988774680,
+      "tag": "0025_observed_domain_events",
+      "breakpoints": true
     }
   ]
 }

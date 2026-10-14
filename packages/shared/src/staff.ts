@@ -10,6 +10,7 @@
 
 import { z } from 'zod'
 import { usernameSchema } from './api'
+import { domainEventList, type DomainEventWindow } from './domain-events'
 import type {
   AccountResponse,
   GenshinServer,
@@ -217,6 +218,8 @@ export const siteSettingsPatch = z
       .min(0)
       .max(100 * 1024 ** 3)
       .nullable(),
+    /** Domain event windows (replaces the list; null or [] clears it). */
+    domainEvents: domainEventList.nullable(),
   })
   .partial()
   .refine((body) => Object.keys(body).length > 0, { message: 'Nothing to change' })
@@ -425,6 +428,8 @@ export interface StaffSiteResponse {
   email: 'on' | 'paused' | 'off'
   build: { version: string; commit: string; dirty: boolean; builtAt: string } | null
   migrations: { applied: number; pending: string[] }
+  /** Domain event windows staff set (`farm.events`). */
+  domainEvents: DomainEventWindow[]
 }
 
 /** `GET /api/staff/overview`. */
