@@ -1712,6 +1712,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :crafting="settings.planner.crafting !== false"
           :no-weekly-count="facts.noWeekly.size"
           :plan-for="farmFor"
+          :order="order"
           @settings="settingsOpen = true"
           @crafted="crafted"
           @hide-crafting="hideCrafting"

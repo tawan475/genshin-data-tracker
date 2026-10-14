@@ -104,6 +104,24 @@
     "weekly": "Weekly bosses",
     "artifact": "Artifacts"
   },
+  "groups": {
+    "ley": "Ley Line Outcrop",
+    "mastery": "Domain of Mastery",
+    "forgery": "Domain of Forgery",
+    "blessing": "Domain of Blessing",
+    "boss": "Normal bosses",
+    "weekly": "Weekly bosses",
+    "local": "Local specialties",
+    "common": "Common enemies",
+    "elite": "Elite enemies",
+    "ore": "Weapon Enhancement Material",
+    "other": "Other"
+  },
+  "people": {
+    "label": "Who the plan is for",
+    "only": "{name}: only their cards",
+    "all": "{name}: show everyone"
+  },
   "card": {
     "runs": "{n} run | {n} runs",
     "claims": "{n} claim | {n} claims",
@@ -194,7 +212,8 @@
     "show": "Show",
     "hidden": "{n} hidden",
     "forge": "Forge from chunks",
-    "pairTitle": "{runs} · {resin} resin · {days}"
+    "pairTitle": "{runs} · {resin} resin · {days}",
+    "cards": "{n} card | {n} cards"
   },
   "event": {
     "names": {

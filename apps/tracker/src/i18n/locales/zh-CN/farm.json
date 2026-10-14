@@ -104,6 +104,24 @@
     "weekly": "周本",
     "artifact": "圣遗物"
   },
+  "groups": {
+    "ley": "地脉衍出",
+    "mastery": "精通秘境",
+    "forgery": "炼武秘境",
+    "blessing": "祝圣秘境",
+    "boss": "首领",
+    "weekly": "征讨领域",
+    "local": "区域特产",
+    "common": "普通敌人",
+    "elite": "精英敌人",
+    "ore": "武器强化素材",
+    "other": "其他"
+  },
+  "people": {
+    "label": "计划中的角色",
+    "only": "{name}：只看其所需",
+    "all": "{name}：显示全部"
+  },
   "card": {
     "runs": "{n} 次",
     "claims": "{n} 次领取",
@@ -194,7 +212,8 @@
     "show": "展开",
     "hidden": "已隐藏 {n} 个",
     "forge": "用矿石锻造",
-    "pairTitle": "{runs} · {resin} 树脂 · {days}"
+    "pairTitle": "{runs} · {resin} 树脂 · {days}",
+    "cards": "{n} 项"
   },
   "event": {
     "names": {

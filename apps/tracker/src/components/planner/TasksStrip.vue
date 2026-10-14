@@ -361,12 +361,12 @@ const summary = computed(() => {
         >{{ summary.first }}</span
       >
       <template v-if="open">
-        <UiSegmented
-          v-model="tab"
-          :options="TABS"
-          :label="$t('planner.tasks.shown')"
-          class="order-last sm:order-none"
-        />
+        <!-- Four tabs outgrow a phone: they scroll sideways there. -->
+        <div
+          class="scroll-hide scroll-fade-x order-last max-w-full min-w-0 basis-full overflow-x-auto sm:order-none sm:basis-auto"
+        >
+          <UiSegmented v-model="tab" :options="TABS" :label="$t('planner.tasks.shown')" />
+        </div>
         <span class="ml-auto flex items-center">
           <UiIconButton
             :label="

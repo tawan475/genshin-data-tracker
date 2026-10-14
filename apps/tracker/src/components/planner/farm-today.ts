@@ -470,6 +470,15 @@ function oreCard(input: FarmInput): FarmCard | null {
 
 export type FarmSectionKey = 'free' | 'domain' | 'boss' | 'weekly' | 'artifact'
 
+/** Original Resin a run costs in each section (the Farm view's tabs and bars). */
+export const SECTION_RESIN: Readonly<Record<FarmSectionKey, string>> = {
+  free: '0',
+  domain: '20',
+  boss: '40',
+  weekly: '30/60',
+  artifact: '20',
+}
+
 export interface FarmSection {
   key: FarmSectionKey
   /** Original Resin a run costs: '0', '20', '40', '30/60'. */
@@ -751,18 +760,33 @@ export function artifactCards(input: FarmInput): FarmCard[] {
  */
 export function todaySections(input: FarmInput, weekday: number): FarmSection[] {
   const sections: FarmSection[] = [
-    { key: 'free', resin: '0', label: t('farm.sections.free'), cards: freeCards(input) },
+    {
+      key: 'free',
+      resin: SECTION_RESIN.free,
+      label: t('farm.sections.free'),
+      cards: freeCards(input),
+    },
     {
       key: 'domain',
-      resin: '20',
+      resin: SECTION_RESIN.domain,
       label: t('farm.sections.domain'),
       cards: lockedLast([...domainCardsOn(input, weekday), ...leyCards(input)]),
     },
-    { key: 'boss', resin: '40', label: t('farm.sections.boss'), cards: bossCards(input) },
-    { key: 'weekly', resin: '30/60', label: t('farm.sections.weekly'), cards: weeklyCards(input) },
+    {
+      key: 'boss',
+      resin: SECTION_RESIN.boss,
+      label: t('farm.sections.boss'),
+      cards: bossCards(input),
+    },
+    {
+      key: 'weekly',
+      resin: SECTION_RESIN.weekly,
+      label: t('farm.sections.weekly'),
+      cards: weeklyCards(input),
+    },
     {
       key: 'artifact',
-      resin: '20',
+      resin: SECTION_RESIN.artifact,
       label: t('farm.sections.artifact'),
       cards: artifactCards(input),
     },

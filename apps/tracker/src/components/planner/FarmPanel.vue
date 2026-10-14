@@ -6,13 +6,22 @@ import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { FarmPlan } from '@gdt/game-data/planner-estimate'
 import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, ref, watch } from 'vue'
-import { CalendarOff, ChevronDown, Clock, Info, Lock, PartyPopper, Sparkles } from 'lucide-vue-next'
+import {
+  CalendarDays,
+  CalendarOff,
+  ChevronDown,
+  Clock,
+  Flower2,
+  Info,
+  Lock,
+  PartyPopper,
+} from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
-import UiSegmented from '@/components/ui/UiSegmented.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import { materialIcon } from '@/lib/assets'
 import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
@@ -21,6 +30,17 @@ import { materialName } from '@/utils/materials'
 import CraftCard from './CraftCard.vue'
 import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
+import FarmPeople from './FarmPeople.vue'
+import ResinGlyph from './ResinGlyph.vue'
+import {
+  FARM_TABS,
+  cardsFor,
+  farmPeople,
+  groupCards,
+  isFarmTab,
+  shownTab,
+  type FarmTab,
+} from './farm-groups'
 import {
   daysText,
   formatCountdown,
@@ -34,6 +54,7 @@ import type { GoalEntry } from './model'
 import { useProgressive } from './use-progressive'
 import {
   REFRESH_RESIN,
+  SECTION_RESIN,
   clampRefreshes,
   farmHeadline,
   resinDays,
@@ -43,16 +64,23 @@ import {
   type FarmCard as FarmCardData,
   type FarmDay,
   type FarmInput,
+  type FarmSection,
+  type FarmSectionKey,
 } from './farm-today'
 
 /**
  * What to farm (farm-today.ts): one headline (resin and days for domains,
  * normal bosses and ley lines at the account's daily resin, Condensed
  * Resin, weeks of weekly bosses), then
+ * - a strip of everyone the plan is for (a tap narrows the cards to one);
+ * - tabs (farm-groups.ts): Today (every section), one per resin cost,
+ *   Artifacts, Schedule; an empty one is disabled;
  * - Today: what can be farmed on the server's day, by what a run costs
- *   (nothing, 20, 40, 30/60), with the crafting checklist first among the
- *   no-resin cards (its steps record into the bag: `crafted`), then the
- *   artifact domains of the sets the goals want;
+ *   (nothing, 20, 40, 30/60), each a bar that folds (per device), with the
+ *   crafting checklist first among the no-resin cards (its steps record
+ *   into the bag: `crafted`), then the artifact domains of the sets the
+ *   goals want; inside a section the cards sit under type labels (Ley Line
+ *   Outcrop, Domain of Mastery, Domain of Forgery, …);
  * - Schedule: the other day pairs' domains.
  * Every card lists what is still missing and who needs it.
  *
@@ -86,6 +114,8 @@ const props = defineProps<{
   noWeeklyCount: number
   /** With No weekly boss on, the cards the plan is for (priority order); null when off. */
   planFor: readonly GoalEntry[] | null
+  /** The goals in priority order (the strip of who the plan is for follows it). */
+  order?: readonly GoalEntry[]
 }>()
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
@@ -94,11 +124,6 @@ const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]]; hideCrafti
 
 /** No weekly boss is on and leaves no goal. */
 const noneLeft = computed(() => props.planFor !== null && props.planFor.length === 0)
-
-const VIEWS = computed(() => [
-  { value: 'today' as const, label: t('farm.panel.today') },
-  { value: 'schedule' as const, label: t('farm.panel.schedule') },
-])
 
 const input = computed<FarmInput>(() => ({
   planner: props.planner,
@@ -192,32 +217,6 @@ const dayTitle = computed(() =>
   ].join(' · '),
 )
 
-// ------------------------------------------------------------ domain events
-
-/** The running event to show (the one that opens every domain first). */
-const event = computed(() => {
-  const active = props.day.events.active
-  return active.find((e) => e.kind === 'abundance') ?? active[0] ?? null
-})
-const eventTitle = computed(() => {
-  const e = event.value
-  if (!e) return ''
-  return [
-    t(`farm.event.rules.${e.kind}`),
-    e.multiplier && e.dailyClaims
-      ? t('farm.event.claims', {
-          times: formatNumber(e.multiplier),
-          n: formatNumber(e.dailyClaims),
-        })
-      : '',
-    props.day.msUntilEventEnd === null
-      ? ''
-      : t('farm.event.endsIn', { time: formatCountdown(props.day.msUntilEventEnd) }),
-  ]
-    .filter(Boolean)
-    .join(' · ')
-})
-
 // ------------------------------------------------------------ forging
 
 /** Weapon EXP is short (offer forging ore from chunks), or forging is on. */
@@ -234,15 +233,111 @@ const forgeTitle = computed(() => {
 })
 
 const dayLabel = (days: readonly number[]) => days.map(weekdayShort).join(' · ')
-/** Today's sections, with a no-resin one (first) for the crafting card when nothing else needs it. */
-const shown = computed(() => {
-  const list = sections.value
-  if (props.steps.length === 0 || list.some((s) => s.key === 'free')) return list
-  return [{ key: 'free' as const, resin: '0', label: t('farm.sections.free'), cards: [] }, ...list]
-})
-const nothing = computed(() => shown.value.length === 0)
 
-/** Today's resin groups folded to their heading (per device), like the Materials bag's tabs. */
+// ------------------------------------------------------------ who it is for
+
+/** Everyone today's cards and the schedule's are for, in priority order. */
+const people = computed(() =>
+  farmPeople(
+    [...sections.value.flatMap((s) => s.cards), ...schedule.value.flatMap((p) => p.cards)],
+    props.order?.map((e) => e.id),
+  ),
+)
+/** The one the cards are narrowed to (a `goalSlot`), or null for everyone. */
+const person = ref<string | null>(null)
+watch(people, (list) => {
+  if (person.value !== null && !list.some((p) => p.slot === person.value)) person.value = null
+})
+
+// ------------------------------------------------------------ sections
+
+const sectionLabel = (key: FarmSectionKey) => t(`farm.sections.${key}`)
+
+/**
+ * Today's sections narrowed to `person`, their cards under type labels,
+ * with a no-resin one (first) for the crafting card when nothing else
+ * needs it. The crafting checklist is the whole plan's: hidden while
+ * narrowed to one person.
+ */
+const shown = computed(() => {
+  const craft = props.crafting && props.steps.length > 0 && person.value === null
+  const list: FarmSection[] = sections.value.map((s) => ({
+    ...s,
+    cards: cardsFor(s.cards, person.value),
+  }))
+  if (craft && !list.some((s) => s.key === 'free')) {
+    list.unshift({ key: 'free', resin: SECTION_RESIN.free, label: sectionLabel('free'), cards: [] })
+  }
+  return list
+    .filter((s) => s.cards.length > 0 || (s.key === 'free' && craft))
+    .map((s) => {
+      const withCraft = s.key === 'free' && craft
+      return {
+        ...s,
+        groups: groupCards(s.key, s.cards),
+        craft: withCraft,
+        /** Cards in it (the crafting checklist counts as one). */
+        count: s.cards.length + (withCraft ? 1 : 0),
+      }
+    })
+})
+const scheduleShown = computed(() =>
+  schedule.value.map((pair) => ({ ...pair, cards: cardsFor(pair.cards, person.value) })),
+)
+
+// ------------------------------------------------------------ tabs
+
+/** Cards per tab (an empty tab is disabled). */
+const counts = computed(() => {
+  const c: Partial<Record<FarmTab, number>> = {}
+  for (const s of shown.value) c[s.key] = s.count
+  c.all = shown.value.reduce((n, s) => n + s.count, 0)
+  c.schedule = scheduleShown.value.reduce((n, p) => n + p.cards.length, 0)
+  return c
+})
+
+/** The Today tab chosen last on this device ('all' or a section). */
+const TAB_KEY = 'planner:farm-tab'
+const storedTab = readStorage(TAB_KEY)
+const todayTab = ref<FarmTab>(isFarmTab(storedTab) && storedTab !== 'schedule' ? storedTab : 'all')
+/** Schedule is the page's `view`; the others are Today narrowed to one section. */
+const tab = computed<FarmTab>({
+  get: () => (view.value === 'schedule' ? 'schedule' : shownTab(todayTab.value, counts.value)),
+  set: (value) => {
+    if (value === 'schedule') {
+      view.value = 'schedule'
+      return
+    }
+    view.value = 'today'
+    todayTab.value = value
+    writeStorage(TAB_KEY, value === 'all' ? null : value)
+  },
+})
+const TABS = computed<SegmentedOption<FarmTab>[]>(() =>
+  FARM_TABS.map((value): SegmentedOption<FarmTab> => {
+    if (value === 'all') return { value, label: t('farm.panel.today') }
+    if (value === 'schedule') return { value, label: t('farm.panel.schedule'), icon: CalendarDays }
+    const disabled = !counts.value[value]
+    if (value === 'artifact') return { value, label: sectionLabel(value), icon: Flower2, disabled }
+    return {
+      value,
+      label: SECTION_RESIN[value],
+      icon: ResinGlyph,
+      disabled,
+      title: t('farm.panel.sectionLabel', {
+        label: sectionLabel(value),
+        resin: SECTION_RESIN[value],
+      }),
+    }
+  }),
+)
+/** The sections the tab shows. */
+const inTab = computed(() =>
+  tab.value === 'all' ? shown.value : shown.value.filter((s) => s.key === tab.value),
+)
+const nothing = computed(() => inTab.value.length === 0)
+
+/** Today's resin sections folded to their bar (per device), like the Materials bag's tabs. */
 const FOLDED_KEY = 'planner:farm-folded'
 const folded = ref(new Set((readStorage(FOLDED_KEY) ?? '').split(',').filter(Boolean)))
 function toggleFold(key: string) {
@@ -251,30 +346,31 @@ function toggleFold(key: string) {
   folded.value = next
   writeStorage(FOLDED_KEY, next.size ? [...next].join(',') : null)
 }
-/** The cards a folded group hides (the crafting checklist counts as one). */
-const hiddenCount = (key: string) => {
-  const s = shown.value.find((x) => x.key === key)
-  const craft = key === 'free' && props.crafting && props.steps.length ? 1 : 0
-  return (s?.cards.length ?? 0) + craft
-}
+/** A section's cards show: on its own tab always, under Today unless folded. */
+const open = (key: string) => tab.value !== 'all' || !folded.value.has(key)
 
 /**
  * Cards mounted so far, the first ones at once and the rest over the next
  * frames (many goals make many cards); a section shows once its first card does.
  */
 const progressive = useProgressive(
-  computed(() => shown.value.reduce((n, s) => n + s.cards.length + 1, 0)),
+  computed(() => inTab.value.reduce((n, s) => n + s.cards.length + 1, 0)),
 )
 const visible = computed(() => {
   let budget = progressive.shown.value
-  return shown.value.flatMap((s) => {
+  return inTab.value.flatMap((s) => {
     if (budget <= 0) return []
-    const cards = s.cards.slice(0, Math.max(0, budget - 1))
-    budget -= s.cards.length + 1
-    return [{ ...s, cards }]
+    budget -= 1
+    const groups = []
+    for (const g of s.groups) {
+      if (budget <= 0) break
+      groups.push({ ...g, cards: g.cards.slice(0, budget) })
+      budget -= g.cards.length
+    }
+    return [{ ...s, groups }]
   })
 })
-watch(view, (value) => {
+watch([view, () => tab.value, person], ([value]) => {
   if (value === 'today') progressive.restart()
 })
 </script>
@@ -361,9 +457,15 @@ watch(view, (value) => {
       </p>
     </section>
 
+    <FarmPeople v-if="!noneLeft" v-model="person" :people="people" />
+
     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-      <span class="flex flex-wrap items-center gap-2">
-        <UiSegmented v-model="view" :options="VIEWS" :label="$t('farm.panel.view')" />
+      <div
+        class="scroll-hide scroll-fade-x -mx-1 max-w-full min-w-0 overflow-x-auto px-1 whitespace-nowrap"
+      >
+        <UiSegmented v-model="tab" :options="TABS" :label="$t('farm.panel.view')" />
+      </div>
+      <span class="flex flex-wrap items-center gap-x-3 gap-y-2">
         <FilterChip
           :pressed="noWeekly"
           :count="noWeeklyCount"
@@ -373,20 +475,15 @@ watch(view, (value) => {
           <CalendarOff class="size-4" aria-hidden="true" />
           {{ $t('farm.panel.noWeekly') }}
         </FilterChip>
-      </span>
-      <UiBadge v-if="event" tone="warning" :title="eventTitle">
-        <Sparkles class="size-3.5" aria-hidden="true" />
-        {{ $t(`farm.event.names.${event.kind}`) }}
-        <span class="sr-only">{{ eventTitle }}</span>
-      </UiBadge>
-      <span
-        class="tabular inline-flex items-center gap-1 font-mono text-sm text-text-secondary"
-        :title="dayTitle"
-      >
-        <Clock class="size-4" aria-hidden="true" />
-        <span class="font-sans font-medium text-text-primary">{{ weekdayShort(weekday) }}</span>
-        {{ formatCountdown(day.msUntilReset) }}
-        <span class="sr-only">{{ dayTitle }}</span>
+        <span
+          class="tabular inline-flex items-center gap-1 font-mono text-sm text-text-secondary"
+          :title="dayTitle"
+        >
+          <Clock class="size-4" aria-hidden="true" />
+          <span class="font-sans font-medium text-text-primary">{{ weekdayShort(weekday) }}</span>
+          {{ formatCountdown(day.msUntilReset) }}
+          <span class="sr-only">{{ dayTitle }}</span>
+        </span>
       </span>
     </div>
 
@@ -420,45 +517,35 @@ watch(view, (value) => {
       <section
         v-for="s in visible"
         :key="s.key"
-        class="mt-1 flex flex-col gap-1.5"
+        class="flex flex-col gap-2"
         :aria-label="$t('farm.panel.sectionLabel', { label: s.label, resin: s.resin })"
       >
-        <h2 class="text-sm font-semibold">
+        <h2 v-if="tab === 'all'" class="text-sm font-semibold">
           <button
             type="button"
-            class="-mx-1 flex min-h-8 w-[calc(100%+0.5rem)] items-center gap-1.5 rounded-md px-1 text-left transition-colors hover:bg-surface-overlay"
+            class="flex min-h-10 w-full min-w-0 items-center gap-2 rounded-lg bg-accent/10 px-3 text-left transition-colors hover:bg-accent/15"
             :aria-expanded="!folded.has(s.key)"
             :title="folded.has(s.key) ? $t('farm.panel.show') : $t('farm.craft.fold')"
             @click="toggleFold(s.key)"
           >
             <ChevronDown
-              class="size-4 shrink-0 text-text-muted transition-transform"
+              class="size-4 shrink-0 text-text-secondary transition-transform"
               :class="folded.has(s.key) ? '-rotate-90' : ''"
               aria-hidden="true"
             />
-            <span class="size-5 shrink-0">
-              <MaterialIcon
-                :src="materialIcon('OriginalResin')"
-                :name="materialName('OriginalResin')"
-              />
-            </span>
+            <ResinGlyph class="size-5 shrink-0" />
             <span class="tabular font-mono">{{ s.resin }}</span>
-            <span class="font-normal text-text-muted">{{ s.label }}</span>
+            <span class="min-w-0 truncate font-normal text-text-secondary">{{ s.label }}</span>
             <span
-              v-if="folded.has(s.key)"
-              class="tabular rounded-md bg-surface-overlay px-1.5 font-mono text-xs font-normal text-text-secondary"
-              :title="$t('farm.panel.hidden', { n: hiddenCount(s.key) })"
-              >{{ hiddenCount(s.key) }}</span
+              class="tabular ml-auto shrink-0 rounded-md bg-surface-raised px-1.5 font-mono text-xs font-normal text-text-secondary"
+              :title="$t('farm.panel.cards', { n: s.count }, s.count)"
+              >{{ s.count }}</span
             >
           </button>
         </h2>
-        <div
-          v-if="!folded.has(s.key)"
-          class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3"
-        >
+        <template v-if="open(s.key)">
           <CraftCard
-            v-if="s.key === 'free' && crafting && steps.length"
-            class="col-span-full"
+            v-if="s.craft"
             :planner="planner"
             :steps="steps"
             :bag="bag"
@@ -476,30 +563,37 @@ watch(view, (value) => {
               {{ $t('farm.panel.forge') }}
             </button>
           </CraftCard>
-          <FarmCard v-for="card in s.cards" :key="card.id" :card="card">
-            <button
-              v-if="card.kind === 'ore'"
-              type="button"
-              class="self-start rounded-md border px-2 py-0.5 text-xs font-medium transition-colors"
-              :class="
-                forge
-                  ? 'border-accent-text text-accent-text'
-                  : 'border-border-default text-text-secondary hover:text-text-primary'
-              "
-              :aria-pressed="forge"
-              :title="forgeTitle"
-              @click="forge = !forge"
-            >
-              {{ $t('farm.panel.forge') }}
-            </button>
-          </FarmCard>
-        </div>
+          <div v-for="g in s.groups" :key="g.key" class="flex flex-col gap-1.5">
+            <h3 v-if="g.labelled" class="flex">
+              <UiBadge tone="accent">{{ $t(`farm.groups.${g.key}`) }}</UiBadge>
+            </h3>
+            <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 xl:grid-cols-3">
+              <FarmCard v-for="card in g.cards" :key="card.id" :card="card">
+                <button
+                  v-if="card.kind === 'ore'"
+                  type="button"
+                  class="self-start rounded-md border px-2 py-0.5 text-xs font-medium transition-colors"
+                  :class="
+                    forge
+                      ? 'border-accent-text text-accent-text'
+                      : 'border-border-default text-text-secondary hover:text-text-primary'
+                  "
+                  :aria-pressed="forge"
+                  :title="forgeTitle"
+                  @click="forge = !forge"
+                >
+                  {{ $t('farm.panel.forge') }}
+                </button>
+              </FarmCard>
+            </div>
+          </div>
+        </template>
       </section>
     </template>
 
     <div v-else-if="!noneLeft" class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <section
-        v-for="pair in schedule"
+        v-for="pair in scheduleShown"
         :key="pair.days.join()"
         class="flex min-w-0 flex-col gap-2"
         :aria-label="dayLabel(pair.days)"
@@ -507,7 +601,7 @@ watch(view, (value) => {
         <h2 class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-sm font-semibold">
           {{ dayLabel(pair.days) }}
           <span
-            v-if="pair.run"
+            v-if="pair.run && person === null"
             class="tabular inline-flex items-center gap-0.5 font-mono text-xs font-normal text-text-secondary"
             :title="
               $t('farm.panel.pairTitle', {
