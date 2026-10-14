@@ -453,7 +453,7 @@
   },
   "events": {
     "title": "Domain events",
-    "hint": "Overflowing Abundance and the other Overflowing events, for a run the game data has not caught up with. Server time, end exclusive (04:00 to 04:00); irminsul adds runs it sees by itself.",
+    "hint": "Overflowing Abundance and the other Overflowing events, for a run the game data has not caught up with. Server time, end exclusive (04:00 to 04:00).",
     "none": "None set",
     "kind": "Event",
     "start": "Starts (server time)",
