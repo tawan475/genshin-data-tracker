@@ -2,6 +2,7 @@
 import type { UserSettings } from '@gdt/shared'
 import { computed, ref } from 'vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
+import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { t } from '@/i18n'
 import { applyLocale, storedPreference } from '@/i18n/apply'
@@ -102,14 +103,12 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
       :class="signedIn ? 'py-3' : 'pb-1'"
     >
       <span class="text-base">{{ $t('settings.appearance.language') }}</span>
-      <!-- Four languages outgrow a phone: they scroll sideways there. -->
-      <div class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto whitespace-nowrap">
-        <UiSegmented
-          v-model="language"
-          :options="languages"
-          :label="$t('settings.appearance.language')"
-        />
-      </div>
+      <UiSelect
+        v-model="language"
+        :options="languages"
+        :aria-label="$t('settings.appearance.language')"
+        class="w-44"
+      />
     </div>
     <div v-if="signedIn" class="pt-1">
       <UiSwitch v-model="use24Hour" :label="$t('settings.appearance.clock24')" />
