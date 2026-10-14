@@ -59,6 +59,7 @@ export const staffApi = {
     storageQuota?: number | null
     domainEvents?: DomainEventWindow[] | null
   }) => requestJson<StaffSiteResponse>('/api/staff/site', { method: 'PATCH', json: patch }),
+  syncEvents: () => requestJson<StaffSiteResponse>('/api/staff/events/sync', { method: 'POST' }),
 
   users: (params: {
     q?: string

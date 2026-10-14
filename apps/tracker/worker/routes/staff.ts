@@ -107,6 +107,7 @@ import {
   siteSettingsStatement,
   userUsage,
 } from '../services/staff-deps'
+import { lastEventsSync, syncGameEvents } from '../services/game-events'
 import { deleteUsers } from '../services/user-delete'
 import { UPLOAD_SETTING_KEYS } from '../services/upload-limits'
 
@@ -239,6 +240,7 @@ async function siteResponse(c: C): Promise<StaffSiteResponse> {
       pending: expected.filter((name) => !names.includes(name)),
     },
     domainEvents: site.domainEvents,
+    eventsSync: await lastEventsSync(c.env.DB),
   }
 }
 
@@ -318,6 +320,16 @@ export const staff = new Hono<AppEnv>()
   })
 
   .get('/site', async (c) => c.json<StaffSiteResponse>(await siteResponse(c)))
+
+  /** Reads the game's events now (the hourly cron's job), for staff checking a source. */
+  .post('/events/sync', need('site.settings'), async (c) => {
+    const status = await syncGameEvents(c.env.DB)
+    await auditStatement(c.env.DB, actorOf(c), {
+      action: 'site.events_sync',
+      detail: { ok: status.ok, counts: status.counts, errors: status.errors },
+    }).run()
+    return c.json<StaffSiteResponse>(await siteResponse(c))
+  })
 
   .patch('/site', need('site.settings'), async (c) => {
     const body = await parseJson(c, siteSettingsPatch)

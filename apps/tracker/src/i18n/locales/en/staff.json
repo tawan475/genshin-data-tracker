@@ -462,6 +462,14 @@
     "source": "Where it was announced",
     "add": "Add",
     "remove": "Remove",
-    "saved": "Domain events saved"
+    "saved": "Domain events saved",
+    "sync": "Event sync",
+    "syncHint": "Every hour the tracker reads the game's notice board (events, banners) and the official HoYoLAB posts (Overflowing events).",
+    "syncOk": "OK",
+    "syncFailed": "Failed",
+    "neverSynced": "Not run yet",
+    "syncNow": "Sync now",
+    "boardCount": "{n} on the board",
+    "hoyolabCount": "{n} HoYoLAB posts"
   }
 }

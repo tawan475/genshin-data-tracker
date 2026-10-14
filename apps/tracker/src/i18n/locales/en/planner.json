@@ -512,7 +512,8 @@
     "events": "Events",
     "startsIn": "in {time}",
     "eventStarts": "Starts {time}",
-    "eventEnds": "Ends {time}"
+    "eventEnds": "Ends {time}",
+    "noEnd": "No end date"
   },
   "view": {
     "title": "Planner",

@@ -699,3 +699,34 @@ export const adminAudit = sqliteTable(
     index('admin_audit_target_idx').on(t.targetUserId, t.createdAt),
   ],
 )
+
+/**
+ * The game's events as the hourly sync read them (migration 0025;
+ * worker/services/game-events.ts, docs/plans/game-events.md): the public
+ * notice board's Events and Event Wishes per server (`source` 'board',
+ * `ann_id` the notice), and the official HoYoLAB posts announcing an
+ * Overflowing event (`source` 'hoyolab', `ann_id` the post, `kind` the
+ * domain event kind). `start`/`end` are the server's local time
+ * (`YYYY-MM-DDTHH:mm`, end exclusive; NULL end: open-ended); `titles` is
+ * `{ en, zh-CN?, zh-TW? }`. A row stays until a week after it ends, even
+ * when the board drops the notice.
+ */
+export const gameNotices = sqliteTable(
+  'game_notices',
+  {
+    server: text('server', { enum: ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] }).notNull(),
+    source: text('source', { enum: ['board', 'hoyolab'] }).notNull(),
+    annId: integer('ann_id').notNull(),
+    kind: text('kind').notNull(),
+    start: text('start').notNull(),
+    end: text('end'),
+    titles: text('titles', { mode: 'json' })
+      .$type<Record<string, string>>()
+      .notNull()
+      .$defaultFn(() => ({})),
+    image: text('image'),
+    firstSeenAt: timestamp('first_seen_at'),
+    lastSeenAt: timestamp('last_seen_at'),
+  },
+  (t) => [primaryKey({ columns: [t.server, t.source, t.annId] })],
+)

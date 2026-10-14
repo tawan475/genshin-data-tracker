@@ -512,7 +512,8 @@
     "events": "活動",
     "startsIn": "{time}後開始",
     "eventStarts": "開始於 {time}",
-    "eventEnds": "結束於 {time}"
+    "eventEnds": "結束於 {time}",
+    "noEnd": "長期開放"
   },
   "view": {
     "title": "養成規劃",

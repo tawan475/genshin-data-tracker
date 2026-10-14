@@ -462,6 +462,14 @@
     "source": "公告來源",
     "add": "新增",
     "remove": "移除",
-    "saved": "已儲存祕境活動"
+    "saved": "已儲存祕境活動",
+    "sync": "活動同步",
+    "syncHint": "追蹤器每小時讀取遊戲公告（活動、祈願）和 HoYoLAB 官方貼文（移湧活動）。",
+    "syncOk": "正常",
+    "syncFailed": "失敗",
+    "neverSynced": "尚未執行",
+    "syncNow": "立即同步",
+    "boardCount": "公告 {n} 則",
+    "hoyolabCount": "HoYoLAB 貼文 {n} 篇"
   }
 }

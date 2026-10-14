@@ -5,7 +5,7 @@ import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
 import { auth } from './routes/auth'
-import { domainEvents } from './routes/domain-events'
+import { domainEvents, gameEvents } from './routes/domain-events'
 import { health } from './routes/health'
 import { irminsul } from './routes/irminsul'
 import { irminsulOAuth } from './routes/irminsul-oauth'
@@ -18,6 +18,7 @@ import { recovery } from './routes/recovery'
 import { staff } from './routes/staff'
 import { wishProxy } from './routes/wish-proxy'
 import { wishAccounts, wishSync } from './routes/wishes'
+import { syncGameEvents } from './services/game-events'
 import { runMaintenance } from './services/maintenance'
 
 const app = new Hono<AppEnv>().basePath('/api')
@@ -48,6 +49,7 @@ app.route('/live', live)
 app.route('/admin', admin)
 app.route('/staff', staff)
 app.route('/domain-events', domainEvents)
+app.route('/game-events', gameEvents)
 
 app.notFound((c) => c.json(errorBody(new ApiError(404, 'not_found', 'Not found')), 404))
 
@@ -59,9 +61,24 @@ app.onError((error, c) => {
 
 export { LiveHub } from './services/live'
 
+/** wrangler.jsonc's hourly cron: the game events sync. */
+const EVENTS_CRON = '7 * * * *'
+
 export default {
   fetch: app.fetch,
-  async scheduled(_controller, env, ctx) {
+  async scheduled(controller, env, ctx) {
+    // Hourly: the game's notice board and HoYoLAB (services/game-events.ts).
+    if (controller.cron === EVENTS_CRON) {
+      ctx.waitUntil(
+        syncGameEvents(env.DB).then((status) =>
+          console.log(
+            'game events',
+            JSON.stringify({ ok: status.ok, counts: status.counts, errors: status.errors }),
+          ),
+        ),
+      )
+      return
+    }
     // Optional var (wrangler.jsonc "vars" or the dashboard): v1 rows to repack per day.
     const repackLimit = Number((env as { REPACK_CRON_LIMIT?: string }).REPACK_CRON_LIMIT ?? 0) || 0
     ctx.waitUntil(

@@ -512,7 +512,8 @@
     "events": "活动",
     "startsIn": "{time}后开始",
     "eventStarts": "开始于 {time}",
-    "eventEnds": "结束于 {time}"
+    "eventEnds": "结束于 {time}",
+    "noEnd": "长期开放"
   },
   "view": {
     "title": "养成规划",

@@ -113,6 +113,32 @@ const eventLines = computed(() =>
   ),
 )
 
+const syncing = ref(false)
+async function syncEvents() {
+  syncing.value = true
+  try {
+    site.value = await api.staff.syncEvents()
+  } catch (cause) {
+    feedback.error(t('staff.events.syncFailed'), cause)
+  } finally {
+    syncing.value = false
+  }
+}
+/** "board 17 · HoYoLAB 7" (one server's count: they match). */
+const syncCounts = computed(() => {
+  const counts = shownSite.value?.eventsSync?.counts ?? {}
+  const board =
+    counts['board:ASIA'] ?? Object.entries(counts).find(([k]) => k.startsWith('board:'))?.[1]
+  return [
+    board === undefined ? '' : t('staff.events.boardCount', { n: formatNumber(board) }),
+    counts.hoyolab === undefined
+      ? ''
+      : t('staff.events.hoyolabCount', { n: formatNumber(counts.hoyolab) }),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+})
+
 const storedShare = computed(() => {
   const bytes = data.value?.storedBytes ?? 0
   // D1's 10 GB.
@@ -312,6 +338,49 @@ const emailTone = (state: StaffSiteResponse['email']) =>
               </dd>
               <UiButton v-if="canSettings" variant="ghost" size="sm" @click="eventsOpen = true">
                 {{ $t('staff.common.edit') }}
+              </UiButton>
+            </div>
+            <div class="flex items-center gap-3 py-2.5">
+              <dt
+                class="w-28 shrink-0 text-text-secondary sm:w-36"
+                :title="$t('staff.events.syncHint')"
+              >
+                {{ $t('staff.events.sync') }}
+              </dt>
+              <dd class="tabular flex min-w-0 flex-1 flex-col gap-0.5">
+                <template v-if="shownSite.eventsSync">
+                  <span class="flex flex-wrap items-center gap-2">
+                    <UiBadge :tone="shownSite.eventsSync.ok ? 'success' : 'warning'">{{
+                      shownSite.eventsSync.ok
+                        ? $t('staff.events.syncOk')
+                        : $t('staff.events.syncFailed')
+                    }}</UiBadge>
+                    <span :title="formatDateTime(shownSite.eventsSync.at)">{{
+                      formatRelative(shownSite.eventsSync.at)
+                    }}</span>
+                    <span class="text-text-muted">{{ syncCounts }}</span>
+                  </span>
+                  <span
+                    v-for="line in [
+                      ...shownSite.eventsSync.errors,
+                      ...shownSite.eventsSync.unparsed,
+                    ]"
+                    :key="line"
+                    class="truncate text-xs text-warning-text"
+                    :title="line"
+                    >{{ line }}</span
+                  >
+                </template>
+                <span v-else class="text-text-muted">{{ $t('staff.events.neverSynced') }}</span>
+              </dd>
+              <UiButton
+                v-if="canSettings"
+                variant="ghost"
+                size="sm"
+                :loading="syncing"
+                @click="syncEvents"
+              >
+                {{ $t('staff.events.syncNow') }}
               </UiButton>
             </div>
           </dl>

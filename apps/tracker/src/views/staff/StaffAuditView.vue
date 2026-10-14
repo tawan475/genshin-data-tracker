@@ -162,6 +162,9 @@ function describe(row: AuditRow): string {
         }),
       )
       break
+    case 'site.events_sync':
+      parts.push(d.ok ? t('staff.events.syncOk') : t('staff.events.syncFailed'))
+      break
     case 'site.limits':
       parts.push(
         Object.entries(d)

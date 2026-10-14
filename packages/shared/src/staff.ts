@@ -11,6 +11,7 @@
 import { z } from 'zod'
 import { usernameSchema } from './api'
 import { domainEventList, type DomainEventWindow } from './domain-events'
+import type { EventsSyncStatus } from './notices'
 import type {
   AccountResponse,
   GenshinServer,
@@ -430,6 +431,8 @@ export interface StaffSiteResponse {
   migrations: { applied: number; pending: string[] }
   /** Domain event windows staff set (`farm.events`). */
   domainEvents: DomainEventWindow[]
+  /** The hourly game events sync's last run (null before the first). */
+  eventsSync: EventsSyncStatus | null
 }
 
 /** `GET /api/staff/overview`. */

@@ -324,6 +324,18 @@ export interface GameNotice {
   image: string | null
 }
 
+/** The last game events sync (site_settings `events.sync`), for the staff page. */
+export interface EventsSyncStatus {
+  /** When it ran (ms). */
+  at: number
+  ok: boolean
+  /** Rows read per source and server: `board:ASIA` -> 17, `hoyolab` -> 7. */
+  counts: Record<string, number>
+  /** Board events whose dates no rule read: `ASIA:21811 title`. */
+  unparsed: string[]
+  errors: string[]
+}
+
 /** `GET /api/game-events?server=ASIA`. */
 export interface GameEventsResponse {
   server: NoticeServer | null

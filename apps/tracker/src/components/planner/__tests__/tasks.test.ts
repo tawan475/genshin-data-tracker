@@ -13,7 +13,7 @@
  *   Use The Parametric Transformer").
  */
 
-import type { DomainEventWindow, PlannerTask } from '@gdt/shared'
+import type { DomainEventWindow, GameNotice, PlannerTask } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import {
   BUILTIN_TASKS,
@@ -364,5 +364,52 @@ describe('domain events as tasks', () => {
 
   it('a run starting more than two weeks ahead is not listed yet', () => {
     expect(rowsAt(Date.UTC(2026, 8, 25)).map((r) => r.id)).toEqual([])
+  })
+})
+
+describe('notice board events as tasks', () => {
+  const notice = (over: Partial<GameNotice>): GameNotice => ({
+    id: 'board:21168',
+    kind: 'event',
+    start: '2026-09-30T10:00',
+    end: '2026-11-03T04:00',
+    title: { en: 'Stygian Onslaught Event: Ley Line challenges', 'zh-CN': '「幽境危战」活动' },
+    image: null,
+    ...over,
+  })
+  const NOW = Date.UTC(2026, 9, 14, 4)
+  const rowsAt = (notices: GameNotice[], stored: PlannerTask[] = [], now = NOW) =>
+    taskRows(stored, now, 'ASIA', [], notices).filter((r) => r.notice)
+
+  it('lists running events once, upcoming ones resting, never wishes', () => {
+    const rows = rowsAt([
+      notice({}),
+      notice({
+        id: 'board:9',
+        title: { en: '"Moontrace" Event Details' },
+        start: '2026-10-20T10:00',
+      }),
+      notice({ id: 'board:10', kind: 'wish' }),
+      notice({ id: 'board:11', start: '2026-12-01T10:00' }),
+    ])
+    expect(rows.map((r) => [r.id, r.due, r.name])).toEqual([
+      ['nt-21168', true, 'Stygian Onslaught Event: Ley Line challenges'],
+      ['nt-9', false, 'Moontrace'],
+    ])
+    expect(rows[0]!.resets).toBe(Date.UTC(2026, 10, 2, 20))
+    expect(rows[1]!.back).toBe(Date.UTC(2026, 9, 20, 2))
+  })
+
+  it('Done lasts the run (a year for an open-ended one)', () => {
+    const [row] = rowsAt([notice({})])
+    expect(doneInput(row!, NOW, 'ASIA')).toEqual({
+      kind: 'builtin',
+      id: 'nt-21168',
+      next: Date.UTC(2026, 10, 2, 20),
+    })
+    const [open] = rowsAt([notice({ end: null })])
+    expect(doneInput(open!, NOW, 'ASIA')).toMatchObject({ next: NOW + 365 * 86_400_000 })
+    const stored = [{ ...doneInput(row!, NOW, 'ASIA'), updatedAt: NOW } as PlannerTask]
+    expect(rowsAt([notice({})], stored)[0]).toMatchObject({ due: false, tone: 'rest' })
   })
 })

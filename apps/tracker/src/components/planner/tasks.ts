@@ -27,7 +27,15 @@
 
 import { RESET_HOUR, SERVER_UTC_OFFSET } from '@gdt/game-data/planner-math'
 import { serverLocalTime } from '@gdt/game-data/events'
-import type { CustomTask, DomainEventWindow, PlannerTask, PlannerTaskInput } from '@gdt/shared'
+import {
+  noticeShortTitle,
+  type CustomTask,
+  type DomainEventWindow,
+  type GameNotice,
+  type PlannerTask,
+  type PlannerTaskInput,
+} from '@gdt/shared'
+import { locale } from '@/i18n/locale'
 import { t } from '@/i18n'
 
 const HOUR = 3_600_000
@@ -332,6 +340,8 @@ export interface TaskRow {
   custom: { task: CustomTask; due: number; position: number } | null
   /** A domain event: its window, and when it starts/ends on the server (ms). */
   event: { window: DomainEventWindow; start: number; end: number } | null
+  /** A notice board event: done once per run; `end` null = open-ended. */
+  notice: { notice: GameNotice; start: number; end: number | null } | null
   /** What is stored for it (a built-in task never touched has nothing). */
   stored: PlannerTask | null
 }
@@ -346,6 +356,19 @@ export const EVENT_LEAD_MS = 14 * DAY
 export const eventTaskId = (window: Pick<DomainEventWindow, 'kind' | 'start'>) =>
   `ev-${window.kind.toLowerCase()}-${window.start.slice(0, 10).replace(/-/g, '')}`
 
+/** A notice board event's task id, stored like a built-in's: `nt-21168`. */
+export const noticeTaskId = (notice: Pick<GameNotice, 'id'>) =>
+  `nt-${notice.id.replace(/^board:/, '')}`
+
+/** A notice's title in the language on screen, shortened to its quoted name. */
+export function noticeName(notice: GameNotice): { name: string; full: string } {
+  const full = notice.title[locale.value] || notice.title.en || notice.id
+  return { name: noticeShortTitle(full), full }
+}
+
+/** Open-ended events stay done this long. */
+const OPEN_DONE_MS = 365 * DAY
+
 /**
  * The tasks to list: running and soon domain events first, built-in ones
  * (minus the hidden), then custom ones by position. `stored` is what the
@@ -356,6 +379,7 @@ export function taskRows(
   now: number,
   server: string | null | undefined,
   events: readonly DomainEventWindow[] = [],
+  notices: readonly GameNotice[] = [],
 ): TaskRow[] {
   const byId = new Map(stored.map((t) => [`${t.kind}:${t.id}`, t]))
   const rows: TaskRow[] = []
@@ -388,6 +412,41 @@ export function taskRows(
       builtin: null,
       custom: null,
       event: { window, start, end },
+      notice: null,
+      stored: s ?? null,
+    })
+  }
+  // The notice board's events (wishes have their own page): done once per run.
+  for (const notice of notices) {
+    if (notice.kind !== 'event') continue
+    const id = noticeTaskId(notice)
+    const start = serverLocalTime(notice.start, server)
+    const end = notice.end === null ? null : serverLocalTime(notice.end, server)
+    if (seen.has(id) || (end !== null && !(end > now)) || !(start - now <= EVENT_LEAD_MS)) continue
+    seen.add(id)
+    const s = byId.get(`builtin:${id}`)
+    if (s?.kind === 'builtin' && s.hidden) continue
+    const upcoming = start > now
+    const next = s?.kind === 'builtin' ? (s.next ?? null) : null
+    const resting = upcoming || (next !== null && next > now)
+    const due = !resting
+    const { name, full } = noticeName(notice)
+    rows.push({
+      key: `event:${id}`,
+      kind: 'event',
+      id,
+      name,
+      note: full !== name ? full : undefined,
+      due,
+      tone: !due ? 'rest' : end !== null && end - now <= DAY ? 'soon' : 'due',
+      resets: due ? end : null,
+      back: upcoming ? start : resting ? next : null,
+      snoozed: false,
+      late: 0,
+      builtin: null,
+      custom: null,
+      event: null,
+      notice: { notice, start, end },
       stored: s ?? null,
     })
   }
@@ -412,6 +471,7 @@ export function taskRows(
       builtin: b,
       custom: null,
       event: null,
+      notice: null,
       stored: s ?? null,
     })
   }
@@ -437,6 +497,7 @@ export function taskRows(
       builtin: null,
       custom: { task: t.task, due, position: t.position ?? i },
       event: null,
+      notice: null,
       stored: t,
     })
   }
@@ -480,6 +541,8 @@ export function doneInput(
       const reset = nextReset({ kind: 'daily' }, now, server) ?? row.event.end
       return { ...input, next: Math.min(reset, row.event.end) }
     }
+    // A notice's event: done for this run.
+    if (row.notice) return { ...input, next: row.notice.end ?? now + OPEN_DONE_MS }
     return { ...input, next: doneUntil(row.builtin!, now, server) }
   }
   return {

@@ -70,8 +70,8 @@ import { craftChanges, rowText, type CraftRow } from '@/components/planner/craft
 import { costChanges, doneCost, type DoneCost, type DonePart } from '@/components/planner/done'
 import { READINESS } from '@/components/planner/farm-format'
 import { farmDay, type ArtifactWant } from '@/components/planner/farm-today'
-import type { DomainEvent } from '@gdt/game-data/events'
-import { loadAllDomainEvents } from '@/data/domain-events'
+import type { GameEventsResponse } from '@gdt/shared'
+import { loadGameEvents } from '@/data/domain-events'
 import { provideGoalActions } from '@/components/planner/goal-actions'
 import {
   GOAL_SORTS,
@@ -228,15 +228,17 @@ const pinned = computed(() => {
   const at = /^\d+$/.test(raw) ? Number(raw) : Date.parse(raw)
   return Number.isFinite(at) ? at : null
 })
-/** The domain events the tracker serves (game data and staff), re-read every 10 min. */
-const domainEvents = shallowRef<DomainEvent[]>([])
+/** The game's events for the account's server (domain windows, notices), re-read every 10 min. */
+const gameEvents = shallowRef<GameEventsResponse | null>(null)
 watch(
-  () => Math.floor(now.value / 600_000),
-  () => {
-    void loadAllDomainEvents().then((list) => (domainEvents.value = list))
+  [() => account.value.server, () => Math.floor(now.value / 600_000)],
+  ([server]) => {
+    void loadGameEvents(server).then((events) => (gameEvents.value = events))
   },
   { immediate: true },
 )
+const domainEvents = computed(() => gameEvents.value?.domain ?? [])
+const notices = computed(() => gameEvents.value?.notices ?? [])
 const day = computed(() =>
   farmDay(pinned.value ?? now.value, account.value.server, domainEvents.value),
 )
@@ -1667,6 +1669,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         :now="now"
         :server="account.server"
         :events="domainEvents"
+        :notices="notices"
         @change="tasks.change"
       />
     </div>

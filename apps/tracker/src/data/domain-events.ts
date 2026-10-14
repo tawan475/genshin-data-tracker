@@ -1,34 +1,43 @@
-import type { DomainEventsResponse, DomainEventWindow } from '@gdt/shared'
+import type { GameEventsResponse } from '@gdt/shared'
 import { requestJson } from '@/api/http'
 
 /**
- * The limited-time domain events ("Overflowing Abundance" opens every talent
- * book and weapon material all week, others multiply some domains), as the
- * tracker serves them (`GET /api/domain-events`: the game data's announced
- * runs and staff's windows, merged on the server). Read again every 10
- * minutes; a failed read keeps what was there.
+ * The game's events as the tracker serves them (`GET /api/game-events`,
+ * docs/plans/game-events.md): the domain event windows (game data, staff,
+ * HoYoLAB, the banner rule: "Overflowing Abundance" opens every domain) and
+ * the notice board's events and wishes, for one server. Read again every
+ * 10 minutes; a failed read keeps what was there.
  */
 
 const TTL_MS = 10 * 60_000
+const EMPTY: GameEventsResponse = { server: null, domain: [], notices: [], syncedAt: null }
 
-let cached: { at: number; promise: Promise<DomainEventWindow[]> } | undefined
-let last: DomainEventWindow[] = []
+const cache = new Map<string, { at: number; promise: Promise<GameEventsResponse> }>()
+const last = new Map<string, GameEventsResponse>()
 
-export function loadAllDomainEvents(now = Date.now()): Promise<DomainEventWindow[]> {
-  if (!cached || now - cached.at > TTL_MS) {
-    const promise = requestJson<DomainEventsResponse>('/domain-events').then(
-      (body) => (last = body.events),
-      () => last,
-    )
-    cached = { at: now, promise }
-  }
-  return cached.promise
+export function loadGameEvents(
+  server: string | null | undefined,
+  now = Date.now(),
+): Promise<GameEventsResponse> {
+  const key = server ?? ''
+  const hit = cache.get(key)
+  if (hit && now - hit.at <= TTL_MS) return hit.promise
+  const query = server ? `?server=${encodeURIComponent(server)}` : ''
+  const promise = requestJson<GameEventsResponse>(`/game-events${query}`).then(
+    (body) => {
+      last.set(key, body)
+      return body
+    },
+    () => last.get(key) ?? EMPTY,
+  )
+  cache.set(key, { at: now, promise })
+  return promise
 }
 
 export { domainEventsAt, type DomainEventsNow } from './domain-events-now'
 
 /** For tests: forget what was loaded. */
 export function resetDomainEventsCache(): void {
-  cached = undefined
-  last = []
+  cache.clear()
+  last.clear()
 }

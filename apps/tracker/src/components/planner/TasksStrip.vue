@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CustomTask, DomainEventWindow, PlannerTask } from '@gdt/shared'
+import type { CustomTask, DomainEventWindow, GameNotice, PlannerTask } from '@gdt/shared'
 import { computed, ref, shallowRef, watch } from 'vue'
 import {
   AlarmClock,
@@ -61,6 +61,8 @@ const props = defineProps<{
   server: string | null
   /** Domain event windows (the tracker's): running ones are daily tasks, soon ones rest. */
   events?: readonly DomainEventWindow[]
+  /** The notice board's events: one-time tasks while they run. */
+  notices?: readonly GameNotice[]
 }>()
 const emit = defineEmits<{ change: [ops: TaskOp[]] }>()
 const feedback = useFeedback()
@@ -76,7 +78,9 @@ watch(tab, (value) => writeStorage('planner:tasks-tab', value === 'all' ? null :
 const showAll = ref(false)
 
 const today = computed(() => gameDay(props.now, props.server))
-const rows = computed(() => taskRows(props.tasks, props.now, props.server, props.events ?? []))
+const rows = computed(() =>
+  taskRows(props.tasks, props.now, props.server, props.events ?? [], props.notices ?? []),
+)
 const dueRows = computed(() => rows.value.filter((r) => r.due))
 const dueCount = (kind?: TaskRow['kind']) =>
   dueRows.value.filter((r) => !kind || r.kind === kind).length
@@ -101,6 +105,18 @@ const soon = computed(() => dueRows.value.filter((r) => r.tone === 'soon'))
 // ------------------------------------------------------------ labels
 
 function when(row: TaskRow): { text: string; title: string } {
+  if (row.notice) {
+    const n = row.notice
+    if (n.start > props.now) {
+      return {
+        text: t('planner.tasks.startsIn', { time: formatSpan(n.start - props.now) }),
+        title: t('planner.tasks.eventStarts', { time: formatDateTime(n.start) }),
+      }
+    }
+    if (n.end === null) return { text: '∞', title: t('planner.tasks.noEnd') }
+    const ends = t('planner.tasks.eventEnds', { time: formatDateTime(n.end) })
+    return { text: formatSpan(n.end - props.now), title: ends }
+  }
   if (row.event) {
     const e = row.event
     if (e.start > props.now) {
