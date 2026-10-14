@@ -1666,6 +1666,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         :tasks="tasks.tasks.value"
         :now="now"
         :server="account.server"
+        :events="domainEvents"
         @change="tasks.change"
       />
     </div>

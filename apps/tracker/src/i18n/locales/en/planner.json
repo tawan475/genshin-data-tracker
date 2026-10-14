@@ -508,7 +508,11 @@
     "snoozeName": "Snooze {name}",
     "snooze": "Snooze",
     "lastDay": "Last day",
-    "permanentTasks": "Permanent tasks"
+    "permanentTasks": "Permanent tasks",
+    "events": "Events",
+    "startsIn": "in {time}",
+    "eventStarts": "Starts {time}",
+    "eventEnds": "Ends {time}"
   },
   "view": {
     "title": "Planner",

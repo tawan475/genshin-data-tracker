@@ -508,7 +508,11 @@
     "snoozeName": "延后 {name}",
     "snooze": "延后",
     "lastDay": "最后一天",
-    "permanentTasks": "常驻任务"
+    "permanentTasks": "常驻任务",
+    "events": "活动",
+    "startsIn": "{time}后开始",
+    "eventStarts": "开始于 {time}",
+    "eventEnds": "结束于 {time}"
   },
   "view": {
     "title": "养成规划",

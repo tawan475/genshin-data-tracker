@@ -17,12 +17,17 @@
  * - Imaginarium Theater, Paimon's Bargains: the 1st of each month at 04:00.
  * - Parametric Transformer: 166 hours after it was used (a cooldown, not a
  *   reset).
- * Event schedules (Stygian Onslaught, banners, limited events) follow the
- * patch calendar, which has no official machine-readable source: not here.
+ * Domain events (Overflowing Abundance & co.) come from the tracker
+ * (`GET /api/domain-events`: the game data's announced runs and staff's):
+ * while one runs it is a daily task (its multiplied claims come back at
+ * 04:00) until it ends; one starting soon is listed resting until it starts,
+ * like Seelie's Events tab. Other event schedules (Stygian Onslaught,
+ * banners) follow the patch calendar, which has no machine-readable source.
  */
 
 import { RESET_HOUR, SERVER_UTC_OFFSET } from '@gdt/game-data/planner-math'
-import type { CustomTask, PlannerTask, PlannerTaskInput } from '@gdt/shared'
+import { serverLocalTime } from '@gdt/game-data/events'
+import type { CustomTask, DomainEventWindow, PlannerTask, PlannerTaskInput } from '@gdt/shared'
 import { t } from '@/i18n'
 
 const HOUR = 3_600_000
@@ -302,9 +307,9 @@ export const customUndone = (task: Pick<CustomTask, 'every'>, due: number) => du
 export type TaskTone = 'soon' | 'today' | 'due' | 'rest'
 
 export interface TaskRow {
-  /** `builtin:<id>` / `custom:<id>` */
+  /** `builtin:<id>` / `custom:<id>` / `event:<id>` */
   key: string
-  kind: 'builtin' | 'custom'
+  kind: 'builtin' | 'custom' | 'event'
   id: string
   name: string
   note?: string
@@ -325,21 +330,67 @@ export interface TaskRow {
   late: number
   builtin: BuiltinTask | null
   custom: { task: CustomTask; due: number; position: number } | null
+  /** A domain event: its window, and when it starts/ends on the server (ms). */
+  event: { window: DomainEventWindow; start: number; end: number } | null
   /** What is stored for it (a built-in task never touched has nothing). */
   stored: PlannerTask | null
 }
 
+/** Events starting within this long are listed (resting) before they start. */
+export const EVENT_LEAD_MS = 14 * DAY
+
 /**
- * The tasks to list, built-in ones first (minus the hidden), then custom
- * ones by position. `stored` is what the server has (and what waits).
+ * A domain event window's task id: stored like a built-in task's (no other
+ * storage), unique per run: `ev-abundance-20261013`.
+ */
+export const eventTaskId = (window: Pick<DomainEventWindow, 'kind' | 'start'>) =>
+  `ev-${window.kind.toLowerCase()}-${window.start.slice(0, 10).replace(/-/g, '')}`
+
+/**
+ * The tasks to list: running and soon domain events first, built-in ones
+ * (minus the hidden), then custom ones by position. `stored` is what the
+ * server has (and what waits).
  */
 export function taskRows(
   stored: readonly PlannerTask[],
   now: number,
   server: string | null | undefined,
+  events: readonly DomainEventWindow[] = [],
 ): TaskRow[] {
   const byId = new Map(stored.map((t) => [`${t.kind}:${t.id}`, t]))
   const rows: TaskRow[] = []
+  const seen = new Set<string>()
+  for (const window of events) {
+    const id = eventTaskId(window)
+    const start = serverLocalTime(window.start, server)
+    const end = serverLocalTime(window.end, server)
+    if (seen.has(id) || !(end > now) || !(start - now <= EVENT_LEAD_MS)) continue
+    seen.add(id)
+    const s = byId.get(`builtin:${id}`)
+    if (s?.kind === 'builtin' && s.hidden) continue
+    const upcoming = start > now
+    const next = s?.kind === 'builtin' ? (s.next ?? null) : null
+    const resting = upcoming || (next !== null && next > now)
+    const resets = Math.min(nextReset({ kind: 'daily' }, now, server) ?? end, end)
+    const due = !resting
+    rows.push({
+      key: `event:${id}`,
+      kind: 'event',
+      id,
+      name: t(`farm.event.names.${window.kind}`),
+      note: t(`farm.event.rules.${window.kind}`),
+      due,
+      tone: !due ? 'rest' : resets - now <= 3 * HOUR ? 'soon' : 'due',
+      resets: due ? resets : null,
+      back: upcoming ? start : resting ? next : null,
+      snoozed: false,
+      late: 0,
+      builtin: null,
+      custom: null,
+      event: { window, start, end },
+      stored: s ?? null,
+    })
+  }
   for (const b of BUILTIN_TASKS) {
     const s = byId.get(`builtin:${b.id}`)
     if (s?.kind === 'builtin' && s.hidden) continue
@@ -360,6 +411,7 @@ export function taskRows(
       late: 0,
       builtin: b,
       custom: null,
+      event: null,
       stored: s ?? null,
     })
   }
@@ -384,6 +436,7 @@ export function taskRows(
       late,
       builtin: null,
       custom: { task: t.task, due, position: t.position ?? i },
+      event: null,
       stored: t,
     })
   }
@@ -394,7 +447,7 @@ export function taskRows(
 
 /** A row's task as it is stored (the write that puts it back). */
 export function taskInput(row: TaskRow): PlannerTaskInput {
-  if (row.kind === 'builtin') {
+  if (row.kind === 'builtin' || row.kind === 'event') {
     const s = row.stored?.kind === 'builtin' ? row.stored : null
     return {
       kind: 'builtin',
@@ -421,7 +474,14 @@ export function doneInput(
   server: string | null | undefined,
 ): PlannerTaskInput {
   const input = taskInput(row)
-  if (input.kind === 'builtin') return { ...input, next: doneUntil(row.builtin!, now, server) }
+  if (input.kind === 'builtin') {
+    // An event's claims come back at the next 04:00, or never once it ends.
+    if (row.event) {
+      const reset = nextReset({ kind: 'daily' }, now, server) ?? row.event.end
+      return { ...input, next: Math.min(reset, row.event.end) }
+    }
+    return { ...input, next: doneUntil(row.builtin!, now, server) }
+  }
   return {
     ...input,
     due: dayText(customDone(row.custom!.task, row.custom!.due, gameDay(now, server))),

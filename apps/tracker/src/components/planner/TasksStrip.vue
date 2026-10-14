@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CustomTask, PlannerTask } from '@gdt/shared'
+import type { CustomTask, DomainEventWindow, PlannerTask } from '@gdt/shared'
 import { computed, ref, shallowRef, watch } from 'vue'
 import {
   AlarmClock,
@@ -11,6 +11,7 @@ import {
   ListChecks,
   Moon,
   Plus,
+  Sparkles,
   StickyNote,
 } from 'lucide-vue-next'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
@@ -58,27 +59,31 @@ const props = defineProps<{
   tasks: readonly PlannerTask[]
   now: number
   server: string | null
+  /** Domain event windows (the tracker's): running ones are daily tasks, soon ones rest. */
+  events?: readonly DomainEventWindow[]
 }>()
 const emit = defineEmits<{ change: [ops: TaskOp[]] }>()
 const feedback = useFeedback()
 
-type Tab = 'all' | 'builtin' | 'custom'
+type Tab = 'all' | 'builtin' | 'event' | 'custom'
 const open = ref(readStorage('planner:tasks') !== 'closed')
 watch(open, (value) => writeStorage('planner:tasks', value ? null : 'closed'))
 const tab = ref<Tab>(
-  (['builtin', 'custom'] as const).find((x) => x === readStorage('planner:tasks-tab')) ?? 'all',
+  (['builtin', 'event', 'custom'] as const).find((x) => x === readStorage('planner:tasks-tab')) ??
+    'all',
 )
 watch(tab, (value) => writeStorage('planner:tasks-tab', value === 'all' ? null : value))
 const showAll = ref(false)
 
 const today = computed(() => gameDay(props.now, props.server))
-const rows = computed(() => taskRows(props.tasks, props.now, props.server))
+const rows = computed(() => taskRows(props.tasks, props.now, props.server, props.events ?? []))
 const dueRows = computed(() => rows.value.filter((r) => r.due))
 const dueCount = (kind?: TaskRow['kind']) =>
   dueRows.value.filter((r) => !kind || r.kind === kind).length
 const TABS = computed(() => [
   { value: 'all' as const, label: t('planner.toolbar.status.all'), count: dueCount() },
   { value: 'builtin' as const, label: t('planner.tasks.permanent'), count: dueCount('builtin') },
+  { value: 'event' as const, label: t('planner.tasks.events'), count: dueCount('event') },
   { value: 'custom' as const, label: t('planner.card.custom'), count: dueCount('custom') },
 ])
 const shown = computed(() =>
@@ -96,6 +101,26 @@ const soon = computed(() => dueRows.value.filter((r) => r.tone === 'soon'))
 // ------------------------------------------------------------ labels
 
 function when(row: TaskRow): { text: string; title: string } {
+  if (row.event) {
+    const e = row.event
+    if (e.start > props.now) {
+      return {
+        text: t('planner.tasks.startsIn', { time: formatSpan(e.start - props.now) }),
+        title: t('planner.tasks.eventStarts', { time: formatDateTime(e.start) }),
+      }
+    }
+    const ends = t('planner.tasks.eventEnds', { time: formatDateTime(e.end) })
+    if (row.due) {
+      return {
+        text: formatSpan(row.resets! - props.now),
+        title: `${t('planner.tasks.resets', { time: formatDateTime(row.resets!) })} · ${ends}`,
+      }
+    }
+    return {
+      text: formatSpan(row.back! - props.now),
+      title: `${t('planner.tasks.doneBack', { time: formatDateTime(row.back!) })} · ${ends}`,
+    }
+  }
   if (row.kind === 'builtin') {
     if (row.due) {
       return row.resets === null
@@ -185,7 +210,9 @@ const snoozes = computed(() => {
   }))
 })
 const canSnooze = (row: TaskRow) =>
-  row.due && (!row.builtin || snoozeChoices(row.builtin, props.now, props.server).length > 0)
+  row.due &&
+  row.kind !== 'event' &&
+  (!row.builtin || snoozeChoices(row.builtin, props.now, props.server).length > 0)
 function snooze(days: number) {
   const row = snoozeRow.value
   snoozeOpen.value = false
@@ -428,6 +455,11 @@ const summary = computed(() => {
           :title="row.note ? `${row.name} · ${row.note}` : row.name"
           @click="row.kind === 'custom' ? edit(row) : undefined"
         >
+          <Sparkles
+            v-if="row.kind === 'event'"
+            class="size-3.5 shrink-0 text-warning-text"
+            aria-hidden="true"
+          />
           <span class="truncate">{{ row.name }}</span>
           <StickyNote
             v-if="row.note"

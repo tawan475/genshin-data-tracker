@@ -13,7 +13,7 @@
  *   Use The Parametric Transformer").
  */
 
-import type { PlannerTask } from '@gdt/shared'
+import type { DomainEventWindow, PlannerTask } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import {
   BUILTIN_TASKS,
@@ -311,5 +311,58 @@ describe('the list and its writes', () => {
     expect(formatSpan(3 * 24 * HOUR + 4 * HOUR + 1)).toBe('3d 4h')
     expect(formatSpan(2 * 24 * HOUR)).toBe('2d')
     expect(formatSpan(-5)).toBe('0m')
+  })
+})
+
+describe('domain events as tasks', () => {
+  const abundance: DomainEventWindow = {
+    kind: 'abundance',
+    start: '2026-10-13T04:00',
+    end: '2026-10-20T04:00',
+    multiplier: 2,
+    dailyClaims: 3,
+    version: '7.1',
+    source: 'game data',
+  }
+  const favor: DomainEventWindow = {
+    ...abundance,
+    kind: 'favor',
+    start: '2026-10-26T04:00',
+    end: '2026-11-02T04:00',
+  }
+  // Wednesday 2026-10-14 12:00 in Asia (UTC+8).
+  const NOW = Date.UTC(2026, 9, 14, 4)
+  const rowsAt = (now: number, stored: PlannerTask[] = []) =>
+    taskRows(stored, now, 'ASIA', [abundance, favor]).filter((r) => r.kind === 'event')
+
+  it('lists a running event as a daily task and a soon one resting until it starts', () => {
+    const [running, soon] = rowsAt(NOW)
+    expect(running).toMatchObject({ id: 'ev-abundance-20261013', due: true, tone: 'due' })
+    // Claims come back at the next 04:00 (Thursday 04:00 +08 = Wednesday 20:00 UTC).
+    expect(running!.resets).toBe(Date.UTC(2026, 9, 14, 20))
+    expect(soon).toMatchObject({ id: 'ev-favor-20261026', due: false, tone: 'rest' })
+    expect(soon!.back).toBe(Date.UTC(2026, 9, 25, 20))
+  })
+
+  it('Done rests it until the next reset, never past its end; ended events go', () => {
+    const [running] = rowsAt(NOW)
+    const done = doneInput(running!, NOW, 'ASIA')
+    expect(done).toEqual({
+      kind: 'builtin',
+      id: 'ev-abundance-20261013',
+      next: Date.UTC(2026, 9, 14, 20),
+    })
+    const stored = [{ ...done, updatedAt: NOW } as PlannerTask]
+    expect(rowsAt(NOW + 3_600_000, stored)[0]).toMatchObject({ due: false, tone: 'rest' })
+    // Its last day: done means done until it ends.
+    const lastDay = Date.UTC(2026, 9, 19, 4)
+    const last = rowsAt(lastDay)[0]!
+    expect(doneInput(last, lastDay, 'ASIA')).toMatchObject({ next: Date.UTC(2026, 9, 19, 20) })
+    // After it ends only the upcoming one is left.
+    expect(rowsAt(Date.UTC(2026, 9, 19, 20)).map((r) => r.id)).toEqual(['ev-favor-20261026'])
+  })
+
+  it('a run starting more than two weeks ahead is not listed yet', () => {
+    expect(rowsAt(Date.UTC(2026, 8, 25)).map((r) => r.id)).toEqual([])
   })
 })
