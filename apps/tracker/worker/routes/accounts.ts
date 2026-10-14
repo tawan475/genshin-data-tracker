@@ -31,7 +31,6 @@ import { listSnapshots, parseIds, parseSections } from '../services/account-view
 import { buildBundle, buildGood, catalogJson, goodFileName } from '../services/export'
 import { importSnapshot } from '../services/import'
 import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
-import { recordObservedEvents } from '../services/observed-events'
 
 /**
  * Part of the snapshot list's ETag. Bump it whenever the list's JSON changes
@@ -180,14 +179,13 @@ export const accounts = new Hono<AppEnv>()
     if (blocked) throw uploadsRefused(blocked)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
     const meter = new D1Meter()
-    const { response, dataVersion, listener, observedEvents } = await importSnapshot(
+    const { response, dataVersion, listener } = await importSnapshot(
       c.env.DB,
       account,
       await readUpload(c),
       meter,
     )
     meter.report(c)
-    recordObservedEvents(c, account.uid, observedEvents)
     if (dataVersion !== null && c.req.header('x-gdt-live') !== 'quiet') {
       notifyUser(
         c,

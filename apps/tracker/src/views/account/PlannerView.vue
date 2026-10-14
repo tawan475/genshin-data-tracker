@@ -228,12 +228,12 @@ const pinned = computed(() => {
   const at = /^\d+$/.test(raw) ? Number(raw) : Date.parse(raw)
   return Number.isFinite(at) ? at : null
 })
-/** Every known domain event window (game data, staff, the server's schedule), re-read every 10 min. */
+/** The domain events the tracker serves (game data and staff), re-read every 10 min. */
 const domainEvents = shallowRef<DomainEvent[]>([])
 watch(
-  [() => account.value.server, () => Math.floor(now.value / 600_000)],
-  ([server]) => {
-    void loadAllDomainEvents(server).then((list) => (domainEvents.value = list))
+  () => Math.floor(now.value / 600_000),
+  () => {
+    void loadAllDomainEvents().then((list) => (domainEvents.value = list))
   },
   { immediate: true },
 )

@@ -699,28 +699,3 @@ export const adminAudit = sqliteTable(
     index('admin_audit_target_idx').on(t.targetUserId, t.createdAt),
   ],
 )
-
-/**
- * Domain event windows irminsul saw in the game's own schedule (migration
- * 0025): the "Overflowing …" events (Abundance opens every domain) by server,
- * from captures' `gi_events`. Events are the same for everyone on a server,
- * so one capture tells the whole server's Farm view. `reports` counts the
- * uploads that carried the window (staff can tell a lone report from many).
- */
-export const observedDomainEvents = sqliteTable(
-  'observed_domain_events',
-  {
-    server: text('server', { enum: ['AMERICA', 'EUROPE', 'ASIA', 'SAR'] }).notNull(),
-    activityId: integer('activity_id').notNull(),
-    kind: text('kind').notNull(),
-    beginAt: integer('begin_at').notNull(),
-    endAt: integer('end_at').notNull(),
-    reports: integer('reports').notNull().default(1),
-    firstSeenAt: timestamp('first_seen_at'),
-    lastSeenAt: timestamp('last_seen_at'),
-  },
-  (t) => [
-    primaryKey({ columns: [t.server, t.activityId, t.beginAt] }),
-    index('observed_domain_events_end_idx').on(t.endAt),
-  ],
-)

@@ -60,72 +60,12 @@ export function parseStaffDomainEvents(text: unknown): DomainEventWindow[] {
 }
 
 /**
- * `GET /api/domain-events`: the staff-set windows, and the windows irminsul
- * saw in the game's schedule per server (`observed`, server local times, for
- * events not ended more than a day ago). The game data's list is in the app.
+ * `GET /api/domain-events`: every domain event window the tracker knows, the
+ * game data's announced runs and staff's, merged on the server (the app
+ * reads only this): those running, starting within 60 days or ended within
+ * the last day, by start. Times are server local, the same hours on every
+ * server; the app reads them on the account's server.
  */
 export interface DomainEventsResponse {
   events: DomainEventWindow[]
-  observed: Partial<Record<'AMERICA' | 'EUROPE' | 'ASIA' | 'SAR', DomainEventWindow[]>>
-}
-
-/**
- * irminsul's `gi_events` (contract v1): the "Overflowing …" events the game's
- * own schedule (OpActivity) listed at the capture's login, by the game's
- * activity id. Times are unix seconds.
- */
-export interface ObservedDomainEvent {
-  id: number
-  kind: DomainEventKind
-  /** Unix ms. */
-  begin: number
-  /** Unix ms, exclusive. */
-  end: number
-}
-
-/** The game's OpActivity ids of each kind (7.1 OpActivityExcelConfigData). */
-export const OP_ACTIVITY_KINDS: Readonly<Record<number, DomainEventKind>> = {
-  101: 'leyLine',
-  102: 'leyLine',
-  103: 'leyLine',
-  201: 'revelation',
-  202: 'revelation',
-  301: 'wealth',
-  302: 'wealth',
-  401: 'mastery',
-  402: 'mastery',
-  501: 'favor',
-  502: 'favor',
-  601: 'abundance',
-  602: 'abundance',
-}
-
-const HOUR_S = 3600
-/** irminsul's own bounds: 1 hour to 45 days. */
-const MAX_EVENT_S = 45 * 24 * HOUR_S
-
-/**
- * Reads `gi_events` from an upload (anything else, or a malformed entry, is
- * left out): known ids whose kind matches, whole-second times, 1 h – 45 days
- * long, at most 20.
- */
-export function parseObservedEvents(value: unknown): ObservedDomainEvent[] {
-  if (!Array.isArray(value)) return []
-  const out: ObservedDomainEvent[] = []
-  for (const row of value.slice(0, 20)) {
-    if (typeof row !== 'object' || row === null) continue
-    const { id, kind, begin, end } = row as Record<string, unknown>
-    if (typeof id !== 'number' || !(id in OP_ACTIVITY_KINDS)) continue
-    if (OP_ACTIVITY_KINDS[id] !== kind) continue
-    if (!Number.isSafeInteger(begin) || !Number.isSafeInteger(end)) continue
-    const length = (end as number) - (begin as number)
-    if ((begin as number) <= 0 || length < HOUR_S || length > MAX_EVENT_S) continue
-    out.push({
-      id,
-      kind: OP_ACTIVITY_KINDS[id]!,
-      begin: (begin as number) * 1000,
-      end: (end as number) * 1000,
-    })
-  }
-  return out
 }

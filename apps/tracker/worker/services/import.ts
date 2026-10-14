@@ -36,7 +36,6 @@ import {
   encodeCatalogChunk,
   encodeSnapshotMeta,
   encodeStaticSections,
-  parseObservedEvents,
   planSnapshotV2,
   prepareSnapshot,
   resolveImportTimestamp,
@@ -48,7 +47,6 @@ import {
   type ImportResponse,
   type ImportWarning,
   type KnownBlob,
-  type ObservedDomainEvent,
   type PreparedSnapshot,
   type RawBlob,
   type Section,
@@ -134,17 +132,6 @@ export interface ImportResult {
   response: ImportResponse
   dataVersion: number | null
   listener?: Listener
-  /** The file's `gi_events` (the game's event schedule irminsul saw), for `recordObservedEvents`. */
-  observedEvents: ObservedDomainEvent[]
-}
-
-/** What storing one upload did, before the file's other parts are added. */
-type StoredImport = Omit<ImportResult, 'observedEvents'>
-
-/** An upload parsed by `parseUpload`: the snapshot, and what the file says outside it. */
-export interface ParsedUpload extends PreparedSnapshot {
-  /** irminsul's `gi_events`; never stored with the snapshot (it is the server's, not the account's). */
-  observedEvents: ObservedDomainEvent[]
 }
 
 /** A section another write removed between our read and our write: start over. */
@@ -160,15 +147,14 @@ export async function importSnapshot(
   account: ImportTarget,
   upload: Upload,
   meter = new D1Meter(),
-  parsed?: ParsedUpload,
+  parsed?: PreparedSnapshot,
 ): Promise<ImportResult> {
   const prepared = parsed ?? (await parseUpload(upload.text))
   for (let attempt = 1; ; attempt++) {
     try {
-      const result = await withLegacySchema((legacy) =>
+      return await withLegacySchema((legacy) =>
         importOnce(d1, account, upload, meter, prepared, legacy),
       )
-      return { ...result, observedEvents: prepared.observedEvents }
     } catch (error) {
       // Only the daily maintenance or repack can pull a section away mid-import.
       if (error instanceof Retry && attempt < 3) continue
@@ -184,7 +170,7 @@ async function importOnce(
   meter: D1Meter,
   prepared: PreparedSnapshot,
   legacy: boolean,
-): Promise<StoredImport> {
+): Promise<ImportResult> {
   const accountId = account.id
   const now = Date.now()
   const day = utcDay(now)
@@ -287,7 +273,7 @@ async function importOnce(
     storedSize = 0,
     dataVersion: number | null = null,
     listener?: Listener,
-  ): StoredImport => ({
+  ): ImportResult => ({
     response: {
       status,
       snapshotId,
@@ -427,7 +413,7 @@ async function importOnce(
  * Parses and normalises a GOOD file; malformed input is a 400, a file over
  * GOOD_LIMITS (more items than the game holds, an overlong key) a 422.
  */
-export async function parseUpload(text: string): Promise<ParsedUpload> {
+export async function parseUpload(text: string): Promise<PreparedSnapshot> {
   let input: unknown
   try {
     input = JSON.parse(text)
@@ -435,9 +421,7 @@ export async function parseUpload(text: string): Promise<ParsedUpload> {
     throw new ApiError(400, 'invalid_json', 'The file is not valid JSON')
   }
   try {
-    const prepared = await prepareSnapshot(input, { materials: MATERIALS })
-    const events = (input as { gi_events?: unknown } | null)?.gi_events
-    return Object.assign(prepared, { observedEvents: parseObservedEvents(events) })
+    return await prepareSnapshot(input, { materials: MATERIALS })
   } catch (error) {
     if (error instanceof GoodLimitError) throw new ApiError(422, error.code, error.message)
     if (error instanceof GoodFormatError) throw new ApiError(400, 'invalid_good', error.message)

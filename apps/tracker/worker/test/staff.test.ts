@@ -814,10 +814,13 @@ describe('site settings, storage and the overview', () => {
   it('domain event windows: staff set them, anyone reads them, every change is logged', async () => {
     const admin = await member('Admin')
     const support = await member('Support')
+    // Around today: the server lists only windows near now.
+    const day = (offset: number) =>
+      `${new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10)}T04:00`
     const window = {
       kind: 'abundance',
-      start: '2026-10-13T04:00',
-      end: '2026-10-20T04:00',
+      start: day(-1),
+      end: day(6),
       multiplier: 2,
       dailyClaims: 3,
       version: '7.1',
@@ -833,7 +836,7 @@ describe('site settings, storage and the overview', () => {
     const set = (json: unknown) =>
       admin.client.json<StaffSiteResponse>('/api/staff/site', { method: 'PATCH', json })
     try {
-      expect((await read()).events).toEqual([])
+      expect((await read()).events).not.toContainEqual(window)
       // Defaults fill what the form leaves out.
       const site = await set({
         domainEvents: [{ kind: 'favor', start: '2026-10-26T04:00', end: '2026-11-02T04:00' }],
@@ -852,7 +855,8 @@ describe('site settings, storage and the overview', () => {
       expect((await set({ domainEvents: [window] })).domainEvents).toEqual([window])
       const response = await new Client().fetch('/api/domain-events')
       expect(response.headers.get('cache-control')).toBe('public, max-age=300')
-      expect(await response.json()).toEqual({ events: [window], observed: {} })
+      // Merged with the game data's runs on the server.
+      expect(((await response.json()) as DomainEventsResponse).events).toContainEqual(window)
       // The same list again changes and logs nothing.
       await set({ domainEvents: [window] })
 
@@ -872,7 +876,7 @@ describe('site settings, storage and the overview', () => {
     } finally {
       await set({ domainEvents: null })
     }
-    expect((await read()).events).toEqual([])
+    expect((await read()).events).not.toContainEqual(window)
     const audit = await admin.client.json<StaffAuditResponse>('/api/staff/audit?kind=site')
     expect(audit.rows.slice(0, 3).map((r) => r.action)).toEqual([
       'site.events',
