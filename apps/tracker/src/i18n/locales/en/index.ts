@@ -18,6 +18,12 @@ import achievements from './achievements.json'
 import planner from './planner.json'
 import farm from './farm.json'
 import staff from './staff.json'
+import snapshots from './snapshots.json'
+import transfer from './transfer.json'
+import wishes from './wishes.json'
+import anecdotes from './anecdotes.json'
+import share from './share.json'
+import ui from './ui.json'
 
 const messages = {
   common,
@@ -38,6 +44,12 @@ const messages = {
   planner,
   farm,
   staff,
+  snapshots,
+  transfer,
+  wishes,
+  anecdotes,
+  share,
+  ui,
 }
 
 export default messages
