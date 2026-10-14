@@ -413,7 +413,7 @@ const summary = computed(() => {
 
     <ul
       v-if="open"
-      class="grid grid-cols-1 gap-x-2 border-t border-border-subtle py-1 sm:grid-cols-2 xl:grid-cols-3"
+      class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-x-2 border-t border-border-subtle py-1"
       :aria-label="$t('planner.tasks.title')"
     >
       <li v-if="shown.length === 0" class="px-3 py-2 text-sm text-text-muted sm:col-span-full">
