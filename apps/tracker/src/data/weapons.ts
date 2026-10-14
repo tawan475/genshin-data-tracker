@@ -14,10 +14,12 @@
 
 import type { Good } from '@gdt/shared'
 import { keyToName } from '@/lib/format'
+import { characterName, gameName } from '@/i18n/game-names'
 import { levelCap } from '@/lib/level'
 import { weaponGameId, weaponMaxLevel, weaponMeta, type WeaponType } from './game-meta'
 import { compareText, normalizeSearch } from '@/lib/search'
 import { labelTable } from '@/i18n/labels'
+import { t } from '@/i18n'
 
 export type { WeaponType }
 
@@ -111,7 +113,11 @@ const SMALL_WORDS = /(?<= )(Of|The|And|An|In|To|For|From|On|At|By|With)(?= )/g
  * Harmonic Whimsy". (Apostrophes and hyphens are gone from GOOD keys.)
  */
 export function itemName(key: string): string {
-  return keyToName(key).replace(SMALL_WORDS, (word) => word.toLowerCase())
+  return gameName(
+    'weapons',
+    key,
+    keyToName(key).replace(SMALL_WORDS, (word) => word.toLowerCase()),
+  )
 }
 
 const normalize = normalizeSearch
@@ -176,7 +182,7 @@ export function buildArmory(good: Good, gameId: (key: string) => number = weapon
     }
     const name = itemName(w.key)
     const type = meta?.[1] ?? null
-    const ownerName = w.location ? keyToName(w.location) : ''
+    const ownerName = w.location ? characterName(w.location) : ''
     rows.set(id, {
       id,
       key: w.key,
@@ -274,10 +280,10 @@ export function weaponTitle(row: WeaponRow): string {
   return [
     row.name,
     `R${row.refinement}`,
-    `Lv ${row.level}/${levelCap(row.ascension, row.level)}`,
-    row.count > 1 ? `${row.count} copies` : '',
+    t('weapons.title.level', { level: row.level, cap: levelCap(row.ascension, row.level) }),
+    row.count > 1 ? t('weapons.title.copies', { n: row.count }, row.count) : '',
     row.ownerName,
-    row.lock ? 'Locked' : '',
+    row.lock ? t('weapons.title.locked') : '',
   ]
     .filter(Boolean)
     .join(' · ')
@@ -289,12 +295,48 @@ export type WeaponSort = 'quality' | 'level' | 'refinement' | 'count' | 'name' |
 export type SortDirection = 'asc' | 'desc'
 
 export const WEAPON_SORTS: { value: WeaponSort; label: string; natural: SortDirection }[] = [
-  { value: 'quality', label: 'Quality', natural: 'desc' },
-  { value: 'level', label: 'Level', natural: 'desc' },
-  { value: 'refinement', label: 'Refinement', natural: 'desc' },
-  { value: 'count', label: 'Copies', natural: 'desc' },
-  { value: 'name', label: 'Name', natural: 'asc' },
-  { value: 'type', label: 'Type', natural: 'asc' },
+  {
+    value: 'quality',
+    get label() {
+      return t('weapons.sort.quality')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'level',
+    get label() {
+      return t('weapons.sort.level')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'refinement',
+    get label() {
+      return t('weapons.sort.refinement')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'count',
+    get label() {
+      return t('weapons.sort.count')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'name',
+    get label() {
+      return t('weapons.sort.name')
+    },
+    natural: 'asc',
+  },
+  {
+    value: 'type',
+    get label() {
+      return t('weapons.sort.type')
+    },
+    natural: 'asc',
+  },
 ]
 
 export type RarityFilter = 'all' | 1 | 2 | 3 | 4 | 5
@@ -323,10 +365,30 @@ export const NO_WEAPON_FILTERS: WeaponFilters = {
 }
 
 export const LEVEL_OPTIONS: { value: LevelFilter; label: string }[] = [
-  { value: 'all', label: 'Level' },
-  { value: 'max', label: 'Max' },
-  { value: 'levelled', label: 'Levelled' },
-  { value: 'base', label: 'Lv 1' },
+  {
+    value: 'all',
+    get label() {
+      return t('weapons.levelFilter.all')
+    },
+  },
+  {
+    value: 'max',
+    get label() {
+      return t('weapons.levelFilter.max')
+    },
+  },
+  {
+    value: 'levelled',
+    get label() {
+      return t('weapons.levelFilter.levelled')
+    },
+  },
+  {
+    value: 'base',
+    get label() {
+      return t('weapons.levelFilter.base')
+    },
+  },
 ]
 
 export function hasWeaponFilters(f: WeaponFilters): boolean {

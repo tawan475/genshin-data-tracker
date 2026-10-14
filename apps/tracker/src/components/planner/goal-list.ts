@@ -7,6 +7,7 @@
  */
 
 import type { WeaponType } from '@gdt/game-data'
+import { t } from '@/i18n'
 import type { Element } from '@/data/game-meta'
 import { normalizeSearch } from '@/data/characters'
 import type { GoalEntry, ItemGoalView } from './model'
@@ -72,16 +73,20 @@ export function parseGoalToggles(raw: string | null): Pick<GoalFilters, GoalTogg
 
 export type GoalSort = 'name' | 'missing' | 'favorites' | 'priority'
 
-export const GOAL_SORTS: { value: GoalSort; label: string; title: string }[] = [
-  { value: 'name', label: 'Name', title: 'A to Z' },
-  { value: 'missing', label: 'Missing', title: 'Fewest items missing first' },
-  { value: 'favorites', label: 'Favorites', title: 'Favorites first' },
-  {
-    value: 'priority',
-    label: 'Priority',
-    title: 'Materials go to the top goals first: drag to reorder',
+const sortOption = (value: GoalSort) => ({
+  value,
+  get label() {
+    return t(`planner.sort.${value}.label`)
   },
-]
+  get title() {
+    return t(`planner.sort.${value}.title`)
+  },
+})
+
+/** The sorts (labels read where they render: they answer in the language on screen). */
+export const GOAL_SORTS: readonly { value: GoalSort; label: string; title: string }[] = (
+  ['name', 'missing', 'favorites', 'priority'] as const
+).map(sortOption)
 
 function statusMatches(status: GoalStatus, active: boolean, ready: boolean): boolean {
   if (status === 'ready') return active && ready

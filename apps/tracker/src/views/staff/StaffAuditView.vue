@@ -18,7 +18,15 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { api } from '@/api'
 import { useResource } from '@/data/use-resource'
-import { dateLocale, formatBytes, formatDateTime, formatFullDateTime, sameDay } from '@/lib/format'
+import { t } from '@/i18n'
+import {
+  dateLocale,
+  formatBytes,
+  formatDateTime,
+  formatFullDateTime,
+  formatNumber,
+  sameDay,
+} from '@/lib/format'
 
 /** What staff did, newest first: every dashboard write and every look at someone's data. */
 const route = useRoute()
@@ -60,18 +68,13 @@ const { data, error, loading, reload } = useResource(
 )
 
 const actorOptions = computed(() => [
-  { value: null, label: 'All staff' },
+  { value: null, label: t('staff.audit.allStaff') },
   ...(data.value?.actors ?? []).map((a) => ({ value: a.id, label: a.label })),
 ])
-const KIND_OPTIONS: { value: AuditKind | null; label: string }[] = [
-  { value: null, label: 'All actions' },
-  { value: 'views', label: 'Views of data' },
-  { value: 'deletes', label: 'Deletes' },
-  { value: 'users', label: 'Users' },
-  { value: 'data', label: 'Data' },
-  { value: 'roles', label: 'Roles' },
-  { value: 'site', label: 'Site' },
-]
+const kindOptions = computed<{ value: AuditKind | null; label: string }[]>(() => [
+  { value: null, label: t('staff.audit.kinds.all') },
+  ...AUDIT_KINDS.map((value) => ({ value, label: t(`staff.audit.kinds.${value}`) })),
+])
 
 function tone(action: string): BadgeTone {
   if (/delete/.test(action) || action === 'user.suspend') return 'danger'
@@ -94,28 +97,34 @@ function describe(row: AuditRow): string {
     case 'data.reset_key':
     case 'data.delete_account':
       parts.push([str(d.account), str(d.view)].filter(Boolean).join(' · '))
-      if (row.action === 'data.reset_key' && d.key === 'user') parts.push('all-accounts key')
+      if (row.action === 'data.reset_key' && d.key === 'user') {
+        parts.push(t('staff.audit.allAccountsKey'))
+      }
       break
     case 'data.delete': {
       const range =
         d.kind === 'range' && typeof d.from === 'number' && typeof d.to === 'number'
           ? ` · ${new Date(d.from).toLocaleDateString(dateLocale())}–${new Date(d.to - 1).toLocaleDateString(dateLocale())}`
           : d.kind === 'trash'
-            ? ' · trash'
+            ? ` · ${t('staff.audit.trash')}`
             : ''
       parts.push(
-        `${typeof d.snapshots === 'number' ? d.snapshots : '?'} snapshots, ${str(d.account)}${range}`,
+        t('staff.audit.deleted', {
+          n: typeof d.snapshots === 'number' ? formatNumber(d.snapshots) : '?',
+          account: str(d.account),
+          range,
+        }),
       )
       break
     }
     case 'data.quota':
-      parts.push(typeof d.bytes === 'number' ? formatBytes(d.bytes) : 'Default')
+      parts.push(typeof d.bytes === 'number' ? formatBytes(d.bytes) : t('staff.audit.default'))
       break
     case 'user.unlink':
       parts.push(str(d.provider))
       break
     case 'user.sessions':
-      parts.push(d.all ? 'Every device' : 'One device')
+      parts.push(d.all ? t('staff.audit.everyDevice') : t('staff.audit.oneDevice'))
       break
     case 'role.assign':
     case 'role.unassign':
@@ -148,13 +157,15 @@ function describe(row: AuditRow): string {
     case 'site.limits':
       parts.push(
         Object.entries(d)
-          .map(([k, v]) => `${k} ${v === null ? 'default' : String(v)}`)
+          .map(([k, v]) =>
+            v === null ? t('staff.audit.limitDefault', { key: k }) : `${k} ${String(v)}`,
+          )
           .join(', '),
       )
       break
   }
   if (str(d.reason)) parts.push(`“${str(d.reason)}”`)
-  if (typeof d.bulk === 'number') parts.push(`bulk of ${d.bulk}`)
+  if (typeof d.bulk === 'number') parts.push(t('staff.audit.bulk', { n: formatNumber(d.bulk) }))
   return parts.filter(Boolean).join(' · ')
 }
 
@@ -169,44 +180,54 @@ const pageCount = computed(() =>
 </script>
 
 <template>
-  <PageHeader title="Audit" />
+  <PageHeader :title="$t('staff.audit.title')" />
 
   <div class="flex flex-col gap-4">
-    <UiToolbar label="Filter audit log">
+    <UiToolbar :label="$t('staff.audit.filter')">
       <div class="flex flex-wrap items-center gap-2">
         <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
-          <span class="sr-only">Search</span>
+          <span class="sr-only">{{ $t('staff.common.search') }}</span>
           <Search
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
-          <UiInput v-model="q" type="search" class="pl-9" placeholder="User, staff or detail" />
+          <UiInput
+            v-model="q"
+            type="search"
+            class="pl-9"
+            :placeholder="$t('staff.audit.searchPlaceholder')"
+          />
         </label>
         <label class="min-w-0 flex-1 sm:w-44 sm:flex-none">
-          <span class="sr-only">Staff</span>
+          <span class="sr-only">{{ $t('staff.audit.staff') }}</span>
           <UiSelect v-model="actor" :options="actorOptions" />
         </label>
         <label class="min-w-0 flex-1 sm:w-44 sm:flex-none">
-          <span class="sr-only">Action</span>
-          <UiSelect v-model="kind" :options="KIND_OPTIONS" />
+          <span class="sr-only">{{ $t('staff.audit.action') }}</span>
+          <UiSelect v-model="kind" :options="kindOptions" />
         </label>
       </div>
       <div v-if="user" class="flex flex-wrap gap-2">
-        <FilterChip pressed title="Show every user" @toggle="user = null">
-          User #{{ user }}
+        <FilterChip pressed :title="$t('staff.audit.showEveryUser')" @toggle="user = null">
+          {{ $t('staff.audit.userChip', { id: user }) }}
           <X class="size-4" aria-hidden="true" />
         </FilterChip>
       </div>
     </UiToolbar>
 
-    <UiError v-if="error && !data" :error="error" title="Could not load" @retry="reload" />
+    <UiError
+      v-if="error && !data"
+      :error="error"
+      :title="$t('staff.common.couldNotLoad')"
+      @retry="reload"
+    />
 
     <div v-else-if="!data" class="flex flex-col gap-2" aria-busy="true">
       <UiSkeleton v-for="n in 8" :key="n" class="h-11" />
     </div>
 
     <UiPanel v-else-if="data.rows.length === 0" flush>
-      <UiEmpty title="Nothing logged">
+      <UiEmpty :title="$t('staff.audit.nothingLogged')">
         <template #icon><ScrollText aria-hidden="true" /></template>
       </UiEmpty>
     </UiPanel>
@@ -219,11 +240,21 @@ const pageCount = computed(() =>
       <table class="w-full min-w-[54rem] text-sm">
         <thead class="border-b border-border-default bg-surface-overlay/50 text-text-secondary">
           <tr>
-            <th scope="col" class="px-3 py-2 text-left font-medium">When</th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">Staff</th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">Action</th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">User</th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">Detail</th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.audit.when') }}
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.audit.staff') }}
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.audit.action') }}
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.common.user') }}
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.audit.detail') }}
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-border-subtle">

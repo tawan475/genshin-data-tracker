@@ -24,7 +24,7 @@ const rest = computed(() => props.sets.length - top.value.length)
   <div
     class="scroll-hide scroll-fade-x -my-1 flex min-w-0 items-center gap-2 overflow-x-auto px-0.5 py-1 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible"
     role="group"
-    aria-label="Top sets"
+    :aria-label="$t('artifacts.topSets.label')"
   >
     <button
       v-for="set in top"
@@ -47,7 +47,7 @@ const rest = computed(() => props.sets.length - top.value.length)
     <span
       v-if="rest > 0"
       class="tabular shrink-0 font-mono text-sm text-text-muted"
-      :title="`${rest} more sets`"
+      :title="$t('artifacts.topSets.more', { n: formatNumber(rest) })"
     >
       +{{ formatNumber(rest) }}
     </span>

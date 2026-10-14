@@ -14,6 +14,7 @@
  */
 
 import type { TimelineGroupBy } from '@gdt/shared'
+import { t } from '@/i18n'
 import { dateLocale } from '@/lib/format'
 
 export type ChartRange =
@@ -51,15 +52,31 @@ const RANGE_MS: Record<ChartRange, number> = {
 /** Shortest first. */
 export const CHART_RANGES = Object.keys(RANGE_MS) as ChartRange[]
 
-/** The range select's layout: hours, days, then the long ranges on their own. */
-export const CHART_RANGE_GROUPS: { label: string | null; ranges: ChartRange[] }[] = [
-  { label: 'Hours', ranges: ['1h', '3h', '6h', '12h'] },
-  { label: 'Days', ranges: ['1d', '3d', '7d', '14d', '30d'] },
+/**
+ * The range select's layout: hours, days, then the long ranges on their own.
+ * The group labels read in the language on screen when they are read.
+ */
+export const CHART_RANGE_GROUPS: { readonly label: string | null; ranges: ChartRange[] }[] = [
+  {
+    get label() {
+      return t('progression.range.hours')
+    },
+    ranges: ['1h', '3h', '6h', '12h'],
+  },
+  {
+    get label() {
+      return t('progression.range.days')
+    },
+    ranges: ['1d', '3d', '7d', '14d', '30d'],
+  },
   { label: null, ranges: ['1y', 'all'] },
 ]
 
+/** "30d", "1y", "All" (Chinese "30天", "1年", "全部"). */
 export function rangeLabel(range: ChartRange): string {
-  return range === 'all' ? 'All' : range
+  if (range === 'all') return t('progression.range.all')
+  const unit = range.slice(-1) as 'h' | 'd' | 'y'
+  return t(`progression.range.${unit}`, { n: Number.parseInt(range, 10) })
 }
 
 export function isChartRange(value: unknown): value is ChartRange {

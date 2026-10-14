@@ -1,1 +1,67 @@
-{}
+{
+  "title": {
+    "level": "Lv {level}/{cap}",
+    "copies": "{n} copy | {n} copies",
+    "locked": "Locked"
+  },
+  "sort": {
+    "quality": "Quality",
+    "level": "Level",
+    "refinement": "Refinement",
+    "count": "Copies",
+    "name": "Name",
+    "type": "Type"
+  },
+  "levelFilter": {
+    "all": "Level",
+    "max": "Max",
+    "levelled": "Levelled",
+    "base": "Lv 1"
+  },
+  "refine": {
+    "spare": "{n} spare",
+    "possible": "possible: {title}"
+  },
+  "group": {
+    "copies": "{count} copy | {count} copies"
+  },
+  "bag": {
+    "notInData": "{copies} · Not in the game data yet"
+  },
+  "toolbar": {
+    "bag": "Bag",
+    "byWeapon": "By weapon",
+    "list": "List",
+    "status": "Status",
+    "equipped": "Equipped",
+    "unused": "Unused",
+    "lock": "Lock",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "label": "Filter weapons",
+    "searchTitle": "Weapon, type or character",
+    "chips": "Type, rarity and refinement",
+    "noneInCapture": "None in this capture",
+    "refinableTitle": "Weapons whose spare copies could refine an equipped one",
+    "refinable": "Refinable"
+  },
+  "detail": {
+    "refinementTitle": "Refinement Rank {rank} of {max}",
+    "unequipped": "Unequipped",
+    "copies": "{n} copy | {n} copies",
+    "equipped": "{n} equipped",
+    "spareCopies": "{n} spare copy | {n} spare copies"
+  },
+  "table": {
+    "qualityTitle": "Quality: rarity, level, refinement, newest",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Kinds",
+    "kindsTitle": "Different weapons",
+    "unused5": "Unused 5★",
+    "refinableTitle": "Spare copies could refine an equipped one",
+    "empty": "No weapons",
+    "pages": "Weapon pages"
+  }
+}

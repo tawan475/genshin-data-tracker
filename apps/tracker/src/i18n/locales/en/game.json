@@ -31,7 +31,15 @@
     "anemo_dmg_": "Anemo",
     "geo_dmg_": "Geo",
     "dendro_dmg_": "Dendro",
-    "physical_dmg_": "Physical"
+    "physical_dmg_": "Physical",
+    "critRate_": "CRIT Rate",
+    "critDMG_": "CRIT DMG",
+    "hp": "HP",
+    "hp_": "HP%",
+    "atk": "ATK",
+    "atk_": "ATK%",
+    "def": "DEF",
+    "def_": "DEF%"
   },
   "statTiny": {
     "critRate_": "CR",
@@ -59,8 +67,6 @@
     "goblet": "Goblet of Eonothem",
     "circlet": "Circlet of Logos"
   },
-  "element": "Element",
-  "weaponType": "Weapon type",
   "level": "Lv.",
   "levelN": "Lv. {n}",
   "constellation": "Constellation",
@@ -96,5 +102,23 @@
   "rarity": "Rarity",
   "traveler": "Traveler",
   "cv": "CV",
-  "rv": "RV"
+  "rv": "RV",
+  "elementTitle": "Element",
+  "weaponTypeTitle": "Weapon type",
+  "element": {
+    "pyro": "Pyro",
+    "hydro": "Hydro",
+    "anemo": "Anemo",
+    "electro": "Electro",
+    "dendro": "Dendro",
+    "cryo": "Cryo",
+    "geo": "Geo"
+  },
+  "weaponType": {
+    "sword": "Sword",
+    "claymore": "Claymore",
+    "polearm": "Polearm",
+    "bow": "Bow",
+    "catalyst": "Catalyst"
+  }
 }

@@ -4,6 +4,7 @@ import { useEventListener } from '@vueuse/core'
 import { CircleCheck, Download, Share, SquarePlus } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import { t } from '@/i18n'
 import { installPrompt, isStandalone } from '@/pwa/register'
 import { useFeedback } from '@/stores/feedback'
 import BuildInfo from './BuildInfo.vue'
@@ -40,7 +41,7 @@ async function install() {
     const outcome = result?.outcome ?? (await event.userChoice)?.outcome
     if (outcome === 'accepted') installedNow.value = true
   } catch (error) {
-    feedback.error('Could not open the install prompt', error)
+    feedback.error(t('settings.app.installFailed'), error)
   } finally {
     // The browser lets each prompt event be used once.
     installPrompt.value = null
@@ -50,52 +51,61 @@ async function install() {
 </script>
 
 <template>
-  <UiPanel title="App">
+  <UiPanel :title="$t('settings.app.title')">
     <div class="flex flex-col gap-6">
       <div>
-        <h3 class="font-display text-lg font-bold">Install</h3>
+        <h3 class="font-display text-lg font-bold">{{ $t('settings.app.install') }}</h3>
 
         <p v-if="standalone" class="mt-3 flex items-center gap-2 text-success-text">
           <CircleCheck class="size-5 shrink-0" aria-hidden="true" />
-          Installed
+          {{ $t('settings.app.installed') }}
         </p>
         <p v-else-if="installedNow" class="mt-3 flex items-center gap-2 text-success-text">
           <CircleCheck class="size-5 shrink-0" aria-hidden="true" />
-          Installed
+          {{ $t('settings.app.installed') }}
         </p>
         <div v-else-if="installPrompt" class="mt-3">
           <UiButton :loading="installing" @click="install">
             <Download v-if="!installing" class="size-4" aria-hidden="true" />
-            Install app
+            {{ $t('settings.app.installApp') }}
           </UiButton>
         </div>
         <ol v-else-if="ios" class="mt-3 flex flex-col gap-2 text-text-secondary">
           <li class="flex gap-3">
             <span class="tabular font-mono text-sm leading-6 text-text-muted">1</span>
-            <span>
-              Tap
-              <Share class="inline size-5 align-text-bottom text-text-primary" aria-hidden="true" />
-              <span class="font-medium text-text-primary">Share</span>.
-            </span>
+            <i18n-t keypath="settings.app.iosShare" tag="span">
+              <template #icon>
+                <Share
+                  class="inline size-5 align-text-bottom text-text-primary"
+                  aria-hidden="true"
+                />
+              </template>
+              <template #share>
+                <span class="font-medium text-text-primary">{{
+                  $t('settings.app.iosShareLabel')
+                }}</span>
+              </template>
+            </i18n-t>
           </li>
           <li class="flex gap-3">
             <span class="tabular font-mono text-sm leading-6 text-text-muted">2</span>
-            <span>
-              then
-              <SquarePlus
-                class="inline size-5 align-text-bottom text-text-primary"
-                aria-hidden="true"
-              />
-              <span class="font-medium text-text-primary">Add to Home Screen</span>.
-            </span>
+            <i18n-t keypath="settings.app.iosAdd" tag="span">
+              <template #icon>
+                <SquarePlus
+                  class="inline size-5 align-text-bottom text-text-primary"
+                  aria-hidden="true"
+                />
+              </template>
+              <template #add>
+                <span class="font-medium text-text-primary">{{
+                  $t('settings.app.iosAddLabel')
+                }}</span>
+              </template>
+            </i18n-t>
           </li>
         </ol>
-        <p
-          v-else
-          class="mt-3 text-sm text-text-muted"
-          title="Chrome or Edge: install icon in the address bar"
-        >
-          Use your browser's install option
+        <p v-else class="mt-3 text-sm text-text-muted" :title="$t('settings.app.browserTitle')">
+          {{ $t('settings.app.browser') }}
         </p>
       </div>
 

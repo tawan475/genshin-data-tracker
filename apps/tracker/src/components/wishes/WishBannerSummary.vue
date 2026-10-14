@@ -23,12 +23,12 @@ const info = computed(() => bannerInfo(props.stats.banner))
   >
     <div class="flex min-w-0 items-center gap-2.5 border-b border-border-default px-4 py-3 sm:px-5">
       <h2 class="min-w-0 truncate text-base font-semibold">{{ info.title }}</h2>
-      <span class="tabular shrink-0 font-mono text-xs text-text-muted"
-        >{{ formatNumber(stats.total) }} pulls</span
-      >
-      <RouterLink :to="to" class="ml-auto shrink-0 text-xs text-accent-text hover:underline"
-        >All wishes</RouterLink
-      >
+      <span class="tabular shrink-0 font-mono text-xs text-text-muted">{{
+        $t('wishes.pulls', { n: formatNumber(stats.total) })
+      }}</span>
+      <RouterLink :to="to" class="ml-auto shrink-0 text-xs text-accent-text hover:underline">{{
+        $t('wishes.allWishes')
+      }}</RouterLink>
     </div>
     <!-- A 1px gap on the border colour draws the line between the halves, side by side or stacked. -->
     <div class="flex flex-wrap gap-px overflow-hidden rounded-b-xl bg-border-default">

@@ -147,6 +147,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import { t } from '@/i18n'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
@@ -248,7 +249,9 @@ const condensed = computed(() => {
 const plannerUrl = computed(
   () => router.resolve({ name: 'account-planner', params: { accountId: account.value.id } }).href,
 )
-const accountLabel = computed(() => account.value.name ?? account.value.uid ?? 'Genshin account')
+const accountLabel = computed(
+  () => account.value.name ?? account.value.uid ?? t('planner.view.accountFallback'),
+)
 
 const sameList = (a: readonly unknown[], b: readonly unknown[]) =>
   a.length === b.length && a.every((x, i) => x === b[i])
@@ -508,10 +511,10 @@ const itemsInStock = computed(() => {
 // ------------------------------------------------------------------ tabs
 
 type Tab = 'farm' | 'goals'
-const TABS: { value: Tab; label: string }[] = [
-  { value: 'farm', label: 'Farm' },
-  { value: 'goals', label: 'Goals' },
-]
+const TABS = computed<{ value: Tab; label: string }[]>(() => [
+  { value: 'farm', label: t('planner.view.farm') },
+  { value: 'goals', label: t('planner.view.goals') },
+])
 const tab = ref<Tab>(readStorage('planner:tab') === 'goals' ? 'goals' : 'farm')
 watch(tab, (value) => writeStorage('planner:tab', value))
 
@@ -818,10 +821,10 @@ function pickAll() {
   picked.value = allPicked.value ? new Set() : new Set(pendingEntries.value.map((e) => e.id))
 }
 const bulkPreset = ref<PresetId | ''>('')
-const presetChoices = [
-  { value: '' as const, label: 'Preset' },
+const presetChoices = computed(() => [
+  { value: '' as const, label: t('planner.picker.preset') },
   ...PRESETS.map((p) => ({ value: p.id, label: p.label })),
-]
+])
 
 /** Stored targets of some cards, for an Undo. */
 function snapshotOf(list: readonly GoalEntry[]): PlannerTarget[] {
@@ -833,7 +836,10 @@ function undoToast(title: string, before: PlannerTarget[]) {
   feedback.toast({
     tone: 'info',
     title,
-    action: { label: 'Undo', run: () => store.change(before.map((t) => upsert(inputOf(t)))) },
+    action: {
+      label: t('planner.common.undo'),
+      run: () => store.change(before.map((x) => upsert(inputOf(x)))),
+    },
   })
 }
 
@@ -853,7 +859,10 @@ watch(bulkPreset, (id) => {
       return upsert(characterInput(c, applyPreset(preset, c.current, c.stored, phases)))
     }),
   )
-  undoToast(`${preset.label}: ${formatNumber(list.length)} goals`, before)
+  undoToast(
+    t('planner.view.presetApplied', { preset: preset.label, n: formatNumber(list.length) }),
+    before,
+  )
 })
 
 function bulkActive(active: boolean) {
@@ -861,13 +870,21 @@ function bulkActive(active: boolean) {
   if (list.length === 0) return
   const before = snapshotOf(list)
   store.change(list.flatMap((e) => entryInputs(e, { active }).map(upsert)))
-  undoToast(`${formatNumber(list.length)} ${active ? 'counted' : 'paused'}`, before)
+  undoToast(
+    t(active ? 'planner.view.bulkCounted' : 'planner.view.bulkPaused', {
+      n: formatNumber(list.length),
+    }),
+    before,
+  )
 }
 
 function bulkRemove() {
   const list = pickedEntries.value
   if (list.length === 0) return
-  void removeGoals(list.flatMap(entryRefs), `${formatNumber(list.length)} goals removed`)
+  void removeGoals(
+    list.flatMap(entryRefs),
+    t('planner.view.goalsRemoved', { n: formatNumber(list.length) }),
+  )
   selecting.value = false
 }
 
@@ -914,8 +931,11 @@ function pauseGoal(id: string) {
   const name = entry?.name ?? board.value?.items.find((i) => i.id === id)?.name ?? before[0]!.key
   feedback.toast({
     tone: 'info',
-    title: `${name} paused`,
-    action: { label: 'Undo', run: () => store.change(before.map((t) => upsert(inputOf(t)))) },
+    title: t('planner.view.paused', { name }),
+    action: {
+      label: t('planner.common.undo'),
+      run: () => store.change(before.map((x) => upsert(inputOf(x)))),
+    },
   })
 }
 
@@ -1049,10 +1069,10 @@ async function confirmDone() {
   feedback.toast(
     {
       tone: 'success',
-      title: `${request.entry.name}: ${request.label} done`,
+      title: t('planner.view.partDone', { name: request.entry.name, label: request.label }),
       hint: `${request.from} → ${request.to}`,
       action: {
-        label: 'Undo',
+        label: t('planner.common.undo'),
         run: () =>
           void state
             .commit({
@@ -1080,10 +1100,12 @@ async function crafted(rows: CraftRow[]) {
   feedback.toast(
     {
       tone: 'success',
-      title: one ? 'Crafting step done' : `${formatNumber(rows.length)} crafting steps done`,
+      title: one
+        ? t('planner.view.craftStepDone')
+        : t('planner.view.craftStepsDone', { n: formatNumber(rows.length) }),
       ...(one ? { hint: rowText(one, materialName) } : {}),
       action: {
-        label: 'Undo',
+        label: t('planner.common.undo'),
         run: () => void state.commit({ inventory: craftChanges(rows, true) }).catch(() => {}),
       },
     },
@@ -1097,10 +1119,10 @@ function hideCrafting() {
   feedback.toast(
     {
       tone: 'info',
-      title: 'Crafting hidden',
-      hint: 'Planner settings: Crafting checklist',
+      title: t('planner.view.craftingHidden'),
+      hint: t('planner.view.craftingHiddenHint'),
       action: {
-        label: 'Undo',
+        label: t('planner.common.undo'),
         run: () => void saveSettings({ planner: { crafting: true } }),
       },
     },
@@ -1214,7 +1236,7 @@ async function removeGoals(refs: TargetRef[], title: string) {
       tone: 'info',
       title,
       action: {
-        label: 'Undo',
+        label: t('planner.common.undo'),
         run: () =>
           void (async () => {
             await store.commit(removed.map((t) => upsert(inputOf(t))))
@@ -1230,7 +1252,7 @@ async function removeGoals(refs: TargetRef[], title: string) {
 async function removeItem(ops: Ops) {
   const refs = ops.flatMap((op) => (op.kind === 'remove' ? [op.ref] : []))
   closeEditor()
-  await removeGoals(refs, 'Item removed')
+  await removeGoals(refs, t('planner.view.itemRemoved'))
 }
 
 // The modal saves as you go: each change is written at once (sent after a short pause).
@@ -1282,7 +1304,7 @@ function addWeaponGoal(key: string) {
 function removeWeaponGoal(w: WeaponGoalView) {
   void removeGoals(
     [{ kind: 'weapon', key: w.key, owner: w.owner, id: w.goalId }],
-    `${w.name} removed`,
+    t('planner.view.removed', { name: w.name }),
   )
 }
 
@@ -1290,7 +1312,7 @@ function removeEntry() {
   const e = editorEntry.value
   if (!e) return
   closeEditor()
-  void removeGoals(entryRefs(e), `${e.name} removed`)
+  void removeGoals(entryRefs(e), t('planner.view.removed', { name: e.name }))
 }
 
 async function replaceWith(real: string) {
@@ -1369,7 +1391,7 @@ function addCharacters(keys: string[], presetId: PresetId) {
   void addGoals(
     ops,
     keys.length === 1 ? characterGoalId(keys[0]!) : null,
-    `Added ${formatNumber(keys.length)} goals`,
+    t('planner.view.added', { n: formatNumber(keys.length) }),
   )
 }
 
@@ -1415,7 +1437,7 @@ async function importSeelie(writes: SeelieWrites) {
     if (writes.server) await accounts.update(account.value.id, { server: writes.server })
   } catch (cause) {
     // The stores say what went wrong; the rest (settings, account) here.
-    if (!(cause instanceof ApiRequestError)) feedback.error('Not imported', cause)
+    if (!(cause instanceof ApiRequestError)) feedback.error(t('planner.view.notImported'), cause)
     return
   } finally {
     importing.value = false
@@ -1423,14 +1445,17 @@ async function importSeelie(writes: SeelieWrites) {
   importOpen.value = false
   const goals = writes.targets.filter((op) => op.kind === 'upsert').length
   const parts = [
-    goals && `${formatNumber(goals)} goals`,
-    writes.current.length && `${formatNumber(writes.current.length)} current`,
-    writes.inventory.length && `${formatNumber(writes.inventory.length)} items`,
-    writes.tasks.length && `${formatNumber(writes.tasks.length)} tasks`,
+    goals && t('planner.view.importedGoals', { n: formatNumber(goals) }),
+    writes.current.length &&
+      t('planner.view.importedCurrent', { n: formatNumber(writes.current.length) }),
+    writes.inventory.length &&
+      t('planner.view.importedItems', { n: formatNumber(writes.inventory.length) }),
+    writes.tasks.length &&
+      t('planner.view.importedTasks', { n: formatNumber(writes.tasks.length) }),
   ].filter(Boolean)
   feedback.toast({
     tone: 'success',
-    title: 'Imported from Seelie',
+    title: t('planner.view.imported'),
     ...(parts.length ? { detail: parts.join(' · ') } : {}),
   })
   tab.value = 'farm'
@@ -1448,7 +1473,7 @@ async function exportSeelie() {
   try {
     module = await import('@/data/seelie-export')
   } catch (cause) {
-    feedback.error('Not exported', cause)
+    feedback.error(t('planner.view.notExported'), cause)
     return
   }
   const { buildSeelieExport, seelieExportFileName } = module
@@ -1478,7 +1503,7 @@ async function exportSeelie() {
   link.click()
   link.remove()
   setTimeout(() => URL.revokeObjectURL(link.href), 10_000)
-  feedback.toast({ tone: 'success', title: 'Exported for Seelie', hint: link.download })
+  feedback.toast({ tone: 'success', title: t('planner.view.exported'), hint: link.download })
 }
 
 watch(accountId, () => {
@@ -1514,9 +1539,9 @@ const hasGoals = computed(
   () => (board.value?.entries.length ?? 0) + (board.value?.items.length ?? 0) > 0,
 )
 const settingsLabel = computed(() => {
-  const parts = ['Planner settings']
-  if (ar.value !== null) parts.push(`AR ${ar.value}`)
-  if (wl.value !== null) parts.push(`WL ${wl.value}`)
+  const parts = [t('planner.settings.title')]
+  if (ar.value !== null) parts.push(t('farm.lock.ar', { ar: ar.value }))
+  if (wl.value !== null) parts.push(t('farm.lock.wl', { wl: wl.value }))
   return parts.join(' · ')
 })
 /** Open once the data is in, and only on a card that exists (a stale link does nothing). */
@@ -1536,45 +1561,49 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
 </script>
 
 <template>
-  <PageHeader title="Planner">
+  <PageHeader :title="$t('planner.view.title')">
     <template v-if="data" #meta>
       <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-secondary">
-        <UiSegmented v-if="board && hasGoals" v-model="tab" :options="TABS" label="View" />
+        <UiSegmented
+          v-if="board && hasGoals"
+          v-model="tab"
+          :options="TABS"
+          :label="$t('planner.view.view')"
+        />
         <p v-if="newest && hasCapture" class="flex items-center gap-1.5">
           <Clock class="size-4" aria-hidden="true" />
-          <span class="sr-only">Newest capture</span>
+          <span class="sr-only">{{ $t('planner.view.newest') }}</span>
           <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
         </p>
         <p v-else class="flex items-center gap-1.5">
           <Info class="size-4" aria-hidden="true" />
-          No capture: counts are yours
-          <RouterLink :to="importTo" class="font-medium text-accent-text hover:underline"
-            >Import</RouterLink
-          >
+          {{ $t('planner.view.noCapture') }}
+          <RouterLink :to="importTo" class="font-medium text-accent-text hover:underline">{{
+            $t('planner.view.import')
+          }}</RouterLink>
         </p>
         <p v-if="replaced" class="flex items-center gap-1.5 text-accent-text">
           <Info class="size-4" aria-hidden="true" />
-          {{ formatNumber(replaced) }} hand {{ replaced === 1 ? 'edit' : 'edits' }} replaced by the
-          capture
+          {{ $t('planner.view.replaced', { n: formatNumber(replaced) }, replaced) }}
           <button
             type="button"
             class="rounded px-1.5 font-medium hover:bg-surface-overlay"
             @click="state.prune()"
           >
-            OK
+            {{ $t('planner.view.ok') }}
           </button>
         </p>
       </div>
     </template>
     <template v-if="board" #actions>
       <template v-if="hasGoals">
-        <UiButton title="Import from or export to Seelie" @click="importOpen = true">
+        <UiButton :title="$t('planner.view.seelieTitle')" @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
           Seelie
         </UiButton>
-        <UiButton variant="primary" title="Add goals" @click="openPicker()">
+        <UiButton variant="primary" :title="$t('planner.view.addGoals')" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
-          Add
+          {{ $t('planner.picker.add') }}
         </UiButton>
       </template>
       <UiIconButton :label="settingsLabel" @click="settingsOpen = true">
@@ -1585,7 +1614,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
 
   <UiError
     v-if="loadError && !board"
-    title="Could not load the planner"
+    :title="$t('planner.view.loadError')"
     :error="loadError"
     @retry="
       resource.error.value ? resource.reload() : store.error.value ? store.reload() : state.reload()
@@ -1629,19 +1658,19 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
     </div>
 
     <UiPanel v-if="!hasGoals" flush>
-      <UiEmpty title="No goals">
+      <UiEmpty :title="$t('planner.view.noGoals')">
         <template #icon><Target aria-hidden="true" /></template>
         <UiButton variant="primary" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
-          Add goals
+          {{ $t('planner.view.addGoals') }}
         </UiButton>
         <UiButton @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
-          Import from Seelie
+          {{ $t('planner.view.importSeelie') }}
         </UiButton>
         <UiButton v-if="!hasCapture" :to="importTo">
           <Upload class="size-4" aria-hidden="true" />
-          Import a capture
+          {{ $t('planner.view.importCapture') }}
         </UiButton>
       </UiEmpty>
     </UiPanel>
@@ -1703,7 +1732,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <ul
             class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary"
-            aria-label="Readiness"
+            :aria-label="$t('planner.view.readiness')"
           >
             <li v-for="s in LEGEND" :key="s.label" class="inline-flex items-center gap-1.5">
               <span class="size-2 rounded-full" :class="s.dot" aria-hidden="true" />
@@ -1716,11 +1745,11 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
             variant="ghost"
             size="sm"
             :aria-pressed="selecting"
-            title="Pick goals to change together"
+            :title="$t('planner.view.selectTitle')"
             @click="selecting = !selecting"
           >
             <CheckSquare class="size-4" aria-hidden="true" />
-            Select
+            {{ $t('planner.view.select') }}
           </UiButton>
         </div>
 
@@ -1728,31 +1757,32 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           v-if="selecting"
           class="sticky top-[4.5rem] z-20 flex flex-wrap items-center gap-2 rounded-xl border border-border-strong bg-surface-raised/95 px-2 py-2 shadow-overlay backdrop-blur"
           role="toolbar"
-          aria-label="Selected goals"
+          :aria-label="$t('planner.view.selected')"
         >
           <span
             class="tabular inline-flex min-w-8 items-center justify-center rounded-md bg-accent/15 px-2 font-mono text-sm font-semibold text-accent-text"
             role="status"
-            :title="`${formatNumber(picked.size)} selected`"
-            >{{ formatNumber(picked.size) }}<span class="sr-only"> selected</span></span
+            :title="$t('planner.view.selectedCount', { n: formatNumber(picked.size) })"
+            >{{ formatNumber(picked.size)
+            }}<span class="sr-only"> {{ $t('planner.view.selectedSr') }}</span></span
           >
           <UiButton variant="ghost" size="sm" @click="pickAll">
-            {{ allPicked ? 'None' : 'All' }}
+            {{ allPicked ? $t('planner.view.pickNone') : $t('planner.view.pickAll') }}
           </UiButton>
           <UiSelect
             v-model="bulkPreset"
             :options="presetChoices"
             class="w-36"
-            aria-label="Apply a preset"
+            :aria-label="$t('planner.view.applyPreset')"
             :disabled="picked.size === 0"
           />
           <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(false)">
             <EyeOff class="size-4" aria-hidden="true" />
-            Pause
+            {{ $t('planner.view.pause') }}
           </UiButton>
           <UiButton size="sm" :disabled="picked.size === 0" @click="bulkActive(true)">
             <Eye class="size-4" aria-hidden="true" />
-            Count
+            {{ $t('planner.view.count') }}
           </UiButton>
           <UiButton
             size="sm"
@@ -1762,24 +1792,28 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
             @click="bulkRemove"
           >
             <Trash2 class="size-4" aria-hidden="true" />
-            Remove
+            {{ $t('planner.common.remove') }}
           </UiButton>
-          <UiIconButton label="Done selecting" class="ml-auto" @click="selecting = false">
+          <UiIconButton
+            :label="$t('planner.view.doneSelecting')"
+            class="ml-auto"
+            @click="selecting = false"
+          >
             <X class="size-5" aria-hidden="true" />
           </UiIconButton>
         </div>
 
         <UiPanel v-if="matching.length === 0 && shownItems.length === 0" flush>
-          <UiEmpty title="No matches">
+          <UiEmpty :title="$t('planner.common.noMatches')">
             <template #icon><SearchX aria-hidden="true" /></template>
-            <UiButton @click="clearFilters">Clear</UiButton>
+            <UiButton @click="clearFilters">{{ $t('planner.common.clear') }}</UiButton>
           </UiEmpty>
         </UiPanel>
 
         <ul
           v-if="pendingEntries.length"
           class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
-          aria-label="Goals"
+          :aria-label="$t('planner.view.goals')"
         >
           <li v-for="entry in shownPending" :key="entry.id" class="flex">
             <GoalCard
@@ -1818,14 +1852,14 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           @add="openPicker('item')"
         />
 
-        <section v-if="doneEntries.length" aria-label="Done">
+        <section v-if="doneEntries.length" :aria-label="$t('planner.view.done')">
           <button
             type="button"
             class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-text-secondary hover:text-text-primary"
             :aria-expanded="showDone"
             @click="showDone = !showDone"
           >
-            Done
+            {{ $t('planner.view.done') }}
             <span class="tabular font-mono font-normal text-text-muted">{{
               doneEntries.length
             }}</span>
@@ -1833,7 +1867,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           <ul
             v-if="showDone"
             class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
-            aria-label="Done goals"
+            :aria-label="$t('planner.view.doneGoals')"
           >
             <li v-for="entry in doneEntries" :key="entry.id" class="flex">
               <GoalCard
@@ -1958,7 +1992,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
     />
   </template>
 
-  <div v-else class="flex flex-col gap-4" aria-busy="true" aria-label="Loading planner">
+  <div v-else class="flex flex-col gap-4" aria-busy="true" :aria-label="$t('planner.view.loading')">
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
       <UiSkeleton v-for="n in 3" :key="n" class="h-[4.5rem]" />
     </div>

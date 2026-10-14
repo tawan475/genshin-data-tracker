@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { ArrowUp, Backpack, Layers, List, Search } from 'lucide-vue-next'
+import { t } from '@/i18n'
 import SortControl from '@/components/characters/SortControl.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -49,24 +51,24 @@ const RARITY_TEXT: Record<number, string> = {
   2: 'text-rarity-2',
   1: 'text-rarity-1',
 }
-const VIEWS: SegmentedOption<WeaponView>[] = [
-  { value: 'bag', label: 'Bag', icon: Backpack },
-  { value: 'weapon', label: 'By weapon', icon: Layers },
-  { value: 'list', label: 'List', icon: List },
-]
-const statusOptions = [
-  { value: 'all' as const, label: 'Status' },
-  { value: 'equipped' as const, label: 'Equipped' },
-  { value: 'unequipped' as const, label: 'Unused' },
-]
-const lockOptions = [
-  { value: 'all' as const, label: 'Lock' },
-  { value: 'locked' as const, label: 'Locked' },
-  { value: 'unlocked' as const, label: 'Unlocked' },
-]
+const VIEWS = computed<SegmentedOption<WeaponView>[]>(() => [
+  { value: 'bag', label: t('weapons.toolbar.bag'), icon: Backpack },
+  { value: 'weapon', label: t('weapons.toolbar.byWeapon'), icon: Layers },
+  { value: 'list', label: t('weapons.toolbar.list'), icon: List },
+])
+const statusOptions = computed(() => [
+  { value: 'all' as const, label: t('weapons.toolbar.status') },
+  { value: 'equipped' as const, label: t('weapons.toolbar.equipped') },
+  { value: 'unequipped' as const, label: t('weapons.toolbar.unused') },
+])
+const lockOptions = computed(() => [
+  { value: 'all' as const, label: t('weapons.toolbar.lock') },
+  { value: 'locked' as const, label: t('weapons.toolbar.locked') },
+  { value: 'unlocked' as const, label: t('weapons.toolbar.unlocked') },
+])
 
-function toggleType(t: WeaponType) {
-  filters.value.type = filters.value.type === t ? 'all' : t
+function toggleType(type: WeaponType) {
+  filters.value.type = filters.value.type === type ? 'all' : type
 }
 function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
   filters.value.rarity = filters.value.rarity === r ? 'all' : r
@@ -74,10 +76,10 @@ function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
 </script>
 
 <template>
-  <UiToolbar label="Filter weapons">
+  <UiToolbar :label="$t('weapons.toolbar.label')">
     <div class="flex flex-wrap items-center gap-2">
       <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
-        <span class="sr-only">Search</span>
+        <span class="sr-only">{{ $t('characters.toolbar.search') }}</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
@@ -86,8 +88,8 @@ function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
           v-model="filters.query"
           type="search"
           class="pl-9"
-          placeholder="Search"
-          title="Weapon, type or character"
+          :placeholder="$t('characters.toolbar.search')"
+          :title="$t('weapons.toolbar.searchTitle')"
           autocomplete="off"
         />
       </label>
@@ -97,13 +99,18 @@ function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
         class="min-w-0 flex-1 sm:w-48 sm:flex-none"
         :options="WEAPON_SORTS"
       />
-      <UiSegmented v-model="view" :options="VIEWS" label="View" icon-only />
+      <UiSegmented
+        v-model="view"
+        :options="VIEWS"
+        :label="$t('characters.toolbar.view')"
+        icon-only
+      />
     </div>
 
     <div
       class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
-      aria-label="Type, rarity and refinement"
+      :aria-label="$t('weapons.toolbar.chips')"
     >
       <FilterChip
         v-for="t in WEAPON_TYPES"
@@ -120,7 +127,7 @@ function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
         :key="r"
         :pressed="filters.rarity === r"
         :count="rarityCounts.get(r) ?? 0"
-        :title="present.has(r) ? undefined : 'None in this capture'"
+        :title="present.has(r) ? undefined : $t('weapons.toolbar.noneInCapture')"
         @toggle="toggleRarity(r)"
       >
         <span :class="RARITY_TEXT[r]">{{ r }}★</span>
@@ -129,25 +136,25 @@ function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
       <FilterChip
         :pressed="filters.refinable"
         :count="refinableCount"
-        title="Weapons whose spare copies could refine an equipped one"
+        :title="$t('weapons.toolbar.refinableTitle')"
         @toggle="filters.refinable = !filters.refinable"
       >
         <ArrowUp class="size-4 text-success-text" aria-hidden="true" />
-        Refinable
+        {{ $t('weapons.toolbar.refinable') }}
       </FilterChip>
     </div>
 
     <div class="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
       <label class="min-w-0 sm:w-36">
-        <span class="sr-only">Equipped</span>
+        <span class="sr-only">{{ $t('weapons.toolbar.equipped') }}</span>
         <UiSelect v-model="filters.status" :options="statusOptions" />
       </label>
       <label class="min-w-0 sm:w-32">
-        <span class="sr-only">Lock</span>
+        <span class="sr-only">{{ $t('weapons.toolbar.lock') }}</span>
         <UiSelect v-model="filters.lock" :options="lockOptions" />
       </label>
       <label class="min-w-0 sm:w-32">
-        <span class="sr-only">Level</span>
+        <span class="sr-only">{{ $t('weapons.sort.level') }}</span>
         <UiSelect v-model="filters.level" :options="LEVEL_OPTIONS" />
       </label>
       <div
@@ -157,7 +164,9 @@ function toggleRarity(r: (typeof WEAPON_RARITIES)[number]) {
         <span class="tabular font-mono text-sm text-text-secondary" aria-live="polite"
           >{{ formatNumber(shown) }} / {{ formatNumber(total) }}</span
         >
-        <UiButton variant="ghost" size="sm" @click="$emit('clear')">Clear</UiButton>
+        <UiButton variant="ghost" size="sm" @click="$emit('clear')">{{
+          $t('characters.toolbar.clear')
+        }}</UiButton>
       </div>
     </div>
   </UiToolbar>

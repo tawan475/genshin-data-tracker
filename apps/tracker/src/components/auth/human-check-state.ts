@@ -1,12 +1,11 @@
 import { computed, readonly, ref } from 'vue'
+import { t } from '@/i18n'
 
 /** Without an interactive challenge, a token takes moments; past this something is wrong. */
 export const QUIET_TIMEOUT_MS = 20_000
-export const HUMAN_CHECK_FAILED = 'Human check failed. Try again.'
+export const humanCheckFailed = (): string => t('auth.humanCheck.failed')
 /** Under the widget after a failed run: Cloudflare runs it again by itself. */
-export const HUMAN_CHECK_RETRYING = 'Human check failed. Retrying…'
-/** The submit button's tooltip while it waits for the human check. */
-export const HUMAN_CHECK_WAIT = "Checking you're human…"
+export const humanCheckRetrying = (): string => t('auth.humanCheck.retrying')
 
 /**
  * Whether a form may submit as far as the human check goes: the server said
@@ -55,8 +54,8 @@ export function createHumanCheckState(restart: () => void, quietTimeoutMs = QUIE
     current.value = null
     failed = true
     interactive = false
-    if (shown) problem.value = HUMAN_CHECK_RETRYING
-    settle({ error: HUMAN_CHECK_FAILED })
+    if (shown) problem.value = humanCheckRetrying()
+    settle({ error: humanCheckFailed() })
   }
 
   /** A token for one submit: the one held, or the next one made. */
@@ -75,7 +74,7 @@ export function createHumanCheckState(restart: () => void, quietTimeoutMs = QUIE
             return
           }
           waiters = waiters.filter((w) => w !== waiter)
-          reject(new Error(HUMAN_CHECK_FAILED))
+          reject(new Error(humanCheckFailed()))
         }, quietTimeoutMs),
       }
       waiters.push(waiter)
@@ -129,7 +128,7 @@ export function createHumanCheckState(restart: () => void, quietTimeoutMs = QUIE
     },
     /** The form is gone: whoever waits gets an error. */
     dispose() {
-      settle({ error: HUMAN_CHECK_FAILED })
+      settle({ error: humanCheckFailed() })
     },
   }
 }

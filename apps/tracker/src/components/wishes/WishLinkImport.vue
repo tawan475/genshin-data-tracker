@@ -19,6 +19,7 @@ import {
   type LinkProgress,
   type WishPageAnswer,
 } from '@/data/wish-link-import'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 import { bannerInfo } from './wish-labels'
@@ -58,29 +59,15 @@ async function copyCommand() {
     copied.value = true
     setTimeout(() => (copied.value = false), 2000)
   } catch {
-    feedback.error('Not copied: select the command and copy it')
+    feedback.error(t('wishes.link.copyFailed'))
   }
 }
 
+/** Each platform's steps as message keys (wishes.link.steps.*), read when drawn. */
 const STEPS: Record<Exclude<Platform, 'pc'>, string[]> = {
-  android: [
-    'Open Wish → History in game and let it load.',
-    'Turn off Wi-Fi and mobile data.',
-    'Tap refresh (top right): the page shows an error with some text.',
-    'Select all of that text and copy it.',
-    'Turn the connection back on, then paste it below.',
-  ],
-  ios: [
-    'Open the Paimon menu → Feedback and let it load.',
-    'Tap In-game issue → Co-Op Mode.',
-    'Tap the link at the bottom of the reply: it opens in the browser.',
-    'Copy that link and paste it below.',
-  ],
-  ps: [
-    'Open the event mail with a QR code in game.',
-    'Scan the code with your phone and copy the link it opens.',
-    'Paste it below. If it fails, link your PlayStation to a HoYoverse account and use the PC or phone steps.',
-  ],
+  android: ['open', 'android2', 'android3', 'android4', 'android5'],
+  ios: ['ios1', 'ios2', 'ios3', 'ios4'],
+  ps: ['ps1', 'ps2', 'ps3'],
 }
 
 const pasted = ref('')
@@ -122,7 +109,7 @@ async function start() {
     })
     const own = props.account.uid?.trim()
     if (uid && own && uid !== own) {
-      failure.value = `That link is UID ${uid}; this account is UID ${own}.`
+      failure.value = t('wishes.link.uidMismatch', { uid, own })
       return
     }
     let added = 0
@@ -136,13 +123,13 @@ async function start() {
     pasted.value = ''
     feedback.toast({
       tone: 'success',
-      title: added > 0 ? `${formatNumber(added)} new pulls` : 'Nothing new',
+      title: added > 0 ? t('wishes.newPulls', { n: formatNumber(added) }) : t('wishes.nothingNew'),
     })
     if (added > 0) emit('changed')
     emit('done')
   } catch (error) {
     if (error instanceof WishLinkError && error.code === 'cancelled') return
-    failure.value = error instanceof Error ? error.message : 'Import failed'
+    failure.value = error instanceof Error ? error.message : t('wishes.link.failed')
   } finally {
     running.value = false
     progress.value = null
@@ -157,15 +144,15 @@ function cancel() {
 const progressText = computed(() => {
   const p = progress.value
   if (!p) return ''
-  if (p.banner === 0) return `Saving ${formatNumber(p.found)}…`
+  if (p.banner === 0) return t('wishes.link.saving', { n: formatNumber(p.found) })
   const name = bannerInfo(p.banner as (typeof UIGF_GACHA_TYPES)[number]).label
-  return `${name} · page ${p.page} · ${formatNumber(p.found)} new`
+  return t('wishes.link.progress', { banner: name, page: p.page, n: formatNumber(p.found) })
 })
 </script>
 
 <template>
   <div class="flex flex-col gap-3">
-    <div role="radiogroup" aria-label="Platform" class="flex flex-wrap gap-2">
+    <div role="radiogroup" :aria-label="$t('wishes.link.platform')" class="flex flex-wrap gap-2">
       <FilterChip
         v-for="p in PLATFORMS"
         :key="p.value"
@@ -178,19 +165,23 @@ const progressText = computed(() => {
 
     <ol class="flex list-decimal flex-col gap-1.5 pl-5 text-sm text-text-secondary">
       <template v-if="platform === 'pc'">
-        <li>Open Wish → History in game and let it load.</li>
+        <li>{{ $t('wishes.link.steps.open') }}</li>
         <li>
-          Open PowerShell (Start, type PowerShell) and run:
+          {{ $t('wishes.link.steps.pcRun') }}
           <div class="mt-1.5 flex items-stretch gap-1">
             <pre
               class="font-code min-w-0 flex-1 rounded-lg bg-surface-sunken px-3 py-2 text-xs break-all whitespace-pre-wrap text-text-primary select-all"
-              title="Reads the game's web cache on this PC, checks the link once with HoYoverse, copies it. Nothing else."
+              :title="$t('wishes.link.scriptTitle')"
               >{{ command }}</pre
             >
-            <UiButton size="sm" :title="copied ? 'Copied' : 'Copy'" @click="copyCommand">
+            <UiButton
+              size="sm"
+              :title="copied ? $t('wishes.link.copied') : $t('wishes.link.copy')"
+              @click="copyCommand"
+            >
               <Check v-if="copied" class="size-4" aria-hidden="true" />
               <Copy v-else class="size-4" aria-hidden="true" />
-              <span class="sr-only">Copy</span>
+              <span class="sr-only">{{ $t('wishes.link.copy') }}</span>
             </UiButton>
           </div>
           <a
@@ -198,33 +189,33 @@ const progressText = computed(() => {
             href="/wish-url.ps1"
             target="_blank"
             rel="noopener"
-            >Read the script</a
+            >{{ $t('wishes.link.readScript') }}</a
           >
         </li>
-        <li title="irminsul's Copy wish URL gives the same link">
-          It copies the link: paste it below.
+        <li :title="$t('wishes.link.steps.pcPasteTitle')">
+          {{ $t('wishes.link.steps.pcPaste') }}
         </li>
       </template>
       <li v-for="step in STEPS[platform as Exclude<Platform, 'pc'>] ?? []" v-else :key="step">
-        {{ step }}
+        {{ $t(`wishes.link.steps.${step}`) }}
       </li>
     </ol>
 
     <label class="flex flex-col gap-1">
-      <span class="sr-only">Wish history link</span>
+      <span class="sr-only">{{ $t('wishes.link.label') }}</span>
       <textarea
         v-model="pasted"
         rows="3"
         class="w-full resize-y rounded-md border bg-surface-raised px-3 py-2 text-sm text-text-primary shadow-sm placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none disabled:opacity-60"
         :class="invalid ? 'border-danger' : 'border-border-strong'"
-        placeholder="Paste the link: https://…"
+        :placeholder="$t('wishes.link.placeholder')"
         :disabled="running"
         spellcheck="false"
         autocomplete="off"
       />
     </label>
     <p v-if="invalid" class="text-sm text-danger-text" role="alert">
-      No wish history link in that text
+      {{ $t('wishes.link.invalid') }}
     </p>
     <p v-if="failure" class="text-sm text-danger-text" role="alert">{{ failure }}</p>
     <p v-if="running" class="tabular font-mono text-sm text-text-secondary" aria-live="polite">
@@ -232,9 +223,9 @@ const progressText = computed(() => {
     </p>
     <div class="flex gap-2">
       <UiButton variant="primary" :disabled="!link" :loading="running" @click="start">
-        <Link2 class="size-4" aria-hidden="true" />Import
+        <Link2 class="size-4" aria-hidden="true" />{{ $t('wishes.import') }}
       </UiButton>
-      <UiButton v-if="running" variant="ghost" @click="cancel">Cancel</UiButton>
+      <UiButton v-if="running" variant="ghost" @click="cancel">{{ $t('wishes.cancel') }}</UiButton>
     </div>
   </div>
 </template>

@@ -13,10 +13,7 @@ import { pageFromInput, pagerItems } from './pager'
  * ("…") opens "Go to page" to jump anywhere; on a phone only the arrows and
  * "page / pages" remain, and that opens it. Renders nothing for a single page.
  */
-const props = withDefaults(
-  defineProps<{ pageCount: number; total: number; pageSize: number; label?: string }>(),
-  { label: 'Pages' },
-)
+const props = defineProps<{ pageCount: number; total: number; pageSize: number; label?: string }>()
 const page = defineModel<number>({ required: true })
 
 const from = computed(() => (props.total === 0 ? 0 : (page.value - 1) * props.pageSize + 1))
@@ -54,7 +51,7 @@ const GAP =
   <nav
     v-if="pageCount > 1"
     class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2"
-    :aria-label="label"
+    :aria-label="label ?? $t('ui.pager.label')"
   >
     <span class="tabular font-mono text-sm text-text-muted">
       {{ formatNumber(from) }}–{{ formatNumber(to) }} / {{ formatNumber(total) }}
@@ -63,8 +60,8 @@ const GAP =
       <button
         type="button"
         :class="ARROW"
-        aria-label="Previous page"
-        title="Previous page"
+        :aria-label="$t('ui.pager.previous')"
+        :title="$t('ui.pager.previous')"
         :disabled="page <= 1"
         @click="go(page - 1)"
       >
@@ -73,7 +70,7 @@ const GAP =
       <button
         type="button"
         class="tabular rounded-lg px-2 py-2 font-mono text-sm transition-colors hover:bg-surface-overlay sm:hidden"
-        title="Go to page"
+        :title="$t('ui.pager.goTo')"
         @click="openJump"
       >
         {{ page }} / {{ pageCount }}
@@ -83,8 +80,8 @@ const GAP =
           v-if="item === null"
           type="button"
           :class="GAP"
-          aria-label="Go to page"
-          title="Go to page"
+          :aria-label="$t('ui.pager.goTo')"
+          :title="$t('ui.pager.goTo')"
           @click="openJump"
         >
           …
@@ -107,15 +104,15 @@ const GAP =
       <button
         type="button"
         :class="ARROW"
-        aria-label="Next page"
-        title="Next page"
+        :aria-label="$t('ui.pager.next')"
+        :title="$t('ui.pager.next')"
         :disabled="page >= pageCount"
         @click="go(page + 1)"
       >
         <ChevronRight class="size-5" aria-hidden="true" />
       </button>
     </div>
-    <UiModal :open="jumpOpen" title="Go to page" @close="jumpOpen = false">
+    <UiModal :open="jumpOpen" :title="$t('ui.pager.goTo')" @close="jumpOpen = false">
       <form class="flex items-center gap-2" @submit.prevent="jump">
         <UiInput
           v-model="jumpText"
@@ -125,10 +122,12 @@ const GAP =
           autofocus
           :placeholder="`1–${pageCount}`"
           :invalid="jumpInvalid"
-          :aria-label="`Page, 1 to ${pageCount}`"
+          :aria-label="$t('ui.pager.input', { count: pageCount })"
         />
         <span class="tabular shrink-0 font-mono text-sm text-text-muted">/ {{ pageCount }}</span>
-        <UiButton type="submit" variant="primary" :disabled="jumpTarget === null">Go</UiButton>
+        <UiButton type="submit" variant="primary" :disabled="jumpTarget === null">{{
+          $t('ui.pager.go')
+        }}</UiButton>
       </form>
     </UiModal>
   </nav>

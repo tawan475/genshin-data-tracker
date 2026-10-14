@@ -11,6 +11,7 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import { normalizeSearch } from '@/data/characters'
 import { gameIcon, materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import CustomForm from './CustomForm.vue'
@@ -120,13 +121,13 @@ const materials = computed(() =>
     })),
 )
 
-const MODES = [
-  { value: 'character' as const, label: 'Characters' },
-  { value: 'weapon' as const, label: 'Weapons' },
-  { value: 'item' as const, label: 'Items' },
-  { value: 'custom' as const, label: 'Custom' },
-]
-const presetOptions = PRESETS.map((p) => ({ value: p.id, label: p.label }))
+const MODES = computed(() => [
+  { value: 'character' as const, label: t('planner.picker.characters') },
+  { value: 'weapon' as const, label: t('planner.picker.weapons') },
+  { value: 'item' as const, label: t('planner.picker.items') },
+  { value: 'custom' as const, label: t('planner.card.custom') },
+])
+const presetOptions = computed(() => PRESETS.map((p) => ({ value: p.id, label: p.label })))
 const presetTitle = computed(() => presetById(preset.value)?.title ?? '')
 
 function addCharacters() {
@@ -139,10 +140,10 @@ function addCustom() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Add goal" size="wide" @close="emit('close')">
+  <UiModal :open="open" :title="$t('planner.picker.title')" size="wide" @close="emit('close')">
     <div class="flex flex-col gap-3">
       <div class="scroll-hide scroll-fade-x -mx-1 flex overflow-x-auto px-1">
-        <UiSegmented v-model="mode" :options="MODES" label="Kind" />
+        <UiSegmented v-model="mode" :options="MODES" :label="$t('planner.picker.kind')" />
       </div>
 
       <RosterGrid
@@ -172,16 +173,21 @@ function addCustom() {
 
       <template v-else>
         <label class="relative">
-          <span class="sr-only">Search items</span>
+          <span class="sr-only">{{ $t('planner.picker.searchItems') }}</span>
           <Search
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
           />
-          <UiInput v-model="query" class="pl-9" placeholder="Search" type="search" />
+          <UiInput
+            v-model="query"
+            class="pl-9"
+            :placeholder="$t('planner.common.search')"
+            type="search"
+          />
         </label>
         <ul
           class="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-1.5"
-          aria-label="Items"
+          :aria-label="$t('planner.picker.items')"
         >
           <li v-for="m in materials" :key="m.material.key">
             <button
@@ -211,10 +217,12 @@ function addCustom() {
         v-model="preset"
         :options="presetOptions"
         class="mr-auto w-36 sm:w-40"
-        aria-label="Preset"
+        :aria-label="$t('planner.picker.preset')"
         :title="presetTitle"
       />
-      <UiButton class="max-sm:hidden!" @click="emit('close')">Cancel</UiButton>
+      <UiButton class="max-sm:hidden!" @click="emit('close')">{{
+        $t('planner.common.cancel')
+      }}</UiButton>
       <UiButton
         v-if="mode === 'character'"
         variant="primary"
@@ -223,7 +231,11 @@ function addCustom() {
         @click="addCharacters"
       >
         <Plus class="size-4" aria-hidden="true" />
-        Add{{ selected.size ? ` ${formatNumber(selected.size)}` : '' }}
+        {{
+          selected.size
+            ? $t('planner.picker.addCount', { n: formatNumber(selected.size) })
+            : $t('planner.picker.add')
+        }}
       </UiButton>
       <UiButton
         v-else
@@ -233,7 +245,7 @@ function addCustom() {
         @click="addCustom"
       >
         <Plus class="size-4" aria-hidden="true" />
-        Add
+        {{ $t('planner.picker.add') }}
       </UiButton>
     </template>
   </UiModal>

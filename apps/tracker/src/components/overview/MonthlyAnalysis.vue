@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import {
   ARTIFACT_LEVEL0_EXP,
@@ -27,12 +28,14 @@ import ChangeValue from './ChangeValue.vue'
  */
 const props = defineProps<{ days: DayClose[] }>()
 
-const COLUMNS: Record<MonthlyKey, { label: string; up: string; down: string }> = {
-  primogem: { label: 'Primogems', up: 'gained', down: 'spent' },
-  mora: { label: 'Mora', up: 'gained', down: 'spent' },
-  artifact4: { label: '4★ Artifact', up: 'added', down: 'used' },
-  artifact3: { label: '3★ Artifact', up: 'added', down: 'used' },
+/** How each column's gains and losses read ("gained 1,600" / "used 12"). */
+const VERBS: Record<MonthlyKey, { up: 'gained' | 'added'; down: 'spent' | 'used' }> = {
+  primogem: { up: 'gained', down: 'spent' },
+  mora: { up: 'gained', down: 'spent' },
+  artifact4: { up: 'added', down: 'used' },
+  artifact3: { up: 'added', down: 'used' },
 }
+const columnLabel = (key: MonthlyKey) => t(`overview.figure.${key}`)
 
 const firstMonth = computed(() => {
   const first = props.days[0]
@@ -68,10 +71,14 @@ const canNext = computed(
   () => !!month.value && !!lastMonth.value && compareMonths(month.value, lastMonth.value) < 0,
 )
 const prevLabel = computed(() =>
-  month.value ? `Previous month, ${monthLabel(shiftMonth(month.value, -1))}` : 'Previous month',
+  month.value
+    ? t('overview.monthly.previousTo', { month: monthLabel(shiftMonth(month.value, -1)) })
+    : t('overview.monthly.previous'),
 )
 const nextLabel = computed(() =>
-  month.value ? `Next month, ${monthLabel(shiftMonth(month.value, 1))}` : 'Next month',
+  month.value
+    ? t('overview.monthly.nextTo', { month: monthLabel(shiftMonth(month.value, 1)) })
+    : t('overview.monthly.next'),
 )
 
 function go(by: number) {
@@ -80,7 +87,7 @@ function go(by: number) {
 
 const analysis = computed(() => (month.value ? monthlyAnalysis(props.days, month.value) : null))
 
-const columns = MONTHLY_KEYS.map((key) => ({ key, label: COLUMNS[key].label }))
+const columns = computed(() => MONTHLY_KEYS.map((key) => ({ key, label: columnLabel(key) })))
 
 // Display strings are prepared here so the template only reads them. Newest
 // day first (the user's call); each day's change is still against the day before.
@@ -91,21 +98,22 @@ const rows = computed(() =>
         key: row.key,
         label: `${row.from} – ${row.to}`,
         note: '',
-        title: `No captures for ${row.count} days`,
+        title: t('overview.monthly.gapTitle', { n: formatNumber(row.count) }),
         cells: null,
       }
     }
     const { day } = row
     const figures = day.figures
+    const captures = t('overview.monthly.captures', { n: formatNumber(day.captures) }, day.captures)
     return {
       key: day.key,
       label: day.label,
-      note: day.since ? `vs ${day.since}` : '',
+      note: day.since ? t('overview.monthly.vs', { day: day.since }) : '',
       title: figures
-        ? `${day.captures} ${day.captures === 1 ? 'capture' : 'captures'}${
-            day.since ? `, compared with ${day.since}` : ''
-          }`
-        : 'No captures',
+        ? day.since
+          ? t('overview.monthly.comparedWith', { captures, day: day.since })
+          : captures
+        : t('overview.monthly.noCaptures'),
       cells: figures
         ? MONTHLY_KEYS.map((key) => ({
             key,
@@ -121,20 +129,34 @@ const totals = computed(() => {
   const a = analysis.value
   if (!a) return []
   return MONTHLY_KEYS.map((key) => {
-    const t = a.totals[key]
-    const c = COLUMNS[key]
-    const detail = [`${c.up} ${formatNumber(t.gained)}`, `${c.down} ${formatNumber(t.spent)}`]
-    if (t.closing !== null) detail.push(`closing ${formatNumber(t.closing)}`)
-    if ((key === 'artifact4' || key === 'artifact3') && t.net !== null) {
-      detail.push(`${formatSignedExact(t.net * ARTIFACT_LEVEL0_EXP[key])} artifact EXP at level 0`)
+    const total = a.totals[key]
+    const verbs = VERBS[key]
+    const detail = [
+      t(`overview.monthly.${verbs.up}`, { n: formatNumber(total.gained) }),
+      t(`overview.monthly.${verbs.down}`, { n: formatNumber(total.spent) }),
+    ]
+    if (total.closing !== null) {
+      detail.push(t('overview.monthly.closing', { n: formatNumber(total.closing) }))
     }
-    return { key, label: c.label, net: t.net, detail: detail.join(' · ') }
+    if ((key === 'artifact4' || key === 'artifact3') && total.net !== null) {
+      detail.push(
+        t('overview.monthly.artifactExp', {
+          n: formatSignedExact(total.net * ARTIFACT_LEVEL0_EXP[key]),
+        }),
+      )
+    }
+    return {
+      key,
+      label: columnLabel(key),
+      net: total.net,
+      hint: t('overview.monthly.thisMonth', { detail: detail.join(' · ') }),
+    }
   })
 })
 </script>
 
 <template>
-  <UiPanel title="Monthly analysis">
+  <UiPanel :title="$t('overview.monthly.title')">
     <template v-if="analysis" #actions>
       <div class="flex items-center gap-1">
         <UiIconButton
@@ -161,7 +183,7 @@ const totals = computed(() => {
 
     <template v-if="analysis">
       <p v-if="analysis.capturedDays === 0" class="py-6 text-center text-text-secondary">
-        No captures
+        {{ $t('overview.monthly.noCaptures') }}
       </p>
 
       <template v-else>
@@ -173,7 +195,7 @@ const totals = computed(() => {
           >
             <dt class="text-sm text-text-secondary">{{ total.label }}</dt>
             <dd class="text-lg font-medium">
-              <ChangeValue :value="total.net" exact :hint="`this month · ${total.detail}`" />
+              <ChangeValue :value="total.net" exact :hint="total.hint" />
             </dd>
           </div>
         </dl>
@@ -181,19 +203,18 @@ const totals = computed(() => {
         <div class="-mx-5 mt-5 overflow-x-auto border-t border-border-subtle">
           <table class="w-full border-collapse text-left">
             <caption class="sr-only">
-              Daily change in
               {{
-                analysis.label
-              }}: each day's last capture against the previous captured day, with the value below
+                $t('overview.monthly.caption', { month: analysis.label })
+              }}
             </caption>
             <thead>
               <tr class="border-b border-border-default">
                 <th
                   scope="col"
                   class="sticky left-0 bg-surface-raised px-5 py-3 text-sm font-medium text-text-secondary"
-                  title="Last capture of the day vs the previous captured day, local time"
+                  :title="$t('overview.monthly.dayTitle')"
                 >
-                  Day
+                  {{ $t('overview.monthly.day') }}
                 </th>
                 <th
                   v-for="column in columns"
@@ -240,7 +261,7 @@ const totals = computed(() => {
                     class="px-4 py-2 text-right text-text-muted"
                   >
                     <span aria-hidden="true">—</span>
-                    <span class="sr-only">No capture</span>
+                    <span class="sr-only">{{ $t('overview.monthly.noCapture') }}</span>
                   </td>
                 </template>
               </tr>

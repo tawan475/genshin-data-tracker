@@ -17,6 +17,7 @@ import {
   UtensilsCrossed,
   Wrench,
 } from 'lucide-vue-next'
+import { t } from '@/i18n'
 import { bagTabs, type TabKey } from './material-meta'
 
 export interface TabDisplay {
@@ -30,33 +31,31 @@ export interface TabDisplay {
   icon: Component
 }
 
+/** Chip labels and notes are message keys (materials.tabs.*), read when drawn. */
 const DISPLAY: Partial<Record<TabKey, { label?: string; note?: string; icon: Component }>> = {
-  weapon: { icon: Sword, note: 'Enhancement ores (the game keeps them with the weapons)' },
-  artifact: {
-    icon: Flower2,
-    note: 'Sanctifying Unction and Essence (the game keeps them with the artifacts)',
-  },
-  development: { label: 'Development', icon: BookOpen },
+  weapon: { icon: Sword, note: 'materials.tabs.notes.weapon' },
+  artifact: { icon: Flower2, note: 'materials.tabs.notes.artifact' },
+  development: { label: 'materials.tabs.development', icon: BookOpen },
   food: { icon: UtensilsCrossed },
   material: { icon: Leaf },
   gadget: { icon: Wrench },
   quest: { icon: ScrollText },
-  precious: { label: 'Precious', icon: Gem },
+  precious: { label: 'materials.tabs.precious', icon: Gem },
   furnishing: { icon: Armchair },
-  other: {
-    icon: Package,
-    note: 'Not in the in-game Inventory: currencies, seeds, card game items, items newer than the game data',
-  },
+  other: { icon: Package, note: 'materials.tabs.notes.other' },
 }
 
 export function tabDisplay(key: TabKey): TabDisplay {
-  const name = key === 'other' ? 'Other' : (bagTabs().find((t) => t.key === key)?.name ?? key)
+  const name =
+    key === 'other'
+      ? t('materials.tabs.other')
+      : (bagTabs().find((tab) => tab.key === key)?.name ?? key)
   const display = DISPLAY[key]
   return {
     key,
     name,
-    label: display?.label ?? name,
-    title: display?.note ? `${name}: ${display.note}` : name,
+    label: display?.label ? t(display.label) : name,
+    title: display?.note ? t('materials.tabs.note', { name, note: t(display.note) }) : name,
     icon: display?.icon ?? Package,
   }
 }

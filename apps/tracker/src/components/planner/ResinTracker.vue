@@ -6,6 +6,7 @@ import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
+import { t } from '@/i18n'
 import { materialIcon } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatTime } from '@/lib/format'
 import {
@@ -21,6 +22,7 @@ import {
   type ResinReading,
 } from './resin'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { materialName } from '@/utils/materials'
 import {
   ALERT_AMOUNTS,
   alertSupport,
@@ -54,15 +56,16 @@ const emit = defineEmits<{ set: [value: ManualResin | null] }>()
 const current = computed(() => (props.reading ? resinAt(props.reading, props.now) : null))
 const full = computed(() => (props.reading ? fullAt(props.reading, props.now) : null))
 const mark = computed(() => (props.reading ? nextMark(props.reading, props.now) : null))
-const SOURCE = {
-  manual: 'set by hand',
-  player: 'irminsul, at login',
-  inventory: 'the snapshot',
-} as const
 const readingTitle = computed(() => {
   const r = props.reading
-  if (!r) return 'Original Resin: not known yet · set it'
-  return `Original Resin ~${formatNumber(current.value ?? 0)}/${RESIN_MAX} · ${formatNumber(r.value)} from ${SOURCE[r.source]}, ${formatDateTime(r.at)} · +1 every 8 minutes`
+  if (!r) return t('planner.resin.unknown')
+  return t('planner.resin.readingTitle', {
+    now: formatNumber(current.value ?? 0),
+    max: RESIN_MAX,
+    value: formatNumber(r.value),
+    source: t(`planner.resin.source.${r.source}`),
+    at: formatDateTime(r.at),
+  })
 })
 
 function canStep(step: number) {
@@ -144,10 +147,12 @@ const alertWhen = computed(() =>
   alertOn.value ? alertAt(props.reading, amount.value!, props.now) : null,
 )
 const alertTitle = computed(() => {
-  if (support.value === 'unsupported') return 'Resin alert: not supported in this browser'
-  if (!alertOn.value) return 'Resin alert: off'
+  if (support.value === 'unsupported') return t('planner.resin.alertUnsupported')
+  if (!alertOn.value) return t('planner.resin.alertOff')
   const when = alertWhen.value
-  return `Resin alert at ${amount.value}${when ? `, ${formatTime(when)}` : ''} · while the site is open`
+  return when
+    ? t('planner.resin.alertOnAt', { amount: amount.value, time: formatTime(when) })
+    : t('planner.resin.alertOn', { amount: amount.value })
 })
 
 // Rescheduled when the reading or the amount changes (not every clock tick).
@@ -174,17 +179,17 @@ watch(
 <template>
   <section
     class="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-border-default bg-surface-raised px-3 py-2 shadow-sm"
-    aria-label="Original Resin"
+    :aria-label="materialName('OriginalResin')"
   >
     <div class="flex w-full items-center gap-2 sm:w-auto">
       <span class="size-8 shrink-0">
-        <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+        <MaterialIcon :src="materialIcon('OriginalResin')" :name="materialName('OriginalResin')" />
       </span>
       <button
         type="button"
         class="group tabular inline-flex items-baseline gap-1 rounded-md px-1 font-mono transition-colors hover:bg-surface-overlay"
         :title="readingTitle"
-        :aria-label="`${readingTitle}. Set`"
+        :aria-label="$t('planner.resin.setLabel', { title: readingTitle })"
         @click="openEdit"
       >
         <span
@@ -205,7 +210,11 @@ watch(
           size="sm"
           class="tabular min-w-12 font-mono"
           :disabled="!canStep(step)"
-          :title="`${step < 0 ? 'Spend' : 'Add'} ${Math.abs(step)}`"
+          :title="
+            step < 0
+              ? $t('planner.resin.spend', { n: Math.abs(step) })
+              : $t('planner.resin.add', { n: Math.abs(step) })
+          "
           @click="applyStep(step)"
           >{{ formatStep(step) }}</UiButton
         >
@@ -214,32 +223,44 @@ watch(
     <p
       class="tabular flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary"
     >
-      <span v-if="full" class="inline-flex gap-1.5" :title="`Full at ${formatDateTime(full)}`">
-        <span class="text-text-muted">Full</span>
+      <span
+        v-if="full"
+        class="inline-flex gap-1.5"
+        :title="$t('planner.resin.fullAt', { time: formatDateTime(full) })"
+      >
+        <span class="text-text-muted">{{ $t('planner.resin.fullLabel') }}</span>
         <time class="font-mono text-text-primary" :datetime="new Date(full).toISOString()">{{
           formatTime(full)
         }}</time>
         <span class="font-mono text-text-muted">· {{ formatSpan(full - now) }}</span>
       </span>
-      <span v-else-if="current !== null" class="font-medium text-warning-text">Full</span>
+      <span v-else-if="current !== null" class="font-medium text-warning-text">{{
+        $t('planner.resin.full')
+      }}</span>
       <span
         v-if="mark && mark.amount < RESIN_MAX"
         class="inline-flex gap-1 font-mono"
-        :title="`${mark.amount} at ${formatTime(mark.at)}`"
+        :title="$t('planner.resin.markTitle', { amount: mark.amount, time: formatTime(mark.at) })"
       >
         <span class="text-text-primary">{{ mark.amount }}</span>
-        <span class="font-sans text-text-muted">in</span>
+        <span class="font-sans text-text-muted">{{ $t('planner.resin.in') }}</span>
         {{ formatSpan(mark.at - now) }}
       </span>
-      <span class="inline-flex items-center gap-1 font-mono" title="Condensed Resin">
+      <span
+        class="inline-flex items-center gap-1 font-mono"
+        :title="materialName('CondensedResin')"
+      >
         <span class="size-5 shrink-0">
-          <MaterialIcon :src="materialIcon('CondensedResin')" name="Condensed Resin" />
+          <MaterialIcon
+            :src="materialIcon('CondensedResin')"
+            :name="materialName('CondensedResin')"
+          />
         </span>
         <span
           >{{ formatNumber(condensed)
           }}<span v-if="condensedMax" class="text-text-muted">/{{ condensedMax }}</span></span
         >
-        <span class="sr-only">Condensed Resin</span>
+        <span class="sr-only">{{ materialName('CondensedResin') }}</span>
       </span>
     </p>
     <button
@@ -261,7 +282,12 @@ watch(
       <span v-if="alertOn" class="tabular font-mono text-xs">{{ amount }}</span>
     </button>
 
-    <UiPopover :open="editing" :anchor="editAnchor" label="Original Resin" @close="editing = false">
+    <UiPopover
+      :open="editing"
+      :anchor="editAnchor"
+      :label="materialName('OriginalResin')"
+      @close="editing = false"
+    >
       <form class="flex flex-col gap-3 p-4" @submit.prevent="commitEdit">
         <div class="flex items-center gap-2">
           <UiInput
@@ -273,14 +299,16 @@ watch(
             mono
             autofocus
             class="w-28"
-            aria-label="Original Resin now"
+            :aria-label="$t('planner.resin.now')"
             :invalid="invalid"
           />
           <span class="text-sm text-text-muted">/{{ RESIN_MAX }}</span>
-          <UiButton type="submit" variant="primary" size="sm" class="ml-auto">Set</UiButton>
+          <UiButton type="submit" variant="primary" size="sm" class="ml-auto">{{
+            $t('farm.panel.set')
+          }}</UiButton>
         </div>
         <UiButton v-if="reading?.source === 'manual'" size="sm" variant="ghost" @click="useCapture">
-          Back to the capture
+          {{ $t('planner.editor.resetTitle') }}
         </UiButton>
       </form>
     </UiPopover>
@@ -288,18 +316,22 @@ watch(
     <UiPopover
       :open="alertOpen"
       :anchor="alertAnchor"
-      label="Resin alert"
+      :label="$t('planner.resin.alert')"
       @close="alertOpen = false"
     >
       <div class="flex flex-col gap-3 p-4 text-sm">
         <p v-if="support === 'unsupported'" class="text-text-secondary">
-          Not supported in this browser
+          {{ $t('planner.resin.unsupported') }}
         </p>
         <template v-else>
           <p v-if="support === 'denied'" class="text-danger-text" role="alert">
-            Blocked: allow notifications for this site in the browser's settings
+            {{ $t('planner.resin.blocked') }}
           </p>
-          <div class="flex flex-wrap gap-1.5" role="group" aria-label="Notify at">
+          <div
+            class="flex flex-wrap gap-1.5"
+            role="group"
+            :aria-label="$t('planner.resin.notifyAt')"
+          >
             <UiButton
               v-for="a in ALERT_AMOUNTS"
               :key="a"
@@ -311,11 +343,15 @@ watch(
               @click="chooseAlert(a)"
               >{{ a }}</UiButton
             >
-            <UiButton size="sm" variant="ghost" :aria-pressed="!alertOn" @click="chooseAlert(null)"
-              >Off</UiButton
+            <UiButton
+              size="sm"
+              variant="ghost"
+              :aria-pressed="!alertOn"
+              @click="chooseAlert(null)"
+              >{{ $t('planner.resin.off') }}</UiButton
             >
           </div>
-          <p class="text-xs text-text-muted">While the site is open on this device</p>
+          <p class="text-xs text-text-muted">{{ $t('planner.resin.whileOpen') }}</p>
         </template>
       </div>
     </UiPopover>

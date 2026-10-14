@@ -1,6 +1,7 @@
 import type { PlannerTask, PlannerTaskInput } from '@gdt/shared'
 import { shallowRef, watch, type Ref } from 'vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 
 export type TaskRef = Pick<PlannerTaskInput, 'kind' | 'id'>
@@ -96,7 +97,7 @@ export function usePlannerTasks(accountId: Ref<number>) {
         tasks.value = applyTaskOps(server, pending.values())
       } catch (cause) {
         if (mine !== generation) return
-        feedback.error('Not saved', cause)
+        feedback.error(t('planner.toast.notSaved'), cause)
         await load(true)
         throw cause
       } finally {

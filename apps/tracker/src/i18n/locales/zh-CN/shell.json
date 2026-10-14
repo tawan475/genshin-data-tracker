@@ -1,1 +1,108 @@
-{}
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "总览",
+    "progression": "成长",
+    "characters": "角色",
+    "artifacts": "圣遗物",
+    "weapons": "武器",
+    "materials": "材料",
+    "planner": "规划",
+    "achievements": "成就",
+    "anecdotes": "游逸旅账",
+    "wishes": "祈愿",
+    "snapshots": "快照",
+    "import": "导入",
+    "manage": "管理",
+    "staffOverview": "总览",
+    "users": "用户",
+    "storage": "存储",
+    "roles": "身份组",
+    "audit": "审计"
+  },
+  "section": {
+    "staff": "管理后台",
+    "account": "账号",
+    "system": "系统"
+  },
+  "accounts": "账号",
+  "staff": "管理后台",
+  "settings": "设置",
+  "import": "导入",
+  "expandMenu": "展开菜单",
+  "collapseMenu": "收起菜单",
+  "openMenu": "打开菜单",
+  "closeMenu": "关闭菜单",
+  "lightTheme": "浅色主题",
+  "darkTheme": "深色主题",
+  "themeNotSaved": "主题未保存",
+  "landingPage": "首页",
+  "return": "返回",
+  "highestRole": "你的最高身份组",
+  "copyName": "复制名称",
+  "copyUid": "复制 UID",
+  "copyUidValue": "复制 UID {uid}",
+  "nameCopied": "已复制名称",
+  "uidCopied": "已复制 UID",
+  "switcher": {
+    "select": "选择账号",
+    "add": "添加账号"
+  },
+  "page": {
+    "signIn": "登录",
+    "createAccount": "注册",
+    "continue": "继续",
+    "linkIrminsul": "关联 Irminsul",
+    "resetPassword": "重置密码",
+    "newPassword": "新密码",
+    "confirmEmail": "验证邮箱",
+    "accounts": "账号",
+    "addAccount": "添加账号",
+    "settings": "设置",
+    "overview": "总览",
+    "users": "用户",
+    "user": "用户",
+    "storage": "存储",
+    "roles": "身份组",
+    "audit": "审计",
+    "progression": "成长",
+    "characters": "角色",
+    "weapons": "武器",
+    "artifacts": "圣遗物",
+    "materials": "材料",
+    "planner": "规划",
+    "achievements": "成就",
+    "anecdotes": "游逸旅账",
+    "wishHistory": "祈愿记录",
+    "snapshots": "快照",
+    "import": "导入",
+    "accountSettings": "账号设置",
+    "notFound": "未找到",
+    "inspect": "查看 · {page}"
+  },
+  "notFound": {
+    "title": "页面不存在",
+    "body": "链接可能已过期，或页面已移动。",
+    "home": "前往控制台"
+  },
+  "accountMissing": {
+    "title": "未找到账号",
+    "body": "它可能已被删除，或属于其他用户。",
+    "all": "全部账号"
+  },
+  "update": {
+    "ready": "追踪器有新版本可用。"
+  },
+  "public": {
+    "dashboard": "控制台"
+  },
+  "landing": {
+    "heroLine1": "掌握你的",
+    "heroLine2": "提瓦特之旅",
+    "tagline": "每次登录，自动快照。圣遗物、材料、历史记录。",
+    "openDashboard": "打开控制台",
+    "getStarted": "开始使用",
+    "critDmg": "暴击伤害 21.8%"
+  }
+}

@@ -4,6 +4,7 @@
  */
 
 import { resolveImportTimestamp } from '@gdt/shared'
+import { t } from '@/i18n'
 import { captureTimeFromName } from './capture-time-name'
 
 export function isJsonFile(name: string): boolean {
@@ -122,7 +123,7 @@ export async function readCaptureTime(file: File): Promise<CaptureTimeResult> {
   try {
     parsed = JSON.parse(await file.text())
   } catch {
-    return { takenAt: null, invalid: 'Not valid JSON' }
+    return { takenAt: null, invalid: t('transfer.upload.notJson') }
   }
   // GOOD requires `format: "GOOD"`; the server is laxer, so catch strays here.
   if (
@@ -131,7 +132,7 @@ export async function readCaptureTime(file: File): Promise<CaptureTimeResult> {
     Array.isArray(parsed) ||
     (parsed as { format?: unknown }).format !== 'GOOD'
   ) {
-    return { takenAt: null, invalid: 'Not a GOOD file' }
+    return { takenAt: null, invalid: t('transfer.upload.notGood') }
   }
   const raw = (parsed as { timestamp?: unknown }).timestamp
   const ms = raw === undefined ? Number.NaN : resolveImportTimestamp(undefined, raw, Number.NaN)

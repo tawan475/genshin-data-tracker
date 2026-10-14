@@ -1,1 +1,160 @@
-{}
+{
+  "gap": {
+    "level": "等級 {level}",
+    "noWeapon": "未裝備武器",
+    "weaponLevel": "武器等級 {level}",
+    "artifactCount": "聖遺物 {count}/5",
+    "belowMax": "{n} 件聖遺物未滿級",
+    "noSet": "無完整套裝效果"
+  },
+  "sort": {
+    "default": "預設",
+    "level": "等級",
+    "constellation": "命之座",
+    "talents": "天賦",
+    "cv": "CV",
+    "rarity": "稀有度",
+    "element": "元素",
+    "name": "名稱",
+    "friendship": "好感度",
+    "obtained": "獲得時間"
+  },
+  "build": {
+    "all": "培養",
+    "ready": "已完成",
+    "needs": "待培養",
+    "level": "等級 < 90",
+    "weapon": "武器 < 90",
+    "artifacts": "聖遺物未滿級",
+    "set": "無套裝效果"
+  },
+  "talentFilter": {
+    "all": "天賦",
+    "nine": "全部 9+",
+    "crowned": "有皇冠",
+    "below": "任一 < 9"
+  },
+  "favorites": {
+    "notSaved": "未儲存"
+  },
+  "stat": {
+    "maxHp": "生命值上限",
+    "baseAtk": "基礎攻擊力"
+  },
+  "talent": {
+    "crowned": "{title} · 已戴皇冠"
+  },
+  "setBonus": {
+    "line": "{n}件套：{stats}",
+    "inactive": "{n}件套（未啟動）：{stats}",
+    "join": "，"
+  },
+  "friendship": {
+    "title": "好感度 {level}/10"
+  },
+  "refinementTitle": "精煉 {value}/5",
+  "talentChips": "普攻 {auto} · 戰技 {skill} · 爆發 {burst}",
+  "sortControl": {
+    "sort": "排序",
+    "descending": "遞減排序",
+    "ascending": "遞增排序"
+  },
+  "favorite": {
+    "named": "收藏{name}",
+    "on": "收藏",
+    "off": "取消收藏"
+  },
+  "stars": "{n} 星",
+  "sets": "套裝",
+  "pieceBonus": "件套效果",
+  "constellation": {
+    "title": "命之座 {level}/6",
+    "lockedTitle": "{n}命 · 未解鎖",
+    "unlocked": "{n}命 已解鎖",
+    "locked": "{n}命 未解鎖"
+  },
+  "timeline": {
+    "firstSeen": "首次記錄",
+    "obtained": "獲得",
+    "to": "變為",
+    "less": "收合",
+    "all": "全部 {n}"
+  },
+  "talentShort": {
+    "auto": "普攻",
+    "skill": "戰技",
+    "burst": "爆發"
+  },
+  "talentRaised": "提升至",
+  "crowned": "已戴皇冠",
+  "weapon": {
+    "passive": "被動：{stats}",
+    "locked": "已鎖定"
+  },
+  "stats": {
+    "allDmg": "+{value}% 全傷害加成，遊戲面板未顯示",
+    "label": "屬性",
+    "weaponMissingTitle": "武器比遊戲資料新：未計入其屬性",
+    "weaponMissing": "未計入武器屬性",
+    "newerThanData": "比遊戲資料新",
+    "none": "無屬性"
+  },
+  "card": {
+    "label": "{name}，{level}，{constellation}命，天賦 {auto} {skill} {burst}",
+    "friendship": "，好感度 {n}",
+    "toDo": "待辦：{gaps}",
+    "critDetail": "聖遺物暴擊 {rate}% / {dmg}%"
+  },
+  "piece": {
+    "levelTitle": "+{level}/{max} · {rarity}★",
+    "activatesAt4": "+4 時啟動",
+    "inactive": "（未啟動）",
+    "rolls": "{n} 詞條",
+    "rollsTitle": "詞條數",
+    "empty": "：空"
+  },
+  "toolbar": {
+    "weapon": "武器",
+    "cards": "卡片",
+    "list": "列表",
+    "label": "篩選角色",
+    "search": "搜尋",
+    "searchTitle": "名稱、元素、武器或套裝",
+    "view": "檢視",
+    "chips": "收藏、元素與稀有度",
+    "favorites": "收藏",
+    "buildTitle": "已完成：等級 90、武器等級 90、五件滿級聖遺物、完整套裝效果",
+    "clear": "清除"
+  },
+  "table": {
+    "lv": "等級",
+    "c": "命座",
+    "critTitle": "聖遺物暴擊率 / 暴擊傷害",
+    "crit": "雙暴",
+    "toDo": "待辦",
+    "toDoList": "待辦：{gaps}"
+  },
+  "detail": {
+    "toDo": "待辦：",
+    "build": "角色配置",
+    "obtainedAt": "獲得於 {date}",
+    "noArtifacts": "無聖遺物",
+    "history": "歷史",
+    "loadFailed": "載入失敗",
+    "none": "無"
+  },
+  "modal": {
+    "pngSize": "{size} PNG"
+  },
+  "page": {
+    "c6": "6命",
+    "level90": "90 級以上",
+    "crowns": "皇冠",
+    "crownsTitle": "10 級天賦",
+    "loading": "載入中",
+    "noSnapshots": "尚無快照",
+    "empty": "沒有角色",
+    "import": "匯入",
+    "noMatches": "無符合結果"
+  }
+}

@@ -70,11 +70,11 @@ function retry() {
 
 <template>
   <div>
-    <PageHeader :title="`Wish history · ${info.title}`" />
+    <PageHeader :title="$t('wishes.bannerPageTitle', { banner: info.title })" />
 
     <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-3">
       <UiIconButton
-        label="Wish history"
+        :label="$t('wishes.title')"
         :to="{ name: 'account-wishes', params: { accountId: account.id } }"
       >
         <ArrowLeft class="size-5" aria-hidden="true" />
@@ -84,28 +84,35 @@ function retry() {
         v-if="bannerOptions.length > 1"
         class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto sm:scroll-fade-none"
       >
-        <UiSegmented v-model="banner" :options="bannerOptions" label="Banner" />
+        <UiSegmented v-model="banner" :options="bannerOptions" :label="$t('wishes.banner')" />
       </div>
     </div>
 
-    <UiError v-if="loadError && !ready" title="Load failed" :error="loadError" @retry="retry" />
+    <UiError
+      v-if="loadError && !ready"
+      :title="$t('wishes.loadFailed')"
+      :error="loadError"
+      @retry="retry"
+    />
 
     <template v-else-if="stats">
       <UiPanel v-if="stats.total === 0" flush>
-        <UiEmpty title="No pulls on this banner" />
+        <UiEmpty :title="$t('wishes.bannerPage.noPulls')" />
       </UiPanel>
 
       <div v-else class="flex flex-col gap-4">
         <section
-          aria-label="Now"
+          :aria-label="$t('wishes.bannerPage.now')"
           class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,15.5rem),1fr))] gap-3 sm:gap-3.5"
         >
           <div
             :class="TILE"
             class="justify-center gap-1.5!"
-            :title="`${formatNumber(stats.total)} wishes × ${PRIMOS_PER_PULL}`"
+            :title="
+              $t('wishes.pullsTimes', { n: formatNumber(stats.total), primos: PRIMOS_PER_PULL })
+            "
           >
-            <span class="text-xs text-text-secondary">Lifetime pulls</span>
+            <span class="text-xs text-text-secondary">{{ $t('wishes.lifetime') }}</span>
             <span class="tabular font-mono text-[2rem] leading-none font-bold">{{
               formatNumber(stats.total)
             }}</span>
@@ -116,12 +123,21 @@ function retry() {
 
           <div
             :class="TILE"
-            :title="`${formatNumber(left)} pulls to hard pity · ✦ ${formatNumber(left * PRIMOS_PER_PULL)}`"
+            :title="
+              $t('wishes.bannerPage.hardTitle', {
+                left: formatNumber(left),
+                primos: formatNumber(left * PRIMOS_PER_PULL),
+              })
+            "
           >
             <div class="flex min-w-0 items-center gap-2.5">
               <span class="flex min-w-0 flex-col">
-                <span class="truncate text-xs text-text-secondary">5★ pity</span>
-                <span class="truncate text-xs text-text-muted">Guaranteed at {{ hard[0] }}</span>
+                <span class="truncate text-xs text-text-secondary">{{
+                  $t('wishes.card.pity5')
+                }}</span>
+                <span class="truncate text-xs text-text-muted">{{
+                  $t('wishes.card.guaranteedAt', { n: hard[0] })
+                }}</span>
               </span>
               <WishOddsChip :stats="stats" class="ml-auto" />
               <span
@@ -134,25 +150,33 @@ function retry() {
             <div
               class="tabular flex flex-wrap justify-between gap-x-3 font-mono text-xs text-text-muted"
             >
-              <span
-                >{{ formatNumber(left) }} to hard pity · ✦
-                {{ formatNumber(left * PRIMOS_PER_PULL) }}</span
-              >
-              <span class="text-warning-text">soft from {{ soft }}</span>
+              <span>{{
+                $t('wishes.bannerPage.toHard', {
+                  left: formatNumber(left),
+                  primos: formatNumber(left * PRIMOS_PER_PULL),
+                })
+              }}</span>
+              <span class="text-warning-text">{{
+                $t('wishes.bannerPage.softFrom', { soft })
+              }}</span>
             </div>
           </div>
 
           <div :class="TILE">
             <div class="flex min-w-0 items-center gap-2.5">
               <span class="flex min-w-0 flex-col">
-                <span class="truncate text-xs text-text-secondary">4★ pity</span>
-                <span class="truncate text-xs text-text-muted">Guaranteed at {{ hard[1] }}</span>
+                <span class="truncate text-xs text-text-secondary">{{
+                  $t('wishes.card.pity4')
+                }}</span>
+                <span class="truncate text-xs text-text-muted">{{
+                  $t('wishes.card.guaranteedAt', { n: hard[1] })
+                }}</span>
               </span>
               <span
                 v-if="stats.guaranteed4"
                 class="ml-auto inline-flex shrink-0 items-center rounded-full border border-accent-text bg-accent/15 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-accent-text"
-                title="The last 4★ was off-banner: the next one is featured"
-                >Featured next</span
+                :title="$t('wishes.bannerPage.featuredNextTitle')"
+                >{{ $t('wishes.bannerPage.featuredNext') }}</span
               >
               <span
                 class="tabular font-mono text-[2rem] leading-none font-bold text-rarity-4"
@@ -166,16 +190,16 @@ function retry() {
                 :style="{ width: `${Math.min(100, (stats.pity4 / hard[1]) * 100)}%` }"
               />
             </div>
-            <span class="tabular font-mono text-xs text-text-muted"
-              >{{ hard[1] - stats.pity4 }} to the guaranteed 4★</span
-            >
+            <span class="tabular font-mono text-xs text-text-muted">{{
+              $t('wishes.bannerPage.toGuaranteed4', { n: hard[1] - stats.pity4 })
+            }}</span>
           </div>
         </section>
 
         <WishNumbers :stats="stats" />
 
         <section
-          aria-label="Every 5★"
+          :aria-label="$t('wishes.five.every')"
           class="min-w-0 rounded-xl border border-border-default bg-surface-raised px-4 pt-3.5 pb-4 shadow-sm sm:px-5"
         >
           <WishFiveGrid :stats="stats" dated box-class="max-h-[20rem]" />
@@ -187,7 +211,7 @@ function retry() {
       </div>
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4">
+    <div v-else aria-busy="true" :aria-label="$t('wishes.loading')" class="flex flex-col gap-4">
       <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,15.5rem),1fr))] gap-3.5">
         <UiSkeleton v-for="n in 3" :key="n" class="h-32" />
       </div>

@@ -5,6 +5,8 @@
 
 import { accountInput, GENSHIN_SERVERS, type GenshinServer } from '@gdt/shared'
 import type { AccountInput } from '@/api'
+import { t } from '@/i18n'
+import { serverLabel } from './overview'
 
 /**
  * The base URL Irminsul posts to. It appends `/genshin-accounts-public/...`
@@ -15,17 +17,13 @@ export function trackerApiUrl(): string {
   return `${window.location.origin}/api`
 }
 
-export const SERVER_LABELS: Record<GenshinServer, string> = {
-  AMERICA: 'America',
-  EUROPE: 'Europe',
-  ASIA: 'Asia',
-  SAR: 'TW, HK, MO',
+/** The server select's options, in the language on screen. */
+export function serverOptions(): { value: GenshinServer | null; label: string }[] {
+  return [
+    { value: null, label: t('transfer.account.notSet') },
+    ...GENSHIN_SERVERS.map((value) => ({ value, label: serverLabel(value) ?? value })),
+  ]
 }
-
-export const SERVER_OPTIONS: { value: GenshinServer | null; label: string }[] = [
-  { value: null, label: 'Not set' },
-  ...GENSHIN_SERVERS.map((value) => ({ value, label: SERVER_LABELS[value] })),
-]
 
 export interface AccountFormValues {
   name: string
@@ -35,11 +33,11 @@ export interface AccountFormValues {
 
 export type AccountFormErrors = Partial<Record<keyof AccountFormValues, string>>
 
-const FIELD_MESSAGES: Record<keyof AccountFormValues, string> = {
-  name: 'Max 64 characters',
-  uid: '9 or 10 digits',
-  server: 'Pick a server',
-}
+const FIELD_MESSAGES = {
+  name: 'transfer.account.nameError',
+  uid: 'transfer.account.uidError',
+  server: 'transfer.account.serverError',
+} as const satisfies Record<keyof AccountFormValues, string>
 
 export function emptyAccountForm(): AccountFormValues {
   return { name: '', uid: '', server: null }
@@ -65,7 +63,7 @@ export function validateAccountForm(
   for (const issue of result.error.issues) {
     const field = issue.path[0]
     if (field === 'name' || field === 'uid' || field === 'server') {
-      errors[field] ??= FIELD_MESSAGES[field]
+      errors[field] ??= t(FIELD_MESSAGES[field])
     }
   }
   return { ok: false, errors }

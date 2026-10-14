@@ -49,7 +49,7 @@ function onKey(event: KeyboardEvent) {
       type="button"
       class="inline-flex size-10 items-center justify-center rounded-l-lg text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40"
       :disabled="modelValue <= min"
-      :aria-label="`${label}: down`"
+      :aria-label="$t('planner.stepper.down', { label })"
       @click="set(modelValue - 1)"
     >
       <Minus class="size-4" aria-hidden="true" />
@@ -77,7 +77,7 @@ function onKey(event: KeyboardEvent) {
       type="button"
       class="inline-flex size-10 items-center justify-center rounded-r-lg text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:opacity-40"
       :disabled="modelValue >= max"
-      :aria-label="`${label}: up`"
+      :aria-label="$t('planner.stepper.up', { label })"
       @click="set(modelValue + 1)"
     >
       <Plus class="size-4" aria-hidden="true" />

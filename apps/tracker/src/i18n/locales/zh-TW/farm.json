@@ -1,1 +1,199 @@
-{}
+{
+  "stock": {
+    "all": "足夠所有目標",
+    "alone": "足夠此目標",
+    "short": "不足"
+  },
+  "readiness": {
+    "all": {
+      "label": "齊全",
+      "meaning": "扣除上方目標後仍足夠"
+    },
+    "alone": {
+      "label": "單獨齊全",
+      "meaning": "單獨足夠，扣除上方目標後不足"
+    },
+    "short": {
+      "label": "不足",
+      "meaning": "單獨也不足"
+    },
+    "done": {
+      "label": "已完成",
+      "meaning": "已達成"
+    },
+    "artifacts": {
+      "label": "聖遺物",
+      "meaning": "等級已達成，聖遺物未完成"
+    }
+  },
+  "bracket": {
+    "tier": "等級 {tier}",
+    "bossLevel": "首領等級 {level}",
+    "wl": "世界等級 {wl}",
+    "withAr": "{base}（冒險等階 {ar}）",
+    "assumed": "{base}，假定"
+  },
+  "unit": {
+    "days": "{n} 天",
+    "weeks": "{n} 週"
+  },
+  "status": {
+    "locked": "冒險等階或世界等級不足，暫時無法刷取",
+    "noRate": "此來源沒有平均掉落率，無法估算",
+    "notFarmed": "沒有消耗樹脂的來源"
+  },
+  "time": {
+    "hm": "{h}小時{m}分",
+    "h": "{h}小時",
+    "m": "{m}分",
+    "dh": "{d}天{h}小時",
+    "d": "{d}天"
+  },
+  "craft": {
+    "kind": {
+      "convert": "轉換",
+      "craft": "合成",
+      "forge": "鍛造"
+    },
+    "item": "{name} ×{count}",
+    "convertRow": "{input} 轉換為 {output}",
+    "craftRow": "用 {input} 合成 {output}",
+    "forgeRow": "用 {input} 鍛造 {output}",
+    "kindTitle": {
+      "convert": "煉金：轉換",
+      "craft": "煉金：合成，從最低階開始",
+      "forge": "鐵匠：鍛造"
+    },
+    "listSeparator": "、",
+    "notYet": "暫不可：還需 {items}（請先完成上方步驟）",
+    "doneRow": "完成：{row}",
+    "notEnough": "不足：還需 {items}",
+    "allDoneTitle": "全部 {n} 步完成：背包依完成後更新",
+    "title": "製作",
+    "fold": "收合",
+    "unfold": "計畫中需要轉換、合成和鍛造的材料",
+    "steps": "{n} 步",
+    "inAll": "共 {cost}",
+    "forgingTime": "鍛造時間 {time}（不計鍛造佇列）",
+    "forging": "鍛造",
+    "allDone": "全部完成",
+    "hideTitle": "隱藏製作（可在養成規劃設定中恢復）",
+    "hide": "隱藏製作",
+    "from": "消耗",
+    "fewer": "收合",
+    "all": "全部 {n}"
+  },
+  "lock": {
+    "ar": "冒險等階 {ar}",
+    "wl": "世界等級 {wl}",
+    "locked": "未解鎖"
+  },
+  "cards": {
+    "blossomExp": "啟示之花",
+    "blossomMora": "藏金之花",
+    "local": "區域特產",
+    "common": "普通敵人",
+    "elite": "精英敵人",
+    "other": "其他",
+    "elsewhere": "其他途徑"
+  },
+  "sections": {
+    "free": "無需樹脂",
+    "domain": "祕境 · 地脈",
+    "boss": "首領",
+    "weekly": "週本",
+    "artifact": "聖遺物"
+  },
+  "card": {
+    "runs": "{n} 次",
+    "claims": "{n} 次領取",
+    "claimsWeekly": "{claims}，每週一次",
+    "atMost": "最多 {runs}",
+    "atMostPrefix": "最多",
+    "runsShort": "{n} 次",
+    "claimsShort": "{n} 次領取",
+    "resinRange": "{min}–{max} 樹脂",
+    "resin": "{n} 樹脂",
+    "condensed": "{n} 濃縮樹脂",
+    "condensedTitle": "{n} 濃縮樹脂",
+    "guaranteed": "掉落率依保底最低值計算",
+    "lockTitle": "暫不可刷取：需要{lock}",
+    "kind": {
+      "boss": "首領",
+      "gem": "掉落該材料的首領",
+      "enemy": "掉落該材料的敵人",
+      "local": "產地",
+      "artifact": "聖遺物祕境"
+    },
+    "elsewhereTitle": "沒有祕境掉落這些套裝",
+    "noRate": "無掉落率",
+    "paidTitle": "計畫中的祕境挑戰可獲得 {mora} 摩拉",
+    "paid": "+{n} 來自祕境",
+    "blockedTitle": "{n} 次轉換需要更多異夢溶媒",
+    "blocked": "{n} 受阻",
+    "blockedSr": "：需要更多異夢溶媒"
+  },
+  "weekday": {
+    "short": {
+      "sun": "週日",
+      "mon": "週一",
+      "tue": "週二",
+      "wed": "週三",
+      "thu": "週四",
+      "fri": "週五",
+      "sat": "週六"
+    },
+    "long": {
+      "sun": "星期日",
+      "mon": "星期一",
+      "tue": "星期二",
+      "wed": "星期三",
+      "thu": "星期四",
+      "fri": "星期五",
+      "sat": "星期六"
+    }
+  },
+  "panel": {
+    "today": "今天",
+    "schedule": "日程",
+    "runsLine": "{runs} · {resin} 樹脂（{condensed} 濃縮樹脂）· {days}",
+    "sources": "祕境、普通首領和地脈",
+    "daily": "每天 {n} 樹脂",
+    "dailyRefresh": "每天 {n} 樹脂（180 + {r} × {per}）",
+    "withHeld": "計入現有樹脂後 {days}",
+    "gems": "寶石：{runs}，{resin} 樹脂",
+    "partial": "部分來源沒有掉落率",
+    "upperBound": "世界等級 9 的首領掉落依保底最低值計算",
+    "weeklyClaims": "週本：{claims}，共 {weeks}",
+    "weeklyResin": "依週本半價計 {resin} 樹脂（原價 {max}）",
+    "weeklyPartial": "部分首領沒有掉落率",
+    "serverDay": "伺服器日：{day}",
+    "serverDaySunday": "伺服器日：{day}（所有祕境開放）",
+    "resetIn": "距 04:00 重置還有 {time}",
+    "forgeOff": "計入持有礦石可鍛造的精鍛用魔礦",
+    "forgeLine": "鍛造 {item}：{mora} 摩拉，{time}",
+    "stillShort": "仍缺 {n}",
+    "totals": "總計",
+    "resin": "樹脂",
+    "dayUnit": "天",
+    "refreshTitle": "每天補充樹脂 {r} 次：每天 {daily} 樹脂",
+    "perDay": "{n}/天",
+    "weekly": "週本",
+    "weekUnit": "週",
+    "lockedTitle": "{n} 個來源受冒險等階/世界等級限制",
+    "locked": "受冒險等階/世界等級限制",
+    "view": "刷取檢視",
+    "noWeeklyTitle": "僅顯示無需週本即可完成的目標：其週本材料已持有或可轉換（扣除上方目標後）",
+    "noWeekly": "無週本",
+    "noneLeft": "所有目標仍需要週本",
+    "showAll": "顯示所有目標",
+    "assumed": "未設定冒險等階/世界等級：依最高檔位計算",
+    "set": "設定",
+    "nothing": "沒有需要刷取的材料",
+    "sectionLabel": "{label}：{resin} 樹脂",
+    "show": "展開",
+    "hidden": "已隱藏 {n} 個",
+    "forge": "用礦石鍛造",
+    "pairTitle": "{runs} · {resin} 樹脂 · {days}"
+  }
+}

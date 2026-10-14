@@ -26,6 +26,7 @@ import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { materialMatcher, matchRank } from '@/utils/materials'
@@ -80,21 +81,17 @@ type Sort = 'order' | 'count' | 'change' | 'name'
 type View = 'grid' | 'list'
 type Tab = TabKey | 'all'
 
-const SORT_OPTIONS: { value: Sort; label: string }[] = [
-  { value: 'order', label: 'In-game' },
-  { value: 'count', label: 'Count' },
-  { value: 'change', label: 'Change' },
-  { value: 'name', label: 'Name' },
-]
+const SORTS: Sort[] = ['order', 'count', 'change', 'name']
+const sortOptions = computed(() =>
+  SORTS.map((value) => ({ value, label: t(`materials.bag.sorts.${value}`) })),
+)
 const SORT_KEY = 'materials:sort'
 const VIEW_KEY = 'materials:view'
 const TAB_KEY = 'materials:tab'
 const FOLDED_KEY = 'materials:folded'
 
 const storedSort = readStorage(SORT_KEY)
-const sort = ref<Sort>(
-  SORT_OPTIONS.some((o) => o.value === storedSort) ? (storedSort as Sort) : 'order',
-)
+const sort = ref<Sort>(SORTS.includes(storedSort as Sort) ? (storedSort as Sort) : 'order')
 watch(sort, (value) => writeStorage(SORT_KEY, value))
 const view = ref<View>(readStorage(VIEW_KEY) === 'list' ? 'list' : 'grid')
 watch(view, (value) => writeStorage(VIEW_KEY, value))
@@ -183,7 +180,13 @@ const tabCounts = computed(() => {
 })
 
 const tabChips = computed(() => [
-  { key: 'all' as Tab, label: 'All', title: 'Every tab', icon: null, count: searched.value.length },
+  {
+    key: 'all' as Tab,
+    label: t('materials.bag.all'),
+    title: t('materials.bag.allTitle'),
+    icon: null,
+    count: searched.value.length,
+  },
   ...tabKeys.value.map((key) => {
     const display = tabDisplay(key)
     return {
@@ -284,14 +287,14 @@ const heading = computed(() =>
 const showTabs = computed<SegmentedOption<Show>[]>(() => [
   {
     value: 'owned',
-    label: 'Owned',
-    title: 'Materials you hold',
+    label: t('materials.bag.owned'),
+    title: t('materials.bag.ownedTitle'),
     count: pools.value.owned.length,
   },
   {
     value: 'gained',
-    label: 'Gained',
-    title: `Gained ${props.hint}`,
+    label: t('materials.bag.gained'),
+    title: t('materials.bag.gainedTitle', { hint: props.hint }),
     count: pools.value.gained.length,
     icon: ArrowUp,
     iconClass: 'text-success-text',
@@ -299,8 +302,8 @@ const showTabs = computed<SegmentedOption<Show>[]>(() => [
   },
   {
     value: 'spent',
-    label: 'Spent',
-    title: `Spent ${props.hint}`,
+    label: t('materials.bag.spent'),
+    title: t('materials.bag.spentTitle', { hint: props.hint }),
     count: pools.value.spent.length,
     icon: ArrowDown,
     iconClass: 'text-danger-text',
@@ -318,13 +321,16 @@ function tileTitle(item: MaterialItem): string {
   const edit =
     hand === undefined
       ? ''
-      : ` · set by hand ${formatNumber(hand)} (capture ${formatNumber(item.count)})`
-  return `${item.name}: ${formatNumber(item.count)}${delta}${edit}`
+      : t('materials.bag.handSet', {
+          hand: formatNumber(hand),
+          capture: formatNumber(item.count),
+        })
+  return `${t('materials.bag.tile', { name: item.name, count: formatNumber(item.count) })}${delta}${edit}`
 }
-const VIEW_OPTIONS: SegmentedOption<View>[] = [
-  { value: 'grid', label: 'Icons', icon: LayoutGrid },
-  { value: 'list', label: 'List', icon: List },
-]
+const viewOptions = computed<SegmentedOption<View>[]>(() => [
+  { value: 'grid', label: t('materials.bag.views.grid'), icon: LayoutGrid },
+  { value: 'list', label: t('materials.bag.views.list'), icon: List },
+])
 </script>
 
 <template>
@@ -339,11 +345,16 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
           />
           <span class="truncate" :title="heading.title">{{ heading.name }}</span>
         </template>
-        <template v-else>Bag</template>
+        <template v-else>{{ $t('materials.bag.title') }}</template>
       </h2>
       <div class="flex flex-wrap items-center gap-2">
-        <UiSegmented v-model="show" :options="showTabs" label="Show" compact />
-        <UiSegmented v-model="view" :options="VIEW_OPTIONS" label="View" icon-only />
+        <UiSegmented v-model="show" :options="showTabs" :label="$t('materials.bag.show')" compact />
+        <UiSegmented
+          v-model="view"
+          :options="viewOptions"
+          :label="$t('materials.bag.view')"
+          icon-only
+        />
       </div>
     </template>
 
@@ -352,7 +363,7 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
         ref="tabRow"
         class="scroll-hide scroll-fade-x -mx-4 flex scroll-px-4 gap-2 overflow-x-auto px-4 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:px-0"
         role="radiogroup"
-        aria-label="Inventory tab"
+        :aria-label="$t('materials.bag.tabRow')"
       >
         <FilterChip
           v-for="chip in tabChips"
@@ -379,22 +390,22 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
             type="search"
             autocomplete="off"
             spellcheck="false"
-            placeholder="Search"
-            aria-label="Search materials"
+            :placeholder="$t('materials.search')"
+            :aria-label="$t('materials.searchLabel')"
             class="pl-9"
           />
         </div>
         <UiSelect
           v-if="show === 'owned'"
           v-model="sort"
-          :options="SORT_OPTIONS"
-          aria-label="Sort"
-          title="Sort"
+          :options="sortOptions"
+          :aria-label="$t('materials.bag.sort')"
+          :title="$t('materials.bag.sort')"
           class="w-28 sm:w-36"
         />
         <UiIconButton
           v-if="grouped && tabKeys.length > 1"
-          :label="allFolded ? 'Unfold every tab' : 'Fold every tab'"
+          :label="allFolded ? $t('materials.bag.unfoldAll') : $t('materials.bag.foldAll')"
           @click="foldAll"
         >
           <ChevronsUpDown v-if="allFolded" class="size-5" aria-hidden="true" />
@@ -404,17 +415,17 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
     </div>
 
     <div class="p-3 sm:p-5">
-      <UiEmpty v-if="items.length === 0" title="No materials">
+      <UiEmpty v-if="items.length === 0" :title="$t('materials.noMaterials')">
         <template #icon><Package aria-hidden="true" /></template>
         <UiButton variant="primary" :to="importTo">
           <Upload class="size-4" aria-hidden="true" />
-          Import
+          {{ $t('materials.import') }}
         </UiButton>
       </UiEmpty>
 
-      <UiEmpty v-else-if="filtered.length === 0" title="No matches">
+      <UiEmpty v-else-if="filtered.length === 0" :title="$t('materials.noMatches')">
         <template #icon><SearchX aria-hidden="true" /></template>
-        <UiButton @click="clearFilters">Clear</UiButton>
+        <UiButton @click="clearFilters">{{ $t('materials.clear') }}</UiButton>
       </UiEmpty>
 
       <div v-else class="flex flex-col gap-1">
@@ -512,7 +523,7 @@ const VIEW_OPTIONS: SegmentedOption<View>[] = [
 
         <div v-if="more > 0" ref="sentinel" class="flex justify-center">
           <UiButton size="sm" @click="limit += PAGE[view]">
-            {{ formatNumber(more) }} more
+            {{ $t('materials.more', { n: formatNumber(more) }) }}
           </UiButton>
         </div>
       </div>

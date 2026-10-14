@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { ArrowRight, ArrowUp, Backpack, Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
@@ -30,7 +31,8 @@ const selected = computed<WeaponRow>(
   () => g.value.rows.find((r) => r.id === props.selectedId) ?? g.value.best,
 )
 const equipped = computed(() => g.value.owners.length)
-const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT}`
+const refinementTitle = (r: number) =>
+  t('weapons.detail.refinementTitle', { rank: r, max: MAX_REFINEMENT })
 </script>
 
 <template>
@@ -82,30 +84,36 @@ const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT
           </template>
           <span v-else class="inline-flex items-center gap-1.5">
             <Backpack class="size-4" aria-hidden="true" />
-            Unequipped
+            {{ $t('weapons.detail.unequipped') }}
           </span>
-          <Lock v-if="selected.lock" class="size-4 shrink-0" aria-label="Locked" />
+          <Lock
+            v-if="selected.lock"
+            class="size-4 shrink-0"
+            :aria-label="$t('weapons.title.locked')"
+          />
         </p>
       </div>
     </div>
 
     <p class="flex flex-wrap gap-x-4 text-sm text-text-secondary">
-      <span
-        ><span class="tabular font-mono text-lg text-text-primary">{{
-          formatNumber(g.count)
-        }}</span>
-        {{ g.count === 1 ? 'copy' : 'copies' }}</span
+      <i18n-t keypath="weapons.detail.copies" tag="span" :plural="g.count"
+        ><template #n
+          ><span class="tabular font-mono text-lg text-text-primary">{{
+            formatNumber(g.count)
+          }}</span></template
+        ></i18n-t
       >
-      <span v-if="equipped"
-        ><span class="tabular font-mono text-lg text-text-primary">{{ equipped }}</span>
-        equipped</span
+      <i18n-t v-if="equipped" keypath="weapons.detail.equipped" tag="span"
+        ><template #n
+          ><span class="tabular font-mono text-lg text-text-primary">{{ equipped }}</span></template
+        ></i18n-t
       >
     </p>
 
     <ul
       v-if="g.refine"
       class="flex flex-col gap-1 rounded-xl bg-emerald-500/10 px-3 py-2 text-sm"
-      :title="`${g.refine.spare} spare ${g.refine.spare === 1 ? 'copy' : 'copies'}`"
+      :title="$t('weapons.detail.spareCopies', { n: g.refine.spare }, g.refine.spare)"
     >
       <li v-for="t in g.refine.targets" :key="t.owner" class="flex items-center gap-2">
         <ArrowUp class="size-4 text-success-text" aria-hidden="true" />
@@ -113,7 +121,7 @@ const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT
         <span class="tabular ml-auto flex items-center gap-1 font-mono text-success-text">
           R{{ t.from }}
           <ArrowRight class="size-3.5" aria-hidden="true" />
-          <span class="sr-only">to</span>
+          <span class="sr-only">{{ $t('characters.timeline.to') }}</span>
           R{{ t.to }}
         </span>
       </li>
@@ -121,7 +129,7 @@ const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT
 
     <ul
       class="divide-y divide-border-subtle overflow-hidden rounded-xl border border-border-default"
-      aria-label="Copies"
+      :aria-label="$t('weapons.sort.count')"
     >
       <li
         v-for="row in g.rows"
@@ -156,7 +164,7 @@ const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT
           </span>
         </span>
         <span class="w-4 shrink-0 text-text-muted">
-          <Lock v-if="row.lock" class="size-3.5" aria-label="Locked" />
+          <Lock v-if="row.lock" class="size-3.5" :aria-label="$t('weapons.title.locked')" />
         </span>
         <RouterLink
           v-if="row.location"
@@ -179,7 +187,7 @@ const refinementTitle = (r: number) => `Refinement Rank ${r} of ${MAX_REFINEMENT
         <span
           v-if="row.count > 1"
           class="tabular shrink-0 font-mono text-text-secondary"
-          :title="`${formatNumber(row.count)} copies`"
+          :title="$t('weapons.group.copies', { count: formatNumber(row.count) }, row.count)"
           >×{{ formatNumber(row.count) }}</span
         >
       </li>

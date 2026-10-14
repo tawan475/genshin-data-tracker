@@ -20,6 +20,7 @@ import {
   type StatCharacter,
   type StatWeapon,
 } from '@gdt/game-data/stats'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { formatStatName } from '@/utils/artifact-stats'
 import type { Element } from './game-meta'
@@ -59,10 +60,9 @@ export const DAMAGE_ORDER: readonly DamageKind[] = [
   'physical',
 ]
 
-const PANEL_LABELS: Readonly<Record<string, string>> = { hp: 'Max HP' }
-
+/** "Max HP" where the Attributes screen names a stat differently, else the stat's name. */
 export function statLabel(key: string): string {
-  return PANEL_LABELS[key] ?? formatStatName(key)
+  return key === 'hp' ? t('characters.stat.maxHp') : formatStatName(key)
 }
 
 /** "18,663" for flat stats, "62.2%" for percentages (GOOD's trailing underscore). */
@@ -175,10 +175,17 @@ export type TalentKey = TalentSlot
 
 export const TALENT_KEYS: readonly TalentKey[] = ['auto', 'skill', 'burst']
 
+/** "Normal Attack", … in the language on screen (read where it renders). */
 export const TALENT_LABELS: Readonly<Record<TalentKey, string>> = {
-  auto: 'Normal Attack',
-  skill: 'Elemental Skill',
-  burst: 'Elemental Burst',
+  get auto() {
+    return t('game.normalAttack')
+  },
+  get skill() {
+    return t('game.skill')
+  },
+  get burst() {
+    return t('game.burst')
+  },
 }
 
 /** The talents a character's 3rd and 5th constellations raise by 3 (the planner data's). */
@@ -223,9 +230,12 @@ export function talentLevels(
 }
 
 /** "Elemental Skill 9 → 12 (C3)", "Elemental Burst 10 → 13 (C5) · crowned". */
-export function talentTitle(t: TalentLevel): string {
-  const value = t.from ? `${t.base} → ${t.level} (C${t.from})` : `${t.level}`
-  return `${TALENT_LABELS[t.key]} ${value}${t.crowned ? ' · crowned' : ''}`
+export function talentTitle(talent: TalentLevel): string {
+  const value = talent.from
+    ? `${talent.base} → ${talent.level} (C${talent.from})`
+    : `${talent.level}`
+  const title = `${TALENT_LABELS[talent.key]} ${value}`
+  return talent.crowned ? t('characters.talent.crowned', { title }) : title
 }
 
 // ----------------------------------------------------------------- weapon
@@ -252,7 +262,7 @@ export function weaponLines(weapon: StatWeapon): WeaponLines | null {
   const subKey = sub?.[0]
   const shown = (key: string, value: number) => row(key, displayStat(key, value))
   return {
-    atk: { ...shown('atk', all.baseAtk ?? 0), key: 'baseAtk', label: 'Base ATK' },
+    atk: { ...shown('atk', all.baseAtk ?? 0), key: 'baseAtk', label: t('characters.stat.baseAtk') },
     sub: subKey ? shown(subKey, (all[subKey] ?? 0) - (passive[subKey] ?? 0)) : null,
     passive: Object.entries(passive).map(([key, value]) => shown(key, value)),
   }
@@ -316,9 +326,10 @@ export function bonusSets<S extends { count: number; thresholds: readonly number
 export function setBonusTitle(setKey: string, active: readonly number[]): string[] {
   return setBonusLines(setKey)
     .filter((b) => b.stats.length > 0)
-    .map(
-      (b) =>
-        `${b.pieces}-piece${active.includes(b.pieces) ? '' : ' (inactive)'}: ` +
-        b.stats.map((s) => `${s.label} +${s.text}`).join(', '),
+    .map((b) =>
+      t(active.includes(b.pieces) ? 'characters.setBonus.line' : 'characters.setBonus.inactive', {
+        n: b.pieces,
+        stats: b.stats.map((s) => `${s.label} +${s.text}`).join(t('characters.setBonus.join')),
+      }),
     )
 }

@@ -22,7 +22,7 @@ const HEIGHT = { sm: 'h-2', md: 'h-2.5', lg: 'h-3.5' } as const
     class="relative overflow-hidden rounded-full"
     :class="[HEIGHT[size], on === 'tile' ? 'bg-surface-raised' : 'bg-surface-sunken']"
     role="img"
-    :aria-label="`Pity ${pity} of ${hard}, soft pity from ${soft}`"
+    :aria-label="$t('wishes.track.label', { pity, hard, soft })"
   >
     <div
       class="absolute inset-y-0 right-0 bg-rarity-5/16"

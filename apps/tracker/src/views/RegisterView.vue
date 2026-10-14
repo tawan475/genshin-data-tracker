@@ -10,16 +10,13 @@ import {
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
-import {
-  HUMAN_CHECK_NEEDED,
-  HUMAN_CHECK_WAIT,
-  humanCheckPassed,
-  siteKeyAfter,
-} from '@/components/auth/human-check'
+import { humanCheckNeeded, humanCheckPassed, siteKeyAfter } from '@/components/auth/human-check'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import { loadSignInOptions } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
 
@@ -58,18 +55,18 @@ onMounted(async () => {
 
 // The same schemas the server validates with.
 const errors = computed(() => ({
-  username: usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _',
+  username: usernameSchema.safeParse(username.value).success ? '' : t('auth.usernameRule'),
   email:
     !emailFeatures.value || !email.value.trim() || emailSchema.safeParse(email.value).success
       ? ''
-      : 'Invalid email',
+      : t('auth.invalidEmail'),
   password:
     password.value.length < MIN_PASSWORD_LENGTH
-      ? `Min ${MIN_PASSWORD_LENGTH} characters`
+      ? t('auth.minChars', { n: MIN_PASSWORD_LENGTH })
       : password.value.length > MAX_PASSWORD_LENGTH
-        ? `Max ${MAX_PASSWORD_LENGTH} characters`
+        ? t('auth.maxChars', { n: MAX_PASSWORD_LENGTH })
         : '',
-  confirm: confirm.value !== password.value ? 'Does not match' : '',
+  confirm: confirm.value !== password.value ? t('auth.doesNotMatch') : '',
 }))
 const valid = computed(() => Object.values(errors.value).every((e) => !e))
 const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
@@ -92,14 +89,12 @@ async function submit() {
     const key = await siteKeyAfter(cause)
     if (key) siteKey.value = key
     serverError.value = key
-      ? HUMAN_CHECK_NEEDED
+      ? humanCheckNeeded()
       : cause instanceof ApiRequestError && cause.code === 'taken'
         ? emailFeatures.value
-          ? 'Username or email taken'
-          : 'Username taken'
-        : cause instanceof Error
-          ? cause.message
-          : 'Sign-up failed'
+          ? t('auth.usernameOrEmailTaken')
+          : t('auth.usernameTaken')
+        : errorText(cause, t('auth.signUpFailed'))
   } finally {
     // A token works once, whatever the answer.
     human.value?.reset()
@@ -109,7 +104,7 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame title="Create account">
+  <AuthFrame :title="$t('auth.createAccount')">
     <p
       v-if="serverError"
       class="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300"
@@ -122,15 +117,11 @@ async function submit() {
       class="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/15 p-3 text-sm text-amber-200"
       role="status"
     >
-      {{
-        signups === 'oauth'
-          ? 'Sign up with Discord or Google for now'
-          : 'Sign-ups are closed for now'
-      }}
+      {{ signups === 'oauth' ? $t('auth.signupsOauth') : $t('auth.signupsClosed') }}
     </p>
     <form v-if="signups === 'open'" class="flex flex-col gap-4" novalidate @submit.prevent="submit">
       <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-gray-400">Username</span>
+        <span class="text-sm font-medium text-gray-400">{{ $t('common.username') }}</span>
         <input
           v-model="username"
           class="glass-input"
@@ -143,7 +134,8 @@ async function submit() {
       </label>
       <label v-if="emailFeatures" class="flex flex-col gap-2">
         <span class="text-sm font-medium text-gray-400"
-          >Email <span class="text-gray-500">(optional)</span></span
+          >{{ $t('common.email') }}
+          <span class="text-gray-500">{{ $t('common.optional') }}</span></span
         >
         <input
           v-model="email"
@@ -155,7 +147,7 @@ async function submit() {
         <span v-if="show('email')" class="text-sm text-red-300">{{ show('email') }}</span>
       </label>
       <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-gray-400">Password</span>
+        <span class="text-sm font-medium text-gray-400">{{ $t('common.password') }}</span>
         <input
           v-model="password"
           class="glass-input"
@@ -166,7 +158,7 @@ async function submit() {
         <span v-if="show('password')" class="text-sm text-red-300">{{ show('password') }}</span>
       </label>
       <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-gray-400">Confirm password</span>
+        <span class="text-sm font-medium text-gray-400">{{ $t('auth.confirmPassword') }}</span>
         <input
           v-model="confirm"
           class="glass-input"
@@ -189,21 +181,21 @@ async function submit() {
           type="submit"
           class="btn-glow w-full rounded-xl"
           :disabled="busy || !humanOk"
-          :title="humanOk ? undefined : HUMAN_CHECK_WAIT"
+          :title="humanOk ? undefined : $t('auth.humanCheck.wait')"
         >
           <UiSpinner v-if="busy" class="size-4" />
-          Create account
+          {{ $t('auth.createAccount') }}
         </button>
       </div>
     </form>
     <OAuthButtons v-if="signups !== 'closed'" :next="next" />
     <template #footer>
-      Have an account?
+      {{ $t('auth.haveAccount') }}
       <RouterLink
         :to="{ name: 'login', query: next ? { next } : {} }"
         class="font-semibold text-paimon hover:underline"
       >
-        Sign in
+        {{ $t('common.signIn') }}
       </RouterLink>
     </template>
   </AuthFrame>

@@ -91,14 +91,22 @@ const ownerName = (key: string) => props.names?.get(key) ?? characterName(key)
 <template>
   <div class="flex flex-col gap-2">
     <label class="relative">
-      <span class="sr-only">Search weapons</span>
+      <span class="sr-only">{{ $t('planner.weaponBlock.search') }}</span>
       <Search
         class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
         aria-hidden="true"
       />
-      <UiInput v-model="query" class="pl-9" placeholder="Search" type="search" />
+      <UiInput
+        v-model="query"
+        class="pl-9"
+        :placeholder="$t('planner.common.search')"
+        type="search"
+      />
     </label>
-    <ul class="flex max-h-80 flex-col gap-0.5 overflow-y-auto" aria-label="Weapons">
+    <ul
+      class="flex max-h-80 flex-col gap-0.5 overflow-y-auto"
+      :aria-label="$t('planner.picker.weapons')"
+    >
       <li v-for="row in rows" :key="row.id">
         <button
           type="button"
@@ -106,8 +114,15 @@ const ownerName = (key: string) => props.names?.get(key) ?? characterName(key)
           :class="row.owner === null ? 'opacity-70' : ''"
           :title="
             row.owner === null
-              ? `${row.name} · not owned`
-              : `${row.name} · Lv ${row.level} R${row.refinement}${row.owner ? ` · ${ownerName(row.owner)}` : ''}`
+              ? $t('planner.roster.notOwned', { name: row.name })
+              : [
+                  $t('planner.roster.weaponOwned', {
+                    name: row.name,
+                    level: row.level,
+                    refinement: row.refinement,
+                  }),
+                  ...(row.owner ? [ownerName(row.owner)] : []),
+                ].join(' · ')
           "
           @click="
             emit('pick', row.key, row.owner === null ? (holder ?? '') : (holder ?? row.owner))

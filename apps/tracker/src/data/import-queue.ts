@@ -17,6 +17,8 @@
 import { MAX_IMPORT_FILES, MAX_IMPORT_FILE_SIZE_BYTES, MAX_IMPORT_FILE_SIZE_MB } from '@gdt/shared'
 import { markRaw, reactive } from 'vue'
 import { ApiRequestError, api } from '@/api'
+import { errorText } from '@/i18n/api-errors'
+import { t } from '@/i18n'
 import { formatDateTime, formatNumber, formatTime } from '@/lib/format'
 import { importingAccounts } from '@/live/holds'
 import router from '@/router'
@@ -200,10 +202,10 @@ export function addFiles(queue: ImportQueue, files: File[]): AddReport {
       snapshotId: null,
     }
     if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
-      fail(item, `Over ${MAX_IMPORT_FILE_SIZE_MB} MB`)
+      fail(item, t('transfer.upload.overSize', { mb: formatNumber(MAX_IMPORT_FILE_SIZE_MB) }))
       item.takenAt = null
     } else if (file.size === 0) {
-      fail(item, 'Empty file')
+      fail(item, t('transfer.upload.empty'))
       item.takenAt = null
     }
     queue.items.push(item)
@@ -458,7 +460,7 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
         queue.state = 'pausing'
         useFeedback().toast({
           tone: 'danger',
-          title: 'Upload paused',
+          title: t('transfer.upload.paused'),
           detail: item.message ?? undefined,
         })
         return 'stop'
@@ -468,7 +470,7 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
           queue,
           item,
           Math.min(60_000, 15_000 * rateLimited),
-          'Rate limited',
+          t('transfer.upload.rateLimited'),
         )
         if (!resumed) return requeue(item)
         continue
@@ -478,7 +480,7 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
           queue,
           item,
           5_000 * 2 ** (transient - 1),
-          status === 0 ? 'Offline' : 'Server error',
+          status === 0 ? t('transfer.upload.offline') : t('transfer.upload.serverError'),
         )
         if (!resumed) return requeue(item)
         continue
@@ -489,13 +491,13 @@ async function upload(queue: ImportQueue, item: ImportItem): Promise<UploadResul
         queue.state = 'pausing'
         useFeedback().toast({
           tone: 'danger',
-          title: 'Upload paused',
-          detail: 'Signed out',
+          title: t('transfer.upload.paused'),
+          detail: t('transfer.upload.signedOut'),
         })
         return 'stop'
       }
       if (status === 404) {
-        fail(item, 'Account deleted')
+        fail(item, t('transfer.upload.accountDeleted'))
         queue.state = 'cancelling'
         return 'stop'
       }
@@ -513,21 +515,21 @@ function requeue(item: ImportItem): UploadResult {
 
 function describeError(error: unknown, item: ImportItem): string {
   if (!(error instanceof ApiRequestError)) {
-    return error instanceof Error ? 'Unreadable file' : 'Upload failed'
+    return error instanceof Error ? t('transfer.upload.unreadable') : t('transfer.upload.failed')
   }
   switch (error.code) {
     case 'duplicate_capture':
       return item.takenAt
-        ? `Other snapshot at ${formatDateTime(item.takenAt)}`
-        : 'Other snapshot at this time'
+        ? t('transfer.upload.otherSnapshotAt', { time: formatDateTime(item.takenAt) })
+        : t('transfer.upload.otherSnapshot')
     case 'rate_limited':
-      return 'Rate limited'
+      return t('transfer.upload.rateLimited')
     case 'daily_upload_limit':
-      return `Daily limit · resets ${formatTime(nextUtcMidnight())}`
+      return t('transfer.upload.dailyLimit', { time: formatTime(nextUtcMidnight()) })
     case 'storage_quota':
-      return 'Storage full'
+      return t('transfer.upload.storageFull')
     default:
-      return error.message
+      return errorText(error)
   }
 }
 
@@ -552,7 +554,7 @@ async function pace(queue: ImportQueue, item: ImportItem): Promise<boolean> {
   recent.set(queue.accountId, times)
   if (times.length < PACED_LIMIT) return true
   const until = times[times.length - PACED_LIMIT]! + RATE_WINDOW_MS + 250
-  return wait(queue, item, until - now, 'Rate limit: 60 files a minute')
+  return wait(queue, item, until - now, t('transfer.upload.rateLimit'))
 }
 
 /** Sleeps, showing why; false if paused or cancelled meanwhile. */
@@ -600,8 +602,11 @@ function finishCancelled(queue: ImportQueue) {
   const stored = summary.created + summary.unchanged
   useFeedback().toast({
     tone: 'info',
-    title: 'Upload cancelled',
-    detail: `${formatNumber(stored)}/${formatNumber(summary.total)} imported`,
+    title: t('transfer.upload.cancelled'),
+    detail: t('transfer.upload.imported', {
+      done: formatNumber(stored),
+      total: formatNumber(summary.total),
+    }),
   })
 }
 
@@ -616,14 +621,14 @@ function finishDone(queue: ImportQueue) {
 
   const title =
     s.created > 0
-      ? `${formatNumber(s.created)} new ${s.created === 1 ? 'snapshot' : 'snapshots'}`
+      ? t('transfer.upload.newSnapshots', { n: formatNumber(s.created) }, s.created)
       : s.unchanged > 0
-        ? 'Nothing new'
-        : `${formatNumber(s.failed)} failed`
+        ? t('transfer.upload.nothingNew')
+        : t('transfer.upload.failedN', { n: formatNumber(s.failed) })
   const parts: string[] = []
-  if (s.unchanged > 0) parts.push(`${formatNumber(s.unchanged)} unchanged`)
+  if (s.unchanged > 0) parts.push(t('transfer.upload.unchangedN', { n: formatNumber(s.unchanged) }))
   if (s.failed > 0 && (s.created > 0 || s.unchanged > 0))
-    parts.push(`${formatNumber(s.failed)} failed`)
+    parts.push(t('transfer.upload.failedN', { n: formatNumber(s.failed) }))
   const accountId = queue.accountId
   useFeedback().toast(
     {
@@ -633,7 +638,7 @@ function finishDone(queue: ImportQueue) {
       action:
         s.created + s.unchanged > 0
           ? {
-              label: 'Snapshots',
+              label: t('transfer.upload.snapshots'),
               run: () => void router.push({ name: 'account-snapshots', params: { accountId } }),
             }
           : undefined,

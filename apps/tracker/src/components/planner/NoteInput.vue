@@ -5,7 +5,7 @@ const model = defineModel<string>({ required: true })
 
 <template>
   <label class="flex flex-col gap-1">
-    <span class="text-sm text-text-secondary">Note</span>
+    <span class="text-sm text-text-secondary">{{ $t('planner.editor.note') }}</span>
     <textarea
       v-model="model"
       rows="2"

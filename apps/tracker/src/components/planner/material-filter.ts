@@ -23,6 +23,7 @@
 import type { MaterialKind, PlannerData, PlannerMaterial } from '@gdt/game-data'
 import type { StockStatus } from '@gdt/game-data/planner-goals'
 import type { PlanGoal, PlanTotals, Requirement } from '@gdt/game-data/planner-math'
+import { t } from '@/i18n'
 import { materialMatcher } from '@/utils/materials'
 import type { GoalNeeds } from './needs'
 
@@ -39,7 +40,8 @@ export interface MaterialOption {
   exp: ExpKind | null
 }
 
-const EXP_NAME: Record<ExpKind, string> = { character: 'Character EXP', weapon: 'Weapon EXP' }
+const expLabel = (exp: ExpKind) =>
+  exp === 'character' ? t('planner.material.characterExp') : t('planner.material.weaponExp')
 
 /** Options built so far, per planner data (by its materials: one map for every copy). */
 const cache = new WeakMap<object, Map<string, MaterialOption | null>>()
@@ -86,11 +88,11 @@ export function materialOption(planner: PlannerData, key: string): MaterialOptio
 }
 
 /** "Character EXP" / "Weapon EXP". */
-export const expName = (exp: ExpKind) => EXP_NAME[exp]
+export const expName = (exp: ExpKind) => expLabel(exp)
 
 /** An option's name: the game's name of its face, or "Character EXP" / "Weapon EXP". */
 export function optionName(option: MaterialOption, name: (key: string) => string): string {
-  return option.exp ? EXP_NAME[option.exp] : name(option.face.key)
+  return option.exp ? expLabel(option.exp) : name(option.face.key)
 }
 
 /** The options a goal's remaining cost uses (by key). */
@@ -134,18 +136,25 @@ export function materialUses(
  * bosses, weapon materials, elite drops), by the game data's kinds. A kind
  * this table doesn't know yet lands in "Other".
  */
-const GROUPS: { id: string; label: string; kinds: readonly MaterialKind[] }[] = [
-  { id: 'exp', label: 'EXP', kinds: ['exp', 'ore'] },
-  { id: 'gem', label: 'Gems', kinds: ['gem'] },
-  { id: 'boss', label: 'Boss drops', kinds: ['boss'] },
-  { id: 'local', label: 'Local specialties', kinds: ['local'] },
-  { id: 'common', label: 'Enemy drops', kinds: ['common'] },
-  { id: 'book', label: 'Talent books', kinds: ['book', 'crown'] },
-  { id: 'weekly', label: 'Weekly bosses', kinds: ['weekly'] },
-  { id: 'weapon', label: 'Weapon materials', kinds: ['weapon'] },
-  { id: 'elite', label: 'Elite drops', kinds: ['elite'] },
+const group = (id: string, kinds: readonly MaterialKind[] = []) => ({
+  id,
+  get label() {
+    return t(`planner.material.group.${id}`)
+  },
+  kinds,
+})
+const GROUPS: readonly { id: string; label: string; kinds: readonly MaterialKind[] }[] = [
+  group('exp', ['exp', 'ore']),
+  group('gem', ['gem']),
+  group('boss', ['boss']),
+  group('local', ['local']),
+  group('common', ['common']),
+  group('book', ['book', 'crown']),
+  group('weekly', ['weekly']),
+  group('weapon', ['weapon']),
+  group('elite', ['elite']),
 ]
-const OTHER = { id: 'other', label: 'Other' }
+const OTHER = group('other')
 
 export interface MaterialChoice {
   option: MaterialOption

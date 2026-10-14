@@ -8,6 +8,7 @@ import UiModal from '@/components/ui/UiModal.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { formatNumber } from '@/lib/format'
 import type { PurgeBody } from '@/api'
+import { t } from '@/i18n'
 
 /**
  * Deletes a Genshin account's data at once, skipping the 30-day trash: the
@@ -36,9 +37,9 @@ watch(
 )
 
 const options = computed(() => [
-  { value: 'range' as const, label: 'Dates' },
-  { value: 'trash' as const, label: 'Trash', count: props.account?.trash ?? 0 },
-  { value: 'account' as const, label: 'Account' },
+  { value: 'range' as const, label: t('staff.deleteData.dates') },
+  { value: 'trash' as const, label: t('staff.deleteData.trash'), count: props.account?.trash ?? 0 },
+  { value: 'account' as const, label: t('staff.deleteData.account') },
 ])
 
 /** Local midnight of a yyyy-mm-dd input. */
@@ -73,38 +74,38 @@ const name = computed(
 </script>
 
 <template>
-  <UiModal :open="open" title="Delete data" @close="emit('close')">
+  <UiModal :open="open" :title="$t('staff.deleteData.title')" @close="emit('close')">
     <form v-if="account" :id="formId" class="flex flex-col gap-4" @submit.prevent="submit">
       <p class="text-sm font-medium">
         {{ name }}
         <span class="tabular font-mono text-text-muted">
-          · {{ formatNumber(account.snapshotCount) }} snapshots
+          {{ $t('staff.deleteData.snapshots', { n: formatNumber(account.snapshotCount) }) }}
         </span>
       </p>
-      <UiSegmented v-model="kind" :options="options" label="What to delete" />
+      <UiSegmented v-model="kind" :options="options" :label="$t('staff.deleteData.what')" />
       <div v-if="kind === 'range'" class="grid grid-cols-2 gap-3">
-        <UiField v-slot="{ id }" label="From">
+        <UiField v-slot="{ id }" :label="$t('staff.deleteData.from')">
           <UiInput :id="id" v-model="from" type="date" />
         </UiField>
-        <UiField v-slot="{ id }" label="To">
+        <UiField v-slot="{ id }" :label="$t('staff.deleteData.to')">
           <UiInput :id="id" v-model="to" type="date" />
         </UiField>
       </div>
       <p v-else-if="kind === 'trash'" class="text-sm text-text-secondary">
-        {{ formatNumber(account.trash) }} deleted snapshots, waiting out their 30 days
+        {{ $t('staff.deleteData.trashText', { n: formatNumber(account.trash) }) }}
       </p>
       <label v-else class="flex flex-col gap-1.5">
         <span class="text-sm font-medium text-text-secondary">
-          The account and all its data. Type <span class="font-code">DELETE</span>
+          {{ $t('staff.deleteData.accountType') }} <span class="font-code">DELETE</span>
         </span>
         <UiInput v-model="typed" autocomplete="off" spellcheck="false" />
       </label>
-      <span class="text-[0.8125rem] text-danger-text">Deleted at once, no trash</span>
+      <span class="text-[0.8125rem] text-danger-text">{{ $t('staff.deleteData.noTrash') }}</span>
     </form>
     <template #footer>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('staff.common.cancel') }}</UiButton>
       <UiButton variant="danger" type="submit" :form="formId" :disabled="!ready" :loading="busy">
-        Delete
+        {{ $t('staff.common.delete') }}
       </UiButton>
     </template>
   </UiModal>

@@ -226,12 +226,20 @@ export function textRuns(text: string): { text: string; em: boolean }[] {
     .filter((run) => run.text)
 }
 
+/** A title's "Name: " prefix: an ASCII colon and a space, or Chinese text's full-width colon. */
+const PREFIX_END = /:\s|：\s*/
+
 /** "Noelle: Bladework" -> "Bladework": the group heading already names the NPC. */
 export function shortTitle(title: string, npcName: string | undefined): string {
   const plain = plainText(title)
-  if (npcName && plain.startsWith(`${npcName}: `)) return plain.slice(npcName.length + 2)
-  const colon = plain.indexOf(': ')
-  return colon > 0 && colon < 40 ? plain.slice(colon + 2) : plain
+  if (npcName && plain.startsWith(npcName)) {
+    const end = PREFIX_END.exec(plain.slice(npcName.length))
+    if (end?.index === 0) return plain.slice(npcName.length + end[0].length)
+  }
+  const colon = PREFIX_END.exec(plain)
+  return colon && colon.index > 0 && colon.index < 40
+    ? plain.slice(colon.index + colon[0].length)
+    : plain
 }
 
 export function matchesCompletion(entry: AnecdoteEntry, completion: AnecdoteCompletion): boolean {

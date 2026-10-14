@@ -154,7 +154,7 @@ const sheet = computed(() => !wide.value)
           <slot name="heading">
             <h2 class="min-w-0 flex-1 truncate text-base font-semibold">{{ label }}</h2>
           </slot>
-          <UiIconButton label="Close" @click="emit('close')">
+          <UiIconButton :label="$t('ui.close')" @click="emit('close')">
             <X class="size-5" aria-hidden="true" />
           </UiIconButton>
         </div>

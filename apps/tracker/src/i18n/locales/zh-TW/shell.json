@@ -1,1 +1,108 @@
-{}
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "總覽",
+    "progression": "成長",
+    "characters": "角色",
+    "artifacts": "聖遺物",
+    "weapons": "武器",
+    "materials": "素材",
+    "planner": "規劃",
+    "achievements": "成就",
+    "anecdotes": "遊逸旅帳",
+    "wishes": "祈願",
+    "snapshots": "快照",
+    "import": "匯入",
+    "manage": "管理",
+    "staffOverview": "總覽",
+    "users": "使用者",
+    "storage": "儲存空間",
+    "roles": "身分組",
+    "audit": "稽核"
+  },
+  "section": {
+    "staff": "管理後台",
+    "account": "帳號",
+    "system": "系統"
+  },
+  "accounts": "帳號",
+  "staff": "管理後台",
+  "settings": "設定",
+  "import": "匯入",
+  "expandMenu": "展開選單",
+  "collapseMenu": "收合選單",
+  "openMenu": "開啟選單",
+  "closeMenu": "關閉選單",
+  "lightTheme": "淺色主題",
+  "darkTheme": "深色主題",
+  "themeNotSaved": "主題未儲存",
+  "landingPage": "首頁",
+  "return": "返回",
+  "highestRole": "你的最高身分組",
+  "copyName": "複製名稱",
+  "copyUid": "複製 UID",
+  "copyUidValue": "複製 UID {uid}",
+  "nameCopied": "已複製名稱",
+  "uidCopied": "已複製 UID",
+  "switcher": {
+    "select": "選擇帳號",
+    "add": "新增帳號"
+  },
+  "page": {
+    "signIn": "登入",
+    "createAccount": "註冊",
+    "continue": "繼續",
+    "linkIrminsul": "連結 Irminsul",
+    "resetPassword": "重設密碼",
+    "newPassword": "新密碼",
+    "confirmEmail": "驗證電子郵件",
+    "accounts": "帳號",
+    "addAccount": "新增帳號",
+    "settings": "設定",
+    "overview": "總覽",
+    "users": "使用者",
+    "user": "使用者",
+    "storage": "儲存空間",
+    "roles": "身分組",
+    "audit": "稽核",
+    "progression": "成長",
+    "characters": "角色",
+    "weapons": "武器",
+    "artifacts": "聖遺物",
+    "materials": "素材",
+    "planner": "規劃",
+    "achievements": "成就",
+    "anecdotes": "遊逸旅帳",
+    "wishHistory": "祈願紀錄",
+    "snapshots": "快照",
+    "import": "匯入",
+    "accountSettings": "帳號設定",
+    "notFound": "找不到",
+    "inspect": "檢視 · {page}"
+  },
+  "notFound": {
+    "title": "找不到頁面",
+    "body": "連結可能已失效，或頁面已移動。",
+    "home": "前往儀表板"
+  },
+  "accountMissing": {
+    "title": "找不到帳號",
+    "body": "它可能已被刪除，或屬於其他使用者。",
+    "all": "全部帳號"
+  },
+  "update": {
+    "ready": "追蹤器有新版本可用。"
+  },
+  "public": {
+    "dashboard": "儀表板"
+  },
+  "landing": {
+    "heroLine1": "掌握你的",
+    "heroLine2": "提瓦特之旅",
+    "tagline": "每次登入，自動快照。聖遺物、素材、歷史紀錄。",
+    "openDashboard": "開啟儀表板",
+    "getStarted": "開始使用",
+    "critDmg": "暴擊傷害 21.8%"
+  }
+}

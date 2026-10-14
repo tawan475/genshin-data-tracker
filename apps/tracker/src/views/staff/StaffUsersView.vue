@@ -34,6 +34,7 @@ import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { api } from '@/api'
 import { useSnapshotSelection } from '@/composables/useSnapshotSelection'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
 import { formatBytes, formatDate, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
@@ -86,23 +87,23 @@ const { data, error, loading, reload } = useResource(
 )
 const rows = computed<StaffUserRow[]>(() => data.value?.users ?? [])
 
-const CHIPS: { value: StaffUserFilter; label: string; title: string }[] = [
-  { value: 'all', label: 'All', title: 'Every user' },
-  { value: 'new', label: 'New 7 d', title: 'Joined in the last 7 days' },
-  { value: 'active', label: 'Active', title: 'Seen in the last 7 days' },
-  { value: 'none', label: 'No uploads', title: 'No snapshot yet' },
-  { value: 'suspended', label: 'Suspended', title: 'Suspended users' },
-  { value: 'staff', label: 'Staff', title: 'Users with a staff role' },
-]
+const CHIP_FILTERS: StaffUserFilter[] = ['all', 'new', 'active', 'none', 'suspended', 'staff']
+const chips = computed(() =>
+  CHIP_FILTERS.map((value) => ({
+    value,
+    label: t(`staff.users.chips.${value}`),
+    title: t(`staff.users.chips.${value}Title`),
+  })),
+)
 
 /** Newest first by default; the select offers the common orders. */
-const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: 'joined:desc', label: 'Newest' },
-  { value: 'joined:asc', label: 'Oldest' },
-  { value: 'active:desc', label: 'Last active' },
-  { value: 'storage:desc', label: 'Storage' },
-  { value: 'snapshots:desc', label: 'Snapshots' },
-  { value: 'name:asc', label: 'Name' },
+const SORTS: { value: string; key: string }[] = [
+  { value: 'joined:desc', key: 'newest' },
+  { value: 'joined:asc', key: 'oldest' },
+  { value: 'active:desc', key: 'lastActive' },
+  { value: 'storage:desc', key: 'storage' },
+  { value: 'snapshots:desc', key: 'snapshots' },
+  { value: 'name:asc', key: 'name' },
 ]
 const sortChoice = computed({
   get: () => `${sort.value}:${direction.value}`,
@@ -112,11 +113,12 @@ const sortChoice = computed({
     direction.value = dir === 'asc' ? 'asc' : 'desc'
   },
 })
-const sortOptions = computed(() =>
-  SORT_OPTIONS.some((o) => o.value === sortChoice.value)
-    ? SORT_OPTIONS
-    : [...SORT_OPTIONS, { value: sortChoice.value, label: 'Column' }],
-)
+const sortOptions = computed(() => {
+  const options = SORTS.map((o) => ({ value: o.value, label: t(`staff.users.sorts.${o.key}`) }))
+  return options.some((o) => o.value === sortChoice.value)
+    ? options
+    : [...options, { value: sortChoice.value, label: t('staff.users.sorts.column') }]
+})
 
 /** Natural first direction per column. */
 const NATURAL: Record<StaffUserSort, 'asc' | 'desc'> = {
@@ -163,16 +165,23 @@ async function runBulk(action: 'suspend' | 'delete', reason = '') {
     )
     feedback.toast({
       tone: 'success',
-      title: `${action === 'delete' ? 'Deleted' : 'Suspended'} ${formatNumber(result.done)} ${result.done === 1 ? 'user' : 'users'}`,
+      title: t(
+        action === 'delete' ? 'staff.users.deletedCount' : 'staff.users.suspendedCount',
+        { n: formatNumber(result.done) },
+        result.done,
+      ),
       detail: result.skipped.length
-        ? `${formatNumber(result.skipped.length)} skipped: roles as high as yours`
+        ? t('staff.users.skipped', { n: formatNumber(result.skipped.length) })
         : undefined,
     })
     resetSelection()
     suspendOpen.value = false
     await reload()
   } catch (cause) {
-    feedback.error(action === 'delete' ? 'Not deleted' : 'Not suspended', cause)
+    feedback.error(
+      action === 'delete' ? t('staff.common.notDeleted') : t('staff.common.notSuspended'),
+      cause,
+    )
   } finally {
     busy.value = false
   }
@@ -180,9 +189,9 @@ async function runBulk(action: 'suspend' | 'delete', reason = '') {
 
 async function bulkDelete() {
   const ok = await confirmDialog.value?.ask({
-    title: `Delete ${formatNumber(selectedCount.value)} users`,
-    text: 'Their accounts, snapshots and sign-ins go with them. This cannot be undone.',
-    confirmText: 'Delete users',
+    title: t('staff.users.deleteTitle', { n: formatNumber(selectedCount.value) }),
+    text: t('staff.users.deleteText'),
+    confirmText: t('staff.users.deleteConfirm'),
     expect: 'DELETE',
   })
   if (ok) await runBulk('delete')
@@ -198,13 +207,13 @@ const pageCount = computed(() =>
 </script>
 
 <template>
-  <PageHeader title="Users" />
+  <PageHeader :title="$t('staff.users.title')" />
 
   <div class="flex flex-col gap-4">
-    <UiToolbar label="Filter users">
+    <UiToolbar :label="$t('staff.users.filter')">
       <div class="flex flex-wrap items-center gap-2">
         <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
-          <span class="sr-only">Search</span>
+          <span class="sr-only">{{ $t('staff.common.search') }}</span>
           <Search
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
             aria-hidden="true"
@@ -215,24 +224,24 @@ const pageCount = computed(() =>
             class="pl-9"
             :placeholder="
               session.can('users.view_private')
-                ? 'Name, email, UID, id, IP, Discord or Google'
-                : 'Name, UID or id'
+                ? $t('staff.users.searchPrivate')
+                : $t('staff.users.searchPublic')
             "
             autocomplete="off"
           />
         </label>
         <label class="w-full sm:w-44">
-          <span class="sr-only">Sort</span>
+          <span class="sr-only">{{ $t('staff.common.sort') }}</span>
           <UiSelect v-model="sortChoice" :options="sortOptions" />
         </label>
       </div>
       <div
         class="scroll-hide scroll-fade-x -mx-3 flex items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
         role="radiogroup"
-        aria-label="Show"
+        :aria-label="$t('staff.users.show')"
       >
         <FilterChip
-          v-for="chip in CHIPS"
+          v-for="chip in chips"
           :key="chip.value"
           radio
           :pressed="filter === chip.value"
@@ -245,7 +254,12 @@ const pageCount = computed(() =>
         <span
           v-if="data"
           class="tabular ml-auto shrink-0 pl-2 font-mono text-sm text-text-secondary"
-          :title="`${formatNumber(data.total)} shown of ${formatNumber(data.counts.all)} users`"
+          :title="
+            $t('staff.users.shownOf', {
+              shown: formatNumber(data.total),
+              all: formatNumber(data.counts.all),
+            })
+          "
           >{{ formatNumber(data.total) }} / {{ formatNumber(data.counts.all) }}</span
         >
       </div>
@@ -256,10 +270,12 @@ const pageCount = computed(() =>
       class="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-border-default bg-accent/10 px-4 py-2.5 text-sm"
       role="status"
     >
-      <span class="font-semibold">{{ formatNumber(selectedCount) }} selected</span>
-      <span v-if="tooMany" class="text-warning-text"
-        >At most {{ formatNumber(STAFF_BULK_MAX) }} at once</span
-      >
+      <span class="font-semibold">{{
+        $t('staff.users.selected', { n: formatNumber(selectedCount) })
+      }}</span>
+      <span v-if="tooMany" class="text-warning-text">{{
+        $t('staff.users.atMost', { n: formatNumber(STAFF_BULK_MAX) })
+      }}</span>
       <span class="ml-auto flex flex-wrap gap-2">
         <UiButton
           v-if="canSuspend"
@@ -268,7 +284,7 @@ const pageCount = computed(() =>
           @click="suspendOpen = true"
         >
           <Ban class="size-4" aria-hidden="true" />
-          Suspend
+          {{ $t('staff.common.suspend') }}
         </UiButton>
         <UiButton
           v-if="canDelete"
@@ -278,20 +294,27 @@ const pageCount = computed(() =>
           @click="bulkDelete"
         >
           <Trash2 class="size-4" aria-hidden="true" />
-          Delete
+          {{ $t('staff.common.delete') }}
         </UiButton>
-        <UiButton variant="ghost" size="sm" @click="resetSelection">Clear</UiButton>
+        <UiButton variant="ghost" size="sm" @click="resetSelection">{{
+          $t('staff.common.clear')
+        }}</UiButton>
       </span>
     </div>
 
-    <UiError v-if="error && !data" :error="error" title="Could not load users" @retry="reload" />
+    <UiError
+      v-if="error && !data"
+      :error="error"
+      :title="$t('staff.users.couldNotLoad')"
+      @retry="reload"
+    />
 
     <div v-else-if="!data" class="flex flex-col gap-2" aria-busy="true">
       <UiSkeleton v-for="n in 8" :key="n" class="h-12" />
     </div>
 
     <UiPanel v-else-if="rows.length === 0" flush>
-      <UiEmpty title="No users match">
+      <UiEmpty :title="$t('staff.users.noMatch')">
         <template #icon><SearchX aria-hidden="true" /></template>
       </UiEmpty>
     </UiPanel>
@@ -309,23 +332,27 @@ const pageCount = computed(() =>
                 class="size-8"
                 :checked="pageCoverage === 'all'"
                 :mixed="pageCoverage === 'some'"
-                label="Select this page"
+                :label="$t('staff.users.selectPage')"
                 @toggle="toggleView(rows)"
               />
             </th>
             <th scope="col" class="px-3 py-2 text-left" :aria-sort="ariaSort('name')">
               <SortHeader
-                label="User"
+                :label="$t('staff.common.user')"
                 :active="sort === 'name'"
                 :direction="direction"
                 @sort="sortBy('name')"
               />
             </th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">Sign-in</th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">Roles</th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.users.signIn') }}
+            </th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.common.roles') }}
+            </th>
             <th scope="col" class="px-3 py-2 text-right" :aria-sort="ariaSort('accounts')">
               <SortHeader
-                label="Accounts"
+                :label="$t('staff.common.accounts')"
                 :active="sort === 'accounts'"
                 :direction="direction"
                 @sort="sortBy('accounts')"
@@ -333,7 +360,7 @@ const pageCount = computed(() =>
             </th>
             <th scope="col" class="px-3 py-2 text-right" :aria-sort="ariaSort('snapshots')">
               <SortHeader
-                label="Snapshots"
+                :label="$t('staff.common.snapshots')"
                 :active="sort === 'snapshots'"
                 :direction="direction"
                 @sort="sortBy('snapshots')"
@@ -341,7 +368,7 @@ const pageCount = computed(() =>
             </th>
             <th scope="col" class="px-3 py-2 text-right" :aria-sort="ariaSort('storage')">
               <SortHeader
-                label="Storage"
+                :label="$t('staff.common.storage')"
                 :active="sort === 'storage'"
                 :direction="direction"
                 @sort="sortBy('storage')"
@@ -349,7 +376,7 @@ const pageCount = computed(() =>
             </th>
             <th scope="col" class="px-3 py-2 text-left" :aria-sort="ariaSort('joined')">
               <SortHeader
-                label="Joined"
+                :label="$t('staff.common.joined')"
                 :active="sort === 'joined'"
                 :direction="direction"
                 @sort="sortBy('joined')"
@@ -357,13 +384,15 @@ const pageCount = computed(() =>
             </th>
             <th scope="col" class="px-3 py-2 text-left" :aria-sort="ariaSort('active')">
               <SortHeader
-                label="Last active"
+                :label="$t('staff.common.lastActive')"
                 :active="sort === 'active'"
                 :direction="direction"
                 @sort="sortBy('active')"
               />
             </th>
-            <th scope="col" class="px-3 py-2 text-left font-medium">Status</th>
+            <th scope="col" class="px-3 py-2 text-left font-medium">
+              {{ $t('staff.users.status') }}
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-border-subtle">
@@ -377,8 +406,8 @@ const pageCount = computed(() =>
               <LegacyCheckbox
                 class="size-8"
                 :checked="isSelected(user.id)"
-                :label="`Select ${user.username}`"
-                title="Shift-click to select a range"
+                :label="$t('staff.users.selectUser', { name: user.username })"
+                :title="$t('staff.users.shiftClick')"
                 @toggle="(event) => toggle(user.id, rows, event.shiftKey)"
               />
             </td>
@@ -439,15 +468,15 @@ const pageCount = computed(() =>
 
   <ReasonDialog
     :open="suspendOpen"
-    :title="`Suspend ${formatNumber(selectedCount)} ${selectedCount === 1 ? 'user' : 'users'}`"
+    :title="$t('staff.users.suspendTitle', { n: formatNumber(selectedCount) }, selectedCount)"
     :user="null"
     :effects="[
       selectedNames.slice(0, 5).join(', ') + (selectedNames.length > 5 ? '…' : ''),
-      'Signs them out everywhere',
-      'Blocks sign-in and uploads',
-      'Keeps their data',
+      $t('staff.effects.signsOut'),
+      $t('staff.effects.blocksSignIn'),
+      $t('staff.effects.keepsData'),
     ]"
-    confirm-label="Suspend"
+    :confirm-label="$t('staff.common.suspend')"
     :busy="busy"
     @close="suspendOpen = false"
     @confirm="(reason) => runBulk('suspend', reason)"

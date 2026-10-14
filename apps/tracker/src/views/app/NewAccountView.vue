@@ -8,6 +8,8 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { ApiRequestError } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import {
   emptyAccountForm,
   trackerApiUrl,
@@ -49,7 +51,7 @@ async function submit() {
     created.value = await accounts.create(result.input)
     feedback.toast({
       tone: 'success',
-      title: `Added ${accounts.displayName(created.value.account)}`,
+      title: t('accounts.new.added', { name: accounts.displayName(created.value.account) }),
     })
     window.scrollTo({ top: 0 })
   } catch (error) {
@@ -63,7 +65,7 @@ async function submit() {
         : {}
     errors.value = fields
     if (!fields.name && !fields.uid && !fields.server) {
-      formError.value = error instanceof Error ? error.message : 'Not added'
+      formError.value = errorText(error, t('accounts.new.notAdded'))
     }
   } finally {
     busy.value = false
@@ -81,26 +83,32 @@ function addAnother() {
 
 <template>
   <template v-if="!created || !account">
-    <PageHeader title="Add account" />
+    <PageHeader :title="$t('accounts.new.title')" />
     <UiPanel class="max-w-2xl">
       <form class="flex flex-col gap-5" novalidate @submit.prevent="submit">
         <AccountFields :key="formKey" v-model="form" :errors="errors" :disabled="busy" />
         <p v-if="formError" class="text-sm text-danger-text" role="alert">{{ formError }}</p>
         <div class="flex flex-wrap items-center gap-2">
-          <UiButton type="submit" variant="primary" :loading="busy">Add</UiButton>
-          <UiButton variant="ghost" :to="{ name: 'home' }">Cancel</UiButton>
+          <UiButton type="submit" variant="primary" :loading="busy">{{
+            $t('accounts.new.add')
+          }}</UiButton>
+          <UiButton variant="ghost" :to="{ name: 'home' }">{{ $t('common.cancel') }}</UiButton>
         </div>
       </form>
     </UiPanel>
   </template>
 
   <template v-else>
-    <PageHeader title="Connect Irminsul" />
+    <PageHeader :title="$t('accounts.new.connect')" />
     <div class="flex max-w-2xl flex-col gap-6">
       <UiPanel>
         <div class="flex flex-col gap-4">
-          <CopyField label="Tracker URL" :value="url" url />
-          <CopyField label="Import key" :value="created.importKey" note="Shown once" />
+          <CopyField :label="$t('common.trackerUrl')" :value="url" url />
+          <CopyField
+            :label="$t('common.importKey')"
+            :value="created.importKey"
+            :note="$t('common.shownOnce')"
+          />
           <IrminsulSteps class="border-t border-border-subtle pt-4" />
         </div>
       </UiPanel>
@@ -109,12 +117,12 @@ function addAnother() {
           variant="primary"
           :to="{ name: 'account-overview', params: { accountId: account.id } }"
         >
-          Overview
+          {{ $t('accounts.new.overview') }}
         </UiButton>
         <UiButton :to="{ name: 'account-import', params: { accountId: account.id } }">
-          Import files
+          {{ $t('accounts.new.importFiles') }}
         </UiButton>
-        <UiButton variant="ghost" @click="addAnother">Add another</UiButton>
+        <UiButton variant="ghost" @click="addAnother">{{ $t('accounts.new.addAnother') }}</UiButton>
       </div>
     </div>
   </template>

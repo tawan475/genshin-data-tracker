@@ -44,26 +44,26 @@ const saved = computed(() =>
     class="relative z-10 rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm transition-colors"
   >
     <div class="flex flex-wrap items-center justify-between gap-4">
-      <h2 class="text-base font-semibold">Storage</h2>
+      <h2 class="text-base font-semibold">{{ $t('snapshots.storage.title') }}</h2>
       <div
         class="grid w-full grid-cols-2 gap-x-6 gap-y-2 text-sm sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-6"
       >
         <div class="flex items-center gap-2">
-          <span class="text-text-muted">Snapshots</span>
+          <span class="text-text-muted">{{ $t('snapshots.storage.snapshots') }}</span>
           <span class="tabular font-semibold">{{ snapshots }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-text-muted">Raw Data</span>
+          <span class="text-text-muted">{{ $t('snapshots.storage.raw') }}</span>
           <span class="tabular font-semibold">{{ formatBytes(rawBytes) }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-text-muted">Stored</span>
+          <span class="text-text-muted">{{ $t('snapshots.storage.stored') }}</span>
           <span class="tabular font-semibold text-success-text">{{
             formatBytes(storedBytes)
           }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-text-muted">Saved</span>
+          <span class="text-text-muted">{{ $t('snapshots.storage.saved') }}</span>
           <span class="tabular font-semibold text-success-text">{{ saved }}%</span>
         </div>
       </div>

@@ -1,1 +1,97 @@
-{}
+{
+  "title": "Materials",
+  "newestSnapshot": "Newest snapshot",
+  "since": "since {date}",
+  "oneSnapshot": "One snapshot only",
+  "changesTitle": "Changes {hint}",
+  "changeSince": "Change since",
+  "noSnapshots": "No snapshots yet",
+  "import": "Import",
+  "loadFailed": "Could not load materials",
+  "loading": "Loading materials",
+  "saveChartFailed": "Could not save the chart settings",
+  "search": "Search",
+  "searchLabel": "Search materials",
+  "noMatches": "No matches",
+  "noMaterials": "No materials",
+  "clear": "Clear",
+  "more": "{n} more",
+  "upTo": "Up to {max}",
+  "trackedOfMax": "Tracked / max",
+  "track": "Track",
+  "untrack": "Untrack",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Last"
+  },
+  "wallet": {
+    "label": "Wallet",
+    "title": "Currencies and wish items",
+    "short": {
+      "GenesisCrystal": "Genesis",
+      "IntertwinedFate": "Intertwined",
+      "AcquaintFate": "Acquaint",
+      "MasterlessStarglitter": "Starglitter",
+      "MasterlessStardust": "Stardust",
+      "OriginalResin": "Resin",
+      "FragileResin": "Fragile",
+      "CondensedResin": "Condensed",
+      "RealmCurrency": "Realm"
+    }
+  },
+  "tabs": {
+    "development": "Development",
+    "precious": "Precious",
+    "other": "Other",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Enhancement ores (the game keeps them with the weapons)",
+      "artifact": "Sanctifying Unction and Essence (the game keeps them with the artifacts)",
+      "other": "Not in the in-game Inventory: currencies, seeds, card game items, items newer than the game data"
+    }
+  },
+  "bag": {
+    "title": "Bag",
+    "show": "Show",
+    "view": "View",
+    "views": {
+      "grid": "Icons",
+      "list": "List"
+    },
+    "tabRow": "Inventory tab",
+    "all": "All",
+    "allTitle": "Every tab",
+    "sort": "Sort",
+    "sorts": {
+      "order": "In-game",
+      "count": "Count",
+      "change": "Change",
+      "name": "Name"
+    },
+    "unfoldAll": "Unfold every tab",
+    "foldAll": "Fold every tab",
+    "owned": "Owned",
+    "ownedTitle": "Materials you hold",
+    "gained": "Gained",
+    "gainedTitle": "Gained {hint}",
+    "spent": "Spent",
+    "spentTitle": "Spent {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · set by hand {hand} (capture {capture})"
+  },
+  "detail": {
+    "history": "History",
+    "chartLabel": "{name} over time, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Gained",
+    "spent": "Spent",
+    "peak": "Peak",
+    "first": "First",
+    "firstTitle": "First snapshot holding it"
+  },
+  "tracked": {
+    "title": "Tracked",
+    "list": "Tracked materials",
+    "untrackName": "Untrack {name}"
+  }
+}

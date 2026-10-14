@@ -12,6 +12,8 @@
  * (phones need that), else with `new Notification`.
  */
 
+import { t } from '@/i18n'
+
 // The Notification API by hand: this module is also compiled for the tests (no DOM types there).
 type Permission = 'default' | 'denied' | 'granted'
 interface NotificationOptionsLike {
@@ -100,7 +102,12 @@ export function scheduleResinAlert(
   const timer = setTimeout(() => {
     scheduled.delete(accountId)
     if (alertSupport() !== 'granted') return
-    void show(`Original Resin ${amount}`, text.name, `resin-${accountId}`, text.url).catch(() => {})
+    void show(
+      t('planner.resin.alertTitle', { amount }),
+      text.name,
+      `resin-${accountId}`,
+      text.url,
+    ).catch(() => {})
   }, delay)
   scheduled.set(accountId, { at, amount, timer })
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, provide, ref, watch } from 'vue'
+import { t } from '@/i18n'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
   bonusSets,
@@ -125,7 +126,7 @@ watch(
   banner,
   (url) => {
     tone.value = LIGHT_ART
-    if (url) void artTone(url).then((t) => banner.value === url && (tone.value = t))
+    if (url) void artTone(url).then((found) => banner.value === url && (tone.value = found))
   },
   { immediate: true },
 )
@@ -157,7 +158,7 @@ function statTitle(row: StatRow): string {
     lines.push(`${formatPanelValue(row.key, row.base)} + ${formatPanelValue(row.key, row.bonus)}`)
   }
   if (row.damage && props.panel && props.panel.allDmg > 0) {
-    lines.push(`+${props.panel.allDmg.toFixed(1)}% all DMG, not on the game's panel`)
+    lines.push(t('characters.stats.allDmg', { value: props.panel.allDmg.toFixed(1) }))
   }
   return lines.join('\n')
 }
@@ -167,8 +168,12 @@ function setTitle(set: SetCount): string {
 }
 
 /** Talent level colour: crowned gold first (Enka), then a C3/C5 boost in cyan. */
-function talentTone(t: TalentLevel): string {
-  return t.crowned ? 'text-talent-crown' : t.from ? 'text-talent-boost' : 'text-(--card-text)'
+function talentTone(talent: TalentLevel): string {
+  return talent.crowned
+    ? 'text-talent-crown'
+    : talent.from
+      ? 'text-talent-boost'
+      : 'text-(--card-text)'
 }
 
 /**
@@ -213,7 +218,7 @@ const pieces = computed(() =>
     const title = [
       formatSetName(piece.setKey),
       `${SLOT_LABELS[slot]} +${piece.level} · ${piece.rarity}★`,
-      `CV ${piece.cv.toFixed(1)} · RV ${piece.rv}% · ${rollCount} rolls (the first ones and one per +4)`,
+      t('share.card.pieceTitle', { cv: piece.cv.toFixed(1), rv: piece.rv, n: rollCount }),
     ].join('\n')
     return { slot, piece, lines, cv, rv, title }
   }),
@@ -274,7 +279,10 @@ const ownerLine = computed(() =>
       class="absolute inset-[44px_48px_44px_48px] grid grid-cols-[700px_528px_532px] grid-rows-[minmax(0,1fr)] gap-x-[32px]"
     >
       <!-- Left: who, the constellations down its right edge, the talents at its foot -->
-      <section class="relative flex min-h-0 flex-col justify-between" aria-label="Character">
+      <section
+        class="relative flex min-h-0 flex-col justify-between"
+        :aria-label="$t('game.character')"
+      >
         <div class="flex flex-col gap-[10px]">
           <div class="flex min-w-0 items-center gap-[18px]">
             <ElementIcon
@@ -298,7 +306,7 @@ const ownerLine = computed(() =>
                   : 'bg-(--card-chip) text-(--card-hero) shadow-(--card-chip-ring)'
               "
               :style="isMaxConstellation(c.constellation) ? CONSTELLATION_MAX_STYLE : undefined"
-              :title="`Constellation ${c.constellation} of 6`"
+              :title="$t('characters.constellation.title', { level: c.constellation })"
               >C{{ c.constellation }}</span
             >
           </div>
@@ -308,7 +316,8 @@ const ownerLine = computed(() =>
             class="flex items-baseline gap-[22px] self-start rounded-full px-[18px] py-[4px] text-[28px]"
             :class="CHIP_TEXT"
           >
-            <span :title="`Level ${c.level} of ${cap} · Ascension ${c.ascension}`"
+            <span
+              :title="$t('share.card.levelTitle', { level: c.level, cap, ascension: c.ascension })"
               ><span class="font-normal opacity-85">Lv.&nbsp;</span>
               <span class="font-bold">{{ c.level }}</span
               ><span class="font-medium opacity-70">/{{ cap }}</span></span
@@ -316,7 +325,7 @@ const ownerLine = computed(() =>
             <template v-if="c.friendship !== null">
               <span class="opacity-50">·</span>
               <span
-                ><span class="font-normal opacity-85">Friendship&nbsp;</span>
+                ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
                 <span class="font-bold">{{ c.friendship }}</span></span
               >
             </template>
@@ -326,13 +335,17 @@ const ownerLine = computed(() =>
 
         <ol
           class="absolute top-[150px] right-0 flex flex-col gap-[16px]"
-          :aria-label="`Constellation ${c.constellation} of 6`"
+          :aria-label="$t('characters.constellation.title', { level: c.constellation })"
         >
           <li
             v-for="(src, index) in constellations"
             :key="index"
             class="flex"
-            :title="`C${index + 1}${index < c.constellation ? '' : ' · locked'}`"
+            :title="
+              index < c.constellation
+                ? `C${index + 1}`
+                : $t('characters.constellation.lockedTitle', { n: index + 1 })
+            "
           >
             <ElementDisc
               :src="src"
@@ -346,7 +359,7 @@ const ownerLine = computed(() =>
 
         <!-- Talents, then the owner and the capture date with the site, flush with the panels' foot -->
         <div class="flex flex-col gap-[22px]">
-          <ul class="flex items-end gap-[30px]" aria-label="Talents">
+          <ul class="flex items-end gap-[30px]" :aria-label="$t('game.talents')">
             <li
               v-for="t in talents"
               :key="t.key"
@@ -361,7 +374,7 @@ const ownerLine = computed(() =>
                 <FadeImage
                   v-if="t.crowned"
                   :src="crown"
-                  alt="Crowned"
+                  :alt="$t('characters.crowned')"
                   class="ml-[-6px] size-[30px]"
                 />
                 <span class="text-[26px] font-bold" :class="talentTone(t)">{{ t.level }}</span>
@@ -392,7 +405,10 @@ const ownerLine = computed(() =>
       </section>
 
       <!-- Middle: weapon, stats (they take the height left), sets and the build -->
-      <section class="flex min-h-0 flex-col gap-[16px]" aria-label="Weapon and stats">
+      <section
+        class="flex min-h-0 flex-col gap-[16px]"
+        :aria-label="$t('share.card.weaponAndStats')"
+      >
         <div
           v-if="c.weapon"
           class="flex items-center gap-[20px] px-[22px] py-[18px]"
@@ -423,7 +439,13 @@ const ownerLine = computed(() =>
             </p>
             <p class="flex items-center gap-[12px] text-[22px]">
               <span
-                :title="`Level ${c.weapon.level} of ${weaponCap} · Ascension ${c.weapon.ascension}`"
+                :title="
+                  $t('share.card.levelTitle', {
+                    level: c.weapon.level,
+                    cap: weaponCap,
+                    ascension: c.weapon.ascension,
+                  })
+                "
                 ><span class="text-(--card-muted)">Lv.&nbsp;</span>
                 <span class="font-semibold">{{ c.weapon.level }}</span
                 ><span class="text-(--card-muted)">/{{ weaponCap }}</span></span
@@ -431,7 +453,7 @@ const ownerLine = computed(() =>
               <span
                 class="rounded-[8px] px-[10px] py-[2px] font-bold"
                 :style="refinementStyle(c.weapon.refinement)"
-                :title="`Refinement ${c.weapon.refinement} of 5`"
+                :title="$t('characters.refinementTitle', { value: c.weapon.refinement })"
                 >R{{ c.weapon.refinement }}</span
               >
               <GameStars v-if="c.weapon.rarity" :rarity="c.weapon.rarity" :px="22" />
@@ -442,7 +464,7 @@ const ownerLine = computed(() =>
                 :key="stat.key"
                 class="whitespace-nowrap"
                 ><span class="text-(--card-muted)"
-                  >{{ stat.key === 'baseAtk' ? 'ATK' : formatStatShort(stat.key) }}&nbsp;</span
+                  >{{ formatStatShort(stat.key === 'baseAtk' ? 'atk' : stat.key) }}&nbsp;</span
                 >
                 <span class="font-bold">{{ stat.text }}</span></span
               >
@@ -454,7 +476,7 @@ const ownerLine = computed(() =>
           class="flex h-[164px] shrink-0 items-center justify-center text-[24px] text-(--card-muted)"
           :class="PANEL"
         >
-          No weapon
+          {{ $t('characters.gap.noWeapon') }}
         </div>
 
         <div class="flex min-h-0 flex-[1_1_auto] flex-col px-[26px] py-[10px]" :class="PANEL">
@@ -495,8 +517,12 @@ const ownerLine = computed(() =>
               </dd>
             </div>
           </dl>
-          <p v-else class="m-auto text-[24px] text-(--card-muted)" title="Newer than the game data">
-            No stats
+          <p
+            v-else
+            class="m-auto text-[24px] text-(--card-muted)"
+            :title="$t('characters.stats.newerThanData')"
+          >
+            {{ $t('characters.stats.none') }}
           </p>
         </div>
 
@@ -513,24 +539,24 @@ const ownerLine = computed(() =>
             <span class="min-w-0 flex-[1_1_auto] truncate text-[23px]">{{ set.name }}</span>
             <span
               class="min-w-[36px] rounded-[10px] bg-(--card-set-on-bg) px-[10px] py-[2px] text-center text-[22px] font-bold text-(--card-set-on)"
-              :title="`${pieces}-piece bonus`"
+              :title="$t('share.card.pieceBonus', { n: pieces })"
               >{{ pieces }}</span
             >
           </p>
-          <p v-if="!c.artifactCount" class="text-[22px] text-(--card-muted)">No artifacts</p>
+          <p v-if="!c.artifactCount" class="text-[22px] text-(--card-muted)">
+            {{ $t('characters.detail.noArtifacts') }}
+          </p>
           <p
             v-else
             class="flex items-baseline gap-[18px] text-[20px] whitespace-nowrap"
             :class="bonus.length ? 'border-t border-(--card-rule) pt-[10px]' : ''"
           >
-            <span class="text-(--card-muted)">Build</span>
-            <span
-              class="ml-auto"
-              title="Roll value: every substat roll as a % of its highest roll, added up"
+            <span class="text-(--card-muted)">{{ $t('characters.detail.build') }}</span>
+            <span class="ml-auto" :title="$t('share.card.rvTitle')"
               ><span class="text-(--card-muted)">RV </span
               ><span class="font-bold" :class="buildRvTone">{{ rv }}%</span></span
             >
-            <span title="Crit value"
+            <span :title="$t('artifacts.sortTitle.cv')"
               ><span class="text-(--card-muted)">CV </span
               ><span class="font-bold" :class="buildCvTone">{{ c.cv.toFixed(1) }}</span></span
             >
@@ -539,7 +565,7 @@ const ownerLine = computed(() =>
       </section>
 
       <!-- Right: the five pieces fill the column -->
-      <ol class="flex min-h-0 flex-col gap-[14px]" aria-label="Artifacts">
+      <ol class="flex min-h-0 flex-col gap-[14px]" :aria-label="$t('game.artifacts')">
         <li
           v-for="{ slot, piece, lines, cv, rv, title } in pieces"
           :key="slot"
@@ -629,7 +655,7 @@ const ownerLine = computed(() =>
                   lines[n - 1] && !lines[n - 1]!.inactive
                     ? rollTitle(lines[n - 1]!.key, lines[n - 1]!.rolls)
                     : lines[n - 1]
-                      ? 'Activates at +4'
+                      ? $t('characters.piece.activatesAt4')
                       : undefined
                 "
               >

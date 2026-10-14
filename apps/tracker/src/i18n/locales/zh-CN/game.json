@@ -67,8 +67,6 @@
     "goblet": "空之杯",
     "circlet": "理之冠"
   },
-  "element": "元素",
-  "weaponType": "武器类型",
   "level": "Lv.",
   "levelN": "Lv. {n}",
   "constellation": "命之座",
@@ -104,5 +102,23 @@
   "rarity": "稀有度",
   "traveler": "旅行者",
   "cv": "双暴分",
-  "rv": "词条数"
+  "rv": "词条数",
+  "elementTitle": "元素",
+  "weaponTypeTitle": "武器类型",
+  "element": {
+    "pyro": "火元素",
+    "hydro": "水元素",
+    "anemo": "风元素",
+    "electro": "雷元素",
+    "dendro": "草元素",
+    "cryo": "冰元素",
+    "geo": "岩元素"
+  },
+  "weaponType": {
+    "sword": "单手剑",
+    "claymore": "双手剑",
+    "polearm": "长柄武器",
+    "bow": "弓",
+    "catalyst": "法器"
+  }
 }

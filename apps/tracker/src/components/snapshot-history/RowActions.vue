@@ -15,8 +15,8 @@ defineEmits<{ download: []; delete: [] }>()
     <button
       type="button"
       class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-ink shadow-sm shadow-accent/30 transition-colors hover:bg-accent-hover disabled:opacity-50"
-      title="Download GOOD"
-      :aria-label="`Download snapshot ${id}`"
+      :title="$t('snapshots.row.downloadGood')"
+      :aria-label="$t('snapshots.row.download', { id })"
       :disabled="downloading"
       @click="$emit('download')"
     >
@@ -26,8 +26,8 @@ defineEmits<{ download: []; delete: [] }>()
     <button
       type="button"
       class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-danger-border bg-danger-surface text-danger-text transition-colors hover:border-danger hover:bg-danger hover:text-white disabled:opacity-50"
-      title="Delete snapshot"
-      :aria-label="`Delete snapshot ${id}`"
+      :title="$t('snapshots.row.delete')"
+      :aria-label="$t('snapshots.row.deleteId', { id })"
       :disabled="deleting"
       @click="$emit('delete')"
     >

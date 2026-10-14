@@ -1,25 +1,41 @@
 import { characterImages, weaponImages } from '@gdt/game-data/images'
 import { formatWishTime, toGoodKey, type UigfGachaType, type WishItem } from '@gdt/shared'
 import type { BannerRun, Outcome, PityBand, PullRow } from '@/data/wish-history'
+import { t } from '@/i18n'
 import { imageUrl } from '@/lib/assets'
 
 export interface WishBannerInfo {
   banner: UigfGachaType
   /** The detail page's path segment. */
   slug: string
-  label: string
-  title: string
+  /** Short and long name, in the language on screen (read when drawn). */
+  readonly label: string
+  readonly title: string
   /** Whether its 5★ has a 50/50 (75/25 on the weapon banner). */
   rated: boolean
 }
 
+function banner(id: UigfGachaType, slug: string, rated: boolean): WishBannerInfo {
+  return {
+    banner: id,
+    slug,
+    rated,
+    get label() {
+      return t(`wishes.banners.${slug}.label`)
+    },
+    get title() {
+      return t(`wishes.banners.${slug}.title`)
+    },
+  }
+}
+
 /** Banners in the game's Wish screen order. */
 export const WISH_BANNERS: readonly WishBannerInfo[] = [
-  { banner: 301, slug: 'character', label: 'Character', title: 'Character Event', rated: true },
-  { banner: 302, slug: 'weapon', label: 'Weapon', title: 'Weapon Event', rated: true },
-  { banner: 200, slug: 'standard', label: 'Standard', title: 'Standard', rated: false },
-  { banner: 500, slug: 'chronicled', label: 'Chronicled', title: 'Chronicled Wish', rated: false },
-  { banner: 100, slug: 'beginners', label: "Beginners'", title: "Beginners' Wish", rated: false },
+  banner(301, 'character', true),
+  banner(302, 'weapon', true),
+  banner(200, 'standard', false),
+  banner(500, 'chronicled', false),
+  banner(100, 'beginners', false),
 ]
 
 export function bannerBySlug(slug: unknown): WishBannerInfo | undefined {
@@ -55,25 +71,31 @@ export function wishIcon(item: WishItem): string {
 /** The game's clock, to the minute ("2026-10-12 21:04"). */
 export const wishMinute = (time: number) => formatWishTime(time).slice(0, 16)
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+/** A month's short name ("Oct"; "10月" in Chinese), 0-based. */
+const monthShort = (index: number) => t(`wishes.date.months.${index + 1}`)
 const thisYear = () => new Date().getFullYear()
 
 /** A wall-clock day ("Oct 3"; "Oct 3, 2024" in another year), from seconds read as UTC. */
 export function wishDay(time: number, year = thisYear()): string {
   const d = new Date(time * 1000)
-  const text = `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`
-  return d.getUTCFullYear() === year ? text : `${text}, ${d.getUTCFullYear()}`
+  const parts = { month: monthShort(d.getUTCMonth()), day: d.getUTCDate() }
+  return d.getUTCFullYear() === year
+    ? t('wishes.date.day', parts)
+    : t('wishes.date.dayYear', { ...parts, year: d.getUTCFullYear() })
 }
 
 /** A pull's game-clock time as the table shows it ("Oct 3, 13:34"). */
 export function wishShortTime(time: number, year = thisYear()): string {
-  return `${wishDay(time, year)}, ${formatWishTime(time).slice(11, 16)}`
+  return t('wishes.date.dayTime', {
+    day: wishDay(time, year),
+    time: formatWishTime(time).slice(11, 16),
+  })
 }
 
 /** A month key ("2026-10") as "Oct 2026". */
 export function monthName(month: string): string {
   const [y, m] = month.split('-').map(Number) as [number, number]
-  return `${MONTHS[m - 1]} ${y}`
+  return t('wishes.date.month', { month: monthShort(m - 1), year: y })
 }
 
 /**
@@ -83,11 +105,11 @@ export function monthName(month: string): string {
 export function runDates(run: BannerRun, open: boolean, year = thisYear()): string {
   const start = run.banner.start + 8 * 3600
   const end = run.banner.end + 8 * 3600
-  if (open) return `${wishDay(start, year)} – now`
+  if (open) return t('wishes.date.range', { from: wishDay(start, year), to: t('wishes.date.now') })
   const endYear = new Date(end * 1000).getUTCFullYear()
   const startYear = new Date(start * 1000).getUTCFullYear()
   const from = wishDay(start, startYear === endYear ? startYear : year)
-  return `${from} – ${wishDay(end, year)}`
+  return t('wishes.date.range', { from, to: wishDay(end, year) })
 }
 
 /** A 5★ pity band's colour, from the theme's tokens (green, gold, orange, red). */
@@ -98,20 +120,15 @@ export const BAND_COLOR: Record<PityBand, string> = {
   late: 'var(--danger-text)',
 }
 
-export const OUTCOME_LABEL: Record<Outcome, string> = {
-  won: 'Won',
-  lost: 'Lost',
-  guaranteed: 'Guaranteed',
-}
+/** An outcome's badge text ("Won", "Lost", "Guaranteed"), in the language on screen. */
+export const outcomeLabel = (outcome: Outcome): string => t(`wishes.outcomes.${outcome}`)
 
 export const oddsOf = (banner: UigfGachaType) => (banner === 302 ? '75/25' : '50/50')
 
 /** Tooltip of an outcome; the weapon banner's 5★ odds are 75/25. */
 export function outcomeTitle(outcome: Outcome, banner: UigfGachaType, rank = 5): string {
   const odds = rank === 5 ? oddsOf(banner) : '50/50'
-  if (outcome === 'won') return `Won the ${odds}`
-  if (outcome === 'lost') return `Lost the ${odds}: the next one is featured`
-  return `Featured, guaranteed after a lost ${odds}`
+  return t(`wishes.outcomeTitles.${outcome}`, { odds })
 }
 
 /** The banner a pull was made on, by name ('' outside the banner data). */
@@ -134,10 +151,10 @@ export const RARITY_TEXT: Record<number, string> = {
  * the theme's tokens, so it reads in both themes.
  */
 export function pityColor(pity: number, hard: number): string {
-  const t = Math.min(1, Math.max(0, (pity - 1) / Math.max(1, hard - 1)))
-  return t < 0.5
-    ? `color-mix(in oklab, var(--warning-text) ${Math.round(t * 200)}%, var(--success-text))`
-    : `color-mix(in oklab, var(--danger-text) ${Math.round((t - 0.5) * 200)}%, var(--warning-text))`
+  const x = Math.min(1, Math.max(0, (pity - 1) / Math.max(1, hard - 1)))
+  return x < 0.5
+    ? `color-mix(in oklab, var(--warning-text) ${Math.round(x * 200)}%, var(--success-text))`
+    : `color-mix(in oklab, var(--danger-text) ${Math.round((x - 0.5) * 200)}%, var(--warning-text))`
 }
 
 export const formatPercent = (share: number) =>

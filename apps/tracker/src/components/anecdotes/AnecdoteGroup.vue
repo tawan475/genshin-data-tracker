@@ -22,6 +22,8 @@ import AnecdoteRow from './AnecdoteRow.vue'
 const props = defineProps<{
   group: NpcGroup
   text: AnecdoteTexts
+  /** The English text, for the NPC's portrait key (GOOD keys are made from English names). */
+  english?: AnecdoteTexts
   readOnly: boolean
   fold: boolean
   /** Rows toggled since the filters changed: they stay unfolded. */
@@ -31,7 +33,8 @@ defineEmits<{ mark: [id: number]; unmark: [id: number] }>()
 
 const name = computed(() => props.text.npcs.get(props.group.npc) ?? `#${props.group.npc}`)
 const portrait = computed(() => {
-  const key = toGoodKey(name.value)
+  const english = (props.english ?? props.text).npcs.get(props.group.npc)
+  const key = english ? toGoodKey(english) : ''
   return key && characterInfo(key) ? characterIcon(key) : ''
 })
 const complete = computed(() => props.group.total > 0 && props.group.done >= props.group.total)
@@ -59,7 +62,13 @@ const opened = ref(false)
         settled ? 'cursor-pointer rounded-xl hover:bg-surface-overlay' : '',
       ]"
       :aria-expanded="settled ? opened : undefined"
-      :title="settled ? (opened ? 'Hide done' : 'Show done') : undefined"
+      :title="
+        settled
+          ? opened
+            ? $t('anecdotes.group.hideDone')
+            : $t('anecdotes.group.showDone')
+          : undefined
+      "
       @click="settled && (opened = !opened)"
     >
       <GameIcon :src="portrait" :name="name" size="sm" />
@@ -96,7 +105,9 @@ const opened = ref(false)
           @click="opened = !opened"
         >
           <Check class="size-4 text-success-text" aria-hidden="true" />
-          <span class="tabular font-mono">{{ formatNumber(split.finished.length) }} done</span>
+          <span class="tabular font-mono">{{
+            $t('anecdotes.group.done', { n: formatNumber(split.finished.length) })
+          }}</span>
           <ChevronDown
             class="ml-auto size-4 text-text-muted transition-transform motion-reduce:transition-none"
             :class="opened ? 'rotate-180' : ''"

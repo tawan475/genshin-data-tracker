@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TriangleAlert } from 'lucide-vue-next'
+import { t } from '@/i18n'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
   formatPanelValue,
@@ -26,7 +27,7 @@ function title(row: StatRow): string {
     lines.push(`${formatPanelValue(row.key, row.base)} + ${formatPanelValue(row.key, row.bonus)}`)
   }
   if (row.damage && props.panel && props.panel.allDmg > 0) {
-    lines.push(`+${props.panel.allDmg.toFixed(1)}% all DMG, not on the game's panel`)
+    lines.push(t('characters.stats.allDmg', { value: props.panel.allDmg.toFixed(1) }))
   }
   return lines.join('\n')
 }
@@ -35,15 +36,15 @@ function title(row: StatRow): string {
 <template>
   <section
     class="relative rounded-xl border border-border-default bg-surface-raised/85 px-3 py-1.5"
-    aria-label="Stats"
+    :aria-label="$t('characters.stats.label')"
   >
     <span
       v-if="panel?.weaponMissing"
       class="absolute -top-2 -right-2 inline-flex rounded-full bg-surface-raised p-1 text-warning-text shadow-sm"
-      title="Weapon newer than the game data: its stats are left out"
+      :title="$t('characters.stats.weaponMissingTitle')"
     >
       <TriangleAlert class="size-4" aria-hidden="true" />
-      <span class="sr-only">Weapon stats left out</span>
+      <span class="sr-only">{{ $t('characters.stats.weaponMissing') }}</span>
     </span>
     <dl v-if="panel" class="flex flex-col divide-y divide-border-subtle">
       <div
@@ -82,8 +83,12 @@ function title(row: StatRow): string {
         </dd>
       </div>
     </dl>
-    <p v-else class="py-6 text-center text-sm text-text-muted" title="Newer than the game data">
-      No stats
+    <p
+      v-else
+      class="py-6 text-center text-sm text-text-muted"
+      :title="$t('characters.stats.newerThanData')"
+    >
+      {{ $t('characters.stats.none') }}
     </p>
   </section>
 </template>

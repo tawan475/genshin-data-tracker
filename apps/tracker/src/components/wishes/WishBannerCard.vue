@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { wishItemName } from './item-name'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, useId, watch } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { ChevronDown, List } from 'lucide-vue-next'
@@ -11,6 +12,7 @@ import {
   type BannerStats,
   type PullRow,
 } from '@/data/wish-history'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import WishOddsChip from './WishOddsChip.vue'
 import WishPityTrack from './WishPityTrack.vue'
@@ -37,11 +39,16 @@ const soft = computed(() => SOFT_PITY[props.stats.banner])
 
 const fiveTitle = computed(() => {
   const left = hard.value[0] - props.stats.pity5
-  return `${formatNumber(left)} pulls to hard pity · ✦ ${formatNumber(left * PRIMOS_PER_PULL)} · soft pity from ${soft.value}`
+  return t('wishes.card.fiveTitle', {
+    left: formatNumber(left),
+    primos: formatNumber(left * PRIMOS_PER_PULL),
+    soft: soft.value,
+  })
 })
 const fourTitle = computed(
   () =>
-    `${hard.value[1] - props.stats.pity4} to a sure 4★${props.stats.guaranteed4 ? ' · the next 4★ is featured' : ''}`,
+    t('wishes.card.fourTitle', { left: hard.value[1] - props.stats.pity4 }) +
+    (props.stats.guaranteed4 ? t('wishes.card.fourFeatured') : ''),
 )
 
 const open = ref(false)
@@ -102,21 +109,28 @@ onBeforeUnmount(() => {
     >
       <header class="flex min-w-0 items-center gap-2 pb-1 pl-0.5">
         <h2 class="min-w-0 truncate text-base font-semibold">
-          <RouterLink :to="to" class="hover:underline" :title="`${info.title}: every pull`">{{
-            info.title
-          }}</RouterLink>
+          <RouterLink
+            :to="to"
+            class="hover:underline"
+            :title="$t('wishes.card.everyPull', { banner: info.title })"
+            >{{ info.title }}</RouterLink
+          >
         </h2>
-        <UiIconButton :label="`${info.title}: every pull`" :to="to" class="ml-auto">
+        <UiIconButton
+          :label="$t('wishes.card.everyPull', { banner: info.title })"
+          :to="to"
+          class="ml-auto"
+        >
           <List class="size-5" aria-hidden="true" />
         </UiIconButton>
       </header>
 
       <div
         class="flex items-center gap-2.5 rounded-lg bg-surface-sunken px-3.5 py-2.5"
-        :title="`${formatNumber(stats.total)} wishes × ${PRIMOS_PER_PULL}`"
+        :title="$t('wishes.pullsTimes', { n: formatNumber(stats.total), primos: PRIMOS_PER_PULL })"
       >
         <span class="flex min-w-0 flex-col">
-          <span class="truncate text-xs text-text-secondary">Lifetime pulls</span>
+          <span class="truncate text-xs text-text-secondary">{{ $t('wishes.lifetime') }}</span>
           <span class="tabular truncate font-mono text-xs text-text-muted"
             >✦ {{ formatNumber(stats.total * PRIMOS_PER_PULL) }}</span
           >
@@ -132,8 +146,10 @@ onBeforeUnmount(() => {
       >
         <div class="flex min-w-0 items-center gap-2.5">
           <span class="flex min-w-0 flex-col">
-            <span class="truncate text-xs text-text-secondary">5★ pity</span>
-            <span class="truncate text-xs text-text-muted">Guaranteed at {{ hard[0] }}</span>
+            <span class="truncate text-xs text-text-secondary">{{ $t('wishes.card.pity5') }}</span>
+            <span class="truncate text-xs text-text-muted">{{
+              $t('wishes.card.guaranteedAt', { n: hard[0] })
+            }}</span>
           </span>
           <WishOddsChip :stats="stats" class="ml-auto" />
           <span
@@ -151,8 +167,10 @@ onBeforeUnmount(() => {
       >
         <div class="flex min-w-0 items-center gap-2.5">
           <span class="flex min-w-0 flex-col">
-            <span class="truncate text-xs text-text-secondary">4★ pity</span>
-            <span class="truncate text-xs text-text-muted">Guaranteed at {{ hard[1] }}</span>
+            <span class="truncate text-xs text-text-secondary">{{ $t('wishes.card.pity4') }}</span>
+            <span class="truncate text-xs text-text-muted">{{
+              $t('wishes.card.guaranteedAt', { n: hard[1] })
+            }}</span>
           </span>
           <span
             class="tabular ml-auto font-mono text-[1.65rem] leading-none font-bold text-rarity-4"
@@ -172,8 +190,8 @@ onBeforeUnmount(() => {
         class="flex h-8 w-11 items-center justify-center self-center rounded-md text-text-muted hover:bg-surface-overlay hover:text-text-primary"
         :aria-expanded="open"
         :aria-controls="panelId"
-        :aria-label="open ? 'Hide the latest pulls' : 'Show the latest pulls'"
-        :title="open ? 'Hide the latest pulls' : 'Latest pulls'"
+        :aria-label="open ? $t('wishes.card.hideLatest') : $t('wishes.card.showLatest')"
+        :title="open ? $t('wishes.card.hideLatest') : $t('wishes.card.latest')"
         @click="open = !open"
       >
         <ChevronDown
@@ -189,11 +207,11 @@ onBeforeUnmount(() => {
       :id="panelId"
       ref="panel"
       role="region"
-      :aria-label="`${info.title}: latest pulls`"
+      :aria-label="$t('wishes.card.latestRegion', { banner: info.title })"
       class="absolute inset-x-0 top-full flex flex-col gap-2 overflow-y-auto rounded-b-xl border border-t-0 border-border-default bg-surface-raised px-3.5 pt-1 pb-3 shadow-[var(--shadow-overlay)] sm:px-4"
       :style="{ maxHeight }"
     >
-      <div role="group" aria-label="Rarity" class="flex gap-1.5">
+      <div role="group" :aria-label="$t('wishes.rarity')" class="flex gap-1.5">
         <FilterChip
           v-for="rank in [5, 4, 3] as const"
           :key="rank"
@@ -203,13 +221,19 @@ onBeforeUnmount(() => {
           <span :class="RARITY_TEXT[rank]">{{ rank }}★</span>
         </FilterChip>
       </div>
-      <p v-if="latest.length === 0" class="py-2 text-center text-xs text-text-muted">None</p>
+      <p v-if="latest.length === 0" class="py-2 text-center text-xs text-text-muted">
+        {{ $t('wishes.card.none') }}
+      </p>
       <table v-else class="tabular w-full table-fixed font-mono text-xs">
         <thead>
           <tr class="text-left text-text-muted">
-            <th scope="col" class="py-1 font-medium">Name</th>
-            <th scope="col" class="w-[7.5rem] py-1 pl-2 font-medium">Time</th>
-            <th scope="col" class="w-9 py-1 text-right font-medium">Pity</th>
+            <th scope="col" class="py-1 font-medium">{{ $t('wishes.card.cols.name') }}</th>
+            <th scope="col" class="w-[7.5rem] py-1 pl-2 font-medium">
+              {{ $t('wishes.card.cols.time') }}
+            </th>
+            <th scope="col" class="w-9 py-1 text-right font-medium">
+              {{ $t('wishes.card.cols.pity') }}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -221,9 +245,9 @@ onBeforeUnmount(() => {
             <td
               class="truncate py-1.5 font-sans font-medium"
               :class="RARITY_TEXT[row.pull.item.rank]"
-              :title="row.pull.item.name"
+              :title="wishItemName(row.pull.item)"
             >
-              {{ row.pull.item.name }}
+              {{ wishItemName(row.pull.item) }}
             </td>
             <td class="truncate py-1.5 pl-2 whitespace-nowrap text-text-secondary">
               {{ wishMinute(row.pull.time) }}

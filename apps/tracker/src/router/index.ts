@@ -2,6 +2,8 @@ import type { InspectView, PermissionNode } from '@gdt/shared'
 import { nextTick } from 'vue'
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 import { loadSignInOptions } from '@/components/oauth/oauth'
+import { pageTitle, type PageKey } from '@/components/shell/nav'
+import { onLocaleChange, t } from '@/i18n'
 import { setPublicPage } from '@/lib/theme'
 import { useAccounts } from '@/stores/accounts'
 import { useSession } from '@/stores/session'
@@ -14,7 +16,8 @@ declare module 'vue-router' {
     guest?: boolean
     /** A public page (PublicFrame): the whole document is dark while it shows. */
     public?: boolean
-    title?: string
+    /** The page's title: a key of the `shell.page` messages (top bar and tab title). */
+    title?: PageKey
     /** A staff node the page needs: without it the page is Not found (the Worker 404s too). */
     permission?: PermissionNode
     /** A staff page: the sidebar lists the staff pages. */
@@ -24,7 +27,7 @@ declare module 'vue-router' {
   }
 }
 
-const account = (path: string, name: string, title: string, load: () => Promise<unknown>) => ({
+const account = (path: string, name: string, title: PageKey, load: () => Promise<unknown>) => ({
   path,
   name,
   component: load,
@@ -34,20 +37,20 @@ const account = (path: string, name: string, title: string, load: () => Promise<
 const staffPage = (
   path: string,
   name: string,
-  title: string,
+  title: PageKey,
   permission: PermissionNode,
   load: () => Promise<unknown>,
 ) => ({ path, name, component: load, meta: { auth: true, staff: true, title, permission } })
 
 /** Someone's account page, read-only, under Inspect (the owner's views, reused). */
-const inspectPage = (view: InspectView, title: string, load: () => Promise<unknown>) => ({
+const inspectPage = (view: InspectView, title: PageKey, load: () => Promise<unknown>) => ({
   path: view,
   name: `staff-inspect-${view}`,
   component: load,
   meta: {
     auth: true,
     staff: true,
-    title: `Inspect · ${title}`,
+    title,
     permission: 'data.inspect' as const,
     inspect: view,
   },
@@ -78,20 +81,20 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
-      meta: { guest: true, public: true, title: 'Sign in' },
+      meta: { guest: true, public: true, title: 'signIn' },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('@/views/RegisterView.vue'),
-      meta: { guest: true, public: true, title: 'Create account' },
+      meta: { guest: true, public: true, title: 'createAccount' },
     },
     // Back from Discord / Google with an account no user has linked yet.
     {
       path: '/oauth',
       name: 'oauth-continue',
       component: () => import('@/views/OAuthContinueView.vue'),
-      meta: { guest: true, public: true, title: 'Continue' },
+      meta: { guest: true, public: true, title: 'continue' },
     },
     // irminsul's "Sign in with the tracker" (README "Sign in from irminsul"):
     // signed out, sign-in comes first and returns here (`?next=`).
@@ -99,7 +102,7 @@ const router = createRouter({
       path: '/link',
       name: 'link',
       component: () => import('@/views/LinkView.vue'),
-      meta: { auth: true, public: true, title: 'Link Irminsul' },
+      meta: { auth: true, public: true, title: 'linkIrminsul' },
     },
     // Account recovery: open signed in or not (links arrive by email, or from
     // an admin). While email is paused, only a reset link with a token opens.
@@ -107,21 +110,21 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('@/views/ForgotPasswordView.vue'),
-      meta: { public: true, title: 'Reset password' },
+      meta: { public: true, title: 'resetPassword' },
       beforeEnter: emailPage,
     },
     {
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/views/ResetPasswordView.vue'),
-      meta: { public: true, title: 'New password' },
+      meta: { public: true, title: 'newPassword' },
       beforeEnter: emailPage,
     },
     {
       path: '/verify-email',
       name: 'verify-email',
       component: () => import('@/views/VerifyEmailView.vue'),
-      meta: { public: true, title: 'Confirm email' },
+      meta: { public: true, title: 'confirmEmail' },
       beforeEnter: emailPage,
     },
     {
@@ -133,7 +136,7 @@ const router = createRouter({
           path: '',
           name: 'home',
           component: () => import('@/views/app/HomeView.vue'),
-          meta: { auth: true, title: 'Accounts' },
+          meta: { auth: true, title: 'accounts' },
         },
         // Pages that existed briefly; old links land on their replacements.
         { path: 'accounts', redirect: { name: 'home' } },
@@ -141,13 +144,13 @@ const router = createRouter({
           path: 'accounts/new',
           name: 'account-new',
           component: () => import('@/views/app/NewAccountView.vue'),
-          meta: { auth: true, title: 'Add account' },
+          meta: { auth: true, title: 'addAccount' },
         },
         {
           path: 'settings',
           name: 'settings',
           component: () => import('@/views/app/SettingsView.vue'),
-          meta: { auth: true, title: 'Settings' },
+          meta: { auth: true, title: 'settings' },
         },
         {
           path: 'staff',
@@ -157,42 +160,42 @@ const router = createRouter({
             staffPage(
               '',
               'staff-overview',
-              'Overview',
+              'overview',
               'staff.view',
               () => import('@/views/staff/StaffOverviewView.vue'),
             ),
             staffPage(
               'users',
               'staff-users',
-              'Users',
+              'users',
               'users.view',
               () => import('@/views/staff/StaffUsersView.vue'),
             ),
             staffPage(
               'users/:userId(\\d+)',
               'staff-user',
-              'User',
+              'user',
               'users.view',
               () => import('@/views/staff/StaffUserView.vue'),
             ),
             staffPage(
               'storage',
               'staff-storage',
-              'Storage',
+              'storage',
               'data.storage',
               () => import('@/views/staff/StaffStorageView.vue'),
             ),
             staffPage(
               'roles',
               'staff-roles',
-              'Roles',
+              'roles',
               'roles.manage',
               () => import('@/views/staff/StaffRolesView.vue'),
             ),
             staffPage(
               'audit',
               'staff-audit',
-              'Audit',
+              'audit',
               'audit.view',
               () => import('@/views/staff/StaffAuditView.vue'),
             ),
@@ -204,23 +207,23 @@ const router = createRouter({
                 { path: '', redirect: { name: 'staff-inspect-characters' } },
                 inspectPage(
                   'characters',
-                  'Characters',
+                  'characters',
                   () => import('@/views/account/CharactersView.vue'),
                 ),
-                inspectPage('weapons', 'Weapons', () => import('@/views/account/WeaponsView.vue')),
+                inspectPage('weapons', 'weapons', () => import('@/views/account/WeaponsView.vue')),
                 inspectPage(
                   'artifacts',
-                  'Artifacts',
+                  'artifacts',
                   () => import('@/views/account/ArtifactsView.vue'),
                 ),
                 inspectPage(
                   'materials',
-                  'Materials',
+                  'materials',
                   () => import('@/views/account/MaterialsView.vue'),
                 ),
                 inspectPage(
                   'snapshots',
-                  'Snapshots',
+                  'snapshots',
                   () => import('@/views/account/SnapshotsView.vue'),
                 ),
               ],
@@ -235,86 +238,86 @@ const router = createRouter({
             account(
               '',
               'account-overview',
-              'Overview',
+              'overview',
               () => import('@/views/account/OverviewView.vue'),
             ),
             account(
               'progression',
               'account-progression',
-              'Progression',
+              'progression',
               () => import('@/views/account/ProgressionView.vue'),
             ),
             account(
               'characters',
               'account-characters',
-              'Characters',
+              'characters',
               () => import('@/views/account/CharactersView.vue'),
             ),
             account(
               'weapons',
               'account-weapons',
-              'Weapons',
+              'weapons',
               () => import('@/views/account/WeaponsView.vue'),
             ),
             account(
               'artifacts',
               'account-artifacts',
-              'Artifacts',
+              'artifacts',
               () => import('@/views/account/ArtifactsView.vue'),
             ),
             account(
               'materials',
               'account-materials',
-              'Materials',
+              'materials',
               () => import('@/views/account/MaterialsView.vue'),
             ),
             account(
               'planner',
               'account-planner',
-              'Planner',
+              'planner',
               () => import('@/views/account/PlannerView.vue'),
             ),
             account(
               'achievements',
               'account-achievements',
-              'Achievements',
+              'achievements',
               () => import('@/views/account/AchievementsView.vue'),
             ),
             account(
               'anecdotes',
               'account-anecdotes',
-              'Anecdotes',
+              'anecdotes',
               () => import('@/views/account/AnecdotesView.vue'),
             ),
             account(
               'wishes',
               'account-wishes',
-              'Wish history',
+              'wishHistory',
               () => import('@/views/account/WishesView.vue'),
             ),
             account(
               'wishes/:banner(character|weapon|standard|chronicled|beginners)',
               'account-wishes-banner',
-              'Wish history',
+              'wishHistory',
               () => import('@/views/account/WishBannerView.vue'),
             ),
             account(
               'snapshots',
               'account-snapshots',
-              'Snapshots',
+              'snapshots',
               () => import('@/views/account/SnapshotsView.vue'),
             ),
             { path: 'export', redirect: { name: 'account-snapshots' } },
             account(
               'import',
               'account-import',
-              'Import',
+              'import',
               () => import('@/views/account/ImportView.vue'),
             ),
             account(
               'settings',
               'account-settings',
-              'Account settings',
+              'accountSettings',
               () => import('@/views/account/AccountSettingsView.vue'),
             ),
           ],
@@ -325,7 +328,7 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue'),
-      meta: { title: 'Not found' },
+      meta: { title: 'notFound' },
     },
   ],
 })
@@ -385,8 +388,15 @@ router.afterEach((to) => {
     void nextTick().then(finish)
   }
   setPublicPage(to.meta.public === true)
-  document.title = to.meta.title ? `${to.meta.title} · GI Tracker` : 'GI Tracker'
+  setDocumentTitle(to)
 })
+
+/** The tab's title: the page's, in the language on screen (again on a switch). */
+function setDocumentTitle(to: RouteLocationNormalized) {
+  const title = pageTitle(to.meta)
+  document.title = title ? t('shell.documentTitle', { title }) : t('shell.site')
+}
+onLocaleChange(() => setDocumentTitle(router.currentRoute.value))
 
 /** After a deploy, an open tab may ask for a chunk that no longer exists: reload once. */
 router.onError((error, to) => {

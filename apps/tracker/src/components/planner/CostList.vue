@@ -89,11 +89,11 @@ const legendRows = computed(() => {
       </component>
     </li>
   </ul>
-  <p v-else class="text-sm text-text-muted">Nothing to spend</p>
+  <p v-else class="text-sm text-text-muted">{{ $t('planner.cost.nothing') }}</p>
   <ul
     v-if="legend && legendRows.length"
     class="flex flex-col gap-0.5 text-xs text-text-muted"
-    aria-label="Colours"
+    :aria-label="$t('planner.cost.colours')"
   >
     <li v-for="l in legendRows" :key="l.status" class="flex items-center gap-1.5">
       <span class="tabular min-w-5 font-mono font-semibold" :class="l.tone">{{

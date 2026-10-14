@@ -10,6 +10,7 @@ import {
   formatRelative,
 } from '@/lib/format'
 import { compressionRatio, serverLabel } from '@/data/overview'
+import { t } from '@/i18n'
 import { useAccounts } from '@/stores/accounts'
 
 /** One Genshin account on the home screen; the whole card opens its overview. */
@@ -26,15 +27,21 @@ const view = computed(() => {
     server: serverLabel(a.server),
     figures: latest
       ? [
-          { label: 'Characters', value: formatNumber(latest.summary.characters) },
-          { label: 'Artifacts', value: formatNumber(latest.summary.artifacts) },
           {
-            label: 'Mora',
+            label: t('overview.figure.characters'),
+            value: formatNumber(latest.summary.characters),
+          },
+          {
+            label: t('overview.figure.artifacts'),
+            value: formatNumber(latest.summary.artifacts),
+          },
+          {
+            label: t('overview.figure.mora'),
             value: formatCompact(latest.summary.mora),
             title: formatNumber(latest.summary.mora),
           },
           {
-            label: 'Primogems',
+            label: t('overview.figure.primogem'),
             value: formatCompact(latest.summary.primogem),
             title: formatNumber(latest.summary.primogem),
           },
@@ -44,7 +51,7 @@ const view = computed(() => {
       ? {
           iso: new Date(latest.takenAt).toISOString(),
           ago: formatRelative(latest.takenAt, props.now),
-          title: `Last captured ${formatDateTime(latest.takenAt)}`,
+          title: t('overview.lastCapturedAt', { time: formatDateTime(latest.takenAt) }),
         }
       : null,
     seenAgain:
@@ -52,7 +59,7 @@ const view = computed(() => {
         ? {
             iso: new Date(latest.lastSeenAt).toISOString(),
             ago: formatRelative(latest.lastSeenAt, props.now),
-            title: `Seen again ${formatDateTime(latest.lastSeenAt)}`,
+            title: t('overview.seenAgainAt', { time: formatDateTime(latest.lastSeenAt) }),
           }
         : null,
     snapshots: formatNumber(a.snapshotCount),
@@ -60,9 +67,11 @@ const view = computed(() => {
       a.snapshotCount > 0
         ? {
             text: `${formatBytes(a.rawBytes)} → ${formatBytes(a.storedBytes)}${ratio ? ` · ${ratio}` : ''}`,
-            title: `${formatBytes(a.rawBytes)} uploaded, ${formatBytes(a.storedBytes)} stored${
-              ratio ? ` (${ratio} smaller)` : ''
-            }`,
+            title: t(ratio ? 'overview.card.storedRatio' : 'overview.card.stored', {
+              raw: formatBytes(a.rawBytes),
+              stored: formatBytes(a.storedBytes),
+              ratio,
+            }),
           }
         : null,
   }
@@ -97,14 +106,16 @@ const view = computed(() => {
         </dd>
       </div>
     </dl>
-    <p v-else class="text-text-muted">No snapshots yet</p>
+    <p v-else class="text-text-muted">{{ $t('overview.noSnapshots') }}</p>
 
     <dl
       class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border-subtle pt-3 text-sm text-text-secondary"
     >
       <div v-if="view.captured" class="flex items-center gap-1.5">
         <dt>
-          <Clock class="size-4" aria-hidden="true" /><span class="sr-only">Last captured</span>
+          <Clock class="size-4" aria-hidden="true" /><span class="sr-only">{{
+            $t('overview.lastCaptured')
+          }}</span>
         </dt>
         <dd>
           <time :datetime="view.captured.iso" :title="view.captured.title">{{
@@ -113,19 +124,31 @@ const view = computed(() => {
         </dd>
       </div>
       <div v-if="view.seenAgain" class="flex items-center gap-1.5">
-        <dt><Eye class="size-4" aria-hidden="true" /><span class="sr-only">Seen again</span></dt>
+        <dt>
+          <Eye class="size-4" aria-hidden="true" /><span class="sr-only">{{
+            $t('overview.seenAgain')
+          }}</span>
+        </dt>
         <dd>
           <time :datetime="view.seenAgain.iso" :title="view.seenAgain.title">{{
             view.seenAgain.ago
           }}</time>
         </dd>
       </div>
-      <div class="flex items-center gap-1.5" title="Snapshots">
-        <dt><History class="size-4" aria-hidden="true" /><span class="sr-only">Snapshots</span></dt>
+      <div class="flex items-center gap-1.5" :title="$t('overview.card.snapshots')">
+        <dt>
+          <History class="size-4" aria-hidden="true" /><span class="sr-only">{{
+            $t('overview.card.snapshots')
+          }}</span>
+        </dt>
         <dd class="tabular font-mono">{{ view.snapshots }}</dd>
       </div>
       <div v-if="view.storage" class="flex items-center gap-1.5" :title="view.storage.title">
-        <dt><Database class="size-4" aria-hidden="true" /><span class="sr-only">Storage</span></dt>
+        <dt>
+          <Database class="size-4" aria-hidden="true" /><span class="sr-only">{{
+            $t('overview.card.storage')
+          }}</span>
+        </dt>
         <dd class="tabular font-mono">{{ view.storage.text }}</dd>
       </div>
     </dl>

@@ -39,6 +39,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import { ApiRequestError, api, type PurgeBody } from '@/api'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
 import { formatBytes, formatDate, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { describeUserAgent } from '@/lib/user-agent'
 import { useFeedback } from '@/stores/feedback'
@@ -106,13 +107,23 @@ const quotaOpen = ref(false)
 const dataAccount = ref<StaffAccountRow | null>(null)
 
 async function suspend(reason: string) {
-  if (await act(() => api.staff.suspend(userId.value, reason), 'Suspended', 'Not suspended')) {
+  if (
+    await act(
+      () => api.staff.suspend(userId.value, reason),
+      t('staff.common.suspended'),
+      t('staff.common.notSuspended'),
+    )
+  ) {
     suspendOpen.value = false
   }
 }
 
 async function unsuspend() {
-  await act(() => api.staff.unsuspend(userId.value), 'Suspension lifted', 'Not changed')
+  await act(
+    () => api.staff.unsuspend(userId.value),
+    t('staff.user.suspensionLifted'),
+    t('staff.common.notChanged'),
+  )
 }
 
 async function rename(username: string) {
@@ -121,12 +132,12 @@ async function rename(username: string) {
   try {
     await api.staff.rename(userId.value, username)
     renameOpen.value = false
-    feedback.toast({ tone: 'success', title: `Renamed to ${username}` })
+    feedback.toast({ tone: 'success', title: t('staff.user.renamed', { name: username }) })
     await reload()
   } catch (cause) {
     if (cause instanceof ApiRequestError && cause.code === 'username_taken') {
-      renameError.value = 'Taken'
-    } else feedback.error('Not renamed', cause)
+      renameError.value = t('staff.user.taken')
+    } else feedback.error(t('staff.user.notRenamed'), cause)
   } finally {
     busy.value = false
   }
@@ -136,30 +147,38 @@ async function remove(username: string) {
   busy.value = true
   try {
     await api.staff.deleteUser(userId.value, username)
-    feedback.toast({ tone: 'success', title: `Deleted ${username}` })
+    feedback.toast({ tone: 'success', title: t('staff.user.deleted', { name: username }) })
     deleteOpen.value = false
     await router.replace({ name: 'staff-users' })
   } catch (cause) {
-    feedback.error('Not deleted', cause)
+    feedback.error(t('staff.common.notDeleted'), cause)
   } finally {
     busy.value = false
   }
 }
 
 async function signOutAll() {
-  await act(() => api.staff.signOut(userId.value), 'Signed out everywhere', 'Not signed out')
+  await act(
+    () => api.staff.signOut(userId.value),
+    t('staff.user.signedOutEverywhere'),
+    t('staff.user.notSignedOut'),
+  )
 }
 
 async function signOutSession(id: number) {
-  await act(() => api.staff.signOutSession(userId.value, id), 'Signed out', 'Not signed out')
+  await act(
+    () => api.staff.signOutSession(userId.value, id),
+    t('staff.user.signedOut'),
+    t('staff.user.notSignedOut'),
+  )
 }
 
 async function setUploads(blocked: boolean, reason = '') {
   if (
     await act(
       () => api.staff.setUploads(userId.value, blocked, reason),
-      blocked ? 'Uploads blocked' : 'Uploads unblocked',
-      'Not changed',
+      blocked ? t('staff.common.uploadsBlocked') : t('staff.common.uploadsUnblocked'),
+      t('staff.common.notChanged'),
     )
   ) {
     blockOpen.value = false
@@ -167,39 +186,63 @@ async function setUploads(blocked: boolean, reason = '') {
 }
 
 async function setQuota(bytes: number | null) {
-  if (await act(() => api.staff.setQuota(userId.value, bytes), 'Quota saved', 'Not saved')) {
+  if (
+    await act(
+      () => api.staff.setQuota(userId.value, bytes),
+      t('staff.common.quotaSaved'),
+      t('staff.common.notSaved'),
+    )
+  ) {
     quotaOpen.value = false
   }
 }
 
 async function unlink(provider: string) {
   const ok = await feedback.confirm({
-    title: `Unlink ${providerLabel(provider as never)}`,
-    detail: `${user.value?.username} can no longer sign in with it (they can link it again).`,
-    confirmLabel: 'Unlink',
+    title: t('staff.user.unlinkTitle', { provider: providerLabel(provider as never) }),
+    detail: t('staff.user.unlinkDetail', { user: user.value?.username ?? '' }),
+    confirmLabel: t('staff.user.unlink'),
     tone: 'danger',
   })
-  if (ok) await act(() => api.staff.unlink(userId.value, provider), 'Unlinked', 'Not unlinked')
+  if (ok) {
+    await act(
+      () => api.staff.unlink(userId.value, provider),
+      t('staff.user.unlinked'),
+      t('staff.user.notUnlinked'),
+    )
+  }
 }
 
 async function revokeUserKey() {
   const ok = await feedback.confirm({
-    title: 'Revoke the all-accounts key',
-    detail: 'Irminsul stops uploading with it at once; they can make a new one in Settings.',
-    confirmLabel: 'Revoke',
+    title: t('staff.user.revokeTitle'),
+    detail: t('staff.user.revokeDetail'),
+    confirmLabel: t('staff.user.revoke'),
     tone: 'danger',
   })
-  if (ok) await act(() => api.staff.revokeUserKey(userId.value), 'Key revoked', 'Not revoked')
+  if (ok) {
+    await act(
+      () => api.staff.revokeUserKey(userId.value),
+      t('staff.user.keyRevoked'),
+      t('staff.user.notRevoked'),
+    )
+  }
 }
 
 async function resetAccountKey(account: StaffAccountRow) {
   const ok = await feedback.confirm({
-    title: 'Reset import key',
-    detail: `The key of ${account.name || `UID ${account.uid}`} stops working at once; they make a new one in Manage.`,
-    confirmLabel: 'Reset key',
+    title: t('staff.user.resetKeyTitle'),
+    detail: t('staff.user.resetKeyDetail', { account: account.name || `UID ${account.uid}` }),
+    confirmLabel: t('staff.user.resetKey'),
     tone: 'danger',
   })
-  if (ok) await act(() => api.staff.resetAccountKey(account.id), 'Key reset', 'Not reset')
+  if (ok) {
+    await act(
+      () => api.staff.resetAccountKey(account.id),
+      t('staff.user.keyReset'),
+      t('staff.user.notReset'),
+    )
+  }
 }
 
 async function purge(body: PurgeBody) {
@@ -210,12 +253,12 @@ async function purge(body: PurgeBody) {
     const { deleted } = await api.staff.purge(account.id, body)
     feedback.toast({
       tone: 'success',
-      title: `Deleted ${formatNumber(deleted)} ${deleted === 1 ? 'snapshot' : 'snapshots'}`,
+      title: t('staff.user.deletedSnapshots', { n: formatNumber(deleted) }, deleted),
     })
     dataAccount.value = null
     await reload()
   } catch (cause) {
-    feedback.error('Not deleted', cause)
+    feedback.error(t('staff.common.notDeleted'), cause)
   } finally {
     busy.value = false
   }
@@ -224,7 +267,13 @@ async function purge(body: PurgeBody) {
 async function deleteAccount() {
   const account = dataAccount.value
   if (!account) return
-  if (await act(() => api.staff.deleteAccount(account.id), 'Account deleted', 'Not deleted')) {
+  if (
+    await act(
+      () => api.staff.deleteAccount(account.id),
+      t('staff.user.accountDeleted'),
+      t('staff.common.notDeleted'),
+    )
+  ) {
     dataAccount.value = null
   }
 }
@@ -241,11 +290,19 @@ const removable = (roleId: number) => detail.value?.assignable.some((r) => r.id 
 
 async function addRole(roleId: number) {
   roleOpen.value = false
-  await act(() => api.staff.addRole(userId.value, roleId), 'Role given', 'Not given')
+  await act(
+    () => api.staff.addRole(userId.value, roleId),
+    t('staff.user.roleGiven'),
+    t('staff.user.notGiven'),
+  )
 }
 
 async function removeRole(roleId: number) {
-  await act(() => api.staff.removeRole(userId.value, roleId), 'Role taken away', 'Not changed')
+  await act(
+    () => api.staff.removeRole(userId.value, roleId),
+    t('staff.user.roleTaken'),
+    t('staff.common.notChanged'),
+  )
   // The caller may have changed their own standing (never: they can't act on themselves).
   void staffStore.reload()
 }
@@ -264,14 +321,18 @@ function accountMenu(account: StaffAccountRow): MenuItem[] {
   if (may('data.manage')) {
     items.push(
       user.value?.uploadsBlockedAt
-        ? { label: 'Unblock uploads', run: () => void setUploads(false) }
-        : { label: 'Block uploads…', run: () => (blockOpen.value = true) },
-      { label: 'Storage quota…', run: () => (quotaOpen.value = true) },
-      { label: 'Reset import key', run: () => void resetAccountKey(account) },
+        ? { label: t('staff.user.unblockUploads'), run: () => void setUploads(false) }
+        : { label: t('staff.user.blockUploadsMenu'), run: () => (blockOpen.value = true) },
+      { label: t('staff.common.storageQuotaMenu'), run: () => (quotaOpen.value = true) },
+      { label: t('staff.user.resetImportKey'), run: () => void resetAccountKey(account) },
     )
   }
   if (may('data.delete')) {
-    items.push({ label: 'Delete data…', danger: true, run: () => (dataAccount.value = account) })
+    items.push({
+      label: t('staff.user.deleteDataMenu'),
+      danger: true,
+      run: () => (dataAccount.value = account),
+    })
   }
   return items
 }
@@ -290,13 +351,15 @@ const capHit = computed(
 )
 
 const isPhone = (userAgent: string | null) => /\b(?:iPhone|Android|Mobile)\b/.test(userAgent ?? '')
-const METHODS: Record<string, string> = {
-  password: 'Password',
-  discord: 'Discord',
-  google: 'Google',
-  reset: 'Reset link',
-  legacy: 'Before sessions',
-}
+/** How a session signed in (`irminsul` and the providers are names). */
+const methodLabel = (method: string): string =>
+  method === 'password' || method === 'reset' || method === 'legacy'
+    ? t(`staff.methods.${method}`)
+    : method === 'discord'
+      ? 'Discord'
+      : method === 'google'
+        ? 'Google'
+        : method
 
 const identities = computed(() =>
   OAUTH_PROVIDERS.map((provider) => ({
@@ -307,17 +370,22 @@ const identities = computed(() =>
 </script>
 
 <template>
-  <PageHeader :title="user?.username ?? 'User'" />
+  <PageHeader :title="user?.username ?? $t('staff.user.title')" />
 
   <RouterLink
     :to="{ name: 'staff-users' }"
     class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-text hover:underline"
   >
     <ArrowLeft class="size-4" aria-hidden="true" />
-    Users
+    {{ $t('staff.user.back') }}
   </RouterLink>
 
-  <UiError v-if="error && !detail" :error="error" title="Could not load the user" @retry="reload" />
+  <UiError
+    v-if="error && !detail"
+    :error="error"
+    :title="$t('staff.user.couldNotLoad')"
+    @retry="reload"
+  />
 
   <div v-else-if="!detail || !user" class="flex flex-col gap-6" aria-busy="true">
     <UiSkeleton class="h-16 w-80" />
@@ -341,15 +409,15 @@ const identities = computed(() =>
           <UiBadge v-if="status" :tone="status.tone">{{ status.label }}</UiBadge>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-sm">
-          <span class="text-text-muted">Roles</span>
+          <span class="text-text-muted">{{ $t('staff.common.roles') }}</span>
           <span v-if="user.roles.length === 0" class="text-text-muted">—</span>
           <RoleBadge v-for="role in user.roles" :key="role.id" :role="role">
             <button
               v-if="removable(role.id)"
               type="button"
               class="-mr-1 rounded hover:text-danger-text"
-              :aria-label="`Take ${role.name} away`"
-              :title="`Take ${role.name} away`"
+              :aria-label="$t('staff.user.takeAway', { role: role.name })"
+              :title="$t('staff.user.takeAway', { role: role.name })"
               :disabled="busy"
               @click="removeRole(role.id)"
             >
@@ -359,12 +427,12 @@ const identities = computed(() =>
           <span v-if="addable.length" ref="roleAnchor" class="inline-flex">
             <UiButton variant="ghost" size="sm" class="min-h-7 px-2" @click="roleOpen = !roleOpen">
               <Plus class="size-4" aria-hidden="true" />
-              Role
+              {{ $t('staff.user.addRole') }}
             </UiButton>
             <UiPopover
               :open="roleOpen"
               :anchor="roleAnchor"
-              label="Give a role"
+              :label="$t('staff.user.giveRole')"
               :focus="false"
               @close="roleOpen = false"
             >
@@ -387,29 +455,29 @@ const identities = computed(() =>
       <div class="flex flex-wrap gap-2">
         <UiButton v-if="may('users.reset_password')" @click="resetOpen = true">
           <Link2 class="size-4" aria-hidden="true" />
-          Reset link
+          {{ $t('staff.user.resetLink') }}
         </UiButton>
         <UiButton v-if="may('users.sessions')" :disabled="busy" @click="signOutAll">
           <LogOut class="size-4" aria-hidden="true" />
-          Sign out all
+          {{ $t('staff.user.signOutAll') }}
         </UiButton>
         <template v-if="may('users.manage')">
           <UiButton :disabled="busy" @click="renameOpen = true">
             <Pencil class="size-4" aria-hidden="true" />
-            Rename
+            {{ $t('staff.user.rename') }}
           </UiButton>
           <UiButton v-if="user.suspendedAt" :disabled="busy" @click="unsuspend">
             <Ban class="size-4" aria-hidden="true" />
-            Unsuspend
+            {{ $t('staff.user.unsuspend') }}
           </UiButton>
           <UiButton v-else :disabled="busy" @click="suspendOpen = true">
             <Ban class="size-4" aria-hidden="true" />
-            Suspend
+            {{ $t('staff.common.suspend') }}
           </UiButton>
         </template>
         <UiButton v-if="may('users.delete')" variant="danger" @click="deleteOpen = true">
           <Trash2 class="size-4" aria-hidden="true" />
-          Delete user
+          {{ $t('staff.user.deleteUser') }}
         </UiButton>
       </div>
     </div>
@@ -419,13 +487,13 @@ const identities = computed(() =>
       class="rounded-xl border border-danger-border bg-danger-surface px-4 py-3 text-sm text-danger-text"
       role="note"
     >
-      Suspended {{ formatRelative(user.suspendedAt)
+      {{ $t('staff.user.suspendedNote', { when: formatRelative(user.suspendedAt) })
       }}<template v-if="user.suspendedReason"> · “{{ user.suspendedReason }}”</template>
     </p>
 
     <div class="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-3">
       <UiStat
-        label="Joined"
+        :label="$t('staff.common.joined')"
         :value="formatDate(user.createdAt)"
         :hint="formatDateTime(user.createdAt)"
       >
@@ -435,35 +503,42 @@ const identities = computed(() =>
         </span>
       </UiStat>
       <UiStat
-        label="Last active"
+        :label="$t('staff.common.lastActive')"
         :value="user.lastActiveAt ? formatRelative(user.lastActiveAt) : '—'"
         :hint="user.lastActiveAt ? formatDateTime(user.lastActiveAt) : undefined"
       />
       <UiStat
-        label="Storage"
+        :label="$t('staff.common.storage')"
         :value="usage ? formatBytes(usage.storedBytes) : formatBytes(user.storedBytes)"
       >
         <template v-if="usage">
           <span class="text-sm text-text-muted"
-            >of {{ formatBytes(usage.storageQuota)
-            }}{{ usage.quota !== null ? ' (own quota)' : '' }}</span
+            >{{ $t('staff.user.ofQuota', { size: formatBytes(usage.storageQuota) })
+            }}{{ usage.quota !== null ? $t('staff.user.ownQuota') : '' }}</span
           >
           <UiProgress
             class="mt-1"
             :value="usage.storedBytes"
             :max="usage.storageQuota"
             :tone="quotaShare >= 0.8 ? 'danger' : 'accent'"
-            label="Storage used"
+            :label="$t('staff.user.storageUsed')"
           />
         </template>
       </UiStat>
       <UiStat
         v-if="usage"
-        label="Today"
+        :label="$t('staff.user.today')"
         :value="`${formatNumber(usage.daySnapshots)} / ${formatNumber(usage.dailySnapshots)}`"
-        :hint="`${formatBytes(usage.dayBytes)} of ${formatBytes(usage.dailyBytes)} stored today (UTC)`"
+        :hint="
+          $t('staff.user.todayHint', {
+            day: formatBytes(usage.dayBytes),
+            daily: formatBytes(usage.dailyBytes),
+          })
+        "
       >
-        <span v-if="capHit" class="text-sm text-warning-text">Daily cap hit</span>
+        <span v-if="capHit" class="text-sm text-warning-text">{{
+          $t('staff.user.dailyCapHit')
+        }}</span>
       </UiStat>
     </div>
 
@@ -471,25 +546,39 @@ const identities = computed(() =>
       <div class="flex min-w-0 flex-col gap-6">
         <UiPanel flush>
           <template #header>
-            <h2 class="text-base font-semibold">Genshin accounts</h2>
+            <h2 class="text-base font-semibold">{{ $t('staff.user.genshinAccounts') }}</h2>
             <span class="tabular font-mono text-sm text-text-muted">{{
               formatNumber(detail.accounts.length)
             }}</span>
           </template>
-          <p v-if="detail.accounts.length === 0" class="px-5 py-6 text-sm text-text-muted">None</p>
+          <p v-if="detail.accounts.length === 0" class="px-5 py-6 text-sm text-text-muted">
+            {{ $t('staff.common.none') }}
+          </p>
           <div v-else class="overflow-x-auto">
             <table class="w-full min-w-[34rem] text-sm">
               <thead
                 class="border-b border-border-default bg-surface-overlay/50 text-text-secondary"
               >
                 <tr>
-                  <th scope="col" class="px-4 py-2 text-left font-medium">Name</th>
+                  <th scope="col" class="px-4 py-2 text-left font-medium">
+                    {{ $t('staff.user.name') }}
+                  </th>
                   <th scope="col" class="px-3 py-2 text-left font-medium">UID</th>
-                  <th scope="col" class="px-3 py-2 text-left font-medium">Server</th>
-                  <th scope="col" class="px-3 py-2 text-right font-medium">Snapshots</th>
-                  <th scope="col" class="px-3 py-2 text-left font-medium">Last upload</th>
-                  <th scope="col" class="px-3 py-2 text-right font-medium">Stored</th>
-                  <th scope="col" class="px-3 py-2"><span class="sr-only">Actions</span></th>
+                  <th scope="col" class="px-3 py-2 text-left font-medium">
+                    {{ $t('staff.user.server') }}
+                  </th>
+                  <th scope="col" class="px-3 py-2 text-right font-medium">
+                    {{ $t('staff.common.snapshots') }}
+                  </th>
+                  <th scope="col" class="px-3 py-2 text-left font-medium">
+                    {{ $t('staff.user.lastUpload') }}
+                  </th>
+                  <th scope="col" class="px-3 py-2 text-right font-medium">
+                    {{ $t('staff.common.stored') }}
+                  </th>
+                  <th scope="col" class="px-3 py-2">
+                    <span class="sr-only">{{ $t('staff.common.actions') }}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-border-subtle">
@@ -506,7 +595,9 @@ const identities = computed(() =>
                   <td
                     class="tabular px-3 py-1.5 text-right font-mono"
                     :title="
-                      account.trash ? `${formatNumber(account.trash)} in the trash` : undefined
+                      account.trash
+                        ? $t('staff.user.inTrash', { n: formatNumber(account.trash) })
+                        : undefined
                     "
                   >
                     {{ formatNumber(account.snapshotCount) }}
@@ -532,10 +623,14 @@ const identities = computed(() =>
                         }"
                       >
                         <Eye class="size-4" aria-hidden="true" />
-                        Inspect
+                        {{ $t('staff.user.inspect') }}
                       </UiButton>
                       <ActionMenu
-                        :label="`More for ${account.name || account.uid || 'this account'}`"
+                        :label="
+                          $t('staff.common.moreFor', {
+                            name: account.name || account.uid || $t('staff.user.thisAccount'),
+                          })
+                        "
                         :items="accountMenu(account)"
                       />
                     </span>
@@ -555,21 +650,23 @@ const identities = computed(() =>
             >
               {{
                 showAll
-                  ? 'Show fewer'
-                  : `Show ${formatNumber(detail.accounts.length - ACCOUNTS_SHOWN)} more`
+                  ? $t('staff.user.showFewer')
+                  : $t('staff.user.showMore', {
+                      n: formatNumber(detail.accounts.length - ACCOUNTS_SHOWN),
+                    })
               }}
             </button>
           </div>
         </UiPanel>
 
-        <UiPanel v-if="detail.sessions" title="Sessions" flush>
+        <UiPanel v-if="detail.sessions" :title="$t('staff.user.sessions')" flush>
           <template v-if="may('users.sessions') && detail.sessions.length" #actions>
             <UiButton variant="ghost" size="sm" :disabled="busy" @click="signOutAll">
-              Sign out all
+              {{ $t('staff.user.signOutAll') }}
             </UiButton>
           </template>
           <p v-if="detail.sessions.length === 0" class="px-5 py-6 text-sm text-text-muted">
-            Signed in nowhere
+            {{ $t('staff.user.signedInNowhere') }}
           </p>
           <ul v-else class="divide-y divide-border-subtle text-sm">
             <li
@@ -587,7 +684,7 @@ const identities = computed(() =>
                 <span class="text-[0.8125rem] text-text-muted">
                   <span class="font-code">{{ s.ip ?? '—' }}</span>
                   · {{ [s.city, s.country].filter(Boolean).join(', ') || '—' }} ·
-                  {{ METHODS[s.method] ?? s.method }}
+                  {{ methodLabel(s.method) }}
                 </span>
               </span>
               <span class="tabular text-text-secondary" :title="formatDateTime(s.lastSeenAt)">{{
@@ -600,7 +697,7 @@ const identities = computed(() =>
                 :disabled="busy"
                 @click="signOutSession(s.id)"
               >
-                Sign out
+                {{ $t('staff.user.signOut') }}
               </UiButton>
             </li>
           </ul>
@@ -608,19 +705,19 @@ const identities = computed(() =>
       </div>
 
       <div class="flex min-w-0 flex-col gap-6">
-        <UiPanel title="Sign-in" flush>
+        <UiPanel :title="$t('staff.user.signIn')" flush>
           <dl class="divide-y divide-border-subtle px-5 text-sm">
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-24 shrink-0 text-text-secondary">Password</dt>
-              <dd class="flex-1">{{ user.hasPassword ? 'Set' : '—' }}</dd>
+              <dt class="w-24 shrink-0 text-text-secondary">{{ $t('staff.user.password') }}</dt>
+              <dd class="flex-1">{{ user.hasPassword ? $t('staff.common.set') : '—' }}</dd>
             </div>
             <div v-if="user.email !== undefined" class="flex items-center gap-3 py-2.5">
-              <dt class="w-24 shrink-0 text-text-secondary">Email</dt>
+              <dt class="w-24 shrink-0 text-text-secondary">{{ $t('staff.user.email') }}</dt>
               <dd class="min-w-0 flex-1 truncate" :class="user.email ? '' : 'text-text-muted'">
                 {{ user.email ?? '—' }}
-                <UiBadge v-if="user.email && user.emailVerified" tone="success" class="ml-1"
-                  >Confirmed</UiBadge
-                >
+                <UiBadge v-if="user.email && user.emailVerified" tone="success" class="ml-1">{{
+                  $t('staff.user.confirmed')
+                }}</UiBadge>
               </dd>
             </div>
             <template v-if="detail.identities">
@@ -635,15 +732,17 @@ const identities = computed(() =>
                 </dt>
                 <dd v-if="row.identity" class="flex min-w-0 flex-1 flex-wrap items-center gap-x-2">
                   <span class="truncate font-medium">{{
-                    row.identity.displayName ?? row.identity.email ?? 'Linked'
+                    row.identity.displayName ?? row.identity.email ?? $t('staff.user.linked')
                   }}</span>
                   <span
                     class="text-[0.8125rem] text-text-muted"
-                    :title="`Linked ${formatDateTime(row.identity.createdAt)}`"
+                    :title="
+                      $t('staff.user.linkedAt', { date: formatDateTime(row.identity.createdAt) })
+                    "
                     >{{
                       row.identity.lastUsedAt
-                        ? `used ${formatRelative(row.identity.lastUsedAt)}`
-                        : 'never used'
+                        ? $t('staff.user.used', { when: formatRelative(row.identity.lastUsedAt) })
+                        : $t('staff.user.neverUsed')
                     }}</span
                   >
                 </dd>
@@ -656,16 +755,16 @@ const identities = computed(() =>
                   @click="unlink(row.provider)"
                 >
                   <Unlink class="size-4" aria-hidden="true" />
-                  Unlink
+                  {{ $t('staff.user.unlink') }}
                 </UiButton>
               </div>
             </template>
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-24 shrink-0 text-text-secondary" title="Irminsul key for all accounts">
-                User key
+              <dt class="w-24 shrink-0 text-text-secondary" :title="$t('staff.user.userKeyTitle')">
+                {{ $t('staff.user.userKey') }}
               </dt>
               <dd class="flex-1" :class="user.hasImportKey ? '' : 'text-text-muted'">
-                {{ user.hasImportKey ? 'Set' : '—' }}
+                {{ user.hasImportKey ? $t('staff.common.set') : '—' }}
               </dd>
               <UiButton
                 v-if="user.hasImportKey && may('data.manage')"
@@ -674,23 +773,25 @@ const identities = computed(() =>
                 :disabled="busy"
                 @click="revokeUserKey"
               >
-                Revoke
+                {{ $t('staff.user.revoke') }}
               </UiButton>
             </div>
           </dl>
         </UiPanel>
 
-        <UiPanel v-if="detail.history" title="Staff history" flush>
+        <UiPanel v-if="detail.history" :title="$t('staff.user.staffHistory')" flush>
           <template #actions>
             <UiButton
               variant="ghost"
               size="sm"
               :to="{ name: 'staff-audit', query: { user: String(user.id) } }"
             >
-              All
+              {{ $t('staff.common.all') }}
             </UiButton>
           </template>
-          <p v-if="detail.history.length === 0" class="px-5 py-6 text-sm text-text-muted">None</p>
+          <p v-if="detail.history.length === 0" class="px-5 py-6 text-sm text-text-muted">
+            {{ $t('staff.common.none') }}
+          </p>
           <ul v-else class="divide-y divide-border-subtle text-sm">
             <li v-for="h in detail.history" :key="h.id" class="flex items-start gap-3 px-5 py-2.5">
               <span class="tabular w-24 shrink-0 text-text-muted" :title="formatDateTime(h.at)">{{
@@ -722,24 +823,28 @@ const identities = computed(() =>
   />
   <ReasonDialog
     :open="suspendOpen"
-    title="Suspend"
+    :title="$t('staff.common.suspend')"
     :user="target"
-    :effects="['Signs them out everywhere', 'Blocks sign-in and uploads', 'Keeps their data']"
-    confirm-label="Suspend"
+    :effects="[
+      $t('staff.effects.signsOut'),
+      $t('staff.effects.blocksSignIn'),
+      $t('staff.effects.keepsData'),
+    ]"
+    :confirm-label="$t('staff.common.suspend')"
     :busy="busy"
     @close="suspendOpen = false"
     @confirm="suspend"
   />
   <ReasonDialog
     :open="blockOpen"
-    title="Block uploads"
+    :title="$t('staff.common.blockUploads')"
     :user="target"
     :effects="[
-      'Refuses every upload, from Irminsul and the website',
-      'They can still sign in and look',
-      'Keeps their data',
+      $t('staff.effects.refusesUploads'),
+      $t('staff.effects.canStillSignIn'),
+      $t('staff.effects.keepsData'),
     ]"
-    confirm-label="Block uploads"
+    :confirm-label="$t('staff.common.blockUploads')"
     :busy="busy"
     @close="blockOpen = false"
     @confirm="(reason) => setUploads(true, reason)"

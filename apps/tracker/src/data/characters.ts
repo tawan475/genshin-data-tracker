@@ -13,7 +13,7 @@ import {
   type GoodArtifact,
   type GoodWeapon,
 } from '@gdt/shared'
-import { keyToName } from '@/lib/format'
+import { characterName } from '@/i18n/game-names'
 import { maxLevel } from '@/utils/artifact-rolls'
 import { formatSetName } from '@/utils/artifact-stats'
 import { ARTIFACT_MAIN_STATS, ARTIFACT_SET_THRESHOLDS } from './artifact-stats'
@@ -21,6 +21,7 @@ import { characterMeta, weaponMeta, type Element, type WeaponType } from './game
 import { WEAPON_TYPE_LABELS, itemName } from './weapons'
 import { compareText, normalizeSearch } from '@/lib/search'
 import { labelTable } from '@/i18n/labels'
+import { t } from '@/i18n'
 
 export { WEAPON_TYPES, WEAPON_TYPE_LABELS, itemName } from './weapons'
 
@@ -170,6 +171,16 @@ function countSets(pieces: readonly EquippedArtifact[]): SetCount[] {
     .sort((a, b) => b.count - a.count || compareText(a.name, b.name))
 }
 
+/** A gap whose text follows the language on screen (read where it renders). */
+function gap(kind: GapKind, text: () => string): Gap {
+  return {
+    kind,
+    get text() {
+      return text()
+    },
+  }
+}
+
 function findGaps(
   level: number,
   weapon: EquippedWeapon | null,
@@ -177,21 +188,22 @@ function findGaps(
   bonusCount: number,
 ): Gap[] {
   const gaps: Gap[] = []
-  if (level < TARGET_LEVEL) gaps.push({ kind: 'level', text: `Lv ${level}` })
-  if (!weapon) gaps.push({ kind: 'weapon', text: 'No weapon' })
+  if (level < TARGET_LEVEL) gaps.push(gap('level', () => t('characters.gap.level', { level })))
+  if (!weapon) gaps.push(gap('weapon', () => t('characters.gap.noWeapon')))
   else if (weapon.level < TARGET_LEVEL) {
-    gaps.push({ kind: 'weapon', text: `Weapon Lv ${weapon.level}` })
+    const weaponLevel = weapon.level
+    gaps.push(gap('weapon', () => t('characters.gap.weaponLevel', { level: weaponLevel })))
   }
   const unlevelled = equipped.filter((p) => !p.maxed).length
   if (equipped.length < SLOT_ORDER.length) {
-    gaps.push({ kind: 'artifacts', text: `${equipped.length}/5 artifacts` })
+    const count = equipped.length
+    gaps.push(gap('artifacts', () => t('characters.gap.artifactCount', { count })))
   } else if (unlevelled > 0) {
-    gaps.push({
-      kind: 'artifacts',
-      text: `${unlevelled} artifact${unlevelled > 1 ? 's' : ''} below max`,
-    })
+    gaps.push(gap('artifacts', () => t('characters.gap.belowMax', { n: unlevelled }, unlevelled)))
   }
-  if (equipped.length > 0 && bonusCount < 2) gaps.push({ kind: 'set', text: 'No full set bonus' })
+  if (equipped.length > 0 && bonusCount < 2) {
+    gaps.push(gap('set', () => t('characters.gap.noSet')))
+  }
   return gaps
 }
 
@@ -230,7 +242,7 @@ export function buildRoster(good: Good): Roster {
     const sets = countSets(equipped)
     const activeSets = sets.filter((s) => s.active.length > 0)
     const bonusCount = activeSets.reduce((sum, s) => sum + s.active.length, 0)
-    const name = keyToName(c.key)
+    const name = characterName(c.key)
     const element = meta?.[1] ?? null
     const weaponType = meta?.[2] ?? weapon?.type ?? null
     let critRate = 0
@@ -353,16 +365,76 @@ export interface SortOption {
 
 export const CHARACTER_SORTS: SortOption[] = [
   // The game's order: level (high first), element, date obtained (oldest first).
-  { value: 'default', label: 'Default', natural: 'desc' },
-  { value: 'level', label: 'Level', natural: 'desc' },
-  { value: 'constellation', label: 'Constellation', natural: 'desc' },
-  { value: 'talents', label: 'Talents', natural: 'desc' },
-  { value: 'cv', label: 'CV', natural: 'desc' },
-  { value: 'rarity', label: 'Rarity', natural: 'desc' },
-  { value: 'element', label: 'Element', natural: 'asc' },
-  { value: 'name', label: 'Name', natural: 'asc' },
-  { value: 'friendship', label: 'Friendship', natural: 'desc' },
-  { value: 'obtained', label: 'Obtained', natural: 'desc' },
+  {
+    value: 'default',
+    get label() {
+      return t('characters.sort.default')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'level',
+    get label() {
+      return t('characters.sort.level')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'constellation',
+    get label() {
+      return t('characters.sort.constellation')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'talents',
+    get label() {
+      return t('characters.sort.talents')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'cv',
+    get label() {
+      return t('characters.sort.cv')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'rarity',
+    get label() {
+      return t('characters.sort.rarity')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'element',
+    get label() {
+      return t('characters.sort.element')
+    },
+    natural: 'asc',
+  },
+  {
+    value: 'name',
+    get label() {
+      return t('characters.sort.name')
+    },
+    natural: 'asc',
+  },
+  {
+    value: 'friendship',
+    get label() {
+      return t('characters.sort.friendship')
+    },
+    natural: 'desc',
+  },
+  {
+    value: 'obtained',
+    get label() {
+      return t('characters.sort.obtained')
+    },
+    natural: 'desc',
+  },
 ]
 
 /** The sorts this roster can use: friendship and obtained only when a snapshot knows them. */
@@ -380,20 +452,75 @@ export type BuildFilter = 'all' | 'ready' | 'needs' | GapKind
 export type TalentFilter = 'all' | 'nine' | 'crowned' | 'below'
 
 export const BUILD_OPTIONS: { value: BuildFilter; label: string }[] = [
-  { value: 'all', label: 'Build' },
-  { value: 'ready', label: 'Ready' },
-  { value: 'needs', label: 'Needs work' },
-  { value: 'level', label: 'Lv < 90' },
-  { value: 'weapon', label: 'Weapon < 90' },
-  { value: 'artifacts', label: 'Artifacts < max' },
-  { value: 'set', label: 'No set bonus' },
+  {
+    value: 'all',
+    get label() {
+      return t('characters.build.all')
+    },
+  },
+  {
+    value: 'ready',
+    get label() {
+      return t('characters.build.ready')
+    },
+  },
+  {
+    value: 'needs',
+    get label() {
+      return t('characters.build.needs')
+    },
+  },
+  {
+    value: 'level',
+    get label() {
+      return t('characters.build.level')
+    },
+  },
+  {
+    value: 'weapon',
+    get label() {
+      return t('characters.build.weapon')
+    },
+  },
+  {
+    value: 'artifacts',
+    get label() {
+      return t('characters.build.artifacts')
+    },
+  },
+  {
+    value: 'set',
+    get label() {
+      return t('characters.build.set')
+    },
+  },
 ]
 
 export const TALENT_OPTIONS: { value: TalentFilter; label: string }[] = [
-  { value: 'all', label: 'Talents' },
-  { value: 'nine', label: 'All 9+' },
-  { value: 'crowned', label: 'Crowned' },
-  { value: 'below', label: 'Any < 9' },
+  {
+    value: 'all',
+    get label() {
+      return t('characters.talentFilter.all')
+    },
+  },
+  {
+    value: 'nine',
+    get label() {
+      return t('characters.talentFilter.nine')
+    },
+  },
+  {
+    value: 'crowned',
+    get label() {
+      return t('characters.talentFilter.crowned')
+    },
+  },
+  {
+    value: 'below',
+    get label() {
+      return t('characters.talentFilter.below')
+    },
+  },
 ]
 
 export interface CharacterFilters {

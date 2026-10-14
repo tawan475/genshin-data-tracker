@@ -10,6 +10,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { formatRangeEdge, formatWindow, type ChartRange } from '@/data/chart-range'
 import type { ChartFrame, MaterialsHistory } from '@/data/materials'
+import { t } from '@/i18n'
 import { clock24, formatNumber } from '@/lib/format'
 import { materialName, materialRarity } from '@/utils/materials'
 import DeltaText from './DeltaText.vue'
@@ -31,8 +32,10 @@ const emit = defineEmits<{ open: [key: string]; remove: [key: string]; add: [] }
 const range = defineModel<ChartRange>('range', { required: true })
 
 const from = computed(() => frameStart(props.history, props.frame))
-const rangeHint = computed(
-  () => `since ${formatRangeEdge(from.value, props.frame.end - from.value, !clock24())}`,
+const rangeHint = computed(() =>
+  t('materials.since', {
+    date: formatRangeEdge(from.value, props.frame.end - from.value, !clock24()),
+  }),
 )
 const rangeDetail = computed(() => formatWindow(from.value, props.frame.end, !clock24()))
 
@@ -60,10 +63,10 @@ const rows = computed(() =>
   <UiPanel>
     <template #header>
       <h2 class="text-base font-semibold">
-        Tracked
+        {{ $t('materials.tracked.title') }}
         <span
           class="tabular ml-1 font-mono text-sm font-normal text-text-muted"
-          title="Tracked / max"
+          :title="$t('materials.trackedOfMax')"
           >{{ keys.length }}/{{ MAX_SERIES }}</span
         >
       </h2>
@@ -72,7 +75,7 @@ const rows = computed(() =>
       <ChartRangeSelect v-model="range" :detail="rangeDetail" />
       <UiButton v-if="keys.length > 0 && keys.length < MAX_SERIES" size="sm" @click="emit('add')">
         <Plus class="size-4" aria-hidden="true" />
-        Track
+        {{ $t('materials.track') }}
       </UiButton>
     </template>
 
@@ -87,10 +90,14 @@ const rows = computed(() =>
       @click="emit('add')"
     >
       <Plus class="size-5" aria-hidden="true" />
-      Track
+      {{ $t('materials.track') }}
     </button>
 
-    <ul v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Tracked materials">
+    <ul
+      v-else
+      class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      :aria-label="$t('materials.tracked.list')"
+    >
       <li
         v-for="row in rows"
         :key="row.key"
@@ -122,8 +129,8 @@ const rows = computed(() =>
           <button
             type="button"
             class="-mt-1 -mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-primary"
-            :aria-label="`Untrack ${row.name}`"
-            title="Untrack"
+            :aria-label="$t('materials.tracked.untrackName', { name: row.name })"
+            :title="$t('materials.untrack')"
             @click="emit('remove', row.key)"
           >
             <X class="size-4" aria-hidden="true" />
@@ -131,7 +138,7 @@ const rows = computed(() =>
         </div>
         <TimelineChart
           :series="row.series"
-          :label="`${row.name} over time, ${rangeHint}`"
+          :label="$t('materials.detail.chartLabel', { name: row.name, since: rangeHint })"
           :height="132"
           stepped
           fill

@@ -4,6 +4,7 @@
  * rendering: components/auth/HumanCheck.vue renders the widget. The service
  * worker leaves this host alone, and the site sets no CSP.
  */
+import { t } from '@/i18n'
 
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
 /** Past this the script counts as blocked (an extension, a firewall, offline). */
@@ -50,7 +51,7 @@ export function loadTurnstile(): Promise<TurnstileApi> {
       clearTimeout(timer)
       script.remove()
       loading = null
-      reject(new Error('Human check blocked. Allow challenges.cloudflare.com, then reload.'))
+      reject(new Error(t('auth.humanCheck.blocked')))
     }
     const timer = setTimeout(fail, LOAD_TIMEOUT_MS)
     script.src = SCRIPT_URL

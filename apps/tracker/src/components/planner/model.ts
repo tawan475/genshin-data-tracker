@@ -56,6 +56,7 @@ import type {
 import type { z } from 'zod'
 import { toElement, type Element } from '@/data/game-meta'
 import { itemName } from '@/data/weapons'
+import { t } from '@/i18n'
 import { formatNumber, keyToName } from '@/lib/format'
 import { materialName } from '@/utils/materials'
 import {
@@ -580,10 +581,19 @@ export function nextHint(
       const talentsUp = (['auto', 'skill', 'burst'] as const).some(
         (t) => s.talents[t] > c.current.talents[t],
       )
-      if (levelUp) parts.push(`Lv ${levelLabel(planner, 'character', c.key, s.level, s.ascension)}`)
-      if (talentsUp) parts.push(`talents ${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`)
+      const talents = `${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`
+      if (levelUp) {
+        const label = levelLabel(planner, 'character', c.key, s.level, s.ascension)
+        parts.push(t('planner.hint.level', { level: label }))
+      }
+      if (talentsUp) parts.push(t('planner.hint.talents', { talents }))
       details.push(
-        `${c.name}: Lv ${s.level} (A${s.ascension}), talents ${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`,
+        t('planner.hint.characterDetail', {
+          name: c.name,
+          level: s.level,
+          ascension: s.ascension,
+          talents,
+        }),
       )
     }
   }
@@ -592,19 +602,25 @@ export function nextHint(
     const step = nextWeaponStep(planner, w.key, w.current, w.target, inventory, options)
     if (note(step) && step) {
       const label = levelLabel(planner, 'weapon', w.key, step.state.level, step.state.ascension)
-      if (!c) parts.push(`Lv ${label}`)
-      details.push(`${w.name}: Lv ${step.state.level} (A${step.state.ascension})`)
+      if (!c) parts.push(t('planner.hint.level', { level: label }))
+      details.push(
+        t('planner.hint.weaponDetail', {
+          name: w.name,
+          level: step.state.level,
+          ascension: step.state.ascension,
+        }),
+      )
     }
   }
   if (details.length === 0 || full) return null
   const then = stops.has('ar')
-    ? `then AR ${formatNumber(entry.ar)}`
+    ? t('planner.hint.thenAr', { ar: formatNumber(entry.ar) })
     : stops.has('stock')
-      ? 'then short of materials'
+      ? t('planner.hint.thenShort')
       : ''
   return {
-    text: parts.length ? parts.join(' · ') : 'Weapon',
-    title: ['Can level now', ...details, then].filter(Boolean).join(' · '),
+    text: parts.length ? parts.join(' · ') : t('planner.hint.weapon'),
+    title: [t('planner.hint.canLevel'), ...details, then].filter(Boolean).join(' · '),
   }
 }
 

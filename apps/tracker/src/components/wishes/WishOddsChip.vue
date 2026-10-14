@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { wishItemName } from './item-name'
 import { computed } from 'vue'
 import { CircleArrowUp } from 'lucide-vue-next'
 import type { BannerStats } from '@/data/wish-history'
+import { t } from '@/i18n'
 import { oddsOf } from './wish-labels'
 
 /**
@@ -17,17 +19,17 @@ const chip = computed(() => {
   if (s.guaranteed5) {
     const last = s.fives[0]
     return {
-      text: 'Guaranteed',
+      text: t('wishes.odds.guaranteed'),
       sure: true,
       title: last
-        ? `Lost the last ${oddsOf(s.banner)} (${last.pull.item.name}): the next 5★ is featured`
-        : 'The next 5★ is featured',
+        ? t('wishes.odds.lostLast', { odds: oddsOf(s.banner), name: wishItemName(last.pull.item) })
+        : t('wishes.odds.nextFeatured'),
     }
   }
   return {
     text: oddsOf(s.banner),
     sure: false,
-    title: s.banner === 302 ? 'Next 5★: 75% a featured weapon' : 'Next 5★: a coin flip',
+    title: s.banner === 302 ? t('wishes.odds.weapon') : t('wishes.odds.coin'),
   }
 })
 </script>

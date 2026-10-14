@@ -1,1 +1,134 @@
-{}
+{
+  "label": {
+    "locked": "已锁定",
+    "astralMark": "星标",
+    "new": "新"
+  },
+  "sort": {
+    "quality": "品质",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "潜力",
+    "level": "等级",
+    "set": "套装",
+    "recent": "最近"
+  },
+  "sortTitle": {
+    "quality": "与游戏相同：稀有度、等级、套装、装备者",
+    "cv": "双暴分（CV）",
+    "rv": "词条价值（RV）",
+    "potential": "满级时的期望 CV",
+    "level": "等级",
+    "set": "套装",
+    "recent": "新增或有变化"
+  },
+  "topSets": {
+    "label": "主要套装",
+    "more": "另有 {n} 个套装"
+  },
+  "lower": {
+    "label": "较低稀有度：{counts}",
+    "title": "较低稀有度，此排序会将其排在最后"
+  },
+  "picker": {
+    "find": "查找",
+    "noMatch": "无匹配",
+    "done": "完成"
+  },
+  "setsTable": {
+    "cellNone": "{slot}：无",
+    "cell": "{slot} · {n} 件 · 最佳 {rarity}★ {main} +{level}，CV {cv}",
+    "pieces": "件数",
+    "slotHeader": "{slot}：最佳 CV、件数",
+    "sumTitle": "各部位最佳 CV 之和"
+  },
+  "bag": {
+    "more": "还有 {n} 件"
+  },
+  "table": {
+    "sortBySet": "按套装排序",
+    "sortByLevel": "按等级排序",
+    "equippedBy": "装备者",
+    "marks": "锁定与标记",
+    "elixir": "祝圣精华"
+  },
+  "detail": {
+    "fromGame": "来自游戏",
+    "inferred": "根据等级推算",
+    "upgradesToCome": "{source} · 还有 {n} 次强化",
+    "rankTitle": "在 {n} 件 {rarity}★ {slot}中的 CV 排名",
+    "newTitle": "上次记录中没有",
+    "rolls": "词条数",
+    "rank": "排名",
+    "upgradesTitle": "每 4 级强化一次副属性，直至 {max}",
+    "upgrades": "剩余强化",
+    "expectedCv": "期望 CV",
+    "expectedDetail": "{max} 时的期望值：每次强化有 {chance}% 概率强化到双暴词条，按平均档位计",
+    "bestCase": "最佳情况",
+    "bestDetail": "每次强化都是最高档双暴，直至 {max}",
+    "critLinesTitle": "4 条副属性中有 {n} 条为暴击：即每次强化命中双暴的概率",
+    "critPerRoll": "双暴 / 次",
+    "activatesTitle": "第四条副属性，首次强化时激活",
+    "activates": "+4 新增",
+    "maxRv": "最高 RV",
+    "unlocked": "未锁定",
+    "astral": "星标",
+    "elixirTitle": "祝圣精华",
+    "rollTier": "{tier} 档",
+    "inactive": "未激活"
+  },
+  "card": {
+    "potentialTitle": "+{max} 时期望 CV · 最佳 {best}",
+    "equipped": "{name}已装备"
+  },
+  "toolbar": {
+    "all": "全部",
+    "yes": "是",
+    "no": "否",
+    "linesNow": "当前 {n} 条副属性",
+    "any": "任意",
+    "allSets": "全部套装",
+    "anyone": "任何人",
+    "noAstral": "无星标",
+    "noElixir": "非祝圣精华",
+    "quoted": "“{text}”",
+    "mainPill": "主属性：{stat}",
+    "lines": "{n} 条副属性",
+    "best": "最佳",
+    "label": "筛选圣遗物",
+    "searchLabel": "搜索套装或角色",
+    "searchTitle": "套装或角色",
+    "equippedByTitle": "装备者：{names}",
+    "sortBy": "排序方式",
+    "descending": "降序",
+    "ascending": "升序",
+    "slot": "部位",
+    "presets": "预设",
+    "bestTitle": "按当前排序，每个部位前 {n} 件",
+    "newNone": "没有更早的记录可对比",
+    "newTitle": "上次记录中没有：新获得或之后升过级",
+    "zeroTitle": "未装备的 +0 5★",
+    "lowTitle": "未锁定、未装备的 4★ 与 3★",
+    "low": "4★/3★ 圣遗物",
+    "spareTitle": "未装备的 5★",
+    "spare": "闲置 5★",
+    "maxTitle": "仅 +20",
+    "moreTitle": "主属性、副属性、词条数、等级、锁定、位置、星标、祝圣精华",
+    "more": "更多",
+    "substatsTitle": "包含以上全部（+4 激活的副属性也算）",
+    "linesLabel": "副属性数",
+    "min": "最低",
+    "max": "最高",
+    "location": "位置",
+    "remove": "移除{label}"
+  },
+  "page": {
+    "table": "表格",
+    "loadFailed": "无法加载圣遗物",
+    "loading": "正在加载圣遗物",
+    "refreshFailed": "无法刷新",
+    "shownTitle": "显示 / 圣遗物总数",
+    "countSuffix": "件圣遗物",
+    "pngSize": "{px} px 宽 PNG"
+  }
+}

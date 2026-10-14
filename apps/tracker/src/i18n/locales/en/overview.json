@@ -1,1 +1,73 @@
-{}
+{
+  "progression": "Progression",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Primogems",
+    "characters": "Characters",
+    "weapons": "Weapons",
+    "artifacts": "Artifacts",
+    "artifact4": "4★ Artifact",
+    "artifact3": "3★ Artifact"
+  },
+  "server": {
+    "AMERICA": "America",
+    "EUROPE": "Europe",
+    "ASIA": "Asia",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "No snapshots yet",
+  "import": "Import",
+  "historyUnavailable": "History unavailable",
+  "currencyCarried": "from an earlier capture",
+  "currencyMissing": "missing from the latest capture",
+  "sincePrevious": "since previous snapshot",
+  "lastCaptured": "Last captured",
+  "lastCapturedAt": "Last captured {time}",
+  "seenAgain": "Seen again",
+  "seenAgainAt": "Seen again {time}",
+  "loadingHistory": "Loading snapshot history",
+  "lowRarity": {
+    "label": "4★ / 3★ Artifact",
+    "hint": "Unlocked, unequipped",
+    "rarity": "{n}-star"
+  },
+  "card": {
+    "snapshots": "Snapshots",
+    "storage": "Storage",
+    "stored": "{raw} uploaded, {stored} stored",
+    "storedRatio": "{raw} uploaded, {stored} stored ({ratio} smaller)"
+  },
+  "monthly": {
+    "title": "Monthly analysis",
+    "previous": "Previous month",
+    "previousTo": "Previous month, {month}",
+    "next": "Next month",
+    "nextTo": "Next month, {month}",
+    "gained": "gained {n}",
+    "spent": "spent {n}",
+    "added": "added {n}",
+    "used": "used {n}",
+    "closing": "closing {n}",
+    "artifactExp": "{n} artifact EXP at level 0",
+    "thisMonth": "this month · {detail}",
+    "gapTitle": "No captures for {n} days",
+    "vs": "vs {day}",
+    "captures": "{n} capture | {n} captures",
+    "comparedWith": "{captures}, compared with {day}",
+    "noCaptures": "No captures",
+    "noCapture": "No capture",
+    "caption": "Daily change in {month}: each day's last capture against the previous captured day, with the value below",
+    "day": "Day",
+    "dayTitle": "Last capture of the day vs the previous captured day, local time"
+  },
+  "recent": {
+    "title": "Recent",
+    "all": "All",
+    "allTitle": "All {n} snapshots",
+    "size": "{raw} bytes uploaded, {stored} bytes stored",
+    "unchanged": "Totals unchanged",
+    "first": "First snapshot",
+    "currencyMissing": "Mora and primogems missing",
+    "noCurrency": "No currency"
+  }
+}

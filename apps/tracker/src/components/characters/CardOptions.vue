@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick } from 'vue'
+import { computed, nextTick } from 'vue'
+import { t } from '@/i18n'
 import { Moon, Sun } from 'lucide-vue-next'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
@@ -36,10 +37,14 @@ function setTheme(next: 'light' | 'dark') {
   })
 }
 
-const themes = [
-  { value: 'dark' as const, label: 'Dark card', icon: Moon },
-  { value: 'light' as const, label: 'Light card', icon: Sun },
-]
+const themes = computed(() => [
+  { value: 'dark' as const, label: t('share.options.darkCard'), icon: Moon },
+  { value: 'light' as const, label: t('share.options.lightCard'), icon: Sun },
+])
+const themesLong = computed(() => [
+  { value: 'dark' as const, label: t('share.options.dark'), icon: Moon },
+  { value: 'light' as const, label: t('share.options.light'), icon: Sun },
+])
 </script>
 
 <template>
@@ -54,7 +59,7 @@ const themes = [
     <UiSegmented
       :model-value="theme"
       :options="themes"
-      label="Card theme"
+      :label="$t('share.options.cardTheme')"
       icon-only
       @update:model-value="setTheme"
     />
@@ -62,15 +67,15 @@ const themes = [
       v-if="!themeOnly"
       :pressed="name"
       class="min-h-8! px-2.5!"
-      title="Show the account name"
+      :title="$t('share.options.showName')"
       @toggle="name = !name"
-      >Name</FilterChip
+      >{{ $t('share.options.name') }}</FilterChip
     >
     <FilterChip
       v-if="!themeOnly"
       :pressed="uid"
       class="min-h-8! px-2.5!"
-      title="Show the UID"
+      :title="$t('share.options.showUid')"
       @toggle="uid = !uid"
       >UID</FilterChip
     >
@@ -85,14 +90,14 @@ const themes = [
   >
     <UiSegmented
       :model-value="theme"
-      :options="themes.map((t) => ({ ...t, label: t.value === 'dark' ? 'Dark' : 'Light' }))"
-      label="Card theme"
+      :options="themesLong"
+      :label="$t('share.options.cardTheme')"
       size="md"
       class="self-start"
       @update:model-value="setTheme"
     />
     <template v-if="!themeOnly">
-      <UiSwitch v-model="name" label="Name" />
+      <UiSwitch v-model="name" :label="$t('share.options.name')" />
       <UiSwitch v-model="uid" label="UID" />
     </template>
   </div>

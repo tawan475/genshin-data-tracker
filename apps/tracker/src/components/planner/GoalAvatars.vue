@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import { characterMeta, weaponMeta } from '@/data/game-meta'
 import { characterIcon, weaponIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { longPress, useGoalActions } from './goal-actions'
 import { characterName, weaponName } from './model'
 
@@ -51,7 +52,13 @@ const people = computed<Person[]>(() => {
     const [kind, key = '', owner = ''] = id.split(':')
     if (kind === 'item') {
       if (!byKey.has('extra')) {
-        byKey.set('extra', { id, src: '', names: ['Extra'], who: '', rarity: null })
+        byKey.set('extra', {
+          id,
+          src: '',
+          names: [t('planner.extra.title')],
+          who: '',
+          rarity: null,
+        })
       }
       continue
     }
@@ -162,8 +169,14 @@ function open(id: string) {
               ? 'touch-manipulation transition-transform hover:z-10 hover:scale-110 focus-visible:z-10'
               : '',
           ]"
-          :aria-label="actions ? `${p.name}${p.favorite ? ' (favourite)' : ''}` : undefined"
-          :title="actions ? `${p.name} · tap: open · hold or right-click: pause` : undefined"
+          :aria-label="
+            actions
+              ? p.favorite
+                ? $t('planner.avatars.favorite', { name: p.name })
+                : p.name
+              : undefined
+          "
+          :title="actions ? $t('planner.avatars.title', { name: p.name }) : undefined"
           v-on="actions ? press(p.id).handlers : {}"
           @click="actions && open(p.id)"
         >
@@ -195,8 +208,8 @@ function open(id: string) {
       v-if="extra > 0"
       type="button"
       class="tabular inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-surface-overlay px-2 font-mono text-xs font-medium text-text-secondary transition-colors hover:bg-surface-sunken hover:text-text-primary"
-      :title="`${rest} · show all`"
-      :aria-label="`${extra} more: ${rest}. Show all`"
+      :title="$t('planner.avatars.moreTitle', { rest })"
+      :aria-label="$t('planner.avatars.moreLabel', { n: extra, rest })"
       @click="all = true"
     >
       +{{ extra }}
@@ -205,10 +218,10 @@ function open(id: string) {
       v-else-if="all && hidden > 0"
       type="button"
       class="inline-flex h-9 items-center rounded-full px-2 text-xs text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-primary"
-      title="Show fewer"
+      :title="$t('planner.avatars.fewerTitle')"
       @click="all = false"
     >
-      Less
+      {{ $t('planner.avatars.fewer') }}
     </button>
   </span>
 </template>

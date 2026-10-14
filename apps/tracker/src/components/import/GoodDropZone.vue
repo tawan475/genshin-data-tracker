@@ -5,6 +5,7 @@ import { FileUp } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { collectDropped, collectFiles, type CollectedFiles } from '@/data/import-files'
+import { formatNumber } from '@/lib/format'
 
 /**
  * Where GOOD files come in: drag and drop (files or whole folders) or the
@@ -60,7 +61,12 @@ function onPick(event: Event) {
     :class="
       dragging ? 'border-accent bg-surface-overlay' : 'border-border-strong bg-surface-raised'
     "
-    :title="`Up to ${MAX_IMPORT_FILES} files, ${MAX_IMPORT_FILE_SIZE_MB} MB each. Folders work too.`"
+    :title="
+      $t('transfer.drop.hint', {
+        files: formatNumber(MAX_IMPORT_FILES),
+        mb: formatNumber(MAX_IMPORT_FILE_SIZE_MB),
+      })
+    "
     @dragenter.prevent="onEnter"
     @dragover.prevent
     @dragleave="onLeave"
@@ -68,9 +74,9 @@ function onPick(event: Event) {
   >
     <UiSpinner v-if="collecting" class="size-8 text-text-muted" />
     <FileUp v-else class="size-8 text-text-muted" aria-hidden="true" />
-    <h2 class="text-base font-semibold">Drop GOOD files</h2>
+    <h2 class="text-base font-semibold">{{ $t('transfer.drop.title') }}</h2>
     <UiButton :variant="primary ? 'primary' : 'secondary'" @click="input?.click()">
-      Browse
+      {{ $t('transfer.drop.browse') }}
     </UiButton>
     <input
       ref="input"

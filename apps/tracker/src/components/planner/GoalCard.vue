@@ -24,6 +24,7 @@ import {
   materialIcon,
   weaponIcon,
 } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { formatSetName } from '@/utils/artifact-stats'
 import { characterParts, weaponPart, type DonePart } from './done'
@@ -102,11 +103,12 @@ const level = (
   key: string,
   s: { level: number; ascension: number },
 ) => levelLabel(props.planner, kind, key, s.level, s.ascension)
-const talentText = (t: { auto: number; skill: number; burst: number }) =>
-  `${t.auto}/${t.skill}/${t.burst}`
+const talentText = (n: { auto: number; skill: number; burst: number }) =>
+  `${n.auto}/${n.skill}/${n.burst}`
 
 interface Row {
   id: string
+  kind: 'level' | 'talents' | 'weapon'
   label: string
   /** Weapon rows: the weapon. */
   weapon?: WeaponGoalView
@@ -129,10 +131,16 @@ const rows = computed<Row[]>(() => {
     const now = ch.owned || ch.edited ? level('character', ch.key, ch.current) : '–'
     list.push({
       id: `${ch.id}|level`,
-      label: 'Level',
+      kind: 'level',
+      label: t('planner.card.level'),
       from: now,
       to: levelPart ? level('character', ch.key, ch.target) : null,
-      title: `Level ${ch.current.level} (A${ch.current.ascension}) → ${ch.target.level} (A${ch.target.ascension})`,
+      title: t('planner.card.levelTitle', {
+        from: ch.current.level,
+        fromAscension: ch.current.ascension,
+        to: ch.target.level,
+        toAscension: ch.target.ascension,
+      }),
       edited: ch.edited && pairDiffers(ch.current, ch.captured),
       part: levelPart,
       ready: readyOf(levelPart),
@@ -140,14 +148,20 @@ const rows = computed<Row[]>(() => {
     const boosted = talentText(ch.boosted.current) !== talentText(ch.current.talents)
     list.push({
       id: `${ch.id}|talents`,
-      label: 'Talents',
+      kind: 'talents',
+      label: t('planner.card.talents'),
       from: talentText(ch.current.talents),
       to: talentPart ? talentText((talentPart.next.current as typeof ch.current).talents) : null,
-      title: `Attack / Skill / Burst${boosted ? ` · shown in game as ${talentText(ch.boosted.current)} at C${ch.constellation}` : ''}`,
+      title: boosted
+        ? `${t('planner.card.talentsTitle')} · ${t('planner.card.boosted', {
+            talents: talentText(ch.boosted.current),
+            constellation: ch.constellation,
+          })}`
+        : t('planner.card.talentsTitle'),
       edited:
         ch.edited &&
         (['auto', 'skill', 'burst'] as const).some(
-          (t) => ch.current.talents[t] !== ch.captured.talents[t],
+          (k) => ch.current.talents[k] !== ch.captured.talents[k],
         ),
       part: talentPart,
       ready: readyOf(talentPart),
@@ -160,13 +174,22 @@ const rows = computed<Row[]>(() => {
     const now = w.owned || w.edited ? level('weapon', w.key, w.current) : '–'
     list.push({
       id: w.id,
+      kind: 'weapon',
       label: w.name,
       weapon: w,
       from: `${now} · R${w.current.refinement}`,
       to: part
         ? `${lv ? level('weapon', w.key, w.target) : now} · R${refine ? w.target.refinement : w.current.refinement}`
         : null,
-      title: `${w.name}: level ${w.current.level} (A${w.current.ascension}) → ${w.target.level} (A${w.target.ascension}), R${w.current.refinement} → R${w.target.refinement}`,
+      title: t('planner.card.weaponTitle', {
+        name: w.name,
+        from: w.current.level,
+        fromAscension: w.current.ascension,
+        to: w.target.level,
+        toAscension: w.target.ascension,
+        fromRefinement: w.current.refinement,
+        toRefinement: w.target.refinement,
+      }),
       edited: w.edited,
       part,
       ready: readyOf(part),
@@ -179,10 +202,8 @@ function readyOf(part: DonePart | null): PartReady | null {
   return (part && props.parts?.get(part.id)) ?? null
 }
 
-const READY_TITLE: Record<PartReady, string> = {
-  full: 'can do now with the bag',
-  step: 'its next step can be done now with the bag',
-}
+const readyTitle = (ready: PartReady) =>
+  ready === 'full' ? t('planner.card.readyFull') : t('planner.card.readyStep')
 
 function pairDiffers(
   a: { level: number; ascension: number },
@@ -200,7 +221,7 @@ const portrait = computed(() => {
       rarity: ch.rarity,
       element: ch.element,
       tag: ch.owned || ch.constellation ? `C${ch.constellation}` : '',
-      tagTitle: `Constellation ${ch.constellation}`,
+      tagTitle: t('planner.card.constellation', { n: ch.constellation }),
       banner: ch.custom ? '' : characterBanner(ch.key),
     }
   const w = props.entry.weapons[0]!
@@ -210,7 +231,7 @@ const portrait = computed(() => {
     rarity: w.rarity,
     element: null,
     tag: `R${w.current.refinement}`,
-    tagTitle: `Refinement ${w.current.refinement}`,
+    tagTitle: t('planner.card.refinement', { n: w.current.refinement }),
     banner: '',
   }
 })
@@ -232,14 +253,24 @@ const artifacts = computed(() => {
     sets: sets.slice(0, 3),
     done: a.done,
     complete: a.complete,
-    title: `Artifacts: ${a.done}/5 slots${names.length ? ` · ${names.join(', ')}` : ''}`,
+    title: [t('planner.card.artifactsTitle', { done: a.done }), names.join(', ')]
+      .filter(Boolean)
+      .join(' · '),
   }
 })
 
 const chipIcon = (chip: NeedChip) =>
   chip.key === props.planner.mora.key ? materialIcon('Mora') : gameIcon(chip.material.icon)
-const chipTitle = (chip: NeedChip) =>
-  `${chip.material.name}${chip.exp ? ' (EXP)' : ''}: ${formatNumber(chip.count)} short${chip.status === 'alone' ? ' after the goals above' : ''}`
+const chipTitle = (chip: NeedChip) => {
+  const name = chip.exp
+    ? t('planner.card.expSuffix', { name: chip.material.name })
+    : chip.material.name
+  return t('planner.card.amount', { name, n: shortText(chip.count, chip.status === 'alone') })
+}
+const shortText = (n: number, after: boolean) =>
+  after
+    ? t('planner.card.shortAfter', { n: formatNumber(n) })
+    : t('planner.card.short', { n: formatNumber(n) })
 
 /** The missing chips the focus chips don't already show. */
 const chips = computed(() => {
@@ -252,12 +283,14 @@ const chips = computed(() => {
 
 function focusTitle(f: FocusChip): string {
   const amount = f.exp
-    ? `${expName(f.exp)}: ${formatNumber(f.points ?? 0)} (${formatNumber(f.count)} ${f.material.name})`
-    : `${f.material.name}: ${formatNumber(f.count)}`
+    ? t('planner.card.expAmount', {
+        exp: expName(f.exp),
+        points: formatNumber(f.points ?? 0),
+        item: t('farm.craft.item', { count: formatNumber(f.count), name: f.material.name }),
+      })
+    : t('planner.card.amount', { name: f.material.name, n: formatNumber(f.count) })
   const state =
-    f.status === 'all'
-      ? 'enough after the goals above'
-      : `${formatNumber(f.short)} short${f.status === 'alone' ? ' after the goals above' : ''}`
+    f.status === 'all' ? t('planner.card.enoughAfter') : shortText(f.short, f.status === 'alone')
   return `${amount} · ${state}`
 }
 
@@ -270,7 +303,9 @@ function openChip(chip: Pick<NeedChip, 'key'>, event: MouseEvent) {
   })
 }
 
-const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counted'))
+const activeLabel = computed(() =>
+  props.entry.active ? t('planner.common.counted') : t('planner.common.notCounted'),
+)
 </script>
 
 <template>
@@ -300,8 +335,8 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
           type="button"
           class="-my-1 inline-flex w-8 shrink-0 cursor-grab touch-none flex-col items-center justify-center gap-0.5 self-stretch rounded-md text-text-muted transition-colors select-none hover:bg-surface-overlay hover:text-text-primary active:cursor-grabbing"
           :data-goal-handle="entry.id"
-          :aria-label="`${entry.name}: place ${order.rank}, move with the arrow keys`"
-          :title="`#${order.rank} · drag, or arrow keys`"
+          :aria-label="$t('planner.card.handleLabel', { name: entry.name, rank: order.rank })"
+          :title="$t('planner.card.handleTitle', { rank: order.rank })"
           @pointerdown="emit('grab', $event)"
           @keydown="emit('nudge', $event)"
         >
@@ -344,8 +379,8 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               <span
                 v-if="c?.custom"
                 class="text-xs text-text-muted"
-                title="Custom character: not in the game data yet"
-                >Custom</span
+                :title="$t('planner.card.customTitle')"
+                >{{ $t('planner.card.custom') }}</span
               >
             </span>
           </span>
@@ -357,8 +392,8 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
             class="inline-flex size-9 items-center justify-center rounded-md transition-colors hover:bg-surface-overlay"
             :class="entry.favorite ? 'text-rarity-5' : 'text-text-muted hover:text-text-primary'"
             :aria-pressed="entry.favorite"
-            :aria-label="`${entry.name}: favorite`"
-            :title="entry.favorite ? 'Favorite' : 'Not a favorite'"
+            :aria-label="$t('planner.card.favoriteLabel', { name: entry.name })"
+            :title="entry.favorite ? $t('planner.card.favorite') : $t('planner.card.notFavorite')"
             @click="emit('favorite')"
           >
             <Star
@@ -371,7 +406,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
             type="button"
             class="inline-flex size-9 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
             :aria-pressed="entry.active"
-            :aria-label="`${entry.name}: ${activeLabel}`"
+            :aria-label="$t('planner.common.nameState', { name: entry.name, state: activeLabel })"
             :title="activeLabel"
             @click="emit('toggle')"
           >
@@ -409,7 +444,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
             <PencilLine
               v-if="row.edited"
               class="size-3.5 text-accent-text"
-              aria-label="Set by hand"
+              :aria-label="$t('planner.card.setByHand')"
               role="img"
             />
             <template v-if="row.to">
@@ -417,10 +452,10 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
               <span class="font-semibold">{{ row.to }}</span>
             </template>
             <span
-              v-if="row.label === 'Level' && row.to && arShort"
+              v-if="row.kind === 'level' && row.to && arShort"
               class="ml-1 text-xs text-warning-text"
-              :title="`Needs AR ${arShort}`"
-              >AR {{ arShort }}</span
+              :title="$t('planner.card.needsAr', { ar: arShort })"
+              >{{ $t('farm.lock.ar', { ar: arShort }) }}</span
             >
           </span>
         </span>
@@ -428,12 +463,20 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
           v-if="row.part"
           type="button"
           class="relative ml-auto inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg border border-border-strong px-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
-          :aria-label="`${entry.name}: ${row.label} done${row.ready ? ` (${READY_TITLE[row.ready]})` : ''}`"
-          :title="row.ready ? READY_TITLE[row.ready] : undefined"
+          :aria-label="
+            row.ready
+              ? $t('planner.card.doneReadyLabel', {
+                  name: entry.name,
+                  label: row.label,
+                  ready: readyTitle(row.ready),
+                })
+              : $t('planner.card.doneLabel', { name: entry.name, label: row.label })
+          "
+          :title="row.ready ? readyTitle(row.ready) : undefined"
           @click="emit('done', row.part, { label: row.label, from: row.from, to: row.to ?? '' })"
         >
           <Check class="size-4" aria-hidden="true" />
-          Done
+          {{ $t('planner.done.confirm') }}
           <span
             v-if="row.ready"
             class="absolute -top-2 -right-2 inline-flex rounded-full bg-surface-raised text-success-text shadow-sm ring-1 ring-border-default"
@@ -446,7 +489,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
         <Check
           v-else
           class="ml-auto size-4 shrink-0 text-success-text"
-          aria-label="Reached"
+          :aria-label="$t('farm.readiness.done.meaning')"
           role="img"
         />
       </li>
@@ -455,10 +498,12 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
           type="button"
           class="flex min-h-11 w-full items-center gap-2 px-3 py-1 text-left transition-colors hover:bg-surface-overlay"
           :title="artifacts.title"
-          :aria-label="`${entry.name}: ${artifacts.title}`"
+          :aria-label="$t('planner.common.nameState', { name: entry.name, state: artifacts.title })"
           @click="emit('open', 'artifacts')"
         >
-          <span class="w-16 shrink-0 text-sm text-text-muted">Artifacts</span>
+          <span class="w-16 shrink-0 text-sm text-text-muted">{{
+            $t('planner.artifacts.title')
+          }}</span>
           <span class="flex min-w-0 flex-1 items-center gap-1">
             <GameIcon
               v-for="set in artifacts.sets"
@@ -487,7 +532,10 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
       v-if="(focus && focus.length) || chips.length"
       class="border-t border-border-subtle px-3 py-2.5"
     >
-      <ul class="flex flex-wrap gap-1.5" :aria-label="`${entry.name}: missing`">
+      <ul
+        class="flex flex-wrap gap-1.5"
+        :aria-label="$t('planner.card.missing', { name: entry.name })"
+      >
         <li v-for="f in focus ?? []" :key="`focus:${f.material.key}`">
           <component
             :is="openItem ? 'button' : 'span'"
@@ -555,7 +603,7 @@ const activeLabel = computed(() => (props.entry.active ? 'Counted' : 'Not counte
       :title="hint.title"
     >
       <CircleArrowUp class="size-3.5 shrink-0" aria-hidden="true" />
-      <span class="truncate">Can do now: {{ hint.text }}</span>
+      <span class="truncate">{{ $t('planner.card.canDoNow', { text: hint.text }) }}</span>
       <span class="sr-only">({{ hint.title }})</span>
     </p>
 

@@ -41,6 +41,7 @@ import {
   type CustomCharacter,
 } from '@gdt/shared'
 import { seelieMaterial, type SeeliePlanner } from '@/components/planner/seelie-items'
+import { t } from '@/i18n'
 import {
   SEELIE_ELEMENT_GEMS,
   SEELIE_STATS,
@@ -234,7 +235,7 @@ function customOf(
     return found ? (found.family?.members[0] ?? found).key : undefined
   }
   const custom: CustomCharacter = {
-    name: name || 'Custom',
+    name: name || t('planner.seelie.customName'),
     rarity: int(value.tier) === 4 ? 4 : 5,
     element: ELEMENT_KEYS.find((e) => e.toLowerCase() === element) ?? ELEMENT_KEYS[0],
     weapon: WEAPON_TYPE_KEYS.find((w) => w === weapon) ?? 'sword',
@@ -285,7 +286,7 @@ export function mapSeelieGoals(
   context: SeelieContext,
 ): SeelieImport {
   if (!isObject(json) || !Array.isArray(json.goals)) {
-    throw new Error('Not a Seelie export (no goals)')
+    throw new Error(t('planner.seelie.notExport'))
   }
   const keys = seelieKeys(planner)
   const inactive = new Set(

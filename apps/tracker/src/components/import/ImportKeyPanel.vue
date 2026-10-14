@@ -6,6 +6,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { api } from '@/api'
 import { trackerApiUrl } from '@/data/import-setup'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 import CopyField from './CopyField.vue'
 import IrminsulSteps from './IrminsulSteps.vue'
@@ -29,9 +30,9 @@ watch(
 
 async function rotate() {
   const ok = await feedback.confirm({
-    title: 'New import key?',
-    detail: 'Old key stops working.',
-    confirmLabel: 'New key',
+    title: t('transfer.key.rotateTitle'),
+    detail: t('transfer.key.rotateDetail'),
+    confirmLabel: t('transfer.key.newKey'),
     tone: 'danger',
   })
   if (!ok) return
@@ -41,7 +42,7 @@ async function rotate() {
     const { importKey } = await api.rotateImportKey(id)
     if (props.account.id === id) newKey.value = importKey
   } catch (error) {
-    feedback.error('Key not changed', error)
+    feedback.error(t('transfer.key.notChanged'), error)
   } finally {
     rotating.value = false
   }
@@ -51,27 +52,30 @@ async function rotate() {
 <template>
   <UiPanel title="Irminsul">
     <div class="flex flex-col gap-4">
-      <CopyField label="Tracker URL" :value="url" url />
-      <CopyField v-if="newKey" label="Import key" :value="newKey" note="Shown once" />
+      <CopyField :label="$t('transfer.key.trackerUrl')" :value="url" url />
+      <CopyField
+        v-if="newKey"
+        :label="$t('transfer.key.importKey')"
+        :value="newKey"
+        :note="$t('transfer.key.shownOnce')"
+      />
       <div v-else class="flex flex-col gap-1.5">
-        <span class="text-sm font-medium text-text-secondary">Import key</span>
+        <span class="text-sm font-medium text-text-secondary">{{
+          $t('transfer.key.importKey')
+        }}</span>
         <div class="flex flex-wrap items-center gap-3">
-          <UiButton
-            :loading="rotating"
-            title="Keys are shown once. A new key replaces the old one."
-            @click="rotate"
-          >
-            New key
+          <UiButton :loading="rotating" :title="$t('transfer.key.newKeyHint')" @click="rotate">
+            {{ $t('transfer.key.newKey') }}
           </UiButton>
-          <span class="text-sm text-text-muted">Hidden</span>
+          <span class="text-sm text-text-muted">{{ $t('transfer.key.hidden') }}</span>
         </div>
       </div>
       <RouterLink
         :to="{ name: 'settings' }"
         class="self-start text-sm font-medium text-accent-text hover:underline"
-        title="One key for every account: uploads go to the account with the capture's UID"
+        :title="$t('transfer.key.allAccountsHint')"
       >
-        Key for all accounts
+        {{ $t('transfer.key.allAccounts') }}
       </RouterLink>
       <details class="group">
         <summary
@@ -81,7 +85,7 @@ async function rotate() {
             class="size-4 transition-transform group-open:rotate-90"
             aria-hidden="true"
           />
-          Setup
+          {{ $t('transfer.key.setup') }}
         </summary>
         <IrminsulSteps class="pt-1 pb-1" />
       </details>

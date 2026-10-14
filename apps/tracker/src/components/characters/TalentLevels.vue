@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { talentTitle, type TalentLevel } from '@/data/character-build'
 import type { Element } from '@/data/game-meta'
 import TalentGlyph from './TalentGlyph.vue'
@@ -19,7 +20,7 @@ const props = defineProps<{
   element: Element | null
 }>()
 
-const LABELS = { auto: 'Attack', skill: 'Skill', burst: 'Burst' } as const
+const label = (key: TalentLevel['key']) => t(`characters.talentShort.${key}`)
 
 const glyphs = computed(() => talentIcons(props.characterKey))
 const crown = useCrownIcon()
@@ -47,14 +48,14 @@ const tone = computed(() =>
         >
           <TalentGlyph :key="glyphs[t.key]" :src="glyphs[t.key]" class="size-4" />
         </span>
-        <span class="truncate">{{ LABELS[t.key] }}</span>
+        <span class="truncate">{{ label(t.key) }}</span>
       </dt>
       <dd
         class="tabular flex items-baseline gap-0.5 font-mono leading-tight whitespace-nowrap sm:gap-1"
       >
         <span v-if="t.from" class="text-xs text-text-muted"
           >{{ t.base }}<span aria-hidden="true"> →</span
-          ><span class="sr-only"> raised to</span></span
+          ><span class="sr-only"> {{ $t('characters.talentRaised') }}</span></span
         >
         <span
           class="text-xl font-semibold"
@@ -64,7 +65,7 @@ const tone = computed(() =>
         <img
           v-if="t.crowned && crown"
           :src="crown"
-          alt="Crowned"
+          :alt="$t('characters.crowned')"
           class="size-5 shrink-0 self-center sm:size-6"
         />
       </dd>

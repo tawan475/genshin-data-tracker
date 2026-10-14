@@ -7,6 +7,8 @@ import LinkProblem from '@/components/public/LinkProblem.vue'
 import { linkProblem, type LinkProblem as Problem } from '@/components/public/link-problem'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
@@ -37,11 +39,11 @@ const emailFeatures = ref(false)
 const errors = computed(() => ({
   password:
     password.value.length < MIN_PASSWORD_LENGTH
-      ? `Min ${MIN_PASSWORD_LENGTH} characters`
+      ? t('auth.minChars', { n: MIN_PASSWORD_LENGTH })
       : password.value.length > MAX_PASSWORD_LENGTH
-        ? `Max ${MAX_PASSWORD_LENGTH} characters`
+        ? t('auth.maxChars', { n: MAX_PASSWORD_LENGTH })
         : '',
-  confirm: confirm.value !== password.value ? 'Does not match' : '',
+  confirm: confirm.value !== password.value ? t('auth.doesNotMatch') : '',
 }))
 const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
 
@@ -71,8 +73,8 @@ async function submit() {
     await session.resetPassword(token, password.value)
     feedback.toast({
       tone: 'success',
-      title: 'Password changed',
-      detail: 'Every other device was signed out.',
+      title: t('auth.reset.changed'),
+      detail: t('auth.reset.othersSignedOut'),
     })
     await router.replace({ name: 'home' })
   } catch (cause) {
@@ -80,16 +82,14 @@ async function submit() {
     else
       error.value =
         cause instanceof ApiRequestError && cause.code === 'rate_limited'
-          ? 'Too many requests, try again in a minute'
-          : cause instanceof Error
-            ? cause.message
-            : 'Request failed'
+          ? t('auth.tooManyRequests')
+          : errorText(cause, t('common.requestFailed'))
   } finally {
     busy.value = false
   }
 }
 
-const title = computed(() => problem.value?.title ?? 'New password')
+const title = computed(() => problem.value?.title ?? t('auth.reset.title'))
 </script>
 
 <template>
@@ -98,15 +98,17 @@ const title = computed(() => problem.value?.title ?? 'New password')
       v-if="problem"
       :problem="problem"
       :retry="emailFeatures ? { name: 'forgot-password' } : undefined"
-      retry-label="Request a new link"
+      :retry-label="$t('auth.reset.requestNew')"
     />
     <div v-else-if="username === null" class="flex justify-center py-6" aria-busy="true">
       <UiSpinner class="size-6 text-paimon" />
     </div>
     <template v-else>
-      <p class="-mt-4 mb-6 text-center text-gray-400">
-        for <span class="font-semibold text-gray-200">{{ username }}</span>
-      </p>
+      <i18n-t keypath="auth.reset.forUser" tag="p" class="-mt-4 mb-6 text-center text-gray-400">
+        <template #user>
+          <span class="font-semibold text-gray-200">{{ username }}</span>
+        </template>
+      </i18n-t>
       <p
         v-if="error"
         class="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300"
@@ -127,7 +129,7 @@ const title = computed(() => problem.value?.title ?? 'New password')
           aria-hidden="true"
         />
         <label class="flex flex-col gap-2">
-          <span class="text-sm font-medium text-gray-400">New password</span>
+          <span class="text-sm font-medium text-gray-400">{{ $t('auth.newPassword') }}</span>
           <input
             v-model="password"
             class="glass-input"
@@ -139,7 +141,7 @@ const title = computed(() => problem.value?.title ?? 'New password')
           <span v-if="show('password')" class="text-sm text-red-300">{{ show('password') }}</span>
         </label>
         <label class="flex flex-col gap-2">
-          <span class="text-sm font-medium text-gray-400">Confirm password</span>
+          <span class="text-sm font-medium text-gray-400">{{ $t('auth.confirmPassword') }}</span>
           <input
             v-model="confirm"
             class="glass-input"
@@ -154,16 +156,16 @@ const title = computed(() => problem.value?.title ?? 'New password')
           type="submit"
           class="btn-glow mt-2 w-full rounded-xl"
           :disabled="busy"
-          title="Signs every other device out"
+          :title="$t('auth.reset.submitTitle')"
         >
           <UiSpinner v-if="busy" class="size-4" />
-          Set password
+          {{ $t('auth.reset.submit') }}
         </button>
       </form>
     </template>
     <template #footer>
       <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">
-        Back to sign in
+        {{ $t('auth.backToSignIn') }}
       </RouterLink>
     </template>
   </AuthFrame>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { wishItemName } from './item-name'
 import type { WishItem } from '@gdt/shared'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import type { Outcome } from '@/data/wish-history'
@@ -25,7 +26,7 @@ const SIZE = { sm: 'size-6!', md: 'size-[1.9rem]!', lg: 'size-8!' } as const
   <span class="relative inline-flex shrink-0">
     <GameIcon
       :src="wishIcon(item)"
-      :name="item.name"
+      :name="wishItemName(item)"
       :rarity="item.rank || undefined"
       size="xs"
       :class="SIZE[size]"

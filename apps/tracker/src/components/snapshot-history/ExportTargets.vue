@@ -4,6 +4,7 @@ import { computed, shallowRef, toRef, type Component } from 'vue'
 import { CalendarCheck, Calculator, Trophy } from 'lucide-vue-next'
 import BaseButton from '@/components/legacy/BaseButton.vue'
 import { copyText } from '@/data/import-setup'
+import { t } from '@/i18n'
 import { formatFullDateTime } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 import { copyNow, openTab, useLatestGood } from './latest-good'
@@ -23,7 +24,7 @@ interface Target {
   variant: string
 }
 interface Card {
-  title: string
+  key: 'optimizer' | 'planner' | 'achievement'
   icon: Component
   /** The icon tile's tint: a chart series colour per card. */
   chip: string
@@ -32,7 +33,7 @@ interface Card {
 
 const CARDS: Card[] = [
   {
-    title: 'Optimizer',
+    key: 'optimizer',
     icon: Calculator,
     chip: 'bg-chart-4/15 text-chart-4',
     targets: [
@@ -44,13 +45,13 @@ const CARDS: Card[] = [
     ],
   },
   {
-    title: 'Planner',
+    key: 'planner',
     icon: CalendarCheck,
     chip: 'bg-chart-3/15 text-chart-3',
     targets: [{ site: 'Seelie.me', url: 'https://seelie.me/inventory', variant: 'emerald' }],
   },
   {
-    title: 'Achievement',
+    key: 'achievement',
     icon: Trophy,
     chip: 'bg-chart-6/15 text-chart-6',
     targets: [
@@ -66,14 +67,16 @@ const waiting = shallowRef<Target | null>(null)
 const latest = computed(() => props.account.latest)
 const titleFor = (target: Target) =>
   latest.value
-    ? `Copy the latest GOOD file and open ${target.site}\n#${latest.value.id} · ${formatFullDateTime(latest.value.takenAt)}`
-    : 'No snapshots yet'
+    ? `${t('transfer.export.copyAndOpen', { site: target.site })}\n#${latest.value.id} · ${formatFullDateTime(latest.value.takenAt)}`
+    : t('transfer.export.noSnapshots')
 
 function copied(target: Target, opened: boolean) {
   feedback.toast({
     tone: 'success',
-    title: 'Copied to clipboard!',
-    action: opened ? undefined : { label: `Open ${target.site}`, run: () => openTab(target.url) },
+    title: t('transfer.export.copied'),
+    action: opened
+      ? undefined
+      : { label: t('transfer.export.open', { site: target.site }), run: () => openTab(target.url) },
   })
 }
 
@@ -89,11 +92,11 @@ async function exportTo(target: Target) {
   try {
     const value = ready ?? (await fetchLatest())
     if (!copyNow(value) && !(await copyText(value))) {
-      throw new Error('The browser refused clipboard access.')
+      throw new Error(t('transfer.export.clipboardRefused'))
     }
     copied(target, openTab(target.url))
   } catch (cause) {
-    feedback.error('Failed to export data', cause)
+    feedback.error(t('transfer.export.failed'), cause)
   } finally {
     waiting.value = null
   }
@@ -104,7 +107,7 @@ async function exportTo(target: Target) {
   <div v-if="latest" class="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
     <div
       v-for="card in CARDS"
-      :key="card.title"
+      :key="card.key"
       class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm transition-colors sm:flex-col sm:items-stretch sm:p-4"
     >
       <div class="flex min-w-0 flex-1 items-center gap-3">
@@ -112,7 +115,7 @@ async function exportTo(target: Target) {
           <component :is="card.icon" class="size-5" aria-hidden="true" />
         </div>
         <h2 class="truncate text-sm font-semibold sm:text-base">
-          {{ card.title }}
+          {{ $t(`transfer.export.${card.key}`) }}
         </h2>
       </div>
       <div

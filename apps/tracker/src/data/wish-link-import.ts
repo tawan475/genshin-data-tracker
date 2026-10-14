@@ -10,6 +10,7 @@
  */
 
 import { WISH_PAGE_SIZE, type WishNewest, type WishRecord } from '@gdt/shared'
+import { t } from '@/i18n'
 
 /** The API's answer, as the proxy hands it back. */
 export interface WishPageAnswer {
@@ -83,7 +84,9 @@ export async function fetchWishLink(
   const records: WishRecord[] = []
   let uid: string | null = null
   const check = () => {
-    if (options.signal?.aborted) throw new WishLinkError('cancelled', 'Cancelled')
+    if (options.signal?.aborted) {
+      throw new WishLinkError('cancelled', t('wishes.link.errors.cancelled'))
+    }
   }
 
   async function page(gachaType: number, n: number, endId: string): Promise<WishPageAnswer> {
@@ -95,17 +98,14 @@ export async function fetchWishLink(
       } catch (error) {
         if (error instanceof WishLinkError) throw error
         if (attempt >= tries) {
-          throw new WishLinkError('network', 'The wish history did not answer. Try again later.')
+          throw new WishLinkError('network', t('wishes.link.errors.network'))
         }
         await sleep(pageDelay * 2 * attempt)
         continue
       }
       if (answer.retcode === 0) return answer
       if (isExpired(answer)) {
-        throw new WishLinkError(
-          'expired',
-          'The link expired. Open Wish → History in game again and copy a new one.',
-        )
+        throw new WishLinkError('expired', t('wishes.link.errors.expired'))
       }
       if (isThrottled(answer) && attempt < tries) {
         await sleep(5000 * attempt)
@@ -114,8 +114,10 @@ export async function fetchWishLink(
       throw new WishLinkError(
         isThrottled(answer) ? 'throttled' : 'api',
         isThrottled(answer)
-          ? 'HoYoverse asks to slow down. Try again in a few minutes.'
-          : `HoYoverse answered: ${answer.message || `error ${answer.retcode}`}`,
+          ? t('wishes.link.errors.throttled')
+          : t('wishes.link.errors.api', {
+              message: answer.message || t('wishes.link.errors.code', { code: answer.retcode }),
+            }),
       )
     }
   }

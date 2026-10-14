@@ -23,7 +23,7 @@ function title(set: SetCount): string {
 </script>
 
 <template>
-  <ul v-if="listed.length" class="flex min-w-0 flex-wrap gap-2" aria-label="Sets">
+  <ul v-if="listed.length" class="flex min-w-0 flex-wrap gap-2" :aria-label="$t('characters.sets')">
     <li
       v-for="{ set, pieces } in listed"
       :key="set.setKey"
@@ -34,7 +34,7 @@ function title(set: SetCount): string {
       <span class="min-w-0 truncate text-sm">{{ set.name }}</span>
       <UiBadge tone="success" mono>
         {{ pieces }}
-        <span class="sr-only">-piece bonus</span>
+        <span class="sr-only">{{ $t('characters.pieceBonus') }}</span>
       </UiBadge>
     </li>
   </ul>

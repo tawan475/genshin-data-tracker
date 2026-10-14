@@ -33,14 +33,14 @@ const session = useSession()
           :to="{ name: 'home' }"
           class="rounded-full border border-white/10 px-6 py-2 font-semibold text-white transition hover:bg-white/10"
         >
-          Dashboard
+          {{ $t('shell.public.dashboard') }}
         </RouterLink>
         <RouterLink
           v-else
           :to="{ name: 'login' }"
           class="rounded-full border border-white/10 px-6 py-2 font-semibold text-white transition hover:bg-white/10"
         >
-          Sign in
+          {{ $t('common.signIn') }}
         </RouterLink>
       </div>
     </nav>

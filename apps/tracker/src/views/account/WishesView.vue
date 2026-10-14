@@ -18,6 +18,7 @@ import { useWishHistory } from '@/components/wishes/use-wish-history'
 import { useWishStats } from '@/components/wishes/use-wish-stats'
 import { WISH_BANNERS, bannerInfo, formatPity, wishMinute } from '@/components/wishes/wish-labels'
 import { EXPECTED_PITY, PRIMOS_PER_PULL, monthlyPulls, type BannerStats } from '@/data/wish-history'
+import { t } from '@/i18n'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useAccount, useReadOnly } from './context'
 
@@ -61,7 +62,10 @@ const avgPity = computed(() => {
   const diff = Math.round((s.five.avgPity - expected) * 10) / 10
   return {
     value: formatPity(Math.round(s.five.avgPity * 100) / 100),
-    sub: `${diff > 0 ? '+' : diff < 0 ? '−' : '±'}${formatPity(Math.abs(diff))} vs ${expected} expected`,
+    sub: t('wishes.overview.avgPityVs', {
+      diff: `${diff > 0 ? '+' : diff < 0 ? '−' : '±'}${formatPity(Math.abs(diff))}`,
+      expected,
+    }),
     tone: diff > 0 ? 'text-warning-text' : diff < 0 ? 'text-success-text' : 'text-text-muted',
   }
 })
@@ -79,8 +83,8 @@ const synced = computed(() => {
   const at = history.value?.updatedAt
   if (!at) return null
   return {
-    text: `Synced ${formatRelative(at)}`,
-    title: `New wishes stored ${formatDateTime(at)}`,
+    text: t('wishes.overview.synced', { ago: formatRelative(at) }),
+    title: t('wishes.overview.syncedTitle', { time: formatDateTime(at) }),
     fresh: Date.now() - at < 26 * 3600 * 1000,
   }
 })
@@ -93,17 +97,18 @@ function retry() {
 }
 
 const dialog = ref(false)
-
-const SYNC_HELP =
-  "Open Wish → History in game once a day (you can close it right away): irminsul syncs every banner, then each new wish while the key lasts (~24 h). The game's wish link brings the last six months too. Older than 6 months: import a paimon.moe backup or UIGF file."
 </script>
 
 <template>
   <div>
-    <PageHeader title="Wish history">
+    <PageHeader :title="$t('wishes.title')">
       <template v-if="ready && history?.total" #meta>
         <p class="flex flex-wrap items-center gap-x-3.5 gap-y-2 text-text-secondary">
-          <span v-if="newest" class="flex items-center gap-2" title="Newest pull, game clock">
+          <span
+            v-if="newest"
+            class="flex items-center gap-2"
+            :title="$t('wishes.overview.newestPull')"
+          >
             <Clock class="size-4" aria-hidden="true" />
             <span class="tabular font-mono">{{ newest }}</span>
           </span>
@@ -123,23 +128,27 @@ const SYNC_HELP =
       <template v-if="ready && history?.total" #actions>
         <UiButton size="sm" @click="dialog = true">
           <ArrowDownUp class="size-4" aria-hidden="true" />{{
-            readOnly ? 'Export' : 'Import / export'
+            readOnly ? $t('wishes.export') : $t('wishes.importExport')
           }}
         </UiButton>
       </template>
     </PageHeader>
 
-    <UiError v-if="loadError && !ready" title="Load failed" :error="loadError" @retry="retry" />
+    <UiError
+      v-if="loadError && !ready"
+      :title="$t('wishes.loadFailed')"
+      :error="loadError"
+      @retry="retry"
+    />
 
     <template v-else-if="ready && history && stats">
       <UiPanel v-if="history.total === 0" flush>
-        <div :title="SYNC_HELP">
-          <UiEmpty
-            title="No wishes yet"
-            body="Open Wish → History in game once a day (you can close it right away), or import with the game's wish link. Older than 6 months: import a paimon.moe backup or UIGF file."
-          >
+        <div :title="$t('wishes.overview.syncHelp')">
+          <UiEmpty :title="$t('wishes.overview.empty')" :body="$t('wishes.overview.emptyBody')">
             <template #icon><Sparkles aria-hidden="true" /></template>
-            <UiButton v-if="!readOnly" variant="primary" @click="dialog = true">Import</UiButton>
+            <UiButton v-if="!readOnly" variant="primary" @click="dialog = true">{{
+              $t('wishes.import')
+            }}</UiButton>
           </UiEmpty>
         </div>
       </UiPanel>
@@ -147,7 +156,7 @@ const SYNC_HELP =
       <div v-else class="flex flex-col gap-4">
         <!-- items-start: an open card's list hangs below it, never stretching its row. -->
         <section
-          aria-label="Banners"
+          :aria-label="$t('wishes.overview.banners')"
           class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14.5rem),1fr))] items-start gap-3 sm:gap-3.5"
         >
           <WishBannerCard
@@ -160,22 +169,30 @@ const SYNC_HELP =
 
         <div class="flex flex-wrap items-stretch gap-3.5">
           <WishMonthChart :months="months" class="min-w-0 flex-[999_1_640px]" />
-          <section aria-label="Totals" class="flex min-w-0 flex-[1_1_260px] flex-col gap-3.5">
+          <section
+            :aria-label="$t('wishes.overview.totals')"
+            class="flex min-w-0 flex-[1_1_260px] flex-col gap-3.5"
+          >
             <UiStat
-              label="Wishes worth"
+              :label="$t('wishes.overview.worth')"
               :value="`✦ ${formatNumber(history.total * PRIMOS_PER_PULL)}`"
-              :hint="`${formatNumber(history.total)} wishes × ${PRIMOS_PER_PULL} Primogems`"
+              :hint="
+                $t('wishes.overview.worthHint', {
+                  n: formatNumber(history.total),
+                  primos: PRIMOS_PER_PULL,
+                })
+              "
               class="flex-1"
             >
-              <span class="tabular font-mono text-xs text-text-muted"
-                >{{ formatNumber(history.total) }} wishes</span
-              >
+              <span class="tabular font-mono text-xs text-text-muted">{{
+                $t('wishes.overview.wishes', { n: formatNumber(history.total) })
+              }}</span>
             </UiStat>
             <UiStat
               v-if="avgPity"
-              label="Avg 5★ pity"
+              :label="$t('wishes.overview.avgPity')"
               :value="avgPity.value"
-              :hint="`Character Event: the average pity of every 5★, against about ${EXPECTED_PITY[301]} expected with soft pity`"
+              :hint="$t('wishes.overview.avgPityHint', { expected: EXPECTED_PITY[301] })"
               class="flex-1"
             >
               <span class="tabular font-mono text-xs" :class="avgPity.tone">{{ avgPity.sub }}</span>
@@ -204,7 +221,7 @@ const SYNC_HELP =
       </div>
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading" class="flex flex-col gap-4">
+    <div v-else aria-busy="true" :aria-label="$t('wishes.loading')" class="flex flex-col gap-4">
       <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14.5rem),1fr))] gap-3.5">
         <UiSkeleton v-for="n in 4" :key="n" class="h-72" />
       </div>

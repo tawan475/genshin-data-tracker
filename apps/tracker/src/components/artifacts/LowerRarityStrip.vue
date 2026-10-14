@@ -38,8 +38,8 @@ watch(() => props.rows, restart)
       class="flex min-h-11 w-full items-center gap-3 px-3 text-sm"
       :aria-expanded="open"
       :aria-controls="panelId"
-      :aria-label="`Lower rarities: ${label}`"
-      title="Lower rarities, which this sort puts last"
+      :aria-label="$t('artifacts.lower.label', { counts: label })"
+      :title="$t('artifacts.lower.title')"
       @click="open = !open"
     >
       <template v-for="([rarity, count], index) in counts" :key="rarity">

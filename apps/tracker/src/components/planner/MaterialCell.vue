@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { MaterialLine } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
@@ -20,12 +21,18 @@ const openItem = useItemPopover()
 
 const title = computed(() => {
   const l = props.line
-  const parts = [l.material.name, `Need ${formatNumber(l.need)}`, `Have ${formatNumber(l.have)}`]
-  if (l.crafted) parts.push(`Craft ${formatNumber(l.crafted)}`)
-  if (l.spent) parts.push(`Used to craft ${formatNumber(l.spent)}`)
-  if (l.converted) parts.push(`Converted from others ${formatNumber(l.converted)}`)
-  if (l.convertedAway) parts.push(`Converted into others ${formatNumber(l.convertedAway)}`)
-  if (l.missing) parts.push(`Missing ${formatNumber(l.missing)}`)
+  const parts = [
+    l.material.name,
+    t('planner.popover.need', { n: formatNumber(l.need) }),
+    t('planner.cell.have', { n: formatNumber(l.have) }),
+  ]
+  if (l.crafted) parts.push(t('planner.popover.craft', { n: formatNumber(l.crafted) }))
+  if (l.spent) parts.push(t('planner.cell.spent', { n: formatNumber(l.spent) }))
+  if (l.converted) parts.push(t('planner.cell.converted', { n: formatNumber(l.converted) }))
+  if (l.convertedAway) {
+    parts.push(t('planner.cell.convertedAway', { n: formatNumber(l.convertedAway) }))
+  }
+  if (l.missing) parts.push(t('planner.popover.missing', { n: formatNumber(l.missing) }))
   return parts.join(' · ')
 })
 

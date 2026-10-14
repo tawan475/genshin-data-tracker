@@ -55,19 +55,24 @@ const importRoute = computed(() => ({
 </script>
 
 <template>
-  <PageHeader title="Progression" />
+  <PageHeader :title="$t('overview.progression')" />
 
   <UiPanel v-if="!account.latest" flush>
-    <UiEmpty title="No snapshots yet">
+    <UiEmpty :title="$t('overview.noSnapshots')">
       <template #icon><History aria-hidden="true" /></template>
       <UiButton variant="primary" :to="importRoute">
         <Upload class="size-4" aria-hidden="true" />
-        Import
+        {{ $t('overview.import') }}
       </UiButton>
     </UiEmpty>
   </UiPanel>
 
-  <UiError v-else-if="error && !list" title="History unavailable" :error="error" @retry="reload" />
+  <UiError
+    v-else-if="error && !list"
+    :title="$t('overview.historyUnavailable')"
+    :error="error"
+    @retry="reload"
+  />
 
   <div v-else class="flex flex-col gap-6">
     <DetailedProgression

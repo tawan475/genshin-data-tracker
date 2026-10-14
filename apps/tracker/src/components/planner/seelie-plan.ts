@@ -44,6 +44,7 @@ import type {
   currentOverride,
 } from '@gdt/shared'
 import type { z } from 'zod'
+import { t } from '@/i18n'
 import { mapSeelieGoals, type SeelieContext, type SeelieImport } from '@/data/seelie'
 import {
   mapSeelieResin,
@@ -462,7 +463,7 @@ export function planSeelie(
     }
   }
   const events = parsed.tasks.skipped.length
-  if (events) tasks.facts.push(`${events} ${events === 1 ? 'event' : 'events'} left out`)
+  if (events) tasks.facts.push(t('planner.seelie.fact.eventsLeftOut', { n: events }, events))
 
   // ---------------------------------------------------------- resin
 
@@ -470,7 +471,8 @@ export function planSeelie(
   if (resin) {
     const ours = account.resin
     sections.resin.total = 1
-    if (ours && ours.at >= resin.at) sections.resin.facts.push('older than ours')
+    if (ours && ours.at >= resin.at)
+      sections.resin.facts.push(t('planner.seelie.fact.olderThanOurs'))
     else {
       sections.resin.changed = ours ? 1 : 0
       sections.resin.added = ours ? 0 : 1
@@ -489,19 +491,22 @@ export function planSeelie(
     set.facts.push(label)
   }
   if (s.ar !== undefined) {
-    fact(`AR ${s.ar}`, s.ar !== account.settings.ar)
+    fact(t('planner.seelie.fact.ar', { ar: s.ar }), s.ar !== account.settings.ar)
     if (picks.settings && s.ar !== account.settings.ar) writes.settings.ar = s.ar
   }
   if (s.wl !== undefined) {
-    fact(`WL ${s.wl}`, s.wl !== account.settings.wl)
+    fact(t('planner.seelie.fact.wl', { wl: s.wl }), s.wl !== account.settings.wl)
     if (picks.settings && s.wl !== account.settings.wl) writes.settings.wl = s.wl
   }
   if (s.server !== undefined) {
-    fact(SERVER_NAMES[s.server], s.server !== account.server)
+    fact(t(`planner.seelie.server.${s.server}`), s.server !== account.server)
     if (picks.settings && s.server !== account.server) writes.server = s.server
   }
   if (s.traveler !== undefined) {
-    fact(s.traveler === 'F' ? 'Lumine' : 'Aether', s.traveler !== account.settings.traveler)
+    fact(
+      s.traveler === 'F' ? t('planner.seelie.fact.lumine') : t('planner.seelie.fact.aether'),
+      s.traveler !== account.settings.traveler,
+    )
     if (picks.settings && s.traveler !== account.settings.traveler) writes.traveler = s.traveler
   }
 
@@ -519,13 +524,6 @@ export function planSeelie(
     ],
     clamped: g.clamped,
   }
-}
-
-const SERVER_NAMES: Record<GenshinServer, string> = {
-  AMERICA: 'America',
-  EUROPE: 'Europe',
-  ASIA: 'Asia',
-  SAR: 'TW, HK, MO',
 }
 
 /** Whether a section has anything to write (its checkbox can do something). */

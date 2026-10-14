@@ -26,27 +26,32 @@ import {
   type MaterialSeries,
   type MaterialsHistory,
 } from '@/data/materials-history'
+import { t } from '@/i18n'
 
 /** What a change is measured against: the previous snapshot, or one ~7 / 30 days older. */
 export type ChangePeriod = 'last' | ChartRange
 
-/** The detail dialog's three change figures. */
-export const PERIOD_OPTIONS: { value: ChangePeriod; label: string }[] = [
-  { value: 'last', label: 'Last' },
-  { value: '7d', label: '7d' },
-  { value: '30d', label: '30d' },
-]
+/** The detail dialog's three change figures (labels in the language on screen). */
+export function periodOptions(): { value: ChangePeriod; label: string }[] {
+  return [
+    { value: 'last', label: t('materials.periods.last') },
+    { value: '7d', label: rangeLabel('7d') },
+    { value: '30d', label: rangeLabel('30d') },
+  ]
+}
 
 /** The page's "Change since" select: the previous capture, then the charts' ranges. */
-export const CHANGE_SINCE_OPTIONS: (SelectOption<ChangePeriod> | SelectGroup<ChangePeriod>)[] = [
-  { value: 'last', label: 'Last' },
-  ...CHART_RANGE_GROUPS.flatMap(
-    (group): (SelectOption<ChangePeriod> | SelectGroup<ChangePeriod>)[] => {
-      const options = group.ranges.map((value) => ({ value, label: rangeLabel(value) }))
-      return group.label ? [{ group: group.label, options }] : options
-    },
-  ),
-]
+export function changeSinceOptions(): (SelectOption<ChangePeriod> | SelectGroup<ChangePeriod>)[] {
+  return [
+    { value: 'last', label: t('materials.periods.last') },
+    ...CHART_RANGE_GROUPS.flatMap(
+      (group): (SelectOption<ChangePeriod> | SelectGroup<ChangePeriod>)[] => {
+        const options = group.ranges.map((value) => ({ value, label: rangeLabel(value) }))
+        return group.label ? [{ group: group.label, options }] : options
+      },
+    ),
+  ]
+}
 
 export function isChangePeriod(value: unknown): value is ChangePeriod {
   return value === 'last' || isChartRange(value)

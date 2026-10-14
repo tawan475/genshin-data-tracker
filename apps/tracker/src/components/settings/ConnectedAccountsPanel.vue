@@ -12,6 +12,7 @@ import { isProvider, oauthErrorText, providerLabel, providerNames } from '@/comp
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
 import { formatDateTime } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
@@ -59,7 +60,7 @@ async function load() {
   try {
     data.value = await api.identities()
   } catch (cause) {
-    feedback.error('Connected accounts not loaded', cause)
+    feedback.error(t('settings.connected.notLoaded'), cause)
   }
 }
 
@@ -67,9 +68,16 @@ onMounted(async () => {
   // Back from linking: say how it went once, then drop it from the URL.
   const { linked, oauth_error: problem } = route.query
   if (isProvider(linked)) {
-    feedback.toast({ tone: 'success', title: `${providerLabel(linked)} linked` })
+    feedback.toast({
+      tone: 'success',
+      title: t('settings.connected.linked', { provider: providerLabel(linked) }),
+    })
   } else if (typeof problem === 'string') {
-    feedback.toast({ tone: 'danger', title: 'Not linked', detail: oauthErrorText(problem) })
+    feedback.toast({
+      tone: 'danger',
+      title: t('settings.connected.notLinked'),
+      detail: oauthErrorText(problem),
+    })
   }
   if (linked !== undefined || problem !== undefined) {
     void router.replace({ query: { ...route.query, linked: undefined, oauth_error: undefined } })
@@ -84,25 +92,31 @@ async function link(provider: OAuthProvider) {
     window.location.assign(url)
   } catch (cause) {
     busy.value = null
-    feedback.error(`Could not link ${providerLabel(provider)}`, cause)
+    feedback.error(
+      t('settings.connected.couldNotLink', { provider: providerLabel(provider) }),
+      cause,
+    )
   }
 }
 
 async function unlink(provider: OAuthProvider) {
   const label = providerLabel(provider)
   const ok = await feedback.confirm({
-    title: `Unlink ${label}?`,
-    detail: `This ${label} account will no longer sign in here. You can link it again later.`,
-    confirmLabel: 'Unlink',
+    title: t('settings.connected.unlinkTitle', { provider: label }),
+    detail: t('settings.connected.unlinkDetail', { provider: label }),
+    confirmLabel: t('settings.connected.unlink'),
     tone: 'danger',
   })
   if (!ok) return
   busy.value = provider
   try {
     await api.unlinkIdentity(provider)
-    feedback.toast({ tone: 'success', title: `${label} unlinked` })
+    feedback.toast({
+      tone: 'success',
+      title: t('settings.connected.unlinked', { provider: label }),
+    })
   } catch (cause) {
-    feedback.error(`${label} not unlinked`, cause)
+    feedback.error(t('settings.connected.notUnlinked', { provider: label }), cause)
   } finally {
     busy.value = null
     await load()
@@ -117,32 +131,42 @@ async function useEmail(identity: IdentityResponse) {
     await session.updateProfile({ email: identity.email })
     feedback.toast({
       tone: 'success',
-      title: 'Email set',
-      detail: session.me?.emailEnabled ? `Confirmation sent to ${identity.email}` : undefined,
+      title: t('settings.connected.emailSet'),
+      detail: session.me?.emailEnabled
+        ? t('settings.profile.confirmationSent', { email: identity.email })
+        : undefined,
     })
   } catch (cause) {
     const taken = cause instanceof ApiRequestError && cause.code === 'email_taken'
-    feedback.error('Email not set', taken ? new Error('It belongs to another account') : cause)
+    feedback.error(
+      t('settings.connected.emailNotSet'),
+      taken ? new Error(t('settings.connected.belongsToAnother')) : cause,
+    )
   } finally {
     busy.value = null
   }
 }
 
 function details(identity: IdentityResponse): string {
-  const lines = [identity.email ?? '', `Linked ${formatDateTime(identity.createdAt)}`]
-  if (identity.lastUsedAt) lines.push(`Last sign-in ${formatDateTime(identity.lastUsedAt)}`)
+  const lines = [
+    identity.email ?? '',
+    t('settings.connected.linkedAt', { date: formatDateTime(identity.createdAt) }),
+  ]
+  if (identity.lastUsedAt) {
+    lines.push(t('settings.connected.lastSignIn', { date: formatDateTime(identity.lastUsedAt) }))
+  }
   return lines.filter(Boolean).join('\n')
 }
 </script>
 
 <template>
-  <UiPanel v-if="rows.length" title="Connected accounts">
+  <UiPanel v-if="rows.length" :title="$t('settings.connected.title')">
     <p
       v-if="nudge"
       class="mb-3 text-sm text-text-muted"
-      title="If you forget your password, sign in with it instead"
+      :title="$t('settings.connected.nudgeTitle')"
     >
-      Link {{ nudge }} to keep a way in
+      {{ $t('settings.connected.nudge', { providers: nudge }) }}
     </p>
     <ul class="flex flex-col divide-y divide-border-subtle">
       <li
@@ -159,7 +183,11 @@ function details(identity: IdentityResponse): string {
               class="truncate text-sm text-text-muted"
               :title="details(row.identity)"
             >
-              {{ row.identity.displayName ?? row.identity.email ?? 'Linked' }}
+              {{
+                row.identity.displayName ??
+                row.identity.email ??
+                $t('settings.connected.linkedFallback')
+              }}
             </p>
           </div>
         </div>
@@ -170,19 +198,19 @@ function details(identity: IdentityResponse): string {
               size="sm"
               variant="ghost"
               :disabled="busy !== null"
-              :title="`Use ${row.identity.email} as your account email (confirmed by mail)`"
+              :title="$t('settings.connected.useEmailTitle', { email: row.identity.email })"
               @click="useEmail(row.identity)"
             >
-              Use email
+              {{ $t('settings.connected.useEmail') }}
             </UiButton>
-            <span :title="canUnlink ? undefined : 'Set a password or link another account first'">
+            <span :title="canUnlink ? undefined : $t('settings.connected.unlinkBlocked')">
               <UiButton
                 size="sm"
                 :loading="busy === row.provider"
                 :disabled="busy !== null || !canUnlink"
                 @click="unlink(row.provider)"
               >
-                Unlink
+                {{ $t('settings.connected.unlink') }}
               </UiButton>
             </span>
           </template>
@@ -191,10 +219,10 @@ function details(identity: IdentityResponse): string {
             size="sm"
             :loading="busy === row.provider"
             :disabled="busy !== null || !row.enabled"
-            :title="`Sign in with ${providerLabel(row.provider)} too`"
+            :title="$t('settings.connected.linkTitle', { provider: providerLabel(row.provider) })"
             @click="link(row.provider)"
           >
-            Link
+            {{ $t('settings.connected.link') }}
           </UiButton>
         </div>
       </li>

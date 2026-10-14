@@ -1,5 +1,6 @@
 import { shallowRef, watch } from 'vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 
 /** The API takes at most this many ids per list. */
@@ -65,7 +66,7 @@ export function useAchievementMarks(accountId: () => number) {
         if (answer && pending === 1 && id === accountId()) marked.value = new Set(answer)
         return true
       } catch (cause) {
-        feedback.error('Not saved', cause)
+        feedback.error(t('achievements.notSaved'), cause)
         if (id === accountId()) await load(id)
         return false
       } finally {

@@ -5,11 +5,12 @@
  */
 
 import { calculateCV, calculateRV, type GoodArtifact } from '@gdt/shared'
-import { keyToName } from '@/lib/format'
+import { characterName } from '@/i18n/game-names'
 import { inferArtifactRolls, maxLevel, type InferredRoll } from '@/utils/artifact-rolls'
 import { formatSetName, formatSlotName, formatStatName } from '@/utils/artifact-stats'
 import { artifactPotential, type Potential } from './artifact-potential'
 import { compareText } from '@/lib/search'
+import { t } from '@/i18n'
 
 export const SLOT_KEYS = ['flower', 'plume', 'sands', 'goblet', 'circlet'] as const
 export type SlotKey = (typeof SLOT_KEYS)[number]
@@ -97,7 +98,7 @@ export function buildArtifactRows(
     const setName = formatSetName(artifact.setKey)
     const slotIndex = SLOT_KEYS.indexOf(artifact.slotKey as SlotKey)
     const inferred = rolls.reduce((sum, r) => sum + r.length, 0)
-    const ownerName = artifact.location ? keyToName(artifact.location) : ''
+    const ownerName = artifact.location ? characterName(artifact.location) : ''
     const rv = calculateRV(artifact.substats)
     const inactive = artifact.unactivatedSubstats ?? []
     return {
@@ -143,9 +144,9 @@ export function artifactLabel(row: ArtifactRow, isNew = false): string {
     `CV ${row.cv.toFixed(1)}`,
     `RV ${row.rv}%`,
     row.ownerName,
-    a.lock ? 'Locked' : '',
-    a.astralMark ? 'Astral mark' : '',
-    isNew ? 'New' : '',
+    a.lock ? t('artifacts.label.locked') : '',
+    a.astralMark ? t('artifacts.label.astralMark') : '',
+    isNew ? t('artifacts.label.new') : '',
   ]
     .filter(Boolean)
     .join(' · ')
@@ -424,13 +425,69 @@ export function facetCounts<K>(
 // --------------------------------------------------------------------- sort
 
 export const SORT_OPTIONS: { value: ArtifactSort; label: string; title: string }[] = [
-  { value: 'quality', label: 'Quality', title: 'As the game: rarity, level, set, wearer' },
-  { value: 'cv', label: 'CV', title: 'Crit value' },
-  { value: 'rv', label: 'RV', title: 'Roll value' },
-  { value: 'potential', label: 'Potential', title: 'Expected CV at max level' },
-  { value: 'level', label: 'Level', title: 'Level' },
-  { value: 'set', label: 'Set', title: 'Set' },
-  { value: 'recent', label: 'Recent', title: 'New or changed' },
+  {
+    value: 'quality',
+    get label() {
+      return t('artifacts.sort.quality')
+    },
+    get title() {
+      return t('artifacts.sortTitle.quality')
+    },
+  },
+  {
+    value: 'cv',
+    get label() {
+      return t('artifacts.sort.cv')
+    },
+    get title() {
+      return t('artifacts.sortTitle.cv')
+    },
+  },
+  {
+    value: 'rv',
+    get label() {
+      return t('artifacts.sort.rv')
+    },
+    get title() {
+      return t('artifacts.sortTitle.rv')
+    },
+  },
+  {
+    value: 'potential',
+    get label() {
+      return t('artifacts.sort.potential')
+    },
+    get title() {
+      return t('artifacts.sortTitle.potential')
+    },
+  },
+  {
+    value: 'level',
+    get label() {
+      return t('artifacts.sort.level')
+    },
+    get title() {
+      return t('artifacts.sortTitle.level')
+    },
+  },
+  {
+    value: 'set',
+    get label() {
+      return t('artifacts.sort.set')
+    },
+    get title() {
+      return t('artifacts.sortTitle.set')
+    },
+  },
+  {
+    value: 'recent',
+    get label() {
+      return t('artifacts.sort.recent')
+    },
+    get title() {
+      return t('artifacts.sortTitle.recent')
+    },
+  },
 ]
 
 /** Natural direction: numbers high to low, names A to Z. */

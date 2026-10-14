@@ -4,6 +4,7 @@ import { X } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import { gameIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { materialName } from '@/utils/materials'
 import { fromTouch, useItemPopover } from './item-popover'
@@ -34,19 +35,18 @@ function rowTitle(row: FocusRow): string {
   const exp = props.option.exp
   const parts = [
     exp ? name.value : materialName(row.material.key),
-    `Need ${formatNumber(row.need)}`,
-    `Have ${formatNumber(row.have)}`,
+    t('planner.popover.need', { n: formatNumber(row.need) }),
+    t('planner.cell.have', { n: formatNumber(row.have) }),
   ]
-  if (row.crafted) parts.push(`Craft ${formatNumber(row.crafted)}`)
+  if (row.crafted) parts.push(t('planner.popover.craft', { n: formatNumber(row.crafted) }))
   if (row.missing > 0) {
-    parts.push(`Missing ${formatNumber(row.missing)}`)
-  } else parts.push('Enough')
+    parts.push(t('planner.popover.missing', { n: formatNumber(row.missing) }))
+  } else parts.push(t('planner.popover.enough'))
   return parts.join(' · ')
 }
 
-const title = computed(
-  () =>
-    `${name.value}: ${formatNumber(props.goals)} ${props.goals === 1 ? 'goal' : 'goals'}, each after the counted goals above it`,
+const title = computed(() =>
+  t('planner.focus.title', { name: name.value, n: formatNumber(props.goals) }, props.goals),
 )
 
 function open(row: FocusRow, event: MouseEvent) {
@@ -102,7 +102,7 @@ function open(row: FocusRow, event: MouseEvent) {
         </li>
       </ul>
     </div>
-    <UiIconButton :label="`Clear ${name}`" @click="$emit('clear')">
+    <UiIconButton :label="$t('planner.focus.clear', { name })" @click="$emit('clear')">
       <X class="size-5" aria-hidden="true" />
     </UiIconButton>
   </section>

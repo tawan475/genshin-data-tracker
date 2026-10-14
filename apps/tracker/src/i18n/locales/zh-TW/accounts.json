@@ -1,1 +1,47 @@
-{}
+{
+  "displayUid": "UID {uid}",
+  "displayId": "帳號 {id}",
+  "server": {
+    "ASIA": "亞服",
+    "AMERICA": "美服",
+    "EUROPE": "歐服",
+    "SAR": "台港澳服"
+  },
+  "home": {
+    "accounts": "帳號",
+    "snapshots": "快照",
+    "uploaded": "已上傳",
+    "stored": "已儲存",
+    "ratio": "壓縮比",
+    "lastCaptured": "最近擷取",
+    "bytes": "{n} 位元組",
+    "ratioTitle": "儲存大小比上傳小 {ratio}",
+    "add": "新增帳號",
+    "empty": "還沒有帳號"
+  },
+  "new": {
+    "title": "新增帳號",
+    "add": "新增",
+    "notAdded": "未新增",
+    "added": "已新增 {name}",
+    "connect": "連接 Irminsul",
+    "overview": "總覽",
+    "importFiles": "匯入檔案",
+    "addAnother": "再新增一個"
+  },
+  "settings": {
+    "title": "帳號設定",
+    "details": "詳細資料",
+    "traveler": "旅行者",
+    "lumine": "熒",
+    "aether": "空",
+    "deleteAccount": "刪除帳號",
+    "deleteTitle": "已匯出的 GOOD 檔案不受影響",
+    "confirmTitle": "刪除 {name}？",
+    "deletes": "將刪除 {loss}。它的 Irminsul 金鑰將失效。",
+    "typeToConfirm": "輸入 {word}",
+    "confirmWord": "刪除",
+    "loss": "{n} 個快照",
+    "deleted": "已刪除 {name}"
+  }
+}

@@ -25,11 +25,15 @@ function pick(value: T) {
 <template>
   <div class="flex min-w-0 items-center gap-1">
     <label class="min-w-0 flex-1">
-      <span class="sr-only">Sort</span>
+      <span class="sr-only">{{ $t('characters.sortControl.sort') }}</span>
       <UiSelect :model-value="sort" :options="selectOptions" @update:model-value="pick" />
     </label>
     <UiIconButton
-      :label="direction === 'desc' ? 'Sort descending' : 'Sort ascending'"
+      :label="
+        direction === 'desc'
+          ? $t('characters.sortControl.descending')
+          : $t('characters.sortControl.ascending')
+      "
       @click="direction = direction === 'desc' ? 'asc' : 'desc'"
     >
       <ArrowDownWideNarrow v-if="direction === 'desc'" class="size-5" aria-hidden="true" />

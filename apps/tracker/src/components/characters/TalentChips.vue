@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { CONSTELLATION_MAX_STYLE } from './max-badges'
 
 /**
@@ -10,8 +11,12 @@ import { CONSTELLATION_MAX_STYLE } from './max-badges'
 const props = defineProps<{ talent: { auto: number; skill: number; burst: number } }>()
 
 const levels = computed(() => [props.talent.auto, props.talent.skill, props.talent.burst])
-const title = computed(
-  () => `Attack ${props.talent.auto} · Skill ${props.talent.skill} · Burst ${props.talent.burst}`,
+const title = computed(() =>
+  t('characters.talentChips', {
+    auto: props.talent.auto,
+    skill: props.talent.skill,
+    burst: props.talent.burst,
+  }),
 )
 </script>
 

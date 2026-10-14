@@ -13,6 +13,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { axisFormat, fitGroupBy, formatWindow, groupFits } from '@/data/chart-range'
 import type { Capture, Point } from '@/data/overview'
 import { GROUP_BY_OPTIONS, nextPeriod } from '@/data/progression'
+import { t } from '@/i18n'
 import { clock24, formatDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import type { ChangeBar } from './ChangeBarChart.vue'
@@ -58,22 +59,24 @@ const props = withDefaults(
     defaultGroup?: ProgressionGroup
   }>(),
   {
-    title: 'Detailed progression',
+    title: undefined,
     storage: 'progression',
     defaults: () => ['mora', 'primogem'],
     defaultGroup: undefined,
   },
 )
 
-const FIGURES: Record<FigureKey, { title: string; color: TimelineSeries['color'] }> = {
-  mora: { title: 'Mora', color: 2 },
-  primogem: { title: 'Primogems', color: 4 },
-  artifacts: { title: 'Artifacts', color: 5 },
-  artifact4: { title: '4★ Artifact', color: 6 },
-  artifact3: { title: '3★ Artifact', color: 3 },
-  characters: { title: 'Characters', color: 1 },
-  weapons: { title: 'Weapons', color: 3 },
+const COLORS: Record<FigureKey, TimelineSeries['color']> = {
+  mora: 2,
+  primogem: 4,
+  artifacts: 5,
+  artifact4: 6,
+  artifact3: 3,
+  characters: 1,
+  weapons: 3,
 }
+/** A figure's name in the language on screen. */
+const figureTitle = (key: FigureKey) => t(`overview.figure.${key}`)
 
 /** The figures picked on this card (in FIGURE_KEYS order), remembered per device. */
 const FIGURES_KEY = `${props.storage}-figures`
@@ -87,20 +90,19 @@ function toggleFigure(key: FigureKey) {
   picked.value = FIGURE_KEYS.filter((k) => (k === key ? !on : picked.value.includes(k)))
   writeStorage(FIGURES_KEY, picked.value.join(','))
 }
-const CHARTS = computed(() => picked.value.map((key) => ({ key, ...FIGURES[key] })))
+const CHARTS = computed(() =>
+  picked.value.map((key) => ({ key, title: figureTitle(key), color: COLORS[key] })),
+)
 /** The figure chips show only while the cog beside the range is on. */
 const picking = ref(false)
 
-const PER: Record<ProgressionGroup, { label: string; one: string; many: string }> = {
-  snapshot: { label: 'Per snapshot', one: 'snapshot', many: 'snapshots' },
-  hour: { label: 'Per hour', one: 'hour', many: 'hours' },
-  day: { label: 'Per day', one: 'day', many: 'days' },
-  month: { label: 'Per month', one: 'month', many: 'months' },
-  year: { label: 'Per year', one: 'year', many: 'years' },
-}
-
 const GROUPS: SegmentedOption<ProgressionGroup>[] = [
-  { value: 'snapshot', label: 'Snapshot' },
+  {
+    value: 'snapshot',
+    get label() {
+      return t('progression.group.snapshot')
+    },
+  },
   ...GROUP_BY_OPTIONS,
 ]
 
@@ -128,7 +130,7 @@ const groupOptions = computed<SegmentedOption<ProgressionGroup>[]>(() =>
   GROUPS.map((option) =>
     option.value === 'snapshot' || groupFits(range.value, option.value)
       ? option
-      : { ...option, disabled: true, title: 'Longer than the range' },
+      : { ...option, disabled: true, title: t('progression.longerThanRange') },
   ),
 )
 
@@ -197,8 +199,8 @@ const periodLabels = computed(() => {
     title: periodTitle(period.start, group, hour12),
     captures:
       period.captures === 0
-        ? 'No captures'
-        : `${formatNumber(period.captures)} ${period.captures === 1 ? 'capture' : 'captures'}`,
+        ? t('progression.noCaptures')
+        : t('progression.captures', { n: formatNumber(period.captures) }, period.captures),
   }))
 })
 
@@ -210,13 +212,14 @@ const span = computed(() => {
   return first && last ? formatWindow(first.x, last.x, !clock24()) : ''
 })
 
-const per = computed(() => PER[groupBy.value])
+/** "Per day", in the language on screen. */
+const perLabel = computed(() => t(`progression.per.${groupBy.value}`))
 
 /** Tooltip on the "Per day" label; says so when older bars were left out. */
 const perDetail = computed(() => {
-  const detail = `Change against the previous ${per.value.one}`
+  const detail = t(`progression.against.${groupBy.value}`)
   return shown.value?.truncated
-    ? `${detail} · newest ${formatNumber(MAX_PERIODS)} ${per.value.many}`
+    ? `${detail} · ${t(`progression.newest.${groupBy.value}`, { n: formatNumber(MAX_PERIODS) })}`
     : detail
 })
 
@@ -230,7 +233,7 @@ function barsOf(key: FigureKey): { bars: ChangeBar[]; totals: PeriodTotals } | n
         x: c.at,
         title: formatDateTime(c.at),
         value: c.change,
-        detail: [`Total ${formatNumber(c.value)}`],
+        detail: [t('progression.total', { n: formatNumber(c.value) })],
       })),
     }
   }
@@ -243,7 +246,7 @@ function barsOf(key: FigureKey): { bars: ChangeBar[]; totals: PeriodTotals } | n
       tick: labels[i]!.tick,
       title: labels[i]!.title,
       value: period.change[key],
-      detail: [`Total ${formatNumber(period.close[key])}`, labels[i]!.captures],
+      detail: [t('progression.total', { n: formatNumber(period.close[key]) }), labels[i]!.captures],
     })),
   }
 }
@@ -264,12 +267,16 @@ const charts = computed<ChartView[]>(() => {
       gained: totals.gained,
       spent: totals.spent,
       series: [{ label: def.title, color: def.color, points: lines[def.key] }],
-      lineLabel: `${def.title} over time, ${span.value}. Latest ${value}.`,
+      lineLabel: t('progression.lineLabel', { figure: def.title, span: span.value, value }),
       bars,
       domain: perSnapshot.value?.domain,
-      barsLabel: `${def.title} change ${per.value.label.toLowerCase()}, ${span.value}: gained ${formatNumber(
-        totals.gained,
-      )}, spent ${formatNumber(totals.spent)}.`,
+      barsLabel: t('progression.barsLabel', {
+        figure: def.title,
+        per: perLabel.value.toLowerCase(),
+        span: span.value,
+        gained: formatNumber(totals.gained),
+        spent: formatNumber(totals.spent),
+      }),
     }
   })
 })
@@ -288,16 +295,20 @@ function fitAxis(id: string, width: number) {
 </script>
 
 <template>
-  <UiPanel :title="title">
+  <UiPanel :title="title ?? $t('progression.title')">
     <template #actions>
-      <UiIconButton label="Figures" :active="picking" @click="picking = !picking">
+      <UiIconButton
+        :label="$t('progression.figures')"
+        :active="picking"
+        @click="picking = !picking"
+      >
         <Settings class="size-5" aria-hidden="true" />
       </UiIconButton>
       <div
         ref="groupRow"
         class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto sm:scroll-fade-none sm:overflow-visible"
       >
-        <UiSegmented v-model="groupBy" :options="groupOptions" label="Group by" />
+        <UiSegmented v-model="groupBy" :options="groupOptions" :label="$t('progression.groupBy')" />
       </div>
       <ChartRangeSelect v-model="range" :detail="span || undefined" />
     </template>
@@ -307,20 +318,22 @@ function fitAxis(id: string, width: number) {
       v-if="picking"
       class="scroll-hide scroll-fade-x -mt-1 mb-4 flex gap-1.5 overflow-x-auto sm:scroll-fade-none sm:flex-wrap"
       role="group"
-      aria-label="Figures"
+      :aria-label="$t('progression.figures')"
     >
       <FilterChip
         v-for="key in FIGURE_KEYS"
         :key="key"
         :pressed="picked.includes(key)"
-        :title="picked.includes(key) && picked.length === 1 ? 'At least one' : undefined"
+        :title="
+          picked.includes(key) && picked.length === 1 ? $t('progression.atLeastOne') : undefined
+        "
         @toggle="toggleFigure(key)"
-        >{{ FIGURES[key].title }}</FilterChip
+        >{{ figureTitle(key) }}</FilterChip
       >
     </div>
 
     <div v-if="!captures" class="grid gap-8 lg:grid-cols-2" role="status">
-      <span class="sr-only">Loading progression</span>
+      <span class="sr-only">{{ $t('progression.loading') }}</span>
       <div v-for="n in 2" :key="n" class="flex flex-col gap-3">
         <div class="flex justify-between gap-4">
           <UiSkeleton class="h-6 w-24" />
@@ -331,7 +344,9 @@ function fitAxis(id: string, width: number) {
       </div>
     </div>
 
-    <p v-else-if="!shown" class="py-6 text-center text-text-secondary">No data</p>
+    <p v-else-if="!shown" class="py-6 text-center text-text-secondary">
+      {{ $t('progression.noData') }}
+    </p>
 
     <div v-else class="grid gap-8 lg:grid-cols-2">
       <section
@@ -346,7 +361,7 @@ function fitAxis(id: string, width: number) {
           </h3>
           <p class="flex items-baseline gap-2">
             <span class="tabular font-mono font-medium">{{ chart.value }}</span>
-            <ChangeValue :value="chart.net" hint="in this range" class="text-sm" />
+            <ChangeValue :value="chart.net" :hint="$t('progression.inRange')" class="text-sm" />
           </p>
         </div>
         <TimelineChart
@@ -362,11 +377,11 @@ function fitAxis(id: string, width: number) {
 
         <div class="mt-5 mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h4 class="text-sm font-medium text-text-secondary" :title="perDetail">
-            {{ per.label }}
+            {{ perLabel }}
           </h4>
           <p class="flex items-baseline gap-3 text-sm">
-            <ChangeValue :value="chart.gained" hint="gained in this range" />
-            <ChangeValue :value="-chart.spent" hint="spent in this range" />
+            <ChangeValue :value="chart.gained" :hint="$t('progression.gainedInRange')" />
+            <ChangeValue :value="-chart.spent" :hint="$t('progression.spentInRange')" />
           </p>
         </div>
         <ChangeBarChart

@@ -3,6 +3,8 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { i18n } from './i18n'
+// Registers its preload before the first language applies (game names in Chinese).
+import './i18n/game-names'
 import { applyLocale, resolveLocale, storedPreference, warnMissingKeys } from './i18n/apply'
 import { registerServiceWorker } from './pwa/register'
 import router from './router'
@@ -20,8 +22,8 @@ warnMissingKeys()
 const preference = storedPreference()
 const loading = applyLocale(preference).catch(() => undefined)
 const timeout = new Promise<void>((resolve) => setTimeout(resolve, 3000))
-void (resolveLocale(preference) === 'en' ? Promise.resolve() : Promise.race([loading, timeout])).then(
-  () => app.mount('#app'),
-)
+void (
+  resolveLocale(preference) === 'en' ? Promise.resolve() : Promise.race([loading, timeout])
+).then(() => app.mount('#app'))
 
 registerServiceWorker()

@@ -23,7 +23,7 @@ const rows = computed(() => [
 </script>
 
 <template>
-  <UiStat label="4★ / 3★ Artifact" hint="Unlocked, unequipped">
+  <UiStat :label="$t('overview.lowRarity.label')" :hint="$t('overview.lowRarity.hint')">
     <template #value>
       <dl class="flex flex-col">
         <div v-for="row in rows" :key="row.rarity" class="flex items-baseline gap-2">
@@ -32,14 +32,14 @@ const rows = computed(() => [
             :class="row.rarity === 4 ? 'text-rarity-4' : 'text-rarity-3'"
           >
             <span aria-hidden="true">{{ row.rarity }}★</span>
-            <span class="sr-only">{{ row.rarity }}-star</span>
+            <span class="sr-only">{{ $t('overview.lowRarity.rarity', { n: row.rarity }) }}</span>
           </dt>
           <dd class="flex min-w-0 items-baseline gap-2">
             <span class="tabular font-mono text-lg font-medium sm:text-xl">{{ row.value }}</span>
             <ChangeValue
               v-if="row.delta !== undefined && row.delta !== null"
               :value="row.delta"
-              hint="since previous snapshot"
+              :hint="$t('overview.sincePrevious')"
               class="text-sm"
             />
           </dd>

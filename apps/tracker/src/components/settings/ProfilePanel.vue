@@ -8,6 +8,7 @@ import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
@@ -51,12 +52,12 @@ const emailChanged = computed(
 const errors = computed(() => ({
   username:
     serverErrors.value.username ??
-    (usernameSchema.safeParse(username.value).success ? '' : '3–32 letters, digits, . - _'),
+    (usernameSchema.safeParse(username.value).success ? '' : t('auth.usernameRule')),
   email:
     serverErrors.value.email ??
     (!emailFeatures.value || !email.value.trim() || emailSchema.safeParse(email.value).success
       ? ''
-      : 'Invalid email'),
+      : t('auth.invalidEmail')),
 }))
 const show = (field: keyof typeof errors.value) => (touched.value ? errors.value[field] : '')
 const valid = computed(() => Object.values(errors.value).every((e) => !e))
@@ -75,14 +76,17 @@ async function save() {
     editing.value = false
     feedback.toast({
       tone: 'success',
-      title: 'Profile updated',
-      detail: sentTo && session.me?.emailEnabled ? `Confirmation sent to ${sentTo}` : undefined,
+      title: t('settings.profile.updated'),
+      detail:
+        sentTo && session.me?.emailEnabled
+          ? t('settings.profile.confirmationSent', { email: sentTo })
+          : undefined,
     })
   } catch (cause) {
     const code = cause instanceof ApiRequestError ? cause.code : ''
-    if (code === 'username_taken') serverErrors.value = { username: 'Taken' }
-    else if (code === 'email_taken') serverErrors.value = { email: 'Taken' }
-    else feedback.error('Profile not saved', cause)
+    if (code === 'username_taken') serverErrors.value = { username: t('common.taken') }
+    else if (code === 'email_taken') serverErrors.value = { email: t('common.taken') }
+    else feedback.error(t('settings.profile.notSaved'), cause)
   } finally {
     busy.value = false
   }
@@ -96,12 +100,16 @@ async function sendConfirmation() {
   sending.value = true
   try {
     await api.sendVerifyEmail()
-    feedback.toast({ tone: 'success', title: 'Link sent', detail: `Check ${to}` })
+    feedback.toast({
+      tone: 'success',
+      title: t('settings.profile.linkSent'),
+      detail: t('settings.profile.checkInbox', { email: to }),
+    })
   } catch (cause) {
     // Confirmed in another tab meanwhile: just show it.
     if (cause instanceof ApiRequestError && cause.code === 'already_verified') {
       session.emailConfirmed(to)
-    } else feedback.error('Link not sent', cause)
+    } else feedback.error(t('settings.profile.linkNotSent'), cause)
   } finally {
     sending.value = false
   }
@@ -112,18 +120,18 @@ const removing = ref(false)
 /** While email is paused: the one change left to an email set before. */
 async function removeEmail() {
   const ok = await feedback.confirm({
-    title: 'Remove email?',
-    detail: 'It will no longer sign you in.',
-    confirmLabel: 'Remove',
+    title: t('settings.profile.removeEmailTitle'),
+    detail: t('settings.profile.removeEmailDetail'),
+    confirmLabel: t('common.remove'),
     tone: 'danger',
   })
   if (!ok) return
   removing.value = true
   try {
     await session.updateProfile({ email: null })
-    feedback.toast({ tone: 'success', title: 'Email removed' })
+    feedback.toast({ tone: 'success', title: t('settings.profile.emailRemoved') })
   } catch (cause) {
-    feedback.error('Email not removed', cause)
+    feedback.error(t('settings.profile.emailNotRemoved'), cause)
   } finally {
     removing.value = false
   }
@@ -139,11 +147,11 @@ function edit(field: keyof typeof fields, value: string) {
 </script>
 
 <template>
-  <UiPanel title="Profile">
+  <UiPanel :title="$t('settings.profile.title')">
     <template v-if="session.me && !editing" #actions>
       <UiButton size="sm" variant="secondary" @click="startEdit">
         <Pencil class="size-4" aria-hidden="true" />
-        Edit
+        {{ $t('common.edit') }}
       </UiButton>
     </template>
 
@@ -151,65 +159,69 @@ function edit(field: keyof typeof fields, value: string) {
       <div
         class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
       >
-        <dt class="text-text-secondary">User ID</dt>
+        <dt class="text-text-secondary">{{ $t('settings.profile.userId') }}</dt>
         <dd class="font-mono select-all">{{ session.me.id }}</dd>
       </div>
       <div
         class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
       >
-        <dt class="text-text-secondary">Username</dt>
+        <dt class="text-text-secondary">{{ $t('common.username') }}</dt>
         <dd class="min-w-0 truncate font-mono">{{ session.me.username }}</dd>
       </div>
       <div
         v-if="emailFeatures"
         class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
       >
-        <dt class="text-text-secondary">Email</dt>
+        <dt class="text-text-secondary">{{ $t('common.email') }}</dt>
         <dd v-if="session.me.email" class="flex min-w-0 flex-wrap items-center justify-end gap-2">
           <span class="min-w-0 truncate">{{ session.me.email }}</span>
           <UiBadge
             :tone="session.me.emailVerified ? 'success' : 'warning'"
             :title="
-              session.me.emailVerified ? 'Can receive password reset links' : 'Not confirmed yet'
+              session.me.emailVerified
+                ? $t('settings.profile.verifiedTitle')
+                : $t('settings.profile.unverifiedTitle')
             "
           >
-            {{ session.me.emailVerified ? 'Verified' : 'Unverified' }}
+            {{
+              session.me.emailVerified
+                ? $t('settings.profile.verified')
+                : $t('settings.profile.unverified')
+            }}
           </UiBadge>
           <template v-if="!session.me.emailVerified">
             <UiButton
               v-if="session.me.emailEnabled"
               size="sm"
               :loading="sending"
-              title="Mail a confirmation link (valid 24 hours)"
+              :title="$t('settings.profile.verifyTitle')"
               @click="sendConfirmation"
             >
-              Verify
+              {{ $t('settings.profile.verify') }}
             </UiButton>
             <span
               v-else
               class="text-sm text-text-muted"
-              title="This server can't send email yet, so emails can't be confirmed and reset links can't be sent"
+              :title="$t('settings.profile.emailUnavailableTitle')"
             >
-              Email not available yet
+              {{ $t('settings.profile.emailUnavailable') }}
             </span>
           </template>
         </dd>
-        <dd
-          v-else
-          class="text-text-muted"
-          title="Add and confirm an email to reset a lost password"
-        >
-          —
-        </dd>
+        <dd v-else class="text-text-muted" :title="$t('settings.profile.addEmailTitle')">—</dd>
       </div>
       <div
         v-else-if="session.me.email"
         class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
       >
-        <dt class="text-text-secondary">Email</dt>
+        <dt class="text-text-secondary">{{ $t('common.email') }}</dt>
         <dd class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-          <span class="min-w-0 truncate" title="Also signs you in">{{ session.me.email }}</span>
-          <UiButton size="sm" :loading="removing" @click="removeEmail"> Remove </UiButton>
+          <span class="min-w-0 truncate" :title="$t('settings.profile.alsoSignsIn')">{{
+            session.me.email
+          }}</span>
+          <UiButton size="sm" :loading="removing" @click="removeEmail">
+            {{ $t('common.remove') }}
+          </UiButton>
         </dd>
       </div>
     </dl>
@@ -221,7 +233,11 @@ function edit(field: keyof typeof fields, value: string) {
       novalidate
       @submit.prevent="save"
     >
-      <UiField v-slot="{ id, describedBy }" label="Username" :error="show('username')">
+      <UiField
+        v-slot="{ id, describedBy }"
+        :label="$t('common.username')"
+        :error="show('username')"
+      >
         <UiInput
           :id="id"
           :model-value="username"
@@ -237,7 +253,7 @@ function edit(field: keyof typeof fields, value: string) {
       <UiField
         v-if="emailFeatures"
         v-slot="{ id, describedBy }"
-        label="Email"
+        :label="$t('common.email')"
         optional
         :error="show('email')"
       >
@@ -259,9 +275,11 @@ function edit(field: keyof typeof fields, value: string) {
           :loading="busy"
           :disabled="!usernameChanged && !emailChanged"
         >
-          Save
+          {{ $t('common.save') }}
         </UiButton>
-        <UiButton variant="ghost" :disabled="busy" @click="editing = false">Cancel</UiButton>
+        <UiButton variant="ghost" :disabled="busy" @click="editing = false">{{
+          $t('common.cancel')
+        }}</UiButton>
       </div>
     </form>
   </UiPanel>

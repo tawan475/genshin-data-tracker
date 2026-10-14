@@ -22,7 +22,7 @@ const d = computed(() => props.px ?? SIZE_PX[props.size])
   <span
     class="inline-flex items-center [filter:drop-shadow(0_1px_2px_rgba(80,50,0,0.5))]"
     :style="{ gap: `${gap ?? Math.round(d / 6)}px` }"
-    :aria-label="`${rarity} star`"
+    :aria-label="$t('characters.stars', { n: rarity })"
     role="img"
   >
     <svg

@@ -1,1 +1,199 @@
-{}
+{
+  "stock": {
+    "all": "enough for all goals",
+    "alone": "enough for this goal",
+    "short": "short"
+  },
+  "readiness": {
+    "all": {
+      "label": "Ready",
+      "meaning": "Enough after the goals above"
+    },
+    "alone": {
+      "label": "Ready alone",
+      "meaning": "Enough alone, not after the goals above"
+    },
+    "short": {
+      "label": "Short",
+      "meaning": "Not enough, even alone"
+    },
+    "done": {
+      "label": "Done",
+      "meaning": "Reached"
+    },
+    "artifacts": {
+      "label": "Artifacts",
+      "meaning": "Levels reached, artifacts to go"
+    }
+  },
+  "bracket": {
+    "tier": "Tier {tier}",
+    "bossLevel": "Boss Lv {level}",
+    "wl": "WL {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base}, assumed"
+  },
+  "unit": {
+    "days": "{n} day | {n} days",
+    "weeks": "{n} week | {n} weeks"
+  },
+  "status": {
+    "locked": "Adventure Rank or World Level too low to farm it yet",
+    "noRate": "No average drop rate for this source: no estimate",
+    "notFarmed": "No resin source"
+  },
+  "time": {
+    "hm": "{h}h {m}m",
+    "h": "{h}h",
+    "m": "{m}m",
+    "dh": "{d}d {h}h",
+    "d": "{d}d"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Convert",
+      "craft": "Craft",
+      "forge": "Forge"
+    },
+    "item": "{count} {name}",
+    "convertRow": "Convert {input} into {output}",
+    "craftRow": "Craft {output} from {input}",
+    "forgeRow": "Forge {output} from {input}",
+    "kindTitle": {
+      "convert": "Alchemy: conversion",
+      "craft": "Alchemy: crafting, lowest tier first",
+      "forge": "Blacksmith: forging"
+    },
+    "listSeparator": ", ",
+    "notYet": "Not yet: needs {items} more (do the steps above first)",
+    "doneRow": "Done: {row}",
+    "notEnough": "Not enough: needs {items} more",
+    "allDoneTitle": "All {n} done: the bag as after them",
+    "title": "Crafting",
+    "fold": "Fold",
+    "unfold": "What the plan converts, crafts and forges",
+    "steps": "{n} step | {n} steps",
+    "inAll": "{cost} in all",
+    "forgingTime": "Forging time {time} (the forge's queue aside)",
+    "forging": "forging",
+    "allDone": "All done",
+    "hideTitle": "Hide crafting (Planner settings bring it back)",
+    "hide": "Hide crafting",
+    "from": "from",
+    "fewer": "Fewer",
+    "all": "All {n}"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "WL {wl}",
+    "locked": "Locked"
+  },
+  "cards": {
+    "blossomExp": "Blossom of Revelation",
+    "blossomMora": "Blossom of Wealth",
+    "local": "Local specialties",
+    "common": "Common enemies",
+    "elite": "Elite enemies",
+    "other": "Other",
+    "elsewhere": "Elsewhere"
+  },
+  "sections": {
+    "free": "No resin",
+    "domain": "Domains · Ley lines",
+    "boss": "Bosses",
+    "weekly": "Weekly bosses",
+    "artifact": "Artifacts"
+  },
+  "card": {
+    "runs": "{n} run | {n} runs",
+    "claims": "{n} claim | {n} claims",
+    "claimsWeekly": "{claims}, one a week",
+    "atMost": "at most {runs}",
+    "atMostPrefix": "at most",
+    "runsShort": "{n} runs",
+    "claimsShort": "{n} claims",
+    "resinRange": "{min}–{max} resin",
+    "resin": "{n} resin",
+    "condensed": "{n} condensed",
+    "condensedTitle": "{n} Condensed Resin",
+    "guaranteed": "the drop rate is a guaranteed minimum",
+    "lockTitle": "Not yet: needs {lock}",
+    "kind": {
+      "boss": "Boss",
+      "gem": "Bosses dropping it",
+      "enemy": "Enemies dropping it",
+      "local": "Grows in",
+      "artifact": "Artifact domain"
+    },
+    "elsewhereTitle": "No domain drops these sets",
+    "noRate": "No rate",
+    "paidTitle": "The planned domain runs pay {mora} Mora",
+    "paid": "+{n} from domains",
+    "blockedTitle": "{n} conversions need more Dream Solvent",
+    "blocked": "{n} blocked",
+    "blockedSr": ": need more Dream Solvent"
+  },
+  "weekday": {
+    "short": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "long": {
+      "sun": "Sunday",
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday"
+    }
+  },
+  "panel": {
+    "today": "Today",
+    "schedule": "Schedule",
+    "runsLine": "{runs} · {resin} resin ({condensed} condensed) · {days}",
+    "sources": "domains, normal bosses and ley lines",
+    "daily": "{n} resin a day",
+    "dailyRefresh": "{n} resin a day (180 + {r} × {per})",
+    "withHeld": "{days} with the resin held",
+    "gems": "gems: {runs}, {resin} resin",
+    "partial": "some sources have no drop rate",
+    "upperBound": "World Level 9 boss drops are a guaranteed minimum",
+    "weeklyClaims": "Weekly bosses: {claims} over {weeks}",
+    "weeklyResin": "{resin} resin with the weekly discount ({max} without)",
+    "weeklyPartial": "some bosses have no drop rate",
+    "serverDay": "Server day: {day}",
+    "serverDaySunday": "Server day: {day} (every domain open)",
+    "resetIn": "the 04:00 reset in {time}",
+    "forgeOff": "Count the Mystic ore the chunks held can be forged into",
+    "forgeLine": "Forge {item}: {mora} Mora, {time}",
+    "stillShort": "still short {n}",
+    "totals": "Totals",
+    "resin": "resin",
+    "dayUnit": "day | days",
+    "refreshTitle": "{r} resin refresh a day: {daily} resin a day | {r} resin refreshes a day: {daily} resin a day",
+    "perDay": "{n}/day",
+    "weekly": "Weekly",
+    "weekUnit": "week | weeks",
+    "lockedTitle": "{n} source locked by AR/WL | {n} sources locked by AR/WL",
+    "locked": "locked by AR/WL",
+    "view": "Farm view",
+    "noWeeklyTitle": "Only the goals still to farm without a weekly boss: their drops are held or convertible (after the goals above)",
+    "noWeekly": "No weekly boss",
+    "noneLeft": "Every goal still needs a weekly boss",
+    "showAll": "Show all goals",
+    "assumed": "AR/WL not set: top bracket assumed",
+    "set": "Set",
+    "nothing": "Nothing to farm",
+    "sectionLabel": "{label}: {resin} resin",
+    "show": "Show",
+    "hidden": "{n} hidden",
+    "forge": "Forge from chunks",
+    "pairTitle": "{runs} · {resin} resin · {days}"
+  }
+}

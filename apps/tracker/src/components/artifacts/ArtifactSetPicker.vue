@@ -15,10 +15,12 @@ import { formatNumber } from '@/lib/format'
  * default, or with `characters` the wearers ("Equipped by"). Changes apply
  * as they are ticked; counts follow the other filters.
  */
-const props = withDefaults(
-  defineProps<{ open: boolean; options: SetOption[]; title?: string; characters?: boolean }>(),
-  { title: 'Sets' },
-)
+const props = defineProps<{
+  open: boolean
+  options: SetOption[]
+  title?: string
+  characters?: boolean
+}>()
 const emit = defineEmits<{ close: [] }>()
 const selected = defineModel<string[]>({ required: true })
 
@@ -49,11 +51,16 @@ function toggle(key: string, on: boolean) {
 </script>
 
 <template>
-  <UiModal :open="open" :title="title" @close="emit('close')">
+  <UiModal :open="open" :title="title ?? $t('characters.sets')" @close="emit('close')">
     <div class="flex flex-col gap-3">
       <label class="block">
-        <span class="sr-only">Find</span>
-        <UiInput v-model="query" type="search" autocomplete="off" placeholder="Search" />
+        <span class="sr-only">{{ $t('artifacts.picker.find') }}</span>
+        <UiInput
+          v-model="query"
+          type="search"
+          autocomplete="off"
+          :placeholder="$t('characters.toolbar.search')"
+        />
       </label>
 
       <ul v-if="shown.length" class="-mx-2 flex flex-col">
@@ -84,15 +91,17 @@ function toggle(key: string, on: boolean) {
       </ul>
       <p v-else class="flex items-center gap-2 py-6 text-text-secondary">
         <SearchX class="size-5 text-text-muted" aria-hidden="true" />
-        No match
+        {{ $t('artifacts.picker.noMatch') }}
       </p>
     </div>
 
     <template #footer>
       <UiButton variant="ghost" :disabled="selected.length === 0" @click="selected = []">
-        Clear
+        {{ $t('characters.toolbar.clear') }}
       </UiButton>
-      <UiButton variant="primary" @click="emit('close')">Done</UiButton>
+      <UiButton variant="primary" @click="emit('close')">{{
+        $t('artifacts.picker.done')
+      }}</UiButton>
     </template>
   </UiModal>
 </template>

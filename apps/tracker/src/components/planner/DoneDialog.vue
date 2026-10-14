@@ -6,6 +6,7 @@ import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { materialName } from '@/utils/materials'
 import type { DoneCost } from './done'
@@ -80,13 +81,24 @@ function items(map: ReadonlyMap<string, number> | undefined): Item[] {
 
 const take = computed(() => items(props.cost?.take))
 const short = computed(() => items(props.cost?.short))
+const item = (count: number, name: string) =>
+  t('farm.craft.item', { count: formatNumber(count), name })
 const steps = computed(() =>
   (props.cost?.steps ?? []).map((s) =>
     s.kind === 'forge'
-      ? `Forge ${formatNumber(s.count)} ${s.to.name} from ${formatNumber(s.uses)} ${props.planner.materialsByKey.get(s.input)?.name ?? materialName(s.input)}`
+      ? t('farm.craft.forgeRow', {
+          output: item(s.count, s.to.name),
+          input: item(
+            s.uses,
+            props.planner.materialsByKey.get(s.input)?.name ?? materialName(s.input),
+          ),
+        })
       : s.kind === 'craft'
-        ? `Craft ${formatNumber(s.count)} ${s.to.name} from ${formatNumber(s.uses)} ${s.from.name}`
-        : `Convert ${formatNumber(s.count)} ${s.from.name} into ${s.to.name}`,
+        ? t('farm.craft.craftRow', {
+            output: item(s.count, s.to.name),
+            input: item(s.uses, s.from.name),
+          })
+        : t('farm.craft.convertRow', { input: item(s.count, s.from.name), output: s.to.name }),
   ),
 )
 </script>
@@ -101,8 +113,12 @@ const steps = computed(() =>
         <span class="font-semibold text-success-text">{{ to }}</span>
       </p>
 
-      <section v-if="take.length" aria-label="Taken from the bag" class="flex flex-col gap-2">
-        <h3 class="text-sm font-semibold text-text-secondary">Uses</h3>
+      <section
+        v-if="take.length"
+        :aria-label="$t('planner.done.taken')"
+        class="flex flex-col gap-2"
+      >
+        <h3 class="text-sm font-semibold text-text-secondary">{{ $t('planner.done.uses') }}</h3>
         <ul class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           <li v-for="i in take" :key="i.key" class="flex items-center gap-2.5">
             <span
@@ -121,16 +137,16 @@ const steps = computed(() =>
           <li v-for="(s, index) in steps" :key="index">{{ s }}</li>
         </ul>
       </section>
-      <p v-else class="text-sm text-text-muted">Nothing to spend</p>
+      <p v-else class="text-sm text-text-muted">{{ $t('planner.cost.nothing') }}</p>
 
       <section
         v-if="short.length"
-        aria-label="Not in the bag"
+        :aria-label="$t('planner.done.notInBag')"
         class="flex flex-col gap-2 rounded-lg border border-danger-border bg-danger-surface p-3"
       >
         <h3 class="flex items-center gap-1.5 text-sm font-semibold text-danger-text">
           <TriangleAlert class="size-4" aria-hidden="true" />
-          Not in the bag
+          {{ $t('planner.done.notInBag') }}
         </h3>
         <ul class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           <li v-for="i in short" :key="i.key" class="flex items-center gap-2.5">
@@ -148,15 +164,15 @@ const steps = computed(() =>
             >
           </li>
         </ul>
-        <p class="text-xs text-text-secondary">Done takes what there is.</p>
+        <p class="text-xs text-text-secondary">{{ $t('planner.done.takesWhatThereIs') }}</p>
       </section>
     </div>
 
     <template #footer>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('planner.common.cancel') }}</UiButton>
       <UiButton variant="primary" :loading="saving" @click="emit('confirm')">
         <Check class="size-4" aria-hidden="true" />
-        Done
+        {{ $t('planner.done.confirm') }}
       </UiButton>
     </template>
   </UiModal>

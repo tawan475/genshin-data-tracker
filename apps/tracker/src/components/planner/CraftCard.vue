@@ -15,6 +15,7 @@ import {
 } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { materialName } from '@/utils/materials'
@@ -69,11 +70,7 @@ const PHONE_SHOWN = 3
 const all = ref(false)
 
 const KIND_ICON = { craft: ChevronsUp, convert: Repeat2, forge: Hammer } as const
-const KIND_TITLE: Record<CraftKind, string> = {
-  convert: 'Alchemy: conversion',
-  craft: 'Alchemy: crafting, lowest tier first',
-  forge: 'Blacksmith: forging',
-}
+const kindTitle = (kind: CraftKind) => t(`farm.craft.kindTitle.${kind}`)
 
 const icon = (key: string) => {
   if (key === props.planner.mora.key) return materialIcon('Mora')
@@ -82,7 +79,8 @@ const icon = (key: string) => {
 }
 const soft = (key: string) => materialSoft(key, props.planner.materialsByKey.get(key)?.rarity)
 
-const costText = (c: CraftItem) => `${formatNumber(c.count)} ${materialName(c.key)}`
+const costText = (c: CraftItem) =>
+  t('farm.craft.item', { count: formatNumber(c.count), name: materialName(c.key) })
 
 interface Row extends CraftRow {
   at: number
@@ -128,20 +126,21 @@ const moreClass = computed(() =>
       : 'hidden',
 )
 
-const shortTitle = (short: CraftItem[]) =>
-  `Not yet: needs ${short.map(costText).join(', ')} more (do the steps above first)`
-const doneLabel = (row: Row) => (row.short.length ? shortTitle(row.short) : `Done: ${row.title}`)
+const list = (items: CraftItem[]) => items.map(costText).join(t('farm.craft.listSeparator'))
+const shortTitle = (short: CraftItem[]) => t('farm.craft.notYet', { items: list(short) })
+const doneLabel = (row: Row) =>
+  row.short.length ? shortTitle(row.short) : t('farm.craft.doneRow', { row: row.title })
 const allLabel = computed(() =>
   allShort.value.length
-    ? `Not enough: needs ${allShort.value.map(costText).join(', ')} more`
-    : `All ${formatNumber(rows.value.length)} done: the bag as after them`,
+    ? t('farm.craft.notEnough', { items: list(allShort.value) })
+    : t('farm.craft.allDoneTitle', { n: formatNumber(rows.value.length) }),
 )
 </script>
 
 <template>
   <article
     class="flex min-w-0 flex-col gap-2 rounded-xl border border-border-default bg-surface-raised p-2 shadow-sm"
-    aria-label="Crafting"
+    :aria-label="$t('farm.craft.title')"
   >
     <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
       <h3 class="min-w-0">
@@ -149,7 +148,7 @@ const allLabel = computed(() =>
           type="button"
           class="-my-1 -ml-1 flex min-h-9 flex-wrap items-center gap-x-2.5 gap-y-1 rounded-lg px-1 text-left transition-colors hover:bg-surface-overlay"
           :aria-expanded="open"
-          :title="open ? 'Fold' : 'What the plan converts, crafts and forges'"
+          :title="open ? $t('farm.craft.fold') : $t('farm.craft.unfold')"
           @click="toggleOpen"
         >
           <span class="inline-flex items-center gap-1 text-sm leading-7 font-semibold">
@@ -158,16 +157,16 @@ const allLabel = computed(() =>
               :class="open ? '' : '-rotate-90'"
               aria-hidden="true"
             />
-            Crafting
+            {{ $t('farm.craft.title') }}
           </span>
-          <span class="tabular font-mono text-xs font-normal text-text-secondary"
-            >{{ formatNumber(rows.length) }} {{ rows.length === 1 ? 'step' : 'steps' }}</span
-          >
+          <span class="tabular font-mono text-xs font-normal text-text-secondary">{{
+            $t('farm.craft.steps', { n: formatNumber(rows.length) }, rows.length)
+          }}</span>
           <span
             v-for="c in totals.costs"
             :key="c.key"
             class="tabular inline-flex items-center gap-0.5 font-mono text-xs text-text-secondary"
-            :title="`${costText(c)} in all`"
+            :title="$t('farm.craft.inAll', { cost: costText(c) })"
           >
             <span class="size-4 shrink-0">
               <MaterialIcon :src="icon(c.key)" :name="materialName(c.key)" />
@@ -178,11 +177,11 @@ const allLabel = computed(() =>
           <span
             v-if="totals.seconds"
             class="tabular inline-flex items-center gap-0.5 font-mono text-xs text-text-secondary"
-            :title="`Forging time ${formatSeconds(totals.seconds)} (the forge's queue aside)`"
+            :title="$t('farm.craft.forgingTime', { time: formatSeconds(totals.seconds) })"
           >
             <Clock class="size-3.5" aria-hidden="true" />
             {{ formatSeconds(totals.seconds) }}
-            <span class="sr-only">forging</span>
+            <span class="sr-only">{{ $t('farm.craft.forging') }}</span>
           </span>
         </button>
       </h3>
@@ -198,13 +197,13 @@ const allLabel = computed(() =>
           @click="allShort.length || emit('done', rows)"
         >
           <CheckCheck class="size-4" aria-hidden="true" />
-          <span class="max-sm:sr-only">All done</span>
+          <span class="max-sm:sr-only">{{ $t('farm.craft.allDone') }}</span>
         </button>
         <button
           type="button"
           class="inline-flex size-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-primary"
-          title="Hide crafting (Planner settings bring it back)"
-          aria-label="Hide crafting"
+          :title="$t('farm.craft.hideTitle')"
+          :aria-label="$t('farm.craft.hide')"
           @click="emit('hide')"
         >
           <EyeOff class="size-4" aria-hidden="true" />
@@ -222,7 +221,7 @@ const allLabel = computed(() =>
       >
         <h4
           class="flex items-center gap-1 text-xs font-medium text-text-muted"
-          :title="KIND_TITLE[g.kind]"
+          :title="kindTitle(g.kind)"
         >
           <component :is="KIND_ICON[g.kind]" class="size-3.5" aria-hidden="true" />
           {{ CRAFT_LABEL[g.kind] }}
@@ -261,7 +260,8 @@ const allLabel = computed(() =>
               </span>
               <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-muted">
                 <span class="min-w-0 break-words"
-                  >from <span class="tabular font-mono">{{ formatNumber(row.input.count) }}</span>
+                  >{{ $t('farm.craft.from') }}
+                  <span class="tabular font-mono">{{ formatNumber(row.input.count) }}</span>
                   {{ materialName(row.input.key) }}</span
                 >
                 <span
@@ -305,7 +305,7 @@ const allLabel = computed(() =>
         :aria-expanded="all"
         @click="all = !all"
       >
-        {{ all ? 'Fewer' : `All ${formatNumber(rows.length)}` }}
+        {{ all ? $t('farm.craft.fewer') : $t('farm.craft.all', { n: formatNumber(rows.length) }) }}
       </button>
     </template>
   </article>

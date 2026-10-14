@@ -8,6 +8,7 @@
 import type { AscensionPhase } from '@gdt/game-data'
 import { normalizeLevel, type CharacterState } from '@gdt/game-data/planner-math'
 import type { CharacterTarget } from '@gdt/shared'
+import { t } from '@/i18n'
 import { goalAtLeast } from './level-grid'
 
 export type PresetId = 'max' | '90-9' | '80-8' | 'talents' | 'level'
@@ -25,36 +26,56 @@ export interface Preset {
 export const PRESETS: readonly Preset[] = [
   {
     id: 'max',
-    label: 'Max',
-    title: 'Level 90, talents 10/10/10',
+    get label() {
+      return t('planner.preset.max.label')
+    },
+    get title() {
+      return t('planner.preset.max.title')
+    },
     level: { level: 90, ascension: 6 },
     talents: 10,
   },
   {
     id: '90-9',
-    label: '90/9/9/9',
-    title: 'Level 90, talents 9/9/9',
+    get label() {
+      return t('planner.preset.level90.label')
+    },
+    get title() {
+      return t('planner.preset.level90.title')
+    },
     level: { level: 90, ascension: 6 },
     talents: 9,
   },
   {
     id: '80-8',
-    label: '80/8/8/8',
-    title: 'Level 80, talents 8/8/8',
+    get label() {
+      return t('planner.preset.level80.label')
+    },
+    get title() {
+      return t('planner.preset.level80.title')
+    },
     level: { level: 80, ascension: 5 },
     talents: 8,
   },
   {
     id: 'talents',
-    label: 'Talents only',
-    title: 'Talents 9/9/9, level as now',
+    get label() {
+      return t('planner.preset.talents.label')
+    },
+    get title() {
+      return t('planner.preset.talents.title')
+    },
     level: null,
     talents: 9,
   },
   {
     id: 'level',
-    label: 'Level only',
-    title: 'Level 90, talents as now',
+    get label() {
+      return t('planner.preset.level.label')
+    },
+    get title() {
+      return t('planner.preset.level.title')
+    },
     level: { level: 90, ascension: 6 },
     talents: null,
   },

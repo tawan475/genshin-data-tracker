@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { CONSTELLATION_MAX_STYLE, isMaxConstellation } from '@/components/characters/max-badges'
 import { ELEMENT_TEXT } from '@/components/characters/tokens'
 import type { Element } from '@/data/game-meta'
+import { t } from '@/i18n'
 
 /**
  * Constellation as in game: six four-pointed stars, filled in the element's
@@ -29,7 +30,7 @@ const STAR =
 const level = computed(() => Math.min(6, Math.max(0, Math.trunc(props.value) || 0)))
 const on = computed(() => (props.element ? ELEMENT_TEXT[props.element] : 'text-text-secondary'))
 const title = computed(() => {
-  const head = `Constellation ${level.value} of 6`
+  const head = t('ui.constellation.title', { level: level.value })
   const unlocked = (props.names ?? []).slice(0, level.value)
   return unlocked.length
     ? [head, ...unlocked.map((name, i) => `C${i + 1} ${name}`)].join('\n')

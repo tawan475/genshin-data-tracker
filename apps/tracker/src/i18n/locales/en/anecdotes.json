@@ -1,1 +1,75 @@
-{}
+{
+  "title": "Anecdotes",
+  "area": "Area {id}",
+  "newestCapture": "Newest capture",
+  "newestCaptureTitle": "Newest capture: {time}",
+  "notCaptured": "Not captured",
+  "notCapturedTitle": "No capture has anecdotes yet: irminsul records them from the game",
+  "loadFailed": "Load failed",
+  "allDone": "All done",
+  "showDone": "Show done",
+  "noneDone": "None done",
+  "showNotDone": "Show not done",
+  "noneMet": "None met yet",
+  "noneMetBody": "Hidden anecdotes show once met.",
+  "noMatches": "No matches",
+  "clear": "Clear",
+  "loading": "Loading",
+  "notSaved": "Not saved",
+  "group": {
+    "hideDone": "Hide done",
+    "showDone": "Show done",
+    "done": "{n} done"
+  },
+  "row": {
+    "states": {
+      "captured": "captured",
+      "marked": "marked by hand",
+      "none": "not done"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Captured · stays done",
+    "markedByHand": "Marked by hand",
+    "markedClick": "Marked by hand · click to unmark",
+    "notDone": "Not done",
+    "clickToMark": "Click to mark done",
+    "activeTitle": "Going on now in the game",
+    "active": "Active",
+    "repeatTitle": "Done {n} times (a loop)",
+    "hidden": "Hidden anecdote",
+    "addedIn": "Added in {version}"
+  },
+  "summary": {
+    "label": "Summary",
+    "done": "Done",
+    "doneCaptured": "{n} captured",
+    "doneByHand": "{n} by hand",
+    "doneUnknown": "{n} newer than the game data",
+    "doneLabel": "Anecdotes done",
+    "stamps": "Stamps",
+    "stampsTitle": "Stamps toward reward {n}",
+    "stampsNone": "Not in a capture yet",
+    "stampsLabel": "Stamps toward the next reward",
+    "reward": "Reward",
+    "rewardHint": "{primogems} primogems for every {every} anecdotes recorded",
+    "rewardPer": "per {every}",
+    "active": "Active",
+    "activeHint": "Going on now in the game (in the newest capture)"
+  },
+  "toolbar": {
+    "label": "Filter anecdotes",
+    "search": "Search",
+    "searchTitle": "Title, story, NPC or id",
+    "completion": "Completion",
+    "completions": {
+      "all": "All",
+      "missing": "Not done",
+      "done": "Done"
+    },
+    "showDone": "Show done",
+    "showDoneTitle": "Done anecdotes in full instead of folded under each NPC",
+    "area": "Area",
+    "allAreas": "All",
+    "locked": "Not unlocked in the newest capture"
+  }
+}

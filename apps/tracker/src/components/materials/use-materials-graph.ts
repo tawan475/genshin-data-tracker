@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { api } from '@/api'
 import { useFeedback } from '@/stores/feedback'
 import { useReadOnly } from '@/views/account/context'
+import { t } from '@/i18n'
 
 /** One colour token per series (--chart-1…6), so at most six on a chart. */
 export const MAX_SERIES = 6
@@ -72,7 +73,7 @@ export function useMaterialsGraph(accountId: () => number) {
     try {
       await api.updateAccountSettings(id, { materialsGraph: body })
     } catch (error) {
-      feedback.error('Could not save the chart settings', error)
+      feedback.error(t('materials.saveChartFailed'), error)
     }
   }
 

@@ -1,1 +1,74 @@
-{}
+{
+  "title": "Detailed progression",
+  "figures": "Figures",
+  "atLeastOne": "At least one",
+  "groupBy": "Group by",
+  "longerThanRange": "Longer than the range",
+  "loading": "Loading progression",
+  "noData": "No data",
+  "inRange": "in this range",
+  "gainedInRange": "gained in this range",
+  "spentInRange": "spent in this range",
+  "noCaptures": "No captures",
+  "captures": "{n} capture | {n} captures",
+  "total": "Total {n}",
+  "lineLabel": "{figure} over time, {span}. Latest {value}.",
+  "barsLabel": "{figure} change {per}, {span}: gained {gained}, spent {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Snapshot",
+    "hour": "Hour",
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
+  },
+  "per": {
+    "snapshot": "Per snapshot",
+    "hour": "Per hour",
+    "day": "Per day",
+    "month": "Per month",
+    "year": "Per year"
+  },
+  "against": {
+    "snapshot": "Change against the previous snapshot",
+    "hour": "Change against the previous hour",
+    "day": "Change against the previous day",
+    "month": "Change against the previous month",
+    "year": "Change against the previous year"
+  },
+  "newest": {
+    "snapshot": "newest {n} snapshots",
+    "hour": "newest {n} hours",
+    "day": "newest {n} days",
+    "month": "newest {n} months",
+    "year": "newest {n} years"
+  },
+  "range": {
+    "label": "Time range",
+    "hours": "Hours",
+    "days": "Days",
+    "all": "All",
+    "h": "{n}h",
+    "d": "{n}d",
+    "y": "{n}y"
+  },
+  "monthly": {
+    "unavailable": "Monthly analysis unavailable",
+    "loading": "Loading monthly analysis",
+    "noCaptures": "No captures",
+    "goTo": "Go to {month}",
+    "date": "Date",
+    "primogem": "Primogem",
+    "mora": "Mora",
+    "artifact": "Artifact",
+    "extract": "Extract",
+    "netWorth": "Net Worth",
+    "moraUnit": "mora",
+    "primogemUnit": "primogem"
+  },
+  "character": {
+    "level": "Level",
+    "constellation": "Constellation",
+    "talents": "Talents"
+  }
+}

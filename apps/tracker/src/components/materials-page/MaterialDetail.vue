@@ -9,6 +9,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import { formatRangeEdge, formatWindow, type ChartRange } from '@/data/chart-range'
 import type { MaterialsHistory } from '@/data/materials'
+import { t } from '@/i18n'
 import { clock24, formatCompact, formatDate, formatNumber } from '@/lib/format'
 import DeltaText from './DeltaText.vue'
 import MaterialIcon from './MaterialIcon.vue'
@@ -20,7 +21,7 @@ import {
   firstSeen,
   flowBetween,
   frameStart,
-  PERIOD_OPTIONS,
+  periodOptions,
   rangeFrame,
   referenceFor,
 } from './material-stats'
@@ -42,14 +43,16 @@ const series = computed(() => (props.item ? props.history.series.get(props.item.
 
 /** Change against the previous snapshot, ~7 and ~30 days back. */
 const recent = computed(() =>
-  PERIOD_OPTIONS.map((option) => {
+  periodOptions().map((option) => {
     const reference = referenceFor(props.history, option.value)
     return {
       label: option.label,
       change: reference
         ? countAt(series.value, last.value) - countAt(series.value, reference.index)
         : null,
-      hint: reference ? `since ${formatDate(reference.takenAt)}` : 'One snapshot only',
+      hint: reference
+        ? t('materials.since', { date: formatDate(reference.takenAt) })
+        : t('materials.oneSnapshot'),
     }
   }),
 )
@@ -68,9 +71,10 @@ const chart = computed<TimelineSeries[]>(() =>
 )
 const rangeStart = computed(() => frameStart(props.history, frame.value))
 /** "since Oct 5, 2026, 2:10 PM" (the date alone over a week). */
-const sinceStart = computed(
-  () =>
-    `since ${formatRangeEdge(rangeStart.value, frame.value.end - rangeStart.value, !clock24())}`,
+const sinceStart = computed(() =>
+  t('materials.since', {
+    date: formatRangeEdge(rangeStart.value, frame.value.end - rangeStart.value, !clock24()),
+  }),
 )
 const rangeDetail = computed(() => formatWindow(rangeStart.value, frame.value.end, !clock24()))
 
@@ -82,29 +86,30 @@ const stats = computed(() => {
   const inRange = sinceStart.value
   const signed = (value: number, sign: string, format: (n: number) => string) =>
     value ? `${sign}${format(value)}` : '0'
+  const within = (value: string) => t('materials.detail.statTitle', { value, since: inRange })
   return [
     {
-      label: 'Gained',
+      label: t('materials.detail.gained'),
       value: signed(flow.gained, '+', formatCompact),
-      title: `${signed(flow.gained, '+', formatNumber)} ${inRange}`,
+      title: within(signed(flow.gained, '+', formatNumber)),
       tone: flow.gained ? 'text-success-text' : '',
     },
     {
-      label: 'Spent',
+      label: t('materials.detail.spent'),
       value: signed(flow.spent, '−', formatCompact),
-      title: `${signed(flow.spent, '−', formatNumber)} ${inRange}`,
+      title: within(signed(flow.spent, '−', formatNumber)),
       tone: flow.spent ? 'text-danger-text' : '',
     },
     {
-      label: 'Peak',
+      label: t('materials.detail.peak'),
       value: formatCompact(flow.peak),
-      title: `${formatNumber(flow.peak)} ${inRange}`,
+      title: within(formatNumber(flow.peak)),
       tone: '',
     },
     {
-      label: 'First',
+      label: t('materials.detail.first'),
       value: since === null ? '—' : formatDate(since),
-      title: 'First snapshot holding it',
+      title: t('materials.detail.firstTitle'),
       tone: '',
     },
   ]
@@ -115,7 +120,7 @@ const place = computed(() => {
   const item = props.item
   if (!item) return undefined
   if (item.wallet && item.tab === 'other') {
-    return { label: 'Wallet', title: 'Currencies and wish items', icon: Coins }
+    return { label: t('materials.wallet.label'), title: t('materials.wallet.title'), icon: Coins }
   }
   const tab = tabDisplay(item.tab)
   return { label: tab.name, title: tab.title, icon: tab.icon }
@@ -149,12 +154,20 @@ const place = computed(() => {
         <UiButton
           :variant="tracked ? 'secondary' : 'primary'"
           :disabled="!tracked && !canTrack"
-          :title="!tracked && !canTrack ? `Up to ${MAX_SERIES}` : tracked ? 'Untrack' : 'Track'"
+          :title="
+            !tracked && !canTrack
+              ? $t('materials.upTo', { max: MAX_SERIES })
+              : tracked
+                ? $t('materials.untrack')
+                : $t('materials.track')
+          "
           class="shrink-0"
           @click="emit('toggleTrack', item.key)"
         >
           <component :is="tracked ? PinOff : Pin" class="size-4" aria-hidden="true" />
-          <span class="sr-only sm:not-sr-only">{{ tracked ? 'Untrack' : 'Track' }}</span>
+          <span class="sr-only sm:not-sr-only">{{
+            tracked ? $t('materials.untrack') : $t('materials.track')
+          }}</span>
         </UiButton>
       </div>
 
@@ -171,13 +184,13 @@ const place = computed(() => {
         </div>
       </dl>
 
-      <section class="flex flex-col gap-3" aria-label="History">
+      <section class="flex flex-col gap-3" :aria-label="$t('materials.detail.history')">
         <div class="flex justify-end">
           <ChartRangeSelect v-model="range" :detail="rangeDetail" />
         </div>
         <TimelineChart
           :series="chart"
-          :label="`${item.name} over time, ${sinceStart}`"
+          :label="$t('materials.detail.chartLabel', { name: item.name, since: sinceStart })"
           :height="220"
           stepped
           fill

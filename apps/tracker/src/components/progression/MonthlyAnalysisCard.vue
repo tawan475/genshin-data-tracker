@@ -16,6 +16,8 @@ import { materialIcon } from '@/lib/assets'
 import { capturedMonths, monthlyAnalysis, type CalendarMonth } from '@/data/monthly-analysis'
 import { monthLabel } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
+import { materialName } from '@/utils/materials'
 import { useAccount } from '@/views/account/context'
 
 /**
@@ -85,10 +87,14 @@ const canNext = computed(
   () => !!selected.value && !!latestMonth.value && order(selected.value) < order(latestMonth.value),
 )
 const prevLabel = computed(() =>
-  selected.value ? `Previous month, ${label(shift(selected.value, -1))}` : 'Previous month',
+  selected.value
+    ? t('overview.monthly.previousTo', { month: label(shift(selected.value, -1)) })
+    : t('overview.monthly.previous'),
 )
 const nextLabel = computed(() =>
-  selected.value ? `Next month, ${label(shift(selected.value, 1))}` : 'Next month',
+  selected.value
+    ? t('overview.monthly.nextTo', { month: label(shift(selected.value, 1)) })
+    : t('overview.monthly.next'),
 )
 
 const prevMonth = () => {
@@ -130,7 +136,7 @@ const jumps = computed(() => {
 </script>
 
 <template>
-  <UiPanel title="Monthly analysis">
+  <UiPanel :title="$t('overview.monthly.title')">
     <template v-if="selected" #actions>
       <div class="flex items-center gap-1">
         <UiIconButton
@@ -157,21 +163,24 @@ const jumps = computed(() => {
 
     <UiError
       v-if="materialsError && !materials"
-      title="Monthly analysis unavailable"
+      :title="$t('progression.monthly.unavailable')"
       :error="materialsError"
       @retry="reloadMaterials"
     />
     <div v-else-if="!monthlyAnalysisData" class="flex justify-center p-8" role="status">
-      <span class="sr-only">Loading monthly analysis</span>
+      <span class="sr-only">{{ $t('progression.monthly.loading') }}</span>
       <UiSpinner class="size-6 text-text-muted" />
     </div>
-    <UiEmpty v-else-if="monthlyAnalysisData.rows.length === 0" title="No captures">
+    <UiEmpty
+      v-else-if="monthlyAnalysisData.rows.length === 0"
+      :title="$t('progression.monthly.noCaptures')"
+    >
       <template #icon><CalendarX aria-hidden="true" /></template>
       <UiButton
         v-for="jump in jumps"
         :key="jump.key"
         size="sm"
-        :title="`Go to ${jump.label}`"
+        :title="$t('progression.monthly.goTo', { month: jump.label })"
         @click="selected = jump.month"
       >
         <ChevronLeft v-if="jump.direction === 'prev'" class="size-4" aria-hidden="true" />
@@ -190,32 +199,32 @@ const jumps = computed(() => {
             <th
               class="px-3 py-3 font-semibold text-text-secondary whitespace-nowrap transition-colors"
             >
-              Date
+              {{ $t('progression.monthly.date') }}
             </th>
             <th
               class="px-3 py-3 font-semibold text-text-secondary whitespace-nowrap transition-colors"
             >
-              Primogem
+              {{ $t('progression.monthly.primogem') }}
             </th>
             <th
               class="px-3 py-3 font-semibold text-text-secondary whitespace-nowrap transition-colors"
             >
-              Mora
+              {{ $t('progression.monthly.mora') }}
             </th>
             <th
               class="px-3 py-3 font-semibold text-text-secondary whitespace-nowrap transition-colors"
             >
-              Artifact
+              {{ $t('progression.monthly.artifact') }}
             </th>
             <th
               class="px-3 py-3 font-semibold text-text-secondary whitespace-nowrap transition-colors"
             >
-              Extract
+              {{ $t('progression.monthly.extract') }}
             </th>
             <th
               class="px-3 py-3 font-semibold text-text-secondary whitespace-nowrap transition-colors"
             >
-              Net Worth
+              {{ $t('progression.monthly.netWorth') }}
             </th>
           </tr>
         </thead>
@@ -235,7 +244,7 @@ const jumps = computed(() => {
               <div class="flex items-center gap-1.5">
                 <ItemDisplay
                   :amount="row.primogem.total"
-                  name="primogem"
+                  :name="$t('progression.monthly.primogemUnit')"
                   :image="materialIcon('Primogem')"
                   class="font-semibold text-hydro transition-colors"
                 />
@@ -260,7 +269,8 @@ const jumps = computed(() => {
                   :class="row.mora.diff >= 0 ? 'text-success-text' : 'text-danger-text'"
                 >
                   &nbsp;({{ row.mora.diff >= 0 ? '+' : '' }}{{ formatNumber(row.mora.diff)
-                  }}<span class="sr-only">&nbsp;mora</span>)
+                  }}<span class="sr-only">&nbsp;{{ $t('progression.monthly.moraUnit') }}</span
+                  >)
                 </span>
               </div>
             </td>
@@ -277,7 +287,8 @@ const jumps = computed(() => {
                 >
                   &nbsp;({{ row.artifact.diffWorth >= 0 ? '+' : ''
                   }}{{ formatNumber(row.artifact.diffWorth)
-                  }}<span class="sr-only">&nbsp;mora</span>)
+                  }}<span class="sr-only">&nbsp;{{ $t('progression.monthly.moraUnit') }}</span
+                  >)
                 </span>
               </div>
 
@@ -319,8 +330,7 @@ const jumps = computed(() => {
                   class="text-xs font-medium transition-colors"
                   :class="row.extract.diffExp >= 0 ? 'text-success-text' : 'text-danger-text'"
                 >
-                  ({{ row.extract.diffExp >= 0 ? '+' : ''
-                  }}{{ formatNumber(row.extract.diffExp) }})
+                  ({{ row.extract.diffExp >= 0 ? '+' : '' }}{{ formatNumber(row.extract.diffExp) }})
                 </span>
               </div>
 
@@ -329,13 +339,13 @@ const jumps = computed(() => {
                   <ItemDisplay
                     :amount="row.extract.total4"
                     :image="materialIcon('SanctifyingEssence')"
-                    name="Sanctifying Essence"
+                    :name="materialName('SanctifyingEssence')"
                     class="text-rarity-4 font-medium transition-colors"
                   />,
                   <ItemDisplay
                     :amount="row.extract.total3"
                     :image="materialIcon('SanctifyingUnction')"
-                    name="Sanctifying Unction"
+                    :name="materialName('SanctifyingUnction')"
                     class="text-rarity-3 font-medium transition-colors"
                   />
                 </span>
@@ -344,14 +354,14 @@ const jumps = computed(() => {
                   <ItemDisplay
                     :amount="(row.extract.diff4 >= 0 ? '+' : '') + row.extract.diff4"
                     :image="materialIcon('SanctifyingEssence')"
-                    name="Sanctifying Essence"
+                    :name="materialName('SanctifyingEssence')"
                     :class="row.extract.diff4 >= 0 ? 'text-success-text' : 'text-danger-text'"
                     class="transition-colors"
                   />,
                   <ItemDisplay
                     :amount="(row.extract.diff3 >= 0 ? '+' : '') + row.extract.diff3"
                     :image="materialIcon('SanctifyingUnction')"
-                    name="Sanctifying Unction"
+                    :name="materialName('SanctifyingUnction')"
                     :class="row.extract.diff3 >= 0 ? 'text-success-text' : 'text-danger-text'"
                     class="transition-colors"
                   />
@@ -376,7 +386,8 @@ const jumps = computed(() => {
                 >
                   &nbsp;({{ row.mora.diff + row.artifact.diffWorth >= 0 ? '+' : ''
                   }}{{ formatNumber(row.mora.diff + row.artifact.diffWorth)
-                  }}<span class="sr-only">&nbsp;mora</span>)
+                  }}<span class="sr-only">&nbsp;{{ $t('progression.monthly.moraUnit') }}</span
+                  >)
                 </span>
               </div>
             </td>

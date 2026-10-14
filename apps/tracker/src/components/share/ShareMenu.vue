@@ -29,11 +29,17 @@ function openMenu() {
 
 <template>
   <span ref="anchor" class="inline-flex shrink-0">
-    <UiIconButton label="Share card" :active="open" @click="openMenu">
+    <UiIconButton :label="$t('share.menu.label')" :active="open" @click="openMenu">
       <Share2 class="size-5" aria-hidden="true" />
     </UiIconButton>
   </span>
-  <UiPopover :open="open" :anchor="anchor" label="Share card" :focus="false" @close="open = false">
+  <UiPopover
+    :open="open"
+    :anchor="anchor"
+    :label="$t('share.menu.label')"
+    :focus="false"
+    @close="open = false"
+  >
     <div class="flex flex-col gap-4 p-4">
       <CardOptions
         v-model:theme="theme"
@@ -52,8 +58,10 @@ function openMenu() {
         "
         aria-live="polite"
       >
-        <template v-if="exporter.waiting.value">Drawing</template>
-        <template v-else-if="exporter.failure.value">{{ exporter.failure.value.text }}</template>
+        <template v-if="exporter.waiting.value">{{ $t('share.menu.drawing') }}</template>
+        <template v-else-if="exporter.failure.value">{{
+          exporter.actionState(exporter.failure.value.action).title
+        }}</template>
         <template v-else-if="exporter.missing.value">{{
           exporter.actionState('png').title
         }}</template>
@@ -73,7 +81,7 @@ function openMenu() {
             class="size-4"
             aria-hidden="true"
           />
-          Share
+          {{ $t('share.export.share') }}
         </UiButton>
         <UiButton v-if="exporter.copyable" @click="exporter.copy">
           <UiSpinner v-if="!exporter.actionState('copy').icon" class="size-4" />
@@ -83,7 +91,7 @@ function openMenu() {
             class="size-4"
             aria-hidden="true"
           />
-          Copy
+          {{ $t('share.menu.copy') }}
         </UiButton>
         <UiButton
           :variant="exporter.shareable ? 'secondary' : 'primary'"

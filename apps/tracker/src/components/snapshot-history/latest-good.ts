@@ -9,6 +9,7 @@
 import { shallowRef, watch, type Ref } from 'vue'
 import type { AccountResponse } from '@gdt/shared'
 import { api } from '@/api'
+import { t } from '@/i18n'
 
 interface Entry {
   key: string
@@ -41,7 +42,7 @@ export function useLatestGood(account: Ref<AccountResponse>) {
 
   function fetchLatest(): Promise<string> {
     const latest = account.value.latest
-    if (!latest) return Promise.reject(new Error('No snapshots yet'))
+    if (!latest) return Promise.reject(new Error(t('transfer.export.noSnapshots')))
     const key = `${account.value.id}:${latest.id}`
     wanted = key
     failed.value = false

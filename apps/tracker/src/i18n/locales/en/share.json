@@ -1,1 +1,38 @@
-{}
+{
+  "export": {
+    "copyImage": "Copy image",
+    "share": "Share",
+    "missing": "{n} image could not be loaded | {n} images could not be loaded",
+    "drawing": "{label} · drawing",
+    "exportFailed": "Export failed",
+    "copyFailed": "Copy failed",
+    "shareFailed": "Share failed",
+    "copied": "Copied",
+    "download": "Download PNG",
+    "downloadSized": "Download {size} PNG",
+    "buildTitle": "Build",
+    "artifactTitle": "Artifact"
+  },
+  "options": {
+    "darkCard": "Dark card",
+    "lightCard": "Light card",
+    "dark": "Dark",
+    "light": "Light",
+    "cardTheme": "Card theme",
+    "showName": "Show the account name",
+    "name": "Name",
+    "showUid": "Show the UID"
+  },
+  "menu": {
+    "label": "Share card",
+    "drawing": "Drawing",
+    "copy": "Copy"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} rolls (the first ones and one per +4)",
+    "levelTitle": "Level {level} of {cap} · Ascension {ascension}",
+    "weaponAndStats": "Weapon and stats",
+    "pieceBonus": "{n}-piece bonus",
+    "rvTitle": "Roll value: every substat roll as a % of its highest roll, added up"
+  }
+}

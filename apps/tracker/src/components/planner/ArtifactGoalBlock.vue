@@ -6,6 +6,7 @@ import { Check, PencilLine, Plus, X } from 'lucide-vue-next'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiButton from '@/components/ui/UiButton.vue'
+import { t } from '@/i18n'
 import { artifactIcon, artifactSetIcon } from '@/lib/assets'
 import { formatSetName, formatSlotName, formatStatShort } from '@/utils/artifact-stats'
 import { maxLevel } from '@/utils/artifact-rolls'
@@ -73,27 +74,39 @@ const pieceText = (p: GoodArtifact) =>
 
 function slotTitle(s: SlotProgress): string {
   const name = formatSlotName(s.slot)
-  if (s.hand === true) return `${name}: done (ticked by hand)`
-  if (s.hand === false)
-    return `${name}: not done (ticked by hand${s.auto ? '; the capture says done' : ''})`
-  if (s.auto && s.piece) return `${name}: done, from the capture (${pieceText(s.piece)})`
-  return `${name}: ${missText(s) || 'not done'}`
+  if (s.hand === true) return t('planner.artifacts.doneByHand', { name })
+  if (s.hand === false) {
+    return s.auto
+      ? t('planner.artifacts.notDoneByHandCaptureDone', { name })
+      : t('planner.artifacts.notDoneByHand', { name })
+  }
+  if (s.auto && s.piece) {
+    return t('planner.artifacts.doneFromCapture', { name, piece: pieceText(s.piece) })
+  }
+  return t('planner.artifacts.slotState', {
+    name,
+    state: missText(s) || t('planner.artifacts.notDone'),
+  })
 }
 
 function missText(s: SlotProgress): string {
   const p = s.piece
-  if (!p) return 'nothing worn'
-  if (s.miss === 'set') return 'other set'
-  if (s.miss === 'stat') return 'other main stat'
-  if (s.miss === 'level') return `+${p.level} of +${maxLevel(p.rarity)}`
+  if (!p) return t('planner.artifacts.nothingWorn')
+  if (s.miss === 'set') return t('planner.artifacts.otherSet')
+  if (s.miss === 'stat') return t('planner.artifacts.otherMainStat')
+  if (s.miss === 'level') {
+    return t('planner.artifacts.levelOf', { level: p.level, max: maxLevel(p.rarity) })
+  }
   return ''
 }
 
 function setTitle(s: SetProgress): string {
   const name = formatSetName(s.key)
-  if (s.hand === true) return `${name}: done (ticked by hand)`
-  if (s.hand === false) return `${name}: farming (ticked by hand)`
-  return s.auto ? `${name}: done, every slot is` : `${name}: farming`
+  if (s.hand === true) return t('planner.artifacts.doneByHand', { name })
+  if (s.hand === false) return t('planner.artifacts.farmingByHand', { name })
+  return s.auto
+    ? t('planner.artifacts.setDone', { name })
+    : t('planner.artifacts.setFarming', { name })
 }
 
 const tickClass = (done: boolean, hand: boolean | null) =>
@@ -102,15 +115,12 @@ const tickClass = (done: boolean, hand: boolean | null) =>
       ? 'border-dashed border-success-text text-success-text'
       : 'border-transparent bg-emerald-500/15 text-success-text'
     : 'border-border-strong text-transparent hover:text-text-muted'
-
-const AUTO_RULE =
-  'A slot ticks itself when the capture shows a top-level piece (+20 on a 5★) there of a chosen set with a chosen main stat; the fifth slot can be any set once the other four are chosen sets'
 </script>
 
 <template>
-  <section class="flex flex-col gap-4" aria-label="Artifacts">
+  <section class="flex flex-col gap-4" :aria-label="$t('planner.artifacts.title')">
     <div class="flex flex-col gap-1.5">
-      <span class="text-xs font-medium text-text-muted">Sets</span>
+      <span class="text-xs font-medium text-text-muted">{{ $t('planner.artifacts.sets') }}</span>
       <ul v-if="progress.sets.length" class="flex flex-col gap-1">
         <li
           v-for="s in progress.sets"
@@ -128,7 +138,8 @@ const AUTO_RULE =
             <span class="tabular truncate text-xs text-text-muted">
               <template v-if="domainOf(s.key)">{{ domainOf(s.key) }}</template>
               <template v-if="s.worn">
-                <template v-if="domainOf(s.key)"> · </template>{{ s.worn }} worn</template
+                <template v-if="domainOf(s.key)"> · </template
+                >{{ $t('planner.artifacts.worn', { n: s.worn }) }}</template
               >
             </span>
           </span>
@@ -155,8 +166,8 @@ const AUTO_RULE =
           <button
             type="button"
             class="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
-            :aria-label="`Remove ${formatSetName(s.key)}`"
-            :title="`Remove ${formatSetName(s.key)}`"
+            :aria-label="$t('planner.artifacts.remove', { name: formatSetName(s.key) })"
+            :title="$t('planner.artifacts.remove', { name: formatSetName(s.key) })"
             @click="change(withoutSet(goal, s.key))"
           >
             <X class="size-4" aria-hidden="true" />
@@ -173,15 +184,20 @@ const AUTO_RULE =
       <div class="flex">
         <UiButton v-if="!adding" size="sm" @click="adding = true">
           <Plus class="size-4" aria-hidden="true" />
-          Set
+          {{ $t('planner.artifacts.addSet') }}
         </UiButton>
-        <UiButton v-else size="sm" variant="ghost" @click="adding = false">Close</UiButton>
+        <UiButton v-else size="sm" variant="ghost" @click="adding = false">{{
+          $t('planner.artifacts.close')
+        }}</UiButton>
       </div>
     </div>
 
     <div class="flex flex-col gap-1.5">
-      <span class="flex items-center gap-2 text-xs font-medium text-text-muted" :title="AUTO_RULE">
-        Slots
+      <span
+        class="flex items-center gap-2 text-xs font-medium text-text-muted"
+        :title="$t('planner.artifacts.autoRule')"
+      >
+        {{ $t('planner.artifacts.slots') }}
         <span class="tabular font-mono">{{ progress.done }}/5</span>
       </span>
       <ul
@@ -244,7 +260,7 @@ const AUTO_RULE =
             v-if="isStatSlot(s.slot)"
             class="flex flex-wrap gap-1"
             role="group"
-            :aria-label="`${formatSlotName(s.slot)} main stat`"
+            :aria-label="$t('planner.artifacts.mainStat', { slot: formatSlotName(s.slot) })"
           >
             <FilterChip
               v-for="stat in MAIN_STAT_CHOICES[s.slot]"

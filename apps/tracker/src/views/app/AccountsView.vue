@@ -7,7 +7,7 @@ import BaseModal from '@/components/legacy/BaseModal.vue'
 import BaseTable, { type TableLabel } from '@/components/legacy/BaseTable.vue'
 import DeleteAccountModal from '@/components/user/DeleteAccountModal.vue'
 import ImportKeyModal from '@/components/user/ImportKeyModal.vue'
-import { SERVER_OPTIONS } from '@/components/user/servers'
+import { serverOptions as readServerOptions } from '@/components/user/servers'
 import { api, ApiRequestError } from '@/api'
 import { validateAccountForm, type AccountFormErrors } from '@/data/import-setup'
 import { lastAccountId, useAccounts } from '@/stores/accounts'
@@ -18,7 +18,7 @@ const accounts = useAccounts()
 const feedback = useFeedback()
 const router = useRouter()
 
-const serverOptions = SERVER_OPTIONS
+const serverOptions = computed(() => readServerOptions())
 
 const tableLabels: TableLabel[] = [
   { key: 'id', title: 'ID' },

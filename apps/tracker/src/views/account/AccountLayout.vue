@@ -71,12 +71,10 @@ onBeforeUnmount(() => {
 
 <template>
   <RouterView v-if="account" />
-  <UiEmpty
-    v-else
-    title="Account not found"
-    body="It may have been deleted, or it belongs to someone else."
-  >
+  <UiEmpty v-else :title="$t('shell.accountMissing.title')" :body="$t('shell.accountMissing.body')">
     <template #icon><SearchX aria-hidden="true" /></template>
-    <UiButton :to="{ name: 'home' }" variant="primary">All accounts</UiButton>
+    <UiButton :to="{ name: 'home' }" variant="primary">{{
+      $t('shell.accountMissing.all')
+    }}</UiButton>
   </UiEmpty>
 </template>

@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, useId } from 'vue'
 import { Check, Copy } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import { copyText } from '@/data/import-setup'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 
 /**
@@ -16,6 +17,7 @@ const feedback = useFeedback()
 const id = useId()
 const code = ref<HTMLElement>()
 const copied = ref(false)
+const copyLabel = computed(() => t('transfer.copy.label', { label: props.label.toLowerCase() }))
 const parts = computed(() => (props.url ? props.value.split(/(?<=[/.])/) : [props.value]))
 let timer: ReturnType<typeof setTimeout> | undefined
 
@@ -24,10 +26,14 @@ async function copy() {
     copied.value = true
     clearTimeout(timer)
     timer = setTimeout(() => (copied.value = false), 2000)
-    feedback.toast({ tone: 'success', title: 'Copied' })
+    feedback.toast({ tone: 'success', title: t('transfer.copy.copied') })
     emit('copied')
   } else {
-    feedback.toast({ tone: 'danger', title: 'Copy failed', detail: 'Press Ctrl+C' })
+    feedback.toast({
+      tone: 'danger',
+      title: t('transfer.copy.failed'),
+      detail: t('transfer.copy.pressCtrlC'),
+    })
   }
 }
 
@@ -55,11 +61,7 @@ onBeforeUnmount(() => clearTimeout(timer))
           ></code
         >
       </div>
-      <UiButton
-        :aria-label="`Copy ${label.toLowerCase()}`"
-        :title="`Copy ${label.toLowerCase()}`"
-        @click="copy"
-      >
+      <UiButton :aria-label="copyLabel" :title="copyLabel" @click="copy">
         <Check v-if="copied" class="size-4 text-success-text" aria-hidden="true" />
         <Copy v-else class="size-4" aria-hidden="true" />
       </UiButton>

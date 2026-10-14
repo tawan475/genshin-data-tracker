@@ -63,7 +63,7 @@ const results = computed(() => {
 </script>
 
 <template>
-  <UiModal :open="open" title="Track" @close="emit('close')">
+  <UiModal :open="open" :title="$t('materials.track')" @close="emit('close')">
     <div class="flex flex-col gap-3">
       <div class="flex items-center gap-3">
         <div class="relative min-w-0 flex-1">
@@ -77,12 +77,14 @@ const results = computed(() => {
             autocomplete="off"
             spellcheck="false"
             autofocus
-            placeholder="Search"
-            aria-label="Search materials"
+            :placeholder="$t('materials.search')"
+            :aria-label="$t('materials.searchLabel')"
             class="pl-9"
           />
         </div>
-        <span class="tabular shrink-0 font-mono text-sm text-text-muted" title="Tracked / max"
+        <span
+          class="tabular shrink-0 font-mono text-sm text-text-muted"
+          :title="$t('materials.trackedOfMax')"
           >{{ selected.length }}/{{ MAX_SERIES }}</span
         >
       </div>
@@ -94,7 +96,11 @@ const results = computed(() => {
             class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-overlay disabled:opacity-50 disabled:hover:bg-transparent"
             :aria-pressed="selected.includes(item.key)"
             :disabled="!selected.includes(item.key) && full"
-            :title="!selected.includes(item.key) && full ? `Up to ${MAX_SERIES}` : item.name"
+            :title="
+              !selected.includes(item.key) && full
+                ? $t('materials.upTo', { max: MAX_SERIES })
+                : item.name
+            "
             @click="emit('toggle', item.key)"
           >
             <span
@@ -119,7 +125,7 @@ const results = computed(() => {
           </button>
         </li>
       </ul>
-      <p v-else class="py-6 text-center text-text-secondary">No matches</p>
+      <p v-else class="py-6 text-center text-text-secondary">{{ $t('materials.noMatches') }}</p>
     </div>
   </UiModal>
 </template>

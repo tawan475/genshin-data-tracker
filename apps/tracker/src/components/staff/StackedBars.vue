@@ -98,7 +98,7 @@ const ticks = computed(() => {
         </caption>
         <thead>
           <tr>
-            <th scope="col">Day</th>
+            <th scope="col">{{ $t('staff.chart.day') }}</th>
             <th v-for="s in series" :key="s.key" scope="col">{{ s.label }}</th>
           </tr>
         </thead>

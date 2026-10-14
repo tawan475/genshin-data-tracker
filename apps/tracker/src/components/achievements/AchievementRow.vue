@@ -15,6 +15,7 @@ import {
   type DoneState,
 } from '@/data/achievement-progress'
 import { materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { completionText } from './completion'
 
@@ -76,19 +77,24 @@ const completedLine = computed(() => {
 })
 
 function status(id: number, source: DoneSource | null): string {
-  if (!source) return 'Click to mark done'
+  if (!source) return t('achievements.row.clickToMark')
   const done = completedOn(props.capture, id)
   if (source === 'marked')
-    return `${completionText(done ?? { kind: 'marked' }).text} · click to unmark`
-  return `${done ? completionText(done).text : 'Captured'} · in a capture, so it stays done`
+    return t('achievements.row.clickToUnmark', {
+      text: completionText(done ?? { kind: 'marked' }).text,
+    })
+  return t('achievements.row.staysDone', {
+    text: done ? completionText(done).text : t('achievements.row.captured'),
+  })
 }
 
 const mainTitle = computed(() => {
-  if (!complete.value) return chain.value ? 'Mark every tier done' : 'Mark done'
+  if (!complete.value)
+    return chain.value ? t('achievements.row.markEveryTier') : t('achievements.row.markDone')
   if (state.value === 'captured') return status(props.entry.tiers.at(-1)!.id, 'captured')
   return chain.value && unmarkable.value.length < tiers.value.length
-    ? 'Click to unmark the tiers marked by hand'
-    : 'Marked by hand · click to unmark'
+    ? t('achievements.row.unmarkTiers')
+    : t('achievements.row.markedClick')
 })
 
 function toggle() {
@@ -105,15 +111,21 @@ function toggleTier(index: number) {
 function tierTitle(index: number): string {
   const { tier, source } = tiers.value[index]!
   const description = props.text.achievements.get(tier.id)?.description ?? ''
-  return [`Tier ${index + 1} · ${tier.primogems} primogems`, description, status(tier.id, source)]
+  return [
+    t('achievements.row.tierTitle', { n: index + 1, primogems: tier.primogems }),
+    description,
+    status(tier.id, source),
+  ]
     .filter(Boolean)
     .join('\n')
 }
 
 const rewardTitle = computed(() =>
-  chain.value
-    ? `${tiers.value.map((t) => t.tier.primogems).join(' + ')} primogems`
-    : `${props.entry.primogems} primogems`,
+  t('achievements.row.reward', {
+    n: chain.value
+      ? tiers.value.map((x) => x.tier.primogems).join(' + ')
+      : String(props.entry.primogems),
+  }),
 )
 
 const FILL: Record<DoneSource, string> = {
@@ -129,7 +141,12 @@ const FILL: Record<DoneSource, string> = {
       class="group -m-0.5 flex size-11 shrink-0 items-center justify-center rounded-full"
       :aria-pressed="complete"
       :aria-disabled="complete && unmarkable.length === 0 ? 'true' : undefined"
-      :aria-label="`${words.title}: ${state === 'captured' ? 'captured' : state === 'marked' ? 'marked by hand' : 'not done'}`"
+      :aria-label="
+        $t('achievements.row.aria', {
+          title: words.title,
+          state: $t(`achievements.row.states.${state ?? 'none'}`),
+        })
+      "
       :title="mainTitle"
       @click="toggle"
     >
@@ -158,12 +175,17 @@ const FILL: Record<DoneSource, string> = {
         >
           <img :src="primogem" alt="" class="size-5" loading="lazy" />
           {{ formatNumber(entry.primogems) }}
-          <span class="sr-only">primogems</span>
+          <span class="sr-only">{{ $t('achievements.row.primogems') }}</span>
         </span>
       </div>
 
       <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
-        <span v-if="chain" class="-my-1 -ml-1.5 flex items-center" role="group" aria-label="Tiers">
+        <span
+          v-if="chain"
+          class="-my-1 -ml-1.5 flex items-center"
+          role="group"
+          :aria-label="$t('achievements.row.tiers')"
+        >
           <button
             v-for="(t, index) in tiers"
             :key="t.tier.id"
@@ -171,7 +193,7 @@ const FILL: Record<DoneSource, string> = {
             class="flex size-7 items-center justify-center rounded-full hover:bg-surface-overlay"
             :aria-pressed="t.source !== null"
             :aria-disabled="t.source === 'captured' ? 'true' : undefined"
-            :aria-label="`Tier ${index + 1}`"
+            :aria-label="$t('achievements.row.tier', { n: index + 1 })"
             :title="tierTitle(index)"
             @click="toggleTier(index)"
           >
@@ -188,20 +210,27 @@ const FILL: Record<DoneSource, string> = {
           </button>
           <span class="tabular ml-1 font-mono">{{ doneCount }}/{{ tiers.length }}</span>
         </span>
-        <span v-if="entry.version" class="tabular font-mono" :title="`Added in ${entry.version}`"
+        <span
+          v-if="entry.version"
+          class="tabular font-mono"
+          :title="$t('achievements.row.addedIn', { version: entry.version })"
           >v{{ entry.version }}</span
         >
-        <span v-if="entry.hidden" class="flex items-center gap-1" title="Hidden achievement">
+        <span
+          v-if="entry.hidden"
+          class="flex items-center gap-1"
+          :title="$t('achievements.row.hiddenTitle')"
+        >
           <EyeOff class="size-3.5" aria-hidden="true" />
-          Hidden
+          {{ $t('achievements.row.hidden') }}
         </span>
         <span
           v-if="anyMarked && completedLine?.kind !== 'marked'"
           class="flex items-center text-accent-text"
-          title="Marked by hand"
+          :title="$t('achievements.row.markedByHand')"
         >
           <Hand class="size-3.5" aria-hidden="true" />
-          <span class="sr-only">Marked by hand</span>
+          <span class="sr-only">{{ $t('achievements.row.markedByHand') }}</span>
         </span>
         <span class="ml-auto flex min-w-0 items-center gap-2">
           <span
@@ -233,10 +262,10 @@ const FILL: Record<DoneSource, string> = {
             target="_blank"
             rel="noopener noreferrer"
             class="-my-1 inline-flex min-h-7 items-center gap-1 rounded px-1 hover:text-text-primary"
-            title="Guide on stardb.gg"
+            :title="$t('achievements.row.guide')"
           >
             <ExternalLink class="size-3.5" aria-hidden="true" />
-            <span class="sr-only">Guide on stardb.gg</span>
+            <span class="sr-only">{{ $t('achievements.row.guide') }}</span>
           </a>
         </span>
       </div>

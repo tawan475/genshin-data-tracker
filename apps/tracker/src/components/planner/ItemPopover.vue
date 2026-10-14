@@ -194,8 +194,8 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
         v-if="goals != null && material"
         type="button"
         class="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
-        :aria-label="`${title}: goals using it (${formatNumber(goals)})`"
-        title="Goals using it"
+        :aria-label="$t('planner.popover.goalsLabel', { name: title, n: formatNumber(goals) })"
+        :title="$t('planner.popover.goalsTitle')"
         data-goals-using
         @click="emit('goals', material.key)"
       >
@@ -204,7 +204,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
       </button>
       <UiIconButton
         v-if="history && material"
-        :label="`${title}: history`"
+        :label="$t('planner.popover.history', { name: title })"
         @click="emit('history', material.key)"
       >
         <ChartLine class="size-5" aria-hidden="true" />
@@ -215,10 +215,14 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
       v-if="expSummary && expSummary.need > 0"
       class="tabular flex flex-wrap gap-x-3 border-b border-border-subtle px-4 py-2 font-mono text-xs text-text-secondary"
     >
-      <span>EXP need {{ formatCompact(expSummary.need) }}</span>
-      <span v-if="expSummary.mine">Goal {{ formatCompact(expSummary.mine) }}</span>
+      <span>{{ $t('planner.popover.expNeed', { n: formatCompact(expSummary.need) }) }}</span>
+      <span v-if="expSummary.mine">{{
+        $t('planner.popover.goal', { n: formatCompact(expSummary.mine) })
+      }}</span>
       <span :class="expSummary.missing > 0 ? 'text-danger-text' : 'text-success-text'">{{
-        expSummary.missing > 0 ? `Missing ${formatCompact(expSummary.missing)}` : 'Enough'
+        expSummary.missing > 0
+          ? $t('planner.popover.missing', { n: formatCompact(expSummary.missing) })
+          : $t('planner.popover.enough')
       }}</span>
     </p>
 
@@ -241,25 +245,37 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
           }}</span>
           <span class="tabular flex flex-wrap gap-x-2 font-mono text-xs leading-4 text-text-muted">
             <template v-if="!expKind && row.need > 0">
-              <span>Need {{ formatCompact(row.need) }}</span>
-              <span v-if="row.mine">Goal {{ formatCompact(row.mine) }}</span>
+              <span>{{ $t('planner.popover.need', { n: formatCompact(row.need) }) }}</span>
+              <span v-if="row.mine">{{
+                $t('planner.popover.goal', { n: formatCompact(row.mine) })
+              }}</span>
               <span :class="row.missing > 0 ? 'text-danger-text' : 'text-success-text'">{{
-                row.missing > 0 ? `Missing ${formatCompact(row.missing)}` : 'Enough'
+                row.missing > 0
+                  ? $t('planner.popover.missing', { n: formatCompact(row.missing) })
+                  : $t('planner.popover.enough')
               }}</span>
             </template>
-            <span v-if="row.crafted" class="text-text-secondary" title="Crafted from the tier below"
-              >Craft {{ formatCompact(row.crafted) }}</span
+            <span
+              v-if="row.crafted"
+              class="text-text-secondary"
+              :title="$t('planner.popover.craftedTitle')"
+              >{{ $t('planner.popover.craft', { n: formatCompact(row.crafted) }) }}</span
             >
             <span
               v-if="row.have !== row.captured"
               class="inline-flex items-center gap-1 text-accent-text"
             >
-              Capture {{ formatCompact(row.captured) }}
+              {{ $t('planner.popover.capture', { n: formatCompact(row.captured) }) }}
               <button
                 type="button"
                 class="inline-flex size-5 items-center justify-center rounded hover:bg-surface-overlay"
-                :aria-label="`${row.material.name}: back to the capture's ${formatNumber(row.captured)}`"
-                :title="`Back to ${formatNumber(row.captured)}`"
+                :aria-label="
+                  $t('planner.popover.backLabel', {
+                    name: row.material.name,
+                    n: formatNumber(row.captured),
+                  })
+                "
+                :title="$t('planner.popover.backTitle', { n: formatNumber(row.captured) })"
                 @click="emit('change', row.material.key, row.captured)"
               >
                 <RotateCcw class="size-3.5" aria-hidden="true" />
@@ -284,7 +300,7 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
               inputmode="numeric"
               autocomplete="off"
               :autofocus="row.material.key === itemKey || undefined"
-              :aria-label="`${row.material.name} held`"
+              :aria-label="$t('planner.popover.held', { name: row.material.name })"
               :title="keysHint"
               class="tabular h-9 w-16 border-y border-border-strong bg-surface-raised px-1 text-center font-mono text-sm text-text-primary focus:relative focus:z-10 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
               @input="onInput(row, $event)"
@@ -305,9 +321,9 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
             type="text"
             inputmode="numeric"
             autocomplete="off"
-            placeholder="+ add"
-            :aria-label="`${row.material.name}: add obtained`"
-            title="Add what you got (Enter)"
+            :placeholder="$t('planner.popover.addPlaceholder')"
+            :aria-label="$t('planner.popover.addLabel', { name: row.material.name })"
+            :title="$t('planner.popover.addTitle')"
             class="tabular h-9 w-12 rounded-md border border-border-default bg-surface-raised px-1 text-center font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
             @input="onGain(row, $event)"
             @keydown.enter.prevent="commitGain(row)"

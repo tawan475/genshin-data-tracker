@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { MailCheck } from 'lucide-vue-next'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import AuthFrame from './AuthFrame.vue'
 
 /**
@@ -23,10 +25,8 @@ async function submit() {
   } catch (cause) {
     error.value =
       cause instanceof ApiRequestError && cause.code === 'rate_limited'
-        ? 'Too many requests, try again in a minute'
-        : cause instanceof Error
-          ? cause.message
-          : 'Request failed'
+        ? t('auth.tooManyRequests')
+        : errorText(cause, t('common.requestFailed'))
   } finally {
     busy.value = false
   }
@@ -34,14 +34,14 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame title="Reset password">
+  <AuthFrame :title="$t('auth.forgot.title')">
     <div v-if="sent" class="flex flex-col items-center gap-4 text-center" role="status">
       <MailCheck class="size-10 text-paimon" aria-hidden="true" />
       <p class="text-balance text-gray-200">
-        If that account has a confirmed email, we sent a link.
+        {{ $t('auth.forgot.sent') }}
       </p>
-      <p class="text-sm text-gray-400" title="Ask the admin for a link if you have none">
-        Valid for 30 minutes. No confirmed email? Ask the admin.
+      <p class="text-sm text-gray-400" :title="$t('auth.forgot.validTitle')">
+        {{ $t('auth.forgot.valid') }}
       </p>
     </div>
     <template v-else>
@@ -54,7 +54,7 @@ async function submit() {
       </p>
       <form class="flex flex-col gap-5" @submit.prevent="submit">
         <label class="flex flex-col gap-2">
-          <span class="text-sm font-medium text-gray-400">Username or email</span>
+          <span class="text-sm font-medium text-gray-400">{{ $t('auth.usernameOrEmail') }}</span>
           <input
             v-model="login"
             class="glass-input"
@@ -67,13 +67,13 @@ async function submit() {
         </label>
         <button type="submit" class="btn-glow mt-2 w-full rounded-xl" :disabled="busy || !login">
           <UiSpinner v-if="busy" class="size-4" />
-          Send link
+          {{ $t('auth.forgot.send') }}
         </button>
       </form>
     </template>
     <template #footer>
       <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">
-        Back to sign in
+        {{ $t('auth.backToSignIn') }}
       </RouterLink>
     </template>
   </AuthFrame>

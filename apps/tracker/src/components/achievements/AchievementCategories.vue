@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Eye, EyeOff } from 'lucide-vue-next'
 import type { ProgressCount } from '@/data/achievement-progress'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import CategoryIcon from './CategoryIcon.vue'
 
@@ -28,17 +29,22 @@ const selected = defineModel<number | null>({ required: true })
 const showDone = defineModel<boolean>('showDone', { required: true })
 
 const items = computed<CategoryItem[]>(() => [
-  { id: null, name: 'All', icon: '', count: props.total },
+  { id: null, name: t('achievements.categories.all'), icon: '', count: props.total },
   ...props.categories,
 ])
 
 const width = (c: ProgressCount) => `${c.total ? (c.done / c.total) * 100 : 0}%`
 const title = (c: ProgressCount) =>
-  `${formatNumber(c.done)} / ${formatNumber(c.total)} · ${formatNumber(c.primogems)} / ${formatNumber(c.primogemsTotal)} primogems`
+  t('achievements.categories.title', {
+    done: formatNumber(c.done),
+    total: formatNumber(c.total),
+    primogems: formatNumber(c.primogems),
+    primogemsTotal: formatNumber(c.primogemsTotal),
+  })
 </script>
 
 <template>
-  <nav aria-label="Categories">
+  <nav :aria-label="$t('achievements.categories.label')">
     <ul class="flex flex-col gap-0.5">
       <li v-for="item in items" :key="item.id ?? 'all'">
         <button
@@ -81,13 +87,15 @@ const title = (c: ProgressCount) =>
       type="button"
       class="mt-1 flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-overlay/60 hover:text-text-primary"
       :aria-pressed="showDone"
-      :title="showDone ? 'Hide completed series' : 'Show completed series'"
+      :title="
+        showDone ? $t('achievements.categories.hideDone') : $t('achievements.categories.showDone')
+      "
       @click="showDone = !showDone"
     >
       <span class="flex size-8 shrink-0 items-center justify-center">
         <component :is="showDone ? EyeOff : Eye" class="size-4" aria-hidden="true" />
       </span>
-      <span class="flex-1 text-left">Completed</span>
+      <span class="flex-1 text-left">{{ $t('achievements.categories.completed') }}</span>
       <span class="tabular font-mono text-xs">{{ doneCount }}</span>
     </button>
   </nav>

@@ -10,6 +10,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSelect, { type SelectGroup, type SelectOption } from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { describeUserAgent } from '@/lib/user-agent'
 import { useAccounts } from '@/stores/accounts'
@@ -34,15 +35,16 @@ const sessions = ref<SessionResponse[] | null>(null)
 /** The session being signed out, 'others', or 'here'. */
 const busy = ref<number | 'others' | 'here' | null>(null)
 
-/** How a session signed in: a tooltip, and an icon (Discord and Google show their marks). */
-const METHODS: Record<SessionMethod, { title: string; icon?: Component }> = {
-  password: { title: 'Signed in with a password', icon: KeyRound },
-  discord: { title: 'Signed in with Discord' },
-  google: { title: 'Signed in with Google' },
-  reset: { title: 'Signed in with a reset link', icon: LifeBuoy },
-  legacy: { title: 'Signed in before devices were listed', icon: History },
-  irminsul: { title: 'Signed in from Irminsul', icon: Monitor },
+/** How a session signed in: an icon (Discord and Google show their marks) and a tooltip. */
+const METHOD_ICONS: Record<SessionMethod, Component | undefined> = {
+  password: KeyRound,
+  discord: undefined,
+  google: undefined,
+  reset: LifeBuoy,
+  legacy: History,
+  irminsul: Monitor,
 }
+const methodTitle = (method: SessionMethod): string => t(`settings.devices.method.${method}`)
 
 /** The device irminsul's Configure button asked for (`?device=`), highlighted. */
 const focused = computed(() => {
@@ -55,12 +57,14 @@ const saving = ref<number | null>(null)
 /** Upload target options: by UID, or one of the accounts (a removed one only while chosen). */
 function targetOptions(row: SessionResponse): (SelectOption<string> | SelectGroup<string>)[] {
   const options: (SelectOption<string> | SelectGroup<string>)[] = [
-    { value: 'uid', label: 'Auto: match the account by UID' },
+    { value: 'uid', label: t('settings.devices.auto') },
   ]
-  if (targetKey(row) === 'gone') options.push({ value: 'gone', label: 'Removed account' })
+  if (targetKey(row) === 'gone') {
+    options.push({ value: 'gone', label: t('settings.devices.removedAccount') })
+  }
   if (accounts.list.length) {
     options.push({
-      group: 'Always this account',
+      group: t('settings.devices.always'),
       options: accounts.list.map((a) => ({ value: String(a.id), label: accounts.displayName(a) })),
     })
   }
@@ -85,9 +89,13 @@ async function setTarget(row: SessionResponse, key: string) {
     const saved = await api.setSessionUpload(row.id, upload)
     const held = sessions.value?.find((s) => s.id === row.id)
     if (held) held.upload = saved.upload
-    feedback.toast({ tone: 'success', title: 'Upload target saved', hint: deviceName(row) })
+    feedback.toast({
+      tone: 'success',
+      title: t('settings.devices.targetSaved'),
+      hint: deviceName(row),
+    })
   } catch (cause) {
-    feedback.error('Upload target not saved', cause)
+    feedback.error(t('settings.devices.targetNotSaved'), cause)
     await load()
   } finally {
     saving.value = null
@@ -97,7 +105,7 @@ async function setTarget(row: SessionResponse, key: string) {
 /** "Irminsul on <PC>" for irminsul, the browser and system otherwise. */
 function deviceName(row: SessionResponse): string {
   return row.method === 'irminsul'
-    ? `Irminsul on ${row.deviceName || 'a PC'}`
+    ? t('settings.devices.irminsulOn', { device: row.deviceName || t('settings.devices.aPc') })
     : describeUserAgent(row.userAgent)
 }
 
@@ -118,7 +126,7 @@ async function load() {
   try {
     sessions.value = await api.sessions()
   } catch (cause) {
-    feedback.error('Devices not loaded', cause)
+    feedback.error(t('settings.devices.notLoaded'), cause)
   }
 }
 
@@ -133,28 +141,28 @@ onMounted(async () => {
 
 function details(row: SessionResponse): string {
   return [
-    METHODS[row.method].title,
-    `Since ${formatDateTime(row.createdAt)}`,
-    `Last active ${formatDateTime(row.lastSeenAt)}`,
+    methodTitle(row.method),
+    t('settings.devices.since', { date: formatDateTime(row.createdAt) }),
+    t('settings.devices.lastActive', { date: formatDateTime(row.lastSeenAt) }),
   ].join('\n')
 }
 
 async function signOutDevice(row: SessionResponse & { device: string }) {
   const ok = await feedback.confirm({
-    title: `Sign out ${row.device}?`,
-    detail: 'That device will have to sign in again.',
-    confirmLabel: 'Sign out',
+    title: t('settings.devices.signOutTitle', { device: row.device }),
+    detail: t('settings.devices.signOutDetail'),
+    confirmLabel: t('common.signOut'),
     tone: 'danger',
   })
   if (!ok) return
   busy.value = row.id
   try {
     await api.revokeSession(row.id)
-    feedback.toast({ tone: 'success', title: 'Signed out', hint: row.device })
+    feedback.toast({ tone: 'success', title: t('settings.devices.signedOut'), hint: row.device })
   } catch (cause) {
     // Gone already (it signed out, or ran out): the list catches up below.
     if (!(cause instanceof ApiRequestError && cause.status === 404)) {
-      feedback.error('Not signed out', cause)
+      feedback.error(t('settings.devices.notSignedOut'), cause)
     }
   } finally {
     busy.value = null
@@ -164,18 +172,18 @@ async function signOutDevice(row: SessionResponse & { device: string }) {
 
 async function signOutOthers() {
   const ok = await feedback.confirm({
-    title: 'Sign out other devices?',
-    detail: 'This device stays signed in.',
-    confirmLabel: 'Sign out others',
+    title: t('settings.devices.othersTitle'),
+    detail: t('settings.devices.othersDetail'),
+    confirmLabel: t('settings.devices.othersConfirm'),
     tone: 'danger',
   })
   if (!ok) return
   busy.value = 'others'
   try {
     await api.revokeOtherSessions()
-    feedback.toast({ tone: 'success', title: 'Other devices signed out' })
+    feedback.toast({ tone: 'success', title: t('settings.devices.othersDone') })
   } catch (cause) {
-    feedback.error('Other devices not signed out', cause)
+    feedback.error(t('settings.devices.othersFailed'), cause)
   } finally {
     busy.value = null
     await load()
@@ -188,7 +196,7 @@ async function signOut() {
     await session.logout()
   } catch (error) {
     // The store has already forgotten the session; say the server did not hear it.
-    feedback.error('Signed out here, but the server could not be reached', error)
+    feedback.error(t('settings.devices.hereFailed'), error)
   } finally {
     accounts.clear()
     busy.value = null
@@ -198,7 +206,7 @@ async function signOut() {
 </script>
 
 <template>
-  <UiPanel id="devices" title="Devices">
+  <UiPanel id="devices" :title="$t('settings.devices.title')">
     <ul v-if="sessions" class="flex flex-col divide-y divide-border-subtle">
       <li
         v-for="row in rows"
@@ -212,24 +220,26 @@ async function signOut() {
         "
       >
         <div class="flex min-w-0 items-center gap-3">
-          <span class="shrink-0 text-text-muted" :title="METHODS[row.method].title">
+          <span class="shrink-0 text-text-muted" :title="methodTitle(row.method)">
             <ProviderMark
               v-if="row.method === 'discord' || row.method === 'google'"
               :provider="row.method"
               class="size-4"
             />
-            <component :is="METHODS[row.method].icon" v-else class="size-4" aria-hidden="true" />
-            <span class="sr-only">{{ METHODS[row.method].title }}</span>
+            <component :is="METHOD_ICONS[row.method]" v-else class="size-4" aria-hidden="true" />
+            <span class="sr-only">{{ methodTitle(row.method) }}</span>
           </span>
           <div class="min-w-0" :title="details(row)">
             <p class="flex min-w-0 items-center gap-2">
               <span class="truncate font-medium" :title="row.userAgent ?? undefined">
                 {{ row.device }}
               </span>
-              <UiBadge v-if="row.current" tone="accent">This device</UiBadge>
+              <UiBadge v-if="row.current" tone="accent">{{
+                $t('settings.devices.thisDevice')
+              }}</UiBadge>
             </p>
             <p class="truncate text-sm text-text-muted">
-              <span class="tabular">{{ row.place || 'Unknown place' }}</span>
+              <span class="tabular">{{ row.place || $t('settings.devices.unknownPlace') }}</span>
               <template v-if="!row.current"> · {{ formatRelative(row.lastSeenAt) }}</template>
             </p>
           </div>
@@ -240,8 +250,8 @@ async function signOut() {
           :options="targetOptions(row)"
           :disabled="saving === row.id || busy !== null"
           class="order-last w-full sm:order-none sm:w-64"
-          aria-label="Uploads go to"
-          title="Where this PC's uploads go"
+          :aria-label="$t('settings.devices.uploadsGoTo')"
+          :title="$t('settings.devices.uploadsTitle')"
           @update:model-value="(key) => setTarget(row, key)"
         />
         <UiButton
@@ -251,7 +261,7 @@ async function signOut() {
           :disabled="busy !== null"
           @click="signOutDevice(row)"
         >
-          Sign out
+          {{ $t('common.signOut') }}
         </UiButton>
       </li>
     </ul>
@@ -263,14 +273,14 @@ async function signOut() {
       <UiButton
         :loading="busy === 'others'"
         :disabled="busy !== null"
-        title="Every device but this one, including ones signed in before devices were listed"
+        :title="$t('settings.devices.othersButtonTitle')"
         @click="signOutOthers"
       >
-        Sign out other devices
+        {{ $t('settings.devices.othersButton') }}
       </UiButton>
       <UiButton :loading="busy === 'here'" :disabled="busy !== null" @click="signOut">
         <LogOut v-if="busy !== 'here'" class="size-4" aria-hidden="true" />
-        Sign out
+        {{ $t('common.signOut') }}
       </UiButton>
     </div>
   </UiPanel>

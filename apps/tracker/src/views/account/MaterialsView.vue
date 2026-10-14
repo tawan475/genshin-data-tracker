@@ -40,12 +40,12 @@ import {
   bagTabs,
   loadMaterialMeta,
   WALLET_KEYS,
-  WALLET_LABELS,
+  walletLabel,
 } from '@/components/materials-page/material-meta'
 import {
   changesSince,
   isChangePeriod,
-  CHANGE_SINCE_OPTIONS,
+  changeSinceOptions,
   rangeFrame,
   referenceFor,
   type ChangePeriod,
@@ -64,6 +64,7 @@ import { useResource } from '@/data/use-resource'
 import { formatDate, formatDateTime, formatRelative } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { preloadMaterialNames, preloadMaterialRarities } from '@/utils/materials'
+import { t } from '@/i18n'
 import { useAccount, useReadOnly } from './context'
 
 /**
@@ -121,7 +122,9 @@ const changes = computed(() =>
   history.value ? changesSince(history.value, reference.value) : new Map<string, number>(),
 )
 const hint = computed(() =>
-  reference.value ? `since ${formatDate(reference.value.takenAt)}` : 'One snapshot only',
+  reference.value
+    ? t('materials.since', { date: formatDate(reference.value.takenAt) })
+    : t('materials.oneSnapshot'),
 )
 
 // ------------------------------------------------------------------ materials
@@ -137,7 +140,7 @@ const wallet = computed<WalletItem[]>(() => {
     if (!item || (item.count === 0 && key !== 'Mora' && key !== 'Primogem')) continue
     list.push({
       key,
-      label: WALLET_LABELS[key] ?? item.name,
+      label: walletLabel(key) ?? item.name,
       name: item.name,
       count: item.count,
       change: reference.value ? (changes.value.get(key) ?? 0) : null,
@@ -220,20 +223,20 @@ const importTo = computed(() => ({
 </script>
 
 <template>
-  <PageHeader title="Materials">
+  <PageHeader :title="$t('materials.title')">
     <template v-if="newest" #meta>
       <p class="flex items-center gap-1.5 text-text-secondary">
         <Clock class="size-4" aria-hidden="true" />
-        <span class="sr-only">Newest snapshot</span>
+        <span class="sr-only">{{ $t('materials.newestSnapshot') }}</span>
         <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
       </p>
     </template>
     <template v-if="history" #actions>
-      <span :title="`Changes ${hint}`">
+      <span :title="$t('materials.changesTitle', { hint })">
         <UiSelect
           v-model="period"
-          :options="CHANGE_SINCE_OPTIONS"
-          aria-label="Change since"
+          :options="changeSinceOptions()"
+          :aria-label="$t('materials.changeSince')"
           class="w-[5.75rem] shrink-0"
         />
       </span>
@@ -241,18 +244,18 @@ const importTo = computed(() => ({
   </PageHeader>
 
   <UiPanel v-if="!account.latest" flush>
-    <UiEmpty title="No snapshots yet">
+    <UiEmpty :title="$t('materials.noSnapshots')">
       <template #icon><Package aria-hidden="true" /></template>
       <UiButton v-if="!readOnly" variant="primary" :to="importTo">
         <Upload class="size-4" aria-hidden="true" />
-        Import
+        {{ $t('materials.import') }}
       </UiButton>
     </UiEmpty>
   </UiPanel>
 
   <UiError
     v-else-if="resource.error.value && !history"
-    title="Could not load materials"
+    :title="$t('materials.loadFailed')"
     :error="resource.error.value"
     @retry="resource.reload"
   />
@@ -332,7 +335,7 @@ const importTo = computed(() => ({
     />
   </div>
 
-  <div v-else class="flex flex-col gap-6" aria-busy="true" aria-label="Loading materials">
+  <div v-else class="flex flex-col gap-6" aria-busy="true" :aria-label="$t('materials.loading')">
     <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
       <UiSkeleton v-for="n in 8" :key="n" class="h-[4.25rem]" />
     </div>

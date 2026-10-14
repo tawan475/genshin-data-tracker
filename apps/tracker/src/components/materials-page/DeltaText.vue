@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { formatNumber, formatSigned } from '@/lib/format'
 
 /**
@@ -18,7 +19,7 @@ const title = computed(() => {
   const v = props.value
   if (v === null || v === undefined) return props.hint
   const exact = v === 0 ? '0' : `${v > 0 ? '+' : '−'}${formatNumber(Math.abs(v))}`
-  return [exact, props.hint].filter(Boolean).join(' ')
+  return props.hint ? t('materials.deltaHint', { value: exact, hint: props.hint }) : exact
 })
 </script>
 

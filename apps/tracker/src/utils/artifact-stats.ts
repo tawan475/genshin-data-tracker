@@ -4,6 +4,7 @@
  */
 
 import { keyToName } from '@/lib/format'
+import { gameName } from '@/i18n/game-names'
 import { ARTIFACT_SET_NAMES } from '@/data/artifacts-sets'
 import { labelTable, labelsFor } from '@/i18n/labels'
 
@@ -55,7 +56,7 @@ export function formatRollValue(key: string, value: number): string {
 
 /** "GladiatorsFinale" -> "Gladiator's Finale"; unknown sets are spaced out. */
 export function formatSetName(setKey: string): string {
-  return ARTIFACT_SET_NAMES[setKey] ?? keyToName(setKey)
+  return gameName('sets', setKey, ARTIFACT_SET_NAMES[setKey] ?? keyToName(setKey))
 }
 
 export const SLOT_NAMES = labelTable<string>('slotFull')

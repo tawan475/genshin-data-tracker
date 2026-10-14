@@ -41,6 +41,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { characterIcon, weaponIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import ArtifactGoalBlock from './ArtifactGoalBlock.vue'
@@ -136,12 +137,16 @@ const tab = ref<Tab>(saved && TABS_SAVED.includes(saved) ? (saved as Tab) : 'lev
 watch(tab, (value) => writeStorage('planner:goal-tab', value))
 const tabs = computed(() => {
   const list: { value: Tab; label: string; count?: number }[] = [
-    { value: 'level', label: 'Level' },
-    { value: 'talents', label: 'Talents' },
-    { value: 'weapon', label: 'Weapon', count: props.entry?.weapons.length || undefined },
-    { value: 'artifacts', label: 'Artifacts' },
+    { value: 'level', label: t('planner.card.level') },
+    { value: 'talents', label: t('planner.card.talents') },
+    {
+      value: 'weapon',
+      label: t('planner.hint.weapon'),
+      count: props.entry?.weapons.length || undefined,
+    },
+    { value: 'artifacts', label: t('planner.artifacts.title') },
   ]
-  if (c.value?.custom) list.push({ value: 'custom', label: 'Custom' })
+  if (c.value?.custom) list.push({ value: 'custom', label: t('planner.card.custom') })
   return list
 })
 
@@ -218,7 +223,7 @@ function fixGap() {
   if (g && stored.value) setCharacter({ ...stored.value, ...g.level })
 }
 
-const TALENT_LABELS: Record<TalentName, string> = { auto: 'Attack', skill: 'Skill', burst: 'Burst' }
+const talentLabel = (name: TalentName) => t(`planner.editor.talent.${name}`)
 const boosts = computed(() =>
   c.value ? constellationBoosts(props.planner, c.value.key) : { c3: null, c5: null },
 )
@@ -256,7 +261,7 @@ function usePreset(p: Preset) {
 const capturedText = computed(() => {
   const ch = c.value
   if (!ch) return ''
-  if (!ch.owned) return ch.custom ? 'Custom' : 'Not owned'
+  if (!ch.owned) return ch.custom ? t('planner.card.custom') : t('planner.editor.notOwned')
   const s = ch.captured
   return `${levelLabel(props.planner, 'character', ch.key, s.level, s.ascension)} · ${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`
 })
@@ -327,17 +332,23 @@ const estimate = computed(() => {
     props.drops,
     { ...withoutPassives(props.options), ar: props.ar, wl: props.wl },
   )
-  const t = plan.total
+  const total = plan.total
   const weeks = plan.weeklyTotal.weeks
-  if (t.resin === 0 && weeks === 0) return null
-  const days = resinDays(t.resin, props.refreshes)
-  const parts = [`~${formatCompact(t.resin)}${t.partial ? '+' : ''} resin · ${daysText(days)}`]
+  if (total.resin === 0 && weeks === 0) return null
+  const days = resinDays(total.resin, props.refreshes)
+  const resin = `${formatCompact(total.resin)}${total.partial ? '+' : ''}`
+  const parts = [`${t('planner.editor.estimateResin', { resin })} · ${daysText(days)}`]
   if (weeks > 0) parts.push(weeksText(weeks))
   const title = [
-    `${formatNumber(t.runs)} runs · ${formatNumber(t.resin)} resin (${formatNumber(t.condensed)} condensed) · ${formatNumber(days)} days`,
-    weeks > 0 ? `weekly bosses: ${formatNumber(weeks)} weeks` : '',
-    t.partial ? 'some sources have no drop rate' : '',
-    plan.assumed.ar || plan.assumed.wl ? 'AR/WL not set: top bracket assumed' : '',
+    t('planner.editor.estimateTitle', {
+      runs: formatNumber(total.runs),
+      resin: formatNumber(total.resin),
+      condensed: formatNumber(total.condensed),
+      days: formatNumber(days),
+    }),
+    weeks > 0 ? t('planner.editor.estimateWeekly', { weeks: formatNumber(weeks) }) : '',
+    total.partial ? t('farm.panel.partial') : '',
+    plan.assumed.ar || plan.assumed.wl ? t('farm.panel.assumed') : '',
   ]
   return { text: parts.join(' · '), title: title.filter(Boolean).join(' · ') }
 })
@@ -399,8 +410,8 @@ const replaceSelected = computed<ReadonlySet<string>>(
         class="inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-surface-overlay"
         :class="entry.favorite ? 'text-rarity-5' : 'text-text-muted hover:text-text-primary'"
         :aria-pressed="entry.favorite"
-        :aria-label="`${title}: favorite`"
-        :title="entry.favorite ? 'Favorite' : 'Not a favorite'"
+        :aria-label="$t('planner.card.favoriteLabel', { name: title })"
+        :title="entry.favorite ? $t('planner.card.favorite') : $t('planner.card.notFavorite')"
         @click="emit('favorite')"
       >
         <Star class="size-5" :fill="entry.favorite ? 'currentColor' : 'none'" aria-hidden="true" />
@@ -410,8 +421,12 @@ const replaceSelected = computed<ReadonlySet<string>>(
         type="button"
         class="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
         :aria-pressed="entry.active"
-        :aria-label="`${title}: ${entry.active ? 'counted' : 'not counted'}`"
-        :title="entry.active ? 'Counted' : 'Not counted'"
+        :aria-label="
+          entry.active
+            ? $t('planner.editor.countedLabel', { name: title })
+            : $t('planner.editor.notCountedLabel', { name: title })
+        "
+        :title="entry.active ? $t('planner.common.counted') : $t('planner.common.notCounted')"
         @click="emit('toggle')"
       >
         <Eye v-if="entry.active" class="size-5" aria-hidden="true" />
@@ -420,8 +435,8 @@ const replaceSelected = computed<ReadonlySet<string>>(
       <button
         type="button"
         class="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-overlay hover:text-danger-text"
-        :aria-label="`Remove ${title}`"
-        :title="`Remove ${title}`"
+        :aria-label="$t('planner.common.removeName', { name: title })"
+        :title="$t('planner.common.removeName', { name: title })"
         @click="emit('remove')"
       >
         <Trash2 class="size-5" aria-hidden="true" />
@@ -435,7 +450,7 @@ const replaceSelected = computed<ReadonlySet<string>>(
           <div
             class="scroll-hide scroll-fade-x -mx-1 flex min-w-0 flex-1 basis-full gap-1.5 overflow-x-auto px-1 sm:basis-auto"
             role="group"
-            aria-label="Presets"
+            :aria-label="$t('planner.editor.presets')"
           >
             <FilterChip
               v-for="p in PRESETS"
@@ -448,14 +463,14 @@ const replaceSelected = computed<ReadonlySet<string>>(
           </div>
           <span
             class="inline-flex items-center gap-1.5"
-            title="Constellation (C3/C5 raise a talent by 3)"
+            :title="$t('planner.editor.constellationTitle')"
           >
             <span class="text-sm text-text-muted">C</span>
             <NumberStepper
               :model-value="c.constellation"
               :min="c.capturedConstellation"
               :max="6"
-              label="Constellation"
+              :label="$t('planner.editor.constellation')"
               @update:model-value="setConstellation"
             />
           </span>
@@ -463,11 +478,11 @@ const replaceSelected = computed<ReadonlySet<string>>(
             variant="ghost"
             size="sm"
             :aria-expanded="noteOpen"
-            :title="noteOpen ? 'Hide note' : 'Note'"
+            :title="noteOpen ? $t('planner.editor.hideNote') : $t('planner.editor.note')"
             @click="noteOpen = !noteOpen"
           >
             <NotebookPen class="size-4" aria-hidden="true" />
-            Note
+            {{ $t('planner.editor.note') }}
           </UiButton>
         </div>
         <div v-else class="flex justify-end">
@@ -478,7 +493,7 @@ const replaceSelected = computed<ReadonlySet<string>>(
             @click="noteOpen = !noteOpen"
           >
             <NotebookPen class="size-4" aria-hidden="true" />
-            Note
+            {{ $t('planner.editor.note') }}
           </UiButton>
         </div>
         <textarea
@@ -486,8 +501,8 @@ const replaceSelected = computed<ReadonlySet<string>>(
           v-model="note"
           rows="2"
           maxlength="1000"
-          aria-label="Note"
-          placeholder="Note"
+          :aria-label="$t('planner.editor.note')"
+          :placeholder="$t('planner.editor.note')"
           class="min-h-10 w-full resize-y rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-text-primary shadow-sm transition-colors placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
           @input="onNote"
           @blur="saveNote"
@@ -505,15 +520,28 @@ const replaceSelected = computed<ReadonlySet<string>>(
         />
 
         <template v-if="c && stored && phases">
-          <UiSegmented v-model="tab" :options="tabs" label="Goal part" class="self-start" />
+          <UiSegmented
+            v-model="tab"
+            :options="tabs"
+            :label="$t('planner.editor.part')"
+            class="self-start"
+          />
 
           <!-- Level -->
-          <section v-if="tab === 'level'" class="flex flex-col gap-3" aria-label="Level">
+          <section
+            v-if="tab === 'level'"
+            class="flex flex-col gap-3"
+            :aria-label="$t('planner.card.level')"
+          >
             <div class="flex flex-col gap-1.5">
               <span class="flex items-center gap-2 text-xs font-medium text-text-muted">
-                Now
+                {{ $t('planner.editor.now') }}
                 <span v-if="levelEdited" class="inline-flex items-center gap-1 text-accent-text">
-                  <PencilLine class="size-3.5" aria-label="Set by hand" role="img" />
+                  <PencilLine
+                    class="size-3.5"
+                    :aria-label="$t('planner.card.setByHand')"
+                    role="img"
+                  />
                 </span>
               </span>
               <LevelGrid
@@ -521,15 +549,18 @@ const replaceSelected = computed<ReadonlySet<string>>(
                 :level="c.current.level"
                 :ascension="c.current.ascension"
                 :min="c.captured"
-                label="Level now"
+                :label="$t('planner.editor.levelNow')"
                 @pick="pickNow"
               />
             </div>
             <div class="flex flex-col gap-1.5">
               <span class="flex items-center gap-2 text-xs font-medium text-text-muted">
-                Goal
-                <span v-if="arNeed" class="text-warning-text" :title="`Needs AR ${arNeed}`"
-                  >AR {{ arNeed }}</span
+                {{ $t('planner.editor.goal') }}
+                <span
+                  v-if="arNeed"
+                  class="text-warning-text"
+                  :title="$t('planner.card.needsAr', { ar: arNeed })"
+                  >{{ $t('farm.lock.ar', { ar: arNeed }) }}</span
                 >
               </span>
               <LevelGrid
@@ -537,65 +568,86 @@ const replaceSelected = computed<ReadonlySet<string>>(
                 :level="stored.level"
                 :ascension="stored.ascension"
                 :from="c.current"
-                label="Level goal"
+                :label="$t('planner.editor.levelGoal')"
                 @pick="pickGoal"
               />
             </div>
           </section>
 
           <!-- Talents -->
-          <section v-else-if="tab === 'talents'" class="flex flex-col gap-2" aria-label="Talents">
+          <section
+            v-else-if="tab === 'talents'"
+            class="flex flex-col gap-2"
+            :aria-label="$t('planner.card.talents')"
+          >
             <div
               class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[8rem_auto_auto_minmax(0,1fr)]"
             >
               <span />
               <span class="text-xs font-medium text-text-muted">
-                Now
+                {{ $t('planner.editor.now') }}
                 <PencilLine
                   v-if="talentsEdited"
                   class="inline size-3.5 text-accent-text"
-                  aria-label="Set by hand"
+                  :aria-label="$t('planner.card.setByHand')"
                   role="img"
                 />
               </span>
-              <span class="text-xs font-medium text-text-muted">Goal</span>
+              <span class="text-xs font-medium text-text-muted">{{
+                $t('planner.editor.goal')
+              }}</span>
               <span class="hidden sm:block" />
-              <template v-for="t in TALENTS" :key="t">
+              <template v-for="tn in TALENTS" :key="tn">
                 <span class="flex min-w-0 flex-wrap items-center gap-x-1.5 text-sm">
-                  {{ TALENT_LABELS[t] }}
+                  {{ talentLabel(tn) }}
                   <span
-                    v-if="boostOf(t)"
+                    v-if="boostOf(tn)"
                     class="rounded px-1 font-mono text-[0.6875rem] font-medium"
-                    :class="boostOf(t)!.on ? 'bg-accent/15 text-accent-text' : 'text-text-muted'"
-                    :title="`C${boostOf(t)!.at} raises it by 3${boostOf(t)!.on ? ': in game ' + c.boosted.current[t] + ' → ' + c.boosted.target[t] : ''}`"
-                    >C{{ boostOf(t)!.at }}</span
+                    :class="boostOf(tn)!.on ? 'bg-accent/15 text-accent-text' : 'text-text-muted'"
+                    :title="
+                      boostOf(tn)!.on
+                        ? $t('planner.editor.boostOn', {
+                            at: boostOf(tn)!.at,
+                            from: c.boosted.current[tn],
+                            to: c.boosted.target[tn],
+                          })
+                        : $t('planner.editor.boost', { at: boostOf(tn)!.at })
+                    "
+                    >C{{ boostOf(tn)!.at }}</span
                   >
                 </span>
                 <NumberStepper
-                  :model-value="c.current.talents[t]"
-                  :min="c.captured.talents[t]"
-                  :label="`${TALENT_LABELS[t]} now`"
-                  @update:model-value="setNowTalent(t, $event)"
+                  :model-value="c.current.talents[tn]"
+                  :min="c.captured.talents[tn]"
+                  :label="$t('planner.editor.talentNow', { talent: talentLabel(tn) })"
+                  @update:model-value="setNowTalent(tn, $event)"
                 />
                 <NumberStepper
-                  :model-value="stored.talents[t]"
-                  :min="c.current.talents[t]"
-                  :label="`${TALENT_LABELS[t]} goal`"
-                  @update:model-value="setGoalTalent(t, $event)"
+                  :model-value="stored.talents[tn]"
+                  :min="c.current.talents[tn]"
+                  :label="$t('planner.editor.talentGoal', { talent: talentLabel(tn) })"
+                  @update:model-value="setGoalTalent(tn, $event)"
                 />
                 <span
                   class="tabular col-span-3 -mt-1 font-mono text-xs text-text-muted sm:col-span-1 sm:mt-0"
-                  :class="boostOf(t)?.on ? '' : 'hidden sm:block'"
-                  ><template v-if="boostOf(t)?.on"
-                    >In game {{ c.boosted.current[t] }} → {{ c.boosted.target[t] }}</template
-                  ></span
+                  :class="boostOf(tn)?.on ? '' : 'hidden sm:block'"
+                  ><template v-if="boostOf(tn)?.on">{{
+                    $t('planner.editor.inGame', {
+                      from: c.boosted.current[tn],
+                      to: c.boosted.target[tn],
+                    })
+                  }}</template></span
                 >
               </template>
             </div>
           </section>
 
           <!-- Weapon -->
-          <section v-else-if="tab === 'weapon'" class="flex flex-col gap-3" aria-label="Weapon">
+          <section
+            v-else-if="tab === 'weapon'"
+            class="flex flex-col gap-3"
+            :aria-label="$t('planner.hint.weapon')"
+          >
             <WeaponGoalBlock
               v-for="w in entry.weapons"
               :key="w.goalId"
@@ -619,9 +671,11 @@ const replaceSelected = computed<ReadonlySet<string>>(
             <div class="flex gap-2">
               <UiButton v-if="!adding" @click="adding = true">
                 <Plus class="size-4" aria-hidden="true" />
-                Weapon
+                {{ $t('planner.hint.weapon') }}
               </UiButton>
-              <UiButton v-else variant="ghost" @click="adding = false">Cancel</UiButton>
+              <UiButton v-else variant="ghost" @click="adding = false">{{
+                $t('planner.common.cancel')
+              }}</UiButton>
             </div>
           </section>
 
@@ -638,7 +692,7 @@ const replaceSelected = computed<ReadonlySet<string>>(
           <section
             v-else-if="tab === 'custom' && c.custom"
             class="flex flex-col gap-4"
-            aria-label="Custom character"
+            :aria-label="$t('planner.editor.customCharacter')"
           >
             <CustomForm
               :planner="basePlanner"
@@ -649,14 +703,20 @@ const replaceSelected = computed<ReadonlySet<string>>(
               <div class="flex flex-wrap items-center gap-2">
                 <UiButton v-if="!replacing" @click="replacing = true">
                   <Replace class="size-4" aria-hidden="true" />
-                  Replace with…
+                  {{ $t('planner.editor.replaceWithEllipsis') }}
                 </UiButton>
                 <template v-else>
                   <UiButton variant="primary" :disabled="!replaceWith" @click="confirmReplace">
                     <Replace class="size-4" aria-hidden="true" />
-                    {{ replaceWith ? `Replace with ${characterName(replaceWith)}` : 'Replace' }}
+                    {{
+                      replaceWith
+                        ? $t('planner.editor.replaceWith', { name: characterName(replaceWith) })
+                        : $t('planner.editor.replace')
+                    }}
                   </UiButton>
-                  <UiButton variant="ghost" @click="cancelReplace">Cancel</UiButton>
+                  <UiButton variant="ghost" @click="cancelReplace">{{
+                    $t('planner.common.cancel')
+                  }}</UiButton>
                 </template>
               </div>
               <RosterGrid
@@ -677,27 +737,35 @@ const replaceSelected = computed<ReadonlySet<string>>(
           >
             <CircleAlert class="size-4 shrink-0" aria-hidden="true" />
             <span class="min-w-0 flex-1"
-              >{{ gap.talents.map((t) => TALENT_LABELS[t]).join(', ') }} need
+              >{{
+                $t('planner.editor.gapNeed', {
+                  talents: gap.talents.map(talentLabel).join($t('farm.craft.listSeparator')),
+                })
+              }}
               <span class="font-mono">{{ gapLabel }}</span></span
             >
-            <UiButton size="sm" @click="fixGap">Set {{ gapLabel }}</UiButton>
+            <UiButton size="sm" @click="fixGap">{{
+              $t('planner.editor.setLevel', { level: gapLabel })
+            }}</UiButton>
           </p>
 
           <p
             class="tabular flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-text-muted"
           >
-            <span v-if="!c.custom" title="The newest capture">Capture: {{ capturedText }}</span>
+            <span v-if="!c.custom" :title="$t('planner.editor.captureTitle')">{{
+              $t('planner.editor.capture', { text: capturedText })
+            }}</span>
             <span v-if="c.edited" class="inline-flex items-center gap-1 text-accent-text">
               <PencilLine class="size-3.5" aria-hidden="true" />
-              Set by hand
+              {{ $t('planner.card.setByHand') }}
               <button
                 type="button"
                 class="inline-flex min-h-6 items-center gap-1 rounded px-1 hover:bg-surface-overlay"
-                title="Back to the capture"
+                :title="$t('planner.editor.resetTitle')"
                 @click="emit('characterNow', null)"
               >
                 <RotateCcw class="size-3.5" aria-hidden="true" />
-                Reset
+                {{ $t('planner.editor.reset') }}
               </button>
             </span>
           </p>
@@ -706,9 +774,9 @@ const replaceSelected = computed<ReadonlySet<string>>(
 
       <aside
         class="flex min-w-0 flex-col gap-3 lg:border-l lg:border-border-subtle lg:pl-5"
-        aria-label="Cost"
+        :aria-label="$t('planner.editor.cost')"
       >
-        <h3 class="text-sm font-semibold text-text-secondary">Cost</h3>
+        <h3 class="text-sm font-semibold text-text-secondary">{{ $t('planner.editor.cost') }}</h3>
         <CostList
           :planner="planner"
           :requirements="requirements"

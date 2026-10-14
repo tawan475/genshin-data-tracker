@@ -14,8 +14,10 @@ const dismissed = ref(false)
     role="status"
   >
     <RefreshCw class="size-5 shrink-0 text-accent-text" aria-hidden="true" />
-    <p class="flex-1 text-sm">A new version of the tracker is ready.</p>
-    <UiButton size="sm" variant="ghost" @click="dismissed = true">Later</UiButton>
-    <UiButton size="sm" variant="primary" @click="applyUpdate">Reload</UiButton>
+    <p class="flex-1 text-sm">{{ $t('shell.update.ready') }}</p>
+    <UiButton size="sm" variant="ghost" @click="dismissed = true">{{
+      $t('common.later')
+    }}</UiButton>
+    <UiButton size="sm" variant="primary" @click="applyUpdate">{{ $t('common.reload') }}</UiButton>
   </div>
 </template>

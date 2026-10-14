@@ -8,6 +8,7 @@
  */
 
 import type { SnapshotResponse, SnapshotSummary, TimelineGroupBy } from '@gdt/shared'
+import { t } from '@/i18n'
 import { clock24, dateLocale } from '@/lib/format'
 import { periodStart } from './materials-history'
 import { buildHistory } from './overview'
@@ -23,12 +24,15 @@ export interface TimelinePoint {
   summary: SnapshotSummary
 }
 
-export const GROUP_BY_OPTIONS: { value: TimelineGroupBy; label: string }[] = [
-  { value: 'hour', label: 'Hour' },
-  { value: 'day', label: 'Day' },
-  { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
-]
+/** The periods to group by; each label reads in the language on screen when it is read. */
+export const GROUP_BY_OPTIONS: { value: TimelineGroupBy; readonly label: string }[] = (
+  ['hour', 'day', 'month', 'year'] as const
+).map((value) => ({
+  value,
+  get label() {
+    return t(`progression.group.${value}`)
+  },
+}))
 
 export function nextPeriod(start: number, groupBy: TimelineGroupBy): number {
   const date = new Date(start)

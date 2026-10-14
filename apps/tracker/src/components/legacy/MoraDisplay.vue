@@ -13,7 +13,7 @@ const mora = materialIcon('Mora')
   <span class="inline-flex items-center gap-1 whitespace-nowrap">
     <span>{{ formatNumber(amount) }}</span>
     <!-- Visually hidden text so copying works -->
-    <span class="sr-only">&nbsp;mora</span>
+    <span class="sr-only">&nbsp;{{ $t('progression.monthly.moraUnit') }}</span>
     <img
       :src="mora"
       alt=""

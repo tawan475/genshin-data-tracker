@@ -25,12 +25,16 @@ const level = computed(() => Math.min(6, Math.max(0, Math.trunc(props.value) || 
 </script>
 
 <template>
-  <ol class="flex flex-col gap-2" :aria-label="`Constellation ${level} of 6`">
+  <ol class="flex flex-col gap-2" :aria-label="$t('characters.constellation.title', { level })">
     <li
       v-for="(src, index) in icons"
       :key="index"
       class="flex"
-      :title="`C${index + 1}${index < level ? '' : ' · locked'}`"
+      :title="
+        index < level
+          ? `C${index + 1}`
+          : $t('characters.constellation.lockedTitle', { n: index + 1 })
+      "
     >
       <ElementDisc
         :src="src"
@@ -39,7 +43,11 @@ const level = computed(() => Math.min(6, Math.max(0, Math.trunc(props.value) || 
         :locked="index >= level"
         :fallback="`C${index + 1}`"
       />
-      <span class="sr-only">C{{ index + 1 }} {{ index < level ? 'unlocked' : 'locked' }}</span>
+      <span class="sr-only">{{
+        index < level
+          ? $t('characters.constellation.unlocked', { n: index + 1 })
+          : $t('characters.constellation.locked', { n: index + 1 })
+      }}</span>
     </li>
   </ol>
 </template>

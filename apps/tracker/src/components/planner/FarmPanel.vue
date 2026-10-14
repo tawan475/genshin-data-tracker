@@ -4,7 +4,7 @@ import type { DropRates } from '@gdt/game-data/drops'
 import type { FarmingData } from '@gdt/game-data/farming'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { FarmPlan } from '@gdt/game-data/planner-estimate'
-import { WEEKDAY_LABELS, type PlanTotals } from '@gdt/game-data/planner-math'
+import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, ref, watch } from 'vue'
 import { CalendarOff, ChevronDown, Clock, Info, Lock, PartyPopper } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
@@ -13,12 +13,21 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { materialName } from '@/utils/materials'
 import CraftCard from './CraftCard.vue'
 import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
-import { formatCountdown, formatSeconds } from './farm-format'
+import {
+  daysText,
+  formatCountdown,
+  formatSeconds,
+  weekdayLong,
+  weekdayShort,
+  weeksText,
+} from './farm-format'
 import { sameValue } from './keep-unchanged'
 import type { GoalEntry } from './model'
 import { useProgressive } from './use-progressive'
@@ -82,16 +91,13 @@ const forge = defineModel<boolean>('forge', { required: true })
 const noWeekly = defineModel<boolean>('noWeekly', { required: true })
 const emit = defineEmits<{ settings: []; crafted: [rows: CraftRow[]]; hideCrafting: [] }>()
 
-const NO_WEEKLY_TITLE =
-  'Only the goals still to farm without a weekly boss: their drops are held or convertible (after the goals above)'
-
 /** No weekly boss is on and leaves no goal. */
 const noneLeft = computed(() => props.planFor !== null && props.planFor.length === 0)
 
-const VIEWS = [
-  { value: 'today' as const, label: 'Today' },
-  { value: 'schedule' as const, label: 'Schedule' },
-]
+const VIEWS = computed(() => [
+  { value: 'today' as const, label: t('farm.panel.today') },
+  { value: 'schedule' as const, label: t('farm.panel.schedule') },
+])
 
 const input = computed<FarmInput>(() => ({
   planner: props.planner,
@@ -126,43 +132,61 @@ const headline = computed(() => farmHeadline(props.plan, input.value.refreshes))
 
 // ------------------------------------------------------------ headline
 
-const plural = (n: number, one: string) => `${formatNumber(n)} ${one}${n === 1 ? '' : 's'}`
+const runsText = (n: number) => t('farm.card.runs', { n: formatNumber(n) }, n)
 
 const resinTitle = computed(() => {
   const h = headline.value
   const r = input.value.refreshes
-  const most = h.upperBound ? 'at most ' : ''
+  const runs = h.upperBound ? t('farm.card.atMost', { runs: runsText(h.runs) }) : runsText(h.runs)
   const parts = [
-    `${most}${plural(h.runs, 'run')} · ${formatNumber(h.resin)} resin (${formatNumber(h.condensed)} condensed) · ${plural(h.days, 'day')}`,
-    'domains, normal bosses and ley lines',
-    `${formatNumber(h.daily)} resin a day${r ? ` (180 + ${r} × ${REFRESH_RESIN})` : ''}`,
+    t('farm.panel.runsLine', {
+      runs,
+      resin: formatNumber(h.resin),
+      condensed: formatNumber(h.condensed),
+      days: daysText(h.days),
+    }),
+    t('farm.panel.sources'),
+    r
+      ? t('farm.panel.dailyRefresh', { n: formatNumber(h.daily), r, per: REFRESH_RESIN })
+      : t('farm.panel.daily', { n: formatNumber(h.daily) }),
   ]
   if (props.resinHeld !== null && h.resin > 0) {
     const left = Math.max(0, h.resin - props.resinHeld)
-    parts.push(`${plural(resinDays(left, r), 'day')} with the resin held`)
+    parts.push(t('farm.panel.withHeld', { days: daysText(resinDays(left, r)) }))
   }
   if (h.gems.runs > 0) {
-    parts.push(`gems: ${plural(h.gems.runs, 'run')}, ${formatNumber(h.gems.resin)} resin`)
+    parts.push(
+      t('farm.panel.gems', { runs: runsText(h.gems.runs), resin: formatNumber(h.gems.resin) }),
+    )
   }
-  if (h.partial) parts.push('some sources have no drop rate')
-  if (h.upperBound) parts.push('World Level 9 boss drops are a guaranteed minimum')
+  if (h.partial) parts.push(t('farm.panel.partial'))
+  if (h.upperBound) parts.push(t('farm.panel.upperBound'))
   return parts.join(' · ')
 })
 const weeklyTitle = computed(() => {
   const w = headline.value.weekly
   return [
-    `Weekly bosses: ${plural(w.claims, 'claim')} over ${plural(w.weeks, 'week')}`,
-    `${formatNumber(w.resin)} resin with the weekly discount (${formatNumber(w.resinMax)} without)`,
-    w.partial ? 'some bosses have no drop rate' : '',
+    t('farm.panel.weeklyClaims', {
+      claims: t('farm.card.claims', { n: formatNumber(w.claims) }, w.claims),
+      weeks: weeksText(w.weeks),
+    }),
+    t('farm.panel.weeklyResin', {
+      resin: formatNumber(w.resin),
+      max: formatNumber(w.resinMax),
+    }),
+    w.partial ? t('farm.panel.weeklyPartial') : '',
   ]
     .filter(Boolean)
     .join(' · ')
 })
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const dayTitle = computed(
-  () =>
-    `Server day: ${DAY_NAMES[weekday.value]}${weekday.value === 0 ? ' (every domain open)' : ''} · the 04:00 reset in ${formatCountdown(props.day.msUntilReset)}`,
+const dayTitle = computed(() =>
+  [
+    weekday.value === 0
+      ? t('farm.panel.serverDaySunday', { day: weekdayLong(weekday.value) })
+      : t('farm.panel.serverDay', { day: weekdayLong(weekday.value) }),
+    t('farm.panel.resetIn', { time: formatCountdown(props.day.msUntilReset) }),
+  ].join(' · '),
 )
 
 // ------------------------------------------------------------ forging
@@ -171,16 +195,21 @@ const dayTitle = computed(
 const oreCard = computed(() => sections.value.flatMap((s) => s.cards).find((c) => c.kind === 'ore'))
 const forgeTitle = computed(() => {
   const f = props.totals.forge
-  if (!forge.value || !f) return 'Count the Mystic ore the chunks held can be forged into'
-  return `Forge ${formatNumber(f.count)} ${f.ore.name}: ${formatNumber(f.mora)} Mora, ${formatSeconds(f.seconds)}${f.short ? ` · still short ${formatNumber(f.short)}` : ''}`
+  if (!forge.value || !f) return t('farm.panel.forgeOff')
+  const line = t('farm.panel.forgeLine', {
+    item: t('farm.craft.item', { count: formatNumber(f.count), name: f.ore.name }),
+    mora: formatNumber(f.mora),
+    time: formatSeconds(f.seconds),
+  })
+  return f.short ? `${line} · ${t('farm.panel.stillShort', { n: formatNumber(f.short) })}` : line
 })
 
-const dayLabel = (days: readonly number[]) => days.map((d) => WEEKDAY_LABELS[d]).join(' · ')
+const dayLabel = (days: readonly number[]) => days.map(weekdayShort).join(' · ')
 /** Today's sections, with a no-resin one (first) for the crafting card when nothing else needs it. */
 const shown = computed(() => {
   const list = sections.value
   if (props.steps.length === 0 || list.some((s) => s.key === 'free')) return list
-  return [{ key: 'free' as const, resin: '0', label: 'No resin', cards: [] }, ...list]
+  return [{ key: 'free' as const, resin: '0', label: t('farm.sections.free'), cards: [] }, ...list]
 })
 const nothing = computed(() => shown.value.length === 0)
 
@@ -226,25 +255,28 @@ watch(view, (value) => {
     <section
       v-if="!noneLeft"
       class="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 shadow-sm"
-      aria-label="Totals"
+      :aria-label="$t('farm.panel.totals')"
     >
       <p class="flex items-center gap-2" :title="resinTitle">
         <span class="size-7 shrink-0">
-          <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+          <MaterialIcon
+            :src="materialIcon('OriginalResin')"
+            :name="materialName('OriginalResin')"
+          />
         </span>
         <span class="tabular font-mono text-lg leading-7 font-semibold"
           ><span v-if="headline.upperBound && headline.resin > 0" aria-hidden="true">≤</span
           >{{ headline.resin > 0 ? formatNumber(headline.resin) : '–'
           }}{{ headline.partial ? '+' : '' }}</span
         >
-        <span class="text-sm text-text-secondary">resin</span>
+        <span class="text-sm text-text-secondary">{{ $t('farm.panel.resin') }}</span>
         <template v-if="headline.days">
           <span class="text-text-muted" aria-hidden="true">·</span>
           <span class="tabular font-mono text-lg leading-7 font-semibold">{{
             formatNumber(headline.days)
           }}</span>
           <span class="text-sm text-text-secondary">{{
-            headline.days === 1 ? 'day' : 'days'
+            $t('farm.panel.dayUnit', headline.days)
           }}</span>
         </template>
         <span class="sr-only">{{ resinTitle }}</span>
@@ -255,51 +287,62 @@ watch(view, (value) => {
         <span
           v-if="headline.condensed"
           class="inline-flex items-center gap-1"
-          :title="`${formatNumber(headline.condensed)} Condensed Resin`"
+          :title="$t('farm.card.condensedTitle', { n: formatNumber(headline.condensed) })"
         >
           <span class="size-5 shrink-0">
-            <MaterialIcon :src="materialIcon('CondensedResin')" name="Condensed Resin" />
+            <MaterialIcon
+              :src="materialIcon('CondensedResin')"
+              :name="materialName('CondensedResin')"
+            />
           </span>
           {{ formatNumber(headline.condensed) }}
-          <span class="sr-only">Condensed Resin</span>
+          <span class="sr-only">{{ materialName('CondensedResin') }}</span>
         </span>
         <span
           v-if="input.refreshes"
           class="font-sans"
-          :title="`${input.refreshes} resin ${input.refreshes === 1 ? 'refresh' : 'refreshes'} a day: ${formatNumber(headline.daily)} resin a day`"
-          >{{ formatNumber(headline.daily) }}/day</span
+          :title="
+            $t(
+              'farm.panel.refreshTitle',
+              { r: input.refreshes, daily: formatNumber(headline.daily) },
+              input.refreshes,
+            )
+          "
+          >{{ $t('farm.panel.perDay', { n: formatNumber(headline.daily) }) }}</span
         >
         <span v-if="headline.weekly.weeks" class="font-sans" :title="weeklyTitle"
-          >Weekly
+          >{{ $t('farm.panel.weekly') }}
           <span class="font-mono"
             >{{ formatNumber(headline.weekly.weeks) }}{{ headline.weekly.partial ? '+' : '' }}</span
           >
-          {{ headline.weekly.weeks === 1 ? 'week' : 'weeks'
+          {{ $t('farm.panel.weekUnit', headline.weekly.weeks)
           }}<span class="sr-only">: {{ weeklyTitle }}</span></span
         >
         <span
           v-if="headline.locked"
           class="inline-flex items-center gap-1 text-warning-text"
-          :title="`${plural(headline.locked, 'source')} locked by AR/WL`"
+          :title="
+            $t('farm.panel.lockedTitle', { n: formatNumber(headline.locked) }, headline.locked)
+          "
         >
           <Lock class="size-3.5" aria-hidden="true" />
           {{ formatNumber(headline.locked) }}
-          <span class="sr-only">locked by AR/WL</span>
+          <span class="sr-only">{{ $t('farm.panel.locked') }}</span>
         </span>
       </p>
     </section>
 
     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
       <span class="flex flex-wrap items-center gap-2">
-        <UiSegmented v-model="view" :options="VIEWS" label="Farm view" />
+        <UiSegmented v-model="view" :options="VIEWS" :label="$t('farm.panel.view')" />
         <FilterChip
           :pressed="noWeekly"
           :count="noWeeklyCount"
-          :title="NO_WEEKLY_TITLE"
+          :title="$t('farm.panel.noWeeklyTitle')"
           @toggle="noWeekly = !noWeekly"
         >
           <CalendarOff class="size-4" aria-hidden="true" />
-          No weekly boss
+          {{ $t('farm.panel.noWeekly') }}
         </FilterChip>
       </span>
       <span
@@ -307,7 +350,7 @@ watch(view, (value) => {
         :title="dayTitle"
       >
         <Clock class="size-4" aria-hidden="true" />
-        <span class="font-sans font-medium text-text-primary">{{ WEEKDAY_LABELS[weekday] }}</span>
+        <span class="font-sans font-medium text-text-primary">{{ weekdayShort(weekday) }}</span>
         {{ formatCountdown(day.msUntilReset) }}
         <span class="sr-only">{{ dayTitle }}</span>
       </span>
@@ -317,9 +360,9 @@ watch(view, (value) => {
       v-if="noneLeft"
       class="rounded-xl border border-border-default bg-surface-raised shadow-sm"
     >
-      <UiEmpty title="Every goal still needs a weekly boss">
+      <UiEmpty :title="$t('farm.panel.noneLeft')">
         <template #icon><CalendarOff aria-hidden="true" /></template>
-        <UiButton @click="noWeekly = false">Show all goals</UiButton>
+        <UiButton @click="noWeekly = false">{{ $t('farm.panel.showAll') }}</UiButton>
       </UiEmpty>
     </div>
 
@@ -328,28 +371,30 @@ watch(view, (value) => {
       class="-mt-2 flex flex-wrap items-center gap-2 text-sm text-text-muted"
     >
       <Info class="size-4" aria-hidden="true" />
-      AR/WL not set: top bracket assumed
-      <UiButton variant="ghost" size="sm" @click="emit('settings')">Set</UiButton>
+      {{ $t('farm.panel.assumed') }}
+      <UiButton variant="ghost" size="sm" @click="emit('settings')">{{
+        $t('farm.panel.set')
+      }}</UiButton>
     </p>
 
     <template v-if="!noneLeft && view === 'today'">
       <p v-if="nothing" class="flex items-center justify-center gap-2 py-8 text-text-secondary">
         <PartyPopper class="size-5" aria-hidden="true" />
-        Nothing to farm
+        {{ $t('farm.panel.nothing') }}
       </p>
 
       <section
         v-for="s in visible"
         :key="s.key"
         class="mt-1 flex flex-col gap-1.5"
-        :aria-label="`${s.label}: ${s.resin} resin`"
+        :aria-label="$t('farm.panel.sectionLabel', { label: s.label, resin: s.resin })"
       >
         <h2 class="text-sm font-semibold">
           <button
             type="button"
             class="-mx-1 flex min-h-8 w-[calc(100%+0.5rem)] items-center gap-1.5 rounded-md px-1 text-left transition-colors hover:bg-surface-overlay"
             :aria-expanded="!folded.has(s.key)"
-            :title="folded.has(s.key) ? 'Show' : 'Fold'"
+            :title="folded.has(s.key) ? $t('farm.panel.show') : $t('farm.craft.fold')"
             @click="toggleFold(s.key)"
           >
             <ChevronDown
@@ -358,14 +403,17 @@ watch(view, (value) => {
               aria-hidden="true"
             />
             <span class="size-5 shrink-0">
-              <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+              <MaterialIcon
+                :src="materialIcon('OriginalResin')"
+                :name="materialName('OriginalResin')"
+              />
             </span>
             <span class="tabular font-mono">{{ s.resin }}</span>
             <span class="font-normal text-text-muted">{{ s.label }}</span>
             <span
               v-if="folded.has(s.key)"
               class="tabular rounded-md bg-surface-overlay px-1.5 font-mono text-xs font-normal text-text-secondary"
-              :title="`${hiddenCount(s.key)} hidden`"
+              :title="$t('farm.panel.hidden', { n: hiddenCount(s.key) })"
               >{{ hiddenCount(s.key) }}</span
             >
           </button>
@@ -391,7 +439,7 @@ watch(view, (value) => {
               :title="forgeTitle"
               @click="forge = false"
             >
-              Forge from chunks
+              {{ $t('farm.panel.forge') }}
             </button>
           </CraftCard>
           <FarmCard v-for="card in s.cards" :key="card.id" :card="card">
@@ -408,7 +456,7 @@ watch(view, (value) => {
               :title="forgeTitle"
               @click="forge = !forge"
             >
-              Forge from chunks
+              {{ $t('farm.panel.forge') }}
             </button>
           </FarmCard>
         </div>
@@ -427,11 +475,20 @@ watch(view, (value) => {
           <span
             v-if="pair.run"
             class="tabular inline-flex items-center gap-0.5 font-mono text-xs font-normal text-text-secondary"
-            :title="`${plural(pair.run.runs, 'run')} · ${formatNumber(pair.run.resin)} resin · ${plural(pair.run.days, 'day')}`"
+            :title="
+              $t('farm.panel.pairTitle', {
+                runs: runsText(pair.run.runs),
+                resin: formatNumber(pair.run.resin),
+                days: daysText(pair.run.days),
+              })
+            "
           >
-            {{ plural(pair.run.runs, 'run') }} ·
+            {{ runsText(pair.run.runs) }} ·
             <span class="size-4 shrink-0">
-              <MaterialIcon :src="materialIcon('OriginalResin')" name="Original Resin" />
+              <MaterialIcon
+                :src="materialIcon('OriginalResin')"
+                :name="materialName('OriginalResin')"
+              />
             </span>
             {{ formatCompact(pair.run.resin) }}
           </span>

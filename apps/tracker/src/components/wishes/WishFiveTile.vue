@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { wishItemName } from './item-name'
 import { computed } from 'vue'
 import type { UigfGachaType } from '@gdt/shared'
 import { HARD_PITY, pityBand, type PullRow } from '@/data/wish-history'
+import { t } from '@/i18n'
 import WishItemIcon from './WishItemIcon.vue'
-import { BAND_COLOR, OUTCOME_LABEL, oddsOf, runName, wishDay, wishMinute } from './wish-labels'
+import { BAND_COLOR, oddsOf, outcomeLabel, runName, wishDay, wishMinute } from './wish-labels'
 
 /**
  * One 5★: its icon ringed by the 50/50, the name, the pity in its band's
@@ -17,8 +19,13 @@ const width = computed(
 )
 const title = computed(() =>
   [
-    `${props.row.pull.item.name} · pity ${props.row.pity}`,
-    props.row.outcome ? `${OUTCOME_LABEL[props.row.outcome]} (${oddsOf(props.banner)})` : '',
+    t('wishes.five.pity', { name: wishItemName(props.row.pull.item), pity: props.row.pity }),
+    props.row.outcome
+      ? t('wishes.five.outcome', {
+          outcome: outcomeLabel(props.row.outcome),
+          odds: oddsOf(props.banner),
+        })
+      : '',
     wishMinute(props.row.pull.time),
     runName(props.row),
   ]
@@ -35,7 +42,9 @@ const title = computed(() =>
     <WishItemIcon :item="row.pull.item" :outcome="row.outcome" :size="dated ? 'lg' : 'md'" />
     <span class="flex min-w-0 flex-1 flex-col gap-1">
       <span class="flex min-w-0 items-baseline gap-1.5">
-        <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ row.pull.item.name }}</span>
+        <span class="min-w-0 flex-1 truncate text-sm font-medium">{{
+          wishItemName(row.pull.item)
+        }}</span>
         <span class="tabular shrink-0 font-mono text-sm font-bold" :style="{ color }">{{
           row.pity
         }}</span>

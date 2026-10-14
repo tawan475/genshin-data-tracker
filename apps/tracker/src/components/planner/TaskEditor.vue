@@ -8,8 +8,9 @@ import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import { t } from '@/i18n'
+import { weekdayShort } from './farm-format'
 import NoteInput from './NoteInput.vue'
-import { WEEKDAY_LABELS } from '@gdt/game-data/planner-math'
 import { weekdayOf } from './tasks'
 
 /**
@@ -55,25 +56,36 @@ watch(
   { immediate: true },
 )
 
-const everyOptions = Array.from({ length: 7 }, (_, i) => ({
-  value: i + 1,
-  label: i === 0 ? 'Every day' : `Every ${i + 1} days`,
-}))
+const everyOptions = computed(() =>
+  Array.from({ length: 7 }, (_, i) => ({
+    value: i + 1,
+    label:
+      i === 0 ? t('planner.taskEditor.everyDay') : t('planner.taskEditor.everyDays', { n: i + 1 }),
+  })),
+)
 const startOptions = computed(() =>
   Array.from({ length: 7 }, (_, i) => ({
     value: i,
     label:
       i === 0
-        ? `Today (${WEEKDAY_LABELS[weekdayOf(props.today)]})`
+        ? t('planner.taskEditor.today', { day: weekdayShort(weekdayOf(props.today)) })
         : i === 1
-          ? `Tomorrow (${WEEKDAY_LABELS[weekdayOf(props.today + 1)]})`
-          : WEEKDAY_LABELS[weekdayOf(props.today + i)]!,
+          ? t('planner.taskEditor.tomorrow', { day: weekdayShort(weekdayOf(props.today + 1)) })
+          : weekdayShort(weekdayOf(props.today + i)),
   })),
 )
-const MODES = [
-  { value: 'original' as const, label: 'Start day', title: 'Keeps the rhythm of its start day' },
-  { value: 'completed' as const, label: 'Done day', title: 'Counts from the day it was done' },
-]
+const MODES = computed(() => [
+  {
+    value: 'original' as const,
+    label: t('planner.taskEditor.startDay'),
+    title: t('planner.taskEditor.startDayTitle'),
+  },
+  {
+    value: 'completed' as const,
+    label: t('planner.taskEditor.doneDay'),
+    title: t('planner.taskEditor.doneDayTitle'),
+  },
+])
 
 function save() {
   const n = name.value.trim().slice(0, 80)
@@ -94,9 +106,16 @@ function save() {
 </script>
 
 <template>
-  <UiModal :open="open" :title="task ? 'Task' : 'New task'" @close="emit('close')">
+  <UiModal
+    :open="open"
+    :title="task ? $t('planner.taskEditor.task') : $t('planner.taskEditor.newTask')"
+    @close="emit('close')"
+  >
     <form id="task-form" class="flex flex-col gap-4" @submit.prevent="save">
-      <UiField label="Name" :error="nameInvalid ? 'Name it' : undefined">
+      <UiField
+        :label="$t('planner.custom.name')"
+        :error="nameInvalid ? $t('planner.taskEditor.nameIt') : undefined"
+      >
         <template #default="{ id, describedBy }">
           <UiInput
             :id="id"
@@ -111,17 +130,19 @@ function save() {
       </UiField>
       <div class="grid grid-cols-2 gap-3">
         <label class="flex min-w-0 flex-col gap-1">
-          <span class="text-sm text-text-secondary">Repeats</span>
+          <span class="text-sm text-text-secondary">{{ $t('planner.taskEditor.repeats') }}</span>
           <UiSelect v-model="every" :options="everyOptions" />
         </label>
         <label class="flex min-w-0 flex-col gap-1">
-          <span class="text-sm text-text-secondary">{{ task ? 'Next' : 'Starts' }}</span>
+          <span class="text-sm text-text-secondary">{{
+            task ? $t('planner.taskEditor.next') : $t('planner.taskEditor.starts')
+          }}</span>
           <UiSelect v-model="start" :options="startOptions" />
         </label>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <span class="text-sm text-text-secondary">Counts from</span>
-        <UiSegmented v-model="mode" :options="MODES" label="Counts from" />
+        <span class="text-sm text-text-secondary">{{ $t('planner.taskEditor.countsFrom') }}</span>
+        <UiSegmented v-model="mode" :options="MODES" :label="$t('planner.taskEditor.countsFrom')" />
       </div>
       <NoteInput v-model="note" />
     </form>
@@ -133,10 +154,12 @@ function save() {
         @click="emit('remove')"
       >
         <Trash2 class="size-4" aria-hidden="true" />
-        Delete
+        {{ $t('planner.common.delete') }}
       </UiButton>
-      <UiButton @click="emit('close')">Cancel</UiButton>
-      <UiButton variant="primary" type="submit" form="task-form">Save</UiButton>
+      <UiButton @click="emit('close')">{{ $t('planner.common.cancel') }}</UiButton>
+      <UiButton variant="primary" type="submit" form="task-form">{{
+        $t('planner.common.save')
+      }}</UiButton>
     </template>
   </UiModal>
 </template>

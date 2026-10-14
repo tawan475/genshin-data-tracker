@@ -5,20 +5,15 @@
  */
 
 import type { AccountResponse, GenshinServer, SnapshotResponse, SnapshotSummary } from '@gdt/shared'
+import { t } from '@/i18n'
 import { dateLocale, formatNumber } from '@/lib/format'
 import { rangeStart, type ChartRange } from './chart-range'
 
 // ------------------------------------------------------------------ accounts
 
-const SERVER_LABELS: Record<GenshinServer, string> = {
-  AMERICA: 'America',
-  EUROPE: 'Europe',
-  ASIA: 'Asia',
-  SAR: 'TW, HK, MO',
-}
-
+/** A server's name in the language on screen ("America", "TW, HK, MO"). */
 export function serverLabel(server: GenshinServer | null): string | null {
-  return server ? SERVER_LABELS[server] : null
+  return server ? t(`overview.server.${server}`) : null
 }
 
 /** "692×": how many times smaller the stored copy is than what was uploaded. */
@@ -478,23 +473,23 @@ export interface RecentSnapshot {
   rawSize: number
   storedSize: number
   summary: SnapshotSummary
-  /** Non-zero changes against the snapshot before it, in display order. */
-  changes: { label: string; value: number }[]
+  /** Non-zero changes against the snapshot before it, in display order (label in the language on screen). */
+  changes: { key: SummaryKey; label: string; value: number }[]
   /** False for the account's first snapshot (nothing to compare with). */
   hasPrevious: boolean
   /** Mora and primogems were not in this capture (see currencyMissing). */
   currencyMissing: boolean
 }
 
-const CHANGE_LABELS: [SummaryKey, string][] = [
-  ['mora', 'Mora'],
-  ['primogem', 'Primogems'],
-  ['characters', 'Characters'],
-  ['weapons', 'Weapons'],
-  ['artifacts', 'Artifacts'],
-  ['artifact4', '4★ Artifact'],
-  ['artifact3', '3★ Artifact'],
-]
+const CHANGE_KEYS = [
+  'mora',
+  'primogem',
+  'characters',
+  'weapons',
+  'artifacts',
+  'artifact4',
+  'artifact3',
+] as const satisfies readonly SummaryKey[]
 
 /** The newest `count` snapshots with what changed in each. Input is newest first. */
 export function recentSnapshots(
@@ -503,12 +498,14 @@ export function recentSnapshots(
 ): RecentSnapshot[] {
   return snapshots.slice(0, count).map((s, i) => {
     const previous = snapshots[i + 1]
-    const changes: { label: string; value: number }[] = []
+    const changes: RecentSnapshot['changes'] = []
     if (previous) {
       const delta = summaryDelta(s.summary, previous.summary)
-      for (const [key, label] of CHANGE_LABELS) {
+      for (const key of CHANGE_KEYS) {
         const value = delta[key]
-        if (value !== null && value !== 0) changes.push({ label, value })
+        if (value !== null && value !== 0) {
+          changes.push({ key, label: t(`overview.figure.${key}`), value })
+        }
       }
     }
     return {

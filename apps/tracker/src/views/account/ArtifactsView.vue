@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { compareText } from '@/lib/search'
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
 import { refDebounced, useMediaQuery } from '@vueuse/core'
 import { Backpack, Gem, Layers, LayoutGrid, Rows3, SearchX, Upload } from 'lucide-vue-next'
 import ArtifactBag from '@/components/artifacts/ArtifactBag.vue'
@@ -79,12 +81,12 @@ const PAGE_SIZE: Record<ArtifactView, number> = {
   sets: Infinity,
 }
 /** Icons only on a phone; the name stays in the tooltip. */
-const VIEW_OPTIONS: SegmentedOption<ArtifactView>[] = [
-  { value: 'cards', label: 'Cards', icon: LayoutGrid },
-  { value: 'bag', label: 'Bag', icon: Backpack },
-  { value: 'table', label: 'Table', icon: Rows3 },
-  { value: 'sets', label: 'Sets', icon: Layers },
-]
+const VIEW_OPTIONS = computed<SegmentedOption<ArtifactView>[]>(() => [
+  { value: 'cards', label: t('characters.toolbar.cards'), icon: LayoutGrid },
+  { value: 'bag', label: t('weapons.toolbar.bag'), icon: Backpack },
+  { value: 'table', label: t('artifacts.page.table'), icon: Rows3 },
+  { value: 'sets', label: t('characters.sets'), icon: Layers },
+])
 /** Sorts that rank 5★ pieces above the rest, so lower rarities sink to the end. */
 const STRIP_SORTS: readonly ArtifactSort[] = ['cv', 'rv', 'potential']
 
@@ -388,13 +390,13 @@ const artifactExport = useCardExport({
   measure: (node) => ({ width: ARTIFACT_SHARE_WIDTH, height: Math.ceil(node.offsetHeight) }),
   node: () => exportArtifact.value?.$el as HTMLElement | undefined,
   open: () => openRow.value !== null,
-  state: () => [openRow.value, shareTheme.value],
+  state: () => [openRow.value, shareTheme.value, locale.value],
   filename: () =>
     openRow.value
       ? `${openRow.value.artifact.setKey}-${openRow.value.artifact.slotKey}-genshin-tracker.png`
       : 'artifact-genshin-tracker.png',
-  title: () => openRow.value?.setName ?? 'Artifact',
-  pngLabel: 'Download PNG',
+  title: () => openRow.value?.setName ?? t('share.export.artifactTitle'),
+  pngLabel: () => t('share.export.download'),
 })
 const shareFrame = artifactExport.frame
 /** The dialog's title: the piece's own name, else its set's. */
@@ -421,27 +423,27 @@ const GRID =
 </script>
 
 <template>
-  <PageHeader title="Artifacts" />
+  <PageHeader :title="$t('game.artifacts')" />
 
   <UiPanel v-if="!account.latest" flush>
-    <UiEmpty title="No snapshots yet">
+    <UiEmpty :title="$t('characters.page.noSnapshots')">
       <template #icon><Gem aria-hidden="true" /></template>
       <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
         <Upload class="size-4" aria-hidden="true" />
-        Import
+        {{ $t('characters.page.import') }}
       </UiButton>
     </UiEmpty>
   </UiPanel>
 
   <UiError
     v-else-if="inventory.error.value && !inventory.data.value"
-    title="Could not load artifacts"
+    :title="$t('artifacts.page.loadFailed')"
     :error="inventory.error.value"
     @retry="inventory.reload()"
   />
 
   <div v-else-if="!inventory.data.value" class="flex flex-col gap-4" aria-busy="true">
-    <span class="sr-only" role="status">Loading artifacts</span>
+    <span class="sr-only" role="status">{{ $t('artifacts.page.loading') }}</span>
     <UiSkeleton class="h-28" />
     <UiSkeleton class="h-11 w-64" />
     <div class="@container">
@@ -466,11 +468,11 @@ const GRID =
   </div>
 
   <UiPanel v-else-if="rows.length === 0" flush>
-    <UiEmpty title="No artifacts">
+    <UiEmpty :title="$t('characters.detail.noArtifacts')">
       <template #icon><Gem aria-hidden="true" /></template>
       <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
         <Upload class="size-4" aria-hidden="true" />
-        Import
+        {{ $t('characters.page.import') }}
       </UiButton>
     </UiEmpty>
   </UiPanel>
@@ -478,7 +480,7 @@ const GRID =
   <div v-else class="flex flex-col gap-4">
     <UiError
       v-if="inventory.error.value"
-      title="Could not refresh"
+      :title="$t('artifacts.page.refreshFailed')"
       :error="inventory.error.value"
       @retry="inventory.reload()"
     />
@@ -504,14 +506,14 @@ const GRID =
       <p
         class="tabular shrink-0 font-mono text-lg"
         role="status"
-        :title="filtering ? 'Shown / artifacts' : 'Artifacts'"
+        :title="filtering ? $t('artifacts.page.shownTitle') : $t('game.artifacts')"
       >
         <template v-if="filtering">
           {{ formatNumber(view === 'sets' ? matches.length : results.length)
           }}<span class="text-text-muted"> / {{ formatNumber(rows.length) }}</span>
         </template>
         <template v-else>{{ formatNumber(rows.length) }}</template>
-        <span class="sr-only">artifacts</span>
+        <span class="sr-only">{{ $t('artifacts.page.countSuffix') }}</span>
       </p>
       <ArtifactSetBreakdown
         v-if="view !== 'sets' && (matchSets.length > 1 || filters.sets.length)"
@@ -520,7 +522,13 @@ const GRID =
         :selected="filters.sets"
         @toggle="toggleSet"
       />
-      <UiSegmented v-model="view" :options="VIEW_OPTIONS" label="View" compact class="ml-auto" />
+      <UiSegmented
+        v-model="view"
+        :options="VIEW_OPTIONS"
+        :label="$t('characters.toolbar.view')"
+        compact
+        class="ml-auto"
+      />
     </div>
 
     <LowerRarityStrip
@@ -532,9 +540,9 @@ const GRID =
     />
 
     <UiPanel v-if="results.length === 0" flush>
-      <UiEmpty title="No matches">
+      <UiEmpty :title="$t('characters.page.noMatches')">
         <template #icon><SearchX aria-hidden="true" /></template>
-        <UiButton @click="clearFilters">Clear</UiButton>
+        <UiButton @click="clearFilters">{{ $t('characters.toolbar.clear') }}</UiButton>
       </UiEmpty>
     </UiPanel>
 
@@ -629,7 +637,7 @@ const GRID =
           v-else
           v-model:theme="shareTheme"
           :exporter="artifactExport"
-          :size="`${ARTIFACT_SHARE_WIDTH * ARTIFACT_SHARE_SCALE} px wide PNG`"
+          :size="$t('artifacts.page.pngSize', { px: ARTIFACT_SHARE_WIDTH * ARTIFACT_SHARE_SCALE })"
           theme-only
         />
       </template>

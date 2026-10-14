@@ -7,10 +7,12 @@
  */
 
 import { decodeCharacters, type GoodCharacter, type KeyRef } from '@gdt/shared'
+import { t } from '@/i18n'
 import { loadBundle, type AccountRef, type DecodedBundle } from './account-data'
 
 export interface ChangeLine {
-  label: string
+  /** In the language on screen when read (the history is cached across switches). */
+  readonly label: string
   from: string
   to: string
 }
@@ -27,29 +29,39 @@ export interface CharacterChange {
 
 export type CharacterHistory = Map<string, CharacterChange[]>
 
-export const talentText = (t: GoodCharacter['talent']) => `${t.auto} / ${t.skill} / ${t.burst}`
+export const talentText = (talent: GoodCharacter['talent']) =>
+  `${talent.auto} / ${talent.skill} / ${talent.burst}`
 
 const stateText = (c: GoodCharacter) =>
   `Lv ${c.level} · A${c.ascension} · C${c.constellation} · ${talentText(c.talent)}`
 
+/** A change line whose label reads in the language on screen. */
+function line(kind: 'level' | 'constellation' | 'talents', from: string, to: string): ChangeLine {
+  return {
+    get label() {
+      return t(`progression.character.${kind}`)
+    },
+    from,
+    to,
+  }
+}
+
 function describe(before: GoodCharacter, after: GoodCharacter): ChangeLine[] {
   const lines: ChangeLine[] = []
   if (before.level !== after.level || before.ascension !== after.ascension) {
-    lines.push({
-      label: 'Level',
-      from: `${before.level} · A${before.ascension}`,
-      to: `${after.level} · A${after.ascension}`,
-    })
+    lines.push(
+      line(
+        'level',
+        `${before.level} · A${before.ascension}`,
+        `${after.level} · A${after.ascension}`,
+      ),
+    )
   }
   if (before.constellation !== after.constellation) {
-    lines.push({
-      label: 'Constellation',
-      from: `C${before.constellation}`,
-      to: `C${after.constellation}`,
-    })
+    lines.push(line('constellation', `C${before.constellation}`, `C${after.constellation}`))
   }
   if (talentText(before.talent) !== talentText(after.talent)) {
-    lines.push({ label: 'Talents', from: talentText(before.talent), to: talentText(after.talent) })
+    lines.push(line('talents', talentText(before.talent), talentText(after.talent)))
   }
   return lines
 }

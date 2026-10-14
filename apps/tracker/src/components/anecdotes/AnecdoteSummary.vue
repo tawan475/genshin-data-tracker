@@ -4,6 +4,7 @@ import type { AnecdoteProgress, CapturedAnecdotes } from '@/data/anecdote-progre
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import { materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 /**
@@ -30,23 +31,29 @@ const doneTitle = computed(() => {
         if (entry.source === 'captured') captured++
         else if (entry.source === 'marked') marked++
       }
-  parts.push(`${formatNumber(captured)} captured`, `${formatNumber(marked)} by hand`)
+  parts.push(
+    t('anecdotes.summary.doneCaptured', { n: formatNumber(captured) }),
+    t('anecdotes.summary.doneByHand', { n: formatNumber(marked) }),
+  )
   const unknown = props.progress.unknown.length
-  if (unknown) parts.push(`${formatNumber(unknown)} newer than the game data`)
+  if (unknown) parts.push(t('anecdotes.summary.doneUnknown', { n: formatNumber(unknown) }))
   return parts.join(' · ')
 })
 const reward = computed(() => props.captured.reward)
 const stampsTitle = computed(() =>
   reward.value
-    ? `Stamps toward reward ${formatNumber(reward.value.index + 1)}`
-    : 'Not in a capture yet',
+    ? t('anecdotes.summary.stampsTitle', { n: formatNumber(reward.value.index + 1) })
+    : t('anecdotes.summary.stampsNone'),
 )
 </script>
 
 <template>
-  <ul class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4" aria-label="Summary">
+  <ul
+    class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
+    :aria-label="$t('anecdotes.summary.label')"
+  >
     <li class="flex min-w-0">
-      <UiStat label="Done" :hint="doneTitle">
+      <UiStat :label="$t('anecdotes.summary.done')" :hint="doneTitle">
         <template #value>
           <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
             {{ formatNumber(progress.done)
@@ -57,12 +64,12 @@ const stampsTitle = computed(() =>
           class="mt-1"
           :value="progress.done"
           :max="progress.total"
-          label="Anecdotes done"
+          :label="$t('anecdotes.summary.doneLabel')"
         />
       </UiStat>
     </li>
     <li class="flex min-w-0">
-      <UiStat label="Stamps" :hint="stampsTitle">
+      <UiStat :label="$t('anecdotes.summary.stamps')" :hint="stampsTitle">
         <template #value>
           <span v-if="reward" class="tabular truncate font-mono text-lg font-medium sm:text-xl">
             {{ formatNumber(reward.progress)
@@ -75,30 +82,37 @@ const stampsTitle = computed(() =>
           class="mt-1"
           :value="reward.progress"
           :max="reward.target"
-          label="Stamps toward the next reward"
+          :label="$t('anecdotes.summary.stampsLabel')"
         />
       </UiStat>
     </li>
     <li class="flex min-w-0">
       <UiStat
-        label="Reward"
-        :hint="`${formatNumber(rewardPrimogems)} primogems for every ${formatNumber(rewardEvery)} anecdotes recorded`"
+        :label="$t('anecdotes.summary.reward')"
+        :hint="
+          $t('anecdotes.summary.rewardHint', {
+            primogems: formatNumber(rewardPrimogems),
+            every: formatNumber(rewardEvery),
+          })
+        "
       >
         <template #icon><img :src="primogem" alt="" class="size-4" /></template>
         <template #value>
           <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
             {{ formatNumber(rewardPrimogems)
-            }}<span class="text-sm text-text-muted"> per {{ formatNumber(rewardEvery) }}</span>
+            }}<span class="text-sm text-text-muted">
+              {{ $t('anecdotes.summary.rewardPer', { every: formatNumber(rewardEvery) }) }}</span
+            >
           </span>
         </template>
       </UiStat>
     </li>
     <li class="flex min-w-0">
       <UiStat
-        label="Active"
+        :label="$t('anecdotes.summary.active')"
         :value="progress.active"
         exact
-        hint="Going on now in the game (in the newest capture)"
+        :hint="$t('anecdotes.summary.activeHint')"
       />
     </li>
   </ul>

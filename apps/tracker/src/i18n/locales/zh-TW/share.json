@@ -1,1 +1,38 @@
-{}
+{
+  "export": {
+    "copyImage": "複製圖片",
+    "share": "分享",
+    "missing": "{n} 張圖片無法載入",
+    "drawing": "{label} · 繪製中",
+    "exportFailed": "匯出失敗",
+    "copyFailed": "複製失敗",
+    "shareFailed": "分享失敗",
+    "copied": "已複製",
+    "download": "下載 PNG",
+    "downloadSized": "下載 {size} PNG",
+    "buildTitle": "角色配置",
+    "artifactTitle": "聖遺物"
+  },
+  "options": {
+    "darkCard": "深色卡片",
+    "lightCard": "淺色卡片",
+    "dark": "深色",
+    "light": "淺色",
+    "cardTheme": "卡片主題",
+    "showName": "顯示帳號名稱",
+    "name": "名稱",
+    "showUid": "顯示 UID"
+  },
+  "menu": {
+    "label": "分享卡片",
+    "drawing": "繪製中",
+    "copy": "複製"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} 詞條（初始詞條加每 +4 一次）",
+    "levelTitle": "等級 {level}/{cap} · 突破 {ascension}",
+    "weaponAndStats": "武器與屬性",
+    "pieceBonus": "{n}件套效果",
+    "rvTitle": "詞條價值：每次副屬性強化佔該屬性最高檔的百分比之和"
+  }
+}

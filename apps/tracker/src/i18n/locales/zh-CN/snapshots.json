@@ -1,1 +1,108 @@
-{}
+{
+  "heading": "导入历史",
+  "loadFailed": "加载失败",
+  "noneInRange": "此范围内没有快照",
+  "clear": "清除",
+  "noSnapshots": "暂无快照",
+  "import": "导入",
+  "unchangedUntil": "直到 {time} 未变化",
+  "downloadFailed": "快照下载失败",
+  "saved": "已保存 {name}",
+  "files": "{n} 个文件",
+  "gone": "{n} 个已不存在",
+  "exportFailed": "导出失败",
+  "deletedOf": "已删除 {deleted} / {total} 个快照",
+  "deleteFailed": "快照删除失败",
+  "deleteFailedMany": "快照删除失败",
+  "deleted": "已删除 {n} 个快照",
+  "column": {
+    "id": "ID",
+    "date": "日期",
+    "source": "来源",
+    "rawSize": "原始大小",
+    "storedSize": "存储大小",
+    "actions": "操作"
+  },
+  "select": {
+    "page": "选择本页",
+    "snapshot": "选择快照 {id}",
+    "shiftClick": "按住 Shift 点击可选择一段范围",
+    "pageSelected": "已选择本页全部 {n} 个。",
+    "all": "选择全部 {n} 个",
+    "allInRange": "选择范围内全部 {n} 个",
+    "viewSelected": "已选择全部 {n} 个快照。",
+    "rangeSelected": "已选择范围内全部 {n} 个快照。",
+    "clear": "清除选择",
+    "allLabel": "全部"
+  },
+  "confirm": {
+    "title": "确定吗？",
+    "one": "即将删除此快照，且无法撤销。",
+    "oneConfirm": "是的，删除！",
+    "many": "即将删除 {n} 个快照，且无法撤销。",
+    "purge": "即将立即删除该用户的 {n} 个快照（不进入回收站），且无法撤销。",
+    "manyConfirm": "是的，全部删除！",
+    "massTitle": "批量删除警告",
+    "massText": "你已选择所有页面中的全部快照。输入“DELETE”以确认清空全部内容。",
+    "massConfirm": "我明白，全部删除！",
+    "typePlaceholder": "输入“{word}”以确认",
+    "typeLabel": "输入 {word} 以确认",
+    "typeError": "请输入“{word}”",
+    "cancel": "取消"
+  },
+  "figure": {
+    "noCurrency": "此快照没有货币数据",
+    "vs": "对比 #{id} · {time}"
+  },
+  "range": {
+    "label": "按日期筛选",
+    "from": "开始",
+    "to": "结束",
+    "selectTitle": "选择范围内的 {n} 个快照",
+    "select": "选择 {n} 个",
+    "clear": "清除日期"
+  },
+  "row": {
+    "downloadGood": "下载 GOOD",
+    "download": "下载快照 {id}",
+    "delete": "删除快照",
+    "deleteId": "删除快照 {id}"
+  },
+  "bar": {
+    "saving": "正在保存…",
+    "downloadingOf": "正在下载 {done} / {total}",
+    "downloading": "正在下载 {done}",
+    "zipping": "正在打包 {done} / {total}",
+    "selected": "已选择 {n} 个",
+    "outOf": " / 共 {n} 个",
+    "hiddenTitle": "有 {n} 个已选快照不在日期范围内",
+    "hidden": "· {n} 个已隐藏",
+    "cancel": "取消",
+    "blocked": "另一个导出正在进行",
+    "downloadTitle": "下载 GOOD 文件的 zip 压缩包",
+    "download": "下载",
+    "delete": "删除"
+  },
+  "card": {
+    "stored": "已存储"
+  },
+  "storage": {
+    "title": "存储",
+    "snapshots": "快照",
+    "raw": "原始数据",
+    "stored": "已存储",
+    "saved": "节省"
+  },
+  "pagination": {
+    "perPage": "每页",
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第 {page} / {pages} 页",
+    "total": "（共 {n} 个）",
+    "goTo": "跳至",
+    "go": "前往"
+  },
+  "table": {
+    "noData": "暂无数据。"
+  }
+}

@@ -10,6 +10,7 @@ import {
   type AnecdoteEntry,
 } from '@/data/anecdote-progress'
 import UiBadge from '@/components/ui/UiBadge.vue'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 /**
@@ -40,10 +41,10 @@ const runs = computed(() => textRuns(body.value))
 
 const target = computed(() => markTarget(props.entry))
 const status = computed(() => {
-  if (props.entry.source === 'captured') return 'Captured · stays done'
+  if (props.entry.source === 'captured') return t('anecdotes.row.capturedStays')
   if (props.entry.source === 'marked')
-    return props.readOnly ? 'Marked by hand' : 'Marked by hand · click to unmark'
-  return props.readOnly ? 'Not done' : 'Click to mark done'
+    return props.readOnly ? t('anecdotes.row.markedByHand') : t('anecdotes.row.markedClick')
+  return props.readOnly ? t('anecdotes.row.notDone') : t('anecdotes.row.clickToMark')
 })
 
 function toggle() {
@@ -65,7 +66,12 @@ const FILL = {
       class="group flex size-10 shrink-0 items-center justify-center rounded-full"
       :aria-pressed="entry.source !== null"
       :aria-disabled="readOnly || entry.source === 'captured' ? 'true' : undefined"
-      :aria-label="`${title}: ${entry.source === 'captured' ? 'captured' : entry.source === 'marked' ? 'marked by hand' : 'not done'}`"
+      :aria-label="
+        $t('anecdotes.row.aria', {
+          title,
+          state: $t(`anecdotes.row.states.${entry.source ?? 'none'}`),
+        })
+      "
       :title="status"
       @click="toggle"
     >
@@ -102,19 +108,23 @@ const FILL = {
           />
         </button>
         <span class="flex shrink-0 items-center gap-1.5">
-          <UiBadge v-if="entry.active" tone="accent" title="Going on now in the game"
-            >Active</UiBadge
-          >
+          <UiBadge v-if="entry.active" tone="accent" :title="$t('anecdotes.row.activeTitle')">{{
+            $t('anecdotes.row.active')
+          }}</UiBadge>
           <UiBadge
             v-if="entry.anecdote.repeatable"
             mono
-            :title="`Done ${formatNumber(entry.finishCount)} times (a loop)`"
+            :title="$t('anecdotes.row.repeatTitle', { n: formatNumber(entry.finishCount) })"
           >
             <Repeat class="size-3" aria-hidden="true" />{{ formatNumber(entry.finishCount) }}
           </UiBadge>
-          <span v-if="entry.anecdote.hidden" class="text-text-muted" title="Hidden anecdote">
+          <span
+            v-if="entry.anecdote.hidden"
+            class="text-text-muted"
+            :title="$t('anecdotes.row.hidden')"
+          >
             <EyeOff class="size-3.5" aria-hidden="true" />
-            <span class="sr-only">Hidden anecdote</span>
+            <span class="sr-only">{{ $t('anecdotes.row.hidden') }}</span>
           </span>
         </span>
       </div>
@@ -123,7 +133,9 @@ const FILL = {
           <span v-if="run.em" class="font-medium text-text-secondary">{{ run.text }}</span>
           <template v-else>{{ run.text }}</template>
         </template>
-        <span class="tabular ml-1 font-mono text-xs" :title="`Added in ${entry.anecdote.version}`"
+        <span
+          class="tabular ml-1 font-mono text-xs"
+          :title="$t('anecdotes.row.addedIn', { version: entry.anecdote.version })"
           >v{{ entry.anecdote.version }}</span
         >
       </p>

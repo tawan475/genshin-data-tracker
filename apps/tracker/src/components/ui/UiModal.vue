@@ -105,7 +105,7 @@ const detail = computed(() => props.size === 'detail')
             {{ formatNumber(index! + 1) }} / {{ formatNumber(total!) }}
           </span>
           <UiIconButton
-            label="Previous"
+            :label="$t('ui.modal.previous')"
             class="disabled:pointer-events-none disabled:opacity-40"
             :disabled="!canPrev"
             @click="emit('step', -1)"
@@ -113,7 +113,7 @@ const detail = computed(() => props.size === 'detail')
             <ChevronLeft class="size-5" aria-hidden="true" />
           </UiIconButton>
           <UiIconButton
-            label="Next"
+            :label="$t('ui.modal.next')"
             class="disabled:pointer-events-none disabled:opacity-40"
             :disabled="!canNext"
             @click="emit('step', 1)"
@@ -121,7 +121,7 @@ const detail = computed(() => props.size === 'detail')
             <ChevronRight class="size-5" aria-hidden="true" />
           </UiIconButton>
         </template>
-        <UiIconButton label="Close" @click="emit('close')">
+        <UiIconButton :label="$t('ui.close')" @click="emit('close')">
           <X class="size-5" aria-hidden="true" />
         </UiIconButton>
       </div>

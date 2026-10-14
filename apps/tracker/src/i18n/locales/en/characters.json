@@ -1,1 +1,160 @@
-{}
+{
+  "gap": {
+    "level": "Lv {level}",
+    "noWeapon": "No weapon",
+    "weaponLevel": "Weapon Lv {level}",
+    "artifactCount": "{count}/5 artifacts",
+    "belowMax": "{n} artifact below max | {n} artifacts below max",
+    "noSet": "No full set bonus"
+  },
+  "sort": {
+    "default": "Default",
+    "level": "Level",
+    "constellation": "Constellation",
+    "talents": "Talents",
+    "cv": "CV",
+    "rarity": "Rarity",
+    "element": "Element",
+    "name": "Name",
+    "friendship": "Friendship",
+    "obtained": "Obtained"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Ready",
+    "needs": "Needs work",
+    "level": "Lv < 90",
+    "weapon": "Weapon < 90",
+    "artifacts": "Artifacts < max",
+    "set": "No set bonus"
+  },
+  "talentFilter": {
+    "all": "Talents",
+    "nine": "All 9+",
+    "crowned": "Crowned",
+    "below": "Any < 9"
+  },
+  "favorites": {
+    "notSaved": "Not saved"
+  },
+  "stat": {
+    "maxHp": "Max HP",
+    "baseAtk": "Base ATK"
+  },
+  "talent": {
+    "crowned": "{title} · crowned"
+  },
+  "setBonus": {
+    "line": "{n}-piece: {stats}",
+    "inactive": "{n}-piece (inactive): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Friendship {level} of 10"
+  },
+  "refinementTitle": "Refinement {value} of 5",
+  "talentChips": "Attack {auto} · Skill {skill} · Burst {burst}",
+  "sortControl": {
+    "sort": "Sort",
+    "descending": "Sort descending",
+    "ascending": "Sort ascending"
+  },
+  "favorite": {
+    "named": "Favorite {name}",
+    "on": "Favorite",
+    "off": "Unfavorite"
+  },
+  "stars": "{n} star",
+  "sets": "Sets",
+  "pieceBonus": "-piece bonus",
+  "constellation": {
+    "title": "Constellation {level} of 6",
+    "lockedTitle": "C{n} · locked",
+    "unlocked": "C{n} unlocked",
+    "locked": "C{n} locked"
+  },
+  "timeline": {
+    "firstSeen": "First seen",
+    "obtained": "Obtained",
+    "to": "to",
+    "less": "Less",
+    "all": "All {n}"
+  },
+  "talentShort": {
+    "auto": "Attack",
+    "skill": "Skill",
+    "burst": "Burst"
+  },
+  "talentRaised": "raised to",
+  "crowned": "Crowned",
+  "weapon": {
+    "passive": "Passive: {stats}",
+    "locked": "Locked"
+  },
+  "stats": {
+    "allDmg": "+{value}% all DMG, not on the game's panel",
+    "label": "Stats",
+    "weaponMissingTitle": "Weapon newer than the game data: its stats are left out",
+    "weaponMissing": "Weapon stats left out",
+    "newerThanData": "Newer than the game data",
+    "none": "No stats"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, talents {auto} {skill} {burst}",
+    "friendship": ", friendship {n}",
+    "toDo": "to do: {gaps}",
+    "critDetail": "CRIT {rate}% / {dmg}% from artifacts"
+  },
+  "piece": {
+    "levelTitle": "+{level} of {max} · {rarity}★",
+    "activatesAt4": "Activates at +4",
+    "inactive": "(inactive)",
+    "rolls": "{n} rolls",
+    "rollsTitle": "Rolls",
+    "empty": ": empty"
+  },
+  "toolbar": {
+    "weapon": "Weapon",
+    "cards": "Cards",
+    "list": "List",
+    "label": "Filter characters",
+    "search": "Search",
+    "searchTitle": "Name, element, weapon or set",
+    "view": "View",
+    "chips": "Favorites, element and rarity",
+    "favorites": "Favorites",
+    "buildTitle": "Ready: Lv 90, weapon Lv 90, five maxed artifacts, a full set bonus",
+    "clear": "Clear"
+  },
+  "table": {
+    "lv": "Lv",
+    "c": "C",
+    "critTitle": "CRIT Rate / CRIT DMG from artifacts",
+    "crit": "Crit",
+    "toDo": "To do",
+    "toDoList": "To do: {gaps}"
+  },
+  "detail": {
+    "toDo": "To do:",
+    "build": "Build",
+    "obtainedAt": "Obtained {date}",
+    "noArtifacts": "No artifacts",
+    "history": "History",
+    "loadFailed": "Load failed",
+    "none": "None"
+  },
+  "modal": {
+    "pngSize": "{size} PNG"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Lv 90+",
+    "crowns": "Crowns",
+    "crownsTitle": "Talents at level 10",
+    "loading": "Loading",
+    "noSnapshots": "No snapshots yet",
+    "empty": "No characters",
+    "import": "Import",
+    "noMatches": "No matches"
+  }
+}

@@ -112,7 +112,7 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
       </div>
       <p v-if="c.gaps.length" class="flex flex-wrap items-center gap-1.5">
         <Wrench class="size-4 text-warning-text" aria-hidden="true" />
-        <span class="sr-only">To do:</span>
+        <span class="sr-only">{{ $t('characters.detail.toDo') }}</span>
         <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
       </p>
     </template>
@@ -120,7 +120,7 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
     <template v-else>
       <section
         class="relative overflow-hidden rounded-xl border border-border-default bg-surface-base"
-        aria-label="Build"
+        :aria-label="$t('characters.detail.build')"
       >
         <!-- The namecard blurred into atmosphere (it is small), a light scrim, the element's tint -->
         <NamecardBackdrop
@@ -168,7 +168,9 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
                 <time
                   v-if="c.obtainedAt !== null"
                   :datetime="new Date(c.obtainedAt).toISOString()"
-                  :title="`Obtained ${formatFullDateTime(c.obtainedAt)}`"
+                  :title="
+                    $t('characters.detail.obtainedAt', { date: formatFullDateTime(c.obtainedAt) })
+                  "
                   >{{ formatDate(c.obtainedAt) }}</time
                 >
               </p>
@@ -202,16 +204,18 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           class="relative flex flex-wrap items-center gap-1.5 border-t border-border-default bg-surface-base/80 px-4 py-2 sm:px-5"
         >
           <Wrench class="size-4 text-warning-text" aria-hidden="true" />
-          <span class="sr-only">To do:</span>
+          <span class="sr-only">{{ $t('characters.detail.toDo') }}</span>
           <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
         </p>
       </section>
 
       <section class="min-w-0" aria-labelledby="detail-artifacts">
         <div class="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <h3 id="detail-artifacts" class="sr-only">Artifacts</h3>
+          <h3 id="detail-artifacts" class="sr-only">{{ $t('game.artifacts') }}</h3>
           <SetBonuses v-if="c.artifactCount" :sets="c.sets" />
-          <span v-else class="text-sm text-text-muted">No artifacts</span>
+          <span v-else class="text-sm text-text-muted">{{
+            $t('characters.detail.noArtifacts')
+          }}</span>
           <span
             v-if="c.artifactCount"
             class="ml-auto flex items-baseline gap-3 text-sm [&>span>span:last-child]:font-bold"
@@ -221,7 +225,7 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
               :value="c.cv"
               scope="build"
               label
-              :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
+              :detail="$t('characters.card.critDetail', { rate: c.critRate, dmg: c.critDmg })"
             />
           </span>
         </div>
@@ -237,17 +241,21 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
     </template>
 
     <section aria-labelledby="detail-changes">
-      <h3 id="detail-changes" class="mb-3 text-sm font-semibold text-text-secondary">History</h3>
+      <h3 id="detail-changes" class="mb-3 text-sm font-semibold text-text-secondary">
+        {{ $t('characters.detail.history') }}
+      </h3>
       <UiError
         v-if="history.error.value"
         :error="history.error.value"
-        title="Load failed"
+        :title="$t('characters.detail.loadFailed')"
         @retry="history.reload"
       />
       <div v-else-if="!history.data.value" class="flex flex-col gap-3" aria-busy="true">
         <UiSkeleton v-for="n in 3" :key="n" class="h-6 w-full max-w-md" />
       </div>
-      <p v-else-if="changes.length === 0" class="text-sm text-text-muted">None</p>
+      <p v-else-if="changes.length === 0" class="text-sm text-text-muted">
+        {{ $t('characters.detail.none') }}
+      </p>
       <CharacterTimeline v-else :changes="changes" :reset-key="c.key" />
     </section>
   </div>

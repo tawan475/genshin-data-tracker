@@ -5,6 +5,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiModal from '@/components/ui/UiModal.vue'
+import { t } from '@/i18n'
 
 /** A new username (an offensive one, say), checked like sign-up's; a taken one comes back as `error`. */
 const props = defineProps<{
@@ -25,7 +26,7 @@ watch(
 )
 
 const invalid = computed(() =>
-  usernameSchema.safeParse(name.value).success ? '' : '3–32 letters, digits, . - _',
+  usernameSchema.safeParse(name.value).success ? '' : t('staff.rename.invalid'),
 )
 
 function submit() {
@@ -34,9 +35,13 @@ function submit() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Rename" @close="emit('close')">
+  <UiModal :open="open" :title="$t('staff.rename.title')" @close="emit('close')">
     <form :id="formId" class="flex flex-col gap-4" @submit.prevent="submit">
-      <UiField v-slot="{ id, describedBy }" label="Username" :error="invalid || error">
+      <UiField
+        v-slot="{ id, describedBy }"
+        :label="$t('staff.rename.username')"
+        :error="invalid || error"
+      >
         <UiInput
           :id="id"
           v-model="name"
@@ -49,7 +54,7 @@ function submit() {
       </UiField>
     </form>
     <template #footer>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('staff.common.cancel') }}</UiButton>
       <UiButton
         variant="primary"
         type="submit"
@@ -57,7 +62,7 @@ function submit() {
         :disabled="!!invalid"
         :loading="busy"
       >
-        Rename
+        {{ $t('staff.rename.title') }}
       </UiButton>
     </template>
   </UiModal>

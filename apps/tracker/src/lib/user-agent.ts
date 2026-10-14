@@ -6,6 +6,8 @@
  * list of sessions, never for a decision (any client can send any string).
  */
 
+import { t } from '@/i18n'
+
 const BROWSERS: [RegExp, string][] = [
   // Before Chrome and Safari: these carry their tokens too.
   [/\bEdg(?:e|A|iOS)?\//, 'Edge'],
@@ -37,9 +39,13 @@ function find(table: [RegExp, string][], userAgent: string): string | null {
 export function describeUserAgent(userAgent: string | null | undefined): string {
   const ua = userAgent ?? ''
   // An irminsul session's row names itself ("Irminsul on <PC>", the Worker's own text).
-  if (/^Irminsul on \S/.test(ua)) return ua
+  const irminsul = /^Irminsul on (\S.*)$/.exec(ua)
+  if (irminsul) return t('settings.devices.irminsulOn', { device: irminsul[1] })
   const browser = find(BROWSERS, ua)
   const system = find(SYSTEMS, ua)
-  if (browser && system) return `${browser} on ${system}`
-  return browser ?? (system ? `Browser on ${system}` : 'Unknown device')
+  if (browser && system) return t('settings.devices.browserOn', { browser, system })
+  if (browser) return browser
+  return system
+    ? t('settings.devices.browserGeneric', { system })
+    : t('settings.devices.unknownDevice')
 }

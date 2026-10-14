@@ -46,7 +46,7 @@ function ariaSort(key: WeaponSort) {
         <tr>
           <th scope="col" class="px-3 py-2 text-left" :aria-sort="ariaSort('name')">
             <SortHeader
-              label="Name"
+              :label="$t('weapons.sort.name')"
               :active="sort === 'name'"
               :direction="direction"
               @sort="sortBy('name')"
@@ -59,7 +59,7 @@ function ariaSort(key: WeaponSort) {
           >
             <SortHeader
               label="★"
-              title="Quality: rarity, level, refinement, newest"
+              :title="$t('weapons.table.qualityTitle')"
               :active="sort === 'quality'"
               :direction="direction"
               @sort="sortBy('quality')"
@@ -71,7 +71,7 @@ function ariaSort(key: WeaponSort) {
             :aria-sort="ariaSort('type')"
           >
             <SortHeader
-              label="Type"
+              :label="$t('weapons.sort.type')"
               :active="sort === 'type'"
               :direction="direction"
               @sort="sortBy('type')"
@@ -79,8 +79,8 @@ function ariaSort(key: WeaponSort) {
           </th>
           <th scope="col" class="w-16 px-2 py-2 text-right sm:w-20" :aria-sort="ariaSort('level')">
             <SortHeader
-              label="Lv"
-              title="Level"
+              :label="$t('characters.table.lv')"
+              :title="$t('weapons.sort.level')"
               :active="sort === 'level'"
               :direction="direction"
               @sort="sortBy('level')"
@@ -92,24 +92,24 @@ function ariaSort(key: WeaponSort) {
             :aria-sort="ariaSort('refinement')"
           >
             <SortHeader
-              label="R"
-              title="Refinement"
+              :label="$t('weapons.table.r')"
+              :title="$t('weapons.sort.refinement')"
               :active="sort === 'refinement'"
               :direction="direction"
               @sort="sortBy('refinement')"
             />
           </th>
           <th scope="col" class="hidden w-10 px-2 py-2 sm:table-cell">
-            <span class="sr-only">Lock</span>
+            <span class="sr-only">{{ $t('weapons.toolbar.lock') }}</span>
           </th>
           <th scope="col" class="w-12 px-2 py-2 text-left font-medium sm:w-44">
-            <span class="hidden sm:inline">Equipped</span>
-            <span class="sr-only sm:hidden">Equipped</span>
+            <span class="hidden sm:inline">{{ $t('weapons.toolbar.equipped') }}</span>
+            <span class="sr-only sm:hidden">{{ $t('weapons.toolbar.equipped') }}</span>
           </th>
           <th scope="col" class="w-14 px-3 py-2 text-right sm:w-20" :aria-sort="ariaSort('count')">
             <SortHeader
               label="×"
-              title="Copies"
+              :title="$t('weapons.sort.count')"
               :active="sort === 'count'"
               :direction="direction"
               @sort="sortBy('count')"
@@ -161,9 +161,9 @@ function ariaSort(key: WeaponSort) {
             {{ row.refinement }}
           </td>
           <td class="hidden px-2 py-1.5 text-text-muted sm:table-cell">
-            <span v-if="row.lock" class="inline-flex" title="Locked">
+            <span v-if="row.lock" class="inline-flex" :title="$t('weapons.title.locked')">
               <Lock class="size-3.5" aria-hidden="true" />
-              <span class="sr-only">Locked</span>
+              <span class="sr-only">{{ $t('weapons.title.locked') }}</span>
             </span>
           </td>
           <td class="px-2 py-1.5">

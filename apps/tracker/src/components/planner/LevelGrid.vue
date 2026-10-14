@@ -86,8 +86,10 @@ function onKey(event: KeyboardEvent, index: number) {
       :tabindex="index === (chosen >= 0 ? chosen : floor) ? 0 : -1"
       :title="
         blocked(index)
-          ? 'Below the capture'
-          : `Level ${step.level}${step.ascended ? ', ascended' : ''} (A${step.ascension})`
+          ? $t('planner.levelGrid.below')
+          : step.ascended
+            ? $t('planner.levelGrid.ascended', { level: step.level, ascension: step.ascension })
+            : $t('planner.levelGrid.level', { level: step.level, ascension: step.ascension })
       "
       class="tabular inline-flex min-h-10 items-center justify-center rounded-md font-mono text-sm font-medium transition-colors"
       :class="tone(index, step)"
@@ -98,7 +100,7 @@ function onKey(event: KeyboardEvent, index: number) {
       }}<span v-if="step.ascended" class="ml-px text-[0.8em] leading-none" aria-hidden="true"
         >✦</span
       >
-      <span v-if="step.ascended" class="sr-only">ascended</span>
+      <span v-if="step.ascended" class="sr-only">{{ $t('planner.levelGrid.ascendedWord') }}</span>
     </button>
   </div>
 </template>

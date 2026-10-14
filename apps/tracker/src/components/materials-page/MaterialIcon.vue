@@ -28,15 +28,18 @@ function onError() {
   failed.value = true
 }
 
-const initials = computed(() =>
-  props.name
-    .replace(/[^A-Za-z0-9 ]/g, '')
-    .split(' ')
-    .filter((w) => w && !['Of', 'The', 'And', 'A', 'An'].includes(w))
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase(),
+const initials = computed(
+  () =>
+    props.name
+      .replace(/[^A-Za-z0-9 ]/g, '')
+      .split(' ')
+      .filter((w) => w && !['Of', 'The', 'And', 'A', 'An'].includes(w))
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase() ||
+    // A Chinese name: its first character.
+    ([...props.name.trim()][0] ?? ''),
 )
 </script>
 

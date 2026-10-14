@@ -7,6 +7,7 @@ import {
 } from '@gdt/shared'
 import { shallowRef, watch, type Ref } from 'vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 
 /** The account settings the planner reads: AR, World Level, its options and the hand-set resin. */
@@ -89,7 +90,7 @@ export function usePlannerSettings(accountId: Ref<number>) {
           if (accountId.value === id) settings.value = known.get(id)!
         }
       } catch (cause) {
-        feedback.error('Not saved', cause)
+        feedback.error(t('planner.toast.notSaved'), cause)
         await load(id)
       }
     })

@@ -10,6 +10,7 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { api } from '@/api'
 import { travelerGender } from '@/data/traveler'
+import { t } from '@/i18n'
 import { loadGameIcons, setTravelerGender } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useSession } from '@/stores/session'
@@ -69,13 +70,10 @@ provideAccount(
   },
 )
 
-const TABS: { value: InspectView; label: string }[] = [
-  { value: 'characters', label: 'Characters' },
-  { value: 'weapons', label: 'Weapons' },
-  { value: 'artifacts', label: 'Artifacts' },
-  { value: 'materials', label: 'Materials' },
-  { value: 'snapshots', label: 'Snapshots' },
-]
+const VIEWS: InspectView[] = ['characters', 'weapons', 'artifacts', 'materials', 'snapshots']
+const tabs = computed(() =>
+  VIEWS.map((value) => ({ value, label: t(`staff.inspect.tabs.${value}`) })),
+)
 const tab = computed({
   get: () => view.value,
   set: (value: InspectView) =>
@@ -95,16 +93,18 @@ const latest = computed(() => account.value?.latest ?? null)
         <template v-if="opened">
           <span class="font-semibold">{{ opened.owner.username }}</span>
           <span class="text-text-secondary">
-            · {{ opened.account.name || 'Account' }}
+            · {{ opened.account.name || $t('staff.inspect.account') }}
             <template v-if="opened.account.uid">
               · UID <span class="tabular font-mono">{{ opened.account.uid }}</span>
             </template>
           </span>
         </template>
-        <span v-else class="text-text-secondary">Loading…</span>
+        <span v-else class="text-text-secondary">{{ $t('staff.inspect.loading') }}</span>
       </span>
-      <UiBadge title="Staff can't change anything here">Read-only</UiBadge>
-      <UiBadge title="Every page opened here is written to the audit log">Logged</UiBadge>
+      <UiBadge :title="$t('staff.inspect.readOnlyTitle')">{{
+        $t('staff.inspect.readOnly')
+      }}</UiBadge>
+      <UiBadge :title="$t('staff.inspect.loggedTitle')">{{ $t('staff.inspect.logged') }}</UiBadge>
       <UiButton
         v-if="opened"
         variant="ghost"
@@ -112,27 +112,31 @@ const latest = computed(() => account.value?.latest ?? null)
         :to="{ name: 'staff-user', params: { userId: opened.owner.id } }"
       >
         <ArrowLeft class="size-4" aria-hidden="true" />
-        Back to user
+        {{ $t('staff.inspect.back') }}
       </UiButton>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
       <div class="scroll-hide scroll-fade-x -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <UiSegmented v-model="tab" :options="TABS" label="Data" size="md" />
+        <UiSegmented v-model="tab" :options="tabs" :label="$t('staff.inspect.data')" size="md" />
       </div>
       <span
         v-if="latest"
         class="ml-auto text-sm text-text-muted"
         :title="formatDateTime(latest.lastSeenAt)"
-        >Snapshot · {{ formatRelative(latest.lastSeenAt) }} ·
-        {{ formatNumber(account?.snapshotCount ?? 0) }} in all</span
+        >{{
+          $t('staff.inspect.latest', {
+            when: formatRelative(latest.lastSeenAt),
+            n: formatNumber(account?.snapshotCount ?? 0),
+          })
+        }}</span
       >
     </div>
 
     <UiError
       v-if="error && !account"
       :error="error"
-      title="Could not open"
+      :title="$t('staff.inspect.couldNotOpen')"
       @retry="open(accountId, view)"
     />
     <div v-else-if="!account" class="flex flex-col gap-4" aria-busy="true">

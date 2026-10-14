@@ -7,6 +7,7 @@ import LinkProblem from '@/components/public/LinkProblem.vue'
 import { linkProblem, type LinkProblem as Problem } from '@/components/public/link-problem'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
 
@@ -37,7 +38,11 @@ onMounted(async () => {
 })
 
 const title = computed(() =>
-  problem.value ? problem.value.title : email.value ? 'Email confirmed' : 'Confirm email',
+  problem.value
+    ? problem.value.title
+    : email.value
+      ? t('auth.verify.confirmed')
+      : t('auth.verify.title'),
 )
 const signedIn = computed(() => session.status === 'signed-in')
 </script>
@@ -48,7 +53,7 @@ const signedIn = computed(() => session.status === 'signed-in')
       v-if="problem"
       :problem="problem"
       :retry="{ name: 'settings' }"
-      retry-label="Send a new link"
+      :retry-label="$t('auth.verify.sendNew')"
     />
     <div v-else-if="email" class="flex flex-col items-center gap-6 text-center" role="status">
       <CircleCheck class="size-10 text-emerald-400" aria-hidden="true" />
@@ -57,7 +62,7 @@ const signedIn = computed(() => session.status === 'signed-in')
         :to="signedIn ? { name: 'settings' } : { name: 'login' }"
         class="btn-glow w-full rounded-xl"
       >
-        {{ signedIn ? 'Continue' : 'Sign in' }}
+        {{ signedIn ? $t('common.continue') : $t('common.signIn') }}
       </RouterLink>
     </div>
     <div v-else class="flex justify-center py-6" aria-busy="true">

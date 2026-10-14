@@ -1,4 +1,6 @@
 import type { StaffUserRow } from '@gdt/shared'
+import { t } from '@/i18n'
+import { formatNumber } from '@/lib/format'
 
 const WEEK = 7 * 86_400_000
 
@@ -9,9 +11,10 @@ export function userStatus(
   user: Pick<StaffUserRow, 'suspendedAt' | 'uploadsBlockedAt' | 'createdAt'>,
   now = Date.now(),
 ): { label: string; tone: BadgeTone } | null {
-  if (user.suspendedAt !== null) return { label: 'Suspended', tone: 'danger' }
-  if (user.uploadsBlockedAt !== null) return { label: 'Uploads blocked', tone: 'warning' }
-  if (now - user.createdAt < WEEK) return { label: 'New', tone: 'accent' }
+  if (user.suspendedAt !== null) return { label: t('staff.status.suspended'), tone: 'danger' }
+  if (user.uploadsBlockedAt !== null)
+    return { label: t('staff.status.uploadsBlocked'), tone: 'warning' }
+  if (now - user.createdAt < WEEK) return { label: t('staff.status.new'), tone: 'accent' }
   return null
 }
 
@@ -20,39 +23,46 @@ export function auditPhrase(action: string, detail: Record<string, unknown>): st
   const text = (key: string) => (typeof detail[key] === 'string' ? (detail[key] as string) : '')
   switch (action) {
     case 'user.suspend':
-      return 'suspended'
+      return t('staff.history.suspend')
     case 'user.unsuspend':
-      return 'lifted the suspension'
+      return t('staff.history.unsuspend')
     case 'user.rename':
-      return `renamed ${text('from')} → ${text('to')}`
+      return t('staff.history.rename', { from: text('from'), to: text('to') })
     case 'user.reset_link':
-      return 'made a reset link'
+      return t('staff.history.resetLink')
     case 'user.sessions':
-      return detail.all ? 'signed out every device' : 'signed out a device'
+      return detail.all ? t('staff.history.sessionsAll') : t('staff.history.sessionsOne')
     case 'user.unlink':
-      return `unlinked ${text('provider')}`
+      return t('staff.history.unlink', { provider: text('provider') })
     case 'user.delete':
-      return 'deleted the user'
+      return t('staff.history.deleteUser')
     case 'user.delete_self':
-      return 'deleted their own user'
+      return t('staff.history.deleteSelf')
     case 'role.assign':
-      return `gave ${text('role')}`
+      return t('staff.history.roleAssign', { role: text('role') })
     case 'role.unassign':
-      return `took ${text('role')}`
+      return t('staff.history.roleUnassign', { role: text('role') })
     case 'data.inspect':
-      return `inspected ${[text('account'), text('view')].filter(Boolean).join(' · ')}`
+      return t('staff.history.inspect', {
+        what: [text('account'), text('view')].filter(Boolean).join(' · '),
+      })
     case 'data.block_uploads':
-      return 'blocked uploads'
+      return t('staff.history.blockUploads')
     case 'data.unblock_uploads':
-      return 'unblocked uploads'
+      return t('staff.history.unblockUploads')
     case 'data.quota':
-      return detail.bytes === null ? 'reset the storage quota' : 'set the storage quota'
+      return detail.bytes === null ? t('staff.history.quotaReset') : t('staff.history.quotaSet')
     case 'data.reset_key':
-      return text('account') ? `reset the key of ${text('account')}` : 'revoked the user key'
+      return text('account')
+        ? t('staff.history.resetKey', { account: text('account') })
+        : t('staff.history.revokeUserKey')
     case 'data.delete':
-      return `deleted ${typeof detail.snapshots === 'number' ? detail.snapshots : ''} snapshots of ${text('account')}`
+      return t('staff.history.deleteData', {
+        n: typeof detail.snapshots === 'number' ? formatNumber(detail.snapshots) : '',
+        account: text('account'),
+      })
     case 'data.delete_account':
-      return `deleted the account ${text('account')}`
+      return t('staff.history.deleteAccount', { account: text('account') })
     default:
       return action
   }

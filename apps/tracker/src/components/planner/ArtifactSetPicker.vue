@@ -42,14 +42,22 @@ const rows = computed(() => {
 <template>
   <div class="flex flex-col gap-2">
     <label class="relative">
-      <span class="sr-only">Search sets</span>
+      <span class="sr-only">{{ $t('planner.artifacts.searchSets') }}</span>
       <Search
         class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
         aria-hidden="true"
       />
-      <UiInput v-model="query" class="pl-9" placeholder="Search" type="search" />
+      <UiInput
+        v-model="query"
+        class="pl-9"
+        :placeholder="$t('planner.common.search')"
+        type="search"
+      />
     </label>
-    <ul class="flex max-h-72 flex-col gap-0.5 overflow-y-auto" aria-label="Artifact sets">
+    <ul
+      class="flex max-h-72 flex-col gap-0.5 overflow-y-auto"
+      :aria-label="$t('planner.artifacts.setList')"
+    >
       <li v-for="row in rows" :key="row.key">
         <button
           type="button"

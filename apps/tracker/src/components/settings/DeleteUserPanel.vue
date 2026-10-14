@@ -5,6 +5,7 @@ import { Trash2 } from 'lucide-vue-next'
 import DeleteUserDialog from '@/components/staff/DeleteUserDialog.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
+import { t } from '@/i18n'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
@@ -35,10 +36,10 @@ async function remove(username: string) {
     await session.deleteMe(username)
     accounts.clear()
     open.value = false
-    feedback.toast({ tone: 'success', title: 'Your user is deleted' })
+    feedback.toast({ tone: 'success', title: t('settings.deleteUser.deleted') })
     await router.replace({ name: 'landing' })
   } catch (error) {
-    feedback.error('Not deleted', error)
+    feedback.error(t('common.notDeleted'), error)
   } finally {
     busy.value = false
   }
@@ -46,19 +47,19 @@ async function remove(username: string) {
 </script>
 
 <template>
-  <UiPanel title="Delete user">
+  <UiPanel :title="$t('settings.deleteUser.title')">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm text-text-muted">Every account, snapshot and sign-in</p>
+      <p class="text-sm text-text-muted">{{ $t('settings.deleteUser.body') }}</p>
       <UiButton variant="danger" @click="open = true">
         <Trash2 class="size-4" aria-hidden="true" />
-        Delete
+        {{ $t('common.delete') }}
       </UiButton>
     </div>
     <DeleteUserDialog
       :open="open"
       :user="me"
       :figures="figures"
-      title="Delete my user"
+      :title="$t('settings.deleteUser.dialogTitle')"
       :busy="busy"
       @close="open = false"
       @confirm="remove"

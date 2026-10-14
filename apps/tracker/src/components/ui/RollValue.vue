@@ -8,6 +8,7 @@ import {
   tierBounds,
   type CvScope,
 } from '@/lib/crit-tiers'
+import { t } from '@/i18n'
 
 /**
  * A roll value ("640%") in its tier colour (akasha.cv's RV tiers,
@@ -24,7 +25,7 @@ const props = withDefaults(
 const tier = computed(() => rvTier(props.value, props.scope))
 const title = computed(
   () =>
-    `RV ${props.value}% · rolls as % of the highest roll, added up` +
+    t('ui.roll.title', { value: props.value }) +
     (props.plain ? '' : `\n${tierBounds(props.scope === 'build' ? BUILD_RV_TIERS : RV_TIERS)}`),
 )
 </script>

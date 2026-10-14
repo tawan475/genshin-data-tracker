@@ -6,6 +6,8 @@ import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { ApiRequestError } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
@@ -31,17 +33,21 @@ const form = ref<HTMLFormElement>()
 const currentError = computed(() =>
   setting.value
     ? ''
-    : currentServerError.value || (current.value ? '' : 'Enter your current password'),
+    : currentServerError.value || (current.value ? '' : t('settings.password.enterCurrent')),
 )
 const nextError = computed(() => {
-  if (next.value.length < MIN_PASSWORD_LENGTH) return `At least ${MIN_PASSWORD_LENGTH} characters`
-  if (next.value.length > MAX_PASSWORD_LENGTH) return `At most ${MAX_PASSWORD_LENGTH} characters`
-  if (!setting.value && next.value === current.value) {
-    return 'Choose a password different from the current one'
+  if (next.value.length < MIN_PASSWORD_LENGTH) {
+    return t('settings.password.atLeast', { n: MIN_PASSWORD_LENGTH })
   }
+  if (next.value.length > MAX_PASSWORD_LENGTH) {
+    return t('settings.password.atMost', { n: MAX_PASSWORD_LENGTH })
+  }
+  if (!setting.value && next.value === current.value) return t('settings.password.different')
   return ''
 })
-const confirmError = computed(() => (confirm.value !== next.value ? 'Passwords do not match' : ''))
+const confirmError = computed(() =>
+  confirm.value !== next.value ? t('settings.password.mismatch') : '',
+)
 const valid = computed(() => !currentError.value && !nextError.value && !confirmError.value)
 
 function editCurrent(value: string) {
@@ -76,19 +82,23 @@ async function submit() {
     touched.value = false
     feedback.toast(
       first
-        ? { tone: 'success', title: 'Password set', detail: 'You can sign in with it too.' }
+        ? {
+            tone: 'success',
+            title: t('settings.password.setToast'),
+            detail: t('settings.password.setDetail'),
+          }
         : {
             tone: 'success',
-            title: 'Password changed',
-            detail: 'Every other device was signed out. This one stays signed in.',
+            title: t('settings.password.changedToast'),
+            detail: t('settings.password.changedDetail'),
           },
     )
   } catch (cause) {
     if (cause instanceof ApiRequestError && cause.code === 'invalid_credentials') {
-      currentServerError.value = 'Current password is wrong'
+      currentServerError.value = t('settings.password.currentWrong')
       await focusCurrent()
     } else {
-      formError.value = cause instanceof Error ? cause.message : 'Could not change the password.'
+      formError.value = errorText(cause, t('settings.password.couldNotChange'))
     }
   } finally {
     busy.value = false
@@ -97,7 +107,7 @@ async function submit() {
 </script>
 
 <template>
-  <UiPanel :title="setting ? 'Set password' : 'Password'">
+  <UiPanel :title="setting ? $t('settings.password.setTitle') : $t('settings.password.title')">
     <form ref="form" class="flex max-w-md flex-col gap-4" novalidate @submit.prevent="submit">
       <!-- Lets password managers file the new password under the right login. -->
       <input
@@ -113,7 +123,7 @@ async function submit() {
       <UiField
         v-if="!setting"
         v-slot="{ id, describedBy }"
-        label="Current password"
+        :label="$t('settings.password.current')"
         :error="touched ? currentError : ''"
       >
         <UiInput
@@ -130,8 +140,8 @@ async function submit() {
       </UiField>
       <UiField
         v-slot="{ id, describedBy }"
-        :label="setting ? 'Password' : 'New password'"
-        :hint="`At least ${MIN_PASSWORD_LENGTH} characters`"
+        :label="setting ? $t('common.password') : $t('settings.password.new')"
+        :hint="$t('settings.password.atLeast', { n: MIN_PASSWORD_LENGTH })"
         :error="touched ? nextError : ''"
       >
         <UiInput
@@ -147,7 +157,7 @@ async function submit() {
       </UiField>
       <UiField
         v-slot="{ id, describedBy }"
-        :label="setting ? 'Confirm password' : 'Confirm new password'"
+        :label="setting ? $t('settings.password.confirm') : $t('settings.password.confirmNew')"
         :error="touched ? confirmError : ''"
       >
         <UiInput
@@ -164,7 +174,7 @@ async function submit() {
       <p v-if="formError" class="text-sm text-danger-text" role="alert">{{ formError }}</p>
       <div class="flex flex-wrap items-center gap-3">
         <UiButton type="submit" variant="primary" :loading="busy">
-          {{ setting ? 'Set password' : 'Change password' }}
+          {{ setting ? $t('settings.password.set') : $t('settings.password.change') }}
         </UiButton>
       </div>
     </form>

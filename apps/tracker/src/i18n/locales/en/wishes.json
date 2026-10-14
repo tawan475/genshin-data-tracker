@@ -1,1 +1,260 @@
-{}
+{
+  "title": "Wish history",
+  "bannerPageTitle": "Wish history · {banner}",
+  "loadFailed": "Load failed",
+  "loading": "Loading",
+  "import": "Import",
+  "export": "Export",
+  "importExport": "Import / export",
+  "browse": "Browse",
+  "cancel": "Cancel",
+  "search": "Search",
+  "rarity": "Rarity",
+  "banner": "Banner",
+  "pulls": "{n} pulls",
+  "pullsTimes": "{n} wishes × {primos}",
+  "pullsPrimos": "{n} pulls · ✦ {primos}",
+  "lifetime": "Lifetime pulls",
+  "allWishes": "All wishes",
+  "newPulls": "{n} new pulls",
+  "nothingNew": "Nothing new",
+  "banners": {
+    "character": {
+      "label": "Character",
+      "title": "Character Event"
+    },
+    "weapon": {
+      "label": "Weapon",
+      "title": "Weapon Event"
+    },
+    "standard": {
+      "label": "Standard",
+      "title": "Standard"
+    },
+    "chronicled": {
+      "label": "Chronicled",
+      "title": "Chronicled Wish"
+    },
+    "beginners": {
+      "label": "Beginners'",
+      "title": "Beginners' Wish"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "Jan",
+      "2": "Feb",
+      "3": "Mar",
+      "4": "Apr",
+      "5": "May",
+      "6": "Jun",
+      "7": "Jul",
+      "8": "Aug",
+      "9": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    },
+    "day": "{month} {day}",
+    "dayYear": "{month} {day}, {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "now"
+  },
+  "outcomes": {
+    "won": "Won",
+    "lost": "Lost",
+    "guaranteed": "Guaranteed"
+  },
+  "outcomeTitles": {
+    "won": "Won the {odds}",
+    "lost": "Lost the {odds}: the next one is featured",
+    "guaranteed": "Featured, guaranteed after a lost {odds}"
+  },
+  "legend": {
+    "won": "won",
+    "lost": "lost",
+    "guaranteed": "guaranteed"
+  },
+  "overview": {
+    "newestPull": "Newest pull, game clock",
+    "synced": "Synced {ago}",
+    "syncedTitle": "New wishes stored {time}",
+    "syncHelp": "Open Wish → History in game once a day (you can close it right away): irminsul syncs every banner, then each new wish while the key lasts (~24 h). The game's wish link brings the last six months too. Older than 6 months: import a paimon.moe backup or UIGF file.",
+    "empty": "No wishes yet",
+    "emptyBody": "Open Wish → History in game once a day (you can close it right away), or import with the game's wish link. Older than 6 months: import a paimon.moe backup or UIGF file.",
+    "banners": "Banners",
+    "totals": "Totals",
+    "worth": "Wishes worth",
+    "worthHint": "{n} wishes × {primos} Primogems",
+    "wishes": "{n} wishes",
+    "avgPity": "Avg 5★ pity",
+    "avgPityHint": "Character Event: the average pity of every 5★, against about {expected} expected with soft pity",
+    "avgPityVs": "{diff} vs {expected} expected"
+  },
+  "card": {
+    "everyPull": "{banner}: every pull",
+    "fiveTitle": "{left} pulls to hard pity · ✦ {primos} · soft pity from {soft}",
+    "fourTitle": "{left} to a sure 4★",
+    "fourFeatured": " · the next 4★ is featured",
+    "pity5": "5★ pity",
+    "pity4": "4★ pity",
+    "guaranteedAt": "Guaranteed at {n}",
+    "hideLatest": "Hide the latest pulls",
+    "showLatest": "Show the latest pulls",
+    "latest": "Latest pulls",
+    "latestRegion": "{banner}: latest pulls",
+    "none": "None",
+    "cols": {
+      "name": "Name",
+      "time": "Time",
+      "pity": "Pity"
+    }
+  },
+  "five": {
+    "every": "Every 5★",
+    "newestFirst": "{n} · newest first",
+    "none": "No 5★ yet",
+    "pity": "{name} · pity {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Platform",
+    "copyFailed": "Not copied: select the command and copy it",
+    "steps": {
+      "open": "Open Wish → History in game and let it load.",
+      "android2": "Turn off Wi-Fi and mobile data.",
+      "android3": "Tap refresh (top right): the page shows an error with some text.",
+      "android4": "Select all of that text and copy it.",
+      "android5": "Turn the connection back on, then paste it below.",
+      "ios1": "Open the Paimon menu → Feedback and let it load.",
+      "ios2": "Tap In-game issue → Co-Op Mode.",
+      "ios3": "Tap the link at the bottom of the reply: it opens in the browser.",
+      "ios4": "Copy that link and paste it below.",
+      "ps1": "Open the event mail with a QR code in game.",
+      "ps2": "Scan the code with your phone and copy the link it opens.",
+      "ps3": "Paste it below. If it fails, link your PlayStation to a HoYoverse account and use the PC or phone steps.",
+      "pcRun": "Open PowerShell (Start, type PowerShell) and run:",
+      "pcPaste": "It copies the link: paste it below.",
+      "pcPasteTitle": "irminsul's Copy wish URL gives the same link"
+    },
+    "scriptTitle": "Reads the game's web cache on this PC, checks the link once with HoYoverse, copies it. Nothing else.",
+    "copied": "Copied",
+    "copy": "Copy",
+    "readScript": "Read the script",
+    "label": "Wish history link",
+    "placeholder": "Paste the link: https://…",
+    "invalid": "No wish history link in that text",
+    "uidMismatch": "That link is UID {uid}; this account is UID {own}.",
+    "failed": "Import failed",
+    "saving": "Saving {n}…",
+    "progress": "{banner} · page {page} · {n} new",
+    "errors": {
+      "cancelled": "Cancelled",
+      "network": "The wish history did not answer. Try again later.",
+      "expired": "The link expired. Open Wish → History in game again and copy a new one.",
+      "throttled": "HoYoverse asks to slow down. Try again in a few minutes.",
+      "api": "HoYoverse answered: {message}",
+      "code": "error {code}"
+    }
+  },
+  "chart": {
+    "title": "Pulls per month",
+    "label": "Pulls per month by rarity, {n} months",
+    "month": "{month}: {n} wishes"
+  },
+  "numbers": {
+    "label": "Numbers",
+    "avgPity": "{share} · avg pity {avg}",
+    "expected": "Expected 5★ pity about {n} with soft pity",
+    "expectedAbout": "Expected about {n} with soft pity",
+    "streak": "streak {current} · best {best} won · worst {worst} lost",
+    "streakWon": "{n} won",
+    "streakLost": "{n} lost",
+    "flipTitle": "A featured 5★ when it was a {odds} (guaranteed ones left out)",
+    "split": "4★ split",
+    "character": "character",
+    "char": "char",
+    "weapon": "weapon",
+    "rateUp": "4★ rate-up won {won} of {total} · {share}",
+    "splitTitle": "4★ by type",
+    "splitTitleFull": "4★ by type, and 4★ rate-up coin flips"
+  },
+  "odds": {
+    "guaranteed": "Guaranteed",
+    "lostLast": "Lost the last {odds} ({name}): the next 5★ is featured",
+    "nextFeatured": "The next 5★ is featured",
+    "weapon": "Next 5★: 75% a featured weapon",
+    "coin": "Next 5★: a coin flip"
+  },
+  "track": {
+    "label": "Pity {pity} of {hard}, soft pity from {soft}"
+  },
+  "runs": {
+    "label": "Banner runs",
+    "heading": "Banners",
+    "count": "{n} run | {n} runs",
+    "fewer": "Fewer",
+    "all": "All runs",
+    "current": " · current",
+    "no5": "No 5★"
+  },
+  "small": {
+    "pitySoFar": "pity {pity} / {hard}"
+  },
+  "table": {
+    "label": "All wishes",
+    "search": "Search wishes",
+    "searchTitle": "Character or weapon name",
+    "noMatch": "No pulls match",
+    "rollRun": "Pull number on that banner run",
+    "roll": "Pull number",
+    "item": "Item",
+    "pity": "Pity",
+    "result": "Result",
+    "time": "Time",
+    "newestFirst": "Newest first",
+    "oldestFirst": "Oldest first",
+    "newestFirstSr": "newest first",
+    "oldestFirstSr": "oldest first",
+    "weapon": "Weapon",
+    "character": "Character",
+    "pages": "Wish pages"
+  },
+  "transfer": {
+    "backup": "paimon.moe backup",
+    "modes": {
+      "link": "Wish link",
+      "file": "File"
+    },
+    "importFrom": "Import from",
+    "noRecords": "No records",
+    "uidMismatch": "That history is UID {uid}; this account is UID {own}",
+    "account": "Account {n}",
+    "notWishFile": "Not a UIGF or paimon.moe file",
+    "alreadyHeld": "{n} already held",
+    "notImported": "Not imported",
+    "deleteTitle": "Delete wish history?",
+    "deleteDetail": "All {n} pulls of this account are removed. irminsul can fetch the last six months again.",
+    "deleteConfirm": "Delete",
+    "notDeleted": "Not deleted",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), a paimon.moe importer CSV, or paimon.moe's backup (Settings → Export)",
+    "drop": "UIGF or paimon.moe file",
+    "fileAccount": "Account in the file",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward and most wish trackers read it",
+    "paimonTitle": "For paimon.moe's Local Importer (Wish counter → Import → Local)",
+    "delete": "Delete",
+    "deleteHistory": "Delete history"
+  },
+  "bannerPage": {
+    "noPulls": "No pulls on this banner",
+    "now": "Now",
+    "hardTitle": "{left} pulls to hard pity · ✦ {primos}",
+    "toHard": "{left} to hard pity · ✦ {primos}",
+    "softFrom": "soft from {soft}",
+    "featuredNext": "Featured next",
+    "featuredNextTitle": "The last 4★ was off-banner: the next one is featured",
+    "toGuaranteed4": "{n} to the guaranteed 4★"
+  }
+}

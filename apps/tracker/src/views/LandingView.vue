@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PublicFrame from '@/components/public/PublicFrame.vue'
 import { characterIcon } from '@/lib/assets'
+import { characterName } from '@/i18n/game-names'
 import { useSession } from '@/stores/session'
 
 const session = useSession()
@@ -18,19 +19,23 @@ const session = useSession()
           Irminsul · GOOD
         </span>
         <h1 class="mb-6 text-5xl leading-tight font-bold tracking-tight md:text-7xl">
-          Master your <br />
-          <span class="text-gradient">Genshin journey</span>
+          {{ $t('shell.landing.heroLine1') }} <br />
+          <span class="text-gradient">{{ $t('shell.landing.heroLine2') }}</span>
         </h1>
         <p class="mb-10 max-w-md text-lg text-gray-400">
-          Every login, snapshotted. Artifacts, materials, history.
+          {{ $t('shell.landing.tagline') }}
         </p>
         <div class="flex flex-col gap-4 sm:flex-row">
           <RouterLink v-if="session.status === 'signed-in'" :to="{ name: 'home' }" class="btn-glow">
-            Open dashboard
+            {{ $t('shell.landing.openDashboard') }}
           </RouterLink>
           <template v-else>
-            <RouterLink :to="{ name: 'register' }" class="btn-glow">Get started</RouterLink>
-            <RouterLink :to="{ name: 'login' }" class="btn-glass">Sign in</RouterLink>
+            <RouterLink :to="{ name: 'register' }" class="btn-glow">{{
+              $t('shell.landing.getStarted')
+            }}</RouterLink>
+            <RouterLink :to="{ name: 'login' }" class="btn-glass">{{
+              $t('common.signIn')
+            }}</RouterLink>
           </template>
         </div>
       </div>
@@ -50,7 +55,7 @@ const session = useSession()
               class="size-14 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 object-cover shadow-[0_0_15px_var(--paimon-glow)]"
             />
             <div>
-              <p class="text-lg font-bold">Furina</p>
+              <p class="text-lg font-bold">{{ characterName('Furina') }}</p>
               <p class="text-sm text-gray-400">Lv 90 · C2</p>
             </div>
           </div>
@@ -64,7 +69,7 @@ const session = useSession()
         >
           <div class="mb-3 text-4xl text-paimon drop-shadow-[0_0_15px_rgba(245,158,11,0.6)]">✦</div>
           <p class="mb-1 text-2xl font-bold text-emerald-400">CV 42.0</p>
-          <p class="font-medium text-gray-400">Crit DMG 21.8%</p>
+          <p class="font-medium text-gray-400">{{ $t('shell.landing.critDmg') }}</p>
         </div>
       </div>
     </main>

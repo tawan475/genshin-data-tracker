@@ -1,1 +1,38 @@
-{}
+{
+  "export": {
+    "copyImage": "复制图片",
+    "share": "分享",
+    "missing": "{n} 张图片无法加载",
+    "drawing": "{label} · 绘制中",
+    "exportFailed": "导出失败",
+    "copyFailed": "复制失败",
+    "shareFailed": "分享失败",
+    "copied": "已复制",
+    "download": "下载 PNG",
+    "downloadSized": "下载 {size} PNG",
+    "buildTitle": "角色配置",
+    "artifactTitle": "圣遗物"
+  },
+  "options": {
+    "darkCard": "深色卡片",
+    "lightCard": "浅色卡片",
+    "dark": "深色",
+    "light": "浅色",
+    "cardTheme": "卡片主题",
+    "showName": "显示账号名称",
+    "name": "名称",
+    "showUid": "显示 UID"
+  },
+  "menu": {
+    "label": "分享卡片",
+    "drawing": "绘制中",
+    "copy": "复制"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} 词条（初始词条加每 +4 一次）",
+    "levelTitle": "等级 {level}/{cap} · 突破 {ascension}",
+    "weaponAndStats": "武器与属性",
+    "pieceBonus": "{n}件套效果",
+    "rvTitle": "词条价值：每次副属性强化占该属性最高档的百分比之和"
+  }
+}

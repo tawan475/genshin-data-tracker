@@ -52,6 +52,8 @@ import { loadBundle, type AccountRef } from '@/data/account-data'
 import { useResource } from '@/data/use-resource'
 import { gameIcon, loadGameIcons } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
 import { useFeedback } from '@/stores/feedback'
 import { useAccount } from './context'
 
@@ -65,11 +67,11 @@ const account = useAccount()
 const feedback = useFeedback()
 
 const game = useResource(
-  () => 0,
-  async () => {
+  () => locale.value,
+  async (lang) => {
     const [data, text] = await Promise.all([
       loadAchievements(),
-      achievementText('en'),
+      achievementText(lang),
       loadGameIcons(),
     ])
     return { data, text, entries: groupAchievements(data) }
@@ -342,7 +344,7 @@ onBeforeUnmount(() => observer?.disconnect())
 // ------------------------------------------------------------------ marking
 
 function undoAction(done: number[], undone: number[]) {
-  return { label: 'Undo', run: () => void marks.change(done, undone) }
+  return { label: t('achievements.undo'), run: () => void marks.change(done, undone) }
 }
 
 function mark(ids: number[]) {
@@ -362,14 +364,18 @@ async function markAll() {
   if (!ids.length) return
   const n = formatNumber(ids.length)
   const ok = await feedback.confirm({
-    title: `Mark ${n} done?`,
+    title: t('achievements.confirmMark.title', { n }),
     detail: filtered.value
-      ? `The ${n} shown achievements left are marked done by hand.`
-      : `Every achievement left (${n}) is marked done by hand.`,
-    confirmLabel: 'Mark done',
+      ? t('achievements.confirmMark.filtered', { n })
+      : t('achievements.confirmMark.all', { n }),
+    confirmLabel: t('achievements.confirmMark.confirm'),
   })
   if (ok && (await marks.change(ids)))
-    feedback.toast({ tone: 'success', title: `${n} marked done`, action: undoAction([], ids) })
+    feedback.toast({
+      tone: 'success',
+      title: t('achievements.markedDone', { n }),
+      action: undoAction([], ids),
+    })
 }
 
 async function unmarkAll() {
@@ -377,13 +383,17 @@ async function unmarkAll() {
   if (!ids.length) return
   const n = formatNumber(ids.length)
   const ok = await feedback.confirm({
-    title: `Unmark ${n}?`,
-    detail: `Removes the hand marks of the ${n} shown achievements. Captured ones stay done.`,
-    confirmLabel: 'Unmark',
+    title: t('achievements.confirmUnmark.title', { n }),
+    detail: t('achievements.confirmUnmark.detail', { n }),
+    confirmLabel: t('achievements.confirmUnmark.confirm'),
     tone: 'danger',
   })
   if (ok && (await marks.change([], ids)))
-    feedback.toast({ tone: 'success', title: `${n} unmarked`, action: undoAction(ids, []) })
+    feedback.toast({
+      tone: 'success',
+      title: t('achievements.unmarked', { n }),
+      action: undoAction(ids, []),
+    })
 }
 
 // ------------------------------------------------------------------ import
@@ -394,7 +404,7 @@ async function importIds(ids: number[]): Promise<boolean> {
   if (ok)
     feedback.toast({
       tone: 'success',
-      title: `${formatNumber(ids.length)} added`,
+      title: t('achievements.added', { n: formatNumber(ids.length) }),
       action: undoAction([], ids),
     })
   return ok
@@ -403,28 +413,30 @@ async function importIds(ids: number[]): Promise<boolean> {
 
 <template>
   <div>
-    <PageHeader title="Achievements">
+    <PageHeader :title="$t('achievements.title')">
       <template v-if="ready && captured" #meta>
         <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
           <Clock class="size-4" aria-hidden="true" />
-          <span class="sr-only">Newest capture</span>
-          <time :datetime="newestCapture.iso" :title="`Newest capture: ${newestCapture.title}`">{{
-            newestCapture.ago
-          }}</time>
+          <span class="sr-only">{{ $t('achievements.newestCapture') }}</span>
+          <time
+            :datetime="newestCapture.iso"
+            :title="$t('achievements.newestCaptureTitle', { time: newestCapture.title })"
+            >{{ newestCapture.ago }}</time
+          >
         </p>
         <p
           v-else
           class="flex items-center gap-1.5 text-text-secondary"
-          title="Open the in-game Achievements menu while irminsul runs to capture them"
+          :title="$t('achievements.notCapturedTitle')"
         >
           <Info class="size-4 shrink-0" aria-hidden="true" />
-          Not captured
+          {{ $t('achievements.notCaptured') }}
         </p>
       </template>
       <template #actions>
         <UiButton
           :disabled="!ready"
-          title="Import done achievements from a Seelie export or a stardb / irminsul file"
+          :title="$t('achievements.importTitle')"
           @click="importOpen = true"
         >
           <FileUp class="size-4" aria-hidden="true" />
@@ -433,7 +445,12 @@ async function importIds(ids: number[]): Promise<boolean> {
       </template>
     </PageHeader>
 
-    <UiError v-if="loadError && !ready" title="Load failed" :error="loadError" @retry="retry" />
+    <UiError
+      v-if="loadError && !ready"
+      :title="$t('achievements.loadFailed')"
+      :error="loadError"
+      @retry="retry"
+    />
 
     <template v-else-if="ready && summary && game.data.value && captured">
       <AchievementSummary
@@ -476,17 +493,21 @@ async function importIds(ids: number[]): Promise<boolean> {
           />
 
           <UiPanel v-if="empty" flush>
-            <UiEmpty v-if="empty === 'allDone'" title="All done">
+            <UiEmpty v-if="empty === 'allDone'" :title="$t('achievements.allDone')">
               <template #icon><CheckCheck class="text-success-text" aria-hidden="true" /></template>
-              <UiButton @click="filters.completion = 'done'">Show done</UiButton>
+              <UiButton @click="filters.completion = 'done'">{{
+                $t('achievements.showDone')
+              }}</UiButton>
             </UiEmpty>
-            <UiEmpty v-else-if="empty === 'noneDone'" title="None done">
+            <UiEmpty v-else-if="empty === 'noneDone'" :title="$t('achievements.noneDone')">
               <template #icon><SearchX aria-hidden="true" /></template>
-              <UiButton @click="filters.completion = 'missing'">Show missing</UiButton>
+              <UiButton @click="filters.completion = 'missing'">{{
+                $t('achievements.showMissing')
+              }}</UiButton>
             </UiEmpty>
-            <UiEmpty v-else title="No matches">
+            <UiEmpty v-else :title="$t('achievements.noMatches')">
               <template #icon><SearchX aria-hidden="true" /></template>
-              <UiButton @click="clearFilters">Clear</UiButton>
+              <UiButton @click="clearFilters">{{ $t('achievements.clear') }}</UiButton>
             </UiEmpty>
           </UiPanel>
 
@@ -504,7 +525,7 @@ async function importIds(ids: number[]): Promise<boolean> {
 
           <div v-if="limit < shown.length" ref="sentinel" class="flex justify-center">
             <UiButton variant="ghost" @click="more">
-              More
+              {{ $t('achievements.more') }}
               <span class="tabular font-mono text-text-muted">{{
                 formatNumber(shown.length - limit)
               }}</span>
@@ -522,7 +543,7 @@ async function importIds(ids: number[]): Promise<boolean> {
       />
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading">
+    <div v-else aria-busy="true" :aria-label="$t('achievements.loading')">
       <div class="mb-4 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4 lg:mb-6">
         <UiSkeleton v-for="n in 4" :key="n" class="h-16 sm:h-[4.5rem]" />
       </div>

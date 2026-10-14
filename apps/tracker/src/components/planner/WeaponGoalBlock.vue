@@ -5,6 +5,7 @@ import type { WeaponTarget } from '@gdt/shared'
 import { computed } from 'vue'
 import { PencilLine, RotateCcw, X } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import { t } from '@/i18n'
 import { weaponIcon } from '@/lib/assets'
 import LevelGrid from './LevelGrid.vue'
 import { weaponGoalAtLeast, type LevelStep } from './level-grid'
@@ -51,7 +52,7 @@ const pickGoal = (s: LevelStep) =>
 const captured = computed(() =>
   w.value.owned
     ? `${levelLabel(props.planner, 'weapon', w.value.key, w.value.captured.level, w.value.captured.ascension)} · R${w.value.captured.refinement}`
-    : 'Not owned',
+    : t('planner.editor.notOwned'),
 )
 const arNeed = computed(() => {
   const need = w.value.requirement?.ar ?? 0
@@ -74,24 +75,35 @@ const arNeed = computed(() => {
       <span class="flex min-w-0 flex-1 flex-col">
         <span class="truncate text-sm font-semibold">{{ weapon.name }}</span>
         <span class="tabular flex flex-wrap items-center gap-x-2 font-mono text-xs text-text-muted">
-          <span :title="weapon.owned ? 'The copy in the capture' : 'No copy in the capture'">{{
-            captured
-          }}</span>
-          <span v-if="holder" class="font-sans" :title="`Held by ${holder}`">{{ holder }}</span>
+          <span
+            :title="
+              weapon.owned ? $t('planner.weaponBlock.copy') : $t('planner.weaponBlock.noCopy')
+            "
+            >{{ captured }}</span
+          >
+          <span
+            v-if="holder"
+            class="font-sans"
+            :title="$t('planner.weaponBlock.heldBy', { name: holder })"
+            >{{ holder }}</span
+          >
           <span v-if="weapon.edited" class="inline-flex items-center gap-1 text-accent-text">
-            <PencilLine class="size-3.5" aria-label="Set by hand" role="img" />
+            <PencilLine class="size-3.5" :aria-label="$t('planner.card.setByHand')" role="img" />
             <button
               type="button"
               class="inline-flex min-h-6 items-center gap-1 rounded px-1 hover:bg-surface-overlay"
-              title="Back to the capture"
+              :title="$t('planner.editor.resetTitle')"
               @click="emit('now', null)"
             >
               <RotateCcw class="size-3.5" aria-hidden="true" />
-              Reset
+              {{ $t('planner.editor.reset') }}
             </button>
           </span>
-          <span v-if="arNeed" class="text-warning-text" :title="`Needs AR ${arNeed}`"
-            >AR {{ arNeed }}</span
+          <span
+            v-if="arNeed"
+            class="text-warning-text"
+            :title="$t('planner.card.needsAr', { ar: arNeed })"
+            >{{ $t('farm.lock.ar', { ar: arNeed }) }}</span
           >
         </span>
       </span>
@@ -99,8 +111,8 @@ const arNeed = computed(() => {
         v-if="removable"
         type="button"
         class="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
-        :aria-label="`Remove ${weapon.name}`"
-        :title="`Remove ${weapon.name}`"
+        :aria-label="$t('planner.common.removeName', { name: weapon.name })"
+        :title="$t('planner.common.removeName', { name: weapon.name })"
         @click="emit('remove')"
       >
         <X class="size-5" aria-hidden="true" />
@@ -110,13 +122,13 @@ const arNeed = computed(() => {
     <template v-if="phases">
       <div class="flex flex-col gap-1.5">
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-medium text-text-muted">Now</span>
+          <span class="text-xs font-medium text-text-muted">{{ $t('planner.editor.now') }}</span>
           <NumberStepper
             :model-value="weapon.current.refinement"
             :min="weapon.captured.refinement"
             :max="5"
             prefix="R"
-            :label="`${weapon.name} refinement now`"
+            :label="$t('planner.weaponBlock.refinementNow', { name: weapon.name })"
             @update:model-value="setNow({ ...weapon.current, refinement: $event })"
           />
         </div>
@@ -125,19 +137,19 @@ const arNeed = computed(() => {
           :level="weapon.current.level"
           :ascension="weapon.current.ascension"
           :min="weapon.captured"
-          :label="`${weapon.name} level now`"
+          :label="$t('planner.weaponBlock.levelNow', { name: weapon.name })"
           @pick="pickNow"
         />
       </div>
       <div class="flex flex-col gap-1.5">
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-medium text-text-muted">Goal</span>
+          <span class="text-xs font-medium text-text-muted">{{ $t('planner.editor.goal') }}</span>
           <NumberStepper
             :model-value="weapon.target.refinement"
             :min="weapon.current.refinement"
             :max="5"
             prefix="R"
-            :label="`${weapon.name} refinement goal`"
+            :label="$t('planner.weaponBlock.refinementGoal', { name: weapon.name })"
             @update:model-value="emit('target', { ...weapon.target, refinement: $event })"
           />
         </div>
@@ -146,7 +158,7 @@ const arNeed = computed(() => {
           :level="weapon.target.level"
           :ascension="weapon.target.ascension"
           :from="weapon.current"
-          :label="`${weapon.name} level goal`"
+          :label="$t('planner.weaponBlock.levelGoal', { name: weapon.name })"
           @pick="pickGoal"
         />
       </div>

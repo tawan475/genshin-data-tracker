@@ -47,6 +47,7 @@ import {
   type MaterialLine,
   type PlanTotals,
 } from '@gdt/game-data/planner-math'
+import { t } from '@/i18n'
 import { formatSetName } from '@/utils/artifact-stats'
 import { domainsForSet, type ArtifactDomain } from './artifact-domains'
 
@@ -243,12 +244,12 @@ function domainLock(entry: DomainEntry, ar: number | null): string {
   const open = domainTierFor(entry, ar)
   // Nothing open yet: the first tier's AR; open but short (a tier nothing drops): the next one's.
   const next = open ? entry.tiers.find((t) => t.tier > open.tier) : entry.tiers[0]
-  return next ? `AR ${next.ar}` : 'Locked'
+  return next ? t('farm.lock.ar', { ar: next.ar }) : t('farm.lock.locked')
 }
 
 const wlLock = (map: ReadonlyMap<number, unknown> | undefined) => {
   const wl = minKey(map)
-  return wl === null ? 'Locked' : `WL ${wl}`
+  return wl === null ? t('farm.lock.locked') : t('farm.lock.wl', { wl })
 }
 
 /** A domain entrance with only the families given (today's, or a day pair's). */
@@ -321,7 +322,7 @@ function leyCard(line: FarmLeyLine, input: FarmInput): FarmCard | null {
   return {
     id: `ley:${line.kind}`,
     kind: 'ley',
-    name: line.kind === 'exp' ? 'Blossom of Revelation' : 'Blossom of Wealth',
+    name: line.kind === 'exp' ? t('farm.cards.blossomExp') : t('farm.cards.blossomMora'),
     detail: '',
     domain: null,
     resinPerRun: planner.resin.leyLine,
@@ -345,7 +346,7 @@ function weeklyCard(weekly: FarmWeekly, input: FarmInput): FarmCard | null {
   if (weekly.status === 'locked') {
     if (boss.tiers.length > 0) {
       const open = weeklyTierFor(boss, input.ar)
-      lock = open ? 'Locked' : `AR ${boss.tiers[0]!.ar}`
+      lock = open ? t('farm.lock.locked') : t('farm.lock.ar', { ar: boss.tiers[0]!.ar })
     } else lock = wlLock(input.drops?.weekly.byWorldLevel.get(boss.key))
   }
   const condensed = condensedResin(input.planner)
@@ -462,13 +463,13 @@ function nameAndDetail(names: readonly string[], fallback: string) {
 function localCards(input: FarmInput, groups: readonly FarmGroup[]): FarmCard[] {
   const lines = groups.filter((g) => g.kind === 'local').flatMap((g) => missingOnly(g.lines))
   const farming = input.farming
-  if (!farming) return nonNull([listCard('local', 'local', 'Local specialties', lines)])
+  if (!farming) return nonNull([listCard('local', 'local', t('farm.cards.local'), lines)])
   const byRegion = new Map<number, { name: string; lines: MaterialLine[]; areas: string[] }>()
   for (const line of lines) {
     const source = farming.localOf.get(line.material.key)
     const id = source?.region?.id ?? 0
     const region = byRegion.get(id) ?? {
-      name: source?.region?.name ?? 'Local specialties',
+      name: source?.region?.name ?? t('farm.cards.local'),
       lines: [],
       areas: [],
     }
@@ -494,7 +495,7 @@ function enemyCards(
   kind: 'common' | 'elite',
 ): FarmCard[] {
   const mine = groups.filter((g) => g.kind === 'enemy' && g.lines[0]?.material.kind === kind)
-  const label = kind === 'common' ? 'Common enemies' : 'Elite enemies'
+  const label = kind === 'common' ? t('farm.cards.common') : t('farm.cards.elite')
   const farming = input.farming
   if (!farming) {
     return nonNull([
@@ -535,7 +536,7 @@ export function freeCards(input: FarmInput): FarmCard[] {
     ...enemyCards(input, groups, 'elite'),
     ...nonNull([
       oreCard(input),
-      listCard('other', 'other', 'Other', [
+      listCard('other', 'other', t('farm.cards.other'), [
         ...lines((g) => g.kind === 'crown' || (g.kind === 'gem' && g.status === 'not-farmed')),
         ...quest,
       ]),
@@ -642,8 +643,8 @@ export function domainCardsOn(input: FarmInput, weekday: number): FarmCard[] {
   )
 }
 
-/** Sets with no domain in the game data (bosses, events…) share one card. */
-export const ELSEWHERE = 'Elsewhere'
+/** Sets with no domain in the game data (bosses, events…) share one card, named this. */
+export const elsewhereName = () => t('farm.cards.elsewhere')
 
 /**
  * Artifact domains (20 resin, every day) for the sets the counted goals
@@ -680,11 +681,12 @@ export function artifactCards(input: FarmInput): FarmCard[] {
   }
   const ar = input.ar
   const list = [...cards.values()].map(({ domain, sets, goals }): FarmCard => {
-    const lock = domain && ar !== null && ar < domain.ar ? `AR ${domain.ar}` : null
+    const lock =
+      domain && ar !== null && ar < domain.ar ? t('farm.lock.ar', { ar: domain.ar }) : null
     return {
       id: domain ? `artifact:${domain.id}` : 'artifact:elsewhere',
       kind: 'artifact',
-      name: domain?.name ?? ELSEWHERE,
+      name: domain?.name ?? elsewhereName(),
       detail: sets.map(formatSetName).join(' · '),
       domain: null,
       resinPerRun: domain?.resin ?? 0,
@@ -713,16 +715,21 @@ export function artifactCards(input: FarmInput): FarmCard[] {
  */
 export function todaySections(input: FarmInput, weekday: number): FarmSection[] {
   const sections: FarmSection[] = [
-    { key: 'free', resin: '0', label: 'No resin', cards: freeCards(input) },
+    { key: 'free', resin: '0', label: t('farm.sections.free'), cards: freeCards(input) },
     {
       key: 'domain',
       resin: '20',
-      label: 'Domains · Ley lines',
+      label: t('farm.sections.domain'),
       cards: lockedLast([...domainCardsOn(input, weekday), ...leyCards(input)]),
     },
-    { key: 'boss', resin: '40', label: 'Bosses', cards: bossCards(input) },
-    { key: 'weekly', resin: '30/60', label: 'Weekly bosses', cards: weeklyCards(input) },
-    { key: 'artifact', resin: '20', label: 'Artifacts', cards: artifactCards(input) },
+    { key: 'boss', resin: '40', label: t('farm.sections.boss'), cards: bossCards(input) },
+    { key: 'weekly', resin: '30/60', label: t('farm.sections.weekly'), cards: weeklyCards(input) },
+    {
+      key: 'artifact',
+      resin: '20',
+      label: t('farm.sections.artifact'),
+      cards: artifactCards(input),
+    },
   ]
   return sections.filter((s) => s.cards.length > 0)
 }

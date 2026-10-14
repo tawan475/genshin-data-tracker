@@ -23,6 +23,7 @@ import UiSwitch from '@/components/ui/UiSwitch.vue'
 import SectionLabel from '@/components/shell/SectionLabel.vue'
 import { api } from '@/api'
 import { useResource } from '@/data/use-resource'
+import { t, te } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 import { useStaff } from '@/stores/staff'
@@ -97,7 +98,11 @@ const nodeCount = computed(() =>
 )
 
 const busy = ref(false)
-async function run(work: () => Promise<unknown>, done: string, failed = 'Not saved') {
+async function run(
+  work: () => Promise<unknown>,
+  done: string,
+  failed = t('staff.common.notSaved'),
+) {
   busy.value = true
   try {
     await work()
@@ -121,7 +126,7 @@ function save() {
         color: color.value,
         permissions: [...nodes.value],
       }),
-    `${name.value.trim()} saved`,
+    t('staff.roles.saved', { name: name.value.trim() }),
   )
 }
 
@@ -129,14 +134,14 @@ async function createRole() {
   busy.value = true
   try {
     const role = await api.staff.createRole({
-      name: 'New role',
+      name: t('staff.roles.newRole'),
       color: ROLE_COLORS[ROLE_COLORS.length - 1]!,
       permissions: [],
     })
     await reload()
     selectedId.value = role.id
   } catch (cause) {
-    feedback.error('Not created', cause)
+    feedback.error(t('staff.roles.notCreated'), cause)
   } finally {
     busy.value = false
   }
@@ -146,12 +151,32 @@ async function deleteRole() {
   const role = selected.value
   if (!role) return
   const ok = await feedback.confirm({
-    title: `Delete ${role.name}`,
-    detail: `${formatNumber(role.members.length)} ${role.members.length === 1 ? 'member loses' : 'members lose'} it and its permissions.`,
-    confirmLabel: 'Delete role',
+    title: t('staff.roles.deleteTitle', { name: role.name }),
+    detail: t(
+      'staff.roles.deleteDetail',
+      { n: formatNumber(role.members.length) },
+      role.members.length,
+    ),
+    confirmLabel: t('staff.roles.deleteRole'),
     tone: 'danger',
   })
-  if (ok) await run(() => api.staff.deleteRole(role.id), `${role.name} deleted`, 'Not deleted')
+  if (ok) {
+    await run(
+      () => api.staff.deleteRole(role.id),
+      t('staff.roles.deleted', { name: role.name }),
+      t('staff.common.notDeleted'),
+    )
+  }
+}
+
+/** A permission group's name and a node's label in the language on screen (the shared table is English). */
+const groupLabel = (name: string) => {
+  const key = `staff.permissions.groups.${name.toLowerCase()}`
+  return te(key, 'en') ? t(key) : name
+}
+const nodeLabel = (node: string, fallback: string) => {
+  const key = `staff.permissions.nodes.${node.replace(/[._](\w)/g, (_, c: string) => c.toUpperCase())}`
+  return te(key, 'en') ? t(key) : fallback
 }
 
 // ------------------------------------------------------------------- ordering
@@ -169,7 +194,7 @@ const shown = computed(() => {
 
 function reorder(ids: number[]) {
   order.value = ids
-  void run(() => api.staff.orderRoles(ids), '', 'Order not saved').finally(
+  void run(() => api.staff.orderRoles(ids), '', t('staff.roles.orderNotSaved')).finally(
     () => (order.value = null),
   )
 }
@@ -225,20 +250,31 @@ function addMember(user: StaffUserRow) {
   if (!role) return
   adding.value = false
   search.value = ''
-  void run(() => api.staff.addRole(user.id, role.id), `${user.username} has ${role.name}`)
+  void run(
+    () => api.staff.addRole(user.id, role.id),
+    t('staff.roles.memberAdded', { user: user.username, role: role.name }),
+  )
 }
 
 function removeMember(member: { id: number; username: string }) {
   const role = selected.value
   if (!role) return
-  void run(() => api.staff.removeRole(member.id, role.id), `${member.username} lost ${role.name}`)
+  void run(
+    () => api.staff.removeRole(member.id, role.id),
+    t('staff.roles.memberRemoved', { user: member.username, role: role.name }),
+  )
 }
 </script>
 
 <template>
-  <PageHeader title="Roles" />
+  <PageHeader :title="$t('staff.roles.title')" />
 
-  <UiError v-if="error && !data" :error="error" title="Could not load roles" @retry="reload" />
+  <UiError
+    v-if="error && !data"
+    :error="error"
+    :title="$t('staff.roles.couldNotLoad')"
+    @retry="reload"
+  />
 
   <div v-else-if="!data" class="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]" aria-busy="true">
     <UiSkeleton class="h-72" />
@@ -246,14 +282,14 @@ function removeMember(member: { id: number; username: string }) {
   </div>
 
   <div v-else class="grid items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
-    <UiPanel title="Roles" flush>
+    <UiPanel :title="$t('staff.roles.title')" flush>
       <template #actions>
         <UiButton size="sm" :disabled="busy" @click="createRole">
           <Plus class="size-4" aria-hidden="true" />
-          New role
+          {{ $t('staff.roles.newRole') }}
         </UiButton>
       </template>
-      <ul class="flex flex-col p-2" aria-label="Roles, highest first">
+      <ul class="flex flex-col p-2" :aria-label="$t('staff.roles.listLabel')">
         <li
           v-for="role in shown"
           :key="role.id"
@@ -274,7 +310,7 @@ function removeMember(member: { id: number; username: string }) {
                 : 'text-text-secondary hover:bg-surface-overlay/60 hover:text-text-primary'
             "
             :aria-current="role.id === selectedId ? 'true' : undefined"
-            :title="role.builtIn ? 'Owner: every permission, locked' : role.name"
+            :title="role.builtIn ? $t('staff.roles.ownerTitle') : role.name"
             @click="selectedId = role.id"
           >
             <span
@@ -283,8 +319,8 @@ function removeMember(member: { id: number; username: string }) {
               class="-my-1 flex cursor-grab touch-none items-center rounded text-text-muted focus-visible:outline-2 focus-visible:outline-focus-ring"
               role="button"
               tabindex="0"
-              :aria-label="`Move ${role.name}`"
-              title="Drag, or arrow keys"
+              :aria-label="$t('staff.roles.move', { name: role.name })"
+              :title="$t('staff.roles.dragHint')"
               @pointerdown.stop="drag.start(`role:${role.id}`, $event)"
               @click.stop
               @keydown="drag.key(`role:${role.id}`, $event)"
@@ -297,7 +333,7 @@ function removeMember(member: { id: number; username: string }) {
             <Lock
               v-if="!role.editable"
               class="size-3.5 shrink-0 text-text-muted"
-              :aria-label="role.builtIn ? 'Locked' : 'Above your role'"
+              :aria-label="role.builtIn ? $t('staff.roles.locked') : $t('staff.roles.aboveYours')"
             />
             <UiBadge mono>{{ formatNumber(role.members.length) }}</UiBadge>
           </button>
@@ -305,9 +341,9 @@ function removeMember(member: { id: number; username: string }) {
       </ul>
       <p
         class="px-5 pb-4 text-[0.8125rem] text-text-muted"
-        title="Like Discord: you manage users and roles below your highest role, and grant only permissions you have"
+        :title="$t('staff.roles.hierarchyTitle')"
       >
-        Higher roles manage lower ones
+        {{ $t('staff.roles.hierarchy') }}
       </p>
     </UiPanel>
 
@@ -317,9 +353,9 @@ function removeMember(member: { id: number; username: string }) {
           <span class="size-3 shrink-0 rounded-full" :style="{ backgroundColor: color }" />
           <span class="truncate">{{ selected.name }}</span>
         </h2>
-        <span class="tabular text-sm text-text-muted"
-          >{{ formatNumber(nodeCount) }} permissions</span
-        >
+        <span class="tabular text-sm text-text-muted">{{
+          $t('staff.roles.permissionCount', { n: formatNumber(nodeCount) })
+        }}</span>
       </template>
 
       <div class="flex flex-col gap-6 p-5">
@@ -329,7 +365,7 @@ function removeMember(member: { id: number; username: string }) {
           role="note"
         >
           <Lock class="size-4 shrink-0" aria-hidden="true" />
-          Owner has every permission and is given only from the command line.
+          {{ $t('staff.roles.ownerNote') }}
         </p>
         <p
           v-else-if="locked"
@@ -337,16 +373,18 @@ function removeMember(member: { id: number; username: string }) {
           role="note"
         >
           <Lock class="size-4 shrink-0" aria-hidden="true" />
-          As high as your role or higher: only shown.
+          {{ $t('staff.roles.lockedNote') }}
         </p>
 
         <div class="flex flex-wrap gap-x-6 gap-y-4">
-          <UiField v-slot="{ id }" label="Name" class="min-w-0 flex-[1_1_15rem]">
+          <UiField v-slot="{ id }" :label="$t('staff.roles.name')" class="min-w-0 flex-[1_1_15rem]">
             <UiInput :id="id" v-model="name" maxlength="32" :disabled="locked" />
           </UiField>
           <div class="flex flex-col gap-1">
-            <span class="text-sm font-medium text-text-secondary">Colour</span>
-            <div class="flex gap-1.5" role="radiogroup" aria-label="Colour">
+            <span class="text-sm font-medium text-text-secondary">{{
+              $t('staff.roles.colour')
+            }}</span>
+            <div class="flex gap-1.5" role="radiogroup" :aria-label="$t('staff.roles.colour')">
               <button
                 v-for="swatch in ROLE_COLORS"
                 :key="swatch"
@@ -365,23 +403,23 @@ function removeMember(member: { id: number; username: string }) {
         </div>
 
         <section v-for="group in PERMISSION_GROUPS" :key="group.name">
-          <SectionLabel :label="group.name" />
+          <SectionLabel :label="groupLabel(group.name)" />
           <div class="divide-y divide-border-subtle">
             <UiSwitch
               v-for="p in group.nodes"
               :key="p.node"
               :model-value="nodeOn(p.node)"
-              :label="p.label"
+              :label="nodeLabel(p.node, p.label)"
               :description="p.node"
               :disabled="locked || !canGrant(p.node)"
-              :title="!locked && !canGrant(p.node) ? 'You don’t have this permission' : undefined"
+              :title="!locked && !canGrant(p.node) ? $t('staff.roles.noPermission') : undefined"
               @update:model-value="(on: boolean) => setNode(p.node, on)"
             />
           </div>
         </section>
 
         <section>
-          <SectionLabel label="Members" />
+          <SectionLabel :label="$t('staff.roles.members')" />
           <div class="flex flex-wrap items-center gap-2 pt-1">
             <span
               v-for="member in selected.members"
@@ -402,8 +440,8 @@ function removeMember(member: { id: number; username: string }) {
                 v-if="!locked"
                 type="button"
                 class="inline-flex size-7 items-center justify-center rounded-md text-text-muted hover:bg-surface-overlay hover:text-text-primary"
-                :aria-label="`Remove ${member.username}`"
-                :title="`Remove ${member.username}`"
+                :aria-label="$t('staff.roles.remove', { name: member.username })"
+                :title="$t('staff.roles.remove', { name: member.username })"
                 :disabled="busy"
                 @click="removeMember(member)"
               >
@@ -413,17 +451,17 @@ function removeMember(member: { id: number; username: string }) {
             <span v-if="!locked" ref="addAnchor" class="inline-flex">
               <UiButton variant="ghost" size="sm" @click="adding = !adding">
                 <Plus class="size-4" aria-hidden="true" />
-                Add member
+                {{ $t('staff.roles.addMember') }}
               </UiButton>
               <UiPopover
                 :open="adding"
                 :anchor="addAnchor"
-                label="Add member"
+                :label="$t('staff.roles.addMember')"
                 @close="adding = false"
               >
                 <div class="flex flex-col gap-2 p-3">
                   <label class="relative">
-                    <span class="sr-only">Search users</span>
+                    <span class="sr-only">{{ $t('staff.roles.searchUsers') }}</span>
                     <Search
                       class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
                       aria-hidden="true"
@@ -432,7 +470,7 @@ function removeMember(member: { id: number; username: string }) {
                       v-model="search"
                       type="search"
                       class="pl-9"
-                      placeholder="Name or #id"
+                      :placeholder="$t('staff.roles.memberPlaceholder')"
                       autofocus
                     />
                   </label>
@@ -458,17 +496,19 @@ function removeMember(member: { id: number; username: string }) {
         class="flex flex-wrap items-center justify-between gap-2 border-t border-border-default bg-surface-overlay/40 px-5 py-3"
       >
         <UiButton variant="ghost" class="text-danger-text!" :disabled="busy" @click="deleteRole">
-          Delete role
+          {{ $t('staff.roles.deleteRole') }}
         </UiButton>
         <span class="flex gap-2">
-          <UiButton :disabled="!dirty || busy" @click="resetDraft">Discard</UiButton>
+          <UiButton :disabled="!dirty || busy" @click="resetDraft">{{
+            $t('staff.roles.discard')
+          }}</UiButton>
           <UiButton
             variant="primary"
             :disabled="!dirty || !name.trim()"
             :loading="busy"
             @click="save"
           >
-            Save
+            {{ $t('staff.common.save') }}
           </UiButton>
         </span>
       </div>

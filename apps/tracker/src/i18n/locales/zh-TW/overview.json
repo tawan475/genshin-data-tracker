@@ -1,1 +1,73 @@
-{}
+{
+  "progression": "進度",
+  "figure": {
+    "mora": "摩拉",
+    "primogem": "原石",
+    "characters": "角色",
+    "weapons": "武器",
+    "artifacts": "聖遺物",
+    "artifact4": "4★聖遺物",
+    "artifact3": "3★聖遺物"
+  },
+  "server": {
+    "AMERICA": "美服",
+    "EUROPE": "歐服",
+    "ASIA": "亞服",
+    "SAR": "港澳台服"
+  },
+  "noSnapshots": "尚無快照",
+  "import": "匯入",
+  "historyUnavailable": "無法載入歷史",
+  "currencyCarried": "來自較早的擷取",
+  "currencyMissing": "最新擷取中缺少",
+  "sincePrevious": "較上一個快照",
+  "lastCaptured": "最近擷取",
+  "lastCapturedAt": "最近擷取於 {time}",
+  "seenAgain": "再次偵測到",
+  "seenAgainAt": "再次偵測於 {time}",
+  "loadingHistory": "正在載入快照歷史",
+  "lowRarity": {
+    "label": "4★ / 3★聖遺物",
+    "hint": "未鎖定、未裝備",
+    "rarity": "{n} 星"
+  },
+  "card": {
+    "snapshots": "快照",
+    "storage": "儲存空間",
+    "stored": "上傳 {raw}，儲存 {stored}",
+    "storedRatio": "上傳 {raw}，儲存 {stored}（縮小 {ratio}）"
+  },
+  "monthly": {
+    "title": "每月分析",
+    "previous": "上個月",
+    "previousTo": "上個月，{month}",
+    "next": "下個月",
+    "nextTo": "下個月，{month}",
+    "gained": "獲得 {n}",
+    "spent": "消耗 {n}",
+    "added": "新增 {n}",
+    "used": "用掉 {n}",
+    "closing": "月底 {n}",
+    "artifactExp": "依 0 級折合 {n} 聖遺物經驗",
+    "thisMonth": "本月 · {detail}",
+    "gapTitle": "{n} 天無擷取",
+    "vs": "對比 {day}",
+    "captures": "{n} 次擷取",
+    "comparedWith": "{captures}，對比 {day}",
+    "noCaptures": "無擷取",
+    "noCapture": "無擷取",
+    "caption": "{month} 的每日變化：每天最後一次擷取對比上一個有擷取的日子，下方為數值",
+    "day": "日期",
+    "dayTitle": "當天最後一次擷取對比上一個有擷取的日子（本地時間）"
+  },
+  "recent": {
+    "title": "最近",
+    "all": "全部",
+    "allTitle": "全部 {n} 個快照",
+    "size": "上傳 {raw} 位元組，儲存 {stored} 位元組",
+    "unchanged": "總數未變",
+    "first": "第一個快照",
+    "currencyMissing": "缺少摩拉和原石",
+    "noCurrency": "無貨幣"
+  }
+}

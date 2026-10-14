@@ -53,13 +53,19 @@ function rollTitle(index: number, key: string): string {
           <span
             class="tabular font-mono"
             :class="piece.maxed ? 'text-text-secondary' : 'text-warning-text'"
-            :title="`+${piece.level} of ${maxLevel(piece.rarity)} · ${piece.rarity}★`"
+            :title="
+              $t('characters.piece.levelTitle', {
+                level: piece.level,
+                max: maxLevel(piece.rarity),
+                rarity: piece.rarity,
+              })
+            "
             >+{{ piece.level }}</span
           >
           <span class="text-xs" :class="RARITY_TEXT[piece.rarity]" aria-hidden="true">{{
             '★'.repeat(piece.rarity)
           }}</span>
-          <span class="sr-only">{{ piece.rarity }} star</span>
+          <span class="sr-only">{{ $t('characters.stars', { n: piece.rarity }) }}</span>
         </p>
         <p class="truncate text-sm font-medium" :title="formatSetName(piece.setKey)">
           {{ formatSetName(piece.setKey) }}
@@ -80,7 +86,7 @@ function rollTitle(index: number, key: string): string {
       </span>
     </div>
 
-    <ul class="flex flex-col gap-1 px-1 text-sm" aria-label="Substats">
+    <ul class="flex flex-col gap-1 px-1 text-sm" :aria-label="$t('game.substats')">
       <li
         v-for="(sub, index) in piece.substats"
         :key="sub.key"
@@ -97,10 +103,11 @@ function rollTitle(index: number, key: string): string {
         v-for="sub in piece.unactivatedSubstats ?? []"
         :key="`inactive-${sub.key}`"
         class="flex items-center gap-2 text-text-muted"
-        title="Activates at +4"
+        :title="$t('characters.piece.activatesAt4')"
       >
         <span class="min-w-0 flex-1 truncate"
-          >{{ formatStatShort(sub.key) }}<span class="sr-only"> (inactive)</span></span
+          >{{ formatStatShort(sub.key)
+          }}<span class="sr-only"> {{ $t('characters.piece.inactive') }}</span></span
         >
         <span class="tabular font-mono">{{ formatStatValue(sub.key, sub.value) }}</span>
         <span class="w-12 shrink-0" />
@@ -117,8 +124,15 @@ function rollTitle(index: number, key: string): string {
         label
       />
       <RollValue :value="piece.rv" :plain="piece.rarity < 5" label />
-      <span class="ml-auto" title="Rolls"
-        ><span class="tabular font-mono">{{ rollCount }}</span> rolls</span
+      <i18n-t
+        keypath="characters.piece.rolls"
+        tag="span"
+        class="ml-auto"
+        :title="$t('characters.piece.rollsTitle')"
+        :plural="rollCount"
+        ><template #n
+          ><span class="tabular font-mono">{{ rollCount }}</span></template
+        ></i18n-t
       >
     </p>
   </article>
@@ -127,6 +141,6 @@ function rollTitle(index: number, key: string): string {
     v-else
     class="flex min-h-24 items-center justify-center rounded-xl border border-dashed border-border-strong p-3 text-sm text-text-muted"
   >
-    {{ SLOT_LABELS[slotKey] }}<span class="sr-only">: empty</span>
+    {{ SLOT_LABELS[slotKey] }}<span class="sr-only">{{ $t('characters.piece.empty') }}</span>
   </div>
 </template>

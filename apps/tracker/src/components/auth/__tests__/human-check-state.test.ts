@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  HUMAN_CHECK_FAILED,
-  HUMAN_CHECK_RETRYING,
+  humanCheckFailed,
+  humanCheckRetrying,
   QUIET_TIMEOUT_MS,
   createHumanCheckState,
   humanCheckPassed,
@@ -72,7 +72,7 @@ describe('createHumanCheckState', () => {
     const { state } = setup()
     const pending = state.token()
     vi.advanceTimersByTime(QUIET_TIMEOUT_MS)
-    await expect(pending).rejects.toThrow(HUMAN_CHECK_FAILED)
+    await expect(pending).rejects.toThrow(humanCheckFailed())
     expect(state.ready.value).toBe(false)
   })
 
@@ -92,9 +92,9 @@ describe('createHumanCheckState', () => {
     const { state, restart } = setup()
     const pending = state.token()
     state.errored()
-    await expect(pending).rejects.toThrow(HUMAN_CHECK_FAILED)
+    await expect(pending).rejects.toThrow(humanCheckFailed())
     expect(state.ready.value).toBe(false)
-    expect(state.problem.value).toBe(HUMAN_CHECK_RETRYING)
+    expect(state.problem.value).toBe(humanCheckRetrying())
 
     const again = state.token()
     expect(restart).toHaveBeenCalledTimes(1)
@@ -116,7 +116,7 @@ describe('createHumanCheckState', () => {
     const { state } = setup()
     const pending = state.token()
     state.dispose()
-    await expect(pending).rejects.toThrow(HUMAN_CHECK_FAILED)
+    await expect(pending).rejects.toThrow(humanCheckFailed())
   })
 })
 

@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue'
 import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
-import { SERVER_OPTIONS, type AccountFormErrors, type AccountFormValues } from '@/data/import-setup'
+import { serverOptions, type AccountFormErrors, type AccountFormValues } from '@/data/import-setup'
 
 /**
  * Name, UID and server of a Genshin account, for "Add account" and account
@@ -31,20 +31,30 @@ const server = computed({
 
 <template>
   <div class="flex flex-col gap-4">
-    <UiField v-slot="{ id, describedBy, invalid }" label="Name" optional :error="errors.name">
+    <UiField
+      v-slot="{ id, describedBy, invalid }"
+      :label="$t('transfer.account.name')"
+      optional
+      :error="errors.name"
+    >
       <UiInput
         :id="id"
         v-model="form.name"
         :aria-describedby="describedBy"
         :invalid="invalid"
         :disabled="disabled"
-        placeholder="Main"
+        :placeholder="$t('transfer.account.namePlaceholder')"
         maxlength="64"
         autocomplete="off"
       />
     </UiField>
     <div class="grid gap-4 sm:grid-cols-2">
-      <UiField v-slot="{ id, describedBy, invalid }" label="UID" optional :error="errors.uid">
+      <UiField
+        v-slot="{ id, describedBy, invalid }"
+        :label="$t('transfer.account.uid')"
+        optional
+        :error="errors.uid"
+      >
         <UiInput
           :id="id"
           v-model="form.uid"
@@ -57,11 +67,16 @@ const server = computed({
           :disabled="disabled"
         />
       </UiField>
-      <UiField v-slot="{ id, describedBy, invalid }" label="Server" optional :error="errors.server">
+      <UiField
+        v-slot="{ id, describedBy, invalid }"
+        :label="$t('transfer.account.server')"
+        optional
+        :error="errors.server"
+      >
         <UiSelect
           :id="id"
           v-model="server"
-          :options="SERVER_OPTIONS"
+          :options="serverOptions()"
           :aria-describedby="describedBy"
           :invalid="invalid"
           :disabled="disabled"

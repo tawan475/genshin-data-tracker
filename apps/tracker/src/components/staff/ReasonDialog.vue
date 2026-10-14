@@ -39,7 +39,9 @@ watch(
     >
       <UserLink v-if="user" :user="user" plain />
       <div class="flex flex-col gap-1.5">
-        <label :for="reasonId" class="text-sm font-medium text-text-secondary">Reason</label>
+        <label :for="reasonId" class="text-sm font-medium text-text-secondary">{{
+          $t('staff.reason.label')
+        }}</label>
         <textarea
           :id="reasonId"
           v-model="reason"
@@ -47,7 +49,7 @@ watch(
           rows="3"
           autofocus
           class="w-full resize-y rounded-md border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary shadow-sm placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
-          placeholder="For the audit log"
+          :placeholder="$t('staff.reason.placeholder')"
         />
       </div>
       <ul class="flex flex-col divide-y divide-border-subtle text-sm">
@@ -58,7 +60,7 @@ watch(
       </ul>
     </form>
     <template #footer>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('staff.common.cancel') }}</UiButton>
       <UiButton variant="danger" type="submit" :form="`${reasonId}-form`" :loading="busy">
         {{ confirmLabel }}
       </UiButton>

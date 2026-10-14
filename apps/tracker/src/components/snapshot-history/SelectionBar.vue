@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { X } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import type { ExportJob } from '@/data/export'
+import { t } from '@/i18n'
 import { formatBytes, formatNumber } from '@/lib/format'
 
 /**
@@ -32,13 +33,19 @@ const emit = defineEmits<{ download: []; delete: []; clear: []; cancel: [] }>()
 const progress = computed(() => {
   const job = props.job
   if (!job) return null
-  if (job.phase === 'saving') return 'Saving…'
+  if (job.phase === 'saving') return t('snapshots.bar.saving')
   if (job.phase === 'fetching') {
     return job.fetchTotal
-      ? `Downloading ${formatBytes(job.fetched)} / ${formatBytes(job.fetchTotal)}`
-      : `Downloading ${formatBytes(job.fetched)}`
+      ? t('snapshots.bar.downloadingOf', {
+          done: formatBytes(job.fetched),
+          total: formatBytes(job.fetchTotal),
+        })
+      : t('snapshots.bar.downloading', { done: formatBytes(job.fetched) })
   }
-  return `Zipping ${formatNumber(job.done)} / ${formatNumber(job.total)}`
+  return t('snapshots.bar.zipping', {
+    done: formatNumber(job.done),
+    total: formatNumber(job.total),
+  })
 })
 </script>
 
@@ -62,21 +69,24 @@ const progress = computed(() => {
           <button
             type="button"
             class="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-300 hover:bg-white/10 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
-            aria-label="Clear selection"
-            title="Clear selection"
+            :aria-label="$t('snapshots.select.clear')"
+            :title="$t('snapshots.select.clear')"
             :disabled="deleting"
             @click="emit('clear')"
           >
             <X class="size-4" aria-hidden="true" />
           </button>
           <span class="truncate text-sm font-semibold text-white" role="status">
-            {{ selected }} selected<span class="hidden sm:inline"> out of {{ total }}</span>
+            {{ $t('snapshots.bar.selected', { n: formatNumber(selected) })
+            }}<span class="hidden sm:inline">{{
+              $t('snapshots.bar.outOf', { n: formatNumber(total) })
+            }}</span>
             <span
               v-if="hidden > 0"
               class="font-normal text-slate-300"
-              :title="`${hidden} selected snapshots are outside the dates`"
+              :title="$t('snapshots.bar.hiddenTitle', { n: formatNumber(hidden) })"
             >
-              · {{ hidden }} hidden</span
+              {{ $t('snapshots.bar.hidden', { n: formatNumber(hidden) }) }}</span
             >
           </span>
         </div>
@@ -89,7 +99,7 @@ const progress = computed(() => {
             :disabled="job.phase === 'saving'"
             @click="emit('cancel')"
           >
-            Cancel
+            {{ $t('snapshots.bar.cancel') }}
           </UiButton>
           <template v-else>
             <UiButton
@@ -97,13 +107,13 @@ const progress = computed(() => {
               variant="secondary"
               size="sm"
               :disabled="blocked || deleting"
-              :title="blocked ? 'Another export is running' : 'Download a zip of GOOD files'"
+              :title="blocked ? $t('snapshots.bar.blocked') : $t('snapshots.bar.downloadTitle')"
               @click="emit('download')"
             >
-              Download
+              {{ $t('snapshots.bar.download') }}
             </UiButton>
             <UiButton variant="danger" size="sm" :loading="deleting" @click="emit('delete')">
-              Delete
+              {{ $t('snapshots.bar.delete') }}
             </UiButton>
           </template>
         </div>

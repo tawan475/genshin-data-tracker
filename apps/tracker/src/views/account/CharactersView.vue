@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, reactive, ref, watch } from 'vue'
+import { t } from '@/i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { SearchX, Upload, Users } from 'lucide-vue-next'
 import CharacterCard from '@/components/characters/CharacterCard.vue'
@@ -119,20 +120,25 @@ const strip = computed<StripItem[]>(() => {
   const r = roster.value
   if (!r) return []
   return [
-    { key: 'total', label: 'Characters', value: r.total },
-    { key: 'c6', label: 'C6', value: r.c6 },
-    { key: 'level90', label: 'Lv 90+', value: r.level90 },
-    { key: 'crowns', label: 'Crowns', value: r.crowns, title: 'Talents at level 10' },
+    { key: 'total', label: t('game.characters'), value: r.total },
+    { key: 'c6', label: t('characters.page.c6'), value: r.c6 },
+    { key: 'level90', label: t('characters.page.level90'), value: r.level90 },
+    {
+      key: 'crowns',
+      label: t('characters.page.crowns'),
+      value: r.crowns,
+      title: t('characters.page.crownsTitle'),
+    },
     {
       key: 'ready',
-      label: 'Ready',
+      label: t('characters.build.ready'),
       value: r.ready,
-      title: 'Lv 90, weapon Lv 90, five maxed artifacts, a full set bonus',
+      title: t('characters.toolbar.buildTitle'),
       pressed: filters.build === 'ready',
     },
     {
       key: 'needs',
-      label: 'Needs work',
+      label: t('characters.build.needs'),
       value: r.total - r.ready,
       pressed: filters.build === 'needs',
       tone: 'warning',
@@ -230,17 +236,21 @@ watch(
 
 <template>
   <div>
-    <PageHeader title="Characters" />
+    <PageHeader :title="$t('game.characters')" />
 
     <UiError
       v-if="inventory.error.value"
       class="mb-6"
       :error="inventory.error.value"
-      title="Load failed"
+      :title="$t('characters.detail.loadFailed')"
       @retry="inventory.reload"
     />
 
-    <div v-if="!roster && inventory.loading.value" aria-busy="true" aria-label="Loading">
+    <div
+      v-if="!roster && inventory.loading.value"
+      aria-busy="true"
+      :aria-label="$t('characters.page.loading')"
+    >
       <div class="mb-4 grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-6">
         <UiSkeleton v-for="n in 6" :key="n" class="h-16 sm:h-[4.5rem]" />
       </div>
@@ -265,11 +275,17 @@ watch(
     </div>
 
     <UiPanel v-else-if="inventory.data.value === null || (roster && roster.total === 0)" flush>
-      <UiEmpty :title="inventory.data.value === null ? 'No snapshots yet' : 'No characters'">
+      <UiEmpty
+        :title="
+          inventory.data.value === null
+            ? $t('characters.page.noSnapshots')
+            : $t('characters.page.empty')
+        "
+      >
         <template #icon><Users aria-hidden="true" /></template>
         <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
           <Upload class="size-4" aria-hidden="true" />
-          Import
+          {{ $t('characters.page.import') }}
         </UiButton>
       </UiEmpty>
     </UiPanel>
@@ -294,16 +310,16 @@ watch(
       />
 
       <UiPanel v-if="shown.length === 0" flush>
-        <UiEmpty title="No matches">
+        <UiEmpty :title="$t('characters.page.noMatches')">
           <template #icon><SearchX aria-hidden="true" /></template>
-          <UiButton @click="clearFilters">Clear</UiButton>
+          <UiButton @click="clearFilters">{{ $t('characters.toolbar.clear') }}</UiButton>
         </UiEmpty>
       </UiPanel>
 
       <ul
         v-else-if="view === 'grid'"
         class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
-        aria-label="Characters"
+        :aria-label="$t('game.characters')"
       >
         <li
           v-for="c in shown"

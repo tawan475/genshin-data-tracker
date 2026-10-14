@@ -60,7 +60,7 @@ async function copy() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Reset link" @close="emit('close')">
+  <UiModal :open="open" :title="$t('staff.resetLink.title')" @close="emit('close')">
     <div class="flex flex-col gap-4">
       <UserLink v-if="user" :user="user" plain />
       <div
@@ -68,46 +68,49 @@ async function copy() {
         :key="identity.provider"
         class="flex flex-wrap items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm"
       >
-        <span class="min-w-0 flex-1">
-          {{ providerLabel(identity.provider) }}
-          <span class="font-semibold">{{
-            identity.displayName ?? identity.email ?? 'linked'
-          }}</span>
-          is linked
-        </span>
-        <UiBadge title="If the person asking can sign in with it, they don't need a reset link">
-          Try {{ providerLabel(identity.provider) }} first
+        <i18n-t keypath="staff.resetLink.isLinked" tag="span" scope="global" class="min-w-0 flex-1">
+          <template #provider>{{ providerLabel(identity.provider) }}</template>
+          <template #name
+            ><span class="font-semibold">{{
+              identity.displayName ?? identity.email ?? $t('staff.resetLink.linked')
+            }}</span></template
+          >
+        </i18n-t>
+        <UiBadge :title="$t('staff.resetLink.tryFirstTitle')">
+          {{ $t('staff.resetLink.tryFirst', { provider: providerLabel(identity.provider) }) }}
         </UiBadge>
       </div>
-      <UiError v-if="error" :error="error" title="No link made" @retry="make" />
+      <UiError v-if="error" :error="error" :title="$t('staff.resetLink.noLink')" @retry="make" />
       <div v-else-if="!link" class="flex justify-center py-4"><UiSpinner class="size-6" /></div>
       <template v-else>
         <div class="flex flex-col gap-1.5">
-          <span class="text-sm font-medium text-text-secondary">Link</span>
+          <span class="text-sm font-medium text-text-secondary">{{
+            $t('staff.resetLink.link')
+          }}</span>
           <span ref="input" class="flex gap-2">
             <UiInput
               :model-value="link.url"
               readonly
               mono
               class="min-w-0 flex-1 text-[0.8125rem]"
-              aria-label="Reset link"
+              :aria-label="$t('staff.resetLink.title')"
               @focus="($event.target as HTMLInputElement).select()"
             />
             <UiButton @click="copy">
               <Copy class="size-4" aria-hidden="true" />
-              {{ copied ? 'Copied' : 'Copy' }}
+              {{ copied ? $t('staff.resetLink.copied') : $t('staff.resetLink.copy') }}
             </UiButton>
           </span>
         </div>
         <span
           class="text-[0.8125rem] text-text-muted"
-          :title="`Sets a new password once, then stops working. Expires ${formatDateTime(link.expiresAt)}; can't be shown again.`"
-          >One use · 24 h · shown once</span
+          :title="$t('staff.resetLink.onceTitle', { date: formatDateTime(link.expiresAt) })"
+          >{{ $t('staff.resetLink.once') }}</span
         >
       </template>
     </div>
     <template #footer>
-      <UiButton variant="primary" @click="emit('close')">Done</UiButton>
+      <UiButton variant="primary" @click="emit('close')">{{ $t('staff.resetLink.done') }}</UiButton>
     </template>
   </UiModal>
 </template>

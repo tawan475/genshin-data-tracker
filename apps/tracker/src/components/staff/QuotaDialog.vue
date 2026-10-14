@@ -35,12 +35,12 @@ function submit() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Storage quota" @close="emit('close')">
+  <UiModal :open="open" :title="$t('staff.quota.title')" @close="emit('close')">
     <form :id="formId" class="flex flex-col gap-4" @submit.prevent="submit">
       <UiField
         v-slot="{ id, describedBy }"
-        label="Quota (MB)"
-        :hint="`Default ${formatBytes(defaultQuota)}`"
+        :label="$t('staff.quota.label')"
+        :hint="$t('staff.limits.default', { value: formatBytes(defaultQuota) })"
       >
         <UiInput
           :id="id"
@@ -61,10 +61,12 @@ function submit() {
         class="mr-auto"
         @click="emit('confirm', null)"
       >
-        Use default
+        {{ $t('staff.quota.useDefault') }}
       </UiButton>
-      <UiButton @click="emit('close')">Cancel</UiButton>
-      <UiButton variant="primary" type="submit" :form="formId" :loading="busy">Save</UiButton>
+      <UiButton @click="emit('close')">{{ $t('staff.common.cancel') }}</UiButton>
+      <UiButton variant="primary" type="submit" :form="formId" :loading="busy">{{
+        $t('staff.common.save')
+      }}</UiButton>
     </template>
   </UiModal>
 </template>

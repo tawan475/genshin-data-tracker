@@ -7,6 +7,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { formatBytes, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { recentSnapshots } from '@/data/overview'
+import { t } from '@/i18n'
 import ChangeValue from './ChangeValue.vue'
 
 /** The newest five snapshots, each with what changed against the one before. */
@@ -22,29 +23,36 @@ const items = computed(() =>
       ? {
           iso: new Date(s.seenAgainAt).toISOString(),
           ago: formatRelative(s.seenAgainAt, props.now),
-          title: `Seen again ${formatDateTime(s.seenAgainAt)}`,
+          title: t('overview.seenAgainAt', { time: formatDateTime(s.seenAgainAt) }),
         }
       : null,
     source: s.source,
     size: `${formatBytes(s.rawSize)} → ${formatBytes(s.storedSize)}`,
-    sizeTitle: `${formatNumber(s.rawSize)} bytes uploaded, ${formatNumber(s.storedSize)} bytes stored`,
+    sizeTitle: t('overview.recent.size', {
+      raw: formatNumber(s.rawSize),
+      stored: formatNumber(s.storedSize),
+    }),
     changes: s.changes,
-    note: s.changes.length ? null : s.hasPrevious ? 'Totals unchanged' : 'First snapshot',
+    note: s.changes.length
+      ? null
+      : s.hasPrevious
+        ? t('overview.recent.unchanged')
+        : t('overview.recent.first'),
     currencyMissing: s.currencyMissing,
   })),
 )
 </script>
 
 <template>
-  <UiPanel title="Recent" flush>
+  <UiPanel :title="$t('overview.recent.title')" flush>
     <template #actions>
       <UiButton
         size="sm"
         variant="ghost"
         :to="{ name: 'account-snapshots', params: { accountId } }"
-        :title="`All ${formatNumber(snapshots.length)} snapshots`"
+        :title="$t('overview.recent.allTitle', { n: formatNumber(snapshots.length) })"
       >
-        All
+        {{ $t('overview.recent.all') }}
         <ArrowRight class="size-4" aria-hidden="true" />
       </UiButton>
     </template>
@@ -54,15 +62,19 @@ const items = computed(() =>
         <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <time :datetime="item.iso" :title="item.exact" class="font-medium">{{ item.ago }}</time>
           <span class="flex items-center gap-2">
-            <UiBadge v-if="item.currencyMissing" tone="warning" title="Mora and primogems missing">
-              No currency
+            <UiBadge
+              v-if="item.currencyMissing"
+              tone="warning"
+              :title="$t('overview.recent.currencyMissing')"
+            >
+              {{ $t('overview.recent.noCurrency') }}
             </UiBadge>
             <UiBadge>{{ item.source }}</UiBadge>
           </span>
         </div>
 
         <p v-if="item.changes.length" class="flex flex-wrap gap-x-4">
-          <span v-for="change in item.changes" :key="change.label" class="text-text-secondary">
+          <span v-for="change in item.changes" :key="change.key" class="text-text-secondary">
             {{ change.label }}
             <ChangeValue :value="change.value" exact />
           </span>
@@ -73,7 +85,7 @@ const items = computed(() =>
           <span class="tabular font-mono" :title="item.sizeTitle">{{ item.size }}</span>
           <span v-if="item.seenAgain" class="inline-flex items-center gap-1">
             <Eye class="size-4" aria-hidden="true" />
-            <span class="sr-only">Seen again</span>
+            <span class="sr-only">{{ $t('overview.seenAgain') }}</span>
             <time :datetime="item.seenAgain.iso" :title="item.seenAgain.title">{{
               item.seenAgain.ago
             }}</time>

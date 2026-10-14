@@ -8,6 +8,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { accountTotals, compressionRatio } from '@/data/overview'
+import { t } from '@/i18n'
 import { formatBytes, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 
@@ -25,33 +26,33 @@ onMounted(() => {
 
 const totals = computed(() => {
   if (accounts.list.length < 2) return null
-  const t = accountTotals(accounts.list)
-  const ratio = compressionRatio(t.rawBytes, t.storedBytes)
+  const sums = accountTotals(accounts.list)
+  const ratio = compressionRatio(sums.rawBytes, sums.storedBytes)
   return [
-    { label: 'Accounts', value: formatNumber(t.accounts), mono: true },
-    { label: 'Snapshots', value: formatNumber(t.snapshots), mono: true },
+    { label: t('accounts.home.accounts'), value: formatNumber(sums.accounts), mono: true },
+    { label: t('accounts.home.snapshots'), value: formatNumber(sums.snapshots), mono: true },
     {
-      label: 'Uploaded',
-      value: formatBytes(t.rawBytes),
-      title: `${formatNumber(t.rawBytes)} bytes`,
+      label: t('accounts.home.uploaded'),
+      value: formatBytes(sums.rawBytes),
+      title: t('accounts.home.bytes', { n: formatNumber(sums.rawBytes) }),
       mono: true,
     },
     {
-      label: 'Stored',
-      value: formatBytes(t.storedBytes),
-      title: `${formatNumber(t.storedBytes)} bytes`,
+      label: t('accounts.home.stored'),
+      value: formatBytes(sums.storedBytes),
+      title: t('accounts.home.bytes', { n: formatNumber(sums.storedBytes) }),
       mono: true,
     },
     {
-      label: 'Ratio',
+      label: t('accounts.home.ratio'),
       value: ratio ?? '—',
-      title: ratio ? `Stored ${ratio} smaller than uploaded` : undefined,
+      title: ratio ? t('accounts.home.ratioTitle', { ratio }) : undefined,
       mono: true,
     },
     {
-      label: 'Last captured',
-      value: t.lastCapture ? formatRelative(t.lastCapture, nowMs.value) : 'Never',
-      title: t.lastCapture ? formatDateTime(t.lastCapture) : undefined,
+      label: t('accounts.home.lastCaptured'),
+      value: sums.lastCapture ? formatRelative(sums.lastCapture, nowMs.value) : t('common.never'),
+      title: sums.lastCapture ? formatDateTime(sums.lastCapture) : undefined,
       mono: false,
     },
   ]
@@ -59,21 +60,21 @@ const totals = computed(() => {
 </script>
 
 <template>
-  <PageHeader title="Accounts">
+  <PageHeader :title="$t('shell.page.accounts')">
     <template v-if="accounts.list.length" #actions>
       <UiButton variant="primary" :to="{ name: 'account-new' }">
         <Plus class="size-4" aria-hidden="true" />
-        Add account
+        {{ $t('accounts.home.add') }}
       </UiButton>
     </template>
   </PageHeader>
 
   <UiPanel v-if="!accounts.list.length" flush>
-    <UiEmpty title="No accounts yet">
+    <UiEmpty :title="$t('accounts.home.empty')">
       <template #icon><Users aria-hidden="true" /></template>
       <UiButton variant="primary" :to="{ name: 'account-new' }">
         <Plus class="size-4" aria-hidden="true" />
-        Add account
+        {{ $t('accounts.home.add') }}
       </UiButton>
     </UiEmpty>
   </UiPanel>
@@ -95,7 +96,7 @@ const totals = computed(() => {
       </div>
     </dl>
 
-    <ul class="grid gap-4 md:grid-cols-2" aria-label="Accounts">
+    <ul class="grid gap-4 md:grid-cols-2" :aria-label="$t('shell.accounts')">
       <li v-for="account in accounts.list" :key="account.id" class="flex">
         <AccountCard :account="account" :now="nowMs" class="w-full" />
       </li>

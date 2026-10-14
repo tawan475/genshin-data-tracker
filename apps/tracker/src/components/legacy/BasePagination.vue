@@ -79,7 +79,9 @@ const FIELD =
 <template>
   <div v-if="showPagination()" class="mt-6 flex flex-wrap items-center justify-between gap-4">
     <label class="flex items-center gap-2">
-      <span class="text-sm font-medium text-text-muted">Per page</span>
+      <span class="text-sm font-medium text-text-muted">{{
+        $t('snapshots.pagination.perPage')
+      }}</span>
       <select
         :value="meta.limit"
         :class="FIELD"
@@ -97,24 +99,28 @@ const FIELD =
         :disabled="meta.page <= 1 || isLoading"
         @click="handlePageChange(meta.page - 1)"
       >
-        Previous
+        {{ $t('snapshots.pagination.previous') }}
       </UiButton>
       <span class="tabular text-sm font-medium text-text-secondary">
-        Page {{ meta.page }} of {{ meta.totalPages }}
-        <span class="font-normal text-text-muted"> ({{ meta.total }} total) </span>
+        {{ $t('snapshots.pagination.page', { page: meta.page, pages: meta.totalPages }) }}
+        <span class="font-normal text-text-muted">
+          {{ $t('snapshots.pagination.total', { n: meta.total }) }}
+        </span>
       </span>
       <UiButton
         size="sm"
         :disabled="meta.page >= meta.totalPages || isLoading"
         @click="handlePageChange(meta.page + 1)"
       >
-        Next
+        {{ $t('snapshots.pagination.next') }}
       </UiButton>
     </div>
 
     <form class="flex items-center gap-2" @submit.prevent="goToPage">
       <label class="flex items-center gap-2">
-        <span class="text-sm font-medium text-text-muted">Go to</span>
+        <span class="text-sm font-medium text-text-muted">{{
+          $t('snapshots.pagination.goTo')
+        }}</span>
         <input
           v-model="pageInput"
           type="number"
@@ -124,7 +130,9 @@ const FIELD =
           :class="FIELD"
         />
       </label>
-      <UiButton type="submit" variant="primary" size="sm" :disabled="isLoading">Go</UiButton>
+      <UiButton type="submit" variant="primary" size="sm" :disabled="isLoading">{{
+        $t('snapshots.pagination.go')
+      }}</UiButton>
     </form>
   </div>
 </template>

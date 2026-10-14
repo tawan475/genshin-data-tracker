@@ -1,1 +1,74 @@
-{}
+{
+  "title": "详细进度",
+  "figures": "数据项",
+  "atLeastOne": "至少保留一项",
+  "groupBy": "分组方式",
+  "longerThanRange": "比时间范围更长",
+  "loading": "正在加载进度",
+  "noData": "暂无数据",
+  "inRange": "此范围内",
+  "gainedInRange": "此范围内获得",
+  "spentInRange": "此范围内消耗",
+  "noCaptures": "无捕获",
+  "captures": "{n} 次捕获",
+  "total": "总计 {n}",
+  "lineLabel": "{figure}随时间的变化，{span}。最新 {value}。",
+  "barsLabel": "{figure}变化（{per}），{span}：获得 {gained}，消耗 {spent}。",
+  "tooltip": " {name}：{value}",
+  "group": {
+    "snapshot": "快照",
+    "hour": "小时",
+    "day": "日",
+    "month": "月",
+    "year": "年"
+  },
+  "per": {
+    "snapshot": "按快照",
+    "hour": "按小时",
+    "day": "按日",
+    "month": "按月",
+    "year": "按年"
+  },
+  "against": {
+    "snapshot": "与上一个快照相比的变化",
+    "hour": "与上一小时相比的变化",
+    "day": "与前一天相比的变化",
+    "month": "与上个月相比的变化",
+    "year": "与上一年相比的变化"
+  },
+  "newest": {
+    "snapshot": "最新 {n} 个快照",
+    "hour": "最新 {n} 小时",
+    "day": "最新 {n} 天",
+    "month": "最新 {n} 个月",
+    "year": "最新 {n} 年"
+  },
+  "range": {
+    "label": "时间范围",
+    "hours": "小时",
+    "days": "天",
+    "all": "全部",
+    "h": "{n}小时",
+    "d": "{n}天",
+    "y": "{n}年"
+  },
+  "monthly": {
+    "unavailable": "无法加载月度分析",
+    "loading": "正在加载月度分析",
+    "noCaptures": "无捕获",
+    "goTo": "前往 {month}",
+    "date": "日期",
+    "primogem": "原石",
+    "mora": "摩拉",
+    "artifact": "圣遗物",
+    "extract": "祝圣材料",
+    "netWorth": "净值",
+    "moraUnit": "摩拉",
+    "primogemUnit": "原石"
+  },
+  "character": {
+    "level": "等级",
+    "constellation": "命之座",
+    "talents": "天赋"
+  }
+}

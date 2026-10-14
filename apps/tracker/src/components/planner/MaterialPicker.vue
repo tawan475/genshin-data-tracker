@@ -5,6 +5,7 @@ import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
 import { gameIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { materialName } from '@/utils/materials'
 import { fromTouch } from './item-popover'
@@ -36,7 +37,7 @@ watch(open, (value) => {
 
 const shown = computed(() => searchMaterialGroups(props.groups, query.value, materialName))
 const label = computed(() =>
-  props.selected ? optionName(props.selected, materialName) : 'Material',
+  props.selected ? optionName(props.selected, materialName) : t('planner.materialPicker.material'),
 )
 const nameOf = (option: MaterialOption) => optionName(option, materialName)
 /** A family's or the EXP's members, for the tooltip. */
@@ -71,8 +72,12 @@ function pickFirst() {
     "
     aria-haspopup="dialog"
     :aria-expanded="open"
-    :aria-label="selected ? `Material: ${label}` : 'Material'"
-    :title="selected ? membersOf(selected) || label : 'Goals using a material'"
+    :aria-label="
+      selected
+        ? $t('planner.materialPicker.selected', { name: label })
+        : $t('planner.materialPicker.material')
+    "
+    :title="selected ? membersOf(selected) || label : $t('planner.materialPicker.title')"
     @click="toggle"
   >
     <span
@@ -87,10 +92,16 @@ function pickFirst() {
     <ChevronDown class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
   </button>
 
-  <UiPopover :open="open" :anchor="trigger" label="Material" :focus="!touch" @close="open = false">
+  <UiPopover
+    :open="open"
+    :anchor="trigger"
+    :label="$t('planner.materialPicker.material')"
+    :focus="!touch"
+    @close="open = false"
+  >
     <div class="sticky top-0 z-10 border-b border-border-subtle bg-surface-raised p-2">
       <label class="relative block">
-        <span class="sr-only">Search materials</span>
+        <span class="sr-only">{{ $t('planner.materialPicker.search') }}</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
@@ -101,7 +112,7 @@ function pickFirst() {
           type="search"
           autocomplete="off"
           spellcheck="false"
-          placeholder="Search"
+          :placeholder="$t('planner.common.search')"
           autofocus
           @keydown.enter.prevent="pickFirst"
         />
@@ -118,7 +129,7 @@ function pickFirst() {
         <span class="inline-flex size-9 shrink-0 items-center justify-center" aria-hidden="true">
           <X class="size-4" />
         </span>
-        Any
+        {{ $t('planner.materialPicker.any') }}
       </button>
       <section v-for="g in shown" :key="g.id" :aria-label="g.label">
         <h3 class="px-4 pt-2.5 pb-1 text-xs font-semibold text-text-muted">{{ g.label }}</h3>
@@ -145,7 +156,7 @@ function pickFirst() {
               <span
                 class="tabular font-mono text-sm"
                 :class="selected?.key === c.option.key ? 'text-accent-text' : 'text-text-muted'"
-                :title="`${formatNumber(c.count)} ${c.count === 1 ? 'goal' : 'goals'}`"
+                :title="$t('planner.materialPicker.goals', { n: formatNumber(c.count) }, c.count)"
                 >{{ formatNumber(c.count) }}</span
               >
               <Check
@@ -158,7 +169,7 @@ function pickFirst() {
         </ul>
       </section>
       <p v-if="shown.length === 0" class="px-4 py-6 text-center text-sm text-text-secondary">
-        No matches
+        {{ $t('planner.common.noMatches') }}
       </p>
     </div>
   </UiPopover>

@@ -11,6 +11,8 @@
 
 import { loadMaterialIndex, type MaterialIndex } from '@gdt/game-data'
 import { loadBag, type Bag, type BagTab, type BagTabInfo } from '@gdt/game-data/bag'
+import { t, te } from '@/i18n'
+import { gameName } from '@/i18n/game-names'
 import { compareText } from '@/lib/search'
 
 /** An Inventory tab, or 'other' for keys the Inventory doesn't show. */
@@ -37,17 +39,10 @@ export const WALLET_KEYS = [
 export const WALLET = new Set(WALLET_KEYS)
 const WALLET_RANK = new Map(WALLET_KEYS.map((key, i) => [key, i]))
 
-/** Shorter labels for the strip; others use the material name. */
-export const WALLET_LABELS: Record<string, string> = {
-  GenesisCrystal: 'Genesis',
-  IntertwinedFate: 'Intertwined',
-  AcquaintFate: 'Acquaint',
-  MasterlessStarglitter: 'Starglitter',
-  MasterlessStardust: 'Stardust',
-  OriginalResin: 'Resin',
-  FragileResin: 'Fragile',
-  CondensedResin: 'Condensed',
-  RealmCurrency: 'Realm',
+/** A shorter label for the strip (in the language on screen); undefined: use the material name. */
+export function walletLabel(key: string): string | undefined {
+  const id = `materials.wallet.short.${key}`
+  return te(id, 'en') ? t(id) : undefined
 }
 
 export interface MaterialMeta {
@@ -128,7 +123,7 @@ export function loadMaterialMeta(): Promise<void> {
 
 /** The Inventory's tabs left to right ([] until loadMaterialMeta resolves). */
 export function bagTabs(): readonly BagTabInfo[] {
-  return bag?.tabs ?? []
+  return (bag?.tabs ?? []).map((tab) => ({ ...tab, name: gameName('bagTabs', tab.key, tab.name) }))
 }
 
 /** A key's tab and order ("other", last, until loadMaterialMeta resolves). */

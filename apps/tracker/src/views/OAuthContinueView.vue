@@ -4,16 +4,13 @@ import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { TimerOff } from 'lucide-vue-next'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
-import {
-  HUMAN_CHECK_NEEDED,
-  HUMAN_CHECK_WAIT,
-  humanCheckPassed,
-  siteKeyAfter,
-} from '@/components/auth/human-check'
+import { humanCheckNeeded, humanCheckPassed, siteKeyAfter } from '@/components/auth/human-check'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import { loadSignInOptions, providerLabel } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
 
@@ -54,10 +51,10 @@ const humanOk = computed(() => humanCheckPassed(siteKey.value, humanReady.value)
 const label = computed(() => (pending.value ? providerLabel(pending.value.provider) : ''))
 const usernameError = computed(() =>
   usernameTaken.value
-    ? 'Taken'
+    ? t('common.taken')
     : usernameSchema.safeParse(username.value).success
       ? ''
-      : '3–32 letters, digits, . - _',
+      : t('auth.usernameRule'),
 )
 
 onMounted(async () => {
@@ -96,14 +93,14 @@ async function create() {
     const key = await siteKeyAfter(cause)
     if (key) {
       siteKey.value = key
-      error.value = HUMAN_CHECK_NEEDED
+      error.value = humanCheckNeeded()
     } else if (code === 'username_taken') usernameTaken.value = true
     else if (code === 'email_taken') {
       useEmail.value = false
-      error.value = 'That email belongs to another account'
+      error.value = t('auth.oauth.emailBelongs')
     } else if (code === 'pending_expired') gone.value = true
-    else if (code === 'identity_taken') error.value = 'Already linked. Sign in with it.'
-    else error.value = cause instanceof Error ? cause.message : 'Sign-up failed'
+    else if (code === 'identity_taken') error.value = t('auth.oauth.alreadyLinked')
+    else error.value = errorText(cause, t('auth.signUpFailed'))
   } finally {
     // A token works once, whatever the answer.
     human.value?.reset()
@@ -121,11 +118,13 @@ async function cancel() {
 </script>
 
 <template>
-  <AuthFrame :title="gone ? 'Sign-in ran out' : 'Not linked yet'">
+  <AuthFrame :title="gone ? $t('auth.oauth.ranOut') : $t('auth.oauth.notLinkedYet')">
     <div v-if="gone" class="flex flex-col items-center gap-6 text-center" role="alert">
       <TimerOff class="size-10 text-paimon" aria-hidden="true" />
-      <p class="text-gray-200">Start again from the sign-in page.</p>
-      <RouterLink :to="{ name: 'login' }" class="btn-glow w-full rounded-xl">Sign in</RouterLink>
+      <p class="text-gray-200">{{ $t('auth.oauth.startAgain') }}</p>
+      <RouterLink :to="{ name: 'login' }" class="btn-glow w-full rounded-xl">{{
+        $t('common.signIn')
+      }}</RouterLink>
     </div>
 
     <template v-else-if="pending">
@@ -137,7 +136,7 @@ async function cancel() {
         </div>
       </div>
       <p class="mb-6 text-center text-sm text-gray-300">
-        No account is linked to this {{ label }} account.
+        {{ $t('auth.oauth.noAccountLinked', { provider: label }) }}
       </p>
       <p
         v-if="error"
@@ -149,7 +148,7 @@ async function cancel() {
 
       <form class="flex flex-col gap-4" novalidate @submit.prevent="create">
         <label class="flex flex-col gap-2">
-          <span class="text-sm font-medium text-gray-400">Username</span>
+          <span class="text-sm font-medium text-gray-400">{{ $t('common.username') }}</span>
           <input
             :value="username"
             class="glass-input"
@@ -166,10 +165,10 @@ async function cancel() {
         <label
           v-if="emailFeatures && pending.email"
           class="flex cursor-pointer items-center gap-3 text-sm text-gray-300"
-          title="It stays unconfirmed until you open the link mailed to it"
+          :title="$t('auth.oauth.useEmailTitle')"
         >
           <input v-model="useEmail" type="checkbox" class="size-4 accent-amber-500" />
-          Use as account email
+          {{ $t('auth.oauth.useEmail') }}
         </label>
         <div class="mt-2 flex flex-col">
           <HumanCheck
@@ -184,25 +183,25 @@ async function cancel() {
             type="submit"
             class="btn-glow w-full rounded-xl"
             :disabled="busy || !humanOk"
-            :title="humanOk ? undefined : HUMAN_CHECK_WAIT"
+            :title="humanOk ? undefined : $t('auth.humanCheck.wait')"
           >
             <UiSpinner v-if="busy" class="size-4" />
-            Create account
+            {{ $t('auth.createAccount') }}
           </button>
         </div>
       </form>
 
       <div class="my-6 flex items-center gap-3 text-xs tracking-wider text-gray-500 uppercase">
         <span class="h-px flex-1 bg-white/10" />
-        or
+        {{ $t('common.or') }}
         <span class="h-px flex-1 bg-white/10" />
       </div>
       <RouterLink
         :to="{ name: 'login', query: { link: pending.provider, ...(next ? { next } : {}) } }"
         class="btn-glass w-full rounded-xl"
-        :title="`Sign in with your password to link ${label}`"
+        :title="$t('auth.oauth.haveAccountTitle', { provider: label })"
       >
-        I have an account
+        {{ $t('auth.oauth.haveAccount') }}
       </RouterLink>
     </template>
 
@@ -212,7 +211,7 @@ async function cancel() {
 
     <template v-if="pending && !gone" #footer>
       <button type="button" class="text-gray-400 hover:text-white hover:underline" @click="cancel">
-        Cancel
+        {{ $t('common.cancel') }}
       </button>
     </template>
   </AuthFrame>

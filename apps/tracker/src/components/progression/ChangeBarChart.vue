@@ -13,6 +13,7 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
 import { axisFormat, axisTick, axisTicks } from '@/data/chart-range'
 import { formatSignedExact } from '@/data/overview'
+import { t } from '@/i18n'
 import { CHART_FONT as FONT } from '@/lib/chart-defaults'
 import { clock24, formatSignedTick, tickStep } from '@/lib/format'
 import { snapshotBarWidth } from './progression-series'
@@ -182,7 +183,11 @@ function config(): ChartConfiguration<'bar', Datum[]> {
           boxPadding: 4,
           callbacks: {
             title: (items) => bars[items[0]?.dataIndex ?? -1]?.title ?? '',
-            label: (item) => ` ${props.name}: ${formatSignedExact(Number(item.parsed.y))}`,
+            label: (item) =>
+              t('progression.tooltip', {
+                name: props.name,
+                value: formatSignedExact(Number(item.parsed.y)),
+              }),
             footer: (items) => bars[items[0]?.dataIndex ?? -1]?.detail ?? [],
           },
         },

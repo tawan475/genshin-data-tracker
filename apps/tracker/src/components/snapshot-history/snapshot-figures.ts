@@ -5,6 +5,7 @@
 
 import type { SnapshotResponse } from '@gdt/shared'
 import { currencyMissing, dayKey, formatSignedExact } from '@/data/overview'
+import { t } from '@/i18n'
 import { formatFullDateTime, formatNumber } from '@/lib/format'
 
 export const FIGURE_KEYS = ['characters', 'artifacts', 'weapons', 'mora', 'primogem'] as const
@@ -48,7 +49,10 @@ export function figureTitle(value: number, change: Change | undefined): string {
   if (!change) return formatNumber(value)
   return (
     `${formatNumber(value)} (${formatSignedExact(change.delta)})\n` +
-    `vs #${change.since.id} · ${formatFullDateTime(change.since.takenAt)}`
+    t('snapshots.figure.vs', {
+      id: change.since.id,
+      time: formatFullDateTime(change.since.takenAt),
+    })
   )
 }
 

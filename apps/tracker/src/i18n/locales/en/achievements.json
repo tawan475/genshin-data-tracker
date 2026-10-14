@@ -1,1 +1,137 @@
-{}
+{
+  "title": "Achievements",
+  "newestCapture": "Newest capture",
+  "newestCaptureTitle": "Newest capture: {time}",
+  "notCaptured": "Not captured",
+  "notCapturedTitle": "Open the in-game Achievements menu while irminsul runs to capture them",
+  "importTitle": "Import done achievements from a Seelie export or a stardb / irminsul file",
+  "loadFailed": "Load failed",
+  "allDone": "All done",
+  "showDone": "Show done",
+  "noneDone": "None done",
+  "showMissing": "Show missing",
+  "noMatches": "No matches",
+  "clear": "Clear",
+  "more": "More",
+  "loading": "Loading",
+  "undo": "Undo",
+  "notSaved": "Not saved",
+  "markedDone": "{n} marked done",
+  "unmarked": "{n} unmarked",
+  "added": "{n} added",
+  "confirmMark": {
+    "title": "Mark {n} done?",
+    "filtered": "The {n} shown achievements left are marked done by hand.",
+    "all": "Every achievement left ({n}) is marked done by hand.",
+    "confirm": "Mark done"
+  },
+  "confirmUnmark": {
+    "title": "Unmark {n}?",
+    "detail": "Removes the hand marks of the {n} shown achievements. Captured ones stay done.",
+    "confirm": "Unmark"
+  },
+  "categories": {
+    "label": "Categories",
+    "all": "All",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} primogems",
+    "hideDone": "Hide completed series",
+    "showDone": "Show completed series",
+    "completed": "Completed"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} primogems"
+  },
+  "import": {
+    "title": "Import",
+    "formats": {
+      "list": "Id list"
+    },
+    "noAchievements": "No achievements found",
+    "notJson": "Not a JSON file",
+    "dropTitle": "Seelie: Settings → Export Account. stardb or irminsul: a GOOD file with gi_achievements.",
+    "drop": "Seelie or stardb file",
+    "browse": "Browse",
+    "inFile": "In file",
+    "already": "Done already",
+    "new": "New",
+    "newTitle": "Includes {unknown} newer than the game data and {disused} removed from the game: kept, not counted",
+    "cancel": "Cancel",
+    "add": "Add {n}"
+  },
+  "row": {
+    "clickToMark": "Click to mark done",
+    "clickToUnmark": "{text} · click to unmark",
+    "captured": "Captured",
+    "staysDone": "{text} · in a capture, so it stays done",
+    "markEveryTier": "Mark every tier done",
+    "markDone": "Mark done",
+    "unmarkTiers": "Click to unmark the tiers marked by hand",
+    "markedClick": "Marked by hand · click to unmark",
+    "tierTitle": "Tier {n} · {primogems} primogems",
+    "reward": "{n} primogems",
+    "primogems": "primogems",
+    "states": {
+      "captured": "captured",
+      "marked": "marked by hand",
+      "none": "not done"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Tiers",
+    "tier": "Tier {n}",
+    "addedIn": "Added in {version}",
+    "hiddenTitle": "Hidden achievement",
+    "hidden": "Hidden",
+    "markedByHand": "Marked by hand",
+    "guide": "Guide on stardb.gg"
+  },
+  "completion": {
+    "tier": "Tier {n} · {text}",
+    "exact": "Completed {time}",
+    "exactTitle": "Completion time recorded by the game, read by irminsul",
+    "seen": "Completed {window}",
+    "seenTitle": "Done between two captures: not in the one at {since}, in the one at {at}",
+    "by": "Completed by {date}",
+    "byTitle": "Already done in your first capture ({at})",
+    "marked": "Marked done by hand",
+    "markedTitle": "No capture has it, so there is no date"
+  },
+  "summary": {
+    "label": "Summary",
+    "done": "Done",
+    "doneCaptured": "{n} captured",
+    "doneByHand": "{n} by hand",
+    "doneUnknown": "{n} newer than the game data",
+    "progress": "Progress",
+    "progressLabel": "Achievements done",
+    "primogems": "Primogems",
+    "primogemsHint": "Primogems collected / on offer",
+    "missing": "Missing",
+    "showAll": "Show all",
+    "showLeft": "Show only what is left"
+  },
+  "toolbar": {
+    "label": "Filter achievements",
+    "search": "Search",
+    "searchTitle": "Name, description, category or id",
+    "completion": "Completion",
+    "completions": {
+      "all": "All",
+      "done": "Done",
+      "missing": "Missing"
+    },
+    "hidden": {
+      "all": "Hidden: any",
+      "hidden": "Hidden",
+      "visible": "Not hidden"
+    },
+    "hiddenLabel": "Hidden",
+    "allCategories": "All categories",
+    "category": "Category",
+    "version": "Version",
+    "addedIn": "Added in",
+    "markAll": "Mark all",
+    "markAllTitle": "Mark the {n} shown achievements left done",
+    "unmarkAll": "Unmark all",
+    "unmarkAllTitle": "Unmark the {n} shown achievements marked by hand"
+  }
+}

@@ -6,6 +6,7 @@ import UiModal from '@/components/ui/UiModal.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import type { PlannerOptions, PlannerOptionsPatch } from '@/data/planner-settings'
+import { t } from '@/i18n'
 import { MAX_REFRESHES, REFRESH_RESIN } from './farm-today'
 import { formatStep, parseSteps } from './resin'
 
@@ -48,7 +49,10 @@ function commitAr() {
 }
 
 const wlOptions = computed<{ value: number | null; label: string }[]>(() => [
-  { value: null, label: props.player.wl === null ? '–' : `Auto (${props.player.wl})` },
+  {
+    value: null,
+    label: props.player.wl === null ? '–' : t('planner.settings.autoWl', { wl: props.player.wl }),
+  },
   ...Array.from({ length: 10 }, (_, i) => ({ value: i, label: String(i) })),
 ])
 
@@ -93,14 +97,18 @@ function commitSteps() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Planner settings" @close="emit('close')">
+  <UiModal :open="open" :title="$t('planner.settings.title')" @close="emit('close')">
     <div class="flex flex-col gap-4">
       <div class="grid grid-cols-3 gap-3">
         <label
           class="flex min-w-0 flex-col gap-1"
-          :title="`Adventure Rank (1–60)${player.ar === null ? '' : ` · ${player.ar} from irminsul`}`"
+          :title="
+            player.ar === null
+              ? $t('planner.settings.arTitle')
+              : $t('planner.settings.arTitleIrminsul', { ar: player.ar })
+          "
         >
-          <span class="text-sm text-text-secondary">AR</span>
+          <span class="text-sm text-text-secondary">{{ $t('planner.settings.ar') }}</span>
           <UiInput
             v-model="ar"
             type="number"
@@ -112,39 +120,44 @@ function commitSteps() {
             @change="commitAr"
             @keydown.enter="commitAr"
           />
-          <span v-if="arFromPlayer" class="text-xs text-text-muted">from irminsul</span>
+          <span v-if="arFromPlayer" class="text-xs text-text-muted">{{
+            $t('planner.settings.fromIrminsul')
+          }}</span>
         </label>
         <label
           class="flex min-w-0 flex-col gap-1"
-          :title="`World Level (0–9)${player.wl === null ? '' : ` · ${player.wl} from irminsul`}`"
+          :title="
+            player.wl === null
+              ? $t('planner.settings.wlTitle')
+              : $t('planner.settings.wlTitleIrminsul', { wl: player.wl })
+          "
         >
-          <span class="text-sm text-text-secondary">WL</span>
+          <span class="text-sm text-text-secondary">{{ $t('planner.settings.wl') }}</span>
           <UiSelect
             :model-value="settings.wl"
             :options="wlOptions"
-            aria-label="World Level"
+            :aria-label="$t('planner.settings.wlLabel')"
             @update:model-value="setWl"
           />
-          <span v-if="wlFromPlayer" class="text-xs text-text-muted">from irminsul</span>
+          <span v-if="wlFromPlayer" class="text-xs text-text-muted">{{
+            $t('planner.settings.fromIrminsul')
+          }}</span>
         </label>
         <label
           class="flex min-w-0 flex-col gap-1"
-          :title="`Original Resin refreshes a day (${REFRESH_RESIN} resin each): days count 180 + ${REFRESH_RESIN} per refresh`"
+          :title="$t('planner.settings.refreshesTitle', { per: REFRESH_RESIN })"
         >
-          <span class="text-sm text-text-secondary">Refreshes</span>
+          <span class="text-sm text-text-secondary">{{ $t('planner.settings.refreshes') }}</span>
           <UiSelect
             :model-value="settings.planner.refreshes ?? 0"
             :options="refreshOptions"
-            aria-label="Resin refreshes a day"
+            :aria-label="$t('planner.settings.refreshesLabel')"
             @update:model-value="setRefreshes"
           />
         </label>
       </div>
-      <label
-        class="flex flex-col gap-1"
-        title="Up to four amounts, e.g. -40 +60: the resin tracker adds them (minus spends)"
-      >
-        <span class="text-sm text-text-secondary">Resin buttons</span>
+      <label class="flex flex-col gap-1" :title="$t('planner.settings.stepsTitle')">
+        <span class="text-sm text-text-secondary">{{ $t('planner.settings.steps') }}</span>
         <UiInput
           v-model="steps"
           mono
@@ -155,24 +168,24 @@ function commitSteps() {
         />
       </label>
       <div class="flex flex-col border-t border-border-subtle pt-2">
-        <div title="Cover missing gems with spare gems of another element">
+        <div :title="$t('planner.settings.azothTitle')">
           <UiSwitch
             :model-value="settings.planner.azoth"
-            label="Dust of Azoth"
+            :label="$t('planner.settings.azoth')"
             @update:model-value="setOption('azoth', $event)"
           />
         </div>
-        <div title="Raiden Shogun, Wanderer: −50% Mora for weapon ascension">
+        <div :title="$t('planner.settings.passivesTitle')">
           <UiSwitch
             :model-value="settings.planner.passives"
-            label="Mora passives"
+            :label="$t('planner.settings.passives')"
             @update:model-value="setOption('passives', $event)"
           />
         </div>
-        <div title="The Farm view's checklist of what to convert, craft and forge">
+        <div :title="$t('planner.settings.craftingTitle')">
           <UiSwitch
             :model-value="settings.planner.crafting !== false"
-            label="Crafting checklist"
+            :label="$t('planner.settings.crafting')"
             @update:model-value="setOption('crafting', $event)"
           />
         </div>

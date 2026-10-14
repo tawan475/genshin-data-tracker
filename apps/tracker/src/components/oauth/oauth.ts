@@ -6,6 +6,7 @@ import {
   type SignupMode,
 } from '@gdt/shared'
 import { api } from '@/api'
+import { t } from '@/i18n'
 
 export const providerLabel = (provider: OAuthProvider): string => OAUTH_PROVIDER_LABELS[provider]
 
@@ -63,30 +64,30 @@ export function loadSignInOptions(fresh = false): Promise<SignInOptions> {
 
 /** "Discord or Google": the providers named for a line of text. */
 export const providerNames = (providers: readonly OAuthProvider[]): string =>
-  providers.map(providerLabel).join(' or ')
+  providers.map(providerLabel).join(t('auth.oauth.providerJoin'))
 
 /** What a provider round trip's `?oauth_error=` code means, in a few words. */
 export function oauthErrorText(code: unknown): string {
   switch (code) {
     case 'unavailable':
-      return 'That sign-in is off'
+      return t('auth.oauth.error.unavailable')
     case 'state':
-      return "Sign-in didn't finish. Try again."
+      return t('auth.oauth.error.state')
     case 'expired':
-      return 'Took too long. Try again.'
+      return t('auth.oauth.error.expired')
     case 'denied':
-      return 'Cancelled'
+      return t('auth.oauth.error.denied')
     case 'session':
-      return 'Your session changed meanwhile. Try again.'
+      return t('auth.oauth.error.session')
     case 'taken':
-      return 'That account is linked to another user'
+      return t('auth.oauth.error.taken')
     case 'already':
-      return 'Another account of that provider is linked. Unlink it first.'
+      return t('auth.oauth.error.already')
     case 'rate_limited':
-      return 'Too many tries. Wait a minute.'
+      return t('auth.oauth.error.rateLimited')
     case 'suspended':
-      return 'This account is suspended'
+      return t('auth.oauth.error.suspended')
     default:
-      return 'Sign-in failed. Try again.'
+      return t('auth.oauth.error.failed')
   }
 }

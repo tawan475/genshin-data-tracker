@@ -1,1 +1,260 @@
-{}
+{
+  "title": "祈愿记录",
+  "bannerPageTitle": "祈愿记录 · {banner}",
+  "loadFailed": "加载失败",
+  "loading": "正在加载",
+  "import": "导入",
+  "export": "导出",
+  "importExport": "导入 / 导出",
+  "browse": "浏览",
+  "cancel": "取消",
+  "search": "搜索",
+  "rarity": "稀有度",
+  "banner": "卡池",
+  "pulls": "{n} 抽",
+  "pullsTimes": "{n} 抽 × {primos}",
+  "pullsPrimos": "{n} 抽 · ✦ {primos}",
+  "lifetime": "总抽数",
+  "allWishes": "全部记录",
+  "newPulls": "新增 {n} 抽",
+  "nothingNew": "没有新记录",
+  "banners": {
+    "character": {
+      "label": "角色",
+      "title": "角色活动祈愿"
+    },
+    "weapon": {
+      "label": "武器",
+      "title": "武器活动祈愿"
+    },
+    "standard": {
+      "label": "常驻",
+      "title": "常驻祈愿"
+    },
+    "chronicled": {
+      "label": "集录",
+      "title": "集录祈愿"
+    },
+    "beginners": {
+      "label": "新手",
+      "title": "新手祈愿"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "1月",
+      "2": "2月",
+      "3": "3月",
+      "4": "4月",
+      "5": "5月",
+      "6": "6月",
+      "7": "7月",
+      "8": "8月",
+      "9": "9月",
+      "10": "10月",
+      "11": "11月",
+      "12": "12月"
+    },
+    "day": "{month}{day}日",
+    "dayYear": "{year}年{month}{day}日",
+    "month": "{year}年{month}",
+    "dayTime": "{day} {time}",
+    "range": "{from} – {to}",
+    "now": "至今"
+  },
+  "outcomes": {
+    "won": "不歪",
+    "lost": "歪了",
+    "guaranteed": "大保底"
+  },
+  "outcomeTitles": {
+    "won": "{odds} 不歪",
+    "lost": "{odds} 歪了：下一个必定是 UP",
+    "guaranteed": "UP，{odds} 歪了之后的大保底"
+  },
+  "legend": {
+    "won": "不歪",
+    "lost": "歪了",
+    "guaranteed": "大保底"
+  },
+  "overview": {
+    "newestPull": "最新一抽（游戏时间）",
+    "synced": "同步于 {ago}",
+    "syncedTitle": "新记录存储于 {time}",
+    "syncHelp": "每天在游戏中打开一次 祈愿 → 历史记录（打开后可立即关闭）：irminsul 会同步所有卡池，并在密钥有效期内（约 24 小时）同步每一次新的祈愿。游戏的祈愿链接也能取得最近六个月的记录。超过 6 个月的记录：导入 paimon.moe 备份或 UIGF 文件。",
+    "empty": "暂无祈愿记录",
+    "emptyBody": "每天在游戏中打开一次 祈愿 → 历史记录（打开后可立即关闭），或用游戏的祈愿链接导入。超过 6 个月的记录：导入 paimon.moe 备份或 UIGF 文件。",
+    "banners": "卡池",
+    "totals": "总计",
+    "worth": "祈愿价值",
+    "worthHint": "{n} 抽 × {primos} 原石",
+    "wishes": "{n} 抽",
+    "avgPity": "5★ 平均抽数",
+    "avgPityHint": "角色活动祈愿：每个 5★ 的平均抽数，计入软保底的期望约为 {expected}",
+    "avgPityVs": "较期望 {expected} {diff}"
+  },
+  "card": {
+    "everyPull": "{banner}：全部记录",
+    "fiveTitle": "距硬保底 {left} 抽 · ✦ {primos} · 软保底从第 {soft} 抽起",
+    "fourTitle": "距必出 4★ {left} 抽",
+    "fourFeatured": " · 下一个 4★ 必定是 UP",
+    "pity5": "5★ 保底",
+    "pity4": "4★ 保底",
+    "guaranteedAt": "{n} 抽保底",
+    "hideLatest": "隐藏最近记录",
+    "showLatest": "显示最近记录",
+    "latest": "最近记录",
+    "latestRegion": "{banner}：最近记录",
+    "none": "无",
+    "cols": {
+      "name": "名称",
+      "time": "时间",
+      "pity": "抽数"
+    }
+  },
+  "five": {
+    "every": "全部 5★",
+    "newestFirst": "{n} · 最新在前",
+    "none": "暂无 5★",
+    "pity": "{name} · {pity} 抽",
+    "outcome": "{outcome}（{odds}）"
+  },
+  "link": {
+    "platform": "平台",
+    "copyFailed": "未复制：请选中命令后手动复制",
+    "steps": {
+      "open": "在游戏中打开 祈愿 → 历史记录，等待加载完成。",
+      "android2": "关闭 Wi-Fi 和移动数据。",
+      "android3": "点击右上角的刷新：页面会显示一段错误文字。",
+      "android4": "全选这段文字并复制。",
+      "android5": "重新打开网络，然后粘贴到下方。",
+      "ios1": "打开派蒙菜单 → 反馈，等待加载完成。",
+      "ios2": "点击 游戏内问题 → 联机模式。",
+      "ios3": "点击回复底部的链接：会在浏览器中打开。",
+      "ios4": "复制该链接并粘贴到下方。",
+      "ps1": "在游戏中打开带有二维码的活动邮件。",
+      "ps2": "用手机扫描二维码，复制打开的链接。",
+      "ps3": "粘贴到下方。如果失败，请将 PlayStation 绑定 HoYoverse 账号，并按 PC 或手机的步骤操作。",
+      "pcRun": "打开 PowerShell（在开始菜单中输入 PowerShell）并运行：",
+      "pcPaste": "它会复制链接：粘贴到下方即可。",
+      "pcPasteTitle": "irminsul 的“Copy wish URL”会给出同样的链接"
+    },
+    "scriptTitle": "读取本机游戏的网页缓存，向 HoYoverse 验证一次链接，然后复制。仅此而已。",
+    "copied": "已复制",
+    "copy": "复制",
+    "readScript": "查看脚本",
+    "label": "祈愿记录链接",
+    "placeholder": "粘贴链接：https://…",
+    "invalid": "这段文字中没有祈愿记录链接",
+    "uidMismatch": "该链接属于 UID {uid}，此账号为 UID {own}。",
+    "failed": "导入失败",
+    "saving": "正在保存 {n}…",
+    "progress": "{banner} · 第 {page} 页 · 新增 {n}",
+    "errors": {
+      "cancelled": "已取消",
+      "network": "祈愿记录没有响应，请稍后再试。",
+      "expired": "链接已过期。请在游戏中重新打开 祈愿 → 历史记录 并复制新的链接。",
+      "throttled": "HoYoverse 要求降低频率，请几分钟后再试。",
+      "api": "HoYoverse 返回：{message}",
+      "code": "错误 {code}"
+    }
+  },
+  "chart": {
+    "title": "每月抽数",
+    "label": "按稀有度统计的每月抽数，共 {n} 个月",
+    "month": "{month}：{n} 抽"
+  },
+  "numbers": {
+    "label": "统计",
+    "avgPity": "{share} · 平均 {avg} 抽",
+    "expected": "计入软保底，5★ 期望约 {n} 抽",
+    "expectedAbout": "计入软保底，期望约 {n} 抽",
+    "streak": "当前连续 {current} · 最多连续不歪 {best} · 最多连续歪 {worst}",
+    "streakWon": "不歪 {n}",
+    "streakLost": "歪 {n}",
+    "flipTitle": "{odds} 时抽到 UP 5★ 的情况（不计大保底）",
+    "split": "4★ 分布",
+    "character": "角色",
+    "char": "角色",
+    "weapon": "武器",
+    "rateUp": "4★ UP 不歪 {won}/{total} · {share}",
+    "splitTitle": "4★ 按类型",
+    "splitTitleFull": "4★ 按类型，以及 4★ UP 的歪与不歪"
+  },
+  "odds": {
+    "guaranteed": "大保底",
+    "lostLast": "上次 {odds} 歪了（{name}）：下一个 5★ 必定是 UP",
+    "nextFeatured": "下一个 5★ 必定是 UP",
+    "weapon": "下一个 5★：75% 为 UP 武器",
+    "coin": "下一个 5★：五五开"
+  },
+  "track": {
+    "label": "保底进度 {pity}/{hard}，软保底从第 {soft} 抽起"
+  },
+  "runs": {
+    "label": "历次卡池",
+    "heading": "卡池",
+    "count": "{n} 期",
+    "fewer": "收起",
+    "all": "全部卡池",
+    "current": " · 当前",
+    "no5": "无 5★"
+  },
+  "small": {
+    "pitySoFar": "已抽 {pity} / {hard}"
+  },
+  "table": {
+    "label": "全部记录",
+    "search": "搜索祈愿",
+    "searchTitle": "角色或武器名称",
+    "noMatch": "没有匹配的记录",
+    "rollRun": "该期卡池中的抽数序号",
+    "roll": "抽数序号",
+    "item": "物品",
+    "pity": "抽数",
+    "result": "结果",
+    "time": "时间",
+    "newestFirst": "最新在前",
+    "oldestFirst": "最早在前",
+    "newestFirstSr": "最新在前",
+    "oldestFirstSr": "最早在前",
+    "weapon": "武器",
+    "character": "角色",
+    "pages": "祈愿分页"
+  },
+  "transfer": {
+    "backup": "paimon.moe 备份",
+    "modes": {
+      "link": "祈愿链接",
+      "file": "文件"
+    },
+    "importFrom": "导入方式",
+    "noRecords": "没有记录",
+    "uidMismatch": "该记录属于 UID {uid}，此账号为 UID {own}",
+    "account": "账号 {n}",
+    "notWishFile": "不是 UIGF 或 paimon.moe 文件",
+    "alreadyHeld": "{n} 条已存在",
+    "notImported": "未导入",
+    "deleteTitle": "删除祈愿记录？",
+    "deleteDetail": "将删除此账号的全部 {n} 抽记录。irminsul 可以重新获取最近六个月的记录。",
+    "deleteConfirm": "删除",
+    "notDeleted": "未删除",
+    "dropTitle": "UIGF JSON（Snap Hutao、Starward、genshin-wish-export…）、paimon.moe 导入器的 CSV，或 paimon.moe 的备份（Settings → Export）",
+    "drop": "UIGF 或 paimon.moe 文件",
+    "fileAccount": "文件中的账号",
+    "uigfTitle": "UIGF v4.1：Snap Hutao、Starward 和大多数抽卡记录工具都能读取",
+    "paimonTitle": "用于 paimon.moe 的本地导入器（Wish counter → Import → Local）",
+    "delete": "删除",
+    "deleteHistory": "删除记录"
+  },
+  "bannerPage": {
+    "noPulls": "此卡池没有记录",
+    "now": "当前",
+    "hardTitle": "距硬保底 {left} 抽 · ✦ {primos}",
+    "toHard": "距硬保底 {left} 抽 · ✦ {primos}",
+    "softFrom": "软保底 {soft} 抽起",
+    "featuredNext": "下个必 UP",
+    "featuredNextTitle": "上一个 4★ 歪了：下一个必定是 UP",
+    "toGuaranteed4": "距必出 4★ {n} 抽"
+  }
+}

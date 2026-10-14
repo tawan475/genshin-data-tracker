@@ -1,1 +1,47 @@
-{}
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Account {id}",
+  "server": {
+    "ASIA": "Asia",
+    "AMERICA": "America",
+    "EUROPE": "Europe",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Accounts",
+    "snapshots": "Snapshots",
+    "uploaded": "Uploaded",
+    "stored": "Stored",
+    "ratio": "Ratio",
+    "lastCaptured": "Last captured",
+    "bytes": "{n} bytes",
+    "ratioTitle": "Stored {ratio} smaller than uploaded",
+    "add": "Add account",
+    "empty": "No accounts yet"
+  },
+  "new": {
+    "title": "Add account",
+    "add": "Add",
+    "notAdded": "Not added",
+    "added": "Added {name}",
+    "connect": "Connect Irminsul",
+    "overview": "Overview",
+    "importFiles": "Import files",
+    "addAnother": "Add another"
+  },
+  "settings": {
+    "title": "Account settings",
+    "details": "Details",
+    "traveler": "Traveler",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Delete account",
+    "deleteTitle": "Exported GOOD files are not affected",
+    "confirmTitle": "Delete {name}?",
+    "deletes": "Deletes {loss}. Its Irminsul key stops working.",
+    "typeToConfirm": "Type {word}",
+    "confirmWord": "delete",
+    "loss": "{n} snapshot | {n} snapshots",
+    "deleted": "Deleted {name}"
+  }
+}

@@ -26,7 +26,8 @@ import { copyText } from '@/data/import-setup'
 import { useSession } from '@/stores/session'
 import { useStaff } from '@/stores/staff'
 import AccountSwitcher from './AccountSwitcher.vue'
-import { ACCOUNT_SECTIONS, STAFF_SECTIONS } from './nav'
+import { t } from '@/i18n'
+import { ACCOUNT_SECTIONS, STAFF_SECTIONS, pageTitle } from './nav'
 import { NAV_COLLAPSED_KEY, useNavCollapse } from './nav-collapse'
 import SectionLabel from './SectionLabel.vue'
 
@@ -49,6 +50,7 @@ const staffMode = computed(() => route.meta.staff === true)
 const staffSections = computed(() =>
   STAFF_SECTIONS.filter((s) => session.can(s.permission)).map((s) => ({
     ...s,
+    label: t(`shell.nav.${s.label}`),
     to: { name: s.name },
   })),
 )
@@ -98,16 +100,18 @@ const currentId = computed<number | null>(() => {
 const current = computed(() => (currentId.value ? accounts.byId.get(currentId.value) : undefined))
 
 /** The top bar's account name and UID copy on click. */
-async function copyFromBar(label: string, value: string, event: MouseEvent) {
+async function copyFromBar(what: 'name' | 'uid', value: string, event: MouseEvent) {
   const ok = await copyText(value, event.currentTarget as HTMLElement | null)
-  if (ok) feedback.toast({ tone: 'success', title: `${label} copied`, detail: value })
-  else feedback.toast({ tone: 'danger', title: 'Could not copy', detail: value })
+  const title = what === 'name' ? t('shell.nameCopied') : t('shell.uidCopied')
+  if (ok) feedback.toast({ tone: 'success', title, detail: value })
+  else feedback.toast({ tone: 'danger', title: t('common.copyFailed'), detail: value })
 }
 
 const sections = computed(() =>
   currentId.value
     ? ACCOUNT_SECTIONS.map((s) => ({
         ...s,
+        label: t(`shell.nav.${s.label}`),
         to: { name: s.name, params: { accountId: currentId.value } },
       }))
     : [],
@@ -117,7 +121,7 @@ const primary = computed(() =>
     ? staffSections.value.filter((s) => s.primary)
     : sections.value.filter((s) => s.primary),
 )
-const title = computed(() => route.meta.title ?? '')
+const title = computed(() => pageTitle(route.meta))
 
 // Flips what is painted; from "system" it pins the opposite theme.
 const theme = resolvedTheme
@@ -125,7 +129,7 @@ async function toggleTheme() {
   try {
     await session.updateSettings({ theme: theme.value === 'dark' ? 'light' : 'dark' })
   } catch (error) {
-    feedback.error('Theme not saved', error)
+    feedback.error(t('shell.themeNotSaved'), error)
   }
 }
 
@@ -183,14 +187,18 @@ const footButton =
           GDT
         </RouterLink>
         <UiIconButton
-          :label="narrow ? 'Expand menu' : 'Collapse menu'"
+          :label="narrow ? $t('shell.expandMenu') : $t('shell.collapseMenu')"
           class="ml-auto max-lg:hidden"
           @click="nav.toggle"
         >
           <PanelLeftOpen v-if="narrow" class="size-5" aria-hidden="true" />
           <PanelLeftClose v-else class="size-5" aria-hidden="true" />
         </UiIconButton>
-        <UiIconButton label="Close menu" class="ml-auto lg:hidden" @click="drawer = false">
+        <UiIconButton
+          :label="$t('shell.closeMenu')"
+          class="ml-auto lg:hidden"
+          @click="drawer = false"
+        >
           <X class="size-5" aria-hidden="true" />
         </UiIconButton>
       </div>
@@ -202,8 +210,8 @@ const footButton =
         :class="narrow ? 'pr-[calc(1rem_-_10px)] [scrollbar-gutter:stable]' : 'pr-4'"
       >
         <div v-if="staffMode">
-          <SectionLabel label="Staff" :collapsed="narrow" />
-          <nav class="space-y-0.5" aria-label="Staff">
+          <SectionLabel :label="$t('shell.section.staff')" :collapsed="narrow" />
+          <nav class="space-y-0.5" :aria-label="$t('shell.section.staff')">
             <RouterLink
               v-for="section in staffSections"
               :key="section.name"
@@ -220,9 +228,13 @@ const footButton =
         </div>
 
         <div v-else>
-          <SectionLabel label="Account" :collapsed="narrow" />
+          <SectionLabel :label="$t('shell.section.account')" :collapsed="narrow" />
           <AccountSwitcher :current-id="currentId" :collapsed="narrow" />
-          <nav v-if="sections.length" class="mt-3 space-y-0.5" aria-label="Account">
+          <nav
+            v-if="sections.length"
+            class="mt-3 space-y-0.5"
+            :aria-label="$t('shell.section.account')"
+          >
             <RouterLink
               v-for="section in sections"
               :key="section.name"
@@ -239,17 +251,17 @@ const footButton =
         </div>
 
         <div class="mt-auto">
-          <SectionLabel label="System" :collapsed="narrow" />
-          <nav class="space-y-0.5" aria-label="System">
+          <SectionLabel :label="$t('shell.section.system')" :collapsed="narrow" />
+          <nav class="space-y-0.5" :aria-label="$t('shell.section.system')">
             <RouterLink
               :to="{ name: 'home' }"
               class="flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium"
               :class="navClass(isActive('home'))"
               :aria-current="isActive('home') ? 'page' : undefined"
-              :title="narrow ? 'Accounts' : undefined"
+              :title="narrow ? $t('shell.accounts') : undefined"
             >
               <LayoutGrid class="size-5 shrink-0" aria-hidden="true" />
-              <span :class="labelClass">Accounts</span>
+              <span :class="labelClass">{{ $t('shell.accounts') }}</span>
             </RouterLink>
             <RouterLink
               v-if="session.can('staff.view')"
@@ -257,10 +269,10 @@ const footButton =
               class="flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium"
               :class="navClass(staffMode)"
               :aria-current="route.name === 'staff-overview' ? 'page' : undefined"
-              :title="narrow ? 'Staff' : undefined"
+              :title="narrow ? $t('shell.staff') : undefined"
             >
               <ShieldCheck class="size-5 shrink-0" aria-hidden="true" />
-              <span :class="labelClass">Staff</span>
+              <span :class="labelClass">{{ $t('shell.staff') }}</span>
             </RouterLink>
             <div class="flex" :class="compact ? 'flex-col gap-0.5' : 'items-center gap-1'">
               <RouterLink
@@ -268,13 +280,13 @@ const footButton =
                 class="flex min-w-0 flex-1 items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium"
                 :class="navClass(isActive('settings'))"
                 :aria-current="isActive('settings') ? 'page' : undefined"
-                :title="narrow ? 'Settings' : undefined"
+                :title="narrow ? $t('shell.settings') : undefined"
               >
                 <Settings class="size-5 shrink-0" aria-hidden="true" />
-                <span :class="labelClass">Settings</span>
+                <span :class="labelClass">{{ $t('shell.settings') }}</span>
               </RouterLink>
               <UiIconButton
-                :label="theme === 'dark' ? 'Light theme' : 'Dark theme'"
+                :label="theme === 'dark' ? $t('shell.lightTheme') : $t('shell.darkTheme')"
                 :class="compact ? 'self-center' : ''"
                 @click="toggleTheme"
               >
@@ -304,18 +316,22 @@ const footButton =
         </div>
         <!-- Side by side; stacked icons in the rail. -->
         <div class="flex gap-2" :class="compact ? 'flex-col' : ''">
-          <RouterLink :to="{ name: 'landing' }" :class="footButton" title="Landing page">
+          <RouterLink
+            :to="{ name: 'landing' }"
+            :class="footButton"
+            :title="$t('shell.landingPage')"
+          >
             <ArrowLeft class="size-4 shrink-0" aria-hidden="true" />
-            <span :class="compact ? 'sr-only' : ''">Return</span>
+            <span :class="compact ? 'sr-only' : ''">{{ $t('shell.return') }}</span>
           </RouterLink>
           <button
             type="button"
             :class="footButton"
-            :title="compact ? 'Sign out' : undefined"
+            :title="compact ? $t('common.signOut') : undefined"
             @click="signOut"
           >
             <LogOut class="size-4 shrink-0" aria-hidden="true" />
-            <span :class="compact ? 'sr-only' : ''">Sign out</span>
+            <span :class="compact ? 'sr-only' : ''">{{ $t('common.signOut') }}</span>
           </button>
         </div>
       </div>
@@ -325,7 +341,7 @@ const footButton =
       <header
         class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border-default bg-surface-nav/90 px-4 shadow-sm backdrop-blur sm:px-8"
       >
-        <UiIconButton label="Open menu" class="-ml-2 lg:hidden" @click="drawer = true">
+        <UiIconButton :label="$t('shell.openMenu')" class="-ml-2 lg:hidden" @click="drawer = true">
           <Menu class="size-5" aria-hidden="true" />
         </UiIconButton>
         <span class="truncate text-lg font-semibold">{{ title }}</span>
@@ -334,7 +350,7 @@ const footButton =
             <div class="hidden h-4 w-px bg-border-strong sm:block" />
             <span
               class="hidden min-w-0 items-center gap-2 text-sm font-medium text-text-muted sm:flex"
-              title="Your highest role"
+              :title="$t('shell.highestRole')"
             >
               <span
                 class="size-2 shrink-0 rounded-full"
@@ -354,8 +370,8 @@ const footButton =
               v-if="current.name"
               type="button"
               class="min-w-0 truncate rounded-md px-1 py-0.5 transition-colors hover:bg-surface-overlay hover:text-text-primary"
-              title="Copy name"
-              @click="copyFromBar('Name', current.name, $event)"
+              :title="$t('shell.copyName')"
+              @click="copyFromBar('name', current.name, $event)"
             >
               {{ current.name }}
             </button>
@@ -364,9 +380,9 @@ const footButton =
               v-if="current.uid"
               type="button"
               class="tabular shrink-0 rounded-md px-1 py-0.5 font-mono transition-colors hover:bg-surface-overlay hover:text-text-primary"
-              title="Copy UID"
-              :aria-label="`Copy UID ${current.uid}`"
-              @click="copyFromBar('UID', String(current.uid), $event)"
+              :title="$t('shell.copyUid')"
+              :aria-label="$t('shell.copyUidValue', { uid: current.uid })"
+              @click="copyFromBar('uid', String(current.uid), $event)"
             >
               {{ current.uid }}
             </button>
@@ -381,7 +397,7 @@ const footButton =
           class="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-sm font-medium text-accent-ink shadow-sm shadow-accent/30 hover:bg-accent-hover"
         >
           <Upload class="size-4" aria-hidden="true" />
-          <span class="hidden sm:inline">Import</span>
+          <span class="hidden sm:inline">{{ $t('shell.import') }}</span>
         </RouterLink>
       </header>
 
@@ -395,7 +411,7 @@ const footButton =
     <nav
       v-if="primary.length"
       class="fixed inset-x-0 bottom-0 z-30 flex border-t border-border-default bg-surface-nav/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
-      :aria-label="staffMode ? 'Staff' : 'Account'"
+      :aria-label="staffMode ? $t('shell.section.staff') : $t('shell.section.account')"
     >
       <RouterLink
         v-for="section in primary"
@@ -414,7 +430,7 @@ const footButton =
         @click="drawer = true"
       >
         <MoreHorizontal class="size-5 shrink-0" aria-hidden="true" />
-        <span class="max-w-full truncate">More</span>
+        <span class="max-w-full truncate">{{ $t('common.more') }}</span>
       </button>
     </nav>
   </div>

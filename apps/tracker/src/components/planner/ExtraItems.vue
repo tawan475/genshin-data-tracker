@@ -11,6 +11,7 @@ import { computed } from 'vue'
 import { Eye, EyeOff, Plus } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
 import { gameIcon, materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { STOCK_MEANING, STOCK_TONE } from './farm-format'
 import { materialSoft } from './material-soft'
@@ -55,8 +56,8 @@ const rows = computed(() =>
     const crafted = props.totals.lines.get(item.key)?.crafted ?? 0
     const parts = [
       `${item.name} ×${formatNumber(item.target.count)}`,
-      `have ${formatNumber(item.have)}`,
-      crafted && item.target.active ? `craft ${formatNumber(crafted)}` : '',
+      t('planner.extra.have', { n: formatNumber(item.have) }),
+      crafted && item.target.active ? t('planner.extra.craft', { n: formatNumber(crafted) }) : '',
       STOCK_MEANING[status],
     ]
     return { item, icon, status, title: parts.filter(Boolean).join(' · ') }
@@ -65,15 +66,15 @@ const rows = computed(() =>
 </script>
 
 <template>
-  <section aria-label="Extra">
+  <section :aria-label="$t('planner.extra.title')">
     <h2 class="mb-2 flex items-center gap-2 text-sm font-semibold text-text-secondary">
-      Extra
+      {{ $t('planner.extra.title') }}
       <span class="tabular font-mono font-normal text-text-muted">{{ items.length }}</span>
       <button
         type="button"
         class="ml-1 inline-flex size-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
-        aria-label="Add item"
-        title="Add item"
+        :aria-label="$t('planner.extra.add')"
+        :title="$t('planner.extra.add')"
         @click="emit('add')"
       >
         <Plus class="size-4" aria-hidden="true" />
@@ -117,8 +118,17 @@ const rows = computed(() =>
           type="button"
           class="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-overlay hover:text-text-primary"
           :aria-pressed="row.item.target.active"
-          :aria-label="`${row.item.name}: ${row.item.target.active ? 'Counted' : 'Not counted'}`"
-          :title="row.item.target.active ? 'Counted' : 'Not counted'"
+          :aria-label="
+            $t('planner.common.nameState', {
+              name: row.item.name,
+              state: row.item.target.active
+                ? $t('planner.common.counted')
+                : $t('planner.common.notCounted'),
+            })
+          "
+          :title="
+            row.item.target.active ? $t('planner.common.counted') : $t('planner.common.notCounted')
+          "
           @click="emit('toggle', row.item)"
         >
           <Eye v-if="row.item.target.active" class="size-5" aria-hidden="true" />

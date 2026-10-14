@@ -9,6 +9,8 @@ import type { CharacterView } from '@/data/characters'
 import { readJson, writeJson } from '@/lib/storage'
 import { resolvedTheme } from '@/lib/theme'
 import { useCardExport } from '@/lib/use-card-export'
+import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
 import ShareActions from '@/components/share/ShareActions.vue'
 import ShareMenu from '@/components/share/ShareMenu.vue'
 import CharacterDetail from './CharacterDetail.vue'
@@ -85,10 +87,10 @@ const exporter = useCardExport({
   scale: CARD_SCALE,
   node: () => exportCard.value?.$el as HTMLElement | undefined,
   open: () => c.value !== null,
-  state: () => [c.value, theme.value, owner.value, boosts.value],
+  state: () => [c.value, theme.value, owner.value, boosts.value, locale.value],
   filename: () => `${c.value?.key ?? 'character'}-genshin-tracker.png`,
-  title: () => c.value?.name ?? 'Build',
-  pngLabel: 'Download 1920 × 1080 PNG',
+  title: () => c.value?.name ?? t('share.export.buildTitle'),
+  pngLabel: () => t('share.export.downloadSized', { size: '1920 × 1080' }),
 })
 const frame = exporter.frame
 </script>
@@ -128,7 +130,7 @@ const frame = exporter.frame
         v-model:name="showName"
         v-model:uid="showUid"
         :exporter="exporter"
-        size="1920 × 1080 PNG"
+        :size="$t('characters.modal.pngSize', { size: '1920 × 1080' })"
       />
     </template>
 

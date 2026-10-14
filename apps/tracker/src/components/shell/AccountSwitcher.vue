@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import { Check, ChevronsUpDown, Plus, UserRound } from 'lucide-vue-next'
 import UiModal from '@/components/ui/UiModal.vue'
+import { t } from '@/i18n'
 import { useAccounts } from '@/stores/accounts'
 
 /**
@@ -30,7 +31,7 @@ watch(
 
 const current = computed(() => (props.currentId ? accounts.byId.get(props.currentId) : undefined))
 const currentName = computed(() =>
-  current.value ? accounts.displayName(current.value) : 'Select account',
+  current.value ? accounts.displayName(current.value) : t('shell.switcher.select'),
 )
 
 /** First letter of the name; else the UID's first digit. */
@@ -110,11 +111,11 @@ function onButton() {
         @click="open = false"
       >
         <Plus class="size-4" aria-hidden="true" />
-        Add account
+        {{ $t('shell.switcher.add') }}
       </RouterLink>
     </div>
 
-    <UiModal :open="dialog" title="Accounts" @close="dialog = false">
+    <UiModal :open="dialog" :title="$t('shell.accounts')" @close="dialog = false">
       <ul class="-mx-2 space-y-0.5">
         <li v-for="account in accounts.list" :key="account.id">
           <RouterLink
@@ -137,7 +138,7 @@ function onButton() {
             <span
               v-if="account.name && account.uid"
               class="shrink-0 font-mono text-xs text-text-muted"
-              title="UID"
+              :title="$t('common.uid')"
             >
               {{ account.uid }}
             </span>
@@ -160,7 +161,7 @@ function onButton() {
             >
               <Plus class="size-4" />
             </span>
-            Add account
+            {{ $t('shell.switcher.add') }}
           </RouterLink>
         </li>
       </ul>

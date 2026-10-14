@@ -8,6 +8,7 @@ import {
   type MaybeRefOrGetter,
 } from 'vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
 import { updatesHeld } from '@/live/holds'
 import { onPlannerChange } from '@/live/planner-changes'
 import { useFeedback } from '@/stores/feedback'
@@ -108,7 +109,7 @@ export function useFavoriteCharacters(accountId: MaybeRefOrGetter<number>): Favo
         confirmed.set(account, settings.favoriteCharacters ?? [])
         saves.set(account, (saves.get(account) ?? 0) + 1)
       } catch (cause) {
-        feedback.error('Not saved', cause)
+        feedback.error(t('characters.favorites.notSaved'), cause)
       } finally {
         pending.set(
           account,

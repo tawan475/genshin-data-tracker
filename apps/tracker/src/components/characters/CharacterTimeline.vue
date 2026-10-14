@@ -44,7 +44,9 @@ const shown = computed(() => (showAll.value ? props.changes : props.changes.slic
         <div class="min-w-0 flex-1">
           <p v-if="change.kind !== 'changed'" class="flex flex-wrap gap-x-2 text-sm">
             <span class="text-text-secondary">{{
-              change.kind === 'first' ? 'First seen' : 'Obtained'
+              change.kind === 'first'
+                ? $t('characters.timeline.firstSeen')
+                : $t('characters.timeline.obtained')
             }}</span>
             <span class="tabular font-mono">{{ change.state }}</span>
           </p>
@@ -57,7 +59,7 @@ const shown = computed(() => (showAll.value ? props.changes : props.changes.slic
               <span class="text-text-secondary">{{ line.label }}</span>
               <span class="tabular font-mono text-text-secondary">{{ line.from }}</span>
               <ArrowRight class="size-3.5 text-text-muted" aria-hidden="true" />
-              <span class="sr-only">to</span>
+              <span class="sr-only">{{ $t('characters.timeline.to') }}</span>
               <span class="tabular font-mono font-medium">{{ line.to }}</span>
             </li>
           </ul>
@@ -66,7 +68,11 @@ const shown = computed(() => (showAll.value ? props.changes : props.changes.slic
     </ol>
     <div v-if="changes.length > PREVIEW">
       <UiButton variant="ghost" size="sm" @click="showAll = !showAll">
-        {{ showAll ? 'Less' : `All ${changes.length}` }}
+        {{
+          showAll
+            ? $t('characters.timeline.less')
+            : $t('characters.timeline.all', { n: changes.length })
+        }}
       </UiButton>
     </div>
   </div>

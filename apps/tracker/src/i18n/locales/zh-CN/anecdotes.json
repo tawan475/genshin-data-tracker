@@ -1,1 +1,75 @@
-{}
+{
+  "title": "逸闻",
+  "area": "地区 {id}",
+  "newestCapture": "最新捕获",
+  "newestCaptureTitle": "最新捕获：{time}",
+  "notCaptured": "尚未捕获",
+  "notCapturedTitle": "还没有包含逸闻的捕获：irminsul 会从游戏中记录",
+  "loadFailed": "加载失败",
+  "allDone": "全部完成",
+  "showDone": "显示已完成",
+  "noneDone": "没有已完成的",
+  "showNotDone": "显示未完成",
+  "noneMet": "尚未遇到",
+  "noneMetBody": "隐藏的逸闻在遇到后显示。",
+  "noMatches": "无匹配结果",
+  "clear": "清除",
+  "loading": "正在加载",
+  "notSaved": "未保存",
+  "group": {
+    "hideDone": "隐藏已完成",
+    "showDone": "显示已完成",
+    "done": "已完成 {n}"
+  },
+  "row": {
+    "states": {
+      "captured": "已捕获",
+      "marked": "手动标记",
+      "none": "未完成"
+    },
+    "aria": "{title}：{state}",
+    "capturedStays": "已捕获 · 保持完成",
+    "markedByHand": "手动标记",
+    "markedClick": "手动标记 · 点击取消标记",
+    "notDone": "未完成",
+    "clickToMark": "点击标记为已完成",
+    "activeTitle": "正在游戏中进行",
+    "active": "进行中",
+    "repeatTitle": "已完成 {n} 次（可循环）",
+    "hidden": "隐藏逸闻",
+    "addedIn": "于 {version} 版本加入"
+  },
+  "summary": {
+    "label": "概览",
+    "done": "已完成",
+    "doneCaptured": "已捕获 {n}",
+    "doneByHand": "手动 {n}",
+    "doneUnknown": "{n} 个比游戏数据更新",
+    "doneLabel": "已完成的逸闻",
+    "stamps": "印章",
+    "stampsTitle": "第 {n} 份奖励的印章进度",
+    "stampsNone": "尚未被捕获",
+    "stampsLabel": "下一份奖励的印章进度",
+    "reward": "奖励",
+    "rewardHint": "每记录 {every} 则逸闻获得 {primogems} 原石",
+    "rewardPer": "/ {every} 则",
+    "active": "进行中",
+    "activeHint": "正在游戏中进行（据最新捕获）"
+  },
+  "toolbar": {
+    "label": "筛选逸闻",
+    "search": "搜索",
+    "searchTitle": "标题、故事、NPC 或 ID",
+    "completion": "完成度",
+    "completions": {
+      "all": "全部",
+      "missing": "未完成",
+      "done": "已完成"
+    },
+    "showDone": "显示已完成",
+    "showDoneTitle": "完整列出已完成的逸闻，而不是折叠在每个 NPC 下",
+    "area": "地区",
+    "allAreas": "全部",
+    "locked": "最新捕获中尚未解锁"
+  }
+}

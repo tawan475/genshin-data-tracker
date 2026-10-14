@@ -24,6 +24,7 @@ import { loadSnapshots } from '@/data/account-data'
 import { cancelExport, downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
 import { currencyMissing, dayKey } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
 import { clock24, dateLocale, formatBytes, formatFullDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useAccounts } from '@/stores/accounts'
@@ -148,21 +149,25 @@ const layout = computed(() =>
 
 const tableLabels = computed<TableLabel[]>(() => [
   ...(canDelete ? [{ key: 'select', title: '', slot: true, headerSlot: true }] : []),
-  { key: 'id', title: 'ID' },
-  { key: 'takenAt', title: 'Date', slot: true },
+  { key: 'id', title: t('snapshots.column.id') },
+  { key: 'takenAt', title: t('snapshots.column.date'), slot: true },
   ...(layout.value === 'full'
     ? [
-        { key: 'source', title: 'Source' },
-        { key: 'rawSize', title: 'Raw Size', slot: true },
+        { key: 'source', title: t('snapshots.column.source') },
+        { key: 'rawSize', title: t('snapshots.column.rawSize'), slot: true },
       ]
     : []),
-  ...(layout.value === 'narrow' ? [] : [{ key: 'storedSize', title: 'Stored Size', slot: true }]),
-  { key: 'characters', title: 'Characters', slot: true },
-  { key: 'artifacts', title: 'Artifacts', slot: true },
-  ...(layout.value === 'narrow' ? [] : [{ key: 'weapons', title: 'Weapons', slot: true }]),
-  { key: 'mora', title: 'Mora', slot: true },
-  { key: 'primogem', title: 'Primogems', slot: true },
-  ...(readOnly ? [] : [{ key: 'actions', title: 'Actions', slot: true }]),
+  ...(layout.value === 'narrow'
+    ? []
+    : [{ key: 'storedSize', title: t('snapshots.column.storedSize'), slot: true }]),
+  { key: 'characters', title: t('overview.figure.characters'), slot: true },
+  { key: 'artifacts', title: t('overview.figure.artifacts'), slot: true },
+  ...(layout.value === 'narrow'
+    ? []
+    : [{ key: 'weapons', title: t('overview.figure.weapons'), slot: true }]),
+  { key: 'mora', title: t('overview.figure.mora'), slot: true },
+  { key: 'primogem', title: t('overview.figure.primogem'), slot: true },
+  ...(readOnly ? [] : [{ key: 'actions', title: t('snapshots.column.actions'), slot: true }]),
 ])
 
 const formatKb = (bytes: number) => (bytes ? (bytes / 1024).toFixed(1) + ' KB' : '0 KB')
@@ -238,7 +243,7 @@ const downloadSnapshot = async (snapshot: SnapshotResponse) => {
   try {
     await downloadSnapshotGood(account.value.id, snapshot)
   } catch (cause) {
-    feedback.error('Failed to download snapshot', cause)
+    feedback.error(t('snapshots.downloadFailed'), cause)
   } finally {
     const next = new Set(downloading.value)
     next.delete(snapshot.id)
@@ -287,14 +292,14 @@ const handleBulkDownload = async () => {
     const missing = result.requested - result.files
     feedback.toast({
       tone: 'success',
-      title: `Saved ${result.fileName}`,
+      title: t('snapshots.saved', { name: result.fileName }),
       detail:
-        `${formatNumber(result.files)} ${result.files === 1 ? 'file' : 'files'} · ` +
+        `${t('snapshots.files', { n: formatNumber(result.files) }, result.files)} · ` +
         formatBytes(result.zipBytes) +
-        (missing > 0 ? ` · ${formatNumber(missing)} gone` : ''),
+        (missing > 0 ? ` · ${t('snapshots.gone', { n: formatNumber(missing) })}` : ''),
     })
   } catch (cause) {
-    feedback.error('Export failed', cause)
+    feedback.error(t('snapshots.exportFailed'), cause)
   }
 }
 
@@ -341,10 +346,13 @@ async function removeSnapshots(ids: number[], bulk: boolean) {
   if (failure) {
     feedback.error(
       deleted > 0
-        ? `Deleted ${formatNumber(deleted)} of ${formatNumber(ids.length)} snapshots`
+        ? t('snapshots.deletedOf', {
+            deleted: formatNumber(deleted),
+            total: formatNumber(ids.length),
+          })
         : bulk
-          ? 'Failed to delete snapshots'
-          : 'Failed to delete snapshot',
+          ? t('snapshots.deleteFailedMany')
+          : t('snapshots.deleteFailed'),
       failure,
     )
     return
@@ -355,16 +363,16 @@ async function removeSnapshots(ids: number[], bulk: boolean) {
   }
   feedback.toast({
     tone: 'success',
-    title: `Successfully deleted ${formatNumber(deleted)} ${deleted === 1 ? 'snapshot' : 'snapshots'}`,
+    title: t('snapshots.deleted', { n: formatNumber(deleted) }, deleted),
   })
 }
 
 const deleteSnapshot = async (snapshot: SnapshotResponse) => {
   if (deleting.value) return
   const confirmed = await confirmDialog.value?.ask({
-    title: 'Are you sure?',
-    text: 'You are about to delete this snapshot. This cannot be undone.',
-    confirmText: 'Yes, delete it!',
+    title: t('snapshots.confirm.title'),
+    text: t('snapshots.confirm.one'),
+    confirmText: t('snapshots.confirm.oneConfirm'),
   })
   if (!confirmed) return
   await removeSnapshots([snapshot.id], false)
@@ -374,19 +382,19 @@ const handleBulkDelete = async () => {
   if (deleting.value || selectedCount.value === 0) return
 
   const confirmed = await confirmDialog.value?.ask({
-    title: 'Are you sure?',
-    text: mode.purge
-      ? `You are about to delete ${selectedCount.value} of this user's snapshot(s) now, skipping the trash. This cannot be undone.`
-      : `You are about to delete ${selectedCount.value} snapshot(s). This cannot be undone.`,
-    confirmText: 'Yes, delete them!',
+    title: t('snapshots.confirm.title'),
+    text: t(mode.purge ? 'snapshots.confirm.purge' : 'snapshots.confirm.many', {
+      n: formatNumber(selectedCount.value),
+    }),
+    confirmText: t('snapshots.confirm.manyConfirm'),
   })
   if (!confirmed) return
 
   if (allSelected.value) {
     const doubleConfirmed = await confirmDialog.value?.ask({
-      title: 'Mass Deletion Warning',
-      text: 'You have selected ALL snapshots across ALL pages. Type "DELETE" to confirm you want to wipe everything.',
-      confirmText: 'I understand, DELETE ALL!',
+      title: t('snapshots.confirm.massTitle'),
+      text: t('snapshots.confirm.massText'),
+      confirmText: t('snapshots.confirm.massConfirm'),
       expect: 'DELETE',
     })
     if (!doubleConfirmed) return
@@ -429,7 +437,7 @@ const handleBulkDelete = async () => {
 
       <!-- Normal Flow Heading; the selection toolbar covers it. -->
       <h2 class="flex h-[3.25rem] items-center text-xl font-bold transition-colors">
-        Import History
+        {{ $t('snapshots.heading') }}
       </h2>
 
       <RangeFilter
@@ -442,7 +450,12 @@ const handleBulkDelete = async () => {
         @select="selectRange"
       />
 
-      <UiError v-if="error && snapshots" :error="error" title="Load failed" @retry="reload" />
+      <UiError
+        v-if="error && snapshots"
+        :error="error"
+        :title="$t('snapshots.loadFailed')"
+        @retry="reload"
+      />
 
       <p
         v-if="offerAll || allInView"
@@ -450,29 +463,41 @@ const handleBulkDelete = async () => {
         role="status"
       >
         <template v-if="offerAll">
-          <span>
-            All <span class="tabular font-mono">{{ formatNumber(rows.length) }}</span> on this page
-            are selected.
-          </span>
+          <i18n-t keypath="snapshots.select.pageSelected" tag="span" scope="global">
+            <template #n>
+              <span class="tabular font-mono">{{ formatNumber(rows.length) }}</span>
+            </template>
+          </i18n-t>
           <button
             type="button"
             class="rounded-md px-1.5 py-0.5 font-semibold text-accent-text hover:bg-surface-raised"
             @click="onSelectAll"
           >
-            Select all {{ formatNumber(filtered.length) }}{{ filtering ? ' in range' : '' }}
+            {{
+              $t(filtering ? 'snapshots.select.allInRange' : 'snapshots.select.all', {
+                n: formatNumber(filtered.length),
+              })
+            }}
           </button>
         </template>
         <template v-else>
-          <span>
-            All <span class="tabular font-mono">{{ formatNumber(filtered.length) }}</span>
-            {{ filtering ? 'snapshots in range' : 'snapshots' }} are selected.
-          </span>
+          <i18n-t
+            :keypath="
+              filtering ? 'snapshots.select.rangeSelected' : 'snapshots.select.viewSelected'
+            "
+            tag="span"
+            scope="global"
+          >
+            <template #n>
+              <span class="tabular font-mono">{{ formatNumber(filtered.length) }}</span>
+            </template>
+          </i18n-t>
           <button
             type="button"
             class="rounded-md px-1.5 py-0.5 font-semibold text-accent-text hover:bg-surface-raised"
             @click="resetSelection"
           >
-            Clear selection
+            {{ $t('snapshots.select.clear') }}
           </button>
         </template>
       </p>
@@ -504,13 +529,13 @@ const handleBulkDelete = async () => {
           >
             <template #empty>
               <div v-if="error" class="flex justify-center text-left">
-                <UiError :error="error" title="Load failed" @retry="reload" />
+                <UiError :error="error" :title="$t('snapshots.loadFailed')" @retry="reload" />
               </div>
-              <UiEmpty v-else-if="filtering" title="No snapshots in range">
+              <UiEmpty v-else-if="filtering" :title="$t('snapshots.noneInRange')">
                 <template #icon><CalendarX aria-hidden="true" /></template>
-                <UiButton size="sm" @click="clearDates">Clear</UiButton>
+                <UiButton size="sm" @click="clearDates">{{ $t('snapshots.clear') }}</UiButton>
               </UiEmpty>
-              <UiEmpty v-else title="No snapshots yet">
+              <UiEmpty v-else :title="$t('snapshots.noSnapshots')">
                 <template #icon><History aria-hidden="true" /></template>
                 <UiButton
                   v-if="!readOnly"
@@ -518,7 +543,7 @@ const handleBulkDelete = async () => {
                   :to="{ name: 'account-import', params: { accountId: account.id } }"
                 >
                   <Upload class="size-4" aria-hidden="true" />
-                  Import
+                  {{ $t('snapshots.import') }}
                 </UiButton>
               </UiEmpty>
             </template>
@@ -550,7 +575,7 @@ const handleBulkDelete = async () => {
             class="-mx-3 -my-2.5 px-3 py-2.5"
             :checked="pageCoverage === 'all'"
             :mixed="pageCoverage === 'some'"
-            label="Select this page"
+            :label="$t('snapshots.select.page')"
             @toggle="onToggleAll"
           />
         </template>
@@ -558,8 +583,8 @@ const handleBulkDelete = async () => {
           <LegacyCheckbox
             class="-mx-3 -my-2 px-3 py-2"
             :checked="isSelected(item.id)"
-            :label="`Select snapshot ${item.id}`"
-            title="Shift-click to select a range"
+            :label="$t('snapshots.select.snapshot', { id: item.id })"
+            :title="$t('snapshots.select.shiftClick')"
             @toggle="(event) => onToggle(item.id, event)"
           />
         </template>
@@ -570,12 +595,14 @@ const handleBulkDelete = async () => {
               {{ timeLine(item.takenAt) }}
               <span
                 v-if="item.lastSeenAt > item.takenAt"
-                :title="`Unchanged until ${formatFullDateTime(item.lastSeenAt)}`"
+                :title="
+                  $t('snapshots.unchangedUntil', { time: formatFullDateTime(item.lastSeenAt) })
+                "
               >
                 <Repeat2 class="size-3.5" aria-hidden="true" />
-                <span class="sr-only"
-                  >Unchanged until {{ formatFullDateTime(item.lastSeenAt) }}</span
-                >
+                <span class="sr-only">{{
+                  $t('snapshots.unchangedUntil', { time: formatFullDateTime(item.lastSeenAt) })
+                }}</span>
               </span>
             </span>
           </span>
@@ -630,13 +657,13 @@ const handleBulkDelete = async () => {
 
         <template #empty>
           <div v-if="error" class="flex justify-center py-4 text-left">
-            <UiError :error="error" title="Load failed" @retry="reload" />
+            <UiError :error="error" :title="$t('snapshots.loadFailed')" @retry="reload" />
           </div>
-          <UiEmpty v-else-if="filtering" title="No snapshots in range">
+          <UiEmpty v-else-if="filtering" :title="$t('snapshots.noneInRange')">
             <template #icon><CalendarX aria-hidden="true" /></template>
-            <UiButton size="sm" @click="clearDates">Clear</UiButton>
+            <UiButton size="sm" @click="clearDates">{{ $t('snapshots.clear') }}</UiButton>
           </UiEmpty>
-          <UiEmpty v-else title="No snapshots yet">
+          <UiEmpty v-else :title="$t('snapshots.noSnapshots')">
             <template #icon><History aria-hidden="true" /></template>
             <UiButton
               v-if="!readOnly"
@@ -644,7 +671,7 @@ const handleBulkDelete = async () => {
               :to="{ name: 'account-import', params: { accountId: account.id } }"
             >
               <Upload class="size-4" aria-hidden="true" />
-              Import
+              {{ $t('snapshots.import') }}
             </UiButton>
           </UiEmpty>
         </template>

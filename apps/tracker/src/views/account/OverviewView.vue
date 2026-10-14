@@ -18,6 +18,7 @@ import UiStat from '@/components/ui/UiStat.vue'
 import { loadSnapshots } from '@/data/account-data'
 import { buildHistory, currencyMissing, latestDelta, serverLabel } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useAccount } from './context'
@@ -83,16 +84,26 @@ const tiles = computed(() => {
     const carried = captures?.[captures.length - 1]?.summary
     currency =
       carried && !currencyMissing(carried)
-        ? { mora: carried.mora, primogem: carried.primogem, detail: 'from an earlier capture' }
-        : { mora: null, primogem: null, detail: 'missing from the latest capture' }
+        ? { mora: carried.mora, primogem: carried.primogem, detail: t('overview.currencyCarried') }
+        : { mora: null, primogem: null, detail: t('overview.currencyMissing') }
   }
 
   return [
-    { label: 'Mora', value: currency.mora, delta: d?.mora, detail: currency.detail },
-    { label: 'Primogems', value: currency.primogem, delta: d?.primogem, detail: currency.detail },
-    { label: 'Characters', value: summary.characters, delta: d?.characters },
-    { label: 'Weapons', value: summary.weapons, delta: d?.weapons },
-    { label: 'Artifacts', value: summary.artifacts, delta: d?.artifacts },
+    {
+      label: t('overview.figure.mora'),
+      value: currency.mora,
+      delta: d?.mora,
+      detail: currency.detail,
+    },
+    {
+      label: t('overview.figure.primogem'),
+      value: currency.primogem,
+      delta: d?.primogem,
+      detail: currency.detail,
+    },
+    { label: t('overview.figure.characters'), value: summary.characters, delta: d?.characters },
+    { label: t('overview.figure.weapons'), value: summary.weapons, delta: d?.weapons },
+    { label: t('overview.figure.artifacts'), value: summary.artifacts, delta: d?.artifacts },
   ]
 })
 const lowRarity = computed(() => {
@@ -125,23 +136,23 @@ const meta = computed<MetaItem[]>(() => {
   const server = serverLabel(a.server)
   if (server) items.push({ key: 'server', text: server })
   if (!latest) return items
-  const moment = (ms: number, label: string) => ({
+  const moment = (ms: number, key: 'overview.lastCapturedAt' | 'overview.seenAgainAt') => ({
     iso: new Date(ms).toISOString(),
     ago: formatRelative(ms, nowMs.value),
-    title: `${label} ${formatDateTime(ms)}`,
+    title: t(key, { time: formatDateTime(ms) }),
   })
   items.push({
     key: 'captured',
     icon: Clock,
-    label: 'Last captured',
-    time: moment(latest.takenAt, 'Last captured'),
+    label: t('overview.lastCaptured'),
+    time: moment(latest.takenAt, 'overview.lastCapturedAt'),
   })
   if (latest.lastSeenAt > latest.takenAt) {
     items.push({
       key: 'seen',
       icon: Eye,
-      label: 'Seen again',
-      time: moment(latest.lastSeenAt, 'Seen again'),
+      label: t('overview.seenAgain'),
+      time: moment(latest.lastSeenAt, 'overview.seenAgainAt'),
     })
   }
   return items
@@ -176,11 +187,11 @@ const importRoute = computed(() => ({
   </PageHeader>
 
   <UiPanel v-if="!account.latest" flush>
-    <UiEmpty title="No snapshots yet">
+    <UiEmpty :title="$t('overview.noSnapshots')">
       <template #icon><History aria-hidden="true" /></template>
       <UiButton variant="primary" :to="importRoute">
         <Upload class="size-4" aria-hidden="true" />
-        Import
+        {{ $t('overview.import') }}
       </UiButton>
     </UiEmpty>
   </UiPanel>
@@ -198,7 +209,7 @@ const importRoute = computed(() => ({
           <ChangeValue
             v-if="tile.delta !== undefined && tile.delta !== null"
             :value="tile.delta"
-            hint="since previous snapshot"
+            :hint="$t('overview.sincePrevious')"
           />
         </span>
       </UiStat>
@@ -211,12 +222,18 @@ const importRoute = computed(() => ({
       />
     </div>
 
-    <UiError v-if="error" class="mt-6" title="History unavailable" :error="error" @retry="reload" />
+    <UiError
+      v-if="error"
+      class="mt-6"
+      :title="$t('overview.historyUnavailable')"
+      :error="error"
+      @retry="reload"
+    />
 
     <div v-if="list && history?.captures.length" class="mt-6 flex flex-col gap-6">
       <DetailedProgression
         :captures="history.captures"
-        title="Progression"
+        :title="$t('overview.progression')"
         storage="overview-progression"
         :defaults="['mora', 'primogem']"
         default-group="snapshot"

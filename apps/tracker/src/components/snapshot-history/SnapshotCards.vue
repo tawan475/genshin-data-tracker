@@ -37,11 +37,11 @@ const emit = defineEmits<{
 }>()
 
 const FIGURES = [
-  { key: 'characters', label: 'Characters', kind: 'count' },
-  { key: 'artifacts', label: 'Artifacts', kind: 'count' },
-  { key: 'weapons', label: 'Weapons', kind: 'count' },
-  { key: 'mora', label: 'Mora', kind: 'mora' },
-  { key: 'primogem', label: 'Primogems', kind: 'primogem' },
+  { key: 'characters', kind: 'count' },
+  { key: 'artifacts', kind: 'count' },
+  { key: 'weapons', kind: 'count' },
+  { key: 'mora', kind: 'mora' },
+  { key: 'primogem', kind: 'primogem' },
 ] as const
 </script>
 
@@ -57,11 +57,11 @@ const FIGURES = [
         class="-ml-1 size-10"
         :checked="coverage === 'all'"
         :mixed="coverage === 'some'"
-        label="Select this page"
-        title="Select this page"
+        :label="$t('snapshots.select.page')"
+        :title="$t('snapshots.select.page')"
         @toggle="emit('toggleAll')"
       />
-      <span>All</span>
+      <span>{{ $t('snapshots.select.allLabel') }}</span>
     </div>
 
     <ul class="divide-y divide-border-subtle">
@@ -76,8 +76,8 @@ const FIGURES = [
             v-if="selectable"
             class="-my-2.5 -ml-1 size-10 shrink-0"
             :checked="isSelected(item.id)"
-            :label="`Select snapshot ${item.id}`"
-            title="Shift-click to select a range"
+            :label="$t('snapshots.select.snapshot', { id: item.id })"
+            :title="$t('snapshots.select.shiftClick')"
             @toggle="(event) => emit('toggle', item.id, event)"
           />
           <div class="min-w-0 flex-1">
@@ -86,12 +86,14 @@ const FIGURES = [
               <span
                 v-if="item.lastSeenAt > item.takenAt"
                 class="shrink-0 text-text-muted"
-                :title="`Unchanged until ${formatFullDateTime(item.lastSeenAt)}`"
+                :title="
+                  $t('snapshots.unchangedUntil', { time: formatFullDateTime(item.lastSeenAt) })
+                "
               >
                 <Repeat2 class="size-3.5" aria-hidden="true" />
-                <span class="sr-only"
-                  >Unchanged until {{ formatFullDateTime(item.lastSeenAt) }}</span
-                >
+                <span class="sr-only">{{
+                  $t('snapshots.unchangedUntil', { time: formatFullDateTime(item.lastSeenAt) })
+                }}</span>
               </span>
             </p>
             <p class="truncate text-xs text-text-muted">#{{ item.id }} · {{ item.source }}</p>
@@ -112,7 +114,7 @@ const FIGURES = [
           :class="selectable ? 'ml-11' : ''"
         >
           <div v-for="figure in FIGURES" :key="figure.key" class="min-w-0">
-            <dt class="text-xs text-text-muted">{{ figure.label }}</dt>
+            <dt class="text-xs text-text-muted">{{ $t(`overview.figure.${figure.key}`) }}</dt>
             <dd>
               <FigureCell
                 :value="item.summary[figure.key]"
@@ -123,7 +125,7 @@ const FIGURES = [
             </dd>
           </div>
           <div class="min-w-0">
-            <dt class="text-xs text-text-muted">Stored</dt>
+            <dt class="text-xs text-text-muted">{{ $t('snapshots.card.stored') }}</dt>
             <dd
               class="font-medium whitespace-nowrap text-success-text"
               :title="`${formatKb(item.rawSize)} → ${formatKb(item.storedSize)}`"

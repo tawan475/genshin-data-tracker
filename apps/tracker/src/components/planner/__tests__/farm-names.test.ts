@@ -10,7 +10,7 @@ import { emptyRequirement, planTotals, type PlanGoal } from '@gdt/game-data/plan
 import { describe, expect, it } from 'vitest'
 import type { ArtifactDomain } from '../artifact-domains'
 import {
-  ELSEWHERE,
+  elsewhereName,
   artifactCards,
   bossCards,
   farmHeadline,
@@ -220,7 +220,7 @@ describe('artifact cards', () => {
         ['character:Raiden', 'character:Bennett'],
       ],
       ['Midsummer Courtyard', ['ThunderingFury'], ['character:Fischl']],
-      [ELSEWHERE, ['GladiatorsFinale'], ['character:Fischl']],
+      [elsewhereName(), ['GladiatorsFinale'], ['character:Fischl']],
     ])
     const [court] = cards
     expect(court!.detail).toBe('Emblem of Severed Fate · Gambler')
@@ -233,7 +233,7 @@ describe('artifact cards', () => {
     const cards = cardsFor(25)
     expect(cards.map((c) => [c.name, c.lock])).toEqual([
       ['Midsummer Courtyard', null],
-      [ELSEWHERE, null],
+      [elsewhereName(), null],
       ['Momiji-Dyed Court', 'AR 30'],
     ])
   })
@@ -245,7 +245,7 @@ describe('artifact cards', () => {
 
   it('reads every set as "elsewhere" without artifact domains in the game data', () => {
     const cards = artifactCards({ ...input([], { farming: null }), artifacts: wants })
-    expect(cards.map((c) => c.name)).toEqual([ELSEWHERE])
+    expect(cards.map((c) => c.name)).toEqual([elsewhereName()])
     expect(cards[0]!.sets).toEqual([
       'EmblemOfSeveredFate',
       'ThunderingFury',

@@ -14,6 +14,7 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
 import { axisFormat, axisTick, axisTicks } from '@/data/chart-range'
 import { CHART_FONT } from '@/lib/chart-defaults'
+import { t } from '@/i18n'
 import { clock24, formatCompactTick, formatDateTime, formatNumber, tickStep } from '@/lib/format'
 
 Chart.register(
@@ -147,7 +148,11 @@ function config(): ChartConfiguration<'line'> {
           padding: 10,
           callbacks: {
             title: (items) => (items[0] ? formatDateTime(Number(items[0].parsed.x)) : ''),
-            label: (item) => ` ${item.dataset.label}: ${formatNumber(Number(item.parsed.y))}`,
+            label: (item) =>
+              t('progression.tooltip', {
+                name: item.dataset.label ?? '',
+                value: formatNumber(Number(item.parsed.y)),
+              }),
           },
         },
       },

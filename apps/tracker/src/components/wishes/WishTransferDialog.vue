@@ -18,6 +18,7 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import WishLinkImport from './WishLinkImport.vue'
 import type { WishHistory } from '@/data/wish-history'
 import { saveBlob } from '@/data/export'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 
@@ -37,11 +38,12 @@ const props = defineProps<{
 const emit = defineEmits<{ close: []; changed: [] }>()
 const feedback = useFeedback()
 
-const FORMAT_LABELS: Record<WishFile['format'], string> = {
-  uigf: 'UIGF',
-  'paimon-csv': 'paimon.moe CSV',
-  'paimon-backup': 'paimon.moe backup',
-}
+const formatLabel = (format: WishFile['format']): string =>
+  format === 'uigf'
+    ? 'UIGF'
+    : format === 'paimon-csv'
+      ? 'paimon.moe CSV'
+      : t('wishes.transfer.backup')
 
 const input = ref<HTMLInputElement>()
 const dragging = ref(false)
@@ -56,10 +58,10 @@ const uid = computed(() => props.account.uid?.trim() || null)
 
 /** How to import: the game's wish link (paimon.moe's way), or a file. */
 const mode = ref<'link' | 'file'>('link')
-const MODES = [
-  { value: 'link' as const, label: 'Wish link' },
-  { value: 'file' as const, label: 'File' },
-]
+const modes = computed(() => [
+  { value: 'link' as const, label: t('wishes.transfer.modes.link') },
+  { value: 'file' as const, label: t('wishes.transfer.modes.file') },
+])
 
 /**
  * Which of the file's accounts to import (paimon.moe backups can hold
@@ -78,14 +80,14 @@ const entry = computed<WishFileAccount | null>(() =>
 const mismatch = computed(() => {
   const e = entry.value
   if (!file.value) return ''
-  if (file.value.accounts.length === 0) return 'No records'
+  if (file.value.accounts.length === 0) return t('wishes.transfer.noRecords')
   if (e?.uid && uid.value && e.uid !== uid.value) {
-    return `That history is UID ${e.uid}; this account is UID ${uid.value}`
+    return t('wishes.transfer.uidMismatch', { uid: e.uid, own: uid.value })
   }
   return ''
 })
 const accountLabel = (a: WishFileAccount, i: number) =>
-  a.uid ? `UID ${a.uid}` : `Account ${i + 1}`
+  a.uid ? `UID ${a.uid}` : t('wishes.transfer.account', { n: i + 1 })
 
 function reset() {
   fileName.value = ''
@@ -106,7 +108,7 @@ async function read(picked: File | undefined) {
   try {
     file.value = parseWishFile(await picked.text())
   } catch {
-    failure.value = 'Not a UIGF or paimon.moe file'
+    failure.value = t('wishes.transfer.notWishFile')
   } finally {
     reading.value = false
   }
@@ -142,13 +144,13 @@ async function importFile() {
     }
     feedback.toast({
       tone: 'success',
-      title: added > 0 ? `${formatNumber(added)} new pulls` : 'Nothing new',
-      hint: `${formatNumber(known)} already held`,
+      title: added > 0 ? t('wishes.newPulls', { n: formatNumber(added) }) : t('wishes.nothingNew'),
+      hint: t('wishes.transfer.alreadyHeld', { n: formatNumber(known) }),
     })
     emit('changed')
     emit('close')
   } catch (error) {
-    feedback.error('Not imported', error)
+    feedback.error(t('wishes.transfer.notImported'), error)
     if (added > 0) emit('changed')
   } finally {
     saving.value = false
@@ -181,9 +183,9 @@ function exportPaimon() {
 
 async function remove() {
   const ok = await feedback.confirm({
-    title: 'Delete wish history?',
-    detail: `All ${formatNumber(pulls.value.length)} pulls of this account are removed. irminsul can fetch the last six months again.`,
-    confirmLabel: 'Delete',
+    title: t('wishes.transfer.deleteTitle'),
+    detail: t('wishes.transfer.deleteDetail', { n: formatNumber(pulls.value.length) }),
+    confirmLabel: t('wishes.transfer.deleteConfirm'),
     tone: 'danger',
   })
   if (!ok) return
@@ -193,7 +195,7 @@ async function remove() {
     emit('changed')
     emit('close')
   } catch (error) {
-    feedback.error('Not deleted', error)
+    feedback.error(t('wishes.transfer.notDeleted'), error)
   } finally {
     deleting.value = false
   }
@@ -201,10 +203,10 @@ async function remove() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Import / export" @close="emit('close')">
+  <UiModal :open="open" :title="$t('wishes.importExport')" @close="emit('close')">
     <div class="flex flex-col gap-5">
-      <section v-if="!readOnly" class="flex flex-col gap-3" aria-label="Import">
-        <UiSegmented v-model="mode" :options="MODES" label="Import from" />
+      <section v-if="!readOnly" class="flex flex-col gap-3" :aria-label="$t('wishes.import')">
+        <UiSegmented v-model="mode" :options="modes" :label="$t('wishes.transfer.importFrom')" />
         <WishLinkImport
           v-if="open && mode === 'link'"
           :account="account"
@@ -216,15 +218,17 @@ async function remove() {
           <div
             class="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
             :class="dragging ? 'border-accent bg-surface-overlay' : 'border-border-strong'"
-            title="UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), a paimon.moe importer CSV, or paimon.moe's backup (Settings → Export)"
+            :title="$t('wishes.transfer.dropTitle')"
             @dragenter.prevent="dragging = true"
             @dragover.prevent
             @dragleave.self="dragging = false"
             @drop.prevent="onDrop"
           >
             <FileUp class="size-8 text-text-muted" aria-hidden="true" />
-            <p class="text-sm font-medium">UIGF or paimon.moe file</p>
-            <UiButton :loading="reading" @click="input?.click()">Browse</UiButton>
+            <p class="text-sm font-medium">{{ $t('wishes.transfer.drop') }}</p>
+            <UiButton :loading="reading" @click="input?.click()">{{
+              $t('wishes.browse')
+            }}</UiButton>
             <input
               ref="input"
               type="file"
@@ -241,13 +245,13 @@ async function remove() {
               <FileJson class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
               <span class="truncate font-medium">{{ fileName }}</span>
               <span v-if="file" class="shrink-0 text-text-muted">{{
-                FORMAT_LABELS[file.format]
+                formatLabel(file.format)
               }}</span>
             </p>
             <div
               v-if="file && file.accounts.length > 1"
               role="radiogroup"
-              aria-label="Account in the file"
+              :aria-label="$t('wishes.transfer.fileAccount')"
               class="flex flex-wrap gap-2"
             >
               <FilterChip
@@ -264,9 +268,8 @@ async function remove() {
               {{ failure || mismatch }}
             </p>
             <p v-else-if="entry" class="tabular font-mono text-sm text-text-secondary">
-              {{ formatNumber(entry.records.length) }} pulls{{
-                entry.uid ? ` · UID ${entry.uid}` : ''
-              }}
+              {{ $t('wishes.pulls', { n: formatNumber(entry.records.length) })
+              }}{{ entry.uid ? ` · UID ${entry.uid}` : '' }}
             </p>
           </div>
           <UiButton
@@ -275,24 +278,24 @@ async function remove() {
             :loading="saving"
             :disabled="entry.records.length === 0"
             @click="importFile"
-            >Import</UiButton
+            >{{ $t('wishes.import') }}</UiButton
           >
         </template>
       </section>
 
-      <section class="flex flex-col gap-2" aria-label="Export">
-        <h3 class="text-sm font-semibold">Export</h3>
+      <section class="flex flex-col gap-2" :aria-label="$t('wishes.export')">
+        <h3 class="text-sm font-semibold">{{ $t('wishes.export') }}</h3>
         <div class="flex flex-wrap gap-2">
           <UiButton
             :disabled="pulls.length === 0"
-            title="UIGF v4.1: Snap Hutao, Starward and most wish trackers read it"
+            :title="$t('wishes.transfer.uigfTitle')"
             @click="exportUigf"
           >
             <Download class="size-4" aria-hidden="true" />UIGF
           </UiButton>
           <UiButton
             :disabled="pulls.length === 0"
-            title="For paimon.moe's Local Importer (Wish counter → Import → Local)"
+            :title="$t('wishes.transfer.paimonTitle')"
             @click="exportPaimon"
           >
             <Download class="size-4" aria-hidden="true" />paimon.moe CSV
@@ -300,10 +303,16 @@ async function remove() {
         </div>
       </section>
 
-      <section v-if="!readOnly && pulls.length > 0" class="flex flex-col gap-2" aria-label="Delete">
+      <section
+        v-if="!readOnly && pulls.length > 0"
+        class="flex flex-col gap-2"
+        :aria-label="$t('wishes.transfer.delete')"
+      >
         <UiButton variant="ghost" :loading="deleting" class="self-start" @click="remove">
           <span class="inline-flex items-center gap-1.5 text-danger-text"
-            ><Trash2 class="size-4" aria-hidden="true" />Delete history</span
+            ><Trash2 class="size-4" aria-hidden="true" />{{
+              $t('wishes.transfer.deleteHistory')
+            }}</span
           >
         </UiButton>
       </section>

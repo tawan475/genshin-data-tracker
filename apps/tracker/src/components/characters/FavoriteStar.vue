@@ -19,8 +19,8 @@ const readOnly = useReadOnly()
     v-if="!readOnly"
     type="button"
     :aria-pressed="on"
-    :aria-label="`Favorite ${name}`"
-    :title="on ? 'Unfavorite' : 'Favorite'"
+    :aria-label="$t('characters.favorite.named', { name })"
+    :title="on ? $t('characters.favorite.off') : $t('characters.favorite.on')"
     class="inline-flex size-7 shrink-0 items-center justify-center rounded-full transition focus-visible:opacity-100"
     :class="[
       on ? '' : 'text-text-muted hover:text-text-primary',

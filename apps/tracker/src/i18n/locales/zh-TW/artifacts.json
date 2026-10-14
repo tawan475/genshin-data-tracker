@@ -1,1 +1,134 @@
-{}
+{
+  "label": {
+    "locked": "已鎖定",
+    "astralMark": "星標",
+    "new": "新"
+  },
+  "sort": {
+    "quality": "品質",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "潛力",
+    "level": "等級",
+    "set": "套裝",
+    "recent": "最近"
+  },
+  "sortTitle": {
+    "quality": "與遊戲相同：稀有度、等級、套裝、裝備者",
+    "cv": "雙暴分（CV）",
+    "rv": "詞條價值（RV）",
+    "potential": "滿級時的期望 CV",
+    "level": "等級",
+    "set": "套裝",
+    "recent": "新增或有變化"
+  },
+  "topSets": {
+    "label": "主要套裝",
+    "more": "另有 {n} 個套裝"
+  },
+  "lower": {
+    "label": "較低稀有度：{counts}",
+    "title": "較低稀有度，此排序會將其排在最後"
+  },
+  "picker": {
+    "find": "尋找",
+    "noMatch": "無符合項目",
+    "done": "完成"
+  },
+  "setsTable": {
+    "cellNone": "{slot}：無",
+    "cell": "{slot} · {n} 件 · 最佳 {rarity}★ {main} +{level}，CV {cv}",
+    "pieces": "件數",
+    "slotHeader": "{slot}：最佳 CV、件數",
+    "sumTitle": "各部位最佳 CV 之和"
+  },
+  "bag": {
+    "more": "還有 {n} 件"
+  },
+  "table": {
+    "sortBySet": "依套裝排序",
+    "sortByLevel": "依等級排序",
+    "equippedBy": "裝備者",
+    "marks": "鎖定與標記",
+    "elixir": "祝聖精華"
+  },
+  "detail": {
+    "fromGame": "來自遊戲",
+    "inferred": "根據等級推算",
+    "upgradesToCome": "{source} · 還有 {n} 次強化",
+    "rankTitle": "在 {n} 件 {rarity}★ {slot}中的 CV 排名",
+    "newTitle": "上次記錄中沒有",
+    "rolls": "詞條數",
+    "rank": "排名",
+    "upgradesTitle": "每 4 級強化一次副屬性，直至 {max}",
+    "upgrades": "剩餘強化",
+    "expectedCv": "期望 CV",
+    "expectedDetail": "{max} 時的期望值：每次強化有 {chance}% 機率強化到雙暴詞條，按平均檔位計",
+    "bestCase": "最佳情況",
+    "bestDetail": "每次強化都是最高檔雙暴，直至 {max}",
+    "critLinesTitle": "4 條副屬性中有 {n} 條為暴擊：即每次強化命中雙暴的機率",
+    "critPerRoll": "雙暴 / 次",
+    "activatesTitle": "第四條副屬性，首次強化時啟動",
+    "activates": "+4 新增",
+    "maxRv": "最高 RV",
+    "unlocked": "未鎖定",
+    "astral": "星標",
+    "elixirTitle": "祝聖精華",
+    "rollTier": "{tier} 檔",
+    "inactive": "未啟動"
+  },
+  "card": {
+    "potentialTitle": "+{max} 時期望 CV · 最佳 {best}",
+    "equipped": "{name}已裝備"
+  },
+  "toolbar": {
+    "all": "全部",
+    "yes": "是",
+    "no": "否",
+    "linesNow": "目前 {n} 條副屬性",
+    "any": "任意",
+    "allSets": "全部套裝",
+    "anyone": "任何人",
+    "noAstral": "無星標",
+    "noElixir": "非祝聖精華",
+    "quoted": "「{text}」",
+    "mainPill": "主屬性：{stat}",
+    "lines": "{n} 條副屬性",
+    "best": "最佳",
+    "label": "篩選聖遺物",
+    "searchLabel": "搜尋套裝或角色",
+    "searchTitle": "套裝或角色",
+    "equippedByTitle": "裝備者：{names}",
+    "sortBy": "排序方式",
+    "descending": "遞減",
+    "ascending": "遞增",
+    "slot": "部位",
+    "presets": "預設",
+    "bestTitle": "依目前排序，每個部位前 {n} 件",
+    "newNone": "沒有更早的記錄可比較",
+    "newTitle": "上次記錄中沒有：新獲得或之後升過級",
+    "zeroTitle": "未裝備的 +0 5★",
+    "lowTitle": "未鎖定、未裝備的 4★ 與 3★",
+    "low": "4★/3★ 聖遺物",
+    "spareTitle": "未裝備的 5★",
+    "spare": "閒置 5★",
+    "maxTitle": "僅 +20",
+    "moreTitle": "主屬性、副屬性、詞條數、等級、鎖定、位置、星標、祝聖精華",
+    "more": "更多",
+    "substatsTitle": "包含以上全部（+4 啟動的副屬性也算）",
+    "linesLabel": "副屬性數",
+    "min": "最低",
+    "max": "最高",
+    "location": "位置",
+    "remove": "移除{label}"
+  },
+  "page": {
+    "table": "表格",
+    "loadFailed": "無法載入聖遺物",
+    "loading": "正在載入聖遺物",
+    "refreshFailed": "無法重新整理",
+    "shownTitle": "顯示 / 聖遺物總數",
+    "countSuffix": "件聖遺物",
+    "pngSize": "{px} px 寬 PNG"
+  }
+}

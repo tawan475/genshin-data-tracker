@@ -16,6 +16,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import { api } from '@/api'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
 import { formatBytes, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
@@ -34,27 +35,24 @@ const { data, error, reload } = useResource(
 const site = ref<StaffSiteResponse | null>(null)
 const shownSite = computed(() => site.value ?? data.value?.site ?? null)
 
-const SIGNUP_SERIES = [
-  { key: 'password', label: 'Password', color: 'var(--chart-2)' },
+const signupSeries = computed(() => [
+  { key: 'password', label: t('staff.methods.password'), color: 'var(--chart-2)' },
   { key: 'discord', label: 'Discord', color: 'var(--chart-1)' },
   { key: 'google', label: 'Google', color: 'var(--chart-3)' },
-]
-const UPLOAD_SERIES = [{ key: 'stored', label: 'Stored', color: 'var(--chart-4)' }]
+])
+const uploadSeries = computed(() => [
+  { key: 'stored', label: t('staff.common.stored'), color: 'var(--chart-4)' },
+])
 
-const MODES: { value: SignupMode; label: string; title: string }[] = [
-  { value: 'open', label: 'Open', title: 'Anyone can sign up' },
-  {
-    value: 'oauth',
-    label: 'Discord/Google only',
-    title: 'New accounts only through Discord or Google',
-  },
-  { value: 'closed', label: 'Closed', title: 'Nobody can sign up; everyone can still sign in' },
-]
+const MODES: SignupMode[] = ['open', 'oauth', 'closed']
+const modeLabel = (mode: SignupMode) => t(`staff.overview.modes.${mode}`)
 const canSettings = computed(() => session.can('site.settings'))
 const modeOptions = computed(() =>
-  MODES.map((m) => ({
-    ...m,
-    disabled: !canSettings.value && m.value !== shownSite.value?.signupMode,
+  MODES.map((value) => ({
+    value,
+    label: modeLabel(value),
+    title: t(`staff.overview.modes.${value}Title`),
+    disabled: !canSettings.value && value !== shownSite.value?.signupMode,
   })),
 )
 const saving = ref(false)
@@ -66,10 +64,10 @@ async function setMode(mode: SignupMode) {
     site.value = await api.staff.updateSite({ signupMode: mode })
     feedback.toast({
       tone: 'success',
-      title: `Sign-ups: ${MODES.find((m) => m.value === mode)!.label}`,
+      title: t('staff.overview.modeSaved', { mode: modeLabel(mode) }),
     })
   } catch (cause) {
-    feedback.error('Not saved', cause)
+    feedback.error(t('staff.common.notSaved'), cause)
   } finally {
     saving.value = false
   }
@@ -85,9 +83,9 @@ async function saveLimits(patch: LimitsPatch) {
   try {
     site.value = await api.staff.updateSite(patch)
     limitsOpen.value = false
-    feedback.toast({ tone: 'success', title: 'Upload limits saved' })
+    feedback.toast({ tone: 'success', title: t('staff.overview.limitsSaved') })
   } catch (cause) {
-    feedback.error('Not saved', cause)
+    feedback.error(t('staff.common.notSaved'), cause)
   } finally {
     saving.value = false
   }
@@ -104,9 +102,14 @@ const emailTone = (state: StaffSiteResponse['email']) =>
 </script>
 
 <template>
-  <PageHeader title="Overview" />
+  <PageHeader :title="$t('staff.overview.title')" />
 
-  <UiError v-if="error && !data" :error="error" title="Could not load" @retry="reload" />
+  <UiError
+    v-if="error && !data"
+    :error="error"
+    :title="$t('staff.common.couldNotLoad')"
+    @retry="reload"
+  />
 
   <div v-else-if="!data" class="flex flex-col gap-6" aria-busy="true">
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
@@ -117,32 +120,32 @@ const emailTone = (state: StaffSiteResponse['email']) =>
 
   <div v-else class="flex flex-col gap-6">
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-      <UiStat label="Users" :value="data.users.total">
+      <UiStat :label="$t('staff.overview.users')" :value="data.users.total">
         <span
           v-if="data.users.today"
           class="tabular font-mono text-sm text-success-text"
-          title="Signed up today (UTC)"
+          :title="$t('staff.overview.signedUpToday')"
           >+{{ formatNumber(data.users.today) }}</span
         >
       </UiStat>
       <UiStat
-        label="Active 7 d"
+        :label="$t('staff.overview.active7d')"
         :value="data.active7d"
-        hint="Seen in the last 7 days (an upload counts)"
+        :hint="$t('staff.overview.active7dHint')"
       />
-      <UiStat label="Accounts" :value="data.accounts" />
-      <UiStat label="Snapshots" :value="data.snapshots.total">
+      <UiStat :label="$t('staff.common.accounts')" :value="data.accounts" />
+      <UiStat :label="$t('staff.common.snapshots')" :value="data.snapshots.total">
         <span
           v-if="data.snapshots.today"
           class="tabular font-mono text-sm text-success-text"
-          title="Stored today (UTC)"
+          :title="$t('staff.overview.storedToday')"
           >+{{ formatNumber(data.snapshots.today) }}</span
         >
       </UiStat>
       <UiStat
-        label="Stored"
+        :label="$t('staff.common.stored')"
         :value="formatBytes(data.storedBytes)"
-        :hint="`${storedShare} of D1's 10 GB`"
+        :hint="$t('staff.common.d1Share', { share: storedShare })"
       >
         <span class="tabular font-mono text-sm text-text-muted">{{ storedShare }}</span>
       </UiStat>
@@ -150,43 +153,43 @@ const emailTone = (state: StaffSiteResponse['email']) =>
         v-if="session.can('users.view')"
         :to="{ name: 'staff-users', query: { filter: 'suspended' } }"
         class="flex rounded-xl transition-opacity hover:opacity-80"
-        title="Suspended users"
+        :title="$t('staff.overview.suspendedUsers')"
       >
         <UiStat
-          label="Suspended"
+          :label="$t('staff.common.suspended')"
           :value="data.suspended"
           :tone="data.suspended ? 'warning' : undefined"
         />
       </RouterLink>
-      <UiStat v-else label="Suspended" :value="data.suspended" />
+      <UiStat v-else :label="$t('staff.common.suspended')" :value="data.suspended" />
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <UiPanel title="Sign-ups · 30 d">
+      <UiPanel :title="$t('staff.overview.signups30')">
         <StackedBars
           :days="data.signups"
-          :series="SIGNUP_SERIES"
-          label="Sign-ups per day for 30 days, by sign-in method"
+          :series="signupSeries"
+          :label="$t('staff.overview.signupsChart')"
         />
       </UiPanel>
-      <UiPanel title="Uploads · 30 d">
+      <UiPanel :title="$t('staff.overview.uploads30')">
         <StackedBars
           :days="data.uploads"
-          :series="UPLOAD_SERIES"
-          label="Snapshots stored per day for 30 days"
+          :series="uploadSeries"
+          :label="$t('staff.overview.uploadsChart')"
         />
       </UiPanel>
     </div>
 
     <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-      <UiPanel v-if="data.recent" title="Recent sign-ups" flush>
+      <UiPanel v-if="data.recent" :title="$t('staff.overview.recent')" flush>
         <template #actions>
           <UiButton
             variant="ghost"
             size="sm"
             :to="{ name: 'staff-users', query: { filter: 'new' } }"
           >
-            All users
+            {{ $t('staff.overview.allUsers') }}
           </UiButton>
         </template>
         <ul class="divide-y divide-border-subtle text-sm">
@@ -209,59 +212,76 @@ const emailTone = (state: StaffSiteResponse['email']) =>
               :title="formatDateTime(r.createdAt)"
               >{{ formatRelative(r.createdAt) }}</span
             >
-            <span class="tabular text-text-secondary sm:w-24 sm:text-right"
-              >{{ formatNumber(r.accounts) }} {{ r.accounts === 1 ? 'account' : 'accounts' }}</span
-            >
-            <UiBadge
-              v-if="r.sameIp > 0"
-              tone="warning"
-              title="Other sign-ups from this address within an hour"
-              >+{{ r.sameIp }} same IP</UiBadge
-            >
+            <span class="tabular text-text-secondary sm:w-24 sm:text-right">{{
+              $t('staff.overview.accountCount', { n: formatNumber(r.accounts) }, r.accounts)
+            }}</span>
+            <UiBadge v-if="r.sameIp > 0" tone="warning" :title="$t('staff.overview.sameIpTitle')">{{
+              $t('staff.overview.sameIp', { n: r.sameIp })
+            }}</UiBadge>
           </li>
         </ul>
       </UiPanel>
 
-      <UiPanel v-if="shownSite" title="Site">
+      <UiPanel v-if="shownSite" :title="$t('staff.overview.site')">
         <div class="flex flex-col gap-5">
           <div class="flex flex-col gap-2">
-            <span class="text-sm font-medium text-text-secondary">Sign-ups</span>
+            <span class="text-sm font-medium text-text-secondary">{{
+              $t('staff.overview.signups')
+            }}</span>
             <UiSegmented
               v-model="signupMode"
               :options="modeOptions"
-              label="Sign-ups"
+              :label="$t('staff.overview.signups')"
               class="self-start"
             />
           </div>
           <dl class="flex flex-col divide-y divide-border-subtle text-sm">
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Daily snapshots</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.dailySnapshots') }}
+              </dt>
               <dd class="tabular flex-1">
-                {{ formatNumber(shownSite.limits.dailySnapshots) }} per user
+                {{
+                  $t('staff.overview.perUser', {
+                    value: formatNumber(shownSite.limits.dailySnapshots),
+                  })
+                }}
               </dd>
             </div>
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Daily storage</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.dailyStorage') }}
+              </dt>
               <dd class="tabular flex-1">
-                {{ formatBytes(shownSite.limits.dailyBytes) }} per user
+                {{
+                  $t('staff.overview.perUser', { value: formatBytes(shownSite.limits.dailyBytes) })
+                }}
               </dd>
             </div>
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Storage quota</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.storageQuota') }}
+              </dt>
               <dd class="tabular flex-1">
-                {{ formatBytes(shownSite.limits.storageQuota) }} per user
+                {{
+                  $t('staff.overview.perUser', {
+                    value: formatBytes(shownSite.limits.storageQuota),
+                  })
+                }}
               </dd>
               <UiButton v-if="canSettings" variant="ghost" size="sm" @click="limitsOpen = true">
-                Edit
+                {{ $t('staff.common.edit') }}
               </UiButton>
             </div>
           </dl>
           <dl class="flex flex-col divide-y divide-border-subtle text-sm">
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Human check</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.humanCheck') }}
+              </dt>
               <dd>
                 <UiBadge :tone="shownSite.humanCheck ? 'success' : 'neutral'">{{
-                  shownSite.humanCheck ? 'On' : 'Off'
+                  shownSite.humanCheck ? $t('staff.common.on') : $t('staff.common.off')
                 }}</UiBadge>
               </dd>
             </div>
@@ -269,7 +289,7 @@ const emailTone = (state: StaffSiteResponse['email']) =>
               <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Discord</dt>
               <dd>
                 <UiBadge :tone="shownSite.providers.discord ? 'success' : 'neutral'">{{
-                  shownSite.providers.discord ? 'On' : 'Off'
+                  shownSite.providers.discord ? $t('staff.common.on') : $t('staff.common.off')
                 }}</UiBadge>
               </dd>
             </div>
@@ -277,20 +297,24 @@ const emailTone = (state: StaffSiteResponse['email']) =>
               <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Google</dt>
               <dd>
                 <UiBadge :tone="shownSite.providers.google ? 'success' : 'neutral'">{{
-                  shownSite.providers.google ? 'On' : 'Off'
+                  shownSite.providers.google ? $t('staff.common.on') : $t('staff.common.off')
                 }}</UiBadge>
               </dd>
             </div>
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Email</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.email') }}
+              </dt>
               <dd>
-                <UiBadge :tone="emailTone(shownSite.email)" class="capitalize">{{
-                  shownSite.email
+                <UiBadge :tone="emailTone(shownSite.email)">{{
+                  $t(`staff.overview.emailState.${shownSite.email}`)
                 }}</UiBadge>
               </dd>
             </div>
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Build</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.build') }}
+              </dt>
               <dd class="flex flex-wrap items-center gap-2">
                 <span
                   v-if="shownSite.build"
@@ -303,14 +327,18 @@ const emailTone = (state: StaffSiteResponse['email']) =>
                   :title="shownSite.migrations.pending.join(', ') || undefined"
                   >{{
                     shownSite.migrations.pending.length
-                      ? `${shownSite.migrations.pending.length} migrations pending`
-                      : 'Migrations ok'
+                      ? $t('staff.overview.migrationsPending', {
+                          n: shownSite.migrations.pending.length,
+                        })
+                      : $t('staff.overview.migrationsOk')
                   }}</UiBadge
                 >
               </dd>
             </div>
             <div class="flex items-center gap-3 py-2.5">
-              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">Game data</dt>
+              <dt class="w-28 shrink-0 text-text-secondary sm:w-36">
+                {{ $t('staff.overview.gameData') }}
+              </dt>
               <dd class="tabular" :title="gameData.version">
                 v{{ gameData.version.split('+')[0] }}
               </dd>

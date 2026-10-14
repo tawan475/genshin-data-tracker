@@ -11,6 +11,7 @@ import {
 } from '@/data/achievement-progress'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 /**
@@ -27,11 +28,12 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ close: [] }>()
 
-const FORMAT_LABELS: Record<ParsedAchievementImport['format'], string> = {
-  seelie: 'Seelie',
-  good: 'GOOD',
-  list: 'Id list',
-}
+const formatLabel = (format: ParsedAchievementImport['format']): string =>
+  format === 'seelie'
+    ? 'Seelie'
+    : format === 'good'
+      ? 'GOOD'
+      : t('achievements.import.formats.list')
 
 const input = ref<HTMLInputElement>()
 const dragging = ref(false)
@@ -64,9 +66,9 @@ async function read(file: File | undefined) {
   try {
     const result = parseAchievementImport(JSON.parse(await file.text()))
     if (result) parsed.value = result
-    else failure.value = 'No achievements found'
+    else failure.value = t('achievements.import.noAchievements')
   } catch {
-    failure.value = 'Not a JSON file'
+    failure.value = t('achievements.import.notJson')
   } finally {
     reading.value = false
   }
@@ -96,20 +98,22 @@ async function add() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Import" @close="emit('close')">
+  <UiModal :open="open" :title="$t('achievements.import.title')" @close="emit('close')">
     <div class="flex flex-col gap-4">
       <div
         class="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
         :class="dragging ? 'border-accent bg-surface-overlay' : 'border-border-strong'"
-        title="Seelie: Settings → Export Account. stardb or irminsul: a GOOD file with gi_achievements."
+        :title="$t('achievements.import.dropTitle')"
         @dragenter.prevent="dragging = true"
         @dragover.prevent
         @dragleave.self="dragging = false"
         @drop.prevent="onDrop"
       >
         <FileUp class="size-8 text-text-muted" aria-hidden="true" />
-        <p class="text-sm font-medium">Seelie or stardb file</p>
-        <UiButton :loading="reading" @click="input?.click()">Browse</UiButton>
+        <p class="text-sm font-medium">{{ $t('achievements.import.drop') }}</p>
+        <UiButton :loading="reading" @click="input?.click()">{{
+          $t('achievements.import.browse')
+        }}</UiButton>
         <input
           ref="input"
           type="file"
@@ -126,30 +130,33 @@ async function add() {
           <FileJson class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
           <span class="truncate font-medium">{{ fileName }}</span>
           <span v-if="parsed" class="shrink-0 text-text-muted">{{
-            FORMAT_LABELS[parsed.format]
+            formatLabel(parsed.format)
           }}</span>
         </p>
         <p v-if="failure" class="text-sm text-danger-text" role="alert">{{ failure }}</p>
         <dl v-else-if="plan && parsed" class="grid grid-cols-3 gap-2 text-center">
           <div class="rounded-lg bg-surface-overlay px-2 py-2">
-            <dt class="text-xs text-text-muted">In file</dt>
+            <dt class="text-xs text-text-muted">{{ $t('achievements.import.inFile') }}</dt>
             <dd class="tabular font-mono text-lg font-medium">
               {{ formatNumber(parsed.ids.length) }}
             </dd>
           </div>
           <div class="rounded-lg bg-surface-overlay px-2 py-2">
-            <dt class="text-xs text-text-muted">Done already</dt>
+            <dt class="text-xs text-text-muted">{{ $t('achievements.import.already') }}</dt>
             <dd class="tabular font-mono text-lg font-medium">{{ formatNumber(plan.already) }}</dd>
           </div>
           <div
             class="rounded-lg bg-surface-overlay px-2 py-2"
             :title="
               plan.unknown || plan.disused
-                ? `Includes ${formatNumber(plan.unknown)} newer than the game data and ${formatNumber(plan.disused)} removed from the game: kept, not counted`
+                ? $t('achievements.import.newTitle', {
+                    unknown: formatNumber(plan.unknown),
+                    disused: formatNumber(plan.disused),
+                  })
                 : undefined
             "
           >
-            <dt class="text-xs text-text-muted">New</dt>
+            <dt class="text-xs text-text-muted">{{ $t('achievements.import.new') }}</dt>
             <dd class="tabular font-mono text-lg font-medium text-accent-text">
               {{ formatNumber(plan.add.length) }}
             </dd>
@@ -159,9 +166,15 @@ async function add() {
     </div>
 
     <template #footer>
-      <UiButton variant="ghost" @click="emit('close')">Cancel</UiButton>
+      <UiButton variant="ghost" @click="emit('close')">{{
+        $t('achievements.import.cancel')
+      }}</UiButton>
       <UiButton variant="primary" :disabled="!plan?.add.length" :loading="saving" @click="add">
-        Add {{ plan?.add.length ? formatNumber(plan.add.length) : '' }}
+        {{
+          $t('achievements.import.add', {
+            n: plan?.add.length ? formatNumber(plan.add.length) : '',
+          })
+        }}
       </UiButton>
     </template>
   </UiModal>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { levelCap } from '@/lib/level'
 
 /**
@@ -11,7 +12,9 @@ const props = defineProps<{ level: number; ascension: number; target?: number; b
 
 const cap = computed(() => levelCap(props.ascension, props.level))
 const warn = computed(() => props.target !== undefined && props.level < props.target)
-const title = computed(() => `Level ${props.level} of ${cap.value} · Ascension ${props.ascension}`)
+const title = computed(() =>
+  t('ui.level.title', { level: props.level, cap: cap.value, ascension: props.ascension }),
+)
 </script>
 
 <template>

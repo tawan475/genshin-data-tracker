@@ -11,7 +11,7 @@ const hintId = `${id}-hint`
   <div class="flex flex-col gap-1">
     <label :for="id" class="text-sm font-medium text-text-secondary">
       {{ label }}
-      <span v-if="optional" class="font-normal text-text-muted">(optional)</span>
+      <span v-if="optional" class="font-normal text-text-muted">{{ $t('ui.field.optional') }}</span>
     </label>
     <slot
       :id="id"

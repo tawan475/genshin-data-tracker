@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { Wrench } from 'lucide-vue-next'
 import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
@@ -32,8 +33,15 @@ const c = computed(() => props.character)
 
 const label = computed(
   () =>
-    `${c.value.name}, ${formatLevel(c.value.level, c.value.ascension)}, C${c.value.constellation}, talents ${c.value.talent.auto} ${c.value.talent.skill} ${c.value.talent.burst}` +
-    (c.value.friendship !== null ? `, friendship ${c.value.friendship}` : ''),
+    t('characters.card.label', {
+      name: c.value.name,
+      level: formatLevel(c.value.level, c.value.ascension),
+      constellation: c.value.constellation,
+      auto: c.value.talent.auto,
+      skill: c.value.talent.skill,
+      burst: c.value.talent.burst,
+    }) +
+    (c.value.friendship !== null ? t('characters.card.friendship', { n: c.value.friendship }) : ''),
 )
 const kind = computed(() =>
   [
@@ -46,7 +54,9 @@ const kind = computed(() =>
 const gapText = computed(() => c.value.gaps.map((g) => g.text).join(' · '))
 const weaponTitle = computed(() => {
   const w = c.value.weapon
-  return w ? `${w.name} · ${formatLevel(w.level, w.ascension)} · R${w.refinement}` : 'No weapon'
+  return w
+    ? `${w.name} · ${formatLevel(w.level, w.ascension)} · R${w.refinement}`
+    : t('characters.gap.noWeapon')
 })
 </script>
 
@@ -86,7 +96,7 @@ const weaponTitle = computed(() => {
               <UiBadge v-if="c.gaps.length" tone="warning" mono class="shrink-0" :title="gapText">
                 <Wrench class="size-3.5" aria-hidden="true" />
                 {{ c.gaps.length }}
-                <span class="sr-only">to do: {{ gapText }}</span>
+                <span class="sr-only">{{ $t('characters.card.toDo', { gaps: gapText }) }}</span>
               </UiBadge>
             </div>
             <p class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-text-secondary">
@@ -154,7 +164,7 @@ const weaponTitle = computed(() => {
           scope="build"
           label
           class="shrink-0"
-          :detail="`CRIT ${c.critRate}% / ${c.critDmg}% from artifacts`"
+          :detail="$t('characters.card.critDetail', { rate: c.critRate, dmg: c.critDmg })"
         />
       </div>
     </button>

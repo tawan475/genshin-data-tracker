@@ -4,6 +4,7 @@ import type { ProgressSummary } from '@/data/achievement-progress'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import { materialIcon } from '@/lib/assets'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 const primogem = materialIcon('Primogem')
@@ -19,17 +20,24 @@ const percent = computed(() => {
 })
 const doneTitle = computed(() => {
   const s = props.summary
-  const parts = [`${formatNumber(s.captured)} captured`, `${formatNumber(s.marked)} by hand`]
-  if (s.unknown.length) parts.push(`${formatNumber(s.unknown.length)} newer than the game data`)
+  const parts = [
+    t('achievements.summary.doneCaptured', { n: formatNumber(s.captured) }),
+    t('achievements.summary.doneByHand', { n: formatNumber(s.marked) }),
+  ]
+  if (s.unknown.length)
+    parts.push(t('achievements.summary.doneUnknown', { n: formatNumber(s.unknown.length) }))
   return parts.join(' · ')
 })
 const missing = computed(() => props.summary.total - props.summary.done)
 </script>
 
 <template>
-  <ul class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4" aria-label="Summary">
+  <ul
+    class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
+    :aria-label="$t('achievements.summary.label')"
+  >
     <li class="flex min-w-0">
-      <UiStat label="Done" :hint="doneTitle">
+      <UiStat :label="$t('achievements.summary.done')" :hint="doneTitle">
         <template #value>
           <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
             {{ formatNumber(summary.done)
@@ -39,17 +47,20 @@ const missing = computed(() => props.summary.total - props.summary.done)
       </UiStat>
     </li>
     <li class="flex min-w-0">
-      <UiStat label="Progress" :value="`${percent}%`">
+      <UiStat :label="$t('achievements.summary.progress')" :value="`${percent}%`">
         <UiProgress
           class="mt-1"
           :value="summary.done"
           :max="summary.total"
-          label="Achievements done"
+          :label="$t('achievements.summary.progressLabel')"
         />
       </UiStat>
     </li>
     <li class="flex min-w-0">
-      <UiStat label="Primogems" hint="Primogems collected / on offer">
+      <UiStat
+        :label="$t('achievements.summary.primogems')"
+        :hint="$t('achievements.summary.primogemsHint')"
+      >
         <template #icon><img :src="primogem" alt="" class="size-4" /></template>
         <template #value>
           <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
@@ -63,10 +74,12 @@ const missing = computed(() => props.summary.total - props.summary.done)
     </li>
     <li class="flex min-w-0">
       <UiStat
-        label="Missing"
+        :label="$t('achievements.summary.missing')"
         :value="missing"
         exact
-        :hint="missingOnly ? 'Show all' : 'Show only what is left'"
+        :hint="
+          missingOnly ? $t('achievements.summary.showAll') : $t('achievements.summary.showLeft')
+        "
         :tone="missing > 0 ? 'warning' : 'success'"
         :pressed="missingOnly"
         @click="$emit('toggleMissing')"

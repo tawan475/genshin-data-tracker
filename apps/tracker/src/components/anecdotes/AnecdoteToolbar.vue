@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Lock, Search } from 'lucide-vue-next'
 import type { AnecdoteCompletion, AnecdoteFilters } from '@/data/anecdote-progress'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 export interface AreaTab {
@@ -31,18 +33,19 @@ const filters = defineModel<AnecdoteFilters>('filters', { required: true })
 const showDone = defineModel<boolean>('showDone', { required: true })
 defineEmits<{ clear: [] }>()
 
-const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'missing', label: 'Not done' },
-  { value: 'done', label: 'Done' },
-]
+const completionOptions = computed(() =>
+  (['all', 'missing', 'done'] as AnecdoteCompletion[]).map((value) => ({
+    value,
+    label: t(`anecdotes.toolbar.completions.${value}`),
+  })),
+)
 </script>
 
 <template>
-  <UiToolbar label="Filter anecdotes">
+  <UiToolbar :label="$t('anecdotes.toolbar.label')">
     <div class="flex flex-wrap items-center gap-2">
       <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
-        <span class="sr-only">Search</span>
+        <span class="sr-only">{{ $t('anecdotes.toolbar.search') }}</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
@@ -51,14 +54,14 @@ const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
           v-model="filters.query"
           type="search"
           class="pl-9"
-          placeholder="Search"
-          title="Title, story, NPC or id"
+          :placeholder="$t('anecdotes.toolbar.search')"
+          :title="$t('anecdotes.toolbar.searchTitle')"
           autocomplete="off"
         />
       </label>
-      <div class="flex gap-2" role="radiogroup" aria-label="Completion">
+      <div class="flex gap-2" role="radiogroup" :aria-label="$t('anecdotes.toolbar.completion')">
         <FilterChip
-          v-for="option in COMPLETION"
+          v-for="option in completionOptions"
           :key="option.value"
           radio
           :pressed="filters.completion === option.value"
@@ -69,19 +72,19 @@ const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
       <FilterChip
         v-if="filters.completion === 'all'"
         :pressed="showDone"
-        title="Done anecdotes in full instead of folded under each NPC"
+        :title="$t('anecdotes.toolbar.showDoneTitle')"
         @toggle="showDone = !showDone"
-        >Show done</FilterChip
+        >{{ $t('anecdotes.toolbar.showDone') }}</FilterChip
       >
     </div>
 
     <div
       class="scroll-hide scroll-fade-x -mx-3 flex items-center gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="radiogroup"
-      aria-label="Area"
+      :aria-label="$t('anecdotes.toolbar.area')"
     >
       <FilterChip radio :pressed="filters.area === null" @toggle="filters.area = null">
-        All
+        {{ $t('anecdotes.toolbar.allAreas') }}
         <span class="tabular font-mono text-text-muted"
           >{{ formatNumber(done) }}/{{ formatNumber(total) }}</span
         >
@@ -91,7 +94,7 @@ const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
         :key="area.id"
         radio
         :pressed="filters.area === area.id"
-        :title="area.unlocked === false ? 'Not unlocked in the newest capture' : undefined"
+        :title="area.unlocked === false ? $t('anecdotes.toolbar.locked') : undefined"
         @toggle="filters.area = area.id"
       >
         <Lock v-if="area.unlocked === false" class="size-3.5" aria-hidden="true" />
@@ -108,7 +111,9 @@ const COMPLETION: { value: AnecdoteCompletion; label: string }[] = [
 
     <div v-if="filtered" class="flex items-center gap-2 text-sm text-text-secondary">
       <span class="tabular font-mono">{{ formatNumber(shown) }} / {{ formatNumber(listed) }}</span>
-      <UiButton variant="ghost" size="sm" @click="$emit('clear')">Clear</UiButton>
+      <UiButton variant="ghost" size="sm" @click="$emit('clear')">{{
+        $t('anecdotes.clear')
+      }}</UiButton>
     </div>
   </UiToolbar>
 </template>

@@ -5,6 +5,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import type { ImportItem, ImportStatus } from '@/data/import-queue'
+import { t } from '@/i18n'
 import { formatBytes, formatDateTime, formatNumber } from '@/lib/format'
 
 /**
@@ -21,8 +22,14 @@ const filter = ref<'all' | 'failed'>('all')
 
 const failedCount = computed(() => props.items.filter((item) => item.status === 'failed').length)
 const filterOptions = computed(() => [
-  { value: 'all' as const, label: `All ${formatNumber(props.items.length)}` },
-  { value: 'failed' as const, label: `Failed ${formatNumber(failedCount.value)}` },
+  {
+    value: 'all' as const,
+    label: t('transfer.queue.all', { n: formatNumber(props.items.length) }),
+  },
+  {
+    value: 'failed' as const,
+    label: t('transfer.queue.failed', { n: formatNumber(failedCount.value) }),
+  },
 ])
 const filtered = computed(() =>
   filter.value === 'failed' ? props.items.filter((item) => item.status === 'failed') : props.items,
@@ -34,25 +41,28 @@ watch(failedCount, (count) => {
   if (count === 0) filter.value = 'all'
 })
 
-const STATUS: Record<ImportStatus, { label: string; class: string }> = {
-  queued: { label: 'Queued', class: 'text-text-muted' },
-  uploading: { label: 'Uploading', class: 'text-text-primary' },
-  waiting: { label: 'Waiting', class: 'text-warning-text' },
-  created: { label: 'New', class: 'text-success-text' },
-  unchanged: { label: 'Unchanged', class: 'text-text-secondary' },
-  failed: { label: 'Failed', class: 'text-danger-text' },
-  cancelled: { label: 'Skipped', class: 'text-text-muted' },
+/** Each status's colour; its label is transfer.queue.state.<status>. */
+const STATUS: Record<ImportStatus, { class: string }> = {
+  queued: { class: 'text-text-muted' },
+  uploading: { class: 'text-text-primary' },
+  waiting: { class: 'text-warning-text' },
+  created: { class: 'text-success-text' },
+  unchanged: { class: 'text-text-secondary' },
+  failed: { class: 'text-danger-text' },
+  cancelled: { class: 'text-text-muted' },
 }
 
 function details(item: ImportItem): string {
   const parts = [item.path]
   if (item.takenAt) {
     parts.push(
-      `Captured ${formatDateTime(item.takenAt)}${item.takenFromName ? ' (from the file name)' : ''}`,
+      t(item.takenFromName ? 'transfer.queue.capturedFromName' : 'transfer.queue.captured', {
+        time: formatDateTime(item.takenAt),
+      }),
     )
-  } else if (item.takenAt === null) parts.push('No capture time: upload time used')
+  } else if (item.takenAt === null) parts.push(t('transfer.queue.noTime'))
   if (item.status === 'created' || item.status === 'unchanged') {
-    parts.push(`${formatBytes(item.storedSize ?? 0)} stored`)
+    parts.push(t('transfer.queue.stored', { size: formatBytes(item.storedSize ?? 0) }))
   }
   if (item.message) parts.push(item.message)
   return parts.join('\n')
@@ -70,20 +80,26 @@ function removable(item: ImportItem) {
 <template>
   <div>
     <div v-if="failedCount > 0" class="border-b border-border-subtle px-5 py-3">
-      <UiSegmented v-model="filter" :options="filterOptions" label="Show" />
+      <UiSegmented v-model="filter" :options="filterOptions" :label="$t('transfer.queue.show')" />
     </div>
     <table class="w-full table-fixed text-sm">
       <caption class="sr-only">
-        Files, oldest capture first
+        {{
+          $t('transfer.queue.caption')
+        }}
       </caption>
       <thead class="text-left text-text-secondary">
         <tr class="border-b border-border-subtle">
-          <th scope="col" class="py-2 pl-5 font-medium">File</th>
-          <th scope="col" class="w-20 px-2 py-2 text-right font-medium">Size</th>
-          <th scope="col" class="w-12 px-2 py-2 font-medium sm:w-32">
-            <span class="sr-only sm:not-sr-only">Status</span>
+          <th scope="col" class="py-2 pl-5 font-medium">{{ $t('transfer.queue.file') }}</th>
+          <th scope="col" class="w-20 px-2 py-2 text-right font-medium">
+            {{ $t('transfer.queue.size') }}
           </th>
-          <th scope="col" class="w-14 py-2 pr-3"><span class="sr-only">Remove</span></th>
+          <th scope="col" class="w-12 px-2 py-2 font-medium sm:w-32">
+            <span class="sr-only sm:not-sr-only">{{ $t('transfer.queue.status') }}</span>
+          </th>
+          <th scope="col" class="w-14 py-2 pr-3">
+            <span class="sr-only">{{ $t('transfer.queue.remove') }}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -136,7 +152,9 @@ function removable(item: ImportItem) {
                 aria-hidden="true"
               />
               <CircleDashed v-else class="size-4 shrink-0" aria-hidden="true" />
-              <span class="sr-only sm:not-sr-only">{{ STATUS[item.status].label }}</span>
+              <span class="sr-only sm:not-sr-only">{{
+                $t(`transfer.queue.state.${item.status}`)
+              }}</span>
             </span>
           </td>
           <td class="py-0 pr-3 text-right">
@@ -144,8 +162,8 @@ function removable(item: ImportItem) {
               v-if="removable(item)"
               type="button"
               class="inline-flex size-11 items-center justify-center rounded-md text-text-muted hover:bg-surface-overlay hover:text-text-primary"
-              :aria-label="`Remove ${item.name}`"
-              title="Remove"
+              :aria-label="$t('transfer.queue.removeFile', { name: item.name })"
+              :title="$t('transfer.queue.remove')"
               @click="emit('remove', item.id)"
             >
               <X class="size-4" aria-hidden="true" />
@@ -161,7 +179,7 @@ function removable(item: ImportItem) {
       <span class="tabular font-mono text-sm text-text-muted"
         >{{ formatNumber(visible.length) }}/{{ formatNumber(filtered.length) }}</span
       >
-      <UiButton variant="ghost" @click="shown += PAGE">More</UiButton>
+      <UiButton variant="ghost" @click="shown += PAGE">{{ $t('transfer.queue.more') }}</UiButton>
     </div>
   </div>
 </template>

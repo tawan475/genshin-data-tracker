@@ -8,6 +8,7 @@ import {
   tierBounds,
   type CvScope,
 } from '@/lib/crit-tiers'
+import { t } from '@/i18n'
 
 /**
  * A crit value in its tier colour (akasha.cv's tiers, lib/crit-tiers): one
@@ -32,12 +33,12 @@ const props = withDefaults(
 const tier = computed(() => cvTier(props.value, props.scope, props.critCirclet))
 const title = computed(() =>
   [
-    `CV ${props.value.toFixed(1)} · CRIT Rate × 2 + CRIT DMG`,
+    t('ui.crit.title', { value: props.value.toFixed(1) }),
     props.detail,
     props.plain
       ? ''
       : `${tierBounds(props.scope === 'build' ? BUILD_CV_TIERS : ARTIFACT_CV_TIERS)}` +
-        (props.critCirclet ? ' · CRIT circlet +7.77' : ''),
+        (props.critCirclet ? t('ui.crit.circlet') : ''),
   ]
     .filter(Boolean)
     .join('\n'),

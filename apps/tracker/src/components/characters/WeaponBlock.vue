@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import LevelText from '@/components/ui/LevelText.vue'
@@ -21,7 +22,11 @@ const routeName = useAccountRoute()
 const lines = computed(() => (props.weapon ? weaponLines(props.weapon) : null))
 const passiveTitle = computed(() =>
   lines.value?.passive.length
-    ? `Passive: ${lines.value.passive.map((s) => `${s.label} +${s.text}`).join(', ')}`
+    ? t('characters.weapon.passive', {
+        stats: lines.value.passive
+          .map((s) => `${s.label} +${s.text}`)
+          .join(t('characters.setBonus.join')),
+      })
     : undefined,
 )
 </script>
@@ -30,7 +35,7 @@ const passiveTitle = computed(() =>
   <section
     v-if="weapon"
     class="flex items-center gap-3 rounded-xl border border-border-default bg-surface-raised/85 p-2.5 sm:p-3"
-    aria-label="Weapon"
+    :aria-label="$t('game.weapon')"
   >
     <GameIcon
       :src="weaponIcon(weapon.key, weapon.ascension)"
@@ -53,9 +58,13 @@ const passiveTitle = computed(() =>
         <LevelText :level="weapon.level" :ascension="weapon.ascension" :target="TARGET_LEVEL" />
         <RefinementPips :value="weapon.refinement" />
         <GameStars v-if="weapon.rarity" :rarity="weapon.rarity" />
-        <span v-if="weapon.lock" class="inline-flex text-text-muted" title="Locked">
+        <span
+          v-if="weapon.lock"
+          class="inline-flex text-text-muted"
+          :title="$t('characters.weapon.locked')"
+        >
           <Lock class="size-3.5" aria-hidden="true" />
-          <span class="sr-only">Locked</span>
+          <span class="sr-only">{{ $t('characters.weapon.locked') }}</span>
         </span>
       </p>
       <dl v-if="lines" class="flex flex-wrap gap-1.5 text-sm" :title="passiveTitle">
@@ -73,8 +82,8 @@ const passiveTitle = computed(() =>
   <p
     v-else
     class="rounded-xl border border-dashed border-border-strong p-3 text-sm text-text-muted"
-    aria-label="Weapon"
+    :aria-label="$t('game.weapon')"
   >
-    No weapon
+    {{ $t('characters.gap.noWeapon') }}
   </p>
 </template>

@@ -10,6 +10,7 @@ import type {
 import type { z } from 'zod'
 import { computed, shallowRef, watch, type Ref } from 'vue'
 import { ApiRequestError, api } from '@/api'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 import { applyChanges, mergeChange, overrideId } from './hand-edits'
 
@@ -175,8 +176,8 @@ export function usePlannerState(
             if (relative || attempt >= 2) {
               feedback.toast({
                 tone: 'info',
-                title: 'New capture',
-                detail: 'Nothing was changed: check and try again',
+                title: t('planner.toast.newCapture'),
+                detail: t('planner.toast.newCaptureDetail'),
               })
               throw cause
             }
@@ -185,7 +186,7 @@ export function usePlannerState(
       } catch (cause) {
         if (mine !== generation) return
         if (!isConflict(cause)) {
-          feedback.error('Not saved', cause)
+          feedback.error(t('planner.toast.notSaved'), cause)
           await load(true)
         }
         throw cause

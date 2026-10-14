@@ -224,6 +224,9 @@ describe('text', () => {
     expect(shortTitle('Kaedehara Kazuha: Waiting...', 'Kaedehara Kazuha')).toBe('Waiting...')
     expect(shortTitle('Someone Else: Thing', 'Noelle')).toBe('Thing')
     expect(shortTitle('No prefix here', undefined)).toBe('No prefix here')
+    // Chinese text writes the full-width colon.
+    expect(shortTitle('诺艾尔：剑术', '诺艾尔')).toBe('剑术')
+    expect(shortTitle('某人：事情', '诺艾尔')).toBe('事情')
     expect(plainText('By the <color=#E88812FF>fountain</color>...\\nAgain')).toBe(
       'By the fountain... Again',
     )

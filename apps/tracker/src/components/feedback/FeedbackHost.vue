@@ -52,7 +52,7 @@ function runAction(toast: Toast) {
       <button
         type="button"
         class="-m-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-text-muted hover:text-text-primary"
-        aria-label="Dismiss"
+        :aria-label="$t('common.dismiss')"
         @click="feedback.dismiss(toast.id)"
       >
         <X class="size-4" aria-hidden="true" />
@@ -67,7 +67,7 @@ function runAction(toast: Toast) {
   >
     <p class="text-text-secondary">{{ feedback.confirmation?.detail }}</p>
     <template #footer>
-      <UiButton @click="feedback.settle(false)">Cancel</UiButton>
+      <UiButton @click="feedback.settle(false)">{{ $t('common.cancel') }}</UiButton>
       <UiButton
         :variant="feedback.confirmation?.tone === 'danger' ? 'danger' : 'primary'"
         @click="feedback.settle(true)"

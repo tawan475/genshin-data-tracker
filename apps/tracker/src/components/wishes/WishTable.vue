@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { wishItemName } from './item-name'
 import { computed, reactive, ref, watch } from 'vue'
 import { ArrowDown, ArrowUp, Search } from 'lucide-vue-next'
 import type { UigfGachaType } from '@gdt/shared'
@@ -8,12 +9,13 @@ import GameIcon from '@/components/ui/GameIcon.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPager from '@/components/ui/UiPager.vue'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import {
   BAND_COLOR,
-  OUTCOME_LABEL,
   RARITY_TEXT,
+  outcomeLabel,
   outcomeTitle,
   runName,
   wishIcon,
@@ -61,7 +63,7 @@ const filtered = computed(() => {
   const out = props.rows.filter(
     (r) =>
       (ranks[r.pull.item.rank as 3 | 4 | 5] ?? true) &&
-      (!q || r.pull.item.name.toLowerCase().includes(q)),
+      (!q || wishItemName(r.pull.item).toLowerCase().includes(q)),
   )
   return newestFirst.value ? out : out.reverse()
 })
@@ -97,16 +99,20 @@ function pity(row: PullRow): { color: string; width: string } | null {
   return { color: 'var(--rarity-4)', width: `${Math.min(100, (row.pity / hard.value[1]) * 100)}%` }
 }
 const kind = (row: PullRow) =>
-  row.pull.item.kind === 'weapon' ? 'Weapon' : row.pull.item.kind ? 'Character' : ''
+  row.pull.item.kind === 'weapon'
+    ? t('wishes.table.weapon')
+    : row.pull.item.kind
+      ? t('wishes.table.character')
+      : ''
 </script>
 
 <template>
   <section
-    aria-label="All wishes"
+    :aria-label="$t('wishes.table.label')"
     class="min-w-0 rounded-xl border border-border-default bg-surface-raised shadow-sm"
   >
     <div class="flex flex-wrap items-center gap-2 border-b border-border-default px-3 py-3 sm:px-4">
-      <div role="group" aria-label="Rarity" class="flex gap-2">
+      <div role="group" :aria-label="$t('wishes.rarity')" class="flex gap-2">
         <FilterChip
           v-for="rank in [5, 4, 3] as const"
           :key="rank"
@@ -118,7 +124,7 @@ const kind = (row: PullRow) =>
         </FilterChip>
       </div>
       <label class="relative min-w-0 basis-full sm:ml-auto sm:w-60 sm:basis-auto">
-        <span class="sr-only">Search wishes</span>
+        <span class="sr-only">{{ $t('wishes.table.search') }}</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
@@ -127,15 +133,15 @@ const kind = (row: PullRow) =>
           v-model="query"
           type="search"
           class="pl-9"
-          placeholder="Search"
-          title="Character or weapon name"
+          :placeholder="$t('wishes.search')"
+          :title="$t('wishes.table.searchTitle')"
           autocomplete="off"
         />
       </label>
     </div>
 
     <p v-if="filtered.length === 0" class="px-5 py-6 text-center text-sm text-text-muted">
-      No pulls match
+      {{ $t('wishes.table.noMatch') }}
     </p>
     <div v-else class="overflow-x-auto">
       <table class="tabular w-full font-mono text-sm">
@@ -144,36 +150,44 @@ const kind = (row: PullRow) =>
             <th
               scope="col"
               class="hidden w-16 py-2.5 pr-2 pl-4 text-right font-medium sm:table-cell"
-              :title="runs ? 'Pull number on that banner run' : 'Pull number'"
+              :title="runs ? $t('wishes.table.rollRun') : $t('wishes.table.roll')"
             >
               #
             </th>
-            <th scope="col" class="py-2.5 pr-2 pl-3 font-medium sm:pl-3">Item</th>
+            <th scope="col" class="py-2.5 pr-2 pl-3 font-medium sm:pl-3">
+              {{ $t('wishes.table.item') }}
+            </th>
             <th
               scope="col"
               class="px-2 py-2.5 font-medium sm:w-36"
               :class="rated ? '' : 'pr-3 sm:pr-2'"
             >
-              Pity
+              {{ $t('wishes.table.pity') }}
             </th>
-            <th v-if="rated" scope="col" class="py-2.5 pr-3 pl-2 font-medium sm:pr-2">Result</th>
+            <th v-if="rated" scope="col" class="py-2.5 pr-3 pl-2 font-medium sm:pr-2">
+              {{ $t('wishes.table.result') }}
+            </th>
             <th v-if="runs" scope="col" class="hidden px-2 py-2.5 font-medium lg:table-cell">
-              Banner
+              {{ $t('wishes.banner') }}
             </th>
             <th scope="col" class="hidden py-2.5 pr-4 pl-2 text-right font-medium sm:table-cell">
               <button
                 type="button"
                 class="inline-flex items-center gap-1 hover:text-text-primary"
-                :title="newestFirst ? 'Newest first' : 'Oldest first'"
+                :title="
+                  newestFirst ? $t('wishes.table.newestFirst') : $t('wishes.table.oldestFirst')
+                "
                 @click="newestFirst = !newestFirst"
               >
-                Time
+                {{ $t('wishes.table.time') }}
                 <component
                   :is="newestFirst ? ArrowDown : ArrowUp"
                   class="size-3.5"
                   aria-hidden="true"
                 />
-                <span class="sr-only">{{ newestFirst ? 'newest first' : 'oldest first' }}</span>
+                <span class="sr-only">{{
+                  newestFirst ? $t('wishes.table.newestFirstSr') : $t('wishes.table.oldestFirstSr')
+                }}</span>
               </button>
             </th>
           </tr>
@@ -192,7 +206,7 @@ const kind = (row: PullRow) =>
               <div class="flex min-w-0 items-center gap-2.5">
                 <GameIcon
                   :src="wishIcon(row.pull.item)"
-                  :name="row.pull.item.name"
+                  :name="wishItemName(row.pull.item)"
                   :rarity="row.pull.item.rank || undefined"
                   size="xs"
                 />
@@ -201,8 +215,8 @@ const kind = (row: PullRow) =>
                     <span
                       class="max-w-32 truncate font-sans font-medium sm:max-w-56"
                       :class="RARITY_TEXT[row.pull.item.rank] ?? ''"
-                      :title="row.pull.item.name"
-                      >{{ row.pull.item.name }}</span
+                      :title="wishItemName(row.pull.item)"
+                      >{{ wishItemName(row.pull.item) }}</span
                     >
                     <span class="hidden shrink-0 font-sans text-xs text-text-muted 2xl:inline">{{
                       kind(row)
@@ -239,7 +253,7 @@ const kind = (row: PullRow) =>
                 v-if="row.outcome"
                 :tone="OUTCOME_TONE[row.outcome]"
                 :title="outcomeTitle(row.outcome, banner, row.pull.item.rank)"
-                >{{ OUTCOME_LABEL[row.outcome] }}</UiBadge
+                >{{ outcomeLabel(row.outcome) }}</UiBadge
               >
               <span v-else-if="row.pull.item.rank >= 4" class="text-text-muted">—</span>
             </td>
@@ -266,7 +280,7 @@ const kind = (row: PullRow) =>
         :page-count="pageCount"
         :total="filtered.length"
         :page-size="PAGE_SIZE"
-        label="Wish pages"
+        :label="$t('wishes.table.pages')"
       />
     </div>
   </section>

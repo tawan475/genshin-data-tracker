@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
+import { t } from '@/i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { SearchX, Swords, Upload } from 'lucide-vue-next'
 import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
@@ -105,16 +106,21 @@ const strip = computed<StripItem[]>(() => {
   if (!a) return []
   const spare5 = filters.status === 'unequipped' && filters.rarity === 5
   return [
-    { key: 'total', label: 'Weapons', value: a.total },
-    { key: 'kinds', label: 'Kinds', value: a.kinds, title: 'Different weapons' },
-    { key: 'equipped', label: 'Equipped', value: a.equipped },
+    { key: 'total', label: t('game.weapons'), value: a.total },
+    {
+      key: 'kinds',
+      label: t('weapons.page.kinds'),
+      value: a.kinds,
+      title: t('weapons.page.kindsTitle'),
+    },
+    { key: 'equipped', label: t('weapons.toolbar.equipped'), value: a.equipped },
     { key: 'five', label: '5★', value: a.byRarity.get(5) ?? 0 },
-    { key: 'spare5', label: 'Unused 5★', value: a.spare5, pressed: spare5 },
+    { key: 'spare5', label: t('weapons.page.unused5'), value: a.spare5, pressed: spare5 },
     {
       key: 'refinable',
-      label: 'Refinable',
+      label: t('weapons.toolbar.refinable'),
       value: a.refine.size,
-      title: 'Spare copies could refine an equipped one',
+      title: t('weapons.page.refinableTitle'),
       pressed: filters.refinable,
     },
   ]
@@ -220,17 +226,21 @@ function close() {
 
 <template>
   <div>
-    <PageHeader title="Weapons" />
+    <PageHeader :title="$t('game.weapons')" />
 
     <UiError
       v-if="inventory.error.value"
       class="mb-6"
       :error="inventory.error.value"
-      title="Load failed"
+      :title="$t('characters.detail.loadFailed')"
       @retry="inventory.reload"
     />
 
-    <div v-if="!armory && inventory.loading.value" aria-busy="true" aria-label="Loading">
+    <div
+      v-if="!armory && inventory.loading.value"
+      aria-busy="true"
+      :aria-label="$t('characters.page.loading')"
+    >
       <div class="mb-4 grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-6">
         <UiSkeleton v-for="n in 6" :key="n" class="h-16 sm:h-[4.5rem]" />
       </div>
@@ -243,11 +253,17 @@ function close() {
     </div>
 
     <UiPanel v-else-if="inventory.data.value === null || (armory && armory.total === 0)" flush>
-      <UiEmpty :title="inventory.data.value === null ? 'No snapshots yet' : 'No weapons'">
+      <UiEmpty
+        :title="
+          inventory.data.value === null
+            ? $t('characters.page.noSnapshots')
+            : $t('weapons.page.empty')
+        "
+      >
         <template #icon><Swords aria-hidden="true" /></template>
         <UiButton v-if="!readOnly" variant="primary" :to="{ name: 'account-import' }">
           <Upload class="size-4" aria-hidden="true" />
-          Import
+          {{ $t('characters.page.import') }}
         </UiButton>
       </UiEmpty>
     </UiPanel>
@@ -272,9 +288,9 @@ function close() {
       />
 
       <UiPanel v-if="matched.length === 0" flush>
-        <UiEmpty title="No matches">
+        <UiEmpty :title="$t('characters.page.noMatches')">
           <template #icon><SearchX aria-hidden="true" /></template>
-          <UiButton @click="clearFilters">Clear</UiButton>
+          <UiButton @click="clearFilters">{{ $t('characters.toolbar.clear') }}</UiButton>
         </UiEmpty>
       </UiPanel>
 
@@ -285,7 +301,11 @@ function close() {
           :selected="selected ? selectedRow : null"
           @open="openRow"
         />
-        <ul v-else-if="view === 'weapon'" class="flex flex-col gap-2" aria-label="Weapons">
+        <ul
+          v-else-if="view === 'weapon'"
+          class="flex flex-col gap-2"
+          :aria-label="$t('game.weapons')"
+        >
           <li
             v-for="group in shownGroups"
             :key="group.key"
@@ -307,7 +327,7 @@ function close() {
             :page-count="pageCount"
             :total="sortedRows.length"
             :page-size="LIST_PAGE"
-            label="Weapon pages"
+            :label="$t('weapons.page.pages')"
           />
         </template>
       </div>

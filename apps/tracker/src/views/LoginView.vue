@@ -3,12 +3,7 @@ import { appPath } from '@gdt/shared'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import HumanCheck from '@/components/auth/HumanCheck.vue'
-import {
-  HUMAN_CHECK_NEEDED,
-  HUMAN_CHECK_WAIT,
-  humanCheckPassed,
-  siteKeyAfter,
-} from '@/components/auth/human-check'
+import { humanCheckNeeded, humanCheckPassed, siteKeyAfter } from '@/components/auth/human-check'
 import OAuthButtons from '@/components/oauth/OAuthButtons.vue'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import {
@@ -19,6 +14,8 @@ import {
 } from '@/components/oauth/oauth'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { ApiRequestError } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
 
@@ -79,12 +76,10 @@ async function submit() {
     const key = await siteKeyAfter(cause)
     if (key) siteKey.value = key
     error.value = key
-      ? HUMAN_CHECK_NEEDED
+      ? humanCheckNeeded()
       : cause instanceof ApiRequestError && cause.code === 'invalid_credentials'
-        ? 'Wrong username or password'
-        : cause instanceof Error
-          ? cause.message
-          : 'Sign-in failed'
+        ? t('auth.wrongCredentials')
+        : errorText(cause, t('auth.signInFailed'))
   } finally {
     // A token works once, whatever the answer.
     human.value?.reset()
@@ -94,13 +89,13 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame title="Welcome back">
+  <AuthFrame :title="$t('auth.welcomeBack')">
     <p
       v-if="linking"
       class="mb-4 flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-gray-200"
     >
       <ProviderMark :provider="linking" class="size-5 shrink-0" />
-      Sign in to link {{ providerLabel(linking) }}
+      {{ $t('auth.signInToLink', { provider: providerLabel(linking) }) }}
     </p>
     <p
       v-if="error"
@@ -111,7 +106,7 @@ async function submit() {
     </p>
     <form class="flex flex-col gap-5" @submit.prevent="submit">
       <label class="flex flex-col gap-2">
-        <span class="text-sm font-medium text-gray-400">Username or email</span>
+        <span class="text-sm font-medium text-gray-400">{{ $t('auth.usernameOrEmail') }}</span>
         <input
           v-model="login"
           class="glass-input"
@@ -124,14 +119,14 @@ async function submit() {
       </label>
       <label class="flex flex-col gap-2">
         <span class="flex items-baseline justify-between gap-3">
-          <span class="text-sm font-medium text-gray-400">Password</span>
+          <span class="text-sm font-medium text-gray-400">{{ $t('common.password') }}</span>
           <RouterLink
             v-if="emailFeatures"
             :to="{ name: 'forgot-password' }"
             class="text-sm text-paimon hover:underline"
-            title="Reset it by email, or ask the admin"
+            :title="$t('auth.forgotPasswordTitle')"
           >
-            Forgot password?
+            {{ $t('auth.forgotPassword') }}
           </RouterLink>
         </span>
         <input
@@ -156,10 +151,10 @@ async function submit() {
           type="submit"
           class="btn-glow w-full rounded-xl"
           :disabled="busy || !login || !password || !humanOk"
-          :title="humanOk ? undefined : HUMAN_CHECK_WAIT"
+          :title="humanOk ? undefined : $t('auth.humanCheck.wait')"
         >
           <UiSpinner v-if="busy" class="size-4" />
-          {{ linking ? 'Sign in and link' : 'Sign in' }}
+          {{ linking ? $t('auth.signInAndLink') : $t('common.signIn') }}
         </button>
       </div>
     </form>
@@ -169,18 +164,18 @@ async function submit() {
         <RouterLink
           :to="{ name: 'oauth-continue' }"
           class="font-semibold text-paimon hover:underline"
-          title="No password? Sign in with your other provider, then link this one in Settings"
+          :title="$t('auth.backTitle')"
         >
-          Back
+          {{ $t('common.back') }}
         </RouterLink>
       </template>
       <template v-else>
-        New?
+        {{ $t('auth.newHere') }}
         <RouterLink
           :to="{ name: 'register', query: next ? { next } : {} }"
           class="font-semibold text-paimon hover:underline"
         >
-          Create an account
+          {{ $t('auth.createAnAccount') }}
         </RouterLink>
       </template>
     </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { CalendarOff, CircleArrowUp, Search } from 'lucide-vue-next'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
@@ -8,6 +9,7 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiToolbar from '@/components/ui/UiToolbar.vue'
 import { ELEMENTS, ELEMENT_LABELS, WEAPON_TYPES, WEAPON_TYPE_LABELS } from '@/data/characters'
 import type { Element } from '@/data/game-meta'
+import { t } from '@/i18n'
 import {
   GOAL_SORTS,
   type GoalFilters,
@@ -41,39 +43,49 @@ const filters = defineModel<GoalFilters>('filters', { required: true })
 const sort = defineModel<GoalSort>('sort', { required: true })
 defineEmits<{ clear: []; material: [key: string | null] }>()
 
-const STATUSES: { value: GoalStatus; label: string; title?: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'ready', label: 'In stock', title: 'Enough in the bag, each goal on its own' },
-  { value: 'active', label: 'Counted', title: 'In the totals' },
-  { value: 'off', label: 'Paused', title: 'Left out of the totals' },
-]
+const STATUSES = computed<{ value: GoalStatus; label: string; title?: string }[]>(() => [
+  { value: 'all', label: t('planner.toolbar.status.all') },
+  {
+    value: 'ready',
+    label: t('planner.toolbar.status.ready'),
+    title: t('planner.toolbar.status.readyTitle'),
+  },
+  {
+    value: 'active',
+    label: t('planner.common.counted'),
+    title: t('planner.toolbar.status.activeTitle'),
+  },
+  {
+    value: 'off',
+    label: t('planner.toolbar.status.off'),
+    title: t('planner.toolbar.status.offTitle'),
+  },
+])
 
-const TOGGLES: { value: GoalToggle; label: string; title: string }[] = [
+const TOGGLES = computed<{ value: GoalToggle; label: string; title: string }[]>(() => [
   {
     value: 'upgrade',
-    label: 'Upgrade now',
-    title:
-      'Counted goals that can level now with the bag, each on its own: Ready, Ready alone, or a part (Level, Talents, a weapon) or its next step',
+    label: t('planner.toolbar.upgrade'),
+    title: t('planner.toolbar.upgradeTitle'),
   },
   {
     value: 'noWeekly',
-    label: 'No weekly boss',
-    title:
-      'Still to farm, but no weekly boss: its drops are held or convertible (after the goals above)',
+    label: t('farm.panel.noWeekly'),
+    title: t('planner.toolbar.noWeeklyTitle'),
   },
-]
+])
 
-const weaponOptions = [
-  { value: 'all' as const, label: 'Weapon' },
+const weaponOptions = computed(() => [
+  { value: 'all' as const, label: t('planner.hint.weapon') },
   ...WEAPON_TYPES.map((w) => ({ value: w, label: WEAPON_TYPE_LABELS[w] })),
-]
-const sortOptions = GOAL_SORTS.map((s) => ({ value: s.value, label: s.label }))
+])
+const sortOptions = computed(() => GOAL_SORTS.map((s) => ({ value: s.value, label: s.label })))
 
 function setStatus(value: GoalStatus) {
   filters.value.status = filters.value.status === value ? 'all' : value
 }
-function toggle(t: GoalToggle) {
-  filters.value[t] = !filters.value[t]
+function toggle(which: GoalToggle) {
+  filters.value[which] = !filters.value[which]
 }
 function toggleElement(e: Element) {
   filters.value.element = filters.value.element === e ? 'all' : e
@@ -84,10 +96,10 @@ function toggleRarity(r: number) {
 </script>
 
 <template>
-  <UiToolbar label="Filter goals">
+  <UiToolbar :label="$t('planner.toolbar.label')">
     <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
       <label class="relative col-span-2 min-w-0 sm:flex-1">
-        <span class="sr-only">Search</span>
+        <span class="sr-only">{{ $t('planner.common.search') }}</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
@@ -95,18 +107,18 @@ function toggleRarity(r: number) {
         <UiInput
           v-model="filters.query"
           class="pl-9"
-          placeholder="Search"
+          :placeholder="$t('planner.common.search')"
           type="search"
           autocomplete="off"
-          title="Name, weapon or note"
+          :title="$t('planner.toolbar.searchTitle')"
         />
       </label>
       <label class="min-w-0 sm:w-36" :title="GOAL_SORTS.find((s) => s.value === sort)?.title">
-        <span class="sr-only">Sort</span>
+        <span class="sr-only">{{ $t('planner.toolbar.sort') }}</span>
         <UiSelect v-model="sort" :options="sortOptions" />
       </label>
       <label class="min-w-0 sm:w-36">
-        <span class="sr-only">Weapon type</span>
+        <span class="sr-only">{{ $t('planner.custom.weaponType') }}</span>
         <UiSelect v-model="filters.weaponType" :options="weaponOptions" />
       </label>
       <div class="col-span-2 min-w-0 sm:w-56">
@@ -121,24 +133,24 @@ function toggleRarity(r: number) {
     <div
       class="scroll-hide scroll-fade-x -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
       role="group"
-      aria-label="Upgrade now, weekly bosses, status, element and rarity"
+      :aria-label="$t('planner.toolbar.chips')"
     >
       <!-- The toggles lead: on a phone the row scrolls, and they are the ones remembered. -->
       <FilterChip
-        v-for="t in TOGGLES"
-        :key="t.value"
-        :pressed="filters[t.value]"
-        :count="toggleCounts[t.value]"
-        :title="t.title"
-        @toggle="toggle(t.value)"
+        v-for="tg in TOGGLES"
+        :key="tg.value"
+        :pressed="filters[tg.value]"
+        :count="toggleCounts[tg.value]"
+        :title="tg.title"
+        @toggle="toggle(tg.value)"
       >
         <CircleArrowUp
-          v-if="t.value === 'upgrade'"
+          v-if="tg.value === 'upgrade'"
           class="size-4 text-success-text"
           aria-hidden="true"
         />
         <CalendarOff v-else class="size-4" aria-hidden="true" />
-        {{ t.label }}
+        {{ tg.label }}
       </FilterChip>
       <span class="my-1 w-px shrink-0 bg-border-default" aria-hidden="true" />
       <FilterChip
@@ -179,7 +191,7 @@ function toggleRarity(r: number) {
         size="sm"
         class="self-center"
         @click="$emit('clear')"
-        >Clear</UiButton
+        >{{ $t('planner.common.clear') }}</UiButton
       >
     </div>
   </UiToolbar>

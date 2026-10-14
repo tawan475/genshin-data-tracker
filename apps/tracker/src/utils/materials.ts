@@ -7,6 +7,8 @@ import {
 import { shallowRef } from 'vue'
 import { keyToName } from '@/lib/format'
 import { normalizeSearch } from '@/lib/search'
+import { onLocaleLoad } from '@/i18n'
+import { locale, type Locale } from '@/i18n/locale'
 
 /**
  * A material's name: the game's ("Hero's Wit", `Basic Tent: "A Nap Beneath
@@ -39,29 +41,40 @@ export function resolveMaterialRarity(
   return isRarity(fallback) ? fallback : null
 }
 
-// The game data's names and index, reactive: whatever rendered with the
-// fallbacks re-renders once they arrive.
-const names = shallowRef<MaterialNames | null>(null)
+// The game data's names (per language) and index, reactive: whatever
+// rendered with the fallbacks re-renders once they arrive.
+const names = shallowRef<ReadonlyMap<Locale, MaterialNames>>(new Map())
 const index = shallowRef<MaterialIndex | null>(null)
-let namesLoading: Promise<void> | null = null
+const namesLoading = new Map<Locale, Promise<void>>()
 let indexLoading: Promise<void> | null = null
-let namesFailed = false
 let indexFailed = false
 
 /**
- * Starts loading the game's material names (their own lazy chunk, ~63 KB
- * gzip, once) and resolves when they are in. Never rejects: on a failure
- * the names stay key-derived, and the next call tries again.
+ * Starts loading the game's material names in `target` (the language on
+ * screen by default; their own lazy chunk, ~63 KB gzip, once per language;
+ * Chinese loads the English too, for the few names it lacks) and resolves
+ * when they are in. Never rejects: on a failure the names stay key-derived,
+ * and the next call tries again.
  */
-export function preloadMaterialNames(): Promise<void> {
-  if (namesFailed) namesLoading = null
-  namesFailed = false
-  namesLoading ??= loadMaterialNames().then(
-    (loaded) => void (names.value = loaded),
-    () => void (namesFailed = true),
-  )
-  return namesLoading
+export function preloadMaterialNames(target: Locale = locale.value): Promise<void> {
+  const languages: Locale[] = target === 'en' ? ['en'] : [target, 'en']
+  return Promise.all(
+    languages.map((lang) => {
+      let loading = namesLoading.get(lang)
+      if (!loading) {
+        loading = loadMaterialNames(lang).then(
+          (loaded) => void (names.value = new Map(names.value).set(lang, loaded)),
+          () => void namesLoading.delete(lang),
+        )
+        namesLoading.set(lang, loading)
+      }
+      return loading
+    }),
+  ).then(() => undefined)
 }
+
+// A switch loads the new language's names first, when a page already used some.
+onLocaleLoad((target) => (namesLoading.size > 0 ? preloadMaterialNames(target) : Promise.resolve()))
 
 /** As preloadMaterialNames, for the material index (rarities; the icons load the same chunk). */
 export function preloadMaterialRarities(): Promise<void> {
@@ -80,8 +93,10 @@ export function preloadMaterialRarities(): Promise<void> {
  * Reactive, so a template or computed using it updates when they arrive.
  */
 export function materialName(key: string): string {
-  if (!namesLoading) void preloadMaterialNames()
-  return resolveMaterialName(key, names.value)
+  const target = locale.value
+  if (!namesLoading.has(target)) void preloadMaterialNames(target)
+  const loaded = names.value
+  return loaded.get(target)?.name(key) || resolveMaterialName(key, loaded.get('en'))
 }
 
 /**

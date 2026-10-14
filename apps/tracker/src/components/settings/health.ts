@@ -6,6 +6,8 @@
  * report this screen wants to show. It needs no session, so no cookies go.
  */
 
+import { t } from '@/i18n'
+
 export interface HealthReport {
   status: 'ok' | 'degraded'
   build: { version: string; commit: string; dirty: boolean; builtAt: string } | null
@@ -31,7 +33,7 @@ export async function loadHealth(): Promise<HealthReport> {
   try {
     response = await fetch('/api/health', { cache: 'no-store', credentials: 'omit' })
   } catch {
-    throw new Error('Could not reach the server. Check your connection.')
+    throw new Error(t('settings.build.offline'))
   }
   let body: unknown
   try {
@@ -40,7 +42,7 @@ export async function loadHealth(): Promise<HealthReport> {
     body = undefined
   }
   if (!isHealthReport(body)) {
-    throw new Error(`The server answered ${response.status} without a health report.`)
+    throw new Error(t('settings.build.noReport', { status: response.status }))
   }
   return body
 }

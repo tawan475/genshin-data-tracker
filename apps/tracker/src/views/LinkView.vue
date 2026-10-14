@@ -7,6 +7,8 @@ import LinkProblem from '@/components/public/LinkProblem.vue'
 import type { LinkProblem as Problem } from '@/components/public/link-problem'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import { useAccounts } from '@/stores/accounts'
 import { useSession } from '@/stores/session'
 import AuthFrame from './AuthFrame.vue'
@@ -28,26 +30,31 @@ const parsed = parseLinkQuery(route.query)
 /** Inside someone else's frame, Allow could be clicked for the user: show nothing. */
 const framed = window.top !== window.self
 
-const PROBLEMS: Record<LinkQueryProblem, string> = {
-  client: 'This link is not from Irminsul.',
-  redirect: "This link doesn't lead back to Irminsul on this PC.",
-  challenge: 'This link is missing its security check.',
-  state: 'This link is missing its security check.',
-}
+const problemText = (problem: LinkQueryProblem): string =>
+  ({
+    client: t('auth.link.problemClient'),
+    redirect: t('auth.link.problemRedirect'),
+    challenge: t('auth.link.problemCheck'),
+    state: t('auth.link.problemCheck'),
+  })[problem]
 
 const problem = computed<Problem | null>(() => {
   if (framed) {
-    return { kind: 'invalid', title: 'Link not valid', text: 'Open this page in its own tab.' }
+    return {
+      kind: 'invalid',
+      title: t('auth.linkProblem.invalidTitle'),
+      text: t('auth.link.ownTab'),
+    }
   }
   if (parsed.ok) return null
   return {
     kind: 'invalid',
-    title: 'Link not valid',
-    text: `${PROBLEMS[parsed.problem]} Start again from Irminsul.`,
+    title: t('auth.linkProblem.invalidTitle'),
+    text: t('auth.link.startAgain', { problem: problemText(parsed.problem) }),
   }
 })
 
-const device = computed(() => (parsed.ok && parsed.value.device) || 'this PC')
+const device = computed(() => (parsed.ok && parsed.value.device) || t('auth.link.thisPc'))
 const choices = computed(() =>
   accounts.list.map((account) => ({ id: account.id, label: accounts.displayName(account) })),
 )
@@ -83,7 +90,7 @@ async function allow() {
     })
     go(redirect)
   } catch (cause) {
-    error.value = cause instanceof Error ? cause.message : 'Not allowed'
+    error.value = errorText(cause, t('auth.link.notAllowed'))
   } finally {
     busy.value = null
   }
@@ -109,20 +116,22 @@ async function switchUser() {
 </script>
 
 <template>
-  <AuthFrame :title="problem ? problem.title : done ? 'Back to Irminsul' : 'Link Irminsul'">
+  <AuthFrame :title="problem ? problem.title : done ? $t('auth.link.done') : $t('auth.link.title')">
     <LinkProblem v-if="problem" :problem="problem" />
 
     <div v-else-if="done" class="flex flex-col items-center gap-6 text-center" role="status">
       <CircleCheck class="size-10 text-paimon" aria-hidden="true" />
-      <p class="text-gray-200">You can close this tab.</p>
+      <p class="text-gray-200">{{ $t('auth.link.closeTab') }}</p>
     </div>
 
     <form v-else class="flex flex-col gap-5" @submit.prevent="allow">
       <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
         <Monitor class="size-6 shrink-0 text-paimon" aria-hidden="true" />
         <div class="min-w-0">
-          <p class="font-semibold break-words text-white">Irminsul on {{ device }}</p>
-          <p class="text-sm text-gray-400">wants to upload your Genshin data</p>
+          <p class="font-semibold break-words text-white">
+            {{ $t('auth.link.irminsulOn', { device }) }}
+          </p>
+          <p class="text-sm text-gray-400">{{ $t('auth.link.wantsUpload') }}</p>
         </div>
       </div>
 
@@ -135,14 +144,16 @@ async function switchUser() {
       </p>
 
       <fieldset class="flex flex-col gap-2">
-        <legend class="mb-2 text-sm font-medium text-gray-400">Uploads go to</legend>
+        <legend class="mb-2 text-sm font-medium text-gray-400">
+          {{ $t('auth.link.uploadsGoTo') }}
+        </legend>
         <label
           class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors"
           :class="mode === 'uid' ? 'border-paimon/60 bg-white/10' : 'border-white/10 bg-white/5'"
-          title="Each UID uploads to its own account; a new UID gets a new account"
+          :title="$t('auth.link.autoTitle')"
         >
           <input v-model="mode" type="radio" value="uid" class="size-4 accent-amber-500" />
-          <span class="text-gray-100">Auto: match the account by UID</span>
+          <span class="text-gray-100">{{ $t('auth.link.auto') }}</span>
         </label>
         <div
           class="flex flex-col gap-3 rounded-xl border p-3 transition-colors"
@@ -150,9 +161,7 @@ async function switchUser() {
             mode === 'account' ? 'border-paimon/60 bg-white/10' : 'border-white/10 bg-white/5',
             choices.length ? '' : 'opacity-60',
           ]"
-          :title="
-            choices.length ? 'Every upload from this PC goes to one account' : 'No accounts yet'
-          "
+          :title="choices.length ? $t('auth.link.alwaysTitle') : $t('auth.link.noAccounts')"
         >
           <label
             class="flex items-center gap-3"
@@ -165,13 +174,13 @@ async function switchUser() {
               class="size-4 accent-amber-500"
               :disabled="!choices.length"
             />
-            <span class="text-gray-100">Always this account</span>
+            <span class="text-gray-100">{{ $t('auth.link.always') }}</span>
           </label>
           <select
             v-if="choices.length"
             v-model="accountId"
             class="glass-input"
-            aria-label="Account"
+            :aria-label="$t('common.account')"
             @focus="mode = 'account'"
             @change="mode = 'account'"
           >
@@ -189,24 +198,28 @@ async function switchUser() {
           :disabled="busy !== null"
           @click="cancel"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </button>
         <button type="submit" class="btn-glow w-full rounded-xl" :disabled="!ready">
           <UiSpinner v-if="busy === 'allow'" class="size-4" />
-          Allow
+          {{ $t('auth.link.allow') }}
         </button>
       </div>
     </form>
 
     <template v-if="!problem && !done" #footer>
-      Signed in as <span class="font-semibold text-gray-200">{{ session.me?.username }}</span> ·
+      <i18n-t keypath="auth.link.signedInAs">
+        <template #name>
+          <span class="font-semibold text-gray-200">{{ session.me?.username }}</span>
+        </template>
+      </i18n-t>
       <button
         type="button"
         class="font-semibold text-paimon hover:underline"
         :disabled="busy !== null"
         @click="switchUser"
       >
-        Not you?
+        {{ $t('auth.link.notYou') }}
       </button>
     </template>
   </AuthFrame>

@@ -1,1 +1,38 @@
-{}
+{
+  "close": "关闭",
+  "constellation": {
+    "title": "命之座 {level}/6"
+  },
+  "crit": {
+    "title": "双暴分 {value} · 暴击率 × 2 + 暴击伤害",
+    "circlet": " · 暴击主词条理之冠 +7.77"
+  },
+  "level": {
+    "title": "等级 {level}/{cap} · 突破 {ascension} 阶"
+  },
+  "rarity": {
+    "stars": "{n} 星"
+  },
+  "roll": {
+    "title": "RV {value}% · 每次词条提升占该词条最高档的百分比之和"
+  },
+  "error": {
+    "title": "无法加载",
+    "retry": "重试"
+  },
+  "field": {
+    "optional": "（可选）"
+  },
+  "modal": {
+    "previous": "上一个",
+    "next": "下一个"
+  },
+  "pager": {
+    "label": "分页",
+    "previous": "上一页",
+    "next": "下一页",
+    "goTo": "跳至页面",
+    "go": "前往",
+    "input": "页码，1 至 {count}"
+  }
+}

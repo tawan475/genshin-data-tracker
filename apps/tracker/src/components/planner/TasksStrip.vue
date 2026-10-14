@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { WEEKDAY_LABELS } from '@gdt/game-data/planner-math'
 import type { CustomTask, PlannerTask } from '@gdt/shared'
 import { computed, ref, shallowRef, watch } from 'vue'
 import {
@@ -18,9 +17,11 @@ import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
+import { t } from '@/i18n'
 import { formatDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
+import { daysText, weekdayShort } from './farm-format'
 import TaskEditor from './TaskEditor.vue'
 import {
   BUILTIN_TASKS,
@@ -65,7 +66,7 @@ type Tab = 'all' | 'builtin' | 'custom'
 const open = ref(readStorage('planner:tasks') !== 'closed')
 watch(open, (value) => writeStorage('planner:tasks', value ? null : 'closed'))
 const tab = ref<Tab>(
-  (['builtin', 'custom'] as const).find((t) => t === readStorage('planner:tasks-tab')) ?? 'all',
+  (['builtin', 'custom'] as const).find((x) => x === readStorage('planner:tasks-tab')) ?? 'all',
 )
 watch(tab, (value) => writeStorage('planner:tasks-tab', value === 'all' ? null : value))
 const showAll = ref(false)
@@ -76,9 +77,9 @@ const dueRows = computed(() => rows.value.filter((r) => r.due))
 const dueCount = (kind?: TaskRow['kind']) =>
   dueRows.value.filter((r) => !kind || r.kind === kind).length
 const TABS = computed(() => [
-  { value: 'all' as const, label: 'All', count: dueCount() },
-  { value: 'builtin' as const, label: 'Permanent', count: dueCount('builtin') },
-  { value: 'custom' as const, label: 'Custom', count: dueCount('custom') },
+  { value: 'all' as const, label: t('planner.toolbar.status.all'), count: dueCount() },
+  { value: 'builtin' as const, label: t('planner.tasks.permanent'), count: dueCount('builtin') },
+  { value: 'custom' as const, label: t('planner.card.custom'), count: dueCount('custom') },
 ])
 const shown = computed(() =>
   rows.value.filter(
@@ -98,26 +99,37 @@ function when(row: TaskRow): { text: string; title: string } {
   if (row.kind === 'builtin') {
     if (row.due) {
       return row.resets === null
-        ? { text: 'Ready', title: 'Ready to use' }
+        ? { text: t('planner.tasks.ready'), title: t('planner.tasks.readyTitle') }
         : {
             text: formatSpan(row.resets - props.now),
-            title: `Resets ${formatDateTime(row.resets)}`,
+            title: t('planner.tasks.resets', { time: formatDateTime(row.resets) }),
           }
     }
     return {
       text: formatSpan(row.back! - props.now),
-      title: `${row.snoozed ? 'Snoozed' : 'Done'} · back ${formatDateTime(row.back!)}`,
+      title: t(row.snoozed ? 'planner.tasks.snoozedBack' : 'planner.tasks.doneBack', {
+        time: formatDateTime(row.back!),
+      }),
     }
   }
   const c = row.custom!
-  const every = c.task.every === 1 ? 'every day' : `every ${c.task.every} days`
-  const from = c.task.mode === 'completed' ? 'from the day done' : 'from its start day'
-  const title = `Due ${dayText(c.due)} · ${every}, ${from}`
-  if (row.late > 0) return { text: row.late === 1 ? 'Overdue' : `${row.late}d late`, title }
-  if (row.late === 0) return { text: 'Today', title }
-  if (row.late === -1) return { text: 'Tomorrow', title }
-  if (row.late >= -6) return { text: WEEKDAY_LABELS[weekdayOf(c.due)]!, title }
-  return { text: `${-row.late}d`, title }
+  const every =
+    c.task.every === 1
+      ? t('planner.tasks.everyDay')
+      : t('planner.tasks.everyDays', { n: c.task.every })
+  const from =
+    c.task.mode === 'completed' ? t('planner.tasks.fromDone') : t('planner.tasks.fromStart')
+  const title = t('planner.tasks.dueTitle', { date: dayText(c.due), every, from })
+  if (row.late > 0) {
+    return {
+      text: row.late === 1 ? t('planner.tasks.overdue') : t('planner.tasks.late', { n: row.late }),
+      title,
+    }
+  }
+  if (row.late === 0) return { text: t('planner.tasks.today'), title }
+  if (row.late === -1) return { text: t('planner.tasks.tomorrow'), title }
+  if (row.late >= -6) return { text: weekdayShort(weekdayOf(c.due)), title }
+  return { text: t('farm.time.d', { d: -row.late }), title }
 }
 
 const TONE: Record<TaskRow['tone'], string> = {
@@ -139,7 +151,7 @@ function withUndo(title: string, row: TaskRow, ops: TaskOp[]) {
   feedback.toast({
     tone: 'info',
     title,
-    action: { label: 'Undo', run: () => change([upsertTask(before)]) },
+    action: { label: t('planner.common.undo'), run: () => change([upsertTask(before)]) },
   })
 }
 
@@ -148,7 +160,9 @@ function tick(row: TaskRow) {
     change([upsertTask(undoneInput(row))])
     return
   }
-  withUndo(`${row.name} done`, row, [upsertTask(doneInput(row, Date.now(), props.server))])
+  withUndo(t('planner.tasks.doneToast', { name: row.name }), row, [
+    upsertTask(doneInput(row, Date.now(), props.server)),
+  ])
 }
 
 const snoozeRow = shallowRef<TaskRow | null>(null)
@@ -177,8 +191,8 @@ function snooze(days: number) {
   snoozeOpen.value = false
   if (!row) return
   const ops = [upsertTask(snoozedInput(row, days, Date.now(), props.server))]
-  const day = WEEKDAY_LABELS[weekdayOf(today.value + days)]
-  withUndo(`${row.name}: back ${day}`, row, ops)
+  const day = weekdayShort(weekdayOf(today.value + days))
+  withUndo(t('planner.tasks.backToast', { name: row.name, day }), row, ops)
 }
 
 // ------------------------------------------------------------ built-ins on/off
@@ -189,15 +203,17 @@ function openList(event: Event) {
   listAnchor.value = event.currentTarget as HTMLElement
   listOpen.value = true
 }
-const stored = computed(() => new Map(props.tasks.map((t) => [`${t.kind}:${t.id}`, t])))
+const stored = computed(() => new Map(props.tasks.map((x) => [`${x.kind}:${x.id}`, x])))
 const hidden = (id: string) => {
-  const t = stored.value.get(`builtin:${id}`)
-  return t?.kind === 'builtin' && !!t.hidden
+  const task = stored.value.get(`builtin:${id}`)
+  return task?.kind === 'builtin' && !!task.hidden
 }
 function setShown(id: string, on: boolean) {
-  const t = stored.value.get(`builtin:${id}`)
+  const task = stored.value.get(`builtin:${id}`)
   const next =
-    t?.kind === 'builtin' && t.next !== undefined && t.next !== null ? { next: t.next } : {}
+    task?.kind === 'builtin' && task.next !== undefined && task.next !== null
+      ? { next: task.next }
+      : {}
   change([upsertTask({ kind: 'builtin', id, ...next, ...(on ? {} : { hidden: true }) })])
 }
 
@@ -242,8 +258,8 @@ function removeEditing() {
   change([removeTask({ kind: 'custom', id: row.id })])
   feedback.toast({
     tone: 'info',
-    title: `${row.name} deleted`,
-    action: { label: 'Undo', run: () => change([upsertTask(before)]) },
+    title: t('planner.tasks.deleted', { name: row.name }),
+    action: { label: t('planner.common.undo'), run: () => change([upsertTask(before)]) },
   })
 }
 
@@ -284,7 +300,7 @@ const summary = computed(() => {
 <template>
   <section
     class="flex flex-col rounded-xl border border-border-default bg-surface-raised shadow-sm"
-    aria-label="Tasks"
+    :aria-label="$t('planner.tasks.title')"
   >
     <header class="flex flex-wrap items-center gap-x-2 gap-y-1.5 py-1.5 pr-1.5 pl-2">
       <button
@@ -298,7 +314,7 @@ const summary = computed(() => {
           :class="open ? '' : '-rotate-90'"
           aria-hidden="true"
         />
-        Tasks
+        {{ $t('planner.tasks.title') }}
         <span
           class="tabular rounded-md px-1.5 font-mono text-xs"
           :class="
@@ -306,8 +322,9 @@ const summary = computed(() => {
               ? 'bg-danger-surface text-danger-text'
               : 'bg-surface-overlay text-text-secondary'
           "
-          :title="`${formatNumber(summary.n)} to do`"
-          >{{ formatNumber(summary.n) }}<span class="sr-only"> to do</span></span
+          :title="$t('planner.tasks.toDo', { n: formatNumber(summary.n) })"
+          >{{ formatNumber(summary.n)
+          }}<span class="sr-only"> {{ $t('planner.tasks.toDoSr') }}</span></span
         >
       </button>
       <span
@@ -320,12 +337,14 @@ const summary = computed(() => {
         <UiSegmented
           v-model="tab"
           :options="TABS"
-          label="Tasks shown"
+          :label="$t('planner.tasks.shown')"
           class="order-last sm:order-none"
         />
         <span class="ml-auto flex items-center">
           <UiIconButton
-            :label="showAll ? 'Hide done' : `Show done (${resting})`"
+            :label="
+              showAll ? $t('planner.tasks.hideDone') : $t('planner.tasks.showDone', { n: resting })
+            "
             :active="showAll"
             :aria-pressed="showAll"
             @click="showAll = !showAll"
@@ -333,10 +352,10 @@ const summary = computed(() => {
             <EyeOff v-if="showAll" class="size-4" aria-hidden="true" />
             <Eye v-else class="size-4" aria-hidden="true" />
           </UiIconButton>
-          <UiIconButton label="Permanent tasks shown" @click="openList">
+          <UiIconButton :label="$t('planner.tasks.permanentShown')" @click="openList">
             <ListChecks class="size-4" aria-hidden="true" />
           </UiIconButton>
-          <UiIconButton label="Add a task" @click="add">
+          <UiIconButton :label="$t('planner.tasks.add')" @click="add">
             <Plus class="size-5" aria-hidden="true" />
           </UiIconButton>
         </span>
@@ -346,10 +365,10 @@ const summary = computed(() => {
     <ul
       v-if="open"
       class="grid grid-cols-1 gap-x-2 border-t border-border-subtle py-1 sm:grid-cols-2 xl:grid-cols-3"
-      aria-label="Tasks"
+      :aria-label="$t('planner.tasks.title')"
     >
       <li v-if="shown.length === 0" class="px-3 py-2 text-sm text-text-muted sm:col-span-full">
-        {{ tab === 'custom' ? 'No tasks of your own' : 'All done' }}
+        {{ tab === 'custom' ? $t('planner.tasks.noCustom') : $t('planner.tasks.allDone') }}
       </li>
       <li
         v-for="row in shown"
@@ -368,8 +387,8 @@ const summary = computed(() => {
           type="button"
           class="inline-flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-text-muted hover:bg-surface-overlay hover:text-text-primary active:cursor-grabbing"
           :data-goal-handle="`task:${row.id}`"
-          :aria-label="`Move ${row.name}`"
-          title="Drag, or arrow keys"
+          :aria-label="$t('planner.tasks.move', { name: row.name })"
+          :title="$t('planner.tasks.dragTitle')"
           @pointerdown="drag.start(`task:${row.id}`, $event)"
           @keydown="drag.key(`task:${row.id}`, $event)"
         >
@@ -383,8 +402,12 @@ const summary = computed(() => {
               ? 'group/tick text-transparent hover:text-success-text'
               : 'text-success-text hover:text-text-muted'
           "
-          :aria-label="row.due ? `Done: ${row.name}` : `Not done: ${row.name}`"
-          :title="row.due ? 'Done' : 'Take back'"
+          :aria-label="
+            row.due
+              ? $t('planner.tasks.doneLabel', { name: row.name })
+              : $t('planner.tasks.notDoneLabel', { name: row.name })
+          "
+          :title="row.due ? $t('planner.done.confirm') : $t('planner.tasks.takeBack')"
           @click="tick(row)"
         >
           <span
@@ -425,8 +448,8 @@ const summary = computed(() => {
           type="button"
           class="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-surface-overlay hover:text-text-primary disabled:invisible"
           :disabled="!canSnooze(row)"
-          :aria-label="`Snooze ${row.name}`"
-          title="Snooze"
+          :aria-label="$t('planner.tasks.snoozeName', { name: row.name })"
+          :title="$t('planner.tasks.snooze')"
           @click="openSnooze(row, $event)"
         >
           <AlarmClock class="size-4" aria-hidden="true" />
@@ -437,7 +460,7 @@ const summary = computed(() => {
     <UiPopover
       :open="snoozeOpen"
       :anchor="snoozeAnchor"
-      :label="`Snooze ${snoozeRow?.name ?? ''}`"
+      :label="$t('planner.tasks.snoozeName', { name: snoozeRow?.name ?? '' })"
       @close="snoozeOpen = false"
     >
       <ul class="flex flex-col p-1.5">
@@ -447,11 +470,11 @@ const summary = computed(() => {
             class="flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm hover:bg-surface-overlay"
             @click="snooze(c.days)"
           >
-            <span class="font-medium">{{ WEEKDAY_LABELS[weekdayOf(today + c.days)] }}</span>
-            <span class="tabular font-mono text-text-secondary">{{
-              c.days === 1 ? '1 day' : `${c.days} days`
+            <span class="font-medium">{{ weekdayShort(weekdayOf(today + c.days)) }}</span>
+            <span class="tabular font-mono text-text-secondary">{{ daysText(c.days) }}</span>
+            <span v-if="c.last" class="ml-auto text-xs text-text-muted">{{
+              $t('planner.tasks.lastDay')
             }}</span>
-            <span v-if="c.last" class="ml-auto text-xs text-text-muted">Last day</span>
           </button>
         </li>
       </ul>
@@ -460,7 +483,7 @@ const summary = computed(() => {
     <UiPopover
       :open="listOpen"
       :anchor="listAnchor"
-      label="Permanent tasks"
+      :label="$t('planner.tasks.permanentTasks')"
       @close="listOpen = false"
     >
       <div class="flex flex-col px-4 py-2">

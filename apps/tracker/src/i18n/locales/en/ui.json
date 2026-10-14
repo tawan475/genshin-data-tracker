@@ -1,1 +1,38 @@
-{}
+{
+  "close": "Close",
+  "constellation": {
+    "title": "Constellation {level} of 6"
+  },
+  "crit": {
+    "title": "CV {value} · CRIT Rate × 2 + CRIT DMG",
+    "circlet": " · CRIT circlet +7.77"
+  },
+  "level": {
+    "title": "Level {level} of {cap} · Ascension {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} star"
+  },
+  "roll": {
+    "title": "RV {value}% · rolls as % of the highest roll, added up"
+  },
+  "error": {
+    "title": "Could not load this",
+    "retry": "Try again"
+  },
+  "field": {
+    "optional": "(optional)"
+  },
+  "modal": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "pager": {
+    "label": "Pages",
+    "previous": "Previous page",
+    "next": "Next page",
+    "goTo": "Go to page",
+    "go": "Go",
+    "input": "Page, 1 to {count}"
+  }
+}

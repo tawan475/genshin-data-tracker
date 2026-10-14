@@ -1,1 +1,108 @@
-{}
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Overview",
+    "progression": "Progression",
+    "characters": "Characters",
+    "artifacts": "Artifacts",
+    "weapons": "Weapons",
+    "materials": "Materials",
+    "planner": "Planner",
+    "achievements": "Achievements",
+    "anecdotes": "Anecdotes",
+    "wishes": "Wishes",
+    "snapshots": "Snapshots",
+    "import": "Import",
+    "manage": "Manage",
+    "staffOverview": "Overview",
+    "users": "Users",
+    "storage": "Storage",
+    "roles": "Roles",
+    "audit": "Audit"
+  },
+  "section": {
+    "staff": "Staff",
+    "account": "Account",
+    "system": "System"
+  },
+  "accounts": "Accounts",
+  "staff": "Staff",
+  "settings": "Settings",
+  "import": "Import",
+  "expandMenu": "Expand menu",
+  "collapseMenu": "Collapse menu",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "lightTheme": "Light theme",
+  "darkTheme": "Dark theme",
+  "themeNotSaved": "Theme not saved",
+  "landingPage": "Landing page",
+  "return": "Return",
+  "highestRole": "Your highest role",
+  "copyName": "Copy name",
+  "copyUid": "Copy UID",
+  "copyUidValue": "Copy UID {uid}",
+  "nameCopied": "Name copied",
+  "uidCopied": "UID copied",
+  "switcher": {
+    "select": "Select account",
+    "add": "Add account"
+  },
+  "page": {
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "continue": "Continue",
+    "linkIrminsul": "Link Irminsul",
+    "resetPassword": "Reset password",
+    "newPassword": "New password",
+    "confirmEmail": "Confirm email",
+    "accounts": "Accounts",
+    "addAccount": "Add account",
+    "settings": "Settings",
+    "overview": "Overview",
+    "users": "Users",
+    "user": "User",
+    "storage": "Storage",
+    "roles": "Roles",
+    "audit": "Audit",
+    "progression": "Progression",
+    "characters": "Characters",
+    "weapons": "Weapons",
+    "artifacts": "Artifacts",
+    "materials": "Materials",
+    "planner": "Planner",
+    "achievements": "Achievements",
+    "anecdotes": "Anecdotes",
+    "wishHistory": "Wish history",
+    "snapshots": "Snapshots",
+    "import": "Import",
+    "accountSettings": "Account settings",
+    "notFound": "Not found",
+    "inspect": "Inspect · {page}"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be old, or the page moved.",
+    "home": "Go to the dashboard"
+  },
+  "accountMissing": {
+    "title": "Account not found",
+    "body": "It may have been deleted, or it belongs to someone else.",
+    "all": "All accounts"
+  },
+  "update": {
+    "ready": "A new version of the tracker is ready."
+  },
+  "public": {
+    "dashboard": "Dashboard"
+  },
+  "landing": {
+    "heroLine1": "Master your",
+    "heroLine2": "Genshin journey",
+    "tagline": "Every login, snapshotted. Artifacts, materials, history.",
+    "openDashboard": "Open dashboard",
+    "getStarted": "Get started",
+    "critDmg": "Crit DMG 21.8%"
+  }
+}

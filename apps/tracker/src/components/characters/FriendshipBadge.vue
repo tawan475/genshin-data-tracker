@@ -6,9 +6,9 @@ defineProps<{ level: number; bare?: boolean }>()
 <template>
   <span
     class="inline-flex items-baseline gap-1 whitespace-nowrap"
-    :title="`Friendship ${level} of 10`"
+    :title="$t('characters.friendship.title', { level })"
   >
-    <span v-if="!bare">Friendship</span>
+    <span v-if="!bare">{{ $t('game.friendship') }}</span>
     <span class="tabular font-mono" :class="level >= 10 ? 'font-semibold text-text-primary' : ''">{{
       level
     }}</span>

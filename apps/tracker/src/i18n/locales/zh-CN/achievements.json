@@ -1,1 +1,137 @@
-{}
+{
+  "title": "成就",
+  "newestCapture": "最新捕获",
+  "newestCaptureTitle": "最新捕获：{time}",
+  "notCaptured": "尚未捕获",
+  "notCapturedTitle": "在 irminsul 运行时打开游戏内的成就菜单即可捕获",
+  "importTitle": "从 Seelie 导出文件或 stardb / irminsul 文件导入已完成的成就",
+  "loadFailed": "加载失败",
+  "allDone": "全部完成",
+  "showDone": "显示已完成",
+  "noneDone": "没有已完成的",
+  "showMissing": "显示未完成",
+  "noMatches": "无匹配结果",
+  "clear": "清除",
+  "more": "更多",
+  "loading": "正在加载",
+  "undo": "撤销",
+  "notSaved": "未保存",
+  "markedDone": "已将 {n} 个标记为已完成",
+  "unmarked": "已取消标记 {n} 个",
+  "added": "已添加 {n} 个",
+  "confirmMark": {
+    "title": "将 {n} 个标记为已完成？",
+    "filtered": "当前显示的 {n} 个未完成成就将被手动标记为已完成。",
+    "all": "所有未完成的成就（{n} 个）将被手动标记为已完成。",
+    "confirm": "标记为已完成"
+  },
+  "confirmUnmark": {
+    "title": "取消标记 {n} 个？",
+    "detail": "移除当前显示的 {n} 个成就的手动标记。已捕获的仍保持完成。",
+    "confirm": "取消标记"
+  },
+  "categories": {
+    "label": "分类",
+    "all": "全部",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} 原石",
+    "hideDone": "隐藏已完成的系列",
+    "showDone": "显示已完成的系列",
+    "completed": "已完成"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} 原石"
+  },
+  "import": {
+    "title": "导入",
+    "formats": {
+      "list": "ID 列表"
+    },
+    "noAchievements": "未找到成就",
+    "notJson": "不是 JSON 文件",
+    "dropTitle": "Seelie：设置 → 导出账号。stardb 或 irminsul：含 gi_achievements 的 GOOD 文件。",
+    "drop": "Seelie 或 stardb 文件",
+    "browse": "浏览",
+    "inFile": "文件中",
+    "already": "已完成",
+    "new": "新增",
+    "newTitle": "其中 {unknown} 个比游戏数据更新，{disused} 个已从游戏中移除：保留但不计入",
+    "cancel": "取消",
+    "add": "添加 {n}"
+  },
+  "row": {
+    "clickToMark": "点击标记为已完成",
+    "clickToUnmark": "{text} · 点击取消标记",
+    "captured": "已捕获",
+    "staysDone": "{text} · 已被捕获，保持完成",
+    "markEveryTier": "将所有阶段标记为已完成",
+    "markDone": "标记为已完成",
+    "unmarkTiers": "点击取消手动标记的阶段",
+    "markedClick": "手动标记 · 点击取消标记",
+    "tierTitle": "第 {n} 阶段 · {primogems} 原石",
+    "reward": "{n} 原石",
+    "primogems": "原石",
+    "states": {
+      "captured": "已捕获",
+      "marked": "手动标记",
+      "none": "未完成"
+    },
+    "aria": "{title}：{state}",
+    "tiers": "阶段",
+    "tier": "第 {n} 阶段",
+    "addedIn": "于 {version} 版本加入",
+    "hiddenTitle": "隐藏成就",
+    "hidden": "隐藏",
+    "markedByHand": "手动标记",
+    "guide": "stardb.gg 上的攻略"
+  },
+  "completion": {
+    "tier": "第 {n} 阶段 · {text}",
+    "exact": "完成于 {time}",
+    "exactTitle": "游戏记录的完成时间，由 irminsul 读取",
+    "seen": "完成于 {window}",
+    "seenTitle": "在两次捕获之间完成：{since} 的捕获中未完成，{at} 的捕获中已完成",
+    "by": "{date} 前已完成",
+    "byTitle": "在首次捕获中已完成（{at}）",
+    "marked": "手动标记为已完成",
+    "markedTitle": "没有捕获包含它，因此没有日期"
+  },
+  "summary": {
+    "label": "概览",
+    "done": "已完成",
+    "doneCaptured": "已捕获 {n}",
+    "doneByHand": "手动 {n}",
+    "doneUnknown": "{n} 个比游戏数据更新",
+    "progress": "进度",
+    "progressLabel": "已完成的成就",
+    "primogems": "原石",
+    "primogemsHint": "已获得 / 可获得的原石",
+    "missing": "未完成",
+    "showAll": "显示全部",
+    "showLeft": "只显示未完成的"
+  },
+  "toolbar": {
+    "label": "筛选成就",
+    "search": "搜索",
+    "searchTitle": "名称、描述、分类或 ID",
+    "completion": "完成度",
+    "completions": {
+      "all": "全部",
+      "done": "已完成",
+      "missing": "未完成"
+    },
+    "hidden": {
+      "all": "隐藏：不限",
+      "hidden": "隐藏",
+      "visible": "非隐藏"
+    },
+    "hiddenLabel": "隐藏",
+    "allCategories": "所有分类",
+    "category": "分类",
+    "version": "版本",
+    "addedIn": "加入版本",
+    "markAll": "全部标记",
+    "markAllTitle": "将当前显示的 {n} 个未完成成就标记为已完成",
+    "unmarkAll": "全部取消标记",
+    "unmarkAllTitle": "取消当前显示的 {n} 个手动标记的成就"
+  }
+}

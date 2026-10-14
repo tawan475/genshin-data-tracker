@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import { ArrowUp } from 'lucide-vue-next'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import type { RefineInfo } from '@/data/weapons'
@@ -8,10 +9,11 @@ import type { RefineInfo } from '@/data/weapons'
 const props = defineProps<{ refine: RefineInfo }>()
 
 const first = computed(() => props.refine.targets[0]!)
-const title = computed(
-  () =>
-    `${props.refine.spare} spare · ` +
-    props.refine.targets.map((t) => `${t.ownerName} R${t.from} → R${t.to}`).join(' · '),
+const title = computed(() =>
+  [
+    t('weapons.refine.spare', { n: props.refine.spare }),
+    ...props.refine.targets.map((target) => `${target.ownerName} R${target.from} → R${target.to}`),
+  ].join(' · '),
 )
 </script>
 
@@ -19,6 +21,6 @@ const title = computed(
   <UiBadge tone="success" mono class="shrink-0 gap-0.5" :title="title">
     <ArrowUp class="size-3" aria-hidden="true" />
     R{{ first.from }}→R{{ first.to }}
-    <span class="sr-only">possible: {{ title }}</span>
+    <span class="sr-only">{{ $t('weapons.refine.possible', { title }) }}</span>
   </UiBadge>
 </template>

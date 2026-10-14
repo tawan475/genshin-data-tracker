@@ -18,6 +18,7 @@ import {
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 import { materialRarity } from '@/utils/materials'
+import { t } from '@/i18n'
 import { STOCK_MEANING } from './farm-format'
 import { characterName, mergeRequirements } from './model'
 
@@ -101,7 +102,12 @@ export function costCells(input: CostInput): CostCell[] {
       ? requirements
           .map((r) => passiveDiscount(planner, r, owned))
           .filter((d) => d.character && d.mora > 0)
-          .map((d) => `${characterName(d.character!)} saves ${formatNumber(d.mora)}`)
+          .map((d) =>
+            t('planner.cost.saves', {
+              name: characterName(d.character!),
+              mora: formatNumber(d.mora),
+            }),
+          )
           .join(' · ')
       : ''
     list.push({

@@ -56,12 +56,12 @@ function reset() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Upload limits" @close="emit('close')">
+  <UiModal :open="open" :title="$t('staff.limits.title')" @close="emit('close')">
     <form v-if="site" :id="formId" class="flex flex-col gap-4" @submit.prevent="submit">
       <UiField
         v-slot="{ id, describedBy }"
-        label="New snapshots a day, per user"
-        :hint="`Default ${formatNumber(site.defaults.dailySnapshots)}`"
+        :label="$t('staff.limits.snapshots')"
+        :hint="$t('staff.limits.default', { value: formatNumber(site.defaults.dailySnapshots) })"
       >
         <UiInput
           :id="id"
@@ -74,8 +74,8 @@ function reset() {
       </UiField>
       <UiField
         v-slot="{ id, describedBy }"
-        label="Newly stored a day, per user (MB)"
-        :hint="`Default ${formatBytes(site.defaults.dailyBytes)}`"
+        :label="$t('staff.limits.bytes')"
+        :hint="$t('staff.limits.default', { value: formatBytes(site.defaults.dailyBytes) })"
       >
         <UiInput
           :id="id"
@@ -88,8 +88,8 @@ function reset() {
       </UiField>
       <UiField
         v-slot="{ id, describedBy }"
-        label="Storage quota, per user (MB)"
-        :hint="`Default ${formatBytes(site.defaults.storageQuota)}`"
+        :label="$t('staff.limits.quota')"
+        :hint="$t('staff.limits.default', { value: formatBytes(site.defaults.storageQuota) })"
       >
         <UiInput
           :id="id"
@@ -102,9 +102,13 @@ function reset() {
       </UiField>
     </form>
     <template #footer>
-      <UiButton variant="ghost" class="mr-auto" @click="reset">Defaults</UiButton>
-      <UiButton @click="emit('close')">Cancel</UiButton>
-      <UiButton variant="primary" type="submit" :form="formId" :loading="busy">Save</UiButton>
+      <UiButton variant="ghost" class="mr-auto" @click="reset">{{
+        $t('staff.limits.defaults')
+      }}</UiButton>
+      <UiButton @click="emit('close')">{{ $t('staff.common.cancel') }}</UiButton>
+      <UiButton variant="primary" type="submit" :form="formId" :loading="busy">{{
+        $t('staff.common.save')
+      }}</UiButton>
     </template>
   </UiModal>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CritValue from '@/components/ui/CritValue.vue'
+import { t } from '@/i18n'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import { SLOT_KEYS, type SetSummary, type SlotKey } from '@/data/artifacts'
 import { artifactSetIcon } from '@/lib/assets'
@@ -23,9 +24,15 @@ const GRID =
 function cellTitle(set: SetSummary, index: number): string {
   const slot = formatSlotName(SLOT_KEYS[index]!)
   const best = set.best[index]
-  if (!best) return `${slot}: none`
-  const main = formatStatShort(best.artifact.mainStatKey)
-  return `${slot} · ${formatNumber(set.slotCounts[index] ?? 0)} pieces · best ${best.artifact.rarity}★ ${main} +${best.artifact.level}, CV ${formatCv(best.cv)}`
+  if (!best) return t('artifacts.setsTable.cellNone', { slot })
+  return t('artifacts.setsTable.cell', {
+    slot,
+    n: formatNumber(set.slotCounts[index] ?? 0),
+    rarity: best.artifact.rarity,
+    main: formatStatShort(best.artifact.mainStatKey),
+    level: best.artifact.level,
+    cv: formatCv(best.cv),
+  })
 }
 </script>
 
@@ -36,20 +43,24 @@ function cellTitle(set: SetSummary, index: number): string {
       class="border-b border-border-default bg-surface-overlay/50 px-3 py-2 text-sm font-medium text-text-secondary"
       aria-hidden="true"
     >
-      <span class="hidden sm:block">Set</span>
-      <span class="tabular hidden text-right font-mono sm:block" title="Pieces">#</span>
+      <span class="hidden sm:block">{{ $t('game.set') }}</span>
+      <span
+        class="tabular hidden text-right font-mono sm:block"
+        :title="$t('artifacts.setsTable.pieces')"
+        >#</span
+      >
       <span
         v-for="slot in SLOT_KEYS"
         :key="slot"
         class="flex justify-center"
-        :title="`${formatSlotName(slot)}: best CV, pieces`"
+        :title="$t('artifacts.setsTable.slotHeader', { slot: formatSlotName(slot) })"
       >
         <component :is="SLOT_ICONS[slot]" class="size-4" />
       </span>
-      <span class="text-right" title="Best CV per slot, added up">Σ CV</span>
+      <span class="text-right" :title="$t('artifacts.setsTable.sumTitle')">Σ CV</span>
     </div>
 
-    <ul class="divide-y divide-border-subtle" aria-label="Sets">
+    <ul class="divide-y divide-border-subtle" :aria-label="$t('characters.sets')">
       <li v-for="set in sets" :key="set.key" :class="GRID" class="gap-y-1 px-3 py-2">
         <button
           type="button"
@@ -93,7 +104,7 @@ function cellTitle(set: SetSummary, index: number): string {
           :value="set.score"
           scope="build"
           class="text-right text-sm font-semibold"
-          detail="Best CV per slot, added up"
+          :detail="$t('artifacts.setsTable.sumTitle')"
         />
       </li>
     </ul>

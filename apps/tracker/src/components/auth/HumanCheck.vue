@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { loadTurnstile, type TurnstileApi } from '@/lib/turnstile'
-import {
-  HUMAN_CHECK_FAILED,
-  HUMAN_CHECK_RETRYING,
-  createHumanCheckState,
-} from './human-check-state'
+import { createHumanCheckState, humanCheckFailed, humanCheckRetrying } from './human-check-state'
 
 /**
  * The human check (Cloudflare Turnstile) for one form: rendered at once,
@@ -60,7 +56,7 @@ onMounted(async () => {
   try {
     api = await loadTurnstile()
   } catch (error) {
-    state.blocked(error instanceof Error ? error.message : HUMAN_CHECK_FAILED)
+    state.blocked(error instanceof Error ? error.message : humanCheckFailed())
     return
   }
   if (!container.value) return
@@ -101,7 +97,7 @@ defineExpose({ token: state.token, reset: state.reset })
       v-if="problem"
       class="mb-4 text-center text-sm text-red-300"
       role="alert"
-      :title="problem === HUMAN_CHECK_RETRYING ? 'Reload the page if it stays' : undefined"
+      :title="problem === humanCheckRetrying() ? $t('auth.humanCheck.reloadIfStays') : undefined"
     >
       {{ problem }}
     </p>

@@ -173,7 +173,9 @@ onBeforeUnmount(() => {
           :data-rarity="g.rarity"
           class="flex justify-center pb-2"
         >
-          <UiButton size="sm" @click="grow(g.rarity)">{{ formatNumber(g.more) }} more</UiButton>
+          <UiButton size="sm" @click="grow(g.rarity)">{{
+            $t('artifacts.bag.more', { n: formatNumber(g.more) })
+          }}</UiButton>
         </div>
       </template>
     </section>

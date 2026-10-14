@@ -1,1 +1,67 @@
-{}
+{
+  "title": {
+    "level": "Lv. {level}/{cap}",
+    "copies": "{n} 把",
+    "locked": "已鎖定"
+  },
+  "sort": {
+    "quality": "品質",
+    "level": "等級",
+    "refinement": "精煉",
+    "count": "數量",
+    "name": "名稱",
+    "type": "類型"
+  },
+  "levelFilter": {
+    "all": "等級",
+    "max": "滿級",
+    "levelled": "已升級",
+    "base": "Lv. 1"
+  },
+  "refine": {
+    "spare": "{n} 把閒置",
+    "possible": "可精煉：{title}"
+  },
+  "group": {
+    "copies": "{count} 把"
+  },
+  "bag": {
+    "notInData": "{copies} · 尚未收錄於遊戲資料"
+  },
+  "toolbar": {
+    "bag": "背包",
+    "byWeapon": "依武器",
+    "list": "列表",
+    "status": "狀態",
+    "equipped": "已裝備",
+    "unused": "未使用",
+    "lock": "鎖定",
+    "locked": "已鎖定",
+    "unlocked": "未鎖定",
+    "label": "篩選武器",
+    "searchTitle": "武器、類型或角色",
+    "chips": "類型、稀有度與精煉",
+    "noneInCapture": "本次記錄中沒有",
+    "refinableTitle": "閒置副本可用於精煉已裝備武器的武器",
+    "refinable": "可精煉"
+  },
+  "detail": {
+    "refinementTitle": "精煉階級 {rank}/{max}",
+    "unequipped": "未裝備",
+    "copies": "{n} 把",
+    "equipped": "已裝備 {n}",
+    "spareCopies": "{n} 把閒置"
+  },
+  "table": {
+    "qualityTitle": "品質：稀有度、等級、精煉、最新",
+    "r": "精"
+  },
+  "page": {
+    "kinds": "種類",
+    "kindsTitle": "不同的武器",
+    "unused5": "未使用 5★",
+    "refinableTitle": "閒置副本可用於精煉已裝備的武器",
+    "empty": "沒有武器",
+    "pages": "武器分頁"
+  }
+}

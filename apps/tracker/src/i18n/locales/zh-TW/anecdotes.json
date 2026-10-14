@@ -1,1 +1,75 @@
-{}
+{
+  "title": "逸聞",
+  "area": "地區 {id}",
+  "newestCapture": "最新擷取",
+  "newestCaptureTitle": "最新擷取：{time}",
+  "notCaptured": "尚未擷取",
+  "notCapturedTitle": "尚無包含逸聞的擷取：irminsul 會從遊戲中記錄",
+  "loadFailed": "載入失敗",
+  "allDone": "全部完成",
+  "showDone": "顯示已完成",
+  "noneDone": "沒有已完成的",
+  "showNotDone": "顯示未完成",
+  "noneMet": "尚未遇到",
+  "noneMetBody": "隱藏的逸聞在遇到後顯示。",
+  "noMatches": "無相符結果",
+  "clear": "清除",
+  "loading": "載入中",
+  "notSaved": "未儲存",
+  "group": {
+    "hideDone": "隱藏已完成",
+    "showDone": "顯示已完成",
+    "done": "已完成 {n}"
+  },
+  "row": {
+    "states": {
+      "captured": "已擷取",
+      "marked": "手動標記",
+      "none": "未完成"
+    },
+    "aria": "{title}：{state}",
+    "capturedStays": "已擷取 · 保持完成",
+    "markedByHand": "手動標記",
+    "markedClick": "手動標記 · 點擊取消標記",
+    "notDone": "未完成",
+    "clickToMark": "點擊標記為已完成",
+    "activeTitle": "正在遊戲中進行",
+    "active": "進行中",
+    "repeatTitle": "已完成 {n} 次（可循環）",
+    "hidden": "隱藏逸聞",
+    "addedIn": "於 {version} 版本加入"
+  },
+  "summary": {
+    "label": "概覽",
+    "done": "已完成",
+    "doneCaptured": "已擷取 {n}",
+    "doneByHand": "手動 {n}",
+    "doneUnknown": "{n} 個比遊戲資料更新",
+    "doneLabel": "已完成的逸聞",
+    "stamps": "印章",
+    "stampsTitle": "第 {n} 份獎勵的印章進度",
+    "stampsNone": "尚未被擷取",
+    "stampsLabel": "下一份獎勵的印章進度",
+    "reward": "獎勵",
+    "rewardHint": "每記錄 {every} 則逸聞獲得 {primogems} 原石",
+    "rewardPer": "/ {every} 則",
+    "active": "進行中",
+    "activeHint": "正在遊戲中進行（依最新擷取）"
+  },
+  "toolbar": {
+    "label": "篩選逸聞",
+    "search": "搜尋",
+    "searchTitle": "標題、故事、NPC 或 ID",
+    "completion": "完成度",
+    "completions": {
+      "all": "全部",
+      "missing": "未完成",
+      "done": "已完成"
+    },
+    "showDone": "顯示已完成",
+    "showDoneTitle": "完整列出已完成的逸聞，而非摺疊在每個 NPC 下",
+    "area": "地區",
+    "allAreas": "全部",
+    "locked": "最新擷取中尚未解鎖"
+  }
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import { RARITY_TEXT } from '@/components/characters/tokens'
 import { WEAPON_TYPE_LABELS, weaponTitle, type WeaponGroup } from '@/data/weapons'
@@ -21,8 +22,8 @@ const g = computed(() => props.group)
 const shown = computed(() => g.value.rows.slice(0, props.limit))
 const hidden = computed(() => g.value.rows.slice(props.limit))
 const hiddenTitle = computed(() => hidden.value.map(weaponTitle).join('\n'))
-const copies = computed(
-  () => `${formatNumber(g.value.count)} ${g.value.count === 1 ? 'copy' : 'copies'}`,
+const copies = computed(() =>
+  t('weapons.group.copies', { count: formatNumber(g.value.count) }, g.value.count),
 )
 const kind = computed(() =>
   [g.value.rarity ? `${g.value.rarity}★` : '', g.value.type ? WEAPON_TYPE_LABELS[g.value.type] : '']

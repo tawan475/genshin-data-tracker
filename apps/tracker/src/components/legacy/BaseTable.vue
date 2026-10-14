@@ -110,7 +110,7 @@ defineExpose({ scrollToTop })
           </tr>
           <tr v-else-if="data.length === 0">
             <td :colspan="labels.length" class="p-8 text-center text-text-muted">
-              <slot name="empty">No data available.</slot>
+              <slot name="empty">{{ $t('snapshots.table.noData') }}</slot>
             </td>
           </tr>
         </tbody>

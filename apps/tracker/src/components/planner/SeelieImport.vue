@@ -17,6 +17,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { isSeelieExport } from '@/data/seelie'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { newGoalId } from './goal-ids'
 import type { ResinReading } from './resin'
@@ -105,7 +106,7 @@ async function read(file: File | undefined) {
   parsed.value = null
   try {
     const json: unknown = JSON.parse(await file.text())
-    if (!isSeelieExport(json)) throw new Error('Not a Seelie export')
+    if (!isSeelieExport(json)) throw new Error(t('planner.seelieImport.notExport'))
     const result = parseSeelie(
       json,
       props.planner,
@@ -129,7 +130,9 @@ async function read(file: File | undefined) {
     parsed.value = result
   } catch (cause) {
     failure.value =
-      cause instanceof SyntaxError ? 'Not a JSON file' : String((cause as Error).message)
+      cause instanceof SyntaxError
+        ? t('planner.seelieImport.notJson')
+        : String((cause as Error).message)
   }
 }
 
@@ -148,25 +151,10 @@ const plan = computed(() =>
   parsed.value ? planSeelie(parsed.value, account.value, { ...picks }, replace.value) : null,
 )
 
-const LABELS: Record<SeelieSection, { label: string; title: string }> = {
-  goals: { label: 'Goals', title: 'Character, talent and weapon goals, extra item needs' },
-  artifacts: { label: 'Artifact goals', title: 'Sets and main stats to farm' },
-  customs: {
-    label: 'Custom characters',
-    title: 'Characters Seelie has as custom ones, with goals',
-  },
-  current: {
-    label: 'Current levels',
-    title: 'Seelie’s current levels, talents and constellations where ahead of the capture',
-  },
-  inventory: {
-    label: 'Inventory',
-    title: 'Counts as hand edits on the newest capture (a newer capture replaces them)',
-  },
-  tasks: { label: 'Tasks', title: 'Custom tasks, and permanent ones done in Seelie' },
-  resin: { label: 'Resin', title: 'Seelie’s resin tracker, when newer than ours' },
-  settings: { label: 'Settings', title: 'AR, World Level, server and Traveler' },
-}
+const sectionText = (id: SeelieSection) => ({
+  label: t(`planner.seelieImport.section.${id}.label`),
+  title: t(`planner.seelieImport.section.${id}.title`),
+})
 
 /** "12 new · 3 changed · 4 same", zeros left out. */
 function breakdown(s: SectionSummary) {
@@ -176,7 +164,9 @@ function breakdown(s: SectionSummary) {
     [s.same, 'same'],
   ] as const
   return [
-    ...parts.filter(([n]) => n > 0).map(([n, label]) => `${formatNumber(n)} ${label}`),
+    ...parts
+      .filter(([n]) => n > 0)
+      .map(([n, kind]) => t(`planner.seelieImport.count.${kind}`, { n: formatNumber(n) })),
     ...s.facts,
   ].join(' · ')
 }
@@ -186,7 +176,7 @@ const rows = computed(() => {
   if (!p) return []
   return SEELIE_SECTIONS.filter((id) => p.sections[id].total > 0).map((id) => ({
     id,
-    ...LABELS[id],
+    ...sectionText(id),
     data: p.sections[id],
     available: sectionHasChanges(p.sections[id]),
   }))
@@ -216,7 +206,7 @@ function apply() {
       <div
         class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
         :class="dragging ? 'border-accent bg-surface-overlay' : 'border-border-strong'"
-        title="seelie.me → Settings → Export Account"
+        :title="$t('planner.seelieImport.dropTitle')"
         @dragenter.prevent="dragging = true"
         @dragover.prevent
         @dragleave="dragging = false"
@@ -225,14 +215,14 @@ function apply() {
         <FileUp class="size-7 text-text-muted" aria-hidden="true" />
         <p v-if="fileName" class="max-w-full truncate font-mono text-sm">{{ fileName }}</p>
         <UiButton size="sm" @click="input?.click()">{{
-          fileName ? 'Change' : 'Choose file'
+          fileName ? $t('planner.seelieImport.change') : $t('planner.seelieImport.choose')
         }}</UiButton>
         <input
           ref="input"
           type="file"
           accept=".json,application/json"
           class="hidden"
-          aria-label="Seelie export file"
+          :aria-label="$t('planner.seelieImport.fileLabel')"
           @change="onPick"
         />
       </div>
@@ -246,7 +236,7 @@ function apply() {
         <fieldset
           class="flex min-w-0 flex-col divide-y divide-border-subtle rounded-lg border border-border-default"
         >
-          <legend class="sr-only">What to import</legend>
+          <legend class="sr-only">{{ $t('planner.seelieImport.legend') }}</legend>
           <label
             v-for="row in rows"
             :key="row.id"
@@ -271,7 +261,9 @@ function apply() {
         </fieldset>
 
         <div v-if="plan.unmapped.length" class="flex flex-col gap-1.5">
-          <span class="text-xs text-text-muted">Skipped {{ plan.unmapped.length }}</span>
+          <span class="text-xs text-text-muted">{{
+            $t('planner.seelieImport.skipped', { n: plan.unmapped.length })
+          }}</span>
           <span class="flex flex-wrap gap-1">
             <UiBadge v-for="slug in plan.unmapped" :key="slug" tone="warning">{{ slug }}</UiBadge>
           </span>
@@ -279,15 +271,15 @@ function apply() {
         <p
           v-if="plan.clamped"
           class="text-xs text-text-muted"
-          title="Targets above level 90 were set to 90"
+          :title="$t('planner.seelieImport.clampedTitle')"
         >
-          Capped at 90: {{ plan.clamped }}
+          {{ $t('planner.seelieImport.clamped', { n: plan.clamped }) }}
         </p>
 
         <UiSwitch
           v-if="picks.goals && plan.dropped.length"
           v-model="replace"
-          :label="`Replace (remove ${plan.dropped.length})`"
+          :label="$t('planner.seelieImport.replace', { n: plan.dropped.length })"
         />
       </template>
     </div>
@@ -296,15 +288,15 @@ function apply() {
       <UiButton
         variant="ghost"
         class="mr-auto"
-        title="A Seelie account file: goals, inventory, tasks (Seelie → Settings → Import Account)"
+        :title="$t('planner.seelieImport.exportTitle')"
         @click="emit('export')"
       >
         <Download class="size-4" aria-hidden="true" />
-        Export
+        {{ $t('planner.seelieImport.export') }}
       </UiButton>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('planner.common.cancel') }}</UiButton>
       <UiButton variant="primary" :disabled="!canApply" :loading="saving" @click="apply">
-        Import
+        {{ $t('planner.seelieImport.import') }}
       </UiButton>
     </template>
   </UiModal>

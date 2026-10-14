@@ -10,6 +10,7 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import { ELEMENT_LABELS, WEAPON_TYPE_LABELS } from '@/data/characters'
 import { toElement } from '@/data/game-meta'
+import { t } from '@/i18n'
 import { gameIcon } from '@/lib/assets'
 import { customChoices, familyName } from './custom-character'
 import { materialSoft } from './material-soft'
@@ -44,13 +45,12 @@ const set = <K extends keyof CustomCharacter>(key: K, value: CustomCharacter[K])
 const choices = computed(() => customChoices(props.planner))
 
 type Slot = 'book' | 'common' | 'boss' | 'local' | 'weekly'
-const SLOTS: { slot: Slot; label: string }[] = [
-  { slot: 'book', label: 'Talent book' },
-  { slot: 'common', label: 'Enemy drop' },
-  { slot: 'boss', label: 'Boss drop' },
-  { slot: 'local', label: 'Specialty' },
-  { slot: 'weekly', label: 'Weekly boss' },
-]
+const SLOTS = computed(() =>
+  (['book', 'common', 'boss', 'local', 'weekly'] as const).map((slot) => ({
+    slot,
+    label: t(`planner.custom.slot.${slot}`),
+  })),
+)
 
 const options = computed(() => {
   const c = choices.value
@@ -78,18 +78,20 @@ const RARITIES = [
   { value: 4, label: '4★' },
   { value: 5, label: '5★' },
 ]
-const weaponOptions = WEAPON_TYPE_KEYS.map((w) => ({ value: w, label: WEAPON_TYPE_LABELS[w] }))
+const weaponOptions = computed(() =>
+  WEAPON_TYPE_KEYS.map((w) => ({ value: w, label: WEAPON_TYPE_LABELS[w] })),
+)
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex flex-wrap items-end gap-3">
       <label class="flex min-w-0 flex-1 basis-48 flex-col gap-1">
-        <span class="text-sm text-text-secondary">Name</span>
+        <span class="text-sm text-text-secondary">{{ $t('planner.custom.name') }}</span>
         <UiInput
           v-model="name"
           maxlength="40"
-          placeholder="Name"
+          :placeholder="$t('planner.custom.name')"
           :invalid="name.trim() === ''"
           @input="onName"
           @change="commitName"
@@ -99,21 +101,21 @@ const weaponOptions = WEAPON_TYPE_KEYS.map((w) => ({ value: w, label: WEAPON_TYP
       <UiSegmented
         :model-value="profile.rarity"
         :options="RARITIES"
-        label="Rarity"
+        :label="$t('planner.custom.rarity')"
         @update:model-value="set('rarity', $event as 4 | 5)"
       />
       <UiSelect
         :model-value="profile.weapon"
         :options="weaponOptions"
         class="w-36"
-        aria-label="Weapon type"
+        :aria-label="$t('planner.custom.weaponType')"
         @update:model-value="set('weapon', $event)"
       />
     </div>
     <div
       class="scroll-hide scroll-fade-x -mx-1 flex gap-1.5 overflow-x-auto px-1"
       role="radiogroup"
-      aria-label="Element"
+      :aria-label="$t('planner.custom.element')"
     >
       <FilterChip
         v-for="e in ELEMENT_KEYS"

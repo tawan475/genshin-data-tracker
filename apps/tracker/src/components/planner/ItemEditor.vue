@@ -115,7 +115,7 @@ function removeItem() {
           <MaterialIcon :src="icon" :name="material.name" />
         </span>
         <label class="flex w-32 flex-col gap-1">
-          <span class="text-sm text-text-secondary">Count</span>
+          <span class="text-sm text-text-secondary">{{ $t('planner.item.count') }}</span>
           <UiInput
             v-model="count"
             type="number"
@@ -125,13 +125,13 @@ function removeItem() {
           />
         </label>
         <span class="ml-auto flex flex-col items-end gap-1">
-          <span class="text-sm text-text-secondary">Have</span>
+          <span class="text-sm text-text-secondary">{{ $t('planner.item.have') }}</span>
           <button
             v-if="openItem"
             type="button"
             aria-haspopup="dialog"
             class="tabular flex min-h-10 items-center rounded-md border border-border-strong px-3 font-mono text-sm hover:bg-surface-overlay"
-            :aria-label="`Have ${formatNumber(have)}: edit`"
+            :aria-label="$t('planner.item.editHave', { n: formatNumber(have) })"
             @click="editHave"
           >
             {{ formatNumber(have) }}
@@ -142,9 +142,9 @@ function removeItem() {
         </span>
       </div>
       <NoteInput v-model="note" />
-      <UiSwitch v-model="active" label="Counted" />
-      <section class="flex flex-col gap-2" aria-label="Cost">
-        <h3 class="text-sm font-semibold text-text-secondary">Cost</h3>
+      <UiSwitch v-model="active" :label="$t('planner.common.counted')" />
+      <section class="flex flex-col gap-2" :aria-label="$t('planner.editor.cost')">
+        <h3 class="text-sm font-semibold text-text-secondary">{{ $t('planner.editor.cost') }}</h3>
         <CostList
           :planner="planner"
           :requirements="requirements"
@@ -159,11 +159,11 @@ function removeItem() {
     <template #footer>
       <UiButton v-if="target" variant="ghost" class="mr-auto text-danger-text" @click="removeItem">
         <Trash2 class="size-4" aria-hidden="true" />
-        Remove
+        {{ $t('planner.common.remove') }}
       </UiButton>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('planner.common.cancel') }}</UiButton>
       <UiButton variant="primary" :loading="saving" :disabled="countValue === null" @click="save">
-        {{ target ? 'Save' : 'Add' }}
+        {{ target ? $t('planner.common.save') : $t('planner.picker.add') }}
       </UiButton>
     </template>
   </UiModal>

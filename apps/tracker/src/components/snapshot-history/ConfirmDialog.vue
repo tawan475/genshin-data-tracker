@@ -71,19 +71,21 @@ defineExpose({ ask })
           autocomplete="off"
           spellcheck="false"
           autofocus
-          :placeholder="`Type &quot;${options.expect}&quot; to confirm`"
-          :aria-label="`Type ${options.expect} to confirm`"
+          :placeholder="$t('snapshots.confirm.typePlaceholder', { word: options.expect })"
+          :aria-label="$t('snapshots.confirm.typeLabel', { word: options.expect })"
           :invalid="invalid"
           :aria-describedby="invalid ? errorId : undefined"
           @input="invalid = false"
         />
         <p v-if="invalid" :id="errorId" class="text-sm text-danger-text" role="alert">
-          Type "{{ options.expect }}"
+          {{ $t('snapshots.confirm.typeError', { word: options.expect }) }}
         </p>
       </div>
     </form>
     <template #footer>
-      <UiButton autofocus @click="settle(false)">{{ options?.cancelText ?? 'Cancel' }}</UiButton>
+      <UiButton autofocus @click="settle(false)">{{
+        options?.cancelText ?? $t('snapshots.confirm.cancel')
+      }}</UiButton>
       <UiButton variant="danger" type="submit" :form="formId">
         {{ options?.confirmText }}
       </UiButton>

@@ -1,1 +1,567 @@
-{}
+{
+  "sort": {
+    "name": {
+      "label": "名称",
+      "title": "按名称排序"
+    },
+    "missing": {
+      "label": "缺少",
+      "title": "缺少材料最少的优先"
+    },
+    "favorites": {
+      "label": "收藏",
+      "title": "收藏优先"
+    },
+    "priority": {
+      "label": "优先级",
+      "title": "材料优先分配给上方的目标：拖动以调整顺序"
+    }
+  },
+  "material": {
+    "characterExp": "角色经验",
+    "weaponExp": "武器经验",
+    "group": {
+      "exp": "经验",
+      "gem": "宝石",
+      "boss": "首领掉落",
+      "local": "区域特产",
+      "common": "敌人掉落",
+      "book": "天赋书",
+      "weekly": "周本",
+      "weapon": "武器突破素材",
+      "elite": "精英掉落",
+      "other": "其他"
+    }
+  },
+  "hint": {
+    "level": "Lv.{level}",
+    "talents": "天赋 {talents}",
+    "characterDetail": "{name}：Lv.{level}（突破 {ascension}），天赋 {talents}",
+    "weaponDetail": "{name}：Lv.{level}（突破 {ascension}）",
+    "thenAr": "之后需冒险等阶 {ar}",
+    "thenShort": "之后材料不足",
+    "weapon": "武器",
+    "canLevel": "现在可升级"
+  },
+  "preset": {
+    "max": {
+      "label": "全满",
+      "title": "等级 90，天赋 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "等级 90，天赋 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "等级 80，天赋 8/8/8"
+    },
+    "talents": {
+      "label": "仅天赋",
+      "title": "天赋 9/9/9，等级不变"
+    },
+    "level": {
+      "label": "仅等级",
+      "title": "等级 90，天赋不变"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "每日委托",
+      "weeklyBosses": "征讨领域",
+      "battlePass": "纪行每周任务",
+      "reputation": "声望",
+      "abyss": "深境螺旋",
+      "theater": "幻想真境剧诗",
+      "bargains": "派蒙的小卖部",
+      "transformer": "参量质变仪"
+    }
+  },
+  "toast": {
+    "notSaved": "未保存",
+    "newCapture": "有新的抓取数据",
+    "newCaptureDetail": "未做任何更改：请检查后重试"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} 个活动未导入",
+      "olderThanOurs": "早于当前记录",
+      "ar": "冒险等阶 {ar}",
+      "wl": "世界等级 {wl}",
+      "lumine": "荧",
+      "aether": "空"
+    },
+    "server": {
+      "AMERICA": "美服",
+      "EUROPE": "欧服",
+      "ASIA": "亚服",
+      "SAR": "港澳台服"
+    },
+    "notExport": "不是 Seelie 导出文件（没有目标）",
+    "customName": "自定义"
+  },
+  "resin": {
+    "alertTitle": "原粹树脂 {amount}",
+    "source": {
+      "manual": "手动设置",
+      "player": "irminsul（登录时）",
+      "inventory": "快照"
+    },
+    "unknown": "原粹树脂：尚未知 · 点击设置",
+    "readingTitle": "原粹树脂 约 {now}/{max} · {value} 来自{source}，{at} · 每 8 分钟 +1",
+    "setLabel": "{title}。设置",
+    "spend": "消耗 {n}",
+    "add": "增加 {n}",
+    "fullAt": "{time} 回满",
+    "fullLabel": "回满",
+    "full": "已满",
+    "markTitle": "{time} 达到 {amount}",
+    "in": "还需",
+    "now": "当前原粹树脂",
+    "alert": "树脂提醒",
+    "alertUnsupported": "树脂提醒：此浏览器不支持",
+    "alertOff": "树脂提醒：关闭",
+    "alertOn": "树脂达到 {amount} 时提醒 · 需保持网站开启",
+    "alertOnAt": "树脂达到 {amount} 时提醒，{time} · 需保持网站开启",
+    "unsupported": "此浏览器不支持",
+    "blocked": "已被阻止：请在浏览器设置中允许此网站发送通知",
+    "notifyAt": "提醒数值",
+    "off": "关闭",
+    "whileOpen": "仅在此设备上开启网站时有效"
+  },
+  "artifacts": {
+    "title": "圣遗物",
+    "doneByHand": "{name}：已完成（手动勾选）",
+    "notDoneByHand": "{name}：未完成（手动勾选）",
+    "notDoneByHandCaptureDone": "{name}：未完成（手动勾选；抓取数据显示已完成）",
+    "doneFromCapture": "{name}：已完成，来自抓取数据（{piece}）",
+    "slotState": "{name}：{state}",
+    "notDone": "未完成",
+    "nothingWorn": "未装备",
+    "otherSet": "其他套装",
+    "otherMainStat": "主属性不符",
+    "levelOf": "+{level}/+{max}",
+    "farmingByHand": "{name}：刷取中（手动勾选）",
+    "setDone": "{name}：已完成，所有部位均已达成",
+    "setFarming": "{name}：刷取中",
+    "autoRule": "抓取数据显示该部位装备了所选套装、所选主属性的满级圣遗物（5★为 +20）时自动勾选；其他四个部位均为所选套装后，第五个部位可以是任意套装",
+    "sets": "套装",
+    "worn": "已装备 {n}",
+    "remove": "移除 {name}",
+    "addSet": "套装",
+    "close": "关闭",
+    "slots": "部位",
+    "mainStat": "{slot}主属性",
+    "searchSets": "搜索套装",
+    "setList": "圣遗物套装"
+  },
+  "cost": {
+    "saves": "{name} 节省 {mora}",
+    "nothing": "无需消耗",
+    "colours": "颜色说明"
+  },
+  "common": {
+    "search": "搜索",
+    "cancel": "取消",
+    "nameState": "{name}：{state}",
+    "counted": "计入",
+    "notCounted": "不计入",
+    "removeName": "移除 {name}",
+    "clear": "清除",
+    "remove": "移除",
+    "save": "保存",
+    "noMatches": "无匹配结果",
+    "delete": "删除",
+    "undo": "撤销"
+  },
+  "custom": {
+    "slot": {
+      "book": "天赋书",
+      "common": "敌人掉落",
+      "boss": "首领掉落",
+      "local": "区域特产",
+      "weekly": "周本"
+    },
+    "name": "名称",
+    "rarity": "稀有度",
+    "weaponType": "武器类型",
+    "element": "元素"
+  },
+  "done": {
+    "taken": "从背包扣除",
+    "uses": "消耗",
+    "notInBag": "背包中没有",
+    "takesWhatThereIs": "完成时只扣除现有的数量。",
+    "confirm": "完成"
+  },
+  "extra": {
+    "title": "额外",
+    "add": "添加物品",
+    "have": "持有 {n}",
+    "craft": "合成 {n}"
+  },
+  "avatars": {
+    "favorite": "{name}（收藏）",
+    "title": "{name} · 点按：打开 · 长按或右键：暂停",
+    "moreTitle": "{rest} · 显示全部",
+    "moreLabel": "另外 {n} 个：{rest}。显示全部",
+    "fewerTitle": "显示较少",
+    "fewer": "收起"
+  },
+  "card": {
+    "level": "等级",
+    "talents": "天赋",
+    "levelTitle": "等级 {from}（突破 {fromAscension}）→ {to}（突破 {toAscension}）",
+    "talentsTitle": "普通攻击 / 元素战技 / 元素爆发",
+    "boosted": "{constellation} 命时游戏内显示为 {talents}",
+    "weaponTitle": "{name}：等级 {from}（突破 {fromAscension}）→ {to}（突破 {toAscension}），R{fromRefinement} → R{toRefinement}",
+    "readyFull": "背包材料现在即可完成",
+    "readyStep": "下一步现在即可用背包材料完成",
+    "constellation": "命之座 {n}",
+    "refinement": "精炼 {n}",
+    "artifactsTitle": "圣遗物：{done}/5 部位",
+    "expSuffix": "{name}（经验）",
+    "amount": "{name}：{n}",
+    "short": "缺 {n}",
+    "shortAfter": "扣除上方目标后缺 {n}",
+    "expAmount": "{exp}：{points}（{item}）",
+    "enoughAfter": "扣除上方目标后仍足够",
+    "handleLabel": "{name}：第 {rank} 位，用方向键移动",
+    "handleTitle": "#{rank} · 拖动或用方向键",
+    "customTitle": "自定义角色：游戏数据中尚未收录",
+    "custom": "自定义",
+    "favoriteLabel": "{name}：收藏",
+    "favorite": "已收藏",
+    "notFavorite": "未收藏",
+    "setByHand": "手动设置",
+    "needsAr": "需要冒险等阶 {ar}",
+    "doneLabel": "{name}：{label}完成",
+    "doneReadyLabel": "{name}：{label}完成（{ready}）",
+    "missing": "{name}：缺少",
+    "canDoNow": "现在可升级：{text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "普通攻击",
+      "skill": "元素战技",
+      "burst": "元素爆发"
+    },
+    "notOwned": "未拥有",
+    "estimateResin": "约 {resin} 树脂",
+    "estimateTitle": "{runs} 次 · {resin} 树脂（{condensed} 浓缩树脂）· {days} 天",
+    "estimateWeekly": "周本：{weeks} 周",
+    "countedLabel": "{name}：计入",
+    "notCountedLabel": "{name}：不计入",
+    "presets": "预设",
+    "constellationTitle": "命之座（3 命与 5 命使一项天赋 +3）",
+    "constellation": "命之座",
+    "hideNote": "隐藏备注",
+    "note": "备注",
+    "part": "目标部分",
+    "now": "当前",
+    "goal": "目标",
+    "levelNow": "当前等级",
+    "levelGoal": "目标等级",
+    "boost": "{at} 命时 +3",
+    "boostOn": "{at} 命时 +3：游戏内 {from} → {to}",
+    "talentNow": "当前{talent}",
+    "talentGoal": "目标{talent}",
+    "inGame": "游戏内 {from} → {to}",
+    "customCharacter": "自定义角色",
+    "replaceWithEllipsis": "替换为…",
+    "replaceWith": "替换为 {name}",
+    "replace": "替换",
+    "gapNeed": "{talents}需要等级",
+    "setLevel": "设为 {level}",
+    "captureTitle": "最新抓取数据",
+    "capture": "抓取：{text}",
+    "resetTitle": "恢复为抓取数据",
+    "reset": "重置",
+    "cost": "消耗"
+  },
+  "picker": {
+    "characters": "角色",
+    "weapons": "武器",
+    "items": "物品",
+    "title": "添加目标",
+    "kind": "类型",
+    "searchItems": "搜索物品",
+    "preset": "预设",
+    "add": "添加",
+    "addCount": "添加 {n}"
+  },
+  "toolbar": {
+    "label": "筛选目标",
+    "searchTitle": "名称、武器或备注",
+    "sort": "排序",
+    "chips": "可升级、周本、状态、元素和稀有度",
+    "upgrade": "可升级",
+    "upgradeTitle": "计入的目标中，现在可单独用背包材料升级的：齐全、单独齐全，或其中一部分（等级、天赋、武器）或其下一步",
+    "noWeeklyTitle": "仍需刷取，但不需要周本：周本材料已持有或可转换（扣除上方目标后）",
+    "status": {
+      "all": "全部",
+      "ready": "材料齐全",
+      "readyTitle": "背包材料足够，按单个目标计算",
+      "activeTitle": "计入总计",
+      "off": "已暂停",
+      "offTitle": "不计入总计"
+    }
+  },
+  "item": {
+    "count": "数量",
+    "have": "持有",
+    "editHave": "持有 {n}：编辑"
+  },
+  "popover": {
+    "goalsLabel": "{name}：使用它的目标（{n}）",
+    "goalsTitle": "使用它的目标",
+    "history": "{name}：历史",
+    "expNeed": "经验需求 {n}",
+    "goal": "目标 {n}",
+    "missing": "缺少 {n}",
+    "enough": "足够",
+    "need": "需求 {n}",
+    "craftedTitle": "由低一阶合成",
+    "craft": "合成 {n}",
+    "capture": "抓取 {n}",
+    "backLabel": "{name}：恢复为抓取数据的 {n}",
+    "backTitle": "恢复为 {n}",
+    "held": "{name} 持有数量",
+    "addPlaceholder": "+ 添加",
+    "addLabel": "{name}：添加获得数量",
+    "addTitle": "添加新获得的数量（Enter）"
+  },
+  "levelGrid": {
+    "below": "低于抓取数据",
+    "level": "等级 {level}（突破 {ascension}）",
+    "ascended": "等级 {level}，已突破（突破 {ascension}）",
+    "ascendedWord": "已突破"
+  },
+  "cell": {
+    "have": "持有 {n}",
+    "spent": "用于合成 {n}",
+    "converted": "由其他材料转换 {n}",
+    "convertedAway": "转换为其他材料 {n}"
+  },
+  "focus": {
+    "title": "{name}：{n} 个目标，各自扣除上方计入的目标后计算",
+    "clear": "清除 {name}"
+  },
+  "materialPicker": {
+    "material": "材料",
+    "selected": "材料：{name}",
+    "title": "使用某材料的目标",
+    "search": "搜索材料",
+    "any": "不限",
+    "goals": "{n} 个目标"
+  },
+  "stepper": {
+    "down": "{label}：减少",
+    "up": "{label}：增加"
+  },
+  "settings": {
+    "title": "养成规划设置",
+    "autoWl": "自动（{wl}）",
+    "ar": "冒险等阶",
+    "arTitle": "冒险等阶（1–60）",
+    "arTitleIrminsul": "冒险等阶（1–60）· irminsul 读取为 {ar}",
+    "fromIrminsul": "来自 irminsul",
+    "wl": "世界等级",
+    "wlTitle": "世界等级（0–9）",
+    "wlTitleIrminsul": "世界等级（0–9）· irminsul 读取为 {wl}",
+    "wlLabel": "世界等级",
+    "refreshesTitle": "每天补充原粹树脂的次数（每次 {per}）：天数按 180 + 每次 {per} 计算",
+    "refreshes": "每日补充",
+    "refreshesLabel": "每天补充树脂次数",
+    "stepsTitle": "最多四个数值，例如 -40 +60：树脂记录会加上这些数值（负数为消耗）",
+    "steps": "树脂按钮",
+    "azothTitle": "用其他元素的多余宝石补足缺少的宝石",
+    "azoth": "嬗变之尘",
+    "passivesTitle": "雷电将军、流浪者：武器突破摩拉 −50%",
+    "passives": "摩拉减免天赋",
+    "craftingTitle": "刷取视图中需转换、合成和锻造的清单",
+    "crafting": "制作清单"
+  },
+  "roster": {
+    "search": "搜索角色",
+    "multi": "角色（可多选）",
+    "owned": "{name} · Lv.{level}",
+    "notOwned": "{name} · 未拥有",
+    "weaponOwned": "{name} · Lv.{level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "抓取数据中的这把武器",
+    "noCopy": "抓取数据中没有这把武器",
+    "heldBy": "装备者：{name}",
+    "refinementNow": "{name} 当前精炼",
+    "levelNow": "{name} 当前等级",
+    "refinementGoal": "{name} 目标精炼",
+    "levelGoal": "{name} 目标等级",
+    "search": "搜索武器"
+  },
+  "seelieImport": {
+    "notExport": "不是 Seelie 导出文件",
+    "notJson": "不是 JSON 文件",
+    "section": {
+      "goals": {
+        "label": "目标",
+        "title": "角色、天赋和武器目标，额外物品需求"
+      },
+      "artifacts": {
+        "label": "圣遗物目标",
+        "title": "要刷取的套装和主属性"
+      },
+      "customs": {
+        "label": "自定义角色",
+        "title": "Seelie 中的自定义角色及其目标"
+      },
+      "current": {
+        "label": "当前等级",
+        "title": "Seelie 中高于抓取数据的当前等级、天赋和命之座"
+      },
+      "inventory": {
+        "label": "背包",
+        "title": "数量作为最新抓取数据上的手动修改（更新的抓取数据会取代它们）"
+      },
+      "tasks": {
+        "label": "任务",
+        "title": "自定义任务，以及在 Seelie 中完成的常驻任务"
+      },
+      "resin": {
+        "label": "树脂",
+        "title": "Seelie 的树脂记录（比本站的新时）"
+      },
+      "settings": {
+        "label": "设置",
+        "title": "冒险等阶、世界等级、服务器和旅行者"
+      }
+    },
+    "count": {
+      "new": "新增 {n}",
+      "changed": "更改 {n}",
+      "same": "相同 {n}"
+    },
+    "dropTitle": "seelie.me → 设置（Settings）→ 导出账号（Export Account）",
+    "change": "更换",
+    "choose": "选择文件",
+    "fileLabel": "Seelie 导出文件",
+    "legend": "要导入的内容",
+    "skipped": "已跳过 {n}",
+    "clampedTitle": "高于 90 级的目标已设为 90 级",
+    "clamped": "限制为 90 级：{n}",
+    "replace": "替换（移除 {n}）",
+    "exportTitle": "Seelie 账号文件：目标、背包、任务（Seelie → 设置（Settings）→ 导入账号（Import Account））",
+    "export": "导出",
+    "import": "导入"
+  },
+  "taskEditor": {
+    "everyDay": "每天",
+    "everyDays": "每 {n} 天",
+    "today": "今天（{day}）",
+    "tomorrow": "明天（{day}）",
+    "startDay": "开始日",
+    "startDayTitle": "按开始日的周期重复",
+    "doneDay": "完成日",
+    "doneDayTitle": "从完成当天开始计算",
+    "task": "任务",
+    "newTask": "新任务",
+    "nameIt": "请输入名称",
+    "repeats": "重复",
+    "next": "下次",
+    "starts": "开始",
+    "countsFrom": "计算起点"
+  },
+  "tasks": {
+    "title": "任务",
+    "permanent": "常驻",
+    "ready": "可用",
+    "readyTitle": "可以使用",
+    "resets": "{time} 重置",
+    "snoozedBack": "已延后 · {time} 恢复",
+    "doneBack": "已完成 · {time} 恢复",
+    "everyDay": "每天",
+    "everyDays": "每 {n} 天",
+    "fromDone": "从完成当天起算",
+    "fromStart": "从开始日起算",
+    "dueTitle": "到期 {date} · {every}，{from}",
+    "overdue": "已逾期",
+    "late": "逾期 {n} 天",
+    "today": "今天",
+    "tomorrow": "明天",
+    "doneToast": "{name} 已完成",
+    "backToast": "{name}：{day}恢复",
+    "deleted": "{name} 已删除",
+    "toDo": "{n} 项待办",
+    "toDoSr": "项待办",
+    "shown": "显示的任务",
+    "hideDone": "隐藏已完成",
+    "showDone": "显示已完成（{n}）",
+    "permanentShown": "显示的常驻任务",
+    "add": "添加任务",
+    "noCustom": "没有自定义任务",
+    "allDone": "全部完成",
+    "move": "移动 {name}",
+    "dragTitle": "拖动或用方向键",
+    "doneLabel": "完成：{name}",
+    "notDoneLabel": "未完成：{name}",
+    "takeBack": "撤销完成",
+    "snoozeName": "延后 {name}",
+    "snooze": "延后",
+    "lastDay": "最后一天",
+    "permanentTasks": "常驻任务"
+  },
+  "view": {
+    "title": "养成规划",
+    "accountFallback": "原神账号",
+    "farm": "刷取",
+    "goals": "目标",
+    "presetApplied": "{preset}：{n} 个目标",
+    "bulkCounted": "已计入 {n} 个",
+    "bulkPaused": "已暂停 {n} 个",
+    "goalsRemoved": "已移除 {n} 个目标",
+    "paused": "{name} 已暂停",
+    "partDone": "{name}：{label}完成",
+    "craftStepDone": "制作步骤已完成",
+    "craftStepsDone": "已完成 {n} 个制作步骤",
+    "craftingHidden": "已隐藏制作",
+    "craftingHiddenHint": "养成规划设置：制作清单",
+    "itemRemoved": "已移除物品",
+    "removed": "已移除 {name}",
+    "added": "已添加 {n} 个目标",
+    "notImported": "未导入",
+    "importedGoals": "{n} 个目标",
+    "importedCurrent": "当前状态 {n}",
+    "importedItems": "{n} 个物品",
+    "importedTasks": "{n} 个任务",
+    "imported": "已从 Seelie 导入",
+    "notExported": "未导出",
+    "exported": "已导出 Seelie 文件",
+    "view": "视图",
+    "newest": "最新抓取",
+    "noCapture": "无抓取数据：数量为手动输入",
+    "import": "导入",
+    "replaced": "{n} 处手动修改已被抓取数据取代",
+    "ok": "确定",
+    "seelieTitle": "从 Seelie 导入或导出到 Seelie",
+    "addGoals": "添加目标",
+    "loadError": "无法加载养成规划",
+    "noGoals": "没有目标",
+    "importSeelie": "从 Seelie 导入",
+    "importCapture": "导入抓取数据",
+    "readiness": "材料状态",
+    "selectTitle": "选择要一起修改的目标",
+    "select": "选择",
+    "selected": "已选目标",
+    "selectedCount": "已选 {n} 个",
+    "selectedSr": "已选",
+    "pickNone": "全不选",
+    "pickAll": "全选",
+    "applyPreset": "应用预设",
+    "pause": "暂停",
+    "count": "计入",
+    "doneSelecting": "完成选择",
+    "done": "已完成",
+    "doneGoals": "已完成的目标",
+    "loading": "正在加载养成规划"
+  }
+}

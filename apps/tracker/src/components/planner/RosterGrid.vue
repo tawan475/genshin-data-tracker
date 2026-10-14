@@ -17,6 +17,7 @@ import {
   normalizeSearch,
 } from '@/data/characters'
 import { toElement, type Element } from '@/data/game-meta'
+import { t } from '@/i18n'
 import { characterIcon } from '@/lib/assets'
 import { characterName } from './model'
 
@@ -70,28 +71,33 @@ const shown = computed(() => {
   )
 })
 
-const weaponOptions = [
-  { value: 'all', label: 'Weapon' },
+const weaponOptions = computed(() => [
+  { value: 'all', label: t('planner.hint.weapon') },
   ...WEAPON_TYPES.map((w) => ({ value: w as string, label: WEAPON_TYPE_LABELS[w] })),
-]
+])
 </script>
 
 <template>
   <div class="flex flex-col gap-3">
     <div class="flex flex-wrap items-center gap-2">
       <label class="relative min-w-0 flex-1 basis-40">
-        <span class="sr-only">Search characters</span>
+        <span class="sr-only">{{ $t('planner.roster.search') }}</span>
         <Search
           class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
           aria-hidden="true"
         />
-        <UiInput v-model="filters.query" class="pl-9" placeholder="Search" type="search" />
+        <UiInput
+          v-model="filters.query"
+          class="pl-9"
+          :placeholder="$t('planner.common.search')"
+          type="search"
+        />
       </label>
       <UiSelect
         v-model="filters.weapon"
         :options="weaponOptions"
         class="w-32"
-        aria-label="Weapon type"
+        :aria-label="$t('planner.custom.weaponType')"
       />
       <span class="flex gap-1.5">
         <FilterChip
@@ -106,7 +112,7 @@ const weaponOptions = [
     <div
       class="scroll-hide scroll-fade-x -mx-1 flex gap-1.5 overflow-x-auto px-1"
       role="group"
-      aria-label="Element"
+      :aria-label="$t('planner.custom.element')"
     >
       <FilterChip
         v-for="e in ELEMENTS"
@@ -122,7 +128,7 @@ const weaponOptions = [
 
     <ul
       class="grid grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] gap-1.5"
-      :aria-label="multi ? 'Characters (pick several)' : 'Characters'"
+      :aria-label="multi ? $t('planner.roster.multi') : $t('planner.picker.characters')"
     >
       <li v-for="c in shown" :key="c.key">
         <button
@@ -135,7 +141,11 @@ const weaponOptions = [
             c.owned ? '' : 'opacity-60',
           ]"
           :aria-pressed="multi ? selected.has(c.key) : undefined"
-          :title="c.owned ? `${c.name} · Lv ${c.level}` : `${c.name} · not owned`"
+          :title="
+            c.owned
+              ? $t('planner.roster.owned', { name: c.name, level: c.level })
+              : $t('planner.roster.notOwned', { name: c.name })
+          "
           @click="emit('toggle', c.key)"
         >
           <GameIcon :src="characterIcon(c.key)" :name="c.name" :rarity="c.rarity" size="lg" />
@@ -150,6 +160,8 @@ const weaponOptions = [
         </button>
       </li>
     </ul>
-    <p v-if="shown.length === 0" class="py-6 text-center text-sm text-text-muted">No matches</p>
+    <p v-if="shown.length === 0" class="py-6 text-center text-sm text-text-muted">
+      {{ $t('planner.common.noMatches') }}
+    </p>
   </div>
 </template>

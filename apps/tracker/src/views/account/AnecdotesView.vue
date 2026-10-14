@@ -30,6 +30,8 @@ import { useResource } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
 import { useAccount, useReadOnly } from './context'
 
 /**
@@ -41,10 +43,15 @@ const account = useAccount()
 const readOnly = useReadOnly()
 
 const game = useResource(
-  () => 0,
-  async () => {
-    const [data, text] = await Promise.all([loadAnecdotes(), anecdoteText('en'), loadGameIcons()])
-    return { data, text }
+  () => locale.value,
+  async (lang) => {
+    const [data, text, english] = await Promise.all([
+      loadAnecdotes(),
+      anecdoteText(lang),
+      lang === 'en' ? undefined : anecdoteText('en'),
+      loadGameIcons(),
+    ])
+    return { data, text, english: english ?? text }
   },
 )
 
@@ -91,7 +98,7 @@ const progress = computed(() =>
     : null,
 )
 
-const areaName = (id: number) => game.data.value?.text.areas.get(id) ?? `Area ${id}`
+const areaName = (id: number) => game.data.value?.text.areas.get(id) ?? t('anecdotes.area', { id })
 const areaTabs = computed<AreaTab[]>(
   () =>
     progress.value?.areas.map((a) => ({
@@ -176,27 +183,34 @@ function unmark(id: number) {
 
 <template>
   <div>
-    <PageHeader title="Anecdotes">
+    <PageHeader :title="$t('anecdotes.title')">
       <template v-if="ready && captured" #meta>
         <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
           <Clock class="size-4" aria-hidden="true" />
-          <span class="sr-only">Newest capture</span>
-          <time :datetime="newestCapture.iso" :title="`Newest capture: ${newestCapture.title}`">{{
-            newestCapture.ago
-          }}</time>
+          <span class="sr-only">{{ $t('anecdotes.newestCapture') }}</span>
+          <time
+            :datetime="newestCapture.iso"
+            :title="$t('anecdotes.newestCaptureTitle', { time: newestCapture.title })"
+            >{{ newestCapture.ago }}</time
+          >
         </p>
         <p
           v-else
           class="flex items-center gap-1.5 text-text-secondary"
-          title="No capture has anecdotes yet: irminsul records them from the game"
+          :title="$t('anecdotes.notCapturedTitle')"
         >
           <Info class="size-4 shrink-0" aria-hidden="true" />
-          Not captured
+          {{ $t('anecdotes.notCaptured') }}
         </p>
       </template>
     </PageHeader>
 
-    <UiError v-if="loadError && !ready" title="Load failed" :error="loadError" @retry="retry" />
+    <UiError
+      v-if="loadError && !ready"
+      :title="$t('anecdotes.loadFailed')"
+      :error="loadError"
+      @retry="retry"
+    />
 
     <template v-else-if="ready && progress && game.data.value && captured">
       <AnecdoteSummary
@@ -247,6 +261,7 @@ function unmark(id: number) {
               :key="group.npc"
               :group="group"
               :text="game.data.value.text"
+              :english="game.data.value.english"
               :read-only="readOnly"
               :fold="fold"
               :kept="kept"
@@ -257,30 +272,32 @@ function unmark(id: number) {
         </section>
 
         <UiPanel v-if="empty" flush>
-          <UiEmpty v-if="empty === 'allDone'" title="All done">
+          <UiEmpty v-if="empty === 'allDone'" :title="$t('anecdotes.allDone')">
             <template #icon><CheckCheck class="text-success-text" aria-hidden="true" /></template>
-            <UiButton @click="filters.completion = 'done'">Show done</UiButton>
+            <UiButton @click="filters.completion = 'done'">{{ $t('anecdotes.showDone') }}</UiButton>
           </UiEmpty>
-          <UiEmpty v-else-if="empty === 'noneDone'" title="None done">
+          <UiEmpty v-else-if="empty === 'noneDone'" :title="$t('anecdotes.noneDone')">
             <template #icon><SearchX aria-hidden="true" /></template>
-            <UiButton @click="filters.completion = 'missing'">Show not done</UiButton>
+            <UiButton @click="filters.completion = 'missing'">{{
+              $t('anecdotes.showNotDone')
+            }}</UiButton>
           </UiEmpty>
           <UiEmpty
             v-else-if="empty === 'unmet'"
-            title="None met yet"
-            body="Hidden anecdotes show once met."
+            :title="$t('anecdotes.noneMet')"
+            :body="$t('anecdotes.noneMetBody')"
           >
             <template #icon><SearchX aria-hidden="true" /></template>
           </UiEmpty>
-          <UiEmpty v-else title="No matches">
+          <UiEmpty v-else :title="$t('anecdotes.noMatches')">
             <template #icon><SearchX aria-hidden="true" /></template>
-            <UiButton v-if="filtered" @click="clearFilters">Clear</UiButton>
+            <UiButton v-if="filtered" @click="clearFilters">{{ $t('anecdotes.clear') }}</UiButton>
           </UiEmpty>
         </UiPanel>
       </div>
     </template>
 
-    <div v-else aria-busy="true" aria-label="Loading">
+    <div v-else aria-busy="true" :aria-label="$t('anecdotes.loading')">
       <div class="mb-4 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4 lg:mb-6">
         <UiSkeleton v-for="n in 4" :key="n" class="h-16 sm:h-[4.5rem]" />
       </div>

@@ -1,1 +1,97 @@
-{}
+{
+  "title": "素材",
+  "newestSnapshot": "最新快照",
+  "since": "自 {date} 起",
+  "oneSnapshot": "僅有一個快照",
+  "changesTitle": "變化（{hint}）",
+  "changeSince": "變化起點",
+  "noSnapshots": "尚無快照",
+  "import": "匯入",
+  "loadFailed": "無法載入素材",
+  "loading": "正在載入素材",
+  "saveChartFailed": "無法儲存圖表設定",
+  "search": "搜尋",
+  "searchLabel": "搜尋素材",
+  "noMatches": "無相符結果",
+  "noMaterials": "沒有素材",
+  "clear": "清除",
+  "more": "還有 {n} 個",
+  "upTo": "最多 {max} 個",
+  "trackedOfMax": "已追蹤 / 上限",
+  "track": "追蹤",
+  "untrack": "取消追蹤",
+  "deltaHint": "{value}（{hint}）",
+  "periods": {
+    "last": "上次"
+  },
+  "wallet": {
+    "label": "錢包",
+    "title": "貨幣與祈願道具",
+    "short": {
+      "GenesisCrystal": "創世結晶",
+      "IntertwinedFate": "糾纏之緣",
+      "AcquaintFate": "相遇之緣",
+      "MasterlessStarglitter": "星輝",
+      "MasterlessStardust": "星塵",
+      "OriginalResin": "原粹樹脂",
+      "FragileResin": "脆弱樹脂",
+      "CondensedResin": "濃縮樹脂",
+      "RealmCurrency": "洞天寶錢"
+    }
+  },
+  "tabs": {
+    "development": "養成道具",
+    "precious": "貴重道具",
+    "other": "其他",
+    "note": "{name}：{note}",
+    "notes": {
+      "weapon": "強化礦石（遊戲中放在武器分頁）",
+      "artifact": "祝聖油膏與祝聖精華（遊戲中放在聖遺物分頁）",
+      "other": "不在遊戲背包中：貨幣、種子、七聖召喚道具、比遊戲資料更新的道具"
+    }
+  },
+  "bag": {
+    "title": "背包",
+    "show": "顯示",
+    "view": "檢視",
+    "views": {
+      "grid": "圖示",
+      "list": "清單"
+    },
+    "tabRow": "背包分頁",
+    "all": "全部",
+    "allTitle": "所有分頁",
+    "sort": "排序",
+    "sorts": {
+      "order": "遊戲內",
+      "count": "數量",
+      "change": "變化",
+      "name": "名稱"
+    },
+    "unfoldAll": "展開所有分頁",
+    "foldAll": "摺疊所有分頁",
+    "owned": "持有",
+    "ownedTitle": "持有的素材",
+    "gained": "獲得",
+    "gainedTitle": "獲得（{hint}）",
+    "spent": "消耗",
+    "spentTitle": "消耗（{hint}）",
+    "tile": "{name}：{count}",
+    "handSet": " · 手動設為 {hand}（擷取 {capture}）"
+  },
+  "detail": {
+    "history": "歷史",
+    "chartLabel": "{name} 隨時間的變化，{since}",
+    "statTitle": "{value}（{since}）",
+    "gained": "獲得",
+    "spent": "消耗",
+    "peak": "峰值",
+    "first": "首次",
+    "firstTitle": "首次持有的快照"
+  },
+  "tracked": {
+    "title": "追蹤",
+    "list": "已追蹤的素材",
+    "untrackName": "取消追蹤 {name}"
+  }
+}

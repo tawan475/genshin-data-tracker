@@ -1,1 +1,567 @@
-{}
+{
+  "sort": {
+    "name": {
+      "label": "Name",
+      "title": "A to Z"
+    },
+    "missing": {
+      "label": "Missing",
+      "title": "Fewest items missing first"
+    },
+    "favorites": {
+      "label": "Favorites",
+      "title": "Favorites first"
+    },
+    "priority": {
+      "label": "Priority",
+      "title": "Materials go to the top goals first: drag to reorder"
+    }
+  },
+  "material": {
+    "characterExp": "Character EXP",
+    "weaponExp": "Weapon EXP",
+    "group": {
+      "exp": "EXP",
+      "gem": "Gems",
+      "boss": "Boss drops",
+      "local": "Local specialties",
+      "common": "Enemy drops",
+      "book": "Talent books",
+      "weekly": "Weekly bosses",
+      "weapon": "Weapon materials",
+      "elite": "Elite drops",
+      "other": "Other"
+    }
+  },
+  "hint": {
+    "level": "Lv {level}",
+    "talents": "talents {talents}",
+    "characterDetail": "{name}: Lv {level} (A{ascension}), talents {talents}",
+    "weaponDetail": "{name}: Lv {level} (A{ascension})",
+    "thenAr": "then AR {ar}",
+    "thenShort": "then short of materials",
+    "weapon": "Weapon",
+    "canLevel": "Can level now"
+  },
+  "preset": {
+    "max": {
+      "label": "Max",
+      "title": "Level 90, talents 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Level 90, talents 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Level 80, talents 8/8/8"
+    },
+    "talents": {
+      "label": "Talents only",
+      "title": "Talents 9/9/9, level as now"
+    },
+    "level": {
+      "label": "Level only",
+      "title": "Level 90, talents as now"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Daily Commissions",
+      "weeklyBosses": "Trounce Domains",
+      "battlePass": "Battle Pass weekly",
+      "reputation": "Reputation",
+      "abyss": "Spiral Abyss",
+      "theater": "Imaginarium Theater",
+      "bargains": "Paimon's Bargains",
+      "transformer": "Parametric Transformer"
+    }
+  },
+  "toast": {
+    "notSaved": "Not saved",
+    "newCapture": "New capture",
+    "newCaptureDetail": "Nothing was changed: check and try again"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} event left out | {n} events left out",
+      "olderThanOurs": "older than ours",
+      "ar": "AR {ar}",
+      "wl": "WL {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "America",
+      "EUROPE": "Europe",
+      "ASIA": "Asia",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Not a Seelie export (no goals)",
+    "customName": "Custom"
+  },
+  "resin": {
+    "alertTitle": "Original Resin {amount}",
+    "source": {
+      "manual": "set by hand",
+      "player": "irminsul, at login",
+      "inventory": "the snapshot"
+    },
+    "unknown": "Original Resin: not known yet · set it",
+    "readingTitle": "Original Resin ~{now}/{max} · {value} from {source}, {at} · +1 every 8 minutes",
+    "setLabel": "{title}. Set",
+    "spend": "Spend {n}",
+    "add": "Add {n}",
+    "fullAt": "Full at {time}",
+    "fullLabel": "Full",
+    "full": "Full",
+    "markTitle": "{amount} at {time}",
+    "in": "in",
+    "now": "Original Resin now",
+    "alert": "Resin alert",
+    "alertUnsupported": "Resin alert: not supported in this browser",
+    "alertOff": "Resin alert: off",
+    "alertOn": "Resin alert at {amount} · while the site is open",
+    "alertOnAt": "Resin alert at {amount}, {time} · while the site is open",
+    "unsupported": "Not supported in this browser",
+    "blocked": "Blocked: allow notifications for this site in the browser's settings",
+    "notifyAt": "Notify at",
+    "off": "Off",
+    "whileOpen": "While the site is open on this device"
+  },
+  "artifacts": {
+    "title": "Artifacts",
+    "doneByHand": "{name}: done (ticked by hand)",
+    "notDoneByHand": "{name}: not done (ticked by hand)",
+    "notDoneByHandCaptureDone": "{name}: not done (ticked by hand; the capture says done)",
+    "doneFromCapture": "{name}: done, from the capture ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "not done",
+    "nothingWorn": "nothing worn",
+    "otherSet": "other set",
+    "otherMainStat": "other main stat",
+    "levelOf": "+{level} of +{max}",
+    "farmingByHand": "{name}: farming (ticked by hand)",
+    "setDone": "{name}: done, every slot is",
+    "setFarming": "{name}: farming",
+    "autoRule": "A slot ticks itself when the capture shows a top-level piece (+20 on a 5★) there of a chosen set with a chosen main stat; the fifth slot can be any set once the other four are chosen sets",
+    "sets": "Sets",
+    "worn": "{n} worn",
+    "remove": "Remove {name}",
+    "addSet": "Set",
+    "close": "Close",
+    "slots": "Slots",
+    "mainStat": "{slot} main stat",
+    "searchSets": "Search sets",
+    "setList": "Artifact sets"
+  },
+  "cost": {
+    "saves": "{name} saves {mora}",
+    "nothing": "Nothing to spend",
+    "colours": "Colours"
+  },
+  "common": {
+    "search": "Search",
+    "cancel": "Cancel",
+    "nameState": "{name}: {state}",
+    "counted": "Counted",
+    "notCounted": "Not counted",
+    "removeName": "Remove {name}",
+    "clear": "Clear",
+    "remove": "Remove",
+    "save": "Save",
+    "noMatches": "No matches",
+    "delete": "Delete",
+    "undo": "Undo"
+  },
+  "custom": {
+    "slot": {
+      "book": "Talent book",
+      "common": "Enemy drop",
+      "boss": "Boss drop",
+      "local": "Specialty",
+      "weekly": "Weekly boss"
+    },
+    "name": "Name",
+    "rarity": "Rarity",
+    "weaponType": "Weapon type",
+    "element": "Element"
+  },
+  "done": {
+    "taken": "Taken from the bag",
+    "uses": "Uses",
+    "notInBag": "Not in the bag",
+    "takesWhatThereIs": "Done takes what there is.",
+    "confirm": "Done"
+  },
+  "extra": {
+    "title": "Extra",
+    "add": "Add item",
+    "have": "have {n}",
+    "craft": "craft {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (favourite)",
+    "title": "{name} · tap: open · hold or right-click: pause",
+    "moreTitle": "{rest} · show all",
+    "moreLabel": "{n} more: {rest}. Show all",
+    "fewerTitle": "Show fewer",
+    "fewer": "Less"
+  },
+  "card": {
+    "level": "Level",
+    "talents": "Talents",
+    "levelTitle": "Level {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "Attack / Skill / Burst",
+    "boosted": "shown in game as {talents} at C{constellation}",
+    "weaponTitle": "{name}: level {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "can do now with the bag",
+    "readyStep": "its next step can be done now with the bag",
+    "constellation": "Constellation {n}",
+    "refinement": "Refinement {n}",
+    "artifactsTitle": "Artifacts: {done}/5 slots",
+    "expSuffix": "{name} (EXP)",
+    "amount": "{name}: {n}",
+    "short": "{n} short",
+    "shortAfter": "{n} short after the goals above",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "enough after the goals above",
+    "handleLabel": "{name}: place {rank}, move with the arrow keys",
+    "handleTitle": "#{rank} · drag, or arrow keys",
+    "customTitle": "Custom character: not in the game data yet",
+    "custom": "Custom",
+    "favoriteLabel": "{name}: favorite",
+    "favorite": "Favorite",
+    "notFavorite": "Not a favorite",
+    "setByHand": "Set by hand",
+    "needsAr": "Needs AR {ar}",
+    "doneLabel": "{name}: {label} done",
+    "doneReadyLabel": "{name}: {label} done ({ready})",
+    "missing": "{name}: missing",
+    "canDoNow": "Can do now: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Attack",
+      "skill": "Skill",
+      "burst": "Burst"
+    },
+    "notOwned": "Not owned",
+    "estimateResin": "~{resin} resin",
+    "estimateTitle": "{runs} runs · {resin} resin ({condensed} condensed) · {days} days",
+    "estimateWeekly": "weekly bosses: {weeks} weeks",
+    "countedLabel": "{name}: counted",
+    "notCountedLabel": "{name}: not counted",
+    "presets": "Presets",
+    "constellationTitle": "Constellation (C3/C5 raise a talent by 3)",
+    "constellation": "Constellation",
+    "hideNote": "Hide note",
+    "note": "Note",
+    "part": "Goal part",
+    "now": "Now",
+    "goal": "Goal",
+    "levelNow": "Level now",
+    "levelGoal": "Level goal",
+    "boost": "C{at} raises it by 3",
+    "boostOn": "C{at} raises it by 3: in game {from} → {to}",
+    "talentNow": "{talent} now",
+    "talentGoal": "{talent} goal",
+    "inGame": "In game {from} → {to}",
+    "customCharacter": "Custom character",
+    "replaceWithEllipsis": "Replace with…",
+    "replaceWith": "Replace with {name}",
+    "replace": "Replace",
+    "gapNeed": "{talents} need",
+    "setLevel": "Set {level}",
+    "captureTitle": "The newest capture",
+    "capture": "Capture: {text}",
+    "resetTitle": "Back to the capture",
+    "reset": "Reset",
+    "cost": "Cost"
+  },
+  "picker": {
+    "characters": "Characters",
+    "weapons": "Weapons",
+    "items": "Items",
+    "title": "Add goal",
+    "kind": "Kind",
+    "searchItems": "Search items",
+    "preset": "Preset",
+    "add": "Add",
+    "addCount": "Add {n}"
+  },
+  "toolbar": {
+    "label": "Filter goals",
+    "searchTitle": "Name, weapon or note",
+    "sort": "Sort",
+    "chips": "Upgrade now, weekly bosses, status, element and rarity",
+    "upgrade": "Upgrade now",
+    "upgradeTitle": "Counted goals that can level now with the bag, each on its own: Ready, Ready alone, or a part (Level, Talents, a weapon) or its next step",
+    "noWeeklyTitle": "Still to farm, but no weekly boss: its drops are held or convertible (after the goals above)",
+    "status": {
+      "all": "All",
+      "ready": "In stock",
+      "readyTitle": "Enough in the bag, each goal on its own",
+      "activeTitle": "In the totals",
+      "off": "Paused",
+      "offTitle": "Left out of the totals"
+    }
+  },
+  "item": {
+    "count": "Count",
+    "have": "Have",
+    "editHave": "Have {n}: edit"
+  },
+  "popover": {
+    "goalsLabel": "{name}: goals using it ({n})",
+    "goalsTitle": "Goals using it",
+    "history": "{name}: history",
+    "expNeed": "EXP need {n}",
+    "goal": "Goal {n}",
+    "missing": "Missing {n}",
+    "enough": "Enough",
+    "need": "Need {n}",
+    "craftedTitle": "Crafted from the tier below",
+    "craft": "Craft {n}",
+    "capture": "Capture {n}",
+    "backLabel": "{name}: back to the capture's {n}",
+    "backTitle": "Back to {n}",
+    "held": "{name} held",
+    "addPlaceholder": "+ add",
+    "addLabel": "{name}: add obtained",
+    "addTitle": "Add what you got (Enter)"
+  },
+  "levelGrid": {
+    "below": "Below the capture",
+    "level": "Level {level} (A{ascension})",
+    "ascended": "Level {level}, ascended (A{ascension})",
+    "ascendedWord": "ascended"
+  },
+  "cell": {
+    "have": "Have {n}",
+    "spent": "Used to craft {n}",
+    "converted": "Converted from others {n}",
+    "convertedAway": "Converted into others {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} goal, each after the counted goals above it | {name}: {n} goals, each after the counted goals above it",
+    "clear": "Clear {name}"
+  },
+  "materialPicker": {
+    "material": "Material",
+    "selected": "Material: {name}",
+    "title": "Goals using a material",
+    "search": "Search materials",
+    "any": "Any",
+    "goals": "{n} goal | {n} goals"
+  },
+  "stepper": {
+    "down": "{label}: down",
+    "up": "{label}: up"
+  },
+  "settings": {
+    "title": "Planner settings",
+    "autoWl": "Auto ({wl})",
+    "ar": "AR",
+    "arTitle": "Adventure Rank (1–60)",
+    "arTitleIrminsul": "Adventure Rank (1–60) · {ar} from irminsul",
+    "fromIrminsul": "from irminsul",
+    "wl": "WL",
+    "wlTitle": "World Level (0–9)",
+    "wlTitleIrminsul": "World Level (0–9) · {wl} from irminsul",
+    "wlLabel": "World Level",
+    "refreshesTitle": "Original Resin refreshes a day ({per} resin each): days count 180 + {per} per refresh",
+    "refreshes": "Refreshes",
+    "refreshesLabel": "Resin refreshes a day",
+    "stepsTitle": "Up to four amounts, e.g. -40 +60: the resin tracker adds them (minus spends)",
+    "steps": "Resin buttons",
+    "azothTitle": "Cover missing gems with spare gems of another element",
+    "azoth": "Dust of Azoth",
+    "passivesTitle": "Raiden Shogun, Wanderer: −50% Mora for weapon ascension",
+    "passives": "Mora passives",
+    "craftingTitle": "The Farm view's checklist of what to convert, craft and forge",
+    "crafting": "Crafting checklist"
+  },
+  "roster": {
+    "search": "Search characters",
+    "multi": "Characters (pick several)",
+    "owned": "{name} · Lv {level}",
+    "notOwned": "{name} · not owned",
+    "weaponOwned": "{name} · Lv {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "The copy in the capture",
+    "noCopy": "No copy in the capture",
+    "heldBy": "Held by {name}",
+    "refinementNow": "{name} refinement now",
+    "levelNow": "{name} level now",
+    "refinementGoal": "{name} refinement goal",
+    "levelGoal": "{name} level goal",
+    "search": "Search weapons"
+  },
+  "seelieImport": {
+    "notExport": "Not a Seelie export",
+    "notJson": "Not a JSON file",
+    "section": {
+      "goals": {
+        "label": "Goals",
+        "title": "Character, talent and weapon goals, extra item needs"
+      },
+      "artifacts": {
+        "label": "Artifact goals",
+        "title": "Sets and main stats to farm"
+      },
+      "customs": {
+        "label": "Custom characters",
+        "title": "Characters Seelie has as custom ones, with goals"
+      },
+      "current": {
+        "label": "Current levels",
+        "title": "Seelie’s current levels, talents and constellations where ahead of the capture"
+      },
+      "inventory": {
+        "label": "Inventory",
+        "title": "Counts as hand edits on the newest capture (a newer capture replaces them)"
+      },
+      "tasks": {
+        "label": "Tasks",
+        "title": "Custom tasks, and permanent ones done in Seelie"
+      },
+      "resin": {
+        "label": "Resin",
+        "title": "Seelie’s resin tracker, when newer than ours"
+      },
+      "settings": {
+        "label": "Settings",
+        "title": "AR, World Level, server and Traveler"
+      }
+    },
+    "count": {
+      "new": "{n} new",
+      "changed": "{n} changed",
+      "same": "{n} same"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account",
+    "change": "Change",
+    "choose": "Choose file",
+    "fileLabel": "Seelie export file",
+    "legend": "What to import",
+    "skipped": "Skipped {n}",
+    "clampedTitle": "Targets above level 90 were set to 90",
+    "clamped": "Capped at 90: {n}",
+    "replace": "Replace (remove {n})",
+    "exportTitle": "A Seelie account file: goals, inventory, tasks (Seelie → Settings → Import Account)",
+    "export": "Export",
+    "import": "Import"
+  },
+  "taskEditor": {
+    "everyDay": "Every day",
+    "everyDays": "Every {n} days",
+    "today": "Today ({day})",
+    "tomorrow": "Tomorrow ({day})",
+    "startDay": "Start day",
+    "startDayTitle": "Keeps the rhythm of its start day",
+    "doneDay": "Done day",
+    "doneDayTitle": "Counts from the day it was done",
+    "task": "Task",
+    "newTask": "New task",
+    "nameIt": "Name it",
+    "repeats": "Repeats",
+    "next": "Next",
+    "starts": "Starts",
+    "countsFrom": "Counts from"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "permanent": "Permanent",
+    "ready": "Ready",
+    "readyTitle": "Ready to use",
+    "resets": "Resets {time}",
+    "snoozedBack": "Snoozed · back {time}",
+    "doneBack": "Done · back {time}",
+    "everyDay": "every day",
+    "everyDays": "every {n} days",
+    "fromDone": "from the day done",
+    "fromStart": "from its start day",
+    "dueTitle": "Due {date} · {every}, {from}",
+    "overdue": "Overdue",
+    "late": "{n}d late",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "doneToast": "{name} done",
+    "backToast": "{name}: back {day}",
+    "deleted": "{name} deleted",
+    "toDo": "{n} to do",
+    "toDoSr": "to do",
+    "shown": "Tasks shown",
+    "hideDone": "Hide done",
+    "showDone": "Show done ({n})",
+    "permanentShown": "Permanent tasks shown",
+    "add": "Add a task",
+    "noCustom": "No tasks of your own",
+    "allDone": "All done",
+    "move": "Move {name}",
+    "dragTitle": "Drag, or arrow keys",
+    "doneLabel": "Done: {name}",
+    "notDoneLabel": "Not done: {name}",
+    "takeBack": "Take back",
+    "snoozeName": "Snooze {name}",
+    "snooze": "Snooze",
+    "lastDay": "Last day",
+    "permanentTasks": "Permanent tasks"
+  },
+  "view": {
+    "title": "Planner",
+    "accountFallback": "Genshin account",
+    "farm": "Farm",
+    "goals": "Goals",
+    "presetApplied": "{preset}: {n} goals",
+    "bulkCounted": "{n} counted",
+    "bulkPaused": "{n} paused",
+    "goalsRemoved": "{n} goals removed",
+    "paused": "{name} paused",
+    "partDone": "{name}: {label} done",
+    "craftStepDone": "Crafting step done",
+    "craftStepsDone": "{n} crafting steps done",
+    "craftingHidden": "Crafting hidden",
+    "craftingHiddenHint": "Planner settings: Crafting checklist",
+    "itemRemoved": "Item removed",
+    "removed": "{name} removed",
+    "added": "Added {n} goals",
+    "notImported": "Not imported",
+    "importedGoals": "{n} goals",
+    "importedCurrent": "{n} current",
+    "importedItems": "{n} items",
+    "importedTasks": "{n} tasks",
+    "imported": "Imported from Seelie",
+    "notExported": "Not exported",
+    "exported": "Exported for Seelie",
+    "view": "View",
+    "newest": "Newest capture",
+    "noCapture": "No capture: counts are yours",
+    "import": "Import",
+    "replaced": "{n} hand edit replaced by the capture | {n} hand edits replaced by the capture",
+    "ok": "OK",
+    "seelieTitle": "Import from or export to Seelie",
+    "addGoals": "Add goals",
+    "loadError": "Could not load the planner",
+    "noGoals": "No goals",
+    "importSeelie": "Import from Seelie",
+    "importCapture": "Import a capture",
+    "readiness": "Readiness",
+    "selectTitle": "Pick goals to change together",
+    "select": "Select",
+    "selected": "Selected goals",
+    "selectedCount": "{n} selected",
+    "selectedSr": "selected",
+    "pickNone": "None",
+    "pickAll": "All",
+    "applyPreset": "Apply a preset",
+    "pause": "Pause",
+    "count": "Count",
+    "doneSelecting": "Done selecting",
+    "done": "Done",
+    "doneGoals": "Done goals",
+    "loading": "Loading planner"
+  }
+}

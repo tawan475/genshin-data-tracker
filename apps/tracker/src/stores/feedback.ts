@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { errorText } from '@/i18n/api-errors'
 
 export interface Toast {
   id: number
@@ -37,9 +38,12 @@ export const useFeedback = defineStore('feedback', () => {
     toasts.value = toasts.value.filter((t) => t.id !== id)
   }
 
-  /** Shows an error from any thrown value; ApiRequestError messages are safe to show. */
+  /**
+   * Shows an error from any thrown value; ApiRequestError messages are safe to
+   * show (in Chinese, the message for the server's code: i18n/api-errors).
+   */
   function error(title: string, cause?: unknown) {
-    const detail = cause instanceof Error ? cause.message : undefined
+    const detail = cause instanceof Error ? errorText(cause) : undefined
     return toast({ tone: 'danger', title, detail })
   }
 

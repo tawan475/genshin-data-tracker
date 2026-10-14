@@ -25,14 +25,14 @@ const emit = defineEmits<{ open: [key: string] }>()
 <template>
   <ul
     class="scroll-hide scroll-fade-x -mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:scroll-fade-none sm:grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] sm:overflow-visible sm:px-0 sm:pb-0"
-    aria-label="Wallet"
+    :aria-label="$t('materials.wallet.label')"
   >
     <li v-for="item in items" :key="item.key" class="flex w-32 shrink-0 snap-start sm:w-auto">
       <UiStat
         button
         :label="item.label"
         :value="item.count"
-        :hint="`${item.name}: ${formatNumber(item.count)}`"
+        :hint="$t('materials.bag.tile', { name: item.name, count: formatNumber(item.count) })"
         @click="emit('open', item.key)"
       >
         <template #media>

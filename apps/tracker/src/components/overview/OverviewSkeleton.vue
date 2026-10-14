@@ -6,7 +6,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 
 <template>
   <div class="flex flex-col gap-6" role="status">
-    <span class="sr-only">Loading snapshot history</span>
+    <span class="sr-only">{{ $t('overview.loadingHistory') }}</span>
     <section class="rounded-xl border border-border-default bg-surface-raised shadow-sm">
       <div
         class="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-5 py-4"

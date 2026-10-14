@@ -2,6 +2,7 @@ import { onScopeDispose, shallowRef, watch } from 'vue'
 import { api } from '@/api'
 import { onPlannerChange } from '@/live/planner-changes'
 import { updatesHeld } from '@/live/holds'
+import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 
 /**
@@ -68,7 +69,7 @@ export function useAnecdoteMarks(accountId: () => number, readOnly = false) {
         if (pending === 1 && id === accountId()) marked.value = new Set(answer)
         return true
       } catch (cause) {
-        feedback.error('Not saved', cause)
+        feedback.error(t('anecdotes.notSaved'), cause)
         if (id === accountId()) await load(id)
         return false
       } finally {

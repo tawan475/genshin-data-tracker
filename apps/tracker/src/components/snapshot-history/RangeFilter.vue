@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { CalendarRange, X } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
+import { formatNumber } from '@/lib/format'
 
 /**
  * Date filter for the table (local days, inclusive; either end open). While
@@ -33,7 +34,7 @@ const input =
 <template>
   <form
     class="flex w-full flex-wrap items-center gap-2 sm:w-auto"
-    aria-label="Filter by date"
+    :aria-label="$t('snapshots.range.label')"
     @submit.prevent="emit('select')"
   >
     <div class="flex min-w-0 basis-full items-center gap-2 sm:basis-auto">
@@ -41,8 +42,8 @@ const input =
       <input
         v-model="from"
         type="date"
-        aria-label="From"
-        title="From"
+        :aria-label="$t('snapshots.range.from')"
+        :title="$t('snapshots.range.from')"
         :min="firstDay"
         :max="to || lastDay"
         :class="input"
@@ -51,8 +52,8 @@ const input =
       <input
         v-model="to"
         type="date"
-        aria-label="To"
-        title="To"
+        :aria-label="$t('snapshots.range.to')"
+        :title="$t('snapshots.range.to')"
         :min="from || firstDay"
         :max="lastDay"
         :class="input"
@@ -64,11 +65,11 @@ const input =
         variant="primary"
         size="sm"
         :disabled="matched === 0"
-        :title="`Select the ${matched} snapshots in range`"
+        :title="$t('snapshots.range.selectTitle', { n: formatNumber(matched) })"
       >
-        Select {{ matched }}
+        {{ $t('snapshots.range.select', { n: formatNumber(matched) }) }}
       </UiButton>
-      <UiIconButton label="Clear dates" @click="clear">
+      <UiIconButton :label="$t('snapshots.range.clear')" @click="clear">
         <X class="size-5" aria-hidden="true" />
       </UiIconButton>
     </template>

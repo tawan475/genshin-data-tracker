@@ -1,1 +1,108 @@
-{}
+{
+  "heading": "Import History",
+  "loadFailed": "Load failed",
+  "noneInRange": "No snapshots in range",
+  "clear": "Clear",
+  "noSnapshots": "No snapshots yet",
+  "import": "Import",
+  "unchangedUntil": "Unchanged until {time}",
+  "downloadFailed": "Failed to download snapshot",
+  "saved": "Saved {name}",
+  "files": "{n} file | {n} files",
+  "gone": "{n} gone",
+  "exportFailed": "Export failed",
+  "deletedOf": "Deleted {deleted} of {total} snapshots",
+  "deleteFailed": "Failed to delete snapshot",
+  "deleteFailedMany": "Failed to delete snapshots",
+  "deleted": "Successfully deleted {n} snapshot | Successfully deleted {n} snapshots",
+  "column": {
+    "id": "ID",
+    "date": "Date",
+    "source": "Source",
+    "rawSize": "Raw Size",
+    "storedSize": "Stored Size",
+    "actions": "Actions"
+  },
+  "select": {
+    "page": "Select this page",
+    "snapshot": "Select snapshot {id}",
+    "shiftClick": "Shift-click to select a range",
+    "pageSelected": "All {n} on this page are selected.",
+    "all": "Select all {n}",
+    "allInRange": "Select all {n} in range",
+    "viewSelected": "All {n} snapshots are selected.",
+    "rangeSelected": "All {n} snapshots in range are selected.",
+    "clear": "Clear selection",
+    "allLabel": "All"
+  },
+  "confirm": {
+    "title": "Are you sure?",
+    "one": "You are about to delete this snapshot. This cannot be undone.",
+    "oneConfirm": "Yes, delete it!",
+    "many": "You are about to delete {n} snapshot(s). This cannot be undone.",
+    "purge": "You are about to delete {n} of this user's snapshot(s) now, skipping the trash. This cannot be undone.",
+    "manyConfirm": "Yes, delete them!",
+    "massTitle": "Mass Deletion Warning",
+    "massText": "You have selected ALL snapshots across ALL pages. Type \"DELETE\" to confirm you want to wipe everything.",
+    "massConfirm": "I understand, DELETE ALL!",
+    "typePlaceholder": "Type \"{word}\" to confirm",
+    "typeLabel": "Type {word} to confirm",
+    "typeError": "Type \"{word}\"",
+    "cancel": "Cancel"
+  },
+  "figure": {
+    "noCurrency": "No currency in this snapshot",
+    "vs": "vs #{id} · {time}"
+  },
+  "range": {
+    "label": "Filter by date",
+    "from": "From",
+    "to": "To",
+    "selectTitle": "Select the {n} snapshots in range",
+    "select": "Select {n}",
+    "clear": "Clear dates"
+  },
+  "row": {
+    "downloadGood": "Download GOOD",
+    "download": "Download snapshot {id}",
+    "delete": "Delete snapshot",
+    "deleteId": "Delete snapshot {id}"
+  },
+  "bar": {
+    "saving": "Saving…",
+    "downloadingOf": "Downloading {done} / {total}",
+    "downloading": "Downloading {done}",
+    "zipping": "Zipping {done} / {total}",
+    "selected": "{n} selected",
+    "outOf": " out of {n}",
+    "hiddenTitle": "{n} selected snapshots are outside the dates",
+    "hidden": "· {n} hidden",
+    "cancel": "Cancel",
+    "blocked": "Another export is running",
+    "downloadTitle": "Download a zip of GOOD files",
+    "download": "Download",
+    "delete": "Delete"
+  },
+  "card": {
+    "stored": "Stored"
+  },
+  "storage": {
+    "title": "Storage",
+    "snapshots": "Snapshots",
+    "raw": "Raw Data",
+    "stored": "Stored",
+    "saved": "Saved"
+  },
+  "pagination": {
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "total": "({n} total)",
+    "goTo": "Go to",
+    "go": "Go"
+  },
+  "table": {
+    "noData": "No data available."
+  }
+}

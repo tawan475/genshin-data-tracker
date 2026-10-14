@@ -39,26 +39,30 @@ function submit() {
 </script>
 
 <template>
-  <UiModal :open="open" :title="title ?? 'Delete user'" @close="emit('close')">
+  <UiModal :open="open" :title="title ?? $t('staff.deleteUser.title')" @close="emit('close')">
     <form v-if="user" :id="formId" class="flex flex-col gap-4" @submit.prevent="submit">
       <UserLink :user="user" plain />
       <div v-if="figures" class="grid grid-cols-3 gap-2">
-        <UiStat label="Accounts" :value="figures.accounts" exact />
-        <UiStat label="Snapshots" :value="figures.snapshots" />
-        <UiStat label="Stored" :value="formatBytes(figures.storedBytes)" />
+        <UiStat :label="$t('staff.common.accounts')" :value="figures.accounts" exact />
+        <UiStat :label="$t('staff.common.snapshots')" :value="figures.snapshots" />
+        <UiStat :label="$t('staff.common.stored')" :value="formatBytes(figures.storedBytes)" />
       </div>
       <label class="flex flex-col gap-1.5">
         <span class="text-sm font-medium text-text-secondary">
-          Type <span class="font-code">{{ user.username }}</span> to delete
+          <i18n-t keypath="staff.deleteUser.type" scope="global">
+            <template #name
+              ><span class="font-code">{{ user.username }}</span></template
+            >
+          </i18n-t>
         </span>
         <UiInput v-model="typed" autocomplete="off" spellcheck="false" autofocus />
       </label>
-      <span class="text-[0.8125rem] text-danger-text">Can't be undone</span>
+      <span class="text-[0.8125rem] text-danger-text">{{ $t('staff.deleteUser.cantUndo') }}</span>
     </form>
     <template #footer>
-      <UiButton @click="emit('close')">Cancel</UiButton>
+      <UiButton @click="emit('close')">{{ $t('staff.common.cancel') }}</UiButton>
       <UiButton variant="danger" type="submit" :form="formId" :disabled="!matches" :loading="busy">
-        {{ title ?? 'Delete user' }}
+        {{ title ?? $t('staff.deleteUser.title') }}
       </UiButton>
     </template>
   </UiModal>

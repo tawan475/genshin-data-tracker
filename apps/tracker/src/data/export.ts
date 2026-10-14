@@ -13,6 +13,7 @@
 
 import { readonly, ref } from 'vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
 import type { ExportEvent, ExportStart } from './export-protocol'
 import { goodFileName } from './export-zip'
 
@@ -112,7 +113,9 @@ async function pickFile(suggestedName: string): Promise<FileTarget | null | 'dis
   try {
     handle = await picker({
       suggestedName,
-      types: [{ description: 'Zip archive', accept: { 'application/zip': ['.zip'] } }],
+      types: [
+        { description: t('transfer.export.zipArchive'), accept: { 'application/zip': ['.zip'] } },
+      ],
     })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return 'dismissed'
@@ -142,7 +145,7 @@ export async function exportZip(options: {
   requested: number
   fileName: string
 }): Promise<ExportResult | null> {
-  if (job.value) throw new Error('Export already running')
+  if (job.value) throw new Error(t('transfer.export.alreadyRunning'))
   if (starting) return null // A second click while the picker is open.
 
   starting = true
@@ -198,9 +201,9 @@ export async function exportZip(options: {
 
       worker.onerror = (event) => {
         event.preventDefault()
-        fail(new Error(event.message || 'The export worker stopped unexpectedly.'))
+        fail(new Error(event.message || t('transfer.export.workerStopped')))
       }
-      worker.onmessageerror = () => fail(new Error('The export worker sent an unreadable message.'))
+      worker.onmessageerror = () => fail(new Error(t('transfer.export.workerUnreadable')))
 
       worker.onmessage = async ({ data: message }: MessageEvent<ExportEvent>) => {
         if (settled) return

@@ -23,7 +23,10 @@ const title = computed(() => figureTitle(props.value, props.change))
 </script>
 
 <template>
-  <span v-if="missing" class="font-medium text-text-muted" title="No currency in this snapshot"
+  <span
+    v-if="missing"
+    class="font-medium text-text-muted"
+    :title="$t('snapshots.figure.noCurrency')"
     >—</span
   >
   <span v-else class="inline-flex flex-col items-start" :title="title">
@@ -32,7 +35,7 @@ const title = computed(() => figureTitle(props.value, props.change))
       v-else-if="kind === 'primogem'"
       :amount="value"
       :image="materialIcon('Primogem')"
-      name="primogem"
+      :name="$t('progression.monthly.primogemUnit')"
       class="font-medium text-text-primary"
     />
     <span v-else class="font-medium text-text-primary">{{ value }}</span>

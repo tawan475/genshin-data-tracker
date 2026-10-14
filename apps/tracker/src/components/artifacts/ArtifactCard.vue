@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { t } from '@/i18n'
 import { FlaskConical, Lock, Sparkle } from 'lucide-vue-next'
 import GameStars from '@/components/characters/GameStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
@@ -59,9 +60,11 @@ const plain = computed(() => artifact.value.rarity < 5)
 const label = computed(() => artifactLabel(props.row, props.isNew))
 const crit = computed(() => isCritCirclet(artifact.value.slotKey, artifact.value.mainStatKey))
 const potential = computed(() => props.row.potential)
-const potentialTitle = computed(
-  () =>
-    `Expected CV at +${maxLevel(artifact.value.rarity)} · best case ${potential.value.bestCv.toFixed(1)}`,
+const potentialTitle = computed(() =>
+  t('artifacts.card.potentialTitle', {
+    max: maxLevel(artifact.value.rarity),
+    best: potential.value.bestCv.toFixed(1),
+  }),
 )
 const name = computed(
   () => artifactPieceName(artifact.value.setKey, artifact.value.slotKey) ?? props.row.setName,
@@ -170,8 +173,8 @@ const wearer = computed(() => {
           <span
             v-if="isNew"
             class="rounded-[4px] bg-accent px-1.5 font-sans leading-5 text-accent-ink"
-            title="Not in the previous capture"
-            >New</span
+            :title="$t('artifacts.detail.newTitle')"
+            >{{ $t('artifacts.label.new') }}</span
           >
         </p>
       </div>
@@ -212,7 +215,7 @@ const wearer = computed(() => {
         v-for="substat in inactive"
         :key="`inactive-${substat.key}`"
         class="flex items-center gap-2 opacity-55"
-        title="Activates at +4"
+        :title="$t('characters.piece.activatesAt4')"
       >
         <span :class="CARD_MUTED">·</span>
         <span class="min-w-0 flex-1 truncate">{{ formatStatShort(substat.key) }}</span>
@@ -248,7 +251,9 @@ const wearer = computed(() => {
         class="absolute bottom-0 left-1.5 size-13 object-contain object-bottom [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.25))]"
         @error="sideFailed = true"
       />
-      <span class="min-w-0 truncate">Equipped: {{ row.ownerName }}</span>
+      <span class="min-w-0 truncate">{{
+        $t('artifacts.card.equipped', { name: row.ownerName })
+      }}</span>
       <span class="ml-auto flex shrink-0 items-center gap-1.5">
         <FlaskConical v-if="artifact.elixerCrafted" class="size-4" :class="CARD_MUTED" />
         <Sparkle v-if="artifact.astralMark" class="size-4 fill-current text-[#e0a417]" />

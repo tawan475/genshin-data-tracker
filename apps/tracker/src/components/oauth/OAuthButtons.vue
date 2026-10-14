@@ -3,6 +3,8 @@ import type { OAuthProvider } from '@gdt/shared'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { api } from '@/api'
+import { t } from '@/i18n'
+import { errorText } from '@/i18n/api-errors'
 import ProviderMark from './ProviderMark.vue'
 import { loadSignInOptions, providerLabel, providerNames } from './oauth'
 
@@ -41,7 +43,7 @@ async function go(provider: OAuthProvider) {
     window.location.assign(url)
   } catch (cause) {
     busy.value = null
-    error.value = cause instanceof Error ? cause.message : 'Could not start'
+    error.value = errorText(cause, t('auth.oauth.couldNotStart'))
   }
 }
 </script>
@@ -50,15 +52,15 @@ async function go(provider: OAuthProvider) {
   <div v-if="providers.length" class="mt-6 flex flex-col gap-3">
     <div class="flex items-center gap-3 text-xs tracking-wider text-gray-500 uppercase">
       <span class="h-px flex-1 bg-white/10" />
-      or
+      {{ $t('common.or') }}
       <span class="h-px flex-1 bg-white/10" />
     </div>
     <p
       v-if="showNudge"
       class="text-center text-sm text-gray-400"
-      title="If you linked it in Settings. Otherwise, ask the admin for a reset link."
+      :title="$t('auth.oauth.cantSignInTitle')"
     >
-      Can't sign in? Continue with {{ providerNames(providers) }}
+      {{ $t('auth.oauth.cantSignIn', { providers: providerNames(providers) }) }}
     </p>
     <button
       v-for="provider in providers"
@@ -70,7 +72,7 @@ async function go(provider: OAuthProvider) {
     >
       <UiSpinner v-if="busy === provider" class="size-5 shrink-0" />
       <ProviderMark v-else :provider="provider" class="size-5 shrink-0" />
-      <span>Continue with {{ providerLabel(provider) }}</span>
+      <span>{{ $t('auth.oauth.continueWith', { provider: providerLabel(provider) }) }}</span>
     </button>
     <p v-if="error" class="text-sm text-red-300" role="alert">{{ error }}</p>
   </div>

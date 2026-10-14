@@ -23,6 +23,7 @@
 
 import { RESET_HOUR, SERVER_UTC_OFFSET } from '@gdt/game-data/planner-math'
 import type { CustomTask, PlannerTask, PlannerTaskInput } from '@gdt/shared'
+import { t } from '@/i18n'
 
 const HOUR = 3_600_000
 const DAY = 86_400_000
@@ -124,58 +125,78 @@ export interface BuiltinTask {
 
 const MONDAY = 1
 
-/** The built-in tasks, in the order the strip lists them. Ids are never reused. */
+/**
+ * The built-in tasks, in the order the strip lists them. Ids are never
+ * reused. Names are read where they render (they answer in the language on
+ * screen).
+ */
 export const BUILTIN_TASKS: readonly BuiltinTask[] = [
   {
     id: 'commissions',
-    name: 'Daily Commissions',
+    get name() {
+      return t('planner.task.builtin.commissions')
+    },
     rule: { kind: 'daily' },
     soonMs: 3 * HOUR,
     seelie: 'dt',
   },
   {
     id: 'weekly-bosses',
-    name: 'Trounce Domains',
+    get name() {
+      return t('planner.task.builtin.weeklyBosses')
+    },
     rule: { kind: 'weekly', weekday: MONDAY },
     soonMs: DAY,
     seelie: 'trounce',
   },
   {
     id: 'battle-pass',
-    name: 'Battle Pass weekly',
+    get name() {
+      return t('planner.task.builtin.battlePass')
+    },
     rule: { kind: 'weekly', weekday: MONDAY },
     soonMs: DAY,
   },
   {
     id: 'reputation',
-    name: 'Reputation',
+    get name() {
+      return t('planner.task.builtin.reputation')
+    },
     rule: { kind: 'weekly', weekday: MONDAY },
     soonMs: DAY,
   },
   {
     id: 'abyss',
-    name: 'Spiral Abyss',
+    get name() {
+      return t('planner.task.builtin.abyss')
+    },
     rule: { kind: 'monthly', date: 16 },
     soonMs: 3 * DAY,
     seelie: 'abyss',
   },
   {
     id: 'theater',
-    name: 'Imaginarium Theater',
+    get name() {
+      return t('planner.task.builtin.theater')
+    },
     rule: { kind: 'monthly', date: 1 },
     soonMs: 3 * DAY,
     seelie: 'theater',
   },
   {
     id: 'bargains',
-    name: "Paimon's Bargains",
+    get name() {
+      return t('planner.task.builtin.bargains')
+    },
     rule: { kind: 'monthly', date: 1 },
     soonMs: 3 * DAY,
     seelie: 'bargains',
   },
   {
     id: 'transformer',
-    name: 'Parametric Transformer',
+    get name() {
+      return t('planner.task.builtin.transformer')
+    },
     rule: { kind: 'cooldown', hours: 166 },
     soonMs: 0,
   },
@@ -438,6 +459,6 @@ export function formatSpan(ms: number): string {
   const d = Math.floor(minutes / 1440)
   const h = Math.floor((minutes % 1440) / 60)
   const m = minutes % 60
-  if (d > 0) return h > 0 ? `${d}d ${h}h` : `${d}d`
-  return h > 0 ? `${h}h ${m}m` : `${m}m`
+  if (d > 0) return h > 0 ? t('farm.time.dh', { d, h }) : t('farm.time.d', { d })
+  return h > 0 ? t('farm.time.hm', { h, m }) : t('farm.time.m', { m })
 }

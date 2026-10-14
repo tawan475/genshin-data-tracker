@@ -15,6 +15,7 @@
 import type { PlannerData } from '@gdt/game-data'
 import type { PlanStep } from '@gdt/game-data/planner-convert'
 import type { InventoryChange } from '@gdt/shared'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 type Bag = Readonly<Record<string, number>>
@@ -47,10 +48,17 @@ export interface CraftGroup {
 /** Where the game does them, in the order the plan needs them. */
 export const CRAFT_KINDS: readonly CraftKind[] = ['convert', 'craft', 'forge']
 
-export const CRAFT_LABEL: Record<CraftKind, string> = {
-  convert: 'Convert',
-  craft: 'Craft',
-  forge: 'Forge',
+/** Read where it renders (the getters answer in the language on screen). */
+export const CRAFT_LABEL: Readonly<Record<CraftKind, string>> = {
+  get convert() {
+    return t('farm.craft.kind.convert')
+  },
+  get craft() {
+    return t('farm.craft.kind.craft')
+  },
+  get forge() {
+    return t('farm.craft.kind.forge')
+  },
 }
 
 /** One step as a row (the planner's Mora key for its Mora). */
@@ -158,10 +166,14 @@ export function rowText(
   name: (key: string) => string,
   extra: string[] = [],
 ): string {
-  const n = (c: CraftItem) => `${formatNumber(c.count)} ${name(c.key)}`
+  const n = (c: CraftItem) =>
+    t('farm.craft.item', { count: formatNumber(c.count), name: name(c.key) })
   const head =
     row.kind === 'convert'
-      ? `Convert ${n(row.input)} into ${name(row.output.key)}`
-      : `${CRAFT_LABEL[row.kind]} ${n(row.output)} from ${n(row.input)}`
+      ? t('farm.craft.convertRow', { input: n(row.input), output: name(row.output.key) })
+      : t(row.kind === 'craft' ? 'farm.craft.craftRow' : 'farm.craft.forgeRow', {
+          output: n(row.output),
+          input: n(row.input),
+        })
   return [head, ...extra].join(' · ')
 }

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { wishItemName } from './item-name'
+import { gameName } from '@/i18n/game-names'
 import { computed, ref } from 'vue'
 import { wishItemInfo } from '@gdt/shared'
 import {
@@ -9,9 +11,10 @@ import {
   type BannerStats,
   type PullRow,
 } from '@/data/wish-history'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import WishItemIcon from './WishItemIcon.vue'
-import { BAND_COLOR, OUTCOME_LABEL, oddsOf, runDates, wishMinute } from './wish-labels'
+import { BAND_COLOR, oddsOf, outcomeLabel, runDates, wishMinute } from './wish-labels'
 
 /**
  * The banner runs the account pulled on, newest first: name and dates, the
@@ -29,17 +32,28 @@ const open = computed(() => currentRun(props.stats.runs, Date.now() / 1000))
 function name(run: BannerRun): string {
   const b = run.banner
   if (props.stats.banner === 302) {
-    return b.featured5.map((key) => wishItemInfo('weapon', key)?.name ?? key).join(' / ')
+    return b.featured5
+      .map((key) => gameName('weapons', key, wishItemInfo('weapon', key)?.name ?? key))
+      .join(' / ')
   }
   return b.name400 ? `${b.name} / ${b.name400}` : b.name || b.version
 }
+const pullsLine = (run: BannerRun) =>
+  t('wishes.pullsPrimos', {
+    n: formatNumber(run.pulls),
+    primos: formatNumber(run.pulls * PRIMOS_PER_PULL),
+  })
 const title = (run: BannerRun) =>
-  `${name(run)}\n${run.banner.version} · ${runDates(run, false)}\n` +
-  `${formatNumber(run.pulls)} pulls · ✦ ${formatNumber(run.pulls * PRIMOS_PER_PULL)}`
+  `${name(run)}\n${run.banner.version} · ${runDates(run, false)}\n${pullsLine(run)}`
 const chipTitle = (row: PullRow) =>
   [
-    `${row.pull.item.name} · pity ${row.pity}`,
-    row.outcome ? `${OUTCOME_LABEL[row.outcome]} (${oddsOf(props.stats.banner)})` : '',
+    t('wishes.five.pity', { name: wishItemName(row.pull.item), pity: row.pity }),
+    row.outcome
+      ? t('wishes.five.outcome', {
+          outcome: outcomeLabel(row.outcome),
+          odds: oddsOf(props.stats.banner),
+        })
+      : '',
     wishMinute(row.pull.time),
   ]
     .filter(Boolean)
@@ -48,14 +62,16 @@ const chipTitle = (row: PullRow) =>
 
 <template>
   <section
-    aria-label="Banner runs"
+    :aria-label="$t('wishes.runs.label')"
     class="min-w-0 rounded-xl border border-border-default bg-surface-raised shadow-sm"
   >
     <div class="flex items-center gap-3 border-b border-border-default px-4 py-3 sm:px-5">
-      <h2 class="flex min-h-10 items-center text-base font-semibold">Banners</h2>
-      <span class="tabular font-mono text-xs text-text-muted"
-        >{{ formatNumber(runs.length) }} {{ runs.length === 1 ? 'run' : 'runs' }}</span
-      >
+      <h2 class="flex min-h-10 items-center text-base font-semibold">
+        {{ $t('wishes.runs.heading') }}
+      </h2>
+      <span class="tabular font-mono text-xs text-text-muted">{{
+        $t('wishes.runs.count', { n: formatNumber(runs.length) }, runs.length)
+      }}</span>
       <button
         v-if="runs.length > FEW"
         type="button"
@@ -63,7 +79,7 @@ const chipTitle = (row: PullRow) =>
         :aria-expanded="all"
         @click="all = !all"
       >
-        {{ all ? 'Fewer' : 'All runs' }}
+        {{ all ? $t('wishes.runs.fewer') : $t('wishes.runs.all') }}
       </button>
     </div>
     <ul class="py-1">
@@ -79,12 +95,13 @@ const chipTitle = (row: PullRow) =>
         <div class="flex min-w-0 flex-[1_1_300px] flex-col" :title="title(run)">
           <span class="truncate text-sm font-medium">{{ name(run) }}</span>
           <span class="tabular truncate font-mono text-xs text-text-muted"
-            >{{ runDates(run, run === open) }}{{ run === open ? ' · current' : '' }}</span
+            >{{ runDates(run, run === open)
+            }}{{ run === open ? $t('wishes.runs.current') : '' }}</span
           >
         </div>
         <span
           class="tabular w-[4.5rem] shrink-0 text-right font-mono text-sm"
-          :title="`${formatNumber(run.pulls)} pulls · ✦ ${formatNumber(run.pulls * PRIMOS_PER_PULL)}`"
+          :title="pullsLine(run)"
           >{{ formatNumber(run.pulls) }}</span
         >
         <div class="flex min-w-0 flex-[999_1_420px] flex-wrap gap-1.5">
@@ -95,14 +112,16 @@ const chipTitle = (row: PullRow) =>
             :title="chipTitle(row)"
           >
             <WishItemIcon :item="row.pull.item" :outcome="row.outcome" size="sm" />
-            <span class="truncate">{{ row.pull.item.name }}</span>
+            <span class="truncate">{{ wishItemName(row.pull.item) }}</span>
             <span
               class="tabular shrink-0 font-mono font-bold"
               :style="{ color: BAND_COLOR[pityBand(row.pity, stats.banner)] }"
               >{{ row.pity }}</span
             >
           </span>
-          <span v-if="!run.fives.length" class="text-xs text-text-muted">No 5★</span>
+          <span v-if="!run.fives.length" class="text-xs text-text-muted">{{
+            $t('wishes.runs.no5')
+          }}</span>
         </div>
       </li>
     </ul>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, useId } from 'vue'
+import { t } from '@/i18n'
 import { useProgressive } from '@/components/planner/use-progressive'
 import { RARITY_TEXT } from '@/components/characters/tokens'
 import type { RaritySection, WeaponRow } from '@/data/weapons'
@@ -20,7 +21,9 @@ const sectionId = (rarity: number) => `${uid}-r${rarity}`
 const rarityLabel = (rarity: number) => (rarity ? `${rarity}★` : '?')
 /** Rarity 0: weapons newer than the game data. */
 const sectionTitle = (section: RaritySection) =>
-  section.rarity ? copies(section.copies) : `${copies(section.copies)} · Not in the game data yet`
+  section.rarity
+    ? copies(section.copies)
+    : t('weapons.bag.notInData', { copies: copies(section.copies) })
 
 // A screenful of tiles first, the rest over the next frames; then sorts and filters patch the
 // tiles in place (copies stack, so a few hundred at most). A jump renders everything first.
@@ -46,7 +49,7 @@ async function jump(rarity: number) {
   document.getElementById(sectionId(rarity))?.scrollIntoView({ block: 'start' })
 }
 
-const copies = (n: number) => `${formatNumber(n)} ${n === 1 ? 'copy' : 'copies'}`
+const copies = (n: number) => t('weapons.group.copies', { count: formatNumber(n) }, n)
 </script>
 
 <template>
@@ -54,7 +57,7 @@ const copies = (n: number) => `${formatNumber(n)} ${n === 1 ? 'copy' : 'copies'}
     <nav
       v-if="sections.length > 1"
       class="scroll-hide scroll-fade-x -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible sm:px-0"
-      aria-label="Rarity"
+      :aria-label="$t('game.rarity')"
     >
       <button
         v-for="section in sections"

@@ -1,1 +1,134 @@
-{}
+{
+  "label": {
+    "locked": "Locked",
+    "astralMark": "Astral mark",
+    "new": "New"
+  },
+  "sort": {
+    "quality": "Quality",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potential",
+    "level": "Level",
+    "set": "Set",
+    "recent": "Recent"
+  },
+  "sortTitle": {
+    "quality": "As the game: rarity, level, set, wearer",
+    "cv": "Crit value",
+    "rv": "Roll value",
+    "potential": "Expected CV at max level",
+    "level": "Level",
+    "set": "Set",
+    "recent": "New or changed"
+  },
+  "topSets": {
+    "label": "Top sets",
+    "more": "{n} more sets"
+  },
+  "lower": {
+    "label": "Lower rarities: {counts}",
+    "title": "Lower rarities, which this sort puts last"
+  },
+  "picker": {
+    "find": "Find",
+    "noMatch": "No match",
+    "done": "Done"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: none",
+    "cell": "{slot} · {n} pieces · best {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Pieces",
+    "slotHeader": "{slot}: best CV, pieces",
+    "sumTitle": "Best CV per slot, added up"
+  },
+  "bag": {
+    "more": "{n} more"
+  },
+  "table": {
+    "sortBySet": "Sort by set",
+    "sortByLevel": "Sort by level",
+    "equippedBy": "Equipped by",
+    "marks": "Lock and marks",
+    "elixir": "Elixir"
+  },
+  "detail": {
+    "fromGame": "From the game",
+    "inferred": "Inferred from the level",
+    "upgradesToCome": "{source} · {n} upgrades to come",
+    "rankTitle": "CV rank among {n} {rarity}★ {slot}s",
+    "newTitle": "Not in the previous capture",
+    "rolls": "Rolls",
+    "rank": "Rank",
+    "upgradesTitle": "One substat roll every 4 levels, up to {max}",
+    "upgrades": "Upgrades",
+    "expectedCv": "Expected CV",
+    "expectedDetail": "Expected at {max}: each upgrade rolls a crit line {chance}% of the time, by an average roll",
+    "bestCase": "Best case",
+    "bestDetail": "Every upgrade a top crit roll, up to {max}",
+    "critLinesTitle": "{n} of 4 lines are CRIT: the chance an upgrade rolls one",
+    "critPerRoll": "Crit / roll",
+    "activatesTitle": "The fourth line, opened by the first upgrade",
+    "activates": "+4 adds",
+    "maxRv": "Max RV",
+    "unlocked": "Unlocked",
+    "astral": "Astral",
+    "elixirTitle": "Sanctifying Elixir",
+    "rollTier": "{tier} roll",
+    "inactive": "Inactive"
+  },
+  "card": {
+    "potentialTitle": "Expected CV at +{max} · best case {best}",
+    "equipped": "Equipped: {name}"
+  },
+  "toolbar": {
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "linesNow": "{n} lines now",
+    "any": "Any",
+    "allSets": "All sets",
+    "anyone": "Anyone",
+    "noAstral": "No astral",
+    "noElixir": "No elixir",
+    "quoted": "“{text}”",
+    "mainPill": "Main: {stat}",
+    "lines": "{n} lines",
+    "best": "Best",
+    "label": "Filter artifacts",
+    "searchLabel": "Search sets or characters",
+    "searchTitle": "Set or character",
+    "equippedByTitle": "Equipped by: {names}",
+    "sortBy": "Sort by",
+    "descending": "Descending",
+    "ascending": "Ascending",
+    "slot": "Slot",
+    "presets": "Presets",
+    "bestTitle": "Top {n} per slot, by the current sort",
+    "newNone": "No earlier capture to compare with",
+    "newTitle": "Not in the previous capture: new, or levelled since",
+    "zeroTitle": "Unequipped 5★ at +0",
+    "lowTitle": "Unlocked, unequipped 4★ and 3★",
+    "low": "4★/3★ Artifact",
+    "spareTitle": "Unequipped 5★",
+    "spare": "Spare 5★",
+    "maxTitle": "Level +20 only",
+    "moreTitle": "Main stat, substats, lines, level, lock, location, astral mark, elixir",
+    "more": "More",
+    "substatsTitle": "Has all of these (the line +4 opens counts)",
+    "linesLabel": "Lines",
+    "min": "Min",
+    "max": "Max",
+    "location": "Location",
+    "remove": "Remove {label}"
+  },
+  "page": {
+    "table": "Table",
+    "loadFailed": "Could not load artifacts",
+    "loading": "Loading artifacts",
+    "refreshFailed": "Could not refresh",
+    "shownTitle": "Shown / artifacts",
+    "countSuffix": "artifacts",
+    "pngSize": "{px} px wide PNG"
+  }
+}

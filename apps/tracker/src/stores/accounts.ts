@@ -2,6 +2,7 @@ import type { AccountResponse } from '@gdt/shared'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, type AccountInput } from '@/api'
+import { t } from '@/i18n'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { postToTabs } from '@/live/channel'
 import { isHeld, pendingIds } from '@/live/holds'
@@ -127,7 +128,12 @@ export const useAccounts = defineStore('accounts', () => {
   }
 
   function displayName(account: Pick<AccountResponse, 'name' | 'uid' | 'id'>): string {
-    return account.name || (account.uid ? `UID ${account.uid}` : `Account ${account.id}`)
+    return (
+      account.name ||
+      (account.uid
+        ? t('accounts.displayUid', { uid: account.uid })
+        : t('accounts.displayId', { id: account.id }))
+    )
   }
 
   function clear() {

@@ -17,7 +17,7 @@ const color: Record<number, string> = {
   <span
     class="inline-flex items-center gap-px"
     :class="color[rarity] ?? 'text-text-muted'"
-    :aria-label="`${rarity} star`"
+    :aria-label="$t('ui.rarity.stars', { n: rarity })"
     role="img"
   >
     <Star v-for="n in rarity" :key="n" class="size-3.5 fill-current" aria-hidden="true" />

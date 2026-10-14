@@ -1,1 +1,199 @@
-{}
+{
+  "stock": {
+    "all": "足够所有目标",
+    "alone": "足够此目标",
+    "short": "不足"
+  },
+  "readiness": {
+    "all": {
+      "label": "齐全",
+      "meaning": "扣除上方目标后仍足够"
+    },
+    "alone": {
+      "label": "单独齐全",
+      "meaning": "单独足够，扣除上方目标后不足"
+    },
+    "short": {
+      "label": "不足",
+      "meaning": "单独也不足"
+    },
+    "done": {
+      "label": "已完成",
+      "meaning": "已达成"
+    },
+    "artifacts": {
+      "label": "圣遗物",
+      "meaning": "等级已达成，圣遗物未完成"
+    }
+  },
+  "bracket": {
+    "tier": "等级 {tier}",
+    "bossLevel": "首领等级 {level}",
+    "wl": "世界等级 {wl}",
+    "withAr": "{base}（冒险等阶 {ar}）",
+    "assumed": "{base}，假定"
+  },
+  "unit": {
+    "days": "{n} 天",
+    "weeks": "{n} 周"
+  },
+  "status": {
+    "locked": "冒险等阶或世界等级不足，暂时无法刷取",
+    "noRate": "此来源没有平均掉落率，无法估算",
+    "notFarmed": "没有消耗树脂的来源"
+  },
+  "time": {
+    "hm": "{h}小时{m}分",
+    "h": "{h}小时",
+    "m": "{m}分",
+    "dh": "{d}天{h}小时",
+    "d": "{d}天"
+  },
+  "craft": {
+    "kind": {
+      "convert": "转换",
+      "craft": "合成",
+      "forge": "锻造"
+    },
+    "item": "{name} ×{count}",
+    "convertRow": "{input} 转换为 {output}",
+    "craftRow": "用 {input} 合成 {output}",
+    "forgeRow": "用 {input} 锻造 {output}",
+    "kindTitle": {
+      "convert": "炼金：转换",
+      "craft": "炼金：合成，从最低阶开始",
+      "forge": "铁匠：锻造"
+    },
+    "listSeparator": "、",
+    "notYet": "暂不可：还需 {items}（请先完成上方步骤）",
+    "doneRow": "完成：{row}",
+    "notEnough": "不足：还需 {items}",
+    "allDoneTitle": "全部 {n} 步完成：背包按完成后更新",
+    "title": "制作",
+    "fold": "收起",
+    "unfold": "计划中需要转换、合成和锻造的材料",
+    "steps": "{n} 步",
+    "inAll": "共 {cost}",
+    "forgingTime": "锻造时间 {time}（不计锻造队列）",
+    "forging": "锻造",
+    "allDone": "全部完成",
+    "hideTitle": "隐藏制作（可在养成规划设置中恢复）",
+    "hide": "隐藏制作",
+    "from": "消耗",
+    "fewer": "收起",
+    "all": "全部 {n}"
+  },
+  "lock": {
+    "ar": "冒险等阶 {ar}",
+    "wl": "世界等级 {wl}",
+    "locked": "未解锁"
+  },
+  "cards": {
+    "blossomExp": "启示之花",
+    "blossomMora": "藏金之花",
+    "local": "区域特产",
+    "common": "普通敌人",
+    "elite": "精英敌人",
+    "other": "其他",
+    "elsewhere": "其他途径"
+  },
+  "sections": {
+    "free": "无需树脂",
+    "domain": "秘境 · 地脉",
+    "boss": "首领",
+    "weekly": "周本",
+    "artifact": "圣遗物"
+  },
+  "card": {
+    "runs": "{n} 次",
+    "claims": "{n} 次领取",
+    "claimsWeekly": "{claims}，每周一次",
+    "atMost": "最多 {runs}",
+    "atMostPrefix": "最多",
+    "runsShort": "{n} 次",
+    "claimsShort": "{n} 次领取",
+    "resinRange": "{min}–{max} 树脂",
+    "resin": "{n} 树脂",
+    "condensed": "{n} 浓缩树脂",
+    "condensedTitle": "{n} 浓缩树脂",
+    "guaranteed": "掉落率按保底最低值计算",
+    "lockTitle": "暂不可刷取：需要{lock}",
+    "kind": {
+      "boss": "首领",
+      "gem": "掉落该材料的首领",
+      "enemy": "掉落该材料的敌人",
+      "local": "产地",
+      "artifact": "圣遗物秘境"
+    },
+    "elsewhereTitle": "没有秘境掉落这些套装",
+    "noRate": "无掉落率",
+    "paidTitle": "计划中的秘境挑战可获得 {mora} 摩拉",
+    "paid": "+{n} 来自秘境",
+    "blockedTitle": "{n} 次转换需要更多异梦溶媒",
+    "blocked": "{n} 受阻",
+    "blockedSr": "：需要更多异梦溶媒"
+  },
+  "weekday": {
+    "short": {
+      "sun": "周日",
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六"
+    },
+    "long": {
+      "sun": "星期日",
+      "mon": "星期一",
+      "tue": "星期二",
+      "wed": "星期三",
+      "thu": "星期四",
+      "fri": "星期五",
+      "sat": "星期六"
+    }
+  },
+  "panel": {
+    "today": "今天",
+    "schedule": "日程",
+    "runsLine": "{runs} · {resin} 树脂（{condensed} 浓缩树脂）· {days}",
+    "sources": "秘境、普通首领和地脉",
+    "daily": "每天 {n} 树脂",
+    "dailyRefresh": "每天 {n} 树脂（180 + {r} × {per}）",
+    "withHeld": "计入现有树脂后 {days}",
+    "gems": "宝石：{runs}，{resin} 树脂",
+    "partial": "部分来源没有掉落率",
+    "upperBound": "世界等级 9 的首领掉落按保底最低值计算",
+    "weeklyClaims": "周本：{claims}，共 {weeks}",
+    "weeklyResin": "按周本半价计 {resin} 树脂（原价 {max}）",
+    "weeklyPartial": "部分首领没有掉落率",
+    "serverDay": "服务器日：{day}",
+    "serverDaySunday": "服务器日：{day}（所有秘境开放）",
+    "resetIn": "距 04:00 重置还有 {time}",
+    "forgeOff": "计入持有矿石可锻造的精锻用魔矿",
+    "forgeLine": "锻造 {item}：{mora} 摩拉，{time}",
+    "stillShort": "仍缺 {n}",
+    "totals": "总计",
+    "resin": "树脂",
+    "dayUnit": "天",
+    "refreshTitle": "每天补充树脂 {r} 次：每天 {daily} 树脂",
+    "perDay": "{n}/天",
+    "weekly": "周本",
+    "weekUnit": "周",
+    "lockedTitle": "{n} 个来源受冒险等阶/世界等级限制",
+    "locked": "受冒险等阶/世界等级限制",
+    "view": "刷取视图",
+    "noWeeklyTitle": "仅显示无需周本即可完成的目标：其周本材料已持有或可转换（扣除上方目标后）",
+    "noWeekly": "无周本",
+    "noneLeft": "所有目标仍需要周本",
+    "showAll": "显示所有目标",
+    "assumed": "未设置冒险等阶/世界等级：按最高档位计算",
+    "set": "设置",
+    "nothing": "没有需要刷取的材料",
+    "sectionLabel": "{label}：{resin} 树脂",
+    "show": "展开",
+    "hidden": "已隐藏 {n} 个",
+    "forge": "用矿石锻造",
+    "pairTitle": "{runs} · {resin} 树脂 · {days}"
+  }
+}

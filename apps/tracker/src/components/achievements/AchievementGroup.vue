@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import type { AchievementTexts } from '@gdt/game-data'
-import type {
-  AchievementEntry,
-  CapturedAchievements,
-  DoneState,
-} from '@/data/achievement-progress'
+import type { AchievementEntry, CapturedAchievements, DoneState } from '@/data/achievement-progress'
 import { formatNumber } from '@/lib/format'
 import type { CategoryItem } from './AchievementCategories.vue'
 import AchievementRow from './AchievementRow.vue'
@@ -28,7 +24,12 @@ defineEmits<{ mark: [ids: number[]]; unmark: [ids: number[]] }>()
   >
     <header
       class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 sm:px-5"
-      :title="`${formatNumber(category.count.primogems)} / ${formatNumber(category.count.primogemsTotal)} primogems`"
+      :title="
+        $t('achievements.group.primogems', {
+          primogems: formatNumber(category.count.primogems),
+          total: formatNumber(category.count.primogemsTotal),
+        })
+      "
     >
       <CategoryIcon :src="category.icon" size="sm" />
       <h2 class="min-w-0 flex-1 truncate font-semibold">{{ category.name }}</h2>

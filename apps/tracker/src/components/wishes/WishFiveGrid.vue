@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BannerStats } from '@/data/wish-history'
+import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import WishFiveTile from './WishFiveTile.vue'
 
@@ -11,28 +12,31 @@ import WishFiveTile from './WishFiveTile.vue'
 defineProps<{ stats: BannerStats; boxClass?: string; dated?: boolean }>()
 
 const LEGEND = [
-  { label: 'won', dot: 'bg-success-text' },
-  { label: 'lost', dot: 'bg-danger-text' },
-  { label: 'guaranteed', dot: 'bg-accent-text' },
-]
+  { key: 'won', dot: 'bg-success-text' },
+  { key: 'lost', dot: 'bg-danger-text' },
+  { key: 'guaranteed', dot: 'bg-accent-text' },
+] as const
+const legendLabel = (key: (typeof LEGEND)[number]['key']) => t(`wishes.legend.${key}`)
 </script>
 
 <template>
   <div class="flex min-w-0 flex-col gap-2.5">
     <div class="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-xs">
-      <span class="font-semibold text-rarity-5">Every 5★</span>
-      <span class="tabular font-mono text-text-muted"
-        >{{ formatNumber(stats.fives.length) }} · newest first</span
-      >
+      <span class="font-semibold text-rarity-5">{{ $t('wishes.five.every') }}</span>
+      <span class="tabular font-mono text-text-muted">{{
+        $t('wishes.five.newestFirst', { n: formatNumber(stats.fives.length) })
+      }}</span>
       <span v-if="stats.rate5" class="ml-auto inline-flex gap-3 text-text-muted">
-        <span v-for="l in LEGEND" :key="l.label" class="inline-flex items-center gap-1.5"
+        <span v-for="l in LEGEND" :key="l.key" class="inline-flex items-center gap-1.5"
           ><span class="size-2.5 rounded-full" :class="l.dot" aria-hidden="true" />{{
-            l.label
+            legendLabel(l.key)
           }}</span
         >
       </span>
     </div>
-    <p v-if="!stats.fives.length" class="py-6 text-center text-xs text-text-muted">No 5★ yet</p>
+    <p v-if="!stats.fives.length" class="py-6 text-center text-xs text-text-muted">
+      {{ $t('wishes.five.none') }}
+    </p>
     <div
       v-else
       class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,10.5rem),1fr))] gap-2 overflow-y-auto pr-1"

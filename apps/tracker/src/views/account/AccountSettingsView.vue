@@ -12,6 +12,7 @@ import UiModal from '@/components/ui/UiModal.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import { ApiRequestError } from '@/api'
+import { t } from '@/i18n'
 import { discardImportQueue } from '@/data/import-queue'
 import {
   accountFormInput,
@@ -30,16 +31,16 @@ const account = useAccount()
 const accounts = useAccounts()
 const feedback = useFeedback()
 
-const TRAVELER_OPTIONS = [
-  { value: 'F' as const, label: 'Lumine' },
-  { value: 'M' as const, label: 'Aether' },
-]
+const travelerOptions = computed(() => [
+  { value: 'F' as const, label: t('accounts.settings.lumine') },
+  { value: 'M' as const, label: t('accounts.settings.aether') },
+])
 
 async function setTraveler(gender: 'F' | 'M') {
   try {
     await saveTraveler(account.value.id, gender)
   } catch (error) {
-    feedback.error('Not saved', error)
+    feedback.error(t('common.notSaved'), error)
   }
 }
 const router = useRouter()
@@ -77,7 +78,7 @@ async function save() {
   try {
     await accounts.update(account.value.id, result.input)
     resetForm()
-    feedback.toast({ tone: 'success', title: 'Saved' })
+    feedback.toast({ tone: 'success', title: t('common.saved') })
   } catch (error) {
     if (error instanceof ApiRequestError && error.issues.length > 0) {
       errors.value = {
@@ -86,7 +87,7 @@ async function save() {
         server: error.issueFor('server'),
       }
     }
-    feedback.error('Not saved', error)
+    feedback.error(t('common.notSaved'), error)
   } finally {
     saving.value = false
   }
@@ -97,13 +98,14 @@ async function save() {
 const deleteOpen = ref(false)
 const typed = ref('')
 const deleting = ref(false)
-const confirmWord = computed(() => account.value.name?.trim() || 'delete')
+const confirmWord = computed(() => account.value.name?.trim() || t('accounts.settings.confirmWord'))
 const confirmed = computed(() => typed.value.trim() === confirmWord.value)
 
 /** What goes, in the user's numbers: "151 snapshots · 23.4 MB". */
 const loss = computed(() => {
   const count = account.value.snapshotCount
-  return `${formatNumber(count)} ${count === 1 ? 'snapshot' : 'snapshots'} · ${formatBytes(account.value.storedBytes)}`
+  const snapshots = t('accounts.settings.loss', { n: formatNumber(count) }, count)
+  return `${snapshots} · ${formatBytes(account.value.storedBytes)}`
 })
 
 function openDelete() {
@@ -123,10 +125,14 @@ async function confirmDelete() {
     await accounts.remove(id)
     discardImportQueue(id)
     deleteOpen.value = false
-    feedback.toast({ tone: 'success', title: `Deleted ${label}`, detail: lost })
+    feedback.toast({
+      tone: 'success',
+      title: t('accounts.settings.deleted', { name: label }),
+      detail: lost,
+    })
     await router.replace({ name: 'home' })
   } catch (error) {
-    feedback.error('Not deleted', error)
+    feedback.error(t('common.notDeleted'), error)
   } finally {
     deleting.value = false
   }
@@ -134,24 +140,24 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <PageHeader title="Account settings" />
+  <PageHeader :title="$t('accounts.settings.title')" />
 
   <div class="flex max-w-2xl flex-col gap-6">
-    <UiPanel title="Details">
+    <UiPanel :title="$t('accounts.settings.details')">
       <form class="flex flex-col gap-5" novalidate @submit.prevent="save">
         <AccountFields :key="account.id" v-model="form" :errors="errors" :disabled="saving" />
         <div class="flex flex-wrap gap-2">
           <UiButton type="submit" variant="primary" :loading="saving" :disabled="!dirty">
-            Save
+            {{ $t('common.save') }}
           </UiButton>
           <UiButton v-if="dirty" variant="ghost" :disabled="saving" @click="resetForm">
-            Reset
+            {{ $t('common.reset') }}
           </UiButton>
         </div>
       </form>
     </UiPanel>
 
-    <UiPanel title="Traveler">
+    <UiPanel :title="$t('accounts.settings.traveler')">
       <div class="flex items-center gap-4">
         <img
           :src="characterIcon('Traveler')"
@@ -160,8 +166,8 @@ async function confirmDelete() {
         />
         <UiSegmented
           :model-value="travelerGender"
-          :options="TRAVELER_OPTIONS"
-          label="Traveler"
+          :options="travelerOptions"
+          :label="$t('accounts.settings.traveler')"
           @update:model-value="setTraveler"
         />
       </div>
@@ -172,24 +178,32 @@ async function confirmDelete() {
     <section class="rounded-xl border border-danger-border bg-surface-raised shadow-sm">
       <div class="flex flex-wrap items-center justify-between gap-4 p-5">
         <div class="min-w-0">
-          <h2 class="text-base font-semibold">Delete account</h2>
+          <h2 class="text-base font-semibold">{{ $t('accounts.settings.deleteAccount') }}</h2>
           <p class="tabular font-mono text-sm text-text-secondary">{{ loss }}</p>
         </div>
-        <UiButton variant="danger" title="Exported GOOD files are not affected" @click="openDelete">
+        <UiButton variant="danger" :title="$t('accounts.settings.deleteTitle')" @click="openDelete">
           <Trash2 class="size-4" aria-hidden="true" />
-          Delete
+          {{ $t('common.delete') }}
         </UiButton>
       </div>
     </section>
   </div>
 
-  <UiModal :open="deleteOpen" :title="`Delete ${name}?`" @close="deleteOpen = false">
+  <UiModal
+    :open="deleteOpen"
+    :title="$t('accounts.settings.confirmTitle', { name })"
+    @close="deleteOpen = false"
+  >
     <form id="delete-account" class="flex flex-col gap-4" @submit.prevent="confirmDelete">
-      <p class="text-text-secondary">
-        Deletes <span class="tabular font-mono text-text-primary">{{ loss }}</span
-        >. Its Irminsul key stops working.
-      </p>
-      <UiField v-slot="{ id }" :label="`Type ${confirmWord}`">
+      <i18n-t keypath="accounts.settings.deletes" tag="p" class="text-text-secondary">
+        <template #loss>
+          <span class="tabular font-mono text-text-primary">{{ loss }}</span>
+        </template>
+      </i18n-t>
+      <UiField
+        v-slot="{ id }"
+        :label="$t('accounts.settings.typeToConfirm', { word: confirmWord })"
+      >
         <UiInput
           :id="id"
           v-model="typed"
@@ -201,7 +215,9 @@ async function confirmDelete() {
       </UiField>
     </form>
     <template #footer>
-      <UiButton :disabled="deleting" @click="deleteOpen = false">Cancel</UiButton>
+      <UiButton :disabled="deleting" @click="deleteOpen = false">{{
+        $t('common.cancel')
+      }}</UiButton>
       <UiButton
         type="submit"
         form="delete-account"
@@ -209,7 +225,7 @@ async function confirmDelete() {
         :loading="deleting"
         :disabled="!confirmed"
       >
-        Delete
+        {{ $t('common.delete') }}
       </UiButton>
     </template>
   </UiModal>

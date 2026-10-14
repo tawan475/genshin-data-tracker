@@ -6,7 +6,10 @@ defineProps<{ value: number }>()
 </script>
 
 <template>
-  <span class="inline-flex items-center gap-1.5" :title="`Refinement ${value} of 5`">
+  <span
+    class="inline-flex items-center gap-1.5"
+    :title="$t('characters.refinementTitle', { value })"
+  >
     <span
       class="tabular rounded-md px-1.5 font-mono text-xs leading-5 font-bold"
       :style="refinementStyle(value)"

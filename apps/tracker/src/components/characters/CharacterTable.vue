@@ -58,11 +58,11 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
       <thead class="border-b border-border-default bg-surface-overlay/50 text-text-secondary">
         <tr>
           <th scope="col" class="w-8 py-2 pl-1">
-            <span class="sr-only">Favorite</span>
+            <span class="sr-only">{{ $t('characters.favorite.on') }}</span>
           </th>
           <th scope="col" class="py-2 pr-2 pl-1 text-left" :aria-sort="ariaSort('name')">
             <SortHeader
-              label="Name"
+              :label="$t('characters.sort.name')"
               :active="sort === 'name'"
               :direction="direction"
               @sort="sortBy('name')"
@@ -70,8 +70,8 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
           </th>
           <th scope="col" class="w-16 px-2 py-2 text-right sm:w-20" :aria-sort="ariaSort('level')">
             <SortHeader
-              label="Lv"
-              title="Level"
+              :label="$t('characters.table.lv')"
+              :title="$t('characters.sort.level')"
               :active="sort === 'level'"
               :direction="direction"
               @sort="sortBy('level')"
@@ -83,8 +83,8 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
             :aria-sort="ariaSort('constellation')"
           >
             <SortHeader
-              label="C"
-              title="Constellation"
+              :label="$t('characters.table.c')"
+              :title="$t('game.constellation')"
               :active="sort === 'constellation'"
               :direction="direction"
               @sort="sortBy('constellation')"
@@ -97,7 +97,7 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
             :aria-sort="ariaSort('friendship')"
           >
             <SortHeader
-              label="Friendship"
+              :label="$t('game.friendship')"
               :active="sort === 'friendship'"
               :direction="direction"
               @sort="sortBy('friendship')"
@@ -109,35 +109,37 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
             :aria-sort="ariaSort('talents')"
           >
             <SortHeader
-              label="Talents"
+              :label="$t('game.talents')"
               :active="sort === 'talents'"
               :direction="direction"
               @sort="sortBy('talents')"
             />
           </th>
           <th scope="col" class="hidden w-32 px-2 py-2 text-left font-medium md:table-cell">
-            Weapon
+            {{ $t('game.weapon') }}
           </th>
           <th scope="col" class="hidden w-36 px-2 py-2 text-left font-medium lg:table-cell">
-            Sets
+            {{ $t('characters.sets') }}
           </th>
           <th
             scope="col"
             class="hidden w-28 px-2 py-2 text-right font-medium 2xl:table-cell"
-            title="CRIT Rate / CRIT DMG from artifacts"
+            :title="$t('characters.table.critTitle')"
           >
-            Crit
+            {{ $t('characters.table.crit') }}
           </th>
           <th scope="col" class="w-16 px-2 py-2 text-right sm:w-20" :aria-sort="ariaSort('cv')">
             <SortHeader
               label="CV"
-              title="Crit value"
+              :title="$t('artifacts.sortTitle.cv')"
               :active="sort === 'cv'"
               :direction="direction"
               @sort="sortBy('cv')"
             />
           </th>
-          <th scope="col" class="w-10 px-2 py-2"><span class="sr-only">To do</span></th>
+          <th scope="col" class="w-10 px-2 py-2">
+            <span class="sr-only">{{ $t('characters.table.toDo') }}</span>
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-border-subtle">
@@ -227,7 +229,9 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
           <td class="px-2 py-1.5 text-right">
             <span v-if="c.gaps.length" class="inline-flex text-warning-text" :title="gapText(c)">
               <Wrench class="size-4" aria-hidden="true" />
-              <span class="sr-only">To do: {{ gapText(c) }}</span>
+              <span class="sr-only">{{
+                $t('characters.table.toDoList', { gaps: gapText(c) })
+              }}</span>
             </span>
           </td>
         </tr>
