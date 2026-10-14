@@ -349,7 +349,7 @@ const emailTone = (state: StaffSiteResponse['email']) =>
               </dt>
               <dd class="tabular flex min-w-0 flex-1 flex-col gap-0.5">
                 <template v-if="shownSite.eventsSync">
-                  <span class="flex flex-wrap items-center gap-2">
+                  <span class="flex items-center gap-2 whitespace-nowrap">
                     <UiBadge :tone="shownSite.eventsSync.ok ? 'success' : 'warning'">{{
                       shownSite.eventsSync.ok
                         ? $t('staff.events.syncOk')
@@ -358,8 +358,8 @@ const emailTone = (state: StaffSiteResponse['email']) =>
                     <span :title="formatDateTime(shownSite.eventsSync.at)">{{
                       formatRelative(shownSite.eventsSync.at)
                     }}</span>
-                    <span class="text-text-muted">{{ syncCounts }}</span>
                   </span>
+                  <span class="text-xs text-text-muted">{{ syncCounts }}</span>
                   <span
                     v-for="line in [
                       ...shownSite.eventsSync.errors,

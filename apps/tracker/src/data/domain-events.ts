@@ -23,7 +23,7 @@ export function loadGameEvents(
   const hit = cache.get(key)
   if (hit && now - hit.at <= TTL_MS) return hit.promise
   const query = server ? `?server=${encodeURIComponent(server)}` : ''
-  const promise = requestJson<GameEventsResponse>(`/game-events${query}`).then(
+  const promise = requestJson<GameEventsResponse>(`/api/game-events${query}`).then(
     (body) => {
       last.set(key, body)
       return body

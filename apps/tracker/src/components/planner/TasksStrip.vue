@@ -379,7 +379,7 @@ const summary = computed(() => {
       <template v-if="open">
         <!-- Four tabs outgrow a phone: they scroll sideways there. -->
         <div
-          class="scroll-hide scroll-fade-x order-last max-w-full min-w-0 basis-full overflow-x-auto sm:order-none sm:basis-auto"
+          class="scroll-hide scroll-fade-x order-last max-w-full min-w-0 basis-full overflow-x-auto whitespace-nowrap sm:order-none sm:basis-auto"
         >
           <UiSegmented v-model="tab" :options="TABS" :label="$t('planner.tasks.shown')" />
         </div>
@@ -478,7 +478,7 @@ const summary = computed(() => {
           />
           <span class="truncate">{{ row.name }}</span>
           <StickyNote
-            v-if="row.note"
+            v-if="row.note && row.kind !== 'event'"
             class="size-3.5 shrink-0 text-text-muted"
             aria-hidden="true"
           />
