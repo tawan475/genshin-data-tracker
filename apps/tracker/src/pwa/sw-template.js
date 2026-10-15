@@ -1,9 +1,13 @@
 /* Service worker, emitted as /sw.js by the `service-worker` plugin in vite.config.ts,
- * which replaces the three placeholders below. Plain JS on purpose: it runs as-is.
+ * which replaces the four placeholders below. Plain JS on purpose: it runs as-is.
  *
- * - One cache per build: install precaches the hashed build output, activate
- *   deletes every older build's cache. A new version waits until the page asks
- *   it to take over (the "update available" banner), so a tab never runs a mix.
+ * - The hashed build files (/assets/*) live in one cache across builds: a
+ *   file's name changes with its content, so install fetches only the startup
+ *   files this device doesn't hold yet (after a deploy, only what changed), and
+ *   activate drops the files the new build no longer has. Other chunks are
+ *   cached when first used. The app shell (/, icons) is kept per build. A new
+ *   version waits until the page asks it to take over (the "update available"
+ *   banner), so a tab never runs a mix.
  * - Navigations are network-first (a deploy always serves fresh HTML), falling
  *   back to the cached app shell offline.
  * - /api is never cached: account data on a shared device is readable by the
@@ -21,8 +25,13 @@
  */
 
 const BUILD = '__BUILD__'
+/** The shell and the startup files, cached at install. */
 const PRECACHE = __PRECACHE__
+/** Every file of this build under /assets/ (the rest are another build's). */
+const BUILT = new Set(__BUILT__)
 const CACHE = `gdt-${BUILD}`
+/** Hashed build files, shared by every build. */
+const ASSETS = 'gdt-assets'
 /** Image hosts: nanoka, and gi-cdn for the few names nanoka lacks. */
 const IMAGE_HOSTS = __IMAGE_HOSTS__
 const IMAGES = 'gdt-images-v2'
@@ -31,10 +40,24 @@ const IMAGES = 'gdt-images-v2'
  * this many: a large account's weapons, artifacts, materials and splashes fit.
  */
 const MAX_IMAGES = 8000
-const KEEP = [IMAGES]
+const KEEP = [IMAGES, ASSETS]
+
+const isAsset = (path) => path.startsWith('/assets/')
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)))
+  event.waitUntil(
+    (async () => {
+      const shell = await caches.open(CACHE)
+      const assets = await caches.open(ASSETS)
+      await shell.addAll(PRECACHE.filter((path) => !isAsset(path)))
+      // Only what this device doesn't hold yet: after a deploy, the changed files.
+      const missing = []
+      for (const path of PRECACHE.filter(isAsset)) {
+        if (!(await assets.match(path, { ignoreVary: true }))) missing.push(path)
+      }
+      await assets.addAll(missing)
+    })(),
+  )
 })
 
 self.addEventListener('activate', (event) => {
@@ -46,6 +69,11 @@ self.addEventListener('activate', (event) => {
           .filter((key) => key.startsWith('gdt-') && key !== CACHE && !KEEP.includes(key))
           .map((key) => caches.delete(key)),
       )
+      // Files of older builds this one no longer has.
+      const assets = await caches.open(ASSETS)
+      for (const request of await assets.keys()) {
+        if (!BUILT.has(new URL(request.url).pathname)) await assets.delete(request)
+      }
       await self.registration.navigationPreload?.enable()
       await self.clients.claim()
     })(),
@@ -79,7 +107,9 @@ async function trim(cacheName, max) {
 
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName)
-  const hit = await cache.match(request)
+  // A hashed file's name is its content: a Vary header (a module script's
+  // Origin) never makes another copy of it.
+  const hit = await cache.match(request, { ignoreVary: true })
   if (hit) return hit
   const response = await fetch(request)
   if (response.ok) await cache.put(request, response.clone())
@@ -134,7 +164,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(navigate(event))
     return
   }
-  if (url.pathname.startsWith('/assets/') || PRECACHE.includes(url.pathname)) {
-    event.respondWith(cacheFirst(request, CACHE))
+  if (isAsset(url.pathname)) {
+    event.respondWith(cacheFirst(request, ASSETS))
+    return
   }
+  if (PRECACHE.includes(url.pathname)) event.respondWith(cacheFirst(request, CACHE))
 })

@@ -7,6 +7,7 @@ import { onLocaleChange, t } from '@/i18n'
 import { setPublicPage } from '@/lib/theme'
 import { useAccounts } from '@/stores/accounts'
 import { useSession } from '@/stores/session'
+import { setAppRouter } from './instance'
 import { installLinkPrefetch } from './prefetch'
 
 declare module 'vue-router' {
@@ -443,5 +444,6 @@ router.onError((error, to) => {
 
 // A page's code loads when a link to it is hovered, focused or touched.
 installLinkPrefetch(router)
+setAppRouter(router)
 
 export default router

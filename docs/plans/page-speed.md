@@ -309,3 +309,28 @@ steps are compared without CPU throttling.
   The biggest startup piece left is vue-i18n with its message compiler and the
   English messages (32 KB gzip): precompiling messages at build time would drop
   the compiler (a tooling change, not done).
+- **Step 6 — shipped.** Two causes of re-downloads after a deploy, both fixed:
+  1. *Renaming cascades.* Pages imported the app's stores and helpers from the
+     entry chunk, which also holds the router's lazy import of every page: a
+     page's new file name renamed the entry, so every page importing from it
+     was renamed too. Now a `startup-graph` build plugin finds the app's own
+     startup modules (static imports from `main.ts`, minus `main.ts` and
+     `router/index.ts`) and an `app` chunk group holds them (`vite.config.ts`;
+     styles stay with the entry, since the Tailwind sheet changes with any new
+     class); `vendor` and `icons` (Step 5) are stable too. The one module
+     outside the router that needed it reads it from `router/instance.ts`.
+     Startup is 5 files now (vendor, app, icons, entry, CSS; 146 KB gzip).
+  2. *The service worker's per-build cache.* Each deploy's worker deleted the
+     old cache and fetched everything again. Hashed files now live in one
+     `gdt-assets` cache across builds: install fetches only the startup files
+     not already held, activate drops files the new build no longer has
+     (`ignoreVary`: a hashed name is its content). The shell stays per build.
+  A shared-package chunk group was tried and dropped: one 110 KB-gzip chunk at
+  startup (its zod-free modules are startup code) for no gain, as its modules
+  are leaves whose names already change only with their content.
+
+  | after a deploy that changed one page | step 5 | step 6 |
+  |---|---|---|
+  | files renamed (of 164) | 60 | 3 (the page, a chunk it shares code with, the entry) |
+  | … a new CSS class in a card component | 96 | 4 (the same + the CSS) |
+  | a returning visitor downloads (Overview, Characters, Artifacts) | 43 files, 234 KB gzip | 2 files, 15 KB gzip |

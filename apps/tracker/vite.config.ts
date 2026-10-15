@@ -45,6 +45,45 @@ function imageHostPreconnect(): Plugin {
 }
 
 /**
+ * The app's own modules that load at startup (statically reachable from
+ * src/main.ts), except main.ts and the router (whose lazy page imports name
+ * every page's file). They go in one `app` chunk instead of the entry chunk:
+ * pages import them from there, so a page's new file name changes only the
+ * router's chunk, not every page that imports a store or a helper (a one-line
+ * change to one page renamed 60 of 184 files).
+ */
+const startupModules = new Set<string>()
+function startupGraph(): Plugin {
+  const imports = new Map<string, readonly string[]>()
+  return {
+    name: 'startup-graph',
+    apply: 'build',
+    moduleParsed(info) {
+      imports.set(info.id, info.importedIds)
+    },
+    buildEnd() {
+      if (this.environment.name !== 'client') return
+      startupModules.clear()
+      const entry = [...imports.keys()].find((id) => /[\/]src[\/]main\.ts$/.test(id))
+      const queue = entry ? [entry] : []
+      const seen = new Set(queue)
+      while (queue.length) {
+        for (const next of imports.get(queue.pop()!) ?? []) {
+          if (!seen.has(next)) {
+            seen.add(next)
+            queue.push(next)
+          }
+        }
+      }
+      for (const id of seen) {
+        const own = /[\/]apps[\/]tracker[\/]src[\/]/.test(id) && !id.includes('node_modules')
+        if (own && !/[\/]src[\/](main\.ts|router[\/]index\.ts)$/.test(id)) startupModules.add(id)
+      }
+    },
+  }
+}
+
+/**
  * The files index.html loads: the entry chunk, what it imports statically
  * (recursively) and their CSS. Every other chunk loads when a page asks.
  */
@@ -79,6 +118,14 @@ function serviceWorker(): Plugin {
       const source = readFileSync(new URL('./src/pwa/sw-template.js', import.meta.url), 'utf8')
         .replace("'__BUILD__'", JSON.stringify(`${build.commit}-${Date.now().toString(36)}`))
         .replace('__PRECACHE__', JSON.stringify(precache))
+        .replace(
+          '__BUILT__',
+          JSON.stringify(
+            Object.keys(bundle)
+              .filter((file) => file.startsWith('assets/'))
+              .map((file) => `/${file}`),
+          ),
+        )
         .replace('__IMAGE_HOSTS__', JSON.stringify(imageHosts))
       this.emitFile({ type: 'asset', fileName: 'sw.js', source })
     },
@@ -123,6 +170,7 @@ export default defineConfig(({ command }) => ({
     cloudflare(command === 'serve' ? devWorker : {}),
     imageHostPreconnect(),
     serviceWorker(),
+    startupGraph(),
   ],
   // Pre-bundle every client dependency up front. Discovering one at runtime
   // makes Vite re-optimise and invalidate loaded modules, which shows up as
@@ -164,6 +212,15 @@ export default defineConfig(({ command }) => ({
                 // Every lucide icon in one chunk (~100 icons): one request instead
                 // of a file per icon (the shell alone used ~15).
                 { name: 'icons', test: /[\/]lucide-vue-next[\/]/, priority: 10 },
+                // The app's startup modules (startupGraph): out of the entry chunk.
+                // Not the styles: the one Tailwind sheet changes with any new class,
+                // and a chunk's name follows its CSS; with the entry it renames
+                // the entry alone.
+                {
+                  name: 'app',
+                  test: (id: string) => startupModules.has(id) && !/\.css$|[?&]type=style/.test(id),
+                  priority: 5,
+                },
               ],
             },
           },

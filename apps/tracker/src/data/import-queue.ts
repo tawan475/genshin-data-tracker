@@ -21,7 +21,7 @@ import { errorText } from '@/i18n/api-errors'
 import { t } from '@/i18n'
 import { formatDateTime, formatNumber, formatTime } from '@/lib/format'
 import { importingAccounts } from '@/live/holds'
-import router from '@/router'
+import { appRouter } from '@/router/instance'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
@@ -639,7 +639,8 @@ function finishDone(queue: ImportQueue) {
         s.created + s.unchanged > 0
           ? {
               label: t('transfer.upload.snapshots'),
-              run: () => void router.push({ name: 'account-snapshots', params: { accountId } }),
+              run: () =>
+                void appRouter()?.push({ name: 'account-snapshots', params: { accountId } }),
             }
           : undefined,
     },
