@@ -9,10 +9,13 @@ import {
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, onSignedOut } from '@/api'
-import { forgetAccountSettings, seedAccountSettings } from '@/data/account-settings'
+import { forgetAccountSettings, settingsFromBootstrap } from '@/data/account-settings'
+import { clearCached } from '@/data/idb-cache'
+import { routeAccountId } from '@/lib/route-account'
 import { setClockPreference } from '@/lib/format'
 import { applyTheme } from '@/lib/theme'
 import { applyLocale, storedPreference } from '@/i18n/apply'
+import { bootCacheUser, clearBootCache, readBootCache, updateBootCache } from './boot-cache'
 import { bootstrapOnce, forgetBootstrap } from './bootstrap'
 
 type Status = 'unknown' | 'signed-in' | 'signed-out'
@@ -42,9 +45,13 @@ export const useSession = defineStore('session', () => {
   }
 
   function adopt(user: MeResponse | null) {
+    // What this device keeps (boot-cache, idb-cache) is one user's: never
+    // shown to another, nor kept past signing out.
+    if (user?.id !== bootCacheUser()) forgetDevice()
     me.value = user
     status.value = user ? 'signed-in' : 'signed-out'
     if (user) {
+      updateBootCache({ me: user })
       applyTheme(user.settings.theme)
       setClockPreference(user.settings.use24Hour)
       // The account's language wins over this device's; `system` keeps the device's pick.
@@ -56,6 +63,11 @@ export const useSession = defineStore('session', () => {
     }
   }
 
+  function forgetDevice() {
+    clearBootCache()
+    void clearCached()
+  }
+
   onSignedOut(() => adopt(null))
 
   /**
@@ -65,15 +77,29 @@ export const useSession = defineStore('session', () => {
    * request for the user, the accounts and the opened account's settings).
    */
   function ensureLoaded(): Promise<void> {
-    loading ??= hasSessionHint()
-      ? bootstrapOnce()
-          .then((boot) => {
-            if (boot.account) seedAccountSettings(boot.account.id, boot.account.settings)
-            adopt(boot.me)
-          })
-          .catch(() => adopt(null))
-      : Promise.resolve(adopt(null))
+    loading ??= hasSessionHint() ? bootstrap() : Promise.resolve(adopt(null))
     return loading
+  }
+
+  /**
+   * A repeat visit shows the user this device kept at once (boot-cache) and
+   * takes the bootstrap's answer when it lands; a sign-out found on the way
+   * (a refused refresh) ends it like any request would. A first visit waits
+   * for the bootstrap.
+   */
+  function bootstrap(): Promise<void> {
+    const boot = bootstrapOnce()
+    const routeId = routeAccountId(window.location.pathname)
+    if (routeId !== null) settingsFromBootstrap(routeId, boot)
+    const fresh = boot.then((answer) => {
+      adopt(answer.me)
+      updateBootCache({ me: answer.me, accounts: answer.accounts }, true)
+    })
+    const kept = readBootCache()
+    if (!kept) return fresh.catch(() => adopt(null))
+    adopt(kept.me)
+    fresh.catch(() => undefined)
+    return Promise.resolve()
   }
 
   /** `turnstile`: the human check's token, while the server has it on (all four). */

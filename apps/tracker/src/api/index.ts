@@ -50,6 +50,20 @@ export { BUNDLE_FORMAT }
 export * from './http'
 export type { PurgeBody, StaffApi } from './staff'
 
+export interface BundleOptions {
+  ids?: number[]
+  sections?: string[]
+}
+
+/** Where an account's bundle of `options` is read (GDT2). */
+export function bundlePath(id: number, options: BundleOptions = {}): string {
+  const query = new URLSearchParams()
+  if (options.ids) query.set('ids', options.ids.join(','))
+  if (options.sections) query.set('sections', options.sections.join(','))
+  query.set('format', String(BUNDLE_FORMAT))
+  return `/api/accounts/${id}/bundle?${query}`
+}
+
 export interface AccountInput {
   name?: string | null
   uid?: string | null
@@ -324,13 +338,8 @@ export const api = {
     }),
   catalog: (id: number) => requestJson<CatalogRow[]>(`/api/accounts/${id}/catalog`),
   /** Binary GDT2 bundle; decode with decodeBundle / openBundle from @gdt/shared. */
-  bundle: async (id: number, options: { ids?: number[]; sections?: string[] } = {}) => {
-    const query = new URLSearchParams()
-    if (options.ids) query.set('ids', options.ids.join(','))
-    if (options.sections) query.set('sections', options.sections.join(','))
-    query.set('format', String(BUNDLE_FORMAT))
-    const qs = query.toString()
-    const response = await request(`/api/accounts/${id}/bundle${qs ? `?${qs}` : ''}`)
+  bundle: async (id: number, options: BundleOptions = {}) => {
+    const response = await request(bundlePath(id, options))
     return response.arrayBuffer()
   },
   snapshotGood: (id: number, snapshotId: number) =>

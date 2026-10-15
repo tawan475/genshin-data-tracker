@@ -223,3 +223,21 @@ steps are compared without CPU throttling.
   | Artifacts: largest paint | 1,060–1,312 | 648–692 |
   | Planner: largest paint | 960–1,472 | 708–1,328 |
   | API requests, Characters | 5 | 3 |
+- **Step 2 — shipped.** Bundles, the catalog and the snapshot list are kept
+  in IndexedDB (`src/data/idb-cache.ts`, db `gdt-data`) as downloaded (bytes /
+  JSON text), keyed by account + kind and stored under the data version the
+  response's ETag names (never the one asked for); a put drops the account's
+  older versions and skips one older than what is kept. The last bootstrap's
+  user + account list is kept in localStorage (`stores/boot-cache.ts`): a
+  repeat visit adopts it at once and renders from IndexedDB, then takes the
+  bootstrap's answer (a moved version reloads that page's data; a refused
+  refresh signs out as before). Staff Inspect reads are never stored. Signing
+  out, or a different user signing in, clears both. Repeat visit, requests:
+  `bootstrap` only (Characters, Overview, Planner's own routes aside).
+
+  | 1366 px, CPU 1×, +150 ms, repeat visit | step 1 | step 2 |
+  |---|---|---|
+  | Overview: first paint | 948–1,032 | 712–1,004 |
+  | Characters: first paint | 432–524 | 256–360 |
+  | Artifacts: largest paint | 648–692 | 540–616 |
+  | Planner: largest paint | 708–1,328 | 496–828 |

@@ -31,6 +31,7 @@ export function rememberAccountHint(account: AccountHint): void {
     id: account.id,
     dataVersion: account.dataVersion,
     latest: account.latest ? { id: account.latest.id, takenAt: account.latest.takenAt } : null,
+    ...(account.liveSync ? { liveSync: true } : {}),
   }
   writeJson(key(account.id), hint)
 }

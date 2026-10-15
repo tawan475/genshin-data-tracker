@@ -1,4 +1,4 @@
-import type { AccountSettings, AccountSettingsPatch } from '@gdt/shared'
+import type { AccountSettings, AccountSettingsPatch, BootstrapResponse } from '@gdt/shared'
 import { api } from '@/api'
 import { onPlannerChange } from '@/live/planner-changes'
 import { createSettingsCache } from './settings-cache'
@@ -20,8 +20,24 @@ const cache = createSettingsCache<AccountSettings, AccountSettingsPatch>(
 
 /** The account's settings; `fresh` reads them again. */
 export const loadAccountSettings = cache.load
-/** Settings the server just answered with (the bootstrap). */
+/** Settings the server just answered with. */
 export const seedAccountSettings = cache.seed
+
+/**
+ * The settings of the account the app opens on come with the bootstrap:
+ * pages that ask before it answers wait for it rather than read them apart
+ * (a read of their own when it doesn't carry them).
+ */
+export function settingsFromBootstrap(id: number, boot: Promise<BootstrapResponse>): void {
+  const read = async () => (await api.accountSettings(id)).settings
+  cache.seed(
+    id,
+    boot.then(
+      (b) => (b.account?.id === id ? b.account.settings : read()),
+      () => read(),
+    ),
+  )
+}
 /** Saves a change; later reads start from the server's answer. */
 export const saveAccountSettings = cache.save
 /** Signed out: nothing is kept. */

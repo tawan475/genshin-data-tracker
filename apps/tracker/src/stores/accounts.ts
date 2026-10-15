@@ -1,12 +1,13 @@
 import type { AccountResponse } from '@gdt/shared'
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { api, type AccountInput } from '@/api'
 import { t } from '@/i18n'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { postToTabs } from '@/live/channel'
 import { isHeld, pendingIds } from '@/live/holds'
 import { mergeAccounts } from '@/live/policy'
+import { readBootCache, updateBootCache } from './boot-cache'
 import { takeBootstrap } from './bootstrap'
 import { useSession } from './session'
 
@@ -31,6 +32,9 @@ export const useAccounts = defineStore('accounts', () => {
   let readAt = 0
 
   const byId = computed(() => new Map(list.value.map((a) => [a.id, a])))
+
+  // The next visit starts from this list (see boot-cache).
+  watch(list, (accounts) => updateBootCache({ accounts }))
 
   function setPending(next: Map<number, AccountResponse>) {
     pending = next
@@ -87,6 +91,22 @@ export const useAccounts = defineStore('accounts', () => {
   /** The bootstrap's list when this page load made one (see stores/bootstrap), else a read. */
   async function firstLoad() {
     const boot = takeBootstrap()
+    // A repeat visit: the list this device kept shows at once (the session
+    // shows the kept user too), the bootstrap's replaces it when it lands.
+    const kept = boot ? readBootCache() : null
+    if (boot && kept && kept.me.id === useSession().me?.id) {
+      merge(kept.accounts, { complete: true })
+      loaded.value = true
+      readAt = Date.now()
+      boot.then(
+        ({ accounts, accountsEtag }) => {
+          merge(accounts, { complete: true, etag: accountsEtag })
+          readAt = Date.now()
+        },
+        () => undefined,
+      )
+      return
+    }
     if (boot) {
       try {
         const { accounts, accountsEtag } = await boot

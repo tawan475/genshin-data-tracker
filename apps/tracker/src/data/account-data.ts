@@ -21,12 +21,14 @@ import {
   storedSnapshotOf,
   type BundleSnapshot,
   type CatalogEntry,
+  type CatalogRow,
   type Good,
   type KeyDictionary,
   type LiveJournalResponse,
   type SnapshotResponse,
 } from '@gdt/shared'
-import { api, BUNDLE_FORMAT } from '@/api'
+import { api, bundlePath, BUNDLE_FORMAT, request } from '@/api'
+import { readCached, writeCached } from './idb-cache'
 
 export interface AccountRef {
   id: number
@@ -38,11 +40,6 @@ export interface AccountRef {
   source?: 'staff'
   /** Live sync is on for the account: "now" is its newest snapshot with the journal applied. */
   liveSync?: boolean
-}
-
-/** Where an account's data is read from. */
-function reader(account: AccountRef) {
-  return account.source === 'staff' ? api.staff : api
 }
 
 export type SectionName =
@@ -79,15 +76,53 @@ function cached<T>(account: AccountRef, kind: string, load: () => Promise<T>): P
   return entry
 }
 
+/**
+ * An account response as downloaded (bytes or JSON text), from this
+ * device's store (see idb-cache) when it holds this data version, else from
+ * the server, then kept. It is kept under the version its ETag names: the
+ * server answers with its current data, whatever version was asked for.
+ * The owner's data only: staff Inspect reads are never stored.
+ */
+async function stored<T extends ArrayBuffer | string>(
+  account: AccountRef,
+  kind: string,
+  path: string,
+  read: (response: Response) => Promise<T>,
+): Promise<T> {
+  const key = `${account.id}:${BUNDLE_FORMAT}:${kind}`
+  const hit = await readCached(key, account.id, account.dataVersion)
+  if (hit !== undefined) return hit as T
+  const response = await request(path)
+  const body = await read(response)
+  const version = /\.v(\d+)/.exec(response.headers.get('etag') ?? '')
+  if (version) void writeCached(key, account.id, Number(version[1]), body)
+  return body
+}
+
+const text = (response: Response) => response.text()
+const bytes = (response: Response) => response.arrayBuffer()
+
 /** Snapshot metadata and summaries, newest first. */
 export function loadSnapshots(account: AccountRef): Promise<SnapshotResponse[]> {
-  return cached(account, 'snapshots', () => reader(account).snapshots(account.id))
+  return cached(account, 'snapshots', async () =>
+    account.source === 'staff'
+      ? api.staff.snapshots(account.id)
+      : (JSON.parse(
+          await stored(account, 'snapshots', `/api/accounts/${account.id}/snapshots`, text),
+        ) as SnapshotResponse[]),
+  )
 }
 
 /** Every artifact the account has held, by catalog id, with CV/RV derived. */
 export function loadCatalog(account: AccountRef): Promise<Map<number, CatalogEntry>> {
   return cached(account, 'catalog', async () =>
-    catalogFromRows(await reader(account).catalog(account.id)),
+    catalogFromRows(
+      account.source === 'staff'
+        ? await api.staff.catalog(account.id)
+        : (JSON.parse(
+            await stored(account, 'catalog', `/api/accounts/${account.id}/catalog`, text),
+          ) as CatalogRow[]),
+    ),
   )
 }
 
@@ -98,7 +133,11 @@ export function loadBundle(
 ): Promise<DecodedBundle> {
   const variant = `bundle:${options.sections?.join('+') ?? 'all'}:${options.ids?.join(',') ?? 'all'}`
   return cached(account, variant, async () =>
-    decodeBundle(await reader(account).bundle(account.id, options)),
+    decodeBundle(
+      account.source === 'staff'
+        ? await api.staff.bundle(account.id, options)
+        : await stored(account, variant, bundlePath(account.id, options), bytes),
+    ),
   )
 }
 

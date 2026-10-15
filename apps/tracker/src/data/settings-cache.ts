@@ -12,8 +12,8 @@ interface Entry<T> {
 export interface SettingsCache<T, P> {
   /** The settings; `fresh` reads them again. */
   load(id: number, options?: { fresh?: boolean }): Promise<T>
-  /** Settings the server just answered with. */
-  seed(id: number, value: T): void
+  /** Settings the server just answered with, or is about to (a promise). */
+  seed(id: number, value: T | Promise<T>): void
   /** Saves a change; later reads start from the server's answer. */
   save(id: number, patch: P): Promise<T>
   /** The next read asks the server (changed elsewhere). */
@@ -27,19 +27,21 @@ export function createSettingsCache<T, P>(
   reuseMs = 60_000,
 ): SettingsCache<T, P> {
   const entries = new Map<number, Entry<T>>()
-  const seed = (id: number, value: T) =>
-    void entries.set(id, { at: Date.now(), promise: Promise.resolve(value) })
+  /** Keeps `promise` for `id`, forgotten if it fails. */
+  function keep(id: number, promise: Promise<T>): Promise<T> {
+    const mine: Entry<T> = { at: Date.now(), promise }
+    entries.set(id, mine)
+    promise.catch(() => {
+      if (entries.get(id) === mine) entries.delete(id)
+    })
+    return promise
+  }
+  const seed = (id: number, value: T | Promise<T>) => void keep(id, Promise.resolve(value))
   return {
     load(id, options = {}) {
       const entry = entries.get(id)
       if (entry && Date.now() - entry.at < (options.fresh ? 0 : reuseMs)) return entry.promise
-      const promise = read(id)
-      const mine: Entry<T> = { at: Date.now(), promise }
-      entries.set(id, mine)
-      promise.catch(() => {
-        if (entries.get(id) === mine) entries.delete(id)
-      })
-      return promise
+      return keep(id, read(id))
     },
     seed,
     async save(id, patch) {
