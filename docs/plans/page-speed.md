@@ -285,3 +285,27 @@ steps are compared without CPU throttling.
   | empty cache (images from nanoka) | 2,984–3,072 | 1,352–1,440 |
   | warm | 4,596–4,796 (step 2 build) | 1,740–1,924 |
   | Materials, warm | 2,148–2,404 (step 2 build) | 1,576–1,604 |
+- **Step 5 — shipped.** Startup now imports nothing from the `@gdt/shared`
+  index: the few values it needs come from zod-free subpaths
+  (`@gdt/shared/permissions`, `/oauth`, `/settings`; the package has
+  `"sideEffects": false`; `staff.ts`/`api.ts` re-export them, so the index is
+  unchanged). One `vendor` chunk (Vue, router, Pinia, vue-i18n) and one `icons`
+  chunk (every lucide icon, 11 KB gzip) replace ~20 tiny files
+  (`vite.config.ts` `codeSplitting.groups`, client only). AccountLayout's idle
+  prefetch loads only the pages next to the current one in the navigation (and
+  the newest capture), never on Save-Data; any in-app link loads its page's
+  code on hover, focus or touch (`router/prefetch.ts`). The service worker
+  precaches the shell + startup set only (other chunks are cached when used),
+  so a first visit no longer downloads every page.
+
+  | | step 4 | step 5 |
+  |---|---|---|
+  | startup (index.html) | 40 files, 198 KB gzip | 25 files, 150 KB gzip (127 KB JS) |
+  | first visit to Overview, all downloads incl. service worker | 235 files, 1,640 KB gzip | 72 files, 378 KB gzip |
+  | Overview cold, 390 px, CPU 4×, +150 ms: first paint | 3,400–3,440 | 2,408–2,412 |
+  | … data complete | 4,051–4,124 | 2,694–2,762 |
+  | … main thread blocked | 1,267–1,272 | 567–668 |
+
+  The biggest startup piece left is vue-i18n with its message compiler and the
+  English messages (32 KB gzip): precompiling messages at build time would drop
+  the compiler (a tooling change, not done).

@@ -7,6 +7,7 @@ import { onLocaleChange, t } from '@/i18n'
 import { setPublicPage } from '@/lib/theme'
 import { useAccounts } from '@/stores/accounts'
 import { useSession } from '@/stores/session'
+import { installLinkPrefetch } from './prefetch'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -380,7 +381,8 @@ router.beforeEach(async (to) => {
  * Moving between pages crossfades the old page into the new one (View
  * Transitions) instead of swapping it at once: the old page stays on screen
  * until the new one has rendered (its code and, when cached, its data are in
- * by then: AccountLayout preloads both), then fades out over it. Not for
+ * by then: links load their page's code on hover or touch, AccountLayout
+ * preloads the neighbours' and the newest capture), then fades out over it. Not for
  * query changes on one page (filters, an open dialog), nor with reduced
  * motion or without the API.
  */
@@ -438,5 +440,8 @@ router.onError((error, to) => {
   }
   window.location.assign(to.fullPath)
 })
+
+// A page's code loads when a link to it is hovered, focused or touched.
+installLinkPrefetch(router)
 
 export default router

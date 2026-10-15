@@ -6,6 +6,7 @@
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
 import { MAX_FAVORITE_CHARACTERS } from './settings'
+import type { OAuthProvider } from './oauth'
 import type {
   AccountSettings,
   DeltaChange,
@@ -91,17 +92,8 @@ export const resetPasswordRequest = z.object({ token: linkToken, password: passw
 /** `POST /api/auth/password/set`: a first password for an account that has none. */
 export const setPasswordRequest = z.object({ password: passwordSchema })
 
-/**
- * Sign-in providers (OAuth). Each is on only while the Worker has its client
- * id and secret; `GET /api/auth/oauth/providers` says which.
- */
-export const OAUTH_PROVIDERS = ['discord', 'google'] as const
-export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number]
-
-export const OAUTH_PROVIDER_LABELS: Record<OAuthProvider, string> = {
-  discord: 'Discord',
-  google: 'Google',
-}
+// Zod-free, for the app's startup: ./oauth.
+export { OAUTH_PROVIDERS, OAUTH_PROVIDER_LABELS, type OAuthProvider } from './oauth'
 
 /**
  * Where a sign-in may land afterwards: a path inside the app, or irminsul's

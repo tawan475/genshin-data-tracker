@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from 'node:url'
 import { cloudflare, type PluginConfig } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, type Plugin, type Rolldown } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 import { GI_CDN_HOST, IMAGE_HOST } from '@gdt/game-data/image-url'
@@ -45,9 +45,28 @@ function imageHostPreconnect(): Plugin {
 }
 
 /**
- * Emits /sw.js from src/pwa/sw-template.js with this build's id, the list
- * of files to precache (the hashed JS/CSS plus the app shell and icons) and
- * the image hosts it keeps cache-first.
+ * The files index.html loads: the entry chunk, what it imports statically
+ * (recursively) and their CSS. Every other chunk loads when a page asks.
+ */
+function startupFiles(bundle: Rolldown.OutputBundle): string[] {
+  const files = new Set<string>()
+  const visit = (name: string) => {
+    const chunk = bundle[name]
+    if (!chunk || chunk.type !== 'chunk' || files.has(name)) return
+    files.add(name)
+    for (const css of chunk.viteMetadata?.importedCss ?? []) files.add(css)
+    for (const imported of chunk.imports) visit(imported)
+  }
+  for (const [name, chunk] of Object.entries(bundle)) {
+    if (chunk.type === 'chunk' && chunk.isEntry) visit(name)
+  }
+  return [...files]
+}
+
+/**
+ * Emits /sw.js from src/pwa/sw-template.js with this build's id, the files
+ * to precache (the app shell, its icons and the startup JS/CSS; other chunks
+ * are cached when first used) and the image hosts it keeps cache-first.
  */
 function serviceWorker(): Plugin {
   return {
@@ -55,10 +74,8 @@ function serviceWorker(): Plugin {
     apply: 'build',
     generateBundle(_, bundle) {
       if (this.environment.name !== 'client') return
-      const built = Object.keys(bundle)
-        .filter((file) => /\.(js|css)$/.test(file))
-        .map((file) => `/${file}`)
-      const precache = ['/', '/manifest.webmanifest', '/favicon.svg', '/icon-192.png', ...built]
+      const startup = startupFiles(bundle).map((file) => `/${file}`)
+      const precache = ['/', '/manifest.webmanifest', '/favicon.svg', '/icon-192.png', ...startup]
       const source = readFileSync(new URL('./src/pwa/sw-template.js', import.meta.url), 'utf8')
         .replace("'__BUILD__'", JSON.stringify(`${build.commit}-${Date.now().toString(36)}`))
         .replace('__PRECACHE__', JSON.stringify(precache))
@@ -129,6 +146,30 @@ export default defineConfig(({ command }) => ({
     // would merge its per-file JSON chunks, and its subpath modules would each
     // need an entry here.
     exclude: ['@gdt/game-data'],
+  },
+  environments: {
+    client: {
+      build: {
+        rolldownOptions: {
+          output: {
+            codeSplitting: {
+              groups: [
+                // The framework (Vue, the router, Pinia, vue-i18n): every page needs
+                // it at startup, and it changes only with a dependency update.
+                {
+                  name: 'vendor',
+                  test: /[\/]node_modules[\/](vue|@vue[\/][^\/]+|vue-router|pinia|vue-i18n|@intlify[\/][^\/]+)[\/]/,
+                  priority: 20,
+                },
+                // Every lucide icon in one chunk (~100 icons): one request instead
+                // of a file per icon (the shell alone used ~15).
+                { name: 'icons', test: /[\/]lucide-vue-next[\/]/, priority: 10 },
+              ],
+            },
+          },
+        },
+      },
+    },
   },
   // JSON imports are used whole; per-key named exports doubled the icon map's size.
   json: { namedExports: false },

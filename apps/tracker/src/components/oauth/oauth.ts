@@ -1,10 +1,6 @@
-import {
-  OAUTH_PROVIDERS,
-  OAUTH_PROVIDER_LABELS,
-  SIGNUP_MODES,
-  type OAuthProvider,
-  type SignupMode,
-} from '@gdt/shared'
+// Startup code: the zod-free modules, not the package index (its schemas).
+import { OAUTH_PROVIDERS, OAUTH_PROVIDER_LABELS, type OAuthProvider } from '@gdt/shared/oauth'
+import { SIGNUP_MODES, type SignupMode } from '@gdt/shared/permissions'
 import { api } from '@/api'
 import { t } from '@/i18n'
 

@@ -1,11 +1,7 @@
-import {
-  USER_SETTINGS_DEFAULTS,
-  hasPermission,
-  type MeResponse,
-  type PermissionNode,
-  type OAuthLinkLoginResponse,
-  type UserSettings,
-} from '@gdt/shared'
+import type { MeResponse, OAuthLinkLoginResponse } from '@gdt/shared'
+// Startup code: the zod-free modules, not the package index (its schemas).
+import { hasPermission, type PermissionNode } from '@gdt/shared/permissions'
+import { USER_SETTINGS_DEFAULTS, type UserSettings } from '@gdt/shared/settings'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, onSignedOut } from '@/api'

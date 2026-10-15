@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { SearchX } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
+import { ACCOUNT_SECTIONS } from '@/components/shell/nav'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import { loadLatestInventory } from '@/data/account-data'
 import { rememberAccountHint } from '@/data/boot-prefetch'
@@ -12,6 +13,7 @@ import { loadTraveler } from '@/data/traveler'
 import { preload } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
 import { liveVersions } from '@/live/journal'
+import { prefetchRoute, savingData, whenIdle } from '@/router/prefetch'
 import { rememberLast, useAccounts } from '@/stores/accounts'
 import { provideAccount } from './context'
 
@@ -49,38 +51,35 @@ watch(
 )
 
 /**
- * While the browser is idle after an account opens: the account pages' code
- * and the newest capture (Characters, Weapons and Artifacts all read it), so
- * the first visit to each page shows at once instead of loading.
+ * While the browser is idle after a page opens: the code of the pages next to
+ * it in the navigation (any other page's loads when a link to it is hovered,
+ * focused or touched: router/prefetch.ts) and the newest capture
+ * (Characters, Weapons and Artifacts all read it), so those open at once.
+ * Nothing on a data-saving connection.
  */
 const router = useRouter()
-let idle = 0
+let cancelIdle: (() => void) | null = null
 function prefetch() {
-  for (const record of router.getRoutes()) {
-    const load = record.components?.default
-    if (record.path.startsWith('/app/a/:accountId') && typeof load === 'function') {
-      void (load as () => Promise<unknown>)().catch(() => undefined)
+  if (savingData()) return
+  const index = ACCOUNT_SECTIONS.findIndex((s) => s.name === route.name)
+  for (const section of [ACCOUNT_SECTIONS[index - 1], ACCOUNT_SECTIONS[index + 1]]) {
+    if (index >= 0 && section) {
+      prefetchRoute(router, { name: section.name, params: { accountId: accountId.value } })
     }
   }
   if (account.value?.latest) preload(loadLatestInventory(account.value))
   warmDecoder()
 }
-// Safari has no requestIdleCallback: a timeout stands in.
-const hasIdle = typeof window.requestIdleCallback === 'function'
-const whenIdle = (fn: () => void): number =>
-  hasIdle ? window.requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 1500)
 watch(
-  () => account.value?.dataVersion,
-  (version) => {
+  [() => account.value?.dataVersion, () => route.name],
+  ([version]) => {
     if (version === undefined) return
-    idle = whenIdle(prefetch)
+    cancelIdle?.()
+    cancelIdle = whenIdle(prefetch)
   },
   { immediate: true },
 )
-onBeforeUnmount(() => {
-  if (hasIdle) window.cancelIdleCallback(idle)
-  else clearTimeout(idle)
-})
+onBeforeUnmount(() => cancelIdle?.())
 </script>
 
 <template>
