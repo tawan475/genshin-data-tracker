@@ -1,0 +1,21 @@
+{
+  "label": "Live",
+  "thisSession": "This session",
+  "sessionSince": "Since {time}",
+  "levelUps": "{n} level-up | {n} level-ups",
+  "talents": "{n} talent | {n} talents",
+  "updated": "updated {ago}",
+  "updatedAt": "Updated {time}",
+  "row": "Live",
+  "rowDetail": "{n} change since this snapshot | {n} changes since this snapshot",
+  "sinceSnapshot": "since the newest snapshot",
+  "discard": "Discard",
+  "discardTitle": "Delete these changes; the newest snapshot stays",
+  "discarded": "Live changes deleted",
+  "discardFailed": "Could not delete the live changes",
+  "settings": {
+    "title": "Live sync",
+    "label": "Follow Irminsul live",
+    "description": "While Irminsul runs, its changes show here within seconds, between snapshots."
+  }
+}

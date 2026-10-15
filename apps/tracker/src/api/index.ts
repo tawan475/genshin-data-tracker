@@ -17,6 +17,8 @@ import type {
   IdentitiesResponse,
   ImportKeyResponse,
   ImportResponse,
+  LiveJournalResponse,
+  LivePointsResponse,
   MeResponse,
   OAuthAuthorizeResponse,
   OAuthLinkLoginResponse,
@@ -334,6 +336,24 @@ export const api = {
   snapshotGood: (id: number, snapshotId: number) =>
     requestJson<Good>(`/api/accounts/${id}/snapshots/${snapshotId}/good`),
   latestGood: (id: number) => requestJson<Good>(`/api/accounts/${id}/latest/good`),
+
+  // ------------------------------------------------------------- live sync
+  /** The open journal since the newest snapshot (ETag: a 304 costs no body). */
+  live: (id: number) => requestJson<LiveJournalResponse>(`/api/accounts/${id}/live`),
+  deleteLive: (id: number) => requestJson<void>(`/api/accounts/${id}/live`, { method: 'DELETE' }),
+  /** Chart points between two UTC days (YYYY-MM-DD; default: the last 400 days). */
+  points: (id: number, range: { from?: string; to?: string } = {}) => {
+    const query = new URLSearchParams()
+    if (range.from) query.set('from', range.from)
+    if (range.to) query.set('to', range.to)
+    const qs = query.toString()
+    return requestJson<LivePointsResponse>(`/api/accounts/${id}/points${qs ? `?${qs}` : ''}`)
+  },
+  /** One UTC day's points, or every day's without `day`. */
+  deletePoints: (id: number, day?: string) =>
+    requestJson<void>(`/api/accounts/${id}/points${day ? `?day=${day}` : ''}`, {
+      method: 'DELETE',
+    }),
 
   /** The staff dashboard (/api/staff): only for users with the nodes. */
   staff: staffApi,

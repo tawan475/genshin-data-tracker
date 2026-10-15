@@ -46,6 +46,7 @@ import { useSession } from '@/stores/session'
 import { onTabMessage, postToTabs, tabsCanTalk, type TabMessage } from './channel'
 import { importingAccounts, onApplyPending, updatesHeld } from './holds'
 import { requestLeadership } from './leader'
+import { noteLiveChange } from './journal'
 import { emitPlannerChange } from './planner-changes'
 import { emitWishChange } from './wish-changes'
 import {
@@ -204,6 +205,15 @@ export function useLiveUpdates(): void {
     if (event.type === 'planner') {
       // Not about the account list: the open Planner re-reads its own data.
       if (event.tab !== TAB_ID) emitPlannerChange(event.accountId)
+      return
+    }
+    if (event.type === 'hello') {
+      // Journals may have moved while there was no socket: re-read them (a 304 if not).
+      for (const account of accounts.list) if (account.liveSync) noteLiveChange(account.id)
+    }
+    if (event.type === 'live') {
+      // Live sync: the account's journal moved; its "now" views re-read it.
+      noteLiveChange(event.accountId)
       return
     }
     if (event.type === 'wishes') {

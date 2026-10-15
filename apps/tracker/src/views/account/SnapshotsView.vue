@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SnapshotResponse } from '@gdt/shared'
-import { useElementSize } from '@vueuse/core'
+import { useElementSize, useIntervalFn } from '@vueuse/core'
 import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { CalendarX, History, Repeat2, Upload } from 'lucide-vue-next'
 import { api } from '@/api'
@@ -20,7 +20,9 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import { useSnapshotSelection } from '@/composables/useSnapshotSelection'
-import { loadSnapshots } from '@/data/account-data'
+import LiveRow from '@/components/live/LiveRow.vue'
+import { loadLive, loadSnapshots } from '@/data/account-data'
+import { noteLiveChange } from '@/live/journal'
 import { cancelExport, downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
 import { currencyMissing, dayKey } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
@@ -67,6 +69,27 @@ const {
 
 /** Every snapshot, newest first. */
 const list = computed<readonly SnapshotResponse[]>(() => snapshots.value ?? [])
+
+// Live sync: the open journal shows as the first row (owner can delete it).
+const live = useResource(
+  () => account.value,
+  (value) => loadLive(value),
+)
+const liveNow = ref(Date.now())
+useIntervalFn(() => (liveNow.value = Date.now()), 30_000)
+const discarding = ref(false)
+async function discardLive() {
+  discarding.value = true
+  try {
+    await api.deleteLive(account.value.id)
+    noteLiveChange(account.value.id)
+    feedback.toast({ tone: 'success', title: t('live.discarded') })
+  } catch (cause) {
+    feedback.error(t('live.discardFailed'), cause)
+  } finally {
+    discarding.value = false
+  }
+}
 const changes = computed(() => snapshotChanges(list.value))
 
 // ----------------------------------------------------------------- date filter
@@ -439,6 +462,15 @@ const handleBulkDelete = async () => {
       <h2 class="flex h-[3.25rem] items-center text-xl font-bold transition-colors">
         {{ $t('snapshots.heading') }}
       </h2>
+
+      <LiveRow
+        :live="live.data.value"
+        :newest-id="list[0]?.id"
+        :now="liveNow"
+        :deletable="!readOnly"
+        :deleting="discarding"
+        @delete="discardLive"
+      />
 
       <RangeFilter
         v-if="list.length > 0"

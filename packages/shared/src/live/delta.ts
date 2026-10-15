@@ -65,7 +65,11 @@ export interface GoodDelta {
   sum?: SnapshotSummary
 }
 
-const pathPart = z.union([z.string().max(64), z.number().int()])
+/**
+ * A path part: GOOD keys (some material keys the game data names are 90+
+ * characters, past GOOD_LIMITS.keyLength), guids, ids.
+ */
+const pathPart = z.union([z.string().max(256), z.number().int()])
 const path = z.array(pathPart).min(1).max(5)
 const hint = z.record(z.string(), z.unknown())
 const count = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER)

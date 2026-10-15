@@ -131,10 +131,21 @@ export function usePlannerModel(
   )
   onBeforeUnmount(() => void state.flush())
 
+  /**
+   * Hand edits that still count: live sync's journal supersedes an older
+   * edit of a material it changed, as a newer capture supersedes every one.
+   */
+  const liveEdits = computed(() => {
+    const edits = state.adjustments.value
+    const live = data.value?.inventory?.live
+    if (!edits || !live?.materials.length) return edits
+    const touched = new Set(live.materials)
+    return edits.filter((edit) => !(touched.has(edit.key) && edit.updatedAt < live.updatedAt))
+  })
   /** The bag the planner works with: the capture's counts and the hand edits that still apply. */
   const bag = computed(() => {
     const g = good.value
-    const edits = state.adjustments.value
+    const edits = liveEdits.value
     return g && edits ? effectiveInventory(g.materials, edits, base.value) : null
   })
   /** The capture with the planner's bag, for the dialogs that read counts. */

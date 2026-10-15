@@ -107,12 +107,20 @@ export function parseLiveEvent(text: unknown): LiveEvent | null {
   const event = value as Record<string, unknown>
   if (event.type === 'accounts') return { type: 'accounts' }
   if (event.type === 'hello') return parseHello(event.accounts)
-  if (event.type === 'planner') {
+  if (event.type === 'planner' || event.type === 'wishes') {
     if (!Number.isSafeInteger(event.accountId)) return null
     return {
-      type: 'planner',
+      type: event.type,
       accountId: event.accountId as number,
       ...(typeof event.tab === 'string' ? { tab: event.tab } : {}),
+    }
+  }
+  if (event.type === 'live') {
+    if (!Number.isSafeInteger(event.accountId)) return null
+    return {
+      type: 'live',
+      accountId: event.accountId as number,
+      seq: Number.isSafeInteger(event.seq) ? (event.seq as number) : 0,
     }
   }
   if (event.type !== 'data' || !Number.isSafeInteger(event.accountId)) return null
@@ -158,7 +166,7 @@ export interface KnownAccounts {
  * re-reads the list.
  */
 export function eventNeedsFetch(event: LiveEvent, known: KnownAccounts): boolean {
-  if (event.type === 'planner' || event.type === 'wishes') return false
+  if (event.type === 'planner' || event.type === 'wishes' || event.type === 'live') return false
   if (event.type === 'hello') return helloDiffers(event.accounts, known)
   if (event.type !== 'data' || event.dataVersion === null) return true
   const version = known.knownVersion(event.accountId)
@@ -217,7 +225,8 @@ export function sameAccount(a: AccountResponse, b: AccountResponse): boolean {
     a.storedBytes === b.storedBytes &&
     a.latest?.id === b.latest?.id &&
     a.latest?.takenAt === b.latest?.takenAt &&
-    a.latest?.lastSeenAt === b.latest?.lastSeenAt
+    a.latest?.lastSeenAt === b.latest?.lastSeenAt &&
+    (a.liveSync ?? false) === (b.liveSync ?? false)
   )
 }
 

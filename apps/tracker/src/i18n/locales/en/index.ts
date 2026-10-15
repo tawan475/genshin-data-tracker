@@ -24,6 +24,7 @@ import wishes from './wishes.json'
 import anecdotes from './anecdotes.json'
 import share from './share.json'
 import ui from './ui.json'
+import live from './live.json'
 
 const messages = {
   common,
@@ -50,6 +51,7 @@ const messages = {
   anecdotes,
   share,
   ui,
+  live,
 }
 
 export default messages

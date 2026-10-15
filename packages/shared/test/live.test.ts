@@ -75,6 +75,9 @@ describe('GOOD-X delta contract', () => {
     expect(bad({ session: 'short' })).toBe(false)
     expect(bad({ changes: [['put', ['materials', 'Mora'], 1]] })).toBe(false)
     expect(bad({ changes: [['set', [], 1]] })).toBe(false)
+    // Material keys can be long (the game data has 90-character ones).
+    expect(bad({ changes: [['set', ['materials', 'x'.repeat(120)], 1]] })).toBe(true)
+    expect(bad({ changes: [['set', ['materials', 'x'.repeat(257)], 1]] })).toBe(false)
     expect(bad({ changes: [['add', ['artifacts', '1'], 5]] })).toBe(false)
     expect(bad({ changes: Array.from({ length: 2001 }, () => ['del', ['materials', 'x']]) })).toBe(
       false,

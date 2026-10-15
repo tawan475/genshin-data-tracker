@@ -118,6 +118,19 @@ describe('events', () => {
       type: 'hello',
       accounts: [],
     })
+    // Live sync: an account's journal moved.
+    expect(parseLiveEvent('{"type":"live","accountId":3,"seq":12}')).toEqual({
+      type: 'live',
+      accountId: 3,
+      seq: 12,
+    })
+    expect(parseLiveEvent('{"type":"live","accountId":"3","seq":12}')).toBeNull()
+    // Wish history changed elsewhere (it was dropped here before).
+    expect(parseLiveEvent('{"type":"wishes","accountId":3,"tab":"t1"}')).toEqual({
+      type: 'wishes',
+      accountId: 3,
+      tab: 't1',
+    })
     expect(parseLiveEvent('{"type":"planner","accountId":3,"tab":"t1"}')).toEqual({
       type: 'planner',
       accountId: 3,

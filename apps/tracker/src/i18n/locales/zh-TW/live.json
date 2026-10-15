@@ -1,0 +1,21 @@
+{
+  "label": "即時",
+  "thisSession": "本次遊戲",
+  "sessionSince": "自 {time} 起",
+  "levelUps": "{n} 次升級",
+  "talents": "{n} 次天賦提升",
+  "updated": "更新於{ago}",
+  "updatedAt": "更新於 {time}",
+  "row": "即時",
+  "rowDetail": "此快照後 {n} 項變化",
+  "sinceSnapshot": "較最新快照",
+  "discard": "捨棄",
+  "discardTitle": "刪除這些變化，保留最新快照",
+  "discarded": "已刪除即時變化",
+  "discardFailed": "無法刪除即時變化",
+  "settings": {
+    "title": "即時同步",
+    "label": "即時跟隨 Irminsul",
+    "description": "Irminsul 執行時，快照之間的變化會在幾秒內顯示在這裡。"
+  }
+}

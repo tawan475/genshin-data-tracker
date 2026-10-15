@@ -23,6 +23,7 @@ import wishes from './wishes.json'
 import anecdotes from './anecdotes.json'
 import share from './share.json'
 import ui from './ui.json'
+import live from './live.json'
 
 const messages: Record<string, unknown> = {
   common,
@@ -49,6 +50,7 @@ const messages: Record<string, unknown> = {
   anecdotes,
   share,
   ui,
+  live,
 }
 
 export default messages

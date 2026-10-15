@@ -10,6 +10,7 @@ import { rememberAccountHint } from '@/data/boot-prefetch'
 import { loadTraveler } from '@/data/traveler'
 import { preload } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
+import { liveVersions } from '@/live/journal'
 import { rememberLast, useAccounts } from '@/stores/accounts'
 import { provideAccount } from './context'
 
@@ -19,8 +20,16 @@ const accounts = useAccounts()
 const accountId = computed(() => Number(route.params.accountId))
 const account = computed(() => accounts.byId.get(accountId.value))
 
-// Sections below only render once the account exists, so this is safe.
-provideAccount(computed(() => account.value as AccountResponse))
+// Sections below only render once the account exists, so this is safe. A
+// live sync change (live/journal.ts) gives the pages a new object, so what
+// they load for the account ("now") is read again.
+provideAccount(
+  computed(() => {
+    const value = account.value as AccountResponse
+    const version = value ? liveVersions.get(value.id) : undefined
+    return version ? { ...value, liveVersion: version } : value
+  }),
+)
 
 // Which game images the host lacks and which we serve (small): portraits and
 // icons render before it arrives and switch once it does.

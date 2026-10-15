@@ -10,6 +10,8 @@
  */
 
 import { accountPlayer, type AccountPlayer } from '@/data/account-player'
+import { withJournal, type LiveApplied } from '@/data/live-now'
+import { liveVersions } from '@/live/journal'
 import {
   artifactRows,
   catalogFromRows,
@@ -21,6 +23,7 @@ import {
   type CatalogEntry,
   type Good,
   type KeyDictionary,
+  type LiveJournalResponse,
   type SnapshotResponse,
 } from '@gdt/shared'
 import { api, BUNDLE_FORMAT } from '@/api'
@@ -33,6 +36,8 @@ export interface AccountRef {
    * cached apart from the owner's own reads.
    */
   source?: 'staff'
+  /** Live sync is on for the account: "now" is its newest snapshot with the journal applied. */
+  liveSync?: boolean
 }
 
 /** Where an account's data is read from. */
@@ -124,8 +129,13 @@ export interface Inventory {
   snapshot: BundleSnapshot
   good: Good
   catalog: Map<number, CatalogEntry>
-  /** Catalog id of each of `good.artifacts`, same order. */
+  /**
+   * Catalog id of each of `good.artifacts`, same order; -1 for a piece the
+   * live journal added or changed (the catalog has no entry for it yet).
+   */
   artifactIds: number[]
+  /** The live journal applied on top of the snapshot (absent: the snapshot alone). */
+  live?: LiveApplied
 }
 
 /** Catalog ids of a snapshot's artifacts, in `decodeArtifacts` order. */
@@ -140,11 +150,10 @@ function artifactIdsOf(snapshot: BundleSnapshot, bundle: DecodedBundle): number[
 }
 
 /** The newest snapshot, fully decoded, with the catalog for artifact details. */
-export function loadLatestInventory(
-  account: AccountRef & { latest: { id: number } | null },
+function loadSnapshotInventory(
+  account: AccountRef & { latest: { id: number } },
 ): Promise<Inventory | null> {
   const latest = account.latest
-  if (!latest) return Promise.resolve(null)
   return cached(account, `latest:${latest.id}`, async () => {
     const [bundle, catalog, materials] = await Promise.all([
       loadBundle(account, { ids: [latest.id] }),
@@ -159,6 +168,38 @@ export function loadLatestInventory(
       catalog,
       artifactIds: artifactIdsOf(snapshot, bundle),
     }
+  })
+}
+
+/** The account's live journal version (moves on every `live` event). */
+function liveVersion(account: AccountRef): number {
+  return liveVersions.get(account.id) ?? 0
+}
+
+/**
+ * The open live journal (null when live sync is off for the account or the
+ * page is staff's Inspect). Re-read whenever its version moves; the ETag
+ * makes an unchanged one a 304.
+ */
+export function loadLive(account: AccountRef): Promise<LiveJournalResponse | null> {
+  if (!account.liveSync || account.source === 'staff') return Promise.resolve(null)
+  return cached(account, `live:${liveVersion(account)}`, () => api.live(account.id))
+}
+
+/**
+ * The account as it is now: the newest snapshot, fully decoded, with the
+ * live journal applied when one is open on it (live sync).
+ */
+export function loadLatestInventory(
+  account: AccountRef & { latest: { id: number } | null },
+): Promise<Inventory | null> {
+  const latest = account.latest
+  if (!latest) return Promise.resolve(null)
+  const snapshot = loadSnapshotInventory({ ...account, latest })
+  if (!account.liveSync || account.source === 'staff') return snapshot
+  return cached(account, `now:${latest.id}:${liveVersion(account)}`, async () => {
+    const [inventory, live] = await Promise.all([snapshot, loadLive(account)])
+    return inventory && live ? withJournal(inventory, live, latest.id) : inventory
   })
 }
 

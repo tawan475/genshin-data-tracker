@@ -15,7 +15,8 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
-import { loadSnapshots } from '@/data/account-data'
+import LiveStrip from '@/components/live/LiveStrip.vue'
+import { loadLive, loadSnapshots } from '@/data/account-data'
 import { buildHistory, currencyMissing, latestDelta, serverLabel } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
@@ -59,6 +60,22 @@ const list = computed(() => {
   return value && value.accountId === account.value.id ? value.list : undefined
 })
 
+// Live sync: the open journal (null when off); re-read on every live event.
+const live = useResource(
+  () => account.value,
+  (a) => loadLive(a),
+)
+// The strip's "updated 20 s ago" moves every 10 s while a journal is open.
+const liveNow = shallowRef(Date.now())
+useIntervalFn(() => (liveNow.value = Date.now()), 10_000)
+/** The journal's figures when it follows the newest snapshot (the tiles show them). */
+const liveFigures = computed(() => {
+  const journal = live.data.value
+  const latest = account.value.latest
+  if (!journal?.open || !latest || journal.base?.snapshotId !== latest.id) return null
+  return journal.changes?.length ? (journal.figures ?? null) : null
+})
+
 // Derived once per data version; the components below only read.
 const history = computed(() => (list.value ? buildHistory(list.value) : null))
 
@@ -71,9 +88,19 @@ const delta = computed(() => {
 })
 
 const tiles = computed(() => {
-  const summary = account.value.latest?.summary
-  if (!summary) return []
-  const d = delta.value
+  const latestSummary = account.value.latest?.summary
+  if (!latestSummary) return []
+  // Live: the figures now, each against the newest snapshot.
+  const figures = liveFigures.value
+  const summary = figures ?? latestSummary
+  const d = figures
+    ? Object.fromEntries(
+        Object.keys(figures).map((k) => [
+          k,
+          figures[k as keyof typeof figures] - latestSummary[k as keyof typeof latestSummary],
+        ]),
+      )
+    : delta.value
 
   // When the newest capture lacks currency, show the last known figures
   // (history carries them over) rather than a false 0.
@@ -109,9 +136,9 @@ const tiles = computed(() => {
   ]
 })
 const lowRarity = computed(() => {
-  const summary = account.value.latest?.summary
+  const summary = liveFigures.value ?? account.value.latest?.summary
   if (!summary) return null
-  const d = delta.value
+  const d = liveFigures.value ? undefined : delta.value
   return {
     artifact4: summary.artifact4,
     artifact3: summary.artifact3,
@@ -199,6 +226,7 @@ const importRoute = computed(() => ({
   </UiPanel>
 
   <template v-else>
+    <LiveStrip v-if="list" class="mb-3" :live="live.data.value" :snapshots="list" :now="liveNow" />
     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       <UiStat
         v-for="tile in tiles"
@@ -211,7 +239,7 @@ const importRoute = computed(() => ({
           <ChangeValue
             v-if="tile.delta !== undefined && tile.delta !== null"
             :value="tile.delta"
-            :hint="$t('overview.sincePrevious')"
+            :hint="liveFigures ? $t('live.sinceSnapshot') : $t('overview.sincePrevious')"
           />
         </span>
       </UiStat>

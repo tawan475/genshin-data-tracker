@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Trash2 } from 'lucide-vue-next'
 import AccountFields from '@/components/import/AccountFields.vue'
 import ImportKeyPanel from '@/components/import/ImportKeyPanel.vue'
+import LiveSyncPanel from '@/components/live/LiveSyncPanel.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
@@ -172,6 +173,8 @@ async function confirmDelete() {
         />
       </div>
     </UiPanel>
+
+    <LiveSyncPanel :account="account" />
 
     <ImportKeyPanel :account="account" />
 
