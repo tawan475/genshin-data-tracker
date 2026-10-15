@@ -7,6 +7,7 @@
 
 import { ByteReader, ByteWriter, CorruptDataError } from '../codec/bytes'
 import { deflate, inflate } from '../codec/deflate'
+import type { NormalizedGood } from '../codec/normalize'
 import type { SnapshotSummary } from '../codec/snapshot'
 import type { DeltaChange, LiveArtifact, LiveGood, LiveWeapon } from './delta'
 
@@ -259,6 +260,40 @@ export function itemIndexOf(good: Pick<LiveGood, 'artifacts' | 'weapons'>): Item
     artifacts: pairs(good.artifacts, (a) => itemFingerprint('artifacts', a)),
     weapons: pairs(good.weapons, (w) => itemFingerprint('weapons', w)),
   }
+}
+
+/**
+ * The index of an upload's items, from the normalised file (what the stored
+ * snapshot will decode to, so the browser's fingerprints match); null when
+ * no item had a guid.
+ */
+export function preparedItemIndex(good: NormalizedGood): ItemIndex | null {
+  const guids = good.itemGuids
+  if (!guids) return null
+  const artifacts = good.artifacts.flatMap(({ identity, state }, i): [string, number][] => {
+    const guid = guids.artifacts[i]
+    if (!guid || !splitGuid(guid)) return []
+    const item: LiveArtifact = {
+      setKey: identity.setKey,
+      slotKey: identity.slotKey,
+      level: identity.level,
+      rarity: identity.rarity,
+      mainStatKey: identity.mainStatKey,
+      location: state.location,
+      lock: state.lock,
+      substats: identity.substats,
+      totalRolls: identity.totalRolls,
+      astralMark: state.astralMark,
+      elixerCrafted: identity.elixerCrafted,
+      unactivatedSubstats: identity.unactivatedSubstats,
+    }
+    return [[guid, itemFingerprint('artifacts', item)]]
+  })
+  const weapons = good.weapons.flatMap((weapon, i): [string, number][] => {
+    const guid = guids.weapons[i]
+    return guid && splitGuid(guid) ? [[guid, itemFingerprint('weapons', weapon)]] : []
+  })
+  return { artifacts, weapons }
 }
 
 const ITEMS_V1 = 0x01

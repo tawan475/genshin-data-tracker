@@ -80,6 +80,10 @@ jobs:
         if: steps.creds.outputs.enabled == 'true'
         run: pnpm --filter @gdt/tracker db:migrate:remote
 
+      - name: Apply gdt-live migrations
+        if: steps.creds.outputs.enabled == 'true'
+        run: pnpm --filter @gdt/tracker db:migrate:live:remote
+
       - name: Build
         if: steps.creds.outputs.enabled == 'true'
         run: pnpm --filter @gdt/tracker build-only

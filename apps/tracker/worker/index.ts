@@ -10,6 +10,7 @@ import { health } from './routes/health'
 import { irminsul } from './routes/irminsul'
 import { irminsulOAuth } from './routes/irminsul-oauth'
 import { live } from './routes/live'
+import { liveAccounts, liveChanges } from './routes/live-sync'
 import { me } from './routes/me'
 import { oauth } from './routes/oauth'
 import { progress } from './routes/progress'
@@ -40,10 +41,13 @@ app.route('/me', me)
 app.route('/accounts', accounts)
 app.route('/accounts', progress)
 app.route('/accounts', wishAccounts)
+app.route('/accounts', liveAccounts)
 app.route('/wishes', wishSync)
 app.route('/wishes', wishProxy)
 app.route('/genshin-accounts-public', publicImport)
 app.route('/oauth', irminsulOAuth)
+// Before the Bearer-only irminsul router: batches also come with an import key.
+app.route('/irminsul', liveChanges)
 app.route('/irminsul', irminsul)
 app.route('/live', live)
 app.route('/admin', admin)

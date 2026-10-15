@@ -8,7 +8,7 @@
  * of a new UID (422 `uid_required` for a file without one).
  */
 
-import type { ImportResponse, PreparedSnapshot } from '@gdt/shared'
+import { preparedItemIndex, type ImportResponse, type PreparedSnapshot } from '@gdt/shared'
 import type { Context } from 'hono'
 import type { AppEnv } from '../env'
 import { ApiError } from '../lib/http'
@@ -16,6 +16,7 @@ import { D1Meter } from '../lib/meter'
 import { accountForUid, type KeyAccount, type UploadOwner } from './accounts'
 import { importSnapshot, parseUpload, type Upload } from './import'
 import { notifyUser } from './live'
+import { liveDb, liveSyncOn, liveUsage, openJournal } from './live-sync'
 
 export async function uploadAs(
   c: Context<AppEnv>,
@@ -45,18 +46,40 @@ export async function uploadAs(
       owner.accounts,
     ))
   }
-  const { response, dataVersion, listener } = await importSnapshot(
+  const live = liveDb(c.env)
+  const result = await importSnapshot(
     c.env.DB,
     account,
     upload,
     meter,
     parsed,
+    live ? liveUsage(live, userId) : undefined,
   ).catch((error: unknown) => {
     // The account this upload made stays, whatever happened to the file.
     if (created) notifyUser(c, userId, { type: 'accounts' })
     throw error
   })
+  const { response, dataVersion, listener } = result
   meter.report(c)
+  // Live sync: this snapshot opens the account's journal (a failure leaves
+  // the answer without `live`, so irminsul keeps to snapshots).
+  if (live && liveSyncOn(account.live_sync) && result.newest) {
+    try {
+      const base = await openJournal(live, {
+        accountId: account.id,
+        userId,
+        contentKey: result.contentKey,
+        snapshotId: response.snapshotId,
+        takenAt: response.takenAt,
+        session: result.prepared.good.capture?.session ?? '',
+        summary: result.prepared.summary,
+        items: preparedItemIndex(result.prepared.good),
+      })
+      response.live = { base, watching: listener?.live ?? false }
+    } catch (error) {
+      console.warn('live_open_failed', JSON.stringify({ accountId: account.id }), String(error))
+    }
+  }
   // Only when someone listens (read in the import's own batch). A new
   // account is in the list now even when its first file changed nothing.
   if (dataVersion !== null || created) {

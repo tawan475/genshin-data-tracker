@@ -8,6 +8,9 @@ import { defineConfig } from 'vitest/config'
 // (UTC on CI): a test of local time builds what it expects with the Date constructor.
 export default defineConfig(async () => {
   const migrations = await readD1Migrations(fileURLToPath(new URL('./migrations', import.meta.url)))
+  const liveMigrations = await readD1Migrations(
+    fileURLToPath(new URL('./migrations-live', import.meta.url)),
+  )
   return {
     plugins: [
       cloudflareTest({
@@ -15,6 +18,7 @@ export default defineConfig(async () => {
         miniflare: {
           bindings: {
             TEST_MIGRATIONS: migrations,
+            TEST_LIVE_MIGRATIONS: liveMigrations,
             JWT_SECRET: 'test-jwt-secret-test-jwt-secret-0123456789',
             PASSWORD_PEPPER: 'test-pepper-test-pepper-test-pepper-0123',
             DIAG_KEY: 'test-diag-key-test-diag-key-test-diag-key',

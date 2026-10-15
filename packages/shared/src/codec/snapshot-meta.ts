@@ -11,6 +11,9 @@
  *   version (int)
  *   source: index + 1 in SOURCES, or 0 and the string
  *   player flags (bit 0 resin, bit 1 arExp), then those values (int)
+ * Format byte 2 (2026-10-15, live sync): format 1's fields, then irminsul's
+ * `gi_capture`: reason (index in CAPTURE_REASONS), session (string), world,
+ * journal seq (uints). A meta without a capture is still written as format 1.
  * `format` is "GOOD" (normalizeGood allows nothing else). Anything that does
  * not fit (a float count, another format) is stored as format byte 0 and the
  * JSON of the whole value.
@@ -20,6 +23,7 @@
  */
 
 import type { GiPlayer } from '../good'
+import { CAPTURE_REASONS, type GiCapture } from '../live/capture'
 import { ByteReader, ByteWriter, CorruptDataError } from './bytes'
 import { PLAYER_KEY_ORDER } from './normalize'
 import type { SnapshotSummary } from './snapshot'
@@ -46,10 +50,13 @@ export interface SnapshotMeta {
   source: string
   summary: SnapshotSummary
   playerVars: PlayerVars
+  /** Why irminsul took the snapshot (live sync); absent on older ones and other uploads. */
+  capture?: GiCapture
 }
 
 const JSON_META = 0
 const META_V1 = 1
+const META_V2 = 2
 
 const SUMMARY_FIELDS = [
   'characters',
@@ -89,6 +96,17 @@ function canonicalMeta(meta: SnapshotMeta): SnapshotMeta {
     source: meta.source,
     summary: meta.summary,
     playerVars,
+    ...(meta.capture ? { capture: canonicalCapture(meta.capture) } : {}),
+  }
+}
+
+function canonicalCapture(capture: GiCapture): GiCapture {
+  return {
+    v: 1,
+    reason: capture.reason,
+    session: capture.session,
+    world: capture.world,
+    journal: { seq: capture.journal.seq },
   }
 }
 
@@ -99,7 +117,7 @@ function binaryMeta(meta: SnapshotMeta): Uint8Array {
   if (keys.length !== SUMMARY_FIELDS.length || keys.some((k, i) => k !== SUMMARY_FIELDS[i])) {
     throw new TypeError('Summary has other fields')
   }
-  const w = new ByteWriter().byte(META_V1)
+  const w = new ByteWriter().byte(meta.capture ? META_V2 : META_V1)
   for (const field of SUMMARY_FIELDS) w.uint(meta.summary[field])
   w.int(meta.version)
   const source = (SOURCES as readonly string[]).indexOf(meta.source)
@@ -109,6 +127,12 @@ function binaryMeta(meta: SnapshotMeta): Uint8Array {
   w.uint((resin !== undefined ? 1 : 0) | (arExp !== undefined ? 2 : 0))
   if (resin !== undefined) w.int(resin)
   if (arExp !== undefined) w.int(arExp)
+  if (meta.capture) {
+    const reason = (CAPTURE_REASONS as readonly string[]).indexOf(meta.capture.reason)
+    if (reason < 0) throw new TypeError('Unknown capture reason')
+    w.uint(reason).string(meta.capture.session).uint(meta.capture.world)
+    w.uint(meta.capture.journal.seq)
+  }
   return w.finish()
 }
 
@@ -123,7 +147,9 @@ export function decodeSnapshotMeta(data: Uint8Array): SnapshotMeta {
       throw new CorruptDataError('Invalid snapshot meta JSON')
     }
   }
-  if (data[0] !== META_V1) throw new CorruptDataError(`Unknown snapshot meta format ${data[0]}`)
+  if (data[0] !== META_V1 && data[0] !== META_V2) {
+    throw new CorruptDataError(`Unknown snapshot meta format ${data[0]}`)
+  }
   const r = new ByteReader(data.subarray(1))
   const summary = Object.fromEntries(
     SUMMARY_FIELDS.map((field) => [field, r.uint()]),
@@ -141,8 +167,16 @@ export function decodeSnapshotMeta(data: Uint8Array): SnapshotMeta {
   const playerVars: PlayerVars = {}
   if (flags & 1) playerVars.resin = r.int()
   if (flags & 2) playerVars.arExp = r.int()
+  let capture: GiCapture | undefined
+  if (data[0] === META_V2) {
+    const reason = CAPTURE_REASONS[r.uint()]
+    if (reason === undefined) throw new CorruptDataError('Unknown capture reason')
+    const session = r.string()
+    const world = r.uint()
+    capture = { v: 1, reason, session, world, journal: { seq: r.uint() } }
+  }
   r.end()
-  return { format: 'GOOD', version, source, summary, playerVars }
+  return { format: 'GOOD', version, source, summary, playerVars, ...(capture ? { capture } : {}) }
 }
 
 // --------------------------------------------------------------- player

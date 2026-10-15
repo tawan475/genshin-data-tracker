@@ -27,6 +27,7 @@ import {
 import { ACCESS_TTL_S, REFRESH_TTL_S, pruneSessionsStatement, requestOrigin } from '../lib/session'
 import type { KeyAccount, KeyBlock } from './accounts'
 import { revokeLiveSession } from './live'
+import { LIVE_SYNC_SQL } from './live-sync'
 
 /** A code is good for this long after Allow (the browser hands it straight to irminsul). */
 export const CODE_TTL_MS = 60_000
@@ -206,7 +207,10 @@ export async function loadUploadSession(
   const [session, accounts] = await d1.batch<Record<string, unknown>>([
     d1.prepare(SESSION_SQL).bind(claims.sid, claims.userId, Date.now(), claims.ver),
     d1
-      .prepare('SELECT id, name, uid, server FROM genshin_accounts WHERE user_id = ?1 ORDER BY id')
+      .prepare(
+        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()} FROM genshin_accounts AS a
+         WHERE a.user_id = ?1 ORDER BY a.id`,
+      )
       .bind(claims.userId),
   ])
   const row = session!.results[0]

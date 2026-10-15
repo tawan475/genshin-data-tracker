@@ -31,7 +31,16 @@ export interface AccountSettings {
    * Traveler by its element key, `TravelerAnemo`). Order carries no meaning.
    */
   favoriteCharacters: string[]
+  /**
+   * Live sync (docs/plans/live-sync.md): irminsul sends changes between
+   * snapshots and the pages show the account as it is now. Chosen here, on
+   * the website, never in irminsul.
+   */
+  liveSync: boolean
 }
+
+/** Live sync for an account that never chose (stored settings without `liveSync`). */
+export const LIVE_SYNC_DEFAULT = false
 
 /** At most this many favourite characters (more than the game has). */
 export const MAX_FAVORITE_CHARACTERS = 200
@@ -73,6 +82,7 @@ export interface AccountSettingsPatch {
   planner?: Partial<PlannerSettings>
   resin?: ManualResin | null
   favoriteCharacters?: string[]
+  liveSync?: boolean
 }
 
 export const USER_SETTINGS_DEFAULTS: UserSettings = {
@@ -96,6 +106,7 @@ export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   planner: { azoth: false, passives: true, refreshes: 0, resinSteps: [-40, 60], crafting: true },
   resin: null,
   favoriteCharacters: [],
+  liveSync: LIVE_SYNC_DEFAULT,
 }
 
 /**

@@ -8,6 +8,8 @@ import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
 import { MAX_FAVORITE_CHARACTERS } from './settings'
 import type {
   AccountSettings,
+  DeltaChange,
+  GiCapture,
   SessionUpload,
   SignupMode,
   SnapshotSummary,
@@ -227,6 +229,8 @@ export const accountSettingsPatch = z
       .array(goodKeySchema)
       .max(MAX_FAVORITE_CHARACTERS)
       .refine((keys) => new Set(keys).size === keys.length, 'Each key once'),
+    /** Live sync from irminsul (docs/plans/live-sync.md). */
+    liveSync: z.boolean(),
   })
   .partial()
   .strict()
@@ -753,6 +757,8 @@ export interface AccountResponse {
     lastSeenAt: number
     summary: SnapshotSummary
   } | null
+  /** The account's `liveSync` setting (live sync from irminsul). */
+  liveSync?: boolean
 }
 
 export interface AccountCreatedResponse {
@@ -770,6 +776,8 @@ export interface SnapshotResponse {
   rawSize: number
   storedSize: number
   summary: SnapshotSummary
+  /** irminsul's `gi_capture` (why it took the snapshot, its play session); live sync. */
+  capture?: GiCapture
 }
 
 export interface ImportResponse {
@@ -786,6 +794,20 @@ export interface ImportResponse {
    * made it.
    */
   account?: ImportedAccount
+  /** The snapshot's content key, base 36 (irminsul names a journal's base by it). */
+  contentKey?: string
+  /**
+   * Live sync is on for the account and its journal now follows this
+   * snapshot: irminsul sends batches for `base` from seq 1
+   * (docs/plans/live-sync.md §13). Absent: snapshots only.
+   */
+  live?: ImportLive
+}
+
+export interface ImportLive {
+  base: string
+  /** A tracker tab of the user's is open now. */
+  watching: boolean
 }
 
 export interface ImportedAccount {
@@ -821,6 +843,41 @@ export type LiveEvent =
   | { type: 'accounts' }
   | { type: 'planner'; accountId: number; tab?: string }
   | { type: 'wishes'; accountId: number; tab?: string }
+  | { type: 'live'; accountId: number; seq: number }
+
+/** `POST /api/irminsul/changes` (live sync, docs/plans/live-sync.md §13). */
+export type LiveChangesResponse =
+  | { ok: true; seq: number; collapse: boolean; watching: boolean }
+  | { ok: true; duplicate: true; seq: number }
+  | { ok: false; live: false }
+
+/**
+ * `GET /api/accounts/:id/live`: the account's open journal. `open` is false
+ * when there is none (or live sync is off); the browser also ignores one
+ * whose base is not its newest snapshot.
+ */
+export interface LiveJournalResponse {
+  open: boolean
+  base?: { snapshotId: number; contentKey: string; takenAt: number }
+  /** The base snapshot's `gi_capture.session` ('' when it had none). */
+  session?: string
+  seq?: number
+  /** Unix ms of the last batch (server clock). */
+  updatedAt?: number
+  /** The chart figures now. */
+  figures?: SnapshotSummary
+  /** Every change since the base, merged (the last value of each path). */
+  changes?: DeltaChange[]
+  /** The base items the changes touch: [kind, guid, fingerprint] (bindItemGuids). */
+  items?: ['artifacts' | 'weapons', string, number][]
+  /** Bytes the journal keeps. */
+  bytes?: number
+}
+
+/** `GET /api/accounts/:id/points`: chart points per UTC day, decoded. */
+export interface LivePointsResponse {
+  points: { at: number; figures: SnapshotSummary }[]
+}
 
 /**
  * The close code of a live socket whose session was ended (that device was

@@ -333,3 +333,29 @@ describe('gi_capture', () => {
     expect(readCapture('login')).toBeNull()
   })
 })
+
+describe('snapshot meta with gi_capture', () => {
+  it('stores the capture in format 2 and keeps format 1 without one', async () => {
+    const { decodeSnapshotMeta, encodeSnapshotMeta } = await import('../src')
+    const meta = {
+      format: 'GOOD',
+      version: 2,
+      source: 'Irminsul',
+      summary: FIGURES,
+      playerVars: { resin: 160 },
+    }
+    const plain = encodeSnapshotMeta(meta)
+    expect(plain[0]).toBe(1)
+    const capture = {
+      v: 1 as const,
+      reason: 'world' as const,
+      session: '01J9ZK5Q8W3E7R2T',
+      world: 3,
+      journal: { seq: 12 },
+    }
+    const withCapture = encodeSnapshotMeta({ ...meta, capture })
+    expect(withCapture[0]).toBe(2)
+    expect(decodeSnapshotMeta(withCapture)).toEqual({ ...meta, capture })
+    expect(decodeSnapshotMeta(plain)).toEqual(meta)
+  })
+})

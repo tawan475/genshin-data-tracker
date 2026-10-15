@@ -3,11 +3,13 @@
 // Runtime types generated with workerd@1.20261001.1 2026-08-22
 interface __BaseEnv_Env {
 	DB: D1Database;
+	LIVE_DB: D1Database;
 	AUTH_LIMITER: RateLimit;
 	IMPORT_LIMITER: RateLimit;
 	RECOVERY_LIMITER: RateLimit;
 	KEY_IMPORT_LIMITER: RateLimit;
 	WISH_PROXY_LIMITER: RateLimit;
+	LIVE_LIMITER: RateLimit;
 	JWT_SECRET: string;
 	PASSWORD_PEPPER: string;
 	DIAG_KEY: string;

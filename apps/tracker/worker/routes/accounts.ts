@@ -31,6 +31,17 @@ import { listSnapshots, parseIds, parseSections } from '../services/account-view
 import { buildBundle, buildGood, catalogJson, goodFileName } from '../services/export'
 import { importSnapshot } from '../services/import'
 import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
+import { deleteLiveData, endJournalOn, liveDb } from '../services/live-sync'
+
+/** Work that must not hold the response (or fail it): logged when it fails. */
+function afterResponse(c: Context<AppEnv>, work: Promise<unknown>): void {
+  const logged = work.catch((error: unknown) => console.warn('live_cleanup_failed', String(error)))
+  try {
+    c.executionCtx.waitUntil(logged)
+  } catch {
+    // No execution context (a direct app.fetch in a test): the promise still runs.
+  }
+}
 
 /**
  * Part of the snapshot list's ETag. Bump it whenever the list's JSON changes
@@ -117,6 +128,7 @@ export const accounts = new Hono<AppEnv>()
       .where(and(eq(genshinAccounts.id, id), eq(genshinAccounts.userId, c.get('userId'))))
       .returning({ id: genshinAccounts.id })
     if (result.length === 0) throw notFound('Account')
+    afterResponse(c, deleteLiveData(liveDb(c.env), [id]))
     notifyUser(c, c.get('userId'), { type: 'accounts' })
     return c.body(null, 204)
   })
@@ -230,6 +242,14 @@ export const accounts = new Hono<AppEnv>()
       listenerStatement(c.env.DB, id),
     ])
     notifyData(c, id, recomputed, listening)
+    afterResponse(
+      c,
+      endJournalOn(
+        liveDb(c.env),
+        id,
+        deleted!.results.map((row) => Number((row as { id: number }).id)),
+      ),
+    )
     // meta.changes would also count the counter trigger's updates.
     return c.json({ deleted: deleted!.results.length })
   })
@@ -247,6 +267,7 @@ export const accounts = new Hono<AppEnv>()
     ])
     notifyData(c, id, recomputed, listening)
     if (deleted!.meta.changes === 0) throw notFound('Snapshot')
+    afterResponse(c, endJournalOn(liveDb(c.env), id, [snapshotId]))
     return c.body(null, 204)
   })
 

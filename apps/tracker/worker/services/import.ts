@@ -132,6 +132,12 @@ export interface ImportResult {
   response: ImportResponse
   dataVersion: number | null
   listener?: Listener
+  /** The upload, parsed (live sync reads its summary, guids and gi_capture). */
+  prepared: PreparedSnapshot
+  /** The snapshot answered with is the account's newest (live sync starts a journal on it). */
+  newest: boolean
+  /** Its content key (as this upload hashes). */
+  contentKey: number
 }
 
 /** A section another write removed between our read and our write: start over. */
@@ -148,12 +154,14 @@ export async function importSnapshot(
   upload: Upload,
   meter = new D1Meter(),
   parsed?: PreparedSnapshot,
+  /** Bytes the owner keeps elsewhere (gdt-live), counted toward the storage quota. */
+  extraStoredBytes?: Promise<number>,
 ): Promise<ImportResult> {
   const prepared = parsed ?? (await parseUpload(upload.text))
   for (let attempt = 1; ; attempt++) {
     try {
       return await withLegacySchema((legacy) =>
-        importOnce(d1, account, upload, meter, prepared, legacy),
+        importOnce(d1, account, upload, meter, prepared, legacy, extraStoredBytes),
       )
     } catch (error) {
       // Only the daily maintenance or repack can pull a section away mid-import.
@@ -170,6 +178,7 @@ async function importOnce(
   meter: D1Meter,
   prepared: PreparedSnapshot,
   legacy: boolean,
+  extraStoredBytes?: Promise<number>,
 ): Promise<ImportResult> {
   const accountId = account.id
   const now = Date.now()
@@ -234,6 +243,7 @@ async function importOnce(
     ]),
   )
   const usage = readUsage(usageResult!.results[0])
+  if (usage && extraStoredBytes) usage.storedBytes += await extraStoredBytes
 
   // Ids for every identity: a v1 row by hash, or a chunk by packed bytes.
   const artifactIds = new Map<string, number>()
@@ -273,6 +283,7 @@ async function importOnce(
     storedSize = 0,
     dataVersion: number | null = null,
     listener?: Listener,
+    newest = true,
   ): ImportResult => ({
     response: {
       status,
@@ -281,9 +292,13 @@ async function importOnce(
       rawSize: upload.rawSize,
       storedSize,
       ...(warnings.length > 0 ? { warnings } : {}),
+      contentKey: key.toString(36),
     },
     dataVersion,
     ...(listener ? { listener } : {}),
+    prepared,
+    newest,
+    contentKey: key,
   })
   // The same capture, also when it was stored before irminsul's extra keys
   // (or later its anecdotes) were kept (its hash then left them out), in
@@ -301,7 +316,9 @@ async function importOnce(
 
   if (sameTime) {
     // A re-upload of the same capture is a no-op, so uploaders can retry freely.
-    if (sameCapture(sameTime)) return response('unchanged', sameTime.id)
+    if (sameCapture(sameTime)) {
+      return response('unchanged', sameTime.id, 0, null, undefined, sameTime.id === latest?.id)
+    }
     throw new ApiError(
       409,
       'duplicate_capture',
@@ -361,6 +378,7 @@ async function importOnce(
         source: prepared.good.source,
         summary: prepared.summary,
         playerVars: plan.playerVars,
+        ...(prepared.good.capture ? { capture: prepared.good.capture } : {}),
       }),
     }),
   )
@@ -386,7 +404,7 @@ async function importOnce(
         .prepare(sameTimeSql(legacy))
         .bind(accountId, takenAt)
         .first<SameTimeRow>()
-      if (row && sameCapture(row)) return response('unchanged', row.id)
+      if (row && sameCapture(row)) return response('unchanged', row.id, 0, null, undefined, false)
       throw new ApiError(
         409,
         'duplicate_capture',
@@ -406,6 +424,7 @@ async function importOnce(
     plan.storedSize,
     dataVersionOf(results.at(-2)) ?? null,
     listenerOf(results.at(-1)),
+    !latest || takenAt >= latest.taken_at,
   )
 }
 

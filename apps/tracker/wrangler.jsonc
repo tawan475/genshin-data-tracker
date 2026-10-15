@@ -28,6 +28,16 @@
       "database_id": "d64c20e3-2bca-4333-9966-bd79627d4f15",
       "migrations_dir": "migrations",
     },
+    // Live sync (docs/plans/live-sync.md): journals, batches and chart
+    // points, kept apart from `gdt` by purpose. Created with: wrangler d1
+    // create gdt-live --location apac (2026-10-15). Its own migrations:
+    // `pnpm db:migrate:live:local|remote` (deploy.yml runs the remote one).
+    {
+      "binding": "LIVE_DB",
+      "database_name": "gdt-live",
+      "database_id": "12c947eb-37c5-4d6c-bb57-eaace7a792c3",
+      "migrations_dir": "migrations-live",
+    },
   ],
 
   // Live updates (worker/services/live.ts): one LiveHub per user holds that
@@ -48,6 +58,8 @@
     { "name": "KEY_IMPORT_LIMITER", "namespace_id": "1004", "simple": { "limit": 20, "period": 60 } },
     // Wish link imports: pages fetched through the proxy, per user (a second apart each).
     { "name": "WISH_PROXY_LIMITER", "namespace_id": "1005", "simple": { "limit": 120, "period": 60 } },
+    // Live sync batches from irminsul (POST /api/irminsul/changes), per key or session.
+    { "name": "LIVE_LIMITER", "namespace_id": "1006", "simple": { "limit": 20, "period": 60 } },
   ],
 
   // Secrets (wrangler secret put): JWT_SECRET, PASSWORD_PEPPER — each at least

@@ -23,6 +23,8 @@ pnpm dev                                  # Vue app + Worker (workerd) on one Vi
 pnpm test                                 # shared tests (Node) + worker and app helper tests (workerd + local D1)
 pnpm --filter @gdt/tracker db:generate    # after editing worker/db/schema.ts
 pnpm --filter @gdt/tracker db:migrate:local
+pnpm --filter @gdt/tracker db:generate:live        # after editing worker/db/live-schema.ts
+pnpm --filter @gdt/tracker db:migrate:live:local   # the gdt-live database (live sync)
 pnpm --filter @gdt/tracker cf-typegen     # after editing wrangler.jsonc
 ```
 
@@ -394,6 +396,33 @@ from the installed game data (keys, rarities, item ids) and paimon.moe's
 `banners.js` and names (MIT, © Made Baruna). For a new banner: pull
 paimon.moe and run it again (or append the row by hand, newest last).
 
+## Live sync
+
+While irminsul runs, it sends the account's changes between snapshots
+(`POST /api/irminsul/changes`, Bearer or `x-import-key`), and the pages show
+the newest snapshot with them applied. Plan and contract:
+`docs/plans/live-sync.md` (§13 is the wire contract as built).
+
+- **Per account**, setting `liveSync` (default `LIVE_SYNC_DEFAULT` in
+  `packages/shared/src/settings.ts`); off, imports answer without `live` and
+  batches with `{ok: false, live: false}`, and irminsul keeps to snapshots.
+- **Storage**: the separate D1 database `gdt-live` (binding `LIVE_DB`,
+  `worker/db/live-schema.ts`, migrations in `migrations-live/`, applied by
+  `deploy.yml` after the main ones). One journal row per account (the base
+  snapshot, seq, running chart figures, the base's guid → fingerprint index),
+  batch rows merged per 10 minutes (deleted at the next snapshot), and chart
+  points packed one row per account per UTC day. No foreign keys into `gdt`:
+  deleting a base snapshot, an account or a user deletes their rows here
+  (`services/live-sync.ts`).
+- **Limits**: `LIVE_LIMITER` 20 batches/60 s per key or session, 2,000 per
+  account per UTC day (429 `daily_live_limit`), a batch ≤ 2,000 changes and
+  512 KB; the journal asks irminsul for a snapshot (`collapse`) when older than
+  3 h with over 500 paths, or past 1 MB. `gdt-live` bytes count toward the
+  storage quota (read beside the import's lookup).
+- **Reading**: `GET /api/accounts/:id/live` (merged changes, ETag
+  base + seq), `GET /api/accounts/:id/points?from=&to=`; `DELETE` either.
+  Live socket event `{type: "live", accountId, seq}`.
+
 ## Account recovery
 
 **Paused.** Email costs money, so the email features are off unless the Worker
@@ -705,8 +734,10 @@ By hand, from a checkout:
 ```bash
 pnpm exec wrangler login
 pnpm exec wrangler d1 create gdt --location apac        # once; put the id in wrangler.jsonc
+pnpm exec wrangler d1 create gdt-live --location apac   # once (live sync); its id too
 pnpm exec wrangler secret bulk secrets.json             # once: JWT_SECRET, PASSWORD_PEPPER, DIAG_KEY
 pnpm --filter @gdt/tracker db:migrate:remote
+pnpm --filter @gdt/tracker db:migrate:live:remote
 pnpm --filter @gdt/tracker run deploy                    # type-check + build + wrangler deploy
 ```
 

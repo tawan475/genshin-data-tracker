@@ -155,10 +155,15 @@ describe('migrations from 0018 on', () => {
   const HAND_WRITTEN = new Set<string>()
 
   it('only create tables and indexes, add columns and seed rows, never rebuild or drop', () => {
-    const later = env.TEST_MIGRATIONS.filter(
-      (m) => Number(m.name.slice(0, 4)) >= 18 && !HAND_WRITTEN.has(m.name),
-    )
+    const later = [
+      ...env.TEST_MIGRATIONS.filter(
+        (m) => Number(m.name.slice(0, 4)) >= 18 && !HAND_WRITTEN.has(m.name),
+      ),
+      // gdt-live (migrations-live/) follows the same rule from its first one.
+      ...env.TEST_LIVE_MIGRATIONS,
+    ]
     expect(later.map((m) => m.name)).toContain('0018_upload_limits.sql')
+    expect(later.map((m) => m.name)).toContain('0000_live.sql')
     for (const migration of later) {
       for (const query of migration.queries) {
         const sql = query.replace(/--.*$/gm, '')

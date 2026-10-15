@@ -10,6 +10,7 @@ import type {
   GoodWeapon,
 } from '../good'
 import { GOOD_LIMITS } from '../import'
+import { readCapture, type GiCapture } from '../live/capture'
 
 export interface ArtifactOccurrence {
   identity: ArtifactIdentity
@@ -42,6 +43,14 @@ export interface NormalizedGood {
    * id, areas sorted and unique, `reward` / `wish` only when whole.
    */
   anecdotes: GiAnecdotes | null
+  /**
+   * Live sync (irminsul's `gi_guid` on items, `gi_capture`): never stored in
+   * a section and never part of a hash. `itemGuids` lists each kept
+   * artifact's and weapon's guid in the order of `artifacts` / `weapons`
+   * (null for an item without a valid one); absent when no item had one.
+   */
+  itemGuids?: { artifacts: (string | null)[]; weapons: (string | null)[] }
+  capture?: GiCapture | null
 }
 
 export class GoodFormatError extends Error {
@@ -111,6 +120,9 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     characterExtras: toCharacterExtras(input.gi_characters),
     anecdotes: toAnecdotes(input.gi_anecdotes),
   }
+  const itemGuids = toItemGuids(input)
+  if (itemGuids) good.itemGuids = itemGuids
+  if (input.gi_capture !== undefined) good.capture = readCapture(input.gi_capture)
   checkKeys(good, options)
   return good
 }
@@ -242,6 +254,17 @@ function toArtifact(raw: Json): ArtifactOccurrence {
       astralMark: Boolean(raw.astralMark),
     },
   }
+}
+
+const GUID = /^\d{1,20}$/
+
+/** Each kept item's `gi_guid`, aligned with what toArtifact / toWeapon keep. */
+function toItemGuids(input: Json): NormalizedGood['itemGuids'] | null {
+  const guid = (raw: Json) =>
+    typeof raw.gi_guid === 'string' && GUID.test(raw.gi_guid) ? raw.gi_guid : null
+  const artifacts = objects(input.artifacts).map(guid)
+  const weapons = objects(input.weapons).flatMap((raw) => (str(raw.key) ? [guid(raw)] : []))
+  return artifacts.some(Boolean) || weapons.some(Boolean) ? { artifacts, weapons } : null
 }
 
 function toSubstats(raw: unknown): GoodSubstat[] {

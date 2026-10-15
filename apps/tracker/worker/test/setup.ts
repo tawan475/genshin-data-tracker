@@ -4,8 +4,10 @@ declare global {
   namespace Cloudflare {
     interface Env {
       TEST_MIGRATIONS: D1Migration[]
+      TEST_LIVE_MIGRATIONS: D1Migration[]
     }
   }
 }
 
 await applyD1Migrations(env.DB, env.TEST_MIGRATIONS)
+await applyD1Migrations(env.LIVE_DB, env.TEST_LIVE_MIGRATIONS)

@@ -8,6 +8,7 @@
 
 import { ALL_PERMISSIONS } from '@gdt/shared'
 import { revokeLive } from './live'
+import { deleteUsersLiveData, liveDb } from './live-sync'
 
 /**
  * Deletes the users and writes `audit` in the same batch; answers the ids
@@ -27,6 +28,10 @@ export async function deleteUsers(
   ])
   const deleted = results.at(-1)!.results.map((row) => Number(row.id))
   const gone = new Set(deleted)
+  // gdt-live has no foreign keys into gdt: its rows go by user id.
+  await deleteUsersLiveData(liveDb(env), deleted).catch((error: unknown) =>
+    console.warn('live_delete_failed', String(error)),
+  )
   // No version is newer than this: every socket of theirs closes.
   await Promise.all(
     users
