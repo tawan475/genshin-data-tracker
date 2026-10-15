@@ -11,6 +11,7 @@ import { formatSetName, formatSlotName, formatStatName } from '@/utils/artifact-
 import { artifactPotential, type Potential } from './artifact-potential'
 import { compareText } from '@/lib/search'
 import { t } from '@/i18n'
+import { yieldToMain } from '@/lib/yield'
 
 export const SLOT_KEYS = ['flower', 'plume', 'sands', 'goblet', 'circlet'] as const
 export type SlotKey = (typeof SLOT_KEYS)[number]
@@ -131,6 +132,32 @@ export function buildArtifactRows(
   })
   rowCache.set(artifacts, rows)
   return rows
+}
+
+/**
+ * The inventory once its rows are derived (`buildArtifactRows`), in a task
+ * before the one that renders them: thousands of pieces' CV, RV and rolls.
+ * The same promise per inventory promise, so a page whose data is loaded
+ * still renders on its first frame (see use-resource).
+ */
+interface RowsSource {
+  good: { artifacts: readonly GoodArtifact[] }
+  artifactIds: readonly number[]
+}
+const withRowsCache = new WeakMap<Promise<unknown>, Promise<unknown>>()
+export function withArtifactRows<T extends RowsSource | null>(load: Promise<T>): Promise<T> {
+  let entry = withRowsCache.get(load) as Promise<T> | undefined
+  if (!entry) {
+    entry = load.then(async (inventory) => {
+      if (inventory) {
+        await yieldToMain()
+        buildArtifactRows(inventory.good.artifacts, inventory.artifactIds)
+      }
+      return inventory
+    })
+    withRowsCache.set(load, entry)
+  }
+  return entry
 }
 
 /** "Gladiator's Finale · Flower +20 · HP · CV 32.6 · RV 640% · Hu Tao · Locked", for tooltips. */

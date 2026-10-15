@@ -7,6 +7,7 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import { loadLatestInventory } from '@/data/account-data'
 import { rememberAccountHint } from '@/data/boot-prefetch'
+import { warmDecoder } from '@/data/decode'
 import { loadTraveler } from '@/data/traveler'
 import { preload } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
@@ -62,6 +63,7 @@ function prefetch() {
     }
   }
   if (account.value?.latest) preload(loadLatestInventory(account.value))
+  warmDecoder()
 }
 // Safari has no requestIdleCallback: a timeout stands in.
 const hasIdle = typeof window.requestIdleCallback === 'function'

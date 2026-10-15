@@ -13,6 +13,7 @@ import {
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useMutationObserver } from '@vueuse/core'
 import { axisFormat, axisTick, axisTicks } from '@/data/chart-range'
+import { useAfterPaint } from '@/lib/after-paint'
 import { CHART_FONT } from '@/lib/chart-defaults'
 import { t } from '@/i18n'
 import { clock24, formatCompactTick, formatDateTime, formatNumber, tickStep } from '@/lib/format'
@@ -166,7 +167,9 @@ function render() {
   chart.value = new Chart(canvas.value, config())
 }
 
-onMounted(render)
+// Drawn after the page's first paint (measuring the canvas lays the page out).
+const later = useAfterPaint()
+onMounted(() => later(() => chart.value ?? render()))
 onBeforeUnmount(() => chart.value?.destroy())
 watch(() => [props.series, props.stepped, props.fill, props.padRight], render, { deep: true })
 // A wider y axis only moves the plot: lay it out again.

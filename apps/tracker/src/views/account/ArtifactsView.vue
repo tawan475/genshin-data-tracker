@@ -41,6 +41,7 @@ import {
   activeFilterCount,
   bestPerSlot,
   buildArtifactRows,
+  withArtifactRows,
   clearedFilters,
   compileFilter,
   cvRank,
@@ -95,7 +96,7 @@ const account = useAccount()
 const readOnly = useReadOnly()
 const inventory = useResource(
   () => account.value,
-  (a) => loadLatestInventory(a),
+  (a) => withArtifactRows(loadLatestInventory(a)),
 )
 /** The previous capture's catalog ids, for "New" (null: none, or not loaded yet). */
 const previousIds = useResource(

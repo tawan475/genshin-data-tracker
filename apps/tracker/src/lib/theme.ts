@@ -57,8 +57,12 @@ function paint(theme: Theme, animate = false): void {
       requestAnimationFrame(() => root.classList.remove('theme-switching')),
     )
   }
-  if (root.dataset.theme === painted) apply()
-  else if (animate && 'startViewTransition' in document && !reducedMotion()) {
+  const sameTheme = root.dataset.theme === painted
+  // Already painted so (every session answer re-applies the user's theme):
+  // nothing switches, and the forced style pass would cost a frame on a big page.
+  if (sameTheme && root.hasAttribute('data-public') === publicPage) {
+    // Nothing to do.
+  } else if (!sameTheme && animate && 'startViewTransition' in document && !reducedMotion()) {
     quietTransition(apply)
   } else apply()
   resolvedTheme.value = theme

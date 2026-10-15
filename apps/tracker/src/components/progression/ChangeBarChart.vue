@@ -14,6 +14,7 @@ import { useMutationObserver } from '@vueuse/core'
 import { axisFormat, axisTick, axisTicks } from '@/data/chart-range'
 import { formatSignedExact } from '@/data/overview'
 import { t } from '@/i18n'
+import { useAfterPaint } from '@/lib/after-paint'
 import { CHART_FONT as FONT } from '@/lib/chart-defaults'
 import { clock24, formatSignedTick, tickStep } from '@/lib/format'
 import { snapshotBarWidth } from './progression-series'
@@ -214,7 +215,9 @@ function render() {
   chart.value = new Chart(canvas.value, config())
 }
 
-onMounted(render)
+// Drawn after the page's first paint (measuring the canvas lays the page out).
+const later = useAfterPaint()
+onMounted(() => later(() => chart.value ?? render()))
 onBeforeUnmount(() => chart.value?.destroy())
 watch(() => [props.bars, props.name, props.domain, props.padRight], render)
 // A wider y axis only moves the plot: lay it out again.

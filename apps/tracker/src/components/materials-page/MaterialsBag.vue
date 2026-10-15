@@ -17,6 +17,7 @@ import {
   SearchX,
   Upload,
 } from 'lucide-vue-next'
+import { useProgressive } from '@/components/planner/use-progressive'
 import ItemArt from '@/components/ui/ItemArt.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -234,16 +235,20 @@ watch([query, show, activeTab, sort, view], () => (limit.value = PAGE[view.value
 const grouped = computed(
   () => activeTab.value === 'all' && sortBy.value === 'order' && !query.value.trim(),
 )
+// A page of tiles mounts a few rows first and the rest over the next frames.
+const { shown: mounted } = useProgressive(limit, 36, 36)
 const paged = computed(() => {
-  if (grouped.value) return bagSections(filtered.value, folded.value, limit.value)
-  const items = filtered.value.slice(0, limit.value)
+  const upTo = Math.min(limit.value, mounted.value)
+  if (grouped.value) return bagSections(filtered.value, folded.value, upTo)
+  const items = filtered.value.slice(0, upTo)
   return {
     sections: [{ tab: null, total: filtered.value.length, items, open: true }],
     more: filtered.value.length - items.length,
   }
 })
 const sections = computed(() => paged.value.sections)
-const more = computed(() => paged.value.more)
+/** What a "more" adds; nothing while the page is still mounting. */
+const more = computed(() => (mounted.value >= limit.value ? paged.value.more : 0))
 
 /** The tabs shown on All, for folding or unfolding them all at once. */
 const allFolded = computed(() => tabKeys.value.every((key) => folded.value.has(key)))
@@ -270,7 +275,7 @@ useIntersectionObserver(
   },
   { rootMargin: `${NEAR_PX}px 0px` },
 )
-watch([limit, folded], () => void fillIfNear())
+watch([limit, folded, more], () => void fillIfNear())
 
 function clearFilters() {
   query.value = ''

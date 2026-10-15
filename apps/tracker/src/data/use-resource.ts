@@ -1,4 +1,5 @@
 import { shallowRef, watch, type Ref, type WatchSource } from 'vue'
+import { yieldToMain } from '@/lib/yield'
 
 export interface Resource<T> {
   data: Ref<T | undefined>
@@ -45,6 +46,9 @@ export function useResource<T, S>(
     try {
       const result = await promise
       settled.set(promise, result)
+      // Rendering what arrived gets a task of its own, apart from the work
+      // that produced it (decoding, deriving).
+      await yieldToMain()
       if (mine === generation) data.value = result
     } catch (cause) {
       if (mine === generation) error.value = cause

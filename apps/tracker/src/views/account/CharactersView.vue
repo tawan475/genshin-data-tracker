@@ -7,6 +7,7 @@ import CharacterCard from '@/components/characters/CharacterCard.vue'
 import { preloadCharacter } from '@/components/characters/card-images'
 import CharacterTable from '@/components/characters/CharacterTable.vue'
 import CharacterToolbar from '@/components/characters/CharacterToolbar.vue'
+import { useProgressive } from '@/components/planner/use-progressive'
 import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -101,6 +102,17 @@ const shown = computed(() =>
     direction.value,
     favorites.value,
   ),
+)
+// The roster mounts a screenful first and the rest over the next frames:
+// ~120 cards at once froze a phone for most of a second.
+const { shown: mounted, restart: restartRoster } = useProgressive(
+  computed(() => shown.value.length),
+  12,
+  12,
+)
+watch(view, restartRoster)
+const visible = computed(() =>
+  mounted.value >= shown.value.length ? shown.value : shown.value.slice(0, mounted.value),
 )
 const elementCounts = computed(() =>
   facetCounts(all.value, filters, 'element', (c) => c.element, favorites.value),
@@ -321,10 +333,14 @@ watch(
         class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
         :aria-label="$t('game.characters')"
       >
+        <!-- content-visibility: cards off screen skip layout and paint, so each
+             chunk of the roster lays out only what shows. It clips paint to the
+             box: the padding (undone by the margin) keeps the focus ring and
+             shadow inside it. -->
         <li
-          v-for="c in shown"
+          v-for="c in visible"
           :key="c.key"
-          class="flex"
+          class="-m-1 flex p-1 [contain-intrinsic-size:auto_11rem] [content-visibility:auto]"
           @pointerenter="void preloadCharacter(c)"
           @focusin="void preloadCharacter(c)"
         >
@@ -341,7 +357,7 @@ watch(
         v-else
         v-model:sort="sort"
         v-model:direction="direction"
-        :characters="shown"
+        :characters="visible"
         :friendship="roster.hasFriendship"
         :favorites="favorites"
         @open="open"

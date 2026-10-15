@@ -241,3 +241,32 @@ steps are compared without CPU throttling.
   | Characters: first paint | 432–524 | 256–360 |
   | Artifacts: largest paint | 648–692 | 540–616 |
   | Planner: largest paint | 708–1,328 | 496–828 |
+- **Step 3 — shipped.** Profiling showed decoding is the small part (10–35 ms
+  per page unthrottled); mounting and laying out big pages is the rest. So:
+  bundles ≥ 16 KB decode in a Web Worker (`src/workers/decode.worker.ts`, 23 KB,
+  imports `@gdt/shared/codec/bundle` only; main-thread fallback); the catalog's
+  rows, the snapshot decode, the artifact rows (`withArtifactRows`) and the
+  render of what loaded (`useResource`) each get a task of their own
+  (`lib/yield.ts`: `scheduler.yield()` or a zero timeout); Chart.js charts draw
+  after the page's first paint (`lib/after-paint.ts`: measuring the canvas
+  during mount forced a layout of the whole page); the Characters roster mounts
+  12 cards per frame (`useProgressive`) with `content-visibility: auto` per card
+  (padding keeps the focus ring inside its paint box); the Materials bag mounts
+  36 tiles per frame; the theme isn't re-applied when unchanged (a forced style
+  pass of the whole page on every session answer). Memoizing derived views
+  needed nothing new: rows and inventories are already cached per inventory.
+
+  | 390 px, CPU 4×, warm: biggest task (ms) | step 2 | step 3 |
+  |---|---|---|
+  | Overview | 370–499 | 183–184 |
+  | Characters | 1,157–1,497 | 223–319 |
+  | Artifacts | 561–694 | 366–368 |
+  | Materials | 1,266–1,522 | 513–643 |
+  | Planner | 316–750 | 252–399 |
+  | Characters, largest paint | 3,124–4,136 | 2,312–2,820 |
+  | Materials, largest paint | 2,264–2,708 | 1,516–1,840 |
+
+  Left above 150 ms: the first render of a page shell + toolbar (Layout 50–130
+  ms of it), module evaluation at startup (80–100 ms, Step 5), the idle
+  prefetch of every page's code (~100 ms, Step 5), vue-i18n compiling messages
+  on first use (they are not precompiled at build time).

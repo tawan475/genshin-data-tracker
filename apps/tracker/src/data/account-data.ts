@@ -15,7 +15,6 @@ import { liveVersions } from '@/live/journal'
 import {
   artifactRows,
   catalogFromRows,
-  decodeBundle,
   decodePlayer,
   decodeSnapshot,
   storedSnapshotOf,
@@ -29,6 +28,8 @@ import {
   type SnapshotSummary,
 } from '@gdt/shared'
 import { api, bundlePath, BUNDLE_FORMAT, request } from '@/api'
+import { yieldToMain } from '@/lib/yield'
+import { decodeBundleOffThread } from './decode'
 import { readCached, writeCached } from './idb-cache'
 
 export interface AccountRef {
@@ -116,15 +117,17 @@ export function loadSnapshots(account: AccountRef): Promise<SnapshotResponse[]> 
 
 /** Every artifact the account has held, by catalog id, with CV/RV derived. */
 export function loadCatalog(account: AccountRef): Promise<Map<number, CatalogEntry>> {
-  return cached(account, 'catalog', async () =>
-    catalogFromRows(
+  return cached(account, 'catalog', async () => {
+    const rows =
       account.source === 'staff'
         ? await api.staff.catalog(account.id)
         : (JSON.parse(
             await stored(account, 'catalog', `/api/accounts/${account.id}/catalog`, text),
-          ) as CatalogRow[]),
-    ),
-  )
+          ) as CatalogRow[])
+    // Thousands of rows to derive: a task of their own.
+    await yieldToMain()
+    return catalogFromRows(rows)
+  })
 }
 
 /** Stored sections for some or all snapshots (oldest first), inflated. */
@@ -134,7 +137,7 @@ export function loadBundle(
 ): Promise<DecodedBundle> {
   const variant = `bundle:${options.sections?.join('+') ?? 'all'}:${options.ids?.join(',') ?? 'all'}`
   return cached(account, variant, async () =>
-    decodeBundle(
+    decodeBundleOffThread(
       account.source === 'staff'
         ? await api.staff.bundle(account.id, options)
         : await stored(account, variant, bundlePath(account.id, options), bytes),
@@ -202,6 +205,9 @@ function loadSnapshotInventory(
     ])
     const snapshot = bundle.snapshots[0]
     if (!snapshot) return null
+    // The catalog and the bundle may have come in this same task: the
+    // snapshot's decode gets one of its own.
+    await yieldToMain()
     return {
       snapshot,
       good: decodeBundleSnapshot(snapshot, bundle, catalog, materials),
