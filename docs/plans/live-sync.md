@@ -738,7 +738,7 @@ are real samples (no interpolation); a point within a minute of a snapshot is dr
 |---|---|
 | 1 shared format | done (`packages/shared/src/live/`, fixture in both repos) |
 | 2 tracker storage | done, deployed; `gdt-live` created (APAC) and migrated by `deploy.yml` |
-| 3 irminsul | done on `develop` (2a7624e); replay gate passes on all 5 recordings; not released (T-15 is the user's call) |
+| 3 irminsul | done on `develop` (2a7624e; small item change notifies 9bca175); replay gate passes on all 5 recordings; not released (T-15 is the user's call) |
 | 4 browser | done, deployed; QA at 390/1366/1920 px with synthetic data and a real recording replayed into `pnpm dev` (`--replay-live`); a real game session still to do |
 | 5 session cards, points | done; QA with the multi-world recording (no Mora was farmed in it) |
 | 6 transparency | done (export `live/`, delete journal and points, Devices badge, staff Inspect + storage) |
@@ -772,9 +772,10 @@ characters (material keys reach 90).
 
 - **Before turning it on by default:** a real play session with irminsul (T-15) and live
   sync on: batches while farming, a co-op Mora run, the logout snapshot, the Overview strip
-  following. irminsul decodes small incremental item notifies (< 10 items) poorly today
-  (the item matcher's minimum), so in-session Mora/material/item changes may not reach
-  the journal until that matcher is extended (being investigated on irminsul).
+  following. irminsul now also applies the game's small item change notifies (1–9 items;
+  irminsul 9bca175, recognised by shape, 6 of ~48k recorded messages matched, all real),
+  so in-session Mora/material/item changes reach the journal; a real session must show
+  that every kind of change arrives (levelling, salvaging, rewards, shops).
 - Collapse thresholds X and N (3 h / 500 to start).
 - Old points: thin to one per hour after 90 days, or keep all.
 - Whether the Snapshots list folds a session's world-change snapshots under its card by
