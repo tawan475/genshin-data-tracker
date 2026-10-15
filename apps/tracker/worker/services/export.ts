@@ -48,6 +48,7 @@ export const SECTION_NAMES = [
   'achievementTimes',
   'characterExtras',
   'anecdotes',
+  'tasks',
 ] as const satisfies readonly Slot[]
 export type SectionName = (typeof SECTION_NAMES)[number]
 
@@ -209,6 +210,7 @@ function toBundleSnapshotV2(
     achievementTimesBase: deltaBase(meta, ref('achievementTimes')),
     characterExtras: ref('characterExtras'),
     anecdotes: ref('anecdotes'),
+    tasks: ref('tasks'),
     ...(playerVars.resin !== undefined || playerVars.arExp !== undefined ? { playerVars } : {}),
   }
 }
@@ -321,6 +323,7 @@ function v1AsV2(entry: BundleSnapshot): BundleSnapshotV2 {
     achievementTimesBase: entry.achievementTimesBase ?? null,
     characterExtras: entry.characterExtras ?? null,
     anecdotes: entry.anecdotes ?? null,
+    tasks: entry.tasks ?? null,
   }
 }
 
@@ -372,6 +375,7 @@ export async function buildGood(
         snapshot.achievementTimesBase,
         snapshot.characterExtras,
         snapshot.anecdotes,
+        snapshot.tasks,
       ].filter((key): key is string => !!key),
     )
     text = (key) => decoded.get(key)!

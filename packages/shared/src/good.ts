@@ -100,6 +100,37 @@ export interface GiAnecdotes {
   wish?: { npcId?: number; lastWishTime: number }
 }
 
+/** One character out on an expedition, in irminsul's `gi_tasks`. */
+export interface GiExpedition {
+  /** The character's GOOD key; absent when irminsul had no roster. */
+  character?: string
+  /** The game's expedition id. */
+  id: number
+  /** Unix seconds. */
+  start: number
+  hours: number
+  /** When it is done (unix seconds): `start + hours`, less what a talent takes off. */
+  doneAt: number
+}
+
+/**
+ * irminsul's `gi_tasks` (contract v1): what the planner's tasks are ticked
+ * from, each part the game's state when it last sent it (at login). Times
+ * are unix seconds; each part is absent when it was not captured.
+ */
+export interface GiTasks {
+  /** Today's Daily Commissions. */
+  commissions?: { finished: number; total: number }
+  /** The Spiral Abyss period running: `end` is when the next one begins. */
+  abyss?: { start: number; end: number; stars: number; maxStars: number }
+  /** Who is out on an expedition (empty: nobody), sorted by `doneAt`. */
+  expeditions?: GiExpedition[]
+  /** The Serenitea Pot's realm currency waiting in the jar. */
+  realm?: { value: number; limit: number }
+  /** Blessing of the Welkin Moon days left. */
+  welkin?: { days: number }
+}
+
 export interface Good {
   format: string
   version: number
@@ -118,6 +149,7 @@ export interface Good {
   /** Keyed by the character's GOOD key (Traveler with its element). */
   gi_characters?: Record<string, GiCharacter>
   gi_anecdotes?: GiAnecdotes
+  gi_tasks?: GiTasks
 }
 
 /**

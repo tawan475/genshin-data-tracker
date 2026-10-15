@@ -42,6 +42,7 @@ export const SECTION_KIND_CODES: Readonly<Record<SectionKind, number>> = {
   achievementTimes: 7,
   characterExtras: 8,
   anecdotes: 9,
+  tasks: 10,
 }
 
 export const KIND_DELTA = 0x10

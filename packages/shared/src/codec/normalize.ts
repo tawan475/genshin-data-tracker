@@ -4,7 +4,9 @@ import type {
   GiAnecdote,
   GiAnecdotes,
   GiCharacter,
+  GiExpedition,
   GiPlayer,
+  GiTasks,
   GoodCharacter,
   GoodSubstat,
   GoodWeapon,
@@ -51,6 +53,8 @@ export interface NormalizedGood {
    */
   itemGuids?: { artifacts: (string | null)[]; weapons: (string | null)[] }
   capture?: GiCapture | null
+  /** `gi_tasks`, the parts that pass their checks whole (see toTasks). */
+  tasks: GiTasks | null
 }
 
 export class GoodFormatError extends Error {
@@ -119,6 +123,7 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     achievementTimes: toAchievementTimes(input.gi_achievement_times),
     characterExtras: toCharacterExtras(input.gi_characters),
     anecdotes: toAnecdotes(input.gi_anecdotes),
+    tasks: toTasks(input.gi_tasks),
   }
   const itemGuids = toItemGuids(input)
   if (itemGuids) good.itemGuids = itemGuids
@@ -424,6 +429,76 @@ function toAnecdotes(raw: unknown): GiAnecdotes | null {
   }
   const empty = entries.length === 0 && areas.length === 0 && !anecdotes.reward && !anecdotes.wish
   return empty ? null : anecdotes
+}
+
+/** Times in `gi_tasks`: 2015-01-01 .. 2100-01-01 (the contract's window). */
+const TASK_TIME = [1_420_070_400, 4_102_444_800] as const
+/** The most expeditions `gi_tasks` lists (the game has five slots). */
+const MAX_EXPEDITIONS = 20
+/** A GOOD key, as irminsul writes one. */
+const GOOD_KEY = /^[A-Za-z0-9]{1,64}$/
+
+/**
+ * irminsul's `gi_tasks` (contract v1). Each part is kept only when every
+ * value in it is in range; the rest of the key still counts. Rewritten in a
+ * fixed key order, so equal content hashes equal.
+ */
+function toTasks(raw: unknown): GiTasks | null {
+  if (!isObject(raw)) return null
+  const tasks: GiTasks = {}
+  const c = raw.commissions
+  if (isObject(c) && isIntIn(c.total, 1, 10) && isIntIn(c.finished, 0, c.total)) {
+    tasks.commissions = { finished: c.finished, total: c.total }
+  }
+  const a = raw.abyss
+  if (
+    isObject(a) &&
+    isIntIn(a.start, ...TASK_TIME) &&
+    isIntIn(a.end, a.start + 1, Math.min(a.start + 62 * 86_400, TASK_TIME[1])) &&
+    isIntIn(a.maxStars, 1, 108) &&
+    isIntIn(a.stars, 0, a.maxStars)
+  ) {
+    tasks.abyss = { start: a.start, end: a.end, stars: a.stars, maxStars: a.maxStars }
+  }
+  const e = raw.expeditions
+  if (Array.isArray(e) && e.length <= MAX_EXPEDITIONS) {
+    const out: GiExpedition[] = []
+    for (const x of e) {
+      if (
+        !isObject(x) ||
+        !isIntIn(x.id, 1, 999_999) ||
+        !isIntIn(x.start, ...TASK_TIME) ||
+        !isIntIn(x.hours, 1, 100) ||
+        !isIntIn(x.doneAt, x.start, TASK_TIME[1]) ||
+        (x.character !== undefined &&
+          (typeof x.character !== 'string' || !GOOD_KEY.test(x.character)))
+      ) {
+        out.length = 0
+        break
+      }
+      out.push({
+        ...(typeof x.character === 'string' ? { character: x.character } : {}),
+        id: x.id,
+        start: x.start,
+        hours: x.hours,
+        doneAt: x.doneAt,
+      })
+    }
+    // One bad entry and the list is not believed (a partial list would say
+    // fewer are out than are).
+    if (out.length === e.length) {
+      tasks.expeditions = out.sort(
+        (p, q) => p.doneAt - q.doneAt || (p.character ?? '').localeCompare(q.character ?? ''),
+      )
+    }
+  }
+  const r = raw.realm
+  if (isObject(r) && isIntIn(r.limit, 1, 100_000) && isIntIn(r.value, 0, r.limit)) {
+    tasks.realm = { value: r.value, limit: r.limit }
+  }
+  const w = raw.welkin
+  if (isObject(w) && isIntIn(w.days, 0, 400)) tasks.welkin = { days: w.days }
+  return Object.keys(tasks).length > 0 ? tasks : null
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

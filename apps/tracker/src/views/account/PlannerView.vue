@@ -191,6 +191,7 @@ const {
   drops,
   farming,
   hasCapture,
+  capturedTasks,
   store,
   state,
   bag,
@@ -1670,6 +1671,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         :server="account.server"
         :events="domainEvents"
         :notices="notices"
+        :capture="capturedTasks"
         @change="tasks.change"
       />
     </div>

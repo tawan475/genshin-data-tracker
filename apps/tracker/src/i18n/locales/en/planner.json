@@ -74,7 +74,10 @@
       "abyss": "Spiral Abyss",
       "theater": "Imaginarium Theater",
       "bargains": "Paimon's Bargains",
-      "transformer": "Parametric Transformer"
+      "transformer": "Parametric Transformer",
+      "expeditions": "Expeditions",
+      "realm": "Realm Currency",
+      "welkin": "Welkin Moon"
     }
   },
   "toast": {
@@ -534,6 +537,15 @@
       "checkin": "Check-in",
       "exploration": "World Exploration",
       "quest": "Quest"
+    },
+    "capture": {
+      "from": "From the capture of {time}",
+      "commissions": "{n} of {total} done",
+      "abyss": "{stars} of {max} stars",
+      "expeditions": "{n} of {total} back",
+      "nobodyOut": "Nobody out",
+      "realm": "{value} of {limit} in the jar",
+      "welkin": "{n} days left"
     }
   },
   "view": {

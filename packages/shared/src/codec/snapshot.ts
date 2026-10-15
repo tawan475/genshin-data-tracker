@@ -13,6 +13,7 @@ import {
   decodeCharacters,
   decodeMaterials,
   decodePlayer,
+  decodeTasks,
   decodeWeapons,
   deltaPaysOff,
   encodeAchievements,
@@ -25,6 +26,7 @@ import {
   encodeCharacters,
   encodeMaterialsDelta,
   encodeMaterialsFull,
+  encodeTasks,
   encodeWeapons,
   makeSection,
   type AchievementTimesSection,
@@ -103,6 +105,7 @@ export interface ExtraSections {
   achievementTimes: Section | null
   characterExtras: Section | null
   anecdotes: Section | null
+  tasks: Section | null
 }
 
 export interface EncodedSnapshot extends ExtraSections {
@@ -137,6 +140,12 @@ export interface EncodedSnapshot extends ExtraSections {
    * `gi_anecdotes` was kept, so re-uploading it stays a no-op.
    */
   preAnecdotesContentHash: string
+  /**
+   * The content hash with the tasks left out (equal to `contentHash` when
+   * there are none): what this capture has if it was stored before
+   * `gi_tasks` was kept, so re-uploading it stays a no-op.
+   */
+  preTasksContentHash: string
 }
 
 /** The sections that do not depend on catalog ids, materials in full. */
@@ -154,6 +163,7 @@ export function extraSectionsOf(sections: ExtraSections): Section[] {
     sections.achievementTimes,
     sections.characterExtras,
     sections.anecdotes,
+    sections.tasks,
   ].filter((s): s is Section => s !== null)
 }
 
@@ -176,6 +186,7 @@ export async function encodeStaticSections(
     achievementTimes,
     characterExtras,
     anecdotes,
+    tasks,
   ] = await Promise.all([
     makeSection('characters', encodeCharacters(good.characters)),
     makeSection('weapons', encodeWeapons(good.weapons)),
@@ -189,6 +200,7 @@ export async function encodeStaticSections(
       ? makeSection('characterExtras', encodeCharacterExtras(good.characterExtras))
       : null,
     good.anecdotes ? makeSection('anecdotes', encodeAnecdotes(good.anecdotes)) : null,
+    good.tasks ? makeSection('tasks', encodeTasks(good.tasks)) : null,
   ])
   return {
     characters,
@@ -199,6 +211,7 @@ export async function encodeStaticSections(
     achievementTimes,
     characterExtras,
     anecdotes,
+    tasks,
   }
 }
 
@@ -236,9 +249,16 @@ export async function completeSnapshot(
   const preAnecdotesContentHash = extras.some((s) => s !== null)
     ? await sha256Hex128(withExtras.join(':'))
     : legacyContentHash
-  const contentHash = sections.anecdotes
+  const preTasksContentHash = sections.anecdotes
     ? await sha256Hex128([...withExtras, sections.anecdotes.hash].join(':'))
     : preAnecdotesContentHash
+  // The tasks (kept later still) after the anecdotes, the same way; a file
+  // without anecdotes but with tasks keeps an empty anecdotes place.
+  const contentHash = sections.tasks
+    ? await sha256Hex128(
+        [...withExtras, sections.anecdotes?.hash ?? '', sections.tasks.hash].join(':'),
+      )
+    : preTasksContentHash
   return {
     ...sections,
     artifacts,
@@ -248,6 +268,7 @@ export async function completeSnapshot(
     contentHash,
     legacyContentHash,
     preAnecdotesContentHash,
+    preTasksContentHash,
   }
 }
 
@@ -372,6 +393,7 @@ export interface StoredSnapshot {
   achievementTimesBase?: string | null
   characterExtras?: string | null
   anecdotes?: string | null
+  tasks?: string | null
 }
 
 const parseOrNull = <T>(text: string | null | undefined): T | null =>
@@ -421,5 +443,6 @@ export function decodeSnapshot(
     )
   }
   if (stored.anecdotes) good.gi_anecdotes = decodeAnecdotes(JSON.parse(stored.anecdotes))
+  if (stored.tasks) good.gi_tasks = decodeTasks(JSON.parse(stored.tasks))
   return good
 }

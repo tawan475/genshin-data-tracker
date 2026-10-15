@@ -204,6 +204,7 @@ async function importOnce(
     sections.achievementTimes,
     sections.characterExtras,
     sections.anecdotes,
+    sections.tasks,
   ]
     .filter((s): s is Section => s !== null)
     .map((s) => shortHashHex(s.hash))
@@ -277,6 +278,7 @@ async function importOnce(
   const key = contentKey(encoded.contentHash)
   const legacyKey = contentKey(encoded.legacyContentHash)
   const preAnecdotesKey = contentKey(encoded.preAnecdotesContentHash)
+  const preTasksKey = contentKey(encoded.preTasksContentHash)
   const response = (
     status: ImportResponse['status'],
     snapshotId: number,
@@ -301,16 +303,18 @@ async function importOnce(
     contentKey: key,
   })
   // The same capture, also when it was stored before irminsul's extra keys
-  // (or later its anecdotes) were kept (its hash then left them out), in
-  // either storage format.
+  // (or later its anecdotes, then its tasks) were kept (its hash then left
+  // them out), in either storage format.
   const sameCapture = (row: SameTimeRow) =>
     row.content_key !== null
       ? row.content_key === key ||
         row.content_key === legacyKey ||
-        row.content_key === preAnecdotesKey
+        row.content_key === preAnecdotesKey ||
+        row.content_key === preTasksKey
       : row.content_hash === encoded.contentHash ||
         row.content_hash === encoded.legacyContentHash ||
-        row.content_hash === encoded.preAnecdotesContentHash
+        row.content_hash === encoded.preAnecdotesContentHash ||
+        row.content_hash === encoded.preTasksContentHash
   const sameInventory = (row: LatestRow) =>
     row.content_key !== null ? row.content_key === key : row.content_hash === encoded.contentHash
 

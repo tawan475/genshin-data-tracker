@@ -11,6 +11,7 @@ import {
   ListChecks,
   Moon,
   Plus,
+  Radar,
   StickyNote,
 } from 'lucide-vue-next'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
@@ -24,19 +25,20 @@ import { useFeedback } from '@/stores/feedback'
 import { daysText, weekdayShort } from './farm-format'
 import TaskEditor from './TaskEditor.vue'
 import {
-  BUILTIN_TASKS,
   CUSTOM_SNOOZES,
   dayStart,
   dayText,
   doneInput,
   formatSpan,
   gameDay,
+  listedBuiltins,
   snoozeChoices,
   snoozedInput,
   taskInput,
   taskRows,
   undoneInput,
   weekdayOf,
+  type CapturedTasks,
   type TaskRow,
 } from './tasks'
 import { moveBy, moveTo } from './allocation'
@@ -62,6 +64,8 @@ const props = defineProps<{
   events?: readonly DomainEventWindow[]
   /** The notice board's events: one-time tasks while they run. */
   notices?: readonly GameNotice[]
+  /** The newest capture's `gi_tasks`: ticks commissions and the Abyss, adds a few rows. */
+  capture?: CapturedTasks | null
 }>()
 const emit = defineEmits<{ change: [ops: TaskOp[]] }>()
 const feedback = useFeedback()
@@ -78,8 +82,21 @@ const showAll = ref(false)
 
 const today = computed(() => gameDay(props.now, props.server))
 const rows = computed(() =>
-  taskRows(props.tasks, props.now, props.server, props.events ?? [], props.notices ?? []),
+  taskRows(
+    props.tasks,
+    props.now,
+    props.server,
+    props.events ?? [],
+    props.notices ?? [],
+    props.capture ?? null,
+  ),
 )
+const builtins = computed(() => listedBuiltins(props.capture))
+/** "4 of 4 done · From the capture of 14:02": what a captured row's figure means. */
+function captureTitle(row: TaskRow): string {
+  const c = row.capture
+  return c ? `${c.title} · ${t('planner.tasks.capture.from', { time: formatDateTime(c.at) })}` : ''
+}
 const dueRows = computed(() => rows.value.filter((r) => r.due))
 const dueCount = (kind?: TaskRow['kind']) =>
   dueRows.value.filter((r) => !kind || r.kind === kind).length
@@ -144,6 +161,11 @@ function when(row: TaskRow): { text: string; title: string } {
     }
   }
   if (row.kind === 'builtin') {
+    // A row only a capture makes: its figure, due or resting without a
+    // time (the jar not yet full).
+    if (row.capture && (row.due ? row.builtin?.capture : row.back === null)) {
+      return { text: row.capture.text, title: captureTitle(row) }
+    }
     if (row.due) {
       return row.resets === null
         ? { text: t('planner.tasks.ready'), title: t('planner.tasks.readyTitle') }
@@ -177,6 +199,14 @@ function when(row: TaskRow): { text: string; title: string } {
   if (row.late === -1) return { text: t('planner.tasks.tomorrow'), title }
   if (row.late >= -6) return { text: weekdayShort(weekdayOf(c.due)), title }
   return { text: t('farm.time.d', { d: -row.late }), title }
+}
+
+/** The time's tooltip, saying so when a capture decided the row. */
+function timeTitle(row: TaskRow): string {
+  const base = when(row).title
+  if (!row.capture?.rules) return base
+  const from = t('planner.tasks.capture.from', { time: formatDateTime(row.capture.at) })
+  return base.endsWith(from) ? base : `${base} · ${from}`
 }
 
 const TONE: Record<TaskRow['tone'], string> = {
@@ -484,6 +514,12 @@ const summary = computed(() => {
             >{{ $t(`planner.tasks.tags.${row.tag}`) }}</span
           >
           <span class="truncate">{{ row.name }}</span>
+          <span
+            v-if="row.capture && (row.due ? !row.builtin?.capture : row.back !== null)"
+            class="tabular shrink-0 font-mono text-xs text-text-muted"
+            :title="captureTitle(row)"
+            >{{ row.capture.text }}</span
+          >
           <StickyNote
             v-if="row.note && row.kind !== 'event'"
             class="size-3.5 shrink-0 text-text-muted"
@@ -493,11 +529,16 @@ const summary = computed(() => {
         <span
           class="tabular inline-flex shrink-0 items-center gap-1 font-mono text-xs"
           :class="TONE[row.tone]"
-          :title="when(row).title"
+          :title="timeTitle(row)"
         >
           <Moon v-if="row.snoozed" class="size-3.5" aria-hidden="true" />
+          <Radar
+            v-else-if="row.capture?.rules"
+            class="size-3.5 text-text-muted"
+            aria-hidden="true"
+          />
           {{ when(row).text }}
-          <span class="sr-only">: {{ when(row).title }}</span>
+          <span class="sr-only">: {{ timeTitle(row) }}</span>
         </span>
         <button
           type="button"
@@ -543,7 +584,7 @@ const summary = computed(() => {
     >
       <div class="flex flex-col px-4 py-2">
         <UiSwitch
-          v-for="b in BUILTIN_TASKS"
+          v-for="b in builtins"
           :key="b.id"
           :model-value="!hidden(b.id)"
           :label="b.name"

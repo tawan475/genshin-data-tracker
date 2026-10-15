@@ -6,6 +6,7 @@ import type { AccountResponse, CustomCharacter, Good } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch, type ComputedRef } from 'vue'
 import { NO_PLAYER } from '@/data/account-player'
 import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
+import type { CapturedTasks } from './tasks'
 import { usePlannerSettings } from '@/data/planner-settings'
 import { useResource } from '@/data/use-resource'
 import { localizeFarming } from '@/i18n/localize-farming'
@@ -92,6 +93,12 @@ export function usePlannerModel(
     return loaded ? localizeFarming(loaded) : null
   })
   const hasCapture = computed(() => !!data.value?.inventory)
+  /** irminsul's `gi_tasks` in the newest capture, with when it was taken. */
+  const capturedTasks = computed<CapturedTasks | null>(() => {
+    const inventory = data.value?.inventory
+    const tasks = inventory?.good.gi_tasks
+    return inventory && tasks ? { at: inventory.snapshot.takenAt, tasks } : null
+  })
 
   const store = usePlannerTargets(accountId)
   onBeforeUnmount(() => void store.flush())
@@ -236,6 +243,7 @@ export function usePlannerModel(
     drops,
     farming,
     hasCapture,
+    capturedTasks,
     store,
     state,
     bag,

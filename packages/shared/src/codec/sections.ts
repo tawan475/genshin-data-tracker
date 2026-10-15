@@ -16,6 +16,7 @@ import type {
   GiAnecdotes,
   GiCharacter,
   GiPlayer,
+  GiTasks,
   GoodArtifact,
   GoodCharacter,
   GoodWeapon,
@@ -36,6 +37,7 @@ export type SectionKind =
   | 'achievementTimes'
   | 'characterExtras'
   | 'anecdotes'
+  | 'tasks'
 
 export interface Section {
   kind: SectionKind
@@ -519,4 +521,51 @@ export function decodeAnecdotes(section: AnecdotesSection): GiAnecdotes {
     anecdotes.wish = npcId > 0 ? { npcId, lastWishTime } : { lastWishTime }
   }
   return anecdotes
+}
+
+// --------------------------------------------------------------------- tasks
+// irminsul's `gi_tasks`, each part only when the capture had it:
+// `c` = commissions [finished, total], `a` = the Abyss [start, end, stars,
+// maxStars], `e` = expeditions [[character ('' when unknown), id, start,
+// hours, doneAt], ...], `r` = realm currency [value, limit], `w` = Welkin
+// days. A few dozen bytes that change with every login: stored in full.
+
+export interface TasksSection {
+  c?: [finished: number, total: number]
+  a?: [start: number, end: number, stars: number, maxStars: number]
+  e?: [character: string, id: number, start: number, hours: number, doneAt: number][]
+  r?: [value: number, limit: number]
+  w?: number
+}
+
+export function encodeTasks(tasks: GiTasks): TasksSection {
+  const section: TasksSection = {}
+  const { commissions: c, abyss: a, expeditions: e, realm: r, welkin: w } = tasks
+  if (c) section.c = [c.finished, c.total]
+  if (a) section.a = [a.start, a.end, a.stars, a.maxStars]
+  if (e) section.e = e.map((x) => [x.character ?? '', x.id, x.start, x.hours, x.doneAt])
+  if (r) section.r = [r.value, r.limit]
+  if (w) section.w = w.days
+  return section
+}
+
+export function decodeTasks(section: TasksSection): GiTasks {
+  const tasks: GiTasks = {}
+  if (section.c) tasks.commissions = { finished: section.c[0], total: section.c[1] }
+  if (section.a) {
+    const [start, end, stars, maxStars] = section.a
+    tasks.abyss = { start, end, stars, maxStars }
+  }
+  if (section.e) {
+    tasks.expeditions = section.e.map(([character, id, start, hours, doneAt]) => ({
+      ...(character ? { character } : {}),
+      id,
+      start,
+      hours,
+      doneAt,
+    }))
+  }
+  if (section.r) tasks.realm = { value: section.r[0], limit: section.r[1] }
+  if (section.w !== undefined) tasks.welkin = { days: section.w }
+  return tasks
 }

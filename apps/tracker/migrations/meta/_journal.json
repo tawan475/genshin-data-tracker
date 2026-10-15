@@ -183,6 +183,13 @@
       "when": 1791999576491,
       "tag": "0025_game_notices",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1792074993891,
+      "tag": "0028_tasks_capture",
+      "breakpoints": true
     }
   ]
 }

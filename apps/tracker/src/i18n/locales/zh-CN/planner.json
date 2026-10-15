@@ -74,7 +74,10 @@
       "abyss": "深境螺旋",
       "theater": "幻想真境剧诗",
       "bargains": "派蒙的小卖部",
-      "transformer": "参量质变仪"
+      "transformer": "参量质变仪",
+      "expeditions": "探索派遣",
+      "realm": "洞天宝钱",
+      "welkin": "空月祝福"
     }
   },
   "toast": {
@@ -534,6 +537,15 @@
       "checkin": "签到",
       "exploration": "世界探索",
       "quest": "任务"
+    },
+    "capture": {
+      "from": "来自抓取数据（{time}）",
+      "commissions": "已完成 {n}/{total}",
+      "abyss": "{stars}/{max} 星",
+      "expeditions": "已返回 {n}/{total}",
+      "nobodyOut": "无人派遣",
+      "realm": "聚宝盆中 {value}/{limit}",
+      "welkin": "剩余 {n} 天"
     }
   },
   "view": {

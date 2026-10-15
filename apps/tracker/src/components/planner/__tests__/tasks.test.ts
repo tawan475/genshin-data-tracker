@@ -38,6 +38,8 @@ import {
   taskRows,
   undoneInput,
   weekdayOf,
+  welkinDays,
+  type CapturedTasks,
 } from '../tasks'
 
 const at = (iso: string) => Date.parse(iso)
@@ -412,5 +414,118 @@ describe('notice board events as tasks', () => {
     expect(doneInput(open!, NOW, 'ASIA')).toMatchObject({ next: NOW + 365 * 86_400_000 })
     const stored = [{ ...doneInput(row!, NOW, 'ASIA'), updatedAt: NOW } as PlannerTask]
     expect(rowsAt([notice({})], stored)[0]).toMatchObject({ due: false, tone: 'rest' })
+  })
+})
+
+describe('ticked from a capture', () => {
+  // Asia: the game day of Oct 13 runs from Oct 12 20:00 UTC to Oct 13 20:00 UTC.
+  const now = at('2026-10-13T12:00:00Z')
+  const capture = (
+    tasks: CapturedTasks['tasks'],
+    when = '2026-10-13T02:00:00Z',
+  ): CapturedTasks => ({
+    at: at(when),
+    tasks,
+  })
+  const rowOf = (id: string, c: CapturedTasks | null, stored: PlannerTask[] = [], time = now) =>
+    taskRows(stored, time, 'ASIA', [], [], c).find((r) => r.id === id)
+
+  it("ticks the commissions when today's capture has them all, and counts them otherwise", () => {
+    const done = rowOf('commissions', capture({ commissions: { finished: 4, total: 4 } }))!
+    expect(done).toMatchObject({ due: false, tone: 'rest', snoozed: false })
+    expect(iso(done.back)).toBe('2026-10-13T20:00:00.000Z')
+    expect(done.capture).toMatchObject({ rules: true, text: '4/4' })
+    const two = rowOf('commissions', capture({ commissions: { finished: 2, total: 4 } }))!
+    expect(two).toMatchObject({ due: true, capture: { text: '2/4', rules: true } })
+    // Yesterday's count says nothing about today.
+    const old = capture({ commissions: { finished: 4, total: 4 } }, '2026-10-12T19:00:00Z')
+    expect(rowOf('commissions', old)).toMatchObject({ due: true })
+    expect(rowOf('commissions', old)!.capture).toBeUndefined()
+  })
+
+  it('lets a hand tick or Undo made after the capture win until the next one', () => {
+    const c = capture({ commissions: { finished: 4, total: 4 } })
+    const undone: PlannerTask = {
+      kind: 'builtin',
+      id: 'commissions',
+      updatedAt: at('2026-10-13T03:00:00Z'),
+    }
+    expect(rowOf('commissions', c, [undone])).toMatchObject({
+      due: true,
+      capture: { rules: false },
+    })
+    // A hand state older than the capture loses to it.
+    const before: PlannerTask = { ...undone, updatedAt: at('2026-10-13T01:00:00Z') }
+    expect(rowOf('commissions', c, [before])).toMatchObject({
+      due: false,
+      capture: { rules: true },
+    })
+    // A Done after a capture that said 2/4.
+    const ticked: PlannerTask = {
+      kind: 'builtin',
+      id: 'commissions',
+      next: at('2026-10-13T20:00:00Z'),
+      updatedAt: at('2026-10-13T05:00:00Z'),
+    }
+    const two = capture({ commissions: { finished: 2, total: 4 } })
+    expect(rowOf('commissions', two, [ticked])).toMatchObject({ due: false })
+  })
+
+  it('ticks the Abyss on full stars inside the captured period only', () => {
+    const abyss = { start: 1_789_502_400, end: 1_792_094_399, stars: 36, maxStars: 36 }
+    const full = rowOf('abyss', capture({ abyss }))!
+    expect(full).toMatchObject({ due: false, capture: { text: '36★' } })
+    expect(iso(full.back)).toBe('2026-10-15T20:00:00.000Z')
+    expect(rowOf('abyss', capture({ abyss: { ...abyss, stars: 27 } }))).toMatchObject({
+      due: true,
+      capture: { text: '27★', rules: true },
+    })
+    // After the period ends the capture is out of date.
+    const later = rowOf('abyss', capture({ abyss }), [], at('2026-10-16T01:00:00Z'))!
+    expect(later.due).toBe(true)
+    expect(later.capture).toBeUndefined()
+  })
+
+  it('lists expeditions, the jar and the Welkin Moon only when captured', () => {
+    expect(rowOf('expeditions', null)).toBeUndefined()
+    expect(rowOf('realm', capture({ commissions: { finished: 0, total: 4 } }))).toBeUndefined()
+    const out = (doneAt: string) => ({
+      id: 202,
+      start: Date.parse(doneAt) / 1000 - 72_000,
+      hours: 20,
+      doneAt: Date.parse(doneAt) / 1000,
+    })
+    const away = rowOf(
+      'expeditions',
+      capture({ expeditions: [out('2026-10-13T15:00:00Z'), out('2026-10-13T16:00:00Z')] }),
+    )!
+    expect(away).toMatchObject({ due: false, capture: { text: '0/2' } })
+    expect(iso(away.back)).toBe('2026-10-13T15:00:00.000Z')
+    const back = rowOf(
+      'expeditions',
+      capture({ expeditions: [out('2026-10-13T11:00:00Z'), out('2026-10-13T16:00:00Z')] }),
+    )!
+    expect(back).toMatchObject({ due: true, capture: { text: '1/2' } })
+    expect(rowOf('expeditions', capture({ expeditions: [] }))).toMatchObject({ due: true })
+
+    expect(rowOf('realm', capture({ realm: { value: 2400, limit: 2400 } }))).toMatchObject({
+      due: true,
+    })
+    expect(rowOf('realm', capture({ realm: { value: 900, limit: 2400 } }))).toMatchObject({
+      due: false,
+      back: null,
+      capture: { text: '900/2400' },
+    })
+  })
+
+  it('brings the Welkin Moon back three days before it runs out', () => {
+    // Captured on Oct 13 with 10 days: 9 on the 14th, 3 on the 20th.
+    expect(welkinDays(10, at('2026-10-13T02:00:00Z'), at('2026-10-14T12:00:00Z'), 'ASIA')).toBe(9)
+    const plenty = rowOf('welkin', capture({ welkin: { days: 10 } }))!
+    expect(plenty.due).toBe(false)
+    expect(iso(plenty.back)).toBe('2026-10-19T20:00:00.000Z')
+    const soon = rowOf('welkin', capture({ welkin: { days: 10 } }), [], at('2026-10-19T21:00:00Z'))!
+    expect(soon).toMatchObject({ due: true })
+    expect(rowOf('welkin', capture({ welkin: { days: 2 } }))).toMatchObject({ due: true })
   })
 })

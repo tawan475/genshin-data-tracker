@@ -134,6 +134,26 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
         ...(rand() < 0.7 ? { r: [int(rand, 0, 100), int(rand, 0, 9), 10] } : {}),
         ...(rand() < 0.5 ? { w: [rand() < 0.5 ? 0 : 9801, int(rand, 0, 2e9)] } : {}),
       }
+    case 'tasks': {
+      const start = int(rand, 1.6e9, 2e9)
+      return {
+        ...(rand() < 0.8 ? { c: [int(rand, 0, 4), 4] } : {}),
+        ...(rand() < 0.8 ? { a: [start, start + 2_592_000, int(rand, 0, 36), 36] } : {}),
+        ...(rand() < 0.8
+          ? {
+              e: Array.from({ length: int(rand, 0, 5) }, (_, k) => [
+                rand() < 0.2 ? '' : `Character${k}`,
+                int(rand, 101, 706),
+                start + k,
+                20,
+                start + k + 72_000,
+              ]),
+            }
+          : {}),
+        ...(rand() < 0.8 ? { r: [int(rand, 0, 2400), 2400] } : {}),
+        ...(rand() < 0.8 ? { w: int(rand, 0, 180) } : {}),
+      }
+    }
   }
 }
 
@@ -258,6 +278,7 @@ describe('section blobs', () => {
       achievementTimes: 7,
       characterExtras: 8,
       anecdotes: 9,
+      tasks: 10,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -313,6 +334,7 @@ describe('section blobs', () => {
       'achievementTimes',
       'characterExtras',
       'anecdotes',
+      'tasks',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')
@@ -505,6 +527,7 @@ async function v1File(
         achievementTimes: encoded.achievementTimes?.json ?? null,
         characterExtras: encoded.characterExtras?.json ?? null,
         anecdotes: encoded.anecdotes?.json ?? null,
+        tasks: encoded.tasks?.json ?? null,
       },
       catalog,
       MATERIALS,
@@ -664,6 +687,7 @@ class V2Store {
       achievementTimesBase: deltaBase(refs.achievementTimes ?? null),
       characterExtras: refs.characterExtras ?? null,
       anecdotes: refs.anecdotes ?? null,
+      tasks: refs.tasks ?? null,
       ...(Object.keys(vars).length > 0 ? { playerVars: vars } : {}),
     }
     // The blobs the snapshot needs, bases included, as the server sends them.

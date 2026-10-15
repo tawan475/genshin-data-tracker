@@ -421,6 +421,80 @@ const anecdotesLayout: Layout = {
   },
 }
 
+// tasks: flags (bit 0 = `c`, 1 = `a`, 2 = `e`, 3 = `r`, 4 = `w`), then each
+// present part in that order: `c` and `r` as two numbers, `a` as start,
+// end - start, stars, maxStars, `e` as the count then per expedition the
+// character (a string), id, start, hours and doneAt - start, `w` as one
+// number. Every number is unsigned.
+
+const TASK_PARTS = ['c', 'a', 'e', 'r', 'w'] as const
+
+const tasksLayout: Layout = {
+  variants: [0],
+  encode(w, { value, delta }) {
+    if (delta) throw new TypeError('Tasks have no deltas')
+    const v = fields(value, TASK_PARTS, TASK_PARTS)
+    let flags = 0
+    TASK_PARTS.forEach((part, bit) => {
+      if (v[part] !== undefined) flags |= 1 << bit
+    })
+    w.byte(flags)
+    const fixed = (part: unknown, n: number) => {
+      const values = array(part)
+      if (values.length !== n) throw new RangeError(`Not ${n} numbers`)
+      return values.map(uint)
+    }
+    if (v.c !== undefined) for (const n of fixed(v.c, 2)) w.uint(n)
+    if (v.a !== undefined) {
+      const [start, end, stars, maxStars] = fixed(v.a, 4) as [number, number, number, number]
+      w.uint(start)
+        .uint(uint(end - start))
+        .uint(stars)
+        .uint(maxStars)
+    }
+    if (v.e !== undefined) {
+      const list = array(v.e)
+      w.uint(list.length)
+      for (const entry of list) {
+        const [character, id, start, hours, doneAt] = array(entry)
+        if (array(entry).length !== 5 || typeof character !== 'string') {
+          throw new TypeError('Not an expedition')
+        }
+        w.string(character).uint(uint(id)).uint(uint(start)).uint(uint(hours))
+        w.uint(uint(uint(doneAt) - uint(start)))
+      }
+    }
+    if (v.r !== undefined) for (const n of fixed(v.r, 2)) w.uint(n)
+    if (v.w !== undefined) w.uint(uint(v.w))
+  },
+  decode(r) {
+    const flags = r.byte()
+    if (flags >= 1 << TASK_PARTS.length) throw new CorruptDataError(`Unknown tasks flags ${flags}`)
+    const section: Record<string, unknown> = {}
+    if (flags & 1) section.c = [r.uint(), r.uint()]
+    if (flags & 2) {
+      const start = r.uint()
+      section.a = [start, start + r.uint(), r.uint(), r.uint()]
+    }
+    if (flags & 4) {
+      const count = r.uint()
+      if (count > r.remaining) throw new CorruptDataError('Count past the data')
+      const e: unknown[] = []
+      for (let n = 0; n < count; n++) {
+        const character = r.string()
+        const id = r.uint()
+        const start = r.uint()
+        const hours = r.uint()
+        e.push([character, id, start, hours, start + r.uint()])
+      }
+      section.e = e
+    }
+    if (flags & 8) section.r = [r.uint(), r.uint()]
+    if (flags & 16) section.w = r.uint()
+    return section
+  },
+}
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -431,6 +505,7 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   achievementTimes: achievementTimesLayout,
   player: playerLayout,
   anecdotes: anecdotesLayout,
+  tasks: tasksLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */

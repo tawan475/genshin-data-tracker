@@ -9,6 +9,7 @@ import {
   decodeArtifacts,
   decodeSectionBlob,
   decodeSnapshot,
+  decodeTasks,
   deflateRaw,
   deltaPaysOff,
   encodeAchievementTimes,
@@ -17,6 +18,7 @@ import {
   encodeArtifactsDelta,
   encodeSectionBlob,
   encodeSnapshot,
+  encodeTasks,
   extraSectionsOf,
   GOOD_LIMITS,
   GoodFormatError,
@@ -121,6 +123,7 @@ async function storedOf(
     achievementTimesBase: await base(encoded.achievementTimesBase),
     characterExtras: await optionalViaStorage(encoded.characterExtras),
     anecdotes: await optionalViaStorage(encoded.anecdotes),
+    tasks: await optionalViaStorage(encoded.tasks),
   }
 }
 
@@ -254,6 +257,7 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
   }
   if (good.characterExtras) expected.gi_characters = Object.fromEntries(good.characterExtras)
   if (good.anecdotes) expected.gi_anecdotes = good.anecdotes
+  if (good.tasks) expected.gi_tasks = good.tasks
   return expected
 }
 
@@ -1339,5 +1343,139 @@ describe("irminsul's gi_anecdotes", () => {
     expect(sectionHashesOf(entry)).toHaveLength(6)
     const stored = storedSnapshotOf(entry, (hash) => sectionJson.get(hash)!)
     expect(stored.anecdotes).toBeNull()
+  })
+})
+
+// ------------------------------------------------------------- gi_tasks
+
+const tasks = {
+  gi_tasks: {
+    commissions: { finished: 3, total: 4 },
+    abyss: { start: 1_789_502_400, end: 1_792_094_399, stars: 30, maxStars: 36 },
+    expeditions: [
+      { character: 'Yelan', id: 202, start: 1_791_010_000, hours: 20, doneAt: 1_791_082_000 },
+      { id: 301, start: 1_791_000_000, hours: 20, doneAt: 1_791_054_000 },
+    ],
+    realm: { value: 1_800, limit: 2_400 },
+    welkin: { days: 0 },
+  },
+} satisfies Partial<Good>
+
+describe("irminsul's gi_tasks", () => {
+  it('round-trips, expeditions by when they are done, last of the extra keys', async () => {
+    const input = { ...sample, ...extras, ...anecdotes, ...tasks }
+    const { encoded, decoded } = await roundTrip(input)
+    expect(extraSectionsOf(encoded).map((s) => s.kind)).toEqual([
+      'player',
+      'achievementTimes',
+      'characterExtras',
+      'anecdotes',
+      'tasks',
+    ])
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_tasks).toEqual({
+      ...tasks.gi_tasks,
+      expeditions: [tasks.gi_tasks.expeditions[1], tasks.gi_tasks.expeditions[0]],
+    })
+    expect(Object.keys(decoded).slice(-2)).toEqual(['gi_anecdotes', 'gi_tasks'])
+    // One part alone.
+    const alone = await roundTrip({ ...sample, gi_tasks: { expeditions: [] } })
+    expect(alone.decoded.gi_tasks).toEqual({ expeditions: [] })
+  })
+
+  it('keeps the content hash of a file without them, and knows the one from before them', async () => {
+    const catalog = new Catalog()
+    const plain = await roundTrip(sample, catalog)
+    const before = await roundTrip({ ...sample, ...extras, ...anecdotes }, catalog)
+    const all = await roundTrip({ ...sample, ...extras, ...anecdotes, ...tasks }, catalog)
+    const only = await roundTrip({ ...sample, ...tasks }, catalog)
+    const noAnecdotes = await roundTrip({ ...sample, ...extras, ...tasks }, catalog)
+    const extrasOnly = await roundTrip({ ...sample, ...extras }, catalog)
+
+    expect(plain.encoded.preTasksContentHash).toBe(plain.encoded.contentHash)
+    expect(before.encoded.preTasksContentHash).toBe(before.encoded.contentHash)
+    expect(all.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    expect(all.encoded.preTasksContentHash).toBe(before.encoded.contentHash)
+    expect(all.encoded.preAnecdotesContentHash).toBe(extrasOnly.encoded.contentHash)
+    expect(only.encoded.preTasksContentHash).toBe(plain.encoded.contentHash)
+    expect(only.encoded.contentHash).not.toBe(plain.encoded.contentHash)
+    expect(noAnecdotes.encoded.preTasksContentHash).toBe(extrasOnly.encoded.contentHash)
+    expect(new Set([all, only, noAnecdotes].map((x) => x.encoded.contentHash)).size).toBe(3)
+
+    // Another day's state is another capture.
+    const later = await roundTrip(
+      { ...sample, ...extras, ...anecdotes, gi_tasks: { ...tasks.gi_tasks, welkin: { days: 1 } } },
+      catalog,
+    )
+    expect(later.encoded.contentHash).not.toBe(all.encoded.contentHash)
+    expect(later.encoded.preTasksContentHash).toBe(all.encoded.preTasksContentHash)
+  })
+
+  it('keeps each part only when all of it is in range', () => {
+    const read = (raw: unknown) => normalizeGood({ ...sample, gi_tasks: raw }).tasks
+    expect(
+      read({
+        commissions: { finished: 5, total: 4 },
+        abyss: { start: 1_789_502_400, end: 1_789_502_400, stars: 1, maxStars: 36 },
+        expeditions: [
+          { character: 'Yelan', id: 202, start: 1_791_010_000, hours: 20, doneAt: 1_791_082_000 },
+          { character: 'Hu Tao', id: 202, start: 1_791_010_000, hours: 20, doneAt: 1_791_082_000 },
+        ],
+        realm: { value: 2_401, limit: 2_400 },
+        welkin: { days: 30 },
+      }),
+    ).toEqual({ welkin: { days: 30 } })
+    // The edges.
+    expect(
+      read({
+        commissions: { finished: 0, total: 10 },
+        abyss: {
+          start: 1_789_502_400,
+          end: 1_789_502_400 + 62 * 86_400,
+          stars: 108,
+          maxStars: 108,
+        },
+        expeditions: [{ id: 1, start: 1_420_070_400, hours: 100, doneAt: 1_420_070_400 }],
+        realm: { value: 0, limit: 100_000 },
+        welkin: { days: 400 },
+      }),
+    ).toEqual({
+      commissions: { finished: 0, total: 10 },
+      abyss: { start: 1_789_502_400, end: 1_789_502_400 + 62 * 86_400, stars: 108, maxStars: 108 },
+      expeditions: [{ id: 1, start: 1_420_070_400, hours: 100, doneAt: 1_420_070_400 }],
+      realm: { value: 0, limit: 100_000 },
+      welkin: { days: 400 },
+    })
+    const tooMany = Array.from({ length: 21 }, () => ({
+      id: 101,
+      start: 1_791_000_000,
+      hours: 4,
+      doneAt: 1_791_014_400,
+    }))
+    for (const raw of [{ expeditions: tooMany }, { welkin: { days: -1 } }, {}, [1], 'x', null]) {
+      expect(read(raw)).toBeNull()
+    }
+  })
+
+  it('stores the section in its binary layout and gives it back exactly', () => {
+    const value = encodeTasks(normalizeGood({ ...sample, ...tasks }).tasks!)
+    expect(value).toEqual({
+      c: [3, 4],
+      a: [1_789_502_400, 1_792_094_399, 30, 36],
+      e: [
+        ['', 301, 1_791_000_000, 20, 1_791_054_000],
+        ['Yelan', 202, 1_791_010_000, 20, 1_791_082_000],
+      ],
+      r: [1_800, 2_400],
+      w: 0,
+    })
+    for (const v of [value, { e: [] }, { w: 3 }, { c: [0, 4], r: [0, 300] }]) {
+      const clean = JSON.parse(JSON.stringify(v))
+      const blob = encodeSectionBlob('tasks', clean, false, null)
+      expect(blob.payload[0]).toBe(0x10)
+      const back = decodeSectionBlob(kindCode('tasks', false), blob.data, null, null)
+      expect(JSON.stringify(back.value)).toBe(JSON.stringify(clean))
+      expect(decodeTasks(back.value as typeof value)).toEqual(decodeTasks(clean))
+    }
   })
 })

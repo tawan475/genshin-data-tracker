@@ -74,9 +74,9 @@ own lazy chunk.
 ## Storage model
 
 A snapshot row holds its capture times, sizes, the first 47 bits of its
-content hash, the ids of its nine sections (characters, weapons, artifacts,
+content hash, the ids of its ten sections (characters, weapons, artifacts,
 materials, achievements and irminsul's player, achievement times, character
-extras and anecdotes) and `meta`: the summary the list views show, the GOOD
+extras, anecdotes and tasks) and `meta`: the summary the list views show, the GOOD
 header and the player values that move with every login (resin, AR EXP).
 Sections are stored once per account in `section_blobs` under the first 8
 bytes of their content address, with an integer id. Artifacts live in an
@@ -123,13 +123,21 @@ range-checked again on import: `gi_player` (AR, World Level, UID… as read at
 login) as `player`, `gi_achievement_times` (finish times, unix seconds) as
 `achievementTimes`, `gi_characters` (friendship, obtained date) as
 `characterExtras`, `gi_anecdotes` (the Travel Accounts book: state and finish
-count per met anecdote, unlocked areas, stamp progress) as `anecdotes`. A file
+count per met anecdote, unlocked areas, stamp progress) as `anecdotes`,
+`gi_tasks` (contract v1, the game's state at login: commissions done today,
+the Abyss period's stars, who is out on an expedition and when they are back,
+the realm currency jar, Welkin days; each part kept only when all of it is in
+range) as `tasks` (`snapshots.tasks_ref`, migration 0028). A file
 without them stores and hashes exactly as before
 they existed, and exports (GOOD rebuild, zip) write them back after
 `timestamp`. The app uses them for the achievements' real completion times,
 friendship and obtained dates on Characters, the planner's AR/WL (when the
-settings are empty) and resin, and the Anecdotes checklist (captured progress
-plus hand marks in `anecdote_marks`).
+settings are empty) and resin, the Anecdotes checklist (captured progress
+plus hand marks in `anecdote_marks`), and the planner's Tasks: the newest
+capture's `gi_tasks` ticks Daily Commissions (all done today) and the Spiral
+Abyss (full stars in the running period) and adds Expeditions, Realm Currency
+and Welkin Moon rows, while the capture is newer than the row's hand state
+(`components/planner/tasks.ts` `captureRead`).
 
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`; artifact sets,

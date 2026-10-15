@@ -17,6 +17,13 @@
  * - Imaginarium Theater, Paimon's Bargains: the 1st of each month at 04:00.
  * - Parametric Transformer: 166 hours after it was used (a cooldown, not a
  *   reset).
+ * From irminsul's captures (`gi_tasks`, the game's state at login): the
+ * commissions done today and the Abyss stars tick those two by themselves,
+ * and three more rows appear once a capture has them: Expeditions (back
+ * when the first one is done), Realm Currency (when the jar is full) and
+ * the Welkin Moon (three days before it runs out). The capture decides a
+ * row while it is newer than the row's hand state: a tick, Undo or snooze
+ * after it wins until the next capture.
  * Domain events (Overflowing Abundance & co.) come from the tracker
  * (`GET /api/domain-events`: the game data's announced runs and staff's):
  * while one runs it is a daily task (its multiplied claims come back at
@@ -32,10 +39,12 @@ import {
   type CustomTask,
   type DomainEventWindow,
   type GameNotice,
+  type GiTasks,
   type PlannerTask,
   type PlannerTaskInput,
 } from '@gdt/shared'
 import { locale } from '@/i18n/locale'
+import { formatTime, keyToName } from '@/lib/format'
 import { t } from '@/i18n'
 
 const HOUR = 3_600_000
@@ -134,6 +143,8 @@ export interface BuiltinTask {
   soonMs: number
   /** Seelie's key for it (`tasks[].id` in its export), when it has one. */
   seelie?: string
+  /** Listed only while the newest capture has this part of `gi_tasks`. */
+  capture?: 'expeditions' | 'realm' | 'welkin'
 }
 
 const MONDAY = 1
@@ -213,9 +224,41 @@ export const BUILTIN_TASKS: readonly BuiltinTask[] = [
     rule: { kind: 'cooldown', hours: 166 },
     soonMs: 0,
   },
+  {
+    id: 'expeditions',
+    get name() {
+      return t('planner.task.builtin.expeditions')
+    },
+    rule: { kind: 'cooldown', hours: 20 },
+    soonMs: 0,
+    capture: 'expeditions',
+  },
+  {
+    id: 'realm',
+    get name() {
+      return t('planner.task.builtin.realm')
+    },
+    rule: { kind: 'cooldown', hours: 24 },
+    soonMs: 0,
+    capture: 'realm',
+  },
+  {
+    id: 'welkin',
+    get name() {
+      return t('planner.task.builtin.welkin')
+    },
+    rule: { kind: 'cooldown', hours: 7 * 24 },
+    soonMs: 0,
+    capture: 'welkin',
+  },
 ]
 
 export const builtinTask = (id: string) => BUILTIN_TASKS.find((t) => t.id === id) ?? null
+
+/** The built-in tasks to list: capture-only ones while the capture has their part. */
+export function listedBuiltins(capture: CapturedTasks | null | undefined): BuiltinTask[] {
+  return BUILTIN_TASKS.filter((b) => !b.capture || capture?.tasks[b.capture] !== undefined)
+}
 
 /** The first reset of a periodic rule after `now` (null for a cooldown). */
 export function nextReset(rule: TaskRule, now: number, server: string | null | undefined) {
@@ -310,6 +353,135 @@ export function customDone(task: Pick<CustomTask, 'every' | 'mode'>, due: number
 /** Taking a Done back (Seelie's toggle): one period earlier. */
 export const customUndone = (task: Pick<CustomTask, 'every'>, due: number) => due - task.every
 
+// ------------------------------------------------------------- captures
+
+/** The newest capture's `gi_tasks`, taken at `at` (ms). */
+export interface CapturedTasks {
+  at: number
+  tasks: GiTasks
+}
+
+/** What a capture says about a built-in task now. */
+export interface CaptureRead {
+  /** When the capture was taken (ms). */
+  at: number
+  /** Done for now (per the capture). */
+  done: boolean
+  /** Resting until (ms), when the capture knows; null: due, or unknown. */
+  back: number | null
+  /** The figure shown by the name: "2/4", "30★", "3/5", "1800/2400", "12d". */
+  text: string
+  /** The figure in words, for the tooltip. */
+  title: string
+}
+
+/** Welkin days left today: the capture's count, one fewer each game day since. */
+export function welkinDays(
+  days: number,
+  capturedAt: number,
+  now: number,
+  server: string | null | undefined,
+) {
+  return days - Math.max(0, gameDay(now, server) - gameDay(capturedAt, server))
+}
+
+/** Welkin Moon rows come due this many days before it runs out. */
+export const WELKIN_SOON_DAYS = 3
+
+/**
+ * What the capture says about built-in task `id` at `now`, or null when it
+ * says nothing about the period running (a commission count from another
+ * day, an Abyss period that ended, a part it lacks).
+ */
+export function captureRead(
+  id: string,
+  capture: CapturedTasks | null | undefined,
+  now: number,
+  server: string | null | undefined,
+): CaptureRead | null {
+  if (!capture) return null
+  const { at, tasks } = capture
+  switch (id) {
+    case 'commissions': {
+      const c = tasks.commissions
+      if (!c || at < lastReset({ kind: 'daily' }, now, server)!) return null
+      const done = c.finished >= c.total
+      return {
+        at,
+        done,
+        back: done ? nextReset({ kind: 'daily' }, now, server) : null,
+        text: `${c.finished}/${c.total}`,
+        title: t('planner.tasks.capture.commissions', { n: c.finished, total: c.total }),
+      }
+    }
+    case 'abyss': {
+      const a = tasks.abyss
+      if (!a || now >= (a.end + 1) * 1000 || at < a.start * 1000) return null
+      const done = a.stars >= a.maxStars
+      return {
+        at,
+        done,
+        back: done ? (a.end + 1) * 1000 : null,
+        text: `${a.stars}★`,
+        title: t('planner.tasks.capture.abyss', { stars: a.stars, max: a.maxStars }),
+      }
+    }
+    case 'expeditions': {
+      const out = tasks.expeditions
+      if (!out) return null
+      if (out.length === 0) {
+        return {
+          at,
+          done: false,
+          back: null,
+          text: '0',
+          title: t('planner.tasks.capture.nobodyOut'),
+        }
+      }
+      const times = out.map((e) => e.doneAt * 1000)
+      const first = Math.min(...times)
+      const back = times.filter((time) => time <= now).length
+      const who = out
+        .map(
+          (e) => `${e.character ? `${keyToName(e.character)} ` : ''}${formatTime(e.doneAt * 1000)}`,
+        )
+        .join(' · ')
+      return {
+        at,
+        done: first > now,
+        back: first > now ? first : null,
+        text: `${back}/${out.length}`,
+        title: `${t('planner.tasks.capture.expeditions', { n: back, total: out.length })} · ${who}`,
+      }
+    }
+    case 'realm': {
+      const r = tasks.realm
+      if (!r) return null
+      return {
+        at,
+        done: r.value < r.limit,
+        back: null,
+        text: `${r.value}/${r.limit}`,
+        title: t('planner.tasks.capture.realm', { value: r.value, limit: r.limit }),
+      }
+    }
+    case 'welkin': {
+      const w = tasks.welkin
+      if (!w) return null
+      const left = welkinDays(w.days, at, now, server)
+      const soon = left <= WELKIN_SOON_DAYS
+      return {
+        at,
+        done: !soon,
+        back: soon ? null : dayStart(gameDay(at, server) + w.days - WELKIN_SOON_DAYS, server),
+        text: t('farm.time.d', { d: Math.max(0, left) }),
+        title: t('planner.tasks.capture.welkin', { n: Math.max(0, left) }),
+      }
+    }
+  }
+  return null
+}
+
 // ------------------------------------------------------------- the list
 
 export type TaskTone = 'soon' | 'today' | 'due' | 'rest'
@@ -346,6 +518,11 @@ export interface TaskRow {
   notice: { notice: GameNotice; start: number; end: number | null } | null
   /** What is stored for it (a built-in task never touched has nothing). */
   stored: PlannerTask | null
+  /**
+   * What the newest capture says about it; `rules`: the capture is newer
+   * than the hand state, so it decides whether the row is done.
+   */
+  capture?: CaptureRead & { rules: boolean }
 }
 
 /** Events starting within this long are listed (resting) before they start. */
@@ -382,6 +559,7 @@ export function taskRows(
   server: string | null | undefined,
   events: readonly DomainEventWindow[] = [],
   notices: readonly GameNotice[] = [],
+  capture: CapturedTasks | null = null,
 ): TaskRow[] {
   const byId = new Map(stored.map((t) => [`${t.kind}:${t.id}`, t]))
   const rows: TaskRow[] = []
@@ -454,29 +632,40 @@ export function taskRows(
       stored: s ?? null,
     })
   }
-  for (const b of BUILTIN_TASKS) {
+  for (const b of listedBuiltins(capture)) {
     const s = byId.get(`builtin:${b.id}`)
     if (s?.kind === 'builtin' && s.hidden) continue
-    const next = s?.kind === 'builtin' ? (s.next ?? null) : null
-    const resting = next !== null && next > now
     const resets = nextReset(b.rule, now, server)
-    const due = !resting
+    const read = captureRead(b.id, capture, now, server)
+    // The capture decides while it is newer than what was done by hand.
+    const rules = read !== null && (!s || s.updatedAt < read.at)
+    let row: Pick<TaskRow, 'due' | 'back' | 'snoozed'>
+    if (rules) {
+      row = { due: !read.done, back: read.done ? read.back : null, snoozed: false }
+    } else {
+      const next = s?.kind === 'builtin' ? (s.next ?? null) : null
+      const resting = next !== null && next > now
+      row = {
+        due: !resting,
+        back: resting ? next : null,
+        snoozed: resting && resets !== null && next < resets,
+      }
+    }
     rows.push({
       key: `builtin:${b.id}`,
       kind: 'builtin',
       id: b.id,
       name: b.name,
-      due,
-      tone: !due ? 'rest' : resets !== null && resets - now <= b.soonMs ? 'soon' : 'due',
-      resets: due ? resets : null,
-      back: resting ? next : null,
-      snoozed: resting && resets !== null && next < resets,
+      ...row,
+      tone: !row.due ? 'rest' : resets !== null && resets - now <= b.soonMs ? 'soon' : 'due',
+      resets: row.due ? resets : null,
       late: 0,
       builtin: b,
       custom: null,
       event: null,
       notice: null,
       stored: s ?? null,
+      ...(read ? { capture: { ...read, rules } } : {}),
     })
   }
   const today = gameDay(now, server)
