@@ -21,6 +21,7 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import { useSnapshotSelection } from '@/composables/useSnapshotSelection'
 import LiveRow from '@/components/live/LiveRow.vue'
+import SessionList from '@/components/snapshots/SessionList.vue'
 import { loadLive, loadSnapshots } from '@/data/account-data'
 import { noteLiveChange } from '@/live/journal'
 import { cancelExport, downloadSnapshotGood, exportJob, exportZip } from '@/data/export'
@@ -309,6 +310,7 @@ const handleBulkDownload = async () => {
       ids: items.length === list.value.length ? null : items.map((s) => s.id),
       requested: items.length,
       fileName: zipFileName(items),
+      live: account.value.liveSync ?? false,
     })
     if (!result) return
     resetSelection()
@@ -438,6 +440,15 @@ const handleBulkDelete = async () => {
       :raw-bytes="account.rawBytes"
       :stored-bytes="account.storedBytes"
       :loading="!snapshots && !error"
+    />
+
+    <SessionList
+      v-if="list.length"
+      :snapshots="list"
+      :live="live.data.value"
+      :account="account"
+      :limit="3"
+      full
     />
 
     <div ref="host" class="space-y-3">

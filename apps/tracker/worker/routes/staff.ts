@@ -28,6 +28,7 @@ import {
   deleteUserRequest,
   inspectRequest,
   purgeRequest,
+  type LiveJournalResponse,
   quotaRequest,
   renameRequest,
   roleInput,
@@ -53,6 +54,13 @@ import {
   type StorageSort,
   type StorageWindow,
 } from '@gdt/shared'
+import {
+  deleteLiveData,
+  endJournalOn,
+  liveBytesByUser,
+  liveDb,
+  readJournal,
+} from '../services/live-sync'
 import { Hono, type Context } from 'hono'
 import type { AppEnv } from '../env'
 import { emailEnabled, emailFeatures, linkOrigin } from '../lib/email'
@@ -741,6 +749,12 @@ export const staff = new Hono<AppEnv>()
       listenerStatement(d1, account.id),
     ])
     const deleted = results[1]!.results.length
+    // A purged snapshot that a live journal follows ends that journal.
+    await endJournalOn(
+      liveDb(c.env),
+      account.id,
+      results[1]!.results.map((row) => Number((row as { id: number }).id)),
+    ).catch((error: unknown) => console.warn('live_cleanup_failed', String(error)))
     notifyUser(
       c,
       owner.userId,
@@ -761,6 +775,9 @@ export const staff = new Hono<AppEnv>()
       }),
       c.env.DB.prepare('DELETE FROM genshin_accounts WHERE id = ?1').bind(account.id),
     ])
+    await deleteLiveData(liveDb(c.env), [account.id]).catch((error: unknown) =>
+      console.warn('live_cleanup_failed', String(error)),
+    )
     notifyUser(c, owner.userId, { type: 'accounts' })
     return c.body(null, 204)
   })
@@ -806,23 +823,36 @@ export const staff = new Hono<AppEnv>()
     return c.body(await buildBundle(c.env.DB, account.id, ids, sections, 2))
   })
 
+  /** The account's open live sync journal, merged (read-only, logged like the other data looks). */
+  .get('/accounts/:id/live', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'live')
+    const live = liveDb(c.env)
+    if (!live) return c.json<LiveJournalResponse>({ open: false })
+    return c.json<LiveJournalResponse>((await readJournal(live, account.id)).response)
+  })
+
   // ----------------------------------------------------------------- storage
 
   .get('/storage', need('data.storage'), async (c) => {
     const { limits } = await readSiteSettings(c.env.DB)
-    return c.json(
-      await storage(
-        c.env.DB,
-        {
-          window: pick<StorageWindow>(c.req.query('window'), STORAGE_WINDOWS, '24h'),
-          sort: pick<StorageSort>(c.req.query('sort'), STORAGE_SORTS, 'growth'),
-          flagged: c.req.query('flagged') === '1',
-          q: c.req.query('q') ?? '',
-          page: pageOf(c.req.query('page')),
-        },
-        limits,
-      ),
+    const page = await storage(
+      c.env.DB,
+      {
+        window: pick<StorageWindow>(c.req.query('window'), STORAGE_WINDOWS, '24h'),
+        sort: pick<StorageSort>(c.req.query('sort'), STORAGE_SORTS, 'growth'),
+        flagged: c.req.query('flagged') === '1',
+        q: c.req.query('q') ?? '',
+        page: pageOf(c.req.query('page')),
+      },
+      limits,
     )
+    // What each listed user keeps in gdt-live (live sync), read beside it.
+    const bytes = await liveBytesByUser(
+      liveDb(c.env),
+      page.rows.map((row) => row.id),
+    )
+    for (const row of page.rows) row.liveBytes = bytes.get(row.id) ?? 0
+    return c.json(page)
   })
 
   // ------------------------------------------------------------------- roles

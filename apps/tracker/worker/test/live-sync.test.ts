@@ -207,6 +207,30 @@ describe('live sync on', () => {
     expect(await sendOk(importKey, delta(first.live!.base, 1, []))).toMatchObject({ seq: 1 })
   })
 
+  it('a full send in another world is its own snapshot, even unchanged', async () => {
+    const { importKey } = await setup()
+    const home = await snapshot(importKey, liveGood(), 1_000)
+    const coop = await snapshot(
+      importKey,
+      liveGood({
+        gi_capture: { v: 1, reason: 'world', session: SESSION, world: 2, journal: { seq: 0 } },
+      }),
+      2_000,
+    )
+    expect(coop.status).toBe('created')
+    expect(coop.snapshotId).not.toBe(home.snapshotId)
+    expect(coop.storedSize).toBeLessThan(200)
+    // A collapse in the same world with nothing new is not.
+    const same = await snapshot(
+      importKey,
+      liveGood({
+        gi_capture: { v: 1, reason: 'collapse', session: SESSION, world: 2, journal: { seq: 3 } },
+      }),
+      3_000,
+    )
+    expect(same.status).toBe('unchanged')
+  })
+
   it('an older capture does not move the journal', async () => {
     const { account, importKey } = await setup()
     const newest = await snapshot(importKey, liveGood(), 5_000)

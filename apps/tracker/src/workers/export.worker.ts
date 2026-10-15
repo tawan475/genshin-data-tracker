@@ -7,12 +7,20 @@
  * as a single classic script.
  */
 
-import { catalogFromRows, openBundle, sectionHashesOf, type CatalogRow } from '@gdt/shared'
+import {
+  catalogFromRows,
+  openBundle,
+  sectionHashesOf,
+  type CatalogRow,
+  type LiveJournalResponse,
+  type LivePointsResponse,
+} from '@gdt/shared'
 import { MATERIALS } from '@gdt/shared/dictionary/materials'
 import { request } from '@/api/http'
 import { BUNDLE_FORMAT } from '@/api/format'
 import type { ExportCommand, ExportEvent, ExportStart } from '@/data/export-protocol'
 import { decodeFromSections, writeGoodZip } from '@/data/export-zip'
+import { liveFiles } from '@/data/live-export'
 
 /** The parts of DedicatedWorkerGlobalScope used here (the app compiles against the DOM lib). */
 interface WorkerScope {
@@ -63,7 +71,24 @@ async function readBody(response: Response, onBytes: (count: number) => void) {
   return bytes
 }
 
-async function run({ accountId, ids, level }: ExportStart) {
+/** Live sync's journal and points (null / none when it fails: the snapshots still export). */
+async function loadLive(accountId: number) {
+  const json = async <T>(path: string): Promise<T | null> => {
+    try {
+      return (await (await request(path)).json()) as T
+    } catch {
+      return null
+    }
+  }
+  const [live, points] = await Promise.all([
+    json<LiveJournalResponse>(`/api/accounts/${accountId}/live`),
+    json<LivePointsResponse>(`/api/accounts/${accountId}/points`),
+  ])
+  return { live, points: points?.points ?? [] }
+}
+
+async function run({ accountId, ids, level, live: withLive }: ExportStart) {
+  const liveData = withLive ? loadLive(accountId) : null
   const query = ids && ids.length <= MAX_IDS_IN_URL ? `&ids=${ids.join(',')}` : ''
   const [bundleResponse, catalogResponse] = await Promise.all([
     request(`/api/accounts/${accountId}/bundle?format=${BUNDLE_FORMAT}${query}`),
@@ -96,9 +121,19 @@ async function run({ accountId, ids, level }: ExportStart) {
   const rows = JSON.parse(new TextDecoder().decode(catalogBytes)) as CatalogRow[]
   const catalog = catalogFromRows(rows)
 
+  const decode = (snapshot: (typeof snapshots)[number]) =>
+    decodeFromSections(snapshot, texts, catalog, MATERIALS)
+  let extra: ReturnType<typeof liveFiles> = []
+  if (liveData) {
+    const { live, points } = await liveData
+    const base = live?.base ? snapshots.find((s) => s.id === live.base!.snapshotId) : undefined
+    extra = liveFiles(live, points, base ? { id: base.id, good: decode(base) } : null)
+  }
+
   const totals = writeGoodZip({
     snapshots,
-    decode: (snapshot) => decodeFromSections(snapshot, texts, catalog, MATERIALS),
+    decode,
+    extra,
     // fflate may hand out views of buffers it still uses: copy, then transfer the copy.
     onChunk: (chunk) => {
       const data = chunk.slice()

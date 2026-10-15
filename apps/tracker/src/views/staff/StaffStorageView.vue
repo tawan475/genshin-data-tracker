@@ -321,7 +321,14 @@ const pageCount = computed(() =>
               >
                 +{{ formatNumber(row.newSnapshots) }}
               </td>
-              <td class="tabular px-3 py-1.5 text-right font-mono">
+              <td
+                class="tabular px-3 py-1.5 text-right font-mono"
+                :title="
+                  row.liveBytes
+                    ? $t('live.staffBytes', { size: formatBytes(row.liveBytes) })
+                    : undefined
+                "
+              >
                 {{ formatBytes(row.storedBytes) }}
               </td>
               <td class="px-3 py-1.5">

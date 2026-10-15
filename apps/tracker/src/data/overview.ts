@@ -167,6 +167,30 @@ export function buildHistory(snapshots: readonly SnapshotResponse[]): History {
   return { captures, days }
 }
 
+/** A live sync chart point this close to a capture is left out: the capture wins. */
+export const POINT_NEAR_CAPTURE_MS = 60_000
+
+/**
+ * Captures with live sync's chart points (real samples between snapshots,
+ * no interpolation) merged in, oldest first. A point within a minute of a
+ * capture is dropped; points without currency are left out.
+ */
+export function withPoints(
+  captures: readonly Capture[],
+  points: readonly { at: number; figures: SnapshotSummary }[],
+): Capture[] {
+  if (points.length === 0) return [...captures]
+  const near = (at: number) => {
+    const i = lowerBound(captures, at - POINT_NEAR_CAPTURE_MS)
+    const capture = captures[i]
+    return capture !== undefined && capture.at <= at + POINT_NEAR_CAPTURE_MS
+  }
+  const extra = points
+    .filter((p) => !currencyMissing(p.figures) && !near(p.at))
+    .map((p) => ({ at: p.at, summary: p.figures }))
+  return [...captures, ...extra].sort((a, b) => a.at - b.at)
+}
+
 /** First index whose `at` is >= `from` (captures are sorted by `at`). */
 function lowerBound(captures: readonly Capture[], from: number): number {
   let lo = 0

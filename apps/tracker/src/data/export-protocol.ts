@@ -16,6 +16,12 @@ export interface ExportStart {
   ids: number[] | null
   /** DEFLATE level for each file, 0-9. */
   level: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+  /**
+   * Live sync is on for the account: the zip also gets `live/` (the open
+   * journal as GOOD-X delta lines, the chart points as CSV, and the newest
+   * snapshot with the journal applied: the account as of now).
+   */
+  live?: boolean
 }
 
 export type ExportCommand = ExportStart

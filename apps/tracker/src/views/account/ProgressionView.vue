@@ -9,8 +9,8 @@ import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
-import { loadSnapshots } from '@/data/account-data'
-import { buildHistory } from '@/data/overview'
+import { loadPoints, loadSnapshots } from '@/data/account-data'
+import { buildHistory, withPoints } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { useAccounts } from '@/stores/accounts'
 import { useAccount } from './context'
@@ -46,7 +46,14 @@ const list = computed(() => {
   const value = data.value
   return value && value.accountId === account.value.id ? value.list : undefined
 })
-const captures = computed(() => (list.value ? buildHistory(list.value).captures : undefined))
+// Live sync's chart points between snapshots (none when it is off).
+const points = useResource(
+  () => account.value,
+  (a) => loadPoints(a),
+)
+const captures = computed(() =>
+  list.value ? withPoints(buildHistory(list.value).captures, points.data.value ?? []) : undefined,
+)
 
 const importRoute = computed(() => ({
   name: 'account-import',

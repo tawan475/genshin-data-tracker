@@ -2,6 +2,8 @@ import {
   decodeBundle,
   type AccountCreatedResponse,
   type AccountResponse,
+  type ImportResponse,
+  type LiveJournalResponse,
   type MeResponse,
   type DomainEventsResponse,
   type StaffAuditResponse,
@@ -710,6 +712,45 @@ describe('deleting', () => {
       ['data.delete', 1],
       ['data.delete', 1],
     ])
+  })
+})
+
+describe('live sync (staff)', () => {
+  it('reads a journal read-only, and lists gdt-live bytes per user', async () => {
+    const admin = await member('Admin')
+    const user = await member()
+    const { account, importKey } = await createAccount(user.client)
+    await user.client.json(`/api/accounts/${account.id}/settings`, {
+      method: 'PATCH',
+      json: { liveSync: true },
+    })
+    const good = sampleGood(sampleExtras())
+    const answer = (await (await importByKey(importKey, good, 1_000)).json()) as ImportResponse
+    const sent = await SELF.fetch(`${ORIGIN}/api/irminsul/changes`, {
+      method: 'POST',
+      headers: { 'x-import-key': importKey, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        format: 'GOOD-X-delta',
+        v: 1,
+        uid: 812345678,
+        session: 'STAFFTEST-SESSION',
+        seq: 1,
+        base: answer.live!.base,
+        at: 1,
+        changes: [['set', ['materials', 'Mora'], 5]],
+      }),
+    })
+    expect(sent.status).toBe(200)
+    const live = await admin.client.json<LiveJournalResponse>(
+      `/api/staff/accounts/${account.id}/live`,
+    )
+    expect(live).toMatchObject({ open: true, seq: 1, changes: [['set', ['materials', 'Mora'], 5]] })
+    const page = await admin.client.json<StaffStorageResponse>(
+      `/api/staff/storage?q=${encodeURIComponent(user.username)}`,
+    )
+    expect(page.rows[0]!.liveBytes).toBeGreaterThan(0)
+    // A plain user has no staff routes.
+    expect(await status(user.client, `/api/staff/accounts/${account.id}/live`)).toBe(404)
   })
 })
 

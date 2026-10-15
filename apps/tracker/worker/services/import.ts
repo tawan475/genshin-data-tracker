@@ -31,6 +31,7 @@ import {
   artifactKeyString,
   compactSubstats,
   completeSnapshot,
+  decodeSnapshotMeta,
   contentKey,
   decodeCatalogChunk,
   encodeCatalogChunk,
@@ -44,6 +45,7 @@ import {
   BlobDecoder,
   type ArtifactIdentity,
   type BlobRef,
+  type GiCapture,
   type ImportResponse,
   type ImportWarning,
   type KnownBlob,
@@ -80,6 +82,7 @@ interface LatestRow extends Record<string, unknown> {
   content_hash: string | null
   content_key: number | null
   characters_ref: number | null
+  meta: unknown
 }
 
 interface SameTimeRow {
@@ -95,7 +98,7 @@ export const CATALOG_CHUNK_SIZE = 512
 
 /** The latest live snapshot (a v1 row's content hash only while the schema has v1). */
 const latestSql = (legacy: boolean) => `SELECT id, taken_at,
-    ${legacy ? 'content_hash' : 'NULL AS content_hash'}, content_key, ${REFS_SQL}
+    ${legacy ? 'content_hash' : 'NULL AS content_hash'}, content_key, meta, ${REFS_SQL}
   FROM snapshots WHERE account_id = ?1 AND deleted_at IS NULL
   ORDER BY taken_at DESC, id DESC LIMIT 1`
 
@@ -330,9 +333,16 @@ async function importOnce(
     )
   }
 
-  if (latest && sameInventory(latest) && takenAt > latest.taken_at) {
+  if (
+    latest &&
+    sameInventory(latest) &&
+    takenAt > latest.taken_at &&
+    !newWorld(prepared.good.capture, latest.meta)
+  ) {
     // Same inventory captured again later: remember when it was last seen
-    // instead of storing a duplicate snapshot.
+    // instead of storing a duplicate snapshot. (A full send of the game in
+    // another world or session is kept as its own snapshot even unchanged:
+    // live sync's session cards have one row per world stay.)
     const [, bumped, listening] = await meter.batch(d1, 'seen', [
       d1
         .prepare('UPDATE snapshots SET last_seen_at = max(last_seen_at, ?1) WHERE id = ?2')
@@ -430,6 +440,23 @@ async function importOnce(
     listenerOf(results.at(-1)),
     !latest || takenAt >= latest.taken_at,
   )
+}
+
+/**
+ * Whether an irminsul capture starts a world stay the newest snapshot does
+ * not stand for: a full send of the game (`login`, `world`) in another
+ * session or world than the newest snapshot's.
+ */
+function newWorld(capture: GiCapture | null | undefined, latestMeta: unknown): boolean {
+  if (!capture || (capture.reason !== 'login' && capture.reason !== 'world')) return false
+  if (latestMeta === null || latestMeta === undefined) return true
+  let previous: GiCapture | undefined
+  try {
+    previous = decodeSnapshotMeta(toBytes(latestMeta)).capture
+  } catch {
+    return false
+  }
+  return !previous || previous.session !== capture.session || previous.world !== capture.world
 }
 
 /**

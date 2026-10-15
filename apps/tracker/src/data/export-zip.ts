@@ -84,6 +84,8 @@ export interface GoodZipOptions {
   onProgress?: (progress: ZipProgress) => void
   /** DEFLATE level, 0-9. */
   level?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+  /** More files after the snapshots (live sync's `live/` folder). */
+  extra?: readonly { name: string; text: string; mtime?: number }[]
 }
 
 // DOS timestamps in a zip cover 1980-2099; outside that fflate throws.
@@ -92,7 +94,7 @@ const DOS_MAX = Date.UTC(2099, 11, 30)
 
 /** Writes one GOOD file per snapshot into a zip, streaming. Returns the totals. */
 export function writeGoodZip(options: GoodZipOptions): ZipProgress {
-  const { snapshots, decode, onChunk, onProgress, level = 6 } = options
+  const { snapshots, decode, onChunk, onProgress, level = 6, extra = [] } = options
   const progress: ZipProgress = { done: 0, total: snapshots.length, jsonBytes: 0, zipBytes: 0 }
   const names = zipEntryNames(snapshots)
   const encoder = new TextEncoder()
@@ -119,6 +121,15 @@ export function writeGoodZip(options: GoodZipOptions): ZipProgress {
     progress.done++
     progress.jsonBytes += bytes.length
     onProgress?.({ ...progress })
+  }
+  for (const entry of extra) {
+    const file = new ZipDeflate(entry.name, { level })
+    if (entry.mtime !== undefined && entry.mtime >= DOS_MIN && entry.mtime <= DOS_MAX) {
+      file.mtime = entry.mtime
+    }
+    zip.add(file)
+    file.push(encoder.encode(entry.text), true)
+    if (state.failure) throw state.failure
   }
   zip.end()
   if (state.failure) throw state.failure

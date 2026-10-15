@@ -71,6 +71,21 @@ function targetOptions(row: SessionResponse): (SelectOption<string> | SelectGrou
   return options
 }
 
+/**
+ * Live sync for where an irminsul device's uploads go (chosen per account in
+ * its settings): the accounts it is on for, or null when none.
+ */
+function liveTargets(row: SessionResponse): string[] | null {
+  if (row.method !== 'irminsul') return null
+  const upload = row.upload
+  const targets =
+    !upload || upload.mode === 'uid'
+      ? accounts.list
+      : accounts.list.filter((a) => a.id === upload.accountId)
+  const on = targets.filter((a) => a.liveSync).map((a) => accounts.displayName(a))
+  return on.length ? on : null
+}
+
 /** The select's value for a row's target. */
 function targetKey(row: SessionResponse): string {
   const upload = row.upload
@@ -237,6 +252,12 @@ async function signOut() {
               <UiBadge v-if="row.current" tone="accent">{{
                 $t('settings.devices.thisDevice')
               }}</UiBadge>
+              <UiBadge
+                v-if="liveTargets(row)"
+                tone="success"
+                :title="$t('live.settings.devices', { accounts: liveTargets(row)!.join(', ') })"
+                >{{ $t('live.label') }}</UiBadge
+              >
             </p>
             <p class="truncate text-sm text-text-muted">
               <span class="tabular">{{ row.place || $t('settings.devices.unknownPlace') }}</span>

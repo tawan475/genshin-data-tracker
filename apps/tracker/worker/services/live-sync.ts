@@ -311,7 +311,6 @@ function emptyFigures(): Figures {
 export async function readJournal(
   live: D1Database,
   accountId: number,
-  base: { takenAt: number } | null,
 ): Promise<{ response: LiveJournalResponse; etag: string }> {
   const [journalResult, batchesResult] = await live.batch<Record<string, unknown>>([
     live.prepare('SELECT * FROM live_journals WHERE account_id = ?1').bind(accountId),
@@ -343,7 +342,7 @@ export async function readJournal(
       base: {
         snapshotId: journal.base_snapshot_id,
         contentKey: journal.base_key,
-        takenAt: base?.takenAt ?? journal.opened_at,
+        takenAt: journal.opened_at,
       },
       session: journal.session,
       seq: journal.last_seq,
@@ -458,6 +457,33 @@ export function liveUsageStatement(live: D1Database, userId: number): D1Prepared
          AS bytes`,
     )
     .bind(userId)
+}
+
+/** `gdt-live` bytes per user, for the staff storage page (empty when the read fails). */
+export async function liveBytesByUser(
+  live: D1Database | null,
+  userIds: number[],
+): Promise<Map<number, number>> {
+  if (!live || userIds.length === 0) return new Map()
+  try {
+    const ids = JSON.stringify(userIds)
+    const { results } = await live
+      .prepare(
+        `SELECT user_id, sum(bytes) AS bytes FROM (
+           SELECT user_id, bytes + coalesce(length(items), 0) AS bytes FROM live_journals
+             WHERE user_id IN (SELECT value FROM json_each(?1))
+           UNION ALL
+           SELECT user_id, length(data) AS bytes FROM live_points
+             WHERE user_id IN (SELECT value FROM json_each(?1)))
+         GROUP BY user_id`,
+      )
+      .bind(ids)
+      .all<{ user_id: number; bytes: number }>()
+    return new Map(results.map((row) => [row.user_id, Number(row.bytes)]))
+  } catch (error) {
+    console.warn('live_bytes_failed', String(error))
+    return new Map()
+  }
 }
 
 /** A user's `gdt-live` bytes (0 without the binding, or when the read fails). */

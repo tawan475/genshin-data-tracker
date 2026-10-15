@@ -16,8 +16,15 @@ import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import LiveStrip from '@/components/live/LiveStrip.vue'
-import { loadLive, loadSnapshots } from '@/data/account-data'
-import { buildHistory, currencyMissing, latestDelta, serverLabel } from '@/data/overview'
+import SessionList from '@/components/snapshots/SessionList.vue'
+import { loadLive, loadPoints, loadSnapshots } from '@/data/account-data'
+import {
+  buildHistory,
+  currencyMissing,
+  latestDelta,
+  serverLabel,
+  withPoints,
+} from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
 import { formatDateTime, formatRelative } from '@/lib/format'
@@ -78,6 +85,14 @@ const liveFigures = computed(() => {
 
 // Derived once per data version; the components below only read.
 const history = computed(() => (list.value ? buildHistory(list.value) : null))
+// Live sync's chart points between snapshots (none when it is off).
+const points = useResource(
+  () => account.value,
+  (a) => loadPoints(a),
+)
+const chartCaptures = computed(() =>
+  history.value ? withPoints(history.value.captures, points.data.value ?? []) : [],
+)
 
 /** Change since the previous snapshot: undefined while loading, null for the first one. */
 const delta = computed(() => {
@@ -261,8 +276,9 @@ const importRoute = computed(() => ({
     />
 
     <div v-if="list && history?.captures.length" class="mt-6 flex flex-col gap-6">
+      <SessionList :snapshots="list" :live="live.data.value" :account="account" :limit="1" />
       <DetailedProgression
-        :captures="history.captures"
+        :captures="chartCaptures"
         :title="$t('overview.progression')"
         storage="overview-progression"
         :defaults="['mora', 'primogem']"

@@ -16,6 +16,29 @@
   "settings": {
     "title": "Live sync",
     "label": "Follow Irminsul live",
-    "description": "While Irminsul runs, its changes show here within seconds, between snapshots."
-  }
+    "description": "While Irminsul runs, its changes show here within seconds, between snapshots.",
+    "devices": "Live sync from this PC to: {accounts} (Account settings)",
+    "deletePoints": "Delete chart points",
+    "deletePointsTitle": "Delete the chart points live sync kept between snapshots",
+    "deletePointsConfirm": "Delete every chart point of this account? Snapshots stay.",
+    "pointsDeleted": "Chart points deleted",
+    "exportNote": "Exports include the live changes and points (live/ in the zip)."
+  },
+  "session": {
+    "heading": "Sessions",
+    "hours": "{h} h {m} min",
+    "minutes": "{m} min",
+    "world": "World {n}",
+    "newCharacter": "{name} joined",
+    "more": "+{n} more",
+    "showMore": "Show more ({n})",
+    "field": {
+      "level": "{name} Lv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} attack {from}→{to}",
+      "skill": "{name} skill {from}→{to}",
+      "burst": "{name} burst {from}→{to}"
+    }
+  },
+  "staffBytes": "Live sync keeps {size} more (gdt-live)"
 }

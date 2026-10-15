@@ -166,9 +166,7 @@ describe('filterAnecdotes', () => {
     const all = filterAnecdotes(p, DEFAULT_ANECDOTE_FILTERS, TEXT)
     expect(countShown(all)).toBe(7)
     const missing = { ...DEFAULT_ANECDOTE_FILTERS, completion: 'missing' as const }
-    expect(ids(filterAnecdotes(p, missing, TEXT))).toEqual([
-      100105, 100102, 100202, 100203, 100201,
-    ])
+    expect(ids(filterAnecdotes(p, missing, TEXT))).toEqual([100105, 100102, 100202, 100203, 100201])
     expect(ids(filterAnecdotes(p, missing, TEXT, new Set([100101])))).toEqual([
       100105, 100101, 100102, 100202, 100203, 100201,
     ])

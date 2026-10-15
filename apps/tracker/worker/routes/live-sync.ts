@@ -122,7 +122,7 @@ export const liveAccounts = new Hono<AppEnv>()
     if (!live || !liveSyncOn((account.settings as { liveSync?: unknown } | null)?.liveSync)) {
       return c.json<LiveJournalResponse>({ open: false })
     }
-    const { response, etag } = await readJournal(live, account.id, null)
+    const { response, etag } = await readJournal(live, account.id)
     c.header('ETag', etag)
     const match = c.req.header('if-none-match')
     if (match && match.split(/\s*,\s*/).includes(etag)) return c.body(null, 304)

@@ -478,6 +478,8 @@ export interface StaffStorageRow {
   /** Days of the last 7 the user hit the daily cap (null: not tracked). */
   dailyCapDays: number | null
   flags: ('near_quota' | 'daily_cap' | 'account_limit')[]
+  /** Bytes kept in gdt-live (live sync's journals and chart points). */
+  liveBytes?: number
 }
 
 /** `GET /api/staff/storage?window=&sort=&flagged=&q=&page=`. */

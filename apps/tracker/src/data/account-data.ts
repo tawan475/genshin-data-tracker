@@ -26,6 +26,7 @@ import {
   type KeyDictionary,
   type LiveJournalResponse,
   type SnapshotResponse,
+  type SnapshotSummary,
 } from '@gdt/shared'
 import { api, bundlePath, BUNDLE_FORMAT, request } from '@/api'
 import { readCached, writeCached } from './idb-cache'
@@ -221,8 +222,26 @@ function liveVersion(account: AccountRef): number {
  * makes an unchanged one a 304.
  */
 export function loadLive(account: AccountRef): Promise<LiveJournalResponse | null> {
-  if (!account.liveSync || account.source === 'staff') return Promise.resolve(null)
-  return cached(account, `live:${liveVersion(account)}`, () => api.live(account.id))
+  if (!account.liveSync) return Promise.resolve(null)
+  return cached(account, `live:${liveVersion(account)}`, () => reader(account).live(account.id))
+}
+
+/**
+ * Live sync's chart points of the last 400 days (none when live sync is off):
+ * re-read when the journal moves (each batch may add or move today's).
+ */
+export function loadPoints(
+  account: AccountRef,
+): Promise<{ at: number; figures: SnapshotSummary }[]> {
+  if (!account.liveSync || account.source === 'staff') return Promise.resolve([])
+  return cached(account, `points:${liveVersion(account)}`, async () => {
+    try {
+      return (await api.points(account.id)).points
+    } catch {
+      // The charts still have every snapshot.
+      return []
+    }
+  })
 }
 
 /**
@@ -235,7 +254,7 @@ export function loadLatestInventory(
   const latest = account.latest
   if (!latest) return Promise.resolve(null)
   const snapshot = loadSnapshotInventory({ ...account, latest })
-  if (!account.liveSync || account.source === 'staff') return snapshot
+  if (!account.liveSync) return snapshot
   return cached(account, `now:${latest.id}:${liveVersion(account)}`, async () => {
     const [inventory, live] = await Promise.all([snapshot, loadLive(account)])
     return inventory && live ? withJournal(inventory, live, latest.id) : inventory

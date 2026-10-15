@@ -16,6 +16,29 @@
   "settings": {
     "title": "即時同步",
     "label": "即時跟隨 Irminsul",
-    "description": "Irminsul 執行時，快照之間的變化會在幾秒內顯示在這裡。"
-  }
+    "description": "Irminsul 執行時，快照之間的變化會在幾秒內顯示在這裡。",
+    "devices": "此電腦即時同步到：{accounts}（帳號設定）",
+    "deletePoints": "刪除圖表點",
+    "deletePointsTitle": "刪除即時同步在快照之間保存的圖表點",
+    "deletePointsConfirm": "刪除此帳號的所有圖表點？快照會保留。",
+    "pointsDeleted": "已刪除圖表點",
+    "exportNote": "匯出包含即時變化和圖表點（壓縮檔中的 live/）。"
+  },
+  "session": {
+    "heading": "遊戲時段",
+    "hours": "{h} 小時 {m} 分鐘",
+    "minutes": "{m} 分鐘",
+    "world": "世界 {n}",
+    "newCharacter": "{name} 加入",
+    "more": "另有 {n} 項",
+    "showMore": "顯示更多（{n}）",
+    "field": {
+      "level": "{name} 等級 {from}→{to}",
+      "constellation": "{name} 命座 {from}→{to}",
+      "auto": "{name} 普攻 {from}→{to}",
+      "skill": "{name} 戰技 {from}→{to}",
+      "burst": "{name} 爆發 {from}→{to}"
+    }
+  },
+  "staffBytes": "即時同步另占 {size}（gdt-live）"
 }
