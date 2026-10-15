@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { firstScreen } from '@/lib/first-screen'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { RARITY_TEXT } from '@/components/characters/tokens'
@@ -41,6 +42,13 @@ watch(
   () => (limits.value = {}),
 )
 
+/** The tiles a wide screen shows first: their pictures load first. */
+const first = computed(() =>
+  firstScreen(
+    visible.value.map((g) => g.shown),
+    (row) => row.id,
+  ),
+)
 const visible = computed(() =>
   props.groups.map((g) => {
     const isOpen = props.open.has(g.rarity)
@@ -163,6 +171,7 @@ onBeforeUnmount(() => {
             <ArtifactTile
               :row="row"
               :is-new="isNewPiece(row, previous)"
+              :priority="first.has(row.id)"
               @open="emit('open', row.id)"
             />
           </li>

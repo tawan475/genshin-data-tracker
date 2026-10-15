@@ -103,6 +103,9 @@ const shown = computed(() =>
     favorites.value,
   ),
 )
+/** Cards whose pictures load first: what a wide screen shows before scrolling. */
+const FIRST_SCREEN = 12
+
 // The roster mounts a screenful first and the rest over the next frames:
 // ~120 cards at once froze a phone for most of a second.
 const { shown: mounted, restart: restartRoster } = useProgressive(
@@ -338,7 +341,7 @@ watch(
              box: the padding (undone by the margin) keeps the focus ring and
              shadow inside it. -->
         <li
-          v-for="c in visible"
+          v-for="(c, i) in visible"
           :key="c.key"
           class="-m-1 flex p-1 [contain-intrinsic-size:auto_11rem] [content-visibility:auto]"
           @pointerenter="void preloadCharacter(c)"
@@ -346,6 +349,7 @@ watch(
         >
           <CharacterCard
             :character="c"
+            :priority="i < FIRST_SCREEN ? 'high' : 'low'"
             :favorite="favorites.has(c.key)"
             @open="open(c.key)"
             @favorite="toggleFavorite(c.key)"

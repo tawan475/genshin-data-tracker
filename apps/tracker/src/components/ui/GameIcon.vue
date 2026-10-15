@@ -16,6 +16,8 @@ const props = withDefaults(
     size?: 'xs' | 'sm' | 'md' | 'lg'
     /** Load now rather than near the viewport (a page that shows them all, e.g. the roster). */
     eager?: boolean
+    /** Fetch before (`high`: the first screen of a grid) or after the page's other images. */
+    priority?: 'high' | 'low'
   }>(),
   { size: 'md' },
 )
@@ -52,6 +54,7 @@ const initials = computed(() =>
       v-if="src && !failed"
       :key="src"
       :loading="eager ? 'eager' : 'lazy'"
+      :fetchpriority="priority"
       decoding="async"
       :src="src"
       :alt="name"

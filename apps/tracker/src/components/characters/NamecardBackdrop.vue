@@ -8,15 +8,19 @@ import { isDecoded, markDecoded } from '@/lib/image-preload'
  * only once its own picture has loaded: switching characters drops the
  * old picture at once (a new <img> per src), never leaving it up while
  * the next one downloads. Nothing shows for '' or a failed load.
+ *
+ * `priority` high (the first screen of a grid): fetched first and shown the
+ * moment it decodes, without waiting for script (a busy page delayed the
+ * fade-in by up to a second); low: after the rest.
  */
-const props = defineProps<{ src: string; lazy?: boolean }>()
+const props = defineProps<{ src: string; lazy?: boolean; priority?: 'high' | 'low' }>()
 
-const loaded = ref(isDecoded(props.src))
+const loaded = ref(props.priority === 'high' || isDecoded(props.src))
 const failed = ref(false)
 watch(
   () => props.src,
   (src) => {
-    loaded.value = isDecoded(src)
+    loaded.value = props.priority === 'high' || isDecoded(src)
     failed.value = false
   },
 )
@@ -31,6 +35,7 @@ function onLoad() {
     v-if="src && !failed"
     :key="src"
     :loading="lazy ? 'lazy' : undefined"
+    :fetchpriority="priority"
     decoding="async"
     :src="src"
     alt=""

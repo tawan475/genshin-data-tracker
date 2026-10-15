@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { firstScreen } from '@/lib/first-screen'
 import { compareText } from '@/lib/search'
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
@@ -247,6 +248,13 @@ const paged = computed(() => {
   }
 })
 const sections = computed(() => paged.value.sections)
+/** The tiles a wide screen shows first: their pictures load first. */
+const first = computed(() =>
+  firstScreen(
+    sections.value.map((s) => (s.open ? s.items : [])),
+    (item) => item.key,
+  ),
+)
 /** What a "more" adds; nothing while the page is still mounting. */
 const more = computed(() => (mounted.value >= limit.value ? paged.value.more : 0))
 
@@ -476,6 +484,7 @@ const viewOptions = computed<SegmentedOption<View>[]>(() => [
               <li v-for="item in section.items" :key="item.key" class="flex">
                 <MaterialTile
                   :name="item.name"
+                  :priority="first.has(item.key)"
                   :src="icon(item.key)"
                   :rarity="item.rarity"
                   :count="countOf(item)"

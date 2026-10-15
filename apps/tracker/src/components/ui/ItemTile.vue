@@ -23,6 +23,8 @@ const props = defineProps<{
   label: string
   stars?: boolean
   selected?: boolean
+  /** On the first screen of a bag: fetched at once and first, not when laid out (lazy). */
+  priority?: boolean
 }>()
 /** `open` carries the click (its target anchors a popover; pointerType tells touch). */
 defineEmits<{ open: [event: MouseEvent] }>()
@@ -70,7 +72,8 @@ function initials(name: string): string {
       <ItemArt :rarity="rarity" class="rounded-[7cqw]" />
       <img
         v-if="src && !failed"
-        loading="lazy"
+        :loading="priority ? 'eager' : 'lazy'"
+        :fetchpriority="priority ? 'high' : undefined"
         decoding="async"
         :src="src"
         alt=""

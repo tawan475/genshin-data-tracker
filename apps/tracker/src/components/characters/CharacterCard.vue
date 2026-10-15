@@ -26,7 +26,12 @@ import TalentChips from './TalentChips.vue'
  * opens the details. The favourite star sits on the portrait's corner, beside
  * the card's button (a button can't hold another).
  */
-const props = defineProps<{ character: CharacterView; favorite?: boolean }>()
+const props = defineProps<{
+  character: CharacterView
+  favorite?: boolean
+  /** The first screen of the roster: its pictures load first (see NamecardBackdrop). */
+  priority?: 'high' | 'low'
+}>()
 defineEmits<{ open: []; favorite: [] }>()
 
 const c = computed(() => props.character)
@@ -76,6 +81,7 @@ const weaponTitle = computed(() => {
            the roster shows every card. -->
       <NamecardBackdrop
         :src="characterBanner(c.key)"
+        :priority="priority"
         class="absolute inset-y-0 right-0 h-full w-full opacity-45 brightness-[1.35] saturate-[1.1] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-40 dark:brightness-[1.1]"
       />
       <div class="relative w-full">
@@ -86,6 +92,7 @@ const weaponTitle = computed(() => {
             :rarity="c.rarity ?? undefined"
             size="lg"
             eager
+            :priority="priority"
           />
           <div class="flex min-w-0 flex-1 flex-col gap-1.5">
             <div class="flex items-center gap-1.5">
@@ -122,6 +129,7 @@ const weaponTitle = computed(() => {
         <span class="absolute inset-0 -z-10 bg-surface-raised/75" aria-hidden="true" />
         <NamecardBackdrop
           :src="characterBanner(c.key)"
+          :priority="priority"
           class="absolute right-0 bottom-0 -z-10 h-[calc(100%+6rem)] w-full opacity-35 blur-md [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-30"
         />
         <span v-if="c.weapon" class="flex shrink-0 items-center gap-1.5" :title="weaponTitle">

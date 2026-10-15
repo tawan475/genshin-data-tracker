@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { firstScreen } from '@/lib/first-screen'
 import { computed, nextTick, useId } from 'vue'
 import { t } from '@/i18n'
 import { useProgressive } from '@/components/planner/use-progressive'
@@ -29,6 +30,13 @@ const sectionTitle = (section: RaritySection) =>
 // tiles in place (copies stack, so a few hundred at most). A jump renders everything first.
 const total = computed(() => props.sections.reduce((sum, s) => sum + s.rows.length, 0))
 const { shown } = useProgressive(total, 64, 64)
+/** The tiles a wide screen shows first: their pictures load first. */
+const first = computed(() =>
+  firstScreen(
+    visible.value.map((s) => s.rows),
+    (row) => row.id,
+  ),
+)
 const visible = computed(() => {
   let budget = shown.value
   const out: RaritySection[] = []
@@ -96,7 +104,12 @@ const copies = (n: number) => t('weapons.group.copies', { count: formatNumber(n)
         class="grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] gap-3 pt-1.5 sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] sm:gap-4"
       >
         <li v-for="row in section.rows" :key="row.id" class="flex">
-          <WeaponTile :row="row" :selected="row.id === selected" @open="$emit('open', row)" />
+          <WeaponTile
+            :row="row"
+            :selected="row.id === selected"
+            :priority="first.has(row.id)"
+            @open="$emit('open', row)"
+          />
         </li>
       </ul>
     </section>

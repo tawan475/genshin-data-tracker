@@ -270,3 +270,18 @@ steps are compared without CPU throttling.
   ms of it), module evaluation at startup (80–100 ms, Step 5), the idle
   prefetch of every page's code (~100 ms, Step 5), vue-i18n compiling messages
   on first use (they are not precompiled at build time).
+- **Step 4 — shipped.** The Characters LCP was the first namecard, and it
+  waited on script twice: it faded in only after its `load` handler ran (behind
+  the roster's mount tasks, up to a second), and the roster's ~360 eager images
+  all fetched at one priority. Now the first 12 cards' pictures are
+  `fetchpriority="high"` and show as soon as they decode (no script gate), the
+  rest `low` (still eager: the roster doesn't pop in on scroll). The Weapons,
+  Artifacts and Materials bags load their first 30 tiles eager + high
+  (`lib/first-screen.ts`; the rest stay lazy). Image sizes: nanoka serves one
+  size per picture, so nothing smaller to ask for; left as is.
+
+  | 1366 px, CPU 4×: Characters largest paint | step 3 | step 4 |
+  |---|---|---|
+  | empty cache (images from nanoka) | 2,984–3,072 | 1,352–1,440 |
+  | warm | 4,596–4,796 (step 2 build) | 1,740–1,924 |
+  | Materials, warm | 2,148–2,404 (step 2 build) | 1,576–1,604 |
