@@ -38,7 +38,7 @@ export async function assertOwnsAccount(db: Db, userId: number, accountId: numbe
   if (!row) throw notFound('Account')
 }
 
-interface AccountListRow {
+export interface AccountListRow {
   id: number
   name: string | null
   uid: string | null
@@ -56,34 +56,28 @@ interface AccountListRow {
   live_sync: unknown
 }
 
-/**
- * Accounts with their latest snapshot: one round trip, reading each account
- * (by the user index) and its latest snapshot (by primary key). The app also
- * re-reads this list to catch up after missing live events, so it stays this
- * cheap.
- */
-export async function listAccounts(
+/** The account list's query (see listAccounts); `accountId` narrows it to one. */
+export function accountListStatement(
   d1: D1Database,
   userId: number,
-  accountId?: number,
-  meter = new D1Meter(),
-): Promise<AccountResponse[]> {
-  const result = await withLegacySchema(async (legacy) => {
-    const [rows] = await meter.batch<AccountListRow>(d1, 'accounts', [
-      d1
-        .prepare(
-          `SELECT a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
-             a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at,
-             ${legacy ? 's.summary, ' : ''}s.meta, ${LIVE_SYNC_SQL()}
-           FROM genshin_accounts AS a LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id
-           WHERE a.user_id = ?1 AND (?2 IS NULL OR a.id = ?2)
-           ORDER BY a.id`,
-        )
-        .bind(userId, accountId ?? null),
-    ])
-    return rows
-  })
-  return result!.results.map((row) => ({
+  accountId: number | null,
+  legacy: boolean,
+): D1PreparedStatement {
+  return d1
+    .prepare(
+      `SELECT a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
+         a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at,
+         ${legacy ? 's.summary, ' : ''}s.meta, ${LIVE_SYNC_SQL()}
+       FROM genshin_accounts AS a LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id
+       WHERE a.user_id = ?1 AND (?2 IS NULL OR a.id = ?2)
+       ORDER BY a.id`,
+    )
+    .bind(userId, accountId)
+}
+
+/** The rows of `accountListStatement` as the API answers them. */
+export function accountsFromRows(rows: readonly AccountListRow[]): AccountResponse[] {
+  return rows.map((row) => ({
     id: row.id,
     name: row.name,
     uid: row.uid,
@@ -104,6 +98,27 @@ export async function listAccounts(
           },
     liveSync: liveSyncOn(row.live_sync),
   }))
+}
+
+/**
+ * Accounts with their latest snapshot: one round trip, reading each account
+ * (by the user index) and its latest snapshot (by primary key). The app also
+ * re-reads this list to catch up after missing live events, so it stays this
+ * cheap.
+ */
+export async function listAccounts(
+  d1: D1Database,
+  userId: number,
+  accountId?: number,
+  meter = new D1Meter(),
+): Promise<AccountResponse[]> {
+  const result = await withLegacySchema(async (legacy) => {
+    const [rows] = await meter.batch<AccountListRow>(d1, 'accounts', [
+      accountListStatement(d1, userId, accountId ?? null, legacy),
+    ])
+    return rows
+  })
+  return accountsFromRows(result!.results)
 }
 
 /**

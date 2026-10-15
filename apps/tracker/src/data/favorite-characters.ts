@@ -7,7 +7,7 @@ import {
   type ComputedRef,
   type MaybeRefOrGetter,
 } from 'vue'
-import { api } from '@/api'
+import { loadAccountSettings, saveAccountSettings } from '@/data/account-settings'
 import { t } from '@/i18n'
 import { updatesHeld } from '@/live/holds'
 import { onPlannerChange } from '@/live/planner-changes'
@@ -55,10 +55,9 @@ function load(id: number): Promise<void> {
   let read = reads.get(id)
   if (!read) {
     const since = saves.get(id) ?? 0
-    read = api
-      .accountSettings(id)
+    read = loadAccountSettings(id)
       .then(
-        ({ settings }) => {
+        (settings) => {
           if ((saves.get(id) ?? 0) !== since) return
           confirmed.set(id, settings.favoriteCharacters ?? [])
           publish(id)
@@ -103,7 +102,7 @@ export function useFavoriteCharacters(accountId: MaybeRefOrGetter<number>): Favo
     publish(account)
     const run = (queues.get(account) ?? Promise.resolve()).then(async () => {
       try {
-        const { settings } = await api.updateAccountSettings(account, {
+        const settings = await saveAccountSettings(account, {
           favoriteCharacters: withFavorite(confirmed.get(account) ?? [], key, change.on),
         })
         confirmed.set(account, settings.favoriteCharacters ?? [])

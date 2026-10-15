@@ -7,6 +7,7 @@ import type {
   AchievementMarksResponse,
   AccountCreatedResponse,
   AnecdoteMarksResponse,
+  BootstrapResponse,
   AccountResponse,
   AccountSettingsPatch,
   AccountSettingsResponse,
@@ -72,6 +73,14 @@ export const api = {
   logout: () => requestJson<void>('/api/auth/logout', { method: 'POST', noRefresh: true }),
   logoutAll: () => requestJson<void>('/api/auth/logout-all', { method: 'POST' }),
   me: () => requestJson<MeResponse>('/api/auth/me'),
+  /**
+   * The user, their accounts and `account`'s settings in one request: what
+   * the app's first page needs (see stores/bootstrap).
+   */
+  bootstrap: (account: number | null) =>
+    requestJson<BootstrapResponse>(`/api/bootstrap${account ? `?account=${account}` : ''}`, {
+      cache: 'no-store',
+    }),
   updateProfile: (body: { username?: string; email?: string | null }) =>
     requestJson<MeResponse>('/api/auth/profile', { method: 'PATCH', json: body }),
   changePassword: (body: { currentPassword: string; newPassword: string }) =>

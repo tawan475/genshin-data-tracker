@@ -6,7 +6,7 @@ import {
   type PlannerSettings,
 } from '@gdt/shared'
 import { shallowRef, watch, type Ref } from 'vue'
-import { api } from '@/api'
+import { loadAccountSettings, saveAccountSettings } from '@/data/account-settings'
 import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 
@@ -56,10 +56,9 @@ export function usePlannerSettings(accountId: Ref<number>) {
   const settings = shallowRef<PlannerOptions>(known.get(accountId.value) ?? DEFAULTS)
   let queue: Promise<unknown> = Promise.resolve()
 
-  async function load(id: number) {
+  async function load(id: number, fresh = false) {
     try {
-      const response = await api.accountSettings(id)
-      known.set(id, pick(response.settings))
+      known.set(id, pick(await loadAccountSettings(id, { fresh })))
       if (accountId.value === id) settings.value = known.get(id)!
     } catch {
       // Defaults stay; nothing on the page depends on these yet.
@@ -83,10 +82,10 @@ export function usePlannerSettings(accountId: Ref<number>) {
     const body: AccountSettingsPatch = { ...patch }
     const run = queue.then(async () => {
       try {
-        const response = await api.updateAccountSettings(id, body)
+        const saved = await saveAccountSettings(id, body)
         // Only when nothing newer is waiting: a later change is already on screen.
         if (queue === run) {
-          known.set(id, pick(response.settings))
+          known.set(id, pick(saved))
           if (accountId.value === id) settings.value = known.get(id)!
         }
       } catch (cause) {
@@ -105,7 +104,7 @@ export function usePlannerSettings(accountId: Ref<number>) {
     reload: async () => {
       const id = accountId.value
       await queue.catch(() => {})
-      await load(id)
+      await load(id, true)
     },
   }
 }

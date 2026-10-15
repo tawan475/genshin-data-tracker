@@ -48,6 +48,7 @@ import {
 import { auditStatement } from '../services/audit'
 import { closeResetLinks, mailVerification } from '../services/auth-tokens'
 import { listIdentities, unlinkIdentity } from '../services/identities'
+import { meFromResults, meStatements, type MeSource } from '../services/me'
 import { userPermissions } from '../services/roles'
 import { signupMode } from '../services/staff-deps'
 import { deleteUsers, isLastOwner } from '../services/user-delete'
@@ -73,7 +74,7 @@ export function pepper(c: Context<AppEnv>): string {
   return secret
 }
 
-export function toMe(user: User, env: Env, permissions: string[] = []): MeResponse {
+export function toMe(user: MeSource, env: Env, permissions: string[] = []): MeResponse {
   return {
     id: user.id,
     username: user.username,
@@ -362,13 +363,13 @@ export const auth = new Hono<AppEnv>()
     return c.body(null, 204)
   })
 
+  /** The user and their staff nodes: one D1 round trip. */
   .get('/me', requireUser, async (c) => {
-    const [user] = await getDb(c.env.DB)
-      .select()
-      .from(users)
-      .where(eq(users.id, c.get('userId')))
-    if (!user) throw new ApiError(401, 'unauthenticated', 'Not signed in')
-    return c.json(await meOf(c, user))
+    const userId = c.get('userId')
+    const [user, roles] = await c.env.DB.batch(meStatements(c.env.DB, userId))
+    const found = meFromResults(userId, user, roles)
+    if (!found) throw new ApiError(401, 'unauthenticated', 'Not signed in')
+    return c.json(toMe(found.user, c.env, found.permissions))
   })
 
   /**

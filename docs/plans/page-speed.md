@@ -1,9 +1,10 @@
 # Page load speed — analysis and plan (2026-10-15)
 
-Status: **analysis only, nothing changed.** Measured on the live site (owner's
-account, warm cache) and on the production build served locally (`vite preview`,
-the QA account with a real-size capture, Chrome with the CPU slowed 4× like a
-mid-range phone). Live build at the time: `09d8e05`.
+Status: **in progress** — shipped steps and their numbers are in §5. Analysis
+measured on the live site (owner's account, warm cache) and on the production
+build served locally (`vite preview`, the QA account with a real-size capture,
+Chrome with the CPU slowed 4× like a mid-range phone). Live build at the time:
+`09d8e05`.
 
 ## 1. Measurements
 
@@ -193,3 +194,32 @@ paint < 1.5 s.**
 Verification for every step: the perf script before/after (cold, warm, CPU 4×, 390 px
 and 1366 px), the live waterfall on the owner's account, and the full CI gate. Layouts
 must still survive real data (CLAUDE.md rule).
+
+## 5. Progress
+
+Local A/B: `vite preview` of this branch vs the build before it, a synthetic
+account at real scale (123 characters, 520 weapons, 2,300 artifacts, 460
+materials, 60 captures; no real data), headless Chrome, 150 ms added latency.
+CPU-4× numbers swing ±50% while the machine is busy, so the network-bound
+steps are compared without CPU throttling.
+
+- **Step 1 — shipped.** `GET /api/bootstrap?account=` (user + staff nodes +
+  account list + its ETag + the opened account's settings, one `d1.batch`);
+  `/auth/me` is one batch too. The session store adopts the user from it, the
+  accounts store takes the list once. Account settings are one shared cache
+  (`src/data/account-settings.ts`; seeded by the bootstrap, dropped on the
+  live `planner` event, kept from a save) instead of up to three reads per page.
+  Opening the app starts the route's page chunks and, on an account page this
+  device has seen (`account-hint:<id>` in localStorage: last data version +
+  newest capture), the page's data loads (`src/data/boot-prefetch.ts`) beside
+  the bootstrap. Overview skips its account re-read when the list is < 30 s old.
+  Requests before data on Characters: `me → accounts → settings+bundle+catalog`
+  (3 rounds) → `bootstrap ‖ bundle+catalog` (1 round).
+
+  | 1366 px, CPU 1×, +150 ms | before | after |
+  |---|---|---|
+  | Characters: data complete | 877–1,032 | 370–482 |
+  | Characters: largest paint | 1,964–2,216 | 1,764–1,960 |
+  | Artifacts: largest paint | 1,060–1,312 | 648–692 |
+  | Planner: largest paint | 960–1,472 | 708–1,328 |
+  | API requests, Characters | 5 | 3 |

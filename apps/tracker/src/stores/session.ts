@@ -9,9 +9,11 @@ import {
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, onSignedOut } from '@/api'
+import { forgetAccountSettings, seedAccountSettings } from '@/data/account-settings'
 import { setClockPreference } from '@/lib/format'
 import { applyTheme } from '@/lib/theme'
 import { applyLocale, storedPreference } from '@/i18n/apply'
+import { bootstrapOnce, forgetBootstrap } from './bootstrap'
 
 type Status = 'unknown' | 'signed-in' | 'signed-out'
 
@@ -48,6 +50,9 @@ export const useSession = defineStore('session', () => {
       // The account's language wins over this device's; `system` keeps the device's pick.
       const language = user.settings.language ?? 'system'
       void applyLocale(language === 'system' ? storedPreference() : language, { animate: true })
+    } else {
+      forgetBootstrap()
+      forgetAccountSettings()
     }
   }
 
@@ -56,13 +61,16 @@ export const useSession = defineStore('session', () => {
   /**
    * Resolves the session once; later calls reuse the same answer. Without the
    * server's `gdt_s` hint cookie there is no session to find, so a signed-out
-   * visitor costs no requests at all.
+   * visitor costs no requests at all. The answer is the bootstrap's (one
+   * request for the user, the accounts and the opened account's settings).
    */
   function ensureLoaded(): Promise<void> {
     loading ??= hasSessionHint()
-      ? api
-          .me()
-          .then(adopt)
+      ? bootstrapOnce()
+          .then((boot) => {
+            if (boot.account) seedAccountSettings(boot.account.id, boot.account.settings)
+            adopt(boot.me)
+          })
           .catch(() => adopt(null))
       : Promise.resolve(adopt(null))
     return loading

@@ -5,6 +5,7 @@ import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
 import { auth } from './routes/auth'
+import { bootstrap } from './routes/bootstrap'
 import { domainEvents, gameEvents } from './routes/domain-events'
 import { health } from './routes/health'
 import { irminsul } from './routes/irminsul'
@@ -34,6 +35,7 @@ app.use(async (c, next) => {
 })
 
 app.route('/health', health)
+app.route('/bootstrap', bootstrap)
 app.route('/auth', auth)
 app.route('/auth', recovery)
 app.route('/auth/oauth', oauth)

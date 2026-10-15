@@ -1,6 +1,6 @@
 import type { MaterialsGraphSettings, TimelineGroupBy } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { api } from '@/api'
+import { loadAccountSettings, saveAccountSettings } from '@/data/account-settings'
 import { useFeedback } from '@/stores/feedback'
 import { useReadOnly } from '@/views/account/context'
 import { t } from '@/i18n'
@@ -49,7 +49,7 @@ export function useMaterialsGraph(accountId: () => number) {
     }
     ready.value = false
     try {
-      const { settings } = await api.accountSettings(id)
+      const settings = await loadAccountSettings(id)
       // Ignore a late answer for another account, or one the user already overrode.
       if (id !== accountId() || touchedFor === id) return
       const saved = settings.materialsGraph
@@ -71,7 +71,7 @@ export function useMaterialsGraph(accountId: () => number) {
     pending = {}
     pendingFor = null
     try {
-      await api.updateAccountSettings(id, { materialsGraph: body })
+      await saveAccountSettings(id, { materialsGraph: body })
     } catch (error) {
       feedback.error(t('materials.saveChartFailed'), error)
     }

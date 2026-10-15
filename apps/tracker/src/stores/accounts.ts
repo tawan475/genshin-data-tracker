@@ -7,6 +7,7 @@ import { readStorage, writeStorage } from '@/lib/storage'
 import { postToTabs } from '@/live/channel'
 import { isHeld, pendingIds } from '@/live/holds'
 import { mergeAccounts } from '@/live/policy'
+import { takeBootstrap } from './bootstrap'
 import { useSession } from './session'
 
 /**
@@ -26,6 +27,8 @@ export const useAccounts = defineStore('accounts', () => {
   let pending = new Map<number, AccountResponse>()
   /** The ETag of the newest whole list this tab has (shown or waiting). */
   let etag: string | null = null
+  /** When the whole list was last read (ms; 0: never). */
+  let readAt = 0
 
   const byId = computed(() => new Map(list.value.map((a) => [a.id, a])))
 
@@ -78,14 +81,37 @@ export const useAccounts = defineStore('accounts', () => {
     const fresh = await api.accountsSince(null)
     if (fresh) merge(fresh.list, { complete: true, etag: fresh.etag })
     loaded.value = true
+    readAt = Date.now()
+  }
+
+  /** The bootstrap's list when this page load made one (see stores/bootstrap), else a read. */
+  async function firstLoad() {
+    const boot = takeBootstrap()
+    if (boot) {
+      try {
+        const { accounts, accountsEtag } = await boot
+        merge(accounts, { complete: true, etag: accountsEtag })
+        loaded.value = true
+        readAt = Date.now()
+        return
+      } catch {
+        // Read the list on its own below.
+      }
+    }
+    await refresh()
   }
 
   function ensureLoaded(): Promise<void> {
-    loading ??= refresh().catch((error) => {
+    loading ??= firstLoad().catch((error) => {
       loading = null
       throw error
     })
     return loading
+  }
+
+  /** Whether the whole list was read within `ms` (pages skip their own re-read then). */
+  function readWithin(ms: number): boolean {
+    return Date.now() - readAt < ms
   }
 
   /**
@@ -142,6 +168,7 @@ export const useAccounts = defineStore('accounts', () => {
     loading = null
     setPending(new Map())
     etag = null
+    readAt = 0
   }
 
   return {
@@ -154,6 +181,7 @@ export const useAccounts = defineStore('accounts', () => {
     knownVersion,
     refresh,
     ensureLoaded,
+    readWithin,
     reload,
     create,
     update,

@@ -333,8 +333,30 @@ const router = createRouter({
   ],
 })
 
+/**
+ * Opening the app: the page's code and (on an account page this device has
+ * seen) its data start loading at once, beside the bootstrap request, rather
+ * than one after the other.
+ */
+let opening = true
+function startLoadingAhead(to: RouteLocationNormalized) {
+  for (const record of to.matched) {
+    const load = record.components?.default
+    if (typeof load === 'function') void (load as () => Promise<unknown>)().catch(() => undefined)
+  }
+  if (to.meta.auth) {
+    void import('@/data/boot-prefetch')
+      .then((m) => m.prefetchAccountPage(to.path))
+      .catch(() => undefined)
+  }
+}
+
 router.beforeEach(async (to) => {
   const session = useSession()
+  if (opening) {
+    opening = false
+    if (session.status === 'unknown') startLoadingAhead(to)
+  }
   if (to.meta.auth || to.meta.guest || to.name === 'landing') await session.ensureLoaded()
 
   if (to.meta.auth && session.status !== 'signed-in') {

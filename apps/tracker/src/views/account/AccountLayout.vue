@@ -6,6 +6,7 @@ import { SearchX } from 'lucide-vue-next'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import { loadLatestInventory } from '@/data/account-data'
+import { rememberAccountHint } from '@/data/boot-prefetch'
 import { loadTraveler } from '@/data/traveler'
 import { preload } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
@@ -30,6 +31,8 @@ watch(
   (value) => {
     if (!value) return
     rememberLast(value.id)
+    // Next time the app opens here, this page's data starts with the bootstrap.
+    rememberAccountHint(value)
     void loadTraveler(value.id)
   },
   { immediate: true },

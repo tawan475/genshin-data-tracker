@@ -1,7 +1,7 @@
 import type { TravelerGender } from '@gdt/game-data/images'
 import { ACCOUNT_SETTINGS_DEFAULTS } from '@gdt/shared'
 import { shallowRef } from 'vue'
-import { api } from '@/api'
+import { loadAccountSettings, saveAccountSettings } from '@/data/account-settings'
 import { setTravelerGender } from '@/lib/assets'
 
 /**
@@ -25,7 +25,7 @@ export async function loadTraveler(accountId: number): Promise<void> {
   if (cached) return apply(cached)
   apply(ACCOUNT_SETTINGS_DEFAULTS.traveler)
   try {
-    const { settings } = await api.accountSettings(accountId)
+    const settings = await loadAccountSettings(accountId)
     known.set(accountId, settings.traveler)
     if (current === accountId) apply(settings.traveler)
   } catch {
@@ -39,7 +39,7 @@ export async function saveTraveler(accountId: number, gender: TravelerGender): P
   known.set(accountId, gender)
   if (current === accountId) apply(gender)
   try {
-    await api.updateAccountSettings(accountId, { traveler: gender })
+    await saveAccountSettings(accountId, { traveler: gender })
   } catch (error) {
     known.set(accountId, before)
     if (current === accountId) apply(before)

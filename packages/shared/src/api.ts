@@ -930,6 +930,19 @@ export interface AccountSettingsResponse {
   settings: AccountSettings
 }
 
+/**
+ * GET /api/bootstrap: what the app needs before its first page, in one
+ * request (one D1 round trip). `account` is the settings of the account
+ * `?account=` named (the page being opened), null when it isn't the user's.
+ */
+export interface BootstrapResponse {
+  me: MeResponse
+  accounts: AccountResponse[]
+  /** The ETag GET /api/accounts gives the same list (the app revalidates with it). */
+  accountsEtag: string
+  account: ({ id: number } & AccountSettingsResponse) | null
+}
+
 export interface AchievementMarksResponse {
   /** Achievement ids marked done by hand, ascending. */
   done: number[]

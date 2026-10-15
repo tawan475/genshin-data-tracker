@@ -33,11 +33,13 @@ const accounts = useAccounts()
 const nowMs = shallowRef(Date.now())
 useIntervalFn(() => (nowMs.value = Date.now()), 60_000)
 
-// Pick up captures uploaded since the account list was loaded. A moved data
-// version invalidates the snapshot cache below; a failure keeps what we have.
+// Pick up captures uploaded since the account list was loaded (not when it
+// was read just now, as on opening the app). A moved data version
+// invalidates the snapshot cache below; a failure keeps what we have.
 watch(
   () => account.value.id,
   (id) => {
+    if (accounts.readWithin(30_000)) return
     accounts.reload(id).catch(() => undefined)
   },
   { immediate: true },

@@ -4,7 +4,7 @@ import {
   type TimelineGroupBy,
 } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { api } from '@/api'
+import { loadAccountSettings, saveAccountSettings } from '@/data/account-settings'
 import { useFeedback } from '@/stores/feedback'
 
 /** The original "N periods" choices. */
@@ -48,7 +48,7 @@ export function useMaterialHistorySettings(accountId: () => number) {
   async function load(id: number) {
     ready.value = false
     try {
-      const { settings: saved } = await api.accountSettings(id)
+      const saved = await loadAccountSettings(id)
       // Ignore a late answer for another account, or one the user already overrode.
       if (id !== accountId() || touchedFor === id) return
       settings.value = { ...defaults(), ...saved.materialsGraph }
@@ -67,7 +67,7 @@ export function useMaterialHistorySettings(accountId: () => number) {
     pending = {}
     pendingFor = null
     try {
-      await api.updateAccountSettings(id, { materialsGraph: body })
+      await saveAccountSettings(id, { materialsGraph: body })
     } catch (error) {
       feedback.error('Could not save the chart settings', error)
     }
