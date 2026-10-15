@@ -1,8 +1,8 @@
 # Live sync — snapshots + a change journal (plan, 2026-10-15)
 
-Status: **designed with the user, not built.** Every decision below was made in the
-conversation of 2026-10-15; what is still open is listed at the end (§12). This
-document is meant to be enough to build it without that conversation.
+Status: **being built (2026-10-15)** — progress per phase in §10, the wire contract as
+built in §13 (where it refines §5–§7, §13 wins). Every decision below was made in the
+conversation of 2026-10-15; what is still open is listed in §12.
 
 ## 1. Goal
 
@@ -759,3 +759,54 @@ are real samples (no interpolation); a point within a minute of a snapshot is dr
   worlds are numbered by order only.
 - The `materials` count figure (§7.4): a `was` hint from irminsul, or skip it between
   snapshots.
+
+## 13. As built: the contract (2026-10-15)
+
+Where this refines §5–§7 it is what both sides implement.
+
+**Snapshot upload** (`POST /api/irminsul/import`, `/genshin-accounts-public/import-by-key`):
+the GOOD file may carry `gi_capture` (§5.1; reasons, append only: `login`, `world`,
+`manual`, `collapse`, `logout`, `resync`, `change` = a change uploaded whole because
+live sync is off) and `gi_guid` (decimal string) on every artifact and weapon. The
+answer (`ImportResponse`) gains, append only:
+
+- `contentKey`: the snapshot's content key (base 36).
+- `live?: { base: string, watching: boolean }` — only when the account has live sync on
+  and the server's journal now follows this snapshot (also for `unchanged`). irminsul
+  sends batches for `base` from `seq` 1. Without `live` irminsul stays in snapshot mode
+  (today's 5 s debounce, `reason: "change"`) until an answer has it.
+
+**Batch** (`POST /api/irminsul/changes`; Bearer or `x-import-key`, routed by `uid`
+like an import): body = one GOOD-X delta (`packages/shared/src/live/delta.ts`, the path
+table there; contract fixture `good-x-delta.json` in both repos), ≤ 2,000 changes and
+512 KB. `sum` (optional) = the whole account's chart figures after the batch, counted
+like a snapshot's summary: `characters`, `weapons`, `artifacts` (counts), `materials`
+(keys in `materials`), `mora`, `primogem` (those counts, 0 when absent), `artifact3` /
+`artifact4` (artifacts of that rarity with `lock` false and `location` ""). Material
+keys that vanish are `del` (never `set 0`). Answers:
+
+| answer | irminsul does |
+|---|---|
+| 200 `{ok: true, seq, collapse, watching}` | stored; `collapse: true` → snapshot (`collapse`) |
+| 200 `{ok: true, duplicate: true, seq}` | a retry of a stored batch: carry on |
+| 200 `{ok: false, live: false}` | live sync is off: snapshot mode (snapshot now, `change`) |
+| 409 `resync` | snapshot (`resync`), then batches on its `live.base` |
+| 413 / 422 too large | snapshot (`resync`) |
+| 429 `daily_live_limit` | snapshot mode until the next UTC day |
+| 429 `rate_limited`, 5xx, network | keep the changes pending, retry with backoff (15 s → 2 min) |
+| 401 / 403 | as for an import |
+
+The server checks `base` = the journal's base, `session` = the journal's session (the
+snapshot's `gi_capture.session`; a snapshot without one opens a journal any session may
+continue) and `seq` = last + 1 (`seq` ≤ last → duplicate).
+
+**Item guids in the browser**: stored snapshots keep no guids. At each snapshot the
+tracker stores the file's guid → fingerprint index (`itemIndexOf`, ~10 B per item) on
+the journal row; `GET /live` returns `[kind, guid, fingerprint]` for the base items the
+journal touches, and the browser binds them (`bindItemGuids`) before `applyDelta`.
+
+**Replay gate** (`irminsul --replay-journal <out.ndjson> <recording>`): lines
+`{"type":"snapshot","good":…}` (each snapshot as uploaded), `{"type":"batch","delta":…}`
+(each batch as sent, simulated time from the packets), `{"type":"state","good":…}` (the
+whole export just before each snapshot and at the end). Checked with
+`GDT_JOURNAL_REPLAY=<file> pnpm --filter @gdt/shared test live-replay`.

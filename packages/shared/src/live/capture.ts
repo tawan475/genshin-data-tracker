@@ -5,8 +5,21 @@
  * snapshot's content hash.
  */
 
-/** Why the snapshot was taken: the game's full sends, or irminsul's own. */
-export const CAPTURE_REASONS = ['login', 'world', 'manual', 'collapse', 'logout'] as const
+/**
+ * Why the snapshot was taken (append only): the game's full sends (`login`,
+ * `world`), the user's button (`manual`), the tracker asking (`collapse`),
+ * the game closing (`logout`), the tracker refusing a batch (`resync`), or a
+ * change uploaded whole because live sync is off (`change`).
+ */
+export const CAPTURE_REASONS = [
+  'login',
+  'world',
+  'manual',
+  'collapse',
+  'logout',
+  'resync',
+  'change',
+] as const
 export type CaptureReason = (typeof CAPTURE_REASONS)[number]
 
 export interface GiCapture {
