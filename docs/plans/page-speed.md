@@ -1,6 +1,6 @@
 # Page load speed — analysis and plan (2026-10-15)
 
-Status: **in progress** — shipped steps and their numbers are in §5. Analysis
+Status: **steps 1–7 shipped (2026-10-15/16)** — what shipped and its numbers are in §5; the one open decision (placement / read replicas) is at the end of §5. Analysis
 measured on the live site (owner's account, warm cache) and on the production
 build served locally (`vite preview`, the QA account with a real-size capture,
 Chrome with the CPU slowed 4× like a mid-range phone). Live build at the time:
@@ -334,3 +334,49 @@ steps are compared without CPU throttling.
   | files renamed (of 164) | 60 | 3 (the page, a chunk it shares code with, the entry) |
   | … a new CSS class in a card component | 96 | 4 (the same + the CSS) |
   | a returning visitor downloads (Overview, Characters, Artifacts) | 43 files, 234 KB gzip | 2 files, 15 KB gzip |
+- **Step 7 — shipped.** Every API response carries `Server-Timing: total;dur=`
+  (the Worker's time on it: waiting on D1, the live hub and other services; a
+  Worker's clock only moves across I/O), routes that meter D1 add each round
+  trip (`bootstrap;dur=`, `accounts;dur=`, health's `d1;dur=`); the rows-read
+  cost (`x-gdt-d1`) stays behind the diag key. Settings → Server build shows the
+  health check's round trip from this browser, the server's part, its D1 query
+  and `cf-placement`.
+
+  **Placement, measured live (00ca381, from Bangkok, 6 samples):** every answer
+  says `Cf-Placement: local-BKK` — Smart Placement is *not* moving the Worker
+  next to the database — and the health check's one D1 query costs **123–135
+  ms** of a 164–192 ms round trip. So each D1 round trip is still ~125 ms of
+  network, as the wrangler.jsonc comment measured before Smart Placement. With
+  Step 1 a page load makes one D1 trip for the bootstrap (and none for data a
+  repeat visit holds), so this now costs ~125 ms per request rather than per
+  waterfall step. **Needs a decision:** either a placement hint that pins the
+  Worker to D1's region (`placement.region`; D1's actual region is in the
+  dashboard / `wrangler d1 info gdt`), or D1 read replication with the Sessions
+  API on the read routes. Not changed here.
+
+### Overall: the build before Step 1 vs after Step 7
+
+Same synthetic account, 390 px, CPU 4×, +150 ms per request (ms; two runs each).
+
+| | before | after |
+|---|---|---|
+| Overview, empty cache: first paint | 3,524–3,528 | 1,784–1,904 |
+| … data complete | 4,480–4,659 | 2,021–2,168 |
+| … main thread blocked | 1,252–1,315 | 373–613 |
+| Overview, repeat visit: first paint | 1,136–1,344 | 564–840 |
+| … data complete | 1,412–2,108 | 451–489 (bootstrap only) |
+| Characters: largest paint | 3,692–4,256 | 1,588–1,628 |
+| … biggest task | 1,017–1,556 | 253–303 |
+| Materials: largest paint | 2,764–3,456 | 1,460–1,936 |
+| … biggest task | 854–1,167 | 461–658 |
+| Artifacts: data complete | 1,888–2,185 | 911–1,081 |
+| Wishes: largest paint | 984–1,260 | 756–872 |
+| Planner (no added latency): largest paint / blocked | 1,528–1,720 / 925–1,190 | 1,084–1,464 / 550–866 |
+| startup JS+CSS | 37–40 files, 186–198 KB gzip | 5 files, 143–146 KB gzip |
+| first visit, all downloads | 235 files, 1,640 KB gzip | 52 files, 374 KB gzip |
+
+Unchanged: Weapons (largest paint ~2.1–2.3 s, biggest task ~480 ms; its bag
+already mounted progressively) and Artifacts' largest paint (~1.9–2.1 s).
+Not reached: "no task > 150 ms" — the first render of a big page still takes
+200–500 ms at CPU 4× (layout of the shell + first cards), and vue-i18n
+compiles messages at runtime (precompiling them is a tooling change left open).
