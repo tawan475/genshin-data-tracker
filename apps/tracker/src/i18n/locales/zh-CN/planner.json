@@ -329,7 +329,17 @@
     "held": "{name} 持有数量",
     "addPlaceholder": "+ 添加",
     "addLabel": "{name}：添加获得数量",
-    "addTitle": "添加新获得的数量（Enter）"
+    "addTitle": "添加新获得的数量（Enter）",
+    "swap": {
+      "label": "异梦溶媒转换",
+      "heading": "转换",
+      "title": "炼金 → 转换：用首领的其他材料换成这个，每次 {n} 个异梦溶媒",
+      "solventHeld": "持有{name}：{n}",
+      "have": "持有 {n}",
+      "do": "转换",
+      "noneHeld": "未持有{name}",
+      "noSolvent": "每次转换需要 {n} 个异梦溶媒"
+    }
   },
   "levelGrid": {
     "below": "低于抓取数据",
@@ -400,7 +410,7 @@
     "search": "搜索武器"
   },
   "seelieImport": {
-    "notExport": "不是 Seelie 导出文件",
+    "notExport": "不是 Seelie 导出文件或 paimon.moe 备份",
     "notJson": "不是 JSON 文件",
     "section": {
       "goals": {
@@ -441,10 +451,10 @@
       "changed": "更改 {n}",
       "same": "相同 {n}"
     },
-    "dropTitle": "seelie.me → 设置（Settings）→ 导出账号（Export Account）",
+    "dropTitle": "seelie.me → 设置（Settings）→ 导出账号（Export Account）· paimon.moe → 设置 → 导出",
     "change": "更换",
     "choose": "选择文件",
-    "fileLabel": "Seelie 导出文件",
+    "fileLabel": "Seelie 导出文件或 paimon.moe 备份",
     "legend": "要导入的内容",
     "skipped": "已跳过 {n}",
     "clampedTitle": "高于 90 级的目标已设为 90 级",
@@ -452,7 +462,12 @@
     "replace": "替换（移除 {n}）",
     "exportTitle": "Seelie 账号文件：目标、背包、任务（Seelie → 设置（Settings）→ 导入账号（Import Account））",
     "export": "导出",
-    "import": "导入"
+    "import": "导入",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "文件中的账号",
+    "account": "账号 {n}",
+    "paimonLevels": "仅等级",
+    "paimonLevelsTitle": "paimon.moe 的待办只保存等级和材料，不保存天赋等级：天赋保持不变"
   },
   "taskEditor": {
     "everyDay": "每天",
@@ -553,11 +568,11 @@
     "import": "导入",
     "replaced": "{n} 处手动修改已被抓取数据取代",
     "ok": "确定",
-    "seelieTitle": "从 Seelie 导入或导出到 Seelie",
+    "seelieTitle": "从 Seelie 或 paimon.moe 导入，导出到 Seelie",
     "addGoals": "添加目标",
     "loadError": "无法加载养成规划",
     "noGoals": "没有目标",
-    "importSeelie": "从 Seelie 导入",
+    "importSeelie": "从 Seelie 或 paimon.moe 导入",
     "importCapture": "导入抓取数据",
     "readiness": "材料状态",
     "selectTitle": "选择要一起修改的目标",

@@ -9,18 +9,23 @@ import {
   type DoneState,
   type ParsedAchievementImport,
 } from '@/data/achievement-progress'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
+import { pickPaimonAccount } from '@/data/paimon-backup'
 import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 
 /**
  * Marks achievements done from another tracker's file: a Seelie account
- * export, or a GOOD file with `gi_achievements` (stardb, irminsul). Only ids
- * not already done are added.
+ * export, a paimon.moe backup (one of its accounts: this account's UID, else
+ * the user's pick) or a GOOD file with `gi_achievements` (stardb, irminsul).
+ * Only ids not already done are added.
  */
 const props = defineProps<{
   open: boolean
+  /** This account's UID (picks the paimon.moe account with it). */
+  uid?: string | null
   state: DoneState
   known: ReadonlyMap<number, Achievement>
   /** Saves the marks; resolves false when that failed. */
@@ -31,9 +36,11 @@ const emit = defineEmits<{ close: [] }>()
 const formatLabel = (format: ParsedAchievementImport['format']): string =>
   format === 'seelie'
     ? 'Seelie'
-    : format === 'good'
-      ? 'GOOD'
-      : t('achievements.import.formats.list')
+    : format === 'paimon'
+      ? 'paimon.moe'
+      : format === 'good'
+        ? 'GOOD'
+        : t('achievements.import.formats.list')
 
 const input = ref<HTMLInputElement>()
 const dragging = ref(false)
@@ -42,10 +49,15 @@ const saving = ref(false)
 const fileName = ref('')
 const failure = ref('')
 const parsed = shallowRef<ParsedAchievementImport | null>(null)
+/** paimon.moe: which of the file's accounts. */
+const picked = ref(0)
+const ids = computed(() => parsed.value?.accounts?.[picked.value]?.ids ?? parsed.value?.ids ?? [])
 
 const plan = computed<AchievementImportPlan | null>(() =>
-  parsed.value ? planAchievementImport(parsed.value.ids, props.state, props.known) : null,
+  parsed.value ? planAchievementImport(ids.value, props.state, props.known) : null,
 )
+const accountLabel = (a: { value: string; uid: string | null }, i: number) =>
+  a.uid ? `UID ${a.uid}` : t('achievements.import.account', { n: i + 1 })
 
 function reset() {
   fileName.value = ''
@@ -65,8 +77,10 @@ async function read(file: File | undefined) {
   reading.value = true
   try {
     const result = parseAchievementImport(JSON.parse(await file.text()))
-    if (result) parsed.value = result
-    else failure.value = t('achievements.import.noAchievements')
+    if (result) {
+      picked.value = result.accounts ? pickPaimonAccount(result.accounts, props.uid) : 0
+      parsed.value = result
+    } else failure.value = t('achievements.import.noAchievements')
   } catch {
     failure.value = t('achievements.import.notJson')
   } finally {
@@ -133,12 +147,28 @@ async function add() {
             formatLabel(parsed.format)
           }}</span>
         </p>
+        <div
+          v-if="parsed?.accounts && parsed.accounts.length > 1"
+          role="radiogroup"
+          :aria-label="$t('achievements.import.fileAccount')"
+          class="flex flex-wrap gap-2"
+        >
+          <FilterChip
+            v-for="(a, i) in parsed.accounts"
+            :key="a.prefix"
+            radio
+            :pressed="picked === i"
+            :count="a.ids.length"
+            @toggle="picked = i"
+            >{{ accountLabel(a, i) }}</FilterChip
+          >
+        </div>
         <p v-if="failure" class="text-sm text-danger-text" role="alert">{{ failure }}</p>
         <dl v-else-if="plan && parsed" class="grid grid-cols-3 gap-2 text-center">
           <div class="rounded-lg bg-surface-overlay px-2 py-2">
             <dt class="text-xs text-text-muted">{{ $t('achievements.import.inFile') }}</dt>
             <dd class="tabular font-mono text-lg font-medium">
-              {{ formatNumber(parsed.ids.length) }}
+              {{ formatNumber(ids.length) }}
             </dd>
           </div>
           <div class="rounded-lg bg-surface-overlay px-2 py-2">

@@ -329,7 +329,17 @@
     "held": "{name} 持有數量",
     "addPlaceholder": "+ 新增",
     "addLabel": "{name}：新增獲得數量",
-    "addTitle": "新增新獲得的數量（Enter）"
+    "addTitle": "新增新獲得的數量（Enter）",
+    "swap": {
+      "label": "異夢溶媒轉換",
+      "heading": "轉換",
+      "title": "煉金 → 轉換：用首領的其他材料換成這個，每次 {n} 個異夢溶媒",
+      "solventHeld": "持有{name}：{n}",
+      "have": "持有 {n}",
+      "do": "轉換",
+      "noneHeld": "未持有{name}",
+      "noSolvent": "每次轉換需要 {n} 個異夢溶媒"
+    }
   },
   "levelGrid": {
     "below": "低於擷取資料",
@@ -400,7 +410,7 @@
     "search": "搜尋武器"
   },
   "seelieImport": {
-    "notExport": "不是 Seelie 匯出檔案",
+    "notExport": "不是 Seelie 匯出檔案或 paimon.moe 備份",
     "notJson": "不是 JSON 檔案",
     "section": {
       "goals": {
@@ -441,10 +451,10 @@
       "changed": "變更 {n}",
       "same": "相同 {n}"
     },
-    "dropTitle": "seelie.me → 設定（Settings）→ 匯出帳號（Export Account）",
+    "dropTitle": "seelie.me → 設定（Settings）→ 匯出帳號（Export Account）· paimon.moe → 設定 → 匯出",
     "change": "更換",
     "choose": "選擇檔案",
-    "fileLabel": "Seelie 匯出檔案",
+    "fileLabel": "Seelie 匯出檔案或 paimon.moe 備份",
     "legend": "要匯入的內容",
     "skipped": "已略過 {n}",
     "clampedTitle": "高於 90 級的目標已設為 90 級",
@@ -452,7 +462,12 @@
     "replace": "替換（移除 {n}）",
     "exportTitle": "Seelie 帳號檔案：目標、背包、任務（Seelie → 設定（Settings）→ 匯入帳號（Import Account））",
     "export": "匯出",
-    "import": "匯入"
+    "import": "匯入",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "檔案中的帳號",
+    "account": "帳號 {n}",
+    "paimonLevels": "僅等級",
+    "paimonLevelsTitle": "paimon.moe 的待辦只保存等級和材料，不保存天賦等級：天賦維持不變"
   },
   "taskEditor": {
     "everyDay": "每天",
@@ -553,11 +568,11 @@
     "import": "匯入",
     "replaced": "{n} 處手動修改已被擷取資料取代",
     "ok": "確定",
-    "seelieTitle": "從 Seelie 匯入或匯出到 Seelie",
+    "seelieTitle": "從 Seelie 或 paimon.moe 匯入，匯出到 Seelie",
     "addGoals": "新增目標",
     "loadError": "無法載入養成規劃",
     "noGoals": "沒有目標",
-    "importSeelie": "從 Seelie 匯入",
+    "importSeelie": "從 Seelie 或 paimon.moe 匯入",
     "importCapture": "匯入擷取資料",
     "readiness": "材料狀態",
     "selectTitle": "選取要一起修改的目標",

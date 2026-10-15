@@ -12,14 +12,22 @@ import type {
 } from '@gdt/shared'
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { Download, FileUp, TriangleAlert } from 'lucide-vue-next'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
+import {
+  isPaimonBackup,
+  paimonAccounts,
+  pickPaimonAccount,
+  type PaimonAccount,
+} from '@/data/paimon-backup'
 import { isSeelieExport } from '@/data/seelie'
 import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
-import { newGoalId } from './goal-ids'
+import { characterGoalId, newGoalId } from './goal-ids'
+import { parsePaimon } from './paimon-plan'
 import type { ResinReading } from './resin'
 import {
   SEELIE_SECTIONS,
@@ -36,7 +44,10 @@ import {
 } from './seelie-plan'
 
 /**
- * Seelie, both ways. Import: pick or drop an account export, see what each
+ * Seelie, both ways, and paimon.moe in. Import: pick or drop a Seelie
+ * account export or a paimon.moe backup (one of its accounts: this
+ * account's UID, else the user's pick; its to-do list and settings, see
+ * paimon-plan.ts), see what each
  * part would change (new / changed / same, what could not be mapped), tick
  * the parts to bring over, apply. Goals, artifact goals, custom characters,
  * current values (as hand-set "Now" states), inventory (as hand edits on
@@ -60,6 +71,8 @@ const props = defineProps<{
   settings: { ar: number | null; wl: number | null; traveler: 'F' | 'M' }
   irminsulAr: boolean
   server: GenshinServer | null
+  /** This account's UID (picks the paimon.moe account with it). */
+  uid?: string | null
   saving: boolean
 }>()
 const emit = defineEmits<{ close: []; apply: [writes: SeelieWrites]; export: [] }>()
@@ -71,6 +84,9 @@ const dragging = ref(false)
 const fileName = ref('')
 const failure = ref('')
 const parsed = shallowRef<SeelieParsed | null>(null)
+/** A paimon.moe backup: the file, its accounts and the one read. */
+const paimon = shallowRef<{ json: Record<string, unknown>; accounts: PaimonAccount[] } | null>(null)
+const paimonPick = ref(0)
 const replace = ref(false)
 const picks = reactive<SeeliePicks>(
   Object.fromEntries(SEELIE_SECTIONS.map((s) => [s, false])) as SeeliePicks,
@@ -83,6 +99,7 @@ watch(
     fileName.value = ''
     failure.value = ''
     parsed.value = null
+    paimon.value = null
     replace.value = false
   },
 )
@@ -99,13 +116,57 @@ const account = computed<SeelieAccount>(() => ({
   newId: newGoalId,
 }))
 
+/** Ticks the sections with changes for a file just read. */
+function pickDefaults(result: SeelieParsed) {
+  const none = Object.fromEntries(SEELIE_SECTIONS.map((s) => [s, false])) as SeeliePicks
+  Object.assign(
+    picks,
+    defaultPicks(planSeelie(result, account.value, none), {
+      irminsulAr: props.irminsulAr,
+      server: props.server,
+    }),
+  )
+}
+
+function readPaimon(index: number) {
+  const file = paimon.value
+  const chosen = file?.accounts[index]
+  if (!file || !chosen) return
+  paimonPick.value = index
+  const goals = new Map(
+    props.targets.flatMap((target) =>
+      target.kind === 'character' ? [[characterGoalId(target.key), target.target.talents]] : [],
+    ),
+  )
+  const result = parsePaimon(file.json, chosen.prefix, props.planner, {
+    character: (key) => findCharacterState(props.capture.characters, key).state,
+    refinement: (key) => findWeaponState(props.capture.weapons, key, '').state.refinement,
+    goalTalents: (key) => goals.get(characterGoalId(key)) ?? null,
+  })
+  pickDefaults(result)
+  parsed.value = result
+}
+
+const accountLabel = (a: PaimonAccount, i: number) =>
+  a.uid ? `UID ${a.uid}` : t('planner.seelieImport.account', { n: i + 1 })
+
 async function read(file: File | undefined) {
   if (!file) return
   fileName.value = file.name
   failure.value = ''
   parsed.value = null
+  paimon.value = null
   try {
     const json: unknown = JSON.parse(await file.text())
+    if (isPaimonBackup(json)) {
+      const backup = json as Record<string, unknown>
+      const accounts = paimonAccounts(backup)
+      paimon.value = { json: backup, accounts }
+      readPaimon(
+        pickPaimonAccount(accounts, props.uid, (a) => Array.isArray(backup[`${a.prefix}todos`])),
+      )
+      return
+    }
     if (!isSeelieExport(json)) throw new Error(t('planner.seelieImport.notExport'))
     const result = parseSeelie(
       json,
@@ -119,14 +180,7 @@ async function read(file: File | undefined) {
       props.server,
       Date.now(),
     )
-    const none = Object.fromEntries(SEELIE_SECTIONS.map((s) => [s, false])) as SeeliePicks
-    Object.assign(
-      picks,
-      defaultPicks(planSeelie(result, account.value, none), {
-        irminsulAr: props.irminsulAr,
-        server: props.server,
-      }),
-    )
+    pickDefaults(result)
     parsed.value = result
   } catch (cause) {
     failure.value =
@@ -174,12 +228,26 @@ function breakdown(s: SectionSummary) {
 const rows = computed(() => {
   const p = plan.value
   if (!p) return []
-  return SEELIE_SECTIONS.filter((id) => p.sections[id].total > 0).map((id) => ({
-    id,
-    ...sectionText(id),
-    data: p.sections[id],
-    available: sectionHasChanges(p.sections[id]),
-  }))
+  const fromPaimon = !!paimon.value
+  return SEELIE_SECTIONS.filter((id) => p.sections[id].total > 0).map((id) => {
+    const text = sectionText(id)
+    // paimon.moe's goals are levels only (talents stay): said on the row.
+    const levelsOnly = fromPaimon && id === 'goals'
+    return {
+      id,
+      ...text,
+      title: levelsOnly
+        ? `${text.title} · ${t('planner.seelieImport.paimonLevelsTitle')}`
+        : text.title,
+      data: levelsOnly
+        ? {
+            ...p.sections[id],
+            facts: [...p.sections[id].facts, t('planner.seelieImport.paimonLevels')],
+          }
+        : p.sections[id],
+      available: sectionHasChanges(p.sections[id]),
+    }
+  })
 })
 
 const writes = computed(() => plan.value?.writes ?? null)
@@ -201,7 +269,11 @@ function apply() {
 </script>
 
 <template>
-  <UiModal :open="open" title="Seelie" @close="emit('close')">
+  <UiModal
+    :open="open"
+    :title="paimon ? 'paimon.moe' : parsed ? 'Seelie' : $t('planner.seelieImport.title')"
+    @close="emit('close')"
+  >
     <div class="flex flex-col gap-4">
       <div
         class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors"
@@ -231,6 +303,22 @@ function apply() {
         <TriangleAlert class="size-4" aria-hidden="true" />
         {{ failure }}
       </p>
+
+      <div
+        v-if="paimon && paimon.accounts.length > 1"
+        role="radiogroup"
+        :aria-label="$t('planner.seelieImport.fileAccount')"
+        class="flex flex-wrap gap-2"
+      >
+        <FilterChip
+          v-for="(a, i) in paimon.accounts"
+          :key="a.prefix"
+          radio
+          :pressed="paimonPick === i"
+          @toggle="readPaimon(i)"
+          >{{ accountLabel(a, i) }}</FilterChip
+        >
+      </div>
 
       <template v-if="plan">
         <fieldset

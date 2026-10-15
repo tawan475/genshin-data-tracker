@@ -1614,7 +1614,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       <template v-if="hasGoals">
         <UiButton :title="$t('planner.view.seelieTitle')" @click="importOpen = true">
           <FileInput class="size-4" aria-hidden="true" />
-          Seelie
+          Seelie / paimon
         </UiButton>
         <UiButton variant="primary" :title="$t('planner.view.addGoals')" @click="openPicker()">
           <Plus class="size-4" aria-hidden="true" />
@@ -1975,6 +1975,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       :settings="{ ar, wl, traveler: travelerGender }"
       :irminsul-ar="player.ar !== null"
       :server="account.server"
+      :uid="account.uid"
       :saving="importing"
       @close="importOpen = false"
       @apply="importSeelie"
@@ -2007,6 +2008,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       @change="setCount"
       @add="addCount"
       @goals="goalsUsing"
+      @swap="(row) => void crafted([row])"
     />
   </template>
 

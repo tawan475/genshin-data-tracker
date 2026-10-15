@@ -27,6 +27,8 @@ import {
   idsToMark,
   idsToUnmark,
   matchesCompletion,
+  restoreFilters,
+  storedFilters,
   summarizeAchievements,
   type AchievementEntry,
   type AchievementFilters,
@@ -52,6 +54,7 @@ import { loadBundle, type AccountRef } from '@/data/account-data'
 import { useResource } from '@/data/use-resource'
 import { gameIcon, loadGameIcons } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { readJson, writeJson } from '@/lib/storage'
 import { t } from '@/i18n'
 import { locale } from '@/i18n/locale'
 import { useFeedback } from '@/stores/feedback'
@@ -209,8 +212,32 @@ const newestCapture = computed(() => {
 
 // ------------------------------------------------------------------ filters
 
-/** The page opens on what is left ("Missing" is the default, not a filter); a choice lasts while on it. */
-const filters = reactive<AchievementFilters>({ ...DEFAULT_ACHIEVEMENT_FILTERS })
+/**
+ * The page opens on the filters last used on this device (the search
+ * aside); first time on what is left ("Missing" is the default, not a
+ * filter).
+ */
+const FILTERS_KEY = 'achievements:filters'
+const filters = reactive<AchievementFilters>(restoreFilters(readJson(FILTERS_KEY, null)))
+watch(
+  () => storedFilters(filters),
+  (stored) => writeJson(FILTERS_KEY, stored),
+  { deep: true },
+)
+/** A stored category or version the game data doesn't have (any more) is dropped. */
+watch(
+  () => game.data.value,
+  (g) => {
+    if (!g) return
+    const known = restoreFilters(storedFilters(filters), {
+      goals: new Set(g.data.goals.map((goal) => goal.id)),
+      versions: new Set(achievementVersions(g.entries)),
+    })
+    if (known.goal !== filters.goal) filters.goal = known.goal
+    if (known.version !== filters.version) filters.version = known.version
+  },
+  { immediate: true },
+)
 const filtered = computed(() => hasAchievementFilters(filters))
 /** A search or the Done filter is looking for done ones: don't hide them. */
 const hideSeriesEntries = computed(
@@ -440,7 +467,7 @@ async function importIds(ids: number[]): Promise<boolean> {
           @click="importOpen = true"
         >
           <FileUp class="size-4" aria-hidden="true" />
-          Seelie / stardb
+          Seelie / paimon / stardb
         </UiButton>
       </template>
     </PageHeader>
@@ -536,6 +563,7 @@ async function importIds(ids: number[]): Promise<boolean> {
 
       <AchievementImportDialog
         :open="importOpen"
+        :uid="account.uid"
         :state="state"
         :known="game.data.value.data.byId"
         :save="importIds"

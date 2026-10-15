@@ -3,14 +3,19 @@ import { materialName } from '@/utils/materials'
 import type { PlannerData, PlannerMaterial } from '@gdt/game-data'
 import type { PlanTotals } from '@gdt/game-data/planner-math'
 import { computed, reactive, watch } from 'vue'
-import { ChartLine, ListFilter, Minus, Plus, RotateCcw } from 'lucide-vue-next'
+import { ChartLine, ListFilter, Minus, Plus, Repeat2, RotateCcw } from 'lucide-vue-next'
 import MaterialIcon from '@/components/materials-page/MaterialIcon.vue'
+import UiButton from '@/components/ui/UiButton.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPopover from '@/components/ui/UiPopover.vue'
+import { t } from '@/i18n'
 import { gameIcon, materialIcon } from '@/lib/assets'
 import { formatCompact, formatNumber } from '@/lib/format'
+import { rowText, type CraftRow } from './crafting'
 import type { ItemContext } from './item-popover'
 import { materialSoft } from './material-soft'
+import NumberStepper from './NumberStepper.vue'
+import { solventSwap, swapRow, swapStart, type SwapSource } from './solvent-swap'
 
 /**
  * The inventory editor every material icon opens: the material's whole
@@ -22,7 +27,8 @@ import { materialSoft } from './material-soft'
  * domain run). A count that differs from the capture shows it, with a reset.
  * `history` adds a button to the material's history (the Materials page);
  * `goals` one to the goals using it (the Goals tab filtered by it), with
- * how many there are.
+ * how many there are. A weekly boss material offers the Dream Solvent swap
+ * from the boss's other materials (`swap`: recorded like a Crafting step).
  */
 const props = defineProps<{
   open: boolean
@@ -49,6 +55,8 @@ const emit = defineEmits<{
   add: [key: string, count: number]
   history: [key: string]
   goals: [key: string]
+  /** A Dream Solvent swap done in game, as a Convert row. */
+  swap: [row: CraftRow]
 }>()
 
 const material = computed(() =>
@@ -174,6 +182,52 @@ function commitGain(row: Row) {
   gains.delete(row.material.key)
   if (Number.isInteger(n) && n > 0) emit('add', row.material.key, n)
 }
+// ------------------------------------------------------- Dream Solvent swap
+
+const swap = computed(() =>
+  props.itemKey ? solventSwap(props.planner, props.itemKey, props.bag) : null,
+)
+const solventMaterial = computed(() =>
+  swap.value ? (props.planner.materialsByKey.get(swap.value.solvent.key) ?? null) : null,
+)
+/** Counts chosen per source while open (else: what is missing, within what can be given). */
+const swapCounts = reactive(new Map<string, number>())
+watch(
+  () => [props.open, props.itemKey],
+  () => swapCounts.clear(),
+)
+const targetMissing = computed(() =>
+  props.itemKey ? (props.totals?.lines.get(props.itemKey)?.missing ?? 0) : 0,
+)
+function swapCount(source: SwapSource): number {
+  const chosen = swapCounts.get(source.material.key)
+  const start = swapStart(source, targetMissing.value)
+  return chosen === undefined ? start : Math.max(0, Math.min(source.max, chosen))
+}
+function swapTitle(source: SwapSource): string {
+  const s = swap.value
+  if (!s) return ''
+  if (source.max === 0) {
+    return source.have === 0
+      ? t('planner.popover.swap.noneHeld', { name: materialName(source.material.key) })
+      : t('planner.popover.swap.noSolvent', { n: formatNumber(s.solvent.each) })
+  }
+  const row = swapRow(s, source.material.key, swapCount(source))
+  return rowText(row, materialName, [
+    t('farm.craft.item', {
+      count: formatNumber(row.costs[0]?.count ?? 0),
+      name: materialName(s.solvent.key),
+    }),
+  ])
+}
+function doSwap(source: SwapSource) {
+  const s = swap.value
+  const n = swapCount(source)
+  if (!s || n <= 0) return
+  swapCounts.delete(source.material.key)
+  emit('swap', swapRow(s, source.material.key, n))
+}
+
 const title = computed(() => material.value?.name ?? '')
 const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
 </script>
@@ -333,5 +387,81 @@ const keysHint = '↑ / W +1 · ↓ / S −1 · Shift ±10'
         </span>
       </li>
     </ul>
+
+    <section
+      v-if="swap"
+      class="flex flex-col gap-1 border-t border-border-subtle px-4 py-2"
+      :aria-label="$t('planner.popover.swap.label')"
+    >
+      <p
+        class="flex items-center gap-1.5 text-xs text-text-muted"
+        :title="$t('planner.popover.swap.title', { n: formatNumber(swap.solvent.each) })"
+      >
+        <Repeat2 class="size-3.5" aria-hidden="true" />
+        <span>{{ $t('planner.popover.swap.heading') }}</span>
+        <span
+          v-if="solventMaterial"
+          class="tabular ml-auto inline-flex items-center gap-1 font-mono"
+          :title="
+            $t('planner.popover.swap.solventHeld', {
+              name: materialName(swap.solvent.key),
+              n: formatNumber(swap.solvent.have),
+            })
+          "
+        >
+          <span class="size-5 overflow-hidden rounded">
+            <MaterialIcon
+              :src="iconOf(solventMaterial)"
+              :name="materialName(solventMaterial.key)"
+            />
+          </span>
+          {{ formatNumber(swap.solvent.have) }}
+        </span>
+      </p>
+      <ul class="flex flex-col">
+        <li
+          v-for="source in swap.sources"
+          :key="source.material.key"
+          class="flex flex-wrap items-center gap-x-2 gap-y-1 py-1"
+          :class="source.max === 0 ? 'opacity-60' : ''"
+          :title="swapTitle(source)"
+        >
+          <span
+            class="size-8 shrink-0 overflow-hidden rounded-md text-xs"
+            :class="materialSoft(source.material.key, source.material.rarity)"
+          >
+            <MaterialIcon
+              :src="iconOf(source.material)"
+              :name="materialName(source.material.key)"
+            />
+          </span>
+          <span class="flex min-w-[6rem] flex-1 flex-col">
+            <span class="truncate text-sm">{{ materialName(source.material.key) }}</span>
+            <span class="tabular font-mono text-xs text-text-muted">{{
+              $t('planner.popover.swap.have', { n: formatNumber(source.have) })
+            }}</span>
+          </span>
+          <span class="ml-auto flex shrink-0 items-center gap-1.5">
+            <NumberStepper
+              v-if="source.max > 0"
+              :model-value="swapCount(source)"
+              :min="1"
+              :max="source.max"
+              :label="materialName(source.material.key)"
+              @update:model-value="(n: number) => swapCounts.set(source.material.key, n)"
+            />
+            <UiButton
+              size="sm"
+              :disabled="source.max === 0"
+              :aria-label="swapTitle(source)"
+              @click="doSwap(source)"
+            >
+              <Repeat2 class="size-4" aria-hidden="true" />
+              {{ $t('planner.popover.swap.do') }}
+            </UiButton>
+          </span>
+        </li>
+      </ul>
+    </section>
   </UiPopover>
 </template>

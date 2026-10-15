@@ -2,8 +2,8 @@
  * Achievement progress for the tracker's Achievements page, as pure
  * functions over data the app loads: which achievements are done (captured
  * from snapshots, or marked by hand), stage chains grouped into one entry,
- * counts per category, filters, bulk marking and imports from Seelie or
- * stardb/irminsul files.
+ * counts per category, filters, bulk marking and imports from Seelie,
+ * paimon.moe or stardb/irminsul files.
  *
  * Disused achievements (removed from the game) are never counted; ids the
  * data does not know (newer than it) are kept wherever they come from, so
@@ -11,6 +11,12 @@
  */
 
 import type { Achievement, AchievementData, AchievementTexts } from '@gdt/game-data'
+import {
+  isPaimonBackup,
+  paimonAccounts,
+  paimonAchievements,
+  type PaimonAccount,
+} from './paimon-backup'
 
 // ------------------------------------------------------------------ captured
 
@@ -362,6 +368,37 @@ export function hasAchievementFilters(
   )
 }
 
+/** The filters kept per device (the search is left out: it is for the moment). */
+export type StoredAchievementFilters = Omit<AchievementFilters, 'query'>
+
+/** What to remember of the filters. */
+export function storedFilters(filters: AchievementFilters): StoredAchievementFilters {
+  const { completion, goal, version, hidden } = filters
+  return { completion, goal, version, hidden }
+}
+
+/**
+ * The filters to open on from what was stored (anything else: the
+ * defaults). A category or version the data doesn't have (`known`, once
+ * loaded) is dropped.
+ */
+export function restoreFilters(
+  raw: unknown,
+  known?: { goals: ReadonlySet<number>; versions: ReadonlySet<string> },
+): AchievementFilters {
+  const out: AchievementFilters = { ...DEFAULT_ACHIEVEMENT_FILTERS }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out
+  const r = raw as Record<string, unknown>
+  if (r.completion === 'all' || r.completion === 'done' || r.completion === 'missing')
+    out.completion = r.completion
+  if (r.hidden === 'all' || r.hidden === 'hidden' || r.hidden === 'visible') out.hidden = r.hidden
+  if (typeof r.goal === 'number' && Number.isInteger(r.goal) && (!known || known.goals.has(r.goal)))
+    out.goal = r.goal
+  if (typeof r.version === 'string' && (!known || known.versions.has(r.version)))
+    out.version = r.version
+  return out
+}
+
 export function matchesCompletion(
   entry: AchievementEntry,
   completion: Completion,
@@ -472,13 +509,17 @@ export function unmarkFrom(entry: AchievementEntry, index: number, state: DoneSt
  * - `seelie`: a Seelie account export (`achievements: {"80001": {done: true}}`)
  * - `good`: a GOOD file, as irminsul and stardb write it (`gi_achievements: [80001]`)
  * - `list`: a bare JSON array of ids
+ * - `paimon`: a paimon.moe backup (`achievement: {"<category>": {"80001": true}}`,
+ *   one set per paimon.moe account)
  */
-export type AchievementImportFormat = 'seelie' | 'good' | 'list'
+export type AchievementImportFormat = 'seelie' | 'good' | 'list' | 'paimon'
 
 export interface ParsedAchievementImport {
   format: AchievementImportFormat
-  /** Completed ids, sorted, without duplicates. */
+  /** Completed ids, sorted, without duplicates (paimon.moe: its first account with any). */
   ids: number[]
+  /** paimon.moe: each account with its ids (pick one; another UID's are another player's). */
+  accounts?: (PaimonAccount & { ids: number[] })[]
 }
 
 const isId = (value: unknown): value is number =>
@@ -497,6 +538,13 @@ export function parseAchievementImport(json: unknown): ParsedAchievementImport |
     return json.length > 0 && json.every(isId) ? { format: 'list', ids: idList(json) } : null
   }
   if (!isRecord(json)) return null
+  if (isPaimonBackup(json)) {
+    const accounts = paimonAccounts(json)
+      .map((a) => ({ ...a, ids: paimonAchievements(json, a.prefix) }))
+      .filter((a) => a.ids.length > 0)
+    if (accounts.length === 0) return null
+    return { format: 'paimon', ids: accounts[0]!.ids, accounts }
+  }
   if (Array.isArray(json.gi_achievements)) {
     return { format: 'good', ids: idList(json.gi_achievements) }
   }

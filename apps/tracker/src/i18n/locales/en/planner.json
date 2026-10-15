@@ -329,7 +329,17 @@
     "held": "{name} held",
     "addPlaceholder": "+ add",
     "addLabel": "{name}: add obtained",
-    "addTitle": "Add what you got (Enter)"
+    "addTitle": "Add what you got (Enter)",
+    "swap": {
+      "label": "Dream Solvent swap",
+      "heading": "Swap",
+      "title": "Alchemy → Conversion: one of the boss's other materials for this, {n} Dream Solvent each",
+      "solventHeld": "{name} held: {n}",
+      "have": "Have {n}",
+      "do": "Swap",
+      "noneHeld": "No {name} held",
+      "noSolvent": "Needs {n} Dream Solvent per swap"
+    }
   },
   "levelGrid": {
     "below": "Below the capture",
@@ -400,7 +410,7 @@
     "search": "Search weapons"
   },
   "seelieImport": {
-    "notExport": "Not a Seelie export",
+    "notExport": "Not a Seelie export or paimon.moe backup",
     "notJson": "Not a JSON file",
     "section": {
       "goals": {
@@ -441,10 +451,10 @@
       "changed": "{n} changed",
       "same": "{n} same"
     },
-    "dropTitle": "seelie.me → Settings → Export Account",
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
     "change": "Change",
     "choose": "Choose file",
-    "fileLabel": "Seelie export file",
+    "fileLabel": "Seelie export or paimon.moe backup",
     "legend": "What to import",
     "skipped": "Skipped {n}",
     "clampedTitle": "Targets above level 90 were set to 90",
@@ -452,7 +462,12 @@
     "replace": "Replace (remove {n})",
     "exportTitle": "A Seelie account file: goals, inventory, tasks (Seelie → Settings → Import Account)",
     "export": "Export",
-    "import": "Import"
+    "import": "Import",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Account in the file",
+    "account": "Account {n}",
+    "paimonLevels": "levels only",
+    "paimonLevelsTitle": "paimon.moe keeps a to-do's levels and materials, not its talent levels: talents stay as they are"
   },
   "taskEditor": {
     "everyDay": "Every day",
@@ -553,11 +568,11 @@
     "import": "Import",
     "replaced": "{n} hand edit replaced by the capture | {n} hand edits replaced by the capture",
     "ok": "OK",
-    "seelieTitle": "Import from or export to Seelie",
+    "seelieTitle": "Import from Seelie or paimon.moe, export to Seelie",
     "addGoals": "Add goals",
     "loadError": "Could not load the planner",
     "noGoals": "No goals",
-    "importSeelie": "Import from Seelie",
+    "importSeelie": "Import from Seelie or paimon.moe",
     "importCapture": "Import a capture",
     "readiness": "Readiness",
     "selectTitle": "Pick goals to change together",

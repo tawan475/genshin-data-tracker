@@ -1,6 +1,6 @@
 # Achievements tracker, planner, and our own game data
 
-Status: phases 1–4 shipped 2026-10-04 (live); phase 5 open · Owner: the user (tawan475) · Built by Claude Code agents in phases.
+Status: phases 1–4 shipped 2026-10-04 (live); phase 5 done 2026-10-15 (levels 95/100 left) · Owner: the user (tawan475) · Built by Claude Code agents in phases.
 
 The user tracks achievements on stardb.gg and plans characters on seelie.me and wants both in the
 tracker, with game data a maintainer can refresh each patch, and our own item images because
@@ -110,9 +110,16 @@ Game data compiled from the dump, committed, refreshed by one command per patch.
 4. ✅ Planner math (pure, tested) + page + Seelie goal import. (agent) Plus `data/avatars.json`
    (portraits for characters/weapons newer than GO's asset table) and the per-account
    Traveler twin setting. (lead)
-5. Open: drop rates in `overrides/drops.json` (runs/resin/days stay hidden until then),
-   levels 95/100 (not in the dump), Dream Solvent swaps, paimon.moe import, keeping
-   Achievements filters across reloads.
+5. ✅ 2026-10-15. Drop rates: in genshin-game-data `overrides/drops.json` since 2026-10-04/06
+   (wiki permalinks per section; every revid still current on 2026-10-15), runs/resin/days
+   on every farm card (Planner v2). Dream Solvent swaps: the plan's own in the Crafting card's
+   Convert rows; by hand in every weekly boss material's item editor (`solvent-swap.ts`,
+   recorded as a Convert row: toast + Undo, Materials page too). paimon.moe backup import:
+   Achievements (per paimon account, UID picks) and Planner (`paimon-plan.ts` into the
+   Seelie import's plan/dialog: to-dos as level/weapon goals and item needs — paimon keeps
+   no talent levels; ascension read from the to-do's ascension materials — plus AR/WL/server).
+   Achievements filters kept per device (`gdt:achievements:filters`, search not kept).
+   Still open: levels 95/100 (costs not in the dump).
 
 ## Credits / licensing
 Text and images © HoYoverse; non-commercial, credited. Dimbreath (dump) asks for credit; stardb

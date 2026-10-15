@@ -26,6 +26,7 @@ import { useChartRange } from '@/components/charts/use-chart-range'
 import MaterialDetail from '@/components/materials-page/MaterialDetail.vue'
 import MaterialsBag from '@/components/materials-page/MaterialsBag.vue'
 import ItemPopover from '@/components/planner/ItemPopover.vue'
+import { craftChanges, type CraftRow } from '@/components/planner/crafting'
 import { adjustmentApplies } from '@/components/planner/hand-edits'
 import { usePlannerModel } from '@/components/planner/use-planner-model'
 import TrackedPanel from '@/components/materials-page/TrackedPanel.vue'
@@ -187,6 +188,11 @@ function openTile(key: string, anchor: HTMLElement, touch: boolean) {
   } else detailKey.value = key
 }
 
+/** A Dream Solvent swap from the editor: its input and solvent out, its product in. */
+function swapped(row: CraftRow) {
+  for (const change of craftChanges([row])) planning?.addCount(change.key, change.add ?? 0)
+}
+
 function showHistory(key: string) {
   editorOpen.value = false
   detailKey.value = key
@@ -321,6 +327,7 @@ const importTo = computed(() => ({
       @change="planning.setCount"
       @add="planning.addCount"
       @history="showHistory"
+      @swap="swapped"
     />
 
     <TrackPicker

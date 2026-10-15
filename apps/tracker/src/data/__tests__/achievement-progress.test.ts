@@ -18,7 +18,9 @@ import {
   markThrough,
   parseAchievementImport,
   planAchievementImport,
+  restoreFilters,
   stardbAchievementUrl,
+  storedFilters,
   summarizeAchievements,
   tiersDone,
   unmarkFrom,
@@ -356,6 +358,28 @@ describe('filters', () => {
     expect(countAchievements(entries, 'missing', s)).toBe(3)
   })
 
+  it('restores stored filters, dropping anything malformed or unknown', () => {
+    const stored = storedFilters(filters({ goal: 2, version: '4.10', query: 'cook' }))
+    expect(stored).toEqual({ completion: 'all', goal: 2, version: '4.10', hidden: 'all' })
+    expect(restoreFilters(JSON.parse(JSON.stringify(stored)))).toEqual({
+      ...stored,
+      query: '',
+    })
+    expect(restoreFilters(null)).toEqual(DEFAULT_ACHIEVEMENT_FILTERS)
+    expect(restoreFilters([1])).toEqual(DEFAULT_ACHIEVEMENT_FILTERS)
+    expect(restoreFilters({ completion: 'odd', goal: '2', version: 4, hidden: 'hidden' })).toEqual({
+      ...DEFAULT_ACHIEVEMENT_FILTERS,
+      hidden: 'hidden',
+    })
+    const known = { goals: new Set([1]), versions: new Set(['4.0']) }
+    expect(restoreFilters(stored, known)).toEqual({
+      ...stored,
+      goal: null,
+      version: null,
+      query: '',
+    })
+  })
+
   it('knows when filters are on, "Missing" being the default', () => {
     expect(DEFAULT_ACHIEVEMENT_FILTERS).toEqual({
       ...NO_ACHIEVEMENT_FILTERS,
@@ -409,6 +433,27 @@ describe('imports', () => {
       ids: [20],
     })
     expect(parseAchievementImport([21, 20])).toEqual({ format: 'list', ids: [20, 21] })
+  })
+
+  it('reads a paimon.moe backup, account by account', () => {
+    const backup = {
+      accounts: 'account2',
+      achievement: { '0': { '10': true, '11': false }, '17': { '13': true } },
+      'wish-uid': '812345678',
+      ar: 60,
+      'account2-achievement': { '0': { '20': true } },
+      'account2-wish-uid': '812345679',
+      'account3-todos': [],
+    }
+    const parsed = parseAchievementImport(backup)
+    expect(parsed?.format).toBe('paimon')
+    expect(parsed?.ids).toEqual([10, 13])
+    expect(parsed?.accounts?.map((a) => [a.prefix, a.uid, a.ids])).toEqual([
+      ['', '812345678', [10, 13]],
+      ['account2-', '812345679', [20]],
+    ])
+    // A backup with no achievements (or only another tracker's keys) is none.
+    expect(parseAchievementImport({ todos: [], ar: 55 })).toBeNull()
   })
 
   it('rejects anything else', () => {
