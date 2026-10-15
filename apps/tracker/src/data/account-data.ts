@@ -223,7 +223,9 @@ function liveVersion(account: AccountRef): number {
  */
 export function loadLive(account: AccountRef): Promise<LiveJournalResponse | null> {
   if (!account.liveSync) return Promise.resolve(null)
-  return cached(account, `live:${liveVersion(account)}`, () => reader(account).live(account.id))
+  return cached(account, `live:${liveVersion(account)}`, () =>
+    account.source === 'staff' ? api.staff.live(account.id) : api.live(account.id),
+  )
 }
 
 /**
