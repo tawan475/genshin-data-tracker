@@ -38,6 +38,7 @@ describe('bootstrap', () => {
     })
     expect(response.status).toBe(200)
     expect(response.headers.get('x-gdt-d1')).toMatch(/round-trips=1;/)
+    expect(response.headers.get('server-timing')).toMatch(/bootstrap;dur=\d+.*total;dur=\d+/)
     const body = (await response.json()) as BootstrapResponse
 
     expect(body.me).toEqual(await client.json<MeResponse>('/api/auth/me'))

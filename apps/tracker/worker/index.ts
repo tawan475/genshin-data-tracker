@@ -28,6 +28,20 @@ const app = new Hono<AppEnv>().basePath('/api')
 // API responses are JSON or downloads, never pages: lock them down.
 app.use(secureHeaders({ crossOriginResourcePolicy: 'same-origin', xFrameOptions: 'DENY' }))
 
+// Server-Timing `total`: the Worker's time on the request. A Worker's clock
+// only moves across I/O, so this is time spent waiting on D1, the live hub
+// and other services, not CPU; routes that meter D1 add their round trips.
+app.use(async (c, next) => {
+  const started = Date.now()
+  await next()
+  if (c.res.status === 101) return
+  try {
+    c.res.headers.append('Server-Timing', `total;dur=${Date.now() - started}`)
+  } catch {
+    // A response passed through as fetched has read-only headers: no timing.
+  }
+})
+
 // A response that sets a session cookie must never be stored by any cache.
 app.use(async (c, next) => {
   await next()

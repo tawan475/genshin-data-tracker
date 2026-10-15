@@ -128,7 +128,14 @@
     "pending": "{n} 個待套用遷移",
     "couldNotRefresh": "無法重新整理：{error}",
     "offline": "無法連線到伺服器，請檢查網路連線。",
-    "noReport": "伺服器回應了 {status}，但沒有狀態報告。"
+    "noReport": "伺服器回應了 {status}，但沒有狀態報告。",
+    "timing": "回應",
+    "timingHint": "從你的瀏覽器發出的這次檢查：整個請求、其中伺服器的部分，以及資料庫查詢",
+    "ms": "{n} 毫秒",
+    "serverMs": "伺服器 {n} 毫秒",
+    "d1Ms": "資料庫 {n} 毫秒",
+    "placement": "執行位置",
+    "placementHint": "Cloudflare 為這次檢查執行伺服器的位置：local = 離你最近的資料中心，remote = 移到資料庫旁邊"
   },
   "devices": {
     "title": "裝置",

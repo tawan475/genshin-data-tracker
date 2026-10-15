@@ -82,12 +82,14 @@ export class D1Meter {
   }
 
   /**
-   * Adds Server-Timing and x-gdt-d1 headers, but only for a request carrying
-   * the diag key (as aru.gg does): costs are diagnostics, not public data.
+   * Adds each D1 round trip's time to Server-Timing (the browser's network
+   * panel shows where a request's server time went); its cost in rows read
+   * and written (x-gdt-d1) only for a request carrying the diag key (as
+   * aru.gg does): billing figures are diagnostics, not public data.
    */
   report(c: Context<AppEnv>): void {
+    if (this.timings.length) c.header('Server-Timing', this.timings.join(', '), { append: true })
     if (!diagKeyOk(c.req.header('x-diag-key'), c.env.DIAG_KEY)) return
-    c.header('Server-Timing', this.timings.join(', '))
     c.header(
       'x-gdt-d1',
       `round-trips=${this.roundTrips}; rows-read=${this.rowsRead}; rows-written=${this.rowsWritten}; ` +

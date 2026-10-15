@@ -57,3 +57,14 @@ describe('diagKeyOk', () => {
     expect(diagKeyOk(KEY.replace('t', 'T'), KEY)).toBe(false)
   })
 })
+
+describe('server timing', () => {
+  it('tells the time the Worker spent and the D1 round trip, without the diag key', async () => {
+    const response = await SELF.fetch('https://genshin-tracker.475.dev/api/health')
+    const timing = response.headers.get('server-timing') ?? ''
+    expect(timing).toMatch(/(^|, )d1;dur=\d+/)
+    expect(timing).toMatch(/(^|, )total;dur=\d+/)
+    // The rows-read cost stays behind the diag key.
+    expect(response.headers.get('x-gdt-d1')).toBeNull()
+  })
+})

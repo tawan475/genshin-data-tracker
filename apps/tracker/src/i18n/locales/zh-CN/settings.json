@@ -128,7 +128,14 @@
     "pending": "{n} 个待应用迁移",
     "couldNotRefresh": "无法刷新：{error}",
     "offline": "无法连接服务器，请检查网络连接。",
-    "noReport": "服务器返回了 {status}，但没有状态报告。"
+    "noReport": "服务器返回了 {status}，但没有状态报告。",
+    "timing": "响应",
+    "timingHint": "从你的浏览器发出的这次检查：整个请求、其中服务器的部分，以及数据库查询",
+    "ms": "{n} 毫秒",
+    "serverMs": "服务器 {n} 毫秒",
+    "d1Ms": "数据库 {n} 毫秒",
+    "placement": "运行位置",
+    "placementHint": "Cloudflare 为这次检查运行服务器的位置：local = 离你最近的数据中心，remote = 移到数据库旁边"
   },
   "devices": {
     "title": "设备",

@@ -128,7 +128,14 @@
     "pending": "{n} pending migration | {n} pending migrations",
     "couldNotRefresh": "Could not refresh: {error}",
     "offline": "Could not reach the server. Check your connection.",
-    "noReport": "The server answered {status} without a health report."
+    "noReport": "The server answered {status} without a health report.",
+    "timing": "Response",
+    "timingHint": "This check from your browser: the whole request, the server's part of it, and its database query",
+    "ms": "{n} ms",
+    "serverMs": "server {n} ms",
+    "d1Ms": "database {n} ms",
+    "placement": "Runs at",
+    "placementHint": "Where Cloudflare ran the server for this check: local = the data centre near you, remote = moved next to the database"
   },
   "devices": {
     "title": "Devices",

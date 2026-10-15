@@ -43,11 +43,14 @@ export const health = new Hono<AppEnv>().get('/', async (c) => {
   let db: 'ok' | 'error' = 'ok'
   let detail: string | undefined
   let applied: string[] = []
+  const started = Date.now()
   try {
     const { results } = await c.env.DB.prepare('SELECT name FROM d1_migrations ORDER BY id').all<{
       name: string
     }>()
     applied = results.map((row) => row.name)
+    // The one D1 round trip: what the Settings page shows as the database's time.
+    c.header('Server-Timing', `d1;dur=${Date.now() - started}`, { append: true })
   } catch (error) {
     db = 'error'
     detail = String(error)

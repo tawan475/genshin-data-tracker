@@ -6,12 +6,25 @@ import UiError from '@/components/ui/UiError.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { useResource } from '@/data/use-resource'
+import { t } from '@/i18n'
 import { errorText } from '@/i18n/api-errors'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { loadHealth } from './health'
 
 /** What the server says about itself: build, database and schema state. */
 const { data: health, error, loading, reload } = useResource(() => true, loadHealth)
+
+/** "server 3 ms · database 2 ms", from the check's Server-Timing (empty without it). */
+const serverParts = computed(() => {
+  const timing = health.value?.timing
+  if (!timing) return ''
+  return [
+    timing.server !== null ? t('settings.build.serverMs', { n: timing.server }) : null,
+    timing.d1 !== null ? t('settings.build.d1Ms', { n: timing.d1 }) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+})
 
 const builtAt = computed(() => {
   const iso = health.value?.build?.builtAt
@@ -102,6 +115,24 @@ const builtAt = computed(() => {
             $t('settings.build.migrationsApplied')
           }}</span>
         </dd>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5">
+        <dt class="font-sans text-text-secondary" :title="$t('settings.build.timingHint')">
+          {{ $t('settings.build.timing') }}
+        </dt>
+        <dd class="tabular text-right" :title="$t('settings.build.timingHint')">
+          {{ $t('settings.build.ms', { n: health.timing.roundTrip }) }}
+          <span v-if="serverParts" class="ms-1 font-sans text-text-muted">· {{ serverParts }}</span>
+        </dd>
+      </div>
+      <div
+        v-if="health.timing.placement"
+        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5"
+      >
+        <dt class="font-sans text-text-secondary" :title="$t('settings.build.placementHint')">
+          {{ $t('settings.build.placement') }}
+        </dt>
+        <dd>{{ health.timing.placement }}</dd>
       </div>
       <div v-if="health.schema.pending.length" class="flex flex-col gap-1 py-2.5">
         <dt class="font-sans text-warning-text">

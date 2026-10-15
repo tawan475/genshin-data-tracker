@@ -7,6 +7,7 @@
  */
 
 import { t } from '@/i18n'
+import { serverTiming } from '@/lib/server-timing'
 
 export interface HealthReport {
   status: 'ok' | 'degraded'
@@ -14,6 +15,18 @@ export interface HealthReport {
   db: 'ok' | 'error'
   schema: { applied: number; expected: number | null; pending: string[] }
   time: string
+}
+
+/** How long the health check took, from this browser and on the server. */
+export interface HealthTiming {
+  /** The whole request as this browser saw it, ms. */
+  roundTrip: number
+  /** The Worker's own time on it (Server-Timing `total`), ms. */
+  server: number | null
+  /** Its one database round trip (Server-Timing `d1`), ms. */
+  d1: number | null
+  /** Where the Worker ran (Cloudflare's `cf-placement`: `local-BKK`, `remote-SIN`). */
+  placement: string | null
 }
 
 function isHealthReport(value: unknown): value is HealthReport {
@@ -28,12 +41,20 @@ function isHealthReport(value: unknown): value is HealthReport {
   )
 }
 
-export async function loadHealth(): Promise<HealthReport> {
+export async function loadHealth(): Promise<HealthReport & { timing: HealthTiming }> {
   let response: Response
+  const started = performance.now()
   try {
     response = await fetch('/api/health', { cache: 'no-store', credentials: 'omit' })
   } catch {
     throw new Error(t('settings.build.offline'))
+  }
+  const timings = response.headers.get('server-timing')
+  const timing: HealthTiming = {
+    roundTrip: Math.round(performance.now() - started),
+    server: serverTiming(timings, 'total'),
+    d1: serverTiming(timings, 'd1'),
+    placement: response.headers.get('cf-placement'),
   }
   let body: unknown
   try {
@@ -44,5 +65,5 @@ export async function loadHealth(): Promise<HealthReport> {
   if (!isHealthReport(body)) {
     throw new Error(t('settings.build.noReport', { status: response.status }))
   }
-  return body
+  return { ...body, timing }
 }
