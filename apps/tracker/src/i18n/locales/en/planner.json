@@ -216,7 +216,7 @@
     "talents": "Talents",
     "levelTitle": "Level {from} (A{fromAscension}) → {to} (A{toAscension})",
     "talentsTitle": "Attack / Skill / Burst",
-    "boosted": "shown in game as {talents} at C{constellation}",
+    "boosted": "levelled to {talents} (C{constellation} adds +3)",
     "weaponTitle": "{name}: level {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
     "readyFull": "can do now with the bag",
     "readyStep": "its next step can be done now with the bag",

@@ -582,7 +582,9 @@ export function nextHint(
       const talentsUp = (['auto', 'skill', 'burst'] as const).some(
         (t) => s.talents[t] > c.current.talents[t],
       )
-      const talents = `${s.talents.auto}/${s.talents.skill}/${s.talents.burst}`
+      // As the game shows them (C3/C5's +3 included), like the card's talent row.
+      const shown = boostedTalents(planner, c.key, s.talents, c.constellation)
+      const talents = `${shown.auto}/${shown.skill}/${shown.burst}`
       if (levelUp) {
         const label = levelLabel(planner, 'character', c.key, s.level, s.ascension)
         parts.push(t('planner.hint.level', { level: label }))

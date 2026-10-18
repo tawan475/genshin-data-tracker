@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { materialName } from '@/utils/materials'
 import type { PlannerData } from '@gdt/game-data'
-import type { PlanGoal } from '@gdt/game-data/planner-math'
+import { boostedTalents, type PlanGoal } from '@gdt/game-data/planner-math'
 import { computed } from 'vue'
 import {
   ArrowRight,
@@ -146,16 +146,18 @@ const rows = computed<Row[]>(() => {
       part: levelPart,
       ready: readyOf(levelPart),
     })
+    // As the game shows them: C3/C5's +3 included (the levels bought stay in the tooltip).
     const boosted = talentText(ch.boosted.current) !== talentText(ch.current.talents)
+    const next = talentPart ? (talentPart.next.current as typeof ch.current).talents : null
     list.push({
       id: `${ch.id}|talents`,
       kind: 'talents',
       label: t('planner.card.talents'),
-      from: talentText(ch.current.talents),
-      to: talentPart ? talentText((talentPart.next.current as typeof ch.current).talents) : null,
+      from: talentText(ch.boosted.current),
+      to: next ? talentText(boostedTalents(props.planner, ch.key, next, ch.constellation)) : null,
       title: boosted
         ? `${t('planner.card.talentsTitle')} · ${t('planner.card.boosted', {
-            talents: talentText(ch.boosted.current),
+            talents: talentText(ch.current.talents),
             constellation: ch.constellation,
           })}`
         : t('planner.card.talentsTitle'),

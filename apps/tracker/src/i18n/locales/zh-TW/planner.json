@@ -216,7 +216,7 @@
     "talents": "天賦",
     "levelTitle": "等級 {from}（突破 {fromAscension}）→ {to}（突破 {toAscension}）",
     "talentsTitle": "普通攻擊 / 元素戰技 / 元素爆發",
-    "boosted": "{constellation} 命時遊戲內顯示為 {talents}",
+    "boosted": "已升至 {talents}（{constellation} 命另加 +3）",
     "weaponTitle": "{name}：等級 {from}（突破 {fromAscension}）→ {to}（突破 {toAscension}），R{fromRefinement} → R{toRefinement}",
     "readyFull": "背包材料現在即可完成",
     "readyStep": "下一步現在即可用背包材料完成",
