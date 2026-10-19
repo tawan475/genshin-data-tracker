@@ -1,0 +1,75 @@
+{
+  "title": "Anecdotes",
+  "area": "Zone {id}",
+  "newestCapture": "Capture la plus récente",
+  "newestCaptureTitle": "Capture la plus récente : {time}",
+  "notCaptured": "Non capturé",
+  "notCapturedTitle": "Aucune capture ne contient encore d'anecdotes : irminsul les enregistre depuis le jeu",
+  "loadFailed": "Échec du chargement",
+  "allDone": "Tout est terminé",
+  "showDone": "Afficher terminées",
+  "noneDone": "Aucune terminée",
+  "showNotDone": "Afficher non terminées",
+  "noneMet": "Aucune rencontrée",
+  "noneMetBody": "Les anecdotes cachées apparaissent une fois rencontrées.",
+  "noMatches": "Aucun résultat",
+  "clear": "Effacer",
+  "loading": "Chargement",
+  "notSaved": "Non enregistré",
+  "group": {
+    "hideDone": "Masquer terminées",
+    "showDone": "Afficher terminées",
+    "done": "{n} terminée(s)"
+  },
+  "row": {
+    "states": {
+      "captured": "capturée",
+      "marked": "cochée à la main",
+      "none": "non terminée"
+    },
+    "aria": "{title} : {state}",
+    "capturedStays": "Capturée · reste terminée",
+    "markedByHand": "Cochée à la main",
+    "markedClick": "Cochée à la main · cliquer pour décocher",
+    "notDone": "Non terminée",
+    "clickToMark": "Cliquer pour cocher comme terminée",
+    "activeTitle": "En cours dans le jeu",
+    "active": "En cours",
+    "repeatTitle": "Terminée {n} fois (une boucle)",
+    "hidden": "Anecdote cachée",
+    "addedIn": "Ajoutée en {version}"
+  },
+  "summary": {
+    "label": "Résumé",
+    "done": "Terminées",
+    "doneCaptured": "{n} capturée(s)",
+    "doneByHand": "{n} à la main",
+    "doneUnknown": "{n} plus récente(s) que les données du jeu",
+    "doneLabel": "Anecdotes terminées",
+    "stamps": "Tampons",
+    "stampsTitle": "Tampons vers la récompense {n}",
+    "stampsNone": "Pas encore dans une capture",
+    "stampsLabel": "Tampons vers la prochaine récompense",
+    "reward": "Récompense",
+    "rewardHint": "{primogems} Primo-gemmes toutes les {every} anecdotes enregistrées",
+    "rewardPer": "par {every}",
+    "active": "En cours",
+    "activeHint": "En cours dans le jeu (dans la capture la plus récente)"
+  },
+  "toolbar": {
+    "label": "Filtrer les anecdotes",
+    "search": "Rechercher",
+    "searchTitle": "Titre, histoire, PNJ ou id",
+    "completion": "Progression",
+    "completions": {
+      "all": "Toutes",
+      "missing": "Non terminées",
+      "done": "Terminées"
+    },
+    "showDone": "Afficher terminées",
+    "showDoneTitle": "Anecdotes terminées affichées en entier au lieu d'être repliées sous chaque PNJ",
+    "area": "Zone",
+    "allAreas": "Toutes",
+    "locked": "Non débloquée dans la capture la plus récente"
+  }
+}

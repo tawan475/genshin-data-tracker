@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Lv {level}/{cap}",
+    "copies": "{n}개",
+    "locked": "잠금"
+  },
+  "sort": {
+    "quality": "품질",
+    "level": "레벨",
+    "refinement": "재련",
+    "count": "개수",
+    "name": "이름",
+    "type": "종류"
+  },
+  "levelFilter": {
+    "all": "레벨",
+    "max": "최대",
+    "levelled": "강화됨",
+    "base": "Lv 1"
+  },
+  "refine": {
+    "spare": "여분 {n}개",
+    "possible": "가능: {title}"
+  },
+  "group": {
+    "copies": "{count}개"
+  },
+  "bag": {
+    "notInData": "{copies} · 아직 게임 데이터에 없음"
+  },
+  "toolbar": {
+    "bag": "배낭",
+    "byWeapon": "무기별",
+    "list": "목록",
+    "status": "상태",
+    "equipped": "장착 중",
+    "unused": "미사용",
+    "lock": "잠금",
+    "locked": "잠금",
+    "unlocked": "잠금 해제",
+    "label": "무기 필터",
+    "searchTitle": "무기, 종류 또는 캐릭터",
+    "chips": "종류, 희귀도, 재련",
+    "noneInCapture": "이 캡처에 없음",
+    "refinableTitle": "여분으로 장착 중인 무기를 재련할 수 있는 무기",
+    "refinable": "재련 가능"
+  },
+  "detail": {
+    "refinementTitle": "재련 {rank}/{max}단계",
+    "unequipped": "미장착",
+    "copies": "{n}개",
+    "equipped": "{n}개 장착 중",
+    "spareCopies": "여분 {n}개"
+  },
+  "table": {
+    "qualityTitle": "품질: 희귀도, 레벨, 재련, 최신순",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "종류",
+    "kindsTitle": "서로 다른 무기",
+    "unused5": "미사용 5★",
+    "refinableTitle": "여분으로 장착 중인 무기를 재련할 수 있음",
+    "empty": "무기 없음",
+    "pages": "무기 페이지"
+  }
+}

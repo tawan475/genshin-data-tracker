@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Liv. {level}",
+    "noWeapon": "Nessuna arma",
+    "weaponLevel": "Arma Liv. {level}",
+    "artifactCount": "{count}/5 manufatti",
+    "belowMax": "{n} manufatto non al massimo | {n} manufatti non al massimo",
+    "noSet": "Nessun bonus set completo"
+  },
+  "sort": {
+    "default": "Predefinito",
+    "level": "Livello",
+    "constellation": "Costellazione",
+    "talents": "Talenti",
+    "cv": "CV",
+    "rarity": "Rarità",
+    "element": "Elemento",
+    "name": "Nome",
+    "friendship": "Amicizia",
+    "obtained": "Ottenuto"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Pronti",
+    "needs": "Da migliorare",
+    "level": "Liv. < 90",
+    "weapon": "Arma < 90",
+    "artifacts": "Manufatti < max",
+    "set": "Nessun bonus set"
+  },
+  "talentFilter": {
+    "all": "Talenti",
+    "nine": "Tutti 9+",
+    "crowned": "Con corona",
+    "below": "Uno < 9"
+  },
+  "favorites": {
+    "notSaved": "Non salvato"
+  },
+  "stat": {
+    "maxHp": "PS max",
+    "baseAtk": "ATT di base"
+  },
+  "talent": {
+    "crowned": "{title} · con corona"
+  },
+  "setBonus": {
+    "line": "{n} pezzi: {stats}",
+    "inactive": "{n} pezzi (inattivo): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Amicizia {level} di 10"
+  },
+  "refinementTitle": "Miglioramento {value} di 5",
+  "talentChips": "Attacco {auto} · Abilità {skill} · Tripudio {burst}",
+  "sortControl": {
+    "sort": "Ordina",
+    "descending": "Ordine decrescente",
+    "ascending": "Ordine crescente"
+  },
+  "favorite": {
+    "named": "Preferito: {name}",
+    "on": "Preferito",
+    "off": "Rimuovi dai preferiti"
+  },
+  "stars": "{n} stelle",
+  "sets": "Set",
+  "pieceBonus": " pezzi: bonus",
+  "constellation": {
+    "title": "Costellazione {level} di 6",
+    "lockedTitle": "C{n} · bloccata",
+    "unlocked": "C{n} sbloccata",
+    "locked": "C{n} bloccata"
+  },
+  "timeline": {
+    "firstSeen": "Visto la prima volta",
+    "obtained": "Ottenuto",
+    "to": "a",
+    "less": "Meno",
+    "all": "Tutti ({n})"
+  },
+  "talentShort": {
+    "auto": "Attacco",
+    "skill": "Abilità",
+    "burst": "Tripudio"
+  },
+  "talentRaised": "portato a",
+  "crowned": "Con corona",
+  "weapon": {
+    "passive": "Passiva: {stats}",
+    "locked": "Bloccata"
+  },
+  "stats": {
+    "allDmg": "+{value}% a tutti i DAN, non nel pannello del gioco",
+    "label": "Statistiche",
+    "weaponMissingTitle": "Arma più recente dei dati di gioco: le sue statistiche sono escluse",
+    "weaponMissing": "Statistiche dell'arma escluse",
+    "newerThanData": "Più recente dei dati di gioco",
+    "none": "Nessuna statistica"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, talenti {auto} {skill} {burst}",
+    "friendship": ", amicizia {n}",
+    "toDo": "da fare: {gaps}",
+    "critDetail": "CRIT {rate}% / {dmg}% dai manufatti"
+  },
+  "piece": {
+    "levelTitle": "+{level} di {max} · {rarity}★",
+    "activatesAt4": "Si attiva a +4",
+    "inactive": "(inattiva)",
+    "rolls": "{n} tiri",
+    "rollsTitle": "Tiri",
+    "empty": ": vuoto"
+  },
+  "toolbar": {
+    "weapon": "Arma",
+    "cards": "Schede",
+    "list": "Elenco",
+    "label": "Filtra personaggi",
+    "search": "Cerca",
+    "searchTitle": "Nome, elemento, arma o set",
+    "view": "Vista",
+    "chips": "Preferiti, elemento e rarità",
+    "favorites": "Preferiti",
+    "buildTitle": "Pronti: Liv. 90, arma Liv. 90, cinque manufatti al massimo, un bonus set completo",
+    "clear": "Cancella"
+  },
+  "table": {
+    "lv": "Liv.",
+    "c": "C",
+    "critTitle": "Tasso di CRIT / DAN da CRIT dai manufatti",
+    "crit": "CRIT",
+    "toDo": "Da fare",
+    "toDoList": "Da fare: {gaps}"
+  },
+  "detail": {
+    "toDo": "Da fare:",
+    "build": "Build",
+    "obtainedAt": "Ottenuto il {date}",
+    "noArtifacts": "Nessun manufatto",
+    "history": "Cronologia",
+    "loadFailed": "Caricamento non riuscito",
+    "none": "Nessuno"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Liv. 90+",
+    "crowns": "Corone",
+    "crownsTitle": "Talenti al livello 10",
+    "loading": "Caricamento",
+    "noSnapshots": "Ancora nessuna istantanea",
+    "empty": "Nessun personaggio",
+    "import": "Importa",
+    "noMatches": "Nessun risultato"
+  }
+}

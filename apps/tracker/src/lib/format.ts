@@ -1,9 +1,9 @@
 /**
  * Formatting. "Say the real number": counts and sizes are exact or carry a
  * unit, never vague. Everything follows the language on screen
- * (i18n/locale): English numbers as en-US (as always), Chinese in its own
- * locale (compact numbers in 万 / 亿); dates in English follow the browser's
- * locale (as always), in Chinese the language's.
+ * (i18n/locale): English numbers as en-US (as always), every other language in
+ * its own locale (Chinese compact numbers in 万 / 亿); dates in English follow
+ * the browser's locale (as always), in the other languages the language's.
  */
 
 import { t } from '@/i18n'
@@ -67,21 +67,21 @@ export function formatSigned(value: number): string {
 export function formatCompactTick(value: number, step: number): string {
   const abs = Math.abs(value)
   if (abs < 10_000 || !(step > 0)) return formatCompact(value)
-  // Chinese compact numbers step in 万 (1e4) and 亿 (1e8), English in K / M / B / T.
-  const unit =
-    locale.value === 'en'
-      ? abs >= 1e12
-        ? 1e12
-        : abs >= 1e9
-          ? 1e9
-          : abs >= 1e6
-            ? 1e6
-            : 1e3
-      : abs >= 1e12
-        ? 1e12
-        : abs >= 1e8
-          ? 1e8
-          : 1e4
+  // Chinese, Japanese and Korean compact numbers step in 万/萬/만 (1e4) and
+  // 亿/億/억 (1e8); the other languages in thousands, like English's K / M / B / T.
+  const unit = !/^(zh|ja|ko)/.test(locale.value)
+    ? abs >= 1e12
+      ? 1e12
+      : abs >= 1e9
+        ? 1e9
+        : abs >= 1e6
+          ? 1e6
+          : 1e3
+    : abs >= 1e12
+      ? 1e12
+      : abs >= 1e8
+        ? 1e8
+        : 1e4
   const scaled = step / unit
   let digits = 1
   while (digits < 3 && Math.abs(Math.round(scaled * 10 ** digits) - scaled * 10 ** digits) > 1e-6) {

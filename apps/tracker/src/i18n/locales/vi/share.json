@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Sao chép ảnh",
+    "share": "Chia sẻ",
+    "missing": "{n} ảnh không tải được",
+    "drawing": "{label} · đang vẽ",
+    "exportFailed": "Xuất thất bại",
+    "copyFailed": "Sao chép thất bại",
+    "shareFailed": "Chia sẻ thất bại",
+    "copied": "Đã sao chép",
+    "download": "Tải PNG",
+    "downloadSized": "Tải PNG {size}",
+    "buildTitle": "Build",
+    "artifactTitle": "Thánh Di Vật"
+  },
+  "options": {
+    "darkCard": "Thẻ tối",
+    "lightCard": "Thẻ sáng",
+    "dark": "Tối",
+    "light": "Sáng",
+    "cardTheme": "Chủ đề thẻ",
+    "showName": "Hiện tên tài khoản",
+    "name": "Tên",
+    "showUid": "Hiện UID"
+  },
+  "menu": {
+    "label": "Thẻ chia sẻ",
+    "drawing": "Đang vẽ",
+    "copy": "Sao chép"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} lượt tăng (các dòng ban đầu và mỗi +4 một lượt)",
+    "levelTitle": "Cấp {level} / {cap} · Đột Phá {ascension}",
+    "weaponAndStats": "Vũ khí và chỉ số",
+    "pieceBonus": "Hiệu ứng bộ {n} món",
+    "rvTitle": "Roll value: tổng phần trăm của mỗi lượt tăng thuộc tính thêm so với mức tăng cao nhất của nó"
+  }
+}

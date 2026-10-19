@@ -1,0 +1,260 @@
+{
+  "title": "Historial de deseos",
+  "bannerPageTitle": "Historial de deseos · {banner}",
+  "loadFailed": "Error al cargar",
+  "loading": "Cargando",
+  "import": "Importar",
+  "export": "Exportar",
+  "importExport": "Importar / exportar",
+  "browse": "Examinar",
+  "cancel": "Cancelar",
+  "search": "Buscar",
+  "rarity": "Rareza",
+  "banner": "Gachapón",
+  "pulls": "{n} deseos",
+  "pullsTimes": "{n} deseos × {primos}",
+  "pullsPrimos": "{n} deseos · ✦ {primos}",
+  "lifetime": "Deseos totales",
+  "allWishes": "Todos los deseos",
+  "newPulls": "{n} deseos nuevos",
+  "nothingNew": "Nada nuevo",
+  "banners": {
+    "character": {
+      "label": "Personaje",
+      "title": "Gachapón promocional de personaje"
+    },
+    "weapon": {
+      "label": "Arma",
+      "title": "Gachapón promocional de arma"
+    },
+    "standard": {
+      "label": "Permanente",
+      "title": "Gachapón permanente"
+    },
+    "chronicled": {
+      "label": "Recopilatorio",
+      "title": "Gachapón recopilatorio"
+    },
+    "beginners": {
+      "label": "Novato",
+      "title": "Gachapón de novato"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "ene",
+      "2": "feb",
+      "3": "mar",
+      "4": "abr",
+      "5": "may",
+      "6": "jun",
+      "7": "jul",
+      "8": "ago",
+      "9": "sept",
+      "10": "oct",
+      "11": "nov",
+      "12": "dic"
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "ahora"
+  },
+  "outcomes": {
+    "won": "Ganado",
+    "lost": "Perdido",
+    "guaranteed": "Garantizado"
+  },
+  "outcomeTitles": {
+    "won": "Ganado el {odds}",
+    "lost": "Perdido el {odds}: el siguiente es el destacado",
+    "guaranteed": "Destacado, garantizado tras perder un {odds}"
+  },
+  "legend": {
+    "won": "ganado",
+    "lost": "perdido",
+    "guaranteed": "garantizado"
+  },
+  "overview": {
+    "newestPull": "Deseo más reciente, hora del juego",
+    "synced": "Sincronizado {ago}",
+    "syncedTitle": "Deseos nuevos guardados {time}",
+    "syncHelp": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida): irminsul sincroniza todos los gachapones y luego cada deseo nuevo mientras dure la clave (~24 h). El enlace de deseos del juego también trae los últimos seis meses. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",
+    "empty": "Aún no hay deseos",
+    "emptyBody": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida) o importa con el enlace de deseos del juego. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",
+    "banners": "Gachapones",
+    "totals": "Totales",
+    "worth": "Valor de los deseos",
+    "worthHint": "{n} deseos × {primos} Protogemas",
+    "wishes": "{n} deseos",
+    "avgPity": "Garantía media 5★",
+    "avgPityHint": "Gachapón promocional de personaje: la garantía media de cada 5★, frente a unos {expected} esperados con la garantía suave",
+    "avgPityVs": "{diff} vs. {expected} esperados"
+  },
+  "card": {
+    "everyPull": "{banner}: todos los deseos",
+    "fiveTitle": "{left} deseos para la garantía total · ✦ {primos} · garantía suave desde {soft}",
+    "fourTitle": "{left} para un 4★ seguro",
+    "fourFeatured": " · el siguiente 4★ es destacado",
+    "pity5": "Garantía 5★",
+    "pity4": "Garantía 4★",
+    "guaranteedAt": "Garantizado en {n}",
+    "hideLatest": "Ocultar los últimos deseos",
+    "showLatest": "Mostrar los últimos deseos",
+    "latest": "Últimos deseos",
+    "latestRegion": "{banner}: últimos deseos",
+    "none": "Ninguno",
+    "cols": {
+      "name": "Nombre",
+      "time": "Hora",
+      "pity": "Garantía"
+    }
+  },
+  "five": {
+    "every": "Todos los 5★",
+    "newestFirst": "{n} · más recientes primero",
+    "none": "Aún no hay 5★",
+    "pity": "{name} · garantía {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Plataforma",
+    "copyFailed": "No copiado: selecciona el comando y cópialo",
+    "steps": {
+      "open": "Abre Gachapón → Historial en el juego y deja que cargue.",
+      "android2": "Desactiva el Wi-Fi y los datos móviles.",
+      "android3": "Toca actualizar (arriba a la derecha): la página muestra un error con algo de texto.",
+      "android4": "Selecciona todo ese texto y cópialo.",
+      "android5": "Vuelve a activar la conexión y pégalo abajo.",
+      "ios1": "Abre el menú de Paimon → Comentarios y deja que cargue.",
+      "ios2": "Toca Problema en el juego → Modo Cooperativo.",
+      "ios3": "Toca el enlace al final de la respuesta: se abre en el navegador.",
+      "ios4": "Copia ese enlace y pégalo abajo.",
+      "ps1": "Abre en el juego el correo del evento con un código QR.",
+      "ps2": "Escanea el código con tu móvil y copia el enlace que abre.",
+      "ps3": "Pégalo abajo. Si falla, vincula tu PlayStation a una cuenta de HoYoverse y usa los pasos de PC o móvil.",
+      "pcRun": "Abre PowerShell (Inicio, escribe PowerShell) y ejecuta:",
+      "pcPaste": "Copia el enlace: pégalo abajo.",
+      "pcPasteTitle": "El Copy wish URL de irminsul da el mismo enlace"
+    },
+    "scriptTitle": "Lee la caché web del juego en este PC, comprueba el enlace una vez con HoYoverse y lo copia. Nada más.",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "readScript": "Leer el script",
+    "label": "Enlace del historial de deseos",
+    "placeholder": "Pega el enlace: https://…",
+    "invalid": "No hay ningún enlace de historial de deseos en ese texto",
+    "uidMismatch": "Ese enlace es del UID {uid}; esta cuenta es del UID {own}.",
+    "failed": "Error al importar",
+    "saving": "Guardando {n}…",
+    "progress": "{banner} · página {page} · {n} nuevos",
+    "errors": {
+      "cancelled": "Cancelado",
+      "network": "El historial de deseos no respondió. Inténtalo más tarde.",
+      "expired": "El enlace caducó. Vuelve a abrir Gachapón → Historial en el juego y copia uno nuevo.",
+      "throttled": "HoYoverse pide ir más despacio. Inténtalo de nuevo en unos minutos.",
+      "api": "HoYoverse respondió: {message}",
+      "code": "error {code}"
+    }
+  },
+  "chart": {
+    "title": "Deseos por mes",
+    "label": "Deseos por mes según rareza, {n} meses",
+    "month": "{month}: {n} deseos"
+  },
+  "numbers": {
+    "label": "Cifras",
+    "avgPity": "{share} · garantía media {avg}",
+    "expected": "Garantía 5★ esperada de unos {n} con la garantía suave",
+    "expectedAbout": "Esperado unos {n} con la garantía suave",
+    "streak": "racha {current} · mejor {best} ganados · peor {worst} perdidos",
+    "streakWon": "{n} ganados",
+    "streakLost": "{n} perdidos",
+    "flipTitle": "Un 5★ destacado cuando era un {odds} (sin contar los garantizados)",
+    "split": "Reparto 4★",
+    "character": "personaje",
+    "char": "pers.",
+    "weapon": "arma",
+    "rateUp": "4★ con probabilidad aumentada ganados {won} de {total} · {share}",
+    "splitTitle": "4★ por tipo",
+    "splitTitleFull": "4★ por tipo y sorteos de 4★ con probabilidad aumentada"
+  },
+  "odds": {
+    "guaranteed": "Garantizado",
+    "lostLast": "Perdiste el último {odds} ({name}): el siguiente 5★ es destacado",
+    "nextFeatured": "El siguiente 5★ es destacado",
+    "weapon": "Siguiente 5★: 75% un arma destacada",
+    "coin": "Siguiente 5★: a cara o cruz"
+  },
+  "track": {
+    "label": "Garantía {pity} de {hard}, garantía suave desde {soft}"
+  },
+  "runs": {
+    "label": "Ediciones de gachapón",
+    "heading": "Gachapones",
+    "count": "{n} edición | {n} ediciones",
+    "fewer": "Menos",
+    "all": "Todas las ediciones",
+    "current": " · actual",
+    "no5": "Sin 5★"
+  },
+  "small": {
+    "pitySoFar": "garantía {pity} / {hard}"
+  },
+  "table": {
+    "label": "Todos los deseos",
+    "search": "Buscar deseos",
+    "searchTitle": "Nombre de personaje o arma",
+    "noMatch": "Ningún deseo coincide",
+    "rollRun": "Número de deseo en esa edición del gachapón",
+    "roll": "Número de deseo",
+    "item": "Objeto",
+    "pity": "Garantía",
+    "result": "Resultado",
+    "time": "Hora",
+    "newestFirst": "Más recientes primero",
+    "oldestFirst": "Más antiguos primero",
+    "newestFirstSr": "más recientes primero",
+    "oldestFirstSr": "más antiguos primero",
+    "weapon": "Arma",
+    "character": "Personaje",
+    "pages": "Páginas de deseos"
+  },
+  "transfer": {
+    "backup": "Copia de paimon.moe",
+    "modes": {
+      "link": "Enlace de deseos",
+      "file": "Archivo"
+    },
+    "importFrom": "Importar desde",
+    "noRecords": "Sin registros",
+    "uidMismatch": "Ese historial es del UID {uid}; esta cuenta es del UID {own}",
+    "account": "Cuenta {n}",
+    "notWishFile": "No es un archivo UIGF ni de paimon.moe",
+    "alreadyHeld": "{n} ya guardados",
+    "notImported": "No importado",
+    "deleteTitle": "¿Borrar el historial de deseos?",
+    "deleteDetail": "Se quitan los {n} deseos de esta cuenta. irminsul puede volver a obtener los últimos seis meses.",
+    "deleteConfirm": "Borrar",
+    "notDeleted": "No borrado",
+    "dropTitle": "JSON UIGF (Snap Hutao, Starward, genshin-wish-export…), un CSV del importador de paimon.moe o la copia de paimon.moe (Settings → Export)",
+    "drop": "Archivo UIGF o de paimon.moe",
+    "fileAccount": "Cuenta del archivo",
+    "uigfTitle": "UIGF v4.1: lo leen Snap Hutao, Starward y la mayoría de trackers de deseos",
+    "paimonTitle": "Para el Local Importer de paimon.moe (Wish counter → Import → Local)",
+    "delete": "Borrar",
+    "deleteHistory": "Borrar historial"
+  },
+  "bannerPage": {
+    "noPulls": "No hay deseos en este gachapón",
+    "now": "Ahora",
+    "hardTitle": "{left} deseos para la garantía total · ✦ {primos}",
+    "toHard": "{left} para la garantía total · ✦ {primos}",
+    "softFrom": "suave desde {soft}",
+    "featuredNext": "Siguiente destacado",
+    "featuredNextTitle": "El último 4★ no era del gachapón: el siguiente es destacado",
+    "toGuaranteed4": "{n} para el 4★ garantizado"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Cấp {level}/{cap}",
+    "copies": "{n} bản",
+    "locked": "Đã khóa"
+  },
+  "sort": {
+    "quality": "Phẩm chất",
+    "level": "Cấp",
+    "refinement": "Tinh Luyện",
+    "count": "Số bản",
+    "name": "Tên",
+    "type": "Loại"
+  },
+  "levelFilter": {
+    "all": "Cấp",
+    "max": "Tối đa",
+    "levelled": "Đã nâng cấp",
+    "base": "Cấp 1"
+  },
+  "refine": {
+    "spare": "{n} bản dư",
+    "possible": "có thể: {title}"
+  },
+  "group": {
+    "copies": "{count} bản"
+  },
+  "bag": {
+    "notInData": "{copies} · Chưa có trong dữ liệu game"
+  },
+  "toolbar": {
+    "bag": "Túi",
+    "byWeapon": "Theo vũ khí",
+    "list": "Danh sách",
+    "status": "Trạng thái",
+    "equipped": "Đã Trang Bị",
+    "unused": "Chưa dùng",
+    "lock": "Khóa",
+    "locked": "Đã khóa",
+    "unlocked": "Chưa khóa",
+    "label": "Lọc vũ khí",
+    "searchTitle": "Vũ khí, loại hoặc nhân vật",
+    "chips": "Loại, độ hiếm và Tinh Luyện",
+    "noneInCapture": "Không có trong bản ghi này",
+    "refinableTitle": "Vũ khí có bản dư có thể Tinh Luyện cho bản đang trang bị",
+    "refinable": "Tinh Luyện được"
+  },
+  "detail": {
+    "refinementTitle": "Tinh Luyện Hạng {rank} / {max}",
+    "unequipped": "Chưa trang bị",
+    "copies": "{n} bản",
+    "equipped": "{n} đang trang bị",
+    "spareCopies": "{n} bản dư"
+  },
+  "table": {
+    "qualityTitle": "Phẩm chất: độ hiếm, cấp, Tinh Luyện, mới nhất",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Loại",
+    "kindsTitle": "Số vũ khí khác nhau",
+    "unused5": "5★ chưa dùng",
+    "refinableTitle": "Bản dư có thể Tinh Luyện cho bản đang trang bị",
+    "empty": "Không có vũ khí",
+    "pages": "Trang vũ khí"
+  }
+}

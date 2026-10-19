@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "ล็อกอยู่",
+    "astralMark": "Astral Mark",
+    "new": "ใหม่"
+  },
+  "sort": {
+    "quality": "คุณภาพ",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "ศักยภาพ",
+    "level": "เลเวล",
+    "set": "เซ็ต",
+    "recent": "ล่าสุด"
+  },
+  "sortTitle": {
+    "quality": "ตามเกม: ความหายาก เลเวล เซ็ต ผู้สวม",
+    "cv": "Crit value",
+    "rv": "Roll value",
+    "potential": "CV ที่คาดไว้เมื่อเลเวลสูงสุด",
+    "level": "เลเวล",
+    "set": "เซ็ต",
+    "recent": "ใหม่หรือเปลี่ยนแปลง"
+  },
+  "topSets": {
+    "label": "เซ็ตยอดนิยม",
+    "more": "อีก {n} เซ็ต"
+  },
+  "lower": {
+    "label": "ความหายากต่ำกว่า: {counts}",
+    "title": "ความหายากต่ำกว่า ซึ่งการเรียงแบบนี้จะจัดไว้ท้ายสุด"
+  },
+  "picker": {
+    "find": "ค้นหา",
+    "noMatch": "ไม่พบ",
+    "done": "เสร็จ"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: ไม่มี",
+    "cell": "{slot} · {n} ชิ้น · ดีที่สุด {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "ชิ้น",
+    "slotHeader": "{slot}: CV ดีที่สุด, จำนวนชิ้น",
+    "sumTitle": "ผลรวม CV ดีที่สุดของแต่ละช่อง"
+  },
+  "bag": {
+    "more": "อีก {n}"
+  },
+  "table": {
+    "sortBySet": "เรียงตามเซ็ต",
+    "sortByLevel": "เรียงตามเลเวล",
+    "equippedBy": "ผู้สวม",
+    "marks": "ล็อกและเครื่องหมาย",
+    "elixir": "Elixir"
+  },
+  "detail": {
+    "fromGame": "จากเกม",
+    "inferred": "คำนวณจากเลเวล",
+    "upgradesToCome": "{source} · อัปเกรดได้อีก {n} ครั้ง",
+    "rankTitle": "อันดับ CV จาก {slot} {rarity}★ ทั้งหมด {n} ชิ้น",
+    "newTitle": "ไม่มีในการสแกนครั้งก่อน",
+    "rolls": "การสุ่ม",
+    "rank": "อันดับ",
+    "upgradesTitle": "สุ่มค่าสถานะรองหนึ่งครั้งทุก 4 เลเวล จนถึง {max}",
+    "upgrades": "อัปเกรด",
+    "expectedCv": "CV ที่คาดไว้",
+    "expectedDetail": "คาดการณ์ที่ {max}: แต่ละการอัปเกรดมีโอกาส {chance}% ที่จะสุ่มโดนบรรทัดคริ โดยใช้ค่าสุ่มเฉลี่ย",
+    "bestCase": "กรณีดีที่สุด",
+    "bestDetail": "ทุกการอัปเกรดสุ่มโดนคริค่าสูงสุด จนถึง {max}",
+    "critLinesTitle": "{n} จาก 4 บรรทัดเป็นคริ: โอกาสที่การอัปเกรดจะสุ่มโดน",
+    "critPerRoll": "คริ / ครั้ง",
+    "activatesTitle": "บรรทัดที่สี่ เปิดเมื่ออัปเกรดครั้งแรก",
+    "activates": "+4 เพิ่ม",
+    "maxRv": "RV สูงสุด",
+    "unlocked": "ไม่ได้ล็อก",
+    "astral": "Astral",
+    "elixirTitle": "Sanctifying Elixir",
+    "rollTier": "สุ่มได้ {tier}",
+    "inactive": "ไม่ทำงาน"
+  },
+  "card": {
+    "potentialTitle": "CV ที่คาดไว้ที่ +{max} · กรณีดีที่สุด {best}",
+    "equipped": "สวมอยู่: {name}"
+  },
+  "toolbar": {
+    "all": "ทั้งหมด",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "linesNow": "ตอนนี้ {n} บรรทัด",
+    "any": "ใดก็ได้",
+    "allSets": "ทุกเซ็ต",
+    "anyone": "ใครก็ได้",
+    "noAstral": "ไม่มี Astral",
+    "noElixir": "ไม่มี Elixir",
+    "quoted": "“{text}”",
+    "mainPill": "หลัก: {stat}",
+    "lines": "{n} บรรทัด",
+    "best": "ดีที่สุด",
+    "label": "กรองอาร์ติแฟกต์",
+    "searchLabel": "ค้นหาเซ็ตหรือตัวละคร",
+    "searchTitle": "เซ็ตหรือตัวละคร",
+    "equippedByTitle": "ผู้สวม: {names}",
+    "sortBy": "เรียงตาม",
+    "descending": "มากไปน้อย",
+    "ascending": "น้อยไปมาก",
+    "slot": "ช่อง",
+    "presets": "ชุดตัวกรอง",
+    "bestTitle": "{n} อันดับแรกต่อช่อง ตามการเรียงปัจจุบัน",
+    "newNone": "ไม่มีการสแกนก่อนหน้าให้เปรียบเทียบ",
+    "newTitle": "ไม่มีในการสแกนครั้งก่อน: ใหม่ หรือเพิ่มเลเวลตั้งแต่นั้น",
+    "zeroTitle": "5★ ที่ไม่ได้สวม ที่ +0",
+    "lowTitle": "4★ และ 3★ ที่ไม่ได้ล็อกและไม่ได้สวม",
+    "low": "อาร์ติแฟกต์ 4★/3★",
+    "spareTitle": "5★ ที่ไม่ได้สวม",
+    "spare": "5★ ว่าง",
+    "maxTitle": "เฉพาะเลเวล +20",
+    "moreTitle": "ค่าสถานะหลัก ค่าสถานะรอง บรรทัด เลเวล ล็อก ตำแหน่ง Astral Mark และ Elixir",
+    "more": "เพิ่มเติม",
+    "substatsTitle": "มีครบทุกอันนี้ (นับบรรทัดที่เปิดเมื่อ +4 ด้วย)",
+    "linesLabel": "บรรทัด",
+    "min": "ต่ำสุด",
+    "max": "สูงสุด",
+    "location": "ตำแหน่ง",
+    "remove": "นำ {label} ออก"
+  },
+  "page": {
+    "table": "ตาราง",
+    "loadFailed": "โหลดอาร์ติแฟกต์ไม่สำเร็จ",
+    "loading": "กำลังโหลดอาร์ติแฟกต์",
+    "refreshFailed": "รีเฟรชไม่สำเร็จ",
+    "shownTitle": "ที่แสดง / อาร์ติแฟกต์",
+    "countSuffix": "อาร์ติแฟกต์",
+    "pngSize": "PNG กว้าง {px} px"
+  }
+}

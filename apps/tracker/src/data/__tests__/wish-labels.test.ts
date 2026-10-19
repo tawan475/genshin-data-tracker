@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseWishTime } from '@gdt/shared'
 import { monthName, runDates, wishDay, wishShortTime } from '@/components/wishes/wish-labels'
+import { locale } from '@/i18n/locale'
 import type { BannerRun } from '../wish-history'
 
 const at = (text: string) => parseWishTime(text)!
@@ -11,6 +12,16 @@ describe('wish labels', () => {
     expect(wishDay(at('2024-01-31 23:59:00'), 2026)).toBe('Jan 31, 2024')
     expect(wishShortTime(at('2026-10-03 13:34:56'), 2026)).toBe('Oct 3, 13:34')
     expect(monthName('2021-01')).toBe('Jan 2021')
+  })
+
+  it('writes days in the language on screen through Intl (Russian months after a day)', () => {
+    locale.value = 'ru'
+    try {
+      expect(wishDay(at('2026-05-12 13:34:00'), 2026)).toBe('12 мая')
+      expect(wishDay(at('2024-05-12 13:34:00'), 2026)).toMatch(/^12 мая 2024/)
+    } finally {
+      locale.value = 'en'
+    }
   })
 
   it("dates a banner run on the data's clock", () => {

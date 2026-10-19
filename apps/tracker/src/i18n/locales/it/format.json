@@ -1,0 +1,7 @@
+{
+  "justNow": "proprio ora",
+  "betweenTimes": "{date}, tra le {from} e le {to}",
+  "betweenDates": "tra il {from} e il {to}",
+  "today": "Oggi",
+  "yesterday": "Ieri"
+}

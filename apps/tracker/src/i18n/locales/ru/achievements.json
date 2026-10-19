@@ -1,0 +1,139 @@
+{
+  "title": "Достижения",
+  "newestCapture": "Последний снимок",
+  "newestCaptureTitle": "Последний снимок: {time}",
+  "notCaptured": "Не снято",
+  "notCapturedTitle": "Откройте в игре меню «Достижения», пока работает irminsul, чтобы снять их",
+  "importTitle": "Импорт выполненных достижений из экспорта Seelie, резервной копии paimon.moe или файла stardb / irminsul",
+  "loadFailed": "Не удалось загрузить",
+  "allDone": "Всё выполнено",
+  "showDone": "Показать выполненные",
+  "noneDone": "Ничего не выполнено",
+  "showMissing": "Показать невыполненные",
+  "noMatches": "Ничего не найдено",
+  "clear": "Сбросить",
+  "more": "Ещё",
+  "loading": "Загрузка",
+  "undo": "Отменить",
+  "notSaved": "Не сохранено",
+  "markedDone": "Отмечено выполненными: {n}",
+  "unmarked": "Отметки сняты: {n}",
+  "added": "Добавлено: {n}",
+  "confirmMark": {
+    "title": "Отметить выполненными ({n})?",
+    "filtered": "Показанные оставшиеся достижения ({n}) будут отмечены выполненными вручную.",
+    "all": "Все оставшиеся достижения ({n}) будут отмечены выполненными вручную.",
+    "confirm": "Отметить"
+  },
+  "confirmUnmark": {
+    "title": "Снять отметки ({n})?",
+    "detail": "Снимает ручные отметки с показанных достижений ({n}). Снятые со снимка остаются выполненными.",
+    "confirm": "Снять отметки"
+  },
+  "categories": {
+    "label": "Категории",
+    "all": "Все",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} Камней Истока",
+    "hideDone": "Скрыть завершённые серии",
+    "showDone": "Показать завершённые серии",
+    "completed": "Завершено"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} Камней Истока"
+  },
+  "import": {
+    "title": "Импорт",
+    "formats": {
+      "list": "Список id"
+    },
+    "noAchievements": "Достижения не найдены",
+    "notJson": "Это не файл JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb или irminsul: файл GOOD с gi_achievements.",
+    "drop": "Файл Seelie, paimon.moe или stardb",
+    "account": "Аккаунт {n}",
+    "fileAccount": "Аккаунт в файле",
+    "browse": "Обзор",
+    "inFile": "В файле",
+    "already": "Уже выполнено",
+    "new": "Новые",
+    "newTitle": "Включает новее игровых данных: {unknown}, удалённые из игры: {disused} — сохраняются, но не учитываются",
+    "cancel": "Отмена",
+    "add": "Добавить ({n})"
+  },
+  "row": {
+    "clickToMark": "Нажмите, чтобы отметить выполненным",
+    "clickToUnmark": "{text} · нажмите, чтобы снять отметку",
+    "captured": "Снято",
+    "staysDone": "{text} · есть в снимке, поэтому остаётся выполненным",
+    "markEveryTier": "Отметить все уровни",
+    "markDone": "Отметить выполненным",
+    "unmarkTiers": "Нажмите, чтобы снять ручные отметки с уровней",
+    "markedClick": "Отмечено вручную · нажмите, чтобы снять",
+    "tierTitle": "Уровень {n} · Камней Истока: {primogems}",
+    "reward": "Камней Истока: {n}",
+    "primogems": "Камни Истока",
+    "states": {
+      "captured": "снято",
+      "marked": "отмечено вручную",
+      "none": "не выполнено"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Уровни",
+    "tier": "Уровень {n}",
+    "addedIn": "Добавлено в {version}",
+    "hiddenTitle": "Скрытое достижение",
+    "hidden": "Скрытое",
+    "markedByHand": "Отмечено вручную",
+    "guide": "Гайд на stardb.gg"
+  },
+  "completion": {
+    "tier": "Уровень {n} · {text}",
+    "exact": "Выполнено {time}",
+    "exactTitle": "Время выполнения записано игрой и прочитано irminsul",
+    "seen": "Выполнено {window}",
+    "seenTitle": "Выполнено между двумя снимками: нет в снимке от {since}, есть в снимке от {at}",
+    "by": "Выполнено к {date}",
+    "byTitle": "Уже выполнено в вашем первом снимке ({at})",
+    "marked": "Отмечено выполненным вручную",
+    "markedTitle": "Ни в одном снимке его нет, поэтому даты нет"
+  },
+  "summary": {
+    "label": "Сводка",
+    "done": "Выполнено",
+    "doneCaptured": "Снято: {n}",
+    "doneByHand": "Вручную: {n}",
+    "doneUnknown": "Новее игровых данных: {n}",
+    "progress": "Прогресс",
+    "progressLabel": "Выполнено достижений",
+    "primogems": "Камни Истока",
+    "primogemsHint": "Камни Истока: получено / доступно",
+    "missing": "Осталось",
+    "showAll": "Показать все",
+    "showLeft": "Показать только оставшиеся"
+  },
+  "toolbar": {
+    "label": "Фильтр достижений",
+    "search": "Поиск",
+    "searchTitle": "Название, описание, категория или id",
+    "completion": "Выполнение",
+    "completions": {
+      "all": "Все",
+      "done": "Выполнено",
+      "missing": "Осталось"
+    },
+    "hidden": {
+      "all": "Скрытые: любые",
+      "hidden": "Скрытые",
+      "visible": "Не скрытые"
+    },
+    "hiddenLabel": "Скрытые",
+    "allCategories": "Все категории",
+    "category": "Категория",
+    "version": "Версия",
+    "addedIn": "Добавлено в",
+    "markAll": "Отметить все",
+    "markAllTitle": "Отметить выполненными показанные оставшиеся достижения ({n})",
+    "unmarkAll": "Снять все",
+    "unmarkAllTitle": "Снять ручные отметки с показанных достижений ({n})"
+  }
+}

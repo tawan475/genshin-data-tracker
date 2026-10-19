@@ -1,0 +1,73 @@
+{
+  "progression": "Progressi",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Primogemme",
+    "characters": "Personaggi",
+    "weapons": "Armi",
+    "artifacts": "Manufatti",
+    "artifact4": "Manufatto 4★",
+    "artifact3": "Manufatto 3★"
+  },
+  "server": {
+    "AMERICA": "America",
+    "EUROPE": "Europa",
+    "ASIA": "Asia",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Ancora nessuna istantanea",
+  "import": "Importa",
+  "historyUnavailable": "Cronologia non disponibile",
+  "currencyCarried": "da una cattura precedente",
+  "currencyMissing": "assente nell'ultima cattura",
+  "sincePrevious": "dall'istantanea precedente",
+  "lastCaptured": "Ultima cattura",
+  "lastCapturedAt": "Ultima cattura {time}",
+  "seenAgain": "Rivisto",
+  "seenAgainAt": "Rivisto {time}",
+  "loadingHistory": "Caricamento cronologia istantanee",
+  "lowRarity": {
+    "label": "Manufatto 4★ / 3★",
+    "hint": "Sbloccati, non equipaggiati",
+    "rarity": "{n} stelle"
+  },
+  "card": {
+    "snapshots": "Istantanee",
+    "storage": "Spazio",
+    "stored": "{raw} caricati, {stored} salvati",
+    "storedRatio": "{raw} caricati, {stored} salvati ({ratio} più piccolo)"
+  },
+  "monthly": {
+    "title": "Analisi mensile",
+    "previous": "Mese precedente",
+    "previousTo": "Mese precedente, {month}",
+    "next": "Mese successivo",
+    "nextTo": "Mese successivo, {month}",
+    "gained": "ottenuti {n}",
+    "spent": "spesi {n}",
+    "added": "aggiunti {n}",
+    "used": "usati {n}",
+    "closing": "chiusura {n}",
+    "artifactExp": "{n} ESP manufatto a livello 0",
+    "thisMonth": "questo mese · {detail}",
+    "gapTitle": "Nessuna cattura per {n} giorni",
+    "vs": "rispetto a {day}",
+    "captures": "{n} cattura | {n} catture",
+    "comparedWith": "{captures}, rispetto a {day}",
+    "noCaptures": "Nessuna cattura",
+    "noCapture": "Nessuna cattura",
+    "caption": "Variazione giornaliera in {month}: l'ultima cattura di ogni giorno rispetto al giorno catturato precedente, con il valore sotto",
+    "day": "Giorno",
+    "dayTitle": "Ultima cattura del giorno rispetto al giorno catturato precedente, ora locale"
+  },
+  "recent": {
+    "title": "Recenti",
+    "all": "Tutte",
+    "allTitle": "Tutte le {n} istantanee",
+    "size": "{raw} byte caricati, {stored} byte salvati",
+    "unchanged": "Totali invariati",
+    "first": "Prima istantanea",
+    "currencyMissing": "Mora e primogemme assenti",
+    "noCurrency": "Nessuna valuta"
+  }
+}

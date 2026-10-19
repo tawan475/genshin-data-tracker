@@ -1,0 +1,139 @@
+{
+  "title": "Succès",
+  "newestCapture": "Capture la plus récente",
+  "newestCaptureTitle": "Capture la plus récente : {time}",
+  "notCaptured": "Non capturé",
+  "notCapturedTitle": "Ouvrez le menu Succès du jeu pendant qu'irminsul tourne pour les capturer",
+  "importTitle": "Importer les succès obtenus depuis un export Seelie, une sauvegarde paimon.moe ou un fichier stardb / irminsul",
+  "loadFailed": "Échec du chargement",
+  "allDone": "Tout est terminé",
+  "showDone": "Afficher obtenus",
+  "noneDone": "Aucun obtenu",
+  "showMissing": "Afficher manquants",
+  "noMatches": "Aucun résultat",
+  "clear": "Effacer",
+  "more": "Plus",
+  "loading": "Chargement",
+  "undo": "Annuler",
+  "notSaved": "Non enregistré",
+  "markedDone": "{n} coché(s) comme obtenu(s)",
+  "unmarked": "{n} décoché(s)",
+  "added": "{n} ajouté(s)",
+  "confirmMark": {
+    "title": "Cocher {n} comme obtenus ?",
+    "filtered": "Les {n} succès restants affichés sont cochés comme obtenus à la main.",
+    "all": "Tous les succès restants ({n}) sont cochés comme obtenus à la main.",
+    "confirm": "Cocher"
+  },
+  "confirmUnmark": {
+    "title": "Décocher {n} ?",
+    "detail": "Retire les coches manuelles des {n} succès affichés. Les succès capturés restent obtenus.",
+    "confirm": "Décocher"
+  },
+  "categories": {
+    "label": "Catégories",
+    "all": "Toutes",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} Primo-gemmes",
+    "hideDone": "Masquer les séries terminées",
+    "showDone": "Afficher les séries terminées",
+    "completed": "Terminées"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} Primo-gemmes"
+  },
+  "import": {
+    "title": "Importer",
+    "formats": {
+      "list": "Liste d'id"
+    },
+    "noAchievements": "Aucun succès trouvé",
+    "notJson": "Pas un fichier JSON",
+    "dropTitle": "Seelie : Settings → Export Account. paimon.moe : Settings → Export. stardb ou irminsul : un fichier GOOD avec gi_achievements.",
+    "drop": "Fichier Seelie, paimon.moe ou stardb",
+    "account": "Compte {n}",
+    "fileAccount": "Compte du fichier",
+    "browse": "Parcourir",
+    "inFile": "Dans le fichier",
+    "already": "Déjà obtenus",
+    "new": "Nouveaux",
+    "newTitle": "Inclut {unknown} plus récents que les données du jeu et {disused} retirés du jeu : conservés, non comptés",
+    "cancel": "Annuler",
+    "add": "Ajouter {n}"
+  },
+  "row": {
+    "clickToMark": "Cliquer pour cocher comme obtenu",
+    "clickToUnmark": "{text} · cliquer pour décocher",
+    "captured": "Capturé",
+    "staysDone": "{text} · dans une capture, donc reste obtenu",
+    "markEveryTier": "Cocher tous les paliers",
+    "markDone": "Cocher comme obtenu",
+    "unmarkTiers": "Cliquer pour décocher les paliers cochés à la main",
+    "markedClick": "Coché à la main · cliquer pour décocher",
+    "tierTitle": "Palier {n} · {primogems} Primo-gemmes",
+    "reward": "{n} Primo-gemmes",
+    "primogems": "Primo-gemmes",
+    "states": {
+      "captured": "capturé",
+      "marked": "coché à la main",
+      "none": "non obtenu"
+    },
+    "aria": "{title} : {state}",
+    "tiers": "Paliers",
+    "tier": "Palier {n}",
+    "addedIn": "Ajouté en {version}",
+    "hiddenTitle": "Succès caché",
+    "hidden": "Caché",
+    "markedByHand": "Coché à la main",
+    "guide": "Guide sur stardb.gg"
+  },
+  "completion": {
+    "tier": "Palier {n} · {text}",
+    "exact": "Obtenu {time}",
+    "exactTitle": "Heure d'obtention enregistrée par le jeu, lue par irminsul",
+    "seen": "Obtenu {window}",
+    "seenTitle": "Obtenu entre deux captures : absent de la capture de {since}, présent dans celle de {at}",
+    "by": "Obtenu avant le {date}",
+    "byTitle": "Déjà obtenu dans votre première capture ({at})",
+    "marked": "Coché comme obtenu à la main",
+    "markedTitle": "Aucune capture ne le contient, donc pas de date"
+  },
+  "summary": {
+    "label": "Résumé",
+    "done": "Obtenus",
+    "doneCaptured": "{n} capturé(s)",
+    "doneByHand": "{n} à la main",
+    "doneUnknown": "{n} plus récent(s) que les données du jeu",
+    "progress": "Progression",
+    "progressLabel": "Succès obtenus",
+    "primogems": "Primo-gemmes",
+    "primogemsHint": "Primo-gemmes obtenues / disponibles",
+    "missing": "Manquants",
+    "showAll": "Tout afficher",
+    "showLeft": "N'afficher que ce qui reste"
+  },
+  "toolbar": {
+    "label": "Filtrer les succès",
+    "search": "Rechercher",
+    "searchTitle": "Nom, description, catégorie ou id",
+    "completion": "Progression",
+    "completions": {
+      "all": "Tous",
+      "done": "Obtenus",
+      "missing": "Manquants"
+    },
+    "hidden": {
+      "all": "Cachés : tous",
+      "hidden": "Cachés",
+      "visible": "Non cachés"
+    },
+    "hiddenLabel": "Cachés",
+    "allCategories": "Toutes les catégories",
+    "category": "Catégorie",
+    "version": "Version",
+    "addedIn": "Ajouté en",
+    "markAll": "Tout cocher",
+    "markAllTitle": "Cocher comme obtenus les {n} succès restants affichés",
+    "unmarkAll": "Tout décocher",
+    "unmarkAllTitle": "Décocher les {n} succès affichés cochés à la main"
+  }
+}

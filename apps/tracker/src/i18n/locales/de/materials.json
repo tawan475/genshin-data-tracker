@@ -1,0 +1,97 @@
+{
+  "title": "Materialien",
+  "newestSnapshot": "Neuester Snapshot",
+  "since": "seit {date}",
+  "oneSnapshot": "Nur ein Snapshot",
+  "changesTitle": "Änderungen {hint}",
+  "changeSince": "Änderung seit",
+  "noSnapshots": "Noch keine Snapshots",
+  "import": "Importieren",
+  "loadFailed": "Materialien konnten nicht geladen werden",
+  "loading": "Materialien werden geladen",
+  "saveChartFailed": "Diagrammeinstellungen konnten nicht gespeichert werden",
+  "search": "Suchen",
+  "searchLabel": "Materialien suchen",
+  "noMatches": "Keine Treffer",
+  "noMaterials": "Keine Materialien",
+  "clear": "Leeren",
+  "more": "{n} weitere",
+  "upTo": "Bis zu {max}",
+  "trackedOfMax": "Verfolgt / max.",
+  "track": "Verfolgen",
+  "untrack": "Nicht verfolgen",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Letzte"
+  },
+  "wallet": {
+    "label": "Geldbörse",
+    "title": "Währungen und Gebetsobjekte",
+    "short": {
+      "GenesisCrystal": "Kristall",
+      "IntertwinedFate": "Verwoben",
+      "AcquaintFate": "Vorbest.",
+      "MasterlessStarglitter": "Glanz",
+      "MasterlessStardust": "Staub",
+      "OriginalResin": "Harz",
+      "FragileResin": "Zerbr.",
+      "CondensedResin": "Angereich.",
+      "RealmCurrency": "Kannentaler"
+    }
+  },
+  "tabs": {
+    "development": "Verbesserung",
+    "precious": "Wertvoll",
+    "other": "Sonstiges",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Verstärkungserze (das Spiel führt sie bei den Waffen)",
+      "artifact": "Weihsalbe und Heilige Essenz (das Spiel führt sie bei den Artefakten)",
+      "other": "Nicht im Inventar des Spiels: Währungen, Samen, Kartenspiel-Objekte, Objekte neuer als die Spieldaten"
+    }
+  },
+  "bag": {
+    "title": "Inventar",
+    "show": "Zeigen",
+    "view": "Ansicht",
+    "views": {
+      "grid": "Symbole",
+      "list": "Liste"
+    },
+    "tabRow": "Inventar-Reiter",
+    "all": "Alle",
+    "allTitle": "Alle Reiter",
+    "sort": "Sortieren",
+    "sorts": {
+      "order": "Wie im Spiel",
+      "count": "Anzahl",
+      "change": "Änderung",
+      "name": "Name"
+    },
+    "unfoldAll": "Alle Reiter aufklappen",
+    "foldAll": "Alle Reiter einklappen",
+    "owned": "Vorhanden",
+    "ownedTitle": "Materialien in deinem Besitz",
+    "gained": "Erhalten",
+    "gainedTitle": "Erhalten {hint}",
+    "spent": "Verbraucht",
+    "spentTitle": "Verbraucht {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · von Hand gesetzt {hand} (Erfassung {capture})"
+  },
+  "detail": {
+    "history": "Verlauf",
+    "chartLabel": "{name} im Zeitverlauf, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Erhalten",
+    "spent": "Verbraucht",
+    "peak": "Höchststand",
+    "first": "Erstes",
+    "firstTitle": "Erster Snapshot, der es enthält"
+  },
+  "tracked": {
+    "title": "Verfolgt",
+    "list": "Verfolgte Materialien",
+    "untrackName": "{name} nicht mehr verfolgen"
+  }
+}

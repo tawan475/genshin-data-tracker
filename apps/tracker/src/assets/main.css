@@ -170,11 +170,15 @@
 }
 
 /*
- * Chinese text: Outfit has no Han glyphs, so they fall through to the
- * system's own Chinese font (nothing extra downloads); Latin letters and
- * digits stay in Outfit. Set from <html lang> (i18n/locale.ts).
+ * Other scripts: Outfit has only Latin glyphs, so Han, kana, Hangul, Thai and
+ * Cyrillic fall through to the system's own font for that language (nothing
+ * extra downloads; Japanese must not get Chinese glyph shapes); Latin letters
+ * and digits stay in Outfit. Vietnamese skips Outfit (`--font-brand`): it
+ * lacks the stacked diacritics, which would switch fonts mid-word. Set from
+ * <html lang> (i18n/locale.ts).
  */
 :root {
+  --font-brand: 'Outfit';
   --font-cjk: ui-sans-serif;
 }
 :root:lang(zh-CN) {
@@ -183,12 +187,25 @@
 :root:lang(zh-TW) {
   --font-cjk: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Source Han Sans TC';
 }
+:root:lang(ja) {
+  --font-cjk: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', 'Noto Sans JP';
+}
+:root:lang(ko) {
+  --font-cjk: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR';
+}
+:root:lang(th) {
+  --font-cjk: 'Leelawadee UI', 'Thonburi', 'Noto Sans Thai';
+}
+:root:lang(vi) {
+  --font-brand: 'Segoe UI';
+  --font-cjk: 'Roboto', 'Noto Sans', 'Helvetica Neue', Arial;
+}
 
 @theme inline {
-  --font-sans: 'Outfit', var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Outfit', var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-brand), var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-brand), var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
   /* Numbers stay in Outfit (tabular); ids and keys use a real monospace via font-code. */
-  --font-mono: 'Outfit', var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-brand), var(--font-cjk), ui-sans-serif, system-ui, sans-serif;
   --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-surface-base: var(--surface-base);

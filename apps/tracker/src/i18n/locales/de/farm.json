@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "genug für alle Ziele",
+    "alone": "genug für dieses Ziel",
+    "short": "fehlt"
+  },
+  "readiness": {
+    "all": {
+      "label": "Bereit",
+      "meaning": "Genug nach den Zielen darüber"
+    },
+    "alone": {
+      "label": "Allein bereit",
+      "meaning": "Allein genug, nicht nach den Zielen darüber"
+    },
+    "short": {
+      "label": "Fehlt",
+      "meaning": "Nicht genug, auch allein nicht"
+    },
+    "done": {
+      "label": "Erledigt",
+      "meaning": "Erreicht"
+    },
+    "artifacts": {
+      "label": "Artefakte",
+      "meaning": "Stufen erreicht, Artefakte fehlen noch"
+    }
+  },
+  "bracket": {
+    "tier": "Rang {tier}",
+    "bossLevel": "Boss St. {level}",
+    "wl": "WS {wl}",
+    "withAr": "{base} (AS {ar})",
+    "assumed": "{base}, angenommen"
+  },
+  "unit": {
+    "days": "{n} Tag | {n} Tage",
+    "weeks": "{n} Woche | {n} Wochen"
+  },
+  "status": {
+    "locked": "Abenteuerstufe oder Weltstufe noch zu niedrig zum Farmen",
+    "noRate": "Keine durchschnittliche Droprate für diese Quelle: keine Schätzung",
+    "notFarmed": "Keine Harzquelle"
+  },
+  "time": {
+    "hm": "{h} Std. {m} Min.",
+    "h": "{h} Std.",
+    "m": "{m} Min.",
+    "dh": "{d} T. {h} Std.",
+    "d": "{d} T."
+  },
+  "craft": {
+    "kind": {
+      "convert": "Umwandeln",
+      "craft": "Herstellen",
+      "forge": "Schmieden"
+    },
+    "item": "{count} {name}",
+    "convertRow": "{input} in {output} umwandeln",
+    "craftRow": "{output} aus {input} herstellen",
+    "forgeRow": "{output} aus {input} schmieden",
+    "kindTitle": {
+      "convert": "Alchimie: Umwandlung",
+      "craft": "Alchimie: Herstellen, niedrigste Stufe zuerst",
+      "forge": "Schmiede: Schmieden"
+    },
+    "listSeparator": ", ",
+    "notYet": "Noch nicht: braucht noch {items} (erst die Schritte darüber)",
+    "doneRow": "Erledigt: {row}",
+    "notEnough": "Nicht genug: braucht noch {items}",
+    "allDoneTitle": "Alle {n} erledigt: das Inventar wie danach",
+    "title": "Herstellen",
+    "fold": "Einklappen",
+    "unfold": "Was der Plan umwandelt, herstellt und schmiedet",
+    "steps": "{n} Schritt | {n} Schritte",
+    "inAll": "{cost} insgesamt",
+    "forgingTime": "Schmiedezeit {time} (ohne die Warteschlange der Schmiede)",
+    "forging": "Schmieden",
+    "allDone": "Alles erledigt",
+    "hideTitle": "Herstellen ausblenden (in den Planer-Einstellungen wieder einblenden)",
+    "hide": "Herstellen ausblenden",
+    "from": "aus",
+    "fewer": "Weniger",
+    "all": "Alle {n}"
+  },
+  "lock": {
+    "ar": "AS {ar}",
+    "wl": "WS {wl}",
+    "locked": "Gesperrt"
+  },
+  "cards": {
+    "blossomExp": "Blüte der Offenbarung",
+    "blossomMora": "Blüte des Reichtums",
+    "local": "Regionale Besonderheiten",
+    "common": "Normale Gegner",
+    "elite": "Elitegegner",
+    "other": "Sonstiges",
+    "elsewhere": "Anderswo"
+  },
+  "sections": {
+    "free": "Ohne Harz",
+    "domain": "Sphären · Blüten",
+    "boss": "Bosse",
+    "weekly": "Wochenbosse",
+    "artifact": "Artefakte"
+  },
+  "groups": {
+    "ley": "Blüte des Flusses der Elemente",
+    "mastery": "Sphäre des Verständnisses",
+    "forgery": "Sphäre der Kriegskunst",
+    "blessing": "Sphäre des Segens",
+    "boss": "Normale Bosse",
+    "weekly": "Wochenbosse",
+    "local": "Regionale Besonderheiten",
+    "common": "Normale Gegner",
+    "elite": "Elitegegner",
+    "ore": "Material zur Waffenverstärkung",
+    "other": "Sonstiges"
+  },
+  "people": {
+    "label": "Für wen der Plan ist",
+    "only": "{name}: nur deren Karten",
+    "all": "{name}: alle zeigen"
+  },
+  "card": {
+    "runs": "{n} Lauf | {n} Läufe",
+    "claims": "{n} Abholung | {n} Abholungen",
+    "claimsWeekly": "{claims}, eine pro Woche",
+    "atMost": "höchstens {runs}",
+    "atMostPrefix": "höchstens",
+    "runsShort": "{n} Läufe",
+    "claimsShort": "{n} Abholungen",
+    "resinRange": "{min}–{max} Harz",
+    "resin": "{n} Harz",
+    "condensed": "{n} angereichert",
+    "condensedTitle": "{n} Angereichertes Harz",
+    "guaranteed": "die Droprate ist ein garantiertes Minimum",
+    "lockTitle": "Noch nicht: braucht {lock}",
+    "kind": {
+      "boss": "Boss",
+      "gem": "Bosse, die es droppen",
+      "enemy": "Gegner, die es droppen",
+      "local": "Wächst in",
+      "artifact": "Artefakt-Sphäre"
+    },
+    "elsewhereTitle": "Keine Sphäre droppt diese Sets",
+    "noRate": "Keine Rate",
+    "paidTitle": "Die geplanten Sphärenläufe bringen {mora} Mora",
+    "paid": "+{n} aus Sphären",
+    "blockedTitle": "{n} Umwandlungen brauchen mehr Traumlösungsmittel",
+    "blocked": "{n} blockiert",
+    "blockedSr": ": mehr Traumlösungsmittel nötig"
+  },
+  "weekday": {
+    "short": {
+      "sun": "So",
+      "mon": "Mo",
+      "tue": "Di",
+      "wed": "Mi",
+      "thu": "Do",
+      "fri": "Fr",
+      "sat": "Sa"
+    },
+    "long": {
+      "sun": "Sonntag",
+      "mon": "Montag",
+      "tue": "Dienstag",
+      "wed": "Mittwoch",
+      "thu": "Donnerstag",
+      "fri": "Freitag",
+      "sat": "Samstag"
+    }
+  },
+  "panel": {
+    "today": "Heute",
+    "schedule": "Zeitplan",
+    "runsLine": "{runs} · {resin} Harz ({condensed} angereichert) · {days}",
+    "sources": "Sphären, normale Bosse und Blüten",
+    "daily": "{n} Harz pro Tag",
+    "dailyRefresh": "{n} Harz pro Tag (180 + {r} × {per})",
+    "withHeld": "{days} mit dem vorhandenen Harz",
+    "gems": "Edelsteine: {runs}, {resin} Harz",
+    "partial": "manche Quellen haben keine Droprate",
+    "upperBound": "Boss-Drops auf Weltstufe 9 sind ein garantiertes Minimum",
+    "weeklyClaims": "Wochenbosse: {claims} in {weeks}",
+    "weeklyResin": "{resin} Harz mit dem Wochenrabatt ({max} ohne)",
+    "weeklyPartial": "manche Bosse haben keine Droprate",
+    "serverDay": "Servertag: {day}",
+    "serverDaySunday": "Servertag: {day} (alle Sphären offen)",
+    "resetIn": "Reset um 04:00 in {time}",
+    "forgeOff": "Mystisches Erz mitzählen, das aus vorhandenen Brocken geschmiedet werden kann",
+    "forgeLine": "{item} schmieden: {mora} Mora, {time}",
+    "stillShort": "fehlt noch {n}",
+    "totals": "Summen",
+    "resin": "Harz",
+    "dayUnit": "Tag | Tage",
+    "refreshTitle": "{r} Harz-Auffüllung pro Tag: {daily} Harz pro Tag | {r} Harz-Auffüllungen pro Tag: {daily} Harz pro Tag",
+    "perDay": "{n}/Tag",
+    "weekly": "Wöchentlich",
+    "weekUnit": "Woche | Wochen",
+    "lockedTitle": "{n} Quelle durch AS/WS gesperrt | {n} Quellen durch AS/WS gesperrt",
+    "locked": "durch AS/WS gesperrt",
+    "view": "Farm-Ansicht",
+    "noWeeklyTitle": "Nur Ziele, die noch ohne Wochenboss zu farmen sind: deren Drops sind vorhanden oder umwandelbar (nach den Zielen darüber)",
+    "noWeekly": "Ohne Wochenboss",
+    "noneLeft": "Jedes Ziel braucht noch einen Wochenboss",
+    "showAll": "Alle Ziele zeigen",
+    "assumed": "AS/WS nicht gesetzt: höchste Stufe angenommen",
+    "set": "Setzen",
+    "nothing": "Nichts zu farmen",
+    "sectionLabel": "{label}: {resin} Harz",
+    "show": "Zeigen",
+    "hidden": "{n} ausgeblendet",
+    "forge": "Aus Brocken schmieden",
+    "pairTitle": "{runs} · {resin} Harz · {days}",
+    "cards": "{n} Karte | {n} Karten"
+  },
+  "event": {
+    "names": {
+      "abundance": "Hervorquellen der Materialien",
+      "mastery": "Hervorquellen des Verständnisses",
+      "favor": "Hervorquellen der Gunst",
+      "wealth": "Hervorquellen des Reichtums",
+      "revelation": "Hervorquellen der Offenbarung",
+      "leyLine": "Hervorquellen des Flusses der Elemente"
+    },
+    "rules": {
+      "abundance": "Alle Talentbücher und Waffenmaterialien sind verfügbar, mit vervielfachten Belohnungen",
+      "mastery": "Sphären des Verständnisses geben vervielfachte Belohnungen",
+      "favor": "Sphären des Segens (Artefakte) geben vervielfachte Belohnungen",
+      "wealth": "Blüten des Reichtums geben vervielfachte Belohnungen",
+      "revelation": "Blüten der Offenbarung geben vervielfachte Belohnungen",
+      "leyLine": "Blüten des Reichtums und der Offenbarung geben vervielfachte Belohnungen"
+    },
+    "claims": "×{times} mit Ursprünglichem Harz, {n}-mal pro Tag",
+    "endsIn": "endet in {time}"
+  }
+}

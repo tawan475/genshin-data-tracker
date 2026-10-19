@@ -1,0 +1,108 @@
+{
+  "heading": "Riwayat Impor",
+  "loadFailed": "Gagal memuat",
+  "noneInRange": "Tidak ada snapshot dalam rentang",
+  "clear": "Hapus",
+  "noSnapshots": "Belum ada snapshot",
+  "import": "Impor",
+  "unchangedUntil": "Tidak berubah hingga {time}",
+  "downloadFailed": "Gagal mengunduh snapshot",
+  "saved": "{name} tersimpan",
+  "files": "{n} file",
+  "gone": "{n} hilang",
+  "exportFailed": "Ekspor gagal",
+  "deletedOf": "{deleted} dari {total} snapshot dihapus",
+  "deleteFailed": "Gagal menghapus snapshot",
+  "deleteFailedMany": "Gagal menghapus snapshot",
+  "deleted": "Berhasil menghapus {n} snapshot",
+  "column": {
+    "id": "ID",
+    "date": "Tanggal",
+    "source": "Sumber",
+    "rawSize": "Ukuran Asli",
+    "storedSize": "Ukuran Disimpan",
+    "actions": "Aksi"
+  },
+  "select": {
+    "page": "Pilih halaman ini",
+    "snapshot": "Pilih snapshot {id}",
+    "shiftClick": "Shift-klik untuk memilih rentang",
+    "pageSelected": "Semua {n} di halaman ini terpilih.",
+    "all": "Pilih semua {n}",
+    "allInRange": "Pilih semua {n} dalam rentang",
+    "viewSelected": "Semua {n} snapshot terpilih.",
+    "rangeSelected": "Semua {n} snapshot dalam rentang terpilih.",
+    "clear": "Hapus pilihan",
+    "allLabel": "Semua"
+  },
+  "confirm": {
+    "title": "Yakin?",
+    "one": "Kamu akan menghapus snapshot ini. Ini tidak bisa dibatalkan.",
+    "oneConfirm": "Ya, hapus!",
+    "many": "Kamu akan menghapus {n} snapshot. Ini tidak bisa dibatalkan.",
+    "purge": "Kamu akan menghapus {n} snapshot milik pengguna ini sekarang, tanpa lewat tempat sampah. Ini tidak bisa dibatalkan.",
+    "manyConfirm": "Ya, hapus semuanya!",
+    "massTitle": "Peringatan Penghapusan Massal",
+    "massText": "Kamu memilih SEMUA snapshot di SEMUA halaman. Ketik \"DELETE\" untuk mengonfirmasi bahwa kamu ingin menghapus semuanya.",
+    "massConfirm": "Saya mengerti, HAPUS SEMUA!",
+    "typePlaceholder": "Ketik \"{word}\" untuk konfirmasi",
+    "typeLabel": "Ketik {word} untuk konfirmasi",
+    "typeError": "Ketik \"{word}\"",
+    "cancel": "Batal"
+  },
+  "figure": {
+    "noCurrency": "Tidak ada mata uang di snapshot ini",
+    "vs": "vs #{id} · {time}"
+  },
+  "range": {
+    "label": "Filter menurut tanggal",
+    "from": "Dari",
+    "to": "Sampai",
+    "selectTitle": "Pilih {n} snapshot dalam rentang",
+    "select": "Pilih {n}",
+    "clear": "Hapus tanggal"
+  },
+  "row": {
+    "downloadGood": "Unduh GOOD",
+    "download": "Unduh snapshot {id}",
+    "delete": "Hapus snapshot",
+    "deleteId": "Hapus snapshot {id}"
+  },
+  "bar": {
+    "saving": "Menyimpan…",
+    "downloadingOf": "Mengunduh {done} / {total}",
+    "downloading": "Mengunduh {done}",
+    "zipping": "Membuat zip {done} / {total}",
+    "selected": "{n} terpilih",
+    "outOf": " dari {n}",
+    "hiddenTitle": "{n} snapshot terpilih berada di luar tanggal",
+    "hidden": "· {n} tersembunyi",
+    "cancel": "Batal",
+    "blocked": "Ekspor lain sedang berjalan",
+    "downloadTitle": "Unduh zip berisi file GOOD",
+    "download": "Unduh",
+    "delete": "Hapus"
+  },
+  "card": {
+    "stored": "Disimpan"
+  },
+  "storage": {
+    "title": "Penyimpanan",
+    "snapshots": "Snapshot",
+    "raw": "Data Asli",
+    "stored": "Disimpan",
+    "saved": "Dihemat"
+  },
+  "pagination": {
+    "perPage": "Per halaman",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya",
+    "page": "Halaman {page} dari {pages}",
+    "total": "({n} total)",
+    "goTo": "Ke",
+    "go": "Buka"
+  },
+  "table": {
+    "noData": "Tidak ada data."
+  }
+}

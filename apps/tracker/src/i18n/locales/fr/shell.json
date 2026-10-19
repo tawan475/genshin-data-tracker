@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Aperçu",
+    "progression": "Progression",
+    "characters": "Personnages",
+    "artifacts": "Artéfacts",
+    "weapons": "Armes",
+    "materials": "Matériaux",
+    "planner": "Planificateur",
+    "achievements": "Succès",
+    "anecdotes": "Anecdotes",
+    "wishes": "Vœux",
+    "snapshots": "Instantanés",
+    "import": "Importer",
+    "manage": "Gérer",
+    "staffOverview": "Aperçu",
+    "users": "Utilisateurs",
+    "storage": "Stockage",
+    "roles": "Rôles",
+    "audit": "Audit"
+  },
+  "section": {
+    "staff": "Équipe",
+    "account": "Compte",
+    "system": "Système"
+  },
+  "accounts": "Comptes",
+  "staff": "Équipe",
+  "settings": "Paramètres",
+  "import": "Importer",
+  "expandMenu": "Déplier le menu",
+  "collapseMenu": "Replier le menu",
+  "openMenu": "Ouvrir le menu",
+  "closeMenu": "Fermer le menu",
+  "lightTheme": "Thème clair",
+  "darkTheme": "Thème sombre",
+  "themeNotSaved": "Thème non enregistré",
+  "landingPage": "Page d'accueil",
+  "return": "Retour",
+  "highestRole": "Votre rôle le plus élevé",
+  "copyName": "Copier le nom",
+  "copyUid": "Copier l'UID",
+  "copyUidValue": "Copier l'UID {uid}",
+  "nameCopied": "Nom copié",
+  "uidCopied": "UID copié",
+  "switcher": {
+    "select": "Choisir un compte",
+    "add": "Ajouter un compte"
+  },
+  "page": {
+    "signIn": "Connexion",
+    "createAccount": "Créer un compte",
+    "continue": "Continuer",
+    "linkIrminsul": "Lier Irminsul",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmEmail": "Confirmer l'e-mail",
+    "accounts": "Comptes",
+    "addAccount": "Ajouter un compte",
+    "settings": "Paramètres",
+    "overview": "Aperçu",
+    "users": "Utilisateurs",
+    "user": "Utilisateur",
+    "storage": "Stockage",
+    "roles": "Rôles",
+    "audit": "Audit",
+    "progression": "Progression",
+    "characters": "Personnages",
+    "weapons": "Armes",
+    "artifacts": "Artéfacts",
+    "materials": "Matériaux",
+    "planner": "Planificateur",
+    "achievements": "Succès",
+    "anecdotes": "Anecdotes",
+    "wishHistory": "Historique des vœux",
+    "snapshots": "Instantanés",
+    "import": "Importer",
+    "accountSettings": "Paramètres du compte",
+    "notFound": "Introuvable",
+    "inspect": "Inspecter · {page}"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "Le lien est peut-être ancien, ou la page a été déplacée.",
+    "home": "Aller au tableau de bord"
+  },
+  "accountMissing": {
+    "title": "Compte introuvable",
+    "body": "Il a peut-être été supprimé, ou il appartient à quelqu'un d'autre.",
+    "all": "Tous les comptes"
+  },
+  "update": {
+    "ready": "Une nouvelle version du tracker est prête."
+  },
+  "public": {
+    "dashboard": "Tableau de bord"
+  },
+  "landing": {
+    "heroLine1": "Maîtrisez votre",
+    "heroLine2": "aventure Genshin",
+    "tagline": "Chaque connexion, capturée. Artéfacts, matériaux, historique.",
+    "openDashboard": "Ouvrir le tableau de bord",
+    "getStarted": "Commencer",
+    "critDmg": "DGT CRIT 21,8 %"
+  },
+  "appearance": "Langue et apparence"
+}

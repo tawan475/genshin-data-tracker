@@ -1,0 +1,97 @@
+{
+  "title": "Materiali",
+  "newestSnapshot": "Istantanea più recente",
+  "since": "dal {date}",
+  "oneSnapshot": "Una sola istantanea",
+  "changesTitle": "Variazioni {hint}",
+  "changeSince": "Variazione da",
+  "noSnapshots": "Ancora nessuna istantanea",
+  "import": "Importa",
+  "loadFailed": "Impossibile caricare i materiali",
+  "loading": "Caricamento materiali",
+  "saveChartFailed": "Impossibile salvare le impostazioni del grafico",
+  "search": "Cerca",
+  "searchLabel": "Cerca materiali",
+  "noMatches": "Nessun risultato",
+  "noMaterials": "Nessun materiale",
+  "clear": "Cancella",
+  "more": "Altri {n}",
+  "upTo": "Fino a {max}",
+  "trackedOfMax": "Seguiti / max",
+  "track": "Segui",
+  "untrack": "Non seguire",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Ultimi"
+  },
+  "wallet": {
+    "label": "Portafoglio",
+    "title": "Valute e oggetti per i desideri",
+    "short": {
+      "GenesisCrystal": "Genesi",
+      "IntertwinedFate": "Intrecciato",
+      "AcquaintFate": "Incontro",
+      "MasterlessStarglitter": "Luce stellare",
+      "MasterlessStardust": "Polvere stellare",
+      "OriginalResin": "Resina",
+      "FragileResin": "Fragile",
+      "CondensedResin": "Condensata",
+      "RealmCurrency": "Regno"
+    }
+  },
+  "tabs": {
+    "development": "Sviluppo",
+    "precious": "Preziosi",
+    "other": "Altro",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Minerali di potenziamento (il gioco li tiene con le armi)",
+      "artifact": "Unguento ed Essenza santificatori (il gioco li tiene con i manufatti)",
+      "other": "Non nell'Inventario del gioco: valute, semi, oggetti del gioco di carte, oggetti più recenti dei dati di gioco"
+    }
+  },
+  "bag": {
+    "title": "Inventario",
+    "show": "Mostra",
+    "view": "Vista",
+    "views": {
+      "grid": "Icone",
+      "list": "Elenco"
+    },
+    "tabRow": "Scheda dell'inventario",
+    "all": "Tutte",
+    "allTitle": "Tutte le schede",
+    "sort": "Ordina",
+    "sorts": {
+      "order": "Come nel gioco",
+      "count": "Quantità",
+      "change": "Variazione",
+      "name": "Nome"
+    },
+    "unfoldAll": "Espandi tutte le schede",
+    "foldAll": "Comprimi tutte le schede",
+    "owned": "Posseduti",
+    "ownedTitle": "Materiali in tuo possesso",
+    "gained": "Ottenuti",
+    "gainedTitle": "Ottenuti {hint}",
+    "spent": "Spesi",
+    "spentTitle": "Spesi {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · impostato a mano {hand} (cattura {capture})"
+  },
+  "detail": {
+    "history": "Cronologia",
+    "chartLabel": "{name} nel tempo, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Ottenuti",
+    "spent": "Spesi",
+    "peak": "Massimo",
+    "first": "Prima",
+    "firstTitle": "Prima istantanea che lo contiene"
+  },
+  "tracked": {
+    "title": "Seguiti",
+    "list": "Materiali seguiti",
+    "untrackName": "Non seguire più {name}"
+  }
+}

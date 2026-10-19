@@ -1,0 +1,74 @@
+{
+  "title": "Progression détaillée",
+  "figures": "Valeurs",
+  "atLeastOne": "Au moins une",
+  "groupBy": "Grouper par",
+  "longerThanRange": "Plus long que la période",
+  "loading": "Chargement de la progression",
+  "noData": "Aucune donnée",
+  "inRange": "sur cette période",
+  "gainedInRange": "gagné sur cette période",
+  "spentInRange": "dépensé sur cette période",
+  "noCaptures": "Aucune capture",
+  "captures": "{n} capture | {n} captures",
+  "total": "Total {n}",
+  "lineLabel": "{figure} dans le temps, {span}. Dernière valeur {value}.",
+  "barsLabel": "Variation de {figure} {per}, {span} : gagné {gained}, dépensé {spent}.",
+  "tooltip": " {name} : {value}",
+  "group": {
+    "snapshot": "Instantané",
+    "hour": "Heure",
+    "day": "Jour",
+    "month": "Mois",
+    "year": "Année"
+  },
+  "per": {
+    "snapshot": "Par instantané",
+    "hour": "Par heure",
+    "day": "Par jour",
+    "month": "Par mois",
+    "year": "Par année"
+  },
+  "against": {
+    "snapshot": "Variation par rapport à l'instantané précédent",
+    "hour": "Variation par rapport à l'heure précédente",
+    "day": "Variation par rapport au jour précédent",
+    "month": "Variation par rapport au mois précédent",
+    "year": "Variation par rapport à l'année précédente"
+  },
+  "newest": {
+    "snapshot": "{n} derniers instantanés",
+    "hour": "{n} dernières heures",
+    "day": "{n} derniers jours",
+    "month": "{n} derniers mois",
+    "year": "{n} dernières années"
+  },
+  "range": {
+    "label": "Période",
+    "hours": "Heures",
+    "days": "Jours",
+    "all": "Tout",
+    "h": "{n} h",
+    "d": "{n} j",
+    "y": "{n} a"
+  },
+  "monthly": {
+    "unavailable": "Analyse mensuelle indisponible",
+    "loading": "Chargement de l'analyse mensuelle",
+    "noCaptures": "Aucune capture",
+    "goTo": "Aller à {month}",
+    "date": "Date",
+    "primogem": "Primo-gemme",
+    "mora": "Mora",
+    "artifact": "Artéfact",
+    "extract": "Extrait",
+    "netWorth": "Valeur nette",
+    "moraUnit": "Mora",
+    "primogemUnit": "Primo-gemmes"
+  },
+  "character": {
+    "level": "Niveau",
+    "constellation": "Constellation",
+    "talents": "Aptitudes"
+  }
+}

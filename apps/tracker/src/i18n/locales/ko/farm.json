@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "모든 목표에 충분",
+    "alone": "이 목표만으로 충분",
+    "short": "부족"
+  },
+  "readiness": {
+    "all": {
+      "label": "준비됨",
+      "meaning": "위의 목표를 채운 뒤에도 충분"
+    },
+    "alone": {
+      "label": "단독 준비",
+      "meaning": "단독으로는 충분하지만 위의 목표 뒤에는 부족"
+    },
+    "short": {
+      "label": "부족",
+      "meaning": "단독으로도 부족"
+    },
+    "done": {
+      "label": "완료",
+      "meaning": "달성"
+    },
+    "artifacts": {
+      "label": "성유물",
+      "meaning": "레벨 달성, 성유물 남음"
+    }
+  },
+  "bracket": {
+    "tier": "{tier}단계",
+    "bossLevel": "보스 Lv {level}",
+    "wl": "WL {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base}, 가정"
+  },
+  "unit": {
+    "days": "{n}일",
+    "weeks": "{n}주"
+  },
+  "status": {
+    "locked": "모험 등급 또는 월드 레벨이 낮아 아직 파밍할 수 없습니다",
+    "noRate": "이 출처의 평균 드롭률이 없어 추정할 수 없습니다",
+    "notFarmed": "레진 출처 없음"
+  },
+  "time": {
+    "hm": "{h}시간 {m}분",
+    "h": "{h}시간",
+    "m": "{m}분",
+    "dh": "{d}일 {h}시간",
+    "d": "{d}일"
+  },
+  "craft": {
+    "kind": {
+      "convert": "전환",
+      "craft": "합성",
+      "forge": "단조"
+    },
+    "item": "{name} {count}개",
+    "convertRow": "{input} → {output} 전환",
+    "craftRow": "{input}(으)로 {output} 합성",
+    "forgeRow": "{input}(으)로 {output} 단조",
+    "kindTitle": {
+      "convert": "연금: 전환",
+      "craft": "연금: 합성, 낮은 단계부터",
+      "forge": "대장간: 단조"
+    },
+    "listSeparator": ", ",
+    "notYet": "아직 불가: {items} 더 필요 (위 단계를 먼저 진행)",
+    "doneRow": "완료: {row}",
+    "notEnough": "부족: {items} 더 필요",
+    "allDoneTitle": "{n}개 모두 완료: 완료 후의 배낭 기준",
+    "title": "합성",
+    "fold": "접기",
+    "unfold": "계획에서 전환, 합성, 단조하는 항목",
+    "steps": "{n}단계",
+    "inAll": "총 {cost}",
+    "forgingTime": "단조 시간 {time} (대장간 대기열 제외)",
+    "forging": "단조",
+    "allDone": "모두 완료",
+    "hideTitle": "합성 숨기기 (플래너 설정에서 다시 표시)",
+    "hide": "합성 숨기기",
+    "from": "재료",
+    "fewer": "접기",
+    "all": "전체 {n}개"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "WL {wl}",
+    "locked": "미해금"
+  },
+  "cards": {
+    "blossomExp": "계시의 꽃",
+    "blossomMora": "장금의 꽃",
+    "local": "지역 특산물",
+    "common": "일반 몬스터",
+    "elite": "정예 몬스터",
+    "other": "기타",
+    "elsewhere": "기타 출처"
+  },
+  "sections": {
+    "free": "레진 없음",
+    "domain": "비경 · 지맥",
+    "boss": "보스",
+    "weekly": "주간 보스",
+    "artifact": "성유물"
+  },
+  "groups": {
+    "ley": "지맥의 꽃",
+    "mastery": "숙달 비경",
+    "forgery": "연무 비경",
+    "blessing": "축성 비경",
+    "boss": "일반 보스",
+    "weekly": "주간 보스",
+    "local": "지역 특산물",
+    "common": "일반 몬스터",
+    "elite": "정예 몬스터",
+    "ore": "무기 강화 소재",
+    "other": "기타"
+  },
+  "people": {
+    "label": "계획 대상",
+    "only": "{name}: 해당 카드만",
+    "all": "{name}: 모두 표시"
+  },
+  "card": {
+    "runs": "{n}회",
+    "claims": "{n}회 수령",
+    "claimsWeekly": "{claims}, 주 1회",
+    "atMost": "최대 {runs}",
+    "atMostPrefix": "최대",
+    "runsShort": "{n}회",
+    "claimsShort": "{n}회 수령",
+    "resinRange": "레진 {min}–{max}",
+    "resin": "레진 {n}",
+    "condensed": "농축 {n}",
+    "condensedTitle": "농축 레진 {n}개",
+    "guaranteed": "드롭률은 보장된 최소치입니다",
+    "lockTitle": "아직 불가: {lock} 필요",
+    "kind": {
+      "boss": "보스",
+      "gem": "드롭하는 보스",
+      "enemy": "드롭하는 몬스터",
+      "local": "자라는 곳",
+      "artifact": "성유물 비경"
+    },
+    "elsewhereTitle": "이 세트를 드롭하는 비경이 없습니다",
+    "noRate": "드롭률 없음",
+    "paidTitle": "계획한 비경 도전으로 모라 {mora} 획득",
+    "paid": "비경에서 +{n}",
+    "blockedTitle": "전환 {n}건에 이상한 꿈의 용매가 더 필요합니다",
+    "blocked": "{n}건 막힘",
+    "blockedSr": ": 이상한 꿈의 용매 부족"
+  },
+  "weekday": {
+    "short": {
+      "sun": "일",
+      "mon": "월",
+      "tue": "화",
+      "wed": "수",
+      "thu": "목",
+      "fri": "금",
+      "sat": "토"
+    },
+    "long": {
+      "sun": "일요일",
+      "mon": "월요일",
+      "tue": "화요일",
+      "wed": "수요일",
+      "thu": "목요일",
+      "fri": "금요일",
+      "sat": "토요일"
+    }
+  },
+  "panel": {
+    "today": "오늘",
+    "schedule": "일정",
+    "runsLine": "{runs} · 레진 {resin} (농축 {condensed}) · {days}",
+    "sources": "비경, 일반 보스, 지맥",
+    "daily": "하루 레진 {n}",
+    "dailyRefresh": "하루 레진 {n} (180 + {r} × {per})",
+    "withHeld": "보유 레진 포함 {days}",
+    "gems": "보석: {runs}, 레진 {resin}",
+    "partial": "일부 출처는 드롭률이 없습니다",
+    "upperBound": "월드 레벨 9 보스 드롭은 보장된 최소치입니다",
+    "weeklyClaims": "주간 보스: {weeks} 동안 {claims}",
+    "weeklyResin": "주간 할인 적용 레진 {resin} (미적용 {max})",
+    "weeklyPartial": "일부 보스는 드롭률이 없습니다",
+    "serverDay": "서버 요일: {day}",
+    "serverDaySunday": "서버 요일: {day} (모든 비경 개방)",
+    "resetIn": "04:00 초기화까지 {time}",
+    "forgeOff": "보유한 광석 조각으로 단조할 수 있는 정제용 마법 광물 포함",
+    "forgeLine": "{item} 단조: 모라 {mora}, {time}",
+    "stillShort": "아직 {n} 부족",
+    "totals": "합계",
+    "resin": "레진",
+    "dayUnit": "일",
+    "refreshTitle": "하루 레진 충전 {r}회: 하루 레진 {daily}",
+    "perDay": "{n}/일",
+    "weekly": "주간",
+    "weekUnit": "주",
+    "lockedTitle": "AR/WL로 잠긴 출처 {n}개",
+    "locked": "AR/WL로 잠김",
+    "view": "파밍 보기",
+    "noWeeklyTitle": "주간 보스 없이 파밍할 목표만: 그 드롭은 보유 중이거나 전환 가능 (위의 목표 이후)",
+    "noWeekly": "주간 보스 제외",
+    "noneLeft": "모든 목표에 아직 주간 보스가 필요합니다",
+    "showAll": "모든 목표 표시",
+    "assumed": "AR/WL 미설정: 최고 구간으로 가정",
+    "set": "설정",
+    "nothing": "파밍할 것 없음",
+    "sectionLabel": "{label}: 레진 {resin}",
+    "show": "표시",
+    "hidden": "{n}개 숨김",
+    "forge": "광석 조각으로 단조",
+    "pairTitle": "{runs} · 레진 {resin} · {days}",
+    "cards": "카드 {n}개"
+  },
+  "event": {
+    "names": {
+      "abundance": "소재의 격류",
+      "mastery": "마스터리의 격류",
+      "favor": "축성의 격류",
+      "wealth": "장금의 격류",
+      "revelation": "계시의 격류",
+      "leyLine": "지맥의 격류"
+    },
+    "rules": {
+      "abundance": "모든 특성 책과 무기 소재 비경이 열리고 보상이 배로 증가합니다",
+      "mastery": "숙달 비경의 보상이 배로 증가합니다",
+      "favor": "축성 비경(성유물)의 보상이 배로 증가합니다",
+      "wealth": "장금의 꽃의 보상이 배로 증가합니다",
+      "revelation": "계시의 꽃의 보상이 배로 증가합니다",
+      "leyLine": "장금의 꽃과 계시의 꽃의 보상이 배로 증가합니다"
+    },
+    "claims": "퓨어 레진 사용 시 ×{times}, 하루 {n}회",
+    "endsIn": "{time} 후 종료"
+  }
+}

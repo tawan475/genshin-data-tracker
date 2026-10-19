@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "Name",
+      "title": "A bis Z"
+    },
+    "missing": {
+      "label": "Fehlend",
+      "title": "Wenigste fehlende Gegenstände zuerst"
+    },
+    "favorites": {
+      "label": "Favoriten",
+      "title": "Favoriten zuerst"
+    },
+    "priority": {
+      "label": "Priorität",
+      "title": "Materialien gehen zuerst an die obersten Ziele: zum Umsortieren ziehen"
+    }
+  },
+  "material": {
+    "characterExp": "Figuren-EP",
+    "weaponExp": "Waffen-EP",
+    "group": {
+      "exp": "EP",
+      "gem": "Edelsteine",
+      "boss": "Boss-Drops",
+      "local": "Regionale Besonderheiten",
+      "common": "Gegner-Drops",
+      "book": "Talentbücher",
+      "weekly": "Wochenbosse",
+      "weapon": "Waffenmaterialien",
+      "elite": "Elite-Drops",
+      "other": "Sonstiges"
+    }
+  },
+  "hint": {
+    "level": "St. {level}",
+    "talents": "Talente {talents}",
+    "characterDetail": "{name}: St. {level} (A{ascension}), Talente {talents}",
+    "weaponDetail": "{name}: St. {level} (A{ascension})",
+    "thenAr": "dann AS {ar}",
+    "thenShort": "dann fehlen Materialien",
+    "weapon": "Waffe",
+    "canLevel": "Jetzt möglich"
+  },
+  "preset": {
+    "max": {
+      "label": "Max",
+      "title": "Stufe 90, Talente 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Stufe 90, Talente 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Stufe 80, Talente 8/8/8"
+    },
+    "talents": {
+      "label": "Nur Talente",
+      "title": "Talente 9/9/9, Stufe wie jetzt"
+    },
+    "level": {
+      "label": "Nur Stufe",
+      "title": "Stufe 90, Talente wie jetzt"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Tägliche Missionen",
+      "weeklyBosses": "Gebietssäuberungen",
+      "battlePass": "Erlebnispass (Woche)",
+      "reputation": "Ansehen",
+      "abyss": "Gewundener Abgrund",
+      "theater": "Theater der träumerischen Realität",
+      "bargains": "Rares für Staub und Glanz",
+      "transformer": "Parameterwandler",
+      "expeditions": "Erkundungen",
+      "realm": "Kannentaler",
+      "welkin": "Mondsegen"
+    }
+  },
+  "toast": {
+    "notSaved": "Nicht gespeichert",
+    "newCapture": "Neue Erfassung",
+    "newCaptureDetail": "Nichts wurde geändert: prüfen und erneut versuchen"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} Aktion ausgelassen | {n} Aktionen ausgelassen",
+      "olderThanOurs": "älter als unsere",
+      "ar": "AS {ar}",
+      "wl": "WS {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "Amerika",
+      "EUROPE": "Europa",
+      "ASIA": "Asien",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Kein Seelie-Export (keine Ziele)",
+    "customName": "Eigene"
+  },
+  "resin": {
+    "alertTitle": "Ursprüngliches Harz {amount}",
+    "source": {
+      "manual": "von Hand gesetzt",
+      "player": "irminsul, beim Login",
+      "inventory": "Snapshot"
+    },
+    "unknown": "Ursprüngliches Harz: noch unbekannt · setzen",
+    "readingTitle": "Ursprüngliches Harz ~{now}/{max} · {value}, Quelle: {source}, {at} · +1 alle 8 Minuten",
+    "setLabel": "{title}. Setzen",
+    "spend": "{n} ausgeben",
+    "add": "{n} hinzufügen",
+    "fullAt": "Voll um {time}",
+    "fullLabel": "Voll",
+    "full": "Voll",
+    "markTitle": "{amount} um {time}",
+    "in": "in",
+    "now": "Ursprüngliches Harz jetzt",
+    "alert": "Harz-Alarm",
+    "alertUnsupported": "Harz-Alarm: in diesem Browser nicht unterstützt",
+    "alertOff": "Harz-Alarm: aus",
+    "alertOn": "Harz-Alarm bei {amount} · solange die Seite offen ist",
+    "alertOnAt": "Harz-Alarm bei {amount}, {time} · solange die Seite offen ist",
+    "unsupported": "In diesem Browser nicht unterstützt",
+    "blocked": "Blockiert: erlaube Benachrichtigungen für diese Seite in den Browser-Einstellungen",
+    "notifyAt": "Melden bei",
+    "off": "Aus",
+    "whileOpen": "Solange die Seite auf diesem Gerät offen ist"
+  },
+  "artifacts": {
+    "title": "Artefakte",
+    "doneByHand": "{name}: erledigt (von Hand markiert)",
+    "notDoneByHand": "{name}: nicht erledigt (von Hand markiert)",
+    "notDoneByHandCaptureDone": "{name}: nicht erledigt (von Hand markiert; laut Erfassung erledigt)",
+    "doneFromCapture": "{name}: erledigt, laut Erfassung ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "nicht erledigt",
+    "nothingWorn": "nichts angelegt",
+    "otherSet": "anderes Set",
+    "otherMainStat": "anderes Hauptattribut",
+    "levelOf": "+{level} von +{max}",
+    "farmingByHand": "{name}: wird gefarmt (von Hand markiert)",
+    "setDone": "{name}: erledigt, alle Plätze",
+    "setFarming": "{name}: wird gefarmt",
+    "autoRule": "Ein Platz hakt sich selbst ab, wenn die Erfassung dort ein voll aufgewertetes Teil (+20 bei 5★) eines gewählten Sets mit gewähltem Hauptattribut zeigt; der fünfte Platz darf ein beliebiges Set sein, wenn die anderen vier gewählte Sets sind",
+    "sets": "Sets",
+    "worn": "{n} angelegt",
+    "remove": "{name} entfernen",
+    "addSet": "Set",
+    "close": "Schließen",
+    "slots": "Plätze",
+    "mainStat": "Hauptattribut {slot}",
+    "searchSets": "Sets suchen",
+    "setList": "Artefaktsets"
+  },
+  "cost": {
+    "saves": "{name} spart {mora}",
+    "nothing": "Nichts auszugeben",
+    "colours": "Farben"
+  },
+  "common": {
+    "search": "Suchen",
+    "cancel": "Abbrechen",
+    "nameState": "{name}: {state}",
+    "counted": "Gezählt",
+    "notCounted": "Nicht gezählt",
+    "removeName": "{name} entfernen",
+    "clear": "Leeren",
+    "remove": "Entfernen",
+    "save": "Speichern",
+    "noMatches": "Keine Treffer",
+    "delete": "Löschen",
+    "undo": "Rückgängig"
+  },
+  "custom": {
+    "slot": {
+      "book": "Talentbuch",
+      "common": "Gegner-Drop",
+      "boss": "Boss-Drop",
+      "local": "Besonderheit",
+      "weekly": "Wochenboss"
+    },
+    "name": "Name",
+    "rarity": "Seltenheit",
+    "weaponType": "Waffentyp",
+    "element": "Element"
+  },
+  "done": {
+    "taken": "Aus dem Inventar genommen",
+    "uses": "Verbraucht",
+    "notInBag": "Nicht im Inventar",
+    "takesWhatThereIs": "Erledigt nimmt, was da ist.",
+    "confirm": "Erledigt"
+  },
+  "extra": {
+    "title": "Extra",
+    "add": "Gegenstand hinzufügen",
+    "have": "{n} vorhanden",
+    "craft": "{n} herstellen"
+  },
+  "avatars": {
+    "favorite": "{name} (Favorit)",
+    "title": "{name} · Tippen: öffnen · Halten oder Rechtsklick: pausieren",
+    "moreTitle": "{rest} · alle zeigen",
+    "moreLabel": "{n} weitere: {rest}. Alle zeigen",
+    "fewerTitle": "Weniger zeigen",
+    "fewer": "Weniger"
+  },
+  "card": {
+    "level": "Stufe",
+    "talents": "Talente",
+    "levelTitle": "Stufe {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "Angriff / Fähigkeit / Spezial",
+    "boosted": "auf {talents} gestuft (C{constellation} gibt +3)",
+    "weaponTitle": "{name}: Stufe {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "jetzt mit dem Inventar machbar",
+    "readyStep": "der nächste Schritt ist jetzt mit dem Inventar machbar",
+    "constellation": "Sternbild {n}",
+    "refinement": "Verfeinerung {n}",
+    "artifactsTitle": "Artefakte: {done}/5 Plätze",
+    "expSuffix": "{name} (EP)",
+    "amount": "{name}: {n}",
+    "short": "{n} fehlen",
+    "shortAfter": "{n} fehlen nach den Zielen darüber",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "genug nach den Zielen darüber",
+    "handleLabel": "{name}: Platz {rank}, mit den Pfeiltasten verschieben",
+    "handleTitle": "#{rank} · ziehen oder Pfeiltasten",
+    "customTitle": "Eigene Figur: noch nicht in den Spieldaten",
+    "custom": "Eigene",
+    "favoriteLabel": "{name}: Favorit",
+    "favorite": "Favorit",
+    "notFavorite": "Kein Favorit",
+    "setByHand": "Von Hand gesetzt",
+    "needsAr": "Braucht AS {ar}",
+    "doneLabel": "{name}: {label} erledigt",
+    "doneReadyLabel": "{name}: {label} erledigt ({ready})",
+    "missing": "{name}: fehlt",
+    "canDoNow": "Jetzt machbar: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Angriff",
+      "skill": "Fähigkeit",
+      "burst": "Spezial"
+    },
+    "notOwned": "Nicht im Besitz",
+    "estimateResin": "~{resin} Harz",
+    "estimateTitle": "{runs} Läufe · {resin} Harz ({condensed} angereichert) · {days} Tage",
+    "estimateWeekly": "Wochenbosse: {weeks} Wochen",
+    "countedLabel": "{name}: gezählt",
+    "notCountedLabel": "{name}: nicht gezählt",
+    "presets": "Vorlagen",
+    "constellationTitle": "Sternbild (C3/C5 erhöhen ein Talent um 3)",
+    "constellation": "Sternbild",
+    "hideNote": "Notiz ausblenden",
+    "note": "Notiz",
+    "part": "Zielteil",
+    "now": "Jetzt",
+    "goal": "Ziel",
+    "levelNow": "Stufe jetzt",
+    "levelGoal": "Zielstufe",
+    "boost": "C{at} erhöht es um 3",
+    "boostOn": "C{at} erhöht es um 3: im Spiel {from} → {to}",
+    "talentNow": "{talent} jetzt",
+    "talentGoal": "{talent} Ziel",
+    "inGame": "Im Spiel {from} → {to}",
+    "customCharacter": "Eigene Figur",
+    "replaceWithEllipsis": "Ersetzen durch …",
+    "replaceWith": "Durch {name} ersetzen",
+    "replace": "Ersetzen",
+    "gapNeed": "{talents} nötig",
+    "setLevel": "{level} setzen",
+    "captureTitle": "Die neueste Erfassung",
+    "capture": "Erfassung: {text}",
+    "resetTitle": "Zurück zur Erfassung",
+    "reset": "Zurücksetzen",
+    "cost": "Kosten"
+  },
+  "picker": {
+    "characters": "Figuren",
+    "weapons": "Waffen",
+    "items": "Gegenstände",
+    "title": "Ziel hinzufügen",
+    "kind": "Art",
+    "searchItems": "Gegenstände suchen",
+    "preset": "Vorlage",
+    "add": "Hinzufügen",
+    "addCount": "{n} hinzufügen"
+  },
+  "toolbar": {
+    "label": "Ziele filtern",
+    "searchTitle": "Name, Waffe oder Notiz",
+    "sort": "Sortieren",
+    "chips": "Jetzt aufwerten, Wochenbosse, Status, Element und Seltenheit",
+    "upgrade": "Jetzt aufwerten",
+    "upgradeTitle": "Gezählte Ziele, die jetzt mit dem Inventar steigen können, jedes für sich: Bereit, Allein bereit oder ein Teil (Stufe, Talente, eine Waffe) bzw. dessen nächster Schritt",
+    "noWeeklyTitle": "Noch zu farmen, aber ohne Wochenboss: dessen Drops sind vorhanden oder umwandelbar (nach den Zielen darüber)",
+    "status": {
+      "all": "Alle",
+      "ready": "Vorrätig",
+      "readyTitle": "Genug im Inventar, jedes Ziel für sich",
+      "activeTitle": "In den Summen",
+      "off": "Pausiert",
+      "offTitle": "Nicht in den Summen"
+    }
+  },
+  "item": {
+    "count": "Anzahl",
+    "have": "Vorhanden",
+    "editHave": "{n} vorhanden: bearbeiten"
+  },
+  "popover": {
+    "goalsLabel": "{name}: Ziele, die es nutzen ({n})",
+    "goalsTitle": "Ziele, die es nutzen",
+    "history": "{name}: Verlauf",
+    "expNeed": "EP-Bedarf {n}",
+    "goal": "Ziel {n}",
+    "missing": "{n} fehlen",
+    "enough": "Genug",
+    "need": "{n} nötig",
+    "craftedTitle": "Aus der Stufe darunter hergestellt",
+    "craft": "{n} herstellen",
+    "capture": "Erfassung {n}",
+    "backLabel": "{name}: zurück auf {n} aus der Erfassung",
+    "backTitle": "Zurück auf {n}",
+    "held": "{name} vorhanden",
+    "addPlaceholder": "+ hinzufügen",
+    "addLabel": "{name}: Erhaltenes hinzufügen",
+    "addTitle": "Hinzufügen, was du bekommen hast (Enter)",
+    "swap": {
+      "label": "Tausch mit Traumlösungsmittel",
+      "heading": "Tauschen",
+      "title": "Alchimie → Umwandlung: eines der anderen Materialien des Bosses hierfür, je {n} Traumlösungsmittel",
+      "solventHeld": "{name} vorhanden: {n}",
+      "have": "{n} vorhanden",
+      "do": "Tauschen",
+      "noneHeld": "Kein {name} vorhanden",
+      "noSolvent": "Braucht {n} Traumlösungsmittel pro Tausch"
+    }
+  },
+  "levelGrid": {
+    "below": "Unter der Erfassung",
+    "level": "Stufe {level} (A{ascension})",
+    "ascended": "Stufe {level}, aufgestiegen (A{ascension})",
+    "ascendedWord": "aufgestiegen"
+  },
+  "cell": {
+    "have": "{n} vorhanden",
+    "spent": "Zum Herstellen genutzt: {n}",
+    "converted": "Aus anderen umgewandelt: {n}",
+    "convertedAway": "In andere umgewandelt: {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} Ziel, jeweils nach den gezählten Zielen darüber | {name}: {n} Ziele, jeweils nach den gezählten Zielen darüber",
+    "clear": "{name} entfernen"
+  },
+  "materialPicker": {
+    "material": "Material",
+    "selected": "Material: {name}",
+    "title": "Ziele, die ein Material nutzen",
+    "search": "Materialien suchen",
+    "any": "Alle",
+    "goals": "{n} Ziel | {n} Ziele"
+  },
+  "stepper": {
+    "down": "{label}: runter",
+    "up": "{label}: hoch"
+  },
+  "settings": {
+    "title": "Planer-Einstellungen",
+    "autoWl": "Auto ({wl})",
+    "ar": "AS",
+    "arTitle": "Abenteuerstufe (1–60)",
+    "arTitleIrminsul": "Abenteuerstufe (1–60) · {ar} aus irminsul",
+    "fromIrminsul": "aus irminsul",
+    "wl": "WS",
+    "wlTitle": "Weltstufe (0–9)",
+    "wlTitleIrminsul": "Weltstufe (0–9) · {wl} aus irminsul",
+    "wlLabel": "Weltstufe",
+    "refreshesTitle": "Auffüllungen von Ursprünglichem Harz pro Tag (je {per} Harz): Tage zählen 180 + {per} pro Auffüllung",
+    "refreshes": "Auffüllungen",
+    "refreshesLabel": "Harz-Auffüllungen pro Tag",
+    "stepsTitle": "Bis zu vier Beträge, z. B. -40 +60: der Harz-Tracker addiert sie (minus Ausgaben)",
+    "steps": "Harz-Knöpfe",
+    "azothTitle": "Fehlende Edelsteine mit übrigen Edelsteinen eines anderen Elements decken",
+    "azoth": "Staub von Azoth",
+    "passivesTitle": "Shougun Raiden, Wanderer: −50 % Mora beim Waffenaufstieg",
+    "passives": "Mora-Passive",
+    "craftingTitle": "Checkliste der Farm-Ansicht: was umzuwandeln, herzustellen und zu schmieden ist",
+    "crafting": "Herstell-Checkliste"
+  },
+  "roster": {
+    "search": "Figuren suchen",
+    "multi": "Figuren (mehrere wählen)",
+    "owned": "{name} · St. {level}",
+    "notOwned": "{name} · nicht im Besitz",
+    "weaponOwned": "{name} · St. {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "Das Exemplar in der Erfassung",
+    "noCopy": "Kein Exemplar in der Erfassung",
+    "heldBy": "Getragen von {name}",
+    "refinementNow": "{name} Verfeinerung jetzt",
+    "levelNow": "{name} Stufe jetzt",
+    "refinementGoal": "{name} Ziel-Verfeinerung",
+    "levelGoal": "{name} Zielstufe",
+    "search": "Waffen suchen"
+  },
+  "seelieImport": {
+    "notExport": "Kein Seelie-Export und kein paimon.moe-Backup",
+    "notJson": "Keine JSON-Datei",
+    "section": {
+      "goals": {
+        "label": "Ziele",
+        "title": "Figuren-, Talent- und Waffenziele, zusätzlicher Gegenstandsbedarf"
+      },
+      "artifacts": {
+        "label": "Artefaktziele",
+        "title": "Zu farmende Sets und Hauptattribute"
+      },
+      "customs": {
+        "label": "Eigene Figuren",
+        "title": "Figuren, die Seelie als eigene führt, mit Zielen"
+      },
+      "current": {
+        "label": "Aktuelle Stufen",
+        "title": "Seelies aktuelle Stufen, Talente und Sternbilder, wo sie vor der Erfassung liegen"
+      },
+      "inventory": {
+        "label": "Inventar",
+        "title": "Anzahlen als Handänderungen an der neuesten Erfassung (eine neuere Erfassung ersetzt sie)"
+      },
+      "tasks": {
+        "label": "Aufgaben",
+        "title": "Eigene Aufgaben und in Seelie erledigte dauerhafte"
+      },
+      "resin": {
+        "label": "Harz",
+        "title": "Seelies Harz-Tracker, wenn neuer als unserer"
+      },
+      "settings": {
+        "label": "Einstellungen",
+        "title": "AS, Weltstufe, Server und Reisender"
+      }
+    },
+    "count": {
+      "new": "{n} neu",
+      "changed": "{n} geändert",
+      "same": "{n} gleich"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "Ändern",
+    "choose": "Datei wählen",
+    "fileLabel": "Seelie-Export oder paimon.moe-Backup",
+    "legend": "Was importieren",
+    "skipped": "{n} übersprungen",
+    "clampedTitle": "Ziele über Stufe 90 wurden auf 90 gesetzt",
+    "clamped": "Auf 90 begrenzt: {n}",
+    "replace": "Ersetzen ({n} entfernen)",
+    "exportTitle": "Eine Seelie-Kontodatei: Ziele, Inventar, Aufgaben (Seelie → Settings → Import Account)",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Konto in der Datei",
+    "account": "Konto {n}",
+    "paimonLevels": "nur Stufen",
+    "paimonLevelsTitle": "paimon.moe speichert Stufen und Materialien eines To-dos, nicht seine Talentstufen: Talente bleiben, wie sie sind"
+  },
+  "taskEditor": {
+    "everyDay": "Jeden Tag",
+    "everyDays": "Alle {n} Tage",
+    "today": "Heute ({day})",
+    "tomorrow": "Morgen ({day})",
+    "startDay": "Starttag",
+    "startDayTitle": "Behält den Rhythmus ab dem Starttag",
+    "doneDay": "Erledigt-Tag",
+    "doneDayTitle": "Zählt ab dem Tag, an dem es erledigt wurde",
+    "task": "Aufgabe",
+    "newTask": "Neue Aufgabe",
+    "nameIt": "Benennen",
+    "repeats": "Wiederholt",
+    "next": "Nächste",
+    "starts": "Beginnt",
+    "countsFrom": "Zählt ab"
+  },
+  "tasks": {
+    "title": "Aufgaben",
+    "permanent": "Dauerhaft",
+    "ready": "Bereit",
+    "readyTitle": "Bereit zur Nutzung",
+    "resets": "Reset {time}",
+    "snoozedBack": "Verschoben · zurück {time}",
+    "doneBack": "Erledigt · zurück {time}",
+    "everyDay": "jeden Tag",
+    "everyDays": "alle {n} Tage",
+    "fromDone": "ab dem Erledigt-Tag",
+    "fromStart": "ab dem Starttag",
+    "dueTitle": "Fällig {date} · {every}, {from}",
+    "overdue": "Überfällig",
+    "late": "{n} T. zu spät",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "doneToast": "{name} erledigt",
+    "backToast": "{name}: zurück {day}",
+    "deleted": "{name} gelöscht",
+    "toDo": "{n} offen",
+    "toDoSr": "offen",
+    "shown": "Angezeigte Aufgaben",
+    "hideDone": "Erledigte ausblenden",
+    "showDone": "Erledigte zeigen ({n})",
+    "permanentShown": "Angezeigte dauerhafte Aufgaben",
+    "add": "Aufgabe hinzufügen",
+    "noCustom": "Keine eigenen Aufgaben",
+    "allDone": "Alles erledigt",
+    "move": "{name} verschieben",
+    "dragTitle": "Ziehen oder Pfeiltasten",
+    "doneLabel": "Erledigt: {name}",
+    "notDoneLabel": "Nicht erledigt: {name}",
+    "takeBack": "Zurücknehmen",
+    "snoozeName": "{name} verschieben",
+    "snooze": "Verschieben",
+    "lastDay": "Letzter Tag",
+    "permanentTasks": "Dauerhafte Aufgaben",
+    "events": "Aktionen",
+    "startsIn": "in {time}",
+    "eventStarts": "Beginnt {time}",
+    "eventEnds": "Endet {time}",
+    "noEnd": "Kein Enddatum",
+    "tags": {
+      "daily": "Täglich",
+      "checkin": "Check-in",
+      "exploration": "Welterkundung",
+      "quest": "Auftrag"
+    },
+    "capture": {
+      "from": "Aus der Erfassung vom {time}",
+      "commissions": "{n} von {total} erledigt",
+      "abyss": "{stars} von {max} Sternen",
+      "expeditions": "{n} von {total} zurück",
+      "nobodyOut": "Niemand unterwegs",
+      "realm": "{value} von {limit} im Krug",
+      "welkin": "Noch {n} Tage"
+    }
+  },
+  "view": {
+    "title": "Planer",
+    "accountFallback": "Genshin-Konto",
+    "farm": "Farmen",
+    "goals": "Ziele",
+    "presetApplied": "{preset}: {n} Ziele",
+    "bulkCounted": "{n} gezählt",
+    "bulkPaused": "{n} pausiert",
+    "goalsRemoved": "{n} Ziele entfernt",
+    "paused": "{name} pausiert",
+    "partDone": "{name}: {label} erledigt",
+    "craftStepDone": "Herstellschritt erledigt",
+    "craftStepsDone": "{n} Herstellschritte erledigt",
+    "craftingHidden": "Herstellen ausgeblendet",
+    "craftingHiddenHint": "Planer-Einstellungen: Herstell-Checkliste",
+    "itemRemoved": "Gegenstand entfernt",
+    "removed": "{name} entfernt",
+    "added": "{n} Ziele hinzugefügt",
+    "notImported": "Nicht importiert",
+    "importedGoals": "{n} Ziele",
+    "importedCurrent": "{n} aktuell",
+    "importedItems": "{n} Gegenstände",
+    "importedTasks": "{n} Aufgaben",
+    "imported": "Aus Seelie importiert",
+    "notExported": "Nicht exportiert",
+    "exported": "Für Seelie exportiert",
+    "view": "Ansicht",
+    "newest": "Neueste Erfassung",
+    "noCapture": "Keine Erfassung: die Anzahlen sind deine",
+    "import": "Importieren",
+    "replaced": "{n} Handänderung durch die Erfassung ersetzt | {n} Handänderungen durch die Erfassung ersetzt",
+    "ok": "OK",
+    "seelieTitle": "Aus Seelie oder paimon.moe importieren, nach Seelie exportieren",
+    "addGoals": "Ziele hinzufügen",
+    "loadError": "Planer konnte nicht geladen werden",
+    "noGoals": "Keine Ziele",
+    "importSeelie": "Aus Seelie oder paimon.moe importieren",
+    "importCapture": "Erfassung importieren",
+    "readiness": "Bereitschaft",
+    "selectTitle": "Ziele wählen, um sie gemeinsam zu ändern",
+    "select": "Auswählen",
+    "selected": "Ausgewählte Ziele",
+    "selectedCount": "{n} ausgewählt",
+    "selectedSr": "ausgewählt",
+    "pickNone": "Keine",
+    "pickAll": "Alle",
+    "applyPreset": "Vorlage anwenden",
+    "pause": "Pausieren",
+    "count": "Zählen",
+    "doneSelecting": "Auswahl beenden",
+    "done": "Erledigt",
+    "doneGoals": "Erledigte Ziele",
+    "loading": "Planer wird geladen"
+  }
+}

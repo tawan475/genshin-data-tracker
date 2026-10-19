@@ -1,0 +1,108 @@
+{
+  "heading": "가져오기 기록",
+  "loadFailed": "불러오기 실패",
+  "noneInRange": "범위 내 스냅샷 없음",
+  "clear": "지우기",
+  "noSnapshots": "아직 스냅샷이 없습니다",
+  "import": "가져오기",
+  "unchangedUntil": "{time}까지 변화 없음",
+  "downloadFailed": "스냅샷을 다운로드하지 못했습니다",
+  "saved": "{name} 저장됨",
+  "files": "파일 {n}개",
+  "gone": "{n}개 없음",
+  "exportFailed": "내보내기 실패",
+  "deletedOf": "스냅샷 {total}개 중 {deleted}개 삭제됨",
+  "deleteFailed": "스냅샷을 삭제하지 못했습니다",
+  "deleteFailedMany": "스냅샷을 삭제하지 못했습니다",
+  "deleted": "스냅샷 {n}개를 삭제했습니다",
+  "column": {
+    "id": "ID",
+    "date": "날짜",
+    "source": "출처",
+    "rawSize": "원본 크기",
+    "storedSize": "저장 크기",
+    "actions": "작업"
+  },
+  "select": {
+    "page": "이 페이지 선택",
+    "snapshot": "스냅샷 {id} 선택",
+    "shiftClick": "Shift+클릭으로 범위 선택",
+    "pageSelected": "이 페이지의 {n}개가 모두 선택되었습니다.",
+    "all": "{n}개 모두 선택",
+    "allInRange": "범위 내 {n}개 모두 선택",
+    "viewSelected": "스냅샷 {n}개가 모두 선택되었습니다.",
+    "rangeSelected": "범위 내 스냅샷 {n}개가 모두 선택되었습니다.",
+    "clear": "선택 해제",
+    "allLabel": "전체"
+  },
+  "confirm": {
+    "title": "정말 삭제할까요?",
+    "one": "이 스냅샷을 삭제합니다. 되돌릴 수 없습니다.",
+    "oneConfirm": "네, 삭제합니다",
+    "many": "스냅샷 {n}개를 삭제합니다. 되돌릴 수 없습니다.",
+    "purge": "이 사용자의 스냅샷 {n}개를 휴지통을 거치지 않고 지금 삭제합니다. 되돌릴 수 없습니다.",
+    "manyConfirm": "네, 모두 삭제합니다",
+    "massTitle": "대량 삭제 경고",
+    "massText": "모든 페이지의 스냅샷을 전부 선택했습니다. 모두 지우려면 \"DELETE\"를 입력하세요.",
+    "massConfirm": "이해했습니다, 모두 삭제",
+    "typePlaceholder": "확인하려면 \"{word}\" 입력",
+    "typeLabel": "확인하려면 {word} 입력",
+    "typeError": "\"{word}\"를 입력하세요",
+    "cancel": "취소"
+  },
+  "figure": {
+    "noCurrency": "이 스냅샷에는 화폐가 없습니다",
+    "vs": "#{id} 대비 · {time}"
+  },
+  "range": {
+    "label": "날짜로 필터",
+    "from": "시작",
+    "to": "끝",
+    "selectTitle": "범위 내 스냅샷 {n}개 선택",
+    "select": "{n}개 선택",
+    "clear": "날짜 지우기"
+  },
+  "row": {
+    "downloadGood": "GOOD 다운로드",
+    "download": "스냅샷 {id} 다운로드",
+    "delete": "스냅샷 삭제",
+    "deleteId": "스냅샷 {id} 삭제"
+  },
+  "bar": {
+    "saving": "저장 중…",
+    "downloadingOf": "다운로드 중 {done} / {total}",
+    "downloading": "다운로드 중 {done}",
+    "zipping": "압축 중 {done} / {total}",
+    "selected": "{n}개 선택됨",
+    "outOf": " / 전체 {n}개",
+    "hiddenTitle": "선택한 스냅샷 {n}개가 날짜 범위 밖에 있습니다",
+    "hidden": "· {n}개 숨김",
+    "cancel": "취소",
+    "blocked": "다른 내보내기가 진행 중입니다",
+    "downloadTitle": "GOOD 파일 zip 다운로드",
+    "download": "다운로드",
+    "delete": "삭제"
+  },
+  "card": {
+    "stored": "저장"
+  },
+  "storage": {
+    "title": "저장 공간",
+    "snapshots": "스냅샷",
+    "raw": "원본 데이터",
+    "stored": "저장",
+    "saved": "절약"
+  },
+  "pagination": {
+    "perPage": "페이지당",
+    "previous": "이전",
+    "next": "다음",
+    "page": "{page} / {pages} 페이지",
+    "total": "(총 {n}개)",
+    "goTo": "이동할 페이지",
+    "go": "이동"
+  },
+  "table": {
+    "noData": "데이터가 없습니다."
+  }
+}

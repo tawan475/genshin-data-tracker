@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "ชื่อ",
+      "title": "ก ถึง ฮ / A ถึง Z"
+    },
+    "missing": {
+      "label": "ยังขาด",
+      "title": "ขาดไอเทมน้อยที่สุดก่อน"
+    },
+    "favorites": {
+      "label": "รายการโปรด",
+      "title": "รายการโปรดก่อน"
+    },
+    "priority": {
+      "label": "ลำดับความสำคัญ",
+      "title": "วัสดุจะไปยังเป้าหมายด้านบนก่อน: ลากเพื่อจัดลำดับ"
+    }
+  },
+  "material": {
+    "characterExp": "Character EXP",
+    "weaponExp": "EXP อาวุธ",
+    "group": {
+      "exp": "EXP",
+      "gem": "อัญมณี",
+      "boss": "ดรอปจากบอส",
+      "local": "ของพิเศษท้องถิ่น",
+      "common": "ดรอปจากศัตรู",
+      "book": "หนังสือพรสวรรค์",
+      "weekly": "บอสประจำสัปดาห์",
+      "weapon": "วัสดุอาวุธ",
+      "elite": "ดรอประดับสูง",
+      "other": "อื่น ๆ"
+    }
+  },
+  "hint": {
+    "level": "Lv {level}",
+    "talents": "พรสวรรค์ {talents}",
+    "characterDetail": "{name}: Lv {level} (A{ascension}), พรสวรรค์ {talents}",
+    "weaponDetail": "{name}: Lv {level} (A{ascension})",
+    "thenAr": "จากนั้นต้อง AR {ar}",
+    "thenShort": "จากนั้นวัสดุไม่พอ",
+    "weapon": "อาวุธ",
+    "canLevel": "เพิ่มเลเวลได้ตอนนี้"
+  },
+  "preset": {
+    "max": {
+      "label": "สูงสุด",
+      "title": "เลเวล 90 พรสวรรค์ 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "เลเวล 90 พรสวรรค์ 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "เลเวล 80 พรสวรรค์ 8/8/8"
+    },
+    "talents": {
+      "label": "เฉพาะพรสวรรค์",
+      "title": "พรสวรรค์ 9/9/9 เลเวลคงเดิม"
+    },
+    "level": {
+      "label": "เฉพาะเลเวล",
+      "title": "เลเวล 90 พรสวรรค์คงเดิม"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "คำขอประจำวัน",
+      "weeklyBosses": "Trounce Domain",
+      "battlePass": "Battle Pass รายสัปดาห์",
+      "reputation": "ชื่อเสียง",
+      "abyss": "Spiral Abyss",
+      "theater": "โรงละครในจินตนาการ",
+      "bargains": "ร้านค้า Paimon",
+      "transformer": "Parametric Transformer",
+      "expeditions": "ออกสำรวจ",
+      "realm": "Realm Currency",
+      "welkin": "พรแห่งดวงจันทร์"
+    }
+  },
+  "toast": {
+    "notSaved": "บันทึกไม่สำเร็จ",
+    "newCapture": "มีการสแกนใหม่",
+    "newCaptureDetail": "ไม่มีการเปลี่ยนแปลง: ตรวจสอบแล้วลองอีกครั้ง"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "ไม่รวมกิจกรรม {n} รายการ",
+      "olderThanOurs": "เก่ากว่าของเรา",
+      "ar": "AR {ar}",
+      "wl": "WL {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "อเมริกา",
+      "EUROPE": "ยุโรป",
+      "ASIA": "เอเชีย",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "ไม่ใช่ไฟล์ส่งออกของ Seelie (ไม่มีเป้าหมาย)",
+    "customName": "กำหนดเอง"
+  },
+  "resin": {
+    "alertTitle": "Original Resin {amount}",
+    "source": {
+      "manual": "ตั้งเอง",
+      "player": "irminsul ตอนล็อกอิน",
+      "inventory": "สแนปช็อต"
+    },
+    "unknown": "Original Resin: ยังไม่ทราบ · ตั้งค่า",
+    "readingTitle": "Original Resin ~{now}/{max} · {value} จาก {source}, {at} · +1 ทุก 8 นาที",
+    "setLabel": "{title} ตั้งค่า",
+    "spend": "ใช้ {n}",
+    "add": "เพิ่ม {n}",
+    "fullAt": "เต็มเมื่อ {time}",
+    "fullLabel": "เต็ม",
+    "full": "เต็ม",
+    "markTitle": "{amount} เมื่อ {time}",
+    "in": "ในอีก",
+    "now": "Original Resin ตอนนี้",
+    "alert": "แจ้งเตือน Resin",
+    "alertUnsupported": "แจ้งเตือน Resin: เบราว์เซอร์นี้ไม่รองรับ",
+    "alertOff": "แจ้งเตือน Resin: ปิด",
+    "alertOn": "แจ้งเตือน Resin ที่ {amount} · ขณะเปิดเว็บไซต์อยู่",
+    "alertOnAt": "แจ้งเตือน Resin ที่ {amount}, {time} · ขณะเปิดเว็บไซต์อยู่",
+    "unsupported": "เบราว์เซอร์นี้ไม่รองรับ",
+    "blocked": "ถูกบล็อก: อนุญาตการแจ้งเตือนสำหรับเว็บไซต์นี้ในการตั้งค่าเบราว์เซอร์",
+    "notifyAt": "แจ้งเตือนที่",
+    "off": "ปิด",
+    "whileOpen": "ขณะเปิดเว็บไซต์อยู่บนอุปกรณ์นี้"
+  },
+  "artifacts": {
+    "title": "อาร์ติแฟกต์",
+    "doneByHand": "{name}: เสร็จแล้ว (ติ๊กเอง)",
+    "notDoneByHand": "{name}: ยังไม่เสร็จ (ติ๊กเอง)",
+    "notDoneByHandCaptureDone": "{name}: ยังไม่เสร็จ (ติ๊กเอง แต่การสแกนบอกว่าเสร็จแล้ว)",
+    "doneFromCapture": "{name}: เสร็จแล้ว จากการสแกน ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "ยังไม่เสร็จ",
+    "nothingWorn": "ไม่ได้สวม",
+    "otherSet": "เซ็ตอื่น",
+    "otherMainStat": "ค่าสถานะหลักอื่น",
+    "levelOf": "+{level} จาก +{max}",
+    "farmingByHand": "{name}: กำลังฟาร์ม (ติ๊กเอง)",
+    "setDone": "{name}: เสร็จแล้ว ครบทุกช่อง",
+    "setFarming": "{name}: กำลังฟาร์ม",
+    "autoRule": "ช่องจะติ๊กเองเมื่อการสแกนพบชิ้นที่เลเวลสูงสุด (+20 สำหรับ 5★) ในช่องนั้น เป็นเซ็ตที่เลือกและมีค่าสถานะหลักที่เลือก ช่องที่ห้าเป็นเซ็ตใดก็ได้เมื่ออีกสี่ช่องเป็นเซ็ตที่เลือกแล้ว",
+    "sets": "เซ็ต",
+    "worn": "สวมอยู่ {n}",
+    "remove": "นำ {name} ออก",
+    "addSet": "เซ็ต",
+    "close": "ปิด",
+    "slots": "ช่อง",
+    "mainStat": "ค่าสถานะหลักของ {slot}",
+    "searchSets": "ค้นหาเซ็ต",
+    "setList": "เซ็ตอาร์ติแฟกต์"
+  },
+  "cost": {
+    "saves": "{name} ประหยัด {mora}",
+    "nothing": "ไม่มีอะไรต้องใช้",
+    "colours": "สี"
+  },
+  "common": {
+    "search": "ค้นหา",
+    "cancel": "ยกเลิก",
+    "nameState": "{name}: {state}",
+    "counted": "นับรวม",
+    "notCounted": "ไม่นับรวม",
+    "removeName": "นำ {name} ออก",
+    "clear": "ล้าง",
+    "remove": "นำออก",
+    "save": "บันทึก",
+    "noMatches": "ไม่พบรายการที่ตรงกัน",
+    "delete": "ลบ",
+    "undo": "เลิกทำ"
+  },
+  "custom": {
+    "slot": {
+      "book": "หนังสือพรสวรรค์",
+      "common": "ดรอปจากศัตรู",
+      "boss": "ดรอปจากบอส",
+      "local": "ของพิเศษ",
+      "weekly": "บอสประจำสัปดาห์"
+    },
+    "name": "ชื่อ",
+    "rarity": "ความหายาก",
+    "weaponType": "ประเภทอาวุธ",
+    "element": "ธาตุ"
+  },
+  "done": {
+    "taken": "นำออกจากช่องเก็บของ",
+    "uses": "ใช้",
+    "notInBag": "ไม่มีในช่องเก็บของ",
+    "takesWhatThereIs": "เสร็จจะใช้เท่าที่มีอยู่",
+    "confirm": "เสร็จ"
+  },
+  "extra": {
+    "title": "เพิ่มเติม",
+    "add": "เพิ่มไอเทม",
+    "have": "มี {n}",
+    "craft": "สรรสร้าง {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (รายการโปรด)",
+    "title": "{name} · แตะ: เปิด · กดค้างหรือคลิกขวา: พัก",
+    "moreTitle": "{rest} · แสดงทั้งหมด",
+    "moreLabel": "อีก {n}: {rest} แสดงทั้งหมด",
+    "fewerTitle": "แสดงน้อยลง",
+    "fewer": "ย่อ"
+  },
+  "card": {
+    "level": "เลเวล",
+    "talents": "พรสวรรค์",
+    "levelTitle": "เลเวล {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "โจมตี / สกิล / ท่าไม้ตาย",
+    "boosted": "เลเวลเป็น {talents} (C{constellation} เพิ่ม +3)",
+    "weaponTitle": "{name}: เลเวล {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "ทำได้ตอนนี้ด้วยของในช่องเก็บของ",
+    "readyStep": "ขั้นถัดไปทำได้ตอนนี้ด้วยของในช่องเก็บของ",
+    "constellation": "กลุ่มดาว {n}",
+    "refinement": "ขัดเกลา {n}",
+    "artifactsTitle": "อาร์ติแฟกต์: {done}/5 ช่อง",
+    "expSuffix": "{name} (EXP)",
+    "amount": "{name}: {n}",
+    "short": "ขาด {n}",
+    "shortAfter": "ขาด {n} หลังจากเป้าหมายด้านบน",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "พอหลังจากเป้าหมายด้านบน",
+    "handleLabel": "{name}: ลำดับที่ {rank} ย้ายด้วยปุ่มลูกศร",
+    "handleTitle": "#{rank} · ลาก หรือใช้ปุ่มลูกศร",
+    "customTitle": "ตัวละครกำหนดเอง: ยังไม่มีในข้อมูลเกม",
+    "custom": "กำหนดเอง",
+    "favoriteLabel": "{name}: รายการโปรด",
+    "favorite": "รายการโปรด",
+    "notFavorite": "ไม่ใช่รายการโปรด",
+    "setByHand": "ตั้งเอง",
+    "needsAr": "ต้อง AR {ar}",
+    "doneLabel": "{name}: {label} เสร็จแล้ว",
+    "doneReadyLabel": "{name}: {label} เสร็จแล้ว ({ready})",
+    "missing": "{name}: ยังขาด",
+    "canDoNow": "ทำได้ตอนนี้: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "โจมตี",
+      "skill": "สกิล",
+      "burst": "ท่าไม้ตาย"
+    },
+    "notOwned": "ยังไม่มี",
+    "estimateResin": "~{resin} Resin",
+    "estimateTitle": "{runs} รอบ · {resin} Resin ({condensed} Condensed) · {days} วัน",
+    "estimateWeekly": "บอสประจำสัปดาห์: {weeks} สัปดาห์",
+    "countedLabel": "{name}: นับรวม",
+    "notCountedLabel": "{name}: ไม่นับรวม",
+    "presets": "พรีเซ็ต",
+    "constellationTitle": "กลุ่มดาว (C3/C5 เพิ่มพรสวรรค์ 3 เลเวล)",
+    "constellation": "กลุ่มดาว",
+    "hideNote": "ซ่อนบันทึก",
+    "note": "บันทึก",
+    "part": "ส่วนของเป้าหมาย",
+    "now": "ตอนนี้",
+    "goal": "เป้าหมาย",
+    "levelNow": "เลเวลตอนนี้",
+    "levelGoal": "เลเวลเป้าหมาย",
+    "boost": "C{at} เพิ่ม 3 เลเวล",
+    "boostOn": "C{at} เพิ่ม 3 เลเวล: ในเกม {from} → {to}",
+    "talentNow": "{talent} ตอนนี้",
+    "talentGoal": "{talent} เป้าหมาย",
+    "inGame": "ในเกม {from} → {to}",
+    "customCharacter": "ตัวละครกำหนดเอง",
+    "replaceWithEllipsis": "แทนที่ด้วย…",
+    "replaceWith": "แทนที่ด้วย {name}",
+    "replace": "แทนที่",
+    "gapNeed": "{talents} ต้องการ",
+    "setLevel": "ตั้งเป็น {level}",
+    "captureTitle": "การสแกนล่าสุด",
+    "capture": "การสแกน: {text}",
+    "resetTitle": "กลับไปเป็นค่าจากการสแกน",
+    "reset": "รีเซ็ต",
+    "cost": "ค่าใช้จ่าย"
+  },
+  "picker": {
+    "characters": "ตัวละคร",
+    "weapons": "อาวุธ",
+    "items": "ไอเทม",
+    "title": "เพิ่มเป้าหมาย",
+    "kind": "ประเภท",
+    "searchItems": "ค้นหาไอเทม",
+    "preset": "พรีเซ็ต",
+    "add": "เพิ่ม",
+    "addCount": "เพิ่ม {n}"
+  },
+  "toolbar": {
+    "label": "กรองเป้าหมาย",
+    "searchTitle": "ชื่อ อาวุธ หรือบันทึก",
+    "sort": "เรียง",
+    "chips": "อัปเกรดได้ตอนนี้ บอสประจำสัปดาห์ สถานะ ธาตุ และความหายาก",
+    "upgrade": "อัปเกรดได้ตอนนี้",
+    "upgradeTitle": "เป้าหมายที่นับรวมซึ่งเพิ่มเลเวลได้ตอนนี้ด้วยของในช่องเก็บของ แยกทีละเป้าหมาย: พร้อม, พร้อมเฉพาะตัว หรือบางส่วน (เลเวล พรสวรรค์ อาวุธ) หรือขั้นถัดไป",
+    "noWeeklyTitle": "ยังต้องฟาร์ม แต่ไม่ต้องใช้บอสประจำสัปดาห์: ดรอปของบอสมีอยู่แล้วหรือแปลงได้ (หลังจากเป้าหมายด้านบน)",
+    "status": {
+      "all": "ทั้งหมด",
+      "ready": "มีของพอ",
+      "readyTitle": "ของในช่องเก็บของพอ แยกทีละเป้าหมาย",
+      "activeTitle": "อยู่ในยอดรวม",
+      "off": "พักไว้",
+      "offTitle": "ไม่รวมในยอดรวม"
+    }
+  },
+  "item": {
+    "count": "จำนวน",
+    "have": "มี",
+    "editHave": "มี {n}: แก้ไข"
+  },
+  "popover": {
+    "goalsLabel": "{name}: เป้าหมายที่ใช้ ({n})",
+    "goalsTitle": "เป้าหมายที่ใช้",
+    "history": "{name}: ประวัติ",
+    "expNeed": "ต้องการ EXP {n}",
+    "goal": "เป้าหมาย {n}",
+    "missing": "ขาด {n}",
+    "enough": "พอแล้ว",
+    "need": "ต้องการ {n}",
+    "craftedTitle": "สรรสร้างจากขั้นที่ต่ำกว่า",
+    "craft": "สรรสร้าง {n}",
+    "capture": "การสแกน {n}",
+    "backLabel": "{name}: กลับไปเป็น {n} จากการสแกน",
+    "backTitle": "กลับไปเป็น {n}",
+    "held": "{name} ที่มีอยู่",
+    "addPlaceholder": "+ เพิ่ม",
+    "addLabel": "{name}: เพิ่มที่ได้รับ",
+    "addTitle": "เพิ่มสิ่งที่ได้รับ (Enter)",
+    "swap": {
+      "label": "แลกด้วย Dream Solvent",
+      "heading": "แลก",
+      "title": "เล่นแร่แปรธาตุ → แปลง: ใช้วัสดุอื่นของบอสตัวเดียวกันแลกเป็นชิ้นนี้ ครั้งละ {n} Dream Solvent",
+      "solventHeld": "{name} ที่มีอยู่: {n}",
+      "have": "มี {n}",
+      "do": "แลก",
+      "noneHeld": "ไม่มี {name}",
+      "noSolvent": "ต้องใช้ {n} Dream Solvent ต่อการแลกหนึ่งครั้ง"
+    }
+  },
+  "levelGrid": {
+    "below": "ต่ำกว่าการสแกน",
+    "level": "เลเวล {level} (A{ascension})",
+    "ascended": "เลเวล {level} เลื่อนขั้นแล้ว (A{ascension})",
+    "ascendedWord": "เลื่อนขั้นแล้ว"
+  },
+  "cell": {
+    "have": "มี {n}",
+    "spent": "ใช้สรรสร้าง {n}",
+    "converted": "แปลงมาจากชิ้นอื่น {n}",
+    "convertedAway": "แปลงเป็นชิ้นอื่น {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} เป้าหมาย แต่ละเป้าหมายนับหลังจากเป้าหมายที่นับรวมด้านบน",
+    "clear": "ล้าง {name}"
+  },
+  "materialPicker": {
+    "material": "วัสดุ",
+    "selected": "วัสดุ: {name}",
+    "title": "เป้าหมายที่ใช้วัสดุ",
+    "search": "ค้นหาวัสดุ",
+    "any": "ใดก็ได้",
+    "goals": "{n} เป้าหมาย"
+  },
+  "stepper": {
+    "down": "{label}: ลด",
+    "up": "{label}: เพิ่ม"
+  },
+  "settings": {
+    "title": "ตั้งค่าแพลนเนอร์",
+    "autoWl": "อัตโนมัติ ({wl})",
+    "ar": "AR",
+    "arTitle": "แรงก์ผจญภัย (1–60)",
+    "arTitleIrminsul": "แรงก์ผจญภัย (1–60) · {ar} จาก irminsul",
+    "fromIrminsul": "จาก irminsul",
+    "wl": "WL",
+    "wlTitle": "ระดับโลก (0–9)",
+    "wlTitleIrminsul": "ระดับโลก (0–9) · {wl} จาก irminsul",
+    "wlLabel": "ระดับโลก",
+    "refreshesTitle": "จำนวนครั้งที่เติม Original Resin ต่อวัน (ครั้งละ {per} Resin): นับวันละ 180 + {per} ต่อการเติม",
+    "refreshes": "การเติม",
+    "refreshesLabel": "การเติม Resin ต่อวัน",
+    "stepsTitle": "สูงสุดสี่จำนวน เช่น -40 +60: ตัวติดตาม Resin จะบวกเข้าไป (ลบเมื่อใช้)",
+    "steps": "ปุ่ม Resin",
+    "azothTitle": "ใช้อัญมณีธาตุอื่นที่เหลือแทนอัญมณีที่ขาด",
+    "azoth": "Dust of Azoth",
+    "passivesTitle": "Raiden Shogun, Wanderer: −50% Mora สำหรับการเลื่อนขั้นอาวุธ",
+    "passives": "พาสซีฟลด Mora",
+    "craftingTitle": "เช็กลิสต์ในมุมมองฟาร์มว่าต้องแปลง สรรสร้าง และหลอมอะไร",
+    "crafting": "เช็กลิสต์สรรสร้าง"
+  },
+  "roster": {
+    "search": "ค้นหาตัวละคร",
+    "multi": "ตัวละคร (เลือกได้หลายตัว)",
+    "owned": "{name} · Lv {level}",
+    "notOwned": "{name} · ยังไม่มี",
+    "weaponOwned": "{name} · Lv {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "ชิ้นที่อยู่ในการสแกน",
+    "noCopy": "ไม่มีในการสแกน",
+    "heldBy": "{name} ถืออยู่",
+    "refinementNow": "การขัดเกลาของ {name} ตอนนี้",
+    "levelNow": "เลเวลของ {name} ตอนนี้",
+    "refinementGoal": "การขัดเกลาเป้าหมายของ {name}",
+    "levelGoal": "เลเวลเป้าหมายของ {name}",
+    "search": "ค้นหาอาวุธ"
+  },
+  "seelieImport": {
+    "notExport": "ไม่ใช่ไฟล์ส่งออกของ Seelie หรือไฟล์สำรองของ paimon.moe",
+    "notJson": "ไม่ใช่ไฟล์ JSON",
+    "section": {
+      "goals": {
+        "label": "เป้าหมาย",
+        "title": "เป้าหมายตัวละคร พรสวรรค์ และอาวุธ รวมถึงไอเทมที่ต้องการเพิ่มเติม"
+      },
+      "artifacts": {
+        "label": "เป้าหมายอาร์ติแฟกต์",
+        "title": "เซ็ตและค่าสถานะหลักที่จะฟาร์ม"
+      },
+      "customs": {
+        "label": "ตัวละครกำหนดเอง",
+        "title": "ตัวละครที่ Seelie ตั้งเป็นแบบกำหนดเอง พร้อมเป้าหมาย"
+      },
+      "current": {
+        "label": "เลเวลปัจจุบัน",
+        "title": "เลเวล พรสวรรค์ และกลุ่มดาวปัจจุบันของ Seelie ในส่วนที่สูงกว่าการสแกน"
+      },
+      "inventory": {
+        "label": "ช่องเก็บของ",
+        "title": "จำนวนจะเป็นการแก้ไขเองบนการสแกนล่าสุด (การสแกนที่ใหม่กว่าจะแทนที่)"
+      },
+      "tasks": {
+        "label": "งาน",
+        "title": "งานที่กำหนดเอง และงานถาวรที่ทำเสร็จใน Seelie"
+      },
+      "resin": {
+        "label": "Resin",
+        "title": "ตัวติดตาม Resin ของ Seelie เมื่อใหม่กว่าของเรา"
+      },
+      "settings": {
+        "label": "การตั้งค่า",
+        "title": "AR ระดับโลก เซิร์ฟเวอร์ และตัวเอก"
+      }
+    },
+    "count": {
+      "new": "ใหม่ {n}",
+      "changed": "เปลี่ยน {n}",
+      "same": "เหมือนเดิม {n}"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "เปลี่ยน",
+    "choose": "เลือกไฟล์",
+    "fileLabel": "ไฟล์ส่งออกของ Seelie หรือไฟล์สำรองของ paimon.moe",
+    "legend": "สิ่งที่จะนำเข้า",
+    "skipped": "ข้าม {n}",
+    "clampedTitle": "เป้าหมายที่สูงกว่าเลเวล 90 ถูกตั้งเป็น 90",
+    "clamped": "จำกัดที่ 90: {n}",
+    "replace": "แทนที่ (นำออก {n})",
+    "exportTitle": "ไฟล์บัญชี Seelie: เป้าหมาย ช่องเก็บของ งาน (Seelie → Settings → Import Account)",
+    "export": "ส่งออก",
+    "import": "นำเข้า",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "บัญชีในไฟล์",
+    "account": "บัญชี {n}",
+    "paimonLevels": "เฉพาะเลเวล",
+    "paimonLevelsTitle": "paimon.moe เก็บเลเวลและวัสดุของรายการที่ต้องทำ แต่ไม่เก็บเลเวลพรสวรรค์: พรสวรรค์จะคงเดิม"
+  },
+  "taskEditor": {
+    "everyDay": "ทุกวัน",
+    "everyDays": "ทุก {n} วัน",
+    "today": "วันนี้ ({day})",
+    "tomorrow": "พรุ่งนี้ ({day})",
+    "startDay": "วันเริ่ม",
+    "startDayTitle": "คงรอบตามวันเริ่ม",
+    "doneDay": "วันที่เสร็จ",
+    "doneDayTitle": "นับจากวันที่ทำเสร็จ",
+    "task": "งาน",
+    "newTask": "งานใหม่",
+    "nameIt": "ตั้งชื่อ",
+    "repeats": "ทำซ้ำ",
+    "next": "ครั้งถัดไป",
+    "starts": "เริ่ม",
+    "countsFrom": "นับจาก"
+  },
+  "tasks": {
+    "title": "งาน",
+    "permanent": "ถาวร",
+    "ready": "พร้อม",
+    "readyTitle": "พร้อมใช้",
+    "resets": "รีเซ็ต {time}",
+    "snoozedBack": "เลื่อนไว้ · กลับมา {time}",
+    "doneBack": "เสร็จแล้ว · กลับมา {time}",
+    "everyDay": "ทุกวัน",
+    "everyDays": "ทุก {n} วัน",
+    "fromDone": "นับจากวันที่เสร็จ",
+    "fromStart": "นับจากวันเริ่ม",
+    "dueTitle": "ครบกำหนด {date} · {every}, {from}",
+    "overdue": "เลยกำหนด",
+    "late": "ช้า {n} วัน",
+    "today": "วันนี้",
+    "tomorrow": "พรุ่งนี้",
+    "doneToast": "{name} เสร็จแล้ว",
+    "backToast": "{name}: กลับมา {day}",
+    "deleted": "ลบ {name} แล้ว",
+    "toDo": "ต้องทำ {n}",
+    "toDoSr": "ต้องทำ",
+    "shown": "งานที่แสดง",
+    "hideDone": "ซ่อนที่เสร็จแล้ว",
+    "showDone": "แสดงที่เสร็จแล้ว ({n})",
+    "permanentShown": "งานถาวรที่แสดง",
+    "add": "เพิ่มงาน",
+    "noCustom": "ยังไม่มีงานของคุณเอง",
+    "allDone": "เสร็จทั้งหมด",
+    "move": "ย้าย {name}",
+    "dragTitle": "ลาก หรือใช้ปุ่มลูกศร",
+    "doneLabel": "เสร็จแล้ว: {name}",
+    "notDoneLabel": "ยังไม่เสร็จ: {name}",
+    "takeBack": "ยกเลิก",
+    "snoozeName": "เลื่อน {name}",
+    "snooze": "เลื่อน",
+    "lastDay": "วันสุดท้าย",
+    "permanentTasks": "งานถาวร",
+    "events": "กิจกรรม",
+    "startsIn": "ในอีก {time}",
+    "eventStarts": "เริ่ม {time}",
+    "eventEnds": "สิ้นสุด {time}",
+    "noEnd": "ไม่มีวันสิ้นสุด",
+    "tags": {
+      "daily": "รายวัน",
+      "checkin": "เช็กอิน",
+      "exploration": "ออกสำรวจโลกกว้าง",
+      "quest": "เควสต์"
+    },
+    "capture": {
+      "from": "จากการสแกนเมื่อ {time}",
+      "commissions": "เสร็จ {n} จาก {total}",
+      "abyss": "{stars} จาก {max} ดาว",
+      "expeditions": "กลับมา {n} จาก {total}",
+      "nobodyOut": "ไม่มีใครออกสำรวจ",
+      "realm": "{value} จาก {limit} ในโถ",
+      "welkin": "เหลือ {n} วัน"
+    }
+  },
+  "view": {
+    "title": "แพลนเนอร์",
+    "accountFallback": "บัญชี Genshin",
+    "farm": "ฟาร์ม",
+    "goals": "เป้าหมาย",
+    "presetApplied": "{preset}: {n} เป้าหมาย",
+    "bulkCounted": "นับรวม {n}",
+    "bulkPaused": "พักไว้ {n}",
+    "goalsRemoved": "นำ {n} เป้าหมายออกแล้ว",
+    "paused": "พัก {name} แล้ว",
+    "partDone": "{name}: {label} เสร็จแล้ว",
+    "craftStepDone": "ขั้นตอนสรรสร้างเสร็จแล้ว",
+    "craftStepsDone": "ขั้นตอนสรรสร้าง {n} ขั้นเสร็จแล้ว",
+    "craftingHidden": "ซ่อนการสรรสร้างแล้ว",
+    "craftingHiddenHint": "ตั้งค่าแพลนเนอร์: เช็กลิสต์สรรสร้าง",
+    "itemRemoved": "นำไอเทมออกแล้ว",
+    "removed": "นำ {name} ออกแล้ว",
+    "added": "เพิ่ม {n} เป้าหมายแล้ว",
+    "notImported": "นำเข้าไม่สำเร็จ",
+    "importedGoals": "{n} เป้าหมาย",
+    "importedCurrent": "ปัจจุบัน {n}",
+    "importedItems": "{n} ไอเทม",
+    "importedTasks": "{n} งาน",
+    "imported": "นำเข้าจาก Seelie แล้ว",
+    "notExported": "ส่งออกไม่สำเร็จ",
+    "exported": "ส่งออกสำหรับ Seelie แล้ว",
+    "view": "มุมมอง",
+    "newest": "การสแกนล่าสุด",
+    "noCapture": "ไม่มีการสแกน: จำนวนเป็นค่าที่คุณตั้งเอง",
+    "import": "นำเข้า",
+    "replaced": "การแก้ไขเอง {n} รายการถูกแทนที่ด้วยการสแกน",
+    "ok": "ตกลง",
+    "seelieTitle": "นำเข้าจาก Seelie หรือ paimon.moe ส่งออกไปยัง Seelie",
+    "addGoals": "เพิ่มเป้าหมาย",
+    "loadError": "โหลดแพลนเนอร์ไม่สำเร็จ",
+    "noGoals": "ไม่มีเป้าหมาย",
+    "importSeelie": "นำเข้าจาก Seelie หรือ paimon.moe",
+    "importCapture": "นำเข้าการสแกน",
+    "readiness": "ความพร้อม",
+    "selectTitle": "เลือกเป้าหมายเพื่อเปลี่ยนพร้อมกัน",
+    "select": "เลือก",
+    "selected": "เป้าหมายที่เลือก",
+    "selectedCount": "เลือก {n}",
+    "selectedSr": "เลือกแล้ว",
+    "pickNone": "ไม่เลือก",
+    "pickAll": "ทั้งหมด",
+    "applyPreset": "ใช้พรีเซ็ต",
+    "pause": "พัก",
+    "count": "นับรวม",
+    "doneSelecting": "เลือกเสร็จ",
+    "done": "เสร็จ",
+    "doneGoals": "เป้าหมายที่เสร็จแล้ว",
+    "loading": "กำลังโหลดแพลนเนอร์"
+  }
+}

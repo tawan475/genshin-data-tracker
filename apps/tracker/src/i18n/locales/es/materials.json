@@ -1,0 +1,97 @@
+{
+  "title": "Materiales",
+  "newestSnapshot": "Captura más reciente",
+  "since": "desde el {date}",
+  "oneSnapshot": "Solo una captura",
+  "changesTitle": "Cambios {hint}",
+  "changeSince": "Cambio desde",
+  "noSnapshots": "Aún no hay capturas",
+  "import": "Importar",
+  "loadFailed": "No se pudieron cargar los materiales",
+  "loading": "Cargando materiales",
+  "saveChartFailed": "No se pudieron guardar los ajustes del gráfico",
+  "search": "Buscar",
+  "searchLabel": "Buscar materiales",
+  "noMatches": "Sin resultados",
+  "noMaterials": "No hay materiales",
+  "clear": "Borrar",
+  "more": "{n} más",
+  "upTo": "Hasta {max}",
+  "trackedOfMax": "Seguidos / máx.",
+  "track": "Seguir",
+  "untrack": "Dejar de seguir",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Últimos"
+  },
+  "wallet": {
+    "label": "Cartera",
+    "title": "Monedas y objetos de gachapón",
+    "short": {
+      "GenesisCrystal": "Génesis",
+      "IntertwinedFate": "Entrelazado",
+      "AcquaintFate": "Encuentro",
+      "MasterlessStarglitter": "Brillo",
+      "MasterlessStardust": "Polvo",
+      "OriginalResin": "Resina",
+      "FragileResin": "Débil",
+      "CondensedResin": "Concentrada",
+      "RealmCurrency": "Intramora"
+    }
+  },
+  "tabs": {
+    "development": "Mejora",
+    "precious": "Valiosos",
+    "other": "Otros",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Minerales de refinamiento (el juego los guarda con las armas)",
+      "artifact": "Ungüento y Esencia benditos (el juego los guarda con los artefactos)",
+      "other": "No están en el Inventario del juego: monedas, semillas, objetos del juego de cartas, objetos más nuevos que los datos del juego"
+    }
+  },
+  "bag": {
+    "title": "Inventario",
+    "show": "Mostrar",
+    "view": "Vista",
+    "views": {
+      "grid": "Iconos",
+      "list": "Lista"
+    },
+    "tabRow": "Pestaña del Inventario",
+    "all": "Todo",
+    "allTitle": "Todas las pestañas",
+    "sort": "Ordenar",
+    "sorts": {
+      "order": "Del juego",
+      "count": "Cantidad",
+      "change": "Cambio",
+      "name": "Nombre"
+    },
+    "unfoldAll": "Desplegar todas las pestañas",
+    "foldAll": "Plegar todas las pestañas",
+    "owned": "En posesión",
+    "ownedTitle": "Materiales que tienes",
+    "gained": "Obtenidos",
+    "gainedTitle": "Obtenidos {hint}",
+    "spent": "Gastados",
+    "spentTitle": "Gastados {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · fijado a mano {hand} (captura {capture})"
+  },
+  "detail": {
+    "history": "Historial",
+    "chartLabel": "{name} a lo largo del tiempo, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Obtenido",
+    "spent": "Gastado",
+    "peak": "Máximo",
+    "first": "Primera",
+    "firstTitle": "Primera captura que lo tiene"
+  },
+  "tracked": {
+    "title": "Seguidos",
+    "list": "Materiales seguidos",
+    "untrackName": "Dejar de seguir {name}"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "progression": "Fortschritt",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Urgesteine",
+    "characters": "Figuren",
+    "weapons": "Waffen",
+    "artifacts": "Artefakte",
+    "artifact4": "4★-Artefakt",
+    "artifact3": "3★-Artefakt"
+  },
+  "server": {
+    "AMERICA": "Amerika",
+    "EUROPE": "Europa",
+    "ASIA": "Asien",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Noch keine Snapshots",
+  "import": "Importieren",
+  "historyUnavailable": "Verlauf nicht verfügbar",
+  "currencyCarried": "aus einer früheren Erfassung",
+  "currencyMissing": "fehlt in der letzten Erfassung",
+  "sincePrevious": "seit dem vorigen Snapshot",
+  "lastCaptured": "Zuletzt erfasst",
+  "lastCapturedAt": "Zuletzt erfasst {time}",
+  "seenAgain": "Erneut gesehen",
+  "seenAgainAt": "Erneut gesehen {time}",
+  "loadingHistory": "Snapshot-Verlauf wird geladen",
+  "lowRarity": {
+    "label": "4★ / 3★-Artefakt",
+    "hint": "Nicht gesperrt, nicht angelegt",
+    "rarity": "{n} Sterne"
+  },
+  "card": {
+    "snapshots": "Snapshots",
+    "storage": "Speicher",
+    "stored": "{raw} hochgeladen, {stored} gespeichert",
+    "storedRatio": "{raw} hochgeladen, {stored} gespeichert ({ratio} kleiner)"
+  },
+  "monthly": {
+    "title": "Monatsanalyse",
+    "previous": "Voriger Monat",
+    "previousTo": "Voriger Monat, {month}",
+    "next": "Nächster Monat",
+    "nextTo": "Nächster Monat, {month}",
+    "gained": "{n} erhalten",
+    "spent": "{n} verbraucht",
+    "added": "{n} hinzugekommen",
+    "used": "{n} verwendet",
+    "closing": "Endstand {n}",
+    "artifactExp": "{n} Artefakt-EP auf Stufe 0",
+    "thisMonth": "diesen Monat · {detail}",
+    "gapTitle": "{n} Tage ohne Erfassung",
+    "vs": "vs. {day}",
+    "captures": "{n} Erfassung | {n} Erfassungen",
+    "comparedWith": "{captures}, verglichen mit {day}",
+    "noCaptures": "Keine Erfassungen",
+    "noCapture": "Keine Erfassung",
+    "caption": "Tägliche Änderung im {month}: die letzte Erfassung jedes Tages gegenüber dem vorigen erfassten Tag, mit dem Wert darunter",
+    "day": "Tag",
+    "dayTitle": "Letzte Erfassung des Tages gegenüber dem vorigen erfassten Tag, Ortszeit"
+  },
+  "recent": {
+    "title": "Neueste",
+    "all": "Alle",
+    "allTitle": "Alle {n} Snapshots",
+    "size": "{raw} Bytes hochgeladen, {stored} Bytes gespeichert",
+    "unchanged": "Summen unverändert",
+    "first": "Erster Snapshot",
+    "currencyMissing": "Mora und Urgesteine fehlen",
+    "noCurrency": "Keine Währung"
+  }
+}

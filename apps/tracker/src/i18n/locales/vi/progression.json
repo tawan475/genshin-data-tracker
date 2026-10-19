@@ -1,0 +1,74 @@
+{
+  "title": "Tiến triển chi tiết",
+  "figures": "Số liệu",
+  "atLeastOne": "Ít nhất một mục",
+  "groupBy": "Nhóm theo",
+  "longerThanRange": "Dài hơn khoảng thời gian",
+  "loading": "Đang tải tiến triển",
+  "noData": "Không có dữ liệu",
+  "inRange": "trong khoảng này",
+  "gainedInRange": "nhận được trong khoảng này",
+  "spentInRange": "đã dùng trong khoảng này",
+  "noCaptures": "Không có bản ghi",
+  "captures": "{n} bản ghi",
+  "total": "Tổng {n}",
+  "lineLabel": "{figure} theo thời gian, {span}. Mới nhất {value}.",
+  "barsLabel": "Thay đổi {figure} {per}, {span}: nhận {gained}, dùng {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Bản chụp",
+    "hour": "Giờ",
+    "day": "Ngày",
+    "month": "Tháng",
+    "year": "Năm"
+  },
+  "per": {
+    "snapshot": "Mỗi bản chụp",
+    "hour": "Mỗi giờ",
+    "day": "Mỗi ngày",
+    "month": "Mỗi tháng",
+    "year": "Mỗi năm"
+  },
+  "against": {
+    "snapshot": "Thay đổi so với bản chụp trước",
+    "hour": "Thay đổi so với giờ trước",
+    "day": "Thay đổi so với ngày trước",
+    "month": "Thay đổi so với tháng trước",
+    "year": "Thay đổi so với năm trước"
+  },
+  "newest": {
+    "snapshot": "{n} bản chụp mới nhất",
+    "hour": "{n} giờ gần nhất",
+    "day": "{n} ngày gần nhất",
+    "month": "{n} tháng gần nhất",
+    "year": "{n} năm gần nhất"
+  },
+  "range": {
+    "label": "Khoảng thời gian",
+    "hours": "Giờ",
+    "days": "Ngày",
+    "all": "Tất cả",
+    "h": "{n} giờ",
+    "d": "{n} ngày",
+    "y": "{n} năm"
+  },
+  "monthly": {
+    "unavailable": "Không có phân tích hàng tháng",
+    "loading": "Đang tải phân tích hàng tháng",
+    "noCaptures": "Không có bản ghi",
+    "goTo": "Đến {month}",
+    "date": "Ngày",
+    "primogem": "Nguyên Thạch",
+    "mora": "Mora",
+    "artifact": "Thánh Di Vật",
+    "extract": "Trích xuất",
+    "netWorth": "Tổng giá trị",
+    "moraUnit": "Mora",
+    "primogemUnit": "Nguyên Thạch"
+  },
+  "character": {
+    "level": "Cấp",
+    "constellation": "Cung Mệnh",
+    "talents": "Thiên Phú"
+  }
+}

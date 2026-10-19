@@ -1,0 +1,38 @@
+{
+  "close": "닫기",
+  "constellation": {
+    "title": "운명의 자리 {level}/6"
+  },
+  "crit": {
+    "title": "CV {value} · 치명타 확률 × 2 + 치명타 피해",
+    "circlet": " · 치명타 왕관 +7.77"
+  },
+  "level": {
+    "title": "레벨 {level}/{cap} · 돌파 {ascension}"
+  },
+  "rarity": {
+    "stars": "{n}성"
+  },
+  "roll": {
+    "title": "RV {value}% · 각 강화 수치를 최대 수치 대비 %로 합산"
+  },
+  "error": {
+    "title": "불러올 수 없습니다",
+    "retry": "다시 시도"
+  },
+  "field": {
+    "optional": "(선택)"
+  },
+  "modal": {
+    "previous": "이전",
+    "next": "다음"
+  },
+  "pager": {
+    "label": "페이지",
+    "previous": "이전 페이지",
+    "next": "다음 페이지",
+    "goTo": "페이지로 이동",
+    "go": "이동",
+    "input": "페이지, 1~{count}"
+  }
+}

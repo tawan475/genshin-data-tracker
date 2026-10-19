@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "assez pour tous les objectifs",
+    "alone": "assez pour cet objectif",
+    "short": "insuffisant"
+  },
+  "readiness": {
+    "all": {
+      "label": "Prêt",
+      "meaning": "Assez après les objectifs au-dessus"
+    },
+    "alone": {
+      "label": "Prêt seul",
+      "meaning": "Assez seul, pas après les objectifs au-dessus"
+    },
+    "short": {
+      "label": "Insuffisant",
+      "meaning": "Pas assez, même seul"
+    },
+    "done": {
+      "label": "Terminé",
+      "meaning": "Atteint"
+    },
+    "artifacts": {
+      "label": "Artéfacts",
+      "meaning": "Niveaux atteints, artéfacts restants"
+    }
+  },
+  "bracket": {
+    "tier": "Palier {tier}",
+    "bossLevel": "Boss Niv. {level}",
+    "wl": "NM {wl}",
+    "withAr": "{base} (NA {ar})",
+    "assumed": "{base}, supposé"
+  },
+  "unit": {
+    "days": "{n} jour | {n} jours",
+    "weeks": "{n} semaine | {n} semaines"
+  },
+  "status": {
+    "locked": "Niv. d'aventure ou Niv. du monde trop bas pour le farmer",
+    "noRate": "Pas de taux de drop moyen pour cette source : pas d'estimation",
+    "notFarmed": "Aucune source de résine"
+  },
+  "time": {
+    "hm": "{h} h {m} min",
+    "h": "{h} h",
+    "m": "{m} min",
+    "dh": "{d} j {h} h",
+    "d": "{d} j"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Convertir",
+      "craft": "Synthèse",
+      "forge": "Forger"
+    },
+    "item": "{count} {name}",
+    "convertRow": "Convertir {input} en {output}",
+    "craftRow": "Synthétiser {output} à partir de {input}",
+    "forgeRow": "Forger {output} à partir de {input}",
+    "kindTitle": {
+      "convert": "Alchimie : conversion",
+      "craft": "Alchimie : synthèse, palier le plus bas d'abord",
+      "forge": "Forgeron : forge"
+    },
+    "listSeparator": ", ",
+    "notYet": "Pas encore : il manque {items} (faites d'abord les étapes au-dessus)",
+    "doneRow": "Fait : {row}",
+    "notEnough": "Pas assez : il manque {items}",
+    "allDoneTitle": "Les {n} faites : le sac tel qu'après elles",
+    "title": "Synthèse",
+    "fold": "Replier",
+    "unfold": "Ce que le plan convertit, synthétise et forge",
+    "steps": "{n} étape | {n} étapes",
+    "inAll": "{cost} au total",
+    "forgingTime": "Temps de forge {time} (hors file de la forge)",
+    "forging": "forge",
+    "allDone": "Tout est fait",
+    "hideTitle": "Masquer la synthèse (les paramètres du Planificateur la rétablissent)",
+    "hide": "Masquer la synthèse",
+    "from": "à partir de",
+    "fewer": "Moins",
+    "all": "Les {n}"
+  },
+  "lock": {
+    "ar": "NA {ar}",
+    "wl": "NM {wl}",
+    "locked": "Verrouillé"
+  },
+  "cards": {
+    "blossomExp": "Fleur de la révélation",
+    "blossomMora": "Fleur de la fortune",
+    "local": "Spécialités locales",
+    "common": "Ennemis normaux",
+    "elite": "Ennemis d'élite",
+    "other": "Autres",
+    "elsewhere": "Ailleurs"
+  },
+  "sections": {
+    "free": "Sans résine",
+    "domain": "Donjons · Lignes énergétiques",
+    "boss": "Boss",
+    "weekly": "Boss hebdomadaires",
+    "artifact": "Artéfacts"
+  },
+  "groups": {
+    "ley": "Fleur des lignes énergétiques",
+    "mastery": "Donjon de la maîtrise",
+    "forgery": "Donjon d'entraînement",
+    "blessing": "Donjon de la bénédiction",
+    "boss": "Boss normaux",
+    "weekly": "Boss hebdomadaires",
+    "local": "Spécialités locales",
+    "common": "Ennemis normaux",
+    "elite": "Ennemis d'élite",
+    "ore": "Matériau de renforcement d'arme",
+    "other": "Autres"
+  },
+  "people": {
+    "label": "Pour qui est le plan",
+    "only": "{name} : seulement ses cartes",
+    "all": "{name} : afficher tout le monde"
+  },
+  "card": {
+    "runs": "{n} passage | {n} passages",
+    "claims": "{n} récompense | {n} récompenses",
+    "claimsWeekly": "{claims}, une par semaine",
+    "atMost": "au plus {runs}",
+    "atMostPrefix": "au plus",
+    "runsShort": "{n} passages",
+    "claimsShort": "{n} récompenses",
+    "resinRange": "{min}–{max} résine",
+    "resin": "{n} résine",
+    "condensed": "{n} condensée(s)",
+    "condensedTitle": "{n} Résine condensée",
+    "guaranteed": "le taux de drop est un minimum garanti",
+    "lockTitle": "Pas encore : nécessite {lock}",
+    "kind": {
+      "boss": "Boss",
+      "gem": "Boss qui le donnent",
+      "enemy": "Ennemis qui le donnent",
+      "local": "Pousse à",
+      "artifact": "Donjon d'artéfacts"
+    },
+    "elsewhereTitle": "Aucun donjon ne donne ces sets",
+    "noRate": "Pas de taux",
+    "paidTitle": "Les passages en donjon prévus rapportent {mora} Mora",
+    "paid": "+{n} des donjons",
+    "blockedTitle": "{n} conversions nécessitent plus de Solvant de rêve",
+    "blocked": "{n} bloquée(s)",
+    "blockedSr": " : il faut plus de Solvant de rêve"
+  },
+  "weekday": {
+    "short": {
+      "sun": "Dim",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam"
+    },
+    "long": {
+      "sun": "Dimanche",
+      "mon": "Lundi",
+      "tue": "Mardi",
+      "wed": "Mercredi",
+      "thu": "Jeudi",
+      "fri": "Vendredi",
+      "sat": "Samedi"
+    }
+  },
+  "panel": {
+    "today": "Aujourd'hui",
+    "schedule": "Planning",
+    "runsLine": "{runs} · {resin} résine ({condensed} condensée) · {days}",
+    "sources": "donjons, boss normaux et lignes énergétiques",
+    "daily": "{n} résine par jour",
+    "dailyRefresh": "{n} résine par jour (180 + {r} × {per})",
+    "withHeld": "{days} avec la résine détenue",
+    "gems": "gemmes : {runs}, {resin} résine",
+    "partial": "certaines sources n'ont pas de taux de drop",
+    "upperBound": "Les drops de boss au Niv. du monde 9 sont un minimum garanti",
+    "weeklyClaims": "Boss hebdomadaires : {claims} sur {weeks}",
+    "weeklyResin": "{resin} résine avec la réduction hebdomadaire ({max} sans)",
+    "weeklyPartial": "certains boss n'ont pas de taux de drop",
+    "serverDay": "Jour serveur : {day}",
+    "serverDaySunday": "Jour serveur : {day} (tous les donjons ouverts)",
+    "resetIn": "réinitialisation de 04:00 dans {time}",
+    "forgeOff": "Compter le minerai mystique que les fragments détenus peuvent donner à la forge",
+    "forgeLine": "Forger {item} : {mora} Mora, {time}",
+    "stillShort": "il manque encore {n}",
+    "totals": "Totaux",
+    "resin": "résine",
+    "dayUnit": "jour | jours",
+    "refreshTitle": "{r} recharge de résine par jour : {daily} résine par jour | {r} recharges de résine par jour : {daily} résine par jour",
+    "perDay": "{n}/jour",
+    "weekly": "Hebdomadaire",
+    "weekUnit": "semaine | semaines",
+    "lockedTitle": "{n} source verrouillée par NA/NM | {n} sources verrouillées par NA/NM",
+    "locked": "verrouillé par NA/NM",
+    "view": "Vue farm",
+    "noWeeklyTitle": "Seulement les objectifs encore à farmer sans boss hebdomadaire : leurs drops sont détenus ou convertibles (après les objectifs au-dessus)",
+    "noWeekly": "Sans boss hebdo",
+    "noneLeft": "Chaque objectif nécessite encore un boss hebdomadaire",
+    "showAll": "Afficher tous les objectifs",
+    "assumed": "NA/NM non définis : palier le plus haut supposé",
+    "set": "Définir",
+    "nothing": "Rien à farmer",
+    "sectionLabel": "{label} : {resin} résine",
+    "show": "Afficher",
+    "hidden": "{n} masqué(s)",
+    "forge": "Forger depuis les fragments",
+    "pairTitle": "{runs} · {resin} résine · {days}",
+    "cards": "{n} carte | {n} cartes"
+  },
+  "event": {
+    "names": {
+      "abundance": "Abondance de prospérité",
+      "mastery": "Abondance de maîtrise",
+      "favor": "Abondance de bénédiction",
+      "wealth": "Abondance de fortune",
+      "revelation": "Abondance de révélation",
+      "leyLine": "Reflux des lignes énergétiques"
+    },
+    "rules": {
+      "abundance": "Tous les livres d'aptitude et matériaux d'arme sont ouverts, avec récompenses multipliées",
+      "mastery": "Les Donjons de la maîtrise donnent des récompenses multipliées",
+      "favor": "Les Donjons de la bénédiction (artéfacts) donnent des récompenses multipliées",
+      "wealth": "Les Fleurs de la fortune donnent des récompenses multipliées",
+      "revelation": "Les Fleurs de la révélation donnent des récompenses multipliées",
+      "leyLine": "Les Fleurs de la fortune et de la révélation donnent des récompenses multipliées"
+    },
+    "claims": "×{times} avec la Résine originelle, {n} fois par jour",
+    "endsIn": "se termine dans {time}"
+  }
+}

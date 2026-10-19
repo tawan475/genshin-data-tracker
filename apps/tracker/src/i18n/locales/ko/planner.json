@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "이름",
+      "title": "가나다순"
+    },
+    "missing": {
+      "label": "부족",
+      "title": "부족한 아이템이 적은 순"
+    },
+    "favorites": {
+      "label": "즐겨찾기",
+      "title": "즐겨찾기 먼저"
+    },
+    "priority": {
+      "label": "우선순위",
+      "title": "재료는 위쪽 목표부터 배분됩니다: 드래그하여 순서 변경"
+    }
+  },
+  "material": {
+    "characterExp": "캐릭터 경험치",
+    "weaponExp": "무기 경험치",
+    "group": {
+      "exp": "경험치",
+      "gem": "보석",
+      "boss": "보스 드롭",
+      "local": "지역 특산물",
+      "common": "몬스터 드롭",
+      "book": "특성 책",
+      "weekly": "주간 보스",
+      "weapon": "무기 소재",
+      "elite": "정예 드롭",
+      "other": "기타"
+    }
+  },
+  "hint": {
+    "level": "Lv {level}",
+    "talents": "특성 {talents}",
+    "characterDetail": "{name}: Lv {level} (A{ascension}), 특성 {talents}",
+    "weaponDetail": "{name}: Lv {level} (A{ascension})",
+    "thenAr": "그다음 AR {ar} 필요",
+    "thenShort": "그다음 재료 부족",
+    "weapon": "무기",
+    "canLevel": "지금 레벨 업 가능"
+  },
+  "preset": {
+    "max": {
+      "label": "최대",
+      "title": "레벨 90, 특성 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "레벨 90, 특성 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "레벨 80, 특성 8/8/8"
+    },
+    "talents": {
+      "label": "특성만",
+      "title": "특성 9/9/9, 레벨은 현재대로"
+    },
+    "level": {
+      "label": "레벨만",
+      "title": "레벨 90, 특성은 현재대로"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "일일 의뢰",
+      "weeklyBosses": "영역 토벌",
+      "battlePass": "기행 주간",
+      "reputation": "평판",
+      "abyss": "나선 비경",
+      "theater": "현실 속 환상극",
+      "bargains": "더스트 라이트 교환",
+      "transformer": "매개 변수 변환기",
+      "expeditions": "탐사 파견",
+      "realm": "선계 화폐",
+      "welkin": "공월 축복"
+    }
+  },
+  "toast": {
+    "notSaved": "저장되지 않음",
+    "newCapture": "새 캡처",
+    "newCaptureDetail": "아무것도 변경되지 않았습니다: 확인 후 다시 시도하세요"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "이벤트 {n}개 제외",
+      "olderThanOurs": "트래커보다 오래됨",
+      "ar": "AR {ar}",
+      "wl": "WL {wl}",
+      "lumine": "루미네",
+      "aether": "아이테르"
+    },
+    "server": {
+      "AMERICA": "미국",
+      "EUROPE": "유럽",
+      "ASIA": "아시아",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Seelie 내보내기가 아닙니다 (목표 없음)",
+    "customName": "사용자 지정"
+  },
+  "resin": {
+    "alertTitle": "퓨어 레진 {amount}",
+    "source": {
+      "manual": "직접 설정",
+      "player": "irminsul, 로그인 시",
+      "inventory": "스냅샷"
+    },
+    "unknown": "퓨어 레진: 아직 알 수 없음 · 설정하세요",
+    "readingTitle": "퓨어 레진 ~{now}/{max} · {source}의 {value}, {at} · 8분마다 +1",
+    "setLabel": "{title}. 설정",
+    "spend": "{n} 사용",
+    "add": "{n} 추가",
+    "fullAt": "{time}에 가득 참",
+    "fullLabel": "가득 참",
+    "full": "가득 참",
+    "markTitle": "{time}에 {amount}",
+    "in": "남은 시간",
+    "now": "현재 퓨어 레진",
+    "alert": "레진 알림",
+    "alertUnsupported": "레진 알림: 이 브라우저에서 지원하지 않음",
+    "alertOff": "레진 알림: 꺼짐",
+    "alertOn": "{amount}에 레진 알림 · 사이트가 열려 있는 동안",
+    "alertOnAt": "{amount}, {time}에 레진 알림 · 사이트가 열려 있는 동안",
+    "unsupported": "이 브라우저에서 지원하지 않음",
+    "blocked": "차단됨: 브라우저 설정에서 이 사이트의 알림을 허용하세요",
+    "notifyAt": "알림 시점",
+    "off": "끄기",
+    "whileOpen": "이 기기에서 사이트가 열려 있는 동안"
+  },
+  "artifacts": {
+    "title": "성유물",
+    "doneByHand": "{name}: 완료 (직접 체크)",
+    "notDoneByHand": "{name}: 미완료 (직접 체크)",
+    "notDoneByHandCaptureDone": "{name}: 미완료 (직접 체크, 캡처상으로는 완료)",
+    "doneFromCapture": "{name}: 완료, 캡처 기준 ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "미완료",
+    "nothingWorn": "장착 없음",
+    "otherSet": "다른 세트",
+    "otherMainStat": "다른 주 옵션",
+    "levelOf": "+{level}/+{max}",
+    "farmingByHand": "{name}: 파밍 중 (직접 체크)",
+    "setDone": "{name}: 완료, 모든 부위 완료",
+    "setFarming": "{name}: 파밍 중",
+    "autoRule": "캡처에서 선택한 세트·주 옵션의 최고 레벨 성유물(5★는 +20)이 해당 부위에 있으면 자동으로 체크됩니다. 나머지 네 부위가 선택한 세트이면 다섯 번째 부위는 어떤 세트든 됩니다",
+    "sets": "세트",
+    "worn": "{n}개 장착",
+    "remove": "{name} 제거",
+    "addSet": "세트",
+    "close": "닫기",
+    "slots": "부위",
+    "mainStat": "{slot} 주 옵션",
+    "searchSets": "세트 검색",
+    "setList": "성유물 세트"
+  },
+  "cost": {
+    "saves": "{name}(으)로 {mora} 절약",
+    "nothing": "소모할 것 없음",
+    "colours": "색상"
+  },
+  "common": {
+    "search": "검색",
+    "cancel": "취소",
+    "nameState": "{name}: {state}",
+    "counted": "집계",
+    "notCounted": "집계 안 함",
+    "removeName": "{name} 제거",
+    "clear": "지우기",
+    "remove": "제거",
+    "save": "저장",
+    "noMatches": "일치 항목 없음",
+    "delete": "삭제",
+    "undo": "실행 취소"
+  },
+  "custom": {
+    "slot": {
+      "book": "특성 책",
+      "common": "몬스터 드롭",
+      "boss": "보스 드롭",
+      "local": "특산물",
+      "weekly": "주간 보스"
+    },
+    "name": "이름",
+    "rarity": "희귀도",
+    "weaponType": "무기 종류",
+    "element": "원소"
+  },
+  "done": {
+    "taken": "배낭에서 차감",
+    "uses": "사용",
+    "notInBag": "배낭에 없음",
+    "takesWhatThereIs": "완료 시 있는 만큼만 차감합니다.",
+    "confirm": "완료"
+  },
+  "extra": {
+    "title": "추가",
+    "add": "아이템 추가",
+    "have": "보유 {n}",
+    "craft": "합성 {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (즐겨찾기)",
+    "title": "{name} · 탭: 열기 · 길게 누르기 또는 우클릭: 일시 정지",
+    "moreTitle": "{rest} · 모두 표시",
+    "moreLabel": "{n}명 더: {rest}. 모두 표시",
+    "fewerTitle": "접기",
+    "fewer": "접기"
+  },
+  "card": {
+    "level": "레벨",
+    "talents": "특성",
+    "levelTitle": "레벨 {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "일반 공격 / 스킬 / 원소폭발",
+    "boosted": "{talents}(으)로 상승 (C{constellation}에서 +3)",
+    "weaponTitle": "{name}: 레벨 {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "배낭만으로 지금 가능",
+    "readyStep": "다음 단계를 배낭만으로 지금 진행 가능",
+    "constellation": "운명의 자리 {n}",
+    "refinement": "재련 {n}",
+    "artifactsTitle": "성유물: {done}/5 부위",
+    "expSuffix": "{name} (경험치)",
+    "amount": "{name}: {n}",
+    "short": "{n} 부족",
+    "shortAfter": "위의 목표 이후 {n} 부족",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "위의 목표 이후에도 충분",
+    "handleLabel": "{name}: {rank}번째, 방향키로 이동",
+    "handleTitle": "#{rank} · 드래그 또는 방향키",
+    "customTitle": "사용자 지정 캐릭터: 아직 게임 데이터에 없음",
+    "custom": "사용자 지정",
+    "favoriteLabel": "{name}: 즐겨찾기",
+    "favorite": "즐겨찾기",
+    "notFavorite": "즐겨찾기 아님",
+    "setByHand": "직접 설정",
+    "needsAr": "AR {ar} 필요",
+    "doneLabel": "{name}: {label} 완료",
+    "doneReadyLabel": "{name}: {label} 완료 ({ready})",
+    "missing": "{name}: 부족",
+    "canDoNow": "지금 가능: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "일반 공격",
+      "skill": "스킬",
+      "burst": "원소폭발"
+    },
+    "notOwned": "미보유",
+    "estimateResin": "레진 ~{resin}",
+    "estimateTitle": "{runs}회 · 레진 {resin} (농축 {condensed}) · {days}일",
+    "estimateWeekly": "주간 보스: {weeks}주",
+    "countedLabel": "{name}: 집계",
+    "notCountedLabel": "{name}: 집계 안 함",
+    "presets": "프리셋",
+    "constellationTitle": "운명의 자리 (C3/C5는 특성 하나를 3 올림)",
+    "constellation": "운명의 자리",
+    "hideNote": "메모 숨기기",
+    "note": "메모",
+    "part": "목표 항목",
+    "now": "현재",
+    "goal": "목표",
+    "levelNow": "현재 레벨",
+    "levelGoal": "목표 레벨",
+    "boost": "C{at}에서 3 상승",
+    "boostOn": "C{at}에서 3 상승: 게임 내 {from} → {to}",
+    "talentNow": "현재 {talent}",
+    "talentGoal": "목표 {talent}",
+    "inGame": "게임 내 {from} → {to}",
+    "customCharacter": "사용자 지정 캐릭터",
+    "replaceWithEllipsis": "다른 것으로 교체…",
+    "replaceWith": "{name}(으)로 교체",
+    "replace": "교체",
+    "gapNeed": "{talents} 필요",
+    "setLevel": "{level} 설정",
+    "captureTitle": "최신 캡처",
+    "capture": "캡처: {text}",
+    "resetTitle": "캡처 값으로 되돌리기",
+    "reset": "초기화",
+    "cost": "비용"
+  },
+  "picker": {
+    "characters": "캐릭터",
+    "weapons": "무기",
+    "items": "아이템",
+    "title": "목표 추가",
+    "kind": "종류",
+    "searchItems": "아이템 검색",
+    "preset": "프리셋",
+    "add": "추가",
+    "addCount": "{n}개 추가"
+  },
+  "toolbar": {
+    "label": "목표 필터",
+    "searchTitle": "이름, 무기 또는 메모",
+    "sort": "정렬",
+    "chips": "지금 육성, 주간 보스, 상태, 원소, 희귀도",
+    "upgrade": "지금 육성",
+    "upgradeTitle": "배낭만으로 지금 레벨 업할 수 있는 집계 목표 (각각 단독 기준): 준비됨, 단독 준비, 또는 일부 항목(레벨, 특성, 무기)이나 그 다음 단계",
+    "noWeeklyTitle": "아직 파밍이 필요하지만 주간 보스는 필요 없음: 그 드롭은 보유 중이거나 전환 가능 (위의 목표 이후)",
+    "status": {
+      "all": "전체",
+      "ready": "재고 있음",
+      "readyTitle": "목표별 단독 기준으로 배낭에 충분",
+      "activeTitle": "합계에 포함",
+      "off": "일시 정지",
+      "offTitle": "합계에서 제외"
+    }
+  },
+  "item": {
+    "count": "수량",
+    "have": "보유",
+    "editHave": "보유 {n}: 편집"
+  },
+  "popover": {
+    "goalsLabel": "{name}: 사용하는 목표 ({n})",
+    "goalsTitle": "사용하는 목표",
+    "history": "{name}: 기록",
+    "expNeed": "필요 경험치 {n}",
+    "goal": "목표 {n}",
+    "missing": "부족 {n}",
+    "enough": "충분",
+    "need": "필요 {n}",
+    "craftedTitle": "아래 단계로 합성",
+    "craft": "합성 {n}",
+    "capture": "캡처 {n}",
+    "backLabel": "{name}: 캡처 값 {n}(으)로 되돌리기",
+    "backTitle": "{n}(으)로 되돌리기",
+    "held": "{name} 보유",
+    "addPlaceholder": "+ 추가",
+    "addLabel": "{name}: 획득량 추가",
+    "addTitle": "얻은 만큼 추가 (Enter)",
+    "swap": {
+      "label": "이상한 꿈의 용매 전환",
+      "heading": "전환",
+      "title": "연금 → 전환: 같은 보스의 다른 재료를 이것으로, 1회당 이상한 꿈의 용매 {n}개",
+      "solventHeld": "{name} 보유: {n}",
+      "have": "보유 {n}",
+      "do": "전환",
+      "noneHeld": "{name} 미보유",
+      "noSolvent": "1회당 이상한 꿈의 용매 {n}개 필요"
+    }
+  },
+  "levelGrid": {
+    "below": "캡처보다 낮음",
+    "level": "레벨 {level} (A{ascension})",
+    "ascended": "레벨 {level}, 돌파 완료 (A{ascension})",
+    "ascendedWord": "돌파 완료"
+  },
+  "cell": {
+    "have": "보유 {n}",
+    "spent": "합성에 사용 {n}",
+    "converted": "다른 재료에서 전환 {n}",
+    "convertedAway": "다른 재료로 전환 {n}"
+  },
+  "focus": {
+    "title": "{name}: 목표 {n}개, 각각 위쪽 집계 목표 이후 기준",
+    "clear": "{name} 지우기"
+  },
+  "materialPicker": {
+    "material": "재료",
+    "selected": "재료: {name}",
+    "title": "재료를 사용하는 목표",
+    "search": "재료 검색",
+    "any": "전체",
+    "goals": "목표 {n}개"
+  },
+  "stepper": {
+    "down": "{label}: 내리기",
+    "up": "{label}: 올리기"
+  },
+  "settings": {
+    "title": "플래너 설정",
+    "autoWl": "자동 ({wl})",
+    "ar": "AR",
+    "arTitle": "모험 등급 (1–60)",
+    "arTitleIrminsul": "모험 등급 (1–60) · irminsul 기준 {ar}",
+    "fromIrminsul": "irminsul 기준",
+    "wl": "WL",
+    "wlTitle": "월드 레벨 (0–9)",
+    "wlTitleIrminsul": "월드 레벨 (0–9) · irminsul 기준 {wl}",
+    "wlLabel": "월드 레벨",
+    "refreshesTitle": "하루 퓨어 레진 충전 횟수 (1회당 레진 {per}): 일수는 180 + 충전당 {per}로 계산",
+    "refreshes": "충전",
+    "refreshesLabel": "하루 레진 충전 횟수",
+    "stepsTitle": "최대 4개 값, 예: -40 +60: 레진 트래커가 더합니다 (음수는 사용)",
+    "steps": "레진 버튼",
+    "azothTitle": "부족한 보석을 다른 원소의 여분 보석으로 충당",
+    "azoth": "변환의 먼지",
+    "passivesTitle": "라이덴 쇼군, 방랑자: 무기 돌파 모라 −50%",
+    "passives": "모라 패시브",
+    "craftingTitle": "파밍 보기의 전환·합성·단조 체크리스트",
+    "crafting": "합성 체크리스트"
+  },
+  "roster": {
+    "search": "캐릭터 검색",
+    "multi": "캐릭터 (여러 명 선택)",
+    "owned": "{name} · Lv {level}",
+    "notOwned": "{name} · 미보유",
+    "weaponOwned": "{name} · Lv {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "캡처에 있는 무기",
+    "noCopy": "캡처에 무기 없음",
+    "heldBy": "{name} 장착 중",
+    "refinementNow": "{name} 현재 재련",
+    "levelNow": "{name} 현재 레벨",
+    "refinementGoal": "{name} 목표 재련",
+    "levelGoal": "{name} 목표 레벨",
+    "search": "무기 검색"
+  },
+  "seelieImport": {
+    "notExport": "Seelie 내보내기 또는 paimon.moe 백업이 아닙니다",
+    "notJson": "JSON 파일이 아닙니다",
+    "section": {
+      "goals": {
+        "label": "목표",
+        "title": "캐릭터, 특성, 무기 목표와 추가 아이템"
+      },
+      "artifacts": {
+        "label": "성유물 목표",
+        "title": "파밍할 세트와 주 옵션"
+      },
+      "customs": {
+        "label": "사용자 지정 캐릭터",
+        "title": "Seelie에 사용자 지정으로 있는 캐릭터와 그 목표"
+      },
+      "current": {
+        "label": "현재 레벨",
+        "title": "캡처보다 앞선 Seelie의 현재 레벨, 특성, 운명의 자리"
+      },
+      "inventory": {
+        "label": "배낭",
+        "title": "최신 캡처에 직접 수정으로 반영 (더 새로운 캡처가 대체)"
+      },
+      "tasks": {
+        "label": "할 일",
+        "title": "사용자 지정 할 일과 Seelie에서 완료한 상시 할 일"
+      },
+      "resin": {
+        "label": "레진",
+        "title": "트래커보다 최신인 경우 Seelie의 레진 트래커"
+      },
+      "settings": {
+        "label": "설정",
+        "title": "AR, 월드 레벨, 서버, 주인공"
+      }
+    },
+    "count": {
+      "new": "신규 {n}",
+      "changed": "변경 {n}",
+      "same": "동일 {n}"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "변경",
+    "choose": "파일 선택",
+    "fileLabel": "Seelie 내보내기 또는 paimon.moe 백업",
+    "legend": "가져올 항목",
+    "skipped": "{n}개 건너뜀",
+    "clampedTitle": "90레벨을 넘는 목표는 90으로 설정되었습니다",
+    "clamped": "90으로 제한: {n}",
+    "replace": "교체 ({n}개 제거)",
+    "exportTitle": "Seelie 계정 파일: 목표, 배낭, 할 일 (Seelie → Settings → Import Account)",
+    "export": "내보내기",
+    "import": "가져오기",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "파일의 계정",
+    "account": "계정 {n}",
+    "paimonLevels": "레벨만",
+    "paimonLevelsTitle": "paimon.moe는 할 일의 레벨과 재료만 보관하고 특성 레벨은 보관하지 않으므로 특성은 그대로 유지됩니다"
+  },
+  "taskEditor": {
+    "everyDay": "매일",
+    "everyDays": "{n}일마다",
+    "today": "오늘 ({day})",
+    "tomorrow": "내일 ({day})",
+    "startDay": "시작일 기준",
+    "startDayTitle": "시작일의 주기를 유지합니다",
+    "doneDay": "완료일 기준",
+    "doneDayTitle": "완료한 날부터 계산합니다",
+    "task": "할 일",
+    "newTask": "새 할 일",
+    "nameIt": "이름 입력",
+    "repeats": "반복",
+    "next": "다음",
+    "starts": "시작",
+    "countsFrom": "계산 기준"
+  },
+  "tasks": {
+    "title": "할 일",
+    "permanent": "상시",
+    "ready": "준비됨",
+    "readyTitle": "사용 가능",
+    "resets": "{time} 초기화",
+    "snoozedBack": "미룸 · {time} 복귀",
+    "doneBack": "완료 · {time} 복귀",
+    "everyDay": "매일",
+    "everyDays": "{n}일마다",
+    "fromDone": "완료일부터",
+    "fromStart": "시작일부터",
+    "dueTitle": "{date} 예정 · {every}, {from}",
+    "overdue": "기한 지남",
+    "late": "{n}일 지연",
+    "today": "오늘",
+    "tomorrow": "내일",
+    "doneToast": "{name} 완료",
+    "backToast": "{name}: {day} 복귀",
+    "deleted": "{name} 삭제됨",
+    "toDo": "할 일 {n}개",
+    "toDoSr": "할 일",
+    "shown": "표시된 할 일",
+    "hideDone": "완료 숨기기",
+    "showDone": "완료 표시 ({n})",
+    "permanentShown": "표시된 상시 할 일",
+    "add": "할 일 추가",
+    "noCustom": "직접 만든 할 일 없음",
+    "allDone": "모두 완료",
+    "move": "{name} 이동",
+    "dragTitle": "드래그 또는 방향키",
+    "doneLabel": "완료: {name}",
+    "notDoneLabel": "미완료: {name}",
+    "takeBack": "되돌리기",
+    "snoozeName": "{name} 미루기",
+    "snooze": "미루기",
+    "lastDay": "마지막 날",
+    "permanentTasks": "상시 할 일",
+    "events": "이벤트",
+    "startsIn": "{time} 후",
+    "eventStarts": "{time} 시작",
+    "eventEnds": "{time} 종료",
+    "noEnd": "종료일 없음",
+    "tags": {
+      "daily": "일일",
+      "checkin": "출석 체크",
+      "exploration": "월드 탐사",
+      "quest": "임무"
+    },
+    "capture": {
+      "from": "{time} 캡처 기준",
+      "commissions": "{total}개 중 {n}개 완료",
+      "abyss": "별 {stars}/{max}",
+      "expeditions": "{total}명 중 {n}명 복귀",
+      "nobodyOut": "파견 중인 캐릭터 없음",
+      "realm": "{value}/{limit} 보관 중",
+      "welkin": "{n}일 남음"
+    }
+  },
+  "view": {
+    "title": "플래너",
+    "accountFallback": "원신 계정",
+    "farm": "파밍",
+    "goals": "목표",
+    "presetApplied": "{preset}: 목표 {n}개",
+    "bulkCounted": "{n}개 집계",
+    "bulkPaused": "{n}개 일시 정지",
+    "goalsRemoved": "목표 {n}개 제거됨",
+    "paused": "{name} 일시 정지됨",
+    "partDone": "{name}: {label} 완료",
+    "craftStepDone": "합성 단계 완료",
+    "craftStepsDone": "합성 단계 {n}개 완료",
+    "craftingHidden": "합성 숨겨짐",
+    "craftingHiddenHint": "플래너 설정: 합성 체크리스트",
+    "itemRemoved": "아이템 제거됨",
+    "removed": "{name} 제거됨",
+    "added": "목표 {n}개 추가됨",
+    "notImported": "가져오지 않음",
+    "importedGoals": "목표 {n}개",
+    "importedCurrent": "현재 {n}개",
+    "importedItems": "아이템 {n}개",
+    "importedTasks": "할 일 {n}개",
+    "imported": "Seelie에서 가져옴",
+    "notExported": "내보내지 않음",
+    "exported": "Seelie용으로 내보냄",
+    "view": "보기",
+    "newest": "최신 캡처",
+    "noCapture": "캡처 없음: 수량은 직접 입력한 값",
+    "import": "가져오기",
+    "replaced": "직접 수정 {n}개가 캡처로 대체됨",
+    "ok": "확인",
+    "seelieTitle": "Seelie 또는 paimon.moe에서 가져오기, Seelie로 내보내기",
+    "addGoals": "목표 추가",
+    "loadError": "플래너를 불러올 수 없습니다",
+    "noGoals": "목표 없음",
+    "importSeelie": "Seelie 또는 paimon.moe에서 가져오기",
+    "importCapture": "캡처 가져오기",
+    "readiness": "준비 상태",
+    "selectTitle": "함께 변경할 목표 선택",
+    "select": "선택",
+    "selected": "선택한 목표",
+    "selectedCount": "{n}개 선택됨",
+    "selectedSr": "선택됨",
+    "pickNone": "없음",
+    "pickAll": "전체",
+    "applyPreset": "프리셋 적용",
+    "pause": "일시 정지",
+    "count": "집계",
+    "doneSelecting": "선택 완료",
+    "done": "완료",
+    "doneGoals": "완료한 목표",
+    "loading": "플래너 불러오는 중"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "素材",
+  "newestSnapshot": "最新スナップショット",
+  "since": "{date} から",
+  "oneSnapshot": "スナップショットは1件のみ",
+  "changesTitle": "変化 {hint}",
+  "changeSince": "比較対象",
+  "noSnapshots": "スナップショットはまだありません",
+  "import": "インポート",
+  "loadFailed": "素材を読み込めませんでした",
+  "loading": "素材を読み込み中",
+  "saveChartFailed": "グラフ設定を保存できませんでした",
+  "search": "検索",
+  "searchLabel": "素材を検索",
+  "noMatches": "該当なし",
+  "noMaterials": "素材なし",
+  "clear": "クリア",
+  "more": "他 {n}件",
+  "upTo": "最大 {max}",
+  "trackedOfMax": "追跡中 / 上限",
+  "track": "追跡",
+  "untrack": "追跡解除",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "直近"
+  },
+  "wallet": {
+    "label": "所持通貨",
+    "title": "通貨と祈願アイテム",
+    "short": {
+      "GenesisCrystal": "創世結晶",
+      "IntertwinedFate": "紡がれた",
+      "AcquaintFate": "出会い",
+      "MasterlessStarglitter": "スターライト",
+      "MasterlessStardust": "スターダスト",
+      "OriginalResin": "樹脂",
+      "FragileResin": "脆弱",
+      "CondensedResin": "濃縮",
+      "RealmCurrency": "宝銭"
+    }
+  },
+  "tabs": {
+    "development": "育成",
+    "precious": "貴重",
+    "other": "その他",
+    "note": "{name}：{note}",
+    "notes": {
+      "weapon": "強化用の鉱石（ゲームでは武器と同じタブにあります）",
+      "artifact": "祈聖のオイルと祝福の精髄（ゲームでは聖遺物と同じタブにあります）",
+      "other": "ゲーム内のバッグにないもの：通貨、種、カードゲームのアイテム、ゲームデータより新しいアイテム"
+    }
+  },
+  "bag": {
+    "title": "バッグ",
+    "show": "表示",
+    "view": "表示形式",
+    "views": {
+      "grid": "アイコン",
+      "list": "リスト"
+    },
+    "tabRow": "バッグのタブ",
+    "all": "すべて",
+    "allTitle": "全タブ",
+    "sort": "並べ替え",
+    "sorts": {
+      "order": "ゲーム順",
+      "count": "数量",
+      "change": "変化",
+      "name": "名前"
+    },
+    "unfoldAll": "全タブを展開",
+    "foldAll": "全タブを折りたたむ",
+    "owned": "所持",
+    "ownedTitle": "所持している素材",
+    "gained": "獲得",
+    "gainedTitle": "獲得 {hint}",
+    "spent": "消費",
+    "spentTitle": "消費 {hint}",
+    "tile": "{name}：{count}",
+    "handSet": " · 手動設定 {hand}（キャプチャ {capture}）"
+  },
+  "detail": {
+    "history": "履歴",
+    "chartLabel": "{name}の推移、{since}",
+    "statTitle": "{value} {since}",
+    "gained": "獲得",
+    "spent": "消費",
+    "peak": "最大",
+    "first": "初回",
+    "firstTitle": "初めて所持したスナップショット"
+  },
+  "tracked": {
+    "title": "追跡中",
+    "list": "追跡中の素材",
+    "untrackName": "{name}の追跡を解除"
+  }
+}

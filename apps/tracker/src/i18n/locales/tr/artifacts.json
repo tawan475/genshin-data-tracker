@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Kilitli",
+    "astralMark": "Astral işaret",
+    "new": "Yeni"
+  },
+  "sort": {
+    "quality": "Kalite",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potansiyel",
+    "level": "Seviye",
+    "set": "Set",
+    "recent": "Yeni"
+  },
+  "sortTitle": {
+    "quality": "Oyundaki gibi: nadirlik, seviye, set, kuşanan",
+    "cv": "Kritik değeri",
+    "rv": "Artış değeri",
+    "potential": "Maks. seviyede beklenen CV",
+    "level": "Seviye",
+    "set": "Set",
+    "recent": "Yeni veya değişmiş"
+  },
+  "topSets": {
+    "label": "En çok setler",
+    "more": "{n} set daha"
+  },
+  "lower": {
+    "label": "Düşük nadirlikler: {counts}",
+    "title": "Bu sıralamanın sona koyduğu düşük nadirlikler"
+  },
+  "picker": {
+    "find": "Bul",
+    "noMatch": "Eşleşme yok",
+    "done": "Tamam"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: yok",
+    "cell": "{slot} · {n} parça · en iyi {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Parça",
+    "slotHeader": "{slot}: en iyi CV, parça",
+    "sumTitle": "Yuva başına en iyi CV, toplanmış"
+  },
+  "bag": {
+    "more": "{n} daha"
+  },
+  "table": {
+    "sortBySet": "Sete göre sırala",
+    "sortByLevel": "Seviyeye göre sırala",
+    "equippedBy": "Kuşanan",
+    "marks": "Kilit ve işaretler",
+    "elixir": "İksir"
+  },
+  "detail": {
+    "fromGame": "Oyundan",
+    "inferred": "Seviyeden çıkarıldı",
+    "upgradesToCome": "{source} · {n} geliştirme kaldı",
+    "rankTitle": "{n} adet {rarity}★ {slot} arasında CV sırası",
+    "newTitle": "Önceki taramada yok",
+    "rolls": "Artışlar",
+    "rank": "Sıra",
+    "upgradesTitle": "Her 4 seviyede bir alt özellik artışı, en fazla {max}",
+    "upgrades": "Geliştirmeler",
+    "expectedCv": "Beklenen CV",
+    "expectedDetail": "{max} seviyesinde beklenen: her geliştirme %{chance} olasılıkla bir kritik satırına ortalama bir artış verir",
+    "bestCase": "En iyi durum",
+    "bestDetail": "Her geliştirme en yüksek kritik artışı, {max} seviyesine kadar",
+    "critLinesTitle": "4 satırdan {n} tanesi KRİTİK: bir geliştirmenin birine artış verme olasılığı",
+    "critPerRoll": "Kritik / artış",
+    "activatesTitle": "İlk geliştirmeyle açılan dördüncü satır",
+    "activates": "+4 ekler",
+    "maxRv": "Maks. RV",
+    "unlocked": "Kilitsiz",
+    "astral": "Astral",
+    "elixirTitle": "Kutsal İksir",
+    "rollTier": "{tier} artış",
+    "inactive": "Etkin değil"
+  },
+  "card": {
+    "potentialTitle": "+{max} seviyesinde beklenen CV · en iyi durum {best}",
+    "equipped": "Kuşanan: {name}"
+  },
+  "toolbar": {
+    "all": "Tümü",
+    "yes": "Evet",
+    "no": "Hayır",
+    "linesNow": "Şu an {n} satır",
+    "any": "Herhangi",
+    "allSets": "Tüm setler",
+    "anyone": "Herkes",
+    "noAstral": "Astral yok",
+    "noElixir": "İksir yok",
+    "quoted": "“{text}”",
+    "mainPill": "Ana: {stat}",
+    "lines": "{n} satır",
+    "best": "En iyi",
+    "label": "Yadigarları filtrele",
+    "searchLabel": "Set veya karakter ara",
+    "searchTitle": "Set veya karakter",
+    "equippedByTitle": "Kuşanan: {names}",
+    "sortBy": "Sırala",
+    "descending": "Azalan",
+    "ascending": "Artan",
+    "slot": "Yuva",
+    "presets": "Hazır ayarlar",
+    "bestTitle": "Geçerli sıralamaya göre yuva başına ilk {n}",
+    "newNone": "Karşılaştırılacak önceki tarama yok",
+    "newTitle": "Önceki taramada yok: yeni veya o zamandan beri geliştirilmiş",
+    "zeroTitle": "Kuşanılmamış +0 5★",
+    "lowTitle": "Kilitsiz, kuşanılmamış 4★ ve 3★",
+    "low": "4★/3★ Yadigar",
+    "spareTitle": "Kuşanılmamış 5★",
+    "spare": "Yedek 5★",
+    "maxTitle": "Yalnızca +20 seviye",
+    "moreTitle": "Ana özellik, alt özellikler, satırlar, seviye, kilit, konum, astral işaret, iksir",
+    "more": "Daha fazla",
+    "substatsTitle": "Bunların hepsine sahip (+4'ün açtığı satır sayılır)",
+    "linesLabel": "Satırlar",
+    "min": "Min.",
+    "max": "Maks.",
+    "location": "Konum",
+    "remove": "{label} kaldır"
+  },
+  "page": {
+    "table": "Tablo",
+    "loadFailed": "Yadigarlar yüklenemedi",
+    "loading": "Yadigarlar yükleniyor",
+    "refreshFailed": "Yenilenemedi",
+    "shownTitle": "Gösterilen / yadigarlar",
+    "countSuffix": "yadigar",
+    "pngSize": "{px} px genişliğinde PNG"
+  }
+}

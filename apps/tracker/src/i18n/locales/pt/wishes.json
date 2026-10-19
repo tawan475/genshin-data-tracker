@@ -1,0 +1,260 @@
+{
+  "title": "Histórico de Orações",
+  "bannerPageTitle": "Histórico de Orações · {banner}",
+  "loadFailed": "Falha ao carregar",
+  "loading": "Carregando",
+  "import": "Importar",
+  "export": "Exportar",
+  "importExport": "Importar / exportar",
+  "browse": "Procurar",
+  "cancel": "Cancelar",
+  "search": "Buscar",
+  "rarity": "Raridade",
+  "banner": "Banner",
+  "pulls": "{n} orações",
+  "pullsTimes": "{n} orações × {primos}",
+  "pullsPrimos": "{n} orações · ✦ {primos}",
+  "lifetime": "Orações no total",
+  "allWishes": "Todas as Orações",
+  "newPulls": "{n} orações novas",
+  "nothingNew": "Nada novo",
+  "banners": {
+    "character": {
+      "label": "Personagem",
+      "title": "Evento de Personagem"
+    },
+    "weapon": {
+      "label": "Arma",
+      "title": "Evento de Arma"
+    },
+    "standard": {
+      "label": "Comum",
+      "title": "Comum"
+    },
+    "chronicled": {
+      "label": "Registro",
+      "title": "Registro de Oração"
+    },
+    "beginners": {
+      "label": "Novato",
+      "title": "Oração de Novato"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "jan",
+      "2": "fev",
+      "3": "mar",
+      "4": "abr",
+      "5": "mai",
+      "6": "jun",
+      "7": "jul",
+      "8": "ago",
+      "9": "set",
+      "10": "out",
+      "11": "nov",
+      "12": "dez"
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "agora"
+  },
+  "outcomes": {
+    "won": "Ganhou",
+    "lost": "Perdeu",
+    "guaranteed": "Garantido"
+  },
+  "outcomeTitles": {
+    "won": "Ganhou o {odds}",
+    "lost": "Perdeu o {odds}: o próximo é o destaque",
+    "guaranteed": "Destaque, garantido após perder o {odds}"
+  },
+  "legend": {
+    "won": "ganhou",
+    "lost": "perdeu",
+    "guaranteed": "garantido"
+  },
+  "overview": {
+    "newestPull": "Oração mais recente, relógio do jogo",
+    "synced": "Sincronizado {ago}",
+    "syncedTitle": "Novas Orações armazenadas {time}",
+    "syncHelp": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida): o irminsul sincroniza todos os banners e depois cada Oração nova enquanto a chave durar (~24 h). O link de Orações do jogo também traz os últimos seis meses. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",
+    "empty": "Nenhuma Oração ainda",
+    "emptyBody": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida), ou importe com o link de Orações do jogo. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",
+    "banners": "Banners",
+    "totals": "Totais",
+    "worth": "Valor das Orações",
+    "worthHint": "{n} orações × {primos} Gemas Essenciais",
+    "wishes": "{n} orações",
+    "avgPity": "Pity médio 5★",
+    "avgPityHint": "Evento de Personagem: o pity médio de cada 5★, contra cerca de {expected} esperado com soft pity",
+    "avgPityVs": "{diff} vs {expected} esperado"
+  },
+  "card": {
+    "everyPull": "{banner}: todas as orações",
+    "fiveTitle": "{left} orações até o hard pity · ✦ {primos} · soft pity a partir de {soft}",
+    "fourTitle": "{left} até um 4★ garantido",
+    "fourFeatured": " · o próximo 4★ é destaque",
+    "pity5": "Pity 5★",
+    "pity4": "Pity 4★",
+    "guaranteedAt": "Garantido em {n}",
+    "hideLatest": "Ocultar as orações recentes",
+    "showLatest": "Mostrar as orações recentes",
+    "latest": "Orações recentes",
+    "latestRegion": "{banner}: orações recentes",
+    "none": "Nenhuma",
+    "cols": {
+      "name": "Nome",
+      "time": "Horário",
+      "pity": "Pity"
+    }
+  },
+  "five": {
+    "every": "Todos os 5★",
+    "newestFirst": "{n} · mais recentes primeiro",
+    "none": "Nenhum 5★ ainda",
+    "pity": "{name} · pity {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Plataforma",
+    "copyFailed": "Não copiado: selecione o comando e copie",
+    "steps": {
+      "open": "Abra Oração → Histórico no jogo e espere carregar.",
+      "android2": "Desligue o Wi-Fi e os dados móveis.",
+      "android3": "Toque em atualizar (canto superior direito): a página mostra um erro com um texto.",
+      "android4": "Selecione todo esse texto e copie.",
+      "android5": "Ligue a conexão de novo e cole abaixo.",
+      "ios1": "Abra o menu da Paimon → Feedback e espere carregar.",
+      "ios2": "Toque em problema no jogo → Modo Multijogador.",
+      "ios3": "Toque no link no fim da resposta: ele abre no navegador.",
+      "ios4": "Copie esse link e cole abaixo.",
+      "ps1": "Abra no jogo o e-mail do evento com um QR code.",
+      "ps2": "Escaneie o código com o celular e copie o link que ele abre.",
+      "ps3": "Cole abaixo. Se falhar, vincule o PlayStation a uma conta HoYoverse e siga os passos de PC ou celular.",
+      "pcRun": "Abra o PowerShell (Iniciar, digite PowerShell) e execute:",
+      "pcPaste": "Ele copia o link: cole abaixo.",
+      "pcPasteTitle": "O Copy wish URL do irminsul dá o mesmo link"
+    },
+    "scriptTitle": "Lê o cache web do jogo neste PC, verifica o link uma vez com a HoYoverse e o copia. Nada mais.",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "readScript": "Ler o script",
+    "label": "Link do histórico de Orações",
+    "placeholder": "Cole o link: https://…",
+    "invalid": "Nenhum link de histórico de Orações nesse texto",
+    "uidMismatch": "Esse link é do UID {uid}; esta conta é do UID {own}.",
+    "failed": "Falha ao importar",
+    "saving": "Salvando {n}…",
+    "progress": "{banner} · página {page} · {n} novas",
+    "errors": {
+      "cancelled": "Cancelado",
+      "network": "O histórico de Orações não respondeu. Tente mais tarde.",
+      "expired": "O link expirou. Abra Oração → Histórico no jogo de novo e copie um novo.",
+      "throttled": "A HoYoverse pede para ir com calma. Tente de novo em alguns minutos.",
+      "api": "A HoYoverse respondeu: {message}",
+      "code": "erro {code}"
+    }
+  },
+  "chart": {
+    "title": "Orações por mês",
+    "label": "Orações por mês por raridade, {n} meses",
+    "month": "{month}: {n} orações"
+  },
+  "numbers": {
+    "label": "Números",
+    "avgPity": "{share} · pity médio {avg}",
+    "expected": "Pity 5★ esperado de cerca de {n} com soft pity",
+    "expectedAbout": "Esperado cerca de {n} com soft pity",
+    "streak": "sequência {current} · melhor {best} ganhos · pior {worst} perdidos",
+    "streakWon": "{n} ganhos",
+    "streakLost": "{n} perdidos",
+    "flipTitle": "Um 5★ destaque quando era um {odds} (garantidos não contam)",
+    "split": "Divisão 4★",
+    "character": "personagem",
+    "char": "pers.",
+    "weapon": "arma",
+    "rateUp": "Destaque 4★ ganho {won} de {total} · {share}",
+    "splitTitle": "4★ por tipo",
+    "splitTitleFull": "4★ por tipo, e os cara ou coroa dos destaques 4★"
+  },
+  "odds": {
+    "guaranteed": "Garantido",
+    "lostLast": "Perdeu o último {odds} ({name}): o próximo 5★ é destaque",
+    "nextFeatured": "O próximo 5★ é destaque",
+    "weapon": "Próximo 5★: 75% de ser uma arma em destaque",
+    "coin": "Próximo 5★: cara ou coroa"
+  },
+  "track": {
+    "label": "Pity {pity} de {hard}, soft pity a partir de {soft}"
+  },
+  "runs": {
+    "label": "Edições dos banners",
+    "heading": "Banners",
+    "count": "{n} edição | {n} edições",
+    "fewer": "Menos",
+    "all": "Todas as edições",
+    "current": " · atual",
+    "no5": "Sem 5★"
+  },
+  "small": {
+    "pitySoFar": "pity {pity} / {hard}"
+  },
+  "table": {
+    "label": "Todas as Orações",
+    "search": "Buscar Orações",
+    "searchTitle": "Nome do personagem ou da arma",
+    "noMatch": "Nenhuma oração corresponde",
+    "rollRun": "Número da oração nessa edição do banner",
+    "roll": "Nº da oração",
+    "item": "Item",
+    "pity": "Pity",
+    "result": "Resultado",
+    "time": "Horário",
+    "newestFirst": "Mais recentes primeiro",
+    "oldestFirst": "Mais antigas primeiro",
+    "newestFirstSr": "mais recentes primeiro",
+    "oldestFirstSr": "mais antigas primeiro",
+    "weapon": "Arma",
+    "character": "Personagem",
+    "pages": "Páginas de Orações"
+  },
+  "transfer": {
+    "backup": "Backup do paimon.moe",
+    "modes": {
+      "link": "Link de Orações",
+      "file": "Arquivo"
+    },
+    "importFrom": "Importar de",
+    "noRecords": "Nenhum registro",
+    "uidMismatch": "Esse histórico é do UID {uid}; esta conta é do UID {own}",
+    "account": "Conta {n}",
+    "notWishFile": "Não é um arquivo UIGF nem do paimon.moe",
+    "alreadyHeld": "{n} já armazenadas",
+    "notImported": "Não importado",
+    "deleteTitle": "Excluir o histórico de Orações?",
+    "deleteDetail": "Todas as {n} orações desta conta serão removidas. O irminsul pode buscar os últimos seis meses de novo.",
+    "deleteConfirm": "Excluir",
+    "notDeleted": "Não excluído",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), um CSV do importador do paimon.moe, ou o backup do paimon.moe (Settings → Export)",
+    "drop": "Arquivo UIGF ou do paimon.moe",
+    "fileAccount": "Conta no arquivo",
+    "uigfTitle": "UIGF v4.1: lido pelo Snap Hutao, Starward e pela maioria dos rastreadores de Orações",
+    "paimonTitle": "Para o Local Importer do paimon.moe (Wish counter → Import → Local)",
+    "delete": "Excluir",
+    "deleteHistory": "Excluir histórico"
+  },
+  "bannerPage": {
+    "noPulls": "Nenhuma oração neste banner",
+    "now": "Agora",
+    "hardTitle": "{left} orações até o hard pity · ✦ {primos}",
+    "toHard": "{left} até o hard pity · ✦ {primos}",
+    "softFrom": "soft a partir de {soft}",
+    "featuredNext": "Próximo é destaque",
+    "featuredNextTitle": "O último 4★ estava fora do banner: o próximo é destaque",
+    "toGuaranteed4": "{n} até o 4★ garantido"
+  }
+}

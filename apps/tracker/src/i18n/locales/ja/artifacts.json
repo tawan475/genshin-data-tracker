@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "ロック中",
+    "astralMark": "星マーク",
+    "new": "新規"
+  },
+  "sort": {
+    "quality": "レア度",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "伸びしろ",
+    "level": "レベル",
+    "set": "セット",
+    "recent": "最近"
+  },
+  "sortTitle": {
+    "quality": "ゲームと同じ：レア度、レベル、セット、装備キャラ",
+    "cv": "会心値（CV）",
+    "rv": "ロール値（RV）",
+    "potential": "最大レベル時の期待CV",
+    "level": "レベル",
+    "set": "セット",
+    "recent": "新規または変更あり"
+  },
+  "topSets": {
+    "label": "上位セット",
+    "more": "他 {n}セット"
+  },
+  "lower": {
+    "label": "低レア度：{counts}",
+    "title": "この並べ替えで最後に回される低レア度"
+  },
+  "picker": {
+    "find": "検索",
+    "noMatch": "該当なし",
+    "done": "完了"
+  },
+  "setsTable": {
+    "cellNone": "{slot}：なし",
+    "cell": "{slot} · {n}個 · 最高 ★{rarity} {main} +{level}、CV {cv}",
+    "pieces": "個数",
+    "slotHeader": "{slot}：最高CV、個数",
+    "sumTitle": "部位ごとの最高CVの合計"
+  },
+  "bag": {
+    "more": "他 {n}個"
+  },
+  "table": {
+    "sortBySet": "セットで並べ替え",
+    "sortByLevel": "レベルで並べ替え",
+    "equippedBy": "装備キャラ",
+    "marks": "ロックとマーク",
+    "elixir": "エリクシル"
+  },
+  "detail": {
+    "fromGame": "ゲームから取得",
+    "inferred": "レベルから推定",
+    "upgradesToCome": "{source} · 残り強化 {n}回",
+    "rankTitle": "★{rarity}の{slot}{n}個中のCV順位",
+    "newTitle": "前回のキャプチャにはありません",
+    "rolls": "上昇回数",
+    "rank": "順位",
+    "upgradesTitle": "4レベルごとにサブステータスが1回上昇（最大 {max}）",
+    "upgrades": "強化",
+    "expectedCv": "期待CV",
+    "expectedDetail": "{max} 時点の期待値：強化ごとに{chance}%の確率で会心系が平均値で上昇",
+    "bestCase": "最大",
+    "bestDetail": "{max} まで毎回会心系が最大値で上昇した場合",
+    "critLinesTitle": "4つ中{n}つが会心系：強化で会心系が上昇する確率",
+    "critPerRoll": "会心 / 上昇",
+    "activatesTitle": "4つ目のサブステータス。最初の強化で開放",
+    "activates": "+4で追加",
+    "maxRv": "最大RV",
+    "unlocked": "ロックなし",
+    "astral": "星マーク",
+    "elixirTitle": "祈聖のエリクシル",
+    "rollTier": "{tier}の上昇",
+    "inactive": "未発動"
+  },
+  "card": {
+    "potentialTitle": "+{max} 時の期待CV · 最大 {best}",
+    "equipped": "装備中：{name}"
+  },
+  "toolbar": {
+    "all": "すべて",
+    "yes": "あり",
+    "no": "なし",
+    "linesNow": "現在 {n}つ",
+    "any": "指定なし",
+    "allSets": "全セット",
+    "anyone": "誰でも",
+    "noAstral": "星マークなし",
+    "noElixir": "エリクシルなし",
+    "quoted": "「{text}」",
+    "mainPill": "メイン：{stat}",
+    "lines": "{n}つ",
+    "best": "ベスト",
+    "label": "聖遺物を絞り込む",
+    "searchLabel": "セットまたはキャラクターを検索",
+    "searchTitle": "セットまたはキャラクター",
+    "equippedByTitle": "装備キャラ：{names}",
+    "sortBy": "並べ替え",
+    "descending": "降順",
+    "ascending": "昇順",
+    "slot": "部位",
+    "presets": "プリセット",
+    "bestTitle": "現在の並べ替えで部位ごとの上位{n}個",
+    "newNone": "比較できる以前のキャプチャがありません",
+    "newTitle": "前回のキャプチャにないもの：新規、またはその後に強化したもの",
+    "zeroTitle": "未装備の+0の★5",
+    "lowTitle": "ロックなし・未装備の★4と★3",
+    "low": "★4/★3聖遺物",
+    "spareTitle": "未装備の★5",
+    "spare": "未装備★5",
+    "maxTitle": "+20のみ",
+    "moreTitle": "メインステータス、サブステータス、数、レベル、ロック、位置、星マーク、エリクシル",
+    "more": "詳細",
+    "substatsTitle": "これらすべてを含む（+4で開放されるものも数えます）",
+    "linesLabel": "サブステータス数",
+    "min": "最小",
+    "max": "最大",
+    "location": "位置",
+    "remove": "{label}を外す"
+  },
+  "page": {
+    "table": "表",
+    "loadFailed": "聖遺物を読み込めませんでした",
+    "loading": "聖遺物を読み込み中",
+    "refreshFailed": "更新できませんでした",
+    "shownTitle": "表示中 / 聖遺物",
+    "countSuffix": "個",
+    "pngSize": "幅 {px} px の PNG"
+  }
+}

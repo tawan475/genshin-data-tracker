@@ -1,0 +1,74 @@
+{
+  "title": "Progres detail",
+  "figures": "Angka",
+  "atLeastOne": "Minimal satu",
+  "groupBy": "Kelompokkan",
+  "longerThanRange": "Lebih panjang dari rentang",
+  "loading": "Memuat progres",
+  "noData": "Tidak ada data",
+  "inRange": "dalam rentang ini",
+  "gainedInRange": "didapat dalam rentang ini",
+  "spentInRange": "dipakai dalam rentang ini",
+  "noCaptures": "Tidak ada tangkapan",
+  "captures": "{n} tangkapan",
+  "total": "Total {n}",
+  "lineLabel": "{figure} dari waktu ke waktu, {span}. Terbaru {value}.",
+  "barsLabel": "Perubahan {figure} {per}, {span}: didapat {gained}, dipakai {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Snapshot",
+    "hour": "Jam",
+    "day": "Hari",
+    "month": "Bulan",
+    "year": "Tahun"
+  },
+  "per": {
+    "snapshot": "Per snapshot",
+    "hour": "Per jam",
+    "day": "Per hari",
+    "month": "Per bulan",
+    "year": "Per tahun"
+  },
+  "against": {
+    "snapshot": "Perubahan dibanding snapshot sebelumnya",
+    "hour": "Perubahan dibanding jam sebelumnya",
+    "day": "Perubahan dibanding hari sebelumnya",
+    "month": "Perubahan dibanding bulan sebelumnya",
+    "year": "Perubahan dibanding tahun sebelumnya"
+  },
+  "newest": {
+    "snapshot": "{n} snapshot terbaru",
+    "hour": "{n} jam terakhir",
+    "day": "{n} hari terakhir",
+    "month": "{n} bulan terakhir",
+    "year": "{n} tahun terakhir"
+  },
+  "range": {
+    "label": "Rentang waktu",
+    "hours": "Jam",
+    "days": "Hari",
+    "all": "Semua",
+    "h": "{n}j",
+    "d": "{n}h",
+    "y": "{n}t"
+  },
+  "monthly": {
+    "unavailable": "Analisis bulanan tidak tersedia",
+    "loading": "Memuat analisis bulanan",
+    "noCaptures": "Tidak ada tangkapan",
+    "goTo": "Ke {month}",
+    "date": "Tanggal",
+    "primogem": "Primogem",
+    "mora": "Mora",
+    "artifact": "Artefak",
+    "extract": "Ekstrak",
+    "netWorth": "Kekayaan bersih",
+    "moraUnit": "mora",
+    "primogemUnit": "primogem"
+  },
+  "character": {
+    "level": "Level",
+    "constellation": "Konstelasi",
+    "talents": "Talenta"
+  }
+}

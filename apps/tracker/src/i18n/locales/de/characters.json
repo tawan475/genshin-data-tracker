@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "St. {level}",
+    "noWeapon": "Keine Waffe",
+    "weaponLevel": "Waffe St. {level}",
+    "artifactCount": "{count}/5 Artefakte",
+    "belowMax": "{n} Artefakt unter Max. | {n} Artefakte unter Max.",
+    "noSet": "Kein voller Setbonus"
+  },
+  "sort": {
+    "default": "Standard",
+    "level": "Stufe",
+    "constellation": "Sternbild",
+    "talents": "Talente",
+    "cv": "CV",
+    "rarity": "Seltenheit",
+    "element": "Element",
+    "name": "Name",
+    "friendship": "Freundschaft",
+    "obtained": "Erhalten"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Fertig",
+    "needs": "Offen",
+    "level": "St. < 90",
+    "weapon": "Waffe < 90",
+    "artifacts": "Artefakte < Max.",
+    "set": "Kein Setbonus"
+  },
+  "talentFilter": {
+    "all": "Talente",
+    "nine": "Alle 9+",
+    "crowned": "Gekrönt",
+    "below": "Eins < 9"
+  },
+  "favorites": {
+    "notSaved": "Nicht gespeichert"
+  },
+  "stat": {
+    "maxHp": "Max. LP",
+    "baseAtk": "Basis-ANG"
+  },
+  "talent": {
+    "crowned": "{title} · gekrönt"
+  },
+  "setBonus": {
+    "line": "{n}-teilig: {stats}",
+    "inactive": "{n}-teilig (inaktiv): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Freundschaft {level} von 10"
+  },
+  "refinementTitle": "Verfeinerung {value} von 5",
+  "talentChips": "Angriff {auto} · Fähigkeit {skill} · Spezial {burst}",
+  "sortControl": {
+    "sort": "Sortieren",
+    "descending": "Absteigend sortieren",
+    "ascending": "Aufsteigend sortieren"
+  },
+  "favorite": {
+    "named": "{name} favorisieren",
+    "on": "Favorisieren",
+    "off": "Kein Favorit mehr"
+  },
+  "stars": "Sterne: {n}",
+  "sets": "Sets",
+  "pieceBonus": "-teiliger Bonus",
+  "constellation": {
+    "title": "Sternbild {level} von 6",
+    "lockedTitle": "C{n} · gesperrt",
+    "unlocked": "C{n} freigeschaltet",
+    "locked": "C{n} gesperrt"
+  },
+  "timeline": {
+    "firstSeen": "Zuerst gesehen",
+    "obtained": "Erhalten",
+    "to": "bis",
+    "less": "Weniger",
+    "all": "Alle {n}"
+  },
+  "talentShort": {
+    "auto": "Angriff",
+    "skill": "Fähigkeit",
+    "burst": "Spezial"
+  },
+  "talentRaised": "erhöht auf",
+  "crowned": "Gekrönt",
+  "weapon": {
+    "passive": "Passiv: {stats}",
+    "locked": "Gesperrt"
+  },
+  "stats": {
+    "allDmg": "+{value}% auf jeden SCH, nicht in der Anzeige im Spiel",
+    "label": "Werte",
+    "weaponMissingTitle": "Waffe neuer als die Spieldaten: ihre Werte fehlen",
+    "weaponMissing": "Waffenwerte fehlen",
+    "newerThanData": "Neuer als die Spieldaten",
+    "none": "Keine Werte"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, Talente {auto} {skill} {burst}",
+    "friendship": ", Freundschaft {n}",
+    "toDo": "offen: {gaps}",
+    "critDetail": "Krit {rate}% / {dmg}% aus Artefakten"
+  },
+  "piece": {
+    "levelTitle": "+{level} von {max} · {rarity}★",
+    "activatesAt4": "Aktiv ab +4",
+    "inactive": "(inaktiv)",
+    "rolls": "{n} Rolls",
+    "rollsTitle": "Rolls",
+    "empty": ": leer"
+  },
+  "toolbar": {
+    "weapon": "Waffe",
+    "cards": "Karten",
+    "list": "Liste",
+    "label": "Figuren filtern",
+    "search": "Suchen",
+    "searchTitle": "Name, Element, Waffe oder Set",
+    "view": "Ansicht",
+    "chips": "Favoriten, Element und Seltenheit",
+    "favorites": "Favoriten",
+    "buildTitle": "Fertig: St. 90, Waffe St. 90, fünf maximierte Artefakte, ein voller Setbonus",
+    "clear": "Leeren"
+  },
+  "table": {
+    "lv": "St.",
+    "c": "C",
+    "critTitle": "KT / Kritischer Schaden aus Artefakten",
+    "crit": "Krit",
+    "toDo": "Offen",
+    "toDoList": "Offen: {gaps}"
+  },
+  "detail": {
+    "toDo": "Offen:",
+    "build": "Build",
+    "obtainedAt": "Erhalten am {date}",
+    "noArtifacts": "Keine Artefakte",
+    "history": "Verlauf",
+    "loadFailed": "Laden fehlgeschlagen",
+    "none": "Keine"
+  },
+  "modal": {
+    "pngSize": "PNG, {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "St. 90+",
+    "crowns": "Kronen",
+    "crownsTitle": "Talente auf Stufe 10",
+    "loading": "Lädt",
+    "noSnapshots": "Noch keine Snapshots",
+    "empty": "Keine Figuren",
+    "import": "Importieren",
+    "noMatches": "Keine Treffer"
+  }
+}

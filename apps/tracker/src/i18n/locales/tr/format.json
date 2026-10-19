@@ -1,0 +1,7 @@
+{
+  "justNow": "az önce",
+  "betweenTimes": "{date}, {from} ile {to} arası",
+  "betweenDates": "{from} ile {to} arası",
+  "today": "Bugün",
+  "yesterday": "Dün"
+}

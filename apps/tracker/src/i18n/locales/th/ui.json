@@ -1,0 +1,38 @@
+{
+  "close": "ปิด",
+  "constellation": {
+    "title": "กลุ่มดาว {level} จาก 6"
+  },
+  "crit": {
+    "title": "CV {value} · อัตราคริ × 2 + ความแรงคริ",
+    "circlet": " · Circlet คริ +7.77"
+  },
+  "level": {
+    "title": "เลเวล {level} จาก {cap} · เลื่อนขั้น {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} ดาว"
+  },
+  "roll": {
+    "title": "RV {value}% · ผลรวมของการสุ่มเพิ่มแต่ละครั้ง คิดเป็น % ของค่าสูงสุดที่สุ่มได้"
+  },
+  "error": {
+    "title": "โหลดส่วนนี้ไม่สำเร็จ",
+    "retry": "ลองอีกครั้ง"
+  },
+  "field": {
+    "optional": "(ไม่บังคับ)"
+  },
+  "modal": {
+    "previous": "ก่อนหน้า",
+    "next": "ถัดไป"
+  },
+  "pager": {
+    "label": "หน้า",
+    "previous": "หน้าก่อนหน้า",
+    "next": "หน้าถัดไป",
+    "goTo": "ไปที่หน้า",
+    "go": "ไป",
+    "input": "หน้า 1 ถึง {count}"
+  }
+}

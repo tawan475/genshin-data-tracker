@@ -1,0 +1,75 @@
+{
+  "title": "Giai Thoại",
+  "area": "Khu vực {id}",
+  "newestCapture": "Bản ghi mới nhất",
+  "newestCaptureTitle": "Bản ghi mới nhất: {time}",
+  "notCaptured": "Chưa ghi",
+  "notCapturedTitle": "Chưa bản ghi nào có giai thoại: irminsul ghi lại chúng từ game",
+  "loadFailed": "Tải thất bại",
+  "allDone": "Đã xong hết",
+  "showDone": "Hiện đã xong",
+  "noneDone": "Chưa xong mục nào",
+  "showNotDone": "Hiện chưa xong",
+  "noneMet": "Chưa gặp giai thoại nào",
+  "noneMetBody": "Giai thoại ẩn sẽ hiện khi đã gặp.",
+  "noMatches": "Không có kết quả",
+  "clear": "Xóa lọc",
+  "loading": "Đang tải",
+  "notSaved": "Chưa lưu",
+  "group": {
+    "hideDone": "Ẩn đã xong",
+    "showDone": "Hiện đã xong",
+    "done": "{n} đã xong"
+  },
+  "row": {
+    "states": {
+      "captured": "đã ghi",
+      "marked": "đánh dấu thủ công",
+      "none": "chưa xong"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Đã ghi · vẫn tính là xong",
+    "markedByHand": "Đánh dấu thủ công",
+    "markedClick": "Đánh dấu thủ công · nhấn để bỏ",
+    "notDone": "Chưa xong",
+    "clickToMark": "Nhấn để đánh dấu xong",
+    "activeTitle": "Đang diễn ra trong game",
+    "active": "Đang làm",
+    "repeatTitle": "Đã xong {n} lần (lặp lại)",
+    "hidden": "Giai thoại ẩn",
+    "addedIn": "Thêm vào bản {version}"
+  },
+  "summary": {
+    "label": "Tóm tắt",
+    "done": "Đã xong",
+    "doneCaptured": "{n} đã ghi",
+    "doneByHand": "{n} thủ công",
+    "doneUnknown": "{n} mới hơn dữ liệu game",
+    "doneLabel": "Giai thoại đã xong",
+    "stamps": "Con Dấu",
+    "stampsTitle": "Con Dấu cho phần thưởng {n}",
+    "stampsNone": "Chưa có trong bản ghi",
+    "stampsLabel": "Con Dấu cho phần thưởng kế tiếp",
+    "reward": "Phần thưởng",
+    "rewardHint": "{primogems} Nguyên Thạch cho mỗi {every} giai thoại được ghi lại",
+    "rewardPer": "mỗi {every}",
+    "active": "Đang làm",
+    "activeHint": "Đang diễn ra trong game (trong bản ghi mới nhất)"
+  },
+  "toolbar": {
+    "label": "Lọc giai thoại",
+    "search": "Tìm",
+    "searchTitle": "Tiêu đề, câu chuyện, NPC hoặc id",
+    "completion": "Hoàn thành",
+    "completions": {
+      "all": "Tất cả",
+      "missing": "Chưa xong",
+      "done": "Đã xong"
+    },
+    "showDone": "Hiện đã xong",
+    "showDoneTitle": "Hiện đầy đủ giai thoại đã xong thay vì gộp dưới mỗi NPC",
+    "area": "Khu vực",
+    "allAreas": "Tất cả",
+    "locked": "Chưa mở khóa trong bản ghi mới nhất"
+  }
+}

@@ -698,6 +698,32 @@ the session (`requireActiveSession`), never the diag key. Migration 0020.
   Discord-Google only / Closed) and the upload limits (`site_settings`).
   Users delete themselves in Settings (`DELETE /api/auth/account`).
 
+## Languages
+
+The site speaks every language Genshin Impact ships: English, Simplified and
+Traditional Chinese, Japanese, Korean, Spanish, French, Russian, Thai,
+Vietnamese, German, Indonesian, Portuguese, Italian and Turkish
+(`SITE_LANGUAGES` in `packages/shared/src/settings.ts`; Settings → Appearance,
+or the browser's language, detected in `src/i18n/locale.ts` and the inline
+script in `index.html`).
+
+- **Interface text**: vue-i18n messages, one folder per language under
+  `apps/tracker/src/i18n/locales/<code>/` (same files and keys as `en/`;
+  English is built in, the others load on demand). `i18n/__tests__/messages.test.ts`
+  checks every language has exactly the English keys and placeholders. Game
+  terms in the messages follow the game's own translation in that language.
+- **Game names** (characters, weapons, materials, achievements, anecdotes…)
+  come from `@gdt/game-data`, compiled from the game's own text in each
+  language; English shows where the game has none.
+- **Fonts**: Outfit for Latin text; other scripts fall through to the
+  system's font for that language (`main.css` `:lang(...)`); Vietnamese skips
+  Outfit (no stacked diacritics).
+- **Event titles** come from the game's notice board: English and Chinese per
+  server, the other languages read once from one server (same notice ids).
+
+A new message key needs a text in every language folder (the test fails
+otherwise).
+
 ## Scripts
 
 ```bash

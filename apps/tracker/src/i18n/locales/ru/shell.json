@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Обзор",
+    "progression": "Прогресс",
+    "characters": "Персонажи",
+    "artifacts": "Артефакты",
+    "weapons": "Оружие",
+    "materials": "Материалы",
+    "planner": "Планировщик",
+    "achievements": "Достижения",
+    "anecdotes": "Путевой дневник",
+    "wishes": "Молитвы",
+    "snapshots": "Снимки",
+    "import": "Импорт",
+    "manage": "Управление",
+    "staffOverview": "Обзор",
+    "users": "Пользователи",
+    "storage": "Хранилище",
+    "roles": "Роли",
+    "audit": "Журнал"
+  },
+  "section": {
+    "staff": "Персонал",
+    "account": "Аккаунт",
+    "system": "Система"
+  },
+  "accounts": "Аккаунты",
+  "staff": "Персонал",
+  "settings": "Настройки",
+  "import": "Импорт",
+  "expandMenu": "Развернуть меню",
+  "collapseMenu": "Свернуть меню",
+  "openMenu": "Открыть меню",
+  "closeMenu": "Закрыть меню",
+  "lightTheme": "Светлая тема",
+  "darkTheme": "Тёмная тема",
+  "themeNotSaved": "Тема не сохранена",
+  "landingPage": "Главная страница",
+  "return": "Назад",
+  "highestRole": "Ваша высшая роль",
+  "copyName": "Копировать имя",
+  "copyUid": "Копировать UID",
+  "copyUidValue": "Копировать UID {uid}",
+  "nameCopied": "Имя скопировано",
+  "uidCopied": "UID скопирован",
+  "switcher": {
+    "select": "Выбрать аккаунт",
+    "add": "Добавить аккаунт"
+  },
+  "page": {
+    "signIn": "Вход",
+    "createAccount": "Создать аккаунт",
+    "continue": "Продолжить",
+    "linkIrminsul": "Привязать Irminsul",
+    "resetPassword": "Сброс пароля",
+    "newPassword": "Новый пароль",
+    "confirmEmail": "Подтверждение почты",
+    "accounts": "Аккаунты",
+    "addAccount": "Добавить аккаунт",
+    "settings": "Настройки",
+    "overview": "Обзор",
+    "users": "Пользователи",
+    "user": "Пользователь",
+    "storage": "Хранилище",
+    "roles": "Роли",
+    "audit": "Журнал",
+    "progression": "Прогресс",
+    "characters": "Персонажи",
+    "weapons": "Оружие",
+    "artifacts": "Артефакты",
+    "materials": "Материалы",
+    "planner": "Планировщик",
+    "achievements": "Достижения",
+    "anecdotes": "Путевой дневник",
+    "wishHistory": "История молитв",
+    "snapshots": "Снимки",
+    "import": "Импорт",
+    "accountSettings": "Настройки аккаунта",
+    "notFound": "Не найдено",
+    "inspect": "Просмотр · {page}"
+  },
+  "notFound": {
+    "title": "Страница не найдена",
+    "body": "Ссылка могла устареть, или страница переехала.",
+    "home": "На панель"
+  },
+  "accountMissing": {
+    "title": "Аккаунт не найден",
+    "body": "Возможно, он удалён или принадлежит другому пользователю.",
+    "all": "Все аккаунты"
+  },
+  "update": {
+    "ready": "Доступна новая версия трекера."
+  },
+  "public": {
+    "dashboard": "Панель"
+  },
+  "landing": {
+    "heroLine1": "Покорите своё",
+    "heroLine2": "путешествие в Genshin",
+    "tagline": "Каждый вход — снимок. Артефакты, материалы, история.",
+    "openDashboard": "Открыть панель",
+    "getStarted": "Начать",
+    "critDmg": "Крит. урон 21.8%"
+  },
+  "appearance": "Язык и оформление"
+}

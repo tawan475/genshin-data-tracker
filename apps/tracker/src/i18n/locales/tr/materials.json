@@ -1,0 +1,97 @@
+{
+  "title": "Malzemeler",
+  "newestSnapshot": "En yeni anlık görüntü",
+  "since": "{date} tarihinden beri",
+  "oneSnapshot": "Yalnızca bir anlık görüntü",
+  "changesTitle": "Değişimler {hint}",
+  "changeSince": "Şu tarihten beri değişim",
+  "noSnapshots": "Henüz anlık görüntü yok",
+  "import": "İçe aktar",
+  "loadFailed": "Malzemeler yüklenemedi",
+  "loading": "Malzemeler yükleniyor",
+  "saveChartFailed": "Grafik ayarları kaydedilemedi",
+  "search": "Ara",
+  "searchLabel": "Malzemelerde ara",
+  "noMatches": "Eşleşme yok",
+  "noMaterials": "Malzeme yok",
+  "clear": "Temizle",
+  "more": "{n} daha",
+  "upTo": "En fazla {max}",
+  "trackedOfMax": "Takip edilen / maks.",
+  "track": "Takip et",
+  "untrack": "Takibi bırak",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Son"
+  },
+  "wallet": {
+    "label": "Cüzdan",
+    "title": "Para birimleri ve dilek eşyaları",
+    "short": {
+      "GenesisCrystal": "Kristal",
+      "IntertwinedFate": "Yazgı Taşı",
+      "AcquaintFate": "Buluşma",
+      "MasterlessStarglitter": "Parıltı",
+      "MasterlessStardust": "Toz",
+      "OriginalResin": "Reçine",
+      "FragileResin": "Kırılgan",
+      "CondensedResin": "Yoğun",
+      "RealmCurrency": "Çaydanlık"
+    }
+  },
+  "tabs": {
+    "development": "Gelişim",
+    "precious": "Değerli",
+    "other": "Diğer",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Geliştirme cevherleri (oyun bunları silahlarla birlikte tutar)",
+      "artifact": "Kutsal Yağ ve Kutsal Öz (oyun bunları yadigarlarla birlikte tutar)",
+      "other": "Oyun içi Envanterde yok: para birimleri, tohumlar, kart oyunu eşyaları, oyun verisinden yeni eşyalar"
+    }
+  },
+  "bag": {
+    "title": "Çanta",
+    "show": "Göster",
+    "view": "Görünüm",
+    "views": {
+      "grid": "Simgeler",
+      "list": "Liste"
+    },
+    "tabRow": "Envanter sekmesi",
+    "all": "Tümü",
+    "allTitle": "Tüm sekmeler",
+    "sort": "Sırala",
+    "sorts": {
+      "order": "Oyun içi",
+      "count": "Adet",
+      "change": "Değişim",
+      "name": "Ad"
+    },
+    "unfoldAll": "Tüm sekmeleri aç",
+    "foldAll": "Tüm sekmeleri katla",
+    "owned": "Sahip olunan",
+    "ownedTitle": "Elindeki malzemeler",
+    "gained": "Kazanılan",
+    "gainedTitle": "Kazanılan {hint}",
+    "spent": "Harcanan",
+    "spentTitle": "Harcanan {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · elle ayarlandı {hand} (tarama {capture})"
+  },
+  "detail": {
+    "history": "Geçmiş",
+    "chartLabel": "Zaman içinde {name}, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Kazanılan",
+    "spent": "Harcanan",
+    "peak": "Zirve",
+    "first": "İlk",
+    "firstTitle": "Bunu içeren ilk anlık görüntü"
+  },
+  "tracked": {
+    "title": "Takip edilen",
+    "list": "Takip edilen malzemeler",
+    "untrackName": "{name} takibini bırak"
+  }
+}

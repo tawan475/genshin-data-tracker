@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Lv.{level}/{cap}",
+    "copies": "{n}本",
+    "locked": "ロック中"
+  },
+  "sort": {
+    "quality": "レア度",
+    "level": "レベル",
+    "refinement": "精錬",
+    "count": "所持数",
+    "name": "名前",
+    "type": "タイプ"
+  },
+  "levelFilter": {
+    "all": "レベル",
+    "max": "最大",
+    "levelled": "強化済み",
+    "base": "Lv.1"
+  },
+  "refine": {
+    "spare": "余り {n}本",
+    "possible": "精錬可能：{title}"
+  },
+  "group": {
+    "copies": "{count}本"
+  },
+  "bag": {
+    "notInData": "{copies} · まだゲームデータにありません"
+  },
+  "toolbar": {
+    "bag": "バッグ",
+    "byWeapon": "武器別",
+    "list": "リスト",
+    "status": "状態",
+    "equipped": "装備中",
+    "unused": "未使用",
+    "lock": "ロック",
+    "locked": "ロック中",
+    "unlocked": "ロックなし",
+    "label": "武器を絞り込む",
+    "searchTitle": "武器、タイプ、キャラクター",
+    "chips": "タイプ、レア度、精錬",
+    "noneInCapture": "このキャプチャにはありません",
+    "refinableTitle": "余りで装備中の武器を精錬できる武器",
+    "refinable": "精錬可能"
+  },
+  "detail": {
+    "refinementTitle": "精錬ランク {rank}/{max}",
+    "unequipped": "未装備",
+    "copies": "{n}本",
+    "equipped": "{n}本装備中",
+    "spareCopies": "余り {n}本"
+  },
+  "table": {
+    "qualityTitle": "レア度：レア度、レベル、精錬、新しい順",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "種類",
+    "kindsTitle": "異なる武器の数",
+    "unused5": "未使用★5",
+    "refinableTitle": "余りで装備中の武器を精錬できます",
+    "empty": "武器なし",
+    "pages": "武器のページ"
+  }
+}

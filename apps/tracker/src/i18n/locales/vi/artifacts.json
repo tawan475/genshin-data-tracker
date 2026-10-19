@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Đã khóa",
+    "astralMark": "Dấu Tinh Tú",
+    "new": "Mới"
+  },
+  "sort": {
+    "quality": "Phẩm chất",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Tiềm năng",
+    "level": "Cấp",
+    "set": "Bộ",
+    "recent": "Gần đây"
+  },
+  "sortTitle": {
+    "quality": "Như trong game: độ hiếm, cấp, bộ, người trang bị",
+    "cv": "Crit value (chỉ số bạo kích)",
+    "rv": "Roll value (giá trị dòng)",
+    "potential": "CV dự kiến ở cấp tối đa",
+    "level": "Cấp",
+    "set": "Bộ",
+    "recent": "Mới hoặc đã thay đổi"
+  },
+  "topSets": {
+    "label": "Bộ hàng đầu",
+    "more": "Thêm {n} bộ"
+  },
+  "lower": {
+    "label": "Độ hiếm thấp hơn: {counts}",
+    "title": "Độ hiếm thấp hơn, cách sắp xếp này đặt ở cuối"
+  },
+  "picker": {
+    "find": "Tìm",
+    "noMatch": "Không khớp",
+    "done": "Xong"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: không có",
+    "cell": "{slot} · {n} món · tốt nhất {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Số món",
+    "slotHeader": "{slot}: CV tốt nhất, số món",
+    "sumTitle": "Tổng CV tốt nhất của mỗi vị trí"
+  },
+  "bag": {
+    "more": "Thêm {n}"
+  },
+  "table": {
+    "sortBySet": "Sắp xếp theo bộ",
+    "sortByLevel": "Sắp xếp theo cấp",
+    "equippedBy": "Người trang bị",
+    "marks": "Khóa và dấu",
+    "elixir": "Bột Thánh Hóa"
+  },
+  "detail": {
+    "fromGame": "Từ game",
+    "inferred": "Suy ra từ cấp",
+    "upgradesToCome": "{source} · còn {n} lần nâng",
+    "rankTitle": "Hạng CV trong {n} {slot} {rarity}★",
+    "newTitle": "Không có trong bản ghi trước",
+    "rolls": "Lượt tăng",
+    "rank": "Hạng",
+    "upgradesTitle": "Cứ 4 cấp tăng một dòng thuộc tính thêm, tới {max}",
+    "upgrades": "Lần nâng",
+    "expectedCv": "CV dự kiến",
+    "expectedDetail": "Dự kiến ở {max}: mỗi lần nâng có {chance}% trúng dòng bạo kích, với mức tăng trung bình",
+    "bestCase": "Tốt nhất",
+    "bestDetail": "Mọi lần nâng đều trúng bạo kích mức cao nhất, tới {max}",
+    "critLinesTitle": "{n} trên 4 dòng là bạo kích: xác suất một lần nâng trúng một dòng",
+    "critPerRoll": "Bạo kích / lượt",
+    "activatesTitle": "Dòng thứ tư, mở ở lần nâng đầu tiên",
+    "activates": "+4 mở thêm",
+    "maxRv": "RV tối đa",
+    "unlocked": "Chưa khóa",
+    "astral": "Tinh Tú",
+    "elixirTitle": "Bột Thánh Hóa",
+    "rollTier": "Mức {tier}",
+    "inactive": "Chưa kích hoạt"
+  },
+  "card": {
+    "potentialTitle": "CV dự kiến ở +{max} · tốt nhất {best}",
+    "equipped": "Đã Trang Bị: {name}"
+  },
+  "toolbar": {
+    "all": "Tất cả",
+    "yes": "Có",
+    "no": "Không",
+    "linesNow": "Hiện {n} dòng",
+    "any": "Bất kỳ",
+    "allSets": "Mọi bộ",
+    "anyone": "Bất kỳ ai",
+    "noAstral": "Không dấu Tinh Tú",
+    "noElixir": "Không Bột Thánh Hóa",
+    "quoted": "“{text}”",
+    "mainPill": "Chính: {stat}",
+    "lines": "{n} dòng",
+    "best": "Tốt nhất",
+    "label": "Lọc Thánh Di Vật",
+    "searchLabel": "Tìm bộ hoặc nhân vật",
+    "searchTitle": "Bộ hoặc nhân vật",
+    "equippedByTitle": "Trang bị bởi: {names}",
+    "sortBy": "Sắp Xếp Theo",
+    "descending": "Giảm dần",
+    "ascending": "Tăng dần",
+    "slot": "Vị trí",
+    "presets": "Thiết lập sẵn",
+    "bestTitle": "{n} món đầu mỗi vị trí, theo cách sắp xếp hiện tại",
+    "newNone": "Không có bản ghi trước để so sánh",
+    "newTitle": "Không có trong bản ghi trước: mới, hoặc đã nâng cấp từ đó",
+    "zeroTitle": "5★ chưa trang bị ở +0",
+    "lowTitle": "4★ và 3★ chưa khóa, chưa trang bị",
+    "low": "Thánh Di Vật 4★/3★",
+    "spareTitle": "5★ chưa trang bị",
+    "spare": "5★ dư",
+    "maxTitle": "Chỉ cấp +20",
+    "moreTitle": "Thuộc tính chính, thuộc tính thêm, số dòng, cấp, khóa, vị trí, dấu Tinh Tú, Bột Thánh Hóa",
+    "more": "Thêm",
+    "substatsTitle": "Có tất cả các dòng này (tính cả dòng mở ở +4)",
+    "linesLabel": "Số dòng",
+    "min": "Tối thiểu",
+    "max": "Tối đa",
+    "location": "Vị trí",
+    "remove": "Bỏ {label}"
+  },
+  "page": {
+    "table": "Bảng",
+    "loadFailed": "Không tải được Thánh Di Vật",
+    "loading": "Đang tải Thánh Di Vật",
+    "refreshFailed": "Không làm mới được",
+    "shownTitle": "Đang hiện / Thánh Di Vật",
+    "countSuffix": "Thánh Di Vật",
+    "pngSize": "PNG rộng {px} px"
+  }
+}

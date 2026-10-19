@@ -710,7 +710,7 @@ export const adminAudit = sqliteTable(
  * Overflowing event (`source` 'hoyolab', `ann_id` the post, `kind` the
  * domain event kind). `start`/`end` are the server's local time
  * (`YYYY-MM-DDTHH:mm`, end exclusive; NULL end: open-ended); `titles` is
- * `{ en, zh-CN?, zh-TW? }`. A row stays until a week after it ends, even
+ * `{ en, <other site language>? }`. A row stays until a week after it ends, even
  * when the board drops the notice.
  */
 export const gameNotices = sqliteTable(

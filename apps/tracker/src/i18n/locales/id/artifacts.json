@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Terkunci",
+    "astralMark": "Astral mark",
+    "new": "Baru"
+  },
+  "sort": {
+    "quality": "Kualitas",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potensi",
+    "level": "Level",
+    "set": "Set",
+    "recent": "Terbaru"
+  },
+  "sortTitle": {
+    "quality": "Seperti di game: kelangkaan, level, set, pemakai",
+    "cv": "Crit value",
+    "rv": "Roll value",
+    "potential": "CV yang diharapkan di level maks",
+    "level": "Level",
+    "set": "Set",
+    "recent": "Baru atau berubah"
+  },
+  "topSets": {
+    "label": "Set teratas",
+    "more": "{n} set lagi"
+  },
+  "lower": {
+    "label": "Kelangkaan lebih rendah: {counts}",
+    "title": "Kelangkaan lebih rendah, yang ditaruh paling akhir oleh urutan ini"
+  },
+  "picker": {
+    "find": "Cari",
+    "noMatch": "Tidak ada yang cocok",
+    "done": "Selesai"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: tidak ada",
+    "cell": "{slot} · {n} buah · terbaik {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Buah",
+    "slotHeader": "{slot}: CV terbaik, buah",
+    "sumTitle": "CV terbaik per slot, dijumlahkan"
+  },
+  "bag": {
+    "more": "{n} lagi"
+  },
+  "table": {
+    "sortBySet": "Urutkan menurut set",
+    "sortByLevel": "Urutkan menurut level",
+    "equippedBy": "Dikenakan oleh",
+    "marks": "Kunci dan tanda",
+    "elixir": "Elixir"
+  },
+  "detail": {
+    "fromGame": "Dari game",
+    "inferred": "Disimpulkan dari level",
+    "upgradesToCome": "{source} · {n} upgrade lagi",
+    "rankTitle": "Peringkat CV di antara {n} {slot} {rarity}★",
+    "newTitle": "Tidak ada di tangkapan sebelumnya",
+    "rolls": "Roll",
+    "rank": "Peringkat",
+    "upgradesTitle": "Satu roll substat setiap 4 level, hingga {max}",
+    "upgrades": "Upgrade",
+    "expectedCv": "CV harapan",
+    "expectedDetail": "Harapan di {max}: setiap upgrade me-roll baris crit {chance}% dari waktu, dengan roll rata-rata",
+    "bestCase": "Terbaik",
+    "bestDetail": "Setiap upgrade roll crit tertinggi, hingga {max}",
+    "critLinesTitle": "{n} dari 4 baris adalah CRIT: peluang upgrade me-roll salah satunya",
+    "critPerRoll": "Crit / roll",
+    "activatesTitle": "Baris keempat, dibuka oleh upgrade pertama",
+    "activates": "+4 menambah",
+    "maxRv": "RV maks",
+    "unlocked": "Tak terkunci",
+    "astral": "Astral",
+    "elixirTitle": "Sanctifying Elixir",
+    "rollTier": "Roll {tier}",
+    "inactive": "Tidak aktif"
+  },
+  "card": {
+    "potentialTitle": "CV harapan di +{max} · terbaik {best}",
+    "equipped": "Dikenakan: {name}"
+  },
+  "toolbar": {
+    "all": "Semua",
+    "yes": "Ya",
+    "no": "Tidak",
+    "linesNow": "{n} baris sekarang",
+    "any": "Apa saja",
+    "allSets": "Semua set",
+    "anyone": "Siapa saja",
+    "noAstral": "Tanpa astral",
+    "noElixir": "Tanpa elixir",
+    "quoted": "“{text}”",
+    "mainPill": "Utama: {stat}",
+    "lines": "{n} baris",
+    "best": "Terbaik",
+    "label": "Filter artefak",
+    "searchLabel": "Cari set atau karakter",
+    "searchTitle": "Set atau karakter",
+    "equippedByTitle": "Dikenakan oleh: {names}",
+    "sortBy": "Urutkan menurut",
+    "descending": "Menurun",
+    "ascending": "Menaik",
+    "slot": "Slot",
+    "presets": "Preset",
+    "bestTitle": "{n} teratas per slot, menurut urutan saat ini",
+    "newNone": "Tidak ada tangkapan sebelumnya untuk dibandingkan",
+    "newTitle": "Tidak ada di tangkapan sebelumnya: baru, atau sudah dinaikkan levelnya",
+    "zeroTitle": "5★ tidak dikenakan di +0",
+    "lowTitle": "4★ dan 3★ tak terkunci dan tidak dikenakan",
+    "low": "Artefak 4★/3★",
+    "spareTitle": "5★ tidak dikenakan",
+    "spare": "5★ cadangan",
+    "maxTitle": "Hanya level +20",
+    "moreTitle": "Stat utama, substat, baris, level, kunci, lokasi, astral mark, elixir",
+    "more": "Lainnya",
+    "substatsTitle": "Memiliki semua ini (baris yang dibuka +4 ikut dihitung)",
+    "linesLabel": "Baris",
+    "min": "Min",
+    "max": "Maks",
+    "location": "Lokasi",
+    "remove": "Lepas {label}"
+  },
+  "page": {
+    "table": "Tabel",
+    "loadFailed": "Tidak bisa memuat artefak",
+    "loading": "Memuat artefak",
+    "refreshFailed": "Tidak bisa menyegarkan",
+    "shownTitle": "Ditampilkan / artefak",
+    "countSuffix": "artefak",
+    "pngSize": "PNG lebar {px} px"
+  }
+}

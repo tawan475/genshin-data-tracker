@@ -1,0 +1,75 @@
+{
+  "title": "여행 일화집",
+  "area": "지역 {id}",
+  "newestCapture": "최신 캡처",
+  "newestCaptureTitle": "최신 캡처: {time}",
+  "notCaptured": "캡처 없음",
+  "notCapturedTitle": "아직 일화가 담긴 캡처가 없습니다. irminsul이 게임에서 기록합니다",
+  "loadFailed": "불러오기 실패",
+  "allDone": "모두 완료",
+  "showDone": "완료 표시",
+  "noneDone": "완료 없음",
+  "showNotDone": "미완료 표시",
+  "noneMet": "아직 만난 일화 없음",
+  "noneMetBody": "숨겨진 일화는 만난 후에 표시됩니다.",
+  "noMatches": "일치 항목 없음",
+  "clear": "지우기",
+  "loading": "불러오는 중",
+  "notSaved": "저장되지 않음",
+  "group": {
+    "hideDone": "완료 숨기기",
+    "showDone": "완료 표시",
+    "done": "{n}개 완료"
+  },
+  "row": {
+    "states": {
+      "captured": "캡처됨",
+      "marked": "직접 표시함",
+      "none": "미완료"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "캡처됨 · 완료 유지",
+    "markedByHand": "직접 표시함",
+    "markedClick": "직접 표시함 · 클릭하여 해제",
+    "notDone": "미완료",
+    "clickToMark": "클릭하여 완료 표시",
+    "activeTitle": "게임에서 진행 중",
+    "active": "진행 중",
+    "repeatTitle": "{n}회 완료 (반복)",
+    "hidden": "숨겨진 일화",
+    "addedIn": "{version}에 추가"
+  },
+  "summary": {
+    "label": "요약",
+    "done": "완료",
+    "doneCaptured": "캡처 {n}개",
+    "doneByHand": "직접 {n}개",
+    "doneUnknown": "게임 데이터보다 최신 {n}개",
+    "doneLabel": "완료한 일화",
+    "stamps": "스탬프",
+    "stampsTitle": "보상 {n}까지의 스탬프",
+    "stampsNone": "아직 캡처에 없음",
+    "stampsLabel": "다음 보상까지의 스탬프",
+    "reward": "보상",
+    "rewardHint": "일화 {every}개를 기록할 때마다 원석 {primogems}개",
+    "rewardPer": "{every}개당",
+    "active": "진행 중",
+    "activeHint": "게임에서 진행 중 (최신 캡처 기준)"
+  },
+  "toolbar": {
+    "label": "일화 필터",
+    "search": "검색",
+    "searchTitle": "제목, 이야기, NPC 또는 ID",
+    "completion": "완료 여부",
+    "completions": {
+      "all": "전체",
+      "missing": "미완료",
+      "done": "완료"
+    },
+    "showDone": "완료 표시",
+    "showDoneTitle": "완료한 일화를 NPC별로 접지 않고 모두 표시",
+    "area": "지역",
+    "allAreas": "전체",
+    "locked": "최신 캡처에서 미해금"
+  }
+}

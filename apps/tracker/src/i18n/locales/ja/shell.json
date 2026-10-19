@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "概要",
+    "progression": "育成推移",
+    "characters": "キャラクター",
+    "artifacts": "聖遺物",
+    "weapons": "武器",
+    "materials": "素材",
+    "planner": "プランナー",
+    "achievements": "アチーブメント",
+    "anecdotes": "秘話",
+    "wishes": "祈願",
+    "snapshots": "スナップショット",
+    "import": "インポート",
+    "manage": "管理",
+    "staffOverview": "概要",
+    "users": "ユーザー",
+    "storage": "容量",
+    "roles": "ロール",
+    "audit": "監査"
+  },
+  "section": {
+    "staff": "スタッフ",
+    "account": "アカウント",
+    "system": "システム"
+  },
+  "accounts": "アカウント",
+  "staff": "スタッフ",
+  "settings": "設定",
+  "import": "インポート",
+  "expandMenu": "メニューを展開",
+  "collapseMenu": "メニューを折りたたむ",
+  "openMenu": "メニューを開く",
+  "closeMenu": "メニューを閉じる",
+  "lightTheme": "ライトテーマ",
+  "darkTheme": "ダークテーマ",
+  "themeNotSaved": "テーマを保存できませんでした",
+  "landingPage": "トップページ",
+  "return": "戻る",
+  "highestRole": "あなたの最上位ロール",
+  "copyName": "名前をコピー",
+  "copyUid": "UIDをコピー",
+  "copyUidValue": "UID {uid} をコピー",
+  "nameCopied": "名前をコピーしました",
+  "uidCopied": "UIDをコピーしました",
+  "switcher": {
+    "select": "アカウントを選択",
+    "add": "アカウントを追加"
+  },
+  "page": {
+    "signIn": "ログイン",
+    "createAccount": "アカウント作成",
+    "continue": "続ける",
+    "linkIrminsul": "Irminsul と連携",
+    "resetPassword": "パスワードをリセット",
+    "newPassword": "新しいパスワード",
+    "confirmEmail": "メールアドレスの確認",
+    "accounts": "アカウント",
+    "addAccount": "アカウントを追加",
+    "settings": "設定",
+    "overview": "概要",
+    "users": "ユーザー",
+    "user": "ユーザー",
+    "storage": "容量",
+    "roles": "ロール",
+    "audit": "監査",
+    "progression": "育成推移",
+    "characters": "キャラクター",
+    "weapons": "武器",
+    "artifacts": "聖遺物",
+    "materials": "素材",
+    "planner": "プランナー",
+    "achievements": "アチーブメント",
+    "anecdotes": "秘話",
+    "wishHistory": "祈願履歴",
+    "snapshots": "スナップショット",
+    "import": "インポート",
+    "accountSettings": "アカウント設定",
+    "notFound": "見つかりません",
+    "inspect": "閲覧 · {page}"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "body": "リンクが古いか、ページが移動した可能性があります。",
+    "home": "ダッシュボードへ"
+  },
+  "accountMissing": {
+    "title": "アカウントが見つかりません",
+    "body": "削除されたか、他のユーザーのアカウントの可能性があります。",
+    "all": "すべてのアカウント"
+  },
+  "update": {
+    "ready": "トラッカーの新しいバージョンが利用できます。"
+  },
+  "public": {
+    "dashboard": "ダッシュボード"
+  },
+  "landing": {
+    "heroLine1": "原神の旅を",
+    "heroLine2": "すべて記録",
+    "tagline": "ログインのたびにスナップショット。聖遺物、素材、履歴。",
+    "openDashboard": "ダッシュボードを開く",
+    "getStarted": "はじめる",
+    "critDmg": "会心ダメージ 21.8%"
+  },
+  "appearance": "言語と外観"
+}

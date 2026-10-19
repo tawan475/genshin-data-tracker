@@ -1,0 +1,75 @@
+{
+  "title": "Seyahat Notları",
+  "area": "Bölge {id}",
+  "newestCapture": "En yeni tarama",
+  "newestCaptureTitle": "En yeni tarama: {time}",
+  "notCaptured": "Taranmadı",
+  "notCapturedTitle": "Henüz anekdot içeren tarama yok: irminsul bunları oyundan kaydeder",
+  "loadFailed": "Yüklenemedi",
+  "allDone": "Hepsi tamam",
+  "showDone": "Tamamlananları göster",
+  "noneDone": "Hiçbiri tamamlanmadı",
+  "showNotDone": "Tamamlanmayanları göster",
+  "noneMet": "Henüz hiçbiriyle karşılaşılmadı",
+  "noneMetBody": "Gizli anekdotlar karşılaşıldığında görünür.",
+  "noMatches": "Eşleşme yok",
+  "clear": "Temizle",
+  "loading": "Yükleniyor",
+  "notSaved": "Kaydedilmedi",
+  "group": {
+    "hideDone": "Tamamlananları gizle",
+    "showDone": "Tamamlananları göster",
+    "done": "{n} tamam"
+  },
+  "row": {
+    "states": {
+      "captured": "tarandı",
+      "marked": "elle işaretlendi",
+      "none": "tamamlanmadı"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Tarandı · tamamlanmış kalır",
+    "markedByHand": "Elle işaretlendi",
+    "markedClick": "Elle işaretlendi · işareti kaldırmak için tıkla",
+    "notDone": "Tamamlanmadı",
+    "clickToMark": "Tamamlandı olarak işaretlemek için tıkla",
+    "activeTitle": "Şu an oyunda devam ediyor",
+    "active": "Etkin",
+    "repeatTitle": "{n} kez tamamlandı (döngü)",
+    "hidden": "Gizli anekdot",
+    "addedIn": "{version} sürümünde eklendi"
+  },
+  "summary": {
+    "label": "Özet",
+    "done": "Tamam",
+    "doneCaptured": "{n} tarandı",
+    "doneByHand": "{n} elle",
+    "doneUnknown": "{n} oyun verisinden yeni",
+    "doneLabel": "Tamamlanan anekdotlar",
+    "stamps": "Damgalar",
+    "stampsTitle": "{n}. ödüle doğru damgalar",
+    "stampsNone": "Henüz taramada yok",
+    "stampsLabel": "Sonraki ödüle doğru damgalar",
+    "reward": "Ödül",
+    "rewardHint": "Kaydedilen her {every} anekdot için {primogems} köken taşı",
+    "rewardPer": "{every} başına",
+    "active": "Etkin",
+    "activeHint": "Şu an oyunda devam ediyor (en yeni taramada)"
+  },
+  "toolbar": {
+    "label": "Anekdotları filtrele",
+    "search": "Ara",
+    "searchTitle": "Başlık, hikâye, NPC veya id",
+    "completion": "Tamamlanma",
+    "completions": {
+      "all": "Tümü",
+      "missing": "Tamamlanmadı",
+      "done": "Tamam"
+    },
+    "showDone": "Tamamlananları göster",
+    "showDoneTitle": "Tamamlanan anekdotları her NPC altında katlamak yerine tam göster",
+    "area": "Bölge",
+    "allAreas": "Tümü",
+    "locked": "En yeni taramada açılmamış"
+  }
+}

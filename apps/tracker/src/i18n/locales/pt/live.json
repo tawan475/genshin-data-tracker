@@ -1,0 +1,44 @@
+{
+  "label": "Ao vivo",
+  "thisSession": "Esta sessão",
+  "sessionSince": "Desde {time}",
+  "levelUps": "{n} nível subido | {n} níveis subidos",
+  "talents": "{n} talento | {n} talentos",
+  "updated": "atualizado {ago}",
+  "updatedAt": "Atualizado às {time}",
+  "row": "Ao vivo",
+  "rowDetail": "{n} alteração desde esta captura | {n} alterações desde esta captura",
+  "sinceSnapshot": "desde a captura mais recente",
+  "discard": "Descartar",
+  "discardTitle": "Excluir estas alterações; a captura mais recente permanece",
+  "discarded": "Alterações ao vivo excluídas",
+  "discardFailed": "Não foi possível excluir as alterações ao vivo",
+  "settings": {
+    "title": "Sincronização ao vivo",
+    "label": "Acompanhar o Irminsul ao vivo",
+    "description": "Enquanto o Irminsul estiver aberto, as alterações aparecem aqui em segundos, entre as capturas.",
+    "devices": "Sincronização ao vivo deste PC para: {accounts} (Ajustes da conta)",
+    "deletePoints": "Excluir pontos do gráfico",
+    "deletePointsTitle": "Excluir os pontos do gráfico que a sincronização ao vivo guardou entre as capturas",
+    "deletePointsConfirm": "Excluir todos os pontos do gráfico desta conta? As capturas permanecem.",
+    "pointsDeleted": "Pontos do gráfico excluídos",
+    "exportNote": "As exportações incluem as alterações e os pontos ao vivo (live/ no zip)."
+  },
+  "session": {
+    "heading": "Sessões",
+    "hours": "{h} h {m} min",
+    "minutes": "{m} min",
+    "world": "Mundo {n}",
+    "newCharacter": "{name} entrou",
+    "more": "+{n}",
+    "showMore": "Mostrar mais ({n})",
+    "field": {
+      "level": "{name} Nv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} ataque {from}→{to}",
+      "skill": "{name} habilidade {from}→{to}",
+      "burst": "{name} supremo {from}→{to}"
+    }
+  },
+  "staffBytes": "A sincronização ao vivo guarda mais {size} (gdt-live)"
+}

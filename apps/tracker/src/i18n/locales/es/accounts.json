@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Cuenta {id}",
+  "server": {
+    "ASIA": "Asia",
+    "AMERICA": "América",
+    "EUROPE": "Europa",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Cuentas",
+    "snapshots": "Capturas",
+    "uploaded": "Subido",
+    "stored": "Guardado",
+    "ratio": "Proporción",
+    "lastCaptured": "Última captura",
+    "bytes": "{n} bytes",
+    "ratioTitle": "Guardado {ratio} más pequeño que lo subido",
+    "add": "Añadir cuenta",
+    "empty": "Aún no hay cuentas"
+  },
+  "new": {
+    "title": "Añadir cuenta",
+    "add": "Añadir",
+    "notAdded": "No añadida",
+    "added": "{name} añadida",
+    "connect": "Conectar Irminsul",
+    "overview": "Vista general",
+    "importFiles": "Importar archivos",
+    "addAnother": "Añadir otra"
+  },
+  "settings": {
+    "title": "Ajustes de la cuenta",
+    "details": "Detalles",
+    "traveler": "Viajero",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Borrar cuenta",
+    "deleteTitle": "Los archivos GOOD exportados no se ven afectados",
+    "confirmTitle": "¿Borrar {name}?",
+    "deletes": "Borra {loss}. Su clave de Irminsul dejará de funcionar.",
+    "typeToConfirm": "Escribe {word}",
+    "confirmWord": "borrar",
+    "loss": "{n} captura | {n} capturas",
+    "deleted": "{name} borrada"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "label": "Live",
+  "thisSession": "Sesi ini",
+  "sessionSince": "Sejak {time}",
+  "levelUps": "{n} naik level",
+  "talents": "{n} talenta",
+  "updated": "diperbarui {ago}",
+  "updatedAt": "Diperbarui {time}",
+  "row": "Live",
+  "rowDetail": "{n} perubahan sejak snapshot ini",
+  "sinceSnapshot": "sejak snapshot terbaru",
+  "discard": "Buang",
+  "discardTitle": "Hapus perubahan ini; snapshot terbaru tetap ada",
+  "discarded": "Perubahan live dihapus",
+  "discardFailed": "Tidak bisa menghapus perubahan live",
+  "settings": {
+    "title": "Sinkronisasi live",
+    "label": "Ikuti Irminsul secara live",
+    "description": "Selama Irminsul berjalan, perubahannya muncul di sini dalam hitungan detik, di antara snapshot.",
+    "devices": "Sinkronisasi live dari PC ini ke: {accounts} (Pengaturan akun)",
+    "deletePoints": "Hapus titik grafik",
+    "deletePointsTitle": "Hapus titik grafik yang disimpan sinkronisasi live di antara snapshot",
+    "deletePointsConfirm": "Hapus semua titik grafik akun ini? Snapshot tetap ada.",
+    "pointsDeleted": "Titik grafik dihapus",
+    "exportNote": "Ekspor menyertakan perubahan dan titik live (live/ di dalam zip)."
+  },
+  "session": {
+    "heading": "Sesi",
+    "hours": "{h} j {m} mnt",
+    "minutes": "{m} mnt",
+    "world": "Dunia {n}",
+    "newCharacter": "{name} bergabung",
+    "more": "+{n} lagi",
+    "showMore": "Tampilkan lagi ({n})",
+    "field": {
+      "level": "{name} Lv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} serangan {from}→{to}",
+      "skill": "{name} skill {from}→{to}",
+      "burst": "{name} burst {from}→{to}"
+    }
+  },
+  "staffBytes": "Sinkronisasi live menyimpan {size} lagi (gdt-live)"
+}

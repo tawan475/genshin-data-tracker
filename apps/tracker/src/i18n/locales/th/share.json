@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "คัดลอกรูปภาพ",
+    "share": "แชร์",
+    "missing": "โหลดรูปภาพไม่ได้ {n} รูป",
+    "drawing": "{label} · กำลังวาด",
+    "exportFailed": "ส่งออกไม่สำเร็จ",
+    "copyFailed": "คัดลอกไม่สำเร็จ",
+    "shareFailed": "แชร์ไม่สำเร็จ",
+    "copied": "คัดลอกแล้ว",
+    "download": "ดาวน์โหลด PNG",
+    "downloadSized": "ดาวน์โหลด PNG {size}",
+    "buildTitle": "บิลด์",
+    "artifactTitle": "อาร์ติแฟกต์"
+  },
+  "options": {
+    "darkCard": "การ์ดมืด",
+    "lightCard": "การ์ดสว่าง",
+    "dark": "มืด",
+    "light": "สว่าง",
+    "cardTheme": "ธีมการ์ด",
+    "showName": "แสดงชื่อบัญชี",
+    "name": "ชื่อ",
+    "showUid": "แสดง UID"
+  },
+  "menu": {
+    "label": "การ์ดแชร์",
+    "drawing": "กำลังวาด",
+    "copy": "คัดลอก"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · สุ่ม {n} ครั้ง (ค่าเริ่มต้น และอีกครั้งทุก +4)",
+    "levelTitle": "เลเวล {level} จาก {cap} · เลื่อนขั้น {ascension}",
+    "weaponAndStats": "อาวุธและค่าสถานะ",
+    "pieceBonus": "โบนัส {n} ชิ้น",
+    "rvTitle": "Roll value: ผลรวมของค่าสถานะรองทุกครั้งที่สุ่มเพิ่ม คิดเป็น % ของค่าสูงสุดที่สุ่มได้"
+  }
+}

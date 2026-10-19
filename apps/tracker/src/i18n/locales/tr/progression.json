@@ -1,0 +1,74 @@
+{
+  "title": "Ayrıntılı ilerleme",
+  "figures": "Değerler",
+  "atLeastOne": "En az bir",
+  "groupBy": "Grupla",
+  "longerThanRange": "Aralıktan uzun",
+  "loading": "İlerleme yükleniyor",
+  "noData": "Veri yok",
+  "inRange": "bu aralıkta",
+  "gainedInRange": "bu aralıkta kazanılan",
+  "spentInRange": "bu aralıkta harcanan",
+  "noCaptures": "Tarama yok",
+  "captures": "{n} tarama",
+  "total": "Toplam {n}",
+  "lineLabel": "Zaman içinde {figure}, {span}. Son değer {value}.",
+  "barsLabel": "{figure} değişimi {per}, {span}: kazanılan {gained}, harcanan {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Anlık görüntü",
+    "hour": "Saat",
+    "day": "Gün",
+    "month": "Ay",
+    "year": "Yıl"
+  },
+  "per": {
+    "snapshot": "Anlık görüntü başına",
+    "hour": "Saat başına",
+    "day": "Gün başına",
+    "month": "Ay başına",
+    "year": "Yıl başına"
+  },
+  "against": {
+    "snapshot": "Önceki anlık görüntüye göre değişim",
+    "hour": "Önceki saate göre değişim",
+    "day": "Önceki güne göre değişim",
+    "month": "Önceki aya göre değişim",
+    "year": "Önceki yıla göre değişim"
+  },
+  "newest": {
+    "snapshot": "son {n} anlık görüntü",
+    "hour": "son {n} saat",
+    "day": "son {n} gün",
+    "month": "son {n} ay",
+    "year": "son {n} yıl"
+  },
+  "range": {
+    "label": "Zaman aralığı",
+    "hours": "Saat",
+    "days": "Gün",
+    "all": "Tümü",
+    "h": "{n} sa",
+    "d": "{n} g",
+    "y": "{n} y"
+  },
+  "monthly": {
+    "unavailable": "Aylık analiz kullanılamıyor",
+    "loading": "Aylık analiz yükleniyor",
+    "noCaptures": "Tarama yok",
+    "goTo": "{month} ayına git",
+    "date": "Tarih",
+    "primogem": "Köken Taşı",
+    "mora": "Mora",
+    "artifact": "Yadigar",
+    "extract": "Özüt",
+    "netWorth": "Net değer",
+    "moraUnit": "mora",
+    "primogemUnit": "köken taşı"
+  },
+  "character": {
+    "level": "Seviye",
+    "constellation": "Takımyıldız",
+    "talents": "Yetenekler"
+  }
+}

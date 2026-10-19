@@ -1,0 +1,38 @@
+{
+  "close": "Chiudi",
+  "constellation": {
+    "title": "Costellazione {level} di 6"
+  },
+  "crit": {
+    "title": "CV {value} · Tasso di CRIT × 2 + DAN da CRIT",
+    "circlet": " · corona CRIT +7,77"
+  },
+  "level": {
+    "title": "Livello {level} di {cap} · Ascensione {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} stelle"
+  },
+  "roll": {
+    "title": "RV {value}% · tiri in % del tiro massimo, sommati"
+  },
+  "error": {
+    "title": "Impossibile caricare",
+    "retry": "Riprova"
+  },
+  "field": {
+    "optional": "(facoltativo)"
+  },
+  "modal": {
+    "previous": "Precedente",
+    "next": "Successivo"
+  },
+  "pager": {
+    "label": "Pagine",
+    "previous": "Pagina precedente",
+    "next": "Pagina successiva",
+    "goTo": "Vai alla pagina",
+    "go": "Vai",
+    "input": "Pagina, da 1 a {count}"
+  }
+}

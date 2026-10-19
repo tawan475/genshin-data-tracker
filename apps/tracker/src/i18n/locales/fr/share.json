@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Copier l'image",
+    "share": "Partager",
+    "missing": "{n} image n'a pas pu être chargée | {n} images n'ont pas pu être chargées",
+    "drawing": "{label} · dessin",
+    "exportFailed": "Échec de l'export",
+    "copyFailed": "Échec de la copie",
+    "shareFailed": "Échec du partage",
+    "copied": "Copié",
+    "download": "Télécharger le PNG",
+    "downloadSized": "Télécharger le PNG {size}",
+    "buildTitle": "Build",
+    "artifactTitle": "Artéfact"
+  },
+  "options": {
+    "darkCard": "Carte sombre",
+    "lightCard": "Carte claire",
+    "dark": "Sombre",
+    "light": "Clair",
+    "cardTheme": "Thème de la carte",
+    "showName": "Afficher le nom du compte",
+    "name": "Nom",
+    "showUid": "Afficher l'UID"
+  },
+  "menu": {
+    "label": "Carte à partager",
+    "drawing": "Dessin",
+    "copy": "Copier"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv} % · {n} jets (les premiers et un par +4)",
+    "levelTitle": "Niveau {level} sur {cap} · Élévation {ascension}",
+    "weaponAndStats": "Arme et statistiques",
+    "pieceBonus": "Bonus {n} pièces",
+    "rvTitle": "Valeur des jets : chaque jet de sous-stat en % de son jet maximal, additionnés"
+  }
+}

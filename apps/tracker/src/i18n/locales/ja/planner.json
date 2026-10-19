@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "名前",
+      "title": "名前順"
+    },
+    "missing": {
+      "label": "不足",
+      "title": "不足アイテムが少ない順"
+    },
+    "favorites": {
+      "label": "お気に入り",
+      "title": "お気に入りを先に表示"
+    },
+    "priority": {
+      "label": "優先度",
+      "title": "素材は上の目標から順に割り当てられます：ドラッグで並べ替え"
+    }
+  },
+  "material": {
+    "characterExp": "キャラクター経験値",
+    "weaponExp": "武器経験値",
+    "group": {
+      "exp": "経験値",
+      "gem": "宝石",
+      "boss": "ボス素材",
+      "local": "特産品",
+      "common": "敵素材",
+      "book": "天賦本",
+      "weekly": "週ボス",
+      "weapon": "武器突破素材",
+      "elite": "精鋭素材",
+      "other": "その他"
+    }
+  },
+  "hint": {
+    "level": "Lv.{level}",
+    "talents": "天賦 {talents}",
+    "characterDetail": "{name}：Lv.{level}（突破{ascension}）、天賦 {talents}",
+    "weaponDetail": "{name}：Lv.{level}（突破{ascension}）",
+    "thenAr": "その後は冒険ランク{ar}が必要",
+    "thenShort": "その後は素材不足",
+    "weapon": "武器",
+    "canLevel": "今すぐ育成可能"
+  },
+  "preset": {
+    "max": {
+      "label": "最大",
+      "title": "Lv.90、天賦 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Lv.90、天賦 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Lv.80、天賦 8/8/8"
+    },
+    "talents": {
+      "label": "天賦のみ",
+      "title": "天賦 9/9/9、レベルは現状のまま"
+    },
+    "level": {
+      "label": "レベルのみ",
+      "title": "Lv.90、天賦は現状のまま"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "デイリー依頼",
+      "weeklyBosses": "征討領域",
+      "battlePass": "紀行（週間）",
+      "reputation": "都市評判",
+      "abyss": "深境螺旋",
+      "theater": "幻想シアター",
+      "bargains": "スター交換",
+      "transformer": "参量物質変化器",
+      "expeditions": "派遣",
+      "realm": "洞天宝銭",
+      "welkin": "空月の祝福"
+    }
+  },
+  "toast": {
+    "notSaved": "保存されませんでした",
+    "newCapture": "新しいキャプチャ",
+    "newCaptureDetail": "何も変更されていません：確認してもう一度お試しください"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n}件のイベントを除外",
+      "olderThanOurs": "こちらより古い",
+      "ar": "冒険ランク{ar}",
+      "wl": "世界ランク{wl}",
+      "lumine": "女性主人公",
+      "aether": "男性主人公"
+    },
+    "server": {
+      "AMERICA": "アメリカ",
+      "EUROPE": "ヨーロッパ",
+      "ASIA": "アジア",
+      "SAR": "台湾・香港・マカオ"
+    },
+    "notExport": "Seelieのエクスポートではありません（目標なし）",
+    "customName": "カスタム"
+  },
+  "resin": {
+    "alertTitle": "天然樹脂 {amount}",
+    "source": {
+      "manual": "手動設定",
+      "player": "irminsul（ログイン時）",
+      "inventory": "スナップショット"
+    },
+    "unknown": "天然樹脂：未取得 · 設定する",
+    "readingTitle": "天然樹脂 約{now}/{max} · {source}の{value}（{at}） · 8分ごとに+1",
+    "setLabel": "{title}。設定",
+    "spend": "{n}消費",
+    "add": "{n}追加",
+    "fullAt": "{time}に全回復",
+    "fullLabel": "全回復",
+    "full": "全回復",
+    "markTitle": "{time}に{amount}",
+    "in": "あと",
+    "now": "現在の天然樹脂",
+    "alert": "樹脂通知",
+    "alertUnsupported": "樹脂通知：このブラウザは非対応です",
+    "alertOff": "樹脂通知：オフ",
+    "alertOn": "{amount}で樹脂通知 · サイトを開いている間",
+    "alertOnAt": "{amount}で樹脂通知（{time}） · サイトを開いている間",
+    "unsupported": "このブラウザは非対応です",
+    "blocked": "ブロック中：ブラウザの設定でこのサイトの通知を許可してください",
+    "notifyAt": "通知する値",
+    "off": "オフ",
+    "whileOpen": "このデバイスでサイトを開いている間"
+  },
+  "artifacts": {
+    "title": "聖遺物",
+    "doneByHand": "{name}：完了（手動）",
+    "notDoneByHand": "{name}：未完了（手動）",
+    "notDoneByHandCaptureDone": "{name}：未完了（手動。キャプチャでは完了）",
+    "doneFromCapture": "{name}：完了、キャプチャより（{piece}）",
+    "slotState": "{name}：{state}",
+    "notDone": "未完了",
+    "nothingWorn": "未装備",
+    "otherSet": "別のセット",
+    "otherMainStat": "別のメインステータス",
+    "levelOf": "+{level}/+{max}",
+    "farmingByHand": "{name}：周回中（手動）",
+    "setDone": "{name}：完了、全部位達成",
+    "setFarming": "{name}：周回中",
+    "autoRule": "キャプチャで、選んだセット・選んだメインステータスの最大レベル（★5なら+20）の聖遺物がその部位に装備されていると自動で完了になります。他の4部位が選んだセットなら、5部位目はどのセットでも構いません",
+    "sets": "セット",
+    "worn": "装備 {n}",
+    "remove": "{name}を削除",
+    "addSet": "セット",
+    "close": "閉じる",
+    "slots": "部位",
+    "mainStat": "{slot}のメインステータス",
+    "searchSets": "セットを検索",
+    "setList": "聖遺物セット"
+  },
+  "cost": {
+    "saves": "{name}で{mora}節約",
+    "nothing": "消費なし",
+    "colours": "色分け"
+  },
+  "common": {
+    "search": "検索",
+    "cancel": "キャンセル",
+    "nameState": "{name}：{state}",
+    "counted": "集計中",
+    "notCounted": "集計外",
+    "removeName": "{name}を削除",
+    "clear": "クリア",
+    "remove": "削除",
+    "save": "保存",
+    "noMatches": "該当なし",
+    "delete": "削除",
+    "undo": "取り消し"
+  },
+  "custom": {
+    "slot": {
+      "book": "天賦本",
+      "common": "敵素材",
+      "boss": "ボス素材",
+      "local": "特産品",
+      "weekly": "週ボス"
+    },
+    "name": "名前",
+    "rarity": "レア度",
+    "weaponType": "武器タイプ",
+    "element": "元素"
+  },
+  "done": {
+    "taken": "バッグから消費",
+    "uses": "使用",
+    "notInBag": "バッグにありません",
+    "takesWhatThereIs": "完了にすると、あるだけ消費します。",
+    "confirm": "完了"
+  },
+  "extra": {
+    "title": "追加",
+    "add": "アイテムを追加",
+    "have": "所持 {n}",
+    "craft": "合成 {n}"
+  },
+  "avatars": {
+    "favorite": "{name}（お気に入り）",
+    "title": "{name} · タップ：開く · 長押し/右クリック：一時停止",
+    "moreTitle": "{rest} · すべて表示",
+    "moreLabel": "他{n}人：{rest}。すべて表示",
+    "fewerTitle": "表示を減らす",
+    "fewer": "閉じる"
+  },
+  "card": {
+    "level": "レベル",
+    "talents": "天賦",
+    "levelTitle": "Lv.{from}（突破{fromAscension}） → {to}（突破{toAscension}）",
+    "talentsTitle": "通常攻撃 / 元素スキル / 元素爆発",
+    "boosted": "{talents}まで育成（C{constellation}で+3）",
+    "weaponTitle": "{name}：Lv.{from}（突破{fromAscension}） → {to}（突破{toAscension}）、R{fromRefinement} → R{toRefinement}",
+    "readyFull": "今のバッグで達成可能",
+    "readyStep": "次の段階は今のバッグで達成可能",
+    "constellation": "命ノ星座 {n}",
+    "refinement": "精錬 {n}",
+    "artifactsTitle": "聖遺物：{done}/5部位",
+    "expSuffix": "{name}（経験値）",
+    "amount": "{name}：{n}",
+    "short": "{n}不足",
+    "shortAfter": "上の目標の後で{n}不足",
+    "expAmount": "{exp}：{points}（{item}）",
+    "enoughAfter": "上の目標の後でも足りる",
+    "handleLabel": "{name}：{rank}番目、矢印キーで移動",
+    "handleTitle": "#{rank} · ドラッグまたは矢印キー",
+    "customTitle": "カスタムキャラクター：ゲームデータにまだありません",
+    "custom": "カスタム",
+    "favoriteLabel": "{name}：お気に入り",
+    "favorite": "お気に入り",
+    "notFavorite": "お気に入りではない",
+    "setByHand": "手動設定",
+    "needsAr": "冒険ランク{ar}が必要",
+    "doneLabel": "{name}：{label}完了",
+    "doneReadyLabel": "{name}：{label}完了（{ready}）",
+    "missing": "{name}：不足",
+    "canDoNow": "今すぐ可能：{text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "通常",
+      "skill": "スキル",
+      "burst": "爆発"
+    },
+    "notOwned": "未所持",
+    "estimateResin": "樹脂 約{resin}",
+    "estimateTitle": "{runs}回 · 樹脂{resin}（濃縮{condensed}） · {days}日",
+    "estimateWeekly": "週ボス：{weeks}週",
+    "countedLabel": "{name}：集計中",
+    "notCountedLabel": "{name}：集計外",
+    "presets": "プリセット",
+    "constellationTitle": "命ノ星座（C3/C5で天賦が+3）",
+    "constellation": "命ノ星座",
+    "hideNote": "メモを隠す",
+    "note": "メモ",
+    "part": "目標の項目",
+    "now": "現在",
+    "goal": "目標",
+    "levelNow": "現在のレベル",
+    "levelGoal": "目標レベル",
+    "boost": "C{at}で+3",
+    "boostOn": "C{at}で+3：ゲーム内では{from} → {to}",
+    "talentNow": "現在の{talent}",
+    "talentGoal": "目標の{talent}",
+    "inGame": "ゲーム内 {from} → {to}",
+    "customCharacter": "カスタムキャラクター",
+    "replaceWithEllipsis": "置き換え…",
+    "replaceWith": "{name}に置き換え",
+    "replace": "置き換え",
+    "gapNeed": "{talents}必要",
+    "setLevel": "{level}に設定",
+    "captureTitle": "最新のキャプチャ",
+    "capture": "キャプチャ：{text}",
+    "resetTitle": "キャプチャの値に戻す",
+    "reset": "リセット",
+    "cost": "コスト"
+  },
+  "picker": {
+    "characters": "キャラクター",
+    "weapons": "武器",
+    "items": "アイテム",
+    "title": "目標を追加",
+    "kind": "種類",
+    "searchItems": "アイテムを検索",
+    "preset": "プリセット",
+    "add": "追加",
+    "addCount": "{n}件追加"
+  },
+  "toolbar": {
+    "label": "目標を絞り込む",
+    "searchTitle": "名前、武器、メモ",
+    "sort": "並べ替え",
+    "chips": "今すぐ育成、週ボス、状態、元素、レア度",
+    "upgrade": "今すぐ育成",
+    "upgradeTitle": "今のバッグで育成できる集計中の目標（それぞれ単独で）：準備完了、単独で準備完了、または一部（レベル、天賦、武器）やその次の段階",
+    "noWeeklyTitle": "まだ周回が必要だが週ボス不要：ドロップ素材は所持済みか変換可能（上の目標の後）",
+    "status": {
+      "all": "すべて",
+      "ready": "在庫あり",
+      "readyTitle": "バッグに十分ある（目標ごとに単独で）",
+      "activeTitle": "合計に含む",
+      "off": "一時停止",
+      "offTitle": "合計から除外"
+    }
+  },
+  "item": {
+    "count": "数",
+    "have": "所持",
+    "editHave": "所持 {n}：編集"
+  },
+  "popover": {
+    "goalsLabel": "{name}：使用する目標（{n}）",
+    "goalsTitle": "使用する目標",
+    "history": "{name}：履歴",
+    "expNeed": "必要経験値 {n}",
+    "goal": "目標 {n}",
+    "missing": "不足 {n}",
+    "enough": "十分",
+    "need": "必要 {n}",
+    "craftedTitle": "1つ下のランクから合成",
+    "craft": "合成 {n}",
+    "capture": "キャプチャ {n}",
+    "backLabel": "{name}：キャプチャの{n}に戻す",
+    "backTitle": "{n}に戻す",
+    "held": "{name}の所持数",
+    "addPlaceholder": "+ 追加",
+    "addLabel": "{name}：入手数を追加",
+    "addTitle": "入手した数を追加（Enter）",
+    "swap": {
+      "label": "異夢の溶媒で変換",
+      "heading": "変換",
+      "title": "錬金合成 → 変転：同じボスの別の素材から、1個につき異夢の溶媒{n}個",
+      "solventHeld": "{name}の所持数：{n}",
+      "have": "所持 {n}",
+      "do": "変換",
+      "noneHeld": "{name}を所持していません",
+      "noSolvent": "1回の変換に異夢の溶媒が{n}個必要"
+    }
+  },
+  "levelGrid": {
+    "below": "キャプチャより下",
+    "level": "Lv.{level}（突破{ascension}）",
+    "ascended": "Lv.{level}、突破済み（突破{ascension}）",
+    "ascendedWord": "突破済み"
+  },
+  "cell": {
+    "have": "所持 {n}",
+    "spent": "合成に使用 {n}",
+    "converted": "他から変換 {n}",
+    "convertedAway": "他へ変換 {n}"
+  },
+  "focus": {
+    "title": "{name}：目標{n}件（それぞれ上の集計中の目標の後）",
+    "clear": "{name}を解除"
+  },
+  "materialPicker": {
+    "material": "素材",
+    "selected": "素材：{name}",
+    "title": "素材を使用する目標",
+    "search": "素材を検索",
+    "any": "すべて",
+    "goals": "目標{n}件"
+  },
+  "stepper": {
+    "down": "{label}：下げる",
+    "up": "{label}：上げる"
+  },
+  "settings": {
+    "title": "プランナー設定",
+    "autoWl": "自動（{wl}）",
+    "ar": "冒険ランク",
+    "arTitle": "冒険ランク（1～60）",
+    "arTitleIrminsul": "冒険ランク（1～60） · irminsulから{ar}",
+    "fromIrminsul": "irminsulから",
+    "wl": "世界ランク",
+    "wlTitle": "世界ランク（0～9）",
+    "wlTitleIrminsul": "世界ランク（0～9） · irminsulから{wl}",
+    "wlLabel": "世界ランク",
+    "refreshesTitle": "1日の天然樹脂の補充回数（1回につき樹脂{per}）：日数は180 + 補充1回ごとに{per}で計算",
+    "refreshes": "補充",
+    "refreshesLabel": "1日の樹脂補充回数",
+    "stepsTitle": "最大4つの数値（例：-40 +60）：樹脂トラッカーに加算します（マイナスは消費）",
+    "steps": "樹脂ボタン",
+    "azothTitle": "不足している宝石を、他元素の余った宝石で補う",
+    "azoth": "変転の塵",
+    "passivesTitle": "雷電将軍、放浪者：武器突破のモラ-50%",
+    "passives": "モラ節約の固有天賦",
+    "craftingTitle": "周回画面の変転・合成・鍛造チェックリスト",
+    "crafting": "合成チェックリスト"
+  },
+  "roster": {
+    "search": "キャラクターを検索",
+    "multi": "キャラクター（複数選択）",
+    "owned": "{name} · Lv.{level}",
+    "notOwned": "{name} · 未所持",
+    "weaponOwned": "{name} · Lv.{level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "キャプチャ内の武器",
+    "noCopy": "キャプチャにありません",
+    "heldBy": "{name}が装備中",
+    "refinementNow": "{name}の現在の精錬",
+    "levelNow": "{name}の現在のレベル",
+    "refinementGoal": "{name}の目標精錬",
+    "levelGoal": "{name}の目標レベル",
+    "search": "武器を検索"
+  },
+  "seelieImport": {
+    "notExport": "Seelieのエクスポートでもpaimon.moeのバックアップでもありません",
+    "notJson": "JSONファイルではありません",
+    "section": {
+      "goals": {
+        "label": "目標",
+        "title": "キャラクター・天賦・武器の目標、追加アイテムの必要数"
+      },
+      "artifacts": {
+        "label": "聖遺物の目標",
+        "title": "周回するセットとメインステータス"
+      },
+      "customs": {
+        "label": "カスタムキャラクター",
+        "title": "Seelieでカスタム扱いのキャラクターと目標"
+      },
+      "current": {
+        "label": "現在のレベル",
+        "title": "Seelieの現在のレベル・天賦・命ノ星座（キャプチャより進んでいるもの）"
+      },
+      "inventory": {
+        "label": "バッグ",
+        "title": "最新キャプチャへの手動編集として反映（新しいキャプチャで置き換わります）"
+      },
+      "tasks": {
+        "label": "タスク",
+        "title": "カスタムタスクと、Seelieで完了した常設タスク"
+      },
+      "resin": {
+        "label": "樹脂",
+        "title": "Seelieの樹脂トラッカー（こちらより新しい場合）"
+      },
+      "settings": {
+        "label": "設定",
+        "title": "冒険ランク、世界ランク、サーバー、主人公"
+      }
+    },
+    "count": {
+      "new": "新規 {n}",
+      "changed": "変更 {n}",
+      "same": "同じ {n}"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "変更",
+    "choose": "ファイルを選択",
+    "fileLabel": "Seelieのエクスポートまたはpaimon.moeのバックアップ",
+    "legend": "インポートする項目",
+    "skipped": "スキップ {n}",
+    "clampedTitle": "Lv.90を超える目標は90に設定されました",
+    "clamped": "90に制限：{n}",
+    "replace": "置き換え（{n}件削除）",
+    "exportTitle": "Seelieのアカウントファイル：目標、バッグ、タスク（Seelie → Settings → Import Account）",
+    "export": "エクスポート",
+    "import": "インポート",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "ファイル内のアカウント",
+    "account": "アカウント {n}",
+    "paimonLevels": "レベルのみ",
+    "paimonLevelsTitle": "paimon.moeはTo-Doのレベルと素材のみ保持し、天賦レベルは保持しません：天賦は現状のままです"
+  },
+  "taskEditor": {
+    "everyDay": "毎日",
+    "everyDays": "{n}日ごと",
+    "today": "今日（{day}）",
+    "tomorrow": "明日（{day}）",
+    "startDay": "開始日基準",
+    "startDayTitle": "開始日の周期を保ちます",
+    "doneDay": "完了日基準",
+    "doneDayTitle": "完了した日から数えます",
+    "task": "タスク",
+    "newTask": "新しいタスク",
+    "nameIt": "名前を入力",
+    "repeats": "繰り返し",
+    "next": "次回",
+    "starts": "開始",
+    "countsFrom": "基準"
+  },
+  "tasks": {
+    "title": "タスク",
+    "permanent": "常設",
+    "ready": "使用可能",
+    "readyTitle": "使用可能",
+    "resets": "{time}にリセット",
+    "snoozedBack": "スヌーズ中 · {time}に復帰",
+    "doneBack": "完了 · {time}に復帰",
+    "everyDay": "毎日",
+    "everyDays": "{n}日ごと",
+    "fromDone": "完了日から",
+    "fromStart": "開始日から",
+    "dueTitle": "期限 {date} · {every}、{from}",
+    "overdue": "期限切れ",
+    "late": "{n}日遅れ",
+    "today": "今日",
+    "tomorrow": "明日",
+    "doneToast": "{name}完了",
+    "backToast": "{name}：{day}に復帰",
+    "deleted": "{name}を削除しました",
+    "toDo": "残り{n}",
+    "toDoSr": "未完了",
+    "shown": "表示中のタスク",
+    "hideDone": "完了を隠す",
+    "showDone": "完了を表示（{n}）",
+    "permanentShown": "表示中の常設タスク",
+    "add": "タスクを追加",
+    "noCustom": "自分のタスクはありません",
+    "allDone": "すべて完了",
+    "move": "{name}を移動",
+    "dragTitle": "ドラッグまたは矢印キー",
+    "doneLabel": "完了：{name}",
+    "notDoneLabel": "未完了：{name}",
+    "takeBack": "元に戻す",
+    "snoozeName": "{name}をスヌーズ",
+    "snooze": "スヌーズ",
+    "lastDay": "最終日",
+    "permanentTasks": "常設タスク",
+    "events": "イベント",
+    "startsIn": "{time}後",
+    "eventStarts": "{time}開始",
+    "eventEnds": "{time}終了",
+    "noEnd": "終了日なし",
+    "tags": {
+      "daily": "デイリー",
+      "checkin": "ログインボーナス",
+      "exploration": "世界探索",
+      "quest": "任務"
+    },
+    "capture": {
+      "from": "{time}のキャプチャより",
+      "commissions": "{n}/{total}完了",
+      "abyss": "スター {stars}/{max}",
+      "expeditions": "{n}/{total}帰還",
+      "nobodyOut": "派遣なし",
+      "realm": "宝銭 {value}/{limit}",
+      "welkin": "残り{n}日"
+    }
+  },
+  "view": {
+    "title": "プランナー",
+    "accountFallback": "原神アカウント",
+    "farm": "周回",
+    "goals": "目標",
+    "presetApplied": "{preset}：目標{n}件",
+    "bulkCounted": "{n}件を集計に追加",
+    "bulkPaused": "{n}件を一時停止",
+    "goalsRemoved": "目標{n}件を削除しました",
+    "paused": "{name}を一時停止",
+    "partDone": "{name}：{label}完了",
+    "craftStepDone": "合成ステップ完了",
+    "craftStepsDone": "合成ステップ{n}件完了",
+    "craftingHidden": "合成を非表示にしました",
+    "craftingHiddenHint": "プランナー設定：合成チェックリスト",
+    "itemRemoved": "アイテムを削除しました",
+    "removed": "{name}を削除しました",
+    "added": "目標{n}件を追加しました",
+    "notImported": "インポートされませんでした",
+    "importedGoals": "目標{n}件",
+    "importedCurrent": "現在値{n}件",
+    "importedItems": "アイテム{n}件",
+    "importedTasks": "タスク{n}件",
+    "imported": "Seelieからインポートしました",
+    "notExported": "エクスポートされませんでした",
+    "exported": "Seelie用にエクスポートしました",
+    "view": "表示",
+    "newest": "最新のキャプチャ",
+    "noCapture": "キャプチャなし：数値は手動入力です",
+    "import": "インポート",
+    "replaced": "手動編集{n}件がキャプチャで置き換えられました",
+    "ok": "OK",
+    "seelieTitle": "Seelie・paimon.moeからインポート、Seelieへエクスポート",
+    "addGoals": "目標を追加",
+    "loadError": "プランナーを読み込めませんでした",
+    "noGoals": "目標なし",
+    "importSeelie": "Seelie・paimon.moeからインポート",
+    "importCapture": "キャプチャをインポート",
+    "readiness": "達成状況",
+    "selectTitle": "まとめて変更する目標を選択",
+    "select": "選択",
+    "selected": "選択中の目標",
+    "selectedCount": "{n}件選択中",
+    "selectedSr": "選択中",
+    "pickNone": "選択解除",
+    "pickAll": "すべて",
+    "applyPreset": "プリセットを適用",
+    "pause": "一時停止",
+    "count": "集計",
+    "doneSelecting": "選択を終了",
+    "done": "完了",
+    "doneGoals": "完了した目標",
+    "loading": "プランナーを読み込み中"
+  }
+}

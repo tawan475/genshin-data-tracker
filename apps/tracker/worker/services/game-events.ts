@@ -28,6 +28,7 @@ import {
   type EventsSyncStatus,
   type GameEventsResponse,
   type GameNotice,
+  type SiteLanguage,
   type NoticeKind,
   type NoticeServer,
   type NoticeWindow,
@@ -39,12 +40,33 @@ import { staffDomainEvents } from './staff-deps'
 const BOARD = 'https://sg-hk4e-api.hoyoverse.com/common/hk4e_global/announcement/api'
 const BOARD_QUERY =
   'game=hk4e&game_biz=hk4e_global&bundle_id=hk4e_global&platform=pc&level=55&uid=100000000'
-/** The board's language codes, and ours. */
+/** The board's language codes, and ours: read for every server. */
 const LANGUAGES = [
   ['en', 'en'],
   ['zh-cn', 'zh-CN'],
   ['zh-tw', 'zh-TW'],
 ] as const
+/**
+ * The site's other languages (the board's codes are ours): only titles come
+ * from them, and every server's board has the same notices under the same
+ * ids, so they are read from one server and shared (12 requests, not 48:
+ * a sync stays far below the Worker's subrequest limit).
+ */
+const TITLE_LANGUAGES = [
+  'ja',
+  'ko',
+  'es',
+  'fr',
+  'ru',
+  'th',
+  'vi',
+  'de',
+  'id',
+  'pt',
+  'it',
+  'tr',
+] as const satisfies readonly SiteLanguage[]
+const TITLE_REGION = 'os_asia'
 const HOYOLAB_SEARCH =
   'https://bbs-api-os.hoyolab.com/community/search/wapi/search/post?keyword=Overflowing&gids=2&size=20&preview=true&page_num=1'
 /** HoYoLAB's official Genshin Impact account: only its posts count. */
@@ -112,12 +134,13 @@ const contentItems = (content: Record<string, unknown> | undefined) =>
 export function boardRows(
   server: NoticeServer,
   list: Record<string, unknown>,
-  contents: Partial<Record<'en' | 'zh-CN' | 'zh-TW', Record<string, unknown>>>,
+  contents: Partial<Record<SiteLanguage, Record<string, unknown>>>,
 ): { rows: NoticeRow[]; unparsed: string[] } {
   const items = listItems(list)
   const english = contentItems(contents.en)
-  const zhCN = contentItems(contents['zh-CN'])
-  const zhTW = contentItems(contents['zh-TW'])
+  const translated = (Object.keys(contents) as SiteLanguage[])
+    .filter((lang) => lang !== 'en')
+    .map((lang) => [lang, contentItems(contents[lang])] as const)
   const boardZone = typeof list.timezone === 'number' ? list.timezone : 8
   const texts = new Map(
     [...english].map(([id, item]) => [id, noticeText(item.content ?? '', server)]),
@@ -161,10 +184,10 @@ export function boardRows(
       continue
     }
     const titles: Record<string, string> = { en: english.get(item.ann_id)?.title ?? item.title }
-    const cn = zhCN.get(item.ann_id)?.title
-    const tw = zhTW.get(item.ann_id)?.title
-    if (cn) titles['zh-CN'] = cn
-    if (tw) titles['zh-TW'] = tw
+    for (const [lang, items] of translated) {
+      const title = items.get(item.ann_id)?.title
+      if (title) titles[lang] = title
+    }
     rows.push({
       server,
       source: 'board',
@@ -219,17 +242,30 @@ export async function syncGameEvents(
 ): Promise<EventsSyncStatus> {
   const status: EventsSyncStatus = { at: now, ok: true, counts: {}, unparsed: [], errors: [] }
   const rows: NoticeRow[] = []
+  const boardUrl = (region: string, endpoint: string, lang: string) =>
+    `${BOARD}/${endpoint}?${BOARD_QUERY}&region=${region}&lang=${lang}`
+  // Titles in the other languages: one server's board, shared; a language that fails is left out.
+  const titleContents = Promise.all(
+    TITLE_LANGUAGES.map((lang) =>
+      getData(fetcher, boardUrl(TITLE_REGION, 'getAnnContent', lang)).then(
+        (content) => [lang, content] as const,
+        () => null,
+      ),
+    ),
+  ).then((read) => Object.fromEntries(read.filter((entry) => entry !== null)))
   await Promise.all(
     SERVERS.map(async (server) => {
       const region = NOTICE_REGIONS[server]
-      const url = (endpoint: string, lang: string) =>
-        `${BOARD}/${endpoint}?${BOARD_QUERY}&region=${region}&lang=${lang}`
+      const url = (endpoint: string, lang: string) => boardUrl(region, endpoint, lang)
       try {
         const [list, ...contents] = await Promise.all([
           getData(fetcher, url('getAnnList', 'en')),
           ...LANGUAGES.map(([lang]) => getData(fetcher, url('getAnnContent', lang))),
         ])
-        const byLanguage = Object.fromEntries(LANGUAGES.map(([, ours], i) => [ours, contents[i]]))
+        const byLanguage = {
+          ...(await titleContents),
+          ...Object.fromEntries(LANGUAGES.map(([, ours], i) => [ours, contents[i]])),
+        }
         const read = boardRows(server, list!, byLanguage)
         rows.push(...read.rows)
         status.unparsed.push(...read.unparsed)

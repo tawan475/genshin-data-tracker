@@ -1,0 +1,260 @@
+{
+  "title": "祈願履歴",
+  "bannerPageTitle": "祈願履歴 · {banner}",
+  "loadFailed": "読み込みに失敗しました",
+  "loading": "読み込み中",
+  "import": "インポート",
+  "export": "エクスポート",
+  "importExport": "インポート / エクスポート",
+  "browse": "参照",
+  "cancel": "キャンセル",
+  "search": "検索",
+  "rarity": "レア度",
+  "banner": "祈願",
+  "pulls": "{n} 回",
+  "pullsTimes": "{n} 回 × {primos}",
+  "pullsPrimos": "{n} 回 · ✦ {primos}",
+  "lifetime": "累計祈願数",
+  "allWishes": "すべての祈願",
+  "newPulls": "新しい祈願 {n} 回",
+  "nothingNew": "新しいデータなし",
+  "banners": {
+    "character": {
+      "label": "キャラ",
+      "title": "イベント祈願·キャラクター"
+    },
+    "weapon": {
+      "label": "武器",
+      "title": "イベント祈願·武器"
+    },
+    "standard": {
+      "label": "通常",
+      "title": "通常祈願"
+    },
+    "chronicled": {
+      "label": "集録",
+      "title": "集録祈願"
+    },
+    "beginners": {
+      "label": "初心者",
+      "title": "初心者向け祈願"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "1月",
+      "2": "2月",
+      "3": "3月",
+      "4": "4月",
+      "5": "5月",
+      "6": "6月",
+      "7": "7月",
+      "8": "8月",
+      "9": "9月",
+      "10": "10月",
+      "11": "11月",
+      "12": "12月"
+    },
+    "day": "{month}{day}日",
+    "dayYear": "{year}年{month}{day}日",
+    "month": "{year}年{month}",
+    "dayTime": "{day} {time}",
+    "range": "{from} – {to}",
+    "now": "現在"
+  },
+  "outcomes": {
+    "won": "勝ち",
+    "lost": "すり抜け",
+    "guaranteed": "確定"
+  },
+  "outcomeTitles": {
+    "won": "{odds} に勝ち",
+    "lost": "{odds} ですり抜け：次はピックアップ確定",
+    "guaranteed": "ピックアップ（{odds} のすり抜け後の確定）"
+  },
+  "legend": {
+    "won": "勝ち",
+    "lost": "すり抜け",
+    "guaranteed": "確定"
+  },
+  "overview": {
+    "newestPull": "最新の祈願（ゲーム内時刻）",
+    "synced": "{ago}に同期",
+    "syncedTitle": "{time} に新しい祈願を保存",
+    "syncHelp": "1日1回、ゲーム内で祈願 → 履歴を開いてください（すぐ閉じて構いません）。irminsul が全祈願を同期し、キーが有効な間（約 24 時間）は新しい祈願も同期します。ゲームの祈願リンクでも直近 6 か月分を取り込めます。6 か月より前の分は paimon.moe のバックアップか UIGF ファイルをインポートしてください。",
+    "empty": "祈願はまだありません",
+    "emptyBody": "1日1回、ゲーム内で祈願 → 履歴を開くか（すぐ閉じて構いません）、ゲームの祈願リンクでインポートしてください。6 か月より前の分は paimon.moe のバックアップか UIGF ファイルをインポートしてください。",
+    "banners": "祈願",
+    "totals": "合計",
+    "worth": "祈願の価値",
+    "worthHint": "{n} 回 × 原石 {primos}",
+    "wishes": "{n} 回",
+    "avgPity": "★5 平均天井",
+    "avgPityHint": "イベント祈願·キャラクター：すべての★5の平均天井。ソフト天井込みの期待値は約 {expected}",
+    "avgPityVs": "期待値 {expected} に対し {diff}"
+  },
+  "card": {
+    "everyPull": "{banner}：すべての祈願",
+    "fiveTitle": "天井まであと {left} 回 · ✦ {primos} · ソフト天井は {soft} から",
+    "fourTitle": "★4 確定まであと {left} 回",
+    "fourFeatured": " · 次の★4はピックアップ",
+    "pity5": "★5 天井",
+    "pity4": "★4 天井",
+    "guaranteedAt": "{n} 回で確定",
+    "hideLatest": "最新の祈願を隠す",
+    "showLatest": "最新の祈願を表示",
+    "latest": "最新の祈願",
+    "latestRegion": "{banner}：最新の祈願",
+    "none": "なし",
+    "cols": {
+      "name": "名前",
+      "time": "時刻",
+      "pity": "天井"
+    }
+  },
+  "five": {
+    "every": "すべての★5",
+    "newestFirst": "{n} · 新しい順",
+    "none": "★5はまだありません",
+    "pity": "{name} · 天井 {pity}",
+    "outcome": "{outcome}（{odds}）"
+  },
+  "link": {
+    "platform": "プラットフォーム",
+    "copyFailed": "コピーできませんでした：コマンドを選択してコピーしてください",
+    "steps": {
+      "open": "ゲーム内で祈願 → 履歴を開き、読み込みを待ちます。",
+      "android2": "Wi-Fi とモバイルデータをオフにします。",
+      "android3": "右上の更新をタップすると、テキスト付きのエラーが表示されます。",
+      "android4": "そのテキストをすべて選択してコピーします。",
+      "android5": "接続を元に戻し、下に貼り付けます。",
+      "ios1": "パイモンメニュー → 報告を開き、読み込みを待ちます。",
+      "ios2": "ゲーム内の問題 → マルチプレイをタップします。",
+      "ios3": "返信の一番下にあるリンクをタップすると、ブラウザーで開きます。",
+      "ios4": "そのリンクをコピーして下に貼り付けます。",
+      "ps1": "ゲーム内で QR コード付きのイベントメールを開きます。",
+      "ps2": "スマホでコードを読み取り、開いたリンクをコピーします。",
+      "ps3": "下に貼り付けます。失敗する場合は PlayStation を HoYoverse アカウントに連携し、PC かスマホの手順を使ってください。",
+      "pcRun": "PowerShell を開き（スタートで PowerShell と入力）、次を実行します：",
+      "pcPaste": "リンクがコピーされるので、下に貼り付けます。",
+      "pcPasteTitle": "irminsul の Copy wish URL でも同じリンクが得られます"
+    },
+    "scriptTitle": "この PC のゲームのウェブキャッシュを読み、HoYoverse でリンクを一度確認してコピーします。それ以外は何もしません。",
+    "copied": "コピーしました",
+    "copy": "コピー",
+    "readScript": "スクリプトを見る",
+    "label": "祈願履歴リンク",
+    "placeholder": "リンクを貼り付け：https://…",
+    "invalid": "このテキストに祈願履歴リンクがありません",
+    "uidMismatch": "このリンクは UID {uid} です。このアカウントは UID {own} です。",
+    "failed": "インポートに失敗しました",
+    "saving": "{n} 件を保存中…",
+    "progress": "{banner} · {page} ページ目 · 新規 {n}",
+    "errors": {
+      "cancelled": "キャンセルしました",
+      "network": "祈願履歴から応答がありません。後でもう一度お試しください。",
+      "expired": "リンクの有効期限が切れました。ゲーム内で祈願 → 履歴を開き直し、新しいリンクをコピーしてください。",
+      "throttled": "HoYoverse から速度を落とすよう求められました。数分後にもう一度お試しください。",
+      "api": "HoYoverse の応答：{message}",
+      "code": "エラー {code}"
+    }
+  },
+  "chart": {
+    "title": "月別祈願数",
+    "label": "レア度別の月別祈願数（{n} か月）",
+    "month": "{month}：{n} 回"
+  },
+  "numbers": {
+    "label": "数値",
+    "avgPity": "{share} · 平均天井 {avg}",
+    "expected": "ソフト天井込みの★5 天井期待値は約 {n}",
+    "expectedAbout": "ソフト天井込みの期待値は約 {n}",
+    "streak": "現在 {current} · 最長連勝 {best} · 最長連続すり抜け {worst}",
+    "streakWon": "{n} 連勝",
+    "streakLost": "{n} 連続すり抜け",
+    "flipTitle": "{odds} の時に引いたピックアップ★5（確定分は除く）",
+    "split": "★4 内訳",
+    "character": "キャラクター",
+    "char": "キャラ",
+    "weapon": "武器",
+    "rateUp": "★4 ピックアップ {total} 回中 {won} 回勝ち · {share}",
+    "splitTitle": "種類別の★4",
+    "splitTitleFull": "種類別の★4 と★4 ピックアップの勝敗"
+  },
+  "odds": {
+    "guaranteed": "確定",
+    "lostLast": "前回の {odds} ですり抜け（{name}）：次の★5はピックアップ確定",
+    "nextFeatured": "次の★5はピックアップ確定",
+    "weapon": "次の★5：75% でピックアップ武器",
+    "coin": "次の★5：五分五分"
+  },
+  "track": {
+    "label": "天井 {pity} / {hard}、ソフト天井は {soft} から"
+  },
+  "runs": {
+    "label": "祈願の開催回",
+    "heading": "祈願",
+    "count": "{n} 回",
+    "fewer": "折りたたむ",
+    "all": "すべての開催回",
+    "current": " · 開催中",
+    "no5": "★5なし"
+  },
+  "small": {
+    "pitySoFar": "天井 {pity} / {hard}"
+  },
+  "table": {
+    "label": "すべての祈願",
+    "search": "祈願を検索",
+    "searchTitle": "キャラクター名または武器名",
+    "noMatch": "一致する祈願はありません",
+    "rollRun": "その開催回での祈願番号",
+    "roll": "祈願番号",
+    "item": "アイテム",
+    "pity": "天井",
+    "result": "結果",
+    "time": "時刻",
+    "newestFirst": "新しい順",
+    "oldestFirst": "古い順",
+    "newestFirstSr": "新しい順",
+    "oldestFirstSr": "古い順",
+    "weapon": "武器",
+    "character": "キャラクター",
+    "pages": "祈願のページ"
+  },
+  "transfer": {
+    "backup": "paimon.moe バックアップ",
+    "modes": {
+      "link": "祈願リンク",
+      "file": "ファイル"
+    },
+    "importFrom": "インポート元",
+    "noRecords": "記録なし",
+    "uidMismatch": "この履歴は UID {uid} です。このアカウントは UID {own} です",
+    "account": "アカウント {n}",
+    "notWishFile": "UIGF または paimon.moe のファイルではありません",
+    "alreadyHeld": "保存済み {n}",
+    "notImported": "インポートできませんでした",
+    "deleteTitle": "祈願履歴を削除しますか？",
+    "deleteDetail": "このアカウントの {n} 回分の祈願がすべて削除されます。直近 6 か月分は irminsul で再取得できます。",
+    "deleteConfirm": "削除",
+    "notDeleted": "削除できませんでした",
+    "dropTitle": "UIGF JSON（Snap Hutao、Starward、genshin-wish-export など）、paimon.moe インポーター用 CSV、または paimon.moe のバックアップ（Settings → Export）",
+    "drop": "UIGF または paimon.moe のファイル",
+    "fileAccount": "ファイル内のアカウント",
+    "uigfTitle": "UIGF v4.1：Snap Hutao、Starward など多くの祈願トラッカーで読み込めます",
+    "paimonTitle": "paimon.moe の Local Importer 用（Wish counter → Import → Local）",
+    "delete": "削除",
+    "deleteHistory": "履歴を削除"
+  },
+  "bannerPage": {
+    "noPulls": "この祈願での記録はありません",
+    "now": "現在",
+    "hardTitle": "天井まであと {left} 回 · ✦ {primos}",
+    "toHard": "天井まであと {left} · ✦ {primos}",
+    "softFrom": "ソフト天井 {soft} から",
+    "featuredNext": "次はピックアップ",
+    "featuredNextTitle": "前回の★4はピックアップ外でした：次の★4はピックアップ確定",
+    "toGuaranteed4": "★4 確定まであと {n}"
+  }
+}

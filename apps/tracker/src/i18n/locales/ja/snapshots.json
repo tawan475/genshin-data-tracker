@@ -1,0 +1,108 @@
+{
+  "heading": "インポート履歴",
+  "loadFailed": "読み込み失敗",
+  "noneInRange": "期間内にスナップショットがありません",
+  "clear": "クリア",
+  "noSnapshots": "スナップショットはまだありません",
+  "import": "インポート",
+  "unchangedUntil": "{time} まで変化なし",
+  "downloadFailed": "スナップショットをダウンロードできませんでした",
+  "saved": "{name} を保存しました",
+  "files": "{n}ファイル",
+  "gone": "{n}件削除済み",
+  "exportFailed": "エクスポートに失敗しました",
+  "deletedOf": "{total}件中{deleted}件のスナップショットを削除しました",
+  "deleteFailed": "スナップショットを削除できませんでした",
+  "deleteFailedMany": "スナップショットを削除できませんでした",
+  "deleted": "スナップショット{n}件を削除しました",
+  "column": {
+    "id": "ID",
+    "date": "日付",
+    "source": "取得元",
+    "rawSize": "元のサイズ",
+    "storedSize": "保存サイズ",
+    "actions": "操作"
+  },
+  "select": {
+    "page": "このページを選択",
+    "snapshot": "スナップショット {id} を選択",
+    "shiftClick": "Shift+クリックで範囲を選択",
+    "pageSelected": "このページの{n}件をすべて選択しています。",
+    "all": "{n}件をすべて選択",
+    "allInRange": "期間内の{n}件をすべて選択",
+    "viewSelected": "スナップショット{n}件をすべて選択しています。",
+    "rangeSelected": "期間内のスナップショット{n}件をすべて選択しています。",
+    "clear": "選択を解除",
+    "allLabel": "すべて"
+  },
+  "confirm": {
+    "title": "よろしいですか？",
+    "one": "このスナップショットを削除します。元に戻せません。",
+    "oneConfirm": "削除する",
+    "many": "スナップショット{n}件を削除します。元に戻せません。",
+    "purge": "このユーザーのスナップショット{n}件を、ゴミ箱を経由せずに今すぐ削除します。元に戻せません。",
+    "manyConfirm": "削除する",
+    "massTitle": "一括削除の警告",
+    "massText": "全ページのスナップショットをすべて選択しています。すべて消去するには「DELETE」と入力してください。",
+    "massConfirm": "理解しました。すべて削除",
+    "typePlaceholder": "確認のため「{word}」と入力",
+    "typeLabel": "確認のため {word} と入力",
+    "typeError": "「{word}」と入力してください",
+    "cancel": "キャンセル"
+  },
+  "figure": {
+    "noCurrency": "このスナップショットに通貨はありません",
+    "vs": "#{id} と比較 · {time}"
+  },
+  "range": {
+    "label": "日付で絞り込む",
+    "from": "開始",
+    "to": "終了",
+    "selectTitle": "期間内のスナップショット{n}件を選択",
+    "select": "{n}件を選択",
+    "clear": "日付をクリア"
+  },
+  "row": {
+    "downloadGood": "GOOD をダウンロード",
+    "download": "スナップショット {id} をダウンロード",
+    "delete": "スナップショットを削除",
+    "deleteId": "スナップショット {id} を削除"
+  },
+  "bar": {
+    "saving": "保存中…",
+    "downloadingOf": "ダウンロード中 {done} / {total}",
+    "downloading": "ダウンロード中 {done}",
+    "zipping": "圧縮中 {done} / {total}",
+    "selected": "{n}件を選択中",
+    "outOf": "（全{n}件中）",
+    "hiddenTitle": "選択中のスナップショット{n}件が日付の範囲外です",
+    "hidden": "· {n}件非表示",
+    "cancel": "キャンセル",
+    "blocked": "別のエクスポートを実行中です",
+    "downloadTitle": "GOOD ファイルの zip をダウンロード",
+    "download": "ダウンロード",
+    "delete": "削除"
+  },
+  "card": {
+    "stored": "保存済み"
+  },
+  "storage": {
+    "title": "容量",
+    "snapshots": "スナップショット",
+    "raw": "元データ",
+    "stored": "保存済み",
+    "saved": "節約"
+  },
+  "pagination": {
+    "perPage": "表示件数",
+    "previous": "前へ",
+    "next": "次へ",
+    "page": "{page} / {pages} ページ",
+    "total": "（全{n}件）",
+    "goTo": "移動先",
+    "go": "移動"
+  },
+  "table": {
+    "noData": "データがありません。"
+  }
+}

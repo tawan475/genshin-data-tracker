@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Copiar imagem",
+    "share": "Compartilhar",
+    "missing": "{n} imagem não pôde ser carregada | {n} imagens não puderam ser carregadas",
+    "drawing": "{label} · desenhando",
+    "exportFailed": "Falha ao exportar",
+    "copyFailed": "Falha ao copiar",
+    "shareFailed": "Falha ao compartilhar",
+    "copied": "Copiado",
+    "download": "Baixar PNG",
+    "downloadSized": "Baixar PNG {size}",
+    "buildTitle": "Build",
+    "artifactTitle": "Artefato"
+  },
+  "options": {
+    "darkCard": "Cartão escuro",
+    "lightCard": "Cartão claro",
+    "dark": "Escuro",
+    "light": "Claro",
+    "cardTheme": "Tema do cartão",
+    "showName": "Mostrar o nome da conta",
+    "name": "Nome",
+    "showUid": "Mostrar o UID"
+  },
+  "menu": {
+    "label": "Cartão para compartilhar",
+    "drawing": "Desenhando",
+    "copy": "Copiar"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} rolagens (as iniciais e uma a cada +4)",
+    "levelTitle": "Nível {level} de {cap} · Ascensão {ascension}",
+    "weaponAndStats": "Arma e atributos",
+    "pieceBonus": "Bônus de {n} peças",
+    "rvTitle": "Valor de rolagem: cada rolagem de atributo secundário como % da maior rolagem possível, somadas"
+  }
+}

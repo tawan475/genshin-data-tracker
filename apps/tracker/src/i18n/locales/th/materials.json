@@ -1,0 +1,97 @@
+{
+  "title": "วัสดุ",
+  "newestSnapshot": "สแนปช็อตล่าสุด",
+  "since": "ตั้งแต่ {date}",
+  "oneSnapshot": "มีสแนปช็อตเดียว",
+  "changesTitle": "การเปลี่ยนแปลง {hint}",
+  "changeSince": "เปลี่ยนแปลงตั้งแต่",
+  "noSnapshots": "ยังไม่มีสแนปช็อต",
+  "import": "นำเข้า",
+  "loadFailed": "โหลดวัสดุไม่สำเร็จ",
+  "loading": "กำลังโหลดวัสดุ",
+  "saveChartFailed": "บันทึกการตั้งค่ากราฟไม่สำเร็จ",
+  "search": "ค้นหา",
+  "searchLabel": "ค้นหาวัสดุ",
+  "noMatches": "ไม่พบรายการที่ตรงกัน",
+  "noMaterials": "ไม่มีวัสดุ",
+  "clear": "ล้าง",
+  "more": "อีก {n}",
+  "upTo": "สูงสุด {max}",
+  "trackedOfMax": "ติดตาม / สูงสุด",
+  "track": "ติดตาม",
+  "untrack": "เลิกติดตาม",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "ล่าสุด"
+  },
+  "wallet": {
+    "label": "กระเป๋าเงิน",
+    "title": "สกุลเงินและไอเทมอธิษฐาน",
+    "short": {
+      "GenesisCrystal": "Genesis",
+      "IntertwinedFate": "Intertwined",
+      "AcquaintFate": "Acquaint",
+      "MasterlessStarglitter": "Starglitter",
+      "MasterlessStardust": "Stardust",
+      "OriginalResin": "Resin",
+      "FragileResin": "Fragile",
+      "CondensedResin": "Condensed",
+      "RealmCurrency": "Realm"
+    }
+  },
+  "tabs": {
+    "development": "ไอเทมพัฒนา",
+    "precious": "ไอเทมล้ำค่า",
+    "other": "อื่น ๆ",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "แร่เสริมพลัง (ในเกมเก็บไว้รวมกับอาวุธ)",
+      "artifact": "Sanctifying Unction และ Essence (ในเกมเก็บไว้รวมกับอาร์ติแฟกต์)",
+      "other": "ไม่อยู่ในช่องเก็บของในเกม: สกุลเงิน เมล็ดพันธุ์ ไอเทมเกมการ์ด และไอเทมที่ใหม่กว่าข้อมูลเกม"
+    }
+  },
+  "bag": {
+    "title": "ช่องเก็บของ",
+    "show": "แสดง",
+    "view": "มุมมอง",
+    "views": {
+      "grid": "ไอคอน",
+      "list": "รายการ"
+    },
+    "tabRow": "แท็บช่องเก็บของ",
+    "all": "ทั้งหมด",
+    "allTitle": "ทุกแท็บ",
+    "sort": "เรียง",
+    "sorts": {
+      "order": "ตามเกม",
+      "count": "จำนวน",
+      "change": "เปลี่ยนแปลง",
+      "name": "ชื่อ"
+    },
+    "unfoldAll": "กางทุกแท็บ",
+    "foldAll": "พับทุกแท็บ",
+    "owned": "มีอยู่",
+    "ownedTitle": "วัสดุที่คุณมี",
+    "gained": "ได้รับ",
+    "gainedTitle": "ได้รับ {hint}",
+    "spent": "ใช้ไป",
+    "spentTitle": "ใช้ไป {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · ตั้งเอง {hand} (สแกน {capture})"
+  },
+  "detail": {
+    "history": "ประวัติ",
+    "chartLabel": "{name} ตามเวลา {since}",
+    "statTitle": "{value} {since}",
+    "gained": "ได้รับ",
+    "spent": "ใช้ไป",
+    "peak": "สูงสุด",
+    "first": "แรกสุด",
+    "firstTitle": "สแนปช็อตแรกที่มีไอเทมนี้"
+  },
+  "tracked": {
+    "title": "ติดตาม",
+    "list": "วัสดุที่ติดตาม",
+    "untrackName": "เลิกติดตาม {name}"
+  }
+}

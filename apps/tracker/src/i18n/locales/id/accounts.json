@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Akun {id}",
+  "server": {
+    "ASIA": "Asia",
+    "AMERICA": "Amerika",
+    "EUROPE": "Eropa",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Akun",
+    "snapshots": "Snapshot",
+    "uploaded": "Diunggah",
+    "stored": "Disimpan",
+    "ratio": "Rasio",
+    "lastCaptured": "Tangkapan terakhir",
+    "bytes": "{n} byte",
+    "ratioTitle": "Disimpan {ratio} lebih kecil dari yang diunggah",
+    "add": "Tambah akun",
+    "empty": "Belum ada akun"
+  },
+  "new": {
+    "title": "Tambah akun",
+    "add": "Tambah",
+    "notAdded": "Tidak ditambahkan",
+    "added": "{name} ditambahkan",
+    "connect": "Hubungkan Irminsul",
+    "overview": "Ringkasan",
+    "importFiles": "Impor file",
+    "addAnother": "Tambah lagi"
+  },
+  "settings": {
+    "title": "Pengaturan akun",
+    "details": "Detail",
+    "traveler": "Pengembara",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Hapus akun",
+    "deleteTitle": "File GOOD yang sudah diekspor tidak terpengaruh",
+    "confirmTitle": "Hapus {name}?",
+    "deletes": "Menghapus {loss}. Kunci Irminsul-nya berhenti berfungsi.",
+    "typeToConfirm": "Ketik {word}",
+    "confirmWord": "hapus",
+    "loss": "{n} snapshot",
+    "deleted": "{name} dihapus"
+  }
+}

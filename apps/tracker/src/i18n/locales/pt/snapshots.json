@@ -1,0 +1,108 @@
+{
+  "heading": "Histórico de importações",
+  "loadFailed": "Falha ao carregar",
+  "noneInRange": "Nenhuma captura no intervalo",
+  "clear": "Limpar",
+  "noSnapshots": "Nenhuma captura ainda",
+  "import": "Importar",
+  "unchangedUntil": "Inalterada até {time}",
+  "downloadFailed": "Falha ao baixar a captura",
+  "saved": "{name} salvo",
+  "files": "{n} arquivo | {n} arquivos",
+  "gone": "{n} indisponíveis",
+  "exportFailed": "Falha ao exportar",
+  "deletedOf": "{deleted} de {total} capturas excluídas",
+  "deleteFailed": "Falha ao excluir a captura",
+  "deleteFailedMany": "Falha ao excluir as capturas",
+  "deleted": "{n} captura excluída | {n} capturas excluídas",
+  "column": {
+    "id": "ID",
+    "date": "Data",
+    "source": "Origem",
+    "rawSize": "Tamanho bruto",
+    "storedSize": "Tamanho armazenado",
+    "actions": "Ações"
+  },
+  "select": {
+    "page": "Selecionar esta página",
+    "snapshot": "Selecionar captura {id}",
+    "shiftClick": "Shift + clique para selecionar um intervalo",
+    "pageSelected": "Todas as {n} desta página estão selecionadas.",
+    "all": "Selecionar todas as {n}",
+    "allInRange": "Selecionar todas as {n} do intervalo",
+    "viewSelected": "Todas as {n} capturas estão selecionadas.",
+    "rangeSelected": "Todas as {n} capturas do intervalo estão selecionadas.",
+    "clear": "Limpar seleção",
+    "allLabel": "Todas"
+  },
+  "confirm": {
+    "title": "Tem certeza?",
+    "one": "Esta captura será excluída. Isso não pode ser desfeito.",
+    "oneConfirm": "Sim, excluir!",
+    "many": "{n} captura(s) serão excluídas. Isso não pode ser desfeito.",
+    "purge": "{n} captura(s) deste usuário serão excluídas agora, sem passar pela lixeira. Isso não pode ser desfeito.",
+    "manyConfirm": "Sim, excluir!",
+    "massTitle": "Aviso de exclusão em massa",
+    "massText": "TODAS as capturas de TODAS as páginas estão selecionadas. Digite \"DELETE\" para confirmar que deseja apagar tudo.",
+    "massConfirm": "Entendi, EXCLUIR TUDO!",
+    "typePlaceholder": "Digite \"{word}\" para confirmar",
+    "typeLabel": "Digite {word} para confirmar",
+    "typeError": "Digite \"{word}\"",
+    "cancel": "Cancelar"
+  },
+  "figure": {
+    "noCurrency": "Sem moedas nesta captura",
+    "vs": "vs #{id} · {time}"
+  },
+  "range": {
+    "label": "Filtrar por data",
+    "from": "De",
+    "to": "Até",
+    "selectTitle": "Selecionar as {n} capturas do intervalo",
+    "select": "Selecionar {n}",
+    "clear": "Limpar datas"
+  },
+  "row": {
+    "downloadGood": "Baixar GOOD",
+    "download": "Baixar captura {id}",
+    "delete": "Excluir captura",
+    "deleteId": "Excluir captura {id}"
+  },
+  "bar": {
+    "saving": "Salvando…",
+    "downloadingOf": "Baixando {done} / {total}",
+    "downloading": "Baixando {done}",
+    "zipping": "Compactando {done} / {total}",
+    "selected": "{n} selecionadas",
+    "outOf": " de {n}",
+    "hiddenTitle": "{n} capturas selecionadas estão fora das datas",
+    "hidden": "· {n} ocultas",
+    "cancel": "Cancelar",
+    "blocked": "Outra exportação está em andamento",
+    "downloadTitle": "Baixar um zip de arquivos GOOD",
+    "download": "Baixar",
+    "delete": "Excluir"
+  },
+  "card": {
+    "stored": "Armazenado"
+  },
+  "storage": {
+    "title": "Armazenamento",
+    "snapshots": "Capturas",
+    "raw": "Dados brutos",
+    "stored": "Armazenado",
+    "saved": "Economizado"
+  },
+  "pagination": {
+    "perPage": "Por página",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "page": "Página {page} de {pages}",
+    "total": "({n} no total)",
+    "goTo": "Ir para",
+    "go": "Ir"
+  },
+  "table": {
+    "noData": "Nenhum dado disponível."
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Matériaux",
+  "newestSnapshot": "Instantané le plus récent",
+  "since": "depuis {date}",
+  "oneSnapshot": "Un seul instantané",
+  "changesTitle": "Changements {hint}",
+  "changeSince": "Changement depuis",
+  "noSnapshots": "Aucun instantané",
+  "import": "Importer",
+  "loadFailed": "Impossible de charger les matériaux",
+  "loading": "Chargement des matériaux",
+  "saveChartFailed": "Impossible d'enregistrer les réglages du graphique",
+  "search": "Rechercher",
+  "searchLabel": "Rechercher des matériaux",
+  "noMatches": "Aucun résultat",
+  "noMaterials": "Aucun matériau",
+  "clear": "Effacer",
+  "more": "{n} de plus",
+  "upTo": "Jusqu'à {max}",
+  "trackedOfMax": "Suivis / max",
+  "track": "Suivre",
+  "untrack": "Ne plus suivre",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Derniers"
+  },
+  "wallet": {
+    "label": "Portefeuille",
+    "title": "Devises et objets de vœux",
+    "short": {
+      "GenesisCrystal": "Cristal",
+      "IntertwinedFate": "Fatalité",
+      "AcquaintFate": "Destinée",
+      "MasterlessStarglitter": "Astérie",
+      "MasterlessStardust": "Astrion",
+      "OriginalResin": "Résine",
+      "FragileResin": "Fragile",
+      "CondensedResin": "Condensée",
+      "RealmCurrency": "Royaume"
+    }
+  },
+  "tabs": {
+    "development": "Amélioration",
+    "precious": "Précieux",
+    "other": "Autres",
+    "note": "{name} : {note}",
+    "notes": {
+      "weapon": "Minerais de renforcement (le jeu les range avec les armes)",
+      "artifact": "Baume et Essence sanctifiants (le jeu les range avec les artéfacts)",
+      "other": "Absent de l'Inventaire du jeu : devises, graines, objets du jeu de cartes, objets plus récents que les données du jeu"
+    }
+  },
+  "bag": {
+    "title": "Sac",
+    "show": "Afficher",
+    "view": "Vue",
+    "views": {
+      "grid": "Icônes",
+      "list": "Liste"
+    },
+    "tabRow": "Onglet de l'Inventaire",
+    "all": "Tout",
+    "allTitle": "Tous les onglets",
+    "sort": "Tri",
+    "sorts": {
+      "order": "Jeu",
+      "count": "Quantité",
+      "change": "Variation",
+      "name": "Nom"
+    },
+    "unfoldAll": "Déplier tous les onglets",
+    "foldAll": "Replier tous les onglets",
+    "owned": "Possédés",
+    "ownedTitle": "Matériaux que vous possédez",
+    "gained": "Gagnés",
+    "gainedTitle": "Gagnés {hint}",
+    "spent": "Dépensés",
+    "spentTitle": "Dépensés {hint}",
+    "tile": "{name} : {count}",
+    "handSet": " · fixé à la main {hand} (capture {capture})"
+  },
+  "detail": {
+    "history": "Historique",
+    "chartLabel": "{name} dans le temps, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Gagnés",
+    "spent": "Dépensés",
+    "peak": "Pic",
+    "first": "Premier",
+    "firstTitle": "Premier instantané qui le contient"
+  },
+  "tracked": {
+    "title": "Suivis",
+    "list": "Matériaux suivis",
+    "untrackName": "Ne plus suivre {name}"
+  }
+}

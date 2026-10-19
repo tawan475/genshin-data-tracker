@@ -1,0 +1,38 @@
+{
+  "close": "Cerrar",
+  "constellation": {
+    "title": "Constelación {level} de 6"
+  },
+  "crit": {
+    "title": "CV {value} · Prob. CRIT × 2 + Daño CRIT",
+    "circlet": " · tiara CRIT +7.77"
+  },
+  "level": {
+    "title": "Nivel {level} de {cap} · Ascensión {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} estrellas"
+  },
+  "roll": {
+    "title": "RV {value}% · mejoras como % de la mejora más alta, sumadas"
+  },
+  "error": {
+    "title": "No se pudo cargar",
+    "retry": "Reintentar"
+  },
+  "field": {
+    "optional": "(opcional)"
+  },
+  "modal": {
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "pager": {
+    "label": "Páginas",
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "goTo": "Ir a la página",
+    "go": "Ir",
+    "input": "Página, de 1 a {count}"
+  }
+}

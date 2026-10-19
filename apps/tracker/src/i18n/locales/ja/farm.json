@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "すべての目標に十分",
+    "alone": "この目標には十分",
+    "short": "不足"
+  },
+  "readiness": {
+    "all": {
+      "label": "準備完了",
+      "meaning": "上の目標の後でも足りる"
+    },
+    "alone": {
+      "label": "単独で完了",
+      "meaning": "単独なら足りるが、上の目標の後では足りない"
+    },
+    "short": {
+      "label": "不足",
+      "meaning": "単独でも足りない"
+    },
+    "done": {
+      "label": "達成",
+      "meaning": "到達済み"
+    },
+    "artifacts": {
+      "label": "聖遺物",
+      "meaning": "レベルは到達、聖遺物が残り"
+    }
+  },
+  "bracket": {
+    "tier": "ランク{tier}",
+    "bossLevel": "ボスLv.{level}",
+    "wl": "世界ランク{wl}",
+    "withAr": "{base}（冒険ランク{ar}）",
+    "assumed": "{base}（仮定）"
+  },
+  "unit": {
+    "days": "{n}日",
+    "weeks": "{n}週"
+  },
+  "status": {
+    "locked": "冒険ランクまたは世界ランクが低く、まだ周回できません",
+    "noRate": "この入手先の平均ドロップ率がないため、見積もりできません",
+    "notFarmed": "樹脂を使う入手先なし"
+  },
+  "time": {
+    "hm": "{h}時間{m}分",
+    "h": "{h}時間",
+    "m": "{m}分",
+    "dh": "{d}日{h}時間",
+    "d": "{d}日"
+  },
+  "craft": {
+    "kind": {
+      "convert": "変転",
+      "craft": "合成",
+      "forge": "鍛造"
+    },
+    "item": "{name} ×{count}",
+    "convertRow": "{input}を{output}に変転",
+    "craftRow": "{input}から{output}を合成",
+    "forgeRow": "{input}から{output}を鍛造",
+    "kindTitle": {
+      "convert": "錬金合成：変転",
+      "craft": "錬金合成：合成（低ランクから順に）",
+      "forge": "鍛冶屋：鍛造"
+    },
+    "listSeparator": "、",
+    "notYet": "まだ不可：あと{items}必要（先に上のステップを行ってください）",
+    "doneRow": "完了：{row}",
+    "notEnough": "不足：あと{items}必要",
+    "allDoneTitle": "{n}件すべて完了：バッグは完了後の状態です",
+    "title": "合成",
+    "fold": "折りたたむ",
+    "unfold": "プランで変転・合成・鍛造するもの",
+    "steps": "{n}ステップ",
+    "inAll": "合計{cost}",
+    "forgingTime": "鍛造時間{time}（鍛造の待ち行列は除く）",
+    "forging": "鍛造中",
+    "allDone": "すべて完了",
+    "hideTitle": "合成を非表示（プランナー設定で再表示できます）",
+    "hide": "合成を非表示",
+    "from": "から",
+    "fewer": "減らす",
+    "all": "すべて（{n}）"
+  },
+  "lock": {
+    "ar": "冒険ランク{ar}",
+    "wl": "世界ランク{wl}",
+    "locked": "未開放"
+  },
+  "cards": {
+    "blossomExp": "啓示の花",
+    "blossomMora": "蔵金の花",
+    "local": "特産品",
+    "common": "普通の敵",
+    "elite": "精鋭",
+    "other": "その他",
+    "elsewhere": "その他の入手先"
+  },
+  "sections": {
+    "free": "樹脂不要",
+    "domain": "秘境 · 地脈",
+    "boss": "ボス",
+    "weekly": "週ボス",
+    "artifact": "聖遺物"
+  },
+  "groups": {
+    "ley": "地脈の花",
+    "mastery": "熟知秘境",
+    "forgery": "煉武秘境",
+    "blessing": "祝聖秘境",
+    "boss": "通常ボス",
+    "weekly": "週ボス",
+    "local": "特産品",
+    "common": "普通の敵",
+    "elite": "精鋭",
+    "ore": "武器強化素材",
+    "other": "その他"
+  },
+  "people": {
+    "label": "プランの対象",
+    "only": "{name}：このキャラのカードのみ",
+    "all": "{name}：全員を表示"
+  },
+  "card": {
+    "runs": "{n}回",
+    "claims": "{n}回受取",
+    "claimsWeekly": "{claims}（週1回）",
+    "atMost": "最大{runs}",
+    "atMostPrefix": "最大",
+    "runsShort": "{n}回",
+    "claimsShort": "{n}回受取",
+    "resinRange": "樹脂{min}～{max}",
+    "resin": "樹脂{n}",
+    "condensed": "濃縮{n}",
+    "condensedTitle": "濃縮樹脂{n}個",
+    "guaranteed": "ドロップ率は保証される最低値です",
+    "lockTitle": "まだ不可：{lock}が必要",
+    "kind": {
+      "boss": "ボス",
+      "gem": "ドロップするボス",
+      "enemy": "ドロップする敵",
+      "local": "採集地",
+      "artifact": "聖遺物秘境"
+    },
+    "elsewhereTitle": "これらのセットがドロップする秘境はありません",
+    "noRate": "ドロップ率なし",
+    "paidTitle": "予定の秘境周回で{mora}モラ獲得",
+    "paid": "秘境から+{n}",
+    "blockedTitle": "変換{n}件に異夢の溶媒が不足",
+    "blocked": "{n}件不可",
+    "blockedSr": "：異夢の溶媒が不足"
+  },
+  "weekday": {
+    "short": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土"
+    },
+    "long": {
+      "sun": "日曜日",
+      "mon": "月曜日",
+      "tue": "火曜日",
+      "wed": "水曜日",
+      "thu": "木曜日",
+      "fri": "金曜日",
+      "sat": "土曜日"
+    }
+  },
+  "panel": {
+    "today": "今日",
+    "schedule": "スケジュール",
+    "runsLine": "{runs} · 樹脂{resin}（濃縮{condensed}） · {days}",
+    "sources": "秘境、通常ボス、地脈",
+    "daily": "1日樹脂{n}",
+    "dailyRefresh": "1日樹脂{n}（180 + {r} × {per}）",
+    "withHeld": "所持樹脂込みで{days}",
+    "gems": "宝石：{runs}、樹脂{resin}",
+    "partial": "一部の入手先にドロップ率がありません",
+    "upperBound": "世界ランク9のボスドロップは保証される最低値です",
+    "weeklyClaims": "週ボス：{weeks}で{claims}",
+    "weeklyResin": "週ボス割引込みで樹脂{resin}（割引なしで{max}）",
+    "weeklyPartial": "一部のボスにドロップ率がありません",
+    "serverDay": "サーバーの曜日：{day}",
+    "serverDaySunday": "サーバーの曜日：{day}（全秘境開放）",
+    "resetIn": "4:00のリセットまで{time}",
+    "forgeOff": "所持している鉱石の欠片から鍛造できる仕上げ用魔鉱を含める",
+    "forgeLine": "{item}を鍛造：{mora}モラ、{time}",
+    "stillShort": "まだ{n}不足",
+    "totals": "合計",
+    "resin": "樹脂",
+    "dayUnit": "日",
+    "refreshTitle": "1日の樹脂補充{r}回：1日樹脂{daily}",
+    "perDay": "{n}/日",
+    "weekly": "週間",
+    "weekUnit": "週",
+    "lockedTitle": "冒険ランク/世界ランクで未開放の入手先{n}件",
+    "locked": "冒険ランク/世界ランクで未開放",
+    "view": "周回画面",
+    "noWeeklyTitle": "週ボスなしでまだ周回が必要な目標のみ：ドロップ素材は所持済みか変換可能（上の目標の後）",
+    "noWeekly": "週ボスなし",
+    "noneLeft": "すべての目標にまだ週ボスが必要です",
+    "showAll": "すべての目標を表示",
+    "assumed": "冒険ランク/世界ランク未設定：最上位として計算",
+    "set": "設定",
+    "nothing": "周回するものはありません",
+    "sectionLabel": "{label}：樹脂{resin}",
+    "show": "表示",
+    "hidden": "{n}件非表示",
+    "forge": "欠片から鍛造",
+    "pairTitle": "{runs} · 樹脂{resin} · {days}",
+    "cards": "{n}枚"
+  },
+  "event": {
+    "names": {
+      "abundance": "豊材の奔流",
+      "mastery": "熟知の奔流",
+      "favor": "祈聖の奔流",
+      "wealth": "蔵金の奔流",
+      "revelation": "啓示の奔流",
+      "leyLine": "地脈の奔流"
+    },
+    "rules": {
+      "abundance": "すべての天賦本・武器素材の秘境が開放され、報酬が倍増します",
+      "mastery": "熟知秘境の報酬が倍増します",
+      "favor": "祝聖秘境（聖遺物）の報酬が倍増します",
+      "wealth": "蔵金の花の報酬が倍増します",
+      "revelation": "啓示の花の報酬が倍増します",
+      "leyLine": "蔵金の花と啓示の花の報酬が倍増します"
+    },
+    "claims": "天然樹脂で×{times}、1日{n}回",
+    "endsIn": "残り{time}"
+  }
+}

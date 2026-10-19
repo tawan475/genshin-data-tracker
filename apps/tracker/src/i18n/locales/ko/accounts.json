@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "계정 {id}",
+  "server": {
+    "ASIA": "아시아",
+    "AMERICA": "미국",
+    "EUROPE": "유럽",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "계정",
+    "snapshots": "스냅샷",
+    "uploaded": "업로드",
+    "stored": "저장",
+    "ratio": "비율",
+    "lastCaptured": "마지막 캡처",
+    "bytes": "{n}바이트",
+    "ratioTitle": "업로드보다 {ratio} 작게 저장됨",
+    "add": "계정 추가",
+    "empty": "아직 계정이 없습니다"
+  },
+  "new": {
+    "title": "계정 추가",
+    "add": "추가",
+    "notAdded": "추가되지 않음",
+    "added": "{name} 추가됨",
+    "connect": "Irminsul 연결",
+    "overview": "개요",
+    "importFiles": "파일 가져오기",
+    "addAnother": "하나 더 추가"
+  },
+  "settings": {
+    "title": "계정 설정",
+    "details": "상세",
+    "traveler": "주인공",
+    "lumine": "루미네",
+    "aether": "아이테르",
+    "deleteAccount": "계정 삭제",
+    "deleteTitle": "내보낸 GOOD 파일에는 영향이 없습니다",
+    "confirmTitle": "{name}을(를) 삭제할까요?",
+    "deletes": "{loss}이(가) 삭제됩니다. 이 계정의 Irminsul 키도 더 이상 작동하지 않습니다.",
+    "typeToConfirm": "{word} 입력",
+    "confirmWord": "삭제",
+    "loss": "스냅샷 {n}개",
+    "deleted": "{name} 삭제됨"
+  }
+}

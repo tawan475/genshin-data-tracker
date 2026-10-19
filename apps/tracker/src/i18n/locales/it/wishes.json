@@ -1,0 +1,260 @@
+{
+  "title": "Cronologia desideri",
+  "bannerPageTitle": "Cronologia desideri · {banner}",
+  "loadFailed": "Caricamento non riuscito",
+  "loading": "Caricamento",
+  "import": "Importa",
+  "export": "Esporta",
+  "importExport": "Importa / esporta",
+  "browse": "Sfoglia",
+  "cancel": "Annulla",
+  "search": "Cerca",
+  "rarity": "Rarità",
+  "banner": "Banner",
+  "pulls": "{n} tiri",
+  "pullsTimes": "{n} desideri × {primos}",
+  "pullsPrimos": "{n} tiri · ✦ {primos}",
+  "lifetime": "Tiri totali",
+  "allWishes": "Tutti i desideri",
+  "newPulls": "{n} nuovi tiri",
+  "nothingNew": "Niente di nuovo",
+  "banners": {
+    "character": {
+      "label": "Personaggio",
+      "title": "Evento personaggio"
+    },
+    "weapon": {
+      "label": "Arma",
+      "title": "Evento arma"
+    },
+    "standard": {
+      "label": "Standard",
+      "title": "Desiderio standard"
+    },
+    "chronicled": {
+      "label": "Cronache",
+      "title": "Desiderio delle cronache"
+    },
+    "beginners": {
+      "label": "Novizi",
+      "title": "Desideri per viaggiatori novizi"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "gen",
+      "2": "feb",
+      "3": "mar",
+      "4": "apr",
+      "5": "mag",
+      "6": "giu",
+      "7": "lug",
+      "8": "ago",
+      "9": "set",
+      "10": "ott",
+      "11": "nov",
+      "12": "dic"
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "ora"
+  },
+  "outcomes": {
+    "won": "Vinto",
+    "lost": "Perso",
+    "guaranteed": "Garantito"
+  },
+  "outcomeTitles": {
+    "won": "Vinto il {odds}",
+    "lost": "Perso il {odds}: il prossimo è in evidenza",
+    "guaranteed": "In evidenza, garantito dopo un {odds} perso"
+  },
+  "legend": {
+    "won": "vinto",
+    "lost": "perso",
+    "guaranteed": "garantito"
+  },
+  "overview": {
+    "newestPull": "Tiro più recente, ora del gioco",
+    "synced": "Sincronizzato {ago}",
+    "syncedTitle": "Nuovi desideri salvati {time}",
+    "syncHelp": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito): irminsul sincronizza ogni banner, poi ogni nuovo desiderio finché dura la chiave (~24 h). Il link dei desideri del gioco porta anche gli ultimi sei mesi. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",
+    "empty": "Ancora nessun desiderio",
+    "emptyBody": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito), o importa con il link dei desideri del gioco. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",
+    "banners": "Banner",
+    "totals": "Totali",
+    "worth": "Valore dei desideri",
+    "worthHint": "{n} desideri × {primos} Primogemme",
+    "wishes": "{n} desideri",
+    "avgPity": "Pity medio 5★",
+    "avgPityHint": "Evento personaggio: il pity medio di ogni 5★, rispetto ai circa {expected} attesi con il soft pity",
+    "avgPityVs": "{diff} rispetto ai {expected} attesi"
+  },
+  "card": {
+    "everyPull": "{banner}: tutti i tiri",
+    "fiveTitle": "{left} tiri all'hard pity · ✦ {primos} · soft pity da {soft}",
+    "fourTitle": "{left} a un 4★ sicuro",
+    "fourFeatured": " · il prossimo 4★ è in evidenza",
+    "pity5": "Pity 5★",
+    "pity4": "Pity 4★",
+    "guaranteedAt": "Garantito a {n}",
+    "hideLatest": "Nascondi gli ultimi tiri",
+    "showLatest": "Mostra gli ultimi tiri",
+    "latest": "Ultimi tiri",
+    "latestRegion": "{banner}: ultimi tiri",
+    "none": "Nessuno",
+    "cols": {
+      "name": "Nome",
+      "time": "Ora",
+      "pity": "Pity"
+    }
+  },
+  "five": {
+    "every": "Tutti i 5★",
+    "newestFirst": "{n} · dal più recente",
+    "none": "Ancora nessun 5★",
+    "pity": "{name} · pity {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Piattaforma",
+    "copyFailed": "Non copiato: seleziona il comando e copialo",
+    "steps": {
+      "open": "Apri Desiderio → Cronologia nel gioco e attendi il caricamento.",
+      "android2": "Disattiva il Wi-Fi e i dati mobili.",
+      "android3": "Tocca aggiorna (in alto a destra): la pagina mostra un errore con del testo.",
+      "android4": "Seleziona tutto quel testo e copialo.",
+      "android5": "Riattiva la connessione, poi incollalo qui sotto.",
+      "ios1": "Apri il menu Paimon → Feedback e attendi il caricamento.",
+      "ios2": "Tocca Problema nel gioco → Modalità cooperativa.",
+      "ios3": "Tocca il link in fondo alla risposta: si apre nel browser.",
+      "ios4": "Copia quel link e incollalo qui sotto.",
+      "ps1": "Apri nel gioco la posta dell'evento con un codice QR.",
+      "ps2": "Scansiona il codice con il telefono e copia il link che si apre.",
+      "ps3": "Incollalo qui sotto. Se non funziona, collega la PlayStation a un account HoYoverse e segui i passaggi per PC o telefono.",
+      "pcRun": "Apri PowerShell (Start, digita PowerShell) ed esegui:",
+      "pcPaste": "Copia il link: incollalo qui sotto.",
+      "pcPasteTitle": "La funzione Copy wish URL di irminsul dà lo stesso link"
+    },
+    "scriptTitle": "Legge la cache web del gioco su questo PC, controlla il link una volta con HoYoverse e lo copia. Nient'altro.",
+    "copied": "Copiato",
+    "copy": "Copia",
+    "readScript": "Leggi lo script",
+    "label": "Link della cronologia desideri",
+    "placeholder": "Incolla il link: https://…",
+    "invalid": "Nessun link della cronologia desideri in quel testo",
+    "uidMismatch": "Quel link è dell'UID {uid}; questo account è UID {own}.",
+    "failed": "Importazione non riuscita",
+    "saving": "Salvataggio di {n}…",
+    "progress": "{banner} · pagina {page} · {n} nuovi",
+    "errors": {
+      "cancelled": "Annullato",
+      "network": "La cronologia desideri non ha risposto. Riprova più tardi.",
+      "expired": "Il link è scaduto. Riapri Desiderio → Cronologia nel gioco e copiane uno nuovo.",
+      "throttled": "HoYoverse chiede di rallentare. Riprova tra qualche minuto.",
+      "api": "HoYoverse ha risposto: {message}",
+      "code": "errore {code}"
+    }
+  },
+  "chart": {
+    "title": "Tiri al mese",
+    "label": "Tiri al mese per rarità, {n} mesi",
+    "month": "{month}: {n} desideri"
+  },
+  "numbers": {
+    "label": "Numeri",
+    "avgPity": "{share} · pity medio {avg}",
+    "expected": "Pity 5★ atteso circa {n} con il soft pity",
+    "expectedAbout": "Atteso circa {n} con il soft pity",
+    "streak": "serie {current} · migliore {best} vinti · peggiore {worst} persi",
+    "streakWon": "{n} vinti",
+    "streakLost": "{n} persi",
+    "flipTitle": "Un 5★ in evidenza quando era un {odds} (esclusi quelli garantiti)",
+    "split": "Ripartizione 4★",
+    "character": "personaggio",
+    "char": "pers.",
+    "weapon": "arma",
+    "rateUp": "4★ in evidenza vinti {won} su {total} · {share}",
+    "splitTitle": "4★ per tipo",
+    "splitTitleFull": "4★ per tipo e testa o croce dei 4★ in evidenza"
+  },
+  "odds": {
+    "guaranteed": "Garantito",
+    "lostLast": "Perso l'ultimo {odds} ({name}): il prossimo 5★ è in evidenza",
+    "nextFeatured": "Il prossimo 5★ è in evidenza",
+    "weapon": "Prossimo 5★: 75% un'arma in evidenza",
+    "coin": "Prossimo 5★: testa o croce"
+  },
+  "track": {
+    "label": "Pity {pity} di {hard}, soft pity da {soft}"
+  },
+  "runs": {
+    "label": "Edizioni dei banner",
+    "heading": "Banner",
+    "count": "{n} edizione | {n} edizioni",
+    "fewer": "Meno",
+    "all": "Tutte le edizioni",
+    "current": " · attuale",
+    "no5": "Nessun 5★"
+  },
+  "small": {
+    "pitySoFar": "pity {pity} / {hard}"
+  },
+  "table": {
+    "label": "Tutti i desideri",
+    "search": "Cerca desideri",
+    "searchTitle": "Nome del personaggio o dell'arma",
+    "noMatch": "Nessun tiro corrisponde",
+    "rollRun": "Numero del tiro in quell'edizione del banner",
+    "roll": "Numero del tiro",
+    "item": "Oggetto",
+    "pity": "Pity",
+    "result": "Risultato",
+    "time": "Ora",
+    "newestFirst": "Prima i più recenti",
+    "oldestFirst": "Prima i più vecchi",
+    "newestFirstSr": "prima i più recenti",
+    "oldestFirstSr": "prima i più vecchi",
+    "weapon": "Arma",
+    "character": "Personaggio",
+    "pages": "Pagine dei desideri"
+  },
+  "transfer": {
+    "backup": "Backup di paimon.moe",
+    "modes": {
+      "link": "Link dei desideri",
+      "file": "File"
+    },
+    "importFrom": "Importa da",
+    "noRecords": "Nessun dato",
+    "uidMismatch": "Quella cronologia è dell'UID {uid}; questo account è UID {own}",
+    "account": "Account {n}",
+    "notWishFile": "Non è un file UIGF o paimon.moe",
+    "alreadyHeld": "{n} già presenti",
+    "notImported": "Non importato",
+    "deleteTitle": "Eliminare la cronologia desideri?",
+    "deleteDetail": "Tutti i {n} tiri di questo account vengono rimossi. irminsul può recuperare di nuovo gli ultimi sei mesi.",
+    "deleteConfirm": "Elimina",
+    "notDeleted": "Non eliminato",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), un CSV per l'importatore di paimon.moe, o il backup di paimon.moe (Settings → Export)",
+    "drop": "File UIGF o paimon.moe",
+    "fileAccount": "Account nel file",
+    "uigfTitle": "UIGF v4.1: lo leggono Snap Hutao, Starward e la maggior parte dei tracker di desideri",
+    "paimonTitle": "Per il Local Importer di paimon.moe (Wish counter → Import → Local)",
+    "delete": "Elimina",
+    "deleteHistory": "Elimina cronologia"
+  },
+  "bannerPage": {
+    "noPulls": "Nessun tiro su questo banner",
+    "now": "Ora",
+    "hardTitle": "{left} tiri all'hard pity · ✦ {primos}",
+    "toHard": "{left} all'hard pity · ✦ {primos}",
+    "softFrom": "soft da {soft}",
+    "featuredNext": "Prossimo in evidenza",
+    "featuredNextTitle": "L'ultimo 4★ non era in evidenza: il prossimo lo sarà",
+    "toGuaranteed4": "{n} al 4★ garantito"
+  }
+}

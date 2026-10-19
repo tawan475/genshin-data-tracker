@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Tổng Quan",
+    "progression": "Tiến triển",
+    "characters": "Nhân Vật",
+    "artifacts": "Thánh Di Vật",
+    "weapons": "Vũ Khí",
+    "materials": "Nguyên Liệu",
+    "planner": "Kế hoạch",
+    "achievements": "Thành Tựu",
+    "anecdotes": "Giai Thoại",
+    "wishes": "Cầu Nguyện",
+    "snapshots": "Bản chụp",
+    "import": "Nhập",
+    "manage": "Quản lý",
+    "staffOverview": "Tổng Quan",
+    "users": "Người dùng",
+    "storage": "Lưu trữ",
+    "roles": "Vai trò",
+    "audit": "Nhật ký"
+  },
+  "section": {
+    "staff": "Quản trị",
+    "account": "Tài khoản",
+    "system": "Hệ thống"
+  },
+  "accounts": "Tài khoản",
+  "staff": "Quản trị",
+  "settings": "Thiết Lập",
+  "import": "Nhập",
+  "expandMenu": "Mở rộng menu",
+  "collapseMenu": "Thu gọn menu",
+  "openMenu": "Mở menu",
+  "closeMenu": "Đóng menu",
+  "lightTheme": "Chủ đề sáng",
+  "darkTheme": "Chủ đề tối",
+  "themeNotSaved": "Chưa lưu chủ đề",
+  "landingPage": "Trang chủ",
+  "return": "Quay lại",
+  "highestRole": "Vai trò cao nhất của bạn",
+  "copyName": "Sao chép tên",
+  "copyUid": "Sao chép UID",
+  "copyUidValue": "Sao chép UID {uid}",
+  "nameCopied": "Đã sao chép tên",
+  "uidCopied": "Đã sao chép UID",
+  "switcher": {
+    "select": "Chọn tài khoản",
+    "add": "Thêm tài khoản"
+  },
+  "page": {
+    "signIn": "Đăng nhập",
+    "createAccount": "Tạo tài khoản",
+    "continue": "Tiếp tục",
+    "linkIrminsul": "Liên kết Irminsul",
+    "resetPassword": "Đặt lại mật khẩu",
+    "newPassword": "Mật khẩu mới",
+    "confirmEmail": "Xác nhận email",
+    "accounts": "Tài khoản",
+    "addAccount": "Thêm tài khoản",
+    "settings": "Thiết Lập",
+    "overview": "Tổng Quan",
+    "users": "Người dùng",
+    "user": "Người dùng",
+    "storage": "Lưu trữ",
+    "roles": "Vai trò",
+    "audit": "Nhật ký",
+    "progression": "Tiến triển",
+    "characters": "Nhân Vật",
+    "weapons": "Vũ Khí",
+    "artifacts": "Thánh Di Vật",
+    "materials": "Nguyên Liệu",
+    "planner": "Kế hoạch",
+    "achievements": "Thành Tựu",
+    "anecdotes": "Giai Thoại",
+    "wishHistory": "Lịch sử cầu nguyện",
+    "snapshots": "Bản chụp",
+    "import": "Nhập",
+    "accountSettings": "Thiết lập tài khoản",
+    "notFound": "Không tìm thấy",
+    "inspect": "Kiểm tra · {page}"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "body": "Liên kết có thể đã cũ, hoặc trang đã chuyển đi.",
+    "home": "Về bảng điều khiển"
+  },
+  "accountMissing": {
+    "title": "Không tìm thấy tài khoản",
+    "body": "Tài khoản có thể đã bị xóa, hoặc thuộc về người khác.",
+    "all": "Mọi tài khoản"
+  },
+  "update": {
+    "ready": "Đã có phiên bản mới của tracker."
+  },
+  "public": {
+    "dashboard": "Bảng điều khiển"
+  },
+  "landing": {
+    "heroLine1": "Làm chủ",
+    "heroLine2": "hành trình Genshin",
+    "tagline": "Mỗi lần đăng nhập đều được lưu lại. Thánh Di Vật, nguyên liệu, lịch sử.",
+    "openDashboard": "Mở bảng điều khiển",
+    "getStarted": "Bắt đầu",
+    "critDmg": "Sát Thương Bạo Kích 21.8%"
+  },
+  "appearance": "Ngôn ngữ và giao diện"
+}

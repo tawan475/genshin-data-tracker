@@ -1,0 +1,7 @@
+{
+  "justNow": "baru saja",
+  "betweenTimes": "{date}, antara {from} dan {to}",
+  "betweenDates": "antara {from} dan {to}",
+  "today": "Hari ini",
+  "yesterday": "Kemarin"
+}

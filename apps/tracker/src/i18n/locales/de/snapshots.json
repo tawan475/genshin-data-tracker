@@ -1,0 +1,108 @@
+{
+  "heading": "Importverlauf",
+  "loadFailed": "Laden fehlgeschlagen",
+  "noneInRange": "Keine Snapshots im Zeitraum",
+  "clear": "Leeren",
+  "noSnapshots": "Noch keine Snapshots",
+  "import": "Importieren",
+  "unchangedUntil": "Unverändert bis {time}",
+  "downloadFailed": "Snapshot konnte nicht heruntergeladen werden",
+  "saved": "{name} gespeichert",
+  "files": "{n} Datei | {n} Dateien",
+  "gone": "{n} nicht mehr vorhanden",
+  "exportFailed": "Export fehlgeschlagen",
+  "deletedOf": "{deleted} von {total} Snapshots gelöscht",
+  "deleteFailed": "Snapshot konnte nicht gelöscht werden",
+  "deleteFailedMany": "Snapshots konnten nicht gelöscht werden",
+  "deleted": "{n} Snapshot gelöscht | {n} Snapshots gelöscht",
+  "column": {
+    "id": "ID",
+    "date": "Datum",
+    "source": "Quelle",
+    "rawSize": "Rohgröße",
+    "storedSize": "Gespeichert",
+    "actions": "Aktionen"
+  },
+  "select": {
+    "page": "Diese Seite auswählen",
+    "snapshot": "Snapshot {id} auswählen",
+    "shiftClick": "Umschalt-Klick wählt einen Bereich",
+    "pageSelected": "Alle {n} auf dieser Seite sind ausgewählt.",
+    "all": "Alle {n} auswählen",
+    "allInRange": "Alle {n} im Zeitraum auswählen",
+    "viewSelected": "Alle {n} Snapshots sind ausgewählt.",
+    "rangeSelected": "Alle {n} Snapshots im Zeitraum sind ausgewählt.",
+    "clear": "Auswahl aufheben",
+    "allLabel": "Alle"
+  },
+  "confirm": {
+    "title": "Bist du sicher?",
+    "one": "Du löschst diesen Snapshot. Das lässt sich nicht rückgängig machen.",
+    "oneConfirm": "Ja, löschen!",
+    "many": "Du löschst {n} Snapshot(s). Das lässt sich nicht rückgängig machen.",
+    "purge": "Du löschst jetzt {n} Snapshot(s) dieses Benutzers, ohne Papierkorb. Das lässt sich nicht rückgängig machen.",
+    "manyConfirm": "Ja, alle löschen!",
+    "massTitle": "Warnung: Massenlöschung",
+    "massText": "Du hast ALLE Snapshots auf ALLEN Seiten ausgewählt. Gib \"DELETE\" ein, um zu bestätigen, dass du alles löschen willst.",
+    "massConfirm": "Verstanden, ALLES LÖSCHEN!",
+    "typePlaceholder": "Zum Bestätigen \"{word}\" eingeben",
+    "typeLabel": "Zum Bestätigen {word} eingeben",
+    "typeError": "\"{word}\" eingeben",
+    "cancel": "Abbrechen"
+  },
+  "figure": {
+    "noCurrency": "Keine Währung in diesem Snapshot",
+    "vs": "vs. #{id} · {time}"
+  },
+  "range": {
+    "label": "Nach Datum filtern",
+    "from": "Von",
+    "to": "Bis",
+    "selectTitle": "Die {n} Snapshots im Zeitraum auswählen",
+    "select": "{n} auswählen",
+    "clear": "Daten leeren"
+  },
+  "row": {
+    "downloadGood": "GOOD herunterladen",
+    "download": "Snapshot {id} herunterladen",
+    "delete": "Snapshot löschen",
+    "deleteId": "Snapshot {id} löschen"
+  },
+  "bar": {
+    "saving": "Speichert…",
+    "downloadingOf": "Lädt herunter {done} / {total}",
+    "downloading": "Lädt herunter {done}",
+    "zipping": "Packt {done} / {total}",
+    "selected": "{n} ausgewählt",
+    "outOf": " von {n}",
+    "hiddenTitle": "{n} ausgewählte Snapshots liegen außerhalb der Daten",
+    "hidden": "· {n} ausgeblendet",
+    "cancel": "Abbrechen",
+    "blocked": "Ein anderer Export läuft",
+    "downloadTitle": "ZIP mit GOOD-Dateien herunterladen",
+    "download": "Herunterladen",
+    "delete": "Löschen"
+  },
+  "card": {
+    "stored": "Gespeichert"
+  },
+  "storage": {
+    "title": "Speicher",
+    "snapshots": "Snapshots",
+    "raw": "Rohdaten",
+    "stored": "Gespeichert",
+    "saved": "Gespart"
+  },
+  "pagination": {
+    "perPage": "Pro Seite",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {page} von {pages}",
+    "total": "({n} insgesamt)",
+    "goTo": "Gehe zu",
+    "go": "Los"
+  },
+  "table": {
+    "noData": "Keine Daten vorhanden."
+  }
+}

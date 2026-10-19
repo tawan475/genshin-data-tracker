@@ -1,0 +1,108 @@
+{
+  "heading": "Historial de importaciones",
+  "loadFailed": "Error al cargar",
+  "noneInRange": "No hay capturas en el intervalo",
+  "clear": "Borrar",
+  "noSnapshots": "Aún no hay capturas",
+  "import": "Importar",
+  "unchangedUntil": "Sin cambios hasta {time}",
+  "downloadFailed": "No se pudo descargar la captura",
+  "saved": "{name} guardado",
+  "files": "{n} archivo | {n} archivos",
+  "gone": "{n} ya no están",
+  "exportFailed": "Error al exportar",
+  "deletedOf": "Borradas {deleted} de {total} capturas",
+  "deleteFailed": "No se pudo borrar la captura",
+  "deleteFailedMany": "No se pudieron borrar las capturas",
+  "deleted": "{n} captura borrada | {n} capturas borradas",
+  "column": {
+    "id": "ID",
+    "date": "Fecha",
+    "source": "Origen",
+    "rawSize": "Tamaño bruto",
+    "storedSize": "Tamaño guardado",
+    "actions": "Acciones"
+  },
+  "select": {
+    "page": "Seleccionar esta página",
+    "snapshot": "Seleccionar captura {id}",
+    "shiftClick": "Mayús + clic para seleccionar un rango",
+    "pageSelected": "Las {n} de esta página están seleccionadas.",
+    "all": "Seleccionar las {n}",
+    "allInRange": "Seleccionar las {n} del intervalo",
+    "viewSelected": "Las {n} capturas están seleccionadas.",
+    "rangeSelected": "Las {n} capturas del intervalo están seleccionadas.",
+    "clear": "Quitar selección",
+    "allLabel": "Todas"
+  },
+  "confirm": {
+    "title": "¿Seguro?",
+    "one": "Vas a borrar esta captura. No se puede deshacer.",
+    "oneConfirm": "¡Sí, bórrala!",
+    "many": "Vas a borrar {n} captura(s). No se puede deshacer.",
+    "purge": "Vas a borrar ya {n} captura(s) de este usuario, sin pasar por la papelera. No se puede deshacer.",
+    "manyConfirm": "¡Sí, bórralas!",
+    "massTitle": "Aviso de borrado masivo",
+    "massText": "Has seleccionado TODAS las capturas de TODAS las páginas. Escribe \"DELETE\" para confirmar que quieres borrarlo todo.",
+    "massConfirm": "Lo entiendo, ¡BORRAR TODO!",
+    "typePlaceholder": "Escribe \"{word}\" para confirmar",
+    "typeLabel": "Escribe {word} para confirmar",
+    "typeError": "Escribe \"{word}\"",
+    "cancel": "Cancelar"
+  },
+  "figure": {
+    "noCurrency": "No hay monedas en esta captura",
+    "vs": "vs. #{id} · {time}"
+  },
+  "range": {
+    "label": "Filtrar por fecha",
+    "from": "Desde",
+    "to": "Hasta",
+    "selectTitle": "Seleccionar las {n} capturas del intervalo",
+    "select": "Seleccionar {n}",
+    "clear": "Borrar fechas"
+  },
+  "row": {
+    "downloadGood": "Descargar GOOD",
+    "download": "Descargar captura {id}",
+    "delete": "Borrar captura",
+    "deleteId": "Borrar captura {id}"
+  },
+  "bar": {
+    "saving": "Guardando…",
+    "downloadingOf": "Descargando {done} / {total}",
+    "downloading": "Descargando {done}",
+    "zipping": "Comprimiendo {done} / {total}",
+    "selected": "{n} seleccionadas",
+    "outOf": " de {n}",
+    "hiddenTitle": "{n} capturas seleccionadas están fuera de las fechas",
+    "hidden": "· {n} ocultas",
+    "cancel": "Cancelar",
+    "blocked": "Hay otra exportación en curso",
+    "downloadTitle": "Descargar un zip de archivos GOOD",
+    "download": "Descargar",
+    "delete": "Borrar"
+  },
+  "card": {
+    "stored": "Guardado"
+  },
+  "storage": {
+    "title": "Almacenamiento",
+    "snapshots": "Capturas",
+    "raw": "Datos brutos",
+    "stored": "Guardado",
+    "saved": "Ahorrado"
+  },
+  "pagination": {
+    "perPage": "Por página",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {page} de {pages}",
+    "total": "({n} en total)",
+    "goTo": "Ir a",
+    "go": "Ir"
+  },
+  "table": {
+    "noData": "No hay datos."
+  }
+}

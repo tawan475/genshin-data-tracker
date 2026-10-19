@@ -1,0 +1,108 @@
+{
+  "heading": "Lịch sử nhập",
+  "loadFailed": "Tải thất bại",
+  "noneInRange": "Không có bản chụp trong khoảng này",
+  "clear": "Xóa lọc",
+  "noSnapshots": "Chưa có bản chụp",
+  "import": "Nhập",
+  "unchangedUntil": "Không đổi tới {time}",
+  "downloadFailed": "Không tải được bản chụp",
+  "saved": "Đã lưu {name}",
+  "files": "{n} tệp",
+  "gone": "{n} không còn",
+  "exportFailed": "Xuất thất bại",
+  "deletedOf": "Đã xóa {deleted} / {total} bản chụp",
+  "deleteFailed": "Không xóa được bản chụp",
+  "deleteFailedMany": "Không xóa được các bản chụp",
+  "deleted": "Đã xóa thành công {n} bản chụp",
+  "column": {
+    "id": "ID",
+    "date": "Ngày",
+    "source": "Nguồn",
+    "rawSize": "Kích thước gốc",
+    "storedSize": "Kích thước lưu",
+    "actions": "Thao tác"
+  },
+  "select": {
+    "page": "Chọn trang này",
+    "snapshot": "Chọn bản chụp {id}",
+    "shiftClick": "Giữ Shift và nhấp để chọn một dải",
+    "pageSelected": "Đã chọn cả {n} mục trên trang này.",
+    "all": "Chọn tất cả {n}",
+    "allInRange": "Chọn tất cả {n} trong khoảng",
+    "viewSelected": "Đã chọn cả {n} bản chụp.",
+    "rangeSelected": "Đã chọn cả {n} bản chụp trong khoảng.",
+    "clear": "Bỏ chọn",
+    "allLabel": "Tất cả"
+  },
+  "confirm": {
+    "title": "Bạn chắc chắn chứ?",
+    "one": "Bạn sắp xóa bản chụp này. Không thể hoàn tác.",
+    "oneConfirm": "Có, xóa nó!",
+    "many": "Bạn sắp xóa {n} bản chụp. Không thể hoàn tác.",
+    "purge": "Bạn sắp xóa ngay {n} bản chụp của người dùng này, bỏ qua thùng rác. Không thể hoàn tác.",
+    "manyConfirm": "Có, xóa chúng!",
+    "massTitle": "Cảnh báo xóa hàng loạt",
+    "massText": "Bạn đã chọn TẤT CẢ bản chụp trên TẤT CẢ các trang. Nhập \"DELETE\" để xác nhận bạn muốn xóa sạch mọi thứ.",
+    "massConfirm": "Tôi hiểu, XÓA TẤT CẢ!",
+    "typePlaceholder": "Nhập \"{word}\" để xác nhận",
+    "typeLabel": "Nhập {word} để xác nhận",
+    "typeError": "Hãy nhập \"{word}\"",
+    "cancel": "Hủy"
+  },
+  "figure": {
+    "noCurrency": "Bản chụp này không có tiền tệ",
+    "vs": "so với #{id} · {time}"
+  },
+  "range": {
+    "label": "Lọc theo ngày",
+    "from": "Từ",
+    "to": "Đến",
+    "selectTitle": "Chọn {n} bản chụp trong khoảng",
+    "select": "Chọn {n}",
+    "clear": "Xóa ngày"
+  },
+  "row": {
+    "downloadGood": "Tải GOOD",
+    "download": "Tải bản chụp {id}",
+    "delete": "Xóa bản chụp",
+    "deleteId": "Xóa bản chụp {id}"
+  },
+  "bar": {
+    "saving": "Đang lưu…",
+    "downloadingOf": "Đang tải {done} / {total}",
+    "downloading": "Đang tải {done}",
+    "zipping": "Đang nén {done} / {total}",
+    "selected": "Đã chọn {n}",
+    "outOf": " trên {n}",
+    "hiddenTitle": "{n} bản chụp đã chọn nằm ngoài khoảng ngày",
+    "hidden": "· {n} đang ẩn",
+    "cancel": "Hủy",
+    "blocked": "Đang có một lần xuất khác",
+    "downloadTitle": "Tải tệp zip gồm các tệp GOOD",
+    "download": "Tải xuống",
+    "delete": "Xóa"
+  },
+  "card": {
+    "stored": "Đã lưu"
+  },
+  "storage": {
+    "title": "Lưu trữ",
+    "snapshots": "Bản chụp",
+    "raw": "Dữ liệu gốc",
+    "stored": "Đã lưu",
+    "saved": "Tiết kiệm"
+  },
+  "pagination": {
+    "perPage": "Mỗi trang",
+    "previous": "Trước",
+    "next": "Sau",
+    "page": "Trang {page} / {pages}",
+    "total": "(tổng {n})",
+    "goTo": "Đến",
+    "go": "Đi"
+  },
+  "table": {
+    "noData": "Không có dữ liệu."
+  }
+}

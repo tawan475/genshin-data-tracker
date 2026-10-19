@@ -1,0 +1,73 @@
+{
+  "progression": "İlerleme",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Köken Taşı",
+    "characters": "Karakterler",
+    "weapons": "Silahlar",
+    "artifacts": "Yadigarlar",
+    "artifact4": "4★ Yadigar",
+    "artifact3": "3★ Yadigar"
+  },
+  "server": {
+    "AMERICA": "Amerika",
+    "EUROPE": "Avrupa",
+    "ASIA": "Asya",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Henüz anlık görüntü yok",
+  "import": "İçe aktar",
+  "historyUnavailable": "Geçmiş kullanılamıyor",
+  "currencyCarried": "önceki bir taramadan",
+  "currencyMissing": "son taramada yok",
+  "sincePrevious": "önceki anlık görüntüden beri",
+  "lastCaptured": "Son tarama",
+  "lastCapturedAt": "Son tarama {time}",
+  "seenAgain": "Yeniden görüldü",
+  "seenAgainAt": "Yeniden görüldü {time}",
+  "loadingHistory": "Anlık görüntü geçmişi yükleniyor",
+  "lowRarity": {
+    "label": "4★ / 3★ Yadigar",
+    "hint": "Kilitsiz, kuşanılmamış",
+    "rarity": "{n} yıldız"
+  },
+  "card": {
+    "snapshots": "Anlık görüntüler",
+    "storage": "Depolama",
+    "stored": "{raw} yüklendi, {stored} saklandı",
+    "storedRatio": "{raw} yüklendi, {stored} saklandı ({ratio} daha küçük)"
+  },
+  "monthly": {
+    "title": "Aylık analiz",
+    "previous": "Önceki ay",
+    "previousTo": "Önceki ay, {month}",
+    "next": "Sonraki ay",
+    "nextTo": "Sonraki ay, {month}",
+    "gained": "{n} kazanıldı",
+    "spent": "{n} harcandı",
+    "added": "{n} eklendi",
+    "used": "{n} kullanıldı",
+    "closing": "kapanış {n}",
+    "artifactExp": "Seviye 0'da {n} yadigar TP'si",
+    "thisMonth": "bu ay · {detail}",
+    "gapTitle": "{n} gündür tarama yok",
+    "vs": "{day} ile",
+    "captures": "{n} tarama",
+    "comparedWith": "{captures}, {day} ile karşılaştırıldı",
+    "noCaptures": "Tarama yok",
+    "noCapture": "Tarama yok",
+    "caption": "{month} ayında günlük değişim: her günün son taraması, önceki taranan güne göre; değer altta",
+    "day": "Gün",
+    "dayTitle": "Günün son taraması, önceki taranan güne göre, yerel saat"
+  },
+  "recent": {
+    "title": "Son",
+    "all": "Tümü",
+    "allTitle": "Tüm {n} anlık görüntü",
+    "size": "{raw} bayt yüklendi, {stored} bayt saklandı",
+    "unchanged": "Toplamlar değişmedi",
+    "first": "İlk anlık görüntü",
+    "currencyMissing": "Mora ve köken taşları eksik",
+    "noCurrency": "Para birimi yok"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Nguyên Liệu",
+  "newestSnapshot": "Bản chụp mới nhất",
+  "since": "từ {date}",
+  "oneSnapshot": "Chỉ có một bản chụp",
+  "changesTitle": "Thay đổi {hint}",
+  "changeSince": "Thay đổi từ",
+  "noSnapshots": "Chưa có bản chụp",
+  "import": "Nhập",
+  "loadFailed": "Không tải được nguyên liệu",
+  "loading": "Đang tải nguyên liệu",
+  "saveChartFailed": "Không lưu được thiết lập biểu đồ",
+  "search": "Tìm",
+  "searchLabel": "Tìm nguyên liệu",
+  "noMatches": "Không có kết quả",
+  "noMaterials": "Không có nguyên liệu",
+  "clear": "Xóa lọc",
+  "more": "Thêm {n}",
+  "upTo": "Tối đa {max}",
+  "trackedOfMax": "Đang theo dõi / tối đa",
+  "track": "Theo dõi",
+  "untrack": "Bỏ theo dõi",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Gần nhất"
+  },
+  "wallet": {
+    "label": "Ví",
+    "title": "Tiền tệ và vật phẩm cầu nguyện",
+    "short": {
+      "GenesisCrystal": "Đá Sáng Thế",
+      "IntertwinedFate": "Vương Vấn",
+      "AcquaintFate": "Tương Ngộ",
+      "MasterlessStarglitter": "Tinh Huy",
+      "MasterlessStardust": "Tinh Trần",
+      "OriginalResin": "Nhựa",
+      "FragileResin": "Dễ Vỡ",
+      "CondensedResin": "Cô Đặc",
+      "RealmCurrency": "Động Tiên"
+    }
+  },
+  "tabs": {
+    "development": "Bồi Dưỡng",
+    "precious": "Quý",
+    "other": "Khác",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Quặng cường hóa (game xếp chúng cùng vũ khí)",
+      "artifact": "Dầu Chúc Phúc và Tinh Hoa Chúc Phúc (game xếp chúng cùng Thánh Di Vật)",
+      "other": "Không có trong Túi của game: tiền tệ, hạt giống, vật phẩm thẻ bài, vật phẩm mới hơn dữ liệu game"
+    }
+  },
+  "bag": {
+    "title": "Túi",
+    "show": "Hiện",
+    "view": "Kiểu xem",
+    "views": {
+      "grid": "Biểu tượng",
+      "list": "Danh sách"
+    },
+    "tabRow": "Thẻ Túi",
+    "all": "Tất cả",
+    "allTitle": "Mọi thẻ",
+    "sort": "Thứ Tự",
+    "sorts": {
+      "order": "Như game",
+      "count": "Số lượng",
+      "change": "Thay đổi",
+      "name": "Tên"
+    },
+    "unfoldAll": "Mở rộng mọi thẻ",
+    "foldAll": "Thu gọn mọi thẻ",
+    "owned": "Đang có",
+    "ownedTitle": "Nguyên liệu bạn đang có",
+    "gained": "Nhận được",
+    "gainedTitle": "Nhận được {hint}",
+    "spent": "Đã dùng",
+    "spentTitle": "Đã dùng {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · đặt thủ công {hand} (bản ghi {capture})"
+  },
+  "detail": {
+    "history": "Lịch Sử",
+    "chartLabel": "{name} theo thời gian, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Nhận được",
+    "spent": "Đã dùng",
+    "peak": "Cao nhất",
+    "first": "Đầu tiên",
+    "firstTitle": "Bản chụp đầu tiên có vật phẩm này"
+  },
+  "tracked": {
+    "title": "Đang theo dõi",
+    "list": "Nguyên liệu đang theo dõi",
+    "untrackName": "Bỏ theo dõi {name}"
+  }
+}

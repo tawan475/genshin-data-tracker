@@ -36,6 +36,18 @@ const languages = computed<{ value: LocalePreference; label: string }[]>(() => [
   { value: 'en', label: 'English' },
   { value: 'zh-CN', label: '简体中文' },
   { value: 'zh-TW', label: '繁體中文' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'ru', label: 'Русский' },
+  { value: 'th', label: 'ไทย' },
+  { value: 'vi', label: 'Tiếng Việt' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'id', label: 'Bahasa Indonesia' },
+  { value: 'pt', label: 'Português' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'tr', label: 'Türkçe' },
 ])
 
 const theme = computed<ThemePreference>({

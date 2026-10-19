@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Hesap {id}",
+  "server": {
+    "ASIA": "Asya",
+    "AMERICA": "Amerika",
+    "EUROPE": "Avrupa",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Hesaplar",
+    "snapshots": "Anlık görüntüler",
+    "uploaded": "Yüklenen",
+    "stored": "Saklanan",
+    "ratio": "Oran",
+    "lastCaptured": "Son tarama",
+    "bytes": "{n} bayt",
+    "ratioTitle": "Yüklenenden {ratio} daha küçük saklandı",
+    "add": "Hesap ekle",
+    "empty": "Henüz hesap yok"
+  },
+  "new": {
+    "title": "Hesap ekle",
+    "add": "Ekle",
+    "notAdded": "Eklenmedi",
+    "added": "{name} eklendi",
+    "connect": "Irminsul'u bağla",
+    "overview": "Genel Bakış",
+    "importFiles": "Dosyaları içe aktar",
+    "addAnother": "Bir tane daha ekle"
+  },
+  "settings": {
+    "title": "Hesap ayarları",
+    "details": "Ayrıntılar",
+    "traveler": "Gezgin",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Hesabı sil",
+    "deleteTitle": "Dışa aktarılmış GOOD dosyaları etkilenmez",
+    "confirmTitle": "{name} silinsin mi?",
+    "deletes": "{loss} silinir. Irminsul anahtarı çalışmayı bırakır.",
+    "typeToConfirm": "{word} yaz",
+    "confirmWord": "sil",
+    "loss": "{n} anlık görüntü",
+    "deleted": "{name} silindi"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "title": "アチーブメント",
+  "newestCapture": "最新キャプチャ",
+  "newestCaptureTitle": "最新キャプチャ：{time}",
+  "notCaptured": "未キャプチャ",
+  "notCapturedTitle": "irminsul の実行中にゲーム内のアチーブメント画面を開くとキャプチャされます",
+  "importTitle": "Seelie のエクスポート、paimon.moe のバックアップ、または stardb / irminsul のファイルから達成済みアチーブメントをインポートします",
+  "loadFailed": "読み込み失敗",
+  "allDone": "すべて達成",
+  "showDone": "達成済みを表示",
+  "noneDone": "達成なし",
+  "showMissing": "未達成を表示",
+  "noMatches": "該当なし",
+  "clear": "クリア",
+  "more": "その他",
+  "loading": "読み込み中",
+  "undo": "取り消し",
+  "notSaved": "保存されていません",
+  "markedDone": "{n}件を達成済みにしました",
+  "unmarked": "{n}件のマークを外しました",
+  "added": "{n}件を追加しました",
+  "confirmMark": {
+    "title": "{n}件を達成済みにしますか？",
+    "filtered": "表示中の未達成アチーブメント{n}件を手動で達成済みにします。",
+    "all": "未達成のアチーブメント（{n}件）をすべて手動で達成済みにします。",
+    "confirm": "達成済みにする"
+  },
+  "confirmUnmark": {
+    "title": "{n}件のマークを外しますか？",
+    "detail": "表示中のアチーブメント{n}件の手動マークを外します。キャプチャ済みのものは達成済みのままです。",
+    "confirm": "マークを外す"
+  },
+  "categories": {
+    "label": "カテゴリー",
+    "all": "すべて",
+    "title": "{done} / {total} · 原石 {primogems} / {primogemsTotal}",
+    "hideDone": "完了したシリーズを隠す",
+    "showDone": "完了したシリーズを表示",
+    "completed": "完了"
+  },
+  "group": {
+    "primogems": "原石 {primogems} / {total}"
+  },
+  "import": {
+    "title": "インポート",
+    "formats": {
+      "list": "IDリスト"
+    },
+    "noAchievements": "アチーブメントが見つかりません",
+    "notJson": "JSONファイルではありません",
+    "dropTitle": "Seelie：Settings → Export Account。paimon.moe：Settings → Export。stardb または irminsul：gi_achievements を含む GOOD ファイル。",
+    "drop": "Seelie・paimon.moe・stardb のファイル",
+    "account": "アカウント {n}",
+    "fileAccount": "ファイル内のアカウント",
+    "browse": "参照",
+    "inFile": "ファイル内",
+    "already": "達成済み",
+    "new": "新規",
+    "newTitle": "ゲームデータより新しいもの{unknown}件とゲームから削除されたもの{disused}件を含みます：保持しますが集計しません",
+    "cancel": "キャンセル",
+    "add": "{n}件を追加"
+  },
+  "row": {
+    "clickToMark": "クリックで達成済みにする",
+    "clickToUnmark": "{text} · クリックでマークを外す",
+    "captured": "キャプチャ済み",
+    "staysDone": "{text} · キャプチャにあるため達成済みのままです",
+    "markEveryTier": "全段階を達成済みにする",
+    "markDone": "達成済みにする",
+    "unmarkTiers": "クリックで手動マークした段階のマークを外す",
+    "markedClick": "手動マーク · クリックで外す",
+    "tierTitle": "段階 {n} · 原石 {primogems}",
+    "reward": "原石 {n}",
+    "primogems": "原石",
+    "states": {
+      "captured": "キャプチャ済み",
+      "marked": "手動マーク",
+      "none": "未達成"
+    },
+    "aria": "{title}：{state}",
+    "tiers": "段階",
+    "tier": "段階 {n}",
+    "addedIn": "{version} で追加",
+    "hiddenTitle": "隠しアチーブメント",
+    "hidden": "隠し",
+    "markedByHand": "手動マーク",
+    "guide": "stardb.gg の攻略"
+  },
+  "completion": {
+    "tier": "段階 {n} · {text}",
+    "exact": "{time} に達成",
+    "exactTitle": "ゲームが記録した達成日時（irminsul が読み取り）",
+    "seen": "{window} に達成",
+    "seenTitle": "2回のキャプチャの間に達成：{since} のキャプチャにはなく、{at} のキャプチャにあります",
+    "by": "{date} までに達成",
+    "byTitle": "最初のキャプチャ（{at}）の時点で達成済み",
+    "marked": "手動で達成済み",
+    "markedTitle": "どのキャプチャにもないため、日付はありません"
+  },
+  "summary": {
+    "label": "概要",
+    "done": "達成",
+    "doneCaptured": "キャプチャ {n}件",
+    "doneByHand": "手動 {n}件",
+    "doneUnknown": "ゲームデータより新しい {n}件",
+    "progress": "進捗",
+    "progressLabel": "達成したアチーブメント",
+    "primogems": "原石",
+    "primogemsHint": "獲得した原石 / 獲得可能な原石",
+    "missing": "未達成",
+    "showAll": "すべて表示",
+    "showLeft": "残りのみ表示"
+  },
+  "toolbar": {
+    "label": "アチーブメントを絞り込む",
+    "search": "検索",
+    "searchTitle": "名前、説明、カテゴリー、ID",
+    "completion": "達成状況",
+    "completions": {
+      "all": "すべて",
+      "done": "達成",
+      "missing": "未達成"
+    },
+    "hidden": {
+      "all": "隠し：すべて",
+      "hidden": "隠し",
+      "visible": "隠し以外"
+    },
+    "hiddenLabel": "隠し",
+    "allCategories": "全カテゴリー",
+    "category": "カテゴリー",
+    "version": "バージョン",
+    "addedIn": "追加バージョン",
+    "markAll": "すべてマーク",
+    "markAllTitle": "表示中の未達成アチーブメント{n}件を達成済みにする",
+    "unmarkAll": "すべて外す",
+    "unmarkAllTitle": "表示中の手動マーク{n}件を外す"
+  }
+}

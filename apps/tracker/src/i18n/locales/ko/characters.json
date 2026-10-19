@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Lv {level}",
+    "noWeapon": "무기 없음",
+    "weaponLevel": "무기 Lv {level}",
+    "artifactCount": "성유물 {count}/5",
+    "belowMax": "최대 레벨 미만 성유물 {n}개",
+    "noSet": "세트 효과 없음"
+  },
+  "sort": {
+    "default": "기본",
+    "level": "레벨",
+    "constellation": "운명의 자리",
+    "talents": "특성",
+    "cv": "CV",
+    "rarity": "희귀도",
+    "element": "원소",
+    "name": "이름",
+    "friendship": "호감도",
+    "obtained": "획득"
+  },
+  "build": {
+    "all": "빌드",
+    "ready": "완성",
+    "needs": "육성 필요",
+    "level": "Lv < 90",
+    "weapon": "무기 < 90",
+    "artifacts": "성유물 < 최대",
+    "set": "세트 효과 없음"
+  },
+  "talentFilter": {
+    "all": "특성",
+    "nine": "모두 9+",
+    "crowned": "왕관",
+    "below": "하나라도 < 9"
+  },
+  "favorites": {
+    "notSaved": "저장되지 않음"
+  },
+  "stat": {
+    "maxHp": "최대 HP",
+    "baseAtk": "기초 공격력"
+  },
+  "talent": {
+    "crowned": "{title} · 왕관"
+  },
+  "setBonus": {
+    "line": "{n}세트: {stats}",
+    "inactive": "{n}세트 (비활성): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "호감도 {level}/10"
+  },
+  "refinementTitle": "재련 {value}/5",
+  "talentChips": "일반 공격 {auto} · 스킬 {skill} · 원소폭발 {burst}",
+  "sortControl": {
+    "sort": "정렬",
+    "descending": "내림차순 정렬",
+    "ascending": "오름차순 정렬"
+  },
+  "favorite": {
+    "named": "{name} 즐겨찾기",
+    "on": "즐겨찾기",
+    "off": "즐겨찾기 해제"
+  },
+  "stars": "{n}성",
+  "sets": "세트",
+  "pieceBonus": "세트 효과",
+  "constellation": {
+    "title": "운명의 자리 {level}/6",
+    "lockedTitle": "C{n} · 미해금",
+    "unlocked": "C{n} 해금",
+    "locked": "C{n} 미해금"
+  },
+  "timeline": {
+    "firstSeen": "처음 확인",
+    "obtained": "획득",
+    "to": "부터",
+    "less": "접기",
+    "all": "전체 {n}개"
+  },
+  "talentShort": {
+    "auto": "일반",
+    "skill": "스킬",
+    "burst": "폭발"
+  },
+  "talentRaised": "에서",
+  "crowned": "왕관",
+  "weapon": {
+    "passive": "패시브: {stats}",
+    "locked": "잠금"
+  },
+  "stats": {
+    "allDmg": "모든 피해 +{value}%, 게임 화면에는 표시되지 않음",
+    "label": "스탯",
+    "weaponMissingTitle": "무기가 게임 데이터보다 최신이므로 스탯이 제외되었습니다",
+    "weaponMissing": "무기 스탯 제외됨",
+    "newerThanData": "게임 데이터보다 최신",
+    "none": "스탯 없음"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, 특성 {auto} {skill} {burst}",
+    "friendship": ", 호감도 {n}",
+    "toDo": "할 일: {gaps}",
+    "critDetail": "성유물 치명타 {rate}% / {dmg}%"
+  },
+  "piece": {
+    "levelTitle": "+{level}/{max} · {rarity}★",
+    "activatesAt4": "+4에서 활성화",
+    "inactive": "(비활성)",
+    "rolls": "{n}회",
+    "rollsTitle": "강화 횟수",
+    "empty": ": 비어 있음"
+  },
+  "toolbar": {
+    "weapon": "무기",
+    "cards": "카드",
+    "list": "목록",
+    "label": "캐릭터 필터",
+    "search": "검색",
+    "searchTitle": "이름, 원소, 무기 또는 세트",
+    "view": "보기",
+    "chips": "즐겨찾기, 원소, 희귀도",
+    "favorites": "즐겨찾기",
+    "buildTitle": "완성: Lv 90, 무기 Lv 90, 최대 강화 성유물 5개, 세트 효과",
+    "clear": "지우기"
+  },
+  "table": {
+    "lv": "Lv",
+    "c": "C",
+    "critTitle": "성유물의 치명타 확률 / 치명타 피해",
+    "crit": "치명",
+    "toDo": "할 일",
+    "toDoList": "할 일: {gaps}"
+  },
+  "detail": {
+    "toDo": "할 일:",
+    "build": "빌드",
+    "obtainedAt": "{date} 획득",
+    "noArtifacts": "성유물 없음",
+    "history": "기록",
+    "loadFailed": "불러오기 실패",
+    "none": "없음"
+  },
+  "modal": {
+    "pngSize": "{size} PNG"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Lv 90+",
+    "crowns": "왕관",
+    "crownsTitle": "10레벨 특성",
+    "loading": "불러오는 중",
+    "noSnapshots": "아직 스냅샷이 없습니다",
+    "empty": "캐릭터 없음",
+    "import": "가져오기",
+    "noMatches": "일치 항목 없음"
+  }
+}

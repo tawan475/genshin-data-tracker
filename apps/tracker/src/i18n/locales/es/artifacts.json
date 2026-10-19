@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Bloqueado",
+    "astralMark": "Marca astral",
+    "new": "Nuevo"
+  },
+  "sort": {
+    "quality": "Calidad",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potencial",
+    "level": "Nivel",
+    "set": "Conjunto",
+    "recent": "Reciente"
+  },
+  "sortTitle": {
+    "quality": "Como en el juego: rareza, nivel, conjunto, portador",
+    "cv": "Valor de CRIT",
+    "rv": "Valor de mejoras",
+    "potential": "CV esperado al nivel máximo",
+    "level": "Nivel",
+    "set": "Conjunto",
+    "recent": "Nuevos o cambiados"
+  },
+  "topSets": {
+    "label": "Conjuntos principales",
+    "more": "{n} conjuntos más"
+  },
+  "lower": {
+    "label": "Rarezas menores: {counts}",
+    "title": "Rarezas menores, que este orden pone al final"
+  },
+  "picker": {
+    "find": "Buscar",
+    "noMatch": "Sin resultados",
+    "done": "Listo"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: ninguno",
+    "cell": "{slot} · {n} piezas · mejor {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Piezas",
+    "slotHeader": "{slot}: mejor CV, piezas",
+    "sumTitle": "Mejor CV por posición, sumado"
+  },
+  "bag": {
+    "more": "{n} más"
+  },
+  "table": {
+    "sortBySet": "Ordenar por conjunto",
+    "sortByLevel": "Ordenar por nivel",
+    "equippedBy": "Equipado por",
+    "marks": "Bloqueo y marcas",
+    "elixir": "Escarcha"
+  },
+  "detail": {
+    "fromGame": "Del juego",
+    "inferred": "Deducido del nivel",
+    "upgradesToCome": "{source} · faltan {n} mejoras",
+    "rankTitle": "Puesto de CV entre {n} {slot} {rarity}★",
+    "newTitle": "No estaba en la captura anterior",
+    "rolls": "Mejoras",
+    "rank": "Puesto",
+    "upgradesTitle": "Una mejora de atributo secundario cada 4 niveles, hasta {max}",
+    "upgrades": "Mejoras",
+    "expectedCv": "CV esperado",
+    "expectedDetail": "Esperado en {max}: cada mejora cae en una línea CRIT el {chance}% de las veces, con una mejora media",
+    "bestCase": "Mejor caso",
+    "bestDetail": "Cada mejora, una mejora CRIT máxima, hasta {max}",
+    "critLinesTitle": "{n} de 4 líneas son CRIT: la probabilidad de que una mejora caiga en una",
+    "critPerRoll": "CRIT / mejora",
+    "activatesTitle": "La cuarta línea, abierta por la primera mejora",
+    "activates": "+4 añade",
+    "maxRv": "RV máx.",
+    "unlocked": "Desbloqueado",
+    "astral": "Astral",
+    "elixirTitle": "Escarcha bendita",
+    "rollTier": "Mejora {tier}",
+    "inactive": "Inactivo"
+  },
+  "card": {
+    "potentialTitle": "CV esperado en +{max} · mejor caso {best}",
+    "equipped": "Equipado: {name}"
+  },
+  "toolbar": {
+    "all": "Todo",
+    "yes": "Sí",
+    "no": "No",
+    "linesNow": "{n} líneas ahora",
+    "any": "Cualquiera",
+    "allSets": "Todos los conjuntos",
+    "anyone": "Cualquiera",
+    "noAstral": "Sin marca astral",
+    "noElixir": "Sin escarcha",
+    "quoted": "«{text}»",
+    "mainPill": "Principal: {stat}",
+    "lines": "{n} líneas",
+    "best": "Mejores",
+    "label": "Filtrar artefactos",
+    "searchLabel": "Buscar conjuntos o personajes",
+    "searchTitle": "Conjunto o personaje",
+    "equippedByTitle": "Equipado por: {names}",
+    "sortBy": "Ordenar por",
+    "descending": "Descendente",
+    "ascending": "Ascendente",
+    "slot": "Posición",
+    "presets": "Preajustes",
+    "bestTitle": "Los {n} mejores por posición, según el orden actual",
+    "newNone": "No hay captura anterior con la que comparar",
+    "newTitle": "No estaban en la captura anterior: nuevos o con nivel subido desde entonces",
+    "zeroTitle": "5★ sin equipar a +0",
+    "lowTitle": "4★ y 3★ desbloqueados y sin equipar",
+    "low": "Artefacto 4★/3★",
+    "spareTitle": "5★ sin equipar",
+    "spare": "5★ de sobra",
+    "maxTitle": "Solo nivel +20",
+    "moreTitle": "Atributo principal, atributos secundarios, líneas, nivel, bloqueo, ubicación, marca astral, escarcha",
+    "more": "Más",
+    "substatsTitle": "Tiene todos estos (cuenta la línea que abre +4)",
+    "linesLabel": "Líneas",
+    "min": "Mín.",
+    "max": "Máx.",
+    "location": "Ubicación",
+    "remove": "Quitar {label}"
+  },
+  "page": {
+    "table": "Tabla",
+    "loadFailed": "No se pudieron cargar los artefactos",
+    "loading": "Cargando artefactos",
+    "refreshFailed": "No se pudo actualizar",
+    "shownTitle": "Mostrados / artefactos",
+    "countSuffix": "artefactos",
+    "pngSize": "PNG de {px} px de ancho"
+  }
+}

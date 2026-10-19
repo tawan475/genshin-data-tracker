@@ -1,0 +1,74 @@
+{
+  "title": "상세 성장",
+  "figures": "항목",
+  "atLeastOne": "최소 하나",
+  "groupBy": "묶음 단위",
+  "longerThanRange": "범위보다 김",
+  "loading": "성장 기록 불러오는 중",
+  "noData": "데이터 없음",
+  "inRange": "이 범위에서",
+  "gainedInRange": "이 범위에서 획득",
+  "spentInRange": "이 범위에서 소모",
+  "noCaptures": "캡처 없음",
+  "captures": "캡처 {n}개",
+  "total": "합계 {n}",
+  "lineLabel": "{figure} 추이, {span}. 최신 {value}.",
+  "barsLabel": "{figure} 변화 {per}, {span}: 획득 {gained}, 소모 {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "스냅샷",
+    "hour": "시간",
+    "day": "일",
+    "month": "월",
+    "year": "연"
+  },
+  "per": {
+    "snapshot": "스냅샷별",
+    "hour": "시간별",
+    "day": "일별",
+    "month": "월별",
+    "year": "연별"
+  },
+  "against": {
+    "snapshot": "이전 스냅샷 대비 변화",
+    "hour": "이전 시간 대비 변화",
+    "day": "전날 대비 변화",
+    "month": "전월 대비 변화",
+    "year": "전년 대비 변화"
+  },
+  "newest": {
+    "snapshot": "최근 스냅샷 {n}개",
+    "hour": "최근 {n}시간",
+    "day": "최근 {n}일",
+    "month": "최근 {n}개월",
+    "year": "최근 {n}년"
+  },
+  "range": {
+    "label": "기간",
+    "hours": "시간",
+    "days": "일",
+    "all": "전체",
+    "h": "{n}시간",
+    "d": "{n}일",
+    "y": "{n}년"
+  },
+  "monthly": {
+    "unavailable": "월간 분석을 사용할 수 없음",
+    "loading": "월간 분석 불러오는 중",
+    "noCaptures": "캡처 없음",
+    "goTo": "{month}(으)로 이동",
+    "date": "날짜",
+    "primogem": "원석",
+    "mora": "모라",
+    "artifact": "성유물",
+    "extract": "추출",
+    "netWorth": "순자산",
+    "moraUnit": "모라",
+    "primogemUnit": "원석"
+  },
+  "character": {
+    "level": "레벨",
+    "constellation": "운명의 자리",
+    "talents": "특성"
+  }
+}

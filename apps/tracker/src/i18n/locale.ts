@@ -1,14 +1,16 @@
+import { SITE_LANGUAGES, type SiteLanguage } from '@gdt/shared/settings'
 import { ref } from 'vue'
 
 /**
- * The site's languages: English, Simplified Chinese, Traditional Chinese
- * (Taiwan wording), in that order of priority. The same codes are used by
- * the game data (`@gdt/game-data` Language), vue-i18n, Intl and <html lang>.
- * Pure (no DOM): the tests import it; choosing and showing one is
- * i18n/apply.ts.
+ * The site's languages: every language the game ships (English, Simplified
+ * and Traditional Chinese, Japanese, Korean, Spanish, French, Russian, Thai,
+ * Vietnamese, German, Indonesian, Portuguese, Italian, Turkish). The same
+ * codes are used by the game data (`@gdt/game-data` Language), vue-i18n, Intl
+ * and <html lang>. Pure (no DOM): the tests import it; choosing and showing
+ * one is i18n/apply.ts.
  */
-export type Locale = 'en' | 'zh-CN' | 'zh-TW'
-export const LOCALES: readonly Locale[] = ['en', 'zh-CN', 'zh-TW']
+export type Locale = SiteLanguage
+export const LOCALES: readonly Locale[] = SITE_LANGUAGES
 
 /** What the user picked; `system` follows the browser. */
 export type LocalePreference = 'system' | Locale
@@ -18,10 +20,10 @@ export const isLocale = (value: unknown): value is Locale =>
   typeof value === 'string' && (LOCALES as readonly string[]).includes(value)
 
 /**
- * The browser's languages as one of ours: Traditional Chinese for Taiwan, Hong
- * Kong, Macau and any Hant tag; Simplified for any other Chinese; English
- * otherwise (the first English or Chinese tag decides). Kept in step with the
- * inline script in index.html.
+ * The browser's languages as one of ours: the first tag whose language we
+ * have decides (Chinese: Traditional for Taiwan, Hong Kong, Macau and any
+ * Hant tag, else Simplified; `in` is Indonesian's old code); English when
+ * none is ours. Kept in step with the inline script in index.html.
  */
 export function detectLocale(languages: readonly string[]): Locale {
   for (const raw of languages) {
@@ -29,7 +31,9 @@ export function detectLocale(languages: readonly string[]): Locale {
     if (tag.startsWith('zh')) {
       return /hant|-tw|-hk|-mo/.test(tag) ? 'zh-TW' : 'zh-CN'
     }
-    if (tag.startsWith('en')) return 'en'
+    const base = tag.split(/[-_]/)[0]
+    const code = base === 'in' ? 'id' : base
+    if (isLocale(code)) return code
   }
   return 'en'
 }

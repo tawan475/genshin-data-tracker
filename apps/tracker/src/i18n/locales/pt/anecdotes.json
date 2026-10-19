@@ -1,0 +1,75 @@
+{
+  "title": "Anedotas",
+  "area": "Área {id}",
+  "newestCapture": "Captura mais recente",
+  "newestCaptureTitle": "Captura mais recente: {time}",
+  "notCaptured": "Não capturado",
+  "notCapturedTitle": "Nenhuma captura tem anedotas ainda: o irminsul as registra do jogo",
+  "loadFailed": "Falha ao carregar",
+  "allDone": "Tudo concluído",
+  "showDone": "Mostrar concluídas",
+  "noneDone": "Nenhuma concluída",
+  "showNotDone": "Mostrar não concluídas",
+  "noneMet": "Nenhuma encontrada ainda",
+  "noneMetBody": "Anedotas ocultas aparecem depois de encontradas.",
+  "noMatches": "Nenhum resultado",
+  "clear": "Limpar",
+  "loading": "Carregando",
+  "notSaved": "Não salvo",
+  "group": {
+    "hideDone": "Ocultar concluídas",
+    "showDone": "Mostrar concluídas",
+    "done": "concluídas: {n}"
+  },
+  "row": {
+    "states": {
+      "captured": "capturada",
+      "marked": "marcada à mão",
+      "none": "não concluída"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Capturada · continua concluída",
+    "markedByHand": "Marcada à mão",
+    "markedClick": "Marcada à mão · clique para desmarcar",
+    "notDone": "Não concluída",
+    "clickToMark": "Clique para marcar como concluída",
+    "activeTitle": "Em andamento no jogo",
+    "active": "Ativa",
+    "repeatTitle": "Concluída {n} vezes (repetível)",
+    "hidden": "Anedota oculta",
+    "addedIn": "Adicionada na {version}"
+  },
+  "summary": {
+    "label": "Resumo",
+    "done": "Concluídas",
+    "doneCaptured": "{n} capturadas",
+    "doneByHand": "{n} à mão",
+    "doneUnknown": "{n} mais novas que os dados do jogo",
+    "doneLabel": "Anedotas concluídas",
+    "stamps": "Carimbos",
+    "stampsTitle": "Carimbos para a recompensa {n}",
+    "stampsNone": "Ainda não está em uma captura",
+    "stampsLabel": "Carimbos para a próxima recompensa",
+    "reward": "Recompensa",
+    "rewardHint": "{primogems} Gemas Essenciais a cada {every} anedotas registradas",
+    "rewardPer": "a cada {every}",
+    "active": "Ativas",
+    "activeHint": "Em andamento no jogo (na captura mais recente)"
+  },
+  "toolbar": {
+    "label": "Filtrar anedotas",
+    "search": "Buscar",
+    "searchTitle": "Título, história, NPC ou id",
+    "completion": "Conclusão",
+    "completions": {
+      "all": "Todas",
+      "missing": "Não concluídas",
+      "done": "Concluídas"
+    },
+    "showDone": "Mostrar concluídas",
+    "showDoneTitle": "Anedotas concluídas por completo em vez de recolhidas sob cada NPC",
+    "area": "Área",
+    "allAreas": "Todas",
+    "locked": "Não desbloqueada na captura mais recente"
+  }
+}

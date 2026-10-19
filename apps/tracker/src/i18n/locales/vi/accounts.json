@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Tài khoản {id}",
+  "server": {
+    "ASIA": "Châu Á",
+    "AMERICA": "Châu Mỹ",
+    "EUROPE": "Châu Âu",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Tài khoản",
+    "snapshots": "Bản chụp",
+    "uploaded": "Đã tải lên",
+    "stored": "Đã lưu",
+    "ratio": "Tỷ lệ",
+    "lastCaptured": "Lần ghi gần nhất",
+    "bytes": "{n} byte",
+    "ratioTitle": "Lưu nhỏ hơn {ratio} so với dữ liệu tải lên",
+    "add": "Thêm tài khoản",
+    "empty": "Chưa có tài khoản"
+  },
+  "new": {
+    "title": "Thêm tài khoản",
+    "add": "Thêm",
+    "notAdded": "Chưa thêm được",
+    "added": "Đã thêm {name}",
+    "connect": "Kết nối Irminsul",
+    "overview": "Tổng Quan",
+    "importFiles": "Nhập tệp",
+    "addAnother": "Thêm tài khoản khác"
+  },
+  "settings": {
+    "title": "Thiết lập tài khoản",
+    "details": "Chi tiết",
+    "traveler": "Nhà Lữ Hành",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Xóa tài khoản",
+    "deleteTitle": "Không ảnh hưởng tới các tệp GOOD đã xuất",
+    "confirmTitle": "Xóa {name}?",
+    "deletes": "Sẽ xóa {loss}. Khóa Irminsul của tài khoản sẽ ngừng hoạt động.",
+    "typeToConfirm": "Nhập {word}",
+    "confirmWord": "xóa",
+    "loss": "{n} bản chụp",
+    "deleted": "Đã xóa {name}"
+  }
+}

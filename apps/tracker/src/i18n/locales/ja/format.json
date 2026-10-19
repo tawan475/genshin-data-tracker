@@ -1,0 +1,7 @@
+{
+  "justNow": "たった今",
+  "betweenTimes": "{date}、{from}～{to}",
+  "betweenDates": "{from}～{to}",
+  "today": "今日",
+  "yesterday": "昨日"
+}

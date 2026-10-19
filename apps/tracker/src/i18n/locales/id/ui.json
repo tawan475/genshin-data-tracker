@@ -1,0 +1,38 @@
+{
+  "close": "Tutup",
+  "constellation": {
+    "title": "Konstelasi {level} dari 6"
+  },
+  "crit": {
+    "title": "CV {value} · CRIT Rate × 2 + CRIT DMG",
+    "circlet": " · circlet CRIT +7.77"
+  },
+  "level": {
+    "title": "Level {level} dari {cap} · Ascension {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} bintang"
+  },
+  "roll": {
+    "title": "RV {value}% · roll sebagai % dari roll tertinggi, dijumlahkan"
+  },
+  "error": {
+    "title": "Tidak bisa memuat ini",
+    "retry": "Coba lagi"
+  },
+  "field": {
+    "optional": "(opsional)"
+  },
+  "modal": {
+    "previous": "Sebelumnya",
+    "next": "Berikutnya"
+  },
+  "pager": {
+    "label": "Halaman",
+    "previous": "Halaman sebelumnya",
+    "next": "Halaman berikutnya",
+    "goTo": "Ke halaman",
+    "go": "Buka",
+    "input": "Halaman, 1 sampai {count}"
+  }
+}

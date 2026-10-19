@@ -1,0 +1,7 @@
+{
+  "justNow": "เมื่อสักครู่",
+  "betweenTimes": "{date} ระหว่าง {from} ถึง {to}",
+  "betweenDates": "ระหว่าง {from} ถึง {to}",
+  "today": "วันนี้",
+  "yesterday": "เมื่อวาน"
+}

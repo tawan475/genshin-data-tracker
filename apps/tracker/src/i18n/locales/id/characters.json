@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Lv {level}",
+    "noWeapon": "Tanpa senjata",
+    "weaponLevel": "Senjata Lv {level}",
+    "artifactCount": "{count}/5 artefak",
+    "belowMax": "{n} artefak belum maks",
+    "noSet": "Tanpa bonus set penuh"
+  },
+  "sort": {
+    "default": "Bawaan",
+    "level": "Level",
+    "constellation": "Konstelasi",
+    "talents": "Talenta",
+    "cv": "CV",
+    "rarity": "Kelangkaan",
+    "element": "Elemen",
+    "name": "Nama",
+    "friendship": "Persahabatan",
+    "obtained": "Didapat"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Siap",
+    "needs": "Perlu digarap",
+    "level": "Lv < 90",
+    "weapon": "Senjata < 90",
+    "artifacts": "Artefak < maks",
+    "set": "Tanpa bonus set"
+  },
+  "talentFilter": {
+    "all": "Talenta",
+    "nine": "Semua 9+",
+    "crowned": "Bermahkota",
+    "below": "Ada < 9"
+  },
+  "favorites": {
+    "notSaved": "Tidak tersimpan"
+  },
+  "stat": {
+    "maxHp": "Max HP",
+    "baseAtk": "Base ATK"
+  },
+  "talent": {
+    "crowned": "{title} · bermahkota"
+  },
+  "setBonus": {
+    "line": "{n} bagian: {stats}",
+    "inactive": "{n} bagian (tidak aktif): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Persahabatan {level} dari 10"
+  },
+  "refinementTitle": "Refinement {value} dari 5",
+  "talentChips": "Serangan {auto} · Skill {skill} · Burst {burst}",
+  "sortControl": {
+    "sort": "Urutkan",
+    "descending": "Urutkan menurun",
+    "ascending": "Urutkan menaik"
+  },
+  "favorite": {
+    "named": "Favoritkan {name}",
+    "on": "Favorit",
+    "off": "Hapus favorit"
+  },
+  "stars": "{n} bintang",
+  "sets": "Set",
+  "pieceBonus": " bagian, bonus set",
+  "constellation": {
+    "title": "Konstelasi {level} dari 6",
+    "lockedTitle": "C{n} · terkunci",
+    "unlocked": "C{n} terbuka",
+    "locked": "C{n} terkunci"
+  },
+  "timeline": {
+    "firstSeen": "Pertama terlihat",
+    "obtained": "Didapat",
+    "to": "ke",
+    "less": "Lebih sedikit",
+    "all": "Semua {n}"
+  },
+  "talentShort": {
+    "auto": "Serangan",
+    "skill": "Skill",
+    "burst": "Burst"
+  },
+  "talentRaised": "naik ke",
+  "crowned": "Bermahkota",
+  "weapon": {
+    "passive": "Pasif: {stats}",
+    "locked": "Terkunci"
+  },
+  "stats": {
+    "allDmg": "+{value}% semua DMG, tidak ada di panel game",
+    "label": "Stat",
+    "weaponMissingTitle": "Senjata lebih baru dari data game: statnya tidak disertakan",
+    "weaponMissing": "Stat senjata tidak disertakan",
+    "newerThanData": "Lebih baru dari data game",
+    "none": "Tidak ada stat"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, talenta {auto} {skill} {burst}",
+    "friendship": ", persahabatan {n}",
+    "toDo": "yang perlu: {gaps}",
+    "critDetail": "CRIT {rate}% / {dmg}% dari artefak"
+  },
+  "piece": {
+    "levelTitle": "+{level} dari {max} · {rarity}★",
+    "activatesAt4": "Aktif di +4",
+    "inactive": "(tidak aktif)",
+    "rolls": "{n} roll",
+    "rollsTitle": "Roll",
+    "empty": ": kosong"
+  },
+  "toolbar": {
+    "weapon": "Senjata",
+    "cards": "Kartu",
+    "list": "Daftar",
+    "label": "Filter karakter",
+    "search": "Cari",
+    "searchTitle": "Nama, elemen, senjata atau set",
+    "view": "Tampilan",
+    "chips": "Favorit, elemen dan kelangkaan",
+    "favorites": "Favorit",
+    "buildTitle": "Siap: Lv 90, senjata Lv 90, lima artefak maks, bonus set penuh",
+    "clear": "Hapus"
+  },
+  "table": {
+    "lv": "Lv",
+    "c": "C",
+    "critTitle": "CRIT Rate / CRIT DMG dari artefak",
+    "crit": "Crit",
+    "toDo": "Perlu",
+    "toDoList": "Yang perlu: {gaps}"
+  },
+  "detail": {
+    "toDo": "Yang perlu:",
+    "build": "Build",
+    "obtainedAt": "Didapat {date}",
+    "noArtifacts": "Tidak ada artefak",
+    "history": "Riwayat",
+    "loadFailed": "Gagal memuat",
+    "none": "Tidak ada"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Lv 90+",
+    "crowns": "Mahkota",
+    "crownsTitle": "Talenta di level 10",
+    "loading": "Memuat",
+    "noSnapshots": "Belum ada snapshot",
+    "empty": "Tidak ada karakter",
+    "import": "Impor",
+    "noMatches": "Tidak ada yang cocok"
+  }
+}

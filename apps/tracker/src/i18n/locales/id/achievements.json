@@ -1,0 +1,139 @@
+{
+  "title": "Achievement",
+  "newestCapture": "Tangkapan terbaru",
+  "newestCaptureTitle": "Tangkapan terbaru: {time}",
+  "notCaptured": "Belum tertangkap",
+  "notCapturedTitle": "Buka menu Achievement di game selagi irminsul berjalan untuk menangkapnya",
+  "importTitle": "Impor achievement yang selesai dari ekspor Seelie, cadangan paimon.moe, atau file stardb / irminsul",
+  "loadFailed": "Gagal memuat",
+  "allDone": "Semua selesai",
+  "showDone": "Tampilkan yang selesai",
+  "noneDone": "Belum ada yang selesai",
+  "showMissing": "Tampilkan yang belum",
+  "noMatches": "Tidak ada yang cocok",
+  "clear": "Hapus",
+  "more": "Lainnya",
+  "loading": "Memuat",
+  "undo": "Urungkan",
+  "notSaved": "Tidak tersimpan",
+  "markedDone": "{n} ditandai selesai",
+  "unmarked": "{n} batal ditandai",
+  "added": "{n} ditambahkan",
+  "confirmMark": {
+    "title": "Tandai {n} selesai?",
+    "filtered": "{n} achievement tersisa yang ditampilkan ditandai selesai secara manual.",
+    "all": "Semua achievement tersisa ({n}) ditandai selesai secara manual.",
+    "confirm": "Tandai selesai"
+  },
+  "confirmUnmark": {
+    "title": "Batal tandai {n}?",
+    "detail": "Menghapus tanda manual dari {n} achievement yang ditampilkan. Yang tertangkap tetap selesai.",
+    "confirm": "Batal tandai"
+  },
+  "categories": {
+    "label": "Kategori",
+    "all": "Semua",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} primogem",
+    "hideDone": "Sembunyikan seri yang selesai",
+    "showDone": "Tampilkan seri yang selesai",
+    "completed": "Selesai"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} primogem"
+  },
+  "import": {
+    "title": "Impor",
+    "formats": {
+      "list": "Daftar id"
+    },
+    "noAchievements": "Tidak ada achievement ditemukan",
+    "notJson": "Bukan file JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb atau irminsul: file GOOD dengan gi_achievements.",
+    "drop": "File Seelie, paimon.moe atau stardb",
+    "account": "Akun {n}",
+    "fileAccount": "Akun di file",
+    "browse": "Telusuri",
+    "inFile": "Di file",
+    "already": "Sudah selesai",
+    "new": "Baru",
+    "newTitle": "Termasuk {unknown} yang lebih baru dari data game dan {disused} yang sudah dihapus dari game: disimpan, tidak dihitung",
+    "cancel": "Batal",
+    "add": "Tambah {n}"
+  },
+  "row": {
+    "clickToMark": "Klik untuk tandai selesai",
+    "clickToUnmark": "{text} · klik untuk batal tandai",
+    "captured": "Tertangkap",
+    "staysDone": "{text} · ada di tangkapan, jadi tetap selesai",
+    "markEveryTier": "Tandai semua tingkat selesai",
+    "markDone": "Tandai selesai",
+    "unmarkTiers": "Klik untuk batal tandai tingkat yang ditandai manual",
+    "markedClick": "Ditandai manual · klik untuk batal tandai",
+    "tierTitle": "Tingkat {n} · {primogems} primogem",
+    "reward": "{n} primogem",
+    "primogems": "primogem",
+    "states": {
+      "captured": "tertangkap",
+      "marked": "ditandai manual",
+      "none": "belum selesai"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Tingkat",
+    "tier": "Tingkat {n}",
+    "addedIn": "Ditambahkan di {version}",
+    "hiddenTitle": "Achievement tersembunyi",
+    "hidden": "Tersembunyi",
+    "markedByHand": "Ditandai manual",
+    "guide": "Panduan di stardb.gg"
+  },
+  "completion": {
+    "tier": "Tingkat {n} · {text}",
+    "exact": "Selesai {time}",
+    "exactTitle": "Waktu selesai yang dicatat game, dibaca oleh irminsul",
+    "seen": "Selesai {window}",
+    "seenTitle": "Selesai di antara dua tangkapan: tidak ada di tangkapan {since}, ada di tangkapan {at}",
+    "by": "Selesai sebelum {date}",
+    "byTitle": "Sudah selesai di tangkapan pertamamu ({at})",
+    "marked": "Ditandai selesai manual",
+    "markedTitle": "Tidak ada tangkapan yang memuatnya, jadi tidak ada tanggal"
+  },
+  "summary": {
+    "label": "Ringkasan",
+    "done": "Selesai",
+    "doneCaptured": "{n} tertangkap",
+    "doneByHand": "{n} manual",
+    "doneUnknown": "{n} lebih baru dari data game",
+    "progress": "Progres",
+    "progressLabel": "Achievement selesai",
+    "primogems": "Primogem",
+    "primogemsHint": "Primogem terkumpul / tersedia",
+    "missing": "Belum",
+    "showAll": "Tampilkan semua",
+    "showLeft": "Tampilkan yang tersisa saja"
+  },
+  "toolbar": {
+    "label": "Filter achievement",
+    "search": "Cari",
+    "searchTitle": "Nama, deskripsi, kategori atau id",
+    "completion": "Penyelesaian",
+    "completions": {
+      "all": "Semua",
+      "done": "Selesai",
+      "missing": "Belum"
+    },
+    "hidden": {
+      "all": "Tersembunyi: semua",
+      "hidden": "Tersembunyi",
+      "visible": "Tidak tersembunyi"
+    },
+    "hiddenLabel": "Tersembunyi",
+    "allCategories": "Semua kategori",
+    "category": "Kategori",
+    "version": "Versi",
+    "addedIn": "Ditambahkan di",
+    "markAll": "Tandai semua",
+    "markAllTitle": "Tandai {n} achievement tersisa yang ditampilkan sebagai selesai",
+    "unmarkAll": "Batal tandai semua",
+    "unmarkAllTitle": "Batal tandai {n} achievement yang ditampilkan yang ditandai manual"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "label": "Live",
+  "thisSession": "Questa sessione",
+  "sessionSince": "Dalle {time}",
+  "levelUps": "{n} aumento di livello | {n} aumenti di livello",
+  "talents": "{n} talento | {n} talenti",
+  "updated": "aggiornato {ago}",
+  "updatedAt": "Aggiornato {time}",
+  "row": "Live",
+  "rowDetail": "{n} modifica da questa istantanea | {n} modifiche da questa istantanea",
+  "sinceSnapshot": "dall'istantanea più recente",
+  "discard": "Scarta",
+  "discardTitle": "Elimina queste modifiche; l'istantanea più recente resta",
+  "discarded": "Modifiche live eliminate",
+  "discardFailed": "Impossibile eliminare le modifiche live",
+  "settings": {
+    "title": "Sincronizzazione live",
+    "label": "Segui Irminsul in diretta",
+    "description": "Mentre Irminsul è attivo, le sue modifiche compaiono qui in pochi secondi, tra un'istantanea e l'altra.",
+    "devices": "Sincronizzazione live da questo PC verso: {accounts} (Impostazioni account)",
+    "deletePoints": "Elimina punti del grafico",
+    "deletePointsTitle": "Elimina i punti del grafico salvati dalla sincronizzazione live tra le istantanee",
+    "deletePointsConfirm": "Eliminare tutti i punti del grafico di questo account? Le istantanee restano.",
+    "pointsDeleted": "Punti del grafico eliminati",
+    "exportNote": "Le esportazioni includono le modifiche e i punti live (live/ nello zip)."
+  },
+  "session": {
+    "heading": "Sessioni",
+    "hours": "{h} h {m} min",
+    "minutes": "{m} min",
+    "world": "Mondo {n}",
+    "newCharacter": "{name} si è unito",
+    "more": "+{n} altri",
+    "showMore": "Mostra altro ({n})",
+    "field": {
+      "level": "{name} Liv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} attacco {from}→{to}",
+      "skill": "{name} abilità {from}→{to}",
+      "burst": "{name} tripudio {from}→{to}"
+    }
+  },
+  "staffBytes": "La sincronizzazione live salva altri {size} (gdt-live)"
+}

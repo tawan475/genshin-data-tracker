@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Аккаунт {id}",
+  "server": {
+    "ASIA": "Азия",
+    "AMERICA": "Америка",
+    "EUROPE": "Европа",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Аккаунты",
+    "snapshots": "Снимки",
+    "uploaded": "Загружено",
+    "stored": "Хранится",
+    "ratio": "Сжатие",
+    "lastCaptured": "Последний снимок",
+    "bytes": "{n} Б",
+    "ratioTitle": "Хранится в {ratio} меньше, чем загружено",
+    "add": "Добавить аккаунт",
+    "empty": "Аккаунтов пока нет"
+  },
+  "new": {
+    "title": "Добавить аккаунт",
+    "add": "Добавить",
+    "notAdded": "Не добавлено",
+    "added": "Добавлен: {name}",
+    "connect": "Подключить Irminsul",
+    "overview": "Обзор",
+    "importFiles": "Импорт файлов",
+    "addAnother": "Добавить ещё"
+  },
+  "settings": {
+    "title": "Настройки аккаунта",
+    "details": "Сведения",
+    "traveler": "Путешественник",
+    "lumine": "Люмин",
+    "aether": "Итэр",
+    "deleteAccount": "Удалить аккаунт",
+    "deleteTitle": "Экспортированные файлы GOOD не затрагиваются",
+    "confirmTitle": "Удалить {name}?",
+    "deletes": "Будет удалено: {loss}. Его ключ Irminsul перестанет работать.",
+    "typeToConfirm": "Введите {word}",
+    "confirmWord": "удалить",
+    "loss": "{n} снимок | снимков: {n}",
+    "deleted": "Удалён: {name}"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "title": "Anekdot",
+  "area": "Area {id}",
+  "newestCapture": "Tangkapan terbaru",
+  "newestCaptureTitle": "Tangkapan terbaru: {time}",
+  "notCaptured": "Belum tertangkap",
+  "notCapturedTitle": "Belum ada tangkapan yang berisi anekdot: irminsul merekamnya dari game",
+  "loadFailed": "Gagal memuat",
+  "allDone": "Semua selesai",
+  "showDone": "Tampilkan yang selesai",
+  "noneDone": "Belum ada yang selesai",
+  "showNotDone": "Tampilkan yang belum selesai",
+  "noneMet": "Belum ada yang ditemui",
+  "noneMetBody": "Anekdot tersembunyi muncul setelah ditemui.",
+  "noMatches": "Tidak ada yang cocok",
+  "clear": "Hapus",
+  "loading": "Memuat",
+  "notSaved": "Tidak tersimpan",
+  "group": {
+    "hideDone": "Sembunyikan yang selesai",
+    "showDone": "Tampilkan yang selesai",
+    "done": "{n} selesai"
+  },
+  "row": {
+    "states": {
+      "captured": "tertangkap",
+      "marked": "ditandai manual",
+      "none": "belum selesai"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Tertangkap · tetap selesai",
+    "markedByHand": "Ditandai manual",
+    "markedClick": "Ditandai manual · klik untuk batal tandai",
+    "notDone": "Belum selesai",
+    "clickToMark": "Klik untuk tandai selesai",
+    "activeTitle": "Sedang berlangsung di game",
+    "active": "Aktif",
+    "repeatTitle": "Selesai {n} kali (berulang)",
+    "hidden": "Anekdot tersembunyi",
+    "addedIn": "Ditambahkan di {version}"
+  },
+  "summary": {
+    "label": "Ringkasan",
+    "done": "Selesai",
+    "doneCaptured": "{n} tertangkap",
+    "doneByHand": "{n} manual",
+    "doneUnknown": "{n} lebih baru dari data game",
+    "doneLabel": "Anekdot selesai",
+    "stamps": "Cap",
+    "stampsTitle": "Cap menuju hadiah {n}",
+    "stampsNone": "Belum ada di tangkapan",
+    "stampsLabel": "Cap menuju hadiah berikutnya",
+    "reward": "Hadiah",
+    "rewardHint": "{primogems} primogem untuk setiap {every} anekdot yang tercatat",
+    "rewardPer": "per {every}",
+    "active": "Aktif",
+    "activeHint": "Sedang berlangsung di game (di tangkapan terbaru)"
+  },
+  "toolbar": {
+    "label": "Filter anekdot",
+    "search": "Cari",
+    "searchTitle": "Judul, cerita, NPC atau id",
+    "completion": "Penyelesaian",
+    "completions": {
+      "all": "Semua",
+      "missing": "Belum selesai",
+      "done": "Selesai"
+    },
+    "showDone": "Tampilkan selesai",
+    "showDoneTitle": "Anekdot selesai ditampilkan penuh, tidak dilipat di bawah tiap NPC",
+    "area": "Area",
+    "allAreas": "Semua",
+    "locked": "Belum terbuka di tangkapan terbaru"
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "title": "Lịch sử cầu nguyện",
+  "bannerPageTitle": "Lịch sử cầu nguyện · {banner}",
+  "loadFailed": "Tải thất bại",
+  "loading": "Đang tải",
+  "import": "Nhập",
+  "export": "Xuất",
+  "importExport": "Nhập / xuất",
+  "browse": "Chọn tệp",
+  "cancel": "Hủy",
+  "search": "Tìm",
+  "rarity": "Độ Hiếm",
+  "banner": "Banner",
+  "pulls": "{n} lượt",
+  "pullsTimes": "{n} lượt × {primos}",
+  "pullsPrimos": "{n} lượt · ✦ {primos}",
+  "lifetime": "Tổng số lượt",
+  "allWishes": "Mọi lượt cầu nguyện",
+  "newPulls": "{n} lượt mới",
+  "nothingNew": "Không có gì mới",
+  "banners": {
+    "character": {
+      "label": "Nhân Vật",
+      "title": "Cầu Nguyện Nhân Vật"
+    },
+    "weapon": {
+      "label": "Vũ Khí",
+      "title": "Cầu Nguyện Vũ Khí"
+    },
+    "standard": {
+      "label": "Thường",
+      "title": "Cầu Nguyện Thường"
+    },
+    "chronicled": {
+      "label": "Sử Ký",
+      "title": "Sử Ký Cầu Nguyện"
+    },
+    "beginners": {
+      "label": "Tân Thủ",
+      "title": "Cầu Nguyện Tân Thủ"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "thg 1",
+      "2": "thg 2",
+      "3": "thg 3",
+      "4": "thg 4",
+      "5": "thg 5",
+      "6": "thg 6",
+      "7": "thg 7",
+      "8": "thg 8",
+      "9": "thg 9",
+      "10": "thg 10",
+      "11": "thg 11",
+      "12": "thg 12"
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month}, {year}",
+    "month": "{month}, {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "hiện tại"
+  },
+  "outcomes": {
+    "won": "Thắng",
+    "lost": "Thua",
+    "guaranteed": "Chắc chắn"
+  },
+  "outcomeTitles": {
+    "won": "Thắng {odds}",
+    "lost": "Thua {odds}: lần sau chắc chắn là UP",
+    "guaranteed": "Nhận UP, chắc chắn sau khi thua {odds}"
+  },
+  "legend": {
+    "won": "thắng",
+    "lost": "thua",
+    "guaranteed": "chắc chắn"
+  },
+  "overview": {
+    "newestPull": "Lượt mới nhất, theo giờ game",
+    "synced": "Đồng bộ {ago}",
+    "syncedTitle": "Lưu cầu nguyện mới lúc {time}",
+    "syncHelp": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay): irminsul đồng bộ mọi banner, rồi từng lượt mới khi khóa còn hiệu lực (~24 giờ). Liên kết cầu nguyện của game cũng lấy được sáu tháng gần nhất. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",
+    "empty": "Chưa có lượt cầu nguyện",
+    "emptyBody": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay), hoặc nhập bằng liên kết cầu nguyện của game. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",
+    "banners": "Banner",
+    "totals": "Tổng",
+    "worth": "Giá trị cầu nguyện",
+    "worthHint": "{n} lượt × {primos} Nguyên Thạch",
+    "wishes": "{n} lượt",
+    "avgPity": "Bảo hiểm 5★ TB",
+    "avgPityHint": "Cầu Nguyện Nhân Vật: bảo hiểm trung bình của mọi 5★, so với khoảng {expected} dự kiến khi tính bảo hiểm mềm",
+    "avgPityVs": "{diff} so với {expected} dự kiến"
+  },
+  "card": {
+    "everyPull": "{banner}: mọi lượt",
+    "fiveTitle": "Còn {left} lượt tới bảo hiểm cứng · ✦ {primos} · bảo hiểm mềm từ {soft}",
+    "fourTitle": "Còn {left} lượt tới 4★ chắc chắn",
+    "fourFeatured": " · 4★ tiếp theo chắc chắn là UP",
+    "pity5": "Bảo hiểm 5★",
+    "pity4": "Bảo hiểm 4★",
+    "guaranteedAt": "Chắc chắn ở {n}",
+    "hideLatest": "Ẩn các lượt gần nhất",
+    "showLatest": "Hiện các lượt gần nhất",
+    "latest": "Lượt gần nhất",
+    "latestRegion": "{banner}: lượt gần nhất",
+    "none": "Không có",
+    "cols": {
+      "name": "Tên",
+      "time": "Thời gian",
+      "pity": "Bảo hiểm"
+    }
+  },
+  "five": {
+    "every": "Mọi 5★",
+    "newestFirst": "{n} · mới nhất trước",
+    "none": "Chưa có 5★",
+    "pity": "{name} · bảo hiểm {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Nền tảng",
+    "copyFailed": "Chưa sao chép: hãy chọn lệnh và sao chép",
+    "steps": {
+      "open": "Mở Cầu Nguyện → Lịch Sử trong game và chờ tải xong.",
+      "android2": "Tắt Wi-Fi và dữ liệu di động.",
+      "android3": "Chạm làm mới (góc trên bên phải): trang sẽ báo lỗi kèm một đoạn chữ.",
+      "android4": "Chọn toàn bộ đoạn chữ đó và sao chép.",
+      "android5": "Bật lại kết nối, rồi dán vào bên dưới.",
+      "ios1": "Mở menu Paimon → Phản hồi và chờ tải xong.",
+      "ios2": "Chạm Vấn đề trong game → Chế Độ Co-Op.",
+      "ios3": "Chạm liên kết ở cuối câu trả lời: nó mở trong trình duyệt.",
+      "ios4": "Sao chép liên kết đó và dán vào bên dưới.",
+      "ps1": "Mở thư sự kiện có mã QR trong game.",
+      "ps2": "Quét mã bằng điện thoại và sao chép liên kết mở ra.",
+      "ps3": "Dán vào bên dưới. Nếu thất bại, hãy liên kết PlayStation với tài khoản HoYoverse rồi làm theo hướng dẫn cho PC hoặc điện thoại.",
+      "pcRun": "Mở PowerShell (Start, gõ PowerShell) và chạy:",
+      "pcPaste": "Lệnh sẽ sao chép liên kết: dán vào bên dưới.",
+      "pcPasteTitle": "Copy wish URL của irminsul cũng cho ra liên kết này"
+    },
+    "scriptTitle": "Đọc bộ nhớ đệm web của game trên máy này, kiểm tra liên kết một lần với HoYoverse, rồi sao chép. Không làm gì khác.",
+    "copied": "Đã sao chép",
+    "copy": "Sao chép",
+    "readScript": "Đọc script",
+    "label": "Liên kết lịch sử cầu nguyện",
+    "placeholder": "Dán liên kết: https://…",
+    "invalid": "Không có liên kết lịch sử cầu nguyện trong đoạn chữ đó",
+    "uidMismatch": "Liên kết đó là UID {uid}; tài khoản này là UID {own}.",
+    "failed": "Nhập thất bại",
+    "saving": "Đang lưu {n}…",
+    "progress": "{banner} · trang {page} · {n} mới",
+    "errors": {
+      "cancelled": "Đã hủy",
+      "network": "Lịch sử cầu nguyện không phản hồi. Hãy thử lại sau.",
+      "expired": "Liên kết đã hết hạn. Hãy mở lại Cầu Nguyện → Lịch Sử trong game và sao chép liên kết mới.",
+      "throttled": "HoYoverse yêu cầu chậm lại. Hãy thử lại sau vài phút.",
+      "api": "HoYoverse trả lời: {message}",
+      "code": "lỗi {code}"
+    }
+  },
+  "chart": {
+    "title": "Số lượt mỗi tháng",
+    "label": "Số lượt mỗi tháng theo độ hiếm, {n} tháng",
+    "month": "{month}: {n} lượt"
+  },
+  "numbers": {
+    "label": "Số liệu",
+    "avgPity": "{share} · bảo hiểm TB {avg}",
+    "expected": "Bảo hiểm 5★ dự kiến khoảng {n} khi tính bảo hiểm mềm",
+    "expectedAbout": "Dự kiến khoảng {n} khi tính bảo hiểm mềm",
+    "streak": "chuỗi {current} · tốt nhất thắng {best} · tệ nhất thua {worst}",
+    "streakWon": "thắng {n}",
+    "streakLost": "thua {n}",
+    "flipTitle": "5★ UP khi đang ở {odds} (không tính các lần chắc chắn)",
+    "split": "Tỷ lệ 4★",
+    "character": "nhân vật",
+    "char": "NV",
+    "weapon": "vũ khí",
+    "rateUp": "Thắng 4★ UP {won} / {total} · {share}",
+    "splitTitle": "4★ theo loại",
+    "splitTitleFull": "4★ theo loại, và các lần tung đồng xu 4★ UP"
+  },
+  "odds": {
+    "guaranteed": "Chắc chắn",
+    "lostLast": "Đã thua {odds} gần nhất ({name}): 5★ tiếp theo chắc chắn là UP",
+    "nextFeatured": "5★ tiếp theo chắc chắn là UP",
+    "weapon": "5★ tiếp theo: 75% là vũ khí UP",
+    "coin": "5★ tiếp theo: tung đồng xu"
+  },
+  "track": {
+    "label": "Bảo hiểm {pity} / {hard}, bảo hiểm mềm từ {soft}"
+  },
+  "runs": {
+    "label": "Các đợt banner",
+    "heading": "Banner",
+    "count": "{n} đợt",
+    "fewer": "Thu gọn",
+    "all": "Mọi đợt",
+    "current": " · hiện tại",
+    "no5": "Không có 5★"
+  },
+  "small": {
+    "pitySoFar": "bảo hiểm {pity} / {hard}"
+  },
+  "table": {
+    "label": "Mọi lượt cầu nguyện",
+    "search": "Tìm lượt cầu nguyện",
+    "searchTitle": "Tên nhân vật hoặc vũ khí",
+    "noMatch": "Không có lượt phù hợp",
+    "rollRun": "Số thứ tự lượt trong đợt banner đó",
+    "roll": "Số thứ tự lượt",
+    "item": "Vật phẩm",
+    "pity": "Bảo hiểm",
+    "result": "Kết quả",
+    "time": "Thời gian",
+    "newestFirst": "Mới nhất trước",
+    "oldestFirst": "Cũ nhất trước",
+    "newestFirstSr": "mới nhất trước",
+    "oldestFirstSr": "cũ nhất trước",
+    "weapon": "Vũ Khí",
+    "character": "Nhân Vật",
+    "pages": "Trang cầu nguyện"
+  },
+  "transfer": {
+    "backup": "Bản sao lưu paimon.moe",
+    "modes": {
+      "link": "Liên kết cầu nguyện",
+      "file": "Tệp"
+    },
+    "importFrom": "Nhập từ",
+    "noRecords": "Không có dữ liệu",
+    "uidMismatch": "Lịch sử đó là UID {uid}; tài khoản này là UID {own}",
+    "account": "Tài khoản {n}",
+    "notWishFile": "Không phải tệp UIGF hay paimon.moe",
+    "alreadyHeld": "{n} đã có",
+    "notImported": "Chưa nhập được",
+    "deleteTitle": "Xóa lịch sử cầu nguyện?",
+    "deleteDetail": "Toàn bộ {n} lượt của tài khoản này sẽ bị xóa. irminsul có thể lấy lại sáu tháng gần nhất.",
+    "deleteConfirm": "Xóa",
+    "notDeleted": "Chưa xóa",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), CSV của trình nhập paimon.moe, hoặc bản sao lưu của paimon.moe (Settings → Export)",
+    "drop": "Tệp UIGF hoặc paimon.moe",
+    "fileAccount": "Tài khoản trong tệp",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward và hầu hết trình theo dõi cầu nguyện đọc được",
+    "paimonTitle": "Cho Local Importer của paimon.moe (Wish counter → Import → Local)",
+    "delete": "Xóa",
+    "deleteHistory": "Xóa lịch sử"
+  },
+  "bannerPage": {
+    "noPulls": "Banner này chưa có lượt nào",
+    "now": "Hiện tại",
+    "hardTitle": "Còn {left} lượt tới bảo hiểm cứng · ✦ {primos}",
+    "toHard": "Còn {left} tới bảo hiểm cứng · ✦ {primos}",
+    "softFrom": "mềm từ {soft}",
+    "featuredNext": "Lần sau là UP",
+    "featuredNextTitle": "4★ trước đó lệch banner: 4★ tiếp theo chắc chắn là UP",
+    "toGuaranteed4": "Còn {n} tới 4★ chắc chắn"
+  }
+}

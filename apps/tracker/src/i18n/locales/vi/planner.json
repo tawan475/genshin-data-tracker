@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "Tên",
+      "title": "Từ A đến Z"
+    },
+    "missing": {
+      "label": "Còn thiếu",
+      "title": "Thiếu ít vật phẩm nhất trước"
+    },
+    "favorites": {
+      "label": "Yêu thích",
+      "title": "Yêu thích trước"
+    },
+    "priority": {
+      "label": "Ưu tiên",
+      "title": "Nguyên liệu dành cho các mục tiêu trên cùng trước: kéo để sắp xếp lại"
+    }
+  },
+  "material": {
+    "characterExp": "EXP Nhân Vật",
+    "weaponExp": "EXP Vũ Khí",
+    "group": {
+      "exp": "EXP",
+      "gem": "Đá đột phá",
+      "boss": "Vật phẩm thủ lĩnh",
+      "local": "Đặc sản khu vực",
+      "common": "Vật phẩm kẻ địch",
+      "book": "Sách Thiên Phú",
+      "weekly": "Thủ lĩnh tuần",
+      "weapon": "Nguyên liệu vũ khí",
+      "elite": "Vật phẩm tinh anh",
+      "other": "Khác"
+    }
+  },
+  "hint": {
+    "level": "Cấp {level}",
+    "talents": "Thiên Phú {talents}",
+    "characterDetail": "{name}: Cấp {level} (A{ascension}), Thiên Phú {talents}",
+    "weaponDetail": "{name}: Cấp {level} (A{ascension})",
+    "thenAr": "sau đó AR {ar}",
+    "thenShort": "sau đó thiếu nguyên liệu",
+    "weapon": "Vũ Khí",
+    "canLevel": "Có thể nâng ngay"
+  },
+  "preset": {
+    "max": {
+      "label": "Tối đa",
+      "title": "Cấp 90, Thiên Phú 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Cấp 90, Thiên Phú 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Cấp 80, Thiên Phú 8/8/8"
+    },
+    "talents": {
+      "label": "Chỉ Thiên Phú",
+      "title": "Thiên Phú 9/9/9, giữ cấp hiện tại"
+    },
+    "level": {
+      "label": "Chỉ cấp",
+      "title": "Cấp 90, giữ Thiên Phú hiện tại"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Ủy Thác Mỗi Ngày",
+      "weeklyBosses": "Vùng Đất Thảo Phạt",
+      "battlePass": "Nhật Ký Hành Trình tuần",
+      "reputation": "Danh Vọng",
+      "abyss": "La Hoàn Thâm Cảnh",
+      "theater": "Nhà Hát Giả Tưởng",
+      "bargains": "Đổi Bụi Ánh Sáng",
+      "transformer": "Máy Biến Đổi Tham Số",
+      "expeditions": "Phái Đi",
+      "realm": "Tiền Động Tiên",
+      "welkin": "Không Nguyệt Chúc Phúc"
+    }
+  },
+  "toast": {
+    "notSaved": "Chưa lưu",
+    "newCapture": "Có bản ghi mới",
+    "newCaptureDetail": "Không có gì bị thay đổi: hãy kiểm tra và thử lại"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "Bỏ qua {n} sự kiện",
+      "olderThanOurs": "cũ hơn dữ liệu ở đây",
+      "ar": "AR {ar}",
+      "wl": "WL {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "Châu Mỹ",
+      "EUROPE": "Châu Âu",
+      "ASIA": "Châu Á",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Không phải tệp xuất Seelie (không có mục tiêu)",
+    "customName": "Tùy chỉnh"
+  },
+  "resin": {
+    "alertTitle": "Nhựa Nguyên Chất {amount}",
+    "source": {
+      "manual": "đặt thủ công",
+      "player": "irminsul, lúc đăng nhập",
+      "inventory": "bản chụp"
+    },
+    "unknown": "Nhựa Nguyên Chất: chưa rõ · hãy đặt",
+    "readingTitle": "Nhựa Nguyên Chất ~{now}/{max} · {value} từ {source}, {at} · +1 mỗi 8 phút",
+    "setLabel": "{title}. Đặt",
+    "spend": "Dùng {n}",
+    "add": "Thêm {n}",
+    "fullAt": "Đầy lúc {time}",
+    "fullLabel": "Đầy",
+    "full": "Đầy",
+    "markTitle": "{amount} lúc {time}",
+    "in": "sau",
+    "now": "Nhựa Nguyên Chất hiện tại",
+    "alert": "Báo Nhựa",
+    "alertUnsupported": "Báo Nhựa: trình duyệt này không hỗ trợ",
+    "alertOff": "Báo Nhựa: tắt",
+    "alertOn": "Báo Nhựa ở mức {amount} · khi trang đang mở",
+    "alertOnAt": "Báo Nhựa ở mức {amount}, {time} · khi trang đang mở",
+    "unsupported": "Trình duyệt này không hỗ trợ",
+    "blocked": "Bị chặn: hãy cho phép thông báo của trang này trong thiết lập trình duyệt",
+    "notifyAt": "Báo khi đạt",
+    "off": "Tắt",
+    "whileOpen": "Khi trang đang mở trên thiết bị này"
+  },
+  "artifacts": {
+    "title": "Thánh Di Vật",
+    "doneByHand": "{name}: xong (đánh dấu thủ công)",
+    "notDoneByHand": "{name}: chưa xong (đánh dấu thủ công)",
+    "notDoneByHandCaptureDone": "{name}: chưa xong (đánh dấu thủ công; bản ghi cho biết đã xong)",
+    "doneFromCapture": "{name}: xong, theo bản ghi ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "chưa xong",
+    "nothingWorn": "chưa trang bị gì",
+    "otherSet": "bộ khác",
+    "otherMainStat": "thuộc tính chính khác",
+    "levelOf": "+{level} / +{max}",
+    "farmingByHand": "{name}: đang farm (đánh dấu thủ công)",
+    "setDone": "{name}: xong, mọi vị trí đều đạt",
+    "setFarming": "{name}: đang farm",
+    "autoRule": "Một vị trí tự đánh dấu khi bản ghi cho thấy ở đó có món cấp tối đa (+20 với 5★) thuộc bộ đã chọn và có thuộc tính chính đã chọn; vị trí thứ năm có thể là bộ bất kỳ khi bốn vị trí kia thuộc bộ đã chọn",
+    "sets": "Bộ",
+    "worn": "{n} đang mặc",
+    "remove": "Bỏ {name}",
+    "addSet": "Bộ",
+    "close": "Đóng",
+    "slots": "Vị trí",
+    "mainStat": "Thuộc tính chính {slot}",
+    "searchSets": "Tìm bộ",
+    "setList": "Bộ Thánh Di Vật"
+  },
+  "cost": {
+    "saves": "{name} tiết kiệm {mora}",
+    "nothing": "Không cần tiêu gì",
+    "colours": "Màu"
+  },
+  "common": {
+    "search": "Tìm",
+    "cancel": "Hủy",
+    "nameState": "{name}: {state}",
+    "counted": "Được tính",
+    "notCounted": "Không tính",
+    "removeName": "Bỏ {name}",
+    "clear": "Xóa lọc",
+    "remove": "Bỏ",
+    "save": "Lưu",
+    "noMatches": "Không có kết quả",
+    "delete": "Xóa",
+    "undo": "Hoàn tác"
+  },
+  "custom": {
+    "slot": {
+      "book": "Sách Thiên Phú",
+      "common": "Vật phẩm kẻ địch",
+      "boss": "Vật phẩm thủ lĩnh",
+      "local": "Đặc sản",
+      "weekly": "Thủ lĩnh tuần"
+    },
+    "name": "Tên",
+    "rarity": "Độ Hiếm",
+    "weaponType": "Loại Vũ Khí",
+    "element": "Nguyên Tố"
+  },
+  "done": {
+    "taken": "Lấy từ túi",
+    "uses": "Dùng",
+    "notInBag": "Không có trong túi",
+    "takesWhatThereIs": "Hoàn thành sẽ lấy những gì đang có.",
+    "confirm": "Xong"
+  },
+  "extra": {
+    "title": "Thêm",
+    "add": "Thêm vật phẩm",
+    "have": "có {n}",
+    "craft": "ghép {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (yêu thích)",
+    "title": "{name} · chạm: mở · giữ hoặc nhấp chuột phải: tạm dừng",
+    "moreTitle": "{rest} · hiện tất cả",
+    "moreLabel": "Thêm {n}: {rest}. Hiện tất cả",
+    "fewerTitle": "Hiện ít hơn",
+    "fewer": "Thu gọn"
+  },
+  "card": {
+    "level": "Cấp",
+    "talents": "Thiên Phú",
+    "levelTitle": "Cấp {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "Tấn Công / Kỹ Năng / Nộ",
+    "boosted": "nâng thành {talents} (C{constellation} cộng +3)",
+    "weaponTitle": "{name}: cấp {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "làm được ngay với túi hiện có",
+    "readyStep": "bước kế tiếp làm được ngay với túi hiện có",
+    "constellation": "Cung Mệnh {n}",
+    "refinement": "Tinh Luyện {n}",
+    "artifactsTitle": "Thánh Di Vật: {done}/5 vị trí",
+    "expSuffix": "{name} (EXP)",
+    "amount": "{name}: {n}",
+    "short": "thiếu {n}",
+    "shortAfter": "thiếu {n} sau các mục tiêu phía trên",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "đủ sau các mục tiêu phía trên",
+    "handleLabel": "{name}: vị trí {rank}, di chuyển bằng phím mũi tên",
+    "handleTitle": "#{rank} · kéo, hoặc dùng phím mũi tên",
+    "customTitle": "Nhân vật tùy chỉnh: chưa có trong dữ liệu game",
+    "custom": "Tùy chỉnh",
+    "favoriteLabel": "{name}: yêu thích",
+    "favorite": "Yêu thích",
+    "notFavorite": "Không yêu thích",
+    "setByHand": "Đặt thủ công",
+    "needsAr": "Cần AR {ar}",
+    "doneLabel": "{name}: {label} xong",
+    "doneReadyLabel": "{name}: {label} xong ({ready})",
+    "missing": "{name}: còn thiếu",
+    "canDoNow": "Làm được ngay: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Tấn Công",
+      "skill": "Kỹ Năng",
+      "burst": "Nộ"
+    },
+    "notOwned": "Chưa có",
+    "estimateResin": "~{resin} Nhựa",
+    "estimateTitle": "{runs} lượt · {resin} Nhựa ({condensed} cô đặc) · {days} ngày",
+    "estimateWeekly": "thủ lĩnh tuần: {weeks} tuần",
+    "countedLabel": "{name}: được tính",
+    "notCountedLabel": "{name}: không tính",
+    "presets": "Thiết lập sẵn",
+    "constellationTitle": "Cung Mệnh (C3/C5 tăng một Thiên Phú thêm 3 cấp)",
+    "constellation": "Cung Mệnh",
+    "hideNote": "Ẩn ghi chú",
+    "note": "Ghi chú",
+    "part": "Phần mục tiêu",
+    "now": "Hiện tại",
+    "goal": "Mục tiêu",
+    "levelNow": "Cấp hiện tại",
+    "levelGoal": "Cấp mục tiêu",
+    "boost": "C{at} tăng thêm 3",
+    "boostOn": "C{at} tăng thêm 3: trong game {from} → {to}",
+    "talentNow": "{talent} hiện tại",
+    "talentGoal": "{talent} mục tiêu",
+    "inGame": "Trong game {from} → {to}",
+    "customCharacter": "Nhân vật tùy chỉnh",
+    "replaceWithEllipsis": "Thay bằng…",
+    "replaceWith": "Thay bằng {name}",
+    "replace": "Thay",
+    "gapNeed": "{talents} cần",
+    "setLevel": "Đặt {level}",
+    "captureTitle": "Bản ghi mới nhất",
+    "capture": "Bản ghi: {text}",
+    "resetTitle": "Quay về bản ghi",
+    "reset": "Đặt lại",
+    "cost": "Chi phí"
+  },
+  "picker": {
+    "characters": "Nhân Vật",
+    "weapons": "Vũ Khí",
+    "items": "Vật phẩm",
+    "title": "Thêm mục tiêu",
+    "kind": "Loại",
+    "searchItems": "Tìm vật phẩm",
+    "preset": "Thiết lập sẵn",
+    "add": "Thêm",
+    "addCount": "Thêm {n}"
+  },
+  "toolbar": {
+    "label": "Lọc mục tiêu",
+    "searchTitle": "Tên, vũ khí hoặc ghi chú",
+    "sort": "Thứ Tự",
+    "chips": "Nâng ngay, thủ lĩnh tuần, trạng thái, nguyên tố và độ hiếm",
+    "upgrade": "Nâng ngay",
+    "upgradeTitle": "Các mục tiêu được tính có thể nâng ngay với túi hiện có, mỗi mục tính riêng: Sẵn sàng, Đủ riêng, hoặc một phần (Cấp, Thiên Phú, vũ khí) hay bước kế tiếp của nó",
+    "noWeeklyTitle": "Còn cần farm nhưng không cần thủ lĩnh tuần: vật phẩm rơi đã có hoặc chuyển hóa được (sau các mục tiêu phía trên)",
+    "status": {
+      "all": "Tất cả",
+      "ready": "Đủ hàng",
+      "readyTitle": "Đủ trong túi, mỗi mục tiêu tính riêng",
+      "activeTitle": "Trong tổng",
+      "off": "Tạm dừng",
+      "offTitle": "Không tính vào tổng"
+    }
+  },
+  "item": {
+    "count": "Số lượng",
+    "have": "Đang có",
+    "editHave": "Đang có {n}: sửa"
+  },
+  "popover": {
+    "goalsLabel": "{name}: mục tiêu dùng vật phẩm này ({n})",
+    "goalsTitle": "Mục tiêu dùng vật phẩm này",
+    "history": "{name}: lịch sử",
+    "expNeed": "Cần {n} EXP",
+    "goal": "Mục tiêu {n}",
+    "missing": "Thiếu {n}",
+    "enough": "Đủ",
+    "need": "Cần {n}",
+    "craftedTitle": "Ghép từ bậc thấp hơn",
+    "craft": "Ghép {n}",
+    "capture": "Bản ghi {n}",
+    "backLabel": "{name}: quay về {n} của bản ghi",
+    "backTitle": "Quay về {n}",
+    "held": "Đang có {name}",
+    "addPlaceholder": "+ thêm",
+    "addLabel": "{name}: thêm số đã nhận",
+    "addTitle": "Thêm số bạn vừa nhận (Enter)",
+    "swap": {
+      "label": "Đổi bằng Dung Môi Ảo Mộng",
+      "heading": "Đổi",
+      "title": "Giả Kim → Chuyển Hóa: đổi một nguyên liệu khác của thủ lĩnh lấy vật phẩm này, mỗi lần {n} Dung Môi Ảo Mộng",
+      "solventHeld": "Đang có {name}: {n}",
+      "have": "Có {n}",
+      "do": "Đổi",
+      "noneHeld": "Không có {name}",
+      "noSolvent": "Mỗi lần đổi cần {n} Dung Môi Ảo Mộng"
+    }
+  },
+  "levelGrid": {
+    "below": "Thấp hơn bản ghi",
+    "level": "Cấp {level} (A{ascension})",
+    "ascended": "Cấp {level}, đã đột phá (A{ascension})",
+    "ascendedWord": "đã đột phá"
+  },
+  "cell": {
+    "have": "Có {n}",
+    "spent": "Dùng để ghép {n}",
+    "converted": "Chuyển hóa từ loại khác {n}",
+    "convertedAway": "Chuyển hóa sang loại khác {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} mục tiêu, mỗi mục tính sau các mục tiêu được tính phía trên",
+    "clear": "Bỏ {name}"
+  },
+  "materialPicker": {
+    "material": "Nguyên liệu",
+    "selected": "Nguyên liệu: {name}",
+    "title": "Mục tiêu dùng một nguyên liệu",
+    "search": "Tìm nguyên liệu",
+    "any": "Bất kỳ",
+    "goals": "{n} mục tiêu"
+  },
+  "stepper": {
+    "down": "{label}: giảm",
+    "up": "{label}: tăng"
+  },
+  "settings": {
+    "title": "Thiết lập Kế hoạch",
+    "autoWl": "Tự động ({wl})",
+    "ar": "AR",
+    "arTitle": "Hạng Mạo Hiểm (1–60)",
+    "arTitleIrminsul": "Hạng Mạo Hiểm (1–60) · {ar} từ irminsul",
+    "fromIrminsul": "từ irminsul",
+    "wl": "WL",
+    "wlTitle": "Cấp Thế Giới (0–9)",
+    "wlTitleIrminsul": "Cấp Thế Giới (0–9) · {wl} từ irminsul",
+    "wlLabel": "Cấp Thế Giới",
+    "refreshesTitle": "Số lần hồi Nhựa Nguyên Chất mỗi ngày ({per} Nhựa mỗi lần): số ngày tính theo 180 + {per} mỗi lần hồi",
+    "refreshes": "Lần hồi",
+    "refreshesLabel": "Số lần hồi Nhựa mỗi ngày",
+    "stepsTitle": "Tối đa bốn mức, ví dụ -40 +60: bộ theo dõi Nhựa sẽ cộng chúng (trừ khi tiêu)",
+    "steps": "Nút Nhựa",
+    "azothTitle": "Bù đá còn thiếu bằng đá dư của nguyên tố khác",
+    "azoth": "Bụi Biến Đổi",
+    "passivesTitle": "Raiden Shogun, Kẻ Lang Thang: −50% Mora khi đột phá vũ khí",
+    "passives": "Nội tại Mora",
+    "craftingTitle": "Danh sách những gì cần chuyển hóa, ghép và rèn trong chế độ Farm",
+    "crafting": "Danh sách ghép"
+  },
+  "roster": {
+    "search": "Tìm nhân vật",
+    "multi": "Nhân vật (chọn nhiều)",
+    "owned": "{name} · Cấp {level}",
+    "notOwned": "{name} · chưa có",
+    "weaponOwned": "{name} · Cấp {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "Bản trong bản ghi",
+    "noCopy": "Không có trong bản ghi",
+    "heldBy": "Do {name} cầm",
+    "refinementNow": "Tinh Luyện hiện tại của {name}",
+    "levelNow": "Cấp hiện tại của {name}",
+    "refinementGoal": "Tinh Luyện mục tiêu của {name}",
+    "levelGoal": "Cấp mục tiêu của {name}",
+    "search": "Tìm vũ khí"
+  },
+  "seelieImport": {
+    "notExport": "Không phải tệp xuất Seelie hay bản sao lưu paimon.moe",
+    "notJson": "Không phải tệp JSON",
+    "section": {
+      "goals": {
+        "label": "Mục tiêu",
+        "title": "Mục tiêu nhân vật, Thiên Phú và vũ khí, vật phẩm cần thêm"
+      },
+      "artifacts": {
+        "label": "Mục tiêu Thánh Di Vật",
+        "title": "Bộ và thuộc tính chính cần farm"
+      },
+      "customs": {
+        "label": "Nhân vật tùy chỉnh",
+        "title": "Các nhân vật tùy chỉnh trong Seelie, kèm mục tiêu"
+      },
+      "current": {
+        "label": "Cấp hiện tại",
+        "title": "Cấp, Thiên Phú và Cung Mệnh hiện tại của Seelie ở những chỗ cao hơn bản ghi"
+      },
+      "inventory": {
+        "label": "Túi",
+        "title": "Số lượng thành chỉnh sửa thủ công trên bản ghi mới nhất (bản ghi mới hơn sẽ thay thế)"
+      },
+      "tasks": {
+        "label": "Nhiệm vụ",
+        "title": "Nhiệm vụ tùy chỉnh, và nhiệm vụ cố định đã xong trong Seelie"
+      },
+      "resin": {
+        "label": "Nhựa",
+        "title": "Bộ theo dõi Nhựa của Seelie, khi mới hơn dữ liệu ở đây"
+      },
+      "settings": {
+        "label": "Thiết lập",
+        "title": "AR, Cấp Thế Giới, máy chủ và Nhà Lữ Hành"
+      }
+    },
+    "count": {
+      "new": "{n} mới",
+      "changed": "{n} đã đổi",
+      "same": "{n} giữ nguyên"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "Đổi",
+    "choose": "Chọn tệp",
+    "fileLabel": "Tệp xuất Seelie hoặc bản sao lưu paimon.moe",
+    "legend": "Nội dung cần nhập",
+    "skipped": "Bỏ qua {n}",
+    "clampedTitle": "Mục tiêu trên cấp 90 đã được đặt về 90",
+    "clamped": "Giới hạn ở 90: {n}",
+    "replace": "Thay thế (bỏ {n})",
+    "exportTitle": "Tệp tài khoản Seelie: mục tiêu, túi, nhiệm vụ (Seelie → Settings → Import Account)",
+    "export": "Xuất",
+    "import": "Nhập",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Tài khoản trong tệp",
+    "account": "Tài khoản {n}",
+    "paimonLevels": "chỉ cấp",
+    "paimonLevelsTitle": "paimon.moe lưu cấp và nguyên liệu của mục cần làm, không lưu cấp Thiên Phú: Thiên Phú giữ nguyên"
+  },
+  "taskEditor": {
+    "everyDay": "Mỗi ngày",
+    "everyDays": "Mỗi {n} ngày",
+    "today": "Hôm nay ({day})",
+    "tomorrow": "Ngày mai ({day})",
+    "startDay": "Ngày bắt đầu",
+    "startDayTitle": "Giữ nhịp theo ngày bắt đầu",
+    "doneDay": "Ngày hoàn thành",
+    "doneDayTitle": "Tính từ ngày hoàn thành",
+    "task": "Nhiệm vụ",
+    "newTask": "Nhiệm vụ mới",
+    "nameIt": "Đặt tên",
+    "repeats": "Lặp lại",
+    "next": "Lần tới",
+    "starts": "Bắt đầu",
+    "countsFrom": "Tính từ"
+  },
+  "tasks": {
+    "title": "Nhiệm vụ",
+    "permanent": "Cố định",
+    "ready": "Sẵn sàng",
+    "readyTitle": "Sẵn sàng dùng",
+    "resets": "Làm mới {time}",
+    "snoozedBack": "Tạm hoãn · quay lại {time}",
+    "doneBack": "Xong · quay lại {time}",
+    "everyDay": "mỗi ngày",
+    "everyDays": "mỗi {n} ngày",
+    "fromDone": "từ ngày hoàn thành",
+    "fromStart": "từ ngày bắt đầu",
+    "dueTitle": "Hạn {date} · {every}, {from}",
+    "overdue": "Quá hạn",
+    "late": "trễ {n} ngày",
+    "today": "Hôm nay",
+    "tomorrow": "Ngày mai",
+    "doneToast": "Đã xong {name}",
+    "backToast": "{name}: quay lại {day}",
+    "deleted": "Đã xóa {name}",
+    "toDo": "{n} cần làm",
+    "toDoSr": "cần làm",
+    "shown": "Nhiệm vụ đang hiện",
+    "hideDone": "Ẩn đã xong",
+    "showDone": "Hiện đã xong ({n})",
+    "permanentShown": "Nhiệm vụ cố định đang hiện",
+    "add": "Thêm nhiệm vụ",
+    "noCustom": "Chưa có nhiệm vụ riêng",
+    "allDone": "Đã xong hết",
+    "move": "Di chuyển {name}",
+    "dragTitle": "Kéo, hoặc dùng phím mũi tên",
+    "doneLabel": "Xong: {name}",
+    "notDoneLabel": "Chưa xong: {name}",
+    "takeBack": "Hoàn tác",
+    "snoozeName": "Tạm hoãn {name}",
+    "snooze": "Tạm hoãn",
+    "lastDay": "Ngày cuối",
+    "permanentTasks": "Nhiệm vụ cố định",
+    "events": "Sự Kiện",
+    "startsIn": "sau {time}",
+    "eventStarts": "Bắt đầu {time}",
+    "eventEnds": "Kết thúc {time}",
+    "noEnd": "Không có ngày kết thúc",
+    "tags": {
+      "daily": "Hàng Ngày",
+      "checkin": "Điểm danh",
+      "exploration": "Thám hiểm thế giới",
+      "quest": "Nhiệm Vụ"
+    },
+    "capture": {
+      "from": "Theo bản ghi lúc {time}",
+      "commissions": "Xong {n} / {total}",
+      "abyss": "{stars} / {max} sao",
+      "expeditions": "Đã về {n} / {total}",
+      "nobodyOut": "Không ai đang đi",
+      "realm": "{value} / {limit} trong hũ",
+      "welkin": "Còn {n} ngày"
+    }
+  },
+  "view": {
+    "title": "Kế hoạch",
+    "accountFallback": "Tài khoản Genshin",
+    "farm": "Farm",
+    "goals": "Mục tiêu",
+    "presetApplied": "{preset}: {n} mục tiêu",
+    "bulkCounted": "{n} được tính",
+    "bulkPaused": "{n} tạm dừng",
+    "goalsRemoved": "Đã bỏ {n} mục tiêu",
+    "paused": "Đã tạm dừng {name}",
+    "partDone": "{name}: {label} xong",
+    "craftStepDone": "Đã xong bước ghép",
+    "craftStepsDone": "Đã xong {n} bước ghép",
+    "craftingHidden": "Đã ẩn mục ghép",
+    "craftingHiddenHint": "Thiết lập Kế hoạch: Danh sách ghép",
+    "itemRemoved": "Đã bỏ vật phẩm",
+    "removed": "Đã bỏ {name}",
+    "added": "Đã thêm {n} mục tiêu",
+    "notImported": "Chưa nhập được",
+    "importedGoals": "{n} mục tiêu",
+    "importedCurrent": "{n} hiện tại",
+    "importedItems": "{n} vật phẩm",
+    "importedTasks": "{n} nhiệm vụ",
+    "imported": "Đã nhập từ Seelie",
+    "notExported": "Chưa xuất được",
+    "exported": "Đã xuất cho Seelie",
+    "view": "Kiểu xem",
+    "newest": "Bản ghi mới nhất",
+    "noCapture": "Không có bản ghi: số lượng do bạn nhập",
+    "import": "Nhập",
+    "replaced": "{n} chỉnh sửa thủ công đã được bản ghi thay thế",
+    "ok": "OK",
+    "seelieTitle": "Nhập từ Seelie hoặc paimon.moe, xuất sang Seelie",
+    "addGoals": "Thêm mục tiêu",
+    "loadError": "Không tải được Kế hoạch",
+    "noGoals": "Chưa có mục tiêu",
+    "importSeelie": "Nhập từ Seelie hoặc paimon.moe",
+    "importCapture": "Nhập một bản ghi",
+    "readiness": "Mức sẵn sàng",
+    "selectTitle": "Chọn các mục tiêu để thay đổi cùng lúc",
+    "select": "Chọn",
+    "selected": "Mục tiêu đã chọn",
+    "selectedCount": "Đã chọn {n}",
+    "selectedSr": "đã chọn",
+    "pickNone": "Không chọn",
+    "pickAll": "Tất cả",
+    "applyPreset": "Áp dụng thiết lập sẵn",
+    "pause": "Tạm dừng",
+    "count": "Tính",
+    "doneSelecting": "Chọn xong",
+    "done": "Xong",
+    "doneGoals": "Mục tiêu đã xong",
+    "loading": "Đang tải Kế hoạch"
+  }
+}

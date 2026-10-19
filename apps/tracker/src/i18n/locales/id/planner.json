@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "Nama",
+      "title": "A sampai Z"
+    },
+    "missing": {
+      "label": "Kurang",
+      "title": "Item kurang paling sedikit dulu"
+    },
+    "favorites": {
+      "label": "Favorit",
+      "title": "Favorit dulu"
+    },
+    "priority": {
+      "label": "Prioritas",
+      "title": "Material diberikan ke target teratas dulu: seret untuk mengurutkan"
+    }
+  },
+  "material": {
+    "characterExp": "Character EXP",
+    "weaponExp": "EXP Senjata",
+    "group": {
+      "exp": "EXP",
+      "gem": "Gem",
+      "boss": "Drop boss",
+      "local": "Produk khas",
+      "common": "Drop musuh",
+      "book": "Buku talenta",
+      "weekly": "Boss mingguan",
+      "weapon": "Material senjata",
+      "elite": "Drop elite",
+      "other": "Lainnya"
+    }
+  },
+  "hint": {
+    "level": "Lv {level}",
+    "talents": "talenta {talents}",
+    "characterDetail": "{name}: Lv {level} (A{ascension}), talenta {talents}",
+    "weaponDetail": "{name}: Lv {level} (A{ascension})",
+    "thenAr": "lalu AR {ar}",
+    "thenShort": "lalu kurang material",
+    "weapon": "Senjata",
+    "canLevel": "Bisa naik level sekarang"
+  },
+  "preset": {
+    "max": {
+      "label": "Maks",
+      "title": "Level 90, talenta 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Level 90, talenta 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Level 80, talenta 8/8/8"
+    },
+    "talents": {
+      "label": "Talenta saja",
+      "title": "Talenta 9/9/9, level seperti sekarang"
+    },
+    "level": {
+      "label": "Level saja",
+      "title": "Level 90, talenta seperti sekarang"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Misi Harian",
+      "weeklyBosses": "Domain Trounce",
+      "battlePass": "Battle Pass mingguan",
+      "reputation": "Reputasi",
+      "abyss": "Spiral Abyss",
+      "theater": "Imaginarium Theater",
+      "bargains": "Penukaran Paimon",
+      "transformer": "Parametric Transformer",
+      "expeditions": "Ekspedisi",
+      "realm": "Realm Currency",
+      "welkin": "Welkin Moon"
+    }
+  },
+  "toast": {
+    "notSaved": "Tidak tersimpan",
+    "newCapture": "Tangkapan baru",
+    "newCaptureDetail": "Tidak ada yang diubah: periksa lalu coba lagi"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} event tidak disertakan",
+      "olderThanOurs": "lebih lama dari milik kita",
+      "ar": "AR {ar}",
+      "wl": "WL {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "Amerika",
+      "EUROPE": "Eropa",
+      "ASIA": "Asia",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Bukan ekspor Seelie (tidak ada target)",
+    "customName": "Kustom"
+  },
+  "resin": {
+    "alertTitle": "Original Resin {amount}",
+    "source": {
+      "manual": "diatur manual",
+      "player": "irminsul, saat login",
+      "inventory": "snapshot"
+    },
+    "unknown": "Original Resin: belum diketahui · atur",
+    "readingTitle": "Original Resin ~{now}/{max} · {value} dari {source}, {at} · +1 setiap 8 menit",
+    "setLabel": "{title}. Atur",
+    "spend": "Pakai {n}",
+    "add": "Tambah {n}",
+    "fullAt": "Penuh pada {time}",
+    "fullLabel": "Penuh",
+    "full": "Penuh",
+    "markTitle": "{amount} pada {time}",
+    "in": "dalam",
+    "now": "Original Resin sekarang",
+    "alert": "Pengingat resin",
+    "alertUnsupported": "Pengingat resin: tidak didukung browser ini",
+    "alertOff": "Pengingat resin: mati",
+    "alertOn": "Pengingat resin di {amount} · selama situs terbuka",
+    "alertOnAt": "Pengingat resin di {amount}, {time} · selama situs terbuka",
+    "unsupported": "Tidak didukung browser ini",
+    "blocked": "Diblokir: izinkan notifikasi untuk situs ini di pengaturan browser",
+    "notifyAt": "Beri tahu di",
+    "off": "Mati",
+    "whileOpen": "Selama situs terbuka di perangkat ini"
+  },
+  "artifacts": {
+    "title": "Artefak",
+    "doneByHand": "{name}: selesai (dicentang manual)",
+    "notDoneByHand": "{name}: belum selesai (dicentang manual)",
+    "notDoneByHandCaptureDone": "{name}: belum selesai (dicentang manual; tangkapan bilang selesai)",
+    "doneFromCapture": "{name}: selesai, dari tangkapan ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "belum selesai",
+    "nothingWorn": "tidak ada yang dikenakan",
+    "otherSet": "set lain",
+    "otherMainStat": "stat utama lain",
+    "levelOf": "+{level} dari +{max}",
+    "farmingByHand": "{name}: farming (dicentang manual)",
+    "setDone": "{name}: selesai, semua slot sudah",
+    "setFarming": "{name}: farming",
+    "autoRule": "Slot tercentang sendiri saat tangkapan menunjukkan artefak level tertinggi (+20 untuk 5★) di slot itu dari set pilihan dengan stat utama pilihan; slot kelima boleh set apa saja jika empat lainnya sudah set pilihan",
+    "sets": "Set",
+    "worn": "{n} dikenakan",
+    "remove": "Lepas {name}",
+    "addSet": "Set",
+    "close": "Tutup",
+    "slots": "Slot",
+    "mainStat": "Stat utama {slot}",
+    "searchSets": "Cari set",
+    "setList": "Set artefak"
+  },
+  "cost": {
+    "saves": "{name} menghemat {mora}",
+    "nothing": "Tidak ada yang dipakai",
+    "colours": "Warna"
+  },
+  "common": {
+    "search": "Cari",
+    "cancel": "Batal",
+    "nameState": "{name}: {state}",
+    "counted": "Dihitung",
+    "notCounted": "Tidak dihitung",
+    "removeName": "Lepas {name}",
+    "clear": "Hapus",
+    "remove": "Lepas",
+    "save": "Simpan",
+    "noMatches": "Tidak ada yang cocok",
+    "delete": "Hapus",
+    "undo": "Urungkan"
+  },
+  "custom": {
+    "slot": {
+      "book": "Buku talenta",
+      "common": "Drop musuh",
+      "boss": "Drop boss",
+      "local": "Produk khas",
+      "weekly": "Boss mingguan"
+    },
+    "name": "Nama",
+    "rarity": "Kelangkaan",
+    "weaponType": "Tipe senjata",
+    "element": "Elemen"
+  },
+  "done": {
+    "taken": "Diambil dari tas",
+    "uses": "Memakai",
+    "notInBag": "Tidak ada di tas",
+    "takesWhatThereIs": "Selesai mengambil yang ada.",
+    "confirm": "Selesai"
+  },
+  "extra": {
+    "title": "Tambahan",
+    "add": "Tambah item",
+    "have": "punya {n}",
+    "craft": "craft {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (favorit)",
+    "title": "{name} · ketuk: buka · tahan atau klik kanan: jeda",
+    "moreTitle": "{rest} · tampilkan semua",
+    "moreLabel": "{n} lagi: {rest}. Tampilkan semua",
+    "fewerTitle": "Tampilkan lebih sedikit",
+    "fewer": "Lebih sedikit"
+  },
+  "card": {
+    "level": "Level",
+    "talents": "Talenta",
+    "levelTitle": "Level {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "Serangan / Skill / Burst",
+    "boosted": "naik ke {talents} (C{constellation} menambah +3)",
+    "weaponTitle": "{name}: level {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "bisa dilakukan sekarang dengan isi tas",
+    "readyStep": "langkah berikutnya bisa dilakukan sekarang dengan isi tas",
+    "constellation": "Konstelasi {n}",
+    "refinement": "Refinement {n}",
+    "artifactsTitle": "Artefak: {done}/5 slot",
+    "expSuffix": "{name} (EXP)",
+    "amount": "{name}: {n}",
+    "short": "kurang {n}",
+    "shortAfter": "kurang {n} setelah target di atasnya",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "cukup setelah target di atasnya",
+    "handleLabel": "{name}: urutan {rank}, pindahkan dengan tombol panah",
+    "handleTitle": "#{rank} · seret, atau tombol panah",
+    "customTitle": "Karakter kustom: belum ada di data game",
+    "custom": "Kustom",
+    "favoriteLabel": "{name}: favorit",
+    "favorite": "Favorit",
+    "notFavorite": "Bukan favorit",
+    "setByHand": "Diatur manual",
+    "needsAr": "Perlu AR {ar}",
+    "doneLabel": "{name}: {label} selesai",
+    "doneReadyLabel": "{name}: {label} selesai ({ready})",
+    "missing": "{name}: kurang",
+    "canDoNow": "Bisa sekarang: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Serangan",
+      "skill": "Skill",
+      "burst": "Burst"
+    },
+    "notOwned": "Tidak dimiliki",
+    "estimateResin": "~{resin} resin",
+    "estimateTitle": "{runs} kali · {resin} resin ({condensed} condensed) · {days} hari",
+    "estimateWeekly": "boss mingguan: {weeks} minggu",
+    "countedLabel": "{name}: dihitung",
+    "notCountedLabel": "{name}: tidak dihitung",
+    "presets": "Preset",
+    "constellationTitle": "Konstelasi (C3/C5 menaikkan talenta sebesar 3)",
+    "constellation": "Konstelasi",
+    "hideNote": "Sembunyikan catatan",
+    "note": "Catatan",
+    "part": "Bagian target",
+    "now": "Sekarang",
+    "goal": "Target",
+    "levelNow": "Level sekarang",
+    "levelGoal": "Target level",
+    "boost": "C{at} menaikkannya sebesar 3",
+    "boostOn": "C{at} menaikkannya sebesar 3: di game {from} → {to}",
+    "talentNow": "{talent} sekarang",
+    "talentGoal": "Target {talent}",
+    "inGame": "Di game {from} → {to}",
+    "customCharacter": "Karakter kustom",
+    "replaceWithEllipsis": "Ganti dengan…",
+    "replaceWith": "Ganti dengan {name}",
+    "replace": "Ganti",
+    "gapNeed": "{talents} perlu",
+    "setLevel": "Atur {level}",
+    "captureTitle": "Tangkapan terbaru",
+    "capture": "Tangkapan: {text}",
+    "resetTitle": "Kembali ke tangkapan",
+    "reset": "Atur ulang",
+    "cost": "Biaya"
+  },
+  "picker": {
+    "characters": "Karakter",
+    "weapons": "Senjata",
+    "items": "Item",
+    "title": "Tambah target",
+    "kind": "Jenis",
+    "searchItems": "Cari item",
+    "preset": "Preset",
+    "add": "Tambah",
+    "addCount": "Tambah {n}"
+  },
+  "toolbar": {
+    "label": "Filter target",
+    "searchTitle": "Nama, senjata atau catatan",
+    "sort": "Urutkan",
+    "chips": "Upgrade sekarang, boss mingguan, status, elemen dan kelangkaan",
+    "upgrade": "Upgrade sekarang",
+    "upgradeTitle": "Target terhitung yang bisa naik level sekarang dengan isi tas, masing-masing sendiri: Siap, Siap sendiri, atau satu bagian (Level, Talenta, senjata) atau langkah berikutnya",
+    "noWeeklyTitle": "Masih perlu farming, tapi tanpa boss mingguan: drop-nya sudah dimiliki atau bisa dikonversi (setelah target di atasnya)",
+    "status": {
+      "all": "Semua",
+      "ready": "Tersedia",
+      "readyTitle": "Cukup di tas, masing-masing target sendiri",
+      "activeTitle": "Masuk total",
+      "off": "Dijeda",
+      "offTitle": "Tidak masuk total"
+    }
+  },
+  "item": {
+    "count": "Jumlah",
+    "have": "Punya",
+    "editHave": "Punya {n}: ubah"
+  },
+  "popover": {
+    "goalsLabel": "{name}: target yang memakainya ({n})",
+    "goalsTitle": "Target yang memakainya",
+    "history": "{name}: riwayat",
+    "expNeed": "Perlu EXP {n}",
+    "goal": "Target {n}",
+    "missing": "Kurang {n}",
+    "enough": "Cukup",
+    "need": "Perlu {n}",
+    "craftedTitle": "Di-craft dari tingkat di bawahnya",
+    "craft": "Craft {n}",
+    "capture": "Tangkapan {n}",
+    "backLabel": "{name}: kembali ke {n} dari tangkapan",
+    "backTitle": "Kembali ke {n}",
+    "held": "{name} dimiliki",
+    "addPlaceholder": "+ tambah",
+    "addLabel": "{name}: tambah yang didapat",
+    "addTitle": "Tambah yang kamu dapat (Enter)",
+    "swap": {
+      "label": "Tukar dengan Dream Solvent",
+      "heading": "Tukar",
+      "title": "Alkimia → Konversi: salah satu material lain dari boss itu menjadi ini, masing-masing {n} Dream Solvent",
+      "solventHeld": "{name} dimiliki: {n}",
+      "have": "Punya {n}",
+      "do": "Tukar",
+      "noneHeld": "Tidak punya {name}",
+      "noSolvent": "Perlu {n} Dream Solvent per tukar"
+    }
+  },
+  "levelGrid": {
+    "below": "Di bawah tangkapan",
+    "level": "Level {level} (A{ascension})",
+    "ascended": "Level {level}, sudah ascend (A{ascension})",
+    "ascendedWord": "sudah ascend"
+  },
+  "cell": {
+    "have": "Punya {n}",
+    "spent": "Dipakai untuk craft {n}",
+    "converted": "Dikonversi dari yang lain {n}",
+    "convertedAway": "Dikonversi menjadi yang lain {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} target, masing-masing setelah target terhitung di atasnya",
+    "clear": "Hapus {name}"
+  },
+  "materialPicker": {
+    "material": "Material",
+    "selected": "Material: {name}",
+    "title": "Target yang memakai sebuah material",
+    "search": "Cari material",
+    "any": "Apa saja",
+    "goals": "{n} target"
+  },
+  "stepper": {
+    "down": "{label}: turun",
+    "up": "{label}: naik"
+  },
+  "settings": {
+    "title": "Pengaturan Perencana",
+    "autoWl": "Otomatis ({wl})",
+    "ar": "AR",
+    "arTitle": "Rank Adventure (1–60)",
+    "arTitleIrminsul": "Rank Adventure (1–60) · {ar} dari irminsul",
+    "fromIrminsul": "dari irminsul",
+    "wl": "WL",
+    "wlTitle": "Level Dunia (0–9)",
+    "wlTitleIrminsul": "Level Dunia (0–9) · {wl} dari irminsul",
+    "wlLabel": "Level Dunia",
+    "refreshesTitle": "Isi ulang Original Resin per hari (masing-masing {per} resin): hari dihitung 180 + {per} per isi ulang",
+    "refreshes": "Isi ulang",
+    "refreshesLabel": "Isi ulang resin per hari",
+    "stepsTitle": "Hingga empat jumlah, mis. -40 +60: pelacak resin menambahkannya (dikurangi yang dipakai)",
+    "steps": "Tombol resin",
+    "azothTitle": "Tutupi gem yang kurang dengan gem cadangan elemen lain",
+    "azoth": "Dust of Azoth",
+    "passivesTitle": "Raiden Shogun, Wanderer: −50% Mora untuk ascension senjata",
+    "passives": "Pasif Mora",
+    "craftingTitle": "Daftar periksa di tampilan Farming untuk yang dikonversi, di-craft dan di-forge",
+    "crafting": "Daftar crafting"
+  },
+  "roster": {
+    "search": "Cari karakter",
+    "multi": "Karakter (pilih beberapa)",
+    "owned": "{name} · Lv {level}",
+    "notOwned": "{name} · tidak dimiliki",
+    "weaponOwned": "{name} · Lv {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "Salinan di tangkapan",
+    "noCopy": "Tidak ada salinan di tangkapan",
+    "heldBy": "Dipegang {name}",
+    "refinementNow": "Refinement {name} sekarang",
+    "levelNow": "Level {name} sekarang",
+    "refinementGoal": "Target refinement {name}",
+    "levelGoal": "Target level {name}",
+    "search": "Cari senjata"
+  },
+  "seelieImport": {
+    "notExport": "Bukan ekspor Seelie atau cadangan paimon.moe",
+    "notJson": "Bukan file JSON",
+    "section": {
+      "goals": {
+        "label": "Target",
+        "title": "Target karakter, talenta dan senjata, kebutuhan item tambahan"
+      },
+      "artifacts": {
+        "label": "Target artefak",
+        "title": "Set dan stat utama untuk di-farm"
+      },
+      "customs": {
+        "label": "Karakter kustom",
+        "title": "Karakter kustom di Seelie, beserta targetnya"
+      },
+      "current": {
+        "label": "Level saat ini",
+        "title": "Level, talenta dan konstelasi saat ini dari Seelie jika lebih tinggi dari tangkapan"
+      },
+      "inventory": {
+        "label": "Tas",
+        "title": "Jumlah dianggap sebagai ubahan manual pada tangkapan terbaru (tangkapan yang lebih baru menggantikannya)"
+      },
+      "tasks": {
+        "label": "Tugas",
+        "title": "Tugas kustom, dan tugas permanen yang selesai di Seelie"
+      },
+      "resin": {
+        "label": "Resin",
+        "title": "Pelacak resin Seelie, jika lebih baru dari milik kita"
+      },
+      "settings": {
+        "label": "Pengaturan",
+        "title": "AR, Level Dunia, server dan Pengembara"
+      }
+    },
+    "count": {
+      "new": "{n} baru",
+      "changed": "{n} berubah",
+      "same": "{n} sama"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "Ganti",
+    "choose": "Pilih file",
+    "fileLabel": "Ekspor Seelie atau cadangan paimon.moe",
+    "legend": "Yang diimpor",
+    "skipped": "{n} dilewati",
+    "clampedTitle": "Target di atas level 90 diatur ke 90",
+    "clamped": "Dibatasi di 90: {n}",
+    "replace": "Ganti (hapus {n})",
+    "exportTitle": "File akun Seelie: target, tas, tugas (Seelie → Settings → Import Account)",
+    "export": "Ekspor",
+    "import": "Impor",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Akun di file",
+    "account": "Akun {n}",
+    "paimonLevels": "level saja",
+    "paimonLevelsTitle": "paimon.moe menyimpan level dan material sebuah to-do, bukan level talentanya: talenta tetap seperti sekarang"
+  },
+  "taskEditor": {
+    "everyDay": "Setiap hari",
+    "everyDays": "Setiap {n} hari",
+    "today": "Hari ini ({day})",
+    "tomorrow": "Besok ({day})",
+    "startDay": "Hari mulai",
+    "startDayTitle": "Mengikuti ritme hari mulainya",
+    "doneDay": "Hari selesai",
+    "doneDayTitle": "Dihitung dari hari diselesaikan",
+    "task": "Tugas",
+    "newTask": "Tugas baru",
+    "nameIt": "Beri nama",
+    "repeats": "Berulang",
+    "next": "Berikutnya",
+    "starts": "Mulai",
+    "countsFrom": "Dihitung dari"
+  },
+  "tasks": {
+    "title": "Tugas",
+    "permanent": "Permanen",
+    "ready": "Siap",
+    "readyTitle": "Siap dipakai",
+    "resets": "Reset {time}",
+    "snoozedBack": "Ditunda · kembali {time}",
+    "doneBack": "Selesai · kembali {time}",
+    "everyDay": "setiap hari",
+    "everyDays": "setiap {n} hari",
+    "fromDone": "dari hari selesai",
+    "fromStart": "dari hari mulainya",
+    "dueTitle": "Jatuh tempo {date} · {every}, {from}",
+    "overdue": "Terlambat",
+    "late": "telat {n}h",
+    "today": "Hari ini",
+    "tomorrow": "Besok",
+    "doneToast": "{name} selesai",
+    "backToast": "{name}: kembali {day}",
+    "deleted": "{name} dihapus",
+    "toDo": "{n} tersisa",
+    "toDoSr": "tersisa",
+    "shown": "Tugas yang ditampilkan",
+    "hideDone": "Sembunyikan yang selesai",
+    "showDone": "Tampilkan yang selesai ({n})",
+    "permanentShown": "Tugas permanen yang ditampilkan",
+    "add": "Tambah tugas",
+    "noCustom": "Tidak ada tugas buatanmu",
+    "allDone": "Semua selesai",
+    "move": "Pindahkan {name}",
+    "dragTitle": "Seret, atau tombol panah",
+    "doneLabel": "Selesai: {name}",
+    "notDoneLabel": "Belum selesai: {name}",
+    "takeBack": "Batalkan",
+    "snoozeName": "Tunda {name}",
+    "snooze": "Tunda",
+    "lastDay": "Hari terakhir",
+    "permanentTasks": "Tugas permanen",
+    "events": "Event",
+    "startsIn": "dalam {time}",
+    "eventStarts": "Mulai {time}",
+    "eventEnds": "Berakhir {time}",
+    "noEnd": "Tanpa tanggal akhir",
+    "tags": {
+      "daily": "Harian",
+      "checkin": "Check-in",
+      "exploration": "Penjelajahan Dunia",
+      "quest": "Quest"
+    },
+    "capture": {
+      "from": "Dari tangkapan {time}",
+      "commissions": "{n} dari {total} selesai",
+      "abyss": "{stars} dari {max} bintang",
+      "expeditions": "{n} dari {total} kembali",
+      "nobodyOut": "Tidak ada yang pergi",
+      "realm": "{value} dari {limit} di wadah",
+      "welkin": "{n} hari tersisa"
+    }
+  },
+  "view": {
+    "title": "Perencana",
+    "accountFallback": "Akun Genshin",
+    "farm": "Farming",
+    "goals": "Target",
+    "presetApplied": "{preset}: {n} target",
+    "bulkCounted": "{n} dihitung",
+    "bulkPaused": "{n} dijeda",
+    "goalsRemoved": "{n} target dihapus",
+    "paused": "{name} dijeda",
+    "partDone": "{name}: {label} selesai",
+    "craftStepDone": "Langkah crafting selesai",
+    "craftStepsDone": "{n} langkah crafting selesai",
+    "craftingHidden": "Crafting disembunyikan",
+    "craftingHiddenHint": "Pengaturan Perencana: Daftar crafting",
+    "itemRemoved": "Item dihapus",
+    "removed": "{name} dihapus",
+    "added": "{n} target ditambahkan",
+    "notImported": "Tidak diimpor",
+    "importedGoals": "{n} target",
+    "importedCurrent": "{n} saat ini",
+    "importedItems": "{n} item",
+    "importedTasks": "{n} tugas",
+    "imported": "Diimpor dari Seelie",
+    "notExported": "Tidak diekspor",
+    "exported": "Diekspor untuk Seelie",
+    "view": "Tampilan",
+    "newest": "Tangkapan terbaru",
+    "noCapture": "Tidak ada tangkapan: jumlah diisi olehmu",
+    "import": "Impor",
+    "replaced": "{n} ubahan manual digantikan oleh tangkapan",
+    "ok": "OK",
+    "seelieTitle": "Impor dari Seelie atau paimon.moe, ekspor ke Seelie",
+    "addGoals": "Tambah target",
+    "loadError": "Tidak bisa memuat perencana",
+    "noGoals": "Tidak ada target",
+    "importSeelie": "Impor dari Seelie atau paimon.moe",
+    "importCapture": "Impor tangkapan",
+    "readiness": "Kesiapan",
+    "selectTitle": "Pilih target untuk diubah bersama",
+    "select": "Pilih",
+    "selected": "Target terpilih",
+    "selectedCount": "{n} terpilih",
+    "selectedSr": "terpilih",
+    "pickNone": "Tidak ada",
+    "pickAll": "Semua",
+    "applyPreset": "Terapkan preset",
+    "pause": "Jeda",
+    "count": "Hitung",
+    "doneSelecting": "Selesai memilih",
+    "done": "Selesai",
+    "doneGoals": "Target selesai",
+    "loading": "Memuat perencana"
+  }
+}

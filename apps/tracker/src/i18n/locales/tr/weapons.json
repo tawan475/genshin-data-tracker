@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Sv. {level}/{cap}",
+    "copies": "{n} kopya",
+    "locked": "Kilitli"
+  },
+  "sort": {
+    "quality": "Kalite",
+    "level": "Seviye",
+    "refinement": "Saflaştırma",
+    "count": "Kopya",
+    "name": "Ad",
+    "type": "Tür"
+  },
+  "levelFilter": {
+    "all": "Seviye",
+    "max": "Maks.",
+    "levelled": "Geliştirilmiş",
+    "base": "Sv. 1"
+  },
+  "refine": {
+    "spare": "{n} yedek",
+    "possible": "mümkün: {title}"
+  },
+  "group": {
+    "copies": "{count} kopya"
+  },
+  "bag": {
+    "notInData": "{copies} · Henüz oyun verisinde yok"
+  },
+  "toolbar": {
+    "bag": "Çanta",
+    "byWeapon": "Silaha göre",
+    "list": "Liste",
+    "status": "Durum",
+    "equipped": "Kuşanılmış",
+    "unused": "Kullanılmayan",
+    "lock": "Kilit",
+    "locked": "Kilitli",
+    "unlocked": "Kilitsiz",
+    "label": "Silahları filtrele",
+    "searchTitle": "Silah, tür veya karakter",
+    "chips": "Tür, nadirlik ve saflaştırma",
+    "noneInCapture": "Bu taramada yok",
+    "refinableTitle": "Yedek kopyaları kuşanılmış bir silahı saflaştırabilecek silahlar",
+    "refinable": "Saflaştırılabilir"
+  },
+  "detail": {
+    "refinementTitle": "Saflaştırma Seviyesi {rank}/{max}",
+    "unequipped": "Kuşanılmamış",
+    "copies": "{n} kopya",
+    "equipped": "{n} kuşanılmış",
+    "spareCopies": "{n} yedek kopya"
+  },
+  "table": {
+    "qualityTitle": "Kalite: nadirlik, seviye, saflaştırma, en yeni",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Çeşit",
+    "kindsTitle": "Farklı silahlar",
+    "unused5": "Kullanılmayan 5★",
+    "refinableTitle": "Yedek kopyalar kuşanılmış bir silahı saflaştırabilir",
+    "empty": "Silah yok",
+    "pages": "Silah sayfaları"
+  }
+}

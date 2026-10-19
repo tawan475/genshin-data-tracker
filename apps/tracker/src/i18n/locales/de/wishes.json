@@ -1,0 +1,260 @@
+{
+  "title": "Gebetsverlauf",
+  "bannerPageTitle": "Gebetsverlauf · {banner}",
+  "loadFailed": "Laden fehlgeschlagen",
+  "loading": "Lädt",
+  "import": "Importieren",
+  "export": "Exportieren",
+  "importExport": "Import / Export",
+  "browse": "Durchsuchen",
+  "cancel": "Abbrechen",
+  "search": "Suchen",
+  "rarity": "Seltenheit",
+  "banner": "Banner",
+  "pulls": "{n} Gebete",
+  "pullsTimes": "{n} Gebete × {primos}",
+  "pullsPrimos": "{n} Gebete · ✦ {primos}",
+  "lifetime": "Gebete insgesamt",
+  "allWishes": "Alle Gebete",
+  "newPulls": "{n} neue Gebete",
+  "nothingNew": "Nichts Neues",
+  "banners": {
+    "character": {
+      "label": "Figur",
+      "title": "Figurenaktionsgebet"
+    },
+    "weapon": {
+      "label": "Waffe",
+      "title": "Waffenaktionsgebet"
+    },
+    "standard": {
+      "label": "Standard",
+      "title": "Standardgebet"
+    },
+    "chronicled": {
+      "label": "Kollektion",
+      "title": "Kollektionsgebet"
+    },
+    "beginners": {
+      "label": "Neuling",
+      "title": "Neulingsgebet"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "Jan.",
+      "2": "Feb.",
+      "3": "März",
+      "4": "Apr.",
+      "5": "Mai",
+      "6": "Juni",
+      "7": "Juli",
+      "8": "Aug.",
+      "9": "Sep.",
+      "10": "Okt.",
+      "11": "Nov.",
+      "12": "Dez."
+    },
+    "day": "{day}. {month}",
+    "dayYear": "{day}. {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "jetzt"
+  },
+  "outcomes": {
+    "won": "Gewonnen",
+    "lost": "Verloren",
+    "guaranteed": "Garantiert"
+  },
+  "outcomeTitles": {
+    "won": "{odds} gewonnen",
+    "lost": "{odds} verloren: das nächste ist die Banner-Figur",
+    "guaranteed": "Banner-5★, garantiert nach verlorenem {odds}"
+  },
+  "legend": {
+    "won": "gewonnen",
+    "lost": "verloren",
+    "guaranteed": "garantiert"
+  },
+  "overview": {
+    "newestPull": "Neuestes Gebet, Spielzeit",
+    "synced": "Synchronisiert {ago}",
+    "syncedTitle": "Neue Gebete gespeichert {time}",
+    "syncHelp": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen): irminsul synchronisiert jedes Banner und danach jedes neue Gebet, solange der Schlüssel gilt (~24 Std.). Der Gebetslink des Spiels bringt auch die letzten sechs Monate. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",
+    "empty": "Noch keine Gebete",
+    "emptyBody": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen) oder importiere über den Gebetslink des Spiels. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",
+    "banners": "Banner",
+    "totals": "Summen",
+    "worth": "Wert der Gebete",
+    "worthHint": "{n} Gebete × {primos} Urgesteine",
+    "wishes": "{n} Gebete",
+    "avgPity": "Ø 5★-Pity",
+    "avgPityHint": "Figurenaktionsgebet: die durchschnittliche Pity aller 5★, gegenüber etwa {expected} erwartet mit Soft Pity",
+    "avgPityVs": "{diff} vs. {expected} erwartet"
+  },
+  "card": {
+    "everyPull": "{banner}: alle Gebete",
+    "fiveTitle": "{left} Gebete bis Hard Pity · ✦ {primos} · Soft Pity ab {soft}",
+    "fourTitle": "{left} bis zu einem sicheren 4★",
+    "fourFeatured": " · das nächste 4★ ist vom Banner",
+    "pity5": "5★-Pity",
+    "pity4": "4★-Pity",
+    "guaranteedAt": "Garantiert bei {n}",
+    "hideLatest": "Neueste Gebete ausblenden",
+    "showLatest": "Neueste Gebete zeigen",
+    "latest": "Neueste Gebete",
+    "latestRegion": "{banner}: neueste Gebete",
+    "none": "Keine",
+    "cols": {
+      "name": "Name",
+      "time": "Zeit",
+      "pity": "Pity"
+    }
+  },
+  "five": {
+    "every": "Alle 5★",
+    "newestFirst": "{n} · neueste zuerst",
+    "none": "Noch kein 5★",
+    "pity": "{name} · Pity {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Plattform",
+    "copyFailed": "Nicht kopiert: markiere den Befehl und kopiere ihn",
+    "steps": {
+      "open": "Öffne im Spiel Gebet → Verlauf und lass ihn laden.",
+      "android2": "Schalte WLAN und mobile Daten aus.",
+      "android3": "Tippe oben rechts auf Aktualisieren: die Seite zeigt einen Fehler mit etwas Text.",
+      "android4": "Markiere den ganzen Text und kopiere ihn.",
+      "android5": "Schalte die Verbindung wieder ein und füge ihn unten ein.",
+      "ios1": "Öffne das Paimon-Menü → Feedback und lass es laden.",
+      "ios2": "Tippe auf Problem im Spiel → Koop-Modus.",
+      "ios3": "Tippe auf den Link unten in der Antwort: er öffnet sich im Browser.",
+      "ios4": "Kopiere diesen Link und füge ihn unten ein.",
+      "ps1": "Öffne im Spiel die Aktionspost mit einem QR-Code.",
+      "ps2": "Scanne den Code mit deinem Handy und kopiere den Link, der sich öffnet.",
+      "ps3": "Füge ihn unten ein. Klappt es nicht, verknüpfe deine PlayStation mit einem HoYoverse-Konto und nutze die Schritte für PC oder Handy.",
+      "pcRun": "Öffne PowerShell (Start, PowerShell eingeben) und führe aus:",
+      "pcPaste": "Es kopiert den Link: füge ihn unten ein.",
+      "pcPasteTitle": "„Copy wish URL“ in irminsul liefert denselben Link"
+    },
+    "scriptTitle": "Liest den Web-Cache des Spiels auf diesem PC, prüft den Link einmal bei HoYoverse und kopiert ihn. Sonst nichts.",
+    "copied": "Kopiert",
+    "copy": "Kopieren",
+    "readScript": "Skript lesen",
+    "label": "Gebetsverlauf-Link",
+    "placeholder": "Link einfügen: https://…",
+    "invalid": "Kein Gebetsverlauf-Link in diesem Text",
+    "uidMismatch": "Dieser Link hat UID {uid}; dieses Konto hat UID {own}.",
+    "failed": "Import fehlgeschlagen",
+    "saving": "Speichere {n}…",
+    "progress": "{banner} · Seite {page} · {n} neu",
+    "errors": {
+      "cancelled": "Abgebrochen",
+      "network": "Der Gebetsverlauf hat nicht geantwortet. Versuch es später erneut.",
+      "expired": "Der Link ist abgelaufen. Öffne im Spiel erneut Gebet → Verlauf und kopiere einen neuen.",
+      "throttled": "HoYoverse bittet um eine Pause. Versuch es in ein paar Minuten erneut.",
+      "api": "Antwort von HoYoverse: {message}",
+      "code": "Fehler {code}"
+    }
+  },
+  "chart": {
+    "title": "Gebete pro Monat",
+    "label": "Gebete pro Monat nach Seltenheit, {n} Monate",
+    "month": "{month}: {n} Gebete"
+  },
+  "numbers": {
+    "label": "Zahlen",
+    "avgPity": "{share} · Ø Pity {avg}",
+    "expected": "Erwartete 5★-Pity etwa {n} mit Soft Pity",
+    "expectedAbout": "Erwartet etwa {n} mit Soft Pity",
+    "streak": "Serie {current} · beste {best} gewonnen · schlechteste {worst} verloren",
+    "streakWon": "{n} gewonnen",
+    "streakLost": "{n} verloren",
+    "flipTitle": "Ein Banner-5★, wenn es ein {odds} war (garantierte ausgenommen)",
+    "split": "4★-Aufteilung",
+    "character": "Figur",
+    "char": "Fig.",
+    "weapon": "Waffe",
+    "rateUp": "4★-Rate-up {won} von {total} gewonnen · {share}",
+    "splitTitle": "4★ nach Typ",
+    "splitTitleFull": "4★ nach Typ und 4★-Rate-up-Münzwürfe"
+  },
+  "odds": {
+    "guaranteed": "Garantiert",
+    "lostLast": "Letztes {odds} verloren ({name}): das nächste 5★ ist vom Banner",
+    "nextFeatured": "Das nächste 5★ ist vom Banner",
+    "weapon": "Nächstes 5★: 75% eine Banner-Waffe",
+    "coin": "Nächstes 5★: ein Münzwurf"
+  },
+  "track": {
+    "label": "Pity {pity} von {hard}, Soft Pity ab {soft}"
+  },
+  "runs": {
+    "label": "Banner-Läufe",
+    "heading": "Banner",
+    "count": "{n} Lauf | {n} Läufe",
+    "fewer": "Weniger",
+    "all": "Alle Läufe",
+    "current": " · aktuell",
+    "no5": "Kein 5★"
+  },
+  "small": {
+    "pitySoFar": "Pity {pity} / {hard}"
+  },
+  "table": {
+    "label": "Alle Gebete",
+    "search": "Gebete suchen",
+    "searchTitle": "Name der Figur oder Waffe",
+    "noMatch": "Keine passenden Gebete",
+    "rollRun": "Gebetsnummer in diesem Banner-Lauf",
+    "roll": "Gebetsnummer",
+    "item": "Objekt",
+    "pity": "Pity",
+    "result": "Ergebnis",
+    "time": "Zeit",
+    "newestFirst": "Neueste zuerst",
+    "oldestFirst": "Älteste zuerst",
+    "newestFirstSr": "neueste zuerst",
+    "oldestFirstSr": "älteste zuerst",
+    "weapon": "Waffe",
+    "character": "Figur",
+    "pages": "Gebetsseiten"
+  },
+  "transfer": {
+    "backup": "paimon.moe-Backup",
+    "modes": {
+      "link": "Gebetslink",
+      "file": "Datei"
+    },
+    "importFrom": "Importieren aus",
+    "noRecords": "Keine Einträge",
+    "uidMismatch": "Dieser Verlauf hat UID {uid}; dieses Konto hat UID {own}",
+    "account": "Konto {n}",
+    "notWishFile": "Keine UIGF- oder paimon.moe-Datei",
+    "alreadyHeld": "{n} schon vorhanden",
+    "notImported": "Nicht importiert",
+    "deleteTitle": "Gebetsverlauf löschen?",
+    "deleteDetail": "Alle {n} Gebete dieses Kontos werden entfernt. irminsul kann die letzten sechs Monate erneut abrufen.",
+    "deleteConfirm": "Löschen",
+    "notDeleted": "Nicht gelöscht",
+    "dropTitle": "UIGF-JSON (Snap Hutao, Starward, genshin-wish-export…), eine CSV für den paimon.moe-Importer oder das paimon.moe-Backup (Settings → Export)",
+    "drop": "UIGF- oder paimon.moe-Datei",
+    "fileAccount": "Konto in der Datei",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward und die meisten Gebets-Tracker lesen es",
+    "paimonTitle": "Für den Local Importer von paimon.moe (Wish counter → Import → Local)",
+    "delete": "Löschen",
+    "deleteHistory": "Verlauf löschen"
+  },
+  "bannerPage": {
+    "noPulls": "Keine Gebete auf diesem Banner",
+    "now": "Jetzt",
+    "hardTitle": "{left} Gebete bis Hard Pity · ✦ {primos}",
+    "toHard": "{left} bis Hard Pity · ✦ {primos}",
+    "softFrom": "Soft ab {soft}",
+    "featuredNext": "Nächstes vom Banner",
+    "featuredNextTitle": "Das letzte 4★ war nicht vom Banner: das nächste ist es",
+    "toGuaranteed4": "{n} bis zum garantierten 4★"
+  }
+}

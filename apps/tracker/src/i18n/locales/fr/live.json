@@ -1,0 +1,44 @@
+{
+  "label": "Direct",
+  "thisSession": "Cette session",
+  "sessionSince": "Depuis {time}",
+  "levelUps": "{n} montée de niveau | {n} montées de niveau",
+  "talents": "{n} aptitude | {n} aptitudes",
+  "updated": "mis à jour {ago}",
+  "updatedAt": "Mis à jour à {time}",
+  "row": "Direct",
+  "rowDetail": "{n} changement depuis cet instantané | {n} changements depuis cet instantané",
+  "sinceSnapshot": "depuis l'instantané le plus récent",
+  "discard": "Abandonner",
+  "discardTitle": "Supprimer ces changements ; l'instantané le plus récent reste",
+  "discarded": "Changements en direct supprimés",
+  "discardFailed": "Impossible de supprimer les changements en direct",
+  "settings": {
+    "title": "Synchro en direct",
+    "label": "Suivre Irminsul en direct",
+    "description": "Tant qu'Irminsul tourne, ses changements apparaissent ici en quelques secondes, entre les instantanés.",
+    "devices": "Synchro en direct de ce PC vers : {accounts} (Paramètres du compte)",
+    "deletePoints": "Supprimer les points du graphique",
+    "deletePointsTitle": "Supprimer les points du graphique conservés par la synchro en direct entre les instantanés",
+    "deletePointsConfirm": "Supprimer tous les points du graphique de ce compte ? Les instantanés restent.",
+    "pointsDeleted": "Points du graphique supprimés",
+    "exportNote": "Les exports incluent les changements et points en direct (live/ dans le zip)."
+  },
+  "session": {
+    "heading": "Sessions",
+    "hours": "{h} h {m} min",
+    "minutes": "{m} min",
+    "world": "Monde {n}",
+    "newCharacter": "{name} a rejoint",
+    "more": "+{n} de plus",
+    "showMore": "Afficher plus ({n})",
+    "field": {
+      "level": "{name} Niv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} attaque {from}→{to}",
+      "skill": "{name} compétence {from}→{to}",
+      "burst": "{name} déchaînement {from}→{to}"
+    }
+  },
+  "staffBytes": "La synchro en direct conserve {size} de plus (gdt-live)"
+}

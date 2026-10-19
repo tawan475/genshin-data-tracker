@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Niv. {level}",
+    "noWeapon": "Sans arme",
+    "weaponLevel": "Arme Niv. {level}",
+    "artifactCount": "{count}/5 artéfacts",
+    "belowMax": "{n} artéfact sous le max | {n} artéfacts sous le max",
+    "noSet": "Aucun bonus de set complet"
+  },
+  "sort": {
+    "default": "Par défaut",
+    "level": "Niveau",
+    "constellation": "Constellation",
+    "talents": "Aptitudes",
+    "cv": "CV",
+    "rarity": "Rareté",
+    "element": "Élément",
+    "name": "Nom",
+    "friendship": "Affinité",
+    "obtained": "Obtenu"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Prêt",
+    "needs": "À améliorer",
+    "level": "Niv. < 90",
+    "weapon": "Arme < 90",
+    "artifacts": "Artéfacts < max",
+    "set": "Sans bonus de set"
+  },
+  "talentFilter": {
+    "all": "Aptitudes",
+    "nine": "Toutes 9+",
+    "crowned": "Couronnées",
+    "below": "Une < 9"
+  },
+  "favorites": {
+    "notSaved": "Non enregistré"
+  },
+  "stat": {
+    "maxHp": "PV max",
+    "baseAtk": "ATQ de base"
+  },
+  "talent": {
+    "crowned": "{title} · couronnée"
+  },
+  "setBonus": {
+    "line": "{n} pièces : {stats}",
+    "inactive": "{n} pièces (inactif) : {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Affinité {level} sur 10"
+  },
+  "refinementTitle": "Raffinement {value} sur 5",
+  "talentChips": "Attaque {auto} · Compétence {skill} · Déchaînement {burst}",
+  "sortControl": {
+    "sort": "Tri",
+    "descending": "Tri décroissant",
+    "ascending": "Tri croissant"
+  },
+  "favorite": {
+    "named": "{name} en favori",
+    "on": "Favori",
+    "off": "Retirer des favoris"
+  },
+  "stars": "{n} étoile(s)",
+  "sets": "Sets",
+  "pieceBonus": " pièces (bonus)",
+  "constellation": {
+    "title": "Constellation {level} sur 6",
+    "lockedTitle": "C{n} · verrouillée",
+    "unlocked": "C{n} débloquée",
+    "locked": "C{n} verrouillée"
+  },
+  "timeline": {
+    "firstSeen": "Vu la première fois",
+    "obtained": "Obtenu",
+    "to": "à",
+    "less": "Moins",
+    "all": "Les {n}"
+  },
+  "talentShort": {
+    "auto": "Attaque",
+    "skill": "Compétence",
+    "burst": "Déchaînement"
+  },
+  "talentRaised": "montée à",
+  "crowned": "Couronnée",
+  "weapon": {
+    "passive": "Passif : {stats}",
+    "locked": "Verrouillée"
+  },
+  "stats": {
+    "allDmg": "+{value} % de tous les DGT, absent du panneau du jeu",
+    "label": "Statistiques",
+    "weaponMissingTitle": "Arme plus récente que les données du jeu : ses stats sont omises",
+    "weaponMissing": "Stats de l'arme omises",
+    "newerThanData": "Plus récent que les données du jeu",
+    "none": "Aucune stat"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, aptitudes {auto} {skill} {burst}",
+    "friendship": ", affinité {n}",
+    "toDo": "à faire : {gaps}",
+    "critDetail": "CRIT {rate} % / {dmg} % venant des artéfacts"
+  },
+  "piece": {
+    "levelTitle": "+{level} sur {max} · {rarity}★",
+    "activatesAt4": "S'active à +4",
+    "inactive": "(inactive)",
+    "rolls": "{n} jets",
+    "rollsTitle": "Jets",
+    "empty": " : vide"
+  },
+  "toolbar": {
+    "weapon": "Arme",
+    "cards": "Cartes",
+    "list": "Liste",
+    "label": "Filtrer les personnages",
+    "search": "Rechercher",
+    "searchTitle": "Nom, élément, arme ou set",
+    "view": "Vue",
+    "chips": "Favoris, élément et rareté",
+    "favorites": "Favoris",
+    "buildTitle": "Prêt : Niv. 90, arme Niv. 90, cinq artéfacts au max, un bonus de set complet",
+    "clear": "Effacer"
+  },
+  "table": {
+    "lv": "Niv.",
+    "c": "C",
+    "critTitle": "Taux CRIT / DGT CRIT venant des artéfacts",
+    "crit": "CRIT",
+    "toDo": "À faire",
+    "toDoList": "À faire : {gaps}"
+  },
+  "detail": {
+    "toDo": "À faire :",
+    "build": "Build",
+    "obtainedAt": "Obtenu le {date}",
+    "noArtifacts": "Aucun artéfact",
+    "history": "Historique",
+    "loadFailed": "Échec du chargement",
+    "none": "Aucun"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Niv. 90+",
+    "crowns": "Couronnes",
+    "crownsTitle": "Aptitudes au niveau 10",
+    "loading": "Chargement",
+    "noSnapshots": "Aucun instantané",
+    "empty": "Aucun personnage",
+    "import": "Importer",
+    "noMatches": "Aucun résultat"
+  }
+}

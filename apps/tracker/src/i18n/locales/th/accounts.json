@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "บัญชี {id}",
+  "server": {
+    "ASIA": "เอเชีย",
+    "AMERICA": "อเมริกา",
+    "EUROPE": "ยุโรป",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "บัญชี",
+    "snapshots": "สแนปช็อต",
+    "uploaded": "อัปโหลด",
+    "stored": "จัดเก็บ",
+    "ratio": "อัตราส่วน",
+    "lastCaptured": "สแกนล่าสุด",
+    "bytes": "{n} ไบต์",
+    "ratioTitle": "จัดเก็บเล็กกว่าที่อัปโหลด {ratio}",
+    "add": "เพิ่มบัญชี",
+    "empty": "ยังไม่มีบัญชี"
+  },
+  "new": {
+    "title": "เพิ่มบัญชี",
+    "add": "เพิ่ม",
+    "notAdded": "เพิ่มไม่สำเร็จ",
+    "added": "เพิ่ม {name} แล้ว",
+    "connect": "เชื่อมต่อ Irminsul",
+    "overview": "ภาพรวม",
+    "importFiles": "นำเข้าไฟล์",
+    "addAnother": "เพิ่มอีกบัญชี"
+  },
+  "settings": {
+    "title": "ตั้งค่าบัญชี",
+    "details": "รายละเอียด",
+    "traveler": "ตัวเอก",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "ลบบัญชี",
+    "deleteTitle": "ไม่มีผลกับไฟล์ GOOD ที่ส่งออกไปแล้ว",
+    "confirmTitle": "ลบ {name} ใช่ไหม?",
+    "deletes": "จะลบ {loss} และคีย์ Irminsul ของบัญชีนี้จะใช้งานไม่ได้อีก",
+    "typeToConfirm": "พิมพ์ {word}",
+    "confirmWord": "ลบ",
+    "loss": "สแนปช็อต {n} รายการ",
+    "deleted": "ลบ {name} แล้ว"
+  }
+}

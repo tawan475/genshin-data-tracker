@@ -1,0 +1,139 @@
+{
+  "title": "ความสำเร็จ",
+  "newestCapture": "การสแกนล่าสุด",
+  "newestCaptureTitle": "การสแกนล่าสุด: {time}",
+  "notCaptured": "ยังไม่ได้สแกน",
+  "notCapturedTitle": "เปิดเมนูความสำเร็จในเกมขณะที่ irminsul ทำงานเพื่อสแกน",
+  "importTitle": "นำเข้าความสำเร็จที่ทำแล้วจากไฟล์ส่งออกของ Seelie, ไฟล์สำรองของ paimon.moe หรือไฟล์ stardb / irminsul",
+  "loadFailed": "โหลดไม่สำเร็จ",
+  "allDone": "เสร็จครบแล้ว",
+  "showDone": "แสดงที่เสร็จแล้ว",
+  "noneDone": "ยังไม่มีที่เสร็จ",
+  "showMissing": "แสดงที่ยังขาด",
+  "noMatches": "ไม่พบรายการที่ตรงกัน",
+  "clear": "ล้าง",
+  "more": "เพิ่มเติม",
+  "loading": "กำลังโหลด",
+  "undo": "เลิกทำ",
+  "notSaved": "บันทึกไม่สำเร็จ",
+  "markedDone": "ทำเครื่องหมายว่าเสร็จ {n} รายการ",
+  "unmarked": "ยกเลิกเครื่องหมาย {n} รายการ",
+  "added": "เพิ่ม {n} รายการ",
+  "confirmMark": {
+    "title": "ทำเครื่องหมายว่าเสร็จ {n} รายการ?",
+    "filtered": "ความสำเร็จที่เหลือ {n} รายการที่แสดงอยู่จะถูกทำเครื่องหมายว่าเสร็จด้วยมือ",
+    "all": "ความสำเร็จที่เหลือทั้งหมด ({n}) จะถูกทำเครื่องหมายว่าเสร็จด้วยมือ",
+    "confirm": "ทำเครื่องหมายว่าเสร็จ"
+  },
+  "confirmUnmark": {
+    "title": "ยกเลิกเครื่องหมาย {n} รายการ?",
+    "detail": "นำเครื่องหมายที่ทำด้วยมือของความสำเร็จ {n} รายการที่แสดงอยู่ออก รายการจากการสแกนยังคงเสร็จอยู่",
+    "confirm": "ยกเลิกเครื่องหมาย"
+  },
+  "categories": {
+    "label": "หมวดหมู่",
+    "all": "ทั้งหมด",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} Primogem",
+    "hideDone": "ซ่อนชุดที่เสร็จแล้ว",
+    "showDone": "แสดงชุดที่เสร็จแล้ว",
+    "completed": "เสร็จสมบูรณ์"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} Primogem"
+  },
+  "import": {
+    "title": "นำเข้า",
+    "formats": {
+      "list": "รายการ id"
+    },
+    "noAchievements": "ไม่พบความสำเร็จ",
+    "notJson": "ไม่ใช่ไฟล์ JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb หรือ irminsul: ไฟล์ GOOD ที่มี gi_achievements",
+    "drop": "ไฟล์ Seelie, paimon.moe หรือ stardb",
+    "account": "บัญชี {n}",
+    "fileAccount": "บัญชีในไฟล์",
+    "browse": "เลือกไฟล์",
+    "inFile": "ในไฟล์",
+    "already": "เสร็จอยู่แล้ว",
+    "new": "ใหม่",
+    "newTitle": "รวม {unknown} รายการที่ใหม่กว่าข้อมูลเกม และ {disused} รายการที่ถูกนำออกจากเกม: เก็บไว้แต่ไม่นับ",
+    "cancel": "ยกเลิก",
+    "add": "เพิ่ม {n}"
+  },
+  "row": {
+    "clickToMark": "คลิกเพื่อทำเครื่องหมายว่าเสร็จ",
+    "clickToUnmark": "{text} · คลิกเพื่อยกเลิกเครื่องหมาย",
+    "captured": "จากการสแกน",
+    "staysDone": "{text} · อยู่ในการสแกน จึงคงสถานะเสร็จ",
+    "markEveryTier": "ทำเครื่องหมายทุกขั้นว่าเสร็จ",
+    "markDone": "ทำเครื่องหมายว่าเสร็จ",
+    "unmarkTiers": "คลิกเพื่อยกเลิกเครื่องหมายของขั้นที่ทำด้วยมือ",
+    "markedClick": "ทำเครื่องหมายเอง · คลิกเพื่อยกเลิก",
+    "tierTitle": "ขั้น {n} · {primogems} Primogem",
+    "reward": "{n} Primogem",
+    "primogems": "Primogem",
+    "states": {
+      "captured": "จากการสแกน",
+      "marked": "ทำเครื่องหมายเอง",
+      "none": "ยังไม่เสร็จ"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "ขั้น",
+    "tier": "ขั้น {n}",
+    "addedIn": "เพิ่มในเวอร์ชัน {version}",
+    "hiddenTitle": "ความสำเร็จที่ซ่อนอยู่",
+    "hidden": "ซ่อนอยู่",
+    "markedByHand": "ทำเครื่องหมายเอง",
+    "guide": "คู่มือบน stardb.gg"
+  },
+  "completion": {
+    "tier": "ขั้น {n} · {text}",
+    "exact": "เสร็จเมื่อ {time}",
+    "exactTitle": "เวลาที่เสร็จซึ่งเกมบันทึกไว้ อ่านโดย irminsul",
+    "seen": "เสร็จ {window}",
+    "seenTitle": "เสร็จระหว่างการสแกนสองครั้ง: ไม่มีในการสแกนเมื่อ {since} แต่มีในการสแกนเมื่อ {at}",
+    "by": "เสร็จภายใน {date}",
+    "byTitle": "เสร็จอยู่แล้วตั้งแต่การสแกนครั้งแรก ({at})",
+    "marked": "ทำเครื่องหมายว่าเสร็จด้วยมือ",
+    "markedTitle": "ไม่มีในการสแกนใด จึงไม่มีวันที่"
+  },
+  "summary": {
+    "label": "สรุป",
+    "done": "เสร็จแล้ว",
+    "doneCaptured": "จากการสแกน {n}",
+    "doneByHand": "ทำเครื่องหมายเอง {n}",
+    "doneUnknown": "{n} ใหม่กว่าข้อมูลเกม",
+    "progress": "ความคืบหน้า",
+    "progressLabel": "ความสำเร็จที่เสร็จแล้ว",
+    "primogems": "Primogem",
+    "primogemsHint": "Primogem ที่ได้รับ / ที่มีให้รับ",
+    "missing": "ยังขาด",
+    "showAll": "แสดงทั้งหมด",
+    "showLeft": "แสดงเฉพาะที่เหลือ"
+  },
+  "toolbar": {
+    "label": "กรองความสำเร็จ",
+    "search": "ค้นหา",
+    "searchTitle": "ชื่อ คำอธิบาย หมวดหมู่ หรือ id",
+    "completion": "สถานะ",
+    "completions": {
+      "all": "ทั้งหมด",
+      "done": "เสร็จแล้ว",
+      "missing": "ยังขาด"
+    },
+    "hidden": {
+      "all": "ซ่อนอยู่: ใดก็ได้",
+      "hidden": "ซ่อนอยู่",
+      "visible": "ไม่ซ่อน"
+    },
+    "hiddenLabel": "ซ่อนอยู่",
+    "allCategories": "ทุกหมวดหมู่",
+    "category": "หมวดหมู่",
+    "version": "เวอร์ชัน",
+    "addedIn": "เพิ่มใน",
+    "markAll": "ทำเครื่องหมายทั้งหมด",
+    "markAllTitle": "ทำเครื่องหมายว่าเสร็จสำหรับความสำเร็จที่เหลือ {n} รายการที่แสดงอยู่",
+    "unmarkAll": "ยกเลิกเครื่องหมายทั้งหมด",
+    "unmarkAllTitle": "ยกเลิกเครื่องหมายของความสำเร็จ {n} รายการที่แสดงอยู่ซึ่งทำด้วยมือ"
+  }
+}

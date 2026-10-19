@@ -1,0 +1,73 @@
+{
+  "progression": "Tiến triển",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Nguyên Thạch",
+    "characters": "Nhân Vật",
+    "weapons": "Vũ Khí",
+    "artifacts": "Thánh Di Vật",
+    "artifact4": "Thánh Di Vật 4★",
+    "artifact3": "Thánh Di Vật 3★"
+  },
+  "server": {
+    "AMERICA": "Châu Mỹ",
+    "EUROPE": "Châu Âu",
+    "ASIA": "Châu Á",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Chưa có bản chụp",
+  "import": "Nhập",
+  "historyUnavailable": "Không có lịch sử",
+  "currencyCarried": "từ một bản ghi trước",
+  "currencyMissing": "không có trong bản ghi mới nhất",
+  "sincePrevious": "so với bản chụp trước",
+  "lastCaptured": "Lần ghi gần nhất",
+  "lastCapturedAt": "Ghi lần cuối {time}",
+  "seenAgain": "Thấy lại",
+  "seenAgainAt": "Thấy lại {time}",
+  "loadingHistory": "Đang tải lịch sử bản chụp",
+  "lowRarity": {
+    "label": "Thánh Di Vật 4★ / 3★",
+    "hint": "Chưa khóa, chưa trang bị",
+    "rarity": "{n} sao"
+  },
+  "card": {
+    "snapshots": "Bản chụp",
+    "storage": "Lưu trữ",
+    "stored": "Tải lên {raw}, lưu {stored}",
+    "storedRatio": "Tải lên {raw}, lưu {stored} (nhỏ hơn {ratio})"
+  },
+  "monthly": {
+    "title": "Phân tích hàng tháng",
+    "previous": "Tháng trước",
+    "previousTo": "Tháng trước, {month}",
+    "next": "Tháng sau",
+    "nextTo": "Tháng sau, {month}",
+    "gained": "nhận {n}",
+    "spent": "dùng {n}",
+    "added": "thêm {n}",
+    "used": "dùng {n}",
+    "closing": "cuối kỳ {n}",
+    "artifactExp": "{n} EXP Thánh Di Vật ở cấp 0",
+    "thisMonth": "tháng này · {detail}",
+    "gapTitle": "Không có bản ghi trong {n} ngày",
+    "vs": "so với {day}",
+    "captures": "{n} bản ghi",
+    "comparedWith": "{captures}, so với {day}",
+    "noCaptures": "Không có bản ghi",
+    "noCapture": "Không có bản ghi",
+    "caption": "Thay đổi hằng ngày trong {month}: bản ghi cuối của mỗi ngày so với ngày có bản ghi trước đó, kèm giá trị bên dưới",
+    "day": "Ngày",
+    "dayTitle": "Bản ghi cuối trong ngày so với ngày có bản ghi trước đó, giờ địa phương"
+  },
+  "recent": {
+    "title": "Gần đây",
+    "all": "Tất cả",
+    "allTitle": "Tất cả {n} bản chụp",
+    "size": "Tải lên {raw} byte, lưu {stored} byte",
+    "unchanged": "Tổng không đổi",
+    "first": "Bản chụp đầu tiên",
+    "currencyMissing": "Thiếu Mora và Nguyên Thạch",
+    "noCurrency": "Không có tiền tệ"
+  }
+}

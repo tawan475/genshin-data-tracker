@@ -1,0 +1,73 @@
+{
+  "progression": "Progression",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Primo-gemmes",
+    "characters": "Personnages",
+    "weapons": "Armes",
+    "artifacts": "Artéfacts",
+    "artifact4": "Artéfact 4★",
+    "artifact3": "Artéfact 3★"
+  },
+  "server": {
+    "AMERICA": "Amérique",
+    "EUROPE": "Europe",
+    "ASIA": "Asie",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Aucun instantané",
+  "import": "Importer",
+  "historyUnavailable": "Historique indisponible",
+  "currencyCarried": "d'une capture précédente",
+  "currencyMissing": "absent de la dernière capture",
+  "sincePrevious": "depuis l'instantané précédent",
+  "lastCaptured": "Dernière capture",
+  "lastCapturedAt": "Dernière capture {time}",
+  "seenAgain": "Revu",
+  "seenAgainAt": "Revu {time}",
+  "loadingHistory": "Chargement de l'historique des instantanés",
+  "lowRarity": {
+    "label": "Artéfact 4★ / 3★",
+    "hint": "Déverrouillés, non équipés",
+    "rarity": "{n} étoiles"
+  },
+  "card": {
+    "snapshots": "Instantanés",
+    "storage": "Stockage",
+    "stored": "{raw} envoyés, {stored} stockés",
+    "storedRatio": "{raw} envoyés, {stored} stockés ({ratio} plus petit)"
+  },
+  "monthly": {
+    "title": "Analyse mensuelle",
+    "previous": "Mois précédent",
+    "previousTo": "Mois précédent, {month}",
+    "next": "Mois suivant",
+    "nextTo": "Mois suivant, {month}",
+    "gained": "gagné {n}",
+    "spent": "dépensé {n}",
+    "added": "ajouté {n}",
+    "used": "utilisé {n}",
+    "closing": "clôture {n}",
+    "artifactExp": "{n} EXP d'artéfact au niveau 0",
+    "thisMonth": "ce mois-ci · {detail}",
+    "gapTitle": "Aucune capture pendant {n} jours",
+    "vs": "vs {day}",
+    "captures": "{n} capture | {n} captures",
+    "comparedWith": "{captures}, comparé au {day}",
+    "noCaptures": "Aucune capture",
+    "noCapture": "Pas de capture",
+    "caption": "Variation quotidienne en {month} : la dernière capture de chaque jour comparée au jour capturé précédent, avec la valeur en dessous",
+    "day": "Jour",
+    "dayTitle": "Dernière capture du jour vs le jour capturé précédent, heure locale"
+  },
+  "recent": {
+    "title": "Récents",
+    "all": "Tous",
+    "allTitle": "Les {n} instantanés",
+    "size": "{raw} octets envoyés, {stored} octets stockés",
+    "unchanged": "Totaux inchangés",
+    "first": "Premier instantané",
+    "currencyMissing": "Mora et Primo-gemmes absents",
+    "noCurrency": "Aucune devise"
+  }
+}

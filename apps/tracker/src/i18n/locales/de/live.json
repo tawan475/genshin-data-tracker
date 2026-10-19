@@ -1,0 +1,44 @@
+{
+  "label": "Live",
+  "thisSession": "Diese Sitzung",
+  "sessionSince": "Seit {time}",
+  "levelUps": "{n} Stufenaufstieg | {n} Stufenaufstiege",
+  "talents": "{n} Talent | {n} Talente",
+  "updated": "aktualisiert {ago}",
+  "updatedAt": "Aktualisiert {time}",
+  "row": "Live",
+  "rowDetail": "{n} Änderung seit diesem Snapshot | {n} Änderungen seit diesem Snapshot",
+  "sinceSnapshot": "seit dem neuesten Snapshot",
+  "discard": "Verwerfen",
+  "discardTitle": "Diese Änderungen löschen; der neueste Snapshot bleibt",
+  "discarded": "Live-Änderungen gelöscht",
+  "discardFailed": "Live-Änderungen konnten nicht gelöscht werden",
+  "settings": {
+    "title": "Live-Sync",
+    "label": "Irminsul live folgen",
+    "description": "Solange Irminsul läuft, erscheinen seine Änderungen hier innerhalb von Sekunden, zwischen den Snapshots.",
+    "devices": "Live-Sync von diesem PC an: {accounts} (Kontoeinstellungen)",
+    "deletePoints": "Diagrammpunkte löschen",
+    "deletePointsTitle": "Die Diagrammpunkte löschen, die Live-Sync zwischen Snapshots gespeichert hat",
+    "deletePointsConfirm": "Alle Diagrammpunkte dieses Kontos löschen? Snapshots bleiben.",
+    "pointsDeleted": "Diagrammpunkte gelöscht",
+    "exportNote": "Exporte enthalten die Live-Änderungen und -Punkte (live/ in der ZIP)."
+  },
+  "session": {
+    "heading": "Sitzungen",
+    "hours": "{h} Std. {m} Min.",
+    "minutes": "{m} Min.",
+    "world": "Welt {n}",
+    "newCharacter": "{name} ist dazugekommen",
+    "more": "+{n} weitere",
+    "showMore": "Mehr zeigen ({n})",
+    "field": {
+      "level": "{name} St. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} Angriff {from}→{to}",
+      "skill": "{name} Fähigkeit {from}→{to}",
+      "burst": "{name} Spezial {from}→{to}"
+    }
+  },
+  "staffBytes": "Live-Sync speichert zusätzlich {size} (gdt-live)"
+}

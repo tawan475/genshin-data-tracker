@@ -1,0 +1,74 @@
+{
+  "title": "詳細な育成推移",
+  "figures": "項目",
+  "atLeastOne": "1つ以上",
+  "groupBy": "集計単位",
+  "longerThanRange": "期間より長い",
+  "loading": "育成推移を読み込み中",
+  "noData": "データなし",
+  "inRange": "この期間",
+  "gainedInRange": "この期間の獲得",
+  "spentInRange": "この期間の消費",
+  "noCaptures": "キャプチャなし",
+  "captures": "キャプチャ {n}件",
+  "total": "合計 {n}",
+  "lineLabel": "{figure}の推移、{span}。最新 {value}。",
+  "barsLabel": "{figure}の変化（{per}）、{span}：獲得 {gained}、消費 {spent}。",
+  "tooltip": " {name}：{value}",
+  "group": {
+    "snapshot": "スナップショット",
+    "hour": "時間",
+    "day": "日",
+    "month": "月",
+    "year": "年"
+  },
+  "per": {
+    "snapshot": "スナップショットごと",
+    "hour": "1時間ごと",
+    "day": "1日ごと",
+    "month": "1か月ごと",
+    "year": "1年ごと"
+  },
+  "against": {
+    "snapshot": "前回のスナップショットとの差",
+    "hour": "前の1時間との差",
+    "day": "前日との差",
+    "month": "前月との差",
+    "year": "前年との差"
+  },
+  "newest": {
+    "snapshot": "最新 {n}件のスナップショット",
+    "hour": "直近 {n}時間",
+    "day": "直近 {n}日",
+    "month": "直近 {n}か月",
+    "year": "直近 {n}年"
+  },
+  "range": {
+    "label": "期間",
+    "hours": "時間",
+    "days": "日",
+    "all": "すべて",
+    "h": "{n}時間",
+    "d": "{n}日",
+    "y": "{n}年"
+  },
+  "monthly": {
+    "unavailable": "月間分析を表示できません",
+    "loading": "月間分析を読み込み中",
+    "noCaptures": "キャプチャなし",
+    "goTo": "{month} へ移動",
+    "date": "日付",
+    "primogem": "原石",
+    "mora": "モラ",
+    "artifact": "聖遺物",
+    "extract": "分解",
+    "netWorth": "総資産",
+    "moraUnit": "モラ",
+    "primogemUnit": "原石"
+  },
+  "character": {
+    "level": "レベル",
+    "constellation": "命ノ星座",
+    "talents": "天賦"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Genel Bakış",
+    "progression": "İlerleme",
+    "characters": "Karakterler",
+    "artifacts": "Yadigarlar",
+    "weapons": "Silahlar",
+    "materials": "Malzemeler",
+    "planner": "Planlayıcı",
+    "achievements": "Başarımlar",
+    "anecdotes": "Seyahat Notları",
+    "wishes": "Dilekler",
+    "snapshots": "Anlık görüntüler",
+    "import": "İçe aktar",
+    "manage": "Yönet",
+    "staffOverview": "Genel Bakış",
+    "users": "Kullanıcılar",
+    "storage": "Depolama",
+    "roles": "Roller",
+    "audit": "Denetim"
+  },
+  "section": {
+    "staff": "Yetkili",
+    "account": "Hesap",
+    "system": "Sistem"
+  },
+  "accounts": "Hesaplar",
+  "staff": "Yetkili",
+  "settings": "Ayarlar",
+  "import": "İçe aktar",
+  "expandMenu": "Menüyü genişlet",
+  "collapseMenu": "Menüyü daralt",
+  "openMenu": "Menüyü aç",
+  "closeMenu": "Menüyü kapat",
+  "lightTheme": "Açık tema",
+  "darkTheme": "Koyu tema",
+  "themeNotSaved": "Tema kaydedilmedi",
+  "landingPage": "Giriş sayfası",
+  "return": "Geri dön",
+  "highestRole": "En yüksek rolün",
+  "copyName": "Adı kopyala",
+  "copyUid": "UID'yi kopyala",
+  "copyUidValue": "UID {uid} kopyala",
+  "nameCopied": "Ad kopyalandı",
+  "uidCopied": "UID kopyalandı",
+  "switcher": {
+    "select": "Hesap seç",
+    "add": "Hesap ekle"
+  },
+  "page": {
+    "signIn": "Giriş yap",
+    "createAccount": "Hesap oluştur",
+    "continue": "Devam",
+    "linkIrminsul": "Irminsul'u bağla",
+    "resetPassword": "Şifreyi sıfırla",
+    "newPassword": "Yeni şifre",
+    "confirmEmail": "E-postayı onayla",
+    "accounts": "Hesaplar",
+    "addAccount": "Hesap ekle",
+    "settings": "Ayarlar",
+    "overview": "Genel Bakış",
+    "users": "Kullanıcılar",
+    "user": "Kullanıcı",
+    "storage": "Depolama",
+    "roles": "Roller",
+    "audit": "Denetim",
+    "progression": "İlerleme",
+    "characters": "Karakterler",
+    "weapons": "Silahlar",
+    "artifacts": "Yadigarlar",
+    "materials": "Malzemeler",
+    "planner": "Planlayıcı",
+    "achievements": "Başarımlar",
+    "anecdotes": "Seyahat Notları",
+    "wishHistory": "Dilek geçmişi",
+    "snapshots": "Anlık görüntüler",
+    "import": "İçe aktar",
+    "accountSettings": "Hesap ayarları",
+    "notFound": "Bulunamadı",
+    "inspect": "İncele · {page}"
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "body": "Bağlantı eski olabilir veya sayfa taşınmış olabilir.",
+    "home": "Panele git"
+  },
+  "accountMissing": {
+    "title": "Hesap bulunamadı",
+    "body": "Silinmiş olabilir veya başka birine ait olabilir.",
+    "all": "Tüm hesaplar"
+  },
+  "update": {
+    "ready": "Tracker'ın yeni bir sürümü hazır."
+  },
+  "public": {
+    "dashboard": "Panel"
+  },
+  "landing": {
+    "heroLine1": "Genshin yolculuğunu",
+    "heroLine2": "ustalıkla yönet",
+    "tagline": "Her giriş kaydedilir. Yadigarlar, malzemeler, geçmiş.",
+    "openDashboard": "Paneli aç",
+    "getStarted": "Başla",
+    "critDmg": "Kritik Hasar %21.8"
+  },
+  "appearance": "Dil ve görünüm"
+}

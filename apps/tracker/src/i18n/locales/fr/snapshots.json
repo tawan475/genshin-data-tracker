@@ -1,0 +1,108 @@
+{
+  "heading": "Historique des imports",
+  "loadFailed": "Échec du chargement",
+  "noneInRange": "Aucun instantané sur cette période",
+  "clear": "Effacer",
+  "noSnapshots": "Aucun instantané",
+  "import": "Importer",
+  "unchangedUntil": "Inchangé jusqu'à {time}",
+  "downloadFailed": "Échec du téléchargement de l'instantané",
+  "saved": "{name} enregistré",
+  "files": "{n} fichier | {n} fichiers",
+  "gone": "{n} disparu(s)",
+  "exportFailed": "Échec de l'export",
+  "deletedOf": "{deleted} instantanés supprimés sur {total}",
+  "deleteFailed": "Échec de la suppression de l'instantané",
+  "deleteFailedMany": "Échec de la suppression des instantanés",
+  "deleted": "{n} instantané supprimé | {n} instantanés supprimés",
+  "column": {
+    "id": "ID",
+    "date": "Date",
+    "source": "Source",
+    "rawSize": "Taille brute",
+    "storedSize": "Taille stockée",
+    "actions": "Actions"
+  },
+  "select": {
+    "page": "Sélectionner cette page",
+    "snapshot": "Sélectionner l'instantané {id}",
+    "shiftClick": "Maj + clic pour sélectionner une plage",
+    "pageSelected": "Les {n} de cette page sont sélectionnés.",
+    "all": "Sélectionner les {n}",
+    "allInRange": "Sélectionner les {n} de la période",
+    "viewSelected": "Les {n} instantanés sont sélectionnés.",
+    "rangeSelected": "Les {n} instantanés de la période sont sélectionnés.",
+    "clear": "Effacer la sélection",
+    "allLabel": "Tous"
+  },
+  "confirm": {
+    "title": "Êtes-vous sûr ?",
+    "one": "Vous allez supprimer cet instantané. Cette action est irréversible.",
+    "oneConfirm": "Oui, supprimer !",
+    "many": "Vous allez supprimer {n} instantané(s). Cette action est irréversible.",
+    "purge": "Vous allez supprimer maintenant {n} instantané(s) de cet utilisateur, sans passer par la corbeille. Cette action est irréversible.",
+    "manyConfirm": "Oui, les supprimer !",
+    "massTitle": "Avertissement de suppression massive",
+    "massText": "Vous avez sélectionné TOUS les instantanés sur TOUTES les pages. Saisissez « DELETE » pour confirmer que vous voulez tout effacer.",
+    "massConfirm": "J'ai compris, TOUT SUPPRIMER !",
+    "typePlaceholder": "Saisissez « {word} » pour confirmer",
+    "typeLabel": "Saisissez {word} pour confirmer",
+    "typeError": "Saisissez « {word} »",
+    "cancel": "Annuler"
+  },
+  "figure": {
+    "noCurrency": "Aucune devise dans cet instantané",
+    "vs": "vs #{id} · {time}"
+  },
+  "range": {
+    "label": "Filtrer par date",
+    "from": "Du",
+    "to": "Au",
+    "selectTitle": "Sélectionner les {n} instantanés de la période",
+    "select": "Sélectionner {n}",
+    "clear": "Effacer les dates"
+  },
+  "row": {
+    "downloadGood": "Télécharger le GOOD",
+    "download": "Télécharger l'instantané {id}",
+    "delete": "Supprimer l'instantané",
+    "deleteId": "Supprimer l'instantané {id}"
+  },
+  "bar": {
+    "saving": "Enregistrement…",
+    "downloadingOf": "Téléchargement {done} / {total}",
+    "downloading": "Téléchargement {done}",
+    "zipping": "Compression {done} / {total}",
+    "selected": "{n} sélectionné(s)",
+    "outOf": " sur {n}",
+    "hiddenTitle": "{n} instantanés sélectionnés sont hors des dates",
+    "hidden": "· {n} masqué(s)",
+    "cancel": "Annuler",
+    "blocked": "Un autre export est en cours",
+    "downloadTitle": "Télécharger un zip de fichiers GOOD",
+    "download": "Télécharger",
+    "delete": "Supprimer"
+  },
+  "card": {
+    "stored": "Stocké"
+  },
+  "storage": {
+    "title": "Stockage",
+    "snapshots": "Instantanés",
+    "raw": "Données brutes",
+    "stored": "Stocké",
+    "saved": "Économisé"
+  },
+  "pagination": {
+    "perPage": "Par page",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "total": "({n} au total)",
+    "goTo": "Aller à",
+    "go": "Aller"
+  },
+  "table": {
+    "noData": "Aucune donnée disponible."
+  }
+}

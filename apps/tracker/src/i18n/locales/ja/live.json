@@ -1,0 +1,44 @@
+{
+  "label": "ライブ",
+  "thisSession": "今回のセッション",
+  "sessionSince": "{time} から",
+  "levelUps": "レベルアップ {n}回",
+  "talents": "天賦 {n}回",
+  "updated": "{ago} に更新",
+  "updatedAt": "{time} に更新",
+  "row": "ライブ",
+  "rowDetail": "このスナップショット以降の変更 {n}件",
+  "sinceSnapshot": "最新スナップショット以降",
+  "discard": "破棄",
+  "discardTitle": "これらの変更を削除します（最新スナップショットは残ります）",
+  "discarded": "ライブの変更を削除しました",
+  "discardFailed": "ライブの変更を削除できませんでした",
+  "settings": {
+    "title": "ライブ同期",
+    "label": "Irminsul をライブで反映",
+    "description": "Irminsul の実行中は、スナップショットの合間でも変更が数秒でここに表示されます。",
+    "devices": "このPCからのライブ同期先：{accounts}（アカウント設定）",
+    "deletePoints": "グラフのポイントを削除",
+    "deletePointsTitle": "ライブ同期がスナップショットの間に記録したグラフのポイントを削除します",
+    "deletePointsConfirm": "このアカウントのグラフのポイントをすべて削除しますか？スナップショットは残ります。",
+    "pointsDeleted": "グラフのポイントを削除しました",
+    "exportNote": "エクスポートにはライブの変更とポイントが含まれます（zip 内の live/）。"
+  },
+  "session": {
+    "heading": "セッション",
+    "hours": "{h}時間{m}分",
+    "minutes": "{m}分",
+    "world": "ワールド {n}",
+    "newCharacter": "{name}が加入",
+    "more": "他 {n}件",
+    "showMore": "さらに表示（{n}）",
+    "field": {
+      "level": "{name} Lv.{from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} 通常攻撃 {from}→{to}",
+      "skill": "{name} 元素スキル {from}→{to}",
+      "burst": "{name} 元素爆発 {from}→{to}"
+    }
+  },
+  "staffBytes": "ライブ同期の追加保存 {size}（gdt-live）"
+}

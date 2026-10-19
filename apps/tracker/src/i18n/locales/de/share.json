@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Bild kopieren",
+    "share": "Teilen",
+    "missing": "{n} Bild konnte nicht geladen werden | {n} Bilder konnten nicht geladen werden",
+    "drawing": "{label} · wird gezeichnet",
+    "exportFailed": "Export fehlgeschlagen",
+    "copyFailed": "Kopieren fehlgeschlagen",
+    "shareFailed": "Teilen fehlgeschlagen",
+    "copied": "Kopiert",
+    "download": "PNG herunterladen",
+    "downloadSized": "PNG herunterladen ({size})",
+    "buildTitle": "Build",
+    "artifactTitle": "Artefakt"
+  },
+  "options": {
+    "darkCard": "Dunkle Karte",
+    "lightCard": "Helle Karte",
+    "dark": "Dunkel",
+    "light": "Hell",
+    "cardTheme": "Kartendesign",
+    "showName": "Kontonamen zeigen",
+    "name": "Name",
+    "showUid": "UID zeigen"
+  },
+  "menu": {
+    "label": "Karte teilen",
+    "drawing": "Zeichnet",
+    "copy": "Kopieren"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} Rolls (die ersten und einer je +4)",
+    "levelTitle": "Stufe {level} von {cap} · Aufstieg {ascension}",
+    "weaponAndStats": "Waffe und Werte",
+    "pieceBonus": "{n}-teiliger Bonus",
+    "rvTitle": "Roll Value: jeder Nebenattribut-Roll als % seines höchsten Rolls, addiert"
+  }
+}

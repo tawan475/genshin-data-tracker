@@ -1,0 +1,108 @@
+{
+  "heading": "Cronologia importazioni",
+  "loadFailed": "Caricamento non riuscito",
+  "noneInRange": "Nessuna istantanea nell'intervallo",
+  "clear": "Cancella",
+  "noSnapshots": "Ancora nessuna istantanea",
+  "import": "Importa",
+  "unchangedUntil": "Invariata fino a {time}",
+  "downloadFailed": "Download dell'istantanea non riuscito",
+  "saved": "{name} salvato",
+  "files": "{n} file | {n} file",
+  "gone": "{n} non più presenti",
+  "exportFailed": "Esportazione non riuscita",
+  "deletedOf": "Eliminate {deleted} istantanee su {total}",
+  "deleteFailed": "Eliminazione dell'istantanea non riuscita",
+  "deleteFailedMany": "Eliminazione delle istantanee non riuscita",
+  "deleted": "{n} istantanea eliminata | {n} istantanee eliminate",
+  "column": {
+    "id": "ID",
+    "date": "Data",
+    "source": "Origine",
+    "rawSize": "Dimensione grezza",
+    "storedSize": "Dimensione salvata",
+    "actions": "Azioni"
+  },
+  "select": {
+    "page": "Seleziona questa pagina",
+    "snapshot": "Seleziona istantanea {id}",
+    "shiftClick": "Maiusc+clic per selezionare un intervallo",
+    "pageSelected": "Tutte le {n} di questa pagina sono selezionate.",
+    "all": "Seleziona tutte ({n})",
+    "allInRange": "Seleziona tutte le {n} nell'intervallo",
+    "viewSelected": "Tutte le {n} istantanee sono selezionate.",
+    "rangeSelected": "Tutte le {n} istantanee nell'intervallo sono selezionate.",
+    "clear": "Cancella selezione",
+    "allLabel": "Tutte"
+  },
+  "confirm": {
+    "title": "Sei sicuro?",
+    "one": "Stai per eliminare questa istantanea. L'operazione è irreversibile.",
+    "oneConfirm": "Sì, eliminala!",
+    "many": "Stai per eliminare {n} istantanea/e. L'operazione è irreversibile.",
+    "purge": "Stai per eliminare subito {n} istantanea/e di questo utente, senza passare dal cestino. L'operazione è irreversibile.",
+    "manyConfirm": "Sì, eliminale!",
+    "massTitle": "Avviso di eliminazione di massa",
+    "massText": "Hai selezionato TUTTE le istantanee di TUTTE le pagine. Scrivi \"ELIMINA\" per confermare che vuoi cancellare tutto.",
+    "massConfirm": "Ho capito, ELIMINA TUTTO!",
+    "typePlaceholder": "Scrivi \"{word}\" per confermare",
+    "typeLabel": "Scrivi {word} per confermare",
+    "typeError": "Scrivi \"{word}\"",
+    "cancel": "Annulla"
+  },
+  "figure": {
+    "noCurrency": "Nessuna valuta in questa istantanea",
+    "vs": "rispetto a #{id} · {time}"
+  },
+  "range": {
+    "label": "Filtra per data",
+    "from": "Da",
+    "to": "A",
+    "selectTitle": "Seleziona le {n} istantanee nell'intervallo",
+    "select": "Seleziona {n}",
+    "clear": "Cancella date"
+  },
+  "row": {
+    "downloadGood": "Scarica GOOD",
+    "download": "Scarica istantanea {id}",
+    "delete": "Elimina istantanea",
+    "deleteId": "Elimina istantanea {id}"
+  },
+  "bar": {
+    "saving": "Salvataggio…",
+    "downloadingOf": "Download {done} / {total}",
+    "downloading": "Download {done}",
+    "zipping": "Compressione {done} / {total}",
+    "selected": "{n} selezionate",
+    "outOf": " su {n}",
+    "hiddenTitle": "{n} istantanee selezionate sono fuori dalle date",
+    "hidden": "· {n} nascoste",
+    "cancel": "Annulla",
+    "blocked": "È in corso un'altra esportazione",
+    "downloadTitle": "Scarica uno zip di file GOOD",
+    "download": "Scarica",
+    "delete": "Elimina"
+  },
+  "card": {
+    "stored": "Salvati"
+  },
+  "storage": {
+    "title": "Spazio",
+    "snapshots": "Istantanee",
+    "raw": "Dati grezzi",
+    "stored": "Salvati",
+    "saved": "Risparmiati"
+  },
+  "pagination": {
+    "perPage": "Per pagina",
+    "previous": "Precedente",
+    "next": "Successiva",
+    "page": "Pagina {page} di {pages}",
+    "total": "({n} in totale)",
+    "goTo": "Vai a",
+    "go": "Vai"
+  },
+  "table": {
+    "noData": "Nessun dato disponibile."
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Material",
+  "newestSnapshot": "Snapshot terbaru",
+  "since": "sejak {date}",
+  "oneSnapshot": "Hanya satu snapshot",
+  "changesTitle": "Perubahan {hint}",
+  "changeSince": "Perubahan sejak",
+  "noSnapshots": "Belum ada snapshot",
+  "import": "Impor",
+  "loadFailed": "Tidak bisa memuat material",
+  "loading": "Memuat material",
+  "saveChartFailed": "Tidak bisa menyimpan pengaturan grafik",
+  "search": "Cari",
+  "searchLabel": "Cari material",
+  "noMatches": "Tidak ada yang cocok",
+  "noMaterials": "Tidak ada material",
+  "clear": "Hapus",
+  "more": "{n} lagi",
+  "upTo": "Hingga {max}",
+  "trackedOfMax": "Dipantau / maks",
+  "track": "Pantau",
+  "untrack": "Berhenti pantau",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Terakhir"
+  },
+  "wallet": {
+    "label": "Dompet",
+    "title": "Mata uang dan item permohonan",
+    "short": {
+      "GenesisCrystal": "Genesis",
+      "IntertwinedFate": "Intertwined",
+      "AcquaintFate": "Acquaint",
+      "MasterlessStarglitter": "Starglitter",
+      "MasterlessStardust": "Stardust",
+      "OriginalResin": "Resin",
+      "FragileResin": "Fragile",
+      "CondensedResin": "Condensed",
+      "RealmCurrency": "Realm"
+    }
+  },
+  "tabs": {
+    "development": "Perkembangan",
+    "precious": "Berharga",
+    "other": "Lainnya",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Enhancement Ore (game menyimpannya bersama senjata)",
+      "artifact": "Sanctifying Unction dan Essence (game menyimpannya bersama artefak)",
+      "other": "Tidak ada di Tas dalam game: mata uang, benih, item permainan kartu, item yang lebih baru dari data game"
+    }
+  },
+  "bag": {
+    "title": "Tas",
+    "show": "Tampilkan",
+    "view": "Tampilan",
+    "views": {
+      "grid": "Ikon",
+      "list": "Daftar"
+    },
+    "tabRow": "Tab Tas",
+    "all": "Semua",
+    "allTitle": "Semua tab",
+    "sort": "Urutkan",
+    "sorts": {
+      "order": "Dalam game",
+      "count": "Jumlah",
+      "change": "Perubahan",
+      "name": "Nama"
+    },
+    "unfoldAll": "Buka semua tab",
+    "foldAll": "Lipat semua tab",
+    "owned": "Dimiliki",
+    "ownedTitle": "Material yang kamu miliki",
+    "gained": "Didapat",
+    "gainedTitle": "Didapat {hint}",
+    "spent": "Dipakai",
+    "spentTitle": "Dipakai {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · diatur manual {hand} (tangkapan {capture})"
+  },
+  "detail": {
+    "history": "Riwayat",
+    "chartLabel": "{name} dari waktu ke waktu, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Didapat",
+    "spent": "Dipakai",
+    "peak": "Puncak",
+    "first": "Pertama",
+    "firstTitle": "Snapshot pertama yang memilikinya"
+  },
+  "tracked": {
+    "title": "Dipantau",
+    "list": "Material yang dipantau",
+    "untrackName": "Berhenti pantau {name}"
+  }
+}

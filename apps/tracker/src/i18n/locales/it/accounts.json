@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Account {id}",
+  "server": {
+    "ASIA": "Asia",
+    "AMERICA": "America",
+    "EUROPE": "Europa",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Account",
+    "snapshots": "Istantanee",
+    "uploaded": "Caricati",
+    "stored": "Salvati",
+    "ratio": "Rapporto",
+    "lastCaptured": "Ultima cattura",
+    "bytes": "{n} byte",
+    "ratioTitle": "Salvato {ratio} più piccolo del caricato",
+    "add": "Aggiungi account",
+    "empty": "Ancora nessun account"
+  },
+  "new": {
+    "title": "Aggiungi account",
+    "add": "Aggiungi",
+    "notAdded": "Non aggiunto",
+    "added": "{name} aggiunto",
+    "connect": "Collega Irminsul",
+    "overview": "Panoramica",
+    "importFiles": "Importa file",
+    "addAnother": "Aggiungine un altro"
+  },
+  "settings": {
+    "title": "Impostazioni account",
+    "details": "Dettagli",
+    "traveler": "Viaggiatore",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Elimina account",
+    "deleteTitle": "I file GOOD esportati non vengono toccati",
+    "confirmTitle": "Eliminare {name}?",
+    "deletes": "Elimina {loss}. La sua chiave Irminsul smette di funzionare.",
+    "typeToConfirm": "Scrivi {word}",
+    "confirmWord": "elimina",
+    "loss": "{n} istantanea | {n} istantanee",
+    "deleted": "{name} eliminato"
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Lv {level}",
+    "noWeapon": "ไม่มีอาวุธ",
+    "weaponLevel": "อาวุธ Lv {level}",
+    "artifactCount": "อาร์ติแฟกต์ {count}/5",
+    "belowMax": "อาร์ติแฟกต์ต่ำกว่าสูงสุด {n} ชิ้น",
+    "noSet": "ไม่มีโบนัสเซ็ตครบ"
+  },
+  "sort": {
+    "default": "ค่าเริ่มต้น",
+    "level": "เลเวล",
+    "constellation": "กลุ่มดาว",
+    "talents": "พรสวรรค์",
+    "cv": "CV",
+    "rarity": "ความหายาก",
+    "element": "ธาตุ",
+    "name": "ชื่อ",
+    "friendship": "ความประทับใจ",
+    "obtained": "วันที่ได้รับ"
+  },
+  "build": {
+    "all": "บิลด์",
+    "ready": "พร้อม",
+    "needs": "ยังต้องพัฒนา",
+    "level": "Lv < 90",
+    "weapon": "อาวุธ < 90",
+    "artifacts": "อาร์ติแฟกต์ < สูงสุด",
+    "set": "ไม่มีโบนัสเซ็ต"
+  },
+  "talentFilter": {
+    "all": "พรสวรรค์",
+    "nine": "ทั้งหมด 9+",
+    "crowned": "ใส่มงกุฎ",
+    "below": "มีบางอัน < 9"
+  },
+  "favorites": {
+    "notSaved": "บันทึกไม่สำเร็จ"
+  },
+  "stat": {
+    "maxHp": "พลังชีวิตสูงสุด",
+    "baseAtk": "พลังโจมตีพื้นฐาน"
+  },
+  "talent": {
+    "crowned": "{title} · ใส่มงกุฎ"
+  },
+  "setBonus": {
+    "line": "{n} ชิ้น: {stats}",
+    "inactive": "{n} ชิ้น (ไม่ทำงาน): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "ความประทับใจ {level} จาก 10"
+  },
+  "refinementTitle": "ขัดเกลา {value} จาก 5",
+  "talentChips": "โจมตี {auto} · สกิล {skill} · ท่าไม้ตาย {burst}",
+  "sortControl": {
+    "sort": "เรียง",
+    "descending": "เรียงจากมากไปน้อย",
+    "ascending": "เรียงจากน้อยไปมาก"
+  },
+  "favorite": {
+    "named": "ชื่นชอบ {name}",
+    "on": "ชื่นชอบ",
+    "off": "เลิกชื่นชอบ"
+  },
+  "stars": "{n} ดาว",
+  "sets": "เซ็ต",
+  "pieceBonus": " ชิ้น โบนัส",
+  "constellation": {
+    "title": "กลุ่มดาว {level} จาก 6",
+    "lockedTitle": "C{n} · ยังไม่ปลดล็อก",
+    "unlocked": "ปลดล็อก C{n} แล้ว",
+    "locked": "C{n} ยังไม่ปลดล็อก"
+  },
+  "timeline": {
+    "firstSeen": "พบครั้งแรก",
+    "obtained": "ได้รับ",
+    "to": "ถึง",
+    "less": "ย่อ",
+    "all": "ทั้งหมด {n}"
+  },
+  "talentShort": {
+    "auto": "โจมตี",
+    "skill": "สกิล",
+    "burst": "ท่าไม้ตาย"
+  },
+  "talentRaised": "เพิ่มเป็น",
+  "crowned": "ใส่มงกุฎ",
+  "weapon": {
+    "passive": "พาสซีฟ: {stats}",
+    "locked": "ล็อกอยู่"
+  },
+  "stats": {
+    "allDmg": "+{value}% ความเสียหายทั้งหมด ไม่แสดงในหน้าค่าสถานะของเกม",
+    "label": "ค่าสถานะ",
+    "weaponMissingTitle": "อาวุธใหม่กว่าข้อมูลเกม: ไม่รวมค่าสถานะของอาวุธ",
+    "weaponMissing": "ไม่รวมค่าสถานะอาวุธ",
+    "newerThanData": "ใหม่กว่าข้อมูลเกม",
+    "none": "ไม่มีค่าสถานะ"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, พรสวรรค์ {auto} {skill} {burst}",
+    "friendship": ", ความประทับใจ {n}",
+    "toDo": "สิ่งที่ต้องทำ: {gaps}",
+    "critDetail": "คริ {rate}% / {dmg}% จากอาร์ติแฟกต์"
+  },
+  "piece": {
+    "levelTitle": "+{level} จาก {max} · {rarity}★",
+    "activatesAt4": "ทำงานเมื่อ +4",
+    "inactive": "(ไม่ทำงาน)",
+    "rolls": "สุ่ม {n} ครั้ง",
+    "rollsTitle": "การสุ่ม",
+    "empty": ": ว่าง"
+  },
+  "toolbar": {
+    "weapon": "อาวุธ",
+    "cards": "การ์ด",
+    "list": "รายการ",
+    "label": "กรองตัวละคร",
+    "search": "ค้นหา",
+    "searchTitle": "ชื่อ ธาตุ อาวุธ หรือเซ็ต",
+    "view": "มุมมอง",
+    "chips": "รายการโปรด ธาตุ และความหายาก",
+    "favorites": "รายการโปรด",
+    "buildTitle": "พร้อม: Lv 90, อาวุธ Lv 90, อาร์ติแฟกต์ระดับสูงสุด 5 ชิ้น, โบนัสเซ็ตครบ",
+    "clear": "ล้าง"
+  },
+  "table": {
+    "lv": "Lv",
+    "c": "C",
+    "critTitle": "อัตราคริ / ความแรงคริ จากอาร์ติแฟกต์",
+    "crit": "คริ",
+    "toDo": "ต้องทำ",
+    "toDoList": "สิ่งที่ต้องทำ: {gaps}"
+  },
+  "detail": {
+    "toDo": "สิ่งที่ต้องทำ:",
+    "build": "บิลด์",
+    "obtainedAt": "ได้รับเมื่อ {date}",
+    "noArtifacts": "ไม่มีอาร์ติแฟกต์",
+    "history": "ประวัติ",
+    "loadFailed": "โหลดไม่สำเร็จ",
+    "none": "ไม่มี"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Lv 90+",
+    "crowns": "มงกุฎ",
+    "crownsTitle": "พรสวรรค์เลเวล 10",
+    "loading": "กำลังโหลด",
+    "noSnapshots": "ยังไม่มีสแนปช็อต",
+    "empty": "ไม่มีตัวละคร",
+    "import": "นำเข้า",
+    "noMatches": "ไม่พบรายการที่ตรงกัน"
+  }
+}

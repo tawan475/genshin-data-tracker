@@ -1,0 +1,260 @@
+{
+  "title": "Dilek geçmişi",
+  "bannerPageTitle": "Dilek geçmişi · {banner}",
+  "loadFailed": "Yüklenemedi",
+  "loading": "Yükleniyor",
+  "import": "İçe aktar",
+  "export": "Dışa aktar",
+  "importExport": "İçe / dışa aktar",
+  "browse": "Gözat",
+  "cancel": "İptal",
+  "search": "Ara",
+  "rarity": "Nadirlik",
+  "banner": "Afiş",
+  "pulls": "{n} dilek",
+  "pullsTimes": "{n} dilek × {primos}",
+  "pullsPrimos": "{n} dilek · ✦ {primos}",
+  "lifetime": "Toplam dilek",
+  "allWishes": "Tüm dilekler",
+  "newPulls": "{n} yeni dilek",
+  "nothingNew": "Yeni bir şey yok",
+  "banners": {
+    "character": {
+      "label": "Karakter",
+      "title": "Karakter Etkinliği"
+    },
+    "weapon": {
+      "label": "Silah",
+      "title": "Silah Etkinliği"
+    },
+    "standard": {
+      "label": "Standart",
+      "title": "Standart"
+    },
+    "chronicled": {
+      "label": "Nostaljik",
+      "title": "Nostaljik Dilek"
+    },
+    "beginners": {
+      "label": "Başlangıç",
+      "title": "Başlangıç Dileği"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "Oca",
+      "2": "Şub",
+      "3": "Mar",
+      "4": "Nis",
+      "5": "May",
+      "6": "Haz",
+      "7": "Tem",
+      "8": "Ağu",
+      "9": "Eyl",
+      "10": "Eki",
+      "11": "Kas",
+      "12": "Ara"
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "şimdi"
+  },
+  "outcomes": {
+    "won": "Kazandı",
+    "lost": "Kaybetti",
+    "guaranteed": "Garantili"
+  },
+  "outcomeTitles": {
+    "won": "{odds} kazanıldı",
+    "lost": "{odds} kaybedildi: sonraki öne çıkan olacak",
+    "guaranteed": "Öne çıkan, kaybedilen bir {odds} sonrası garantili"
+  },
+  "legend": {
+    "won": "kazanıldı",
+    "lost": "kaybedildi",
+    "guaranteed": "garantili"
+  },
+  "overview": {
+    "newestPull": "En yeni dilek, oyun saati",
+    "synced": "{ago} senkronize edildi",
+    "syncedTitle": "Yeni dilekler {time} saklandı",
+    "syncHelp": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin): irminsul her afişi, ardından anahtar geçerli kaldıkça (~24 sa) her yeni dileği senkronize eder. Oyunun dilek bağlantısı son altı ayı da getirir. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",
+    "empty": "Henüz dilek yok",
+    "emptyBody": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin) veya oyunun dilek bağlantısıyla içe aktar. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",
+    "banners": "Afişler",
+    "totals": "Toplamlar",
+    "worth": "Dileklerin değeri",
+    "worthHint": "{n} dilek × {primos} Köken Taşı",
+    "wishes": "{n} dilek",
+    "avgPity": "Ort. 5★ sayacı",
+    "avgPityHint": "Karakter Etkinliği: her 5★'ın ortalama garanti sayacı; yumuşak garantiyle beklenen yaklaşık {expected}",
+    "avgPityVs": "Beklenen {expected} karşısında {diff}"
+  },
+  "card": {
+    "everyPull": "{banner}: tüm dilekler",
+    "fiveTitle": "Kesin garantiye {left} dilek · ✦ {primos} · yumuşak garanti {soft} itibarıyla",
+    "fourTitle": "Kesin 4★'a {left}",
+    "fourFeatured": " · sonraki 4★ öne çıkan olacak",
+    "pity5": "5★ sayacı",
+    "pity4": "4★ sayacı",
+    "guaranteedAt": "{n} dilekte garantili",
+    "hideLatest": "Son dilekleri gizle",
+    "showLatest": "Son dilekleri göster",
+    "latest": "Son dilekler",
+    "latestRegion": "{banner}: son dilekler",
+    "none": "Yok",
+    "cols": {
+      "name": "Ad",
+      "time": "Zaman",
+      "pity": "Sayaç"
+    }
+  },
+  "five": {
+    "every": "Tüm 5★",
+    "newestFirst": "{n} · en yeni önce",
+    "none": "Henüz 5★ yok",
+    "pity": "{name} · sayaç {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Platform",
+    "copyFailed": "Kopyalanmadı: komutu seç ve kopyala",
+    "steps": {
+      "open": "Oyunda Dilek → Geçmiş'i aç ve yüklenmesini bekle.",
+      "android2": "Wi-Fi'yi ve mobil veriyi kapat.",
+      "android3": "Yenile'ye dokun (sağ üst): sayfa bir metinle birlikte hata gösterir.",
+      "android4": "O metnin tamamını seç ve kopyala.",
+      "android5": "Bağlantıyı tekrar aç, sonra aşağıya yapıştır.",
+      "ios1": "Paimon menüsü → Geri Bildirim'i aç ve yüklenmesini bekle.",
+      "ios2": "Oyun içi sorun → Eşli Mod'a dokun.",
+      "ios3": "Yanıtın altındaki bağlantıya dokun: tarayıcıda açılır.",
+      "ios4": "O bağlantıyı kopyala ve aşağıya yapıştır.",
+      "ps1": "Oyunda QR kodlu etkinlik postasını aç.",
+      "ps2": "Kodu telefonunla tara ve açtığı bağlantıyı kopyala.",
+      "ps3": "Aşağıya yapıştır. Başarısız olursa PlayStation'ını bir HoYoverse hesabına bağla ve bilgisayar veya telefon adımlarını kullan.",
+      "pcRun": "PowerShell'i aç (Başlat, PowerShell yaz) ve çalıştır:",
+      "pcPaste": "Bağlantıyı kopyalar: aşağıya yapıştır.",
+      "pcPasteTitle": "irminsul'un Copy wish URL düğmesi aynı bağlantıyı verir"
+    },
+    "scriptTitle": "Bu bilgisayardaki oyunun web önbelleğini okur, bağlantıyı HoYoverse ile bir kez kontrol eder, kopyalar. Başka bir şey yapmaz.",
+    "copied": "Kopyalandı",
+    "copy": "Kopyala",
+    "readScript": "Betiği oku",
+    "label": "Dilek geçmişi bağlantısı",
+    "placeholder": "Bağlantıyı yapıştır: https://…",
+    "invalid": "Bu metinde dilek geçmişi bağlantısı yok",
+    "uidMismatch": "Bu bağlantı UID {uid}; bu hesap UID {own}.",
+    "failed": "İçe aktarma başarısız",
+    "saving": "{n} kaydediliyor…",
+    "progress": "{banner} · sayfa {page} · {n} yeni",
+    "errors": {
+      "cancelled": "İptal edildi",
+      "network": "Dilek geçmişi yanıt vermedi. Daha sonra tekrar dene.",
+      "expired": "Bağlantının süresi doldu. Oyunda Dilek → Geçmiş'i tekrar aç ve yeni bir bağlantı kopyala.",
+      "throttled": "HoYoverse yavaşlamanı istiyor. Birkaç dakika sonra tekrar dene.",
+      "api": "HoYoverse yanıtı: {message}",
+      "code": "hata {code}"
+    }
+  },
+  "chart": {
+    "title": "Aylık dilekler",
+    "label": "Nadirliğe göre aylık dilekler, {n} ay",
+    "month": "{month}: {n} dilek"
+  },
+  "numbers": {
+    "label": "Rakamlar",
+    "avgPity": "{share} · ort. sayaç {avg}",
+    "expected": "Yumuşak garantiyle beklenen 5★ sayacı yaklaşık {n}",
+    "expectedAbout": "Yumuşak garantiyle beklenen yaklaşık {n}",
+    "streak": "seri {current} · en iyi {best} kazanma · en kötü {worst} kaybetme",
+    "streakWon": "{n} kazanma",
+    "streakLost": "{n} kaybetme",
+    "flipTitle": "{odds} durumundayken öne çıkan bir 5★ (garantili olanlar hariç)",
+    "split": "4★ dağılımı",
+    "character": "karakter",
+    "char": "kar.",
+    "weapon": "silah",
+    "rateUp": "4★ oran artışı {total} denemede {won} kazanma · {share}",
+    "splitTitle": "Türe göre 4★",
+    "splitTitleFull": "Türe göre 4★ ve 4★ oran artışı yazı turaları"
+  },
+  "odds": {
+    "guaranteed": "Garantili",
+    "lostLast": "Son {odds} kaybedildi ({name}): sonraki 5★ öne çıkan olacak",
+    "nextFeatured": "Sonraki 5★ öne çıkan olacak",
+    "weapon": "Sonraki 5★: %75 öne çıkan bir silah",
+    "coin": "Sonraki 5★: yazı tura"
+  },
+  "track": {
+    "label": "Sayaç {pity}/{hard}, yumuşak garanti {soft} itibarıyla"
+  },
+  "runs": {
+    "label": "Afiş dönemleri",
+    "heading": "Afişler",
+    "count": "{n} dönem",
+    "fewer": "Daha az",
+    "all": "Tüm dönemler",
+    "current": " · güncel",
+    "no5": "5★ yok"
+  },
+  "small": {
+    "pitySoFar": "sayaç {pity} / {hard}"
+  },
+  "table": {
+    "label": "Tüm dilekler",
+    "search": "Dileklerde ara",
+    "searchTitle": "Karakter veya silah adı",
+    "noMatch": "Eşleşen dilek yok",
+    "rollRun": "O afiş dönemindeki dilek numarası",
+    "roll": "Dilek no.",
+    "item": "Eşya",
+    "pity": "Sayaç",
+    "result": "Sonuç",
+    "time": "Zaman",
+    "newestFirst": "En yeni önce",
+    "oldestFirst": "En eski önce",
+    "newestFirstSr": "en yeni önce",
+    "oldestFirstSr": "en eski önce",
+    "weapon": "Silah",
+    "character": "Karakter",
+    "pages": "Dilek sayfaları"
+  },
+  "transfer": {
+    "backup": "paimon.moe yedeği",
+    "modes": {
+      "link": "Dilek bağlantısı",
+      "file": "Dosya"
+    },
+    "importFrom": "Şuradan içe aktar",
+    "noRecords": "Kayıt yok",
+    "uidMismatch": "Bu geçmiş UID {uid}; bu hesap UID {own}",
+    "account": "Hesap {n}",
+    "notWishFile": "UIGF veya paimon.moe dosyası değil",
+    "alreadyHeld": "{n} zaten var",
+    "notImported": "İçe aktarılmadı",
+    "deleteTitle": "Dilek geçmişi silinsin mi?",
+    "deleteDetail": "Bu hesabın tüm {n} dileği kaldırılır. irminsul son altı ayı tekrar getirebilir.",
+    "deleteConfirm": "Sil",
+    "notDeleted": "Silinmedi",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), paimon.moe içe aktarıcı CSV'si veya paimon.moe yedeği (Settings → Export)",
+    "drop": "UIGF veya paimon.moe dosyası",
+    "fileAccount": "Dosyadaki hesap",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward ve çoğu dilek takipçisi okur",
+    "paimonTitle": "paimon.moe'nun Local Importer'ı için (Wish counter → Import → Local)",
+    "delete": "Sil",
+    "deleteHistory": "Geçmişi sil"
+  },
+  "bannerPage": {
+    "noPulls": "Bu afişte dilek yok",
+    "now": "Şimdi",
+    "hardTitle": "Kesin garantiye {left} dilek · ✦ {primos}",
+    "toHard": "Kesin garantiye {left} · ✦ {primos}",
+    "softFrom": "yumuşak {soft} itibarıyla",
+    "featuredNext": "Sıradaki öne çıkan",
+    "featuredNextTitle": "Son 4★ afiş dışıydı: sonraki öne çıkan olacak",
+    "toGuaranteed4": "Garantili 4★'a {n}"
+  }
+}

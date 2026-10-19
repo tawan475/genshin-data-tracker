@@ -1,0 +1,75 @@
+{
+  "title": "Aneddoti",
+  "area": "Area {id}",
+  "newestCapture": "Ultima cattura",
+  "newestCaptureTitle": "Ultima cattura: {time}",
+  "notCaptured": "Non catturati",
+  "notCapturedTitle": "Nessuna cattura contiene ancora aneddoti: irminsul li registra dal gioco",
+  "loadFailed": "Caricamento non riuscito",
+  "allDone": "Tutti completati",
+  "showDone": "Mostra completati",
+  "noneDone": "Nessuno completato",
+  "showNotDone": "Mostra da fare",
+  "noneMet": "Ancora nessuno incontrato",
+  "noneMetBody": "Gli aneddoti nascosti compaiono una volta incontrati.",
+  "noMatches": "Nessun risultato",
+  "clear": "Cancella",
+  "loading": "Caricamento",
+  "notSaved": "Non salvato",
+  "group": {
+    "hideDone": "Nascondi completati",
+    "showDone": "Mostra completati",
+    "done": "{n} completati"
+  },
+  "row": {
+    "states": {
+      "captured": "catturato",
+      "marked": "segnato a mano",
+      "none": "non completato"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Catturato · resta completato",
+    "markedByHand": "Segnato a mano",
+    "markedClick": "Segnato a mano · clicca per togliere il segno",
+    "notDone": "Non completato",
+    "clickToMark": "Clicca per segnare come completato",
+    "activeTitle": "In corso ora nel gioco",
+    "active": "In corso",
+    "repeatTitle": "Completato {n} volte (ciclico)",
+    "hidden": "Aneddoto nascosto",
+    "addedIn": "Aggiunto nella {version}"
+  },
+  "summary": {
+    "label": "Riepilogo",
+    "done": "Completati",
+    "doneCaptured": "{n} catturati",
+    "doneByHand": "{n} a mano",
+    "doneUnknown": "{n} più recenti dei dati di gioco",
+    "doneLabel": "Aneddoti completati",
+    "stamps": "Timbri",
+    "stampsTitle": "Timbri verso la ricompensa {n}",
+    "stampsNone": "Non ancora in una cattura",
+    "stampsLabel": "Timbri verso la prossima ricompensa",
+    "reward": "Ricompensa",
+    "rewardHint": "{primogems} primogemme ogni {every} aneddoti registrati",
+    "rewardPer": "ogni {every}",
+    "active": "In corso",
+    "activeHint": "In corso ora nel gioco (nell'ultima cattura)"
+  },
+  "toolbar": {
+    "label": "Filtra aneddoti",
+    "search": "Cerca",
+    "searchTitle": "Titolo, storia, PNG o id",
+    "completion": "Completamento",
+    "completions": {
+      "all": "Tutti",
+      "missing": "Da fare",
+      "done": "Completati"
+    },
+    "showDone": "Mostra completati",
+    "showDoneTitle": "Aneddoti completati per intero invece che raccolti sotto ogni PNG",
+    "area": "Area",
+    "allAreas": "Tutte",
+    "locked": "Non sbloccata nell'ultima cattura"
+  }
+}

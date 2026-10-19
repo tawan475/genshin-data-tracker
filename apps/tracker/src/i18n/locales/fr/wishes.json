@@ -1,0 +1,260 @@
+{
+  "title": "Historique des vœux",
+  "bannerPageTitle": "Historique des vœux · {banner}",
+  "loadFailed": "Échec du chargement",
+  "loading": "Chargement",
+  "import": "Importer",
+  "export": "Exporter",
+  "importExport": "Importer / exporter",
+  "browse": "Parcourir",
+  "cancel": "Annuler",
+  "search": "Rechercher",
+  "rarity": "Rareté",
+  "banner": "Bannière",
+  "pulls": "{n} vœux",
+  "pullsTimes": "{n} vœux × {primos}",
+  "pullsPrimos": "{n} vœux · ✦ {primos}",
+  "lifetime": "Vœux au total",
+  "allWishes": "Tous les vœux",
+  "newPulls": "{n} nouveaux vœux",
+  "nothingNew": "Rien de nouveau",
+  "banners": {
+    "character": {
+      "label": "Personnage",
+      "title": "Vœux événements de personnage"
+    },
+    "weapon": {
+      "label": "Arme",
+      "title": "Vœux événements d'arme"
+    },
+    "standard": {
+      "label": "Permanent",
+      "title": "Vœux permanents"
+    },
+    "chronicled": {
+      "label": "Nostalgie",
+      "title": "Vœux nostalgie"
+    },
+    "beginners": {
+      "label": "Débutants",
+      "title": "Vœux des débutants"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "janv.",
+      "2": "févr.",
+      "3": "mars",
+      "4": "avr.",
+      "5": "mai",
+      "6": "juin",
+      "7": "juil.",
+      "8": "août",
+      "9": "sept.",
+      "10": "oct.",
+      "11": "nov.",
+      "12": "déc."
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "maintenant"
+  },
+  "outcomes": {
+    "won": "Gagné",
+    "lost": "Perdu",
+    "guaranteed": "Garanti"
+  },
+  "outcomeTitles": {
+    "won": "{odds} gagné",
+    "lost": "{odds} perdu : le prochain est en vedette",
+    "guaranteed": "En vedette, garanti après un {odds} perdu"
+  },
+  "legend": {
+    "won": "gagné",
+    "lost": "perdu",
+    "guaranteed": "garanti"
+  },
+  "overview": {
+    "newestPull": "Vœu le plus récent, heure du jeu",
+    "synced": "Synchronisé {ago}",
+    "syncedTitle": "Nouveaux vœux enregistrés {time}",
+    "syncHelp": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt) : irminsul synchronise chaque bannière, puis chaque nouveau vœu tant que la clé dure (~24 h). Le lien de vœux du jeu apporte aussi les six derniers mois. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",
+    "empty": "Aucun vœu",
+    "emptyBody": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt), ou importez avec le lien de vœux du jeu. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",
+    "banners": "Bannières",
+    "totals": "Totaux",
+    "worth": "Valeur des vœux",
+    "worthHint": "{n} vœux × {primos} Primo-gemmes",
+    "wishes": "{n} vœux",
+    "avgPity": "Pity 5★ moyen",
+    "avgPityHint": "Vœux événements de personnage : le pity moyen de chaque 5★, contre environ {expected} attendu avec le soft pity",
+    "avgPityVs": "{diff} vs {expected} attendu"
+  },
+  "card": {
+    "everyPull": "{banner} : tous les vœux",
+    "fiveTitle": "{left} vœux avant le hard pity · ✦ {primos} · soft pity dès {soft}",
+    "fourTitle": "{left} avant un 4★ assuré",
+    "fourFeatured": " · le prochain 4★ est en vedette",
+    "pity5": "Pity 5★",
+    "pity4": "Pity 4★",
+    "guaranteedAt": "Garanti à {n}",
+    "hideLatest": "Masquer les derniers vœux",
+    "showLatest": "Afficher les derniers vœux",
+    "latest": "Derniers vœux",
+    "latestRegion": "{banner} : derniers vœux",
+    "none": "Aucun",
+    "cols": {
+      "name": "Nom",
+      "time": "Heure",
+      "pity": "Pity"
+    }
+  },
+  "five": {
+    "every": "Tous les 5★",
+    "newestFirst": "{n} · plus récents d'abord",
+    "none": "Aucun 5★",
+    "pity": "{name} · pity {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Plateforme",
+    "copyFailed": "Non copié : sélectionnez la commande et copiez-la",
+    "steps": {
+      "open": "Ouvrez Vœux → Historique dans le jeu et laissez charger.",
+      "android2": "Coupez le Wi-Fi et les données mobiles.",
+      "android3": "Touchez Actualiser (en haut à droite) : la page affiche une erreur avec du texte.",
+      "android4": "Sélectionnez tout ce texte et copiez-le.",
+      "android5": "Rétablissez la connexion, puis collez-le ci-dessous.",
+      "ios1": "Ouvrez le menu Paimon → Commentaires et laissez charger.",
+      "ios2": "Touchez Problème en jeu → Mode multijoueur.",
+      "ios3": "Touchez le lien en bas de la réponse : il s'ouvre dans le navigateur.",
+      "ios4": "Copiez ce lien et collez-le ci-dessous.",
+      "ps1": "Ouvrez dans le jeu le message d'événement avec un QR code.",
+      "ps2": "Scannez le code avec votre téléphone et copiez le lien qu'il ouvre.",
+      "ps3": "Collez-le ci-dessous. En cas d'échec, liez votre PlayStation à un compte HoYoverse et suivez les étapes PC ou téléphone.",
+      "pcRun": "Ouvrez PowerShell (Démarrer, tapez PowerShell) et lancez :",
+      "pcPaste": "Il copie le lien : collez-le ci-dessous.",
+      "pcPasteTitle": "Copy wish URL d'irminsul donne le même lien"
+    },
+    "scriptTitle": "Lit le cache web du jeu sur ce PC, vérifie le lien une fois auprès de HoYoverse, le copie. Rien d'autre.",
+    "copied": "Copié",
+    "copy": "Copier",
+    "readScript": "Lire le script",
+    "label": "Lien de l'historique des vœux",
+    "placeholder": "Collez le lien : https://…",
+    "invalid": "Aucun lien d'historique des vœux dans ce texte",
+    "uidMismatch": "Ce lien est l'UID {uid} ; ce compte est l'UID {own}.",
+    "failed": "Échec de l'import",
+    "saving": "Enregistrement de {n}…",
+    "progress": "{banner} · page {page} · {n} nouveaux",
+    "errors": {
+      "cancelled": "Annulé",
+      "network": "L'historique des vœux n'a pas répondu. Réessayez plus tard.",
+      "expired": "Le lien a expiré. Rouvrez Vœux → Historique dans le jeu et copiez-en un nouveau.",
+      "throttled": "HoYoverse demande de ralentir. Réessayez dans quelques minutes.",
+      "api": "HoYoverse a répondu : {message}",
+      "code": "erreur {code}"
+    }
+  },
+  "chart": {
+    "title": "Vœux par mois",
+    "label": "Vœux par mois selon la rareté, {n} mois",
+    "month": "{month} : {n} vœux"
+  },
+  "numbers": {
+    "label": "Chiffres",
+    "avgPity": "{share} · pity moyen {avg}",
+    "expected": "Pity 5★ attendu d'environ {n} avec le soft pity",
+    "expectedAbout": "Environ {n} attendu avec le soft pity",
+    "streak": "série {current} · meilleure {best} gagnés · pire {worst} perdus",
+    "streakWon": "{n} gagné(s)",
+    "streakLost": "{n} perdu(s)",
+    "flipTitle": "Un 5★ en vedette quand c'était un {odds} (garantis exclus)",
+    "split": "Répartition 4★",
+    "character": "personnage",
+    "char": "perso",
+    "weapon": "arme",
+    "rateUp": "4★ en vedette gagnés {won} sur {total} · {share}",
+    "splitTitle": "4★ par type",
+    "splitTitleFull": "4★ par type, et pile ou face des 4★ en vedette"
+  },
+  "odds": {
+    "guaranteed": "Garanti",
+    "lostLast": "Dernier {odds} perdu ({name}) : le prochain 5★ est en vedette",
+    "nextFeatured": "Le prochain 5★ est en vedette",
+    "weapon": "Prochain 5★ : 75 % une arme en vedette",
+    "coin": "Prochain 5★ : pile ou face"
+  },
+  "track": {
+    "label": "Pity {pity} sur {hard}, soft pity dès {soft}"
+  },
+  "runs": {
+    "label": "Passages de bannières",
+    "heading": "Bannières",
+    "count": "{n} passage | {n} passages",
+    "fewer": "Moins",
+    "all": "Tous les passages",
+    "current": " · en cours",
+    "no5": "Aucun 5★"
+  },
+  "small": {
+    "pitySoFar": "pity {pity} / {hard}"
+  },
+  "table": {
+    "label": "Tous les vœux",
+    "search": "Rechercher des vœux",
+    "searchTitle": "Nom du personnage ou de l'arme",
+    "noMatch": "Aucun vœu ne correspond",
+    "rollRun": "Numéro du vœu sur ce passage de bannière",
+    "roll": "Numéro du vœu",
+    "item": "Objet",
+    "pity": "Pity",
+    "result": "Résultat",
+    "time": "Heure",
+    "newestFirst": "Plus récents d'abord",
+    "oldestFirst": "Plus anciens d'abord",
+    "newestFirstSr": "plus récents d'abord",
+    "oldestFirstSr": "plus anciens d'abord",
+    "weapon": "Arme",
+    "character": "Personnage",
+    "pages": "Pages des vœux"
+  },
+  "transfer": {
+    "backup": "Sauvegarde paimon.moe",
+    "modes": {
+      "link": "Lien de vœux",
+      "file": "Fichier"
+    },
+    "importFrom": "Importer depuis",
+    "noRecords": "Aucun enregistrement",
+    "uidMismatch": "Cet historique est l'UID {uid} ; ce compte est l'UID {own}",
+    "account": "Compte {n}",
+    "notWishFile": "Pas un fichier UIGF ou paimon.moe",
+    "alreadyHeld": "{n} déjà présents",
+    "notImported": "Non importé",
+    "deleteTitle": "Supprimer l'historique des vœux ?",
+    "deleteDetail": "Les {n} vœux de ce compte sont supprimés. irminsul peut récupérer à nouveau les six derniers mois.",
+    "deleteConfirm": "Supprimer",
+    "notDeleted": "Non supprimé",
+    "dropTitle": "JSON UIGF (Snap Hutao, Starward, genshin-wish-export…), un CSV de l'importeur paimon.moe, ou la sauvegarde paimon.moe (Settings → Export)",
+    "drop": "Fichier UIGF ou paimon.moe",
+    "fileAccount": "Compte du fichier",
+    "uigfTitle": "UIGF v4.1 : Snap Hutao, Starward et la plupart des trackers de vœux le lisent",
+    "paimonTitle": "Pour le Local Importer de paimon.moe (Wish counter → Import → Local)",
+    "delete": "Supprimer",
+    "deleteHistory": "Supprimer l'historique"
+  },
+  "bannerPage": {
+    "noPulls": "Aucun vœu sur cette bannière",
+    "now": "Maintenant",
+    "hardTitle": "{left} vœux avant le hard pity · ✦ {primos}",
+    "toHard": "{left} avant le hard pity · ✦ {primos}",
+    "softFrom": "soft dès {soft}",
+    "featuredNext": "Vedette ensuite",
+    "featuredNextTitle": "Le dernier 4★ n'était pas en vedette : le prochain le sera",
+    "toGuaranteed4": "{n} avant le 4★ garanti"
+  }
+}

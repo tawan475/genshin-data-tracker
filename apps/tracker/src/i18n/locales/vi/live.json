@@ -1,0 +1,44 @@
+{
+  "label": "Trực tiếp",
+  "thisSession": "Phiên này",
+  "sessionSince": "Từ {time}",
+  "levelUps": "{n} lần tăng cấp",
+  "talents": "{n} Thiên Phú",
+  "updated": "cập nhật {ago}",
+  "updatedAt": "Cập nhật lúc {time}",
+  "row": "Trực tiếp",
+  "rowDetail": "{n} thay đổi kể từ bản chụp này",
+  "sinceSnapshot": "kể từ bản chụp mới nhất",
+  "discard": "Bỏ",
+  "discardTitle": "Xóa các thay đổi này; bản chụp mới nhất vẫn giữ nguyên",
+  "discarded": "Đã xóa thay đổi trực tiếp",
+  "discardFailed": "Không xóa được thay đổi trực tiếp",
+  "settings": {
+    "title": "Đồng bộ trực tiếp",
+    "label": "Theo dõi Irminsul trực tiếp",
+    "description": "Khi Irminsul đang chạy, các thay đổi sẽ hiện ở đây trong vài giây, giữa các bản chụp.",
+    "devices": "Đồng bộ trực tiếp từ máy này tới: {accounts} (Thiết lập tài khoản)",
+    "deletePoints": "Xóa điểm biểu đồ",
+    "deletePointsTitle": "Xóa các điểm biểu đồ mà đồng bộ trực tiếp lưu giữa các bản chụp",
+    "deletePointsConfirm": "Xóa mọi điểm biểu đồ của tài khoản này? Bản chụp vẫn giữ nguyên.",
+    "pointsDeleted": "Đã xóa điểm biểu đồ",
+    "exportNote": "Bản xuất gồm cả thay đổi và điểm trực tiếp (live/ trong tệp zip)."
+  },
+  "session": {
+    "heading": "Phiên chơi",
+    "hours": "{h} giờ {m} phút",
+    "minutes": "{m} phút",
+    "world": "Thế Giới {n}",
+    "newCharacter": "{name} gia nhập",
+    "more": "+{n} nữa",
+    "showMore": "Xem thêm ({n})",
+    "field": {
+      "level": "{name} Cấp {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} tấn công {from}→{to}",
+      "skill": "{name} kỹ năng {from}→{to}",
+      "burst": "{name} nộ {from}→{to}"
+    }
+  },
+  "staffBytes": "Đồng bộ trực tiếp lưu thêm {size} (gdt-live)"
+}

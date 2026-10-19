@@ -1,0 +1,73 @@
+{
+  "progression": "ความคืบหน้า",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Primogem",
+    "characters": "ตัวละคร",
+    "weapons": "อาวุธ",
+    "artifacts": "อาร์ติแฟกต์",
+    "artifact4": "อาร์ติแฟกต์ 4★",
+    "artifact3": "อาร์ติแฟกต์ 3★"
+  },
+  "server": {
+    "AMERICA": "อเมริกา",
+    "EUROPE": "ยุโรป",
+    "ASIA": "เอเชีย",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "ยังไม่มีสแนปช็อต",
+  "import": "นำเข้า",
+  "historyUnavailable": "ไม่มีประวัติ",
+  "currencyCarried": "จากการสแกนครั้งก่อน",
+  "currencyMissing": "ไม่มีในการสแกนล่าสุด",
+  "sincePrevious": "ตั้งแต่สแนปช็อตก่อนหน้า",
+  "lastCaptured": "สแกนล่าสุด",
+  "lastCapturedAt": "สแกนล่าสุด {time}",
+  "seenAgain": "พบอีกครั้ง",
+  "seenAgainAt": "พบอีกครั้ง {time}",
+  "loadingHistory": "กำลังโหลดประวัติสแนปช็อต",
+  "lowRarity": {
+    "label": "อาร์ติแฟกต์ 4★ / 3★",
+    "hint": "ไม่ได้ล็อก ไม่ได้สวม",
+    "rarity": "{n} ดาว"
+  },
+  "card": {
+    "snapshots": "สแนปช็อต",
+    "storage": "พื้นที่จัดเก็บ",
+    "stored": "อัปโหลด {raw} จัดเก็บ {stored}",
+    "storedRatio": "อัปโหลด {raw} จัดเก็บ {stored} (เล็กลง {ratio})"
+  },
+  "monthly": {
+    "title": "วิเคราะห์รายเดือน",
+    "previous": "เดือนก่อนหน้า",
+    "previousTo": "เดือนก่อนหน้า {month}",
+    "next": "เดือนถัดไป",
+    "nextTo": "เดือนถัดไป {month}",
+    "gained": "ได้รับ {n}",
+    "spent": "ใช้ไป {n}",
+    "added": "เพิ่ม {n}",
+    "used": "ใช้ {n}",
+    "closing": "คงเหลือ {n}",
+    "artifactExp": "EXP อาร์ติแฟกต์ {n} ที่เลเวล 0",
+    "thisMonth": "เดือนนี้ · {detail}",
+    "gapTitle": "ไม่มีการสแกน {n} วัน",
+    "vs": "เทียบกับ {day}",
+    "captures": "สแกน {n} ครั้ง",
+    "comparedWith": "{captures} เทียบกับ {day}",
+    "noCaptures": "ไม่มีการสแกน",
+    "noCapture": "ไม่มีการสแกน",
+    "caption": "การเปลี่ยนแปลงรายวันใน {month}: การสแกนล่าสุดของแต่ละวันเทียบกับวันที่สแกนก่อนหน้า พร้อมค่าด้านล่าง",
+    "day": "วัน",
+    "dayTitle": "การสแกนล่าสุดของวันเทียบกับวันที่สแกนก่อนหน้า ตามเวลาท้องถิ่น"
+  },
+  "recent": {
+    "title": "ล่าสุด",
+    "all": "ทั้งหมด",
+    "allTitle": "สแนปช็อตทั้งหมด {n} รายการ",
+    "size": "อัปโหลด {raw} ไบต์ จัดเก็บ {stored} ไบต์",
+    "unchanged": "ยอดรวมไม่เปลี่ยน",
+    "first": "สแนปช็อตแรก",
+    "currencyMissing": "ไม่มี Mora และ Primogem",
+    "noCurrency": "ไม่มีสกุลเงิน"
+  }
+}

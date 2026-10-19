@@ -1,0 +1,75 @@
+{
+  "title": "秘話",
+  "area": "エリア {id}",
+  "newestCapture": "最新キャプチャ",
+  "newestCaptureTitle": "最新キャプチャ：{time}",
+  "notCaptured": "未キャプチャ",
+  "notCapturedTitle": "秘話を含むキャプチャはまだありません：irminsul がゲームから記録します",
+  "loadFailed": "読み込み失敗",
+  "allDone": "すべて完了",
+  "showDone": "完了済みを表示",
+  "noneDone": "完了なし",
+  "showNotDone": "未完了を表示",
+  "noneMet": "まだ出会っていません",
+  "noneMetBody": "隠し秘話は出会うと表示されます。",
+  "noMatches": "該当なし",
+  "clear": "クリア",
+  "loading": "読み込み中",
+  "notSaved": "保存されていません",
+  "group": {
+    "hideDone": "完了済みを隠す",
+    "showDone": "完了済みを表示",
+    "done": "{n}件完了"
+  },
+  "row": {
+    "states": {
+      "captured": "キャプチャ済み",
+      "marked": "手動マーク",
+      "none": "未完了"
+    },
+    "aria": "{title}：{state}",
+    "capturedStays": "キャプチャ済み · 完了のままです",
+    "markedByHand": "手動マーク",
+    "markedClick": "手動マーク · クリックで外す",
+    "notDone": "未完了",
+    "clickToMark": "クリックで完了にする",
+    "activeTitle": "ゲーム内で進行中",
+    "active": "進行中",
+    "repeatTitle": "{n}回完了（繰り返し）",
+    "hidden": "隠し秘話",
+    "addedIn": "{version} で追加"
+  },
+  "summary": {
+    "label": "概要",
+    "done": "完了",
+    "doneCaptured": "キャプチャ {n}件",
+    "doneByHand": "手動 {n}件",
+    "doneUnknown": "ゲームデータより新しい {n}件",
+    "doneLabel": "完了した秘話",
+    "stamps": "スタンプ",
+    "stampsTitle": "報酬 {n} までのスタンプ",
+    "stampsNone": "まだキャプチャにありません",
+    "stampsLabel": "次の報酬までのスタンプ",
+    "reward": "報酬",
+    "rewardHint": "秘話を{every}件記録するごとに原石 {primogems}",
+    "rewardPer": "{every}件ごと",
+    "active": "進行中",
+    "activeHint": "ゲーム内で進行中（最新キャプチャ時点）"
+  },
+  "toolbar": {
+    "label": "秘話を絞り込む",
+    "search": "検索",
+    "searchTitle": "タイトル、ストーリー、NPC、ID",
+    "completion": "完了状況",
+    "completions": {
+      "all": "すべて",
+      "missing": "未完了",
+      "done": "完了"
+    },
+    "showDone": "完了済みを表示",
+    "showDoneTitle": "完了した秘話を NPC ごとに折りたたまず、すべて表示します",
+    "area": "エリア",
+    "allAreas": "すべて",
+    "locked": "最新キャプチャでは未開放"
+  }
+}

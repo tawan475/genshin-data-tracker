@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Ringkasan",
+    "progression": "Progres",
+    "characters": "Karakter",
+    "artifacts": "Artefak",
+    "weapons": "Senjata",
+    "materials": "Material",
+    "planner": "Perencana",
+    "achievements": "Achievement",
+    "anecdotes": "Anekdot",
+    "wishes": "Permohonan",
+    "snapshots": "Snapshot",
+    "import": "Impor",
+    "manage": "Kelola",
+    "staffOverview": "Ringkasan",
+    "users": "Pengguna",
+    "storage": "Penyimpanan",
+    "roles": "Peran",
+    "audit": "Audit"
+  },
+  "section": {
+    "staff": "Staf",
+    "account": "Akun",
+    "system": "Sistem"
+  },
+  "accounts": "Akun",
+  "staff": "Staf",
+  "settings": "Pengaturan",
+  "import": "Impor",
+  "expandMenu": "Bentangkan menu",
+  "collapseMenu": "Ciutkan menu",
+  "openMenu": "Buka menu",
+  "closeMenu": "Tutup menu",
+  "lightTheme": "Tema terang",
+  "darkTheme": "Tema gelap",
+  "themeNotSaved": "Tema tidak tersimpan",
+  "landingPage": "Halaman depan",
+  "return": "Kembali",
+  "highestRole": "Peran tertinggimu",
+  "copyName": "Salin nama",
+  "copyUid": "Salin UID",
+  "copyUidValue": "Salin UID {uid}",
+  "nameCopied": "Nama disalin",
+  "uidCopied": "UID disalin",
+  "switcher": {
+    "select": "Pilih akun",
+    "add": "Tambah akun"
+  },
+  "page": {
+    "signIn": "Masuk",
+    "createAccount": "Buat akun",
+    "continue": "Lanjut",
+    "linkIrminsul": "Tautkan Irminsul",
+    "resetPassword": "Atur ulang kata sandi",
+    "newPassword": "Kata sandi baru",
+    "confirmEmail": "Konfirmasi email",
+    "accounts": "Akun",
+    "addAccount": "Tambah akun",
+    "settings": "Pengaturan",
+    "overview": "Ringkasan",
+    "users": "Pengguna",
+    "user": "Pengguna",
+    "storage": "Penyimpanan",
+    "roles": "Peran",
+    "audit": "Audit",
+    "progression": "Progres",
+    "characters": "Karakter",
+    "weapons": "Senjata",
+    "artifacts": "Artefak",
+    "materials": "Material",
+    "planner": "Perencana",
+    "achievements": "Achievement",
+    "anecdotes": "Anekdot",
+    "wishHistory": "Riwayat Permohonan",
+    "snapshots": "Snapshot",
+    "import": "Impor",
+    "accountSettings": "Pengaturan akun",
+    "notFound": "Tidak ditemukan",
+    "inspect": "Periksa · {page}"
+  },
+  "notFound": {
+    "title": "Halaman tidak ditemukan",
+    "body": "Tautannya mungkin sudah lama, atau halamannya sudah pindah.",
+    "home": "Ke dasbor"
+  },
+  "accountMissing": {
+    "title": "Akun tidak ditemukan",
+    "body": "Akun ini mungkin sudah dihapus, atau milik orang lain.",
+    "all": "Semua akun"
+  },
+  "update": {
+    "ready": "Versi baru tracker sudah siap."
+  },
+  "public": {
+    "dashboard": "Dasbor"
+  },
+  "landing": {
+    "heroLine1": "Kuasai",
+    "heroLine2": "perjalanan Genshin-mu",
+    "tagline": "Setiap login, di-snapshot. Artefak, material, riwayat.",
+    "openDashboard": "Buka dasbor",
+    "getStarted": "Mulai",
+    "critDmg": "CRIT DMG 21.8%"
+  },
+  "appearance": "Bahasa dan tampilan"
+}

@@ -101,7 +101,8 @@ describe('auth', () => {
     expect(((await saved.json()) as { settings: { language: string } }).settings.language).toBe(
       'zh-TW',
     )
-    expect((await patch({ language: 'fr' })).status).toBe(400)
+    expect((await patch({ language: 'ja' })).status).toBe(200)
+    expect((await patch({ language: 'xx' })).status).toBe(400)
 
     const again = await new Client().fetch('/api/auth/register', {
       method: 'POST',

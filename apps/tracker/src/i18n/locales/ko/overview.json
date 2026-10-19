@@ -1,0 +1,73 @@
+{
+  "progression": "성장",
+  "figure": {
+    "mora": "모라",
+    "primogem": "원석",
+    "characters": "캐릭터",
+    "weapons": "무기",
+    "artifacts": "성유물",
+    "artifact4": "4★ 성유물",
+    "artifact3": "3★ 성유물"
+  },
+  "server": {
+    "AMERICA": "미국",
+    "EUROPE": "유럽",
+    "ASIA": "아시아",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "아직 스냅샷이 없습니다",
+  "import": "가져오기",
+  "historyUnavailable": "기록을 사용할 수 없음",
+  "currencyCarried": "이전 캡처의 값",
+  "currencyMissing": "최신 캡처에 없음",
+  "sincePrevious": "이전 스냅샷 대비",
+  "lastCaptured": "마지막 캡처",
+  "lastCapturedAt": "마지막 캡처 {time}",
+  "seenAgain": "다시 확인",
+  "seenAgainAt": "다시 확인 {time}",
+  "loadingHistory": "스냅샷 기록 불러오는 중",
+  "lowRarity": {
+    "label": "4★ / 3★ 성유물",
+    "hint": "잠금 해제, 미장착",
+    "rarity": "{n}성"
+  },
+  "card": {
+    "snapshots": "스냅샷",
+    "storage": "저장 공간",
+    "stored": "업로드 {raw}, 저장 {stored}",
+    "storedRatio": "업로드 {raw}, 저장 {stored} ({ratio} 작음)"
+  },
+  "monthly": {
+    "title": "월간 분석",
+    "previous": "이전 달",
+    "previousTo": "이전 달, {month}",
+    "next": "다음 달",
+    "nextTo": "다음 달, {month}",
+    "gained": "획득 {n}",
+    "spent": "소모 {n}",
+    "added": "추가 {n}",
+    "used": "사용 {n}",
+    "closing": "월말 {n}",
+    "artifactExp": "0레벨 성유물 경험치 {n}",
+    "thisMonth": "이번 달 · {detail}",
+    "gapTitle": "{n}일 동안 캡처 없음",
+    "vs": "{day} 대비",
+    "captures": "캡처 {n}개",
+    "comparedWith": "{captures}, {day} 대비",
+    "noCaptures": "캡처 없음",
+    "noCapture": "캡처 없음",
+    "caption": "{month}의 일별 변화: 각 날의 마지막 캡처를 이전 캡처일과 비교, 아래에 값 표시",
+    "day": "날짜",
+    "dayTitle": "그날의 마지막 캡처 vs 이전 캡처일, 현지 시간"
+  },
+  "recent": {
+    "title": "최근",
+    "all": "전체",
+    "allTitle": "스냅샷 {n}개 전체",
+    "size": "업로드 {raw}바이트, 저장 {stored}바이트",
+    "unchanged": "합계 변화 없음",
+    "first": "첫 스냅샷",
+    "currencyMissing": "모라와 원석 없음",
+    "noCurrency": "화폐 없음"
+  }
+}

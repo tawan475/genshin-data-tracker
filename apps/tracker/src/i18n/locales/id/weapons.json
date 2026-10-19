@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Lv {level}/{cap}",
+    "copies": "{n} salinan",
+    "locked": "Terkunci"
+  },
+  "sort": {
+    "quality": "Kualitas",
+    "level": "Level",
+    "refinement": "Refinement",
+    "count": "Salinan",
+    "name": "Nama",
+    "type": "Tipe"
+  },
+  "levelFilter": {
+    "all": "Level",
+    "max": "Maks",
+    "levelled": "Dinaikkan",
+    "base": "Lv 1"
+  },
+  "refine": {
+    "spare": "{n} cadangan",
+    "possible": "bisa: {title}"
+  },
+  "group": {
+    "copies": "{count} salinan"
+  },
+  "bag": {
+    "notInData": "{copies} · Belum ada di data game"
+  },
+  "toolbar": {
+    "bag": "Tas",
+    "byWeapon": "Per senjata",
+    "list": "Daftar",
+    "status": "Status",
+    "equipped": "Dikenakan",
+    "unused": "Tak dipakai",
+    "lock": "Kunci",
+    "locked": "Terkunci",
+    "unlocked": "Tak terkunci",
+    "label": "Filter senjata",
+    "searchTitle": "Senjata, tipe atau karakter",
+    "chips": "Tipe, kelangkaan dan refinement",
+    "noneInCapture": "Tidak ada di tangkapan ini",
+    "refinableTitle": "Senjata yang salinan cadangannya bisa me-refine senjata yang dikenakan",
+    "refinable": "Bisa di-refine"
+  },
+  "detail": {
+    "refinementTitle": "Refinement Rank {rank} dari {max}",
+    "unequipped": "Tidak dikenakan",
+    "copies": "{n} salinan",
+    "equipped": "{n} dikenakan",
+    "spareCopies": "{n} salinan cadangan"
+  },
+  "table": {
+    "qualityTitle": "Kualitas: kelangkaan, level, refinement, terbaru",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Jenis",
+    "kindsTitle": "Senjata berbeda",
+    "unused5": "5★ tak dipakai",
+    "refinableTitle": "Salinan cadangan bisa me-refine senjata yang dikenakan",
+    "empty": "Tidak ada senjata",
+    "pages": "Halaman senjata"
+  }
+}

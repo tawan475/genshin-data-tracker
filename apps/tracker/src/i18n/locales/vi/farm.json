@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "đủ cho mọi mục tiêu",
+    "alone": "đủ cho mục tiêu này",
+    "short": "thiếu"
+  },
+  "readiness": {
+    "all": {
+      "label": "Sẵn sàng",
+      "meaning": "Đủ sau các mục tiêu phía trên"
+    },
+    "alone": {
+      "label": "Đủ riêng",
+      "meaning": "Đủ nếu tính riêng, không đủ sau các mục tiêu phía trên"
+    },
+    "short": {
+      "label": "Thiếu",
+      "meaning": "Không đủ, kể cả khi tính riêng"
+    },
+    "done": {
+      "label": "Xong",
+      "meaning": "Đã đạt"
+    },
+    "artifacts": {
+      "label": "Thánh Di Vật",
+      "meaning": "Đã đạt cấp, còn Thánh Di Vật"
+    }
+  },
+  "bracket": {
+    "tier": "Bậc {tier}",
+    "bossLevel": "Boss cấp {level}",
+    "wl": "WL {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base}, giả định"
+  },
+  "unit": {
+    "days": "{n} ngày",
+    "weeks": "{n} tuần"
+  },
+  "status": {
+    "locked": "Hạng Mạo Hiểm hoặc Cấp Thế Giới chưa đủ để farm",
+    "noRate": "Nguồn này chưa có tỷ lệ rơi trung bình: không ước tính được",
+    "notFarmed": "Không có nguồn dùng Nhựa"
+  },
+  "time": {
+    "hm": "{h} giờ {m} phút",
+    "h": "{h} giờ",
+    "m": "{m} phút",
+    "dh": "{d} ngày {h} giờ",
+    "d": "{d} ngày"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Chuyển Hóa",
+      "craft": "Ghép",
+      "forge": "Rèn"
+    },
+    "item": "{count} {name}",
+    "convertRow": "Chuyển hóa {input} thành {output}",
+    "craftRow": "Ghép {output} từ {input}",
+    "forgeRow": "Rèn {output} từ {input}",
+    "kindTitle": {
+      "convert": "Giả Kim: chuyển hóa",
+      "craft": "Giả Kim: ghép, bậc thấp nhất trước",
+      "forge": "Lò Rèn: rèn"
+    },
+    "listSeparator": ", ",
+    "notYet": "Chưa được: cần thêm {items} (làm các bước phía trên trước)",
+    "doneRow": "Xong: {row}",
+    "notEnough": "Không đủ: cần thêm {items}",
+    "allDoneTitle": "Đã xong cả {n}: túi như sau khi làm",
+    "title": "Ghép",
+    "fold": "Thu gọn",
+    "unfold": "Những gì kế hoạch chuyển hóa, ghép và rèn",
+    "steps": "{n} bước",
+    "inAll": "tổng {cost}",
+    "forgingTime": "Thời gian rèn {time} (chưa tính hàng chờ của lò rèn)",
+    "forging": "đang rèn",
+    "allDone": "Đã xong hết",
+    "hideTitle": "Ẩn mục ghép (bật lại trong thiết lập Kế hoạch)",
+    "hide": "Ẩn mục ghép",
+    "from": "từ",
+    "fewer": "Thu gọn",
+    "all": "Tất cả {n}"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "WL {wl}",
+    "locked": "Chưa Mở"
+  },
+  "cards": {
+    "blossomExp": "Hoa Chỉ Thị",
+    "blossomMora": "Hoa Tàng Kim",
+    "local": "Đặc sản khu vực",
+    "common": "Kẻ Địch Thường",
+    "elite": "Kẻ địch tinh anh",
+    "other": "Khác",
+    "elsewhere": "Nơi khác"
+  },
+  "sections": {
+    "free": "Không tốn Nhựa",
+    "domain": "Bí Cảnh · Địa Mạch",
+    "boss": "Thủ Lĩnh",
+    "weekly": "Thủ lĩnh tuần",
+    "artifact": "Thánh Di Vật"
+  },
+  "groups": {
+    "ley": "Địa Mạch",
+    "mastery": "Bí Cảnh Tinh Thông",
+    "forgery": "Bí Cảnh Luyện Võ",
+    "blessing": "Bí Cảnh Chúc Phúc",
+    "boss": "Thủ lĩnh thường",
+    "weekly": "Thủ lĩnh tuần",
+    "local": "Đặc sản khu vực",
+    "common": "Kẻ Địch Thường",
+    "elite": "Kẻ địch tinh anh",
+    "ore": "Nguyên Liệu Cường Hóa Vũ Khí",
+    "other": "Khác"
+  },
+  "people": {
+    "label": "Kế hoạch dành cho ai",
+    "only": "{name}: chỉ thẻ của nhân vật này",
+    "all": "{name}: hiện tất cả"
+  },
+  "card": {
+    "runs": "{n} lượt",
+    "claims": "{n} lần nhận",
+    "claimsWeekly": "{claims}, mỗi tuần một lần",
+    "atMost": "tối đa {runs}",
+    "atMostPrefix": "tối đa",
+    "runsShort": "{n} lượt",
+    "claimsShort": "{n} lần nhận",
+    "resinRange": "{min}–{max} Nhựa",
+    "resin": "{n} Nhựa",
+    "condensed": "{n} cô đặc",
+    "condensedTitle": "{n} Nhựa Cô Đặc",
+    "guaranteed": "tỷ lệ rơi là mức tối thiểu được đảm bảo",
+    "lockTitle": "Chưa được: cần {lock}",
+    "kind": {
+      "boss": "Thủ Lĩnh",
+      "gem": "Thủ lĩnh rơi vật phẩm này",
+      "enemy": "Kẻ địch rơi vật phẩm này",
+      "local": "Mọc ở",
+      "artifact": "Bí cảnh Thánh Di Vật"
+    },
+    "elsewhereTitle": "Không bí cảnh nào rơi các bộ này",
+    "noRate": "Chưa có tỷ lệ",
+    "paidTitle": "Các lượt bí cảnh theo kế hoạch cho {mora} Mora",
+    "paid": "+{n} từ bí cảnh",
+    "blockedTitle": "{n} lần chuyển hóa cần thêm Dung Môi Ảo Mộng",
+    "blocked": "{n} bị chặn",
+    "blockedSr": ": cần thêm Dung Môi Ảo Mộng"
+  },
+  "weekday": {
+    "short": {
+      "sun": "CN",
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7"
+    },
+    "long": {
+      "sun": "Chủ Nhật",
+      "mon": "Thứ 2",
+      "tue": "Thứ 3",
+      "wed": "Thứ 4",
+      "thu": "Thứ 5",
+      "fri": "Thứ 6",
+      "sat": "Thứ 7"
+    }
+  },
+  "panel": {
+    "today": "Hôm nay",
+    "schedule": "Lịch",
+    "runsLine": "{runs} · {resin} Nhựa ({condensed} cô đặc) · {days}",
+    "sources": "bí cảnh, thủ lĩnh thường và địa mạch",
+    "daily": "{n} Nhựa mỗi ngày",
+    "dailyRefresh": "{n} Nhựa mỗi ngày (180 + {r} × {per})",
+    "withHeld": "{days} với lượng Nhựa đang có",
+    "gems": "đá: {runs}, {resin} Nhựa",
+    "partial": "một số nguồn chưa có tỷ lệ rơi",
+    "upperBound": "Vật phẩm rơi từ thủ lĩnh ở Cấp Thế Giới 9 là mức tối thiểu được đảm bảo",
+    "weeklyClaims": "Thủ lĩnh tuần: {claims} trong {weeks}",
+    "weeklyResin": "{resin} Nhựa khi được giảm giá hàng tuần ({max} nếu không)",
+    "weeklyPartial": "một số thủ lĩnh chưa có tỷ lệ rơi",
+    "serverDay": "Ngày máy chủ: {day}",
+    "serverDaySunday": "Ngày máy chủ: {day} (mọi bí cảnh đều mở)",
+    "resetIn": "làm mới lúc 04:00 sau {time}",
+    "forgeOff": "Tính cả Ma Khoáng Tinh Đúc có thể rèn từ khoáng thô đang có",
+    "forgeLine": "Rèn {item}: {mora} Mora, {time}",
+    "stillShort": "vẫn thiếu {n}",
+    "totals": "Tổng",
+    "resin": "Nhựa",
+    "dayUnit": "ngày",
+    "refreshTitle": "Hồi {r} lần Nhựa mỗi ngày: {daily} Nhựa mỗi ngày",
+    "perDay": "{n}/ngày",
+    "weekly": "Hàng Tuần",
+    "weekUnit": "tuần",
+    "lockedTitle": "{n} nguồn bị khóa do AR/WL",
+    "locked": "khóa do AR/WL",
+    "view": "Chế độ farm",
+    "noWeeklyTitle": "Chỉ các mục tiêu còn cần farm mà không cần thủ lĩnh tuần: vật phẩm rơi của chúng đã có hoặc chuyển hóa được (sau các mục tiêu phía trên)",
+    "noWeekly": "Không thủ lĩnh tuần",
+    "noneLeft": "Mọi mục tiêu đều còn cần thủ lĩnh tuần",
+    "showAll": "Hiện mọi mục tiêu",
+    "assumed": "Chưa đặt AR/WL: giả định mức cao nhất",
+    "set": "Đặt",
+    "nothing": "Không có gì cần farm",
+    "sectionLabel": "{label}: {resin} Nhựa",
+    "show": "Hiện",
+    "hidden": "{n} đang ẩn",
+    "forge": "Rèn từ khoáng thô",
+    "pairTitle": "{runs} · {resin} Nhựa · {days}",
+    "cards": "{n} thẻ"
+  },
+  "event": {
+    "names": {
+      "abundance": "Dòng Chảy Thịnh Vượng",
+      "mastery": "Dòng Chảy Tinh Thông",
+      "favor": "Dòng Chảy Chúc Phúc",
+      "wealth": "Dòng Chảy Vàng",
+      "revelation": "Dòng Chảy Chỉ Thị",
+      "leyLine": "Dòng Chảy Địa Mạch"
+    },
+    "rules": {
+      "abundance": "Mọi bí cảnh sách Thiên Phú và nguyên liệu vũ khí đều mở, phần thưởng được nhân lên",
+      "mastery": "Bí Cảnh Tinh Thông cho phần thưởng nhân lên",
+      "favor": "Bí Cảnh Chúc Phúc (Thánh Di Vật) cho phần thưởng nhân lên",
+      "wealth": "Hoa Tàng Kim cho phần thưởng nhân lên",
+      "revelation": "Hoa Chỉ Thị cho phần thưởng nhân lên",
+      "leyLine": "Hoa Tàng Kim và Hoa Chỉ Thị cho phần thưởng nhân lên"
+    },
+    "claims": "×{times} khi dùng Nhựa Nguyên Chất, {n} lần mỗi ngày",
+    "endsIn": "kết thúc sau {time}"
+  }
+}

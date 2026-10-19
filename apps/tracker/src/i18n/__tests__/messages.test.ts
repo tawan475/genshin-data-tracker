@@ -1,8 +1,13 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest'
 import en from '../locales/en'
-import zhCN from '../locales/zh-CN'
-import zhTW from '../locales/zh-TW'
+import { LOCALES } from '../locale'
+
+/** Every language's messages (locales/<code>/index.ts), English included. */
+const modules = import.meta.glob<{ default: unknown }>('../locales/*/index.ts', { eager: true })
+const byLocale = new Map(
+  Object.entries(modules).map(([path, module]) => [path.split('/').at(-2)!, module.default]),
+)
 
 /** Every message as `namespace.path` -> text. */
 function flatten(value: unknown, prefix = '', out = new Map<string, string>()) {
@@ -22,10 +27,13 @@ const placeholders = (text: string) =>
 
 const english = flatten(en)
 
-describe.each([
-  ['zh-CN', flatten(zhCN)],
-  ['zh-TW', flatten(zhTW)],
-])('%s messages', (_name, messages) => {
+it('has a messages folder for every language, and only those', () => {
+  expect([...byLocale.keys()].sort()).toEqual([...LOCALES].sort())
+})
+
+describe.each(LOCALES.filter((code) => code !== 'en'))('%s messages', (code) => {
+  const messages = flatten(byLocale.get(code))
+
   it('has exactly the English keys', () => {
     expect([...messages.keys()].filter((key) => !english.has(key))).toEqual([])
     expect([...english.keys()].filter((key) => !messages.has(key))).toEqual([])
@@ -50,8 +58,11 @@ describe.each([
       ([key, text]) =>
         /[a-z]{3}/i.test(text) && text === english.get(key) && !/^[A-Z0-9 .+%/×-]+$/.test(text),
     )
-    // A few English-only tokens are allowed (brand names, game abbreviations).
-    expect(same.length).toBeLessThanOrEqual(Math.max(10, english.size * 0.02))
+    // A few English-only tokens are allowed (brand names, game abbreviations),
+    // and words Latin-script languages share with English (German "Status",
+    // "Build"); the Indonesian game itself keeps most game terms in English.
+    const share = code === 'id' ? 0.1 : 0.05
+    expect(same.length).toBeLessThanOrEqual(Math.max(10, english.size * share))
   })
 })
 

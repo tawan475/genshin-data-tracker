@@ -1,0 +1,44 @@
+{
+  "label": "Live",
+  "thisSession": "Эта сессия",
+  "sessionSince": "С {time}",
+  "levelUps": "{n} повышение уровня | Повышений уровня: {n}",
+  "talents": "{n} талант | Талантов: {n}",
+  "updated": "обновлено {ago}",
+  "updatedAt": "Обновлено {time}",
+  "row": "Live",
+  "rowDetail": "{n} изменение с этого снимка | Изменений с этого снимка: {n}",
+  "sinceSnapshot": "с последнего снимка",
+  "discard": "Сбросить",
+  "discardTitle": "Удалить эти изменения; последний снимок останется",
+  "discarded": "Live-изменения удалены",
+  "discardFailed": "Не удалось удалить live-изменения",
+  "settings": {
+    "title": "Live-синхронизация",
+    "label": "Следить за Irminsul в реальном времени",
+    "description": "Пока Irminsul работает, его изменения появляются здесь за секунды, между снимками.",
+    "devices": "Live-синхронизация с этого ПК в: {accounts} (настройки аккаунта)",
+    "deletePoints": "Удалить точки графика",
+    "deletePointsTitle": "Удалить точки графика, сохранённые live-синхронизацией между снимками",
+    "deletePointsConfirm": "Удалить все точки графика этого аккаунта? Снимки останутся.",
+    "pointsDeleted": "Точки графика удалены",
+    "exportNote": "Экспорт включает live-изменения и точки (live/ в zip)."
+  },
+  "session": {
+    "heading": "Сессии",
+    "hours": "{h} ч {m} мин",
+    "minutes": "{m} мин",
+    "world": "Мир {n}",
+    "newCharacter": "{name} присоединяется",
+    "more": "Ещё +{n}",
+    "showMore": "Показать ещё ({n})",
+    "field": {
+      "level": "{name} ур. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} атака {from}→{to}",
+      "skill": "{name} навык {from}→{to}",
+      "burst": "{name} взрыв {from}→{to}"
+    }
+  },
+  "staffBytes": "Live-синхронизация хранит ещё {size} (gdt-live)"
+}

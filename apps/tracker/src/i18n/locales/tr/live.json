@@ -1,0 +1,44 @@
+{
+  "label": "Canlı",
+  "thisSession": "Bu oturum",
+  "sessionSince": "{time} itibarıyla",
+  "levelUps": "{n} seviye atlama",
+  "talents": "{n} yetenek",
+  "updated": "{ago} güncellendi",
+  "updatedAt": "{time} güncellendi",
+  "row": "Canlı",
+  "rowDetail": "Bu anlık görüntüden beri {n} değişiklik",
+  "sinceSnapshot": "en yeni anlık görüntüden beri",
+  "discard": "At",
+  "discardTitle": "Bu değişiklikleri sil; en yeni anlık görüntü kalır",
+  "discarded": "Canlı değişiklikler silindi",
+  "discardFailed": "Canlı değişiklikler silinemedi",
+  "settings": {
+    "title": "Canlı senkronizasyon",
+    "label": "Irminsul'u canlı takip et",
+    "description": "Irminsul çalışırken değişiklikleri, anlık görüntüler arasında saniyeler içinde burada görünür.",
+    "devices": "Bu bilgisayardan canlı senkronizasyon: {accounts} (Hesap ayarları)",
+    "deletePoints": "Grafik noktalarını sil",
+    "deletePointsTitle": "Canlı senkronizasyonun anlık görüntüler arasında tuttuğu grafik noktalarını sil",
+    "deletePointsConfirm": "Bu hesabın tüm grafik noktaları silinsin mi? Anlık görüntüler kalır.",
+    "pointsDeleted": "Grafik noktaları silindi",
+    "exportNote": "Dışa aktarmalar canlı değişiklikleri ve noktaları içerir (zip içinde live/)."
+  },
+  "session": {
+    "heading": "Oturumlar",
+    "hours": "{h} sa {m} dk",
+    "minutes": "{m} dk",
+    "world": "Dünya {n}",
+    "newCharacter": "{name} katıldı",
+    "more": "+{n} daha",
+    "showMore": "Daha fazla göster ({n})",
+    "field": {
+      "level": "{name} Sv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} saldırı {from}→{to}",
+      "skill": "{name} beceri {from}→{to}",
+      "burst": "{name} patlama {from}→{to}"
+    }
+  },
+  "staffBytes": "Canlı senkronizasyon {size} daha tutuyor (gdt-live)"
+}

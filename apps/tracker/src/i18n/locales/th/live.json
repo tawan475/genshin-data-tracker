@@ -1,0 +1,44 @@
+{
+  "label": "สด",
+  "thisSession": "เซสชันนี้",
+  "sessionSince": "ตั้งแต่ {time}",
+  "levelUps": "เพิ่มเลเวล {n} ครั้ง",
+  "talents": "พรสวรรค์ {n} ครั้ง",
+  "updated": "อัปเดต {ago}",
+  "updatedAt": "อัปเดตเมื่อ {time}",
+  "row": "สด",
+  "rowDetail": "เปลี่ยนแปลง {n} รายการตั้งแต่สแนปช็อตนี้",
+  "sinceSnapshot": "ตั้งแต่สแนปช็อตล่าสุด",
+  "discard": "ทิ้ง",
+  "discardTitle": "ลบการเปลี่ยนแปลงเหล่านี้ สแนปช็อตล่าสุดยังอยู่",
+  "discarded": "ลบการเปลี่ยนแปลงสดแล้ว",
+  "discardFailed": "ลบการเปลี่ยนแปลงสดไม่สำเร็จ",
+  "settings": {
+    "title": "ซิงก์สด",
+    "label": "ติดตาม Irminsul แบบสด",
+    "description": "ขณะที่ Irminsul ทำงาน การเปลี่ยนแปลงจะแสดงที่นี่ภายในไม่กี่วินาที ระหว่างสแนปช็อต",
+    "devices": "ซิงก์สดจาก PC นี้ไปยัง: {accounts} (ตั้งค่าบัญชี)",
+    "deletePoints": "ลบจุดบนกราฟ",
+    "deletePointsTitle": "ลบจุดบนกราฟที่ซิงก์สดเก็บไว้ระหว่างสแนปช็อต",
+    "deletePointsConfirm": "ลบจุดบนกราฟทั้งหมดของบัญชีนี้ใช่ไหม? สแนปช็อตยังอยู่",
+    "pointsDeleted": "ลบจุดบนกราฟแล้ว",
+    "exportNote": "การส่งออกรวมการเปลี่ยนแปลงสดและจุดบนกราฟด้วย (live/ ในไฟล์ zip)"
+  },
+  "session": {
+    "heading": "เซสชัน",
+    "hours": "{h} ชม. {m} นาที",
+    "minutes": "{m} นาที",
+    "world": "โลก {n}",
+    "newCharacter": "{name} เข้าร่วมแล้ว",
+    "more": "+อีก {n}",
+    "showMore": "แสดงเพิ่ม ({n})",
+    "field": {
+      "level": "{name} Lv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} โจมตีปกติ {from}→{to}",
+      "skill": "{name} สกิล {from}→{to}",
+      "burst": "{name} ท่าไม้ตาย {from}→{to}"
+    }
+  },
+  "staffBytes": "ซิงก์สดเก็บเพิ่มอีก {size} (gdt-live)"
+}

@@ -1,0 +1,75 @@
+{
+  "title": "Anécdotas",
+  "area": "Zona {id}",
+  "newestCapture": "Captura más reciente",
+  "newestCaptureTitle": "Captura más reciente: {time}",
+  "notCaptured": "Sin capturar",
+  "notCapturedTitle": "Ninguna captura tiene anécdotas todavía: irminsul las registra desde el juego",
+  "loadFailed": "Error al cargar",
+  "allDone": "Todo completado",
+  "showDone": "Mostrar completadas",
+  "noneDone": "Ninguna completada",
+  "showNotDone": "Mostrar pendientes",
+  "noneMet": "Aún no has conocido a nadie",
+  "noneMetBody": "Las anécdotas ocultas aparecen al conocerlas.",
+  "noMatches": "Sin resultados",
+  "clear": "Borrar",
+  "loading": "Cargando",
+  "notSaved": "No guardado",
+  "group": {
+    "hideDone": "Ocultar completadas",
+    "showDone": "Mostrar completadas",
+    "done": "{n} completadas"
+  },
+  "row": {
+    "states": {
+      "captured": "capturada",
+      "marked": "marcada a mano",
+      "none": "pendiente"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Capturada · sigue completada",
+    "markedByHand": "Marcada a mano",
+    "markedClick": "Marcada a mano · haz clic para desmarcar",
+    "notDone": "Pendiente",
+    "clickToMark": "Haz clic para marcar como completada",
+    "activeTitle": "En curso ahora en el juego",
+    "active": "Activa",
+    "repeatTitle": "Completada {n} veces (un ciclo)",
+    "hidden": "Anécdota oculta",
+    "addedIn": "Añadida en {version}"
+  },
+  "summary": {
+    "label": "Resumen",
+    "done": "Completadas",
+    "doneCaptured": "{n} capturadas",
+    "doneByHand": "{n} a mano",
+    "doneUnknown": "{n} más nuevas que los datos del juego",
+    "doneLabel": "Anécdotas completadas",
+    "stamps": "Sellos",
+    "stampsTitle": "Sellos para la recompensa {n}",
+    "stampsNone": "Aún no hay captura",
+    "stampsLabel": "Sellos para la siguiente recompensa",
+    "reward": "Recompensa",
+    "rewardHint": "{primogems} protogemas cada {every} anécdotas registradas",
+    "rewardPer": "cada {every}",
+    "active": "Activas",
+    "activeHint": "En curso ahora en el juego (en la captura más reciente)"
+  },
+  "toolbar": {
+    "label": "Filtrar anécdotas",
+    "search": "Buscar",
+    "searchTitle": "Título, historia, PNJ o id",
+    "completion": "Progreso",
+    "completions": {
+      "all": "Todas",
+      "missing": "Pendientes",
+      "done": "Completadas"
+    },
+    "showDone": "Mostrar completadas",
+    "showDoneTitle": "Anécdotas completadas al completo en vez de plegadas bajo cada PNJ",
+    "area": "Zona",
+    "allAreas": "Todas",
+    "locked": "No desbloqueada en la captura más reciente"
+  }
+}

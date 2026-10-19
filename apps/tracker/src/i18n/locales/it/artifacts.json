@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Bloccato",
+    "astralMark": "Marchio astrale",
+    "new": "Nuovo"
+  },
+  "sort": {
+    "quality": "Qualità",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potenziale",
+    "level": "Livello",
+    "set": "Set",
+    "recent": "Recenti"
+  },
+  "sortTitle": {
+    "quality": "Come nel gioco: rarità, livello, set, chi lo indossa",
+    "cv": "Valore CRIT",
+    "rv": "Valore dei tiri",
+    "potential": "CV atteso al livello massimo",
+    "level": "Livello",
+    "set": "Set",
+    "recent": "Nuovi o modificati"
+  },
+  "topSets": {
+    "label": "Set principali",
+    "more": "Altri {n} set"
+  },
+  "lower": {
+    "label": "Rarità inferiori: {counts}",
+    "title": "Rarità inferiori, che questo ordinamento mette in fondo"
+  },
+  "picker": {
+    "find": "Trova",
+    "noMatch": "Nessun risultato",
+    "done": "Fatto"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: nessuno",
+    "cell": "{slot} · {n} pezzi · migliore {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Pezzi",
+    "slotHeader": "{slot}: CV migliore, pezzi",
+    "sumTitle": "CV migliore per slot, sommato"
+  },
+  "bag": {
+    "more": "Altri {n}"
+  },
+  "table": {
+    "sortBySet": "Ordina per set",
+    "sortByLevel": "Ordina per livello",
+    "equippedBy": "Equipaggiato da",
+    "marks": "Blocco e marchi",
+    "elixir": "Elisir"
+  },
+  "detail": {
+    "fromGame": "Dal gioco",
+    "inferred": "Dedotto dal livello",
+    "upgradesToCome": "{source} · {n} potenziamenti mancanti",
+    "rankTitle": "Posizione per CV tra {n} {slot} {rarity}★",
+    "newTitle": "Assente nella cattura precedente",
+    "rolls": "Tiri",
+    "rank": "Posizione",
+    "upgradesTitle": "Un tiro di statistica secondaria ogni 4 livelli, fino a {max}",
+    "upgrades": "Potenziamenti",
+    "expectedCv": "CV atteso",
+    "expectedDetail": "Atteso a {max}: ogni potenziamento tira una riga CRIT il {chance}% delle volte, con un tiro medio",
+    "bestCase": "Caso migliore",
+    "bestDetail": "Ogni potenziamento un tiro CRIT massimo, fino a {max}",
+    "critLinesTitle": "{n} righe su 4 sono CRIT: la probabilità che un potenziamento ne tiri una",
+    "critPerRoll": "CRIT / tiro",
+    "activatesTitle": "La quarta riga, aperta dal primo potenziamento",
+    "activates": "+4 aggiunge",
+    "maxRv": "RV max",
+    "unlocked": "Sbloccato",
+    "astral": "Astrale",
+    "elixirTitle": "Elisir santificatore",
+    "rollTier": "Tiro {tier}",
+    "inactive": "Inattiva"
+  },
+  "card": {
+    "potentialTitle": "CV atteso a +{max} · caso migliore {best}",
+    "equipped": "Equipaggiato: {name}"
+  },
+  "toolbar": {
+    "all": "Tutti",
+    "yes": "Sì",
+    "no": "No",
+    "linesNow": "{n} righe ora",
+    "any": "Qualsiasi",
+    "allSets": "Tutti i set",
+    "anyone": "Chiunque",
+    "noAstral": "Senza marchio",
+    "noElixir": "Senza elisir",
+    "quoted": "“{text}”",
+    "mainPill": "Principale: {stat}",
+    "lines": "{n} righe",
+    "best": "Migliori",
+    "label": "Filtra manufatti",
+    "searchLabel": "Cerca set o personaggi",
+    "searchTitle": "Set o personaggio",
+    "equippedByTitle": "Equipaggiato da: {names}",
+    "sortBy": "Ordina per",
+    "descending": "Decrescente",
+    "ascending": "Crescente",
+    "slot": "Slot",
+    "presets": "Preimpostati",
+    "bestTitle": "I primi {n} per slot, secondo l'ordinamento attuale",
+    "newNone": "Nessuna cattura precedente con cui confrontare",
+    "newTitle": "Assenti nella cattura precedente: nuovi o potenziati da allora",
+    "zeroTitle": "5★ non equipaggiati a +0",
+    "lowTitle": "4★ e 3★ sbloccati e non equipaggiati",
+    "low": "Manufatto 4★/3★",
+    "spareTitle": "5★ non equipaggiati",
+    "spare": "5★ liberi",
+    "maxTitle": "Solo livello +20",
+    "moreTitle": "Statistica principale, statistiche secondarie, righe, livello, blocco, posizione, marchio astrale, elisir",
+    "more": "Altro",
+    "substatsTitle": "Ha tutte queste (conta la riga aperta a +4)",
+    "linesLabel": "Righe",
+    "min": "Min",
+    "max": "Max",
+    "location": "Posizione",
+    "remove": "Rimuovi {label}"
+  },
+  "page": {
+    "table": "Tabella",
+    "loadFailed": "Impossibile caricare i manufatti",
+    "loading": "Caricamento manufatti",
+    "refreshFailed": "Impossibile aggiornare",
+    "shownTitle": "Mostrati / manufatti",
+    "countSuffix": "manufatti",
+    "pngSize": "PNG largo {px} px"
+  }
+}

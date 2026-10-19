@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "suficiente para todos los objetivos",
+    "alone": "suficiente para este objetivo",
+    "short": "falta"
+  },
+  "readiness": {
+    "all": {
+      "label": "Listo",
+      "meaning": "Suficiente después de los objetivos de arriba"
+    },
+    "alone": {
+      "label": "Listo solo",
+      "meaning": "Suficiente por sí solo, no después de los objetivos de arriba"
+    },
+    "short": {
+      "label": "Falta",
+      "meaning": "No alcanza, ni siquiera solo"
+    },
+    "done": {
+      "label": "Hecho",
+      "meaning": "Alcanzado"
+    },
+    "artifacts": {
+      "label": "Artefactos",
+      "meaning": "Niveles alcanzados, faltan artefactos"
+    }
+  },
+  "bracket": {
+    "tier": "Nivel {tier}",
+    "bossLevel": "Jefe Niv. {level}",
+    "wl": "NM {wl}",
+    "withAr": "{base} (RA {ar})",
+    "assumed": "{base}, supuesto"
+  },
+  "unit": {
+    "days": "{n} día | {n} días",
+    "weeks": "{n} semana | {n} semanas"
+  },
+  "status": {
+    "locked": "Rango de Aventura o Nivel de Mundo demasiado bajo para farmearlo aún",
+    "noRate": "Sin tasa de obtención media para esta fuente: sin estimación",
+    "notFarmed": "Sin fuente de resina"
+  },
+  "time": {
+    "hm": "{h} h {m} min",
+    "h": "{h} h",
+    "m": "{m} min",
+    "dh": "{d} d {h} h",
+    "d": "{d} d"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Transformar",
+      "craft": "Sintetizar",
+      "forge": "Forjar"
+    },
+    "item": "{count} {name}",
+    "convertRow": "Transformar {input} en {output}",
+    "craftRow": "Sintetizar {output} con {input}",
+    "forgeRow": "Forjar {output} con {input}",
+    "kindTitle": {
+      "convert": "Alquimia: transformación",
+      "craft": "Alquimia: síntesis, empezando por el nivel más bajo",
+      "forge": "Herrería: forja"
+    },
+    "listSeparator": ", ",
+    "notYet": "Aún no: faltan {items} (haz antes los pasos de arriba)",
+    "doneRow": "Hecho: {row}",
+    "notEnough": "No alcanza: faltan {items}",
+    "allDoneTitle": "Los {n} hechos: el inventario como queda después",
+    "title": "Síntesis",
+    "fold": "Plegar",
+    "unfold": "Lo que el plan transforma, sintetiza y forja",
+    "steps": "{n} paso | {n} pasos",
+    "inAll": "{cost} en total",
+    "forgingTime": "Tiempo de forja {time} (sin contar la cola de la forja)",
+    "forging": "forjando",
+    "allDone": "Todo hecho",
+    "hideTitle": "Ocultar síntesis (los ajustes del Planificador la recuperan)",
+    "hide": "Ocultar síntesis",
+    "from": "con",
+    "fewer": "Menos",
+    "all": "Los {n}"
+  },
+  "lock": {
+    "ar": "RA {ar}",
+    "wl": "NM {wl}",
+    "locked": "Bloqueado"
+  },
+  "cards": {
+    "blossomExp": "Flor de revelación",
+    "blossomMora": "Flor de riqueza",
+    "local": "Especialidades locales",
+    "common": "Enemigos normales",
+    "elite": "Élites",
+    "other": "Otros",
+    "elsewhere": "En otro lugar"
+  },
+  "sections": {
+    "free": "Sin resina",
+    "domain": "Dominios · Flores ley",
+    "boss": "Jefes",
+    "weekly": "Jefes semanales",
+    "artifact": "Artefactos"
+  },
+  "groups": {
+    "ley": "Flor ley",
+    "mastery": "Dominio de la maestría",
+    "forgery": "Dominio de la forja",
+    "blessing": "Dominio de la bendición",
+    "boss": "Jefes normales",
+    "weekly": "Jefes semanales",
+    "local": "Especialidades locales",
+    "common": "Enemigos normales",
+    "elite": "Élites",
+    "ore": "Material de fortalecimiento de arma",
+    "other": "Otros"
+  },
+  "people": {
+    "label": "Para quién es el plan",
+    "only": "{name}: solo sus tarjetas",
+    "all": "{name}: mostrar a todos"
+  },
+  "card": {
+    "runs": "{n} intento | {n} intentos",
+    "claims": "{n} recompensa | {n} recompensas",
+    "claimsWeekly": "{claims}, una por semana",
+    "atMost": "como máximo {runs}",
+    "atMostPrefix": "como máximo",
+    "runsShort": "{n} intentos",
+    "claimsShort": "{n} recompensas",
+    "resinRange": "{min}–{max} de resina",
+    "resin": "{n} de resina",
+    "condensed": "{n} concentrada",
+    "condensedTitle": "{n} Resina concentrada",
+    "guaranteed": "la tasa de obtención es un mínimo garantizado",
+    "lockTitle": "Aún no: requiere {lock}",
+    "kind": {
+      "boss": "Jefe",
+      "gem": "Jefes que lo sueltan",
+      "enemy": "Enemigos que lo sueltan",
+      "local": "Crece en",
+      "artifact": "Dominio de artefactos"
+    },
+    "elsewhereTitle": "Ningún dominio da estos conjuntos",
+    "noRate": "Sin tasa",
+    "paidTitle": "Los intentos de dominio planeados dan {mora} de Mora",
+    "paid": "+{n} de dominios",
+    "blockedTitle": "{n} transformaciones requieren más Solvente de sueños",
+    "blocked": "{n} bloqueadas",
+    "blockedSr": ": requieren más Solvente de sueños"
+  },
+  "weekday": {
+    "short": {
+      "sun": "Dom",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mié",
+      "thu": "Jue",
+      "fri": "Vie",
+      "sat": "Sáb"
+    },
+    "long": {
+      "sun": "Domingo",
+      "mon": "Lunes",
+      "tue": "Martes",
+      "wed": "Miércoles",
+      "thu": "Jueves",
+      "fri": "Viernes",
+      "sat": "Sábado"
+    }
+  },
+  "panel": {
+    "today": "Hoy",
+    "schedule": "Calendario",
+    "runsLine": "{runs} · {resin} de resina ({condensed} concentrada) · {days}",
+    "sources": "dominios, jefes normales y flores ley",
+    "daily": "{n} de resina al día",
+    "dailyRefresh": "{n} de resina al día (180 + {r} × {per})",
+    "withHeld": "{days} con la resina que tienes",
+    "gems": "gemas: {runs}, {resin} de resina",
+    "partial": "algunas fuentes no tienen tasa de obtención",
+    "upperBound": "Lo que sueltan los jefes en Nivel de Mundo 9 es un mínimo garantizado",
+    "weeklyClaims": "Jefes semanales: {claims} en {weeks}",
+    "weeklyResin": "{resin} de resina con el descuento semanal ({max} sin él)",
+    "weeklyPartial": "algunos jefes no tienen tasa de obtención",
+    "serverDay": "Día del servidor: {day}",
+    "serverDaySunday": "Día del servidor: {day} (todos los dominios abiertos)",
+    "resetIn": "el reinicio de las 04:00 en {time}",
+    "forgeOff": "Contar el mineral místico que se puede forjar con las vetas que tienes",
+    "forgeLine": "Forjar {item}: {mora} de Mora, {time}",
+    "stillShort": "aún faltan {n}",
+    "totals": "Totales",
+    "resin": "resina",
+    "dayUnit": "día | días",
+    "refreshTitle": "{r} recarga de resina al día: {daily} de resina al día | {r} recargas de resina al día: {daily} de resina al día",
+    "perDay": "{n}/día",
+    "weekly": "Semanal",
+    "weekUnit": "semana | semanas",
+    "lockedTitle": "{n} fuente bloqueada por RA/NM | {n} fuentes bloqueadas por RA/NM",
+    "locked": "bloqueado por RA/NM",
+    "view": "Vista de farmeo",
+    "noWeeklyTitle": "Solo los objetivos que quedan por farmear sin jefe semanal: lo que sueltan ya lo tienes o se puede transformar (después de los objetivos de arriba)",
+    "noWeekly": "Sin jefe semanal",
+    "noneLeft": "Todos los objetivos necesitan aún un jefe semanal",
+    "showAll": "Mostrar todos los objetivos",
+    "assumed": "RA/NM sin definir: se supone el rango más alto",
+    "set": "Definir",
+    "nothing": "Nada que farmear",
+    "sectionLabel": "{label}: {resin} de resina",
+    "show": "Mostrar",
+    "hidden": "{n} ocultas",
+    "forge": "Forjar con vetas",
+    "pairTitle": "{runs} · {resin} de resina · {days}",
+    "cards": "{n} tarjeta | {n} tarjetas"
+  },
+  "event": {
+    "names": {
+      "abundance": "Abundancia desbordante",
+      "mastery": "Sabiduría desbordante",
+      "favor": "Favor desbordante",
+      "wealth": "Riqueza desbordante",
+      "revelation": "Revelación desbordante",
+      "leyLine": "Crecida de líneas ley"
+    },
+    "rules": {
+      "abundance": "Todos los libros de talento y materiales de arma están disponibles, con recompensas multiplicadas",
+      "mastery": "Los Dominios de la maestría dan recompensas multiplicadas",
+      "favor": "Los Dominios de la bendición (artefactos) dan recompensas multiplicadas",
+      "wealth": "Las Flores de riqueza dan recompensas multiplicadas",
+      "revelation": "Las Flores de revelación dan recompensas multiplicadas",
+      "leyLine": "Las Flores de riqueza y de revelación dan recompensas multiplicadas"
+    },
+    "claims": "×{times} con Resina original, {n} veces al día",
+    "endsIn": "termina en {time}"
+  }
+}

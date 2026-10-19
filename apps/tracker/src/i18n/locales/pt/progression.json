@@ -1,0 +1,74 @@
+{
+  "title": "Progresso detalhado",
+  "figures": "Valores",
+  "atLeastOne": "Pelo menos um",
+  "groupBy": "Agrupar por",
+  "longerThanRange": "Maior que o intervalo",
+  "loading": "Carregando o progresso",
+  "noData": "Sem dados",
+  "inRange": "neste intervalo",
+  "gainedInRange": "ganho neste intervalo",
+  "spentInRange": "gasto neste intervalo",
+  "noCaptures": "Sem capturas",
+  "captures": "{n} captura | {n} capturas",
+  "total": "Total {n}",
+  "lineLabel": "{figure} ao longo do tempo, {span}. Mais recente: {value}.",
+  "barsLabel": "Variação de {figure} {per}, {span}: ganho {gained}, gasto {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Captura",
+    "hour": "Hora",
+    "day": "Dia",
+    "month": "Mês",
+    "year": "Ano"
+  },
+  "per": {
+    "snapshot": "Por captura",
+    "hour": "Por hora",
+    "day": "Por dia",
+    "month": "Por mês",
+    "year": "Por ano"
+  },
+  "against": {
+    "snapshot": "Variação em relação à captura anterior",
+    "hour": "Variação em relação à hora anterior",
+    "day": "Variação em relação ao dia anterior",
+    "month": "Variação em relação ao mês anterior",
+    "year": "Variação em relação ao ano anterior"
+  },
+  "newest": {
+    "snapshot": "{n} capturas mais recentes",
+    "hour": "{n} horas mais recentes",
+    "day": "{n} dias mais recentes",
+    "month": "{n} meses mais recentes",
+    "year": "{n} anos mais recentes"
+  },
+  "range": {
+    "label": "Intervalo de tempo",
+    "hours": "Horas",
+    "days": "Dias",
+    "all": "Tudo",
+    "h": "{n} h",
+    "d": "{n} d",
+    "y": "{n} a"
+  },
+  "monthly": {
+    "unavailable": "Análise mensal indisponível",
+    "loading": "Carregando a análise mensal",
+    "noCaptures": "Sem capturas",
+    "goTo": "Ir para {month}",
+    "date": "Data",
+    "primogem": "Gema Essencial",
+    "mora": "Mora",
+    "artifact": "Artefato",
+    "extract": "Extração",
+    "netWorth": "Patrimônio",
+    "moraUnit": "mora",
+    "primogemUnit": "gema essencial"
+  },
+  "character": {
+    "level": "Nível",
+    "constellation": "Constelação",
+    "talents": "Talentos"
+  }
+}

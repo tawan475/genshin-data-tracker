@@ -1,0 +1,38 @@
+{
+  "close": "Schließen",
+  "constellation": {
+    "title": "Sternbild {level} von 6"
+  },
+  "crit": {
+    "title": "CV {value} · KT × 2 + KSCH",
+    "circlet": " · Krit-Haarreif +7,77"
+  },
+  "level": {
+    "title": "Stufe {level} von {cap} · Aufstieg {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} Sterne"
+  },
+  "roll": {
+    "title": "RV {value} % · Rolls in % des höchsten Rolls, summiert"
+  },
+  "error": {
+    "title": "Konnte nicht geladen werden",
+    "retry": "Erneut versuchen"
+  },
+  "field": {
+    "optional": "(optional)"
+  },
+  "modal": {
+    "previous": "Zurück",
+    "next": "Weiter"
+  },
+  "pager": {
+    "label": "Seiten",
+    "previous": "Vorherige Seite",
+    "next": "Nächste Seite",
+    "goTo": "Zu Seite",
+    "go": "Los",
+    "input": "Seite, 1 bis {count}"
+  }
+}

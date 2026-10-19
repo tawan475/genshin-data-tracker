@@ -1,0 +1,38 @@
+{
+  "close": "Kapat",
+  "constellation": {
+    "title": "Takımyıldız {level}/6"
+  },
+  "crit": {
+    "title": "CV {value} · Kritik Oranı × 2 + Kritik Hasar",
+    "circlet": " · Kritik tacı +7.77"
+  },
+  "level": {
+    "title": "Seviye {level}/{cap} · Yükseltme {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} yıldız"
+  },
+  "roll": {
+    "title": "RV %{value} · her artış, en yüksek artışın yüzdesi olarak toplanır"
+  },
+  "error": {
+    "title": "Yüklenemedi",
+    "retry": "Tekrar dene"
+  },
+  "field": {
+    "optional": "(isteğe bağlı)"
+  },
+  "modal": {
+    "previous": "Önceki",
+    "next": "Sonraki"
+  },
+  "pager": {
+    "label": "Sayfalar",
+    "previous": "Önceki sayfa",
+    "next": "Sonraki sayfa",
+    "goTo": "Sayfaya git",
+    "go": "Git",
+    "input": "Sayfa, 1 ile {count} arası"
+  }
+}

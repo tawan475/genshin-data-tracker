@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "tüm hedeflere yeter",
+    "alone": "bu hedefe yeter",
+    "short": "eksik"
+  },
+  "readiness": {
+    "all": {
+      "label": "Hazır",
+      "meaning": "Üstteki hedeflerden sonra da yeterli"
+    },
+    "alone": {
+      "label": "Tek başına hazır",
+      "meaning": "Tek başına yeterli, üstteki hedeflerden sonra değil"
+    },
+    "short": {
+      "label": "Eksik",
+      "meaning": "Tek başına bile yetmiyor"
+    },
+    "done": {
+      "label": "Tamam",
+      "meaning": "Ulaşıldı"
+    },
+    "artifacts": {
+      "label": "Yadigarlar",
+      "meaning": "Seviyelere ulaşıldı, yadigarlar kaldı"
+    }
+  },
+  "bracket": {
+    "tier": "Kademe {tier}",
+    "bossLevel": "Patron Sv. {level}",
+    "wl": "WL {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base}, varsayıldı"
+  },
+  "unit": {
+    "days": "{n} gün",
+    "weeks": "{n} hafta"
+  },
+  "status": {
+    "locked": "Macera Rütbesi veya Dünya Seviyesi bunu toplamak için henüz çok düşük",
+    "noRate": "Bu kaynak için ortalama düşme oranı yok: tahmin yok",
+    "notFarmed": "Reçine kaynağı yok"
+  },
+  "time": {
+    "hm": "{h} sa {m} dk",
+    "h": "{h} sa",
+    "m": "{m} dk",
+    "dh": "{d} g {h} sa",
+    "d": "{d} g"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Dönüştür",
+      "craft": "Üret",
+      "forge": "İşle"
+    },
+    "item": "{count} {name}",
+    "convertRow": "{input} → {output} dönüştür",
+    "craftRow": "{input} ile {output} üret",
+    "forgeRow": "{input} ile {output} işle",
+    "kindTitle": {
+      "convert": "Simya: dönüştürme",
+      "craft": "Simya: üretim, en düşük kademe önce",
+      "forge": "Demirci: işleme"
+    },
+    "listSeparator": ", ",
+    "notYet": "Henüz değil: {items} daha gerekli (önce üstteki adımları yap)",
+    "doneRow": "Tamam: {row}",
+    "notEnough": "Yetersiz: {items} daha gerekli",
+    "allDoneTitle": "{n} adımın hepsi tamam: çanta onlardan sonraki haliyle",
+    "title": "Simya",
+    "fold": "Katla",
+    "unfold": "Planın dönüştürdükleri, ürettikleri ve işledikleri",
+    "steps": "{n} adım",
+    "inAll": "Toplam {cost}",
+    "forgingTime": "İşleme süresi {time} (demirci sırası hariç)",
+    "forging": "işleme",
+    "allDone": "Hepsi tamam",
+    "hideTitle": "Simyayı gizle (Planlayıcı ayarlarından geri getirilir)",
+    "hide": "Simyayı gizle",
+    "from": "kaynak:",
+    "fewer": "Daha az",
+    "all": "Tümü ({n})"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "WL {wl}",
+    "locked": "Kilitli"
+  },
+  "cards": {
+    "blossomExp": "İlham Çiçeği",
+    "blossomMora": "Bolluk Çiçeği",
+    "local": "Yöresel ürünler",
+    "common": "Sıradan Düşmanlar",
+    "elite": "Seçkin Düşmanlar",
+    "other": "Diğer",
+    "elsewhere": "Başka yerde"
+  },
+  "sections": {
+    "free": "Reçinesiz",
+    "domain": "Zindanlar · Ley hatları",
+    "boss": "Patronlar",
+    "weekly": "Haftalık patronlar",
+    "artifact": "Yadigarlar"
+  },
+  "groups": {
+    "ley": "Ley Hattı Çıkıntısı",
+    "mastery": "Ustalık Zindanı",
+    "forgery": "Döküm Zindanı",
+    "blessing": "Yadigar Zindanı",
+    "boss": "Normal patronlar",
+    "weekly": "Haftalık patronlar",
+    "local": "Yöresel ürünler",
+    "common": "Sıradan Düşmanlar",
+    "elite": "Seçkin Düşmanlar",
+    "ore": "Silah Geliştirme Malzemesi",
+    "other": "Diğer"
+  },
+  "people": {
+    "label": "Planın kimin için olduğu",
+    "only": "{name}: yalnızca onun kartları",
+    "all": "{name}: herkesi göster"
+  },
+  "card": {
+    "runs": "{n} deneme",
+    "claims": "{n} ödül alma",
+    "claimsWeekly": "{claims}, haftada bir",
+    "atMost": "en fazla {runs}",
+    "atMostPrefix": "en fazla",
+    "runsShort": "{n} deneme",
+    "claimsShort": "{n} alma",
+    "resinRange": "{min}–{max} reçine",
+    "resin": "{n} reçine",
+    "condensed": "{n} yoğun",
+    "condensedTitle": "{n} Yoğun Reçine",
+    "guaranteed": "düşme oranı garantili bir asgari değerdir",
+    "lockTitle": "Henüz değil: {lock} gerekli",
+    "kind": {
+      "boss": "Patron",
+      "gem": "Bunu düşüren patronlar",
+      "enemy": "Bunu düşüren düşmanlar",
+      "local": "Yetiştiği yer",
+      "artifact": "Yadigar zindanı"
+    },
+    "elsewhereTitle": "Bu setleri hiçbir zindan düşürmüyor",
+    "noRate": "Oran yok",
+    "paidTitle": "Planlanan zindan denemeleri {mora} Mora kazandırır",
+    "paid": "Zindanlardan +{n}",
+    "blockedTitle": "{n} dönüştürme için daha fazla Rüya Çözücü gerekli",
+    "blocked": "{n} engelli",
+    "blockedSr": ": daha fazla Rüya Çözücü gerekli"
+  },
+  "weekday": {
+    "short": {
+      "sun": "Paz",
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt"
+    },
+    "long": {
+      "sun": "Pazar",
+      "mon": "Pazartesi",
+      "tue": "Salı",
+      "wed": "Çarşamba",
+      "thu": "Perşembe",
+      "fri": "Cuma",
+      "sat": "Cumartesi"
+    }
+  },
+  "panel": {
+    "today": "Bugün",
+    "schedule": "Takvim",
+    "runsLine": "{runs} · {resin} reçine ({condensed} yoğun) · {days}",
+    "sources": "zindanlar, normal patronlar ve ley hatları",
+    "daily": "Günde {n} reçine",
+    "dailyRefresh": "Günde {n} reçine (180 + {r} × {per})",
+    "withHeld": "Eldeki reçineyle {days}",
+    "gems": "taşlar: {runs}, {resin} reçine",
+    "partial": "bazı kaynakların düşme oranı yok",
+    "upperBound": "Dünya Seviyesi 9 patron düşüşleri garantili asgari değerdir",
+    "weeklyClaims": "Haftalık patronlar: {weeks} içinde {claims}",
+    "weeklyResin": "Haftalık indirimle {resin} reçine (indirimsiz {max})",
+    "weeklyPartial": "bazı patronların düşme oranı yok",
+    "serverDay": "Sunucu günü: {day}",
+    "serverDaySunday": "Sunucu günü: {day} (tüm zindanlar açık)",
+    "resetIn": "04:00 sıfırlamasına {time}",
+    "forgeOff": "Eldeki parçalardan işlenebilecek Mistik cevheri say",
+    "forgeLine": "{item} işle: {mora} Mora, {time}",
+    "stillShort": "hâlâ {n} eksik",
+    "totals": "Toplamlar",
+    "resin": "reçine",
+    "dayUnit": "gün",
+    "refreshTitle": "Günde {r} reçine yenileme: günde {daily} reçine",
+    "perDay": "{n}/gün",
+    "weekly": "Haftalık",
+    "weekUnit": "hafta",
+    "lockedTitle": "{n} kaynak AR/WL ile kilitli",
+    "locked": "AR/WL ile kilitli",
+    "view": "Toplama görünümü",
+    "noWeeklyTitle": "Yalnızca haftalık patron olmadan toplanacak hedefler: düşüşleri eldedir veya dönüştürülebilir (üstteki hedeflerden sonra)",
+    "noWeekly": "Haftalık patronsuz",
+    "noneLeft": "Her hedef hâlâ bir haftalık patron gerektiriyor",
+    "showAll": "Tüm hedefleri göster",
+    "assumed": "AR/WL ayarlanmadı: en üst kademe varsayıldı",
+    "set": "Ayarla",
+    "nothing": "Toplanacak bir şey yok",
+    "sectionLabel": "{label}: {resin} reçine",
+    "show": "Göster",
+    "hidden": "{n} gizli",
+    "forge": "Parçalardan işle",
+    "pairTitle": "{runs} · {resin} reçine · {days}",
+    "cards": "{n} kart"
+  },
+  "event": {
+    "names": {
+      "abundance": "Bereket Taşkını",
+      "mastery": "Ustalık Taşkını",
+      "favor": "Lütuf Taşkını",
+      "wealth": "Bolluk Taşkını",
+      "revelation": "İlham Taşkını",
+      "leyLine": "Ley Hattı Taşkını"
+    },
+    "rules": {
+      "abundance": "Tüm yetenek kitapları ve silah malzemeleri açık, ödüller katlanır",
+      "mastery": "Ustalık Zindanları katlanmış ödül verir",
+      "favor": "Yadigar Zindanları katlanmış ödül verir",
+      "wealth": "Bolluk Çiçekleri katlanmış ödül verir",
+      "revelation": "İlham Çiçekleri katlanmış ödül verir",
+      "leyLine": "Bolluk ve İlham Çiçekleri katlanmış ödül verir"
+    },
+    "claims": "Orijinal Reçine ile ×{times}, günde {n} kez",
+    "endsIn": "{time} içinde biter"
+  }
+}

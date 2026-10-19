@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "ภาพรวม",
+    "progression": "ความคืบหน้า",
+    "characters": "ตัวละคร",
+    "artifacts": "อาร์ติแฟกต์",
+    "weapons": "อาวุธ",
+    "materials": "วัสดุ",
+    "planner": "แพลนเนอร์",
+    "achievements": "ความสำเร็จ",
+    "anecdotes": "เกร็ดน่ารู้",
+    "wishes": "อธิษฐาน",
+    "snapshots": "สแนปช็อต",
+    "import": "นำเข้า",
+    "manage": "จัดการ",
+    "staffOverview": "ภาพรวม",
+    "users": "ผู้ใช้",
+    "storage": "พื้นที่จัดเก็บ",
+    "roles": "บทบาท",
+    "audit": "ตรวจสอบ"
+  },
+  "section": {
+    "staff": "ทีมงาน",
+    "account": "บัญชี",
+    "system": "ระบบ"
+  },
+  "accounts": "บัญชี",
+  "staff": "ทีมงาน",
+  "settings": "ตั้งค่า",
+  "import": "นำเข้า",
+  "expandMenu": "ขยายเมนู",
+  "collapseMenu": "ย่อเมนู",
+  "openMenu": "เปิดเมนู",
+  "closeMenu": "ปิดเมนู",
+  "lightTheme": "ธีมสว่าง",
+  "darkTheme": "ธีมมืด",
+  "themeNotSaved": "บันทึกธีมไม่สำเร็จ",
+  "landingPage": "หน้าแรก",
+  "return": "กลับ",
+  "highestRole": "บทบาทสูงสุดของคุณ",
+  "copyName": "คัดลอกชื่อ",
+  "copyUid": "คัดลอก UID",
+  "copyUidValue": "คัดลอก UID {uid}",
+  "nameCopied": "คัดลอกชื่อแล้ว",
+  "uidCopied": "คัดลอก UID แล้ว",
+  "switcher": {
+    "select": "เลือกบัญชี",
+    "add": "เพิ่มบัญชี"
+  },
+  "page": {
+    "signIn": "เข้าสู่ระบบ",
+    "createAccount": "สมัครสมาชิก",
+    "continue": "ดำเนินการต่อ",
+    "linkIrminsul": "เชื่อมต่อ Irminsul",
+    "resetPassword": "รีเซ็ตรหัสผ่าน",
+    "newPassword": "รหัสผ่านใหม่",
+    "confirmEmail": "ยืนยันอีเมล",
+    "accounts": "บัญชี",
+    "addAccount": "เพิ่มบัญชี",
+    "settings": "ตั้งค่า",
+    "overview": "ภาพรวม",
+    "users": "ผู้ใช้",
+    "user": "ผู้ใช้",
+    "storage": "พื้นที่จัดเก็บ",
+    "roles": "บทบาท",
+    "audit": "ตรวจสอบ",
+    "progression": "ความคืบหน้า",
+    "characters": "ตัวละคร",
+    "weapons": "อาวุธ",
+    "artifacts": "อาร์ติแฟกต์",
+    "materials": "วัสดุ",
+    "planner": "แพลนเนอร์",
+    "achievements": "ความสำเร็จ",
+    "anecdotes": "เกร็ดน่ารู้",
+    "wishHistory": "ประวัติการอธิษฐาน",
+    "snapshots": "สแนปช็อต",
+    "import": "นำเข้า",
+    "accountSettings": "ตั้งค่าบัญชี",
+    "notFound": "ไม่พบ",
+    "inspect": "ตรวจดู · {page}"
+  },
+  "notFound": {
+    "title": "ไม่พบหน้านี้",
+    "body": "ลิงก์อาจเก่าแล้ว หรือหน้านี้ถูกย้ายไป",
+    "home": "ไปที่แดชบอร์ด"
+  },
+  "accountMissing": {
+    "title": "ไม่พบบัญชี",
+    "body": "บัญชีนี้อาจถูกลบไปแล้ว หรือเป็นของผู้อื่น",
+    "all": "บัญชีทั้งหมด"
+  },
+  "update": {
+    "ready": "Tracker เวอร์ชันใหม่พร้อมใช้งานแล้ว"
+  },
+  "public": {
+    "dashboard": "แดชบอร์ด"
+  },
+  "landing": {
+    "heroLine1": "ควบคุมทุกก้าว",
+    "heroLine2": "การเดินทางใน Genshin",
+    "tagline": "ทุกการล็อกอินถูกบันทึกเป็นสแนปช็อต อาร์ติแฟกต์ วัสดุ และประวัติ",
+    "openDashboard": "เปิดแดชบอร์ด",
+    "getStarted": "เริ่มต้นใช้งาน",
+    "critDmg": "ความแรงคริ 21.8%"
+  },
+  "appearance": "ภาษาและการแสดงผล"
+}

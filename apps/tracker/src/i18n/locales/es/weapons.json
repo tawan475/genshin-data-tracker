@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Niv. {level}/{cap}",
+    "copies": "{n} copia | {n} copias",
+    "locked": "Bloqueada"
+  },
+  "sort": {
+    "quality": "Calidad",
+    "level": "Nivel",
+    "refinement": "Refinamiento",
+    "count": "Copias",
+    "name": "Nombre",
+    "type": "Tipo"
+  },
+  "levelFilter": {
+    "all": "Nivel",
+    "max": "Máx.",
+    "levelled": "Subidas",
+    "base": "Niv. 1"
+  },
+  "refine": {
+    "spare": "{n} de sobra",
+    "possible": "posible: {title}"
+  },
+  "group": {
+    "copies": "{count} copia | {count} copias"
+  },
+  "bag": {
+    "notInData": "{copies} · Aún no está en los datos del juego"
+  },
+  "toolbar": {
+    "bag": "Inventario",
+    "byWeapon": "Por arma",
+    "list": "Lista",
+    "status": "Estado",
+    "equipped": "Equipadas",
+    "unused": "Sin usar",
+    "lock": "Bloqueo",
+    "locked": "Bloqueadas",
+    "unlocked": "Desbloqueadas",
+    "label": "Filtrar armas",
+    "searchTitle": "Arma, tipo o personaje",
+    "chips": "Tipo, rareza y refinamiento",
+    "noneInCapture": "Ninguna en esta captura",
+    "refinableTitle": "Armas cuyas copias de sobra podrían refinar una equipada",
+    "refinable": "Refinables"
+  },
+  "detail": {
+    "refinementTitle": "Refinamiento {rank} de {max}",
+    "unequipped": "Sin equipar",
+    "copies": "{n} copia | {n} copias",
+    "equipped": "{n} equipadas",
+    "spareCopies": "{n} copia de sobra | {n} copias de sobra"
+  },
+  "table": {
+    "qualityTitle": "Calidad: rareza, nivel, refinamiento, más reciente",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Tipos",
+    "kindsTitle": "Armas distintas",
+    "unused5": "5★ sin usar",
+    "refinableTitle": "Copias de sobra podrían refinar una equipada",
+    "empty": "No hay armas",
+    "pages": "Páginas de armas"
+  }
+}

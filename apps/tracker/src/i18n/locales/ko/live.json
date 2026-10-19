@@ -1,0 +1,44 @@
+{
+  "label": "실시간",
+  "thisSession": "이번 세션",
+  "sessionSince": "{time}부터",
+  "levelUps": "레벨 업 {n}회",
+  "talents": "특성 {n}개",
+  "updated": "{ago} 업데이트",
+  "updatedAt": "{time} 업데이트",
+  "row": "실시간",
+  "rowDetail": "이 스냅샷 이후 변경 {n}건",
+  "sinceSnapshot": "최신 스냅샷 이후",
+  "discard": "폐기",
+  "discardTitle": "이 변경 사항을 삭제합니다. 최신 스냅샷은 유지됩니다",
+  "discarded": "실시간 변경 사항 삭제됨",
+  "discardFailed": "실시간 변경 사항을 삭제할 수 없습니다",
+  "settings": {
+    "title": "실시간 동기화",
+    "label": "Irminsul 실시간 반영",
+    "description": "Irminsul이 실행되는 동안 스냅샷 사이의 변경 사항이 몇 초 안에 여기에 표시됩니다.",
+    "devices": "이 PC의 실시간 동기화 대상: {accounts} (계정 설정)",
+    "deletePoints": "차트 포인트 삭제",
+    "deletePointsTitle": "실시간 동기화가 스냅샷 사이에 남긴 차트 포인트를 삭제합니다",
+    "deletePointsConfirm": "이 계정의 차트 포인트를 모두 삭제할까요? 스냅샷은 유지됩니다.",
+    "pointsDeleted": "차트 포인트 삭제됨",
+    "exportNote": "내보내기에는 실시간 변경 사항과 포인트가 포함됩니다 (zip의 live/)."
+  },
+  "session": {
+    "heading": "세션",
+    "hours": "{h}시간 {m}분",
+    "minutes": "{m}분",
+    "world": "월드 {n}",
+    "newCharacter": "{name} 합류",
+    "more": "+{n}개 더",
+    "showMore": "더 보기 ({n})",
+    "field": {
+      "level": "{name} Lv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} 일반 공격 {from}→{to}",
+      "skill": "{name} 스킬 {from}→{to}",
+      "burst": "{name} 원소폭발 {from}→{to}"
+    }
+  },
+  "staffBytes": "실시간 동기화가 {size} 더 보관 중 (gdt-live)"
+}

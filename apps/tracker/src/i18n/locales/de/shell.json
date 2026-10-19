@@ -1,0 +1,109 @@
+{
+  "site": "GI Tracker",
+  "documentTitle": "{title} · GI Tracker",
+  "nav": {
+    "overview": "Übersicht",
+    "progression": "Fortschritt",
+    "characters": "Figuren",
+    "artifacts": "Artefakte",
+    "weapons": "Waffen",
+    "materials": "Materialien",
+    "planner": "Planer",
+    "achievements": "Errungenschaften",
+    "anecdotes": "Anekdoten",
+    "wishes": "Gebete",
+    "snapshots": "Snapshots",
+    "import": "Importieren",
+    "manage": "Verwalten",
+    "staffOverview": "Übersicht",
+    "users": "Benutzer",
+    "storage": "Speicher",
+    "roles": "Rollen",
+    "audit": "Protokoll"
+  },
+  "section": {
+    "staff": "Verwaltung",
+    "account": "Konto",
+    "system": "System"
+  },
+  "accounts": "Konten",
+  "staff": "Verwaltung",
+  "settings": "Einstellungen",
+  "import": "Importieren",
+  "expandMenu": "Menü ausklappen",
+  "collapseMenu": "Menü einklappen",
+  "openMenu": "Menü öffnen",
+  "closeMenu": "Menü schließen",
+  "lightTheme": "Helles Design",
+  "darkTheme": "Dunkles Design",
+  "themeNotSaved": "Design nicht gespeichert",
+  "landingPage": "Startseite",
+  "return": "Zurück",
+  "highestRole": "Deine höchste Rolle",
+  "copyName": "Name kopieren",
+  "copyUid": "UID kopieren",
+  "copyUidValue": "UID {uid} kopieren",
+  "nameCopied": "Name kopiert",
+  "uidCopied": "UID kopiert",
+  "switcher": {
+    "select": "Konto wählen",
+    "add": "Konto hinzufügen"
+  },
+  "page": {
+    "signIn": "Anmelden",
+    "createAccount": "Konto erstellen",
+    "continue": "Weiter",
+    "linkIrminsul": "Irminsul verknüpfen",
+    "resetPassword": "Passwort zurücksetzen",
+    "newPassword": "Neues Passwort",
+    "confirmEmail": "E-Mail bestätigen",
+    "accounts": "Konten",
+    "addAccount": "Konto hinzufügen",
+    "settings": "Einstellungen",
+    "overview": "Übersicht",
+    "users": "Benutzer",
+    "user": "Benutzer",
+    "storage": "Speicher",
+    "roles": "Rollen",
+    "audit": "Protokoll",
+    "progression": "Fortschritt",
+    "characters": "Figuren",
+    "weapons": "Waffen",
+    "artifacts": "Artefakte",
+    "materials": "Materialien",
+    "planner": "Planer",
+    "achievements": "Errungenschaften",
+    "anecdotes": "Anekdoten",
+    "wishHistory": "Gebetsverlauf",
+    "snapshots": "Snapshots",
+    "import": "Importieren",
+    "accountSettings": "Kontoeinstellungen",
+    "notFound": "Nicht gefunden",
+    "inspect": "Ansehen · {page}"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Der Link ist vielleicht alt, oder die Seite wurde verschoben.",
+    "home": "Zum Dashboard"
+  },
+  "accountMissing": {
+    "title": "Konto nicht gefunden",
+    "body": "Es wurde vielleicht gelöscht oder gehört jemand anderem.",
+    "all": "Alle Konten"
+  },
+  "update": {
+    "ready": "Eine neue Version des Trackers ist bereit."
+  },
+  "public": {
+    "dashboard": "Dashboard"
+  },
+  "landing": {
+    "heroLine1": "Meistere deine",
+    "heroLine2": "Genshin-Reise",
+    "tagline": "Jeder Login als Snapshot. Artefakte, Materialien, Verlauf.",
+    "openDashboard": "Dashboard öffnen",
+    "getStarted": "Loslegen",
+    "critDmg": "KSCH 21,8%"
+  },
+  "appearance": "Sprache und Darstellung"
+}

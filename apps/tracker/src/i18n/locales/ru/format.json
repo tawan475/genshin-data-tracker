@@ -1,0 +1,7 @@
+{
+  "justNow": "только что",
+  "betweenTimes": "{date}, между {from} и {to}",
+  "betweenDates": "между {from} и {to}",
+  "today": "Сегодня",
+  "yesterday": "Вчера"
+}

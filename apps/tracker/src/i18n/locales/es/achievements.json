@@ -1,0 +1,139 @@
+{
+  "title": "Logros",
+  "newestCapture": "Captura más reciente",
+  "newestCaptureTitle": "Captura más reciente: {time}",
+  "notCaptured": "Sin capturar",
+  "notCapturedTitle": "Abre el menú de Logros del juego con irminsul en marcha para capturarlos",
+  "importTitle": "Importar logros completados de una exportación de Seelie, una copia de paimon.moe o un archivo de stardb / irminsul",
+  "loadFailed": "Error al cargar",
+  "allDone": "Todo completado",
+  "showDone": "Mostrar completados",
+  "noneDone": "Ninguno completado",
+  "showMissing": "Mostrar pendientes",
+  "noMatches": "Sin resultados",
+  "clear": "Borrar",
+  "more": "Más",
+  "loading": "Cargando",
+  "undo": "Deshacer",
+  "notSaved": "No guardado",
+  "markedDone": "{n} marcados como completados",
+  "unmarked": "{n} desmarcados",
+  "added": "{n} añadidos",
+  "confirmMark": {
+    "title": "¿Marcar {n} como completados?",
+    "filtered": "Los {n} logros pendientes mostrados se marcan a mano como completados.",
+    "all": "Todos los logros pendientes ({n}) se marcan a mano como completados.",
+    "confirm": "Marcar como completados"
+  },
+  "confirmUnmark": {
+    "title": "¿Desmarcar {n}?",
+    "detail": "Quita las marcas a mano de los {n} logros mostrados. Los capturados siguen completados.",
+    "confirm": "Desmarcar"
+  },
+  "categories": {
+    "label": "Categorías",
+    "all": "Todas",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} protogemas",
+    "hideDone": "Ocultar series completadas",
+    "showDone": "Mostrar series completadas",
+    "completed": "Completada"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} protogemas"
+  },
+  "import": {
+    "title": "Importar",
+    "formats": {
+      "list": "Lista de ids"
+    },
+    "noAchievements": "No se encontraron logros",
+    "notJson": "No es un archivo JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb o irminsul: un archivo GOOD con gi_achievements.",
+    "drop": "Archivo de Seelie, paimon.moe o stardb",
+    "account": "Cuenta {n}",
+    "fileAccount": "Cuenta del archivo",
+    "browse": "Examinar",
+    "inFile": "En el archivo",
+    "already": "Ya completados",
+    "new": "Nuevos",
+    "newTitle": "Incluye {unknown} más nuevos que los datos del juego y {disused} retirados del juego: se guardan, no se cuentan",
+    "cancel": "Cancelar",
+    "add": "Añadir {n}"
+  },
+  "row": {
+    "clickToMark": "Haz clic para marcar como completado",
+    "clickToUnmark": "{text} · haz clic para desmarcar",
+    "captured": "Capturado",
+    "staysDone": "{text} · está en una captura, así que sigue completado",
+    "markEveryTier": "Marcar todos los niveles como completados",
+    "markDone": "Marcar como completado",
+    "unmarkTiers": "Haz clic para desmarcar los niveles marcados a mano",
+    "markedClick": "Marcado a mano · haz clic para desmarcar",
+    "tierTitle": "Nivel {n} · {primogems} protogemas",
+    "reward": "{n} protogemas",
+    "primogems": "protogemas",
+    "states": {
+      "captured": "capturado",
+      "marked": "marcado a mano",
+      "none": "pendiente"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Niveles",
+    "tier": "Nivel {n}",
+    "addedIn": "Añadido en {version}",
+    "hiddenTitle": "Logro oculto",
+    "hidden": "Oculto",
+    "markedByHand": "Marcado a mano",
+    "guide": "Guía en stardb.gg"
+  },
+  "completion": {
+    "tier": "Nivel {n} · {text}",
+    "exact": "Completado {time}",
+    "exactTitle": "Hora de finalización registrada por el juego, leída por irminsul",
+    "seen": "Completado {window}",
+    "seenTitle": "Completado entre dos capturas: no estaba en la de {since}, sí en la de {at}",
+    "by": "Completado antes del {date}",
+    "byTitle": "Ya completado en tu primera captura ({at})",
+    "marked": "Marcado a mano como completado",
+    "markedTitle": "Ninguna captura lo tiene, así que no hay fecha"
+  },
+  "summary": {
+    "label": "Resumen",
+    "done": "Completados",
+    "doneCaptured": "{n} capturados",
+    "doneByHand": "{n} a mano",
+    "doneUnknown": "{n} más nuevos que los datos del juego",
+    "progress": "Progreso",
+    "progressLabel": "Logros completados",
+    "primogems": "Protogemas",
+    "primogemsHint": "Protogemas obtenidas / disponibles",
+    "missing": "Pendientes",
+    "showAll": "Mostrar todo",
+    "showLeft": "Mostrar solo lo pendiente"
+  },
+  "toolbar": {
+    "label": "Filtrar logros",
+    "search": "Buscar",
+    "searchTitle": "Nombre, descripción, categoría o id",
+    "completion": "Progreso",
+    "completions": {
+      "all": "Todos",
+      "done": "Completados",
+      "missing": "Pendientes"
+    },
+    "hidden": {
+      "all": "Ocultos: todos",
+      "hidden": "Ocultos",
+      "visible": "No ocultos"
+    },
+    "hiddenLabel": "Ocultos",
+    "allCategories": "Todas las categorías",
+    "category": "Categoría",
+    "version": "Versión",
+    "addedIn": "Añadido en",
+    "markAll": "Marcar todos",
+    "markAllTitle": "Marcar como completados los {n} logros pendientes mostrados",
+    "unmarkAll": "Desmarcar todos",
+    "unmarkAllTitle": "Desmarcar los {n} logros mostrados marcados a mano"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Copia immagine",
+    "share": "Condividi",
+    "missing": "Impossibile caricare {n} immagine | Impossibile caricare {n} immagini",
+    "drawing": "{label} · disegno in corso",
+    "exportFailed": "Esportazione non riuscita",
+    "copyFailed": "Copia non riuscita",
+    "shareFailed": "Condivisione non riuscita",
+    "copied": "Copiato",
+    "download": "Scarica PNG",
+    "downloadSized": "Scarica PNG {size}",
+    "buildTitle": "Build",
+    "artifactTitle": "Manufatto"
+  },
+  "options": {
+    "darkCard": "Scheda scura",
+    "lightCard": "Scheda chiara",
+    "dark": "Scuro",
+    "light": "Chiaro",
+    "cardTheme": "Tema della scheda",
+    "showName": "Mostra il nome dell'account",
+    "name": "Nome",
+    "showUid": "Mostra l'UID"
+  },
+  "menu": {
+    "label": "Scheda da condividere",
+    "drawing": "Disegno in corso",
+    "copy": "Copia"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} tiri (quelli iniziali e uno ogni +4)",
+    "levelTitle": "Livello {level} di {cap} · Ascensione {ascension}",
+    "weaponAndStats": "Arma e statistiche",
+    "pieceBonus": "Bonus {n} pezzi",
+    "rvTitle": "Valore dei tiri: ogni tiro di statistica secondaria in % del suo tiro massimo, sommati"
+  }
+}

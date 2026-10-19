@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "잠금",
+    "astralMark": "별빛 표시",
+    "new": "신규"
+  },
+  "sort": {
+    "quality": "품질",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "잠재력",
+    "level": "레벨",
+    "set": "세트",
+    "recent": "최근"
+  },
+  "sortTitle": {
+    "quality": "게임과 동일: 희귀도, 레벨, 세트, 착용자",
+    "cv": "치명 수치",
+    "rv": "롤 밸류",
+    "potential": "최대 레벨에서의 기대 CV",
+    "level": "레벨",
+    "set": "세트",
+    "recent": "신규 또는 변경됨"
+  },
+  "topSets": {
+    "label": "상위 세트",
+    "more": "세트 {n}개 더"
+  },
+  "lower": {
+    "label": "낮은 희귀도: {counts}",
+    "title": "이 정렬에서 맨 뒤로 가는 낮은 희귀도"
+  },
+  "picker": {
+    "find": "찾기",
+    "noMatch": "일치 항목 없음",
+    "done": "완료"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: 없음",
+    "cell": "{slot} · {n}개 · 최고 {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "개수",
+    "slotHeader": "{slot}: 최고 CV, 개수",
+    "sumTitle": "부위별 최고 CV 합계"
+  },
+  "bag": {
+    "more": "{n}개 더"
+  },
+  "table": {
+    "sortBySet": "세트순 정렬",
+    "sortByLevel": "레벨순 정렬",
+    "equippedBy": "착용자",
+    "marks": "잠금 및 표시",
+    "elixir": "축성의 서리"
+  },
+  "detail": {
+    "fromGame": "게임 데이터",
+    "inferred": "레벨로 추정",
+    "upgradesToCome": "{source} · 남은 강화 {n}회",
+    "rankTitle": "{rarity}★ {slot} {n}개 중 CV 순위",
+    "newTitle": "이전 캡처에 없음",
+    "rolls": "강화",
+    "rank": "순위",
+    "upgradesTitle": "4레벨마다 부 옵션 1회 강화, 최대 {max}",
+    "upgrades": "강화",
+    "expectedCv": "기대 CV",
+    "expectedDetail": "{max} 기준 기대치: 강화마다 {chance}% 확률로 치명 옵션에 평균 수치가 붙음",
+    "bestCase": "최상의 경우",
+    "bestDetail": "{max}까지 모든 강화가 최고 치명 수치",
+    "critLinesTitle": "4줄 중 {n}줄이 치명타 옵션: 강화가 치명 옵션에 붙을 확률",
+    "critPerRoll": "치명 / 강화",
+    "activatesTitle": "첫 강화로 열리는 네 번째 옵션",
+    "activates": "+4 추가",
+    "maxRv": "최대 RV",
+    "unlocked": "잠금 해제",
+    "astral": "별빛",
+    "elixirTitle": "축성의 서리",
+    "rollTier": "{tier} 수치",
+    "inactive": "비활성"
+  },
+  "card": {
+    "potentialTitle": "+{max} 기대 CV · 최상의 경우 {best}",
+    "equipped": "장착 중: {name}"
+  },
+  "toolbar": {
+    "all": "전체",
+    "yes": "예",
+    "no": "아니요",
+    "linesNow": "현재 {n}줄",
+    "any": "전체",
+    "allSets": "모든 세트",
+    "anyone": "모두",
+    "noAstral": "별빛 없음",
+    "noElixir": "서리 없음",
+    "quoted": "“{text}”",
+    "mainPill": "주 옵션: {stat}",
+    "lines": "{n}줄",
+    "best": "최고",
+    "label": "성유물 필터",
+    "searchLabel": "세트 또는 캐릭터 검색",
+    "searchTitle": "세트 또는 캐릭터",
+    "equippedByTitle": "착용자: {names}",
+    "sortBy": "정렬 기준",
+    "descending": "내림차순",
+    "ascending": "오름차순",
+    "slot": "부위",
+    "presets": "프리셋",
+    "bestTitle": "현재 정렬 기준 부위별 상위 {n}개",
+    "newNone": "비교할 이전 캡처 없음",
+    "newTitle": "이전 캡처에 없음: 신규 또는 그 후 강화됨",
+    "zeroTitle": "미장착 5★ +0",
+    "lowTitle": "잠금 해제·미장착 4★ 및 3★",
+    "low": "4★/3★ 성유물",
+    "spareTitle": "미장착 5★",
+    "spare": "여분 5★",
+    "maxTitle": "+20 레벨만",
+    "moreTitle": "주 옵션, 부 옵션, 줄 수, 레벨, 잠금, 위치, 별빛 표시, 축성의 서리",
+    "more": "더 보기",
+    "substatsTitle": "모두 보유 (+4에서 열리는 줄 포함)",
+    "linesLabel": "줄 수",
+    "min": "최소",
+    "max": "최대",
+    "location": "위치",
+    "remove": "{label} 제거"
+  },
+  "page": {
+    "table": "표",
+    "loadFailed": "성유물을 불러올 수 없습니다",
+    "loading": "성유물 불러오는 중",
+    "refreshFailed": "새로고침할 수 없습니다",
+    "shownTitle": "표시 / 성유물",
+    "countSuffix": "성유물",
+    "pngSize": "가로 {px}px PNG"
+  }
+}

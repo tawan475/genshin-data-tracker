@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Niv. {level}/{cap}",
+    "copies": "{n} exemplaire | {n} exemplaires",
+    "locked": "Verrouillée"
+  },
+  "sort": {
+    "quality": "Qualité",
+    "level": "Niveau",
+    "refinement": "Raffinement",
+    "count": "Exemplaires",
+    "name": "Nom",
+    "type": "Type"
+  },
+  "levelFilter": {
+    "all": "Niveau",
+    "max": "Max",
+    "levelled": "Améliorée",
+    "base": "Niv. 1"
+  },
+  "refine": {
+    "spare": "{n} en trop",
+    "possible": "possible : {title}"
+  },
+  "group": {
+    "copies": "{count} exemplaire | {count} exemplaires"
+  },
+  "bag": {
+    "notInData": "{copies} · Pas encore dans les données du jeu"
+  },
+  "toolbar": {
+    "bag": "Sac",
+    "byWeapon": "Par arme",
+    "list": "Liste",
+    "status": "État",
+    "equipped": "Équipée",
+    "unused": "Inutilisée",
+    "lock": "Verrou",
+    "locked": "Verrouillée",
+    "unlocked": "Déverrouillée",
+    "label": "Filtrer les armes",
+    "searchTitle": "Arme, type ou personnage",
+    "chips": "Type, rareté et raffinement",
+    "noneInCapture": "Aucune dans cette capture",
+    "refinableTitle": "Armes dont les exemplaires en trop pourraient raffiner une arme équipée",
+    "refinable": "Raffinable"
+  },
+  "detail": {
+    "refinementTitle": "Rang de raffinement {rank} sur {max}",
+    "unequipped": "Non équipée",
+    "copies": "{n} exemplaire | {n} exemplaires",
+    "equipped": "{n} équipée(s)",
+    "spareCopies": "{n} exemplaire en trop | {n} exemplaires en trop"
+  },
+  "table": {
+    "qualityTitle": "Qualité : rareté, niveau, raffinement, plus récente",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Types",
+    "kindsTitle": "Armes différentes",
+    "unused5": "5★ inutilisées",
+    "refinableTitle": "Des exemplaires en trop pourraient raffiner une arme équipée",
+    "empty": "Aucune arme",
+    "pages": "Pages des armes"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Görseli kopyala",
+    "share": "Paylaş",
+    "missing": "{n} görsel yüklenemedi",
+    "drawing": "{label} · çiziliyor",
+    "exportFailed": "Dışa aktarma başarısız",
+    "copyFailed": "Kopyalama başarısız",
+    "shareFailed": "Paylaşım başarısız",
+    "copied": "Kopyalandı",
+    "download": "PNG indir",
+    "downloadSized": "{size} PNG indir",
+    "buildTitle": "Yapı",
+    "artifactTitle": "Yadigar"
+  },
+  "options": {
+    "darkCard": "Koyu kart",
+    "lightCard": "Açık kart",
+    "dark": "Koyu",
+    "light": "Açık",
+    "cardTheme": "Kart teması",
+    "showName": "Hesap adını göster",
+    "name": "Ad",
+    "showUid": "UID'yi göster"
+  },
+  "menu": {
+    "label": "Paylaşım kartı",
+    "drawing": "Çiziliyor",
+    "copy": "Kopyala"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV %{rv} · {n} artış (ilk değerler ve her +4 için bir)",
+    "levelTitle": "Seviye {level}/{cap} · Yükseltme {ascension}",
+    "weaponAndStats": "Silah ve nitelikler",
+    "pieceBonus": "{n} parça bonusu",
+    "rvTitle": "Artış değeri: her alt özellik artışı, en yüksek artışın yüzdesi olarak toplanır"
+  }
+}

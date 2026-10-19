@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Salin gambar",
+    "share": "Bagikan",
+    "missing": "{n} gambar tidak bisa dimuat",
+    "drawing": "{label} · menggambar",
+    "exportFailed": "Ekspor gagal",
+    "copyFailed": "Gagal menyalin",
+    "shareFailed": "Gagal membagikan",
+    "copied": "Disalin",
+    "download": "Unduh PNG",
+    "downloadSized": "Unduh PNG {size}",
+    "buildTitle": "Build",
+    "artifactTitle": "Artefak"
+  },
+  "options": {
+    "darkCard": "Kartu gelap",
+    "lightCard": "Kartu terang",
+    "dark": "Gelap",
+    "light": "Terang",
+    "cardTheme": "Tema kartu",
+    "showName": "Tampilkan nama akun",
+    "name": "Nama",
+    "showUid": "Tampilkan UID"
+  },
+  "menu": {
+    "label": "Kartu berbagi",
+    "drawing": "Menggambar",
+    "copy": "Salin"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} roll (roll awal dan satu per +4)",
+    "levelTitle": "Level {level} dari {cap} · Ascension {ascension}",
+    "weaponAndStats": "Senjata dan stat",
+    "pieceBonus": "Bonus {n} bagian",
+    "rvTitle": "Roll value: setiap roll substat sebagai % dari roll tertingginya, dijumlahkan"
+  }
+}

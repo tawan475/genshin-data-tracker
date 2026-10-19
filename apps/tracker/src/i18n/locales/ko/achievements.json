@@ -1,0 +1,139 @@
+{
+  "title": "업적",
+  "newestCapture": "최신 캡처",
+  "newestCaptureTitle": "최신 캡처: {time}",
+  "notCaptured": "캡처 없음",
+  "notCapturedTitle": "irminsul 실행 중에 게임의 업적 메뉴를 열면 캡처됩니다",
+  "importTitle": "Seelie 내보내기, paimon.moe 백업 또는 stardb / irminsul 파일에서 완료한 업적 가져오기",
+  "loadFailed": "불러오기 실패",
+  "allDone": "모두 완료",
+  "showDone": "완료 표시",
+  "noneDone": "완료 없음",
+  "showMissing": "미완료 표시",
+  "noMatches": "일치 항목 없음",
+  "clear": "지우기",
+  "more": "더 보기",
+  "loading": "불러오는 중",
+  "undo": "실행 취소",
+  "notSaved": "저장되지 않음",
+  "markedDone": "{n}개 완료 표시됨",
+  "unmarked": "{n}개 표시 해제됨",
+  "added": "{n}개 추가됨",
+  "confirmMark": {
+    "title": "{n}개를 완료로 표시할까요?",
+    "filtered": "표시된 남은 업적 {n}개를 직접 완료로 표시합니다.",
+    "all": "남은 업적 전체({n}개)를 직접 완료로 표시합니다.",
+    "confirm": "완료 표시"
+  },
+  "confirmUnmark": {
+    "title": "{n}개를 해제할까요?",
+    "detail": "표시된 업적 {n}개의 직접 표시를 제거합니다. 캡처된 업적은 완료로 유지됩니다.",
+    "confirm": "해제"
+  },
+  "categories": {
+    "label": "분류",
+    "all": "전체",
+    "title": "{done} / {total} · 원석 {primogems} / {primogemsTotal}",
+    "hideDone": "완료한 시리즈 숨기기",
+    "showDone": "완료한 시리즈 표시",
+    "completed": "완료"
+  },
+  "group": {
+    "primogems": "원석 {primogems} / {total}"
+  },
+  "import": {
+    "title": "가져오기",
+    "formats": {
+      "list": "ID 목록"
+    },
+    "noAchievements": "업적을 찾을 수 없습니다",
+    "notJson": "JSON 파일이 아닙니다",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb 또는 irminsul: gi_achievements가 포함된 GOOD 파일.",
+    "drop": "Seelie, paimon.moe 또는 stardb 파일",
+    "account": "계정 {n}",
+    "fileAccount": "파일의 계정",
+    "browse": "찾아보기",
+    "inFile": "파일 내",
+    "already": "이미 완료",
+    "new": "신규",
+    "newTitle": "게임 데이터보다 최신인 {unknown}개와 게임에서 제거된 {disused}개 포함: 보관되지만 집계되지 않음",
+    "cancel": "취소",
+    "add": "{n}개 추가"
+  },
+  "row": {
+    "clickToMark": "클릭하여 완료 표시",
+    "clickToUnmark": "{text} · 클릭하여 해제",
+    "captured": "캡처됨",
+    "staysDone": "{text} · 캡처에 있으므로 완료 유지",
+    "markEveryTier": "모든 단계 완료 표시",
+    "markDone": "완료 표시",
+    "unmarkTiers": "클릭하여 직접 표시한 단계 해제",
+    "markedClick": "직접 표시함 · 클릭하여 해제",
+    "tierTitle": "{n}단계 · 원석 {primogems}개",
+    "reward": "원석 {n}개",
+    "primogems": "원석",
+    "states": {
+      "captured": "캡처됨",
+      "marked": "직접 표시함",
+      "none": "미완료"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "단계",
+    "tier": "{n}단계",
+    "addedIn": "{version}에 추가",
+    "hiddenTitle": "숨겨진 업적",
+    "hidden": "숨김",
+    "markedByHand": "직접 표시함",
+    "guide": "stardb.gg 공략"
+  },
+  "completion": {
+    "tier": "{n}단계 · {text}",
+    "exact": "{time} 완료",
+    "exactTitle": "게임이 기록한 완료 시각 (irminsul이 읽음)",
+    "seen": "{window} 완료",
+    "seenTitle": "두 캡처 사이에 완료: {since} 캡처에는 없고 {at} 캡처에는 있음",
+    "by": "{date}까지 완료",
+    "byTitle": "첫 캡처({at})에서 이미 완료",
+    "marked": "직접 완료 표시함",
+    "markedTitle": "캡처에 없으므로 날짜가 없습니다"
+  },
+  "summary": {
+    "label": "요약",
+    "done": "완료",
+    "doneCaptured": "캡처 {n}개",
+    "doneByHand": "직접 {n}개",
+    "doneUnknown": "게임 데이터보다 최신 {n}개",
+    "progress": "진행도",
+    "progressLabel": "완료한 업적",
+    "primogems": "원석",
+    "primogemsHint": "획득한 원석 / 전체 원석",
+    "missing": "미완료",
+    "showAll": "전체 표시",
+    "showLeft": "남은 것만 표시"
+  },
+  "toolbar": {
+    "label": "업적 필터",
+    "search": "검색",
+    "searchTitle": "이름, 설명, 분류 또는 ID",
+    "completion": "완료 여부",
+    "completions": {
+      "all": "전체",
+      "done": "완료",
+      "missing": "미완료"
+    },
+    "hidden": {
+      "all": "숨김: 전체",
+      "hidden": "숨김",
+      "visible": "숨김 아님"
+    },
+    "hiddenLabel": "숨김",
+    "allCategories": "모든 분류",
+    "category": "분류",
+    "version": "버전",
+    "addedIn": "추가 버전",
+    "markAll": "모두 표시",
+    "markAllTitle": "표시된 남은 업적 {n}개를 완료로 표시",
+    "unmarkAll": "모두 해제",
+    "unmarkAllTitle": "직접 표시한 업적 {n}개를 해제"
+  }
+}

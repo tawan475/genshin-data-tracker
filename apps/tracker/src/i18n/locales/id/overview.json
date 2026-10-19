@@ -1,0 +1,73 @@
+{
+  "progression": "Progres",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Primogem",
+    "characters": "Karakter",
+    "weapons": "Senjata",
+    "artifacts": "Artefak",
+    "artifact4": "Artefak 4★",
+    "artifact3": "Artefak 3★"
+  },
+  "server": {
+    "AMERICA": "Amerika",
+    "EUROPE": "Eropa",
+    "ASIA": "Asia",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Belum ada snapshot",
+  "import": "Impor",
+  "historyUnavailable": "Riwayat tidak tersedia",
+  "currencyCarried": "dari tangkapan sebelumnya",
+  "currencyMissing": "tidak ada di tangkapan terbaru",
+  "sincePrevious": "sejak snapshot sebelumnya",
+  "lastCaptured": "Tangkapan terakhir",
+  "lastCapturedAt": "Tangkapan terakhir {time}",
+  "seenAgain": "Terlihat lagi",
+  "seenAgainAt": "Terlihat lagi {time}",
+  "loadingHistory": "Memuat riwayat snapshot",
+  "lowRarity": {
+    "label": "Artefak 4★ / 3★",
+    "hint": "Tak terkunci, tidak dikenakan",
+    "rarity": "{n} bintang"
+  },
+  "card": {
+    "snapshots": "Snapshot",
+    "storage": "Penyimpanan",
+    "stored": "{raw} diunggah, {stored} disimpan",
+    "storedRatio": "{raw} diunggah, {stored} disimpan ({ratio} lebih kecil)"
+  },
+  "monthly": {
+    "title": "Analisis bulanan",
+    "previous": "Bulan sebelumnya",
+    "previousTo": "Bulan sebelumnya, {month}",
+    "next": "Bulan berikutnya",
+    "nextTo": "Bulan berikutnya, {month}",
+    "gained": "didapat {n}",
+    "spent": "dipakai {n}",
+    "added": "ditambah {n}",
+    "used": "digunakan {n}",
+    "closing": "akhir {n}",
+    "artifactExp": "{n} EXP artefak di level 0",
+    "thisMonth": "bulan ini · {detail}",
+    "gapTitle": "Tidak ada tangkapan selama {n} hari",
+    "vs": "vs {day}",
+    "captures": "{n} tangkapan",
+    "comparedWith": "{captures}, dibanding {day}",
+    "noCaptures": "Tidak ada tangkapan",
+    "noCapture": "Tidak ada tangkapan",
+    "caption": "Perubahan harian di {month}: tangkapan terakhir tiap hari dibanding hari tertangkap sebelumnya, dengan nilainya di bawah",
+    "day": "Hari",
+    "dayTitle": "Tangkapan terakhir hari itu vs hari tertangkap sebelumnya, waktu lokal"
+  },
+  "recent": {
+    "title": "Terbaru",
+    "all": "Semua",
+    "allTitle": "Semua {n} snapshot",
+    "size": "{raw} byte diunggah, {stored} byte disimpan",
+    "unchanged": "Total tidak berubah",
+    "first": "Snapshot pertama",
+    "currencyMissing": "Mora dan primogem tidak ada",
+    "noCurrency": "Tidak ada mata uang"
+  }
+}

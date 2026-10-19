@@ -1,0 +1,73 @@
+{
+  "progression": "Progresso",
+  "figure": {
+    "mora": "Mora",
+    "primogem": "Gemas Essenciais",
+    "characters": "Personagens",
+    "weapons": "Armas",
+    "artifacts": "Artefatos",
+    "artifact4": "Artefato 4★",
+    "artifact3": "Artefato 3★"
+  },
+  "server": {
+    "AMERICA": "América",
+    "EUROPE": "Europa",
+    "ASIA": "Ásia",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Nenhuma captura ainda",
+  "import": "Importar",
+  "historyUnavailable": "Histórico indisponível",
+  "currencyCarried": "de uma captura anterior",
+  "currencyMissing": "ausente na captura mais recente",
+  "sincePrevious": "desde a captura anterior",
+  "lastCaptured": "Última captura",
+  "lastCapturedAt": "Última captura {time}",
+  "seenAgain": "Visto de novo",
+  "seenAgainAt": "Visto de novo {time}",
+  "loadingHistory": "Carregando o histórico de capturas",
+  "lowRarity": {
+    "label": "Artefato 4★ / 3★",
+    "hint": "Desbloqueados, não equipados",
+    "rarity": "{n} estrelas"
+  },
+  "card": {
+    "snapshots": "Capturas",
+    "storage": "Armazenamento",
+    "stored": "{raw} enviados, {stored} armazenados",
+    "storedRatio": "{raw} enviados, {stored} armazenados ({ratio} menor)"
+  },
+  "monthly": {
+    "title": "Análise mensal",
+    "previous": "Mês anterior",
+    "previousTo": "Mês anterior, {month}",
+    "next": "Próximo mês",
+    "nextTo": "Próximo mês, {month}",
+    "gained": "ganhou {n}",
+    "spent": "gastou {n}",
+    "added": "adicionou {n}",
+    "used": "usou {n}",
+    "closing": "fechamento {n}",
+    "artifactExp": "{n} EXP de artefato no nível 0",
+    "thisMonth": "este mês · {detail}",
+    "gapTitle": "Sem capturas por {n} dias",
+    "vs": "vs {day}",
+    "captures": "{n} captura | {n} capturas",
+    "comparedWith": "{captures}, comparado com {day}",
+    "noCaptures": "Sem capturas",
+    "noCapture": "Sem captura",
+    "caption": "Variação diária em {month}: a última captura de cada dia contra o dia capturado anterior, com o valor abaixo",
+    "day": "Dia",
+    "dayTitle": "Última captura do dia vs o dia capturado anterior, horário local"
+  },
+  "recent": {
+    "title": "Recentes",
+    "all": "Todas",
+    "allTitle": "Todas as {n} capturas",
+    "size": "{raw} bytes enviados, {stored} bytes armazenados",
+    "unchanged": "Totais inalterados",
+    "first": "Primeira captura",
+    "currencyMissing": "Mora e Gemas Essenciais ausentes",
+    "noCurrency": "Sem moedas"
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "title": "Riwayat Permohonan",
+  "bannerPageTitle": "Riwayat Permohonan · {banner}",
+  "loadFailed": "Gagal memuat",
+  "loading": "Memuat",
+  "import": "Impor",
+  "export": "Ekspor",
+  "importExport": "Impor / ekspor",
+  "browse": "Telusuri",
+  "cancel": "Batal",
+  "search": "Cari",
+  "rarity": "Kelangkaan",
+  "banner": "Banner",
+  "pulls": "{n} pull",
+  "pullsTimes": "{n} permohonan × {primos}",
+  "pullsPrimos": "{n} pull · ✦ {primos}",
+  "lifetime": "Total pull",
+  "allWishes": "Semua permohonan",
+  "newPulls": "{n} pull baru",
+  "nothingNew": "Tidak ada yang baru",
+  "banners": {
+    "character": {
+      "label": "Karakter",
+      "title": "Event Karakter"
+    },
+    "weapon": {
+      "label": "Senjata",
+      "title": "Event Senjata"
+    },
+    "standard": {
+      "label": "Standar",
+      "title": "Standar"
+    },
+    "chronicled": {
+      "label": "Chronicled",
+      "title": "Chronicled Wish"
+    },
+    "beginners": {
+      "label": "Pemula",
+      "title": "Permohonan Pemula"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "Jan",
+      "2": "Feb",
+      "3": "Mar",
+      "4": "Apr",
+      "5": "Mei",
+      "6": "Jun",
+      "7": "Jul",
+      "8": "Agu",
+      "9": "Sep",
+      "10": "Okt",
+      "11": "Nov",
+      "12": "Des"
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "sekarang"
+  },
+  "outcomes": {
+    "won": "Menang",
+    "lost": "Kalah",
+    "guaranteed": "Dijamin"
+  },
+  "outcomeTitles": {
+    "won": "Menang {odds}",
+    "lost": "Kalah {odds}: berikutnya pasti featured",
+    "guaranteed": "Featured, dijamin setelah kalah {odds}"
+  },
+  "legend": {
+    "won": "menang",
+    "lost": "kalah",
+    "guaranteed": "dijamin"
+  },
+  "overview": {
+    "newestPull": "Pull terbaru, jam game",
+    "synced": "Disinkronkan {ago}",
+    "syncedTitle": "Permohonan baru disimpan {time}",
+    "syncHelp": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup): irminsul menyinkronkan setiap banner, lalu setiap permohonan baru selama kuncinya berlaku (~24 jam). Tautan permohonan game juga membawa enam bulan terakhir. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
+    "empty": "Belum ada permohonan",
+    "emptyBody": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup), atau impor dengan tautan permohonan game. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
+    "banners": "Banner",
+    "totals": "Total",
+    "worth": "Nilai permohonan",
+    "worthHint": "{n} permohonan × {primos} Primogem",
+    "wishes": "{n} permohonan",
+    "avgPity": "Rata-rata pity 5★",
+    "avgPityHint": "Event Karakter: rata-rata pity setiap 5★, dibanding sekitar {expected} yang diharapkan dengan soft pity",
+    "avgPityVs": "{diff} vs {expected} harapan"
+  },
+  "card": {
+    "everyPull": "{banner}: setiap pull",
+    "fiveTitle": "{left} pull lagi ke hard pity · ✦ {primos} · soft pity dari {soft}",
+    "fourTitle": "{left} lagi ke 4★ pasti",
+    "fourFeatured": " · 4★ berikutnya pasti featured",
+    "pity5": "Pity 5★",
+    "pity4": "Pity 4★",
+    "guaranteedAt": "Dijamin di {n}",
+    "hideLatest": "Sembunyikan pull terbaru",
+    "showLatest": "Tampilkan pull terbaru",
+    "latest": "Pull terbaru",
+    "latestRegion": "{banner}: pull terbaru",
+    "none": "Tidak ada",
+    "cols": {
+      "name": "Nama",
+      "time": "Waktu",
+      "pity": "Pity"
+    }
+  },
+  "five": {
+    "every": "Semua 5★",
+    "newestFirst": "{n} · terbaru dulu",
+    "none": "Belum ada 5★",
+    "pity": "{name} · pity {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "Platform",
+    "copyFailed": "Tidak tersalin: pilih perintahnya lalu salin",
+    "steps": {
+      "open": "Buka Permohonan → Riwayat di game dan tunggu sampai termuat.",
+      "android2": "Matikan Wi-Fi dan data seluler.",
+      "android3": "Ketuk refresh (kanan atas): halaman menampilkan error dengan sejumlah teks.",
+      "android4": "Pilih semua teks itu lalu salin.",
+      "android5": "Nyalakan lagi koneksi, lalu tempel di bawah.",
+      "ios1": "Buka menu Paimon → Masukan dan tunggu sampai termuat.",
+      "ios2": "Ketuk Masalah dalam game → Mode Co-Op.",
+      "ios3": "Ketuk tautan di bagian bawah balasan: tautan terbuka di browser.",
+      "ios4": "Salin tautan itu lalu tempel di bawah.",
+      "ps1": "Buka surat event dengan kode QR di game.",
+      "ps2": "Pindai kode dengan ponselmu dan salin tautan yang terbuka.",
+      "ps3": "Tempel di bawah. Jika gagal, tautkan PlayStation-mu ke akun HoYoverse dan pakai langkah PC atau ponsel.",
+      "pcRun": "Buka PowerShell (Start, ketik PowerShell) lalu jalankan:",
+      "pcPaste": "Perintah ini menyalin tautannya: tempel di bawah.",
+      "pcPasteTitle": "Copy wish URL di irminsul memberi tautan yang sama"
+    },
+    "scriptTitle": "Membaca cache web game di PC ini, memeriksa tautannya sekali ke HoYoverse, lalu menyalinnya. Tidak lebih.",
+    "copied": "Disalin",
+    "copy": "Salin",
+    "readScript": "Baca skripnya",
+    "label": "Tautan riwayat permohonan",
+    "placeholder": "Tempel tautan: https://…",
+    "invalid": "Tidak ada tautan riwayat permohonan di teks itu",
+    "uidMismatch": "Tautan itu UID {uid}; akun ini UID {own}.",
+    "failed": "Impor gagal",
+    "saving": "Menyimpan {n}…",
+    "progress": "{banner} · halaman {page} · {n} baru",
+    "errors": {
+      "cancelled": "Dibatalkan",
+      "network": "Riwayat permohonan tidak menjawab. Coba lagi nanti.",
+      "expired": "Tautan kedaluwarsa. Buka lagi Permohonan → Riwayat di game dan salin tautan baru.",
+      "throttled": "HoYoverse meminta untuk memperlambat. Coba lagi beberapa menit lagi.",
+      "api": "HoYoverse menjawab: {message}",
+      "code": "kesalahan {code}"
+    }
+  },
+  "chart": {
+    "title": "Pull per bulan",
+    "label": "Pull per bulan menurut kelangkaan, {n} bulan",
+    "month": "{month}: {n} permohonan"
+  },
+  "numbers": {
+    "label": "Angka",
+    "avgPity": "{share} · rata-rata pity {avg}",
+    "expected": "Pity 5★ yang diharapkan sekitar {n} dengan soft pity",
+    "expectedAbout": "Diharapkan sekitar {n} dengan soft pity",
+    "streak": "beruntun {current} · terbaik {best} menang · terburuk {worst} kalah",
+    "streakWon": "{n} menang",
+    "streakLost": "{n} kalah",
+    "flipTitle": "5★ featured saat peluangnya {odds} (yang dijamin tidak dihitung)",
+    "split": "Pembagian 4★",
+    "character": "karakter",
+    "char": "kar",
+    "weapon": "senjata",
+    "rateUp": "Rate-up 4★ menang {won} dari {total} · {share}",
+    "splitTitle": "4★ menurut tipe",
+    "splitTitleFull": "4★ menurut tipe, dan undian rate-up 4★"
+  },
+  "odds": {
+    "guaranteed": "Dijamin",
+    "lostLast": "Kalah {odds} terakhir ({name}): 5★ berikutnya pasti featured",
+    "nextFeatured": "5★ berikutnya pasti featured",
+    "weapon": "5★ berikutnya: 75% senjata featured",
+    "coin": "5★ berikutnya: untung-untungan"
+  },
+  "track": {
+    "label": "Pity {pity} dari {hard}, soft pity dari {soft}"
+  },
+  "runs": {
+    "label": "Periode banner",
+    "heading": "Banner",
+    "count": "{n} periode",
+    "fewer": "Lebih sedikit",
+    "all": "Semua periode",
+    "current": " · saat ini",
+    "no5": "Tanpa 5★"
+  },
+  "small": {
+    "pitySoFar": "pity {pity} / {hard}"
+  },
+  "table": {
+    "label": "Semua permohonan",
+    "search": "Cari permohonan",
+    "searchTitle": "Nama karakter atau senjata",
+    "noMatch": "Tidak ada pull yang cocok",
+    "rollRun": "Nomor pull di periode banner itu",
+    "roll": "Nomor pull",
+    "item": "Item",
+    "pity": "Pity",
+    "result": "Hasil",
+    "time": "Waktu",
+    "newestFirst": "Terbaru dulu",
+    "oldestFirst": "Terlama dulu",
+    "newestFirstSr": "terbaru dulu",
+    "oldestFirstSr": "terlama dulu",
+    "weapon": "Senjata",
+    "character": "Karakter",
+    "pages": "Halaman permohonan"
+  },
+  "transfer": {
+    "backup": "Cadangan paimon.moe",
+    "modes": {
+      "link": "Tautan permohonan",
+      "file": "File"
+    },
+    "importFrom": "Impor dari",
+    "noRecords": "Tidak ada catatan",
+    "uidMismatch": "Riwayat itu UID {uid}; akun ini UID {own}",
+    "account": "Akun {n}",
+    "notWishFile": "Bukan file UIGF atau paimon.moe",
+    "alreadyHeld": "{n} sudah ada",
+    "notImported": "Tidak diimpor",
+    "deleteTitle": "Hapus riwayat permohonan?",
+    "deleteDetail": "Semua {n} pull akun ini dihapus. irminsul bisa mengambil enam bulan terakhir lagi.",
+    "deleteConfirm": "Hapus",
+    "notDeleted": "Tidak terhapus",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), CSV importer paimon.moe, atau cadangan paimon.moe (Settings → Export)",
+    "drop": "File UIGF atau paimon.moe",
+    "fileAccount": "Akun di file",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward dan kebanyakan pelacak permohonan bisa membacanya",
+    "paimonTitle": "Untuk Local Importer paimon.moe (Wish counter → Import → Local)",
+    "delete": "Hapus",
+    "deleteHistory": "Hapus riwayat"
+  },
+  "bannerPage": {
+    "noPulls": "Tidak ada pull di banner ini",
+    "now": "Sekarang",
+    "hardTitle": "{left} pull lagi ke hard pity · ✦ {primos}",
+    "toHard": "{left} lagi ke hard pity · ✦ {primos}",
+    "softFrom": "soft dari {soft}",
+    "featuredNext": "Berikutnya featured",
+    "featuredNextTitle": "4★ terakhir di luar banner: berikutnya pasti featured",
+    "toGuaranteed4": "{n} lagi ke 4★ yang dijamin"
+  }
+}

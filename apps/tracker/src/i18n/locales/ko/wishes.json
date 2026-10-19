@@ -1,0 +1,260 @@
+{
+  "title": "기원 기록",
+  "bannerPageTitle": "기원 기록 · {banner}",
+  "loadFailed": "불러오기 실패",
+  "loading": "불러오는 중",
+  "import": "가져오기",
+  "export": "내보내기",
+  "importExport": "가져오기 / 내보내기",
+  "browse": "찾아보기",
+  "cancel": "취소",
+  "search": "검색",
+  "rarity": "희귀도",
+  "banner": "배너",
+  "pulls": "{n}회",
+  "pullsTimes": "기원 {n}회 × {primos}",
+  "pullsPrimos": "{n}회 · ✦ {primos}",
+  "lifetime": "총 기원 횟수",
+  "allWishes": "모든 기원",
+  "newPulls": "새 기원 {n}회",
+  "nothingNew": "새로운 항목 없음",
+  "banners": {
+    "character": {
+      "label": "캐릭터",
+      "title": "캐릭터 이벤트"
+    },
+    "weapon": {
+      "label": "무기",
+      "title": "무기 이벤트"
+    },
+    "standard": {
+      "label": "일반",
+      "title": "일반"
+    },
+    "chronicled": {
+      "label": "묶음",
+      "title": "묶음 기원"
+    },
+    "beginners": {
+      "label": "초심자",
+      "title": "초심자 기원"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "1월",
+      "2": "2월",
+      "3": "3월",
+      "4": "4월",
+      "5": "5월",
+      "6": "6월",
+      "7": "7월",
+      "8": "8월",
+      "9": "9월",
+      "10": "10월",
+      "11": "11월",
+      "12": "12월"
+    },
+    "day": "{month} {day}일",
+    "dayYear": "{year}년 {month} {day}일",
+    "month": "{year}년 {month}",
+    "dayTime": "{day}, {time}",
+    "range": "{from} – {to}",
+    "now": "현재"
+  },
+  "outcomes": {
+    "won": "성공",
+    "lost": "실패",
+    "guaranteed": "확정"
+  },
+  "outcomeTitles": {
+    "won": "{odds} 성공",
+    "lost": "{odds} 실패: 다음은 픽업 확정",
+    "guaranteed": "{odds} 실패 후 확정된 픽업"
+  },
+  "legend": {
+    "won": "성공",
+    "lost": "실패",
+    "guaranteed": "확정"
+  },
+  "overview": {
+    "newestPull": "최신 기원, 게임 시각",
+    "synced": "{ago} 동기화",
+    "syncedTitle": "{time}에 새 기원 저장",
+    "syncHelp": "하루에 한 번 게임에서 기원 → 기록을 여세요 (바로 닫아도 됩니다): irminsul이 모든 배너를 동기화하고, 키가 유효한 동안(~24시간) 새 기원도 동기화합니다. 게임의 기원 링크로 최근 6개월분도 가져옵니다. 6개월보다 오래된 기록: paimon.moe 백업이나 UIGF 파일을 가져오세요.",
+    "empty": "아직 기원이 없습니다",
+    "emptyBody": "하루에 한 번 게임에서 기원 → 기록을 열거나 (바로 닫아도 됩니다), 게임의 기원 링크로 가져오세요. 6개월보다 오래된 기록: paimon.moe 백업이나 UIGF 파일을 가져오세요.",
+    "banners": "배너",
+    "totals": "합계",
+    "worth": "기원 가치",
+    "worthHint": "기원 {n}회 × 원석 {primos}",
+    "wishes": "기원 {n}회",
+    "avgPity": "평균 5★ 천장",
+    "avgPityHint": "캐릭터 이벤트: 모든 5★의 평균 천장, 소프트 천장 기준 예상치는 약 {expected}",
+    "avgPityVs": "예상 {expected} 대비 {diff}"
+  },
+  "card": {
+    "everyPull": "{banner}: 모든 기원",
+    "fiveTitle": "확정 천장까지 {left}회 · ✦ {primos} · 소프트 천장 {soft}부터",
+    "fourTitle": "4★ 확정까지 {left}회",
+    "fourFeatured": " · 다음 4★는 픽업",
+    "pity5": "5★ 천장",
+    "pity4": "4★ 천장",
+    "guaranteedAt": "{n}회에 확정",
+    "hideLatest": "최근 기원 숨기기",
+    "showLatest": "최근 기원 표시",
+    "latest": "최근 기원",
+    "latestRegion": "{banner}: 최근 기원",
+    "none": "없음",
+    "cols": {
+      "name": "이름",
+      "time": "시각",
+      "pity": "천장"
+    }
+  },
+  "five": {
+    "every": "모든 5★",
+    "newestFirst": "{n} · 최신순",
+    "none": "아직 5★ 없음",
+    "pity": "{name} · 천장 {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "플랫폼",
+    "copyFailed": "복사되지 않음: 명령을 선택해서 복사하세요",
+    "steps": {
+      "open": "게임에서 기원 → 기록을 열고 로딩을 기다리세요.",
+      "android2": "Wi-Fi와 모바일 데이터를 끄세요.",
+      "android3": "새로고침(오른쪽 위)을 탭하면 오류와 함께 텍스트가 표시됩니다.",
+      "android4": "그 텍스트를 모두 선택해서 복사하세요.",
+      "android5": "연결을 다시 켠 다음 아래에 붙여넣으세요.",
+      "ios1": "페이몬 메뉴 → 피드백을 열고 로딩을 기다리세요.",
+      "ios2": "게임 내 문제 → 다인 모드를 탭하세요.",
+      "ios3": "답변 하단의 링크를 탭하면 브라우저에서 열립니다.",
+      "ios4": "그 링크를 복사해서 아래에 붙여넣으세요.",
+      "ps1": "게임에서 QR 코드가 있는 이벤트 메일을 여세요.",
+      "ps2": "휴대폰으로 코드를 스캔하고 열린 링크를 복사하세요.",
+      "ps3": "아래에 붙여넣으세요. 실패하면 PlayStation을 HoYoverse 계정에 연결하고 PC 또는 휴대폰 방법을 사용하세요.",
+      "pcRun": "PowerShell을 열고 (시작에서 PowerShell 입력) 다음을 실행하세요:",
+      "pcPaste": "링크가 복사됩니다: 아래에 붙여넣으세요.",
+      "pcPasteTitle": "irminsul의 Copy wish URL로도 같은 링크를 얻을 수 있습니다"
+    },
+    "scriptTitle": "이 PC의 게임 웹 캐시를 읽고, HoYoverse에서 링크를 한 번 확인한 뒤 복사합니다. 그 외에는 아무것도 하지 않습니다.",
+    "copied": "복사됨",
+    "copy": "복사",
+    "readScript": "스크립트 보기",
+    "label": "기원 기록 링크",
+    "placeholder": "링크 붙여넣기: https://…",
+    "invalid": "텍스트에 기원 기록 링크가 없습니다",
+    "uidMismatch": "이 링크는 UID {uid}이고, 이 계정은 UID {own}입니다.",
+    "failed": "가져오기 실패",
+    "saving": "{n}개 저장 중…",
+    "progress": "{banner} · {page}페이지 · 신규 {n}",
+    "errors": {
+      "cancelled": "취소됨",
+      "network": "기원 기록이 응답하지 않았습니다. 나중에 다시 시도하세요.",
+      "expired": "링크가 만료되었습니다. 게임에서 기원 → 기록을 다시 열고 새 링크를 복사하세요.",
+      "throttled": "HoYoverse가 속도를 늦추라고 요청했습니다. 몇 분 후 다시 시도하세요.",
+      "api": "HoYoverse 응답: {message}",
+      "code": "오류 {code}"
+    }
+  },
+  "chart": {
+    "title": "월별 기원",
+    "label": "희귀도별 월간 기원, {n}개월",
+    "month": "{month}: 기원 {n}회"
+  },
+  "numbers": {
+    "label": "통계",
+    "avgPity": "{share} · 평균 천장 {avg}",
+    "expected": "소프트 천장 기준 예상 5★ 천장 약 {n}",
+    "expectedAbout": "소프트 천장 기준 예상 약 {n}",
+    "streak": "연속 {current} · 최고 {best}연속 성공 · 최악 {worst}연속 실패",
+    "streakWon": "{n}회 성공",
+    "streakLost": "{n}회 실패",
+    "flipTitle": "{odds}였을 때 나온 픽업 5★ (확정은 제외)",
+    "split": "4★ 비율",
+    "character": "캐릭터",
+    "char": "캐릭",
+    "weapon": "무기",
+    "rateUp": "4★ 픽업 {total}회 중 {won}회 성공 · {share}",
+    "splitTitle": "종류별 4★",
+    "splitTitleFull": "종류별 4★와 4★ 픽업 확률 결과"
+  },
+  "odds": {
+    "guaranteed": "확정",
+    "lostLast": "지난 {odds} 실패 ({name}): 다음 5★는 픽업",
+    "nextFeatured": "다음 5★는 픽업",
+    "weapon": "다음 5★: 75% 확률로 픽업 무기",
+    "coin": "다음 5★: 반반 확률"
+  },
+  "track": {
+    "label": "천장 {pity}/{hard}, 소프트 천장 {soft}부터"
+  },
+  "runs": {
+    "label": "배너 기간",
+    "heading": "배너",
+    "count": "{n}회",
+    "fewer": "접기",
+    "all": "모든 기간",
+    "current": " · 진행 중",
+    "no5": "5★ 없음"
+  },
+  "small": {
+    "pitySoFar": "천장 {pity} / {hard}"
+  },
+  "table": {
+    "label": "모든 기원",
+    "search": "기원 검색",
+    "searchTitle": "캐릭터 또는 무기 이름",
+    "noMatch": "일치하는 기원 없음",
+    "rollRun": "해당 배너 기간의 기원 번호",
+    "roll": "기원 번호",
+    "item": "아이템",
+    "pity": "천장",
+    "result": "결과",
+    "time": "시각",
+    "newestFirst": "최신순",
+    "oldestFirst": "오래된 순",
+    "newestFirstSr": "최신순",
+    "oldestFirstSr": "오래된 순",
+    "weapon": "무기",
+    "character": "캐릭터",
+    "pages": "기원 페이지"
+  },
+  "transfer": {
+    "backup": "paimon.moe 백업",
+    "modes": {
+      "link": "기원 링크",
+      "file": "파일"
+    },
+    "importFrom": "가져올 곳",
+    "noRecords": "기록 없음",
+    "uidMismatch": "이 기록은 UID {uid}이고, 이 계정은 UID {own}입니다",
+    "account": "계정 {n}",
+    "notWishFile": "UIGF 또는 paimon.moe 파일이 아닙니다",
+    "alreadyHeld": "이미 보유 {n}개",
+    "notImported": "가져오지 않음",
+    "deleteTitle": "기원 기록을 삭제할까요?",
+    "deleteDetail": "이 계정의 기원 {n}회가 모두 삭제됩니다. irminsul은 최근 6개월분을 다시 가져올 수 있습니다.",
+    "deleteConfirm": "삭제",
+    "notDeleted": "삭제되지 않음",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), paimon.moe 가져오기 CSV, 또는 paimon.moe 백업 (Settings → Export)",
+    "drop": "UIGF 또는 paimon.moe 파일",
+    "fileAccount": "파일의 계정",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward 및 대부분의 기원 트래커가 읽을 수 있습니다",
+    "paimonTitle": "paimon.moe의 Local Importer용 (Wish counter → Import → Local)",
+    "delete": "삭제",
+    "deleteHistory": "기록 삭제"
+  },
+  "bannerPage": {
+    "noPulls": "이 배너에 기원 없음",
+    "now": "현재",
+    "hardTitle": "확정 천장까지 {left}회 · ✦ {primos}",
+    "toHard": "확정 천장까지 {left} · ✦ {primos}",
+    "softFrom": "소프트 {soft}부터",
+    "featuredNext": "다음은 픽업",
+    "featuredNextTitle": "지난 4★가 픽업이 아니었으므로 다음 4★는 픽업입니다",
+    "toGuaranteed4": "4★ 확정까지 {n}"
+  }
+}

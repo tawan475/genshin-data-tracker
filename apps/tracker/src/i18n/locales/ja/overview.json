@@ -1,0 +1,73 @@
+{
+  "progression": "育成推移",
+  "figure": {
+    "mora": "モラ",
+    "primogem": "原石",
+    "characters": "キャラクター",
+    "weapons": "武器",
+    "artifacts": "聖遺物",
+    "artifact4": "★4聖遺物",
+    "artifact3": "★3聖遺物"
+  },
+  "server": {
+    "AMERICA": "アメリカ",
+    "EUROPE": "ヨーロッパ",
+    "ASIA": "アジア",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "スナップショットはまだありません",
+  "import": "インポート",
+  "historyUnavailable": "履歴を表示できません",
+  "currencyCarried": "以前のキャプチャから",
+  "currencyMissing": "最新のキャプチャにありません",
+  "sincePrevious": "前回のスナップショットから",
+  "lastCaptured": "最終キャプチャ",
+  "lastCapturedAt": "最終キャプチャ {time}",
+  "seenAgain": "再確認",
+  "seenAgainAt": "再確認 {time}",
+  "loadingHistory": "スナップショット履歴を読み込み中",
+  "lowRarity": {
+    "label": "★4 / ★3聖遺物",
+    "hint": "ロックなし・未装備",
+    "rarity": "★{n}"
+  },
+  "card": {
+    "snapshots": "スナップショット",
+    "storage": "容量",
+    "stored": "アップロード {raw}、保存 {stored}",
+    "storedRatio": "アップロード {raw}、保存 {stored}（{ratio}小さい）"
+  },
+  "monthly": {
+    "title": "月間分析",
+    "previous": "前月",
+    "previousTo": "前月、{month}",
+    "next": "翌月",
+    "nextTo": "翌月、{month}",
+    "gained": "獲得 {n}",
+    "spent": "消費 {n}",
+    "added": "追加 {n}",
+    "used": "使用 {n}",
+    "closing": "月末 {n}",
+    "artifactExp": "レベル0換算で聖遺物経験値 {n}",
+    "thisMonth": "今月 · {detail}",
+    "gapTitle": "{n}日間キャプチャなし",
+    "vs": "{day} と比較",
+    "captures": "キャプチャ {n}件",
+    "comparedWith": "{captures}、{day} と比較",
+    "noCaptures": "キャプチャなし",
+    "noCapture": "キャプチャなし",
+    "caption": "{month} の日ごとの変化：各日の最後のキャプチャを前回キャプチャのあった日と比較し、下に値を表示",
+    "day": "日",
+    "dayTitle": "その日の最後のキャプチャと前回キャプチャのあった日との比較（現地時間）"
+  },
+  "recent": {
+    "title": "最近",
+    "all": "すべて",
+    "allTitle": "全スナップショット（{n}件）",
+    "size": "アップロード {raw} バイト、保存 {stored} バイト",
+    "unchanged": "合計に変化なし",
+    "first": "最初のスナップショット",
+    "currencyMissing": "モラと原石がありません",
+    "noCurrency": "通貨なし"
+  }
+}

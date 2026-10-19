@@ -1,0 +1,7 @@
+{
+  "justNow": "vừa xong",
+  "betweenTimes": "{date}, từ {from} đến {to}",
+  "betweenDates": "từ {from} đến {to}",
+  "today": "Hôm nay",
+  "yesterday": "Hôm qua"
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Материалы",
+  "newestSnapshot": "Последний снимок",
+  "since": "с {date}",
+  "oneSnapshot": "Только один снимок",
+  "changesTitle": "Изменения {hint}",
+  "changeSince": "Изменение с",
+  "noSnapshots": "Снимков пока нет",
+  "import": "Импорт",
+  "loadFailed": "Не удалось загрузить материалы",
+  "loading": "Загрузка материалов",
+  "saveChartFailed": "Не удалось сохранить настройки графика",
+  "search": "Поиск",
+  "searchLabel": "Поиск материалов",
+  "noMatches": "Ничего не найдено",
+  "noMaterials": "Нет материалов",
+  "clear": "Очистить",
+  "more": "Ещё {n}",
+  "upTo": "До {max}",
+  "trackedOfMax": "Отслеживается / макс.",
+  "track": "Отслеживать",
+  "untrack": "Не отслеживать",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Прошлый снимок"
+  },
+  "wallet": {
+    "label": "Кошелёк",
+    "title": "Валюты и предметы для молитв",
+    "short": {
+      "GenesisCrystal": "Кристаллы",
+      "IntertwinedFate": "Переплет.",
+      "AcquaintFate": "Встречи",
+      "MasterlessStarglitter": "Блеск",
+      "MasterlessStardust": "Пыль",
+      "OriginalResin": "Смола",
+      "FragileResin": "Слабая",
+      "CondensedResin": "Густая",
+      "RealmCurrency": "Обитель"
+    }
+  },
+  "tabs": {
+    "development": "Развитие",
+    "precious": "Ценное",
+    "other": "Прочее",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Руда усиления (в игре хранится вместе с оружием)",
+      "artifact": "Священное масло и Священная Эссенция (в игре хранятся вместе с артефактами)",
+      "other": "Нет в игровом инвентаре: валюты, семена, предметы карточной игры, предметы новее игровых данных"
+    }
+  },
+  "bag": {
+    "title": "Инвентарь",
+    "show": "Показать",
+    "view": "Вид",
+    "views": {
+      "grid": "Значки",
+      "list": "Список"
+    },
+    "tabRow": "Вкладка инвентаря",
+    "all": "Все",
+    "allTitle": "Все вкладки",
+    "sort": "Сортировка",
+    "sorts": {
+      "order": "Как в игре",
+      "count": "Количество",
+      "change": "Изменение",
+      "name": "Название"
+    },
+    "unfoldAll": "Развернуть все вкладки",
+    "foldAll": "Свернуть все вкладки",
+    "owned": "Есть",
+    "ownedTitle": "Материалы у вас",
+    "gained": "Получено",
+    "gainedTitle": "Получено {hint}",
+    "spent": "Потрачено",
+    "spentTitle": "Потрачено {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · задано вручную {hand} (снимок {capture})"
+  },
+  "detail": {
+    "history": "История",
+    "chartLabel": "{name} со временем, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Получено",
+    "spent": "Потрачено",
+    "peak": "Пик",
+    "first": "Первый",
+    "firstTitle": "Первый снимок, где он есть"
+  },
+  "tracked": {
+    "title": "Отслеживается",
+    "list": "Отслеживаемые материалы",
+    "untrackName": "Не отслеживать {name}"
+  }
+}

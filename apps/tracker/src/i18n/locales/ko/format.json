@@ -1,0 +1,7 @@
+{
+  "justNow": "방금",
+  "betweenTimes": "{date}, {from}~{to} 사이",
+  "betweenDates": "{from}~{to} 사이",
+  "today": "오늘",
+  "yesterday": "어제"
+}

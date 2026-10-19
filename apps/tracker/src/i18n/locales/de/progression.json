@@ -1,0 +1,74 @@
+{
+  "title": "Detaillierter Fortschritt",
+  "figures": "Werte",
+  "atLeastOne": "Mindestens einer",
+  "groupBy": "Gruppieren nach",
+  "longerThanRange": "Länger als der Zeitraum",
+  "loading": "Fortschritt wird geladen",
+  "noData": "Keine Daten",
+  "inRange": "in diesem Zeitraum",
+  "gainedInRange": "in diesem Zeitraum erhalten",
+  "spentInRange": "in diesem Zeitraum verbraucht",
+  "noCaptures": "Keine Erfassungen",
+  "captures": "{n} Erfassung | {n} Erfassungen",
+  "total": "Gesamt {n}",
+  "lineLabel": "{figure} im Zeitverlauf, {span}. Zuletzt {value}.",
+  "barsLabel": "Änderung von {figure} {per}, {span}: {gained} erhalten, {spent} verbraucht.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Snapshot",
+    "hour": "Stunde",
+    "day": "Tag",
+    "month": "Monat",
+    "year": "Jahr"
+  },
+  "per": {
+    "snapshot": "Pro Snapshot",
+    "hour": "Pro Stunde",
+    "day": "Pro Tag",
+    "month": "Pro Monat",
+    "year": "Pro Jahr"
+  },
+  "against": {
+    "snapshot": "Änderung gegenüber dem vorigen Snapshot",
+    "hour": "Änderung gegenüber der vorigen Stunde",
+    "day": "Änderung gegenüber dem vorigen Tag",
+    "month": "Änderung gegenüber dem vorigen Monat",
+    "year": "Änderung gegenüber dem vorigen Jahr"
+  },
+  "newest": {
+    "snapshot": "neueste {n} Snapshots",
+    "hour": "letzte {n} Stunden",
+    "day": "letzte {n} Tage",
+    "month": "letzte {n} Monate",
+    "year": "letzte {n} Jahre"
+  },
+  "range": {
+    "label": "Zeitraum",
+    "hours": "Stunden",
+    "days": "Tage",
+    "all": "Alle",
+    "h": "{n} Std.",
+    "d": "{n} T.",
+    "y": "{n} J."
+  },
+  "monthly": {
+    "unavailable": "Monatsanalyse nicht verfügbar",
+    "loading": "Monatsanalyse wird geladen",
+    "noCaptures": "Keine Erfassungen",
+    "goTo": "Zu {month}",
+    "date": "Datum",
+    "primogem": "Urgestein",
+    "mora": "Mora",
+    "artifact": "Artefakt",
+    "extract": "EP-Wert",
+    "netWorth": "Gesamtwert",
+    "moraUnit": "Mora",
+    "primogemUnit": "Urgestein"
+  },
+  "character": {
+    "level": "Stufe",
+    "constellation": "Sternbild",
+    "talents": "Talente"
+  }
+}

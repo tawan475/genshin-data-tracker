@@ -1,0 +1,260 @@
+{
+  "title": "ประวัติการอธิษฐาน",
+  "bannerPageTitle": "ประวัติการอธิษฐาน · {banner}",
+  "loadFailed": "โหลดไม่สำเร็จ",
+  "loading": "กำลังโหลด",
+  "import": "นำเข้า",
+  "export": "ส่งออก",
+  "importExport": "นำเข้า / ส่งออก",
+  "browse": "เลือกไฟล์",
+  "cancel": "ยกเลิก",
+  "search": "ค้นหา",
+  "rarity": "ความหายาก",
+  "banner": "แบนเนอร์",
+  "pulls": "{n} ครั้ง",
+  "pullsTimes": "อธิษฐาน {n} ครั้ง × {primos}",
+  "pullsPrimos": "{n} ครั้ง · ✦ {primos}",
+  "lifetime": "จำนวนครั้งทั้งหมด",
+  "allWishes": "การอธิษฐานทั้งหมด",
+  "newPulls": "ใหม่ {n} ครั้ง",
+  "nothingNew": "ไม่มีอะไรใหม่",
+  "banners": {
+    "character": {
+      "label": "ตัวละคร",
+      "title": "กิจกรรมอธิษฐานตัวละคร"
+    },
+    "weapon": {
+      "label": "อาวุธ",
+      "title": "กิจกรรมอธิษฐานอาวุธ"
+    },
+    "standard": {
+      "label": "ถาวร",
+      "title": "อธิษฐานถาวร"
+    },
+    "chronicled": {
+      "label": "รวมปรารถนา",
+      "title": "การอธิษฐานรวมปรารถนา"
+    },
+    "beginners": {
+      "label": "มือใหม่",
+      "title": "อธิษฐานมือใหม่"
+    }
+  },
+  "date": {
+    "months": {
+      "1": "ม.ค.",
+      "2": "ก.พ.",
+      "3": "มี.ค.",
+      "4": "เม.ย.",
+      "5": "พ.ค.",
+      "6": "มิ.ย.",
+      "7": "ก.ค.",
+      "8": "ส.ค.",
+      "9": "ก.ย.",
+      "10": "ต.ค.",
+      "11": "พ.ย.",
+      "12": "ธ.ค."
+    },
+    "day": "{day} {month}",
+    "dayYear": "{day} {month} {year}",
+    "month": "{month} {year}",
+    "dayTime": "{day} {time}",
+    "range": "{from} – {to}",
+    "now": "ตอนนี้"
+  },
+  "outcomes": {
+    "won": "ชนะ",
+    "lost": "แพ้",
+    "guaranteed": "การันตี"
+  },
+  "outcomeTitles": {
+    "won": "ชนะ {odds}",
+    "lost": "แพ้ {odds}: ครั้งถัดไปได้ตัวเรทอัป",
+    "guaranteed": "ตัวเรทอัป จากการันตีหลังแพ้ {odds}"
+  },
+  "legend": {
+    "won": "ชนะ",
+    "lost": "แพ้",
+    "guaranteed": "การันตี"
+  },
+  "overview": {
+    "newestPull": "การสุ่มล่าสุด ตามเวลาในเกม",
+    "synced": "ซิงก์ {ago}",
+    "syncedTitle": "บันทึกการอธิษฐานใหม่เมื่อ {time}",
+    "syncHelp": "เปิด อธิษฐาน → ประวัติ ในเกมวันละครั้ง (ปิดได้ทันที): irminsul จะซิงก์ทุกแบนเนอร์ แล้วซิงก์การอธิษฐานใหม่แต่ละครั้งขณะที่คีย์ยังใช้ได้ (~24 ชม.) ลิงก์อธิษฐานของเกมจะดึงข้อมูลย้อนหลังหกเดือนมาด้วย เก่ากว่า 6 เดือน: นำเข้าไฟล์สำรอง paimon.moe หรือไฟล์ UIGF",
+    "empty": "ยังไม่มีการอธิษฐาน",
+    "emptyBody": "เปิด อธิษฐาน → ประวัติ ในเกมวันละครั้ง (ปิดได้ทันที) หรือนำเข้าด้วยลิงก์อธิษฐานของเกม เก่ากว่า 6 เดือน: นำเข้าไฟล์สำรอง paimon.moe หรือไฟล์ UIGF",
+    "banners": "แบนเนอร์",
+    "totals": "ยอดรวม",
+    "worth": "มูลค่าการอธิษฐาน",
+    "worthHint": "อธิษฐาน {n} ครั้ง × {primos} Primogem",
+    "wishes": "{n} ครั้ง",
+    "avgPity": "การันตี 5★ เฉลี่ย",
+    "avgPityHint": "กิจกรรมอธิษฐานตัวละคร: ค่าเฉลี่ยการันตีของ 5★ ทุกตัว เทียบกับค่าที่คาดไว้ประมาณ {expected} เมื่อมี soft pity",
+    "avgPityVs": "{diff} เทียบกับที่คาดไว้ {expected}"
+  },
+  "card": {
+    "everyPull": "{banner}: ทุกการสุ่ม",
+    "fiveTitle": "อีก {left} ครั้งถึง hard pity · ✦ {primos} · soft pity ตั้งแต่ {soft}",
+    "fourTitle": "อีก {left} ครั้งได้ 4★ แน่นอน",
+    "fourFeatured": " · 4★ ถัดไปเป็นตัวเรทอัป",
+    "pity5": "การันตี 5★",
+    "pity4": "การันตี 4★",
+    "guaranteedAt": "การันตีที่ {n}",
+    "hideLatest": "ซ่อนการสุ่มล่าสุด",
+    "showLatest": "แสดงการสุ่มล่าสุด",
+    "latest": "การสุ่มล่าสุด",
+    "latestRegion": "{banner}: การสุ่มล่าสุด",
+    "none": "ไม่มี",
+    "cols": {
+      "name": "ชื่อ",
+      "time": "เวลา",
+      "pity": "การันตี"
+    }
+  },
+  "five": {
+    "every": "5★ ทั้งหมด",
+    "newestFirst": "{n} · ใหม่สุดก่อน",
+    "none": "ยังไม่มี 5★",
+    "pity": "{name} · การันตี {pity}",
+    "outcome": "{outcome} ({odds})"
+  },
+  "link": {
+    "platform": "แพลตฟอร์ม",
+    "copyFailed": "คัดลอกไม่สำเร็จ: เลือกคำสั่งแล้วคัดลอกเอง",
+    "steps": {
+      "open": "เปิด อธิษฐาน → ประวัติ ในเกมและรอให้โหลดเสร็จ",
+      "android2": "ปิด Wi-Fi และอินเทอร์เน็ตมือถือ",
+      "android3": "แตะรีเฟรช (มุมขวาบน): หน้าจะแสดงข้อผิดพลาดพร้อมข้อความบางส่วน",
+      "android4": "เลือกข้อความทั้งหมดนั้นแล้วคัดลอก",
+      "android5": "เปิดการเชื่อมต่อกลับ แล้ววางด้านล่าง",
+      "ios1": "เปิดเมนู Paimon → ข้อเสนอแนะ และรอให้โหลดเสร็จ",
+      "ios2": "แตะ ปัญหาในเกม → โหมด Co-Op",
+      "ios3": "แตะลิงก์ด้านล่างของคำตอบ: จะเปิดในเบราว์เซอร์",
+      "ios4": "คัดลอกลิงก์นั้นแล้ววางด้านล่าง",
+      "ps1": "เปิดจดหมายกิจกรรมที่มี QR code ในเกม",
+      "ps2": "สแกนโค้ดด้วยโทรศัพท์แล้วคัดลอกลิงก์ที่เปิดขึ้น",
+      "ps3": "วางด้านล่าง หากไม่สำเร็จ ให้เชื่อมต่อ PlayStation กับบัญชี HoYoverse แล้วใช้ขั้นตอนของ PC หรือโทรศัพท์",
+      "pcRun": "เปิด PowerShell (Start แล้วพิมพ์ PowerShell) แล้วรัน:",
+      "pcPaste": "คำสั่งจะคัดลอกลิงก์ให้: วางด้านล่าง",
+      "pcPasteTitle": "Copy wish URL ของ irminsul ให้ลิงก์เดียวกัน"
+    },
+    "scriptTitle": "อ่านเว็บแคชของเกมบน PC นี้ ตรวจสอบลิงก์กับ HoYoverse หนึ่งครั้ง แล้วคัดลอก ไม่ทำอย่างอื่น",
+    "copied": "คัดลอกแล้ว",
+    "copy": "คัดลอก",
+    "readScript": "อ่านสคริปต์",
+    "label": "ลิงก์ประวัติการอธิษฐาน",
+    "placeholder": "วางลิงก์: https://…",
+    "invalid": "ไม่พบลิงก์ประวัติการอธิษฐานในข้อความนั้น",
+    "uidMismatch": "ลิงก์นั้นเป็นของ UID {uid} แต่บัญชีนี้คือ UID {own}",
+    "failed": "นำเข้าไม่สำเร็จ",
+    "saving": "กำลังบันทึก {n}…",
+    "progress": "{banner} · หน้า {page} · ใหม่ {n}",
+    "errors": {
+      "cancelled": "ยกเลิกแล้ว",
+      "network": "ประวัติการอธิษฐานไม่ตอบกลับ โปรดลองใหม่ภายหลัง",
+      "expired": "ลิงก์หมดอายุแล้ว เปิด อธิษฐาน → ประวัติ ในเกมอีกครั้งแล้วคัดลอกลิงก์ใหม่",
+      "throttled": "HoYoverse ขอให้ช้าลง โปรดลองใหม่ในอีกไม่กี่นาที",
+      "api": "HoYoverse ตอบกลับ: {message}",
+      "code": "ข้อผิดพลาด {code}"
+    }
+  },
+  "chart": {
+    "title": "จำนวนครั้งต่อเดือน",
+    "label": "จำนวนครั้งต่อเดือนตามความหายาก {n} เดือน",
+    "month": "{month}: {n} ครั้ง"
+  },
+  "numbers": {
+    "label": "ตัวเลข",
+    "avgPity": "{share} · การันตีเฉลี่ย {avg}",
+    "expected": "การันตี 5★ ที่คาดไว้ประมาณ {n} เมื่อมี soft pity",
+    "expectedAbout": "คาดไว้ประมาณ {n} เมื่อมี soft pity",
+    "streak": "ต่อเนื่อง {current} · ดีที่สุดชนะ {best} · แย่ที่สุดแพ้ {worst}",
+    "streakWon": "ชนะ {n}",
+    "streakLost": "แพ้ {n}",
+    "flipTitle": "ได้ 5★ เรทอัปเมื่อเป็น {odds} (ไม่นับที่การันตี)",
+    "split": "สัดส่วน 4★",
+    "character": "ตัวละคร",
+    "char": "ตัวละคร",
+    "weapon": "อาวุธ",
+    "rateUp": "4★ เรทอัปชนะ {won} จาก {total} · {share}",
+    "splitTitle": "4★ ตามประเภท",
+    "splitTitleFull": "4★ ตามประเภท และการลุ้น 4★ เรทอัป"
+  },
+  "odds": {
+    "guaranteed": "การันตี",
+    "lostLast": "แพ้ {odds} ครั้งล่าสุด ({name}): 5★ ถัดไปเป็นตัวเรทอัป",
+    "nextFeatured": "5★ ถัดไปเป็นตัวเรทอัป",
+    "weapon": "5★ ถัดไป: 75% เป็นอาวุธเรทอัป",
+    "coin": "5★ ถัดไป: ลุ้น 50/50"
+  },
+  "track": {
+    "label": "การันตี {pity} จาก {hard}, soft pity ตั้งแต่ {soft}"
+  },
+  "runs": {
+    "label": "รอบแบนเนอร์",
+    "heading": "แบนเนอร์",
+    "count": "{n} รอบ",
+    "fewer": "ย่อ",
+    "all": "ทุกรอบ",
+    "current": " · ปัจจุบัน",
+    "no5": "ไม่มี 5★"
+  },
+  "small": {
+    "pitySoFar": "การันตี {pity} / {hard}"
+  },
+  "table": {
+    "label": "การอธิษฐานทั้งหมด",
+    "search": "ค้นหาการอธิษฐาน",
+    "searchTitle": "ชื่อตัวละครหรืออาวุธ",
+    "noMatch": "ไม่พบการสุ่มที่ตรงกัน",
+    "rollRun": "ลำดับการสุ่มในรอบแบนเนอร์นั้น",
+    "roll": "ลำดับการสุ่ม",
+    "item": "ไอเทม",
+    "pity": "การันตี",
+    "result": "ผล",
+    "time": "เวลา",
+    "newestFirst": "ใหม่สุดก่อน",
+    "oldestFirst": "เก่าสุดก่อน",
+    "newestFirstSr": "ใหม่สุดก่อน",
+    "oldestFirstSr": "เก่าสุดก่อน",
+    "weapon": "อาวุธ",
+    "character": "ตัวละคร",
+    "pages": "หน้าการอธิษฐาน"
+  },
+  "transfer": {
+    "backup": "ไฟล์สำรอง paimon.moe",
+    "modes": {
+      "link": "ลิงก์อธิษฐาน",
+      "file": "ไฟล์"
+    },
+    "importFrom": "นำเข้าจาก",
+    "noRecords": "ไม่มีบันทึก",
+    "uidMismatch": "ประวัตินั้นเป็นของ UID {uid} แต่บัญชีนี้คือ UID {own}",
+    "account": "บัญชี {n}",
+    "notWishFile": "ไม่ใช่ไฟล์ UIGF หรือ paimon.moe",
+    "alreadyHeld": "มีอยู่แล้ว {n}",
+    "notImported": "นำเข้าไม่สำเร็จ",
+    "deleteTitle": "ลบประวัติการอธิษฐาน?",
+    "deleteDetail": "การสุ่มทั้งหมด {n} ครั้งของบัญชีนี้จะถูกลบ irminsul ดึงข้อมูลย้อนหลังหกเดือนได้อีกครั้ง",
+    "deleteConfirm": "ลบ",
+    "notDeleted": "ลบไม่สำเร็จ",
+    "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), CSV ของ paimon.moe importer หรือไฟล์สำรองของ paimon.moe (Settings → Export)",
+    "drop": "ไฟล์ UIGF หรือ paimon.moe",
+    "fileAccount": "บัญชีในไฟล์",
+    "uigfTitle": "UIGF v4.1: Snap Hutao, Starward และตัวติดตามการอธิษฐานส่วนใหญ่อ่านได้",
+    "paimonTitle": "สำหรับ Local Importer ของ paimon.moe (Wish counter → Import → Local)",
+    "delete": "ลบ",
+    "deleteHistory": "ลบประวัติ"
+  },
+  "bannerPage": {
+    "noPulls": "ไม่มีการสุ่มในแบนเนอร์นี้",
+    "now": "ตอนนี้",
+    "hardTitle": "อีก {left} ครั้งถึง hard pity · ✦ {primos}",
+    "toHard": "อีก {left} ถึง hard pity · ✦ {primos}",
+    "softFrom": "soft ตั้งแต่ {soft}",
+    "featuredNext": "ครั้งถัดไปเรทอัป",
+    "featuredNextTitle": "4★ ล่าสุดไม่ใช่ตัวเรทอัป: ครั้งถัดไปเป็นตัวเรทอัป",
+    "toGuaranteed4": "อีก {n} ถึง 4★ การันตี"
+  }
+}

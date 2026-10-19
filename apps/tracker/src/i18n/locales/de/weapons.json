@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "St. {level}/{cap}",
+    "copies": "{n} Exemplar | {n} Exemplare",
+    "locked": "Gesperrt"
+  },
+  "sort": {
+    "quality": "Qualität",
+    "level": "Stufe",
+    "refinement": "Verfeinerung",
+    "count": "Exemplare",
+    "name": "Name",
+    "type": "Typ"
+  },
+  "levelFilter": {
+    "all": "Stufe",
+    "max": "Max.",
+    "levelled": "Gestuft",
+    "base": "St. 1"
+  },
+  "refine": {
+    "spare": "{n} übrig",
+    "possible": "möglich: {title}"
+  },
+  "group": {
+    "copies": "{count} Exemplar | {count} Exemplare"
+  },
+  "bag": {
+    "notInData": "{copies} · Noch nicht in den Spieldaten"
+  },
+  "toolbar": {
+    "bag": "Inventar",
+    "byWeapon": "Nach Waffe",
+    "list": "Liste",
+    "status": "Status",
+    "equipped": "Angelegt",
+    "unused": "Unbenutzt",
+    "lock": "Sperre",
+    "locked": "Gesperrt",
+    "unlocked": "Nicht gesperrt",
+    "label": "Waffen filtern",
+    "searchTitle": "Waffe, Typ oder Figur",
+    "chips": "Typ, Seltenheit und Verfeinerung",
+    "noneInCapture": "Keine in dieser Erfassung",
+    "refinableTitle": "Waffen, deren übrige Exemplare eine angelegte verfeinern könnten",
+    "refinable": "Verfeinerbar"
+  },
+  "detail": {
+    "refinementTitle": "Verfeinerungsstufe {rank} von {max}",
+    "unequipped": "Nicht angelegt",
+    "copies": "{n} Exemplar | {n} Exemplare",
+    "equipped": "{n} angelegt",
+    "spareCopies": "{n} übriges Exemplar | {n} übrige Exemplare"
+  },
+  "table": {
+    "qualityTitle": "Qualität: Seltenheit, Stufe, Verfeinerung, neueste",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "Arten",
+    "kindsTitle": "Verschiedene Waffen",
+    "unused5": "Unbenutzte 5★",
+    "refinableTitle": "Übrige Exemplare könnten eine angelegte verfeinern",
+    "empty": "Keine Waffen",
+    "pages": "Waffenseiten"
+  }
+}

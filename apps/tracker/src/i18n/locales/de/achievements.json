@@ -1,0 +1,139 @@
+{
+  "title": "Errungenschaften",
+  "newestCapture": "Neueste Erfassung",
+  "newestCaptureTitle": "Neueste Erfassung: {time}",
+  "notCaptured": "Nicht erfasst",
+  "notCapturedTitle": "Öffne im Spiel das Menü „Errungenschaften“, während irminsul läuft, um sie zu erfassen",
+  "importTitle": "Erledigte Errungenschaften aus einem Seelie-Export, einem paimon.moe-Backup oder einer stardb-/irminsul-Datei importieren",
+  "loadFailed": "Laden fehlgeschlagen",
+  "allDone": "Alles erledigt",
+  "showDone": "Erledigte zeigen",
+  "noneDone": "Nichts erledigt",
+  "showMissing": "Fehlende zeigen",
+  "noMatches": "Keine Treffer",
+  "clear": "Leeren",
+  "more": "Mehr",
+  "loading": "Lädt",
+  "undo": "Rückgängig",
+  "notSaved": "Nicht gespeichert",
+  "markedDone": "{n} als erledigt markiert",
+  "unmarked": "{n} Markierungen entfernt",
+  "added": "{n} hinzugefügt",
+  "confirmMark": {
+    "title": "{n} als erledigt markieren?",
+    "filtered": "Die {n} angezeigten offenen Errungenschaften werden von Hand als erledigt markiert.",
+    "all": "Alle offenen Errungenschaften ({n}) werden von Hand als erledigt markiert.",
+    "confirm": "Markieren"
+  },
+  "confirmUnmark": {
+    "title": "{n} Markierungen entfernen?",
+    "detail": "Entfernt die Handmarkierungen der {n} angezeigten Errungenschaften. Erfasste bleiben erledigt.",
+    "confirm": "Entfernen"
+  },
+  "categories": {
+    "label": "Kategorien",
+    "all": "Alle",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} Urgesteine",
+    "hideDone": "Abgeschlossene Reihen ausblenden",
+    "showDone": "Abgeschlossene Reihen zeigen",
+    "completed": "Abgeschlossen"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} Urgesteine"
+  },
+  "import": {
+    "title": "Importieren",
+    "formats": {
+      "list": "ID-Liste"
+    },
+    "noAchievements": "Keine Errungenschaften gefunden",
+    "notJson": "Keine JSON-Datei",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb oder irminsul: eine GOOD-Datei mit gi_achievements.",
+    "drop": "Seelie-, paimon.moe- oder stardb-Datei",
+    "account": "Konto {n}",
+    "fileAccount": "Konto in der Datei",
+    "browse": "Durchsuchen",
+    "inFile": "In der Datei",
+    "already": "Schon erledigt",
+    "new": "Neu",
+    "newTitle": "Enthält {unknown} neuer als die Spieldaten und {disused} aus dem Spiel entfernt: behalten, nicht gezählt",
+    "cancel": "Abbrechen",
+    "add": "{n} hinzufügen"
+  },
+  "row": {
+    "clickToMark": "Klicken, um als erledigt zu markieren",
+    "clickToUnmark": "{text} · klicken, um die Markierung zu entfernen",
+    "captured": "Erfasst",
+    "staysDone": "{text} · in einer Erfassung, bleibt also erledigt",
+    "markEveryTier": "Alle Stufen als erledigt markieren",
+    "markDone": "Als erledigt markieren",
+    "unmarkTiers": "Klicken, um die von Hand markierten Stufen zu entfernen",
+    "markedClick": "Von Hand markiert · klicken zum Entfernen",
+    "tierTitle": "Stufe {n} · {primogems} Urgesteine",
+    "reward": "{n} Urgesteine",
+    "primogems": "Urgesteine",
+    "states": {
+      "captured": "erfasst",
+      "marked": "von Hand markiert",
+      "none": "nicht erledigt"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Stufen",
+    "tier": "Stufe {n}",
+    "addedIn": "Neu in {version}",
+    "hiddenTitle": "Versteckte Errungenschaft",
+    "hidden": "Versteckt",
+    "markedByHand": "Von Hand markiert",
+    "guide": "Guide auf stardb.gg"
+  },
+  "completion": {
+    "tier": "Stufe {n} · {text}",
+    "exact": "Erledigt {time}",
+    "exactTitle": "Vom Spiel gespeicherter Zeitpunkt, von irminsul gelesen",
+    "seen": "Erledigt {window}",
+    "seenTitle": "Zwischen zwei Erfassungen erledigt: nicht in der von {since}, aber in der von {at}",
+    "by": "Erledigt bis {date}",
+    "byTitle": "Schon in deiner ersten Erfassung erledigt ({at})",
+    "marked": "Von Hand als erledigt markiert",
+    "markedTitle": "In keiner Erfassung, daher kein Datum"
+  },
+  "summary": {
+    "label": "Zusammenfassung",
+    "done": "Erledigt",
+    "doneCaptured": "{n} erfasst",
+    "doneByHand": "{n} von Hand",
+    "doneUnknown": "{n} neuer als die Spieldaten",
+    "progress": "Fortschritt",
+    "progressLabel": "Erledigte Errungenschaften",
+    "primogems": "Urgesteine",
+    "primogemsHint": "Gesammelte / verfügbare Urgesteine",
+    "missing": "Fehlend",
+    "showAll": "Alle zeigen",
+    "showLeft": "Nur Offene zeigen"
+  },
+  "toolbar": {
+    "label": "Errungenschaften filtern",
+    "search": "Suchen",
+    "searchTitle": "Name, Beschreibung, Kategorie oder ID",
+    "completion": "Status",
+    "completions": {
+      "all": "Alle",
+      "done": "Erledigt",
+      "missing": "Fehlend"
+    },
+    "hidden": {
+      "all": "Versteckt: alle",
+      "hidden": "Versteckt",
+      "visible": "Nicht versteckt"
+    },
+    "hiddenLabel": "Versteckt",
+    "allCategories": "Alle Kategorien",
+    "category": "Kategorie",
+    "version": "Version",
+    "addedIn": "Neu in",
+    "markAll": "Alle markieren",
+    "markAllTitle": "Die {n} angezeigten offenen Errungenschaften als erledigt markieren",
+    "unmarkAll": "Alle entfernen",
+    "unmarkAllTitle": "Markierung der {n} angezeigten, von Hand markierten Errungenschaften entfernen"
+  }
+}

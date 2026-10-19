@@ -1,0 +1,38 @@
+{
+  "close": "閉じる",
+  "constellation": {
+    "title": "命ノ星座 {level}/6"
+  },
+  "crit": {
+    "title": "CV {value} · 会心率 × 2 + 会心ダメージ",
+    "circlet": " · 会心系の理の冠 +7.77"
+  },
+  "level": {
+    "title": "レベル {level}/{cap} · 突破 {ascension}"
+  },
+  "rarity": {
+    "stars": "★{n}"
+  },
+  "roll": {
+    "title": "RV {value}% · 各上昇値を最大上昇値に対する%で表し合計したもの"
+  },
+  "error": {
+    "title": "読み込めませんでした",
+    "retry": "再試行"
+  },
+  "field": {
+    "optional": "（任意）"
+  },
+  "modal": {
+    "previous": "前へ",
+    "next": "次へ"
+  },
+  "pager": {
+    "label": "ページ",
+    "previous": "前のページ",
+    "next": "次のページ",
+    "goTo": "ページへ移動",
+    "go": "移動",
+    "input": "ページ（1～{count}）"
+  }
+}

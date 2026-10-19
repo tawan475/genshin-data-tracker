@@ -1,0 +1,74 @@
+{
+  "title": "Progressi dettagliati",
+  "figures": "Valori",
+  "atLeastOne": "Almeno uno",
+  "groupBy": "Raggruppa per",
+  "longerThanRange": "Più lungo dell'intervallo",
+  "loading": "Caricamento progressi",
+  "noData": "Nessun dato",
+  "inRange": "in questo intervallo",
+  "gainedInRange": "ottenuti in questo intervallo",
+  "spentInRange": "spesi in questo intervallo",
+  "noCaptures": "Nessuna cattura",
+  "captures": "{n} cattura | {n} catture",
+  "total": "Totale {n}",
+  "lineLabel": "{figure} nel tempo, {span}. Ultimo valore {value}.",
+  "barsLabel": "Variazione di {figure} {per}, {span}: ottenuti {gained}, spesi {spent}.",
+  "tooltip": " {name}: {value}",
+  "group": {
+    "snapshot": "Istantanea",
+    "hour": "Ora",
+    "day": "Giorno",
+    "month": "Mese",
+    "year": "Anno"
+  },
+  "per": {
+    "snapshot": "Per istantanea",
+    "hour": "Per ora",
+    "day": "Per giorno",
+    "month": "Per mese",
+    "year": "Per anno"
+  },
+  "against": {
+    "snapshot": "Variazione rispetto all'istantanea precedente",
+    "hour": "Variazione rispetto all'ora precedente",
+    "day": "Variazione rispetto al giorno precedente",
+    "month": "Variazione rispetto al mese precedente",
+    "year": "Variazione rispetto all'anno precedente"
+  },
+  "newest": {
+    "snapshot": "ultime {n} istantanee",
+    "hour": "ultime {n} ore",
+    "day": "ultimi {n} giorni",
+    "month": "ultimi {n} mesi",
+    "year": "ultimi {n} anni"
+  },
+  "range": {
+    "label": "Intervallo di tempo",
+    "hours": "Ore",
+    "days": "Giorni",
+    "all": "Tutto",
+    "h": "{n} h",
+    "d": "{n} g",
+    "y": "{n} a"
+  },
+  "monthly": {
+    "unavailable": "Analisi mensile non disponibile",
+    "loading": "Caricamento analisi mensile",
+    "noCaptures": "Nessuna cattura",
+    "goTo": "Vai a {month}",
+    "date": "Data",
+    "primogem": "Primogemme",
+    "mora": "Mora",
+    "artifact": "Manufatti",
+    "extract": "Estratti",
+    "netWorth": "Patrimonio",
+    "moraUnit": "mora",
+    "primogemUnit": "primogemme"
+  },
+  "character": {
+    "level": "Livello",
+    "constellation": "Costellazione",
+    "talents": "Talenti"
+  }
+}

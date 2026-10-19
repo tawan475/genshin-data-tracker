@@ -5,7 +5,7 @@
 
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
-import { MAX_FAVORITE_CHARACTERS } from './settings'
+import { MAX_FAVORITE_CHARACTERS, SITE_LANGUAGES } from './settings'
 import type { OAuthProvider } from './oauth'
 import type {
   AccountSettings,
@@ -166,7 +166,7 @@ export const userSettingsPatch = z
   .object({
     theme: z.enum(['system', 'light', 'dark']),
     use24Hour: z.boolean(),
-    language: z.enum(['system', 'en', 'zh-CN', 'zh-TW']),
+    language: z.enum(['system', ...SITE_LANGUAGES]),
   })
   .partial()
   .strict()

@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Gesperrt",
+    "astralMark": "Astralmarke",
+    "new": "Neu"
+  },
+  "sort": {
+    "quality": "Qualität",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potenzial",
+    "level": "Stufe",
+    "set": "Set",
+    "recent": "Neueste"
+  },
+  "sortTitle": {
+    "quality": "Wie im Spiel: Seltenheit, Stufe, Set, Träger",
+    "cv": "Crit Value (KT × 2 + KSCH)",
+    "rv": "Roll Value",
+    "potential": "Erwarteter CV auf Maximalstufe",
+    "level": "Stufe",
+    "set": "Set",
+    "recent": "Neu oder geändert"
+  },
+  "topSets": {
+    "label": "Top-Sets",
+    "more": "{n} weitere Sets"
+  },
+  "lower": {
+    "label": "Niedrigere Seltenheiten: {counts}",
+    "title": "Niedrigere Seltenheiten, die diese Sortierung ans Ende stellt"
+  },
+  "picker": {
+    "find": "Suchen",
+    "noMatch": "Kein Treffer",
+    "done": "Fertig"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: keine",
+    "cell": "{slot} · {n} Teile · bestes {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Teile",
+    "slotHeader": "{slot}: bester CV, Teile",
+    "sumTitle": "Bester CV je Platz, addiert"
+  },
+  "bag": {
+    "more": "{n} weitere"
+  },
+  "table": {
+    "sortBySet": "Nach Set sortieren",
+    "sortByLevel": "Nach Stufe sortieren",
+    "equippedBy": "Angelegt von",
+    "marks": "Sperre und Marken",
+    "elixir": "Elixier"
+  },
+  "detail": {
+    "fromGame": "Aus dem Spiel",
+    "inferred": "Aus der Stufe abgeleitet",
+    "upgradesToCome": "{source} · noch {n} Verbesserungen",
+    "rankTitle": "CV-Rang unter {n} {rarity}★-{slot}",
+    "newTitle": "Nicht in der vorherigen Erfassung",
+    "rolls": "Rolls",
+    "rank": "Rang",
+    "upgradesTitle": "Alle 4 Stufen ein Nebenattribut-Roll, bis +{max}",
+    "upgrades": "Verbesserungen",
+    "expectedCv": "Erwarteter CV",
+    "expectedDetail": "Erwartet bei +{max}: jede Verbesserung trifft zu {chance}% eine Krit-Zeile, mit einem durchschnittlichen Roll",
+    "bestCase": "Bestfall",
+    "bestDetail": "Jede Verbesserung ein maximaler Krit-Roll, bis +{max}",
+    "critLinesTitle": "{n} von 4 Zeilen sind Krit: die Chance, dass eine Verbesserung eine davon trifft",
+    "critPerRoll": "Krit / Roll",
+    "activatesTitle": "Die vierte Zeile, die die erste Verbesserung öffnet",
+    "activates": "+4 fügt hinzu",
+    "maxRv": "Max. RV",
+    "unlocked": "Entsperrt",
+    "astral": "Astral",
+    "elixirTitle": "Heiliger Frost",
+    "rollTier": "{tier}-Roll",
+    "inactive": "Inaktiv"
+  },
+  "card": {
+    "potentialTitle": "Erwarteter CV bei +{max} · Bestfall {best}",
+    "equipped": "Angelegt: {name}"
+  },
+  "toolbar": {
+    "all": "Alle",
+    "yes": "Ja",
+    "no": "Nein",
+    "linesNow": "Jetzt {n} Zeilen",
+    "any": "Beliebig",
+    "allSets": "Alle Sets",
+    "anyone": "Beliebig",
+    "noAstral": "Ohne Astral",
+    "noElixir": "Ohne Elixier",
+    "quoted": "„{text}“",
+    "mainPill": "Haupt: {stat}",
+    "lines": "{n} Zeilen",
+    "best": "Beste",
+    "label": "Artefakte filtern",
+    "searchLabel": "Sets oder Figuren suchen",
+    "searchTitle": "Set oder Figur",
+    "equippedByTitle": "Angelegt von: {names}",
+    "sortBy": "Sortieren nach",
+    "descending": "Absteigend",
+    "ascending": "Aufsteigend",
+    "slot": "Platz",
+    "presets": "Vorlagen",
+    "bestTitle": "Top {n} je Platz, nach der aktuellen Sortierung",
+    "newNone": "Keine frühere Erfassung zum Vergleich",
+    "newTitle": "Nicht in der vorherigen Erfassung: neu oder seitdem verbessert",
+    "zeroTitle": "Nicht angelegte 5★ auf +0",
+    "lowTitle": "Nicht gesperrte, nicht angelegte 4★ und 3★",
+    "low": "4★/3★-Artefakt",
+    "spareTitle": "Nicht angelegte 5★",
+    "spare": "Freie 5★",
+    "maxTitle": "Nur Stufe +20",
+    "moreTitle": "Hauptattribut, Nebenattribute, Zeilen, Stufe, Sperre, Ort, Astralmarke, Elixier",
+    "more": "Mehr",
+    "substatsTitle": "Hat alle davon (die Zeile, die +4 öffnet, zählt)",
+    "linesLabel": "Zeilen",
+    "min": "Min.",
+    "max": "Max.",
+    "location": "Ort",
+    "remove": "{label} entfernen"
+  },
+  "page": {
+    "table": "Tabelle",
+    "loadFailed": "Artefakte konnten nicht geladen werden",
+    "loading": "Artefakte werden geladen",
+    "refreshFailed": "Aktualisieren fehlgeschlagen",
+    "shownTitle": "Angezeigt / Artefakte",
+    "countSuffix": "Artefakte",
+    "pngSize": "PNG, {px} px breit"
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Bloqueado",
+    "astralMark": "Marca Astral",
+    "new": "Novo"
+  },
+  "sort": {
+    "quality": "Qualidade",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potencial",
+    "level": "Nível",
+    "set": "Conjunto",
+    "recent": "Recentes"
+  },
+  "sortTitle": {
+    "quality": "Como no jogo: raridade, nível, conjunto, portador",
+    "cv": "Valor crítico",
+    "rv": "Valor de rolagem",
+    "potential": "CV esperado no nível máximo",
+    "level": "Nível",
+    "set": "Conjunto",
+    "recent": "Novos ou alterados"
+  },
+  "topSets": {
+    "label": "Principais conjuntos",
+    "more": "Mais {n} conjuntos"
+  },
+  "lower": {
+    "label": "Raridades menores: {counts}",
+    "title": "Raridades menores, que esta ordenação coloca por último"
+  },
+  "picker": {
+    "find": "Buscar",
+    "noMatch": "Nenhum resultado",
+    "done": "Concluir"
+  },
+  "setsTable": {
+    "cellNone": "{slot}: nenhum",
+    "cell": "{slot} · {n} peças · melhor {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Peças",
+    "slotHeader": "{slot}: melhor CV, peças",
+    "sumTitle": "Melhor CV por posição, somado"
+  },
+  "bag": {
+    "more": "Mais {n}"
+  },
+  "table": {
+    "sortBySet": "Ordenar por conjunto",
+    "sortByLevel": "Ordenar por nível",
+    "equippedBy": "Equipado por",
+    "marks": "Bloqueio e marcas",
+    "elixir": "Elixir"
+  },
+  "detail": {
+    "fromGame": "Do jogo",
+    "inferred": "Deduzido do nível",
+    "upgradesToCome": "{source} · faltam {n} aprimoramentos",
+    "rankTitle": "Posição de CV entre {n} {slot} {rarity}★",
+    "newTitle": "Não estava na captura anterior",
+    "rolls": "Rolagens",
+    "rank": "Posição",
+    "upgradesTitle": "Uma rolagem de atributo secundário a cada 4 níveis, até {max}",
+    "upgrades": "Aprimoramentos",
+    "expectedCv": "CV esperado",
+    "expectedDetail": "Esperado em {max}: cada aprimoramento rola uma linha de crítico {chance}% das vezes, com uma rolagem média",
+    "bestCase": "Melhor caso",
+    "bestDetail": "Todo aprimoramento com uma rolagem máxima de crítico, até {max}",
+    "critLinesTitle": "{n} de 4 linhas são de Crítico: a chance de um aprimoramento rolar uma delas",
+    "critPerRoll": "Crít. / rolagem",
+    "activatesTitle": "A quarta linha, aberta pelo primeiro aprimoramento",
+    "activates": "+4 adiciona",
+    "maxRv": "RV máx.",
+    "unlocked": "Desbloqueado",
+    "astral": "Astral",
+    "elixirTitle": "Elixir Santificador",
+    "rollTier": "Rolagem {tier}",
+    "inactive": "Inativo"
+  },
+  "card": {
+    "potentialTitle": "CV esperado em +{max} · melhor caso {best}",
+    "equipped": "Equipado: {name}"
+  },
+  "toolbar": {
+    "all": "Todos",
+    "yes": "Sim",
+    "no": "Não",
+    "linesNow": "{n} linhas agora",
+    "any": "Qualquer",
+    "allSets": "Todos os conjuntos",
+    "anyone": "Qualquer um",
+    "noAstral": "Sem Marca Astral",
+    "noElixir": "Sem elixir",
+    "quoted": "“{text}”",
+    "mainPill": "Principal: {stat}",
+    "lines": "{n} linhas",
+    "best": "Melhores",
+    "label": "Filtrar artefatos",
+    "searchLabel": "Buscar conjuntos ou personagens",
+    "searchTitle": "Conjunto ou personagem",
+    "equippedByTitle": "Equipado por: {names}",
+    "sortBy": "Ordenar por",
+    "descending": "Decrescente",
+    "ascending": "Crescente",
+    "slot": "Posição",
+    "presets": "Predefinições",
+    "bestTitle": "Os {n} melhores por posição, pela ordenação atual",
+    "newNone": "Nenhuma captura anterior para comparar",
+    "newTitle": "Não estava na captura anterior: novo, ou aprimorado desde então",
+    "zeroTitle": "5★ não equipados em +0",
+    "lowTitle": "4★ e 3★ desbloqueados e não equipados",
+    "low": "Artefato 4★/3★",
+    "spareTitle": "5★ não equipados",
+    "spare": "5★ sobrando",
+    "maxTitle": "Somente nível +20",
+    "moreTitle": "Atributo principal, atributos secundários, linhas, nível, bloqueio, local, Marca Astral, elixir",
+    "more": "Mais",
+    "substatsTitle": "Tem todos estes (a linha aberta no +4 conta)",
+    "linesLabel": "Linhas",
+    "min": "Mín.",
+    "max": "Máx.",
+    "location": "Local",
+    "remove": "Remover {label}"
+  },
+  "page": {
+    "table": "Tabela",
+    "loadFailed": "Não foi possível carregar os artefatos",
+    "loading": "Carregando artefatos",
+    "refreshFailed": "Não foi possível atualizar",
+    "shownTitle": "Exibidos / artefatos",
+    "countSuffix": "artefatos",
+    "pngSize": "PNG com {px} px de largura"
+  }
+}

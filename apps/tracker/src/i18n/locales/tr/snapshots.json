@@ -1,0 +1,108 @@
+{
+  "heading": "İçe Aktarma Geçmişi",
+  "loadFailed": "Yüklenemedi",
+  "noneInRange": "Aralıkta anlık görüntü yok",
+  "clear": "Temizle",
+  "noSnapshots": "Henüz anlık görüntü yok",
+  "import": "İçe aktar",
+  "unchangedUntil": "{time} tarihine kadar değişmedi",
+  "downloadFailed": "Anlık görüntü indirilemedi",
+  "saved": "{name} kaydedildi",
+  "files": "{n} dosya",
+  "gone": "{n} yok",
+  "exportFailed": "Dışa aktarma başarısız",
+  "deletedOf": "{total} anlık görüntüden {deleted} tanesi silindi",
+  "deleteFailed": "Anlık görüntü silinemedi",
+  "deleteFailedMany": "Anlık görüntüler silinemedi",
+  "deleted": "{n} anlık görüntü başarıyla silindi",
+  "column": {
+    "id": "ID",
+    "date": "Tarih",
+    "source": "Kaynak",
+    "rawSize": "Ham Boyut",
+    "storedSize": "Saklanan Boyut",
+    "actions": "İşlemler"
+  },
+  "select": {
+    "page": "Bu sayfayı seç",
+    "snapshot": "{id} numaralı anlık görüntüyü seç",
+    "shiftClick": "Aralık seçmek için Shift ile tıkla",
+    "pageSelected": "Bu sayfadaki {n} öğenin tümü seçildi.",
+    "all": "Tüm {n} öğeyi seç",
+    "allInRange": "Aralıktaki tüm {n} öğeyi seç",
+    "viewSelected": "Tüm {n} anlık görüntü seçildi.",
+    "rangeSelected": "Aralıktaki tüm {n} anlık görüntü seçildi.",
+    "clear": "Seçimi temizle",
+    "allLabel": "Tümü"
+  },
+  "confirm": {
+    "title": "Emin misin?",
+    "one": "Bu anlık görüntüyü silmek üzeresin. Bu işlem geri alınamaz.",
+    "oneConfirm": "Evet, sil!",
+    "many": "{n} anlık görüntüyü silmek üzeresin. Bu işlem geri alınamaz.",
+    "purge": "Bu kullanıcının {n} anlık görüntüsünü çöp kutusunu atlayarak şimdi silmek üzeresin. Bu işlem geri alınamaz.",
+    "manyConfirm": "Evet, hepsini sil!",
+    "massTitle": "Toplu Silme Uyarısı",
+    "massText": "TÜM sayfalardaki TÜM anlık görüntüleri seçtin. Her şeyi silmek istediğini onaylamak için \"DELETE\" yaz.",
+    "massConfirm": "Anlıyorum, HEPSİNİ SİL!",
+    "typePlaceholder": "Onaylamak için \"{word}\" yaz",
+    "typeLabel": "Onaylamak için {word} yaz",
+    "typeError": "\"{word}\" yaz",
+    "cancel": "İptal"
+  },
+  "figure": {
+    "noCurrency": "Bu anlık görüntüde para birimi yok",
+    "vs": "#{id} ile · {time}"
+  },
+  "range": {
+    "label": "Tarihe göre filtrele",
+    "from": "Başlangıç",
+    "to": "Bitiş",
+    "selectTitle": "Aralıktaki {n} anlık görüntüyü seç",
+    "select": "{n} seç",
+    "clear": "Tarihleri temizle"
+  },
+  "row": {
+    "downloadGood": "GOOD indir",
+    "download": "{id} numaralı anlık görüntüyü indir",
+    "delete": "Anlık görüntüyü sil",
+    "deleteId": "{id} numaralı anlık görüntüyü sil"
+  },
+  "bar": {
+    "saving": "Kaydediliyor…",
+    "downloadingOf": "İndiriliyor {done} / {total}",
+    "downloading": "İndiriliyor {done}",
+    "zipping": "Sıkıştırılıyor {done} / {total}",
+    "selected": "{n} seçili",
+    "outOf": " / {n}",
+    "hiddenTitle": "Seçili {n} anlık görüntü tarih aralığının dışında",
+    "hidden": "· {n} gizli",
+    "cancel": "İptal",
+    "blocked": "Başka bir dışa aktarma çalışıyor",
+    "downloadTitle": "GOOD dosyalarını zip olarak indir",
+    "download": "İndir",
+    "delete": "Sil"
+  },
+  "card": {
+    "stored": "Saklanan"
+  },
+  "storage": {
+    "title": "Depolama",
+    "snapshots": "Anlık görüntüler",
+    "raw": "Ham Veri",
+    "stored": "Saklanan",
+    "saved": "Tasarruf"
+  },
+  "pagination": {
+    "perPage": "Sayfa başına",
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "page": "Sayfa {page}/{pages}",
+    "total": "(toplam {n})",
+    "goTo": "Git:",
+    "go": "Git"
+  },
+  "table": {
+    "noData": "Veri yok."
+  }
+}

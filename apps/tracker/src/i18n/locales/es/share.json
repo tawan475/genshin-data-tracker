@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "Copiar imagen",
+    "share": "Compartir",
+    "missing": "No se pudo cargar {n} imagen | No se pudieron cargar {n} imágenes",
+    "drawing": "{label} · dibujando",
+    "exportFailed": "Error al exportar",
+    "copyFailed": "Error al copiar",
+    "shareFailed": "Error al compartir",
+    "copied": "Copiado",
+    "download": "Descargar PNG",
+    "downloadSized": "Descargar PNG {size}",
+    "buildTitle": "Build",
+    "artifactTitle": "Artefacto"
+  },
+  "options": {
+    "darkCard": "Tarjeta oscura",
+    "lightCard": "Tarjeta clara",
+    "dark": "Oscuro",
+    "light": "Claro",
+    "cardTheme": "Tema de la tarjeta",
+    "showName": "Mostrar el nombre de la cuenta",
+    "name": "Nombre",
+    "showUid": "Mostrar el UID"
+  },
+  "menu": {
+    "label": "Tarjeta para compartir",
+    "drawing": "Dibujando",
+    "copy": "Copiar"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} mejoras (las iniciales y una cada +4)",
+    "levelTitle": "Nivel {level} de {cap} · Ascensión {ascension}",
+    "weaponAndStats": "Arma y atributos",
+    "pieceBonus": "Bonificación de {n} piezas",
+    "rvTitle": "Valor de mejoras: cada mejora de atributo secundario como % de su mejora más alta, sumadas"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "이미지 복사",
+    "share": "공유",
+    "missing": "이미지 {n}개를 불러올 수 없습니다",
+    "drawing": "{label} · 그리는 중",
+    "exportFailed": "내보내기 실패",
+    "copyFailed": "복사 실패",
+    "shareFailed": "공유 실패",
+    "copied": "복사됨",
+    "download": "PNG 다운로드",
+    "downloadSized": "{size} PNG 다운로드",
+    "buildTitle": "빌드",
+    "artifactTitle": "성유물"
+  },
+  "options": {
+    "darkCard": "어두운 카드",
+    "lightCard": "밝은 카드",
+    "dark": "어둡게",
+    "light": "밝게",
+    "cardTheme": "카드 테마",
+    "showName": "계정 이름 표시",
+    "name": "이름",
+    "showUid": "UID 표시"
+  },
+  "menu": {
+    "label": "공유 카드",
+    "drawing": "그리는 중",
+    "copy": "복사"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · 옵션 {n}회 (초기 옵션 + 4레벨마다 1회)",
+    "levelTitle": "레벨 {level}/{cap} · 돌파 {ascension}",
+    "weaponAndStats": "무기와 스탯",
+    "pieceBonus": "{n}세트 효과",
+    "rvTitle": "롤 밸류: 모든 부 옵션 수치를 최대 수치 대비 %로 합산"
+  }
+}

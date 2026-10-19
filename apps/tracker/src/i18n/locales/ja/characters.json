@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Lv.{level}",
+    "noWeapon": "武器なし",
+    "weaponLevel": "武器 Lv.{level}",
+    "artifactCount": "聖遺物 {count}/5",
+    "belowMax": "未強化の聖遺物 {n}個",
+    "noSet": "セット効果なし"
+  },
+  "sort": {
+    "default": "標準",
+    "level": "レベル",
+    "constellation": "命ノ星座",
+    "talents": "天賦",
+    "cv": "CV",
+    "rarity": "レア度",
+    "element": "元素",
+    "name": "名前",
+    "friendship": "好感度",
+    "obtained": "入手日"
+  },
+  "build": {
+    "all": "育成",
+    "ready": "完成",
+    "needs": "育成途中",
+    "level": "Lv < 90",
+    "weapon": "武器 < 90",
+    "artifacts": "聖遺物 < 最大",
+    "set": "セット効果なし"
+  },
+  "talentFilter": {
+    "all": "天賦",
+    "nine": "すべて9以上",
+    "crowned": "知恵の冠",
+    "below": "9未満あり"
+  },
+  "favorites": {
+    "notSaved": "保存されていません"
+  },
+  "stat": {
+    "maxHp": "HP上限",
+    "baseAtk": "基礎攻撃力"
+  },
+  "talent": {
+    "crowned": "{title} · 知恵の冠"
+  },
+  "setBonus": {
+    "line": "{n}セット：{stats}",
+    "inactive": "{n}セット（未発動）：{stats}",
+    "join": "、"
+  },
+  "friendship": {
+    "title": "好感度 {level}/10"
+  },
+  "refinementTitle": "精錬 {value}/5",
+  "talentChips": "通常 {auto} · スキル {skill} · 爆発 {burst}",
+  "sortControl": {
+    "sort": "並べ替え",
+    "descending": "降順に並べ替え",
+    "ascending": "昇順に並べ替え"
+  },
+  "favorite": {
+    "named": "{name}をお気に入り",
+    "on": "お気に入り",
+    "off": "お気に入り解除"
+  },
+  "stars": "★{n}",
+  "sets": "セット",
+  "pieceBonus": "セット効果",
+  "constellation": {
+    "title": "命ノ星座 {level}/6",
+    "lockedTitle": "C{n} · 未開放",
+    "unlocked": "C{n} 開放済み",
+    "locked": "C{n} 未開放"
+  },
+  "timeline": {
+    "firstSeen": "初確認",
+    "obtained": "入手",
+    "to": "から",
+    "less": "閉じる",
+    "all": "すべて（{n}）"
+  },
+  "talentShort": {
+    "auto": "通常",
+    "skill": "スキル",
+    "burst": "爆発"
+  },
+  "talentRaised": "から",
+  "crowned": "知恵の冠",
+  "weapon": {
+    "passive": "パッシブ：{stats}",
+    "locked": "ロック中"
+  },
+  "stats": {
+    "allDmg": "全ダメージ +{value}%（ゲームのステータス画面には非表示）",
+    "label": "ステータス",
+    "weaponMissingTitle": "ゲームデータより新しい武器：ステータスは含まれていません",
+    "weaponMissing": "武器ステータスなし",
+    "newerThanData": "ゲームデータより新しい",
+    "none": "ステータスなし"
+  },
+  "card": {
+    "label": "{name}、{level}、C{constellation}、天賦 {auto} {skill} {burst}",
+    "friendship": "、好感度 {n}",
+    "toDo": "やること：{gaps}",
+    "critDetail": "聖遺物の会心 {rate}% / {dmg}%"
+  },
+  "piece": {
+    "levelTitle": "+{level}/{max} · ★{rarity}",
+    "activatesAt4": "+4で発動",
+    "inactive": "（未発動）",
+    "rolls": "{n}回上昇",
+    "rollsTitle": "上昇回数",
+    "empty": "：空き"
+  },
+  "toolbar": {
+    "weapon": "武器",
+    "cards": "カード",
+    "list": "リスト",
+    "label": "キャラクターを絞り込む",
+    "search": "検索",
+    "searchTitle": "名前、元素、武器、セット",
+    "view": "表示",
+    "chips": "お気に入り、元素、レア度",
+    "favorites": "お気に入り",
+    "buildTitle": "完成：Lv.90、武器Lv.90、最大強化の聖遺物5つ、セット効果あり",
+    "clear": "クリア"
+  },
+  "table": {
+    "lv": "Lv",
+    "c": "C",
+    "critTitle": "聖遺物の会心率 / 会心ダメージ",
+    "crit": "会心",
+    "toDo": "やること",
+    "toDoList": "やること：{gaps}"
+  },
+  "detail": {
+    "toDo": "やること：",
+    "build": "育成",
+    "obtainedAt": "{date} に入手",
+    "noArtifacts": "聖遺物なし",
+    "history": "履歴",
+    "loadFailed": "読み込み失敗",
+    "none": "なし"
+  },
+  "modal": {
+    "pngSize": "{size} PNG"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Lv.90+",
+    "crowns": "知恵の冠",
+    "crownsTitle": "天賦レベル10",
+    "loading": "読み込み中",
+    "noSnapshots": "スナップショットはまだありません",
+    "empty": "キャラクターなし",
+    "import": "インポート",
+    "noMatches": "該当なし"
+  }
+}

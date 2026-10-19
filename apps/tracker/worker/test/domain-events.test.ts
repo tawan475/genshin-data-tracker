@@ -56,14 +56,20 @@ function boardList() {
 }
 
 function boardContent(lang: string) {
-  const zh = lang !== 'en'
+  const zh = lang.startsWith('zh')
+  // The other languages: a title of their own for the wish, English for the rest.
+  const wishTitle = zh
+    ? '「测试」祈愿'
+    : lang === 'en'
+      ? 'Event Wish "Test Banner" - Boosted Drop Rate'
+      : `Wish (${lang})`
   return {
     retcode: 0,
     data: {
       list: [
         {
           ann_id: 9001,
-          title: zh ? '「测试」祈愿' : 'Event Wish "Test Banner" - Boosted Drop Rate',
+          title: wishTitle,
           content: `<p>Promotional Character</p><p>&lt;t class="t_lc"&gt;${day(-1)} 18:00&lt;/t&gt; – &lt;t class="t_lc"&gt;${day(20)} 14:59&lt;/t&gt;</p>`,
         },
         {
@@ -110,9 +116,12 @@ function hoyolab() {
 
 const json = (body: unknown) =>
   new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } })
+/** Every URL the fake was asked, for the last sync. */
+let asked: string[] = []
 const fake =
   (fail: (url: string) => boolean = () => false) =>
   async (url: string) => {
+    asked.push(url)
     if (fail(url)) return new Response('no', { status: 503 })
     if (url.includes('hoyolab')) return json(hoyolab())
     if (url.includes('getAnnList')) return json(boardList())
@@ -121,8 +130,12 @@ const fake =
 
 describe('the game events sync', () => {
   it('reads every server, serves the events and the banner week, and keeps rows when a source fails', async () => {
+    asked = []
     const status = await syncGameEvents(env.DB, Date.now(), fake())
     expect(status.ok).toBe(true)
+    // The other languages' titles are read once (one server), not per server.
+    expect(asked.filter((url) => url.includes('lang=ja'))).toHaveLength(1)
+    expect(asked.filter((url) => url.includes('lang=zh-cn'))).toHaveLength(4)
     expect(status.counts).toMatchObject({ 'board:ASIA': 2, 'board:AMERICA': 2, hoyolab: 1 })
     expect(status.unparsed).toEqual(expect.arrayContaining([expect.stringContaining('9005')]))
     expect((await lastEventsSync(env.DB))?.at).toBe(status.at)
@@ -138,6 +151,12 @@ describe('the game events sync', () => {
       en: 'Event Wish "Test Banner" - Boosted Drop Rate',
       'zh-CN': '「测试」祈愿',
       'zh-TW': '「测试」祈愿',
+      ...Object.fromEntries(
+        ['ja', 'ko', 'es', 'fr', 'ru', 'th', 'vi', 'de', 'id', 'pt', 'it', 'tr'].map((lang) => [
+          lang,
+          `Wish (${lang})`,
+        ]),
+      ),
     })
     const local = (offset: number, time: string) => `${day(offset).replace(/\//g, '-')}T${time}`
     // The banner phase opens every domain for 7 days; the official post's Favor is listed, the fan's Mastery not.

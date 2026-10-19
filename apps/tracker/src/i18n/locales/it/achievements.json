@@ -1,0 +1,139 @@
+{
+  "title": "Obiettivi",
+  "newestCapture": "Ultima cattura",
+  "newestCaptureTitle": "Ultima cattura: {time}",
+  "notCaptured": "Non catturati",
+  "notCapturedTitle": "Apri il menu Obiettivi nel gioco mentre irminsul è attivo per catturarli",
+  "importTitle": "Importa gli obiettivi completati da un'esportazione di Seelie, un backup di paimon.moe o un file stardb / irminsul",
+  "loadFailed": "Caricamento non riuscito",
+  "allDone": "Tutti completati",
+  "showDone": "Mostra completati",
+  "noneDone": "Nessuno completato",
+  "showMissing": "Mostra mancanti",
+  "noMatches": "Nessun risultato",
+  "clear": "Cancella",
+  "more": "Altro",
+  "loading": "Caricamento",
+  "undo": "Annulla",
+  "notSaved": "Non salvato",
+  "markedDone": "{n} segnati come completati",
+  "unmarked": "{n} non più segnati",
+  "added": "{n} aggiunti",
+  "confirmMark": {
+    "title": "Segnare {n} come completati?",
+    "filtered": "I {n} obiettivi mostrati ancora da fare vengono segnati a mano come completati.",
+    "all": "Tutti gli obiettivi ancora da fare ({n}) vengono segnati a mano come completati.",
+    "confirm": "Segna completati"
+  },
+  "confirmUnmark": {
+    "title": "Togliere il segno a {n}?",
+    "detail": "Rimuove i segni manuali dei {n} obiettivi mostrati. Quelli catturati restano completati.",
+    "confirm": "Togli segno"
+  },
+  "categories": {
+    "label": "Categorie",
+    "all": "Tutte",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} primogemme",
+    "hideDone": "Nascondi serie completate",
+    "showDone": "Mostra serie completate",
+    "completed": "Completata"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} primogemme"
+  },
+  "import": {
+    "title": "Importa",
+    "formats": {
+      "list": "Elenco di id"
+    },
+    "noAchievements": "Nessun obiettivo trovato",
+    "notJson": "Non è un file JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb o irminsul: un file GOOD con gi_achievements.",
+    "drop": "File di Seelie, paimon.moe o stardb",
+    "account": "Account {n}",
+    "fileAccount": "Account nel file",
+    "browse": "Sfoglia",
+    "inFile": "Nel file",
+    "already": "Già completati",
+    "new": "Nuovi",
+    "newTitle": "Include {unknown} più recenti dei dati di gioco e {disused} rimossi dal gioco: conservati, non conteggiati",
+    "cancel": "Annulla",
+    "add": "Aggiungi {n}"
+  },
+  "row": {
+    "clickToMark": "Clicca per segnare come completato",
+    "clickToUnmark": "{text} · clicca per togliere il segno",
+    "captured": "Catturato",
+    "staysDone": "{text} · presente in una cattura, quindi resta completato",
+    "markEveryTier": "Segna tutti i livelli come completati",
+    "markDone": "Segna completato",
+    "unmarkTiers": "Clicca per togliere il segno ai livelli segnati a mano",
+    "markedClick": "Segnato a mano · clicca per togliere il segno",
+    "tierTitle": "Livello {n} · {primogems} primogemme",
+    "reward": "{n} primogemme",
+    "primogems": "primogemme",
+    "states": {
+      "captured": "catturato",
+      "marked": "segnato a mano",
+      "none": "non completato"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Livelli",
+    "tier": "Livello {n}",
+    "addedIn": "Aggiunto nella {version}",
+    "hiddenTitle": "Obiettivo nascosto",
+    "hidden": "Nascosto",
+    "markedByHand": "Segnato a mano",
+    "guide": "Guida su stardb.gg"
+  },
+  "completion": {
+    "tier": "Livello {n} · {text}",
+    "exact": "Completato {time}",
+    "exactTitle": "Ora di completamento registrata dal gioco, letta da irminsul",
+    "seen": "Completato {window}",
+    "seenTitle": "Completato tra due catture: assente in quella delle {since}, presente in quella delle {at}",
+    "by": "Completato entro il {date}",
+    "byTitle": "Già completato nella tua prima cattura ({at})",
+    "marked": "Segnato a mano come completato",
+    "markedTitle": "Nessuna cattura lo contiene, quindi non c'è una data"
+  },
+  "summary": {
+    "label": "Riepilogo",
+    "done": "Completati",
+    "doneCaptured": "{n} catturati",
+    "doneByHand": "{n} a mano",
+    "doneUnknown": "{n} più recenti dei dati di gioco",
+    "progress": "Progresso",
+    "progressLabel": "Obiettivi completati",
+    "primogems": "Primogemme",
+    "primogemsHint": "Primogemme ottenute / disponibili",
+    "missing": "Mancanti",
+    "showAll": "Mostra tutti",
+    "showLeft": "Mostra solo quelli da fare"
+  },
+  "toolbar": {
+    "label": "Filtra obiettivi",
+    "search": "Cerca",
+    "searchTitle": "Nome, descrizione, categoria o id",
+    "completion": "Completamento",
+    "completions": {
+      "all": "Tutti",
+      "done": "Completati",
+      "missing": "Mancanti"
+    },
+    "hidden": {
+      "all": "Nascosti: tutti",
+      "hidden": "Nascosti",
+      "visible": "Non nascosti"
+    },
+    "hiddenLabel": "Nascosti",
+    "allCategories": "Tutte le categorie",
+    "category": "Categoria",
+    "version": "Versione",
+    "addedIn": "Aggiunto nella",
+    "markAll": "Segna tutti",
+    "markAllTitle": "Segna come completati i {n} obiettivi mostrati ancora da fare",
+    "unmarkAll": "Togli tutti i segni",
+    "unmarkAllTitle": "Togli il segno ai {n} obiettivi mostrati segnati a mano"
+  }
+}

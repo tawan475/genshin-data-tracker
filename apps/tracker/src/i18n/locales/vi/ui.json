@@ -1,0 +1,38 @@
+{
+  "close": "Đóng",
+  "constellation": {
+    "title": "Cung Mệnh {level} / 6"
+  },
+  "crit": {
+    "title": "CV {value} · Tỷ Lệ Bạo Kích × 2 + Sát Thương Bạo Kích",
+    "circlet": " · Nón bạo kích +7.77"
+  },
+  "level": {
+    "title": "Cấp {level} / {cap} · Đột Phá {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} sao"
+  },
+  "roll": {
+    "title": "RV {value}% · tổng phần trăm mỗi lượt tăng so với mức tăng cao nhất"
+  },
+  "error": {
+    "title": "Không tải được mục này",
+    "retry": "Thử lại"
+  },
+  "field": {
+    "optional": "(tùy chọn)"
+  },
+  "modal": {
+    "previous": "Trước",
+    "next": "Sau"
+  },
+  "pager": {
+    "label": "Trang",
+    "previous": "Trang trước",
+    "next": "Trang sau",
+    "goTo": "Đến trang",
+    "go": "Đi",
+    "input": "Trang, từ 1 đến {count}"
+  }
+}

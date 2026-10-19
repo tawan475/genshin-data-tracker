@@ -1,0 +1,38 @@
+{
+  "export": {
+    "copyImage": "画像をコピー",
+    "share": "共有",
+    "missing": "{n} 枚の画像を読み込めませんでした",
+    "drawing": "{label} · 描画中",
+    "exportFailed": "エクスポートに失敗しました",
+    "copyFailed": "コピーに失敗しました",
+    "shareFailed": "共有に失敗しました",
+    "copied": "コピーしました",
+    "download": "PNG をダウンロード",
+    "downloadSized": "{size} の PNG をダウンロード",
+    "buildTitle": "ビルド",
+    "artifactTitle": "聖遺物"
+  },
+  "options": {
+    "darkCard": "ダークカード",
+    "lightCard": "ライトカード",
+    "dark": "ダーク",
+    "light": "ライト",
+    "cardTheme": "カードのテーマ",
+    "showName": "アカウント名を表示",
+    "name": "名前",
+    "showUid": "UID を表示"
+  },
+  "menu": {
+    "label": "共有カード",
+    "drawing": "描画中",
+    "copy": "コピー"
+  },
+  "card": {
+    "pieceTitle": "CV {cv} · RV {rv}% · {n} 回の強化（初期値と +4 ごとに 1 回）",
+    "levelTitle": "Lv.{level} / {cap} · 突破 {ascension}",
+    "weaponAndStats": "武器とステータス",
+    "pieceBonus": "{n}セット効果",
+    "rvTitle": "強化値：各サブステータスの強化をその最大値に対する % にして合計した値"
+  }
+}

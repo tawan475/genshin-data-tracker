@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Lv {level}/{cap}",
+    "copies": "{n} ชิ้น",
+    "locked": "ล็อกอยู่"
+  },
+  "sort": {
+    "quality": "คุณภาพ",
+    "level": "เลเวล",
+    "refinement": "ขัดเกลา",
+    "count": "จำนวน",
+    "name": "ชื่อ",
+    "type": "ประเภท"
+  },
+  "levelFilter": {
+    "all": "เลเวล",
+    "max": "สูงสุด",
+    "levelled": "อัปเลเวลแล้ว",
+    "base": "Lv 1"
+  },
+  "refine": {
+    "spare": "เหลือ {n}",
+    "possible": "ทำได้: {title}"
+  },
+  "group": {
+    "copies": "{count} ชิ้น"
+  },
+  "bag": {
+    "notInData": "{copies} · ยังไม่มีในข้อมูลเกม"
+  },
+  "toolbar": {
+    "bag": "ช่องเก็บของ",
+    "byWeapon": "ตามอาวุธ",
+    "list": "รายการ",
+    "status": "สถานะ",
+    "equipped": "สวมอยู่",
+    "unused": "ไม่ได้ใช้",
+    "lock": "ล็อก",
+    "locked": "ล็อกอยู่",
+    "unlocked": "ไม่ได้ล็อก",
+    "label": "กรองอาวุธ",
+    "searchTitle": "อาวุธ ประเภท หรือตัวละคร",
+    "chips": "ประเภท ความหายาก และการขัดเกลา",
+    "noneInCapture": "ไม่มีในการสแกนนี้",
+    "refinableTitle": "อาวุธที่ชิ้นที่เหลือใช้ขัดเกลาชิ้นที่สวมอยู่ได้",
+    "refinable": "ขัดเกลาได้"
+  },
+  "detail": {
+    "refinementTitle": "ระดับการขัดเกลา {rank} จาก {max}",
+    "unequipped": "ไม่ได้สวม",
+    "copies": "{n} ชิ้น",
+    "equipped": "สวมอยู่ {n}",
+    "spareCopies": "เหลือ {n} ชิ้น"
+  },
+  "table": {
+    "qualityTitle": "คุณภาพ: ความหายาก เลเวล การขัดเกลา ใหม่สุด",
+    "r": "R"
+  },
+  "page": {
+    "kinds": "ชนิด",
+    "kindsTitle": "อาวุธที่ไม่ซ้ำกัน",
+    "unused5": "5★ ไม่ได้ใช้",
+    "refinableTitle": "ชิ้นที่เหลือใช้ขัดเกลาชิ้นที่สวมอยู่ได้",
+    "empty": "ไม่มีอาวุธ",
+    "pages": "หน้าอาวุธ"
+  }
+}

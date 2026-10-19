@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Cấp {level}",
+    "noWeapon": "Không vũ khí",
+    "weaponLevel": "Vũ khí cấp {level}",
+    "artifactCount": "{count}/5 Thánh Di Vật",
+    "belowMax": "{n} Thánh Di Vật chưa tối đa",
+    "noSet": "Không có hiệu ứng bộ đầy đủ"
+  },
+  "sort": {
+    "default": "Mặc định",
+    "level": "Cấp",
+    "constellation": "Cung Mệnh",
+    "talents": "Thiên Phú",
+    "cv": "CV",
+    "rarity": "Độ Hiếm",
+    "element": "Nguyên tố",
+    "name": "Tên",
+    "friendship": "Độ Yêu Thích",
+    "obtained": "Ngày nhận"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Hoàn thiện",
+    "needs": "Cần nâng",
+    "level": "Cấp < 90",
+    "weapon": "Vũ khí < 90",
+    "artifacts": "Thánh Di Vật < tối đa",
+    "set": "Không hiệu ứng bộ"
+  },
+  "talentFilter": {
+    "all": "Thiên Phú",
+    "nine": "Tất cả 9+",
+    "crowned": "Có Vương Miện",
+    "below": "Có mục < 9"
+  },
+  "favorites": {
+    "notSaved": "Chưa lưu"
+  },
+  "stat": {
+    "maxHp": "HP Tối Đa",
+    "baseAtk": "Tấn Công Cơ Bản"
+  },
+  "talent": {
+    "crowned": "{title} · có Vương Miện"
+  },
+  "setBonus": {
+    "line": "Bộ {n} món: {stats}",
+    "inactive": "Bộ {n} món (chưa kích hoạt): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Độ Yêu Thích {level} / 10"
+  },
+  "refinementTitle": "Tinh Luyện {value} / 5",
+  "talentChips": "Tấn Công {auto} · Kỹ Năng {skill} · Nộ {burst}",
+  "sortControl": {
+    "sort": "Thứ Tự",
+    "descending": "Sắp xếp giảm dần",
+    "ascending": "Sắp xếp tăng dần"
+  },
+  "favorite": {
+    "named": "Yêu thích {name}",
+    "on": "Yêu thích",
+    "off": "Bỏ yêu thích"
+  },
+  "stars": "{n} sao",
+  "sets": "Bộ",
+  "pieceBonus": " món",
+  "constellation": {
+    "title": "Cung Mệnh {level} / 6",
+    "lockedTitle": "C{n} · chưa mở",
+    "unlocked": "C{n} đã mở",
+    "locked": "C{n} chưa mở"
+  },
+  "timeline": {
+    "firstSeen": "Thấy lần đầu",
+    "obtained": "Ngày nhận",
+    "to": "lên",
+    "less": "Thu gọn",
+    "all": "Tất cả {n}"
+  },
+  "talentShort": {
+    "auto": "Tấn Công",
+    "skill": "Kỹ Năng",
+    "burst": "Nộ"
+  },
+  "talentRaised": "tăng lên",
+  "crowned": "Có Vương Miện",
+  "weapon": {
+    "passive": "Nội tại: {stats}",
+    "locked": "Đã khóa"
+  },
+  "stats": {
+    "allDmg": "+{value}% mọi sát thương, không có trên bảng chỉ số của game",
+    "label": "Chỉ số",
+    "weaponMissingTitle": "Vũ khí mới hơn dữ liệu game: chưa tính chỉ số của nó",
+    "weaponMissing": "Chưa tính chỉ số vũ khí",
+    "newerThanData": "Mới hơn dữ liệu game",
+    "none": "Không có chỉ số"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, Thiên Phú {auto} {skill} {burst}",
+    "friendship": ", Độ Yêu Thích {n}",
+    "toDo": "cần làm: {gaps}",
+    "critDetail": "Bạo kích {rate}% / {dmg}% từ Thánh Di Vật"
+  },
+  "piece": {
+    "levelTitle": "+{level} / {max} · {rarity}★",
+    "activatesAt4": "Kích hoạt ở +4",
+    "inactive": "(chưa kích hoạt)",
+    "rolls": "{n} lượt tăng",
+    "rollsTitle": "Lượt tăng",
+    "empty": ": trống"
+  },
+  "toolbar": {
+    "weapon": "Vũ Khí",
+    "cards": "Thẻ",
+    "list": "Danh sách",
+    "label": "Lọc nhân vật",
+    "search": "Tìm",
+    "searchTitle": "Tên, nguyên tố, vũ khí hoặc bộ",
+    "view": "Kiểu xem",
+    "chips": "Yêu thích, nguyên tố và độ hiếm",
+    "favorites": "Yêu thích",
+    "buildTitle": "Hoàn thiện: cấp 90, vũ khí cấp 90, năm Thánh Di Vật tối đa, đủ hiệu ứng bộ",
+    "clear": "Xóa lọc"
+  },
+  "table": {
+    "lv": "Cấp",
+    "c": "C",
+    "critTitle": "Tỷ Lệ Bạo Kích / Sát Thương Bạo Kích từ Thánh Di Vật",
+    "crit": "Bạo kích",
+    "toDo": "Cần làm",
+    "toDoList": "Cần làm: {gaps}"
+  },
+  "detail": {
+    "toDo": "Cần làm:",
+    "build": "Build",
+    "obtainedAt": "Nhận ngày {date}",
+    "noArtifacts": "Không có Thánh Di Vật",
+    "history": "Lịch Sử",
+    "loadFailed": "Tải thất bại",
+    "none": "Không có"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Cấp 90+",
+    "crowns": "Vương Miện",
+    "crownsTitle": "Thiên Phú cấp 10",
+    "loading": "Đang tải",
+    "noSnapshots": "Chưa có bản chụp",
+    "empty": "Không có nhân vật",
+    "import": "Nhập",
+    "noMatches": "Không có kết quả"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "title": "Başarımlar",
+  "newestCapture": "En yeni tarama",
+  "newestCaptureTitle": "En yeni tarama: {time}",
+  "notCaptured": "Taranmadı",
+  "notCapturedTitle": "Taramak için irminsul çalışırken oyundaki Başarımlar menüsünü aç",
+  "importTitle": "Tamamlanan başarımları bir Seelie dışa aktarımından, paimon.moe yedeğinden veya stardb / irminsul dosyasından içe aktar",
+  "loadFailed": "Yüklenemedi",
+  "allDone": "Hepsi tamam",
+  "showDone": "Tamamlananları göster",
+  "noneDone": "Hiçbiri tamamlanmadı",
+  "showMissing": "Eksikleri göster",
+  "noMatches": "Eşleşme yok",
+  "clear": "Temizle",
+  "more": "Daha fazla",
+  "loading": "Yükleniyor",
+  "undo": "Geri Al",
+  "notSaved": "Kaydedilmedi",
+  "markedDone": "{n} tamamlandı olarak işaretlendi",
+  "unmarked": "{n} işaret kaldırıldı",
+  "added": "{n} eklendi",
+  "confirmMark": {
+    "title": "{n} başarım tamamlandı olarak işaretlensin mi?",
+    "filtered": "Gösterilen ve kalan {n} başarım elle tamamlandı olarak işaretlenir.",
+    "all": "Kalan tüm başarımlar ({n}) elle tamamlandı olarak işaretlenir.",
+    "confirm": "Tamamlandı işaretle"
+  },
+  "confirmUnmark": {
+    "title": "{n} işaret kaldırılsın mı?",
+    "detail": "Gösterilen {n} başarımın elle konan işaretlerini kaldırır. Taranmış olanlar tamamlanmış kalır.",
+    "confirm": "İşareti kaldır"
+  },
+  "categories": {
+    "label": "Kategoriler",
+    "all": "Tümü",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} köken taşı",
+    "hideDone": "Tamamlanan serileri gizle",
+    "showDone": "Tamamlanan serileri göster",
+    "completed": "Tamamlandı"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} köken taşı"
+  },
+  "import": {
+    "title": "İçe aktar",
+    "formats": {
+      "list": "Id listesi"
+    },
+    "noAchievements": "Başarım bulunamadı",
+    "notJson": "JSON dosyası değil",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb veya irminsul: gi_achievements içeren bir GOOD dosyası.",
+    "drop": "Seelie, paimon.moe veya stardb dosyası",
+    "account": "Hesap {n}",
+    "fileAccount": "Dosyadaki hesap",
+    "browse": "Gözat",
+    "inFile": "Dosyada",
+    "already": "Zaten tamam",
+    "new": "Yeni",
+    "newTitle": "Oyun verisinden yeni {unknown} ve oyundan kaldırılmış {disused} başarım içerir: saklanır, sayılmaz",
+    "cancel": "İptal",
+    "add": "{n} ekle"
+  },
+  "row": {
+    "clickToMark": "Tamamlandı olarak işaretlemek için tıkla",
+    "clickToUnmark": "{text} · işareti kaldırmak için tıkla",
+    "captured": "Tarandı",
+    "staysDone": "{text} · bir taramada var, tamamlanmış kalır",
+    "markEveryTier": "Tüm kademeleri tamamlandı işaretle",
+    "markDone": "Tamamlandı işaretle",
+    "unmarkTiers": "Elle işaretlenen kademelerin işaretini kaldırmak için tıkla",
+    "markedClick": "Elle işaretlendi · işareti kaldırmak için tıkla",
+    "tierTitle": "Kademe {n} · {primogems} köken taşı",
+    "reward": "{n} köken taşı",
+    "primogems": "köken taşı",
+    "states": {
+      "captured": "tarandı",
+      "marked": "elle işaretlendi",
+      "none": "tamamlanmadı"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Kademeler",
+    "tier": "Kademe {n}",
+    "addedIn": "{version} sürümünde eklendi",
+    "hiddenTitle": "Gizli Başarım",
+    "hidden": "Gizli",
+    "markedByHand": "Elle işaretlendi",
+    "guide": "stardb.gg rehberi"
+  },
+  "completion": {
+    "tier": "Kademe {n} · {text}",
+    "exact": "{time} tamamlandı",
+    "exactTitle": "Oyunun kaydettiği, irminsul'un okuduğu tamamlanma zamanı",
+    "seen": "{window} tamamlandı",
+    "seenTitle": "İki tarama arasında tamamlandı: {since} taramasında yok, {at} taramasında var",
+    "by": "{date} itibarıyla tamamlanmış",
+    "byTitle": "İlk taramanda zaten tamamlanmıştı ({at})",
+    "marked": "Elle tamamlandı işaretlendi",
+    "markedTitle": "Hiçbir taramada yok, bu yüzden tarihi yok"
+  },
+  "summary": {
+    "label": "Özet",
+    "done": "Tamam",
+    "doneCaptured": "{n} tarandı",
+    "doneByHand": "{n} elle",
+    "doneUnknown": "{n} oyun verisinden yeni",
+    "progress": "İlerleme",
+    "progressLabel": "Tamamlanan başarımlar",
+    "primogems": "Köken Taşı",
+    "primogemsHint": "Toplanan / sunulan köken taşları",
+    "missing": "Eksik",
+    "showAll": "Tümünü göster",
+    "showLeft": "Yalnızca kalanları göster"
+  },
+  "toolbar": {
+    "label": "Başarımları filtrele",
+    "search": "Ara",
+    "searchTitle": "Ad, açıklama, kategori veya id",
+    "completion": "Tamamlanma",
+    "completions": {
+      "all": "Tümü",
+      "done": "Tamam",
+      "missing": "Eksik"
+    },
+    "hidden": {
+      "all": "Gizli: hepsi",
+      "hidden": "Gizli",
+      "visible": "Gizli değil"
+    },
+    "hiddenLabel": "Gizli",
+    "allCategories": "Tüm kategoriler",
+    "category": "Kategori",
+    "version": "Sürüm",
+    "addedIn": "Eklendiği sürüm",
+    "markAll": "Tümünü işaretle",
+    "markAllTitle": "Gösterilen ve kalan {n} başarımı tamamlandı işaretle",
+    "unmarkAll": "Tüm işaretleri kaldır",
+    "unmarkAllTitle": "Gösterilen ve elle işaretlenmiş {n} başarımın işaretini kaldır"
+  }
+}

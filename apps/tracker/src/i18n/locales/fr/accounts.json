@@ -1,0 +1,47 @@
+{
+  "displayUid": "UID {uid}",
+  "displayId": "Compte {id}",
+  "server": {
+    "ASIA": "Asie",
+    "AMERICA": "Amérique",
+    "EUROPE": "Europe",
+    "SAR": "TW/HK/MO"
+  },
+  "home": {
+    "accounts": "Comptes",
+    "snapshots": "Instantanés",
+    "uploaded": "Envoyé",
+    "stored": "Stocké",
+    "ratio": "Ratio",
+    "lastCaptured": "Dernière capture",
+    "bytes": "{n} octets",
+    "ratioTitle": "Stocké {ratio} plus petit qu'envoyé",
+    "add": "Ajouter un compte",
+    "empty": "Aucun compte"
+  },
+  "new": {
+    "title": "Ajouter un compte",
+    "add": "Ajouter",
+    "notAdded": "Non ajouté",
+    "added": "{name} ajouté",
+    "connect": "Connecter Irminsul",
+    "overview": "Aperçu",
+    "importFiles": "Importer des fichiers",
+    "addAnother": "En ajouter un autre"
+  },
+  "settings": {
+    "title": "Paramètres du compte",
+    "details": "Détails",
+    "traveler": "Voyageur",
+    "lumine": "Lumine",
+    "aether": "Aether",
+    "deleteAccount": "Supprimer le compte",
+    "deleteTitle": "Les fichiers GOOD exportés ne sont pas touchés",
+    "confirmTitle": "Supprimer {name} ?",
+    "deletes": "Supprime {loss}. Sa clé Irminsul cessera de fonctionner.",
+    "typeToConfirm": "Saisissez {word}",
+    "confirmWord": "supprimer",
+    "loss": "{n} instantané | {n} instantanés",
+    "deleted": "{name} supprimé"
+  }
+}

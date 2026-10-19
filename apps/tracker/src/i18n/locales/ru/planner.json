@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "Имя",
+      "title": "От А до Я"
+    },
+    "missing": {
+      "label": "Недостаёт",
+      "title": "Сначала те, где недостаёт меньше всего"
+    },
+    "favorites": {
+      "label": "Избранное",
+      "title": "Сначала избранное"
+    },
+    "priority": {
+      "label": "Приоритет",
+      "title": "Материалы сначала идут верхним целям: перетащите, чтобы изменить порядок"
+    }
+  },
+  "material": {
+    "characterExp": "Опыт персонажа",
+    "weaponExp": "Опыт оружия",
+    "group": {
+      "exp": "Опыт",
+      "gem": "Самоцветы",
+      "boss": "Добыча с боссов",
+      "local": "Местные диковинки",
+      "common": "Добыча с противников",
+      "book": "Книги талантов",
+      "weekly": "Еженедельные боссы",
+      "weapon": "Материалы оружия",
+      "elite": "Добыча с элиты",
+      "other": "Прочее"
+    }
+  },
+  "hint": {
+    "level": "Ур. {level}",
+    "talents": "таланты {talents}",
+    "characterDetail": "{name}: ур. {level} (В{ascension}), таланты {talents}",
+    "weaponDetail": "{name}: ур. {level} (В{ascension})",
+    "thenAr": "затем РП {ar}",
+    "thenShort": "затем не хватит материалов",
+    "weapon": "Оружие",
+    "canLevel": "Можно улучшить сейчас"
+  },
+  "preset": {
+    "max": {
+      "label": "Макс.",
+      "title": "Уровень 90, таланты 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Уровень 90, таланты 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Уровень 80, таланты 8/8/8"
+    },
+    "talents": {
+      "label": "Только таланты",
+      "title": "Таланты 9/9/9, уровень как сейчас"
+    },
+    "level": {
+      "label": "Только уровень",
+      "title": "Уровень 90, таланты как сейчас"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Ежедневные поручения",
+      "weeklyBosses": "Подземелья наказания",
+      "battlePass": "Боевой пропуск: неделя",
+      "reputation": "Репутация",
+      "abyss": "Витая Бездна",
+      "theater": "Театр «Воображариум»",
+      "bargains": "Магазин Паймон",
+      "transformer": "Параметрический преобразователь",
+      "expeditions": "Экспедиции",
+      "realm": "Сокровища обители",
+      "welkin": "Благословение полой луны"
+    }
+  },
+  "toast": {
+    "notSaved": "Не сохранено",
+    "newCapture": "Новый снимок",
+    "newCaptureDetail": "Ничего не изменено: проверьте и попробуйте ещё раз"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} событие пропущено | Пропущено событий: {n}",
+      "olderThanOurs": "старше наших",
+      "ar": "РП {ar}",
+      "wl": "УМ {wl}",
+      "lumine": "Люмин",
+      "aether": "Итэр"
+    },
+    "server": {
+      "AMERICA": "Америка",
+      "EUROPE": "Европа",
+      "ASIA": "Азия",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Это не экспорт Seelie (нет целей)",
+    "customName": "Свой"
+  },
+  "resin": {
+    "alertTitle": "Первородная смола {amount}",
+    "source": {
+      "manual": "задано вручную",
+      "player": "irminsul, при входе",
+      "inventory": "снимок"
+    },
+    "unknown": "Первородная смола: пока неизвестно · задать",
+    "readingTitle": "Первородная смола ~{now}/{max} · {value} из источника «{source}», {at} · +1 каждые 8 минут",
+    "setLabel": "{title}. Задать",
+    "spend": "Потратить {n}",
+    "add": "Добавить {n}",
+    "fullAt": "Полная в {time}",
+    "fullLabel": "Полная",
+    "full": "Полная",
+    "markTitle": "{amount} в {time}",
+    "in": "через",
+    "now": "Первородная смола сейчас",
+    "alert": "Оповещение о смоле",
+    "alertUnsupported": "Оповещение о смоле: не поддерживается в этом браузере",
+    "alertOff": "Оповещение о смоле: выкл.",
+    "alertOn": "Оповещение о смоле при {amount} · пока сайт открыт",
+    "alertOnAt": "Оповещение о смоле при {amount}, {time} · пока сайт открыт",
+    "unsupported": "Не поддерживается в этом браузере",
+    "blocked": "Заблокировано: разрешите уведомления для этого сайта в настройках браузера",
+    "notifyAt": "Уведомить при",
+    "off": "Выкл.",
+    "whileOpen": "Пока сайт открыт на этом устройстве"
+  },
+  "artifacts": {
+    "title": "Артефакты",
+    "doneByHand": "{name}: готово (отмечено вручную)",
+    "notDoneByHand": "{name}: не готово (отмечено вручную)",
+    "notDoneByHandCaptureDone": "{name}: не готово (отмечено вручную; по снимку готово)",
+    "doneFromCapture": "{name}: готово, по снимку ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "не готово",
+    "nothingWorn": "ничего не надето",
+    "otherSet": "другой комплект",
+    "otherMainStat": "другая основная характеристика",
+    "levelOf": "+{level} из +{max}",
+    "farmingByHand": "{name}: фарм (отмечено вручную)",
+    "setDone": "{name}: готово, во всех ячейках",
+    "setFarming": "{name}: фарм",
+    "autoRule": "Ячейка отмечается сама, когда снимок показывает в ней артефакт максимального уровня (+20 для 5★) выбранного комплекта с выбранной основной характеристикой; пятая ячейка может быть любого комплекта, если остальные четыре — из выбранных",
+    "sets": "Комплекты",
+    "worn": "Надето: {n}",
+    "remove": "Убрать {name}",
+    "addSet": "Комплект",
+    "close": "Закрыть",
+    "slots": "Ячейки",
+    "mainStat": "{slot}: основная характеристика",
+    "searchSets": "Поиск комплектов",
+    "setList": "Комплекты артефактов"
+  },
+  "cost": {
+    "saves": "{name} экономит {mora}",
+    "nothing": "Нечего тратить",
+    "colours": "Цвета"
+  },
+  "common": {
+    "search": "Поиск",
+    "cancel": "Отмена",
+    "nameState": "{name}: {state}",
+    "counted": "Учтено",
+    "notCounted": "Не учтено",
+    "removeName": "Убрать {name}",
+    "clear": "Очистить",
+    "remove": "Убрать",
+    "save": "Сохранить",
+    "noMatches": "Ничего не найдено",
+    "delete": "Удалить",
+    "undo": "Отменить"
+  },
+  "custom": {
+    "slot": {
+      "book": "Книга талантов",
+      "common": "Добыча с противников",
+      "boss": "Добыча с босса",
+      "local": "Диковинка",
+      "weekly": "Еженедельный босс"
+    },
+    "name": "Имя",
+    "rarity": "Редкость",
+    "weaponType": "Тип оружия",
+    "element": "Элемент"
+  },
+  "done": {
+    "taken": "Взято из инвентаря",
+    "uses": "Использует",
+    "notInBag": "Нет в инвентаре",
+    "takesWhatThereIs": "«Готово» берёт то, что есть.",
+    "confirm": "Готово"
+  },
+  "extra": {
+    "title": "Дополнительно",
+    "add": "Добавить предмет",
+    "have": "есть {n}",
+    "craft": "создать {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (избранное)",
+    "title": "{name} · нажатие: открыть · удержание или правый клик: пауза",
+    "moreTitle": "{rest} · показать всех",
+    "moreLabel": "Ещё {n}: {rest}. Показать всех",
+    "fewerTitle": "Показать меньше",
+    "fewer": "Меньше"
+  },
+  "card": {
+    "level": "Уровень",
+    "talents": "Таланты",
+    "levelTitle": "Уровень {from} (В{fromAscension}) → {to} (В{toAscension})",
+    "talentsTitle": "Атака / Навык / Взрыв",
+    "boosted": "улучшено до {talents} (C{constellation} даёт +3)",
+    "weaponTitle": "{name}: уровень {from} (В{fromAscension}) → {to} (В{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "можно сделать сейчас из инвентаря",
+    "readyStep": "следующий шаг можно сделать сейчас из инвентаря",
+    "constellation": "Созвездие {n}",
+    "refinement": "Пробуждение {n}",
+    "artifactsTitle": "Артефакты: {done}/5 ячеек",
+    "expSuffix": "{name} (опыт)",
+    "amount": "{name}: {n}",
+    "short": "не хватает {n}",
+    "shortAfter": "не хватает {n} после целей выше",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "хватает после целей выше",
+    "handleLabel": "{name}: место {rank}, перемещение клавишами со стрелками",
+    "handleTitle": "№{rank} · перетащите или используйте стрелки",
+    "customTitle": "Свой персонаж: пока нет в игровых данных",
+    "custom": "Свой",
+    "favoriteLabel": "{name}: в избранном",
+    "favorite": "В избранном",
+    "notFavorite": "Не в избранном",
+    "setByHand": "Задано вручную",
+    "needsAr": "Нужен РП {ar}",
+    "doneLabel": "{name}: {label} — готово",
+    "doneReadyLabel": "{name}: {label} — готово ({ready})",
+    "missing": "{name}: недостаёт",
+    "canDoNow": "Можно сейчас: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Атака",
+      "skill": "Навык",
+      "burst": "Взрыв"
+    },
+    "notOwned": "Нет в наличии",
+    "estimateResin": "~{resin} смолы",
+    "estimateTitle": "Прохождений: {runs} · {resin} смолы ({condensed} густой) · дней: {days}",
+    "estimateWeekly": "еженедельные боссы: {weeks} нед.",
+    "countedLabel": "{name}: учтено",
+    "notCountedLabel": "{name}: не учтено",
+    "presets": "Шаблоны",
+    "constellationTitle": "Созвездие (C3/C5 повышают талант на 3)",
+    "constellation": "Созвездие",
+    "hideNote": "Скрыть заметку",
+    "note": "Заметка",
+    "part": "Часть цели",
+    "now": "Сейчас",
+    "goal": "Цель",
+    "levelNow": "Уровень сейчас",
+    "levelGoal": "Цель по уровню",
+    "boost": "C{at} повышает на 3",
+    "boostOn": "C{at} повышает на 3: в игре {from} → {to}",
+    "talentNow": "{talent} сейчас",
+    "talentGoal": "{talent}: цель",
+    "inGame": "В игре {from} → {to}",
+    "customCharacter": "Свой персонаж",
+    "replaceWithEllipsis": "Заменить на…",
+    "replaceWith": "Заменить на {name}",
+    "replace": "Заменить",
+    "gapNeed": "Нужно для {talents}",
+    "setLevel": "Задать {level}",
+    "captureTitle": "Последний снимок",
+    "capture": "Снимок: {text}",
+    "resetTitle": "Вернуть как в снимке",
+    "reset": "Сбросить",
+    "cost": "Стоимость"
+  },
+  "picker": {
+    "characters": "Персонажи",
+    "weapons": "Оружие",
+    "items": "Предметы",
+    "title": "Добавить цель",
+    "kind": "Тип",
+    "searchItems": "Поиск предметов",
+    "preset": "Шаблон",
+    "add": "Добавить",
+    "addCount": "Добавить {n}"
+  },
+  "toolbar": {
+    "label": "Фильтр целей",
+    "searchTitle": "Имя, оружие или заметка",
+    "sort": "Сортировка",
+    "chips": "Улучшить сейчас, еженедельные боссы, статус, элемент и редкость",
+    "upgrade": "Улучшить сейчас",
+    "upgradeTitle": "Учтённые цели, которые можно улучшить сейчас из инвентаря, каждая отдельно: «Готово», «Готово отдельно» или часть (уровень, таланты, оружие) либо её следующий шаг",
+    "noWeeklyTitle": "Ещё нужно фармить, но не еженедельного босса: его добыча есть или конвертируется (после целей выше)",
+    "status": {
+      "all": "Все",
+      "ready": "В наличии",
+      "readyTitle": "Хватает в инвентаре, каждая цель отдельно",
+      "activeTitle": "В итогах",
+      "off": "На паузе",
+      "offTitle": "Не входят в итоги"
+    }
+  },
+  "item": {
+    "count": "Количество",
+    "have": "Есть",
+    "editHave": "Есть {n}: изменить"
+  },
+  "popover": {
+    "goalsLabel": "{name}: цели, где используется ({n})",
+    "goalsTitle": "Цели, где используется",
+    "history": "{name}: история",
+    "expNeed": "Нужно опыта: {n}",
+    "goal": "Цель {n}",
+    "missing": "Недостаёт {n}",
+    "enough": "Хватает",
+    "need": "Нужно {n}",
+    "craftedTitle": "Создаётся из уровня ниже",
+    "craft": "Создать {n}",
+    "capture": "Снимок {n}",
+    "backLabel": "{name}: вернуть {n} из снимка",
+    "backTitle": "Вернуть {n}",
+    "held": "{name} в наличии",
+    "addPlaceholder": "+ добавить",
+    "addLabel": "{name}: добавить полученное",
+    "addTitle": "Добавить полученное (Enter)",
+    "swap": {
+      "label": "Обмен за Растворитель снов",
+      "heading": "Обмен",
+      "title": "Алхимия → Конвертация: другой материал того же босса на этот, по {n} Растворителя снов за обмен",
+      "solventHeld": "{name} в наличии: {n}",
+      "have": "Есть {n}",
+      "do": "Обменять",
+      "noneHeld": "Нет предмета «{name}»",
+      "noSolvent": "Нужно {n} Растворителя снов за обмен"
+    }
+  },
+  "levelGrid": {
+    "below": "Ниже снимка",
+    "level": "Уровень {level} (В{ascension})",
+    "ascended": "Уровень {level}, возвышен (В{ascension})",
+    "ascendedWord": "возвышен"
+  },
+  "cell": {
+    "have": "Есть {n}",
+    "spent": "Ушло на создание: {n}",
+    "converted": "Конвертировано из других: {n}",
+    "convertedAway": "Конвертировано в другие: {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} цель, каждая после учтённых целей выше | {name}: целей: {n}, каждая после учтённых целей выше",
+    "clear": "Сбросить {name}"
+  },
+  "materialPicker": {
+    "material": "Материал",
+    "selected": "Материал: {name}",
+    "title": "Цели, использующие материал",
+    "search": "Поиск материалов",
+    "any": "Любой",
+    "goals": "{n} цель | Целей: {n}"
+  },
+  "stepper": {
+    "down": "{label}: меньше",
+    "up": "{label}: больше"
+  },
+  "settings": {
+    "title": "Настройки планировщика",
+    "autoWl": "Авто ({wl})",
+    "ar": "РП",
+    "arTitle": "Ранг приключений (1–60)",
+    "arTitleIrminsul": "Ранг приключений (1–60) · {ar} из irminsul",
+    "fromIrminsul": "из irminsul",
+    "wl": "УМ",
+    "wlTitle": "Уровень мира (0–9)",
+    "wlTitleIrminsul": "Уровень мира (0–9) · {wl} из irminsul",
+    "wlLabel": "Уровень мира",
+    "refreshesTitle": "Пополнений Первородной смолы в день (по {per} смолы): в день считается 180 + {per} за пополнение",
+    "refreshes": "Пополнения",
+    "refreshesLabel": "Пополнений смолы в день",
+    "stepsTitle": "До четырёх значений, например -40 +60: трекер смолы прибавляет их (минус — траты)",
+    "steps": "Кнопки смолы",
+    "azothTitle": "Покрывать недостающие самоцветы лишними самоцветами другого элемента",
+    "azoth": "Пыль Азота",
+    "passivesTitle": "Сёгун Райдэн, Странник: −50% моры на возвышение оружия",
+    "passives": "Пассивки на мору",
+    "craftingTitle": "Список того, что конвертировать, создать и выковать, в виде фарма",
+    "crafting": "Список создания"
+  },
+  "roster": {
+    "search": "Поиск персонажей",
+    "multi": "Персонажи (можно несколько)",
+    "owned": "{name} · ур. {level}",
+    "notOwned": "{name} · нет в наличии",
+    "weaponOwned": "{name} · ур. {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "Экземпляр в снимке",
+    "noCopy": "Нет экземпляра в снимке",
+    "heldBy": "У персонажа {name}",
+    "refinementNow": "{name}: пробуждение сейчас",
+    "levelNow": "{name}: уровень сейчас",
+    "refinementGoal": "{name}: цель по пробуждению",
+    "levelGoal": "{name}: цель по уровню",
+    "search": "Поиск оружия"
+  },
+  "seelieImport": {
+    "notExport": "Это не экспорт Seelie и не резервная копия paimon.moe",
+    "notJson": "Это не файл JSON",
+    "section": {
+      "goals": {
+        "label": "Цели",
+        "title": "Цели по персонажам, талантам и оружию, дополнительные предметы"
+      },
+      "artifacts": {
+        "label": "Цели по артефактам",
+        "title": "Комплекты и основные характеристики для фарма"
+      },
+      "customs": {
+        "label": "Свои персонажи",
+        "title": "Персонажи, которые в Seelie заданы как свои, с целями"
+      },
+      "current": {
+        "label": "Текущие уровни",
+        "title": "Текущие уровни, таланты и созвездия из Seelie, где они выше снимка"
+      },
+      "inventory": {
+        "label": "Инвентарь",
+        "title": "Количества как ручные правки последнего снимка (более новый снимок их заменит)"
+      },
+      "tasks": {
+        "label": "Задачи",
+        "title": "Свои задачи и постоянные, выполненные в Seelie"
+      },
+      "resin": {
+        "label": "Смола",
+        "title": "Трекер смолы Seelie, если он новее нашего"
+      },
+      "settings": {
+        "label": "Настройки",
+        "title": "РП, Уровень мира, сервер и Путешественник"
+      }
+    },
+    "count": {
+      "new": "Новых: {n}",
+      "changed": "Изменено: {n}",
+      "same": "Без изменений: {n}"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "Сменить",
+    "choose": "Выбрать файл",
+    "fileLabel": "Экспорт Seelie или резервная копия paimon.moe",
+    "legend": "Что импортировать",
+    "skipped": "Пропущено: {n}",
+    "clampedTitle": "Цели выше 90 уровня установлены на 90",
+    "clamped": "Ограничено до 90: {n}",
+    "replace": "Заменить (удалить {n})",
+    "exportTitle": "Файл аккаунта Seelie: цели, инвентарь, задачи (Seelie → Settings → Import Account)",
+    "export": "Экспорт",
+    "import": "Импорт",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Аккаунт в файле",
+    "account": "Аккаунт {n}",
+    "paimonLevels": "только уровни",
+    "paimonLevelsTitle": "paimon.moe хранит уровни и материалы задачи, но не уровни талантов: таланты остаются как есть"
+  },
+  "taskEditor": {
+    "everyDay": "Каждый день",
+    "everyDays": "Каждые {n} дн.",
+    "today": "Сегодня ({day})",
+    "tomorrow": "Завтра ({day})",
+    "startDay": "День начала",
+    "startDayTitle": "Сохраняет ритм от дня начала",
+    "doneDay": "День выполнения",
+    "doneDayTitle": "Отсчёт от дня выполнения",
+    "task": "Задача",
+    "newTask": "Новая задача",
+    "nameIt": "Название",
+    "repeats": "Повтор",
+    "next": "Следующий раз",
+    "starts": "Начало",
+    "countsFrom": "Отсчёт от"
+  },
+  "tasks": {
+    "title": "Задачи",
+    "permanent": "Постоянные",
+    "ready": "Готово",
+    "readyTitle": "Можно использовать",
+    "resets": "Сброс {time}",
+    "snoozedBack": "Отложено · вернётся {time}",
+    "doneBack": "Выполнено · вернётся {time}",
+    "everyDay": "каждый день",
+    "everyDays": "каждые {n} дн.",
+    "fromDone": "от дня выполнения",
+    "fromStart": "от дня начала",
+    "dueTitle": "Срок {date} · {every}, {from}",
+    "overdue": "Просрочено",
+    "late": "просрочено на {n} д",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "doneToast": "{name}: выполнено",
+    "backToast": "{name}: вернётся {day}",
+    "deleted": "{name}: удалено",
+    "toDo": "Осталось: {n}",
+    "toDoSr": "осталось",
+    "shown": "Показанные задачи",
+    "hideDone": "Скрыть выполненные",
+    "showDone": "Показать выполненные ({n})",
+    "permanentShown": "Показанные постоянные задачи",
+    "add": "Добавить задачу",
+    "noCustom": "Нет своих задач",
+    "allDone": "Всё выполнено",
+    "move": "Переместить {name}",
+    "dragTitle": "Перетащите или используйте стрелки",
+    "doneLabel": "Выполнено: {name}",
+    "notDoneLabel": "Не выполнено: {name}",
+    "takeBack": "Вернуть",
+    "snoozeName": "Отложить {name}",
+    "snooze": "Отложить",
+    "lastDay": "Последний день",
+    "permanentTasks": "Постоянные задачи",
+    "events": "События",
+    "startsIn": "через {time}",
+    "eventStarts": "Начало {time}",
+    "eventEnds": "Конец {time}",
+    "noEnd": "Без даты окончания",
+    "tags": {
+      "daily": "Ежедневно",
+      "checkin": "Отметка",
+      "exploration": "Исследование мира",
+      "quest": "Задание"
+    },
+    "capture": {
+      "from": "Из снимка от {time}",
+      "commissions": "Выполнено {n} из {total}",
+      "abyss": "{stars} из {max} звёзд",
+      "expeditions": "Вернулись {n} из {total}",
+      "nobodyOut": "Никого нет в экспедиции",
+      "realm": "{value} из {limit} в сосуде",
+      "welkin": "Осталось дней: {n}"
+    }
+  },
+  "view": {
+    "title": "Планировщик",
+    "accountFallback": "Аккаунт Genshin",
+    "farm": "Фарм",
+    "goals": "Цели",
+    "presetApplied": "{preset} · целей: {n}",
+    "bulkCounted": "Учтено: {n}",
+    "bulkPaused": "На паузе: {n}",
+    "goalsRemoved": "Удалено целей: {n}",
+    "paused": "{name}: на паузе",
+    "partDone": "{name}: {label} — готово",
+    "craftStepDone": "Шаг создания выполнен",
+    "craftStepsDone": "Выполнено шагов создания: {n}",
+    "craftingHidden": "Создание скрыто",
+    "craftingHiddenHint": "Настройки планировщика: Список создания",
+    "itemRemoved": "Предмет удалён",
+    "removed": "{name}: удалено",
+    "added": "Добавлено целей: {n}",
+    "notImported": "Не импортировано",
+    "importedGoals": "Целей: {n}",
+    "importedCurrent": "Текущих: {n}",
+    "importedItems": "Предметов: {n}",
+    "importedTasks": "Задач: {n}",
+    "imported": "Импортировано из Seelie",
+    "notExported": "Не экспортировано",
+    "exported": "Экспортировано для Seelie",
+    "view": "Вид",
+    "newest": "Последний снимок",
+    "noCapture": "Нет снимка: количества ваши",
+    "import": "Импорт",
+    "replaced": "{n} ручная правка заменена снимком | Ручных правок заменено снимком: {n}",
+    "ok": "ОК",
+    "seelieTitle": "Импорт из Seelie или paimon.moe, экспорт в Seelie",
+    "addGoals": "Добавить цели",
+    "loadError": "Не удалось загрузить планировщик",
+    "noGoals": "Нет целей",
+    "importSeelie": "Импорт из Seelie или paimon.moe",
+    "importCapture": "Импортировать снимок",
+    "readiness": "Готовность",
+    "selectTitle": "Выбрать цели, чтобы изменить вместе",
+    "select": "Выбрать",
+    "selected": "Выбранные цели",
+    "selectedCount": "Выбрано: {n}",
+    "selectedSr": "выбрано",
+    "pickNone": "Ничего",
+    "pickAll": "Все",
+    "applyPreset": "Применить шаблон",
+    "pause": "Пауза",
+    "count": "Учесть",
+    "doneSelecting": "Готово",
+    "done": "Выполнено",
+    "doneGoals": "Выполненные цели",
+    "loading": "Загрузка планировщика"
+  }
+}

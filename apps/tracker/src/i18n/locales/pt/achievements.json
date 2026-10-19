@@ -1,0 +1,139 @@
+{
+  "title": "Conquistas",
+  "newestCapture": "Captura mais recente",
+  "newestCaptureTitle": "Captura mais recente: {time}",
+  "notCaptured": "Não capturado",
+  "notCapturedTitle": "Abra o menu de Conquistas no jogo com o irminsul aberto para capturá-las",
+  "importTitle": "Importar conquistas concluídas de uma exportação do Seelie, um backup do paimon.moe ou um arquivo do stardb / irminsul",
+  "loadFailed": "Falha ao carregar",
+  "allDone": "Tudo concluído",
+  "showDone": "Mostrar concluídas",
+  "noneDone": "Nenhuma concluída",
+  "showMissing": "Mostrar pendentes",
+  "noMatches": "Nenhum resultado",
+  "clear": "Limpar",
+  "more": "Mais",
+  "loading": "Carregando",
+  "undo": "Desfazer",
+  "notSaved": "Não salvo",
+  "markedDone": "{n} marcadas como concluídas",
+  "unmarked": "{n} desmarcadas",
+  "added": "{n} adicionadas",
+  "confirmMark": {
+    "title": "Marcar {n} como concluídas?",
+    "filtered": "As {n} conquistas restantes exibidas serão marcadas como concluídas à mão.",
+    "all": "Todas as conquistas restantes ({n}) serão marcadas como concluídas à mão.",
+    "confirm": "Marcar como concluídas"
+  },
+  "confirmUnmark": {
+    "title": "Desmarcar {n}?",
+    "detail": "Remove as marcas manuais das {n} conquistas exibidas. As capturadas continuam concluídas.",
+    "confirm": "Desmarcar"
+  },
+  "categories": {
+    "label": "Categorias",
+    "all": "Todas",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} Gemas Essenciais",
+    "hideDone": "Ocultar séries concluídas",
+    "showDone": "Mostrar séries concluídas",
+    "completed": "Concluída"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} Gemas Essenciais"
+  },
+  "import": {
+    "title": "Importar",
+    "formats": {
+      "list": "Lista de ids"
+    },
+    "noAchievements": "Nenhuma conquista encontrada",
+    "notJson": "Não é um arquivo JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb ou irminsul: um arquivo GOOD com gi_achievements.",
+    "drop": "Arquivo do Seelie, paimon.moe ou stardb",
+    "account": "Conta {n}",
+    "fileAccount": "Conta no arquivo",
+    "browse": "Procurar",
+    "inFile": "No arquivo",
+    "already": "Já concluídas",
+    "new": "Novas",
+    "newTitle": "Inclui {unknown} mais novas que os dados do jogo e {disused} removidas do jogo: mantidas, não contadas",
+    "cancel": "Cancelar",
+    "add": "Adicionar {n}"
+  },
+  "row": {
+    "clickToMark": "Clique para marcar como concluída",
+    "clickToUnmark": "{text} · clique para desmarcar",
+    "captured": "Capturada",
+    "staysDone": "{text} · está em uma captura, então continua concluída",
+    "markEveryTier": "Marcar todas as etapas como concluídas",
+    "markDone": "Marcar como concluída",
+    "unmarkTiers": "Clique para desmarcar as etapas marcadas à mão",
+    "markedClick": "Marcada à mão · clique para desmarcar",
+    "tierTitle": "Etapa {n} · {primogems} Gemas Essenciais",
+    "reward": "{n} Gemas Essenciais",
+    "primogems": "Gemas Essenciais",
+    "states": {
+      "captured": "capturada",
+      "marked": "marcada à mão",
+      "none": "não concluída"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Etapas",
+    "tier": "Etapa {n}",
+    "addedIn": "Adicionada na {version}",
+    "hiddenTitle": "Conquista oculta",
+    "hidden": "Oculta",
+    "markedByHand": "Marcada à mão",
+    "guide": "Guia no stardb.gg"
+  },
+  "completion": {
+    "tier": "Etapa {n} · {text}",
+    "exact": "Concluída {time}",
+    "exactTitle": "Horário de conclusão registrado pelo jogo, lido pelo irminsul",
+    "seen": "Concluída {window}",
+    "seenTitle": "Concluída entre duas capturas: ausente na de {since}, presente na de {at}",
+    "by": "Concluída até {date}",
+    "byTitle": "Já concluída na primeira captura ({at})",
+    "marked": "Marcada como concluída à mão",
+    "markedTitle": "Nenhuma captura a contém, então não há data"
+  },
+  "summary": {
+    "label": "Resumo",
+    "done": "Concluídas",
+    "doneCaptured": "{n} capturadas",
+    "doneByHand": "{n} à mão",
+    "doneUnknown": "{n} mais novas que os dados do jogo",
+    "progress": "Progresso",
+    "progressLabel": "Conquistas concluídas",
+    "primogems": "Gemas Essenciais",
+    "primogemsHint": "Gemas Essenciais obtidas / disponíveis",
+    "missing": "Pendentes",
+    "showAll": "Mostrar todas",
+    "showLeft": "Mostrar só o que falta"
+  },
+  "toolbar": {
+    "label": "Filtrar conquistas",
+    "search": "Buscar",
+    "searchTitle": "Nome, descrição, categoria ou id",
+    "completion": "Conclusão",
+    "completions": {
+      "all": "Todas",
+      "done": "Concluídas",
+      "missing": "Pendentes"
+    },
+    "hidden": {
+      "all": "Ocultas: todas",
+      "hidden": "Ocultas",
+      "visible": "Não ocultas"
+    },
+    "hiddenLabel": "Ocultas",
+    "allCategories": "Todas as categorias",
+    "category": "Categoria",
+    "version": "Versão",
+    "addedIn": "Adicionada na",
+    "markAll": "Marcar todas",
+    "markAllTitle": "Marcar como concluídas as {n} conquistas restantes exibidas",
+    "unmarkAll": "Desmarcar todas",
+    "unmarkAllTitle": "Desmarcar as {n} conquistas exibidas marcadas à mão"
+  }
+}

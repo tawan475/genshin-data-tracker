@@ -64,12 +64,35 @@ export interface PlannerSettings {
   crafting: boolean
 }
 
+/**
+ * The site's languages: every language Genshin Impact ships, English first
+ * (BCP 47 codes; the game data, vue-i18n, Intl and <html lang> use the same).
+ */
+export const SITE_LANGUAGES = [
+  'en',
+  'zh-CN',
+  'zh-TW',
+  'ja',
+  'ko',
+  'es',
+  'fr',
+  'ru',
+  'th',
+  'vi',
+  'de',
+  'id',
+  'pt',
+  'it',
+  'tr',
+] as const
+export type SiteLanguage = (typeof SITE_LANGUAGES)[number]
+
 export interface UserSettings {
   /** `system` follows the OS (the default). */
   theme: 'system' | 'light' | 'dark'
   use24Hour: boolean
   /** The site's language: `system` follows the browser (the default). */
-  language: 'system' | 'en' | 'zh-CN' | 'zh-TW'
+  language: 'system' | SiteLanguage
 }
 
 /** What a PATCH may carry: any subset, nested objects included. */

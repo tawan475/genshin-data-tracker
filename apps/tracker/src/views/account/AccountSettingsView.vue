@@ -100,7 +100,10 @@ const deleteOpen = ref(false)
 const typed = ref('')
 const deleting = ref(false)
 const confirmWord = computed(() => account.value.name?.trim() || t('accounts.settings.confirmWord'))
-const confirmed = computed(() => typed.value.trim() === confirmWord.value)
+// NFC: a keyboard may type an accented letter (Vietnamese "xóa") as two code points.
+const confirmed = computed(
+  () => typed.value.trim().normalize('NFC') === confirmWord.value.normalize('NFC'),
+)
 
 /** What goes, in the user's numbers: "151 snapshots · 23.4 MB". */
 const loss = computed(() => {

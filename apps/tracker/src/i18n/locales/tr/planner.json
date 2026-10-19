@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "Ad",
+      "title": "A'dan Z'ye"
+    },
+    "missing": {
+      "label": "Eksik",
+      "title": "En az eksik eşyası olan önce"
+    },
+    "favorites": {
+      "label": "Favoriler",
+      "title": "Favoriler önce"
+    },
+    "priority": {
+      "label": "Öncelik",
+      "title": "Malzemeler önce üstteki hedeflere gider: sırayı değiştirmek için sürükle"
+    }
+  },
+  "material": {
+    "characterExp": "Karakter TP",
+    "weaponExp": "Silah TP",
+    "group": {
+      "exp": "TP",
+      "gem": "Taşlar",
+      "boss": "Patron düşüşleri",
+      "local": "Yöresel ürünler",
+      "common": "Düşman düşüşleri",
+      "book": "Yetenek kitapları",
+      "weekly": "Haftalık patronlar",
+      "weapon": "Silah malzemeleri",
+      "elite": "Seçkin düşüşler",
+      "other": "Diğer"
+    }
+  },
+  "hint": {
+    "level": "Sv. {level}",
+    "talents": "yetenekler {talents}",
+    "characterDetail": "{name}: Sv. {level} (A{ascension}), yetenekler {talents}",
+    "weaponDetail": "{name}: Sv. {level} (A{ascension})",
+    "thenAr": "ardından AR {ar}",
+    "thenShort": "ardından malzeme eksik",
+    "weapon": "Silah",
+    "canLevel": "Şimdi geliştirilebilir"
+  },
+  "preset": {
+    "max": {
+      "label": "Maks.",
+      "title": "Seviye 90, yetenekler 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Seviye 90, yetenekler 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Seviye 80, yetenekler 8/8/8"
+    },
+    "talents": {
+      "label": "Yalnızca yetenekler",
+      "title": "Yetenekler 9/9/9, seviye olduğu gibi"
+    },
+    "level": {
+      "label": "Yalnızca seviye",
+      "title": "Seviye 90, yetenekler olduğu gibi"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Günlük Özel Görevler",
+      "weeklyBosses": "Ezici Zindanlar",
+      "battlePass": "Savaş Bileti haftalık",
+      "reputation": "İtibar",
+      "abyss": "Hiçlik Sarmalı",
+      "theater": "Hayal Dünyası Tiyatrosu",
+      "bargains": "Paimon'un Dükkanı",
+      "transformer": "Parametrik Dönüştürücü",
+      "expeditions": "Keşifler",
+      "realm": "Çaydanlık Parası",
+      "welkin": "Yeni Ayın Lütfu"
+    }
+  },
+  "toast": {
+    "notSaved": "Kaydedilmedi",
+    "newCapture": "Yeni tarama",
+    "newCaptureDetail": "Hiçbir şey değiştirilmedi: kontrol et ve tekrar dene"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} etkinlik dahil edilmedi",
+      "olderThanOurs": "bizimkinden eski",
+      "ar": "AR {ar}",
+      "wl": "WL {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "Amerika",
+      "EUROPE": "Avrupa",
+      "ASIA": "Asya",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Seelie dışa aktarımı değil (hedef yok)",
+    "customName": "Özel"
+  },
+  "resin": {
+    "alertTitle": "Orijinal Reçine {amount}",
+    "source": {
+      "manual": "elle ayarlandı",
+      "player": "irminsul, girişte",
+      "inventory": "anlık görüntü"
+    },
+    "unknown": "Orijinal Reçine: henüz bilinmiyor · ayarla",
+    "readingTitle": "Orijinal Reçine ~{now}/{max} · {source} kaynağından {value}, {at} · her 8 dakikada +1",
+    "setLabel": "{title}. Ayarla",
+    "spend": "{n} harca",
+    "add": "{n} ekle",
+    "fullAt": "{time} dolar",
+    "fullLabel": "Dolu",
+    "full": "Dolu",
+    "markTitle": "{time} anında {amount}",
+    "in": "içinde",
+    "now": "Şu anki Orijinal Reçine",
+    "alert": "Reçine uyarısı",
+    "alertUnsupported": "Reçine uyarısı: bu tarayıcıda desteklenmiyor",
+    "alertOff": "Reçine uyarısı: kapalı",
+    "alertOn": "{amount} reçinede uyarı · site açıkken",
+    "alertOnAt": "{amount} reçinede uyarı, {time} · site açıkken",
+    "unsupported": "Bu tarayıcıda desteklenmiyor",
+    "blocked": "Engellendi: tarayıcı ayarlarından bu site için bildirimlere izin ver",
+    "notifyAt": "Bildirim eşiği",
+    "off": "Kapalı",
+    "whileOpen": "Site bu cihazda açıkken"
+  },
+  "artifacts": {
+    "title": "Yadigarlar",
+    "doneByHand": "{name}: tamam (elle işaretlendi)",
+    "notDoneByHand": "{name}: tamamlanmadı (elle işaretlendi)",
+    "notDoneByHandCaptureDone": "{name}: tamamlanmadı (elle işaretlendi; tarama tamam diyor)",
+    "doneFromCapture": "{name}: tamam, taramadan ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "tamamlanmadı",
+    "nothingWorn": "kuşanılmış yok",
+    "otherSet": "başka set",
+    "otherMainStat": "başka ana özellik",
+    "levelOf": "+{level}/+{max}",
+    "farmingByHand": "{name}: toplanıyor (elle işaretlendi)",
+    "setDone": "{name}: tamam, tüm yuvalar öyle",
+    "setFarming": "{name}: toplanıyor",
+    "autoRule": "Tarama o yuvada seçilen bir setten, seçilen ana özellikte en üst seviye bir parça (5★'ta +20) gösterdiğinde yuva kendiliğinden işaretlenir; diğer dördü seçilen setlerden olduğunda beşinci yuva herhangi bir set olabilir",
+    "sets": "Setler",
+    "worn": "{n} kuşanılmış",
+    "remove": "{name} kaldır",
+    "addSet": "Set",
+    "close": "Kapat",
+    "slots": "Yuvalar",
+    "mainStat": "{slot} ana özelliği",
+    "searchSets": "Set ara",
+    "setList": "Yadigar setleri"
+  },
+  "cost": {
+    "saves": "{name} {mora} tasarruf sağlar",
+    "nothing": "Harcanacak bir şey yok",
+    "colours": "Renkler"
+  },
+  "common": {
+    "search": "Ara",
+    "cancel": "İptal",
+    "nameState": "{name}: {state}",
+    "counted": "Sayılıyor",
+    "notCounted": "Sayılmıyor",
+    "removeName": "{name} kaldır",
+    "clear": "Temizle",
+    "remove": "Kaldır",
+    "save": "Kaydet",
+    "noMatches": "Eşleşme yok",
+    "delete": "Sil",
+    "undo": "Geri Al"
+  },
+  "custom": {
+    "slot": {
+      "book": "Yetenek kitabı",
+      "common": "Düşman düşüşü",
+      "boss": "Patron düşüşü",
+      "local": "Yöresel ürün",
+      "weekly": "Haftalık patron"
+    },
+    "name": "Ad",
+    "rarity": "Nadirlik",
+    "weaponType": "Silah türü",
+    "element": "Element"
+  },
+  "done": {
+    "taken": "Çantadan alındı",
+    "uses": "Kullanır",
+    "notInBag": "Çantada yok",
+    "takesWhatThereIs": "Tamam, ne varsa onu alır.",
+    "confirm": "Tamam"
+  },
+  "extra": {
+    "title": "Ekstra",
+    "add": "Eşya ekle",
+    "have": "{n} var",
+    "craft": "{n} üret"
+  },
+  "avatars": {
+    "favorite": "{name} (favori)",
+    "title": "{name} · dokun: aç · basılı tut veya sağ tıkla: duraklat",
+    "moreTitle": "{rest} · tümünü göster",
+    "moreLabel": "{n} daha: {rest}. Tümünü göster",
+    "fewerTitle": "Daha az göster",
+    "fewer": "Daha az"
+  },
+  "card": {
+    "level": "Seviye",
+    "talents": "Yetenekler",
+    "levelTitle": "Seviye {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "Saldırı / Beceri / Patlama",
+    "boosted": "{talents} seviyesine çıkarıldı (C{constellation} +3 ekler)",
+    "weaponTitle": "{name}: seviye {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "çantadakiyle şimdi yapılabilir",
+    "readyStep": "sonraki adımı çantadakiyle şimdi yapılabilir",
+    "constellation": "Takımyıldız {n}",
+    "refinement": "Saflaştırma {n}",
+    "artifactsTitle": "Yadigarlar: {done}/5 yuva",
+    "expSuffix": "{name} (TP)",
+    "amount": "{name}: {n}",
+    "short": "{n} eksik",
+    "shortAfter": "Üstteki hedeflerden sonra {n} eksik",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "üstteki hedeflerden sonra yeterli",
+    "handleLabel": "{name}: {rank}. sıra, ok tuşlarıyla taşı",
+    "handleTitle": "#{rank} · sürükle veya ok tuşları",
+    "customTitle": "Özel karakter: henüz oyun verisinde yok",
+    "custom": "Özel",
+    "favoriteLabel": "{name}: favori",
+    "favorite": "Favori",
+    "notFavorite": "Favori değil",
+    "setByHand": "Elle ayarlandı",
+    "needsAr": "AR {ar} gerekli",
+    "doneLabel": "{name}: {label} tamam",
+    "doneReadyLabel": "{name}: {label} tamam ({ready})",
+    "missing": "{name}: eksik",
+    "canDoNow": "Şimdi yapılabilir: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Saldırı",
+      "skill": "Beceri",
+      "burst": "Patlama"
+    },
+    "notOwned": "Sahip değilsin",
+    "estimateResin": "~{resin} reçine",
+    "estimateTitle": "{runs} deneme · {resin} reçine ({condensed} yoğun) · {days} gün",
+    "estimateWeekly": "haftalık patronlar: {weeks} hafta",
+    "countedLabel": "{name}: sayılıyor",
+    "notCountedLabel": "{name}: sayılmıyor",
+    "presets": "Hazır ayarlar",
+    "constellationTitle": "Takımyıldız (C3/C5 bir yeteneği 3 artırır)",
+    "constellation": "Takımyıldız",
+    "hideNote": "Notu gizle",
+    "note": "Not",
+    "part": "Hedef parçası",
+    "now": "Şimdi",
+    "goal": "Hedef",
+    "levelNow": "Şu anki seviye",
+    "levelGoal": "Hedef seviye",
+    "boost": "C{at} bunu 3 artırır",
+    "boostOn": "C{at} bunu 3 artırır: oyunda {from} → {to}",
+    "talentNow": "{talent} şu an",
+    "talentGoal": "{talent} hedefi",
+    "inGame": "Oyunda {from} → {to}",
+    "customCharacter": "Özel karakter",
+    "replaceWithEllipsis": "Şununla değiştir…",
+    "replaceWith": "{name} ile değiştir",
+    "replace": "Değiştir",
+    "gapNeed": "{talents} gerekli",
+    "setLevel": "{level} ayarla",
+    "captureTitle": "En yeni tarama",
+    "capture": "Tarama: {text}",
+    "resetTitle": "Taramaya geri dön",
+    "reset": "Sıfırla",
+    "cost": "Maliyet"
+  },
+  "picker": {
+    "characters": "Karakterler",
+    "weapons": "Silahlar",
+    "items": "Eşyalar",
+    "title": "Hedef ekle",
+    "kind": "Tür",
+    "searchItems": "Eşya ara",
+    "preset": "Hazır ayar",
+    "add": "Ekle",
+    "addCount": "{n} ekle"
+  },
+  "toolbar": {
+    "label": "Hedefleri filtrele",
+    "searchTitle": "Ad, silah veya not",
+    "sort": "Sırala",
+    "chips": "Şimdi geliştir, haftalık patronlar, durum, element ve nadirlik",
+    "upgrade": "Şimdi geliştir",
+    "upgradeTitle": "Çantadakiyle şimdi, her biri tek başına geliştirilebilen sayılan hedefler: Hazır, Tek başına hazır veya bir parça (Seviye, Yetenekler, bir silah) ya da sonraki adımı",
+    "noWeeklyTitle": "Hâlâ toplanacak ama haftalık patron yok: düşüşleri eldedir veya dönüştürülebilir (üstteki hedeflerden sonra)",
+    "status": {
+      "all": "Tümü",
+      "ready": "Stokta",
+      "readyTitle": "Çantada yeterli, her hedef tek başına",
+      "activeTitle": "Toplamlarda",
+      "off": "Duraklatıldı",
+      "offTitle": "Toplamlara dahil değil"
+    }
+  },
+  "item": {
+    "count": "Adet",
+    "have": "Var",
+    "editHave": "{n} var: düzenle"
+  },
+  "popover": {
+    "goalsLabel": "{name}: bunu kullanan hedefler ({n})",
+    "goalsTitle": "Bunu kullanan hedefler",
+    "history": "{name}: geçmiş",
+    "expNeed": "Gereken TP {n}",
+    "goal": "Hedef {n}",
+    "missing": "Eksik {n}",
+    "enough": "Yeterli",
+    "need": "Gereken {n}",
+    "craftedTitle": "Alt kademeden üretilir",
+    "craft": "{n} üret",
+    "capture": "Tarama {n}",
+    "backLabel": "{name}: taramadaki {n} değerine dön",
+    "backTitle": "{n} değerine dön",
+    "held": "Eldeki {name}",
+    "addPlaceholder": "+ ekle",
+    "addLabel": "{name}: elde edileni ekle",
+    "addTitle": "Elde ettiğini ekle (Enter)",
+    "swap": {
+      "label": "Rüya Çözücü takası",
+      "heading": "Takas",
+      "title": "Simya → Dönüştürme: patronun diğer malzemelerinden biri bununla, her biri {n} Rüya Çözücü",
+      "solventHeld": "Eldeki {name}: {n}",
+      "have": "{n} var",
+      "do": "Takas et",
+      "noneHeld": "Elde {name} yok",
+      "noSolvent": "Takas başına {n} Rüya Çözücü gerekli"
+    }
+  },
+  "levelGrid": {
+    "below": "Taramanın altında",
+    "level": "Seviye {level} (A{ascension})",
+    "ascended": "Seviye {level}, yükseltildi (A{ascension})",
+    "ascendedWord": "yükseltildi"
+  },
+  "cell": {
+    "have": "{n} var",
+    "spent": "Üretimde kullanılan {n}",
+    "converted": "Diğerlerinden dönüştürülen {n}",
+    "convertedAway": "Diğerlerine dönüştürülen {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} hedef, her biri üstündeki sayılan hedeflerden sonra",
+    "clear": "{name} temizle"
+  },
+  "materialPicker": {
+    "material": "Malzeme",
+    "selected": "Malzeme: {name}",
+    "title": "Bir malzemeyi kullanan hedefler",
+    "search": "Malzeme ara",
+    "any": "Herhangi",
+    "goals": "{n} hedef"
+  },
+  "stepper": {
+    "down": "{label}: azalt",
+    "up": "{label}: artır"
+  },
+  "settings": {
+    "title": "Planlayıcı ayarları",
+    "autoWl": "Otomatik ({wl})",
+    "ar": "AR",
+    "arTitle": "Macera Rütbesi (1–60)",
+    "arTitleIrminsul": "Macera Rütbesi (1–60) · irminsul'dan {ar}",
+    "fromIrminsul": "irminsul'dan",
+    "wl": "WL",
+    "wlTitle": "Dünya Seviyesi (0–9)",
+    "wlTitleIrminsul": "Dünya Seviyesi (0–9) · irminsul'dan {wl}",
+    "wlLabel": "Dünya Seviyesi",
+    "refreshesTitle": "Günlük Orijinal Reçine yenilemeleri (her biri {per} reçine): günler, 180 + yenileme başına {per} olarak hesaplanır",
+    "refreshes": "Yenilemeler",
+    "refreshesLabel": "Günlük reçine yenilemeleri",
+    "stepsTitle": "En fazla dört miktar, ör. -40 +60: reçine takibi bunları ekler (harcamalar düşülür)",
+    "steps": "Reçine düğmeleri",
+    "azothTitle": "Eksik taşları başka elementin yedek taşlarıyla karşıla",
+    "azoth": "Cıva Tozu",
+    "passivesTitle": "Şogun Raiden, Avare: silah yükseltmede −%50 Mora",
+    "passives": "Mora pasifleri",
+    "craftingTitle": "Toplama görünümünde neyin dönüştürüleceği, üretileceği ve işleneceğinin kontrol listesi",
+    "crafting": "Simya kontrol listesi"
+  },
+  "roster": {
+    "search": "Karakter ara",
+    "multi": "Karakterler (birkaç tane seç)",
+    "owned": "{name} · Sv. {level}",
+    "notOwned": "{name} · sahip değilsin",
+    "weaponOwned": "{name} · Sv. {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "Taramadaki kopya",
+    "noCopy": "Taramada kopya yok",
+    "heldBy": "{name} kuşanıyor",
+    "refinementNow": "{name} şu anki saflaştırma",
+    "levelNow": "{name} şu anki seviye",
+    "refinementGoal": "{name} hedef saflaştırma",
+    "levelGoal": "{name} hedef seviye",
+    "search": "Silah ara"
+  },
+  "seelieImport": {
+    "notExport": "Seelie dışa aktarımı veya paimon.moe yedeği değil",
+    "notJson": "JSON dosyası değil",
+    "section": {
+      "goals": {
+        "label": "Hedefler",
+        "title": "Karakter, yetenek ve silah hedefleri, ekstra eşya ihtiyaçları"
+      },
+      "artifacts": {
+        "label": "Yadigar hedefleri",
+        "title": "Toplanacak setler ve ana özellikler"
+      },
+      "customs": {
+        "label": "Özel karakterler",
+        "title": "Seelie'de özel olarak bulunan karakterler, hedefleriyle"
+      },
+      "current": {
+        "label": "Şu anki seviyeler",
+        "title": "Seelie'deki şu anki seviyeler, yetenekler ve takımyıldızlar (taramadan ileride olanlar)"
+      },
+      "inventory": {
+        "label": "Envanter",
+        "title": "En yeni taramaya elle düzenleme olarak sayılır (daha yeni bir tarama bunların yerini alır)"
+      },
+      "tasks": {
+        "label": "Görevler",
+        "title": "Özel görevler ve Seelie'de tamamlanan kalıcı görevler"
+      },
+      "resin": {
+        "label": "Reçine",
+        "title": "Seelie'nin reçine takibi, bizimkinden yeniyse"
+      },
+      "settings": {
+        "label": "Ayarlar",
+        "title": "AR, Dünya Seviyesi, sunucu ve Gezgin"
+      }
+    },
+    "count": {
+      "new": "{n} yeni",
+      "changed": "{n} değişti",
+      "same": "{n} aynı"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "Değiştir",
+    "choose": "Dosya seç",
+    "fileLabel": "Seelie dışa aktarımı veya paimon.moe yedeği",
+    "legend": "Neler içe aktarılsın",
+    "skipped": "{n} atlandı",
+    "clampedTitle": "90 seviyesi üstündeki hedefler 90'a ayarlandı",
+    "clamped": "90 ile sınırlandı: {n}",
+    "replace": "Değiştir ({n} kaldır)",
+    "exportTitle": "Bir Seelie hesap dosyası: hedefler, envanter, görevler (Seelie → Settings → Import Account)",
+    "export": "Dışa aktar",
+    "import": "İçe aktar",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Dosyadaki hesap",
+    "account": "Hesap {n}",
+    "paimonLevels": "yalnızca seviyeler",
+    "paimonLevelsTitle": "paimon.moe bir yapılacağın seviyelerini ve malzemelerini tutar, yetenek seviyelerini değil: yetenekler olduğu gibi kalır"
+  },
+  "taskEditor": {
+    "everyDay": "Her gün",
+    "everyDays": "Her {n} günde bir",
+    "today": "Bugün ({day})",
+    "tomorrow": "Yarın ({day})",
+    "startDay": "Başlangıç günü",
+    "startDayTitle": "Başlangıç gününün ritmini korur",
+    "doneDay": "Tamamlanma günü",
+    "doneDayTitle": "Tamamlandığı günden itibaren sayar",
+    "task": "Görev",
+    "newTask": "Yeni görev",
+    "nameIt": "Ad ver",
+    "repeats": "Tekrar",
+    "next": "Sonraki",
+    "starts": "Başlangıç",
+    "countsFrom": "Sayım başlangıcı"
+  },
+  "tasks": {
+    "title": "Görevler",
+    "permanent": "Kalıcı",
+    "ready": "Hazır",
+    "readyTitle": "Kullanıma hazır",
+    "resets": "{time} sıfırlanır",
+    "snoozedBack": "Ertelendi · {time} geri gelir",
+    "doneBack": "Tamam · {time} geri gelir",
+    "everyDay": "her gün",
+    "everyDays": "her {n} günde bir",
+    "fromDone": "tamamlandığı günden",
+    "fromStart": "başlangıç gününden",
+    "dueTitle": "Son gün {date} · {every}, {from}",
+    "overdue": "Gecikti",
+    "late": "{n} g gecikti",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "doneToast": "{name} tamam",
+    "backToast": "{name}: {day} geri gelir",
+    "deleted": "{name} silindi",
+    "toDo": "{n} yapılacak",
+    "toDoSr": "yapılacak",
+    "shown": "Gösterilen görevler",
+    "hideDone": "Tamamlananları gizle",
+    "showDone": "Tamamlananları göster ({n})",
+    "permanentShown": "Gösterilen kalıcı görevler",
+    "add": "Görev ekle",
+    "noCustom": "Kendi görevin yok",
+    "allDone": "Hepsi tamam",
+    "move": "{name} taşı",
+    "dragTitle": "Sürükle veya ok tuşları",
+    "doneLabel": "Tamam: {name}",
+    "notDoneLabel": "Tamamlanmadı: {name}",
+    "takeBack": "Geri al",
+    "snoozeName": "{name} ertele",
+    "snooze": "Ertele",
+    "lastDay": "Son gün",
+    "permanentTasks": "Kalıcı görevler",
+    "events": "Etkinlikler",
+    "startsIn": "{time} içinde",
+    "eventStarts": "{time} başlar",
+    "eventEnds": "{time} biter",
+    "noEnd": "Bitiş tarihi yok",
+    "tags": {
+      "daily": "Günlük",
+      "checkin": "Giriş ödülü",
+      "exploration": "Dünya Keşfi",
+      "quest": "Görev"
+    },
+    "capture": {
+      "from": "{time} taramasından",
+      "commissions": "{total} görevden {n} tamam",
+      "abyss": "{max} yıldızdan {stars}",
+      "expeditions": "{total} keşiften {n} döndü",
+      "nobodyOut": "Kimse keşifte değil",
+      "realm": "Kapta {limit} üzerinden {value}",
+      "welkin": "{n} gün kaldı"
+    }
+  },
+  "view": {
+    "title": "Planlayıcı",
+    "accountFallback": "Genshin hesabı",
+    "farm": "Toplama",
+    "goals": "Hedefler",
+    "presetApplied": "{preset}: {n} hedef",
+    "bulkCounted": "{n} sayılıyor",
+    "bulkPaused": "{n} duraklatıldı",
+    "goalsRemoved": "{n} hedef kaldırıldı",
+    "paused": "{name} duraklatıldı",
+    "partDone": "{name}: {label} tamam",
+    "craftStepDone": "Simya adımı tamam",
+    "craftStepsDone": "{n} simya adımı tamam",
+    "craftingHidden": "Simya gizlendi",
+    "craftingHiddenHint": "Planlayıcı ayarları: Simya kontrol listesi",
+    "itemRemoved": "Eşya kaldırıldı",
+    "removed": "{name} kaldırıldı",
+    "added": "{n} hedef eklendi",
+    "notImported": "İçe aktarılmadı",
+    "importedGoals": "{n} hedef",
+    "importedCurrent": "{n} güncel",
+    "importedItems": "{n} eşya",
+    "importedTasks": "{n} görev",
+    "imported": "Seelie'den içe aktarıldı",
+    "notExported": "Dışa aktarılmadı",
+    "exported": "Seelie için dışa aktarıldı",
+    "view": "Görünüm",
+    "newest": "En yeni tarama",
+    "noCapture": "Tarama yok: sayılar senin",
+    "import": "İçe aktar",
+    "replaced": "{n} elle düzenleme taramayla değiştirildi",
+    "ok": "Tamam",
+    "seelieTitle": "Seelie veya paimon.moe'dan içe aktar, Seelie'ye dışa aktar",
+    "addGoals": "Hedef ekle",
+    "loadError": "Planlayıcı yüklenemedi",
+    "noGoals": "Hedef yok",
+    "importSeelie": "Seelie veya paimon.moe'dan içe aktar",
+    "importCapture": "Tarama içe aktar",
+    "readiness": "Hazırlık",
+    "selectTitle": "Birlikte değiştirilecek hedefleri seç",
+    "select": "Seç",
+    "selected": "Seçili hedefler",
+    "selectedCount": "{n} seçili",
+    "selectedSr": "seçili",
+    "pickNone": "Hiçbiri",
+    "pickAll": "Tümü",
+    "applyPreset": "Hazır ayar uygula",
+    "pause": "Duraklat",
+    "count": "Say",
+    "doneSelecting": "Seçim tamam",
+    "done": "Tamam",
+    "doneGoals": "Tamamlanan hedefler",
+    "loading": "Planlayıcı yükleniyor"
+  }
+}

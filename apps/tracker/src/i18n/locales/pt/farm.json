@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "suficiente para todas as metas",
+    "alone": "suficiente para esta meta",
+    "short": "faltando"
+  },
+  "readiness": {
+    "all": {
+      "label": "Pronto",
+      "meaning": "Suficiente depois das metas acima"
+    },
+    "alone": {
+      "label": "Pronto sozinho",
+      "meaning": "Suficiente sozinho, não depois das metas acima"
+    },
+    "short": {
+      "label": "Faltando",
+      "meaning": "Insuficiente, mesmo sozinho"
+    },
+    "done": {
+      "label": "Concluído",
+      "meaning": "Alcançado"
+    },
+    "artifacts": {
+      "label": "Artefatos",
+      "meaning": "Níveis alcançados, faltam os artefatos"
+    }
+  },
+  "bracket": {
+    "tier": "Nível {tier}",
+    "bossLevel": "Chefe Nv. {level}",
+    "wl": "NM {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base}, presumido"
+  },
+  "unit": {
+    "days": "{n} dia | {n} dias",
+    "weeks": "{n} semana | {n} semanas"
+  },
+  "status": {
+    "locked": "Rank de Aventura ou Nível do Mundo baixo demais para farmar ainda",
+    "noRate": "Sem taxa média de drop para esta fonte: sem estimativa",
+    "notFarmed": "Nenhuma fonte com resina"
+  },
+  "time": {
+    "hm": "{h} h {m} min",
+    "h": "{h} h",
+    "m": "{m} min",
+    "dh": "{d} d {h} h",
+    "d": "{d} d"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Converter",
+      "craft": "Sintetizar",
+      "forge": "Forjar"
+    },
+    "item": "{count} {name}",
+    "convertRow": "Converter {input} em {output}",
+    "craftRow": "Sintetizar {output} com {input}",
+    "forgeRow": "Forjar {output} com {input}",
+    "kindTitle": {
+      "convert": "Alquimia: conversão",
+      "craft": "Alquimia: síntese, nível mais baixo primeiro",
+      "forge": "Ferreiro: forja"
+    },
+    "listSeparator": ", ",
+    "notYet": "Ainda não: faltam {items} (faça os passos acima primeiro)",
+    "doneRow": "Concluído: {row}",
+    "notEnough": "Insuficiente: faltam {items}",
+    "allDoneTitle": "Todos os {n} concluídos: o inventário como fica depois deles",
+    "title": "Síntese",
+    "fold": "Recolher",
+    "unfold": "O que o plano converte, sintetiza e forja",
+    "steps": "{n} passo | {n} passos",
+    "inAll": "{cost} no total",
+    "forgingTime": "Tempo de forja {time} (sem contar a fila da forja)",
+    "forging": "forjando",
+    "allDone": "Tudo concluído",
+    "hideTitle": "Ocultar a síntese (os ajustes do Planejador a trazem de volta)",
+    "hide": "Ocultar síntese",
+    "from": "de",
+    "fewer": "Menos",
+    "all": "Todos ({n})"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "NM {wl}",
+    "locked": "Bloqueado"
+  },
+  "cards": {
+    "blossomExp": "Flor da Revelação",
+    "blossomMora": "Flor da Riqueza",
+    "local": "Especialidades locais",
+    "common": "Inimigos Comuns",
+    "elite": "Inimigos Elite",
+    "other": "Outros",
+    "elsewhere": "Em outro lugar"
+  },
+  "sections": {
+    "free": "Sem resina",
+    "domain": "Domínios · Linhas Ley",
+    "boss": "Chefes",
+    "weekly": "Chefes Semanais",
+    "artifact": "Artefatos"
+  },
+  "groups": {
+    "ley": "Flor de Linha Ley",
+    "mastery": "Domínio da Proficiência",
+    "forgery": "Domínio da Forja",
+    "blessing": "Domínio da Bênção",
+    "boss": "Chefes comuns",
+    "weekly": "Chefes Semanais",
+    "local": "Especialidades locais",
+    "common": "Inimigos Comuns",
+    "elite": "Inimigos Elite",
+    "ore": "Material de Fortalecimento de Arma",
+    "other": "Outros"
+  },
+  "people": {
+    "label": "Para quem é o plano",
+    "only": "{name}: só os cartões dele(a)",
+    "all": "{name}: mostrar todos"
+  },
+  "card": {
+    "runs": "{n} vez | {n} vezes",
+    "claims": "{n} resgate | {n} resgates",
+    "claimsWeekly": "{claims}, um por semana",
+    "atMost": "no máximo {runs}",
+    "atMostPrefix": "no máximo",
+    "runsShort": "{n} vezes",
+    "claimsShort": "{n} resgates",
+    "resinRange": "{min}–{max} de resina",
+    "resin": "{n} de resina",
+    "condensed": "{n} condensadas",
+    "condensedTitle": "{n} Resina Condensada",
+    "guaranteed": "a taxa de drop é um mínimo garantido",
+    "lockTitle": "Ainda não: requer {lock}",
+    "kind": {
+      "boss": "Chefe",
+      "gem": "Chefes que o dropam",
+      "enemy": "Inimigos que o dropam",
+      "local": "Cresce em",
+      "artifact": "Domínio de artefatos"
+    },
+    "elsewhereTitle": "Nenhum domínio dropa estes conjuntos",
+    "noRate": "Sem taxa",
+    "paidTitle": "As idas planejadas aos domínios rendem {mora} Mora",
+    "paid": "+{n} dos domínios",
+    "blockedTitle": "{n} conversões precisam de mais Solvente dos Sonhos",
+    "blocked": "{n} bloqueadas",
+    "blockedSr": ": precisa de mais Solvente dos Sonhos"
+  },
+  "weekday": {
+    "short": {
+      "sun": "Dom",
+      "mon": "Seg",
+      "tue": "Ter",
+      "wed": "Qua",
+      "thu": "Qui",
+      "fri": "Sex",
+      "sat": "Sáb"
+    },
+    "long": {
+      "sun": "Domingo",
+      "mon": "Segunda-feira",
+      "tue": "Terça-feira",
+      "wed": "Quarta-feira",
+      "thu": "Quinta-feira",
+      "fri": "Sexta-feira",
+      "sat": "Sábado"
+    }
+  },
+  "panel": {
+    "today": "Hoje",
+    "schedule": "Agenda",
+    "runsLine": "{runs} · {resin} de resina ({condensed} condensadas) · {days}",
+    "sources": "domínios, chefes comuns e linhas ley",
+    "daily": "{n} de resina por dia",
+    "dailyRefresh": "{n} de resina por dia (180 + {r} × {per})",
+    "withHeld": "{days} com a resina guardada",
+    "gems": "gemas: {runs}, {resin} de resina",
+    "partial": "algumas fontes não têm taxa de drop",
+    "upperBound": "Os drops de chefes no Nível do Mundo 9 são um mínimo garantido",
+    "weeklyClaims": "Chefes Semanais: {claims} em {weeks}",
+    "weeklyResin": "{resin} de resina com o desconto semanal ({max} sem)",
+    "weeklyPartial": "alguns chefes não têm taxa de drop",
+    "serverDay": "Dia do servidor: {day}",
+    "serverDaySunday": "Dia do servidor: {day} (todos os domínios abertos)",
+    "resetIn": "o reinício das 04:00 em {time}",
+    "forgeOff": "Contar o minério Místico que os pedaços guardados podem render na forja",
+    "forgeLine": "Forjar {item}: {mora} Mora, {time}",
+    "stillShort": "ainda faltam {n}",
+    "totals": "Totais",
+    "resin": "resina",
+    "dayUnit": "dia | dias",
+    "refreshTitle": "{r} recarga de resina por dia: {daily} de resina por dia | {r} recargas de resina por dia: {daily} de resina por dia",
+    "perDay": "{n}/dia",
+    "weekly": "Semanal",
+    "weekUnit": "semana | semanas",
+    "lockedTitle": "{n} fonte bloqueada por AR/NM | {n} fontes bloqueadas por AR/NM",
+    "locked": "bloqueada por AR/NM",
+    "view": "Exibição de farm",
+    "noWeeklyTitle": "Só as metas que ainda dá para farmar sem Chefe Semanal: os drops dele estão guardados ou podem ser convertidos (depois das metas acima)",
+    "noWeekly": "Sem Chefe Semanal",
+    "noneLeft": "Todas as metas ainda precisam de um Chefe Semanal",
+    "showAll": "Mostrar todas as metas",
+    "assumed": "AR/NM não definidos: presumida a faixa mais alta",
+    "set": "Definir",
+    "nothing": "Nada para farmar",
+    "sectionLabel": "{label}: {resin} de resina",
+    "show": "Mostrar",
+    "hidden": "{n} ocultos",
+    "forge": "Forjar com pedaços",
+    "pairTitle": "{runs} · {resin} de resina · {days}",
+    "cards": "{n} cartão | {n} cartões"
+  },
+  "event": {
+    "names": {
+      "abundance": "Abundância Sobrepujante",
+      "mastery": "Proficiência Transbordante",
+      "favor": "Benevolência Abundante",
+      "wealth": "Riqueza Transbordante",
+      "revelation": "Revelação Transbordante",
+      "leyLine": "Transbordamento das Linhas Ley"
+    },
+    "rules": {
+      "abundance": "Todos os livros de talento e materiais de arma estão abertos, com recompensas multiplicadas",
+      "mastery": "Os Domínios da Proficiência dão recompensas multiplicadas",
+      "favor": "Os Domínios da Bênção (artefatos) dão recompensas multiplicadas",
+      "wealth": "As Flores da Riqueza dão recompensas multiplicadas",
+      "revelation": "As Flores da Revelação dão recompensas multiplicadas",
+      "leyLine": "As Flores da Riqueza e da Revelação dão recompensas multiplicadas"
+    },
+    "claims": "×{times} com Resina Original, {n} vezes por dia",
+    "endsIn": "termina em {time}"
+  }
+}

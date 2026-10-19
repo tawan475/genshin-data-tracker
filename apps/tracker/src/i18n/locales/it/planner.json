@@ -1,0 +1,605 @@
+{
+  "sort": {
+    "name": {
+      "label": "Nome",
+      "title": "Dalla A alla Z"
+    },
+    "missing": {
+      "label": "Mancanti",
+      "title": "Prima chi ha meno oggetti mancanti"
+    },
+    "favorites": {
+      "label": "Preferiti",
+      "title": "Prima i preferiti"
+    },
+    "priority": {
+      "label": "Priorità",
+      "title": "I materiali vanno prima agli obiettivi in cima: trascina per riordinare"
+    }
+  },
+  "material": {
+    "characterExp": "ESP personaggio",
+    "weaponExp": "ESP arma",
+    "group": {
+      "exp": "ESP",
+      "gem": "Gemme",
+      "boss": "Drop dei boss",
+      "local": "Specialità locali",
+      "common": "Drop dei nemici",
+      "book": "Libri dei talenti",
+      "weekly": "Boss settimanali",
+      "weapon": "Materiali per armi",
+      "elite": "Drop élite",
+      "other": "Altro"
+    }
+  },
+  "hint": {
+    "level": "Liv. {level}",
+    "talents": "talenti {talents}",
+    "characterDetail": "{name}: Liv. {level} (A{ascension}), talenti {talents}",
+    "weaponDetail": "{name}: Liv. {level} (A{ascension})",
+    "thenAr": "poi GA {ar}",
+    "thenShort": "poi mancano materiali",
+    "weapon": "Arma",
+    "canLevel": "Può salire di livello ora"
+  },
+  "preset": {
+    "max": {
+      "label": "Max",
+      "title": "Livello 90, talenti 10/10/10"
+    },
+    "level90": {
+      "label": "90/9/9/9",
+      "title": "Livello 90, talenti 9/9/9"
+    },
+    "level80": {
+      "label": "80/8/8/8",
+      "title": "Livello 80, talenti 8/8/8"
+    },
+    "talents": {
+      "label": "Solo talenti",
+      "title": "Talenti 9/9/9, livello come ora"
+    },
+    "level": {
+      "label": "Solo livello",
+      "title": "Livello 90, talenti come ora"
+    }
+  },
+  "task": {
+    "builtin": {
+      "commissions": "Incarichi giornalieri",
+      "weeklyBosses": "Domini della conquista",
+      "battlePass": "Pass battaglia settimanale",
+      "reputation": "Reputazione",
+      "abyss": "Abisso a spirale",
+      "theater": "Teatro immaginario",
+      "bargains": "Bazar di Paimon",
+      "transformer": "Modificatore parametrico",
+      "expeditions": "Spedizioni",
+      "realm": "Moneta del regno",
+      "welkin": "Benedizione lunare"
+    }
+  },
+  "toast": {
+    "notSaved": "Non salvato",
+    "newCapture": "Nuova cattura",
+    "newCaptureDetail": "Non è stato modificato nulla: controlla e riprova"
+  },
+  "seelie": {
+    "fact": {
+      "eventsLeftOut": "{n} evento escluso | {n} eventi esclusi",
+      "olderThanOurs": "più vecchio del nostro",
+      "ar": "GA {ar}",
+      "wl": "LM {wl}",
+      "lumine": "Lumine",
+      "aether": "Aether"
+    },
+    "server": {
+      "AMERICA": "America",
+      "EUROPE": "Europa",
+      "ASIA": "Asia",
+      "SAR": "TW, HK, MO"
+    },
+    "notExport": "Non è un'esportazione di Seelie (nessun obiettivo)",
+    "customName": "Personalizzato"
+  },
+  "resin": {
+    "alertTitle": "Resina primordiale {amount}",
+    "source": {
+      "manual": "impostata a mano",
+      "player": "irminsul, all'accesso",
+      "inventory": "l'istantanea"
+    },
+    "unknown": "Resina primordiale: ancora sconosciuta · impostala",
+    "readingTitle": "Resina primordiale ~{now}/{max} · {value} da {source}, {at} · +1 ogni 8 minuti",
+    "setLabel": "{title}. Imposta",
+    "spend": "Spendi {n}",
+    "add": "Aggiungi {n}",
+    "fullAt": "Piena alle {time}",
+    "fullLabel": "Piena",
+    "full": "Piena",
+    "markTitle": "{amount} alle {time}",
+    "in": "tra",
+    "now": "Resina primordiale ora",
+    "alert": "Avviso resina",
+    "alertUnsupported": "Avviso resina: non supportato da questo browser",
+    "alertOff": "Avviso resina: disattivato",
+    "alertOn": "Avviso resina a {amount} · finché il sito è aperto",
+    "alertOnAt": "Avviso resina a {amount}, {time} · finché il sito è aperto",
+    "unsupported": "Non supportato da questo browser",
+    "blocked": "Bloccato: consenti le notifiche per questo sito nelle impostazioni del browser",
+    "notifyAt": "Avvisa a",
+    "off": "Disattivato",
+    "whileOpen": "Finché il sito è aperto su questo dispositivo"
+  },
+  "artifacts": {
+    "title": "Manufatti",
+    "doneByHand": "{name}: fatto (spuntato a mano)",
+    "notDoneByHand": "{name}: da fare (spuntato a mano)",
+    "notDoneByHandCaptureDone": "{name}: da fare (spuntato a mano; la cattura dice fatto)",
+    "doneFromCapture": "{name}: fatto, dalla cattura ({piece})",
+    "slotState": "{name}: {state}",
+    "notDone": "da fare",
+    "nothingWorn": "niente equipaggiato",
+    "otherSet": "altro set",
+    "otherMainStat": "altra statistica principale",
+    "levelOf": "+{level} di +{max}",
+    "farmingByHand": "{name}: in farm (spuntato a mano)",
+    "setDone": "{name}: fatto, lo sono tutti gli slot",
+    "setFarming": "{name}: in farm",
+    "autoRule": "Uno slot si spunta da solo quando la cattura vi mostra un pezzo al livello massimo (+20 su un 5★) di un set scelto con una statistica principale scelta; il quinto slot può essere di qualsiasi set quando gli altri quattro sono di set scelti",
+    "sets": "Set",
+    "worn": "{n} equipaggiati",
+    "remove": "Rimuovi {name}",
+    "addSet": "Set",
+    "close": "Chiudi",
+    "slots": "Slot",
+    "mainStat": "Statistica principale {slot}",
+    "searchSets": "Cerca set",
+    "setList": "Set di manufatti"
+  },
+  "cost": {
+    "saves": "{name} fa risparmiare {mora}",
+    "nothing": "Niente da spendere",
+    "colours": "Colori"
+  },
+  "common": {
+    "search": "Cerca",
+    "cancel": "Annulla",
+    "nameState": "{name}: {state}",
+    "counted": "Conteggiato",
+    "notCounted": "Non conteggiato",
+    "removeName": "Rimuovi {name}",
+    "clear": "Cancella",
+    "remove": "Rimuovi",
+    "save": "Salva",
+    "noMatches": "Nessun risultato",
+    "delete": "Elimina",
+    "undo": "Annulla"
+  },
+  "custom": {
+    "slot": {
+      "book": "Libro dei talenti",
+      "common": "Drop dei nemici",
+      "boss": "Drop del boss",
+      "local": "Specialità",
+      "weekly": "Boss settimanale"
+    },
+    "name": "Nome",
+    "rarity": "Rarità",
+    "weaponType": "Tipo di arma",
+    "element": "Elemento"
+  },
+  "done": {
+    "taken": "Preso dall'inventario",
+    "uses": "Usa",
+    "notInBag": "Non nell'inventario",
+    "takesWhatThereIs": "Fatto prende ciò che c'è.",
+    "confirm": "Fatto"
+  },
+  "extra": {
+    "title": "Extra",
+    "add": "Aggiungi oggetto",
+    "have": "hai {n}",
+    "craft": "crea {n}"
+  },
+  "avatars": {
+    "favorite": "{name} (preferito)",
+    "title": "{name} · tocca: apri · tieni premuto o clic destro: metti in pausa",
+    "moreTitle": "{rest} · mostra tutti",
+    "moreLabel": "Altri {n}: {rest}. Mostra tutti",
+    "fewerTitle": "Mostra meno",
+    "fewer": "Meno"
+  },
+  "card": {
+    "level": "Livello",
+    "talents": "Talenti",
+    "levelTitle": "Livello {from} (A{fromAscension}) → {to} (A{toAscension})",
+    "talentsTitle": "Attacco / Abilità / Tripudio",
+    "boosted": "portati a {talents} (C{constellation} aggiunge +3)",
+    "weaponTitle": "{name}: livello {from} (A{fromAscension}) → {to} (A{toAscension}), R{fromRefinement} → R{toRefinement}",
+    "readyFull": "si può fare ora con l'inventario",
+    "readyStep": "il prossimo passo si può fare ora con l'inventario",
+    "constellation": "Costellazione {n}",
+    "refinement": "Miglioramento {n}",
+    "artifactsTitle": "Manufatti: {done}/5 slot",
+    "expSuffix": "{name} (ESP)",
+    "amount": "{name}: {n}",
+    "short": "ne mancano {n}",
+    "shortAfter": "ne mancano {n} dopo gli obiettivi sopra",
+    "expAmount": "{exp}: {points} ({item})",
+    "enoughAfter": "basta dopo gli obiettivi sopra",
+    "handleLabel": "{name}: posizione {rank}, sposta con i tasti freccia",
+    "handleTitle": "#{rank} · trascina, o usa i tasti freccia",
+    "customTitle": "Personaggio personalizzato: non ancora nei dati di gioco",
+    "custom": "Personalizzato",
+    "favoriteLabel": "{name}: preferito",
+    "favorite": "Preferito",
+    "notFavorite": "Non preferito",
+    "setByHand": "Impostato a mano",
+    "needsAr": "Serve GA {ar}",
+    "doneLabel": "{name}: {label} fatto",
+    "doneReadyLabel": "{name}: {label} fatto ({ready})",
+    "missing": "{name}: mancante",
+    "canDoNow": "Si può fare ora: {text}"
+  },
+  "editor": {
+    "talent": {
+      "auto": "Attacco",
+      "skill": "Abilità",
+      "burst": "Tripudio"
+    },
+    "notOwned": "Non posseduto",
+    "estimateResin": "~{resin} resina",
+    "estimateTitle": "{runs} run · {resin} resina ({condensed} condensate) · {days} giorni",
+    "estimateWeekly": "boss settimanali: {weeks} settimane",
+    "countedLabel": "{name}: conteggiato",
+    "notCountedLabel": "{name}: non conteggiato",
+    "presets": "Preimpostati",
+    "constellationTitle": "Costellazione (C3/C5 alzano un talento di 3)",
+    "constellation": "Costellazione",
+    "hideNote": "Nascondi nota",
+    "note": "Nota",
+    "part": "Parte dell'obiettivo",
+    "now": "Ora",
+    "goal": "Obiettivo",
+    "levelNow": "Livello attuale",
+    "levelGoal": "Livello obiettivo",
+    "boost": "C{at} lo alza di 3",
+    "boostOn": "C{at} lo alza di 3: nel gioco {from} → {to}",
+    "talentNow": "{talent} attuale",
+    "talentGoal": "{talent} obiettivo",
+    "inGame": "Nel gioco {from} → {to}",
+    "customCharacter": "Personaggio personalizzato",
+    "replaceWithEllipsis": "Sostituisci con…",
+    "replaceWith": "Sostituisci con {name}",
+    "replace": "Sostituisci",
+    "gapNeed": "Serve {talents}",
+    "setLevel": "Imposta {level}",
+    "captureTitle": "La cattura più recente",
+    "capture": "Cattura: {text}",
+    "resetTitle": "Torna alla cattura",
+    "reset": "Ripristina",
+    "cost": "Costo"
+  },
+  "picker": {
+    "characters": "Personaggi",
+    "weapons": "Armi",
+    "items": "Oggetti",
+    "title": "Aggiungi obiettivo",
+    "kind": "Tipo",
+    "searchItems": "Cerca oggetti",
+    "preset": "Preimpostato",
+    "add": "Aggiungi",
+    "addCount": "Aggiungi {n}"
+  },
+  "toolbar": {
+    "label": "Filtra obiettivi",
+    "searchTitle": "Nome, arma o nota",
+    "sort": "Ordina",
+    "chips": "Migliorabili ora, boss settimanali, stato, elemento e rarità",
+    "upgrade": "Migliorabili ora",
+    "upgradeTitle": "Obiettivi conteggiati che possono salire di livello ora con l'inventario, ognuno da solo: Pronto, Pronto da solo, o una parte (Livello, Talenti, un'arma) o il suo prossimo passo",
+    "noWeeklyTitle": "Ancora da farmare, ma senza boss settimanale: i suoi drop sono posseduti o convertibili (dopo gli obiettivi sopra)",
+    "status": {
+      "all": "Tutti",
+      "ready": "Disponibili",
+      "readyTitle": "Abbastanza nell'inventario, ogni obiettivo da solo",
+      "activeTitle": "Nei totali",
+      "off": "In pausa",
+      "offTitle": "Esclusi dai totali"
+    }
+  },
+  "item": {
+    "count": "Quantità",
+    "have": "Posseduti",
+    "editHave": "Posseduti {n}: modifica"
+  },
+  "popover": {
+    "goalsLabel": "{name}: obiettivi che lo usano ({n})",
+    "goalsTitle": "Obiettivi che lo usano",
+    "history": "{name}: cronologia",
+    "expNeed": "ESP necessari {n}",
+    "goal": "Obiettivo {n}",
+    "missing": "Mancano {n}",
+    "enough": "Basta",
+    "need": "Servono {n}",
+    "craftedTitle": "Creato dal livello inferiore",
+    "craft": "Crea {n}",
+    "capture": "Cattura {n}",
+    "backLabel": "{name}: torna ai {n} della cattura",
+    "backTitle": "Torna a {n}",
+    "held": "{name} posseduti",
+    "addPlaceholder": "+ aggiungi",
+    "addLabel": "{name}: aggiungi ottenuti",
+    "addTitle": "Aggiungi ciò che hai ottenuto (Invio)",
+    "swap": {
+      "label": "Scambio con Solvente dei sogni",
+      "heading": "Scambio",
+      "title": "Alchimia → Conversione: uno degli altri materiali del boss per questo, {n} Solvente dei sogni ciascuno",
+      "solventHeld": "{name} posseduti: {n}",
+      "have": "Posseduti {n}",
+      "do": "Scambia",
+      "noneHeld": "Nessun {name} posseduto",
+      "noSolvent": "Servono {n} Solvente dei sogni per scambio"
+    }
+  },
+  "levelGrid": {
+    "below": "Sotto la cattura",
+    "level": "Livello {level} (A{ascension})",
+    "ascended": "Livello {level}, asceso (A{ascension})",
+    "ascendedWord": "asceso"
+  },
+  "cell": {
+    "have": "Posseduti {n}",
+    "spent": "Usati per creare {n}",
+    "converted": "Convertiti da altri {n}",
+    "convertedAway": "Convertiti in altri {n}"
+  },
+  "focus": {
+    "title": "{name}: {n} obiettivo, ognuno dopo gli obiettivi conteggiati sopra di esso | {name}: {n} obiettivi, ognuno dopo gli obiettivi conteggiati sopra di esso",
+    "clear": "Cancella {name}"
+  },
+  "materialPicker": {
+    "material": "Materiale",
+    "selected": "Materiale: {name}",
+    "title": "Obiettivi che usano un materiale",
+    "search": "Cerca materiali",
+    "any": "Qualsiasi",
+    "goals": "{n} obiettivo | {n} obiettivi"
+  },
+  "stepper": {
+    "down": "{label}: giù",
+    "up": "{label}: su"
+  },
+  "settings": {
+    "title": "Impostazioni del Pianificatore",
+    "autoWl": "Auto ({wl})",
+    "ar": "GA",
+    "arTitle": "Grado avventura (1–60)",
+    "arTitleIrminsul": "Grado avventura (1–60) · {ar} da irminsul",
+    "fromIrminsul": "da irminsul",
+    "wl": "LM",
+    "wlTitle": "Livello del mondo (0–9)",
+    "wlTitleIrminsul": "Livello del mondo (0–9) · {wl} da irminsul",
+    "wlLabel": "Livello del mondo",
+    "refreshesTitle": "Ricariche di Resina primordiale al giorno ({per} resina ciascuna): i giorni contano 180 + {per} per ricarica",
+    "refreshes": "Ricariche",
+    "refreshesLabel": "Ricariche di resina al giorno",
+    "stepsTitle": "Fino a quattro valori, es. -40 +60: il tracker della resina li aggiunge (meno le spese)",
+    "steps": "Pulsanti resina",
+    "azothTitle": "Copri le gemme mancanti con gemme in più di un altro elemento",
+    "azoth": "Polvere di Azoth",
+    "passivesTitle": "Shogun Raiden, Vagabondo: −50% Mora per l'ascensione delle armi",
+    "passives": "Passive Mora",
+    "craftingTitle": "La lista della vista Farm di cosa convertire, creare e forgiare",
+    "crafting": "Lista di creazione"
+  },
+  "roster": {
+    "search": "Cerca personaggi",
+    "multi": "Personaggi (scegline diversi)",
+    "owned": "{name} · Liv. {level}",
+    "notOwned": "{name} · non posseduto",
+    "weaponOwned": "{name} · Liv. {level} R{refinement}"
+  },
+  "weaponBlock": {
+    "copy": "La copia nella cattura",
+    "noCopy": "Nessuna copia nella cattura",
+    "heldBy": "In mano a {name}",
+    "refinementNow": "Miglioramento attuale di {name}",
+    "levelNow": "Livello attuale di {name}",
+    "refinementGoal": "Miglioramento obiettivo di {name}",
+    "levelGoal": "Livello obiettivo di {name}",
+    "search": "Cerca armi"
+  },
+  "seelieImport": {
+    "notExport": "Non è un'esportazione di Seelie né un backup di paimon.moe",
+    "notJson": "Non è un file JSON",
+    "section": {
+      "goals": {
+        "label": "Obiettivi",
+        "title": "Obiettivi di personaggi, talenti e armi, oggetti extra necessari"
+      },
+      "artifacts": {
+        "label": "Obiettivi manufatti",
+        "title": "Set e statistiche principali da farmare"
+      },
+      "customs": {
+        "label": "Personaggi personalizzati",
+        "title": "Personaggi che Seelie ha come personalizzati, con obiettivi"
+      },
+      "current": {
+        "label": "Livelli attuali",
+        "title": "Livelli, talenti e costellazioni attuali di Seelie dove sono più avanti della cattura"
+      },
+      "inventory": {
+        "label": "Inventario",
+        "title": "Quantità come modifiche manuali sulla cattura più recente (una cattura più nuova le sostituisce)"
+      },
+      "tasks": {
+        "label": "Attività",
+        "title": "Attività personalizzate, e quelle permanenti fatte in Seelie"
+      },
+      "resin": {
+        "label": "Resina",
+        "title": "Il tracker della resina di Seelie, se più recente del nostro"
+      },
+      "settings": {
+        "label": "Impostazioni",
+        "title": "GA, Livello del mondo, server e Viaggiatore"
+      }
+    },
+    "count": {
+      "new": "{n} nuovi",
+      "changed": "{n} modificati",
+      "same": "{n} uguali"
+    },
+    "dropTitle": "seelie.me → Settings → Export Account · paimon.moe → Settings → Export",
+    "change": "Cambia",
+    "choose": "Scegli file",
+    "fileLabel": "Esportazione di Seelie o backup di paimon.moe",
+    "legend": "Cosa importare",
+    "skipped": "Saltati {n}",
+    "clampedTitle": "Gli obiettivi sopra il livello 90 sono stati impostati a 90",
+    "clamped": "Limitati a 90: {n}",
+    "replace": "Sostituisci (rimuovi {n})",
+    "exportTitle": "Un file account di Seelie: obiettivi, inventario, attività (Seelie → Settings → Import Account)",
+    "export": "Esporta",
+    "import": "Importa",
+    "title": "Seelie · paimon.moe",
+    "fileAccount": "Account nel file",
+    "account": "Account {n}",
+    "paimonLevels": "solo livelli",
+    "paimonLevelsTitle": "paimon.moe conserva i livelli e i materiali di un to-do, non i livelli dei talenti: i talenti restano come sono"
+  },
+  "taskEditor": {
+    "everyDay": "Ogni giorno",
+    "everyDays": "Ogni {n} giorni",
+    "today": "Oggi ({day})",
+    "tomorrow": "Domani ({day})",
+    "startDay": "Giorno di inizio",
+    "startDayTitle": "Mantiene il ritmo del giorno di inizio",
+    "doneDay": "Giorno di completamento",
+    "doneDayTitle": "Conta dal giorno in cui è stata fatta",
+    "task": "Attività",
+    "newTask": "Nuova attività",
+    "nameIt": "Dalle un nome",
+    "repeats": "Ripetizione",
+    "next": "Prossima",
+    "starts": "Inizia",
+    "countsFrom": "Conta da"
+  },
+  "tasks": {
+    "title": "Attività",
+    "permanent": "Permanenti",
+    "ready": "Pronta",
+    "readyTitle": "Pronta da usare",
+    "resets": "Si azzera {time}",
+    "snoozedBack": "Rimandata · torna {time}",
+    "doneBack": "Fatta · torna {time}",
+    "everyDay": "ogni giorno",
+    "everyDays": "ogni {n} giorni",
+    "fromDone": "dal giorno di completamento",
+    "fromStart": "dal giorno di inizio",
+    "dueTitle": "Scadenza {date} · {every}, {from}",
+    "overdue": "Scaduta",
+    "late": "{n} g di ritardo",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "doneToast": "{name} fatta",
+    "backToast": "{name}: torna {day}",
+    "deleted": "{name} eliminata",
+    "toDo": "{n} da fare",
+    "toDoSr": "da fare",
+    "shown": "Attività mostrate",
+    "hideDone": "Nascondi fatte",
+    "showDone": "Mostra fatte ({n})",
+    "permanentShown": "Attività permanenti mostrate",
+    "add": "Aggiungi un'attività",
+    "noCustom": "Nessuna attività tua",
+    "allDone": "Tutto fatto",
+    "move": "Sposta {name}",
+    "dragTitle": "Trascina, o usa i tasti freccia",
+    "doneLabel": "Fatta: {name}",
+    "notDoneLabel": "Da fare: {name}",
+    "takeBack": "Annulla",
+    "snoozeName": "Rimanda {name}",
+    "snooze": "Rimanda",
+    "lastDay": "Ultimo giorno",
+    "permanentTasks": "Attività permanenti",
+    "events": "Eventi",
+    "startsIn": "tra {time}",
+    "eventStarts": "Inizia {time}",
+    "eventEnds": "Termina {time}",
+    "noEnd": "Nessuna data di fine",
+    "tags": {
+      "daily": "Giornaliera",
+      "checkin": "Accesso giornaliero",
+      "exploration": "Esplorazione del mondo",
+      "quest": "Missione"
+    },
+    "capture": {
+      "from": "Dalla cattura di {time}",
+      "commissions": "{n} su {total} fatti",
+      "abyss": "{stars} su {max} stelle",
+      "expeditions": "{n} su {total} rientrati",
+      "nobodyOut": "Nessuno in spedizione",
+      "realm": "{value} su {limit} nel vaso",
+      "welkin": "{n} giorni rimasti"
+    }
+  },
+  "view": {
+    "title": "Pianificatore",
+    "accountFallback": "Account Genshin",
+    "farm": "Farm",
+    "goals": "Obiettivi",
+    "presetApplied": "{preset}: {n} obiettivi",
+    "bulkCounted": "{n} conteggiati",
+    "bulkPaused": "{n} in pausa",
+    "goalsRemoved": "{n} obiettivi rimossi",
+    "paused": "{name} in pausa",
+    "partDone": "{name}: {label} fatto",
+    "craftStepDone": "Passaggio di creazione fatto",
+    "craftStepsDone": "{n} passaggi di creazione fatti",
+    "craftingHidden": "Creazione nascosta",
+    "craftingHiddenHint": "Impostazioni del Pianificatore: Lista di creazione",
+    "itemRemoved": "Oggetto rimosso",
+    "removed": "{name} rimosso",
+    "added": "{n} obiettivi aggiunti",
+    "notImported": "Non importato",
+    "importedGoals": "{n} obiettivi",
+    "importedCurrent": "{n} attuali",
+    "importedItems": "{n} oggetti",
+    "importedTasks": "{n} attività",
+    "imported": "Importato da Seelie",
+    "notExported": "Non esportato",
+    "exported": "Esportato per Seelie",
+    "view": "Vista",
+    "newest": "Cattura più recente",
+    "noCapture": "Nessuna cattura: le quantità sono tue",
+    "import": "Importa",
+    "replaced": "{n} modifica manuale sostituita dalla cattura | {n} modifiche manuali sostituite dalla cattura",
+    "ok": "OK",
+    "seelieTitle": "Importa da Seelie o paimon.moe, esporta verso Seelie",
+    "addGoals": "Aggiungi obiettivi",
+    "loadError": "Impossibile caricare il pianificatore",
+    "noGoals": "Nessun obiettivo",
+    "importSeelie": "Importa da Seelie o paimon.moe",
+    "importCapture": "Importa una cattura",
+    "readiness": "Disponibilità",
+    "selectTitle": "Scegli obiettivi da modificare insieme",
+    "select": "Seleziona",
+    "selected": "Obiettivi selezionati",
+    "selectedCount": "{n} selezionati",
+    "selectedSr": "selezionato",
+    "pickNone": "Nessuno",
+    "pickAll": "Tutti",
+    "applyPreset": "Applica un preimpostato",
+    "pause": "Pausa",
+    "count": "Conteggia",
+    "doneSelecting": "Fine selezione",
+    "done": "Fatti",
+    "doneGoals": "Obiettivi fatti",
+    "loading": "Caricamento pianificatore"
+  }
+}

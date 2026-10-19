@@ -1,0 +1,38 @@
+{
+  "close": "Fermer",
+  "constellation": {
+    "title": "Constellation {level} sur 6"
+  },
+  "crit": {
+    "title": "CV {value} · Taux CRIT × 2 + DGT CRIT",
+    "circlet": " · diadème CRIT +7,77"
+  },
+  "level": {
+    "title": "Niveau {level} sur {cap} · Élévation {ascension}"
+  },
+  "rarity": {
+    "stars": "{n} étoile(s)"
+  },
+  "roll": {
+    "title": "RV {value} % · chaque jet en % du jet maximal, additionnés"
+  },
+  "error": {
+    "title": "Chargement impossible",
+    "retry": "Réessayer"
+  },
+  "field": {
+    "optional": "(facultatif)"
+  },
+  "modal": {
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "pager": {
+    "label": "Pages",
+    "previous": "Page précédente",
+    "next": "Page suivante",
+    "goTo": "Aller à la page",
+    "go": "Aller",
+    "input": "Page, de 1 à {count}"
+  }
+}

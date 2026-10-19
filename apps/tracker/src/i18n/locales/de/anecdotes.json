@@ -1,0 +1,75 @@
+{
+  "title": "Anekdoten",
+  "area": "Gebiet {id}",
+  "newestCapture": "Neueste Erfassung",
+  "newestCaptureTitle": "Neueste Erfassung: {time}",
+  "notCaptured": "Nicht erfasst",
+  "notCapturedTitle": "Noch keine Erfassung mit Anekdoten: irminsul liest sie aus dem Spiel",
+  "loadFailed": "Laden fehlgeschlagen",
+  "allDone": "Alles erledigt",
+  "showDone": "Erledigte zeigen",
+  "noneDone": "Nichts erledigt",
+  "showNotDone": "Offene zeigen",
+  "noneMet": "Noch niemanden getroffen",
+  "noneMetBody": "Versteckte Anekdoten erscheinen nach der ersten Begegnung.",
+  "noMatches": "Keine Treffer",
+  "clear": "Leeren",
+  "loading": "Lädt",
+  "notSaved": "Nicht gespeichert",
+  "group": {
+    "hideDone": "Erledigte ausblenden",
+    "showDone": "Erledigte zeigen",
+    "done": "{n} erledigt"
+  },
+  "row": {
+    "states": {
+      "captured": "erfasst",
+      "marked": "von Hand markiert",
+      "none": "nicht erledigt"
+    },
+    "aria": "{title}: {state}",
+    "capturedStays": "Erfasst · bleibt erledigt",
+    "markedByHand": "Von Hand markiert",
+    "markedClick": "Von Hand markiert · klicken zum Entfernen",
+    "notDone": "Nicht erledigt",
+    "clickToMark": "Klicken, um als erledigt zu markieren",
+    "activeTitle": "Läuft gerade im Spiel",
+    "active": "Aktiv",
+    "repeatTitle": "{n}-mal erledigt (wiederholbar)",
+    "hidden": "Versteckte Anekdote",
+    "addedIn": "Neu in {version}"
+  },
+  "summary": {
+    "label": "Zusammenfassung",
+    "done": "Erledigt",
+    "doneCaptured": "{n} erfasst",
+    "doneByHand": "{n} von Hand",
+    "doneUnknown": "{n} neuer als die Spieldaten",
+    "doneLabel": "Erledigte Anekdoten",
+    "stamps": "Stempel",
+    "stampsTitle": "Stempel für Belohnung {n}",
+    "stampsNone": "Noch in keiner Erfassung",
+    "stampsLabel": "Stempel bis zur nächsten Belohnung",
+    "reward": "Belohnung",
+    "rewardHint": "{primogems} Urgesteine je {every} festgehaltene Anekdoten",
+    "rewardPer": "je {every}",
+    "active": "Aktiv",
+    "activeHint": "Läuft gerade im Spiel (in der neuesten Erfassung)"
+  },
+  "toolbar": {
+    "label": "Anekdoten filtern",
+    "search": "Suchen",
+    "searchTitle": "Titel, Geschichte, NPC oder ID",
+    "completion": "Status",
+    "completions": {
+      "all": "Alle",
+      "missing": "Offen",
+      "done": "Erledigt"
+    },
+    "showDone": "Erledigte zeigen",
+    "showDoneTitle": "Erledigte Anekdoten vollständig zeigen statt unter jedem NPC eingeklappt",
+    "area": "Gebiet",
+    "allAreas": "Alle",
+    "locked": "In der neuesten Erfassung nicht freigeschaltet"
+  }
+}

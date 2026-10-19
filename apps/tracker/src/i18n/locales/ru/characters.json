@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Ур. {level}",
+    "noWeapon": "Нет оружия",
+    "weaponLevel": "Оружие ур. {level}",
+    "artifactCount": "Артефактов: {count}/5",
+    "belowMax": "{n} артефакт не на макс. | Артефактов не на макс.: {n}",
+    "noSet": "Нет бонуса полного комплекта"
+  },
+  "sort": {
+    "default": "По умолчанию",
+    "level": "Уровень",
+    "constellation": "Созвездие",
+    "talents": "Таланты",
+    "cv": "CV",
+    "rarity": "Редкость",
+    "element": "Элемент",
+    "name": "Имя",
+    "friendship": "Дружба",
+    "obtained": "Получен"
+  },
+  "build": {
+    "all": "Сборка",
+    "ready": "Готов",
+    "needs": "Нужна работа",
+    "level": "Ур. < 90",
+    "weapon": "Оружие < 90",
+    "artifacts": "Артефакты < макс.",
+    "set": "Нет бонуса комплекта"
+  },
+  "talentFilter": {
+    "all": "Таланты",
+    "nine": "Все 9+",
+    "crowned": "С короной",
+    "below": "Любой < 9"
+  },
+  "favorites": {
+    "notSaved": "Не сохранено"
+  },
+  "stat": {
+    "maxHp": "Макс. HP",
+    "baseAtk": "Базовая сила атаки"
+  },
+  "talent": {
+    "crowned": "{title} · с короной"
+  },
+  "setBonus": {
+    "line": "{n} предм.: {stats}",
+    "inactive": "{n} предм. (неактивно): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Уровень дружбы {level} из 10"
+  },
+  "refinementTitle": "Пробуждение {value} из 5",
+  "talentChips": "Атака {auto} · Навык {skill} · Взрыв {burst}",
+  "sortControl": {
+    "sort": "Сортировка",
+    "descending": "По убыванию",
+    "ascending": "По возрастанию"
+  },
+  "favorite": {
+    "named": "В избранное: {name}",
+    "on": "В избранное",
+    "off": "Убрать из избранного"
+  },
+  "stars": "Звёзд: {n}",
+  "sets": "Комплекты",
+  "pieceBonus": " предм.: бонус",
+  "constellation": {
+    "title": "Созвездие {level} из 6",
+    "lockedTitle": "C{n} · не открыто",
+    "unlocked": "C{n} открыто",
+    "locked": "C{n} не открыто"
+  },
+  "timeline": {
+    "firstSeen": "Впервые замечен",
+    "obtained": "Получен",
+    "to": "до",
+    "less": "Меньше",
+    "all": "Все ({n})"
+  },
+  "talentShort": {
+    "auto": "Атака",
+    "skill": "Навык",
+    "burst": "Взрыв"
+  },
+  "talentRaised": "повышен до",
+  "crowned": "С короной",
+  "weapon": {
+    "passive": "Пассивно: {stats}",
+    "locked": "Заблокировано"
+  },
+  "stats": {
+    "allDmg": "+{value}% ко всему урону, нет на панели игры",
+    "label": "Характеристики",
+    "weaponMissingTitle": "Оружие новее игровых данных: его характеристики не учтены",
+    "weaponMissing": "Характеристики оружия не учтены",
+    "newerThanData": "Новее игровых данных",
+    "none": "Нет характеристик"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, таланты {auto} {skill} {burst}",
+    "friendship": ", дружба {n}",
+    "toDo": "сделать: {gaps}",
+    "critDetail": "Крит {rate}% / {dmg}% от артефактов"
+  },
+  "piece": {
+    "levelTitle": "+{level} из {max} · {rarity}★",
+    "activatesAt4": "Активируется на +4",
+    "inactive": "(неактивно)",
+    "rolls": "Прибавок: {n}",
+    "rollsTitle": "Прибавки",
+    "empty": ": пусто"
+  },
+  "toolbar": {
+    "weapon": "Оружие",
+    "cards": "Карточки",
+    "list": "Список",
+    "label": "Фильтр персонажей",
+    "search": "Поиск",
+    "searchTitle": "Имя, элемент, оружие или комплект",
+    "view": "Вид",
+    "chips": "Избранное, элемент и редкость",
+    "favorites": "Избранное",
+    "buildTitle": "Готов: ур. 90, оружие ур. 90, пять артефактов на макс., бонус полного комплекта",
+    "clear": "Сбросить"
+  },
+  "table": {
+    "lv": "Ур.",
+    "c": "C",
+    "critTitle": "Шанс крит. попадания / Крит. урон от артефактов",
+    "crit": "Крит",
+    "toDo": "Сделать",
+    "toDoList": "Сделать: {gaps}"
+  },
+  "detail": {
+    "toDo": "Сделать:",
+    "build": "Сборка",
+    "obtainedAt": "Получен {date}",
+    "noArtifacts": "Нет артефактов",
+    "history": "История",
+    "loadFailed": "Ошибка загрузки",
+    "none": "Нет"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Ур. 90+",
+    "crowns": "Короны",
+    "crownsTitle": "Таланты на 10 уровне",
+    "loading": "Загрузка",
+    "noSnapshots": "Снимков пока нет",
+    "empty": "Нет персонажей",
+    "import": "Импорт",
+    "noMatches": "Нет совпадений"
+  }
+}

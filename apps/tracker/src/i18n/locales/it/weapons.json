@@ -1,0 +1,67 @@
+{
+  "title": {
+    "level": "Liv. {level}/{cap}",
+    "copies": "{n} copia | {n} copie",
+    "locked": "Bloccata"
+  },
+  "sort": {
+    "quality": "Qualità",
+    "level": "Livello",
+    "refinement": "Miglioramento",
+    "count": "Copie",
+    "name": "Nome",
+    "type": "Tipo"
+  },
+  "levelFilter": {
+    "all": "Livello",
+    "max": "Max",
+    "levelled": "Potenziate",
+    "base": "Liv. 1"
+  },
+  "refine": {
+    "spare": "{n} in più",
+    "possible": "possibile: {title}"
+  },
+  "group": {
+    "copies": "{count} copia | {count} copie"
+  },
+  "bag": {
+    "notInData": "{copies} · Non ancora nei dati di gioco"
+  },
+  "toolbar": {
+    "bag": "Inventario",
+    "byWeapon": "Per arma",
+    "list": "Elenco",
+    "status": "Stato",
+    "equipped": "Equipaggiate",
+    "unused": "Inutilizzate",
+    "lock": "Blocco",
+    "locked": "Bloccate",
+    "unlocked": "Sbloccate",
+    "label": "Filtra armi",
+    "searchTitle": "Arma, tipo o personaggio",
+    "chips": "Tipo, rarità e miglioramento",
+    "noneInCapture": "Nessuna in questa cattura",
+    "refinableTitle": "Armi le cui copie in più possono migliorarne una equipaggiata",
+    "refinable": "Migliorabili"
+  },
+  "detail": {
+    "refinementTitle": "Grado di miglioramento {rank} di {max}",
+    "unequipped": "Non equipaggiata",
+    "copies": "{n} copia | {n} copie",
+    "equipped": "{n} equipaggiate",
+    "spareCopies": "{n} copia in più | {n} copie in più"
+  },
+  "table": {
+    "qualityTitle": "Qualità: rarità, livello, miglioramento, più recente",
+    "r": "M"
+  },
+  "page": {
+    "kinds": "Tipi",
+    "kindsTitle": "Armi diverse",
+    "unused5": "5★ inutilizzate",
+    "refinableTitle": "Le copie in più possono migliorarne una equipaggiata",
+    "empty": "Nessuna arma",
+    "pages": "Pagine delle armi"
+  }
+}

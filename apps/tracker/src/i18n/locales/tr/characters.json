@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Sv. {level}",
+    "noWeapon": "Silah yok",
+    "weaponLevel": "Silah Sv. {level}",
+    "artifactCount": "{count}/5 yadigar",
+    "belowMax": "{n} yadigar maks. seviyede değil",
+    "noSet": "Tam set bonusu yok"
+  },
+  "sort": {
+    "default": "Varsayılan",
+    "level": "Seviye",
+    "constellation": "Takımyıldız",
+    "talents": "Yetenekler",
+    "cv": "CV",
+    "rarity": "Nadirlik",
+    "element": "Element",
+    "name": "Ad",
+    "friendship": "Arkadaşlık",
+    "obtained": "Edinilme"
+  },
+  "build": {
+    "all": "Yapı",
+    "ready": "Hazır",
+    "needs": "Eksikli",
+    "level": "Sv. < 90",
+    "weapon": "Silah < 90",
+    "artifacts": "Yadigar < maks.",
+    "set": "Set bonusu yok"
+  },
+  "talentFilter": {
+    "all": "Yetenekler",
+    "nine": "Hepsi 9+",
+    "crowned": "Taçlı",
+    "below": "Biri < 9"
+  },
+  "favorites": {
+    "notSaved": "Kaydedilmedi"
+  },
+  "stat": {
+    "maxHp": "Maks. Can",
+    "baseAtk": "Temel Saldırı"
+  },
+  "talent": {
+    "crowned": "{title} · taçlı"
+  },
+  "setBonus": {
+    "line": "{n} parça: {stats}",
+    "inactive": "{n} parça (etkin değil): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Arkadaşlık {level}/10"
+  },
+  "refinementTitle": "Saflaştırma {value}/5",
+  "talentChips": "Saldırı {auto} · Beceri {skill} · Patlama {burst}",
+  "sortControl": {
+    "sort": "Sırala",
+    "descending": "Azalan sırala",
+    "ascending": "Artan sırala"
+  },
+  "favorite": {
+    "named": "{name} favorilere ekle",
+    "on": "Favori",
+    "off": "Favorilerden çıkar"
+  },
+  "stars": "{n} yıldız",
+  "sets": "Setler",
+  "pieceBonus": " parça bonusu",
+  "constellation": {
+    "title": "Takımyıldız {level}/6",
+    "lockedTitle": "C{n} · kilitli",
+    "unlocked": "C{n} açık",
+    "locked": "C{n} kilitli"
+  },
+  "timeline": {
+    "firstSeen": "İlk görülme",
+    "obtained": "Edinildi",
+    "to": "ile",
+    "less": "Daha az",
+    "all": "Tümü ({n})"
+  },
+  "talentShort": {
+    "auto": "Saldırı",
+    "skill": "Beceri",
+    "burst": "Patlama"
+  },
+  "talentRaised": "yükseltildi:",
+  "crowned": "Taçlı",
+  "weapon": {
+    "passive": "Pasif: {stats}",
+    "locked": "Kilitli"
+  },
+  "stats": {
+    "allDmg": "Tüm hasara +%{value}, oyunun panelinde yok",
+    "label": "Nitelikler",
+    "weaponMissingTitle": "Silah oyun verisinden yeni: nitelikleri dahil edilmedi",
+    "weaponMissing": "Silah nitelikleri dahil edilmedi",
+    "newerThanData": "Oyun verisinden yeni",
+    "none": "Nitelik yok"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, yetenekler {auto} {skill} {burst}",
+    "friendship": ", arkadaşlık {n}",
+    "toDo": "yapılacak: {gaps}",
+    "critDetail": "Yadigarlardan Kritik %{rate} / %{dmg}"
+  },
+  "piece": {
+    "levelTitle": "+{level}/{max} · {rarity}★",
+    "activatesAt4": "+4'te etkinleşir",
+    "inactive": "(etkin değil)",
+    "rolls": "{n} artış",
+    "rollsTitle": "Artışlar",
+    "empty": ": boş"
+  },
+  "toolbar": {
+    "weapon": "Silah",
+    "cards": "Kartlar",
+    "list": "Liste",
+    "label": "Karakterleri filtrele",
+    "search": "Ara",
+    "searchTitle": "Ad, element, silah veya set",
+    "view": "Görünüm",
+    "chips": "Favoriler, element ve nadirlik",
+    "favorites": "Favoriler",
+    "buildTitle": "Hazır: Sv. 90, silah Sv. 90, beş maks. yadigar, tam set bonusu",
+    "clear": "Temizle"
+  },
+  "table": {
+    "lv": "Sv.",
+    "c": "C",
+    "critTitle": "Yadigarlardan Kritik Oranı / Kritik Hasar",
+    "crit": "Kritik",
+    "toDo": "Yapılacak",
+    "toDoList": "Yapılacak: {gaps}"
+  },
+  "detail": {
+    "toDo": "Yapılacak:",
+    "build": "Yapı",
+    "obtainedAt": "Edinildi: {date}",
+    "noArtifacts": "Yadigar yok",
+    "history": "Geçmiş",
+    "loadFailed": "Yüklenemedi",
+    "none": "Yok"
+  },
+  "modal": {
+    "pngSize": "{size} PNG"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Sv. 90+",
+    "crowns": "Taçlar",
+    "crownsTitle": "10. seviyedeki yetenekler",
+    "loading": "Yükleniyor",
+    "noSnapshots": "Henüz anlık görüntü yok",
+    "empty": "Karakter yok",
+    "import": "İçe aktar",
+    "noMatches": "Eşleşme yok"
+  }
+}

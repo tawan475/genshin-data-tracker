@@ -6,7 +6,7 @@ export type MessageSchema = typeof en
 
 /**
  * The site's translations (vue-i18n, Composition API). English is built in;
- * the Chinese messages load on demand (messages per area under locales/).
+ * the other languages' messages load on demand (messages per area under locales/).
  * Use `$t` in templates and `t` (below) in scripts; never call `t` at a
  * module's top level, where it would run once in whatever language was on
  * then (scripts/i18n-check.mjs flags it). Pure: the tests import it;
@@ -29,6 +29,18 @@ export const te = i18n.global.te
 const loaders: Record<Exclude<Locale, 'en'>, () => Promise<{ default: unknown }>> = {
   'zh-CN': () => import('./locales/zh-CN'),
   'zh-TW': () => import('./locales/zh-TW'),
+  ja: () => import('./locales/ja'),
+  ko: () => import('./locales/ko'),
+  es: () => import('./locales/es'),
+  fr: () => import('./locales/fr'),
+  ru: () => import('./locales/ru'),
+  th: () => import('./locales/th'),
+  vi: () => import('./locales/vi'),
+  de: () => import('./locales/de'),
+  id: () => import('./locales/id'),
+  pt: () => import('./locales/pt'),
+  it: () => import('./locales/it'),
+  tr: () => import('./locales/tr'),
 }
 const loaded = new Set<Locale>(['en'])
 

@@ -2,7 +2,9 @@ import { characterImages, weaponImages } from '@gdt/game-data/images'
 import { formatWishTime, toGoodKey, type UigfGachaType, type WishItem } from '@gdt/shared'
 import type { BannerRun, Outcome, PityBand, PullRow } from '@/data/wish-history'
 import { t } from '@/i18n'
+import { locale } from '@/i18n/locale'
 import { imageUrl } from '@/lib/assets'
+import { dateFormat } from '@/lib/format'
 
 export interface WishBannerInfo {
   banner: UigfGachaType
@@ -75,9 +77,23 @@ export const wishMinute = (time: number) => formatWishTime(time).slice(0, 16)
 const monthShort = (index: number) => t(`wishes.date.months.${index + 1}`)
 const thisYear = () => new Date().getFullYear()
 
-/** A wall-clock day ("Oct 3"; "Oct 3, 2024" in another year), from seconds read as UTC. */
+/**
+ * A wall-clock day ("Oct 3"; "Oct 3, 2024" in another year), from seconds
+ * read as UTC; English always reads this way, whatever the browser's locale.
+ */
 export function wishDay(time: number, year = thisYear()): string {
   const d = new Date(time * 1000)
+  // Other languages through Intl: a month after a day can take another form
+  // (Russian "12 мая", not the month list's "май").
+  if (locale.value !== 'en') {
+    const sameYear = d.getUTCFullYear() === year
+    return dateFormat({
+      month: 'short',
+      day: 'numeric',
+      ...(sameYear ? {} : { year: 'numeric' }),
+      timeZone: 'UTC',
+    }).format(d)
+  }
   const parts = { month: monthShort(d.getUTCMonth()), day: d.getUTCDate() }
   return d.getUTCFullYear() === year
     ? t('wishes.date.day', parts)

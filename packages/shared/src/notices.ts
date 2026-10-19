@@ -13,6 +13,7 @@
  */
 
 import { DOMAIN_EVENT_KINDS, type DomainEventKind, type DomainEventWindow } from './domain-events'
+import type { SiteLanguage } from './settings'
 
 export type NoticeKind = 'wish' | 'event'
 
@@ -346,7 +347,8 @@ export interface GameNotice {
   start: string
   /** Null: open-ended. */
   end: string | null
-  title: { en: string; 'zh-CN'?: string; 'zh-TW'?: string }
+  /** English always; the other site languages where the board has them. */
+  title: { en: string } & Partial<Record<SiteLanguage, string>>
   /** The notice's banner image (HoYoverse's CDN), when it has one. */
   image: string | null
   /** Seelie's small tag (Check-in, World Exploration, Quest), null for a plain event. */

@@ -1,0 +1,139 @@
+{
+  "title": "Thành Tựu",
+  "newestCapture": "Bản ghi mới nhất",
+  "newestCaptureTitle": "Bản ghi mới nhất: {time}",
+  "notCaptured": "Chưa ghi",
+  "notCapturedTitle": "Mở menu Thành Tựu trong game khi irminsul đang chạy để ghi lại",
+  "importTitle": "Nhập thành tựu đã hoàn thành từ tệp xuất Seelie, bản sao lưu paimon.moe hoặc tệp stardb / irminsul",
+  "loadFailed": "Tải thất bại",
+  "allDone": "Đã xong hết",
+  "showDone": "Hiện đã xong",
+  "noneDone": "Chưa xong mục nào",
+  "showMissing": "Hiện còn thiếu",
+  "noMatches": "Không có kết quả",
+  "clear": "Xóa lọc",
+  "more": "Thêm",
+  "loading": "Đang tải",
+  "undo": "Hoàn tác",
+  "notSaved": "Chưa lưu",
+  "markedDone": "Đã đánh dấu xong {n}",
+  "unmarked": "Đã bỏ đánh dấu {n}",
+  "added": "Đã thêm {n}",
+  "confirmMark": {
+    "title": "Đánh dấu xong {n} mục?",
+    "filtered": "{n} thành tựu còn lại đang hiển thị sẽ được đánh dấu xong thủ công.",
+    "all": "Mọi thành tựu còn lại ({n}) sẽ được đánh dấu xong thủ công.",
+    "confirm": "Đánh dấu xong"
+  },
+  "confirmUnmark": {
+    "title": "Bỏ đánh dấu {n} mục?",
+    "detail": "Bỏ dấu thủ công của {n} thành tựu đang hiển thị. Các mục đã ghi từ game vẫn tính là xong.",
+    "confirm": "Bỏ đánh dấu"
+  },
+  "categories": {
+    "label": "Danh mục",
+    "all": "Tất cả",
+    "title": "{done} / {total} · {primogems} / {primogemsTotal} Nguyên Thạch",
+    "hideDone": "Ẩn nhóm đã hoàn thành",
+    "showDone": "Hiện nhóm đã hoàn thành",
+    "completed": "Đã hoàn thành"
+  },
+  "group": {
+    "primogems": "{primogems} / {total} Nguyên Thạch"
+  },
+  "import": {
+    "title": "Nhập",
+    "formats": {
+      "list": "Danh sách id"
+    },
+    "noAchievements": "Không tìm thấy thành tựu",
+    "notJson": "Không phải tệp JSON",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb hoặc irminsul: tệp GOOD có gi_achievements.",
+    "drop": "Tệp Seelie, paimon.moe hoặc stardb",
+    "account": "Tài khoản {n}",
+    "fileAccount": "Tài khoản trong tệp",
+    "browse": "Chọn tệp",
+    "inFile": "Trong tệp",
+    "already": "Đã xong từ trước",
+    "new": "Mới",
+    "newTitle": "Gồm {unknown} mới hơn dữ liệu game và {disused} đã bị gỡ khỏi game: được giữ lại, không tính",
+    "cancel": "Hủy",
+    "add": "Thêm {n}"
+  },
+  "row": {
+    "clickToMark": "Nhấn để đánh dấu xong",
+    "clickToUnmark": "{text} · nhấn để bỏ đánh dấu",
+    "captured": "Đã ghi",
+    "staysDone": "{text} · có trong bản ghi nên vẫn tính là xong",
+    "markEveryTier": "Đánh dấu xong mọi bậc",
+    "markDone": "Đánh dấu xong",
+    "unmarkTiers": "Nhấn để bỏ các bậc đánh dấu thủ công",
+    "markedClick": "Đánh dấu thủ công · nhấn để bỏ",
+    "tierTitle": "Bậc {n} · {primogems} Nguyên Thạch",
+    "reward": "{n} Nguyên Thạch",
+    "primogems": "Nguyên Thạch",
+    "states": {
+      "captured": "đã ghi",
+      "marked": "đánh dấu thủ công",
+      "none": "chưa xong"
+    },
+    "aria": "{title}: {state}",
+    "tiers": "Các bậc",
+    "tier": "Bậc {n}",
+    "addedIn": "Thêm vào bản {version}",
+    "hiddenTitle": "Thành tựu ẩn",
+    "hidden": "Ẩn",
+    "markedByHand": "Đánh dấu thủ công",
+    "guide": "Hướng dẫn trên stardb.gg"
+  },
+  "completion": {
+    "tier": "Bậc {n} · {text}",
+    "exact": "Hoàn thành {time}",
+    "exactTitle": "Thời gian hoàn thành do game ghi lại, irminsul đọc được",
+    "seen": "Hoàn thành {window}",
+    "seenTitle": "Xong giữa hai bản ghi: chưa có trong bản lúc {since}, có trong bản lúc {at}",
+    "by": "Hoàn thành trước {date}",
+    "byTitle": "Đã xong ngay trong bản ghi đầu tiên ({at})",
+    "marked": "Đánh dấu xong thủ công",
+    "markedTitle": "Không bản ghi nào có mục này nên không có ngày"
+  },
+  "summary": {
+    "label": "Tóm tắt",
+    "done": "Đã xong",
+    "doneCaptured": "{n} đã ghi",
+    "doneByHand": "{n} thủ công",
+    "doneUnknown": "{n} mới hơn dữ liệu game",
+    "progress": "Tiến độ",
+    "progressLabel": "Thành tựu đã xong",
+    "primogems": "Nguyên Thạch",
+    "primogemsHint": "Nguyên Thạch đã nhận / có thể nhận",
+    "missing": "Còn thiếu",
+    "showAll": "Hiện tất cả",
+    "showLeft": "Chỉ hiện phần còn lại"
+  },
+  "toolbar": {
+    "label": "Lọc thành tựu",
+    "search": "Tìm",
+    "searchTitle": "Tên, mô tả, danh mục hoặc id",
+    "completion": "Hoàn thành",
+    "completions": {
+      "all": "Tất cả",
+      "done": "Đã xong",
+      "missing": "Còn thiếu"
+    },
+    "hidden": {
+      "all": "Ẩn: bất kỳ",
+      "hidden": "Ẩn",
+      "visible": "Không ẩn"
+    },
+    "hiddenLabel": "Ẩn",
+    "allCategories": "Mọi danh mục",
+    "category": "Danh mục",
+    "version": "Phiên bản",
+    "addedIn": "Thêm vào bản",
+    "markAll": "Đánh dấu hết",
+    "markAllTitle": "Đánh dấu xong {n} thành tựu còn lại đang hiển thị",
+    "unmarkAll": "Bỏ đánh dấu hết",
+    "unmarkAllTitle": "Bỏ đánh dấu {n} thành tựu đánh dấu thủ công đang hiển thị"
+  }
+}

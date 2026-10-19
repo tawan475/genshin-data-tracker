@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "พอสำหรับทุกเป้าหมาย",
+    "alone": "พอสำหรับเป้าหมายนี้",
+    "short": "ขาด"
+  },
+  "readiness": {
+    "all": {
+      "label": "พร้อม",
+      "meaning": "พอหลังจากเป้าหมายด้านบน"
+    },
+    "alone": {
+      "label": "พร้อมเฉพาะตัว",
+      "meaning": "พอถ้าทำเป้าหมายนี้อย่างเดียว แต่ไม่พอหลังจากเป้าหมายด้านบน"
+    },
+    "short": {
+      "label": "ขาด",
+      "meaning": "ไม่พอ แม้ทำเป้าหมายนี้อย่างเดียว"
+    },
+    "done": {
+      "label": "เสร็จแล้ว",
+      "meaning": "บรรลุแล้ว"
+    },
+    "artifacts": {
+      "label": "อาร์ติแฟกต์",
+      "meaning": "เลเวลถึงแล้ว เหลืออาร์ติแฟกต์"
+    }
+  },
+  "bracket": {
+    "tier": "ขั้น {tier}",
+    "bossLevel": "บอส Lv {level}",
+    "wl": "WL {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base} (สมมติ)"
+  },
+  "unit": {
+    "days": "{n} วัน",
+    "weeks": "{n} สัปดาห์"
+  },
+  "status": {
+    "locked": "แรงก์ผจญภัยหรือระดับโลกยังต่ำเกินไปที่จะฟาร์ม",
+    "noRate": "ไม่มีอัตราดรอปเฉลี่ยของแหล่งนี้: ประเมินไม่ได้",
+    "notFarmed": "ไม่ใช้ Resin"
+  },
+  "time": {
+    "hm": "{h} ชม. {m} นาที",
+    "h": "{h} ชม.",
+    "m": "{m} นาที",
+    "dh": "{d} วัน {h} ชม.",
+    "d": "{d} วัน"
+  },
+  "craft": {
+    "kind": {
+      "convert": "แปลง",
+      "craft": "สรรสร้าง",
+      "forge": "หลอม"
+    },
+    "item": "{name} {count}",
+    "convertRow": "แปลง {input} เป็น {output}",
+    "craftRow": "สรรสร้าง {output} จาก {input}",
+    "forgeRow": "หลอม {output} จาก {input}",
+    "kindTitle": {
+      "convert": "เล่นแร่แปรธาตุ: การแปลง",
+      "craft": "เล่นแร่แปรธาตุ: สรรสร้าง เริ่มจากขั้นต่ำสุด",
+      "forge": "ร้านช่างตีเหล็ก: การหลอม"
+    },
+    "listSeparator": ", ",
+    "notYet": "ยังไม่ได้: ต้องการ {items} เพิ่ม (ทำขั้นตอนด้านบนก่อน)",
+    "doneRow": "เสร็จแล้ว: {row}",
+    "notEnough": "ไม่พอ: ต้องการ {items} เพิ่ม",
+    "allDoneTitle": "เสร็จทั้ง {n} ขั้นตอน: ช่องเก็บของหลังทำแล้ว",
+    "title": "สรรสร้าง",
+    "fold": "พับ",
+    "unfold": "สิ่งที่แผนจะแปลง สรรสร้าง และหลอม",
+    "steps": "{n} ขั้นตอน",
+    "inAll": "รวม {cost}",
+    "forgingTime": "เวลาหลอม {time} (ไม่นับคิวของเตาหลอม)",
+    "forging": "กำลังหลอม",
+    "allDone": "เสร็จทั้งหมด",
+    "hideTitle": "ซ่อนการสรรสร้าง (เปิดกลับได้ในการตั้งค่าแพลนเนอร์)",
+    "hide": "ซ่อนการสรรสร้าง",
+    "from": "จาก",
+    "fewer": "ย่อ",
+    "all": "ทั้งหมด {n}"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "WL {wl}",
+    "locked": "ยังไม่ปลดล็อก"
+  },
+  "cards": {
+    "blossomExp": "ดอกไม้แห่งการชี้แนะ",
+    "blossomMora": "ดอกไม้แห่งความมั่งคั่ง",
+    "local": "ของพิเศษท้องถิ่น",
+    "common": "ศัตรูธรรมดา",
+    "elite": "ศัตรูระดับสูง",
+    "other": "อื่น ๆ",
+    "elsewhere": "แหล่งอื่น"
+  },
+  "sections": {
+    "free": "ไม่ใช้ Resin",
+    "domain": "ดันเจี้ยน · Ley Line",
+    "boss": "บอส",
+    "weekly": "บอสประจำสัปดาห์",
+    "artifact": "อาร์ติแฟกต์"
+  },
+  "groups": {
+    "ley": "Ley Line Blossom",
+    "mastery": "ดันเจี้ยนแห่งการพัฒนา",
+    "forgery": "ดันเจี้ยนแห่งการต่อสู้",
+    "blessing": "ดันเจี้ยนแห่งพร",
+    "boss": "บอสทั่วไป",
+    "weekly": "บอสประจำสัปดาห์",
+    "local": "ของพิเศษท้องถิ่น",
+    "common": "ศัตรูธรรมดา",
+    "elite": "ศัตรูระดับสูง",
+    "ore": "วัสดุเสริมพลังอาวุธ",
+    "other": "อื่น ๆ"
+  },
+  "people": {
+    "label": "แผนนี้สำหรับใคร",
+    "only": "{name}: เฉพาะการ์ดของตัวละครนี้",
+    "all": "{name}: แสดงทุกคน"
+  },
+  "card": {
+    "runs": "{n} รอบ",
+    "claims": "รับ {n} ครั้ง",
+    "claimsWeekly": "{claims} สัปดาห์ละครั้ง",
+    "atMost": "ไม่เกิน {runs}",
+    "atMostPrefix": "ไม่เกิน",
+    "runsShort": "{n} รอบ",
+    "claimsShort": "{n} ครั้ง",
+    "resinRange": "{min}–{max} Resin",
+    "resin": "{n} Resin",
+    "condensed": "{n} Condensed",
+    "condensedTitle": "{n} Condensed Resin",
+    "guaranteed": "อัตราดรอปนี้เป็นขั้นต่ำที่การันตี",
+    "lockTitle": "ยังไม่ได้: ต้องการ {lock}",
+    "kind": {
+      "boss": "บอส",
+      "gem": "บอสที่ดรอป",
+      "enemy": "ศัตรูที่ดรอป",
+      "local": "พบได้ที่",
+      "artifact": "ดันเจี้ยนอาร์ติแฟกต์"
+    },
+    "elsewhereTitle": "ไม่มีดันเจี้ยนใดดรอปเซ็ตเหล่านี้",
+    "noRate": "ไม่มีอัตราดรอป",
+    "paidTitle": "รอบดันเจี้ยนที่วางแผนไว้ให้ {mora} Mora",
+    "paid": "+{n} จากดันเจี้ยน",
+    "blockedTitle": "การแปลง {n} ครั้งต้องใช้ Dream Solvent เพิ่ม",
+    "blocked": "ติดอยู่ {n}",
+    "blockedSr": ": ต้องใช้ Dream Solvent เพิ่ม"
+  },
+  "weekday": {
+    "short": {
+      "sun": "อา.",
+      "mon": "จ.",
+      "tue": "อ.",
+      "wed": "พ.",
+      "thu": "พฤ.",
+      "fri": "ศ.",
+      "sat": "ส."
+    },
+    "long": {
+      "sun": "วันอาทิตย์",
+      "mon": "วันจันทร์",
+      "tue": "วันอังคาร",
+      "wed": "วันพุธ",
+      "thu": "วันพฤหัสบดี",
+      "fri": "วันศุกร์",
+      "sat": "วันเสาร์"
+    }
+  },
+  "panel": {
+    "today": "วันนี้",
+    "schedule": "ตาราง",
+    "runsLine": "{runs} · {resin} Resin ({condensed} Condensed) · {days}",
+    "sources": "ดันเจี้ยน บอสทั่วไป และ Ley Line",
+    "daily": "วันละ {n} Resin",
+    "dailyRefresh": "วันละ {n} Resin (180 + {r} × {per})",
+    "withHeld": "{days} รวม Resin ที่มีอยู่",
+    "gems": "อัญมณี: {runs}, {resin} Resin",
+    "partial": "บางแหล่งไม่มีอัตราดรอป",
+    "upperBound": "ดรอปของบอสที่ระดับโลก 9 เป็นขั้นต่ำที่การันตี",
+    "weeklyClaims": "บอสประจำสัปดาห์: {claims} ใน {weeks}",
+    "weeklyResin": "{resin} Resin เมื่อใช้ส่วนลดรายสัปดาห์ ({max} หากไม่มีส่วนลด)",
+    "weeklyPartial": "บอสบางตัวไม่มีอัตราดรอป",
+    "serverDay": "วันของเซิร์ฟเวอร์: {day}",
+    "serverDaySunday": "วันของเซิร์ฟเวอร์: {day} (เปิดทุกดันเจี้ยน)",
+    "resetIn": "รีเซ็ต 04:00 ในอีก {time}",
+    "forgeOff": "นับ Mystic Enhancement Ore ที่หลอมได้จากแร่ที่มีอยู่",
+    "forgeLine": "หลอม {item}: {mora} Mora, {time}",
+    "stillShort": "ยังขาด {n}",
+    "totals": "ยอดรวม",
+    "resin": "Resin",
+    "dayUnit": "วัน",
+    "refreshTitle": "เติม Resin วันละ {r} ครั้ง: วันละ {daily} Resin",
+    "perDay": "{n}/วัน",
+    "weekly": "รายสัปดาห์",
+    "weekUnit": "สัปดาห์",
+    "lockedTitle": "{n} แหล่งถูกล็อกด้วย AR/WL",
+    "locked": "ล็อกด้วย AR/WL",
+    "view": "มุมมองฟาร์ม",
+    "noWeeklyTitle": "เฉพาะเป้าหมายที่ยังต้องฟาร์มโดยไม่ต้องใช้บอสประจำสัปดาห์: ดรอปของบอสมีอยู่แล้วหรือแปลงได้ (หลังจากเป้าหมายด้านบน)",
+    "noWeekly": "ไม่มีบอสประจำสัปดาห์",
+    "noneLeft": "ทุกเป้าหมายยังต้องใช้บอสประจำสัปดาห์",
+    "showAll": "แสดงทุกเป้าหมาย",
+    "assumed": "ยังไม่ได้ตั้ง AR/WL: สมมติเป็นขั้นสูงสุด",
+    "set": "ตั้งค่า",
+    "nothing": "ไม่มีอะไรต้องฟาร์ม",
+    "sectionLabel": "{label}: {resin} Resin",
+    "show": "แสดง",
+    "hidden": "ซ่อนอยู่ {n}",
+    "forge": "หลอมจากแร่",
+    "pairTitle": "{runs} · {resin} Resin · {days}",
+    "cards": "{n} การ์ด"
+  },
+  "event": {
+    "names": {
+      "abundance": "Overflowing Abundance",
+      "mastery": "Overflowing Mastery",
+      "favor": "Overflowing Favor",
+      "wealth": "Overflowing Wealth",
+      "revelation": "Overflowing Revelation",
+      "leyLine": "Ley Line Overflow"
+    },
+    "rules": {
+      "abundance": "เปิดวัสดุหนังสือพรสวรรค์และวัสดุอาวุธทุกชนิด พร้อมรางวัลทวีคูณ",
+      "mastery": "ดันเจี้ยนแห่งการพัฒนาให้รางวัลทวีคูณ",
+      "favor": "ดันเจี้ยนแห่งพร (อาร์ติแฟกต์) ให้รางวัลทวีคูณ",
+      "wealth": "ดอกไม้แห่งความมั่งคั่งให้รางวัลทวีคูณ",
+      "revelation": "ดอกไม้แห่งการชี้แนะให้รางวัลทวีคูณ",
+      "leyLine": "ดอกไม้แห่งความมั่งคั่งและการชี้แนะให้รางวัลทวีคูณ"
+    },
+    "claims": "×{times} เมื่อใช้ Original Resin วันละ {n} ครั้ง",
+    "endsIn": "สิ้นสุดในอีก {time}"
+  }
+}

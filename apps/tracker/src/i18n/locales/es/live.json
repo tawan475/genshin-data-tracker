@@ -1,0 +1,44 @@
+{
+  "label": "En vivo",
+  "thisSession": "Esta sesión",
+  "sessionSince": "Desde las {time}",
+  "levelUps": "{n} subida de nivel | {n} subidas de nivel",
+  "talents": "{n} talento | {n} talentos",
+  "updated": "actualizado {ago}",
+  "updatedAt": "Actualizado a las {time}",
+  "row": "En vivo",
+  "rowDetail": "{n} cambio desde esta captura | {n} cambios desde esta captura",
+  "sinceSnapshot": "desde la captura más reciente",
+  "discard": "Descartar",
+  "discardTitle": "Borrar estos cambios; la captura más reciente se queda",
+  "discarded": "Cambios en vivo borrados",
+  "discardFailed": "No se pudieron borrar los cambios en vivo",
+  "settings": {
+    "title": "Sincronización en vivo",
+    "label": "Seguir Irminsul en vivo",
+    "description": "Mientras Irminsul esté abierto, sus cambios aparecen aquí en segundos, entre capturas.",
+    "devices": "Sincronización en vivo desde este PC a: {accounts} (Ajustes de la cuenta)",
+    "deletePoints": "Borrar puntos del gráfico",
+    "deletePointsTitle": "Borrar los puntos del gráfico que la sincronización en vivo guardó entre capturas",
+    "deletePointsConfirm": "¿Borrar todos los puntos del gráfico de esta cuenta? Las capturas se quedan.",
+    "pointsDeleted": "Puntos del gráfico borrados",
+    "exportNote": "Las exportaciones incluyen los cambios y puntos en vivo (live/ en el zip)."
+  },
+  "session": {
+    "heading": "Sesiones",
+    "hours": "{h} h {m} min",
+    "minutes": "{m} min",
+    "world": "Mundo {n}",
+    "newCharacter": "{name} se unió",
+    "more": "+{n} más",
+    "showMore": "Mostrar más ({n})",
+    "field": {
+      "level": "{name} Niv. {from}→{to}",
+      "constellation": "{name} C{from}→C{to}",
+      "auto": "{name} ataque {from}→{to}",
+      "skill": "{name} habilidad {from}→{to}",
+      "burst": "{name} definitiva {from}→{to}"
+    }
+  },
+  "staffBytes": "La sincronización en vivo guarda {size} más (gdt-live)"
+}

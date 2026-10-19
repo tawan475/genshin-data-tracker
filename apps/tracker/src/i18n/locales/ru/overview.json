@@ -1,0 +1,73 @@
+{
+  "progression": "Прогресс",
+  "figure": {
+    "mora": "Мора",
+    "primogem": "Камни Истока",
+    "characters": "Персонажи",
+    "weapons": "Оружие",
+    "artifacts": "Артефакты",
+    "artifact4": "Артефакт 4★",
+    "artifact3": "Артефакт 3★"
+  },
+  "server": {
+    "AMERICA": "Америка",
+    "EUROPE": "Европа",
+    "ASIA": "Азия",
+    "SAR": "TW, HK, MO"
+  },
+  "noSnapshots": "Снимков пока нет",
+  "import": "Импорт",
+  "historyUnavailable": "История недоступна",
+  "currencyCarried": "из более раннего снимка",
+  "currencyMissing": "нет в последнем снимке",
+  "sincePrevious": "с предыдущего снимка",
+  "lastCaptured": "Последний снимок",
+  "lastCapturedAt": "Последний снимок {time}",
+  "seenAgain": "Замечено снова",
+  "seenAgainAt": "Замечено снова {time}",
+  "loadingHistory": "Загрузка истории снимков",
+  "lowRarity": {
+    "label": "Артефакт 4★ / 3★",
+    "hint": "Не заблокированы, не надеты",
+    "rarity": "{n}★"
+  },
+  "card": {
+    "snapshots": "Снимки",
+    "storage": "Хранилище",
+    "stored": "Загружено {raw}, хранится {stored}",
+    "storedRatio": "Загружено {raw}, хранится {stored} (меньше в {ratio})"
+  },
+  "monthly": {
+    "title": "Анализ за месяц",
+    "previous": "Предыдущий месяц",
+    "previousTo": "Предыдущий месяц, {month}",
+    "next": "Следующий месяц",
+    "nextTo": "Следующий месяц, {month}",
+    "gained": "получено {n}",
+    "spent": "потрачено {n}",
+    "added": "добавлено {n}",
+    "used": "использовано {n}",
+    "closing": "на конец {n}",
+    "artifactExp": "{n} опыта артефактов на уровне 0",
+    "thisMonth": "в этом месяце · {detail}",
+    "gapTitle": "Нет снимков дней: {n}",
+    "vs": "против {day}",
+    "captures": "{n} снимок | Снимков: {n}",
+    "comparedWith": "{captures}, сравнение с {day}",
+    "noCaptures": "Нет снимков",
+    "noCapture": "Нет снимка",
+    "caption": "Изменение по дням за {month}: последний снимок дня против предыдущего дня со снимком, со значением ниже",
+    "day": "День",
+    "dayTitle": "Последний снимок дня против предыдущего дня со снимком, местное время"
+  },
+  "recent": {
+    "title": "Недавние",
+    "all": "Все",
+    "allTitle": "Все снимки ({n})",
+    "size": "Загружено байт: {raw}, хранится байт: {stored}",
+    "unchanged": "Итоги без изменений",
+    "first": "Первый снимок",
+    "currencyMissing": "Нет моры и Камней Истока",
+    "noCurrency": "Нет валюты"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Materiais",
+  "newestSnapshot": "Captura mais recente",
+  "since": "desde {date}",
+  "oneSnapshot": "Apenas uma captura",
+  "changesTitle": "Variações {hint}",
+  "changeSince": "Variação desde",
+  "noSnapshots": "Nenhuma captura ainda",
+  "import": "Importar",
+  "loadFailed": "Não foi possível carregar os materiais",
+  "loading": "Carregando materiais",
+  "saveChartFailed": "Não foi possível salvar os ajustes do gráfico",
+  "search": "Buscar",
+  "searchLabel": "Buscar materiais",
+  "noMatches": "Nenhum resultado",
+  "noMaterials": "Sem materiais",
+  "clear": "Limpar",
+  "more": "Mais {n}",
+  "upTo": "Até {max}",
+  "trackedOfMax": "Acompanhados / máx.",
+  "track": "Acompanhar",
+  "untrack": "Deixar de acompanhar",
+  "deltaHint": "{value} {hint}",
+  "periods": {
+    "last": "Últimos"
+  },
+  "wallet": {
+    "label": "Carteira",
+    "title": "Moedas e itens de Oração",
+    "short": {
+      "GenesisCrystal": "Gênesis",
+      "IntertwinedFate": "Entrelaçado",
+      "AcquaintFate": "Familiar",
+      "MasterlessStarglitter": "Brilho Estrelar",
+      "MasterlessStardust": "Poeira Estrelar",
+      "OriginalResin": "Resina",
+      "FragileResin": "Frágil",
+      "CondensedResin": "Condensada",
+      "RealmCurrency": "Paraíso"
+    }
+  },
+  "tabs": {
+    "development": "Desenvolvimento",
+    "precious": "Preciosos",
+    "other": "Outros",
+    "note": "{name}: {note}",
+    "notes": {
+      "weapon": "Minérios de Refinamento (o jogo os guarda junto com as armas)",
+      "artifact": "Unguento Santificado e Essência da Consagração (o jogo os guarda junto com os artefatos)",
+      "other": "Fora do Inventário do jogo: moedas, sementes, itens do jogo de cartas, itens mais novos que os dados do jogo"
+    }
+  },
+  "bag": {
+    "title": "Inventário",
+    "show": "Mostrar",
+    "view": "Exibição",
+    "views": {
+      "grid": "Ícones",
+      "list": "Lista"
+    },
+    "tabRow": "Aba do Inventário",
+    "all": "Tudo",
+    "allTitle": "Todas as abas",
+    "sort": "Ordenar",
+    "sorts": {
+      "order": "Do jogo",
+      "count": "Quantidade",
+      "change": "Variação",
+      "name": "Nome"
+    },
+    "unfoldAll": "Expandir todas as abas",
+    "foldAll": "Recolher todas as abas",
+    "owned": "Possuídos",
+    "ownedTitle": "Materiais que estão no inventário",
+    "gained": "Ganhos",
+    "gainedTitle": "Ganhos {hint}",
+    "spent": "Gastos",
+    "spentTitle": "Gastos {hint}",
+    "tile": "{name}: {count}",
+    "handSet": " · definido à mão {hand} (captura {capture})"
+  },
+  "detail": {
+    "history": "Histórico",
+    "chartLabel": "{name} ao longo do tempo, {since}",
+    "statTitle": "{value} {since}",
+    "gained": "Ganhos",
+    "spent": "Gastos",
+    "peak": "Pico",
+    "first": "Primeira",
+    "firstTitle": "Primeira captura que o contém"
+  },
+  "tracked": {
+    "title": "Acompanhados",
+    "list": "Materiais acompanhados",
+    "untrackName": "Deixar de acompanhar {name}"
+  }
+}

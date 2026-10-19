@@ -1,0 +1,134 @@
+{
+  "label": {
+    "locked": "Verrouillé",
+    "astralMark": "Marque astrale",
+    "new": "Nouveau"
+  },
+  "sort": {
+    "quality": "Qualité",
+    "cv": "CV",
+    "rv": "RV",
+    "potential": "Potentiel",
+    "level": "Niveau",
+    "set": "Set",
+    "recent": "Récent"
+  },
+  "sortTitle": {
+    "quality": "Comme le jeu : rareté, niveau, set, porteur",
+    "cv": "Valeur CRIT",
+    "rv": "Valeur des jets",
+    "potential": "CV attendue au niveau max",
+    "level": "Niveau",
+    "set": "Set",
+    "recent": "Nouveaux ou modifiés"
+  },
+  "topSets": {
+    "label": "Meilleurs sets",
+    "more": "{n} autres sets"
+  },
+  "lower": {
+    "label": "Raretés inférieures : {counts}",
+    "title": "Raretés inférieures, placées en dernier par ce tri"
+  },
+  "picker": {
+    "find": "Chercher",
+    "noMatch": "Aucun résultat",
+    "done": "OK"
+  },
+  "setsTable": {
+    "cellNone": "{slot} : aucun",
+    "cell": "{slot} · {n} pièces · meilleur {rarity}★ {main} +{level}, CV {cv}",
+    "pieces": "Pièces",
+    "slotHeader": "{slot} : meilleure CV, pièces",
+    "sumTitle": "Meilleure CV par emplacement, additionnée"
+  },
+  "bag": {
+    "more": "{n} de plus"
+  },
+  "table": {
+    "sortBySet": "Trier par set",
+    "sortByLevel": "Trier par niveau",
+    "equippedBy": "Équipé par",
+    "marks": "Verrou et marques",
+    "elixir": "Élixir"
+  },
+  "detail": {
+    "fromGame": "Du jeu",
+    "inferred": "Déduit du niveau",
+    "upgradesToCome": "{source} · {n} améliorations à venir",
+    "rankTitle": "Rang de CV parmi {n} {slot} {rarity}★",
+    "newTitle": "Absent de la capture précédente",
+    "rolls": "Jets",
+    "rank": "Rang",
+    "upgradesTitle": "Un jet de sous-stat tous les 4 niveaux, jusqu'à {max}",
+    "upgrades": "Améliorations",
+    "expectedCv": "CV attendue",
+    "expectedDetail": "Attendue à {max} : chaque amélioration tombe sur une ligne CRIT {chance} % du temps, avec un jet moyen",
+    "bestCase": "Meilleur cas",
+    "bestDetail": "Chaque amélioration un jet CRIT maximal, jusqu'à {max}",
+    "critLinesTitle": "{n} lignes sur 4 sont CRIT : la chance qu'une amélioration en touche une",
+    "critPerRoll": "CRIT / jet",
+    "activatesTitle": "La quatrième ligne, ouverte par la première amélioration",
+    "activates": "+4 ajoute",
+    "maxRv": "RV max",
+    "unlocked": "Déverrouillé",
+    "astral": "Astrale",
+    "elixirTitle": "Élixir sanctifiant",
+    "rollTier": "Jet {tier}",
+    "inactive": "Inactive"
+  },
+  "card": {
+    "potentialTitle": "CV attendue à +{max} · meilleur cas {best}",
+    "equipped": "Équipé : {name}"
+  },
+  "toolbar": {
+    "all": "Tous",
+    "yes": "Oui",
+    "no": "Non",
+    "linesNow": "{n} lignes actuellement",
+    "any": "Tous",
+    "allSets": "Tous les sets",
+    "anyone": "N'importe qui",
+    "noAstral": "Sans marque astrale",
+    "noElixir": "Sans élixir",
+    "quoted": "« {text} »",
+    "mainPill": "Principale : {stat}",
+    "lines": "{n} lignes",
+    "best": "Meilleurs",
+    "label": "Filtrer les artéfacts",
+    "searchLabel": "Rechercher des sets ou des personnages",
+    "searchTitle": "Set ou personnage",
+    "equippedByTitle": "Équipé par : {names}",
+    "sortBy": "Trier par",
+    "descending": "Décroissant",
+    "ascending": "Croissant",
+    "slot": "Emplacement",
+    "presets": "Préréglages",
+    "bestTitle": "{n} meilleurs par emplacement, selon le tri actuel",
+    "newNone": "Aucune capture antérieure à comparer",
+    "newTitle": "Absent de la capture précédente : nouveau, ou amélioré depuis",
+    "zeroTitle": "5★ non équipés à +0",
+    "lowTitle": "4★ et 3★ déverrouillés, non équipés",
+    "low": "Artéfact 4★/3★",
+    "spareTitle": "5★ non équipés",
+    "spare": "5★ libres",
+    "maxTitle": "Niveau +20 uniquement",
+    "moreTitle": "Stat principale, sous-stats, lignes, niveau, verrou, emplacement, marque astrale, élixir",
+    "more": "Plus",
+    "substatsTitle": "Possède toutes celles-ci (la ligne ouverte à +4 compte)",
+    "linesLabel": "Lignes",
+    "min": "Min",
+    "max": "Max",
+    "location": "Porteur",
+    "remove": "Retirer {label}"
+  },
+  "page": {
+    "table": "Tableau",
+    "loadFailed": "Impossible de charger les artéfacts",
+    "loading": "Chargement des artéfacts",
+    "refreshFailed": "Actualisation impossible",
+    "shownTitle": "Affichés / artéfacts",
+    "countSuffix": "artéfacts",
+    "pngSize": "PNG de {px} px de large"
+  }
+}

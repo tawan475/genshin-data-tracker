@@ -1,0 +1,238 @@
+{
+  "stock": {
+    "all": "cukup untuk semua target",
+    "alone": "cukup untuk target ini",
+    "short": "kurang"
+  },
+  "readiness": {
+    "all": {
+      "label": "Siap",
+      "meaning": "Cukup setelah target di atasnya"
+    },
+    "alone": {
+      "label": "Siap sendiri",
+      "meaning": "Cukup sendiri, tidak setelah target di atasnya"
+    },
+    "short": {
+      "label": "Kurang",
+      "meaning": "Tidak cukup, bahkan sendiri"
+    },
+    "done": {
+      "label": "Selesai",
+      "meaning": "Tercapai"
+    },
+    "artifacts": {
+      "label": "Artefak",
+      "meaning": "Level tercapai, artefak belum"
+    }
+  },
+  "bracket": {
+    "tier": "Tingkat {tier}",
+    "bossLevel": "Boss Lv {level}",
+    "wl": "WL {wl}",
+    "withAr": "{base} (AR {ar})",
+    "assumed": "{base}, diasumsikan"
+  },
+  "unit": {
+    "days": "{n} hari",
+    "weeks": "{n} minggu"
+  },
+  "status": {
+    "locked": "Rank Adventure atau Level Dunia terlalu rendah untuk farming ini",
+    "noRate": "Tidak ada rata-rata drop rate untuk sumber ini: tidak ada perkiraan",
+    "notFarmed": "Tidak ada sumber resin"
+  },
+  "time": {
+    "hm": "{h}j {m}m",
+    "h": "{h}j",
+    "m": "{m}m",
+    "dh": "{d}h {h}j",
+    "d": "{d}h"
+  },
+  "craft": {
+    "kind": {
+      "convert": "Konversi",
+      "craft": "Craft",
+      "forge": "Forge"
+    },
+    "item": "{count} {name}",
+    "convertRow": "Konversi {input} menjadi {output}",
+    "craftRow": "Craft {output} dari {input}",
+    "forgeRow": "Forge {output} dari {input}",
+    "kindTitle": {
+      "convert": "Alkimia: konversi",
+      "craft": "Alkimia: crafting, tingkat terendah dulu",
+      "forge": "Toko Tempa: forge"
+    },
+    "listSeparator": ", ",
+    "notYet": "Belum: perlu {items} lagi (lakukan langkah di atas dulu)",
+    "doneRow": "Selesai: {row}",
+    "notEnough": "Tidak cukup: perlu {items} lagi",
+    "allDoneTitle": "Semua {n} selesai: isi tas seperti setelahnya",
+    "title": "Crafting",
+    "fold": "Lipat",
+    "unfold": "Yang dikonversi, di-craft dan di-forge oleh rencana",
+    "steps": "{n} langkah",
+    "inAll": "total {cost}",
+    "forgingTime": "Waktu forge {time} (di luar antrean tempa)",
+    "forging": "forge",
+    "allDone": "Semua selesai",
+    "hideTitle": "Sembunyikan crafting (bisa dimunculkan lagi di pengaturan Perencana)",
+    "hide": "Sembunyikan crafting",
+    "from": "dari",
+    "fewer": "Lebih sedikit",
+    "all": "Semua {n}"
+  },
+  "lock": {
+    "ar": "AR {ar}",
+    "wl": "WL {wl}",
+    "locked": "Terkunci"
+  },
+  "cards": {
+    "blossomExp": "Blossom of Revelation",
+    "blossomMora": "Blossom of Wealth",
+    "local": "Produk khas",
+    "common": "Musuh biasa",
+    "elite": "Musuh elite",
+    "other": "Lainnya",
+    "elsewhere": "Di tempat lain"
+  },
+  "sections": {
+    "free": "Tanpa resin",
+    "domain": "Domain · Ley Line",
+    "boss": "Boss",
+    "weekly": "Boss mingguan",
+    "artifact": "Artefak"
+  },
+  "groups": {
+    "ley": "Ley Line Blossom",
+    "mastery": "Domain of Mastery",
+    "forgery": "Domain of Forgery",
+    "blessing": "Domain of Blessing",
+    "boss": "Boss biasa",
+    "weekly": "Boss mingguan",
+    "local": "Produk khas",
+    "common": "Musuh biasa",
+    "elite": "Musuh elite",
+    "ore": "Material Enhancement Senjata",
+    "other": "Lainnya"
+  },
+  "people": {
+    "label": "Untuk siapa rencana ini",
+    "only": "{name}: hanya kartunya",
+    "all": "{name}: tampilkan semua"
+  },
+  "card": {
+    "runs": "{n} kali",
+    "claims": "{n} klaim",
+    "claimsWeekly": "{claims}, satu per minggu",
+    "atMost": "paling banyak {runs}",
+    "atMostPrefix": "paling banyak",
+    "runsShort": "{n} kali",
+    "claimsShort": "{n} klaim",
+    "resinRange": "{min}–{max} resin",
+    "resin": "{n} resin",
+    "condensed": "{n} condensed",
+    "condensedTitle": "{n} Condensed Resin",
+    "guaranteed": "drop rate-nya adalah minimum yang dijamin",
+    "lockTitle": "Belum: perlu {lock}",
+    "kind": {
+      "boss": "Boss",
+      "gem": "Boss yang menjatuhkannya",
+      "enemy": "Musuh yang menjatuhkannya",
+      "local": "Tumbuh di",
+      "artifact": "Domain artefak"
+    },
+    "elsewhereTitle": "Tidak ada domain yang menjatuhkan set ini",
+    "noRate": "Tanpa rate",
+    "paidTitle": "Domain yang direncanakan memberi {mora} Mora",
+    "paid": "+{n} dari domain",
+    "blockedTitle": "{n} konversi butuh Dream Solvent lagi",
+    "blocked": "{n} terhalang",
+    "blockedSr": ": butuh Dream Solvent lagi"
+  },
+  "weekday": {
+    "short": {
+      "sun": "Min",
+      "mon": "Sen",
+      "tue": "Sel",
+      "wed": "Rab",
+      "thu": "Kam",
+      "fri": "Jum",
+      "sat": "Sab"
+    },
+    "long": {
+      "sun": "Minggu",
+      "mon": "Senin",
+      "tue": "Selasa",
+      "wed": "Rabu",
+      "thu": "Kamis",
+      "fri": "Jumat",
+      "sat": "Sabtu"
+    }
+  },
+  "panel": {
+    "today": "Hari ini",
+    "schedule": "Jadwal",
+    "runsLine": "{runs} · {resin} resin ({condensed} condensed) · {days}",
+    "sources": "domain, boss biasa dan Ley Line",
+    "daily": "{n} resin per hari",
+    "dailyRefresh": "{n} resin per hari (180 + {r} × {per})",
+    "withHeld": "{days} dengan resin yang dimiliki",
+    "gems": "gem: {runs}, {resin} resin",
+    "partial": "beberapa sumber tidak punya drop rate",
+    "upperBound": "Drop boss Level Dunia 9 adalah minimum yang dijamin",
+    "weeklyClaims": "Boss mingguan: {claims} selama {weeks}",
+    "weeklyResin": "{resin} resin dengan diskon mingguan ({max} tanpa diskon)",
+    "weeklyPartial": "beberapa boss tidak punya drop rate",
+    "serverDay": "Hari server: {day}",
+    "serverDaySunday": "Hari server: {day} (semua domain buka)",
+    "resetIn": "reset 04:00 dalam {time}",
+    "forgeOff": "Hitung Mystic ore yang bisa di-forge dari chunk yang dimiliki",
+    "forgeLine": "Forge {item}: {mora} Mora, {time}",
+    "stillShort": "masih kurang {n}",
+    "totals": "Total",
+    "resin": "resin",
+    "dayUnit": "hari",
+    "refreshTitle": "{r} kali isi ulang resin per hari: {daily} resin per hari",
+    "perDay": "{n}/hari",
+    "weekly": "Mingguan",
+    "weekUnit": "minggu",
+    "lockedTitle": "{n} sumber terkunci oleh AR/WL",
+    "locked": "terkunci oleh AR/WL",
+    "view": "Tampilan farming",
+    "noWeeklyTitle": "Hanya target yang masih perlu farming tanpa boss mingguan: drop-nya sudah dimiliki atau bisa dikonversi (setelah target di atasnya)",
+    "noWeekly": "Tanpa boss mingguan",
+    "noneLeft": "Semua target masih butuh boss mingguan",
+    "showAll": "Tampilkan semua target",
+    "assumed": "AR/WL belum diatur: braket tertinggi diasumsikan",
+    "set": "Atur",
+    "nothing": "Tidak ada yang perlu di-farm",
+    "sectionLabel": "{label}: {resin} resin",
+    "show": "Tampilkan",
+    "hidden": "{n} tersembunyi",
+    "forge": "Forge dari chunk",
+    "pairTitle": "{runs} · {resin} resin · {days}",
+    "cards": "{n} kartu"
+  },
+  "event": {
+    "names": {
+      "abundance": "Luapan Materi",
+      "mastery": "Luapan Talenta",
+      "favor": "Luapan Berkah",
+      "wealth": "Overflowing Wealth",
+      "revelation": "Overflowing Revelation",
+      "leyLine": "Luapan Ley Line"
+    },
+    "rules": {
+      "abundance": "Semua buku talenta dan material senjata terbuka, dengan hadiah berlipat",
+      "mastery": "Domain of Mastery memberi hadiah berlipat",
+      "favor": "Domain of Blessing (artefak) memberi hadiah berlipat",
+      "wealth": "Blossom of Wealth memberi hadiah berlipat",
+      "revelation": "Blossom of Revelation memberi hadiah berlipat",
+      "leyLine": "Blossom of Wealth dan Revelation memberi hadiah berlipat"
+    },
+    "claims": "×{times} dengan Original Resin, {n} kali per hari",
+    "endsIn": "berakhir dalam {time}"
+  }
+}

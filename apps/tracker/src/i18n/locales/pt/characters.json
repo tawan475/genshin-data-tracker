@@ -1,0 +1,160 @@
+{
+  "gap": {
+    "level": "Nv. {level}",
+    "noWeapon": "Sem arma",
+    "weaponLevel": "Arma Nv. {level}",
+    "artifactCount": "{count}/5 artefatos",
+    "belowMax": "{n} artefato abaixo do máximo | {n} artefatos abaixo do máximo",
+    "noSet": "Sem bônus de conjunto completo"
+  },
+  "sort": {
+    "default": "Padrão",
+    "level": "Nível",
+    "constellation": "Constelação",
+    "talents": "Talentos",
+    "cv": "CV",
+    "rarity": "Raridade",
+    "element": "Elemento",
+    "name": "Nome",
+    "friendship": "Amizade",
+    "obtained": "Obtido"
+  },
+  "build": {
+    "all": "Build",
+    "ready": "Pronto",
+    "needs": "A melhorar",
+    "level": "Nv. < 90",
+    "weapon": "Arma < 90",
+    "artifacts": "Artefatos < máx.",
+    "set": "Sem bônus de conjunto"
+  },
+  "talentFilter": {
+    "all": "Talentos",
+    "nine": "Todos 9+",
+    "crowned": "Coroados",
+    "below": "Algum < 9"
+  },
+  "favorites": {
+    "notSaved": "Não salvo"
+  },
+  "stat": {
+    "maxHp": "Vida Máx.",
+    "baseAtk": "ATQ Base"
+  },
+  "talent": {
+    "crowned": "{title} · coroado"
+  },
+  "setBonus": {
+    "line": "{n} peças: {stats}",
+    "inactive": "{n} peças (inativo): {stats}",
+    "join": ", "
+  },
+  "friendship": {
+    "title": "Amizade {level} de 10"
+  },
+  "refinementTitle": "Refinamento {value} de 5",
+  "talentChips": "Ataque {auto} · Habilidade {skill} · Supremo {burst}",
+  "sortControl": {
+    "sort": "Ordenar",
+    "descending": "Ordem decrescente",
+    "ascending": "Ordem crescente"
+  },
+  "favorite": {
+    "named": "Favoritar {name}",
+    "on": "Favoritar",
+    "off": "Desfavoritar"
+  },
+  "stars": "{n}★",
+  "sets": "Conjuntos",
+  "pieceBonus": " peças: bônus",
+  "constellation": {
+    "title": "Constelação {level} de 6",
+    "lockedTitle": "C{n} · bloqueada",
+    "unlocked": "C{n} desbloqueada",
+    "locked": "C{n} bloqueada"
+  },
+  "timeline": {
+    "firstSeen": "Visto pela primeira vez",
+    "obtained": "Obtido",
+    "to": "até",
+    "less": "Menos",
+    "all": "Todos ({n})"
+  },
+  "talentShort": {
+    "auto": "Ataque",
+    "skill": "Habilidade",
+    "burst": "Supremo"
+  },
+  "talentRaised": "elevado para",
+  "crowned": "Coroado",
+  "weapon": {
+    "passive": "Passiva: {stats}",
+    "locked": "Bloqueada"
+  },
+  "stats": {
+    "allDmg": "+{value}% de todo o dano, fora do painel do jogo",
+    "label": "Atributos",
+    "weaponMissingTitle": "Arma mais nova que os dados do jogo: seus atributos ficam de fora",
+    "weaponMissing": "Atributos da arma omitidos",
+    "newerThanData": "Mais novo que os dados do jogo",
+    "none": "Sem atributos"
+  },
+  "card": {
+    "label": "{name}, {level}, C{constellation}, talentos {auto} {skill} {burst}",
+    "friendship": ", amizade {n}",
+    "toDo": "pendente: {gaps}",
+    "critDetail": "Crítico {rate}% / {dmg}% dos artefatos"
+  },
+  "piece": {
+    "levelTitle": "+{level} de {max} · {rarity}★",
+    "activatesAt4": "Ativa no +4",
+    "inactive": "(inativo)",
+    "rolls": "{n} rolagens",
+    "rollsTitle": "Rolagens",
+    "empty": ": vazio"
+  },
+  "toolbar": {
+    "weapon": "Arma",
+    "cards": "Cartões",
+    "list": "Lista",
+    "label": "Filtrar personagens",
+    "search": "Buscar",
+    "searchTitle": "Nome, elemento, arma ou conjunto",
+    "view": "Exibição",
+    "chips": "Favoritos, elemento e raridade",
+    "favorites": "Favoritos",
+    "buildTitle": "Pronto: Nv. 90, arma Nv. 90, cinco artefatos no máximo, um bônus de conjunto completo",
+    "clear": "Limpar"
+  },
+  "table": {
+    "lv": "Nv.",
+    "c": "C",
+    "critTitle": "Taxa Crítica / Dano Crítico dos artefatos",
+    "crit": "Crít.",
+    "toDo": "Pendente",
+    "toDoList": "Pendente: {gaps}"
+  },
+  "detail": {
+    "toDo": "Pendente:",
+    "build": "Build",
+    "obtainedAt": "Obtido em {date}",
+    "noArtifacts": "Sem artefatos",
+    "history": "Histórico",
+    "loadFailed": "Falha ao carregar",
+    "none": "Nenhum"
+  },
+  "modal": {
+    "pngSize": "PNG {size}"
+  },
+  "page": {
+    "c6": "C6",
+    "level90": "Nv. 90+",
+    "crowns": "Coroas",
+    "crownsTitle": "Talentos no nível 10",
+    "loading": "Carregando",
+    "noSnapshots": "Nenhuma captura ainda",
+    "empty": "Sem personagens",
+    "import": "Importar",
+    "noMatches": "Nenhum resultado"
+  }
+}
