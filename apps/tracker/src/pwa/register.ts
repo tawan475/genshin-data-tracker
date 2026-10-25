@@ -1,12 +1,12 @@
 import { ref } from 'vue'
 
+import { createUpdateFlow } from './update-flow'
+
 /** A new build is installed and waiting; the banner offers to switch to it. */
 export const updateAvailable = ref(false)
 
 /** Set when the browser offers installation (Chromium); used by Settings. */
 export const installPrompt = ref<{ prompt: () => Promise<unknown> } | null>(null)
-
-let waiting: ServiceWorker | null = null
 
 export function isStandalone(): boolean {
   return (
@@ -29,10 +29,7 @@ export function registerServiceWorker(): void {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
       const offer = (worker: ServiceWorker | null) => {
-        if (worker && navigator.serviceWorker.controller) {
-          waiting = worker
-          updateAvailable.value = true
-        }
+        if (worker && navigator.serviceWorker.controller) updateAvailable.value = true
       }
       offer(registration.waiting)
       registration.addEventListener('updatefound', () => {
@@ -50,20 +47,19 @@ export function registerServiceWorker(): void {
     }
   })
 
-  // Only reload for an update the user accepted. A first visit also fires
-  // controllerchange (the new worker claims the page) and must not reload.
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!updateAccepted || reloading) return
-    reloading = true
-    window.location.reload()
-  })
+  navigator.serviceWorker.addEventListener('controllerchange', () => update.controllerChanged())
 }
 
-let updateAccepted = false
-let reloading = false
+const update = createUpdateFlow({
+  getWaiting: async () =>
+    'serviceWorker' in navigator
+      ? ((await navigator.serviceWorker.getRegistration())?.waiting ?? null)
+      : null,
+  reload: () => window.location.reload(),
+  setTimer: (fn, ms) => window.setTimeout(fn, ms),
+})
 
-/** Switches to the waiting build; the page reloads when it takes over. */
+/** Switches to the waiting build; the page reloads when it takes over (or soon anyway). */
 export function applyUpdate(): void {
-  updateAccepted = true
-  waiting?.postMessage('SKIP_WAITING')
+  void update.apply()
 }
