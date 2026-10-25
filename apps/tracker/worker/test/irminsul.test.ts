@@ -208,7 +208,7 @@ describe('sign in, upload, refresh, sign out', () => {
       uid: null,
       server: null,
       dashboardUrl: `${ORIGIN}/app`,
-      configUrl: `${ORIGIN}/app/settings?device=${row!.id}#devices`,
+      configUrl: `${ORIGIN}/app/settings/devices?device=${row!.id}`,
     }
     expect(tokens.whoami).toEqual(expected)
     expect((await whoami(tokens.access_token)).body).toEqual(expected)

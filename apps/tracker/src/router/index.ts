@@ -153,6 +153,19 @@ const router = createRouter({
           name: 'settings',
           component: () => import('@/views/app/SettingsView.vue'),
           meta: { auth: true, title: 'settings' },
+          beforeEnter: (to) =>
+            to.hash === '#devices' || to.query.device !== undefined
+              ? { name: 'settings-devices', query: to.query, replace: true }
+              : true,
+        },
+        // Irminsul's Configure button (README "Sign in from irminsul") opens
+        // `?device=<sid>`; shipped builds still open it on Settings, as
+        // `/app/settings?device=<sid>#devices`.
+        {
+          path: 'settings/devices',
+          name: 'settings-devices',
+          component: () => import('@/views/app/DevicesView.vue'),
+          meta: { auth: true, title: 'devices' },
         },
         {
           path: 'staff',
@@ -243,12 +256,8 @@ const router = createRouter({
               'overview',
               () => import('@/views/account/OverviewView.vue'),
             ),
-            account(
-              'progression',
-              'account-progression',
-              'progression',
-              () => import('@/views/account/ProgressionView.vue'),
-            ),
+            // Folded into Overview (its monthly analysis is there now).
+            { path: 'progression', redirect: { name: 'account-overview' } },
             account(
               'characters',
               'account-characters',

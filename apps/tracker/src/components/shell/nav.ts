@@ -13,8 +13,6 @@ import {
   Sparkles,
   Swords,
   Trophy,
-  TrendingUp,
-  Upload,
   UserCog,
   Users,
   type LucideIcon,
@@ -45,7 +43,6 @@ export interface AccountSection {
 /** The sections of one Genshin account, in navigation order. */
 export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-overview', label: 'overview', icon: LayoutDashboard, primary: true },
-  { name: 'account-progression', label: 'progression', icon: TrendingUp },
   { name: 'account-characters', label: 'characters', icon: Users, primary: true },
   { name: 'account-artifacts', label: 'artifacts', icon: Gem, primary: true },
   { name: 'account-weapons', label: 'weapons', icon: Swords },
@@ -55,7 +52,6 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-anecdotes', label: 'anecdotes', icon: BookOpen },
   { name: 'account-wishes', label: 'wishes', icon: Sparkles },
   { name: 'account-snapshots', label: 'snapshots', icon: History },
-  { name: 'account-import', label: 'import', icon: Upload },
   { name: 'account-settings', label: 'manage', icon: UserCog },
 ]
 

@@ -5,8 +5,8 @@ import { useIntervalFn } from '@vueuse/core'
 import { Clock, Eye, History, Upload } from 'lucide-vue-next'
 import ChangeValue from '@/components/overview/ChangeValue.vue'
 import LowRarityStat from '@/components/overview/LowRarityStat.vue'
-import MonthlyAnalysis from '@/components/overview/MonthlyAnalysis.vue'
 import DetailedProgression from '@/components/progression/DetailedProgression.vue'
+import MonthlyAnalysisCard from '@/components/progression/MonthlyAnalysisCard.vue'
 import OverviewSkeleton from '@/components/overview/OverviewSkeleton.vue'
 import RecentSnapshots from '@/components/overview/RecentSnapshots.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
@@ -285,7 +285,7 @@ const importRoute = computed(() => ({
         default-group="snapshot"
       />
       <div class="grid items-start gap-6 xl:grid-cols-3">
-        <MonthlyAnalysis :days="history.days" class="min-w-0 xl:col-span-2" />
+        <MonthlyAnalysisCard :snapshots="list" class="min-w-0 xl:col-span-2" />
         <RecentSnapshots :snapshots="list" :account-id="account.id" :now="nowMs" class="min-w-0" />
       </div>
     </div>

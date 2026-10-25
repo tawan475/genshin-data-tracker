@@ -44,7 +44,6 @@ function readHint(id: number): AccountHint | null {
 /** What each account page loads first, by its path segment after `/app/a/:id`. */
 const PAGES: Record<string, (hint: AccountHint) => Promise<unknown>[]> = {
   '': (h) => [loadSnapshots(h)],
-  progression: (h) => [loadSnapshots(h)],
   snapshots: (h) => [loadSnapshots(h)],
   characters: (h) => [loadLatestInventory(h)],
   weapons: (h) => [loadLatestInventory(h)],

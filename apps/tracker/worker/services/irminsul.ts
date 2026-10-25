@@ -121,7 +121,7 @@ const ACCOUNT_COLUMNS = `a.id AS account_id, a.name AS account_name, a.uid AS ac
 
 /** The page that sets this session's upload target: its row in Settings → Devices. */
 export function configUrl(origin: string, sid: number): string {
-  return new URL(`/app/settings?device=${sid}#devices`, origin).href
+  return new URL(`/app/settings/devices?device=${sid}`, origin).href
 }
 
 export function whoamiOf(origin: string, sid: number, row: TargetRow): IrminsulWhoami {

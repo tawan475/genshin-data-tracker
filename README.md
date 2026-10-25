@@ -582,8 +582,9 @@ shared with irminsul; responses only gain fields. Code:
 5. `GET /api/irminsul/whoami` and `POST /api/irminsul/import` take
    `Authorization: Bearer <access>`. whoami answers the verify-key fields
    (`accountId, accountName, uid, server, dashboardUrl`) plus `scope` (`uid` |
-   `account`), `user` and `configUrl`: `/app/settings?device=<sid>#devices`,
-   that session's row in Settings → Devices, the only place its target is
+   `account`), `user` and `configUrl`: `/app/settings/devices?device=<sid>`
+   (the old `/app/settings?device=<sid>#devices` redirects there), that
+   session's row in Settings → Devices, the only place its target is
    changed (`PATCH /api/auth/sessions/:id {upload: {mode: "uid"} | {mode:
    "account", account_id}}`, irminsul rows only). The import is
    `import-by-key`'s, shared code and all (`services/upload-as.ts`): uid mode
