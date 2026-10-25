@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="theme-color" content="#f8fafc" />
     <script>
+      // The site moved to teyvat.me: the old address (still the API for
+      // installed irminsul copies) sends its pages there, path and all.
+      if (location.hostname === 'genshin-tracker.475.dev') {
+        location.replace('https://teyvat.me' + location.pathname + location.search + location.hash)
+      }
       // Theme before first paint: the user's choice, else the OS preference.
       // The public pages (/, /login, /register) are always dark (lib/theme.ts).
       ;(function () {

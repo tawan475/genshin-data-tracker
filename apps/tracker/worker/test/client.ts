@@ -2,7 +2,7 @@ import type { Good, MeResponse } from '@gdt/shared'
 import { createExecutionContext, env, SELF, waitOnExecutionContext } from 'cloudflare:test'
 import worker from '../index'
 
-export const ORIGIN = 'https://genshin-tracker.475.dev'
+export const ORIGIN = 'https://teyvat.me'
 
 let clients = 0
 

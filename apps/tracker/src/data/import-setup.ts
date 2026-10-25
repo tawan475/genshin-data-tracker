@@ -10,8 +10,8 @@ import { serverLabel } from './overview'
 
 /**
  * The base URL Irminsul posts to. It appends `/genshin-accounts-public/...`
- * itself, so this is the site's own `/api` (https://genshin-tracker.475.dev/api
- * in production).
+ * itself, so this is the site's own `/api` (https://teyvat.me/api
+ * in production; the old https://genshin-tracker.475.dev/api still works).
  */
 export function trackerApiUrl(): string {
   return `${window.location.origin}/api`

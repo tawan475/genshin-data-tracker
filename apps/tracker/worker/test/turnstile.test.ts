@@ -11,7 +11,7 @@ import { Client, withEnv } from './client'
 
 const db = getDb(env.DB)
 const PASSWORD = 'correct horse battery staple'
-const HOST = 'genshin-tracker.475.dev'
+const HOST = 'teyvat.me'
 
 /** Made-up keys: the action and hostname are checked for them. */
 const KEYS = { TURNSTILE_SITE_KEY: 'test-site-key', TURNSTILE_SECRET_KEY: 'test-secret-key' }

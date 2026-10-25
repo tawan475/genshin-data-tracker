@@ -25,7 +25,13 @@ interface EmailEnv {
 }
 
 export const BRAND = 'Genshin Tracker'
-export const SITE_ORIGIN = 'https://genshin-tracker.475.dev'
+export const SITE_ORIGIN = 'https://teyvat.me'
+/**
+ * The address the site had before teyvat.me. It still serves the API
+ * (installed irminsul copies post there) and sends pages on to SITE_ORIGIN
+ * (index.html), so a request from it is still this site.
+ */
+export const OLD_SITE_ORIGIN = 'https://genshin-tracker.475.dev'
 const DEFAULT_FROM = 'no-reply@475.dev'
 
 const emailEnv = (env: Env) => env as unknown as EmailEnv
@@ -57,7 +63,7 @@ const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]'])
 
 /**
  * The origin links in a mail point at. The request's own origin only when it
- * is this site (SITE_URL, else the production origin) or loopback (`vite
+ * is this site (SITE_URL, else the production origin or its old address) or loopback (`vite
  * dev`): a forged Host must never put a reset token in a link to someone
  * else's server. A loopback link sends the token to the reader's own machine,
  * which is why it is safe to allow.
@@ -65,7 +71,7 @@ const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]'])
 export function linkOrigin(env: Env, requestUrl: string): string {
   const site = originOf(emailEnv(env).SITE_URL) ?? SITE_ORIGIN
   const request = originOf(requestUrl)
-  if (request === site || request === SITE_ORIGIN) return request
+  if (request === site || request === SITE_ORIGIN || request === OLD_SITE_ORIGIN) return request
   if (request && LOOPBACK.has(new URL(request).hostname)) return request
   return site
 }

@@ -3,7 +3,15 @@
 Tracks Genshin Impact inventory snapshots (GOOD format) uploaded by
 [irminsul](https://github.com/tawan475/irminsul) or imported by hand. One
 Cloudflare Worker serves the Vue dashboard as static assets and the API under
-`/api`, backed by D1. Production: https://genshin-tracker.475.dev
+`/api`, backed by D1. Production: https://teyvat.me
+
+The old address, https://genshin-tracker.475.dev, is a second custom domain
+on the same Worker: its `/api` keeps answering (installed irminsul copies
+post there), and `index.html` sends its pages on to teyvat.me, path and all.
+Cookies are per host, so people sign in again once on teyvat.me. Moving the
+host needs, outside this repo: the `teyvat.me` zone active on Cloudflare,
+the CI token allowed on it, the Discord/Google redirect URIs and the
+Turnstile hostname below, and gi-cdn's `ALLOWED_ORIGINS`.
 
 ## Layout
 
@@ -515,14 +523,16 @@ set, nothing changes. Code: `worker/lib/oauth.ts` (flow, cookies),
 
 1. Discord: <https://discord.com/developers/applications> → New Application →
    OAuth2 → Redirects: add
+   `https://teyvat.me/api/auth/oauth/discord/callback` and the old
    `https://genshin-tracker.475.dev/api/auth/oauth/discord/callback` (and
    `http://localhost:5173/api/auth/oauth/discord/callback` to try the real
    one locally). Copy the Client ID; Reset Secret for the Client Secret.
 2. Google: <https://console.cloud.google.com> → new project → Google Auth
    Platform (OAuth consent screen): External; app name, support email,
-   authorized domain `475.dev`, developer contact; Data access: `openid`,
+   authorized domains `teyvat.me` and `475.dev`, developer contact; Data access: `openid`,
    `.../auth/userinfo.email`, `.../auth/userinfo.profile`; Clients → Create
    client → Web application → Authorized redirect URIs:
+   `https://teyvat.me/api/auth/oauth/google/callback`, the old
    `https://genshin-tracker.475.dev/api/auth/oauth/google/callback` (and the
    localhost one). Audience → Publish app (these scopes need no review).
 3. From `apps/tracker`: `pnpm exec wrangler secret put DISCORD_CLIENT_ID`
@@ -686,7 +696,7 @@ the app learns the site key from `GET /api/auth/oauth/providers`
    have the widget before the server asks for it (old ones get "Reload the
    page to sign in").
 2. Dashboard → Turnstile → Add widget: name "Genshin Tracker", hostname
-   `genshin-tracker.475.dev`, mode **Managed**, no pre-clearance. Copy the
+   `teyvat.me` and `genshin-tracker.475.dev`, mode **Managed**, no pre-clearance. Copy the
    site key and the secret key.
 3. From `apps/tracker`: `pnpm exec wrangler secret put TURNSTILE_SITE_KEY`, then
    `TURNSTILE_SECRET_KEY` (paste at the hidden prompt). Both at once: with
@@ -795,7 +805,7 @@ Repository secrets (Settings → Secrets and variables → Actions):
 | Secret | What |
 |---|---|
 | `GAME_DATA_DEPLOY_KEY` | Private half of a **read-only deploy key** on `tawan475/genshin-game-data` (install the private game data). Or `GAME_DATA_TOKEN`: a fine-grained token with Contents: read on that repository |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API token from the "Edit Cloudflare Workers" template plus **Account · D1 · Edit**, for this account and the `475.dev` zone (optional: without it CI doesn't deploy) |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token from the "Edit Cloudflare Workers" template plus **Account · D1 · Edit**, for this account and the `teyvat.me` and `475.dev` zones (optional: without it CI doesn't deploy) |
 | `CLOUDFLARE_ACCOUNT_ID` | The Cloudflare account id (`wrangler whoami`) |
 
 Settings → Actions → General: "Allow GitHub Actions to create and approve

@@ -398,7 +398,7 @@ const ownerLine = computed(() =>
                 <span>{{ formatDate(takenAt) }}</span>
                 <span class="opacity-60">·</span>
               </template>
-              <span>genshin-tracker.475.dev</span>
+              <span>teyvat.me</span>
             </p>
           </div>
         </div>

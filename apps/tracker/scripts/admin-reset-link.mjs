@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const VALID_MS = 24 * 60 * 60 * 1000
-const PROD_SITE = 'https://genshin-tracker.475.dev'
+const PROD_SITE = 'https://teyvat.me'
 const DEV_SITE = 'http://localhost:5173'
 
 const args = process.argv.slice(2)
