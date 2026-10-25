@@ -28,6 +28,17 @@ export function useConstellationBoosts(key: () => string): ComputedRef<Constella
   return computed(() => (planner.value ? constellationBoosts(planner.value, key()) : null))
 }
 
+/** The same for any character (a roster): a lookup by key, null until the data has loaded. */
+export function useConstellationBoostTable(): ComputedRef<
+  ((key: string) => ConstellationBoosts | null) | null
+> {
+  load()
+  return computed(() => {
+    const data = planner.value
+    return data ? (key: string) => constellationBoosts(data, key) : null
+  })
+}
+
 /**
  * The Crown of Insight's icon (the planner data's `crown` material, as the
  * game names it), for crowned talents; '' until the data has loaded.

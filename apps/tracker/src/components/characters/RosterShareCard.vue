@@ -3,6 +3,7 @@ import { computed, provide } from 'vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import ItemArt from '@/components/ui/ItemArt.vue'
 import { TILE_CHIP } from '@/components/ui/item-tile'
+import { talentLevels, talentTitle, type TalentLevel } from '@/data/character-build'
 import type { CharacterView } from '@/data/characters'
 import { characterIcon } from '@/lib/assets'
 import { formatDate } from '@/lib/format'
@@ -18,11 +19,13 @@ import {
   rosterWidth,
 } from './roster-card'
 import { CARD_STILL, CARD_THEMES, type CardOwner, type CardTheme } from './share-card'
+import { useConstellationBoostTable } from './use-boosts'
 
 /**
  * Every character on one picture (the Characters page's roster share): the
  * game's bag cell per character (rarity art, portrait, element, the
- * constellation chip, "Lv. 90" on the cream strip), under a header with the
+ * constellation chip, the talents as the game shows them, "Lv. 90" on the
+ * cream strip), under a header with the
  * owner, the counts by element and rarity, and the capture date with the
  * site. On the share card's palette (CARD_THEMES), in its theme. Its width
  * follows the roster (roster-card `rosterColumns`), its height is as laid
@@ -64,6 +67,30 @@ const ownerLine = computed(() =>
     props.owner.uid ? `UID ${props.owner.uid}` : null,
   ].filter((part): part is string => !!part),
 )
+// Talents as the game shows them: C3/C5 boosts included (base levels until the data loads).
+const boostTable = useConstellationBoostTable()
+const talents = computed(
+  () =>
+    new Map(
+      props.characters.map((c) => [
+        c.key,
+        talentLevels(c.talent, c.constellation, boostTable.value?.(c.key) ?? null),
+      ]),
+    ),
+)
+/** A crowned talent is the game's gold chip; a boosted one is cyan. */
+function talentTone(t: TalentLevel): string {
+  return t.crowned ? '' : t.from ? 'text-talent-boost' : 'text-white'
+}
+function tileTitle(c: CharacterView): string {
+  return [
+    c.name,
+    formatLevel(c.level, c.ascension),
+    `C${c.constellation}`,
+    ...(talents.value.get(c.key) ?? []).map(talentTitle),
+  ].join(' · ')
+}
+
 const RARITY_TEXT: Record<number, string> = { 5: 'text-rarity-5', 4: 'text-rarity-4' }
 const PILL = 'flex h-[40px] items-center gap-[8px] rounded-full bg-(--card-pill) px-[16px]'
 
@@ -142,7 +169,7 @@ function initials(name: string): string {
         v-for="c in characters"
         :key="c.key"
         class="@container relative aspect-[80/98] rounded-[7cqw] shadow-[0_2px_6px_rgba(0,0,0,0.18)]"
-        :title="`${c.name} · ${formatLevel(c.level, c.ascension)} · C${c.constellation}`"
+        :title="tileTitle(c)"
       >
         <ItemArt :rarity="c.rarity" class="rounded-[7cqw]" />
         <FadeImage
@@ -168,6 +195,19 @@ function initials(name: string): string {
           :style="isMaxConstellation(c.constellation) ? CONSTELLATION_MAX_STYLE : undefined"
           >C{{ c.constellation }}</span
         >
+        <span
+          data-theme="dark"
+          class="absolute inset-x-0 bottom-[23cqw] flex justify-center gap-[2.5cqw]"
+        >
+          <span
+            v-for="t in talents.get(c.key)"
+            :key="t.key"
+            class="grid h-[16cqw] min-w-[23cqw] place-items-center rounded-[3.5cqw] bg-[#1e2433]/85 px-[2cqw] text-[12cqw] leading-none font-bold shadow-[0_0.5cqw_1.5cqw_rgba(0,0,0,0.35)]"
+            :class="talentTone(t)"
+            :style="t.crowned ? CONSTELLATION_MAX_STYLE : undefined"
+            >{{ t.level }}</span
+          >
+        </span>
         <span
           class="absolute right-0 bottom-[20.4cqw] size-[19cqw] bg-[radial-gradient(circle_19cqw_at_0_0,transparent_97%,#e9e5dc_100%)]"
         />

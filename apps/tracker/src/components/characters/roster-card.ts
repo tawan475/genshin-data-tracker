@@ -12,7 +12,7 @@ import type { Element } from '@/data/game-meta'
 export const ROSTER_TILE = 116
 export const ROSTER_GAP = 12
 export const ROSTER_PAD = 48
-export const ROSTER_MIN_COLUMNS = 8
+export const ROSTER_MIN_COLUMNS = 9
 export const ROSTER_MAX_COLUMNS = 14
 /** The hidden frame's viewport: wide enough for the most columns, tall enough for ~250 characters. */
 export const ROSTER_FRAME_WIDTH = 1920
