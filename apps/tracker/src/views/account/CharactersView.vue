@@ -38,6 +38,9 @@ import { useAccount, useReadOnly } from './context'
 const CharacterModal = defineAsyncComponent(
   () => import('@/components/characters/CharacterModal.vue'),
 )
+const RosterShareModal = defineAsyncComponent(
+  () => import('@/components/characters/RosterShareModal.vue'),
+)
 
 const account = useAccount()
 /** Staff Inspect: nothing here links to the owner's own pages. */
@@ -230,6 +233,14 @@ watch(
 )
 const player = computed(() => inventory.data.value?.good.gi_player ?? null)
 
+/** The roster share card (the list as filtered and sorted); mounted from its first open. */
+const rosterOpen = ref(false)
+const rosterUsed = ref(false)
+function openRoster() {
+  rosterUsed.value = true
+  rosterOpen.value = true
+}
+
 // Fetch and decode the open character's card images first, then both
 // neighbours' (after, so they don't slow the open one down), so stepping shows
 // the next one at once. Bounded: lib/image-preload keeps a few characters.
@@ -322,6 +333,7 @@ watch(
         :total="roster.total"
         :filtered="filtered"
         @clear="clearFilters"
+        @share="openRoster"
       />
 
       <UiPanel v-if="shown.length === 0" flush>
@@ -379,6 +391,15 @@ watch(
       :total="stepList.length"
       @close="close"
       @step="step"
+    />
+    <RosterShareModal
+      v-if="rosterUsed"
+      :open="rosterOpen"
+      :characters="shown"
+      :account="account"
+      :player-uid="player?.uid ?? null"
+      :ar="player?.ar ?? null"
+      @close="rosterOpen = false"
     />
   </div>
 </template>

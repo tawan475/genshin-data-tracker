@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "PNG {size}"
   },
+  "roster": {
+    "share": "Bagikan karakter",
+    "title": "Kartu karakter"
+  },
   "page": {
     "c6": "C6",
     "level90": "Lv 90+",

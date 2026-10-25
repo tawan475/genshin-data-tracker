@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "{size} PNG"
   },
+  "roster": {
+    "share": "分享角色一览",
+    "title": "角色一览"
+  },
   "page": {
     "c6": "6命",
     "level90": "90 级以上",

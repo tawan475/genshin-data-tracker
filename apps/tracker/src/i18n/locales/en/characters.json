@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "{size} PNG"
   },
+  "roster": {
+    "share": "Share roster",
+    "title": "Roster card"
+  },
   "page": {
     "c6": "C6",
     "level90": "Lv 90+",

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { LayoutGrid, List, Search, Star } from 'lucide-vue-next'
+import { LayoutGrid, List, Search, Share2, Star } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
@@ -45,7 +46,7 @@ const filters = defineModel<CharacterFilters>('filters', { required: true })
 const sort = defineModel<CharacterSort>('sort', { required: true })
 const direction = defineModel<SortDirection>('direction', { required: true })
 const view = defineModel<'grid' | 'list'>('view', { required: true })
-defineEmits<{ clear: [] }>()
+defineEmits<{ clear: []; share: [] }>()
 
 const weaponOptions = computed(() => [
   { value: 'all' as const, label: t('characters.toolbar.weapon') },
@@ -95,6 +96,9 @@ function toggleRarity(r: 5 | 4) {
         :label="$t('characters.toolbar.view')"
         icon-only
       />
+      <UiIconButton :label="$t('characters.roster.share')" @click="$emit('share')">
+        <Share2 class="size-5" aria-hidden="true" />
+      </UiIconButton>
     </div>
 
     <div

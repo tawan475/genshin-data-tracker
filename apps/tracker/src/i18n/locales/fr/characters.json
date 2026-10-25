@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "PNG {size}"
   },
+  "roster": {
+    "share": "Partager les personnages",
+    "title": "Carte des personnages"
+  },
   "page": {
     "c6": "C6",
     "level90": "Niv. 90+",

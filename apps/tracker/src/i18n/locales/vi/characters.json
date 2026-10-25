@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "PNG {size}"
   },
+  "roster": {
+    "share": "Chia sẻ nhân vật",
+    "title": "Thẻ nhân vật"
+  },
   "page": {
     "c6": "C6",
     "level90": "Cấp 90+",

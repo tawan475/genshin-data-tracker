@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "{size} PNG"
   },
+  "roster": {
+    "share": "Karakterleri paylaş",
+    "title": "Karakter kartı"
+  },
   "page": {
     "c6": "C6",
     "level90": "Sv. 90+",

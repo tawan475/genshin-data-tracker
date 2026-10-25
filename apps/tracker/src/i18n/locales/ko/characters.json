@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "{size} PNG"
   },
+  "roster": {
+    "share": "캐릭터 목록 공유",
+    "title": "캐릭터 목록"
+  },
   "page": {
     "c6": "C6",
     "level90": "Lv 90+",

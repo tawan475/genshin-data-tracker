@@ -146,6 +146,10 @@
   "modal": {
     "pngSize": "{size} PNG"
   },
+  "roster": {
+    "share": "キャラ一覧を共有",
+    "title": "キャラ一覧"
+  },
   "page": {
     "c6": "C6",
     "level90": "Lv.90+",
