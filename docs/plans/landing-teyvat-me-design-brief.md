@@ -7,7 +7,7 @@ Paste everything below the line into a new Claude Design session.
 Design the landing page for **teyvat.me**: one brand for two free tools for Genshin Impact players.
 
 1. **The tracker** (the website at teyvat.me). Your Genshin account over time.
-2. **The capture app** (a desktop program for Windows, Linux and macOS; Android is in progress). It reads your account when you log in and sends it to the tracker.
+2. **The capture app** (a desktop program for Windows, Linux and macOS; Android is in progress). It captures your account when you log in and exports it as GOOD JSON, for the tracker, Genshin Optimizer or any site that reads GOOD. No account needed; connecting it to teyvat.me is optional.
 
 The page has to sell both, and make clear that they work together: play the game, the app captures your account, and the tracker shows it.
 
@@ -24,7 +24,7 @@ Start from the Genshin Tracker Design System: https://claude.ai/artifact/XcdgwEX
 ## Sections (suggested order; improve it if you see a better one)
 
 1. **Hero.** Teyvat.me with one line covering both tools. Two actions: "Open the tracker" (or "Get started" when signed out, plus "Sign in") and "Download the app". Illustration: floating glass cards that look like the real app (a character card at Lv 90 · C2, an artifact with "CV 42.0", a wish pity counter, a progression sparkline).
-2. **How it works.** Three steps: start the app → log in to Genshin → your account appears on teyvat.me, updated each time you log in.
+2. **How it works.** Three steps: start the app → log in to Genshin → your account is exported. Connect the app to teyvat.me (optional) and it appears there, updated each time you log in.
 3. **The tracker.** Feature tiles, one line each:
    - Snapshots over time: characters, weapons, artifacts (crit value, roll value), materials.
    - Progression charts (Mora, Primogems, artifacts) per snapshot or month.
@@ -34,7 +34,7 @@ Start from the Genshin Tracker Design System: https://claude.ai/artifact/XcdgwEX
    - Share cards: a character build card, a whole-roster card, artifact cards (PNG).
    - Share an account with a friend (viewer or editor).
    - 15 languages, installable as an app, live updates across tabs.
-4. **The capture app.** What it does: reads the game's own network traffic on your computer, decodes your account (characters, weapons, artifacts, materials, achievements, wishes) and uploads it to the tracker each time you log in (live sync while you play is coming; don't headline it). You sign in once with your teyvat.me account. It never touches the game's files or memory and needs no mods. One honest line: start it before the game (it can't read a session it didn't see begin), and on Windows it asks for administrator rights, because packet capture needs them. Platform badges, Windows first (the main, best-tested one): "Windows · Linux · macOS", plus Android "in progress". The download button says "GitHub Releases" and its link must be easy to swap: for now it points at https://github.com/tawan475/irminsul/releases/latest (the same app under its old name; it updates itself to Teyvat.me later). Don't write "open source" on the app yet; that waits for its repo going public. A glass mock-up of the app's window is a mood piece (the desktop UI is being redesigned). Use today's real labels: "Data decrypting", "Signed in as …" and an "Auto export to tracker" toggle.
+4. **The capture app.** What it does: reads the game's own network traffic on your computer, decodes your account (characters, weapons, artifacts, materials, achievements, wishes) and exports it as GOOD JSON, for Genshin Optimizer and any site that reads GOOD. **It works without an account: capture first.** Connecting it to teyvat.me (sign in once, then it uploads each time you log in) is the best way to use it with the tracker, but always optional (live sync while you play is coming; don't headline it). It never touches the game's files or memory and needs no mods. One honest line: start it before the game (it can't read a session it didn't see begin), and on Windows it asks for administrator rights, because packet capture needs them. Platform badges, Windows first (the main, best-tested one): "Windows · Linux · macOS", plus Android "in progress". The download button says "GitHub Releases" and its link must be easy to swap: for now it points at https://github.com/tawan475/irminsul/releases/latest (the same app under its old name; it updates itself to Teyvat.me later). Don't write "open source" on the app yet; that waits for its repo going public. A glass mock-up of the app's window is a mood piece (the desktop UI is being redesigned). Use today's real labels: "Data decrypting", "Signed in as …" and an "Auto export to tracker" toggle.
 5. **Privacy.** Short points: your data is yours, export it any time (GOOD format, works with Genshin Optimizer), delete your account any time.
 6. **FAQ** (collapsible): Is it free? Does it modify the game? What does the app read? Why does it need administrator rights on Windows? Do I need the app (no: you can import GOOD files by hand)? Which servers (all: America, Europe, Asia, TW/HK/MO)?
 7. **Footer.** Links: Tracker, Download, GitHub, Discord, a language picker, and the disclaimer above.
