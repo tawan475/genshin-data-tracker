@@ -2,6 +2,7 @@
 import type { AccountResponse } from '@gdt/shared'
 import { computed } from 'vue'
 import { ChevronRight, Clock, Database, Eye, History } from 'lucide-vue-next'
+import UiBadge from '@/components/ui/UiBadge.vue'
 import {
   formatBytes,
   formatCompact,
@@ -85,7 +86,19 @@ const view = computed(() => {
   >
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
-        <h2 class="truncate font-display text-xl font-bold">{{ view.name }}</h2>
+        <h2 class="flex min-w-0 items-center gap-2">
+          <span class="truncate font-display text-xl font-bold">{{ view.name }}</span>
+          <UiBadge
+            v-if="account.owner"
+            :title="
+              $t('sharing.sharedBy', {
+                owner: account.owner,
+                role: $t(`sharing.role.${account.access ?? 'viewer'}`),
+              })
+            "
+            >{{ $t(`sharing.role.${account.access ?? 'viewer'}`) }}</UiBadge
+          >
+        </h2>
         <p v-if="view.uid || view.server" class="text-sm text-text-secondary">
           <span v-if="view.uid" class="tabular font-mono">{{ view.uid }}</span>
           <span v-if="view.uid && view.server" aria-hidden="true"> · </span>

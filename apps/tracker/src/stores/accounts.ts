@@ -1,4 +1,4 @@
-import type { AccountResponse } from '@gdt/shared'
+import type { AccountResponse, InvitationResponse } from '@gdt/shared'
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { api, type AccountInput } from '@/api'
@@ -24,6 +24,8 @@ import { useSession } from './session'
 export const useAccounts = defineStore('accounts', () => {
   const list = ref<AccountResponse[]>([])
   const loaded = ref(false)
+  /** Accounts others invited this user to share (account sharing), not accepted yet. */
+  const invitations = ref<InvitationResponse[]>([])
   let loading: Promise<void> | null = null
   let pending = new Map<number, AccountResponse>()
   /** The ETag of the newest whole list this tab has (shown or waiting). */
@@ -99,8 +101,9 @@ export const useAccounts = defineStore('accounts', () => {
       loaded.value = true
       readAt = Date.now()
       boot.then(
-        ({ accounts, accountsEtag }) => {
+        ({ accounts, accountsEtag, invitations: invited }) => {
           merge(accounts, { complete: true, etag: accountsEtag })
+          invitations.value = invited ?? []
           readAt = Date.now()
         },
         () => undefined,
@@ -109,8 +112,9 @@ export const useAccounts = defineStore('accounts', () => {
     }
     if (boot) {
       try {
-        const { accounts, accountsEtag } = await boot
+        const { accounts, accountsEtag, invitations: invited } = await boot
         merge(accounts, { complete: true, etag: accountsEtag })
+        invitations.value = invited ?? []
         loaded.value = true
         readAt = Date.now()
         return
@@ -119,6 +123,23 @@ export const useAccounts = defineStore('accounts', () => {
       }
     }
     await refresh()
+    await refreshInvitations()
+  }
+
+  /** Re-reads the invitations (a live `accounts` event, or after answering one). */
+  async function refreshInvitations() {
+    try {
+      invitations.value = await api.invitations()
+    } catch {
+      // Keep what we have; the next event tries again.
+    }
+  }
+
+  /** Accepts or declines an invite; accepting puts the account in the list. */
+  async function answerInvitation(accountId: number, accept: boolean) {
+    await (accept ? api.acceptInvitation(accountId) : api.declineInvitation(accountId))
+    invitations.value = invitations.value.filter((i) => i.accountId !== accountId)
+    if (accept) await refresh()
   }
 
   function ensureLoaded(): Promise<void> {
@@ -184,6 +205,7 @@ export const useAccounts = defineStore('accounts', () => {
 
   function clear() {
     list.value = []
+    invitations.value = []
     loaded.value = false
     loading = null
     setPending(new Map())
@@ -194,6 +216,9 @@ export const useAccounts = defineStore('accounts', () => {
   return {
     list,
     loaded,
+    invitations,
+    refreshInvitations,
+    answerInvitation,
     byId,
     currentEtag,
     merge,

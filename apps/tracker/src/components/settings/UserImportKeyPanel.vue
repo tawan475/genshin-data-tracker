@@ -65,15 +65,21 @@ async function revoke() {
 
 <template>
   <UiPanel :title="$t('settings.importKey.title')">
-    <div class="flex flex-col gap-4">
-      <CopyField :label="$t('common.trackerUrl')" :value="url" url />
+    <div class="flex flex-wrap items-end gap-x-6 gap-y-4">
+      <CopyField
+        class="min-w-0 flex-[999_1_28rem]"
+        :label="$t('common.trackerUrl')"
+        :value="url"
+        url
+      />
       <CopyField
         v-if="newKey"
+        class="min-w-0 basis-full"
         :label="$t('common.importKey')"
         :value="newKey"
         :note="$t('common.shownOnce')"
       />
-      <div class="flex flex-col gap-1.5">
+      <div class="flex min-w-0 flex-[1_1_16rem] flex-col gap-1.5">
         <span v-if="!newKey" class="text-sm font-medium text-text-secondary">{{
           $t('common.importKey')
         }}</span>
@@ -100,7 +106,7 @@ async function revoke() {
         </div>
       </div>
       <p
-        class="flex items-center gap-1.5 self-start text-sm text-text-muted"
+        class="flex basis-full items-center gap-1.5 text-sm text-text-muted"
         :title="$t('settings.importKey.routedTitle')"
       >
         <Info class="size-4 shrink-0" aria-hidden="true" />

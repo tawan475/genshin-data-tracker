@@ -470,8 +470,9 @@ describe('account list', () => {
     expect(first.headers.get('cache-control')).toBe('private, no-cache')
     const cost = first.headers.get('x-gdt-d1')!
     expect(cost).toMatch(/round-trips=1;/)
-    // Each account by the user index, plus the one latest snapshot by key.
-    expect(Number(/rows-read=(\d+)/.exec(cost)![1])).toBeLessThanOrEqual(4)
+    // Each account by the user index, plus the one latest snapshot by key,
+    // plus the probe of account_members' user index (accounts shared with them).
+    expect(Number(/rows-read=(\d+)/.exec(cost)![1])).toBeLessThanOrEqual(5)
     const etag = first.headers.get('etag')!
     expect(etag).toMatch(/^W\/"l\.[0-9a-f]{24}"$/)
     const list = (await first.json()) as AccountResponse[]

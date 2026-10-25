@@ -6,6 +6,9 @@
 import type {
   AchievementMarksResponse,
   AccountCreatedResponse,
+  AccountMemberResponse,
+  AccountRole,
+  InvitationResponse,
   AnecdoteMarksResponse,
   BootstrapResponse,
   AccountResponse,
@@ -180,6 +183,29 @@ export const api = {
       method: 'PATCH',
       json: { upload },
     }),
+
+  // --------------------------------------------------------- account sharing
+  /** The owner and everyone the account is shared with (pending invites too). */
+  accountMembers: (accountId: number) =>
+    requestJson<AccountMemberResponse[]>(`/api/accounts/${accountId}/members`),
+  inviteMember: (accountId: number, username: string, role: AccountRole) =>
+    requestJson<AccountMemberResponse[]>(`/api/accounts/${accountId}/members`, {
+      method: 'POST',
+      json: { username, role },
+    }),
+  setMemberRole: (accountId: number, userId: number, role: AccountRole) =>
+    requestJson<AccountMemberResponse[]>(`/api/accounts/${accountId}/members/${userId}`, {
+      method: 'PATCH',
+      json: { role },
+    }),
+  /** The owner removes someone (or cancels an invite); a member's own id: leave. */
+  removeMember: (accountId: number, userId: number) =>
+    requestJson<void>(`/api/accounts/${accountId}/members/${userId}`, { method: 'DELETE' }),
+  invitations: () => requestJson<InvitationResponse[]>('/api/invitations', { cache: 'no-store' }),
+  acceptInvitation: (accountId: number) =>
+    requestJson<void>(`/api/invitations/${accountId}/accept`, { method: 'POST' }),
+  declineInvitation: (accountId: number) =>
+    requestJson<void>(`/api/invitations/${accountId}/decline`, { method: 'POST' }),
 
   // -------------------------------------------------------- irminsul sign-in
   /** The /link page's Allow: answers the loopback callback (with the code) to go to. */

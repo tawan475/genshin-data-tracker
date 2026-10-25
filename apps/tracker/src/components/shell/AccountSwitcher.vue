@@ -3,7 +3,7 @@ import type { AccountResponse } from '@gdt/shared'
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
-import { Check, ChevronsUpDown, Plus, UserRound } from 'lucide-vue-next'
+import { Check, ChevronsUpDown, Mail, Plus, UserRound } from 'lucide-vue-next'
 import UiModal from '@/components/ui/UiModal.vue'
 import { t } from '@/i18n'
 import { useAccounts } from '@/stores/accounts'
@@ -34,6 +34,26 @@ const currentName = computed(() =>
   current.value ? accounts.displayName(current.value) : t('shell.switcher.select'),
 )
 
+/** The user's own accounts, then those shared with them (account sharing), each under a heading. */
+const groups = computed(() => {
+  const own = accounts.list.filter((a) => (a.access ?? 'owner') === 'owner')
+  const shared = accounts.list.filter((a) => (a.access ?? 'owner') !== 'owner')
+  return [
+    { key: 'own', label: null, list: own },
+    ...(shared.length ? [{ key: 'shared', label: t('sharing.sharedWithMe'), list: shared }] : []),
+  ]
+})
+const invited = computed(() => accounts.invitations.length)
+
+/** "Shared by player01 · Viewer", the tooltip of a shared account. */
+function sharedTitle(account: AccountResponse): string | undefined {
+  if (!account.owner) return account.uid ?? undefined
+  return t('sharing.sharedBy', {
+    owner: account.owner,
+    role: t(`sharing.role.${account.access ?? 'viewer'}`),
+  })
+}
+
 /** First letter of the name; else the UID's first digit. */
 function initial(account: AccountResponse): string {
   const name = account.name?.trim()
@@ -61,7 +81,7 @@ function onButton() {
     <!-- One button for both widths: collapsing clips it down to the initial. -->
     <button
       type="button"
-      class="flex min-h-10 w-full items-center gap-2 overflow-hidden rounded-md border border-border-default bg-surface-overlay px-3 text-left text-sm shadow-sm hover:border-border-strong"
+      class="relative flex min-h-10 w-full items-center gap-2 overflow-hidden rounded-md border border-border-default bg-surface-overlay px-3 text-left text-sm shadow-sm hover:border-border-strong"
       :aria-expanded="collapsed ? dialog : open"
       :aria-haspopup="collapsed ? 'dialog' : 'listbox'"
       :title="collapsed ? currentName : undefined"
@@ -74,6 +94,11 @@ function onButton() {
         <template v-if="current">{{ initial(current) }}</template>
         <UserRound v-else class="size-3.5" />
       </span>
+      <span
+        v-if="invited"
+        class="absolute top-1.5 left-6 size-2 rounded-full bg-accent ring-2 ring-surface-nav"
+        :title="$t('sharing.invitationsCount', { n: invited }, invited)"
+      />
       <span
         class="nav-fade min-w-0 flex-1 truncate font-medium"
         :class="collapsed ? 'opacity-0' : ''"
@@ -92,18 +117,43 @@ function onButton() {
       class="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-border-default bg-surface-raised py-1 shadow-overlay"
       role="listbox"
     >
+      <template v-for="group in groups" :key="group.key">
+        <p
+          v-if="group.label"
+          class="px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-text-muted uppercase"
+          :class="group.key === groups[0]?.key ? '' : 'mt-1 border-t border-border-default'"
+        >
+          {{ group.label }}
+        </p>
+        <RouterLink
+          v-for="account in group.list"
+          :key="account.id"
+          :to="targetFor(account.id)"
+          role="option"
+          :aria-selected="account.id === currentId"
+          class="flex min-h-9 items-center gap-2 px-3 text-sm hover:bg-surface-overlay"
+          :title="sharedTitle(account)"
+          @click="open = false"
+        >
+          <span class="min-w-0 flex-1 truncate">{{ accounts.displayName(account) }}</span>
+          <span v-if="account.owner" class="max-w-24 shrink-0 truncate text-xs text-text-muted">{{
+            account.owner
+          }}</span>
+          <Check
+            v-if="account.id === currentId"
+            class="size-4 text-accent-text"
+            aria-hidden="true"
+          />
+        </RouterLink>
+      </template>
       <RouterLink
-        v-for="account in accounts.list"
-        :key="account.id"
-        :to="targetFor(account.id)"
-        role="option"
-        :aria-selected="account.id === currentId"
-        class="flex min-h-9 items-center gap-2 px-3 text-sm hover:bg-surface-overlay"
-        :title="account.uid ?? undefined"
+        v-if="invited"
+        :to="{ name: 'home' }"
+        class="flex min-h-9 items-center gap-2 border-t border-border-default px-3 text-sm text-accent-text hover:bg-surface-overlay"
         @click="open = false"
       >
-        <span class="min-w-0 flex-1 truncate">{{ accounts.displayName(account) }}</span>
-        <Check v-if="account.id === currentId" class="size-4 text-accent-text" aria-hidden="true" />
+        <Mail class="size-4" aria-hidden="true" />
+        {{ $t('sharing.invitationsCount', { n: invited }, invited) }}
       </RouterLink>
       <RouterLink
         :to="{ name: 'account-new' }"
@@ -117,36 +167,63 @@ function onButton() {
 
     <UiModal :open="dialog" :title="$t('shell.accounts')" @close="dialog = false">
       <ul class="-mx-2 space-y-0.5">
-        <li v-for="account in accounts.list" :key="account.id">
+        <template v-for="group in groups" :key="group.key">
+          <li
+            v-if="group.label"
+            class="mt-2 px-2 pt-1 text-xs font-semibold tracking-wide text-text-muted uppercase"
+          >
+            {{ group.label }}
+          </li>
+          <li v-for="account in group.list" :key="account.id">
+            <RouterLink
+              :to="targetFor(account.id)"
+              class="flex min-h-11 items-center gap-3 rounded-lg px-2 text-sm hover:bg-surface-overlay"
+              :class="account.id === currentId ? 'bg-surface-overlay' : ''"
+              :aria-current="account.id === currentId ? 'true' : undefined"
+              :autofocus="account.id === currentId || undefined"
+              @click="dialog = false"
+            >
+              <span
+                class="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent/15 text-sm font-bold text-accent-text"
+                aria-hidden="true"
+              >
+                {{ initial(account) }}
+              </span>
+              <span class="min-w-0 flex-1 truncate font-medium">
+                {{ accounts.displayName(account) }}
+              </span>
+              <span
+                v-if="account.owner"
+                class="max-w-28 shrink-0 truncate text-xs text-text-muted"
+                :title="sharedTitle(account)"
+              >
+                {{ account.owner }}
+              </span>
+              <span
+                v-else-if="account.name && account.uid"
+                class="shrink-0 font-mono text-xs text-text-muted"
+                :title="$t('common.uid')"
+              >
+                {{ account.uid }}
+              </span>
+              <Check
+                v-if="account.id === currentId"
+                class="size-4 shrink-0 text-accent-text"
+                aria-hidden="true"
+              />
+            </RouterLink>
+          </li>
+        </template>
+        <li v-if="invited">
           <RouterLink
-            :to="targetFor(account.id)"
-            class="flex min-h-11 items-center gap-3 rounded-lg px-2 text-sm hover:bg-surface-overlay"
-            :class="account.id === currentId ? 'bg-surface-overlay' : ''"
-            :aria-current="account.id === currentId ? 'true' : undefined"
-            :autofocus="account.id === currentId || undefined"
+            :to="{ name: 'home' }"
+            class="flex min-h-11 items-center gap-3 rounded-lg px-2 text-sm text-accent-text hover:bg-surface-overlay"
             @click="dialog = false"
           >
-            <span
-              class="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent/15 text-sm font-bold text-accent-text"
-              aria-hidden="true"
-            >
-              {{ initial(account) }}
+            <span class="flex size-8 shrink-0 items-center justify-center" aria-hidden="true">
+              <Mail class="size-4" />
             </span>
-            <span class="min-w-0 flex-1 truncate font-medium">
-              {{ accounts.displayName(account) }}
-            </span>
-            <span
-              v-if="account.name && account.uid"
-              class="shrink-0 font-mono text-xs text-text-muted"
-              :title="$t('common.uid')"
-            >
-              {{ account.uid }}
-            </span>
-            <Check
-              v-if="account.id === currentId"
-              class="size-4 shrink-0 text-accent-text"
-              aria-hidden="true"
-            />
+            {{ $t('sharing.invitationsCount', { n: invited }, invited) }}
           </RouterLink>
         </li>
         <li class="mt-1 border-t border-border-default pt-1">

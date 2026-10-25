@@ -175,7 +175,8 @@
     "othersButtonTitle": "除本裝置外的所有裝置，包括裝置列表功能上線前登入的裝置",
     "browserOn": "{system} 上的 {browser}",
     "browserGeneric": "{system} 上的瀏覽器",
-    "unknownDevice": "未知裝置"
+    "unknownDevice": "未知裝置",
+    "all": "全部 {n}"
   },
   "deleteUser": {
     "title": "刪除使用者",

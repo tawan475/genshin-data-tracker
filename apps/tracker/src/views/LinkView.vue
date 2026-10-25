@@ -56,10 +56,12 @@ const problem = computed<Problem | null>(() => {
 
 const device = computed(() => (parsed.ok && parsed.value.device) || t('auth.link.thisPc'))
 const choices = computed(() =>
-  accounts.list.map((account) => ({ id: account.id, label: accounts.displayName(account) })),
+  accounts.list
+    .filter((account) => account.access !== 'viewer')
+    .map((account) => ({ id: account.id, label: accounts.displayName(account) })),
 )
 const mode = ref<'uid' | 'account'>('uid')
-const accountId = ref<number | null>(accounts.list[0]?.id ?? null)
+const accountId = ref<number | null>(choices.value[0]?.id ?? null)
 const busy = ref<'allow' | 'cancel' | null>(null)
 const done = ref(false)
 const error = ref('')

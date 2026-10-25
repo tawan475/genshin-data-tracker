@@ -1,7 +1,12 @@
-import { serverFromUid, type AccountResponse, type GenshinServer } from '@gdt/shared'
-import { and, eq } from 'drizzle-orm'
+import {
+  serverFromUid,
+  type AccountAccess,
+  type AccountResponse,
+  type GenshinServer,
+} from '@gdt/shared'
+import { and, eq, isNotNull, or } from 'drizzle-orm'
 import type { Db } from '../db/client'
-import { genshinAccounts } from '../db/schema'
+import { accountMembers, genshinAccounts } from '../db/schema'
 import { randomToken, sha256Hex } from '../lib/crypto'
 import { ApiError, notFound } from '../lib/http'
 import { D1Meter } from '../lib/meter'
@@ -10,32 +15,108 @@ import { metaOf, withLegacySchema } from './storage'
 
 export type AccountRow = typeof genshinAccounts.$inferSelect
 
-/** Loads an account only if `userId` owns it; anything else is a 404. */
-export async function loadOwnedAccount(
+/**
+ * What a route needs of the user on an account (account sharing,
+ * docs/plans/account-sharing.md): `view` any access, `edit` the owner or an
+ * editor, `own` the owner.
+ */
+export type AccountNeed = 'view' | 'edit' | 'own'
+
+export const ownerOnly = () =>
+  new ApiError(403, 'owner_only', "Only the account's owner can do this")
+export const sharedReadOnly = () =>
+  new ApiError(403, 'account_read_only', 'This account is shared with you to view only')
+
+/** 403 when `access` falls short of `need`. */
+export function requireAccess(access: AccountAccess, need: AccountNeed): void {
+  if (need === 'own' && access !== 'owner') throw ownerOnly()
+  if (need === 'edit' && access === 'viewer') throw sharedReadOnly()
+}
+
+/** The member row that gives `userId` access to the account (accepted invites only). */
+const memberOf = (userId: number) =>
+  and(
+    eq(accountMembers.accountId, genshinAccounts.id),
+    eq(accountMembers.userId, userId),
+    isNotNull(accountMembers.acceptedAt),
+  )
+
+/**
+ * Loads an account `userId` owns or was shared, with their `access`, in one
+ * query; 404 when they have none (a stranger can't tell it exists), 403 when
+ * it falls short of `need`.
+ */
+export async function loadAccount(
   db: Db,
   userId: number,
   accountId: number,
-): Promise<AccountRow> {
-  const [account] = await db
-    .select()
+  need: AccountNeed,
+): Promise<AccountRow & { access: AccountAccess }> {
+  const [row] = await db
+    .select({ account: genshinAccounts, role: accountMembers.role })
     .from(genshinAccounts)
-    .where(and(eq(genshinAccounts.id, accountId), eq(genshinAccounts.userId, userId)))
+    .leftJoin(accountMembers, memberOf(userId))
+    .where(
+      and(
+        eq(genshinAccounts.id, accountId),
+        or(eq(genshinAccounts.userId, userId), isNotNull(accountMembers.userId)),
+      ),
+    )
     .limit(1)
-  if (!account) throw notFound('Account')
-  return account
+  if (!row) throw notFound('Account')
+  const access: AccountAccess = row.account.userId === userId ? 'owner' : (row.role ?? 'viewer')
+  requireAccess(access, need)
+  return { ...row.account, access }
 }
 
 /**
- * Ownership check that reads one column, for routes that don't need the row
- * (`loadOwnedAccount` selects all of it, settings JSON included).
+ * The access check alone, reading two columns, for routes that don't need
+ * the row (`loadAccount` selects all of it, settings JSON included).
  */
-export async function assertOwnsAccount(db: Db, userId: number, accountId: number): Promise<void> {
+export async function assertAccount(
+  db: Db,
+  userId: number,
+  accountId: number,
+  need: AccountNeed,
+): Promise<AccountAccess> {
   const [row] = await db
-    .select({ id: genshinAccounts.id })
+    .select({ owner: genshinAccounts.userId, role: accountMembers.role })
     .from(genshinAccounts)
-    .where(and(eq(genshinAccounts.id, accountId), eq(genshinAccounts.userId, userId)))
+    .leftJoin(accountMembers, memberOf(userId))
+    .where(
+      and(
+        eq(genshinAccounts.id, accountId),
+        or(eq(genshinAccounts.userId, userId), isNotNull(accountMembers.userId)),
+      ),
+    )
     .limit(1)
   if (!row) throw notFound('Account')
+  const access: AccountAccess = row.owner === userId ? 'owner' : (row.role ?? 'viewer')
+  requireAccess(access, need)
+  return access
+}
+
+/**
+ * SQL for the accounts `user` (a bound parameter, `?1` by default) may use:
+ * owned ones (by the user index) and ones shared with them (by
+ * account_members' user index), each row `columns` (over `a`, the account,
+ * and whatever `join` adds) plus `role` ('owner' | 'editor' | 'viewer') and
+ * `owner_name` (NULL on owned ones), filtered by `where`, ordered by `a.id`
+ * (`columns` must start with it).
+ */
+export function accessibleAccountsSql(
+  columns: string,
+  { user = '?1', where = '1', join = '' }: { user?: string; where?: string; join?: string } = {},
+): string {
+  return `SELECT ${columns}, 'owner' AS role, NULL AS owner_name
+    FROM genshin_accounts AS a ${join}
+    WHERE a.user_id = ${user} AND (${where})
+  UNION ALL
+  SELECT ${columns}, m.role AS role, o.username AS owner_name
+    FROM account_members AS m JOIN genshin_accounts AS a ON a.id = m.account_id
+    JOIN users AS o ON o.id = a.user_id ${join}
+    WHERE m.user_id = ${user} AND m.accepted_at IS NOT NULL AND (${where})
+  ORDER BY 1`
 }
 
 export interface AccountListRow {
@@ -54,6 +135,8 @@ export interface AccountListRow {
   summary?: string | null
   meta: unknown
   live_sync: unknown
+  role: AccountAccess
+  owner_name: string | null
 }
 
 /** The account list's query (see listAccounts); `accountId` narrows it to one. */
@@ -65,12 +148,15 @@ export function accountListStatement(
 ): D1PreparedStatement {
   return d1
     .prepare(
-      `SELECT a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
+      accessibleAccountsSql(
+        `a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
          a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at,
-         ${legacy ? 's.summary, ' : ''}s.meta, ${LIVE_SYNC_SQL()}
-       FROM genshin_accounts AS a LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id
-       WHERE a.user_id = ?1 AND (?2 IS NULL OR a.id = ?2)
-       ORDER BY a.id`,
+         ${legacy ? 's.summary, ' : ''}s.meta, ${LIVE_SYNC_SQL()}`,
+        {
+          join: 'LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id',
+          where: '?2 IS NULL OR a.id = ?2',
+        },
+      ),
     )
     .bind(userId, accountId)
 }
@@ -97,6 +183,8 @@ export function accountsFromRows(rows: readonly AccountListRow[]): AccountRespon
             summary: metaOf(row).summary,
           },
     liveSync: liveSyncOn(row.live_sync),
+    access: row.role,
+    ...(row.owner_name !== null ? { owner: row.owner_name } : {}),
   }))
 }
 
@@ -174,6 +262,37 @@ export interface KeyAccount {
   server: GenshinServer | null
   /** The `liveSync` setting as stored (1, 0 or null: see liveSyncOn in services/live-sync). */
   live_sync?: unknown
+  /** The owner's user id: storage, quotas and the live journal count for them. */
+  user_id?: number
+  /** The uploader's access, on lists that include accounts shared with them. */
+  role?: AccountAccess
+}
+
+/**
+ * SQL: whether `user` may upload to (edit) `account`: its owner or an editor.
+ * Both are SQL expressions (bound parameters or columns).
+ */
+export const editableBy = (account: string, user: string) =>
+  `(EXISTS (SELECT 1 FROM genshin_accounts WHERE id = ${account} AND user_id = ${user})
+    OR EXISTS (SELECT 1 FROM account_members WHERE account_id = ${account} AND user_id = ${user}
+      AND role = 'editor' AND accepted_at IS NOT NULL))`
+
+/**
+ * Where a capture of `uid` goes among the uploader's accounts: their own with
+ * that UID, else the one shared with them as editor; null when neither (a
+ * user key then makes one). 403 when only a view-only shared one matches
+ * (no silent second account), 409 when two of one kind do.
+ */
+export function pickByUid(accounts: readonly KeyAccount[], uid: string): KeyAccount | null {
+  const matches = accounts.filter((a) => a.uid?.trim() === uid)
+  const own = matches.filter((a) => (a.role ?? 'owner') === 'owner')
+  if (own.length > 1) throw ambiguousUid(uid)
+  if (own.length === 1) return own[0]!
+  const editable = matches.filter((a) => a.role === 'editor')
+  if (editable.length > 1) throw ambiguousUid(uid)
+  if (editable.length === 1) return editable[0]!
+  if (matches.length) throw sharedReadOnly()
+  return null
 }
 
 /**
@@ -240,9 +359,9 @@ export async function findImportKeyOwner(
       .bind(hash),
     d1
       .prepare(
-        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()} FROM users AS u
-         JOIN genshin_accounts AS a ON a.user_id = u.id
-         WHERE u.import_key_hash = ?1 ORDER BY a.id`,
+        accessibleAccountsSql(`a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id`, {
+          user: '(SELECT id FROM users WHERE import_key_hash = ?1)',
+        }),
       )
       .bind(hash),
   ])
@@ -250,7 +369,8 @@ export async function findImportKeyOwner(
     | (KeyAccount & { user_id: number; suspended_at: unknown; uploads_blocked_at: unknown })
     | undefined
   if (ownAccount) {
-    const { user_id: userId, suspended_at, uploads_blocked_at, ...rest } = ownAccount
+    const { suspended_at, uploads_blocked_at, ...rest } = ownAccount
+    const userId = rest.user_id
     return {
       scope: 'account',
       account: rest,
@@ -283,16 +403,16 @@ export async function accountForUid(
   uid: string,
   accounts: readonly KeyAccount[],
 ): Promise<{ account: KeyAccount; created: boolean }> {
-  const matches = accounts.filter((a) => a.uid?.trim() === uid)
-  if (matches.length === 1) return { account: matches[0]!, created: false }
-  if (matches.length > 1) throw ambiguousUid(uid)
+  const picked = pickByUid(accounts, uid)
+  if (picked) return { account: picked, created: false }
   // A leaked user key must not mint accounts without end (the import rate
   // limit alone allows 60 a minute). Accounts made by hand are not capped.
-  if (accounts.length >= AUTO_ACCOUNT_LIMIT) {
+  const owned = accounts.filter((a) => (a.role ?? 'owner') === 'owner').length
+  if (owned >= AUTO_ACCOUNT_LIMIT) {
     throw new ApiError(
       409,
       'account_limit',
-      `You already have ${accounts.length} accounts, so a new one for UID ${uid} was not made. Create it yourself, or use its account key.`,
+      `You already have ${owned} accounts, so a new one for UID ${uid} was not made. Create it yourself, or use its account key.`,
     )
   }
 
@@ -309,7 +429,7 @@ export async function accountForUid(
       .bind(userId, uid, serverFromUid(uid), hash, Date.now()),
     d1
       .prepare(
-        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()} FROM genshin_accounts AS a
+        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id FROM genshin_accounts AS a
          WHERE a.user_id = ?1 AND a.uid = ?2`,
       )
       .bind(userId, uid),

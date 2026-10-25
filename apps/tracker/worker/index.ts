@@ -12,6 +12,7 @@ import { irminsul } from './routes/irminsul'
 import { irminsulOAuth } from './routes/irminsul-oauth'
 import { live } from './routes/live'
 import { liveAccounts, liveChanges } from './routes/live-sync'
+import { accountSharing, invitations } from './routes/sharing'
 import { me } from './routes/me'
 import { oauth } from './routes/oauth'
 import { progress } from './routes/progress'
@@ -58,6 +59,8 @@ app.route('/accounts', accounts)
 app.route('/accounts', progress)
 app.route('/accounts', wishAccounts)
 app.route('/accounts', liveAccounts)
+app.route('/accounts', accountSharing)
+app.route('/invitations', invitations)
 app.route('/wishes', wishSync)
 app.route('/wishes', wishProxy)
 app.route('/genshin-accounts-public', publicImport)

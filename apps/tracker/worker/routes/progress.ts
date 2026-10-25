@@ -39,8 +39,14 @@ import { getDb } from '../db/client'
 import type { AppEnv } from '../env'
 import { ApiError, idParam, parseJson } from '../lib/http'
 import { requireUser } from '../lib/session'
-import { assertOwnsAccount } from '../services/accounts'
-import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
+import { assertAccount } from '../services/accounts'
+import {
+  listenerOf,
+  listenerStatement,
+  notifyAccount,
+  notifyUser,
+  senderTab,
+} from '../services/live'
 
 const SELECT_MARKS =
   'SELECT achievement_id AS id FROM achievement_marks WHERE account_id = ?1 ORDER BY achievement_id'
@@ -151,7 +157,7 @@ export const progress = new Hono<AppEnv>()
 
   .get('/:id/achievement-marks', async (c) => {
     const id = idParam(c, 'id')
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const { results } = await c.env.DB.prepare(SELECT_MARKS).bind(id).all<{ id: number }>()
     return c.json<AchievementMarksResponse>({ done: results.map((r) => r.id) })
   })
@@ -160,7 +166,7 @@ export const progress = new Hono<AppEnv>()
   .patch('/:id/achievement-marks', async (c) => {
     const id = idParam(c, 'id')
     const body = await parseJson(c, achievementMarksPatch)
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'edit')
     const d1 = c.env.DB
     const statements: D1PreparedStatement[] = []
     if (body.done.length > 0) {
@@ -192,7 +198,7 @@ export const progress = new Hono<AppEnv>()
 
   .get('/:id/anecdote-marks', async (c) => {
     const id = idParam(c, 'id')
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const { results } = await c.env.DB.prepare(SELECT_ANECDOTE_MARKS).bind(id).all<{ id: number }>()
     return c.json<AnecdoteMarksResponse>({ done: results.map((r) => r.id) })
   })
@@ -201,7 +207,7 @@ export const progress = new Hono<AppEnv>()
   .patch('/:id/anecdote-marks', async (c) => {
     const id = idParam(c, 'id')
     const body = await parseJson(c, anecdoteMarksPatch)
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'edit')
     const d1 = c.env.DB
     const statements: D1PreparedStatement[] = []
     if (body.done.length > 0) {
@@ -232,18 +238,18 @@ export const progress = new Hono<AppEnv>()
       listenerStatement(d1, id),
     ])
     const rows = (results.at(-2)!.results ?? []) as { id: number }[]
-    notifyUser(
+    notifyAccount(
       c,
-      c.get('userId'),
-      { type: 'planner', accountId: id, ...senderTab(c) },
       listenerOf(results.at(-1)),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      c.get('userId'),
     )
     return c.json<AnecdoteMarksResponse>({ done: rows.map((r) => r.id) })
   })
 
   .get('/:id/planner-targets', async (c) => {
     const id = idParam(c, 'id')
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const { results } = await c.env.DB.prepare(SELECT_TARGETS).bind(id).all<TargetRow>()
     return c.json<PlannerTargetsResponse>({ targets: toTargets(results) })
   })
@@ -256,7 +262,7 @@ export const progress = new Hono<AppEnv>()
   .patch('/:id/planner-targets', async (c) => {
     const id = idParam(c, 'id')
     const body = await parseJson(c, plannerTargetsPatch)
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'edit')
     const d1 = c.env.DB
     const statements: D1PreparedStatement[] = []
     const removeGoals = body.remove.filter((r) => r.kind !== 'weapon')
@@ -337,18 +343,18 @@ export const progress = new Hono<AppEnv>()
       listenerStatement(d1, id),
     ])
     const rows = (results.at(-2)!.results ?? []) as unknown as TargetRow[]
-    notifyUser(
+    notifyAccount(
       c,
-      c.get('userId'),
-      { type: 'planner', accountId: id, ...senderTab(c) },
       listenerOf(results.at(-1)),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      c.get('userId'),
     )
     return c.json<PlannerTargetsResponse>({ targets: toTargets(rows) })
   })
 
   .get('/:id/planner-state', async (c) => {
     const id = idParam(c, 'id')
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const d1 = c.env.DB
     const [captured, adjustments, overrides] = await d1.batch([
       d1.prepare(`SELECT ${CAPTURED} AS captured`).bind(id),
@@ -366,7 +372,7 @@ export const progress = new Hono<AppEnv>()
   .patch('/:id/planner-state', async (c) => {
     const id = idParam(c, 'id')
     const body = await parseJson(c, plannerStatePatch)
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'edit')
     const d1 = c.env.DB
     const now = Date.now()
     const when = `${CAPTURED} = ?2`
@@ -481,18 +487,18 @@ export const progress = new Hono<AppEnv>()
     if ((state.capturedAt ?? 0) !== body.base) {
       throw new ApiError(409, 'capture_changed', 'A newer capture arrived; nothing was changed')
     }
-    notifyUser(
+    notifyAccount(
       c,
-      c.get('userId'),
-      { type: 'planner', accountId: id, ...senderTab(c) },
       listenerOf(listener),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      c.get('userId'),
     )
     return c.json<PlannerStateResponse>(state)
   })
 
   .get('/:id/planner-tasks', async (c) => {
     const id = idParam(c, 'id')
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const { results } = await c.env.DB.prepare(SELECT_TASKS).bind(id).all<TaskRow>()
     return c.json<PlannerTasksResponse>({ tasks: toTasks(results) })
   })
@@ -501,7 +507,7 @@ export const progress = new Hono<AppEnv>()
   .patch('/:id/planner-tasks', async (c) => {
     const id = idParam(c, 'id')
     const body = await parseJson(c, plannerTasksPatch)
-    await assertOwnsAccount(getDb(c.env.DB), c.get('userId'), id)
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'edit')
     const d1 = c.env.DB
     const statements: D1PreparedStatement[] = []
     if (body.remove.length > 0) {
@@ -541,11 +547,11 @@ export const progress = new Hono<AppEnv>()
       listenerStatement(d1, id),
     ])
     const rows = (results.at(-2)!.results ?? []) as unknown as TaskRow[]
-    notifyUser(
+    notifyAccount(
       c,
-      c.get('userId'),
-      { type: 'planner', accountId: id, ...senderTab(c) },
       listenerOf(results.at(-1)),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      c.get('userId'),
     )
     return c.json<PlannerTasksResponse>({ tasks: toTasks(rows) })
   })

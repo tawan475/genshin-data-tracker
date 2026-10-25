@@ -155,25 +155,21 @@ function edit(field: keyof typeof fields, value: string) {
       </UiButton>
     </template>
 
-    <dl v-if="session.me && !editing" class="flex flex-col divide-y divide-border-subtle">
-      <div
-        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
-      >
-        <dt class="text-text-secondary">{{ $t('settings.profile.userId') }}</dt>
+    <dl
+      v-if="session.me && !editing"
+      class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] gap-x-6 gap-y-4"
+    >
+      <div class="flex min-w-0 flex-col gap-1">
+        <dt class="text-sm text-text-muted">{{ $t('settings.profile.userId') }}</dt>
         <dd class="font-mono select-all">{{ session.me.id }}</dd>
       </div>
-      <div
-        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
-      >
-        <dt class="text-text-secondary">{{ $t('common.username') }}</dt>
+      <div class="flex min-w-0 flex-col gap-1">
+        <dt class="text-sm text-text-muted">{{ $t('common.username') }}</dt>
         <dd class="min-w-0 truncate font-mono">{{ session.me.username }}</dd>
       </div>
-      <div
-        v-if="emailFeatures"
-        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
-      >
-        <dt class="text-text-secondary">{{ $t('common.email') }}</dt>
-        <dd v-if="session.me.email" class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+      <div v-if="emailFeatures" class="flex min-w-0 flex-col gap-1">
+        <dt class="text-sm text-text-muted">{{ $t('common.email') }}</dt>
+        <dd v-if="session.me.email" class="flex min-w-0 flex-wrap items-center gap-2">
           <span class="min-w-0 truncate">{{ session.me.email }}</span>
           <UiBadge
             :tone="session.me.emailVerified ? 'success' : 'warning'"
@@ -210,12 +206,9 @@ function edit(field: keyof typeof fields, value: string) {
         </dd>
         <dd v-else class="text-text-muted" :title="$t('settings.profile.addEmailTitle')">—</dd>
       </div>
-      <div
-        v-else-if="session.me.email"
-        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0"
-      >
-        <dt class="text-text-secondary">{{ $t('common.email') }}</dt>
-        <dd class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+      <div v-else-if="session.me.email" class="flex min-w-0 flex-col gap-1">
+        <dt class="text-sm text-text-muted">{{ $t('common.email') }}</dt>
+        <dd class="flex min-w-0 flex-wrap items-center gap-2">
           <span class="min-w-0 truncate" :title="$t('settings.profile.alsoSignsIn')">{{
             session.me.email
           }}</span>

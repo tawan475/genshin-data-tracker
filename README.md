@@ -614,6 +614,44 @@ Import keys stay: released irminsul builds keep calling
 tools can build on keys, and irminsul keeps a saved key working until the user
 signs in.
 
+## Account sharing
+
+An owner shares an account by username (Manage → Account sharing; plan in
+`docs/plans/account-sharing.md`). Migration 0029 adds `account_members`
+(`account_id`, `user_id`, `role` viewer|editor, `invited_by`, `created_at`,
+`accepted_at`; NULL = a pending invite, gone after 14 days, deleted by
+maintenance). `genshin_accounts.user_id` stays the owner.
+
+- **Access** is checked per request in one query: `loadAccount` /
+  `assertAccount(db, user, account, need)` in `worker/services/accounts.ts`,
+  `need` = `view` (any access) | `edit` (owner, editor) | `own`. No access is
+  a 404, too little a 403 `account_read_only` / `owner_only`. Editors upload,
+  plan, mark achievements/anecdotes, set the Traveler and import wishes;
+  renaming, keys, the live-sync switch, deleting snapshots/chart points/wishes,
+  sharing and deleting the account are the owner's. `worker/test/sharing.test.ts`
+  walks every account route as stranger, viewer, editor: add a new route there.
+- **Routes** (`worker/routes/sharing.ts`): `GET/POST /api/accounts/:id/members`,
+  `PATCH/DELETE /api/accounts/:id/members/:userId` (a member deleting
+  themselves = leave), `GET /api/invitations`,
+  `POST /api/invitations/:accountId/accept|decline`. Limits: 8 members per
+  account, 20 pending invites per owner. Members see accepted members only.
+- **Lists**: `GET /api/accounts` and the bootstrap list owned and shared
+  accounts (`accessibleAccountsSql`, a UNION over both indexes) with `access`
+  and, on shared ones, `owner`; the bootstrap also answers `invitations`.
+- **Live**: `listenerStatement` reads the owner and every accepted member;
+  `notifyAccount` sends to each one listening, `notifyAccountLater` when the
+  write read none. Sharing changes send `accounts` to both sides.
+- **Uploads**: a user key / irminsul "Auto by UID" picks the uploader's own
+  account with the UID, else the one shared with them as editor
+  (`pickByUid`); a view-only match is 403 `account_read_only` (no silent
+  duplicate). "Always this account" may name a shared editor account
+  (`editableBy`). Storage, daily limits and gdt-live bytes count for the
+  account's owner.
+- **App**: shared accounts are grouped under "Shared with me" in the switcher
+  (a dot when invites wait; Home lists them with Accept/Decline); a viewer's
+  pages are read-only (`useReadOnly`, as staff Inspect), owner-only controls
+  check `useAccess()`.
+
 ## Human check (Turnstile)
 
 Cloudflare Turnstile on sign-up (`/register`, action `register`), password

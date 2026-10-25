@@ -1,0 +1,42 @@
+{
+  "section": "Teilen",
+  "sync": "Synchronisierung",
+  "title": "Konto teilen",
+  "sharedWithMe": "Mit mir geteilt",
+  "sharedBy": "Geteilt von {owner} · {role}",
+  "role": {
+    "owner": "Besitzer",
+    "viewer": "Betrachter",
+    "editor": "Bearbeiter"
+  },
+  "roleTitle": {
+    "viewer": "Sieht alles, ändert nichts",
+    "editor": "Lädt auch hoch, plant und hakt Erfolge ab"
+  },
+  "roleLabel": "Rolle",
+  "roleOf": "Rolle von {name}",
+  "you": "Du",
+  "pending": "Eingeladen",
+  "invitedTitle": "Wartet auf Zusage (14 Tage)",
+  "invite": "Einladen",
+  "invited": "Einladung gesendet",
+  "notInvited": "Nicht eingeladen",
+  "cancelInvite": "Zurückziehen",
+  "cancelTitle": "Einladung an {name} zurückziehen?",
+  "cancelDetail": "Sie kann dann nicht mehr angenommen werden.",
+  "removeTitle": "{name} entfernen?",
+  "removeDetail": "Der Zugriff auf dieses Konto endet sofort.",
+  "notRemoved": "Nicht entfernt",
+  "leave": "Verlassen",
+  "leaveTitle": "{name} verlassen?",
+  "leaveDetail": "Du verlierst den Zugriff, bis der Besitzer dich erneut einlädt.",
+  "notLeft": "Nicht verlassen",
+  "notLoaded": "Konnte nicht laden, wer dieses Konto sieht",
+  "limitTitle": "Mit höchstens {n} Personen teilbar",
+  "invitations": "Einladungen",
+  "invitationsCount": "{n} Einladung | {n} Einladungen",
+  "accept": "Annehmen",
+  "decline": "Ablehnen",
+  "accepted": "Konto hinzugefügt",
+  "answerFailed": "Konnte nicht auf die Einladung antworten"
+}

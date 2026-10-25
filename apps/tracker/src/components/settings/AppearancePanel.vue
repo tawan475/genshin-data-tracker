@@ -6,7 +6,7 @@ import AppearanceControls from './AppearanceControls.vue'
 </script>
 
 <template>
-  <UiPanel :title="$t('settings.appearance.title')">
-    <AppearanceControls />
+  <UiPanel>
+    <AppearanceControls inline />
   </UiPanel>
 </template>

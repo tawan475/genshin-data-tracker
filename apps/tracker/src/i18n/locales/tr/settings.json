@@ -175,7 +175,8 @@
     "othersButtonTitle": "Bu cihaz dışındaki tüm cihazlar, cihazlar listelenmeden önce giriş yapanlar dahil",
     "browserOn": "{system} üzerinde {browser}",
     "browserGeneric": "{system} üzerinde tarayıcı",
-    "unknownDevice": "Bilinmeyen cihaz"
+    "unknownDevice": "Bilinmeyen cihaz",
+    "all": "Tümü ({n})"
   },
   "deleteUser": {
     "title": "Kullanıcıyı sil",

@@ -25,7 +25,7 @@ import {
   type IrminsulClaims,
 } from '../lib/irminsul-auth'
 import { ACCESS_TTL_S, REFRESH_TTL_S, pruneSessionsStatement, requestOrigin } from '../lib/session'
-import type { KeyAccount, KeyBlock } from './accounts'
+import { accessibleAccountsSql, editableBy, type KeyAccount, type KeyBlock } from './accounts'
 import { revokeLiveSession } from './live'
 import { LIVE_SYNC_SQL } from './live-sync'
 
@@ -70,16 +70,14 @@ export async function createCode(
   const accountId = request.upload.mode === 'account' ? request.upload.account_id : null
   const [user, account, inserted] = await d1.batch<Record<string, unknown>>([
     d1.prepare('SELECT suspended_at FROM users WHERE id = ?1').bind(userId),
-    d1
-      .prepare('SELECT id FROM genshin_accounts WHERE id = ?1 AND user_id = ?2')
-      .bind(accountId, userId),
+    d1.prepare(`SELECT ?1 AS id WHERE ${editableBy('?1', '?2')}`).bind(accountId, userId),
     d1
       .prepare(
         `INSERT INTO oauth_codes (code_hash, user_id, challenge, redirect_uri, device_name,
            upload_mode, upload_account_id, created_at, expires_at)
          SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9
          WHERE (SELECT suspended_at FROM users WHERE id = ?2) IS NULL
-           AND (?7 IS NULL OR EXISTS (SELECT 1 FROM genshin_accounts WHERE id = ?7 AND user_id = ?2))
+           AND (?7 IS NULL OR ${editableBy('?7', '?2')})
          RETURNING 1 AS ok`,
       )
       .bind(
@@ -167,7 +165,9 @@ export function whoamiOf(origin: string, sid: number, row: TargetRow): IrminsulW
 const SESSION_SQL = `SELECT s.upload_mode, s.upload_account_id, u.username, u.suspended_at,
     u.uploads_blocked_at, ${ACCOUNT_COLUMNS}
   FROM user_sessions AS s JOIN users AS u ON u.id = s.user_id
-  LEFT JOIN genshin_accounts AS a ON a.id = s.upload_account_id AND a.user_id = s.user_id
+  LEFT JOIN genshin_accounts AS a ON a.id = s.upload_account_id
+    AND (a.user_id = s.user_id OR EXISTS (SELECT 1 FROM account_members AS m
+      WHERE m.account_id = a.id AND m.user_id = s.user_id AND m.accepted_at IS NOT NULL))
   WHERE s.id = ?1 AND s.user_id = ?2 AND s.method = 'irminsul' AND s.revoked_at IS NULL
     AND s.expires_at > ?3 AND u.token_version = ?4`
 
@@ -208,8 +208,7 @@ export async function loadUploadSession(
     d1.prepare(SESSION_SQL).bind(claims.sid, claims.userId, Date.now(), claims.ver),
     d1
       .prepare(
-        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()} FROM genshin_accounts AS a
-         WHERE a.user_id = ?1 ORDER BY a.id`,
+        accessibleAccountsSql(`a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id`),
       )
       .bind(claims.userId),
   ])

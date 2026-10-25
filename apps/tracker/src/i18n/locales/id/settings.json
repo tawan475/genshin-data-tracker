@@ -175,7 +175,8 @@
     "othersButtonTitle": "Semua perangkat kecuali yang ini, termasuk yang masuk sebelum perangkat didaftar",
     "browserOn": "{browser} di {system}",
     "browserGeneric": "Browser di {system}",
-    "unknownDevice": "Perangkat tidak dikenal"
+    "unknownDevice": "Perangkat tidak dikenal",
+    "all": "Semua {n}"
   },
   "deleteUser": {
     "title": "Hapus pengguna",

@@ -175,7 +175,8 @@
     "othersButtonTitle": "На всех устройствах, кроме этого, включая вошедшие до появления списка устройств",
     "browserOn": "{browser} на {system}",
     "browserGeneric": "Браузер на {system}",
-    "unknownDevice": "Неизвестное устройство"
+    "unknownDevice": "Неизвестное устройство",
+    "all": "Все ({n})"
   },
   "deleteUser": {
     "title": "Удалить пользователя",

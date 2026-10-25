@@ -175,7 +175,8 @@
     "othersButtonTitle": "Mọi thiết bị trừ thiết bị này, kể cả những thiết bị đăng nhập trước khi có danh sách thiết bị",
     "browserOn": "{browser} trên {system}",
     "browserGeneric": "Trình duyệt trên {system}",
-    "unknownDevice": "Thiết bị không rõ"
+    "unknownDevice": "Thiết bị không rõ",
+    "all": "Tất cả {n}"
   },
   "deleteUser": {
     "title": "Xóa người dùng",

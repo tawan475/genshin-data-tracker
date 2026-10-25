@@ -3,8 +3,10 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Trash2 } from 'lucide-vue-next'
 import AccountFields from '@/components/import/AccountFields.vue'
+import AccountSharingPanel from '@/components/sharing/AccountSharingPanel.vue'
 import ImportKeyPanel from '@/components/import/ImportKeyPanel.vue'
 import LiveSyncPanel from '@/components/live/LiveSyncPanel.vue'
+import SettingsSection from '@/components/settings/SettingsSection.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
@@ -26,15 +28,26 @@ import { characterIcon } from '@/lib/assets'
 import { formatBytes, formatNumber } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
-import { useAccount } from './context'
+import { useAccess, useAccount } from './context'
 
 const account = useAccount()
+// Account sharing: details, keys, live sync and deleting are the owner's.
+const access = useAccess()
+const owner = computed(() => access.value === 'owner')
 const accounts = useAccounts()
 const feedback = useFeedback()
 
 const travelerOptions = computed(() => [
-  { value: 'F' as const, label: t('accounts.settings.lumine') },
-  { value: 'M' as const, label: t('accounts.settings.aether') },
+  {
+    value: 'F' as const,
+    label: t('accounts.settings.lumine'),
+    disabled: access.value === 'viewer',
+  },
+  {
+    value: 'M' as const,
+    label: t('accounts.settings.aether'),
+    disabled: access.value === 'viewer',
+  },
 ])
 
 async function setTraveler(gender: 'F' | 'M') {
@@ -146,42 +159,61 @@ async function confirmDelete() {
 <template>
   <PageHeader :title="$t('accounts.settings.title')" />
 
-  <div class="flex max-w-2xl flex-col gap-6">
-    <UiPanel :title="$t('accounts.settings.details')">
-      <form class="flex flex-col gap-5" novalidate @submit.prevent="save">
-        <AccountFields :key="account.id" v-model="form" :errors="errors" :disabled="saving" />
-        <div class="flex flex-wrap gap-2">
-          <UiButton type="submit" variant="primary" :loading="saving" :disabled="!dirty">
-            {{ $t('common.save') }}
-          </UiButton>
-          <UiButton v-if="dirty" variant="ghost" :disabled="saving" @click="resetForm">
-            {{ $t('common.reset') }}
-          </UiButton>
-        </div>
-      </form>
-    </UiPanel>
+  <div class="flex flex-col gap-8">
+    <SettingsSection :label="$t('shell.section.account')">
+      <div class="flex flex-wrap items-stretch gap-4">
+        <UiPanel :title="$t('accounts.settings.details')" class="min-w-0 flex-[999_1_32rem]">
+          <form class="flex flex-col gap-5" novalidate @submit.prevent="save">
+            <AccountFields
+              :key="account.id"
+              v-model="form"
+              :errors="errors"
+              :disabled="saving || !owner"
+            />
+            <div v-if="owner" class="flex flex-wrap gap-2">
+              <UiButton type="submit" variant="primary" :loading="saving" :disabled="!dirty">
+                {{ $t('common.save') }}
+              </UiButton>
+              <UiButton v-if="dirty" variant="ghost" :disabled="saving" @click="resetForm">
+                {{ $t('common.reset') }}
+              </UiButton>
+            </div>
+          </form>
+        </UiPanel>
 
-    <UiPanel :title="$t('accounts.settings.traveler')">
-      <div class="flex items-center gap-4">
-        <img
-          :src="characterIcon('Traveler')"
-          alt=""
-          class="size-12 rounded-lg bg-surface-overlay object-cover"
-        />
-        <UiSegmented
-          :model-value="travelerGender"
-          :options="travelerOptions"
-          :label="$t('accounts.settings.traveler')"
-          @update:model-value="setTraveler"
-        />
+        <UiPanel :title="$t('accounts.settings.traveler')" class="min-w-0 flex-[1_1_16rem]">
+          <div class="flex flex-wrap items-center gap-4">
+            <img
+              :src="characterIcon('Traveler')"
+              alt=""
+              class="size-12 rounded-lg bg-surface-overlay object-cover"
+            />
+            <UiSegmented
+              :model-value="travelerGender"
+              :options="travelerOptions"
+              :label="$t('accounts.settings.traveler')"
+              @update:model-value="setTraveler"
+            />
+          </div>
+        </UiPanel>
       </div>
-    </UiPanel>
+    </SettingsSection>
 
-    <LiveSyncPanel :account="account" />
+    <SettingsSection :label="$t('sharing.section')">
+      <AccountSharingPanel :account="account" />
+    </SettingsSection>
 
-    <ImportKeyPanel :account="account" />
+    <SettingsSection v-if="owner" :label="$t('sharing.sync')">
+      <div class="flex flex-wrap items-stretch gap-4 [&>*]:min-w-0 [&>*]:flex-[1_1_24rem]">
+        <LiveSyncPanel :account="account" />
+        <ImportKeyPanel :account="account" />
+      </div>
+    </SettingsSection>
 
-    <section class="rounded-xl border border-danger-border bg-surface-raised shadow-sm">
+    <section
+      v-if="owner"
+      class="rounded-xl border border-danger-border bg-surface-raised shadow-sm"
+    >
       <div class="flex flex-wrap items-center justify-between gap-4 p-5">
         <div class="min-w-0">
           <h2 class="text-base font-semibold">{{ $t('accounts.settings.deleteAccount') }}</h2>

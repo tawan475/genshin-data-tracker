@@ -21,6 +21,8 @@ import { useSession } from '@/stores/session'
  * follows it to the user's other devices. Signed out (the public pages, which
  * are always dark) only the language shows, kept on this device.
  */
+/** `inline`: side by side on Settings (the top bar's modal stacks them). */
+const props = defineProps<{ inline?: boolean }>()
 const session = useSession()
 const feedback = useFeedback()
 
@@ -105,7 +107,13 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
 </script>
 
 <template>
-  <div class="flex flex-col divide-y divide-border-subtle">
+  <div
+    :class="
+      props.inline
+        ? 'grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] items-end gap-x-8 gap-y-4 [&>*]:py-0! [&>.flex]:flex-col [&>.flex]:items-start'
+        : 'flex flex-col divide-y divide-border-subtle'
+    "
+  >
     <div v-if="signedIn" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-3">
       <span class="text-base">{{ $t('settings.appearance.theme') }}</span>
       <UiSegmented v-model="theme" :options="themes" :label="$t('settings.appearance.theme')" />

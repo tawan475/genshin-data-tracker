@@ -1,0 +1,42 @@
+{
+  "section": "共有",
+  "sync": "同期",
+  "title": "アカウント共有",
+  "sharedWithMe": "共有されたアカウント",
+  "sharedBy": "{owner} が共有 · {role}",
+  "role": {
+    "owner": "オーナー",
+    "viewer": "閲覧者",
+    "editor": "編集者"
+  },
+  "roleTitle": {
+    "viewer": "すべて閲覧でき、変更はできません",
+    "editor": "アップロード、計画、アチーブメントの記録もできます"
+  },
+  "roleLabel": "役割",
+  "roleOf": "{name} の役割",
+  "you": "あなた",
+  "pending": "招待中",
+  "invitedTitle": "相手の承認待ち（14日間）",
+  "invite": "招待",
+  "invited": "招待を送りました",
+  "notInvited": "招待できませんでした",
+  "cancelInvite": "取り消す",
+  "cancelTitle": "{name} への招待を取り消しますか？",
+  "cancelDetail": "相手は承認できなくなります。",
+  "removeTitle": "{name} を削除しますか？",
+  "removeDetail": "このアカウントへのアクセスがすぐに失われます。",
+  "notRemoved": "削除できませんでした",
+  "leave": "退出",
+  "leaveTitle": "{name} から退出しますか？",
+  "leaveDetail": "オーナーが再び招待するまでアクセスできなくなります。",
+  "notLeft": "退出できませんでした",
+  "notLoaded": "共有相手を読み込めませんでした",
+  "limitTitle": "最大 {n} 人と共有できます",
+  "invitations": "招待",
+  "invitationsCount": "{n} 件の招待",
+  "accept": "承認",
+  "decline": "辞退",
+  "accepted": "アカウントを追加しました",
+  "answerFailed": "招待に応答できませんでした"
+}

@@ -19,10 +19,12 @@ import { D1Meter } from '../lib/meter'
 import { requireActiveSession, requireUser } from '../lib/session'
 import { readUpload } from '../lib/upload'
 import {
+  assertAccount,
   dataVersionOf,
   listAccounts,
-  loadOwnedAccount,
+  loadAccount,
   newImportKey,
+  ownerOnly,
   recomputeAccount,
   uidTaken,
   uploadsRefused,
@@ -30,7 +32,14 @@ import {
 import { listSnapshots, parseIds, parseSections } from '../services/account-views'
 import { buildBundle, buildGood, catalogJson, goodFileName } from '../services/export'
 import { importSnapshot } from '../services/import'
-import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
+import {
+  listenerOf,
+  listenerStatement,
+  notifyAccount,
+  notifyAccountLater,
+  notifyUser,
+  senderTab,
+} from '../services/live'
 import { deleteLiveData, endJournalOn, liveDb } from '../services/live-sync'
 
 /** Work that must not hold the response (or fail it): logged when it fails. */
@@ -106,7 +115,7 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const body = await parseJson(c, accountInput)
     const db = getDb(c.env.DB)
-    await loadOwnedAccount(db, c.get('userId'), id)
+    await loadAccount(db, c.get('userId'), id, 'own')
     await db
       .update(genshinAccounts)
       .set({
@@ -117,19 +126,22 @@ export const accounts = new Hono<AppEnv>()
       .where(eq(genshinAccounts.id, id))
       .catch(rethrowUidTaken)
     const [account] = await listAccounts(c.env.DB, c.get('userId'), id)
-    notifyUser(c, c.get('userId'), { type: 'accounts' })
+    notifyAccountLater(c, id, { type: 'accounts' })
     return c.json(account!)
   })
 
   .delete('/:id', async (c) => {
     const id = idParam(c, 'id')
+    await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'own')
+    // Members lose it too (account_members cascades): read them first.
+    const listeners = listenerOf(await listenerStatement(c.env.DB, id).all())
     const result = await getDb(c.env.DB)
       .delete(genshinAccounts)
       .where(and(eq(genshinAccounts.id, id), eq(genshinAccounts.userId, c.get('userId'))))
       .returning({ id: genshinAccounts.id })
     if (result.length === 0) throw notFound('Account')
     afterResponse(c, deleteLiveData(liveDb(c.env), [id]))
-    notifyUser(c, c.get('userId'), { type: 'accounts' })
+    notifyAccount(c, listeners, { type: 'accounts' }, c.get('userId'))
     return c.body(null, 204)
   })
 
@@ -137,14 +149,14 @@ export const accounts = new Hono<AppEnv>()
   .post('/:id/import-key', requireActiveSession, async (c) => {
     const id = idParam(c, 'id')
     const db = getDb(c.env.DB)
-    await loadOwnedAccount(db, c.get('userId'), id)
+    await loadAccount(db, c.get('userId'), id, 'own')
     const { key, hash } = await newImportKey()
     await db.update(genshinAccounts).set({ importKeyHash: hash }).where(eq(genshinAccounts.id, id))
     return c.json({ importKey: key })
   })
 
   .get('/:id/settings', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     return c.json<AccountSettingsResponse>({
       settings: deepMerge(ACCOUNT_SETTINGS_DEFAULTS, account.settings),
     })
@@ -154,7 +166,9 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const patch = await parseJson(c, accountSettingsPatch)
     const db = getDb(c.env.DB)
-    const account = await loadOwnedAccount(db, c.get('userId'), id)
+    const account = await loadAccount(db, c.get('userId'), id, 'edit')
+    // Whether irminsul streams to this account is the owner's call.
+    if (patch.liveSync !== undefined && account.access !== 'owner') throw ownerOnly()
     const stored = deepMerge(account.settings, patch)
     const [, listener] = await c.env.DB.batch([
       c.env.DB.prepare('UPDATE genshin_accounts SET settings = ?1 WHERE id = ?2').bind(
@@ -165,11 +179,11 @@ export const accounts = new Hono<AppEnv>()
     ])
     // The planner reads AR/WL, its options and the resin set by hand, the Characters
     // page the favourites: open ones follow.
-    notifyUser(
+    notifyAccount(
       c,
-      c.get('userId'),
-      { type: 'planner', accountId: id, ...senderTab(c) },
       listenerOf(listener),
+      { type: 'planner', accountId: id, ...senderTab(c) },
+      c.get('userId'),
     )
     return c.json<AccountSettingsResponse>({
       settings: deepMerge(ACCOUNT_SETTINGS_DEFAULTS, stored),
@@ -184,7 +198,7 @@ export const accounts = new Hono<AppEnv>()
   .post('/:id/import', async (c) => {
     const id = idParam(c, 'id')
     const [account, blocked] = await Promise.all([
-      loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id),
+      loadAccount(getDb(c.env.DB), c.get('userId'), id, 'edit'),
       uploadBlock(c.env.DB, c.get('userId')),
     ])
     // Staff stopped this user's uploads: the website's too, not only the key's.
@@ -199,11 +213,11 @@ export const accounts = new Hono<AppEnv>()
     )
     meter.report(c)
     if (dataVersion !== null && c.req.header('x-gdt-live') !== 'quiet') {
-      notifyUser(
+      notifyAccount(
         c,
-        c.get('userId'),
-        { type: 'data', accountId: id, dataVersion, takenAt: response.takenAt },
         listener,
+        { type: 'data', accountId: id, dataVersion, takenAt: response.takenAt },
+        c.get('userId'),
       )
     }
     return c.json(response, response.status === 'created' ? 201 : 200)
@@ -214,7 +228,7 @@ export const accounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     const [account] = await listAccounts(c.env.DB, c.get('userId'), id)
     if (!account) throw notFound('Account')
-    notifyUser(c, c.get('userId'), {
+    notifyAccountLater(c, id, {
       type: 'data',
       accountId: id,
       dataVersion: account.dataVersion,
@@ -223,7 +237,7 @@ export const accounts = new Hono<AppEnv>()
   })
 
   .get('/:id/snapshots', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const cached = checkEtag(c, accountEtag(account, `snapshots.${SNAPSHOT_LIST_FORMAT}`))
     if (cached) return cached
     return c.json<SnapshotResponse[]>(await listSnapshots(c.env.DB, account.id))
@@ -232,7 +246,7 @@ export const accounts = new Hono<AppEnv>()
   .post('/:id/snapshots/delete', async (c) => {
     const id = idParam(c, 'id')
     const { ids } = await parseJson(c, snapshotIdsRequest)
-    await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    await loadAccount(getDb(c.env.DB), c.get('userId'), id, 'own')
     const [deleted, recomputed, listening] = await c.env.DB.batch([
       c.env.DB.prepare(
         `UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND deleted_at IS NULL
@@ -257,7 +271,7 @@ export const accounts = new Hono<AppEnv>()
   .delete('/:id/snapshots/:snapshotId', async (c) => {
     const id = idParam(c, 'id')
     const snapshotId = idParam(c, 'snapshotId')
-    await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    await loadAccount(getDb(c.env.DB), c.get('userId'), id, 'own')
     const [deleted, recomputed, listening] = await c.env.DB.batch([
       c.env.DB.prepare(
         'UPDATE snapshots SET deleted_at = ?3 WHERE account_id = ?1 AND id = ?2 AND deleted_at IS NULL',
@@ -273,7 +287,7 @@ export const accounts = new Hono<AppEnv>()
 
   /** Every artifact the account has ever held, as CatalogRow arrays. */
   .get('/:id/catalog', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const cached = checkEtag(c, accountEtag(account, 'catalog'))
     if (cached) return cached
     c.header('Content-Type', 'application/json; charset=utf-8')
@@ -289,7 +303,7 @@ export const accounts = new Hono<AppEnv>()
    * read (v2 sections decoded into the v1 form for them).
    */
   .get('/:id/bundle', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const ids = parseIds(c.req.query('ids'))
     const sections = parseSections(c.req.query('sections'))
     const format = c.req.query('format') === '2' ? 2 : 1
@@ -306,7 +320,7 @@ export const accounts = new Hono<AppEnv>()
   .get('/:id/snapshots/:snapshotId/good', async (c) => {
     const id = idParam(c, 'id')
     const snapshotId = idParam(c, 'snapshotId')
-    await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    await loadAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const { good, takenAt } = await buildGood(c.env.DB, id, snapshotId)
     // A stored snapshot never changes.
     c.header('Cache-Control', 'private, max-age=31536000, immutable')
@@ -315,7 +329,7 @@ export const accounts = new Hono<AppEnv>()
   })
 
   .get('/:id/latest/good', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const cached = checkEtag(c, accountEtag(account, 'latest-good'))
     if (cached) return cached
     const { good, takenAt } = await buildGood(c.env.DB, account.id, 'latest')
@@ -343,11 +357,11 @@ function notifyData(
   recomputed: D1Result | undefined,
   listening: D1Result | undefined,
 ) {
-  notifyUser(
+  notifyAccount(
     c,
-    c.get('userId'),
-    { type: 'data', accountId, dataVersion: dataVersionOf(recomputed) ?? null },
     listenerOf(listening),
+    { type: 'data', accountId, dataVersion: dataVersionOf(recomputed) ?? null },
+    c.get('userId'),
   )
 }
 

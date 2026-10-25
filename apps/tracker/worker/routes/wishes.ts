@@ -39,8 +39,14 @@ import { ApiError, idParam, parseJson, rateLimit } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { requireUser } from '../lib/session'
 import { uploaderAccount, uploaderOf, uploaderUserId } from '../lib/uploader'
-import { accountForUid, loadOwnedAccount, uploadsRefused } from '../services/accounts'
-import { listenerOf, listenerStatement, notifyUser, senderTab } from '../services/live'
+import { accountForUid, loadAccount, uploadsRefused } from '../services/accounts'
+import {
+  listenerOf,
+  listenerStatement,
+  notifyAccount,
+  notifyUser,
+  senderTab,
+} from '../services/live'
 import { importWishes, readWishHistory, wishCursor } from '../services/wishes'
 import { uploadBlock } from './accounts'
 
@@ -101,7 +107,7 @@ export const wishSync = new Hono<AppEnv>()
       meter,
     )
     meter.report(c)
-    if (changed) notifyUser(c, userId, { type: 'wishes', accountId: account.id }, listener)
+    if (changed) notifyAccount(c, listener, { type: 'wishes', accountId: account.id }, userId)
     return c.json<WishImportResponse>({ accountId: account.id, ...response })
   })
 
@@ -119,7 +125,7 @@ export const wishAccounts = new Hono<AppEnv>()
 
   .get('/:id/wishes', async (c) => {
     const id = idParam(c, 'id')
-    await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    await loadAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
     const cached = checkEtag(c, await historyEtag(c.env.DB, id))
     if (cached) return cached
     return c.json<WishHistoryResponse>(await readWishHistory(c.env.DB, id))
@@ -129,7 +135,7 @@ export const wishAccounts = new Hono<AppEnv>()
     const id = idParam(c, 'id')
     limitBody(c, SITE_BODY_LIMIT)
     const [account, blocked] = await Promise.all([
-      loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id),
+      loadAccount(getDb(c.env.DB), c.get('userId'), id, 'edit'),
       uploadBlock(c.env.DB, c.get('userId')),
     ])
     if (blocked) throw uploadsRefused(blocked)
@@ -144,24 +150,29 @@ export const wishAccounts = new Hono<AppEnv>()
     )
     meter.report(c)
     if (changed) {
-      notifyUser(c, c.get('userId'), { type: 'wishes', accountId: id, ...senderTab(c) }, listener)
+      notifyAccount(
+        c,
+        listener,
+        { type: 'wishes', accountId: id, ...senderTab(c) },
+        c.get('userId'),
+      )
     }
     return c.json<WishImportResponse>({ accountId: id, ...response })
   })
 
   .delete('/:id/wishes', async (c) => {
     const id = idParam(c, 'id')
-    await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), id)
+    await loadAccount(getDb(c.env.DB), c.get('userId'), id, 'own')
     const [chunks, , listening] = await c.env.DB.batch([
       c.env.DB.prepare('DELETE FROM wish_chunks WHERE account_id = ?1').bind(id),
       c.env.DB.prepare('DELETE FROM wish_histories WHERE account_id = ?1').bind(id),
       listenerStatement(c.env.DB, id),
     ])
-    notifyUser(
+    notifyAccount(
       c,
-      c.get('userId'),
-      { type: 'wishes', accountId: id, ...senderTab(c) },
       listenerOf(listening),
+      { type: 'wishes', accountId: id, ...senderTab(c) },
+      c.get('userId'),
     )
     return c.json({ deleted: chunks!.meta.changes })
   })

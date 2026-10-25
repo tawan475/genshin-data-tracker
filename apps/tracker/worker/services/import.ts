@@ -134,7 +134,7 @@ export interface ImportTarget {
 export interface ImportResult {
   response: ImportResponse
   dataVersion: number | null
-  listener?: Listener
+  listener?: Listener[]
   /** The upload, parsed (live sync reads its summary, guids and gi_capture). */
   prepared: PreparedSnapshot
   /** The snapshot answered with is the account's newest (live sync starts a journal on it). */
@@ -287,7 +287,7 @@ async function importOnce(
     snapshotId: number,
     storedSize = 0,
     dataVersion: number | null = null,
-    listener?: Listener,
+    listener?: Listener[],
     newest = true,
   ): ImportResult => ({
     response: {

@@ -1,0 +1,42 @@
+{
+  "section": "Sharing",
+  "sync": "Sync",
+  "title": "Account sharing",
+  "sharedWithMe": "Shared with me",
+  "sharedBy": "Shared by {owner} · {role}",
+  "role": {
+    "owner": "Owner",
+    "viewer": "Viewer",
+    "editor": "Editor"
+  },
+  "roleTitle": {
+    "viewer": "Sees everything, changes nothing",
+    "editor": "Also uploads, plans and marks achievements"
+  },
+  "roleLabel": "Role",
+  "roleOf": "Role of {name}",
+  "you": "You",
+  "pending": "Invited",
+  "invitedTitle": "Waiting for them to accept (14 days)",
+  "invite": "Invite",
+  "invited": "Invite sent",
+  "notInvited": "Not invited",
+  "cancelInvite": "Cancel",
+  "cancelTitle": "Cancel the invite to {name}?",
+  "cancelDetail": "They can no longer accept it.",
+  "removeTitle": "Remove {name}?",
+  "removeDetail": "They lose access to this account at once.",
+  "notRemoved": "Not removed",
+  "leave": "Leave",
+  "leaveTitle": "Leave {name}?",
+  "leaveDetail": "You lose access until the owner invites you again.",
+  "notLeft": "Not left",
+  "notLoaded": "Could not load who can see this account",
+  "limitTitle": "Shared with at most {n} people",
+  "invitations": "Invitations",
+  "invitationsCount": "{n} invitation | {n} invitations",
+  "accept": "Accept",
+  "decline": "Decline",
+  "accepted": "Account added",
+  "answerFailed": "Could not answer the invite"
+}

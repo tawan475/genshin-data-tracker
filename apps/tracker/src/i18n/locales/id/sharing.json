@@ -1,0 +1,42 @@
+{
+  "section": "Berbagi",
+  "sync": "Sinkron",
+  "title": "Berbagi akun",
+  "sharedWithMe": "Dibagikan ke saya",
+  "sharedBy": "Dibagikan oleh {owner} · {role}",
+  "role": {
+    "owner": "Pemilik",
+    "viewer": "Pelihat",
+    "editor": "Editor"
+  },
+  "roleTitle": {
+    "viewer": "Melihat semua, tidak mengubah apa pun",
+    "editor": "Juga mengunggah, merencanakan, dan menandai pencapaian"
+  },
+  "roleLabel": "Peran",
+  "roleOf": "Peran {name}",
+  "you": "Anda",
+  "pending": "Diundang",
+  "invitedTitle": "Menunggu diterima (14 hari)",
+  "invite": "Undang",
+  "invited": "Undangan terkirim",
+  "notInvited": "Tidak terundang",
+  "cancelInvite": "Batalkan",
+  "cancelTitle": "Batalkan undangan untuk {name}?",
+  "cancelDetail": "Mereka tidak bisa menerimanya lagi.",
+  "removeTitle": "Hapus {name}?",
+  "removeDetail": "Akses mereka ke akun ini langsung hilang.",
+  "notRemoved": "Tidak terhapus",
+  "leave": "Keluar",
+  "leaveTitle": "Keluar dari {name}?",
+  "leaveDetail": "Akses Anda hilang sampai pemilik mengundang lagi.",
+  "notLeft": "Tidak keluar",
+  "notLoaded": "Tidak bisa memuat siapa yang melihat akun ini",
+  "limitTitle": "Dibagikan ke paling banyak {n} orang",
+  "invitations": "Undangan",
+  "invitationsCount": "{n} undangan",
+  "accept": "Terima",
+  "decline": "Tolak",
+  "accepted": "Akun ditambahkan",
+  "answerFailed": "Tidak bisa menjawab undangan"
+}

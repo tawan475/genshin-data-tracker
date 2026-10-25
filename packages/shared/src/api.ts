@@ -751,6 +751,48 @@ export interface AccountResponse {
   } | null
   /** The account's `liveSync` setting (live sync from irminsul). */
   liveSync?: boolean
+  /** What this user may do here (account sharing); absent in answers from before it = owner. */
+  access?: AccountAccess
+  /** The owner's username, on accounts shared with this user. */
+  owner?: string
+}
+
+/** A shared account's member role (docs/plans/account-sharing.md). */
+export type AccountRole = 'viewer' | 'editor'
+/** The owner, or a member's role. */
+export type AccountAccess = 'owner' | AccountRole
+
+export const ACCOUNT_ROLES = ['viewer', 'editor'] as const
+/** Members an account may have (pending invites included). */
+export const ACCOUNT_MEMBER_LIMIT = 8
+
+/** `POST /api/accounts/:id/members`: invite by exact username. */
+export const accountInvite = z.object({
+  username: z.string().trim().min(1).max(64),
+  role: z.enum(ACCOUNT_ROLES),
+})
+/** `PATCH /api/accounts/:id/members/:userId`. */
+export const accountMemberPatch = z.object({ role: z.enum(ACCOUNT_ROLES) })
+
+/** One person who can see an account: the owner first, then members and invites. */
+export interface AccountMemberResponse {
+  userId: number
+  username: string
+  access: AccountAccess
+  /** When the invite was made (the account's creation for the owner). */
+  createdAt: number
+  /** Null: invited, not accepted yet. */
+  acceptedAt: number | null
+}
+
+/** An invite waiting for this user (`GET /api/invitations`, and in the bootstrap). */
+export interface InvitationResponse {
+  accountId: number
+  accountName: string | null
+  uid: string | null
+  owner: string
+  role: AccountRole
+  invitedAt: number
 }
 
 export interface AccountCreatedResponse {
@@ -933,6 +975,8 @@ export interface BootstrapResponse {
   /** The ETag GET /api/accounts gives the same list (the app revalidates with it). */
   accountsEtag: string
   account: ({ id: number } & AccountSettingsResponse) | null
+  /** Invites waiting for this user (account sharing). */
+  invitations?: InvitationResponse[]
 }
 
 export interface AchievementMarksResponse {

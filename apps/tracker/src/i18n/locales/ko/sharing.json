@@ -1,0 +1,42 @@
+{
+  "section": "공유",
+  "sync": "동기화",
+  "title": "계정 공유",
+  "sharedWithMe": "나와 공유됨",
+  "sharedBy": "{owner} 님이 공유 · {role}",
+  "role": {
+    "owner": "소유자",
+    "viewer": "보기 권한",
+    "editor": "편집 권한"
+  },
+  "roleTitle": {
+    "viewer": "모두 볼 수 있지만 변경할 수 없습니다",
+    "editor": "업로드, 계획, 업적 표시도 할 수 있습니다"
+  },
+  "roleLabel": "역할",
+  "roleOf": "{name}의 역할",
+  "you": "나",
+  "pending": "초대됨",
+  "invitedTitle": "상대방의 수락 대기 중(14일)",
+  "invite": "초대",
+  "invited": "초대를 보냈습니다",
+  "notInvited": "초대하지 못했습니다",
+  "cancelInvite": "취소",
+  "cancelTitle": "{name}에게 보낸 초대를 취소할까요?",
+  "cancelDetail": "더 이상 수락할 수 없습니다.",
+  "removeTitle": "{name}을(를) 제거할까요?",
+  "removeDetail": "이 계정에 대한 접근 권한을 즉시 잃습니다.",
+  "notRemoved": "제거하지 못했습니다",
+  "leave": "나가기",
+  "leaveTitle": "{name}에서 나갈까요?",
+  "leaveDetail": "소유자가 다시 초대할 때까지 접근할 수 없습니다.",
+  "notLeft": "나가지 못했습니다",
+  "notLoaded": "이 계정을 볼 수 있는 사람을 불러오지 못했습니다",
+  "limitTitle": "최대 {n}명과 공유할 수 있습니다",
+  "invitations": "초대",
+  "invitationsCount": "초대 {n}개",
+  "accept": "수락",
+  "decline": "거절",
+  "accepted": "계정이 추가되었습니다",
+  "answerFailed": "초대에 응답하지 못했습니다"
+}

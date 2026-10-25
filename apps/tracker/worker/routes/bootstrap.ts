@@ -12,6 +12,7 @@ import { D1Meter } from '../lib/meter'
 import { requireUser } from '../lib/session'
 import { accountListStatement, accountsFromRows, type AccountListRow } from '../services/accounts'
 import { meFromResults, meStatements } from '../services/me'
+import { invitationsFromRows, invitationsStatement } from '../services/sharing'
 import { withLegacySchema } from '../services/storage'
 import { toMe } from './auth'
 
@@ -32,12 +33,17 @@ export const bootstrap = new Hono<AppEnv>().get('/', requireUser, async (c) => {
       ...meStatements(d1, userId),
       accountListStatement(d1, userId, null, legacy),
       d1
-        .prepare('SELECT id, settings FROM genshin_accounts WHERE id = ?1 AND user_id = ?2')
+        .prepare(
+          `SELECT a.id, a.settings FROM genshin_accounts AS a WHERE a.id = ?1
+             AND (a.user_id = ?2 OR EXISTS (SELECT 1 FROM account_members AS m
+               WHERE m.account_id = a.id AND m.user_id = ?2 AND m.accepted_at IS NOT NULL))`,
+        )
         .bind(accountId ?? 0, userId),
+      invitationsStatement(d1, userId, Date.now()),
     ]),
   )
   meter.report(c)
-  const [user, roles, list, settings] = results
+  const [user, roles, list, settings, invited] = results
   const found = meFromResults(userId, user, roles)
   if (!found) throw new ApiError(401, 'unauthenticated', 'Not signed in')
   const accounts = accountsFromRows((list?.results ?? []) as unknown as AccountListRow[])
@@ -56,6 +62,7 @@ export const bootstrap = new Hono<AppEnv>().get('/', requireUser, async (c) => {
           ),
         }
       : null,
+    invitations: invitationsFromRows(invited?.results ?? []),
   }
   c.header('Cache-Control', 'private, no-store')
   return c.json(body)

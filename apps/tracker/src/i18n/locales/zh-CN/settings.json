@@ -175,7 +175,8 @@
     "othersButtonTitle": "除本设备外的所有设备，包括设备列表功能上线前登录的设备",
     "browserOn": "{system} 上的 {browser}",
     "browserGeneric": "{system} 上的浏览器",
-    "unknownDevice": "未知设备"
+    "unknownDevice": "未知设备",
+    "all": "全部 {n}"
   },
   "deleteUser": {
     "title": "删除用户",

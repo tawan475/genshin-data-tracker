@@ -1,0 +1,42 @@
+{
+  "section": "Compartilhamento",
+  "sync": "Sincronização",
+  "title": "Compartilhar conta",
+  "sharedWithMe": "Compartilhadas comigo",
+  "sharedBy": "Compartilhada por {owner} · {role}",
+  "role": {
+    "owner": "Dono",
+    "viewer": "Leitor",
+    "editor": "Editor"
+  },
+  "roleTitle": {
+    "viewer": "Vê tudo, não muda nada",
+    "editor": "Também envia dados, planeja e marca conquistas"
+  },
+  "roleLabel": "Função",
+  "roleOf": "Função de {name}",
+  "you": "Você",
+  "pending": "Convidado",
+  "invitedTitle": "Aguardando aceite (14 dias)",
+  "invite": "Convidar",
+  "invited": "Convite enviado",
+  "notInvited": "Não convidado",
+  "cancelInvite": "Cancelar",
+  "cancelTitle": "Cancelar o convite para {name}?",
+  "cancelDetail": "A pessoa não poderá mais aceitá-lo.",
+  "removeTitle": "Remover {name}?",
+  "removeDetail": "A pessoa perde o acesso a esta conta na hora.",
+  "notRemoved": "Não removido",
+  "leave": "Sair",
+  "leaveTitle": "Sair de {name}?",
+  "leaveDetail": "Você perde o acesso até o dono convidar de novo.",
+  "notLeft": "Não saiu",
+  "notLoaded": "Não foi possível carregar quem vê esta conta",
+  "limitTitle": "Compartilhada com no máximo {n} pessoas",
+  "invitations": "Convites",
+  "invitationsCount": "{n} convite | {n} convites",
+  "accept": "Aceitar",
+  "decline": "Recusar",
+  "accepted": "Conta adicionada",
+  "answerFailed": "Não foi possível responder ao convite"
+}

@@ -32,7 +32,7 @@ import { clock24, dateLocale, formatBytes, formatFullDateTime, formatNumber } fr
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
-import { useAccount, useAccountMode } from './context'
+import { useAccess, useAccount, useAccountMode } from './context'
 
 /** The bulk delete endpoint takes at most this many ids per request. */
 const DELETE_BATCH = 1000
@@ -55,7 +55,9 @@ const accounts = useAccounts()
  */
 const mode = useAccountMode()
 const readOnly = mode.readOnly
-const canDelete = !readOnly || mode.purge !== undefined
+// Deleting is the owner's (an account shared with them as editor can't).
+const owner = useAccess().value === 'owner'
+const canDelete = (!readOnly && owner) || mode.purge !== undefined
 const feedback = useFeedback()
 
 const {
@@ -478,7 +480,7 @@ const handleBulkDelete = async () => {
         :live="live.data.value"
         :newest-id="list[0]?.id"
         :now="liveNow"
-        :deletable="!readOnly"
+        :deletable="!readOnly && owner"
         :deleting="discarding"
         @delete="discardLive"
       />

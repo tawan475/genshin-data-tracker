@@ -284,9 +284,15 @@ const importRoute = computed(() => ({
         :defaults="['mora', 'primogem']"
         default-group="snapshot"
       />
-      <div class="grid items-start gap-6 xl:grid-cols-3">
-        <MonthlyAnalysisCard :snapshots="list" class="min-w-0 xl:col-span-2" />
-        <RecentSnapshots :snapshots="list" :account-id="account.id" :now="nowMs" class="min-w-0" />
+      <!-- The monthly table is wide: side by side only where it fits whole. -->
+      <div class="flex flex-wrap items-start gap-6">
+        <MonthlyAnalysisCard :snapshots="list" class="min-w-0 flex-[999_1_52rem]" />
+        <RecentSnapshots
+          :snapshots="list"
+          :account-id="account.id"
+          :now="nowMs"
+          class="min-w-0 flex-[1_1_20rem]"
+        />
       </div>
     </div>
     <OverviewSkeleton v-else-if="!error && !list" class="mt-6" />

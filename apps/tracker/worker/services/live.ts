@@ -50,8 +50,9 @@ interface Attachment {
   sid?: number | null
 }
 
-/** Whether anyone listens, and the session version, as a write's batch read them. */
+/** One user who can see an account (its owner or a member), as a write's batch read them. */
 export interface Listener {
+  userId: number
   live: boolean
   tokenVersion: number
 }
@@ -290,26 +291,42 @@ export function liveHub(env: Env, userId: number): DurableObjectStub<LiveHub> {
 }
 
 /**
- * Reads, in a write's own batch, whether the account's user has anyone
- * listening and their session version (see `listenerOf`).
+ * Reads, in a write's own batch, everyone who can see the account (its owner
+ * and accepted members: account sharing), whether each has anyone listening
+ * and their session version (see `listenerOf`).
  */
 export function listenerStatement(d1: D1Database, accountId: number): D1PreparedStatement {
   return d1
     .prepare(
-      `SELECT u.live_since, u.token_version FROM genshin_accounts AS a
-       JOIN users AS u ON u.id = a.user_id WHERE a.id = ?1`,
+      `SELECT u.id AS user_id, u.live_since, u.token_version FROM users AS u
+       WHERE u.id IN (SELECT user_id FROM genshin_accounts WHERE id = ?1
+                      UNION ALL
+                      SELECT user_id FROM account_members WHERE account_id = ?1
+                        AND accepted_at IS NOT NULL)`,
     )
     .bind(accountId)
 }
 
-export function listenerOf(result: D1Result | undefined): Listener | undefined {
-  const row = result?.results[0] as { live_since?: unknown; token_version?: unknown } | undefined
-  if (!row || typeof row.token_version !== 'number') return undefined
-  return {
-    live: row.live_since !== null && row.live_since !== undefined,
-    tokenVersion: row.token_version,
-  }
+/** The rows of `listenerStatement` (undefined when the account is gone). */
+export function listenerOf(result: D1Result | undefined): Listener[] | undefined {
+  const rows = (result?.results ?? []) as {
+    user_id?: unknown
+    live_since?: unknown
+    token_version?: unknown
+  }[]
+  const listeners = rows
+    .filter((row) => typeof row.user_id === 'number' && typeof row.token_version === 'number')
+    .map((row) => ({
+      userId: row.user_id as number,
+      live: row.live_since !== null && row.live_since !== undefined,
+      tokenVersion: row.token_version as number,
+    }))
+  return listeners.length ? listeners : undefined
 }
+
+/** Whether anyone who can see the account has a page open. */
+export const anyListening = (listeners: Listener[] | undefined): boolean =>
+  listeners?.some((l) => l.live) ?? false
 
 /** The tab that sent a write (`x-gdt-tab`), echoed in its live event so that tab skips it. */
 export function senderTab(c: Context<AppEnv>): { tab?: string } {
@@ -330,11 +347,50 @@ export function notifyUser(
   listener?: Listener,
 ): void {
   if (!c.env.LIVE || (listener && !listener.live)) return
-  const sent = liveHub(c.env, userId)
-    .notify(userId, event, listener?.tokenVersion)
-    .catch((error: unknown) => console.warn('live_notify_failed', String(error)))
+  afterResponse(
+    c,
+    liveHub(c.env, userId)
+      .notify(userId, event, listener?.tokenVersion)
+      .catch((error: unknown) => console.warn('live_notify_failed', String(error))),
+  )
+}
+
+/**
+ * An account's event for everyone who can see it (`listeners`, read in the
+ * write's batch: only those listening get it). Without them (none read),
+ * `fallback`'s pages get it unchecked, as `notifyUser` sends.
+ */
+export function notifyAccount(
+  c: Context<AppEnv>,
+  listeners: Listener[] | undefined,
+  event: LiveEvent,
+  fallback?: number,
+): void {
+  if (!listeners) {
+    if (fallback !== undefined) notifyUser(c, fallback, event)
+    return
+  }
+  for (const listener of listeners) notifyUser(c, listener.userId, event, listener)
+}
+
+/**
+ * An account's event when the write read no listeners: reads them after the
+ * response (one query, never holding or failing the request).
+ */
+export function notifyAccountLater(c: Context<AppEnv>, accountId: number, event: LiveEvent): void {
+  if (!c.env.LIVE) return
+  afterResponse(
+    c,
+    listenerStatement(c.env.DB, accountId)
+      .all()
+      .then((result) => notifyAccount(c, listenerOf(result), event))
+      .catch((error: unknown) => console.warn('live_notify_failed', String(error))),
+  )
+}
+
+function afterResponse(c: Context<AppEnv>, work: Promise<unknown>): void {
   try {
-    c.executionCtx.waitUntil(sent)
+    c.executionCtx.waitUntil(work)
   } catch {
     // No execution context (a direct app.fetch in a test): the promise still runs.
   }

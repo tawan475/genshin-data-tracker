@@ -175,7 +175,8 @@
     "othersButtonTitle": "このデバイス以外のすべて（デバイス一覧の導入前にログインしたものも含む）",
     "browserOn": "{system} の {browser}",
     "browserGeneric": "{system} のブラウザー",
-    "unknownDevice": "不明なデバイス"
+    "unknownDevice": "不明なデバイス",
+    "all": "すべて {n}"
   },
   "deleteUser": {
     "title": "ユーザーを削除",

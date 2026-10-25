@@ -207,6 +207,10 @@ export function useLiveUpdates(): void {
       if (event.tab !== TAB_ID) emitPlannerChange(event.accountId)
       return
     }
+    if (event.type === 'accounts') {
+      // Sharing changed (an invite, a role, a removal): the invitations may have too.
+      void accounts.refreshInvitations()
+    }
     if (event.type === 'hello') {
       // Journals may have moved while there was no socket: re-read them (a 304 if not).
       for (const account of accounts.list) if (account.liveSync) noteLiveChange(account.id)

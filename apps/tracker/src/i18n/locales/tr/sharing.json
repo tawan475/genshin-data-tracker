@@ -1,0 +1,42 @@
+{
+  "section": "Paylaşım",
+  "sync": "Eşitleme",
+  "title": "Hesap paylaşımı",
+  "sharedWithMe": "Benimle paylaşılanlar",
+  "sharedBy": "{owner} paylaştı · {role}",
+  "role": {
+    "owner": "Sahip",
+    "viewer": "İzleyici",
+    "editor": "Düzenleyici"
+  },
+  "roleTitle": {
+    "viewer": "Her şeyi görür, hiçbir şeyi değiştirmez",
+    "editor": "Ayrıca yükler, planlar ve başarıları işaretler"
+  },
+  "roleLabel": "Rol",
+  "roleOf": "{name} rolü",
+  "you": "Sen",
+  "pending": "Davet edildi",
+  "invitedTitle": "Kabul bekleniyor (14 gün)",
+  "invite": "Davet et",
+  "invited": "Davet gönderildi",
+  "notInvited": "Davet edilemedi",
+  "cancelInvite": "İptal",
+  "cancelTitle": "{name} davetini iptal et?",
+  "cancelDetail": "Artık kabul edemez.",
+  "removeTitle": "{name} çıkarılsın mı?",
+  "removeDetail": "Bu hesaba erişimi hemen kalkar.",
+  "notRemoved": "Çıkarılamadı",
+  "leave": "Ayrıl",
+  "leaveTitle": "{name} hesabından ayrıl?",
+  "leaveDetail": "Sahip seni tekrar davet edene kadar erişimin kalkar.",
+  "notLeft": "Ayrılamadı",
+  "notLoaded": "Bu hesabı kimlerin gördüğü yüklenemedi",
+  "limitTitle": "En çok {n} kişiyle paylaşılır",
+  "invitations": "Davetler",
+  "invitationsCount": "{n} davet",
+  "accept": "Kabul et",
+  "decline": "Reddet",
+  "accepted": "Hesap eklendi",
+  "answerFailed": "Davete yanıt verilemedi"
+}

@@ -1,0 +1,42 @@
+{
+  "section": "Compartir",
+  "sync": "Sincronización",
+  "title": "Cuenta compartida",
+  "sharedWithMe": "Compartidas conmigo",
+  "sharedBy": "Compartida por {owner} · {role}",
+  "role": {
+    "owner": "Propietario",
+    "viewer": "Lector",
+    "editor": "Editor"
+  },
+  "roleTitle": {
+    "viewer": "Ve todo, no cambia nada",
+    "editor": "También sube datos, planifica y marca logros"
+  },
+  "roleLabel": "Rol",
+  "roleOf": "Rol de {name}",
+  "you": "Tú",
+  "pending": "Invitado",
+  "invitedTitle": "Esperando a que acepte (14 días)",
+  "invite": "Invitar",
+  "invited": "Invitación enviada",
+  "notInvited": "No se invitó",
+  "cancelInvite": "Cancelar",
+  "cancelTitle": "¿Cancelar la invitación a {name}?",
+  "cancelDetail": "Ya no podrá aceptarla.",
+  "removeTitle": "¿Quitar a {name}?",
+  "removeDetail": "Pierde el acceso a esta cuenta al instante.",
+  "notRemoved": "No se quitó",
+  "leave": "Salir",
+  "leaveTitle": "¿Salir de {name}?",
+  "leaveDetail": "Pierdes el acceso hasta que el propietario te invite de nuevo.",
+  "notLeft": "No se salió",
+  "notLoaded": "No se pudo cargar quién ve esta cuenta",
+  "limitTitle": "Se comparte con {n} personas como máximo",
+  "invitations": "Invitaciones",
+  "invitationsCount": "{n} invitación | {n} invitaciones",
+  "accept": "Aceptar",
+  "decline": "Rechazar",
+  "accepted": "Cuenta añadida",
+  "answerFailed": "No se pudo responder a la invitación"
+}

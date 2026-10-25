@@ -15,7 +15,7 @@ import { ApiError } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { accountForUid, type KeyAccount, type UploadOwner } from './accounts'
 import { importSnapshot, parseUpload, type Upload } from './import'
-import { notifyUser } from './live'
+import { anyListening, notifyAccount, notifyUser } from './live'
 import { liveDb, liveSyncOn, liveUsage, openJournal } from './live-sync'
 
 export async function uploadAs(
@@ -53,7 +53,7 @@ export async function uploadAs(
     upload,
     meter,
     parsed,
-    live ? liveUsage(live, userId) : undefined,
+    live ? liveUsage(live, account.user_id ?? userId) : undefined,
   ).catch((error: unknown) => {
     // The account this upload made stays, whatever happened to the file.
     if (created) notifyUser(c, userId, { type: 'accounts' })
@@ -67,7 +67,7 @@ export async function uploadAs(
     try {
       const base = await openJournal(live, {
         accountId: account.id,
-        userId,
+        userId: account.user_id ?? userId,
         contentKey: result.contentKey,
         snapshotId: response.snapshotId,
         takenAt: response.takenAt,
@@ -75,7 +75,7 @@ export async function uploadAs(
         summary: result.prepared.summary,
         items: preparedItemIndex(result.prepared.good),
       })
-      response.live = { base, watching: listener?.live ?? false }
+      response.live = { base, watching: anyListening(listener) }
     } catch (error) {
       console.warn('live_open_failed', JSON.stringify({ accountId: account.id }), String(error))
     }
@@ -83,11 +83,11 @@ export async function uploadAs(
   // Only when someone listens (read in the import's own batch). A new
   // account is in the list now even when its first file changed nothing.
   if (dataVersion !== null || created) {
-    notifyUser(
+    notifyAccount(
       c,
-      userId,
-      { type: 'data', accountId: account.id, dataVersion, takenAt: response.takenAt },
       listener,
+      { type: 'data', accountId: account.id, dataVersion, takenAt: response.takenAt },
+      userId,
     )
   }
   return c.json<ImportResponse>(

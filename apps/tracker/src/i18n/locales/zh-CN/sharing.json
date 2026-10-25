@@ -1,0 +1,42 @@
+{
+  "section": "共享",
+  "sync": "同步",
+  "title": "账号共享",
+  "sharedWithMe": "共享给我的",
+  "sharedBy": "{owner} 共享 · {role}",
+  "role": {
+    "owner": "所有者",
+    "viewer": "查看者",
+    "editor": "编辑者"
+  },
+  "roleTitle": {
+    "viewer": "可查看全部，不能修改",
+    "editor": "还可上传、规划和标记成就"
+  },
+  "roleLabel": "角色",
+  "roleOf": "{name} 的角色",
+  "you": "你",
+  "pending": "已邀请",
+  "invitedTitle": "等待对方接受（14 天）",
+  "invite": "邀请",
+  "invited": "邀请已发送",
+  "notInvited": "未能邀请",
+  "cancelInvite": "取消",
+  "cancelTitle": "取消对 {name} 的邀请？",
+  "cancelDetail": "对方将无法再接受。",
+  "removeTitle": "移除 {name}？",
+  "removeDetail": "对方将立即失去此账号的访问权限。",
+  "notRemoved": "未能移除",
+  "leave": "退出",
+  "leaveTitle": "退出 {name}？",
+  "leaveDetail": "在所有者再次邀请前，你将无法访问。",
+  "notLeft": "未能退出",
+  "notLoaded": "无法读取可查看此账号的人",
+  "limitTitle": "最多共享给 {n} 人",
+  "invitations": "邀请",
+  "invitationsCount": "{n} 个邀请",
+  "accept": "接受",
+  "decline": "拒绝",
+  "accepted": "已添加账号",
+  "answerFailed": "无法回应邀请"
+}

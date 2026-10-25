@@ -150,6 +150,33 @@ export const genshinAccounts = sqliteTable(
   ],
 )
 
+/**
+ * Account sharing (0029, docs/plans/account-sharing.md): who besides the
+ * owner (`genshin_accounts.user_id`) may see or change an account. A row
+ * with `accepted_at` NULL is an invite not yet accepted; it grants nothing.
+ * `role`: 'viewer' (reads) or 'editor' (also uploads, planner and marks).
+ */
+export const accountMembers = sqliteTable(
+  'account_members',
+  {
+    accountId: integer('account_id')
+      .notNull()
+      .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role', { enum: ['viewer', 'editor'] }).notNull(),
+    /** The owner who invited them; no FK, so the label outlives them. */
+    invitedBy: integer('invited_by'),
+    createdAt: timestamp('created_at'),
+    acceptedAt: integer('accepted_at'),
+  },
+  (t) => [
+    primaryKey({ columns: [t.accountId, t.userId] }),
+    index('account_members_user_idx').on(t.userId, t.acceptedAt),
+  ],
+)
+
 export const snapshots = sqliteTable(
   'snapshots',
   {

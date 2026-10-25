@@ -25,8 +25,14 @@ import { bodyEtag } from '../lib/etag'
 import { ApiError, idParam } from '../lib/http'
 import { requireUser } from '../lib/session'
 import { uploaderAccount, uploaderOf, uploaderUserId } from '../lib/uploader'
-import { loadOwnedAccount } from '../services/accounts'
-import { notifyUser } from '../services/live'
+import { loadAccount } from '../services/accounts'
+import {
+  anyListening,
+  listenerOf,
+  listenerStatement,
+  notifyAccount,
+  notifyAccountLater,
+} from '../services/live'
 import {
   deleteJournalStatements,
   liveDb,
@@ -91,16 +97,16 @@ export const liveChanges = new Hono<AppEnv>().post('/changes', async (c) => {
   }
   const userId = uploaderUserId(owner)
   const [stored, listening] = await Promise.all([
-    storeBatch(live, { id: account.id, userId }, delta),
-    c.env.DB.prepare('SELECT live_since FROM users WHERE id = ?1')
-      .bind(userId)
-      .first<{ live_since: number | null }>(),
+    storeBatch(live, { id: account.id, userId: account.user_id ?? userId }, delta),
+    listenerStatement(c.env.DB, account.id).all(),
   ])
   if (stored.duplicate) {
     return c.json<LiveChangesResponse>({ ok: true, duplicate: true, seq: stored.seq })
   }
-  const watching = listening?.live_since != null
-  if (watching) notifyUser(c, userId, { type: 'live', accountId: account.id, seq: stored.seq })
+  const listeners = listenerOf(listening)
+  const watching = anyListening(listeners)
+  if (watching)
+    notifyAccount(c, listeners, { type: 'live', accountId: account.id, seq: stored.seq })
   return c.json<LiveChangesResponse>({
     ok: true,
     seq: stored.seq,
@@ -116,7 +122,7 @@ export const liveAccounts = new Hono<AppEnv>()
 
   /** The open journal, merged; ETag = base + seq. Live sync off: `open: false`. */
   .get('/:id/live', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const live = liveDb(c.env)
     c.header('Cache-Control', 'private, no-cache')
     if (!live || !liveSyncOn((account.settings as { liveSync?: unknown } | null)?.liveSync)) {
@@ -131,16 +137,16 @@ export const liveAccounts = new Hono<AppEnv>()
 
   /** Ends the open journal: the pages show the newest snapshot again. */
   .delete('/:id/live', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'own')
     const live = liveDb(c.env)
     if (live) await live.batch(deleteJournalStatements(live, account.id))
-    notifyUser(c, c.get('userId'), { type: 'live', accountId: account.id, seq: 0 })
+    notifyAccountLater(c, account.id, { type: 'live', accountId: account.id, seq: 0 })
     return c.body(null, 204)
   })
 
   /** Chart points, `?from=YYYY-MM-DD&to=YYYY-MM-DD` (UTC days; default: the last 400 days). */
   .get('/:id/points', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const live = liveDb(c.env)
     const today = utcDay(Date.now())
     const from = DAY.test(c.req.query('from') ?? '')
@@ -160,7 +166,7 @@ export const liveAccounts = new Hono<AppEnv>()
 
   /** Deletes chart points: `?day=YYYY-MM-DD` one day, without it every day. */
   .delete('/:id/points', async (c) => {
-    const account = await loadOwnedAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'))
+    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'own')
     const day = c.req.query('day')
     if (day !== undefined && !DAY.test(day)) {
       throw new ApiError(400, 'invalid_day', 'day is YYYY-MM-DD')
@@ -175,6 +181,6 @@ export const liveAccounts = new Hono<AppEnv>()
           : live.prepare('DELETE FROM live_points WHERE account_id = ?1').bind(account.id)
       ).run()
     }
-    notifyUser(c, c.get('userId'), { type: 'live', accountId: account.id, seq: 0 })
+    notifyAccountLater(c, account.id, { type: 'live', accountId: account.id, seq: 0 })
     return c.body(null, 204)
   })

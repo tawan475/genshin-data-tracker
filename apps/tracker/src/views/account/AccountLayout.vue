@@ -32,7 +32,15 @@ provideAccount(
     const version = value ? liveVersions.get(value.id) : undefined
     return version ? { ...value, liveVersion: version } : value
   }),
+  // An account shared to view only shows like staff Inspect: nothing saved.
+  // Pages read this once, so they are remounted when the access changes (below).
+  {
+    get readOnly() {
+      return account.value?.access === 'viewer'
+    },
+  },
 )
+const access = computed(() => account.value?.access ?? 'owner')
 
 // Which game images the host lacks and which we serve (small): portraits and
 // icons render before it arrives and switch once it does.
@@ -83,7 +91,9 @@ onBeforeUnmount(() => cancelIdle?.())
 </script>
 
 <template>
-  <RouterView v-if="account" />
+  <RouterView v-if="account" v-slot="{ Component }">
+    <component :is="Component" :key="access" />
+  </RouterView>
   <UiEmpty v-else :title="$t('shell.accountMissing.title')" :body="$t('shell.accountMissing.body')">
     <template #icon><SearchX aria-hidden="true" /></template>
     <UiButton :to="{ name: 'home' }" variant="primary">{{

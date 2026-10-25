@@ -74,7 +74,13 @@ import { auditStatement, inspectReadStatement, listAudit, userHistory } from '..
 import { adminResetLink } from '../services/auth-tokens'
 import { buildBundle, catalogJson } from '../services/export'
 import { unlinkIdentity } from '../services/identities'
-import { listenerOf, listenerStatement, notifyUser, revokeLive } from '../services/live'
+import {
+  listenerOf,
+  listenerStatement,
+  notifyAccount,
+  notifyUser,
+  revokeLive,
+} from '../services/live'
 import { collectAccountBlobs } from '../services/maintenance'
 import {
   assertOutranks,
@@ -755,11 +761,11 @@ export const staff = new Hono<AppEnv>()
       account.id,
       results[1]!.results.map((row) => Number((row as { id: number }).id)),
     ).catch((error: unknown) => console.warn('live_cleanup_failed', String(error)))
-    notifyUser(
+    notifyAccount(
       c,
-      owner.userId,
-      { type: 'data', accountId: account.id, dataVersion: dataVersionOf(results[2]) ?? null },
       listenerOf(results[4]),
+      { type: 'data', accountId: account.id, dataVersion: dataVersionOf(results[2]) ?? null },
+      owner.userId,
     )
     return c.json<StaffPurgeResponse>({ deleted })
   })

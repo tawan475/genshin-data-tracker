@@ -1,5 +1,5 @@
-import type { AccountResponse } from '@gdt/shared'
-import { inject, provide, type ComputedRef, type InjectionKey } from 'vue'
+import type { AccountAccess, AccountResponse } from '@gdt/shared'
+import { computed, inject, provide, type ComputedRef, type InjectionKey } from 'vue'
 
 const ACCOUNT: InjectionKey<ComputedRef<AccountResponse>> = Symbol('account')
 const MODE: InjectionKey<AccountMode> = Symbol('account-mode')
@@ -38,6 +38,16 @@ export function useAccountMode(): AccountMode {
 /** True on staff Inspect pages: show, never save. */
 export function useReadOnly(): boolean {
   return useAccountMode().readOnly
+}
+
+/**
+ * The user's access to the account (account sharing): 'owner', or the role
+ * it was shared with them as. Owner-only controls (rename, keys, deleting
+ * snapshots, sharing) check it; a viewer's pages are also read-only (`useReadOnly`).
+ */
+export function useAccess(): ComputedRef<AccountAccess> {
+  const account = useAccount()
+  return computed(() => account.value.access ?? 'owner')
 }
 
 /** Maps an account page's route name to where it opens here (Inspect has its own). */

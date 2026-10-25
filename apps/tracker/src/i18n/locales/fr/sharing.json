@@ -1,0 +1,42 @@
+{
+  "section": "Partage",
+  "sync": "Synchronisation",
+  "title": "Partage du compte",
+  "sharedWithMe": "Partagés avec moi",
+  "sharedBy": "Partagé par {owner} · {role}",
+  "role": {
+    "owner": "Propriétaire",
+    "viewer": "Lecteur",
+    "editor": "Éditeur"
+  },
+  "roleTitle": {
+    "viewer": "Voit tout, ne modifie rien",
+    "editor": "Peut aussi importer, planifier et cocher des succès"
+  },
+  "roleLabel": "Rôle",
+  "roleOf": "Rôle de {name}",
+  "you": "Vous",
+  "pending": "Invité",
+  "invitedTitle": "En attente de son accord (14 jours)",
+  "invite": "Inviter",
+  "invited": "Invitation envoyée",
+  "notInvited": "Invitation non envoyée",
+  "cancelInvite": "Annuler",
+  "cancelTitle": "Annuler l'invitation de {name} ?",
+  "cancelDetail": "Cette personne ne pourra plus l'accepter.",
+  "removeTitle": "Retirer {name} ?",
+  "removeDetail": "Cette personne perd l'accès au compte immédiatement.",
+  "notRemoved": "Non retiré",
+  "leave": "Quitter",
+  "leaveTitle": "Quitter {name} ?",
+  "leaveDetail": "Vous perdez l'accès jusqu'à une nouvelle invitation du propriétaire.",
+  "notLeft": "Non quitté",
+  "notLoaded": "Impossible de charger qui voit ce compte",
+  "limitTitle": "Partagé avec {n} personnes au maximum",
+  "invitations": "Invitations",
+  "invitationsCount": "{n} invitation | {n} invitations",
+  "accept": "Accepter",
+  "decline": "Refuser",
+  "accepted": "Compte ajouté",
+  "answerFailed": "Impossible de répondre à l'invitation"
+}

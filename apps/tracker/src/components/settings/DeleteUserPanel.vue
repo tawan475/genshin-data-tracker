@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { Trash2 } from 'lucide-vue-next'
 import DeleteUserDialog from '@/components/staff/DeleteUserDialog.vue'
 import UiButton from '@/components/ui/UiButton.vue'
-import UiPanel from '@/components/ui/UiPanel.vue'
 import { t } from '@/i18n'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -24,10 +23,12 @@ const busy = ref(false)
 const me = computed(() =>
   session.me ? { id: session.me.id, username: session.me.username } : null,
 )
+/** Only the user's own accounts go (ones shared with them stay with their owners). */
+const owned = computed(() => accounts.list.filter((a) => (a.access ?? 'owner') === 'owner'))
 const figures = computed(() => ({
-  accounts: accounts.list.length,
-  snapshots: accounts.list.reduce((n, a) => n + a.snapshotCount, 0),
-  storedBytes: accounts.list.reduce((n, a) => n + a.storedBytes, 0),
+  accounts: owned.value.length,
+  snapshots: owned.value.reduce((n, a) => n + a.snapshotCount, 0),
+  storedBytes: owned.value.reduce((n, a) => n + a.storedBytes, 0),
 }))
 
 async function remove(username: string) {
@@ -47,9 +48,12 @@ async function remove(username: string) {
 </script>
 
 <template>
-  <UiPanel :title="$t('settings.deleteUser.title')">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm text-text-muted">{{ $t('settings.deleteUser.body') }}</p>
+  <section class="rounded-xl border border-danger-border bg-surface-raised shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 p-5">
+      <div class="min-w-0">
+        <h2 class="text-base font-semibold">{{ $t('settings.deleteUser.title') }}</h2>
+        <p class="text-sm text-text-muted">{{ $t('settings.deleteUser.body') }}</p>
+      </div>
       <UiButton variant="danger" @click="open = true">
         <Trash2 class="size-4" aria-hidden="true" />
         {{ $t('common.delete') }}
@@ -64,5 +68,5 @@ async function remove(username: string) {
       @close="open = false"
       @confirm="remove"
     />
-  </UiPanel>
+  </section>
 </template>

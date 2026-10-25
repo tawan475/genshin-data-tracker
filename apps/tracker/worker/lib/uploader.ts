@@ -17,6 +17,8 @@ import type { AppEnv } from '../env'
 import {
   findImportKeyOwner,
   hashImportKey,
+  pickByUid,
+  sharedReadOnly,
   uploadsRefused,
   type ImportKeyOwner,
   type KeyAccount,
@@ -64,6 +66,8 @@ export async function sessionOwner(
   if (session.block) throw uploadsRefused(session.block)
   if (session.upload_mode === 'account') {
     const account = accounts.find((a) => a.id === session.upload_account_id)
+    // Shared with this user to view only (or no longer editable): refuse, as for a key.
+    if (account?.role === 'viewer') throw sharedReadOnly()
     if (!account) {
       const where = configUrl(new URL(c.req.url).origin, claims.sid)
       throw new ApiError(
@@ -72,7 +76,7 @@ export async function sessionOwner(
         `The account this PC uploads to was deleted. Choose where uploads go: ${where}`,
       )
     }
-    return { scope: 'account', account, userId: claims.userId }
+    return { scope: 'account', account, userId: account.user_id ?? claims.userId }
   }
   return { scope: 'user', user: { id: claims.userId, username: session.username }, accounts }
 }
@@ -118,13 +122,5 @@ export function uploaderAccount(owner: UploadOwner, uid: string): KeyAccount | n
     }
     return owner.account
   }
-  const matches = owner.accounts.filter((a) => a.uid?.trim() === uid)
-  if (matches.length > 1) {
-    throw new ApiError(
-      409,
-      'ambiguous_uid',
-      `More than one of your accounts has UID ${uid}. Give each a different UID, or use the account's own key.`,
-    )
-  }
-  return matches[0] ?? null
+  return pickByUid(owner.accounts, uid)
 }

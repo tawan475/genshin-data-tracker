@@ -175,7 +175,8 @@
     "othersButtonTitle": "Todos os dispositivos exceto este, incluindo os conectados antes de os dispositivos serem listados",
     "browserOn": "{browser} em {system}",
     "browserGeneric": "Navegador em {system}",
-    "unknownDevice": "Dispositivo desconhecido"
+    "unknownDevice": "Dispositivo desconhecido",
+    "all": "Todos ({n})"
   },
   "deleteUser": {
     "title": "Excluir usuário",

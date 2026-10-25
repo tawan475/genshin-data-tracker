@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { SessionMethod, SessionResponse, UploadTarget } from '@gdt/shared'
-import { computed, nextTick, onMounted, ref, type Component } from 'vue'
+import type { SessionResponse, UploadTarget } from '@gdt/shared'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { History, KeyRound, LifeBuoy, LogOut, Monitor } from 'lucide-vue-next'
+import { LogOut } from 'lucide-vue-next'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -12,10 +12,10 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { ApiRequestError, api } from '@/api'
 import { t } from '@/i18n'
 import { formatDateTime, formatRelative } from '@/lib/format'
-import { describeUserAgent } from '@/lib/user-agent'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
+import { METHOD_ICONS, byRecent, deviceName, devicePlace, methodTitle } from './devices'
 
 /**
  * The devices signed in to this account (each sign-in is one): where each
@@ -35,17 +35,6 @@ const sessions = ref<SessionResponse[] | null>(null)
 /** The session being signed out, 'others', or 'here'. */
 const busy = ref<number | 'others' | 'here' | null>(null)
 
-/** How a session signed in: an icon (Discord and Google show their marks) and a tooltip. */
-const METHOD_ICONS: Record<SessionMethod, Component | undefined> = {
-  password: KeyRound,
-  discord: undefined,
-  google: undefined,
-  reset: LifeBuoy,
-  legacy: History,
-  irminsul: Monitor,
-}
-const methodTitle = (method: SessionMethod): string => t(`settings.devices.method.${method}`)
-
 /** The device irminsul's Configure button asked for (`?device=`), highlighted. */
 const focused = computed(() => {
   const id = Number(route.query.device)
@@ -62,10 +51,12 @@ function targetOptions(row: SessionResponse): (SelectOption<string> | SelectGrou
   if (targetKey(row) === 'gone') {
     options.push({ value: 'gone', label: t('settings.devices.removedAccount') })
   }
-  if (accounts.list.length) {
+  // Accounts this user may upload to: their own and those shared with them as editor.
+  const writable = accounts.list.filter((a) => a.access !== 'viewer')
+  if (writable.length) {
     options.push({
       group: t('settings.devices.always'),
-      options: accounts.list.map((a) => ({ value: String(a.id), label: accounts.displayName(a) })),
+      options: writable.map((a) => ({ value: String(a.id), label: accounts.displayName(a) })),
     })
   }
   return options
@@ -117,24 +108,11 @@ async function setTarget(row: SessionResponse, key: string) {
   }
 }
 
-/** "Irminsul on <PC>" for irminsul, the browser and system otherwise. */
-function deviceName(row: SessionResponse): string {
-  return row.method === 'irminsul'
-    ? t('settings.devices.irminsulOn', { device: row.deviceName || t('settings.devices.aPc') })
-    : describeUserAgent(row.userAgent)
-}
-
 /** This device first, then the most recently seen. */
 const rows = computed(() =>
   [...(sessions.value ?? [])]
-    .sort((a, b) => Number(b.current) - Number(a.current) || b.lastSeenAt - a.lastSeenAt)
-    .map((row) => ({
-      ...row,
-      device: deviceName(row),
-      place: [row.ip, [row.city, row.country].filter(Boolean).join(', ')]
-        .filter(Boolean)
-        .join(' · '),
-    })),
+    .sort(byRecent)
+    .map((row) => ({ ...row, device: deviceName(row), place: devicePlace(row) })),
 )
 
 async function load() {

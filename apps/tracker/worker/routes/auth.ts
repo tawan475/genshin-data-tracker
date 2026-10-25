@@ -47,6 +47,7 @@ import {
 } from '../lib/session'
 import { auditStatement } from '../services/audit'
 import { closeResetLinks, mailVerification } from '../services/auth-tokens'
+import { editableBy } from '../services/accounts'
 import { listIdentities, unlinkIdentity } from '../services/identities'
 import { meFromResults, meStatements, type MeSource } from '../services/me'
 import { userPermissions } from '../services/roles'
@@ -317,13 +318,11 @@ export const auth = new Hono<AppEnv>()
           `UPDATE user_sessions SET upload_mode = ?3, upload_account_id = ?4
            WHERE id = ?1 AND user_id = ?2 AND method = 'irminsul' AND revoked_at IS NULL
              AND expires_at > ?5
-             AND (?4 IS NULL OR EXISTS (SELECT 1 FROM genshin_accounts WHERE id = ?4 AND user_id = ?2))
+             AND (?4 IS NULL OR ${editableBy('?4', '?2')})
            RETURNING id`,
         )
         .bind(id, userId, upload.mode, accountId, Date.now()),
-      d1
-        .prepare('SELECT id FROM genshin_accounts WHERE id = ?1 AND user_id = ?2')
-        .bind(accountId, userId),
+      d1.prepare(`SELECT ?1 AS id WHERE ${editableBy('?1', '?2')}`).bind(accountId, userId),
     ])
     if (updated!.results.length === 0) {
       if (accountId !== null && owned!.results.length === 0) {

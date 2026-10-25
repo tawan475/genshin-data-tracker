@@ -1,0 +1,42 @@
+{
+  "section": "การแชร์",
+  "sync": "ซิงก์",
+  "title": "แชร์บัญชี",
+  "sharedWithMe": "แชร์กับฉัน",
+  "sharedBy": "แชร์โดย {owner} · {role}",
+  "role": {
+    "owner": "เจ้าของ",
+    "viewer": "ผู้ดู",
+    "editor": "ผู้แก้ไข"
+  },
+  "roleTitle": {
+    "viewer": "ดูได้ทั้งหมด แก้ไขไม่ได้",
+    "editor": "อัปโหลด วางแผน และทำเครื่องหมายความสำเร็จได้ด้วย"
+  },
+  "roleLabel": "บทบาท",
+  "roleOf": "บทบาทของ {name}",
+  "you": "คุณ",
+  "pending": "เชิญแล้ว",
+  "invitedTitle": "รอการตอบรับ (14 วัน)",
+  "invite": "เชิญ",
+  "invited": "ส่งคำเชิญแล้ว",
+  "notInvited": "เชิญไม่สำเร็จ",
+  "cancelInvite": "ยกเลิก",
+  "cancelTitle": "ยกเลิกคำเชิญถึง {name}?",
+  "cancelDetail": "อีกฝ่ายจะตอบรับไม่ได้อีก",
+  "removeTitle": "นำ {name} ออก?",
+  "removeDetail": "อีกฝ่ายจะเข้าถึงบัญชีนี้ไม่ได้ทันที",
+  "notRemoved": "นำออกไม่สำเร็จ",
+  "leave": "ออก",
+  "leaveTitle": "ออกจาก {name}?",
+  "leaveDetail": "คุณจะเข้าถึงไม่ได้จนกว่าเจ้าของจะเชิญอีกครั้ง",
+  "notLeft": "ออกไม่สำเร็จ",
+  "notLoaded": "โหลดรายชื่อผู้ที่เห็นบัญชีนี้ไม่ได้",
+  "limitTitle": "แชร์ได้สูงสุด {n} คน",
+  "invitations": "คำเชิญ",
+  "invitationsCount": "{n} คำเชิญ",
+  "accept": "ตอบรับ",
+  "decline": "ปฏิเสธ",
+  "accepted": "เพิ่มบัญชีแล้ว",
+  "answerFailed": "ตอบคำเชิญไม่สำเร็จ"
+}

@@ -1,0 +1,42 @@
+{
+  "section": "Condivisione",
+  "sync": "Sincronizzazione",
+  "title": "Condivisione account",
+  "sharedWithMe": "Condivisi con me",
+  "sharedBy": "Condiviso da {owner} · {role}",
+  "role": {
+    "owner": "Proprietario",
+    "viewer": "Lettore",
+    "editor": "Editor"
+  },
+  "roleTitle": {
+    "viewer": "Vede tutto, non cambia nulla",
+    "editor": "Carica anche dati, pianifica e segna obiettivi"
+  },
+  "roleLabel": "Ruolo",
+  "roleOf": "Ruolo di {name}",
+  "you": "Tu",
+  "pending": "Invitato",
+  "invitedTitle": "In attesa di conferma (14 giorni)",
+  "invite": "Invita",
+  "invited": "Invito inviato",
+  "notInvited": "Invito non inviato",
+  "cancelInvite": "Annulla",
+  "cancelTitle": "Annullare l'invito a {name}?",
+  "cancelDetail": "Non potrà più accettarlo.",
+  "removeTitle": "Rimuovere {name}?",
+  "removeDetail": "Perde subito l'accesso a questo account.",
+  "notRemoved": "Non rimosso",
+  "leave": "Esci",
+  "leaveTitle": "Uscire da {name}?",
+  "leaveDetail": "Perdi l'accesso finché il proprietario non ti invita di nuovo.",
+  "notLeft": "Non uscito",
+  "notLoaded": "Impossibile caricare chi vede questo account",
+  "limitTitle": "Condivisibile con al massimo {n} persone",
+  "invitations": "Inviti",
+  "invitationsCount": "{n} invito | {n} inviti",
+  "accept": "Accetta",
+  "decline": "Rifiuta",
+  "accepted": "Account aggiunto",
+  "answerFailed": "Impossibile rispondere all'invito"
+}

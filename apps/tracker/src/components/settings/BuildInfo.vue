@@ -59,7 +59,7 @@ const builtAt = computed(() => {
 
     <dl
       v-else
-      class="mt-1 flex flex-col divide-y divide-border-subtle font-mono text-sm"
+      class="mt-1 grid gap-x-8 font-mono text-sm sm:grid-cols-2 [&>div]:border-b [&>div]:border-border-subtle"
       :aria-busy="loading"
     >
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5">

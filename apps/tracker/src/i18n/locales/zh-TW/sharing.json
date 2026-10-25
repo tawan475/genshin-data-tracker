@@ -1,0 +1,42 @@
+{
+  "section": "共用",
+  "sync": "同步",
+  "title": "帳號共用",
+  "sharedWithMe": "與我共用",
+  "sharedBy": "{owner} 共用 · {role}",
+  "role": {
+    "owner": "擁有者",
+    "viewer": "檢視者",
+    "editor": "編輯者"
+  },
+  "roleTitle": {
+    "viewer": "可檢視全部，不能修改",
+    "editor": "也可上傳、規劃和標記成就"
+  },
+  "roleLabel": "角色",
+  "roleOf": "{name} 的角色",
+  "you": "你",
+  "pending": "已邀請",
+  "invitedTitle": "等待對方接受（14 天）",
+  "invite": "邀請",
+  "invited": "已送出邀請",
+  "notInvited": "未能邀請",
+  "cancelInvite": "取消",
+  "cancelTitle": "取消對 {name} 的邀請？",
+  "cancelDetail": "對方將無法再接受。",
+  "removeTitle": "移除 {name}？",
+  "removeDetail": "對方將立即失去此帳號的存取權。",
+  "notRemoved": "未能移除",
+  "leave": "退出",
+  "leaveTitle": "退出 {name}？",
+  "leaveDetail": "在擁有者再次邀請前，你將無法存取。",
+  "notLeft": "未能退出",
+  "notLoaded": "無法讀取可檢視此帳號的人",
+  "limitTitle": "最多共用給 {n} 人",
+  "invitations": "邀請",
+  "invitationsCount": "{n} 個邀請",
+  "accept": "接受",
+  "decline": "拒絕",
+  "accepted": "已加入帳號",
+  "answerFailed": "無法回應邀請"
+}

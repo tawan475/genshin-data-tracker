@@ -69,7 +69,7 @@ export interface WishImportResult {
   response: Omit<WishImportResponse, 'accountId'>
   /** Pulls were added or replaced. */
   changed: boolean
-  listener?: Listener
+  listener?: Listener[]
 }
 
 const NEWEST_SQL =
@@ -327,7 +327,7 @@ async function importOnce(
     writes.push({ banner, from, chunks: rewritten })
   }
 
-  const respond = (newest: WishNewest, listener?: Listener): WishImportResult => ({
+  const respond = (newest: WishNewest, listener?: Listener[]): WishImportResult => ({
     response: {
       added,
       known,

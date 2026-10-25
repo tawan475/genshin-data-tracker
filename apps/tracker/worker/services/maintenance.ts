@@ -27,6 +27,7 @@ import { KEEP_EXPIRED_MS } from './auth-tokens'
 import { CODE_KEEP_MS } from './irminsul'
 import { COLLECT_LEGACY_BLOBS, repack, type RepackResult } from './repack'
 import { REFS_SQL, withLegacySchema } from './storage'
+import { expiredInvitesStatement } from './sharing'
 import { UPLOAD_DAYS_KEPT, utcDay } from './upload-limits'
 
 export const TRASH_DAYS = 30
@@ -41,6 +42,8 @@ export interface MaintenanceResult {
   uploadDays: number
   sessions: number
   signupIps: number
+  /** Account-sharing invites nobody accepted in time. */
+  invites: number
   repack?: RepackResult
 }
 
@@ -85,7 +88,7 @@ export async function runMaintenance(
 ): Promise<MaintenanceResult> {
   // One batch: a failure (the v1 tables gone, say) leaves nothing half done.
   const sessionsEnded = now - SESSION_KEEP_DAYS * 86_400_000
-  const [snapshots, sections, tokens, codes, uploadDays, sessions, signupIps, legacy] =
+  const [snapshots, sections, tokens, codes, uploadDays, sessions, signupIps, invites, legacy] =
     await withLegacySchema((withV1) =>
       d1.batch([
         d1
@@ -105,6 +108,7 @@ export async function runMaintenance(
             'UPDATE users SET signup_ip = NULL WHERE signup_ip IS NOT NULL AND created_at < ?1',
           )
           .bind(now - SIGNUP_IP_DAYS * 86_400_000),
+        expiredInvitesStatement(d1, now),
         ...(withV1 ? [d1.prepare(COLLECT_LEGACY_BLOBS)] : []),
       ]),
     )
@@ -116,6 +120,7 @@ export async function runMaintenance(
     uploadDays: uploadDays!.meta.changes,
     sessions: sessions!.meta.changes,
     signupIps: signupIps!.meta.changes,
+    invites: invites!.meta.changes,
   }
   if (options.repackLimit && options.repackLimit > 0) {
     result.repack = await repack(d1, { limit: options.repackLimit })

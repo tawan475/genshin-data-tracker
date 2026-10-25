@@ -175,7 +175,8 @@
     "othersButtonTitle": "ทุกอุปกรณ์ยกเว้นเครื่องนี้ รวมถึงที่เข้าสู่ระบบก่อนที่จะมีรายการอุปกรณ์",
     "browserOn": "{browser} บน {system}",
     "browserGeneric": "เบราว์เซอร์บน {system}",
-    "unknownDevice": "อุปกรณ์ที่ไม่รู้จัก"
+    "unknownDevice": "อุปกรณ์ที่ไม่รู้จัก",
+    "all": "ทั้งหมด {n}"
   },
   "deleteUser": {
     "title": "ลบผู้ใช้",

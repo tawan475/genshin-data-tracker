@@ -51,9 +51,9 @@ async function install() {
 </script>
 
 <template>
-  <UiPanel :title="$t('settings.app.title')">
-    <div class="flex flex-col gap-6">
-      <div>
+  <UiPanel>
+    <div class="flex flex-wrap gap-x-10 gap-y-6">
+      <div class="min-w-0 flex-[1_1_14rem]">
         <h3 class="font-display text-lg font-bold">{{ $t('settings.app.install') }}</h3>
 
         <p v-if="standalone" class="mt-3 flex items-center gap-2 text-success-text">
@@ -109,7 +109,7 @@ async function install() {
         </p>
       </div>
 
-      <div class="border-t border-border-subtle pt-5">
+      <div class="min-w-0 flex-[999_1_30rem]">
         <BuildInfo />
       </div>
     </div>

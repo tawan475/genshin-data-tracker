@@ -1,0 +1,42 @@
+{
+  "section": "Chia sẻ",
+  "sync": "Đồng bộ",
+  "title": "Chia sẻ tài khoản",
+  "sharedWithMe": "Được chia sẻ với tôi",
+  "sharedBy": "{owner} chia sẻ · {role}",
+  "role": {
+    "owner": "Chủ sở hữu",
+    "viewer": "Người xem",
+    "editor": "Người sửa"
+  },
+  "roleTitle": {
+    "viewer": "Xem mọi thứ, không thay đổi gì",
+    "editor": "Cũng tải lên, lập kế hoạch và đánh dấu thành tựu"
+  },
+  "roleLabel": "Vai trò",
+  "roleOf": "Vai trò của {name}",
+  "you": "Bạn",
+  "pending": "Đã mời",
+  "invitedTitle": "Đang chờ chấp nhận (14 ngày)",
+  "invite": "Mời",
+  "invited": "Đã gửi lời mời",
+  "notInvited": "Chưa mời được",
+  "cancelInvite": "Hủy",
+  "cancelTitle": "Hủy lời mời {name}?",
+  "cancelDetail": "Họ sẽ không thể chấp nhận nữa.",
+  "removeTitle": "Xóa {name}?",
+  "removeDetail": "Họ mất quyền truy cập tài khoản này ngay lập tức.",
+  "notRemoved": "Chưa xóa được",
+  "leave": "Rời",
+  "leaveTitle": "Rời {name}?",
+  "leaveDetail": "Bạn mất quyền truy cập cho đến khi chủ sở hữu mời lại.",
+  "notLeft": "Chưa rời được",
+  "notLoaded": "Không tải được ai xem tài khoản này",
+  "limitTitle": "Chia sẻ tối đa {n} người",
+  "invitations": "Lời mời",
+  "invitationsCount": "{n} lời mời",
+  "accept": "Chấp nhận",
+  "decline": "Từ chối",
+  "accepted": "Đã thêm tài khoản",
+  "answerFailed": "Không trả lời được lời mời"
+}

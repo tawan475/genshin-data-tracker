@@ -175,7 +175,8 @@
     "othersButtonTitle": "Every device but this one, including ones signed in before devices were listed",
     "browserOn": "{browser} on {system}",
     "browserGeneric": "Browser on {system}",
-    "unknownDevice": "Unknown device"
+    "unknownDevice": "Unknown device",
+    "all": "All {n}"
   },
   "deleteUser": {
     "title": "Delete user",
