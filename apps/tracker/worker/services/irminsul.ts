@@ -18,6 +18,7 @@ import {
 import type { Context } from 'hono'
 import type { AppEnv } from '../env'
 import { randomToken, safeEqual, sha256Hex } from '../lib/crypto'
+import { pageOrigin } from '../lib/email'
 import {
   mintAccessToken,
   newRefreshToken,
@@ -239,7 +240,7 @@ async function tokenAnswer(
     expires_in: ACCESS_TTL_S,
     refresh_token: refreshToken,
     refresh_expires_in: REFRESH_TTL_S,
-    whoami: whoamiOf(new URL(c.req.url).origin, claims.sid, row),
+    whoami: whoamiOf(pageOrigin(c.env, c.req.url), claims.sid, row),
   }
 }
 

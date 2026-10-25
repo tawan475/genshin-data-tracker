@@ -7,13 +7,9 @@ Cloudflare Worker serves the Vue dashboard as static assets and the API under
 
 The old address, https://genshin-tracker.475.dev, is a second custom domain
 on the same Worker: its `/api` keeps answering (installed irminsul copies
-post there). Its pages still work too, until teyvat.me's sign-in setup
-(Turnstile hostname, Discord/Google redirect URIs) is done; then
-`index.html` sends them on to teyvat.me, path and all.
-Cookies are per host, so people sign in again once on teyvat.me. Moving the
-host needs, outside this repo: the `teyvat.me` zone active on Cloudflare,
-the CI token allowed on it, the Discord/Google redirect URIs and the
-Turnstile hostname below, and gi-cdn's `ALLOWED_ORIGINS`.
+post there) and its pages go to teyvat.me, path and all (see
+[The old address](#the-old-address)). Cookies are per host, so people sign
+in again once on teyvat.me.
 
 ## Layout
 
@@ -274,7 +270,7 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   value, bindings, error detail — and imports add `Server-Timing` and
   `x-gdt-d1` (round trips, rows read/written, SQL time). A session never opens
   it. The key lives in the gitignored `apps/tracker/.diag-key`:
-  `curl -H "x-diag-key: $(cat apps/tracker/.diag-key)" https://genshin-tracker.475.dev/api/health`.
+  `curl -H "x-diag-key: $(cat apps/tracker/.diag-key)" https://teyvat.me/api/health`.
 - **Progress** (cookie auth, account owner only):
   `GET/PATCH /api/accounts/:id/achievement-marks` (`{done, undone}` id lists;
   marks by hand, on top of what snapshots captured) and
@@ -779,7 +775,7 @@ otherwise).
 
 ```bash
 # Replay a folder of GOOD files through irminsul's upload path (import old exports / load test)
-GDT_IMPORT_KEY=gdt_ik_... [GDT_DIAG_KEY=...] node apps/tracker/scripts/upload-goods.mjs <dir>   --url https://genshin-tracker.475.dev --gzip [--limit N]
+GDT_IMPORT_KEY=gdt_ik_... [GDT_DIAG_KEY=...] node apps/tracker/scripts/upload-goods.mjs <dir>   --url https://teyvat.me --gzip [--limit N]
 pnpm --filter @gdt/tracker icons     # regenerate PWA icons + manifest
 ```
 
@@ -838,6 +834,40 @@ is.
 Static assets are served from the edge; `/api` runs with Smart Placement (next
 to D1). Measured from Bangkok: ~5 ms of SQL per import, ~120 ms per D1 round
 trip without placement.
+
+### The old address
+
+teyvat.me has been the site since 2026-10-25; genshin-tracker.475.dev stays
+a custom domain of the same Worker for good, because irminsul builds already
+installed post to its `/api` (import by key, verify-key, sign-in, wishes,
+live sync). What each part does there:
+
+- `/api/*` answers as on teyvat.me, on the same data. The links it gives
+  irminsul for a browser (`dashboardUrl`, `configUrl`, discovery's
+  `authorize_url`) point at teyvat.me (`pageOrigin` in `worker/lib/email.ts`);
+  `token_url`/`revoke_url` stay on the host asked, as irminsul requires.
+  Discord/Google sign-in started there still comes back there (`linkOrigin`:
+  the flow cookie is per host), so its redirect URIs stay registered.
+- Pages: a Redirect Rule answers 301 to teyvat.me, path and query kept.
+  `index.html` does the same in script for a page a service worker or
+  cache still holds.
+
+The Redirect Rule (Cloudflare dashboard → the `475.dev` zone → Rules →
+Redirect Rules → Create rule → Single Redirect), added only once sign-in on
+teyvat.me works (Discord/Google redirect URIs, Turnstile hostname):
+
+- Custom filter expression:
+  `(http.host eq "genshin-tracker.475.dev" and not starts_with(http.request.uri.path, "/api/"))`
+- Then: Dynamic, `concat("https://teyvat.me", http.request.uri.path)`,
+  status 301, Preserve query string on.
+
+Never let it cover `/api/`: shipped irminsul builds would lose uploads and
+sign-in (clients don't follow a 301 on a POST). Outside this repo the move
+also needed the `teyvat.me` zone on Cloudflare, the CI token allowed on it,
+the Discord/Google redirect URIs, the Turnstile hostname and gi-cdn's
+`ALLOWED_ORIGINS` (all done). Email, while paused, still sends from
+`no-reply@475.dev` with links to teyvat.me; moving the sender to teyvat.me
+means onboarding that domain to Email Sending and setting `EMAIL_FROM`.
 
 ## Credits
 

@@ -166,6 +166,14 @@ describe('discovery', () => {
       'http://localhost:5181/link',
     )
   })
+
+  it('sends the old address to the site for sign-in, keeping its API', async () => {
+    const response = await SELF.fetch('https://genshin-tracker.475.dev/api/oauth/irminsul')
+    const body = (await response.json()) as IrminsulDiscovery
+    expect(body.authorize_url).toBe('https://teyvat.me/link')
+    expect(body.token_url).toBe('https://genshin-tracker.475.dev/api/oauth/token')
+    expect(body.revoke_url).toBe('https://genshin-tracker.475.dev/api/oauth/revoke')
+  })
 })
 
 describe('sign in, upload, refresh, sign out', () => {

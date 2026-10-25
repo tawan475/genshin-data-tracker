@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { linkOrigin, OLD_SITE_ORIGIN, SITE_ORIGIN } from '../lib/email'
+import { linkOrigin, OLD_SITE_ORIGIN, pageOrigin, SITE_ORIGIN } from '../lib/email'
 
 const env = {} as Env
 
@@ -14,5 +14,13 @@ describe('linkOrigin', () => {
   it('never follows a forged host', () => {
     expect(linkOrigin(env, 'https://evil.example/api/auth/x')).toBe(SITE_ORIGIN)
     expect(linkOrigin(env, 'https://teyvat.me.evil.example/api')).toBe(SITE_ORIGIN)
+  })
+})
+
+describe('pageOrigin', () => {
+  it('gives the site for the old address, the request origin otherwise', () => {
+    expect(pageOrigin(env, `${OLD_SITE_ORIGIN}/api/irminsul/whoami`)).toBe(SITE_ORIGIN)
+    expect(pageOrigin(env, 'https://teyvat.me/api/irminsul/whoami')).toBe(SITE_ORIGIN)
+    expect(pageOrigin(env, 'http://localhost:5173/api/x')).toBe('http://localhost:5173')
   })
 })

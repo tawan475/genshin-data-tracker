@@ -330,6 +330,16 @@ describe('accounts and imports', () => {
       headers: { 'x-import-key': 'gdt_ik_wrong' },
     })
     expect(bad.status).toBe(401)
+    // Installed copies still ask the old address; their dashboard is the site.
+    const old = await SELF.fetch(
+      'https://genshin-tracker.475.dev/api/genshin-accounts-public/verify-key',
+      {
+        headers: { 'x-import-key': importKey },
+      },
+    )
+    expect(((await old.json()) as VerifyKeyResponse).dashboardUrl).toBe(
+      `${ORIGIN}/app/a/${account.id}`,
+    )
   })
 
   it('imports, dedupes re-uploads, and reconstructs the exact file', async () => {

@@ -19,6 +19,7 @@
 import type { IrminsulWhoami } from '@gdt/shared'
 import { Hono, type Context } from 'hono'
 import type { AppEnv } from '../env'
+import { pageOrigin } from '../lib/email'
 import type { IrminsulClaims } from '../lib/irminsul-auth'
 import { irminsulSessionEnded, requireIrminsul } from '../lib/irminsul-auth'
 import { rateLimit } from '../lib/http'
@@ -43,14 +44,14 @@ export const irminsul = new Hono<AppEnv>()
     // As verify-key does for a stopped key's owner.
     if (session.block) throw uploadsRefused(session.block)
     c.header('Cache-Control', 'no-store')
-    return c.json<IrminsulWhoami>(whoamiOf(new URL(c.req.url).origin, claims.sid, session))
+    return c.json<IrminsulWhoami>(whoamiOf(pageOrigin(c.env, c.req.url), claims.sid, session))
   })
 
   .post('/import', async (c) => {
     const claims = claimsOf(c)
     await rateLimit(c.env.KEY_IMPORT_LIMITER, `irminsul:${claims.sid}`)
     const owner = await sessionOwner(c, claims)
-    const where = configUrl(new URL(c.req.url).origin, claims.sid)
+    const where = configUrl(pageOrigin(c.env, c.req.url), claims.sid)
     return uploadAs(c, owner, await readUpload(c), {
       uidRequired: `This file has no UID (gi_player.uid), so it can't be matched to an account. Update Irminsul, or choose one account for this PC: ${where}`,
     })

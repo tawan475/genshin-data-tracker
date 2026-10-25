@@ -76,6 +76,18 @@ export function linkOrigin(env: Env, requestUrl: string): string {
   return site
 }
 
+/**
+ * The origin of pages the API hands to irminsul (dashboard, device settings,
+ * sign-in page): the request's own, except that the old address gives the
+ * site's, since its pages are sent on to it. Not for OAuth redirect URIs:
+ * those stay on the host whose cookie started the flow (`linkOrigin`).
+ */
+export function pageOrigin(env: Env, requestUrl: string): string {
+  const request = new URL(requestUrl).origin
+  if (request !== OLD_SITE_ORIGIN) return request
+  return originOf(emailEnv(env).SITE_URL) ?? SITE_ORIGIN
+}
+
 export interface Mail {
   to: string
   subject: string

@@ -4,7 +4,8 @@
  * authorization code flow with PKCE for a public desktop client answering on
  * a loopback port (RFC 8252):
  *
- * - `GET /irminsul`: discovery, absolute URLs from this request's origin.
+ * - `GET /irminsul`: discovery, absolute URLs from this request's origin; the
+ *   sign-in page is the site's (`pageOrigin`) when asked on the old address.
  * - `POST /authorize` (the /link page: session cookie, CSRF header, an active
  *   session): the user's Allow, with the upload target they chose. Answers
  *   the loopback callback with a one-time code (60 s, stored hashed).
@@ -27,6 +28,7 @@ import {
 } from '@gdt/shared'
 import { Hono, type Context } from 'hono'
 import type { AppEnv } from '../env'
+import { pageOrigin } from '../lib/email'
 import { ApiError, clientIp, rateLimit, validate } from '../lib/http'
 import { requireActiveSession } from '../lib/session'
 import { suspendedError } from './auth'
@@ -74,7 +76,7 @@ export const irminsulOAuth = new Hono<AppEnv>()
   .get('/irminsul', (c) => {
     const origin = new URL(c.req.url).origin
     return c.json<IrminsulDiscovery>({
-      authorize_url: `${origin}/link`,
+      authorize_url: `${pageOrigin(c.env, c.req.url)}/link`,
       token_url: `${origin}/api/oauth/token`,
       revoke_url: `${origin}/api/oauth/revoke`,
       client_id: IRMINSUL_CLIENT_ID,

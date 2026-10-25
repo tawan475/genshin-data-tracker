@@ -21,6 +21,7 @@
 import type { VerifyKeyResponse } from '@gdt/shared'
 import { Hono } from 'hono'
 import type { AppEnv } from '../env'
+import { pageOrigin } from '../lib/email'
 import { readUpload } from '../lib/upload'
 import { keyOwner } from '../lib/uploader'
 import { uploadAs } from '../services/upload-as'
@@ -28,14 +29,14 @@ import { uploadAs } from '../services/upload-as'
 export const publicImport = new Hono<AppEnv>()
   .get('/verify-key', async (c) => {
     const owner = await keyOwner(c, c.env.IMPORT_LIMITER)
-    // Same origin the request came in on, so links are right for any deployment.
+    // The site's own origin (pageOrigin), so links are right for any deployment.
     if (owner.scope === 'user') {
       return c.json<VerifyKeyResponse>({
         accountId: null,
         accountName: `${owner.user.username} · all accounts`,
         uid: null,
         server: null,
-        dashboardUrl: new URL('/app', c.req.url).href,
+        dashboardUrl: new URL('/app', pageOrigin(c.env, c.req.url)).href,
         scope: 'user',
       })
     }
@@ -45,7 +46,7 @@ export const publicImport = new Hono<AppEnv>()
       accountName: account.name,
       uid: account.uid,
       server: account.server,
-      dashboardUrl: new URL(`/app/a/${account.id}`, c.req.url).href,
+      dashboardUrl: new URL(`/app/a/${account.id}`, pageOrigin(c.env, c.req.url)).href,
       scope: 'account',
     })
   })

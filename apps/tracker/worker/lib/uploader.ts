@@ -25,6 +25,7 @@ import {
   type UploadOwner,
 } from '../services/accounts'
 import { configUrl, loadUploadSession } from '../services/irminsul'
+import { pageOrigin } from './email'
 import { ApiError, clientIp, rateLimit } from './http'
 import {
   bearerToken,
@@ -69,7 +70,7 @@ export async function sessionOwner(
     // Shared with this user to view only (or no longer editable): refuse, as for a key.
     if (account?.role === 'viewer') throw sharedReadOnly()
     if (!account) {
-      const where = configUrl(new URL(c.req.url).origin, claims.sid)
+      const where = configUrl(pageOrigin(c.env, c.req.url), claims.sid)
       throw new ApiError(
         409,
         'upload_target_missing',
