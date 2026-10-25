@@ -1,5 +1,5 @@
 {
-  "name": "genshin-data-tracker",
+  "name": "teyvat.me-tracker",
   "private": true,
   "packageManager": "pnpm@10.15.1",
   "engines": {

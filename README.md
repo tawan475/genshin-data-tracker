@@ -1,4 +1,4 @@
-# genshin-data-tracker
+# teyvat.me-tracker
 
 Tracks Genshin Impact inventory snapshots (GOOD format) uploaded by
 [irminsul](https://github.com/tawan475/irminsul) or imported by hand. One

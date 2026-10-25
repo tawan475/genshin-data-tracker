@@ -1,5 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+  // The Worker keeps its first name (the repo is teyvat.me-tracker now):
+  // renaming it would make a new Worker without its secrets and Durable Objects.
   "name": "genshin-data-tracker",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-22",
