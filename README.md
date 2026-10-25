@@ -7,7 +7,9 @@ Cloudflare Worker serves the Vue dashboard as static assets and the API under
 
 The old address, https://genshin-tracker.475.dev, is a second custom domain
 on the same Worker: its `/api` keeps answering (installed irminsul copies
-post there), and `index.html` sends its pages on to teyvat.me, path and all.
+post there). Its pages still work too, until teyvat.me's sign-in setup
+(Turnstile hostname, Discord/Google redirect URIs) is done; then
+`index.html` sends them on to teyvat.me, path and all.
 Cookies are per host, so people sign in again once on teyvat.me. Moving the
 host needs, outside this repo: the `teyvat.me` zone active on Cloudflare,
 the CI token allowed on it, the Discord/Google redirect URIs and the
