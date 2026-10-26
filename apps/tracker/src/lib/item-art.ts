@@ -114,6 +114,12 @@ export function emblemFromRight(
  */
 export function qualityCell(rarity: number | null | undefined, small = false): string {
   return rarity && rarity >= 1 && rarity <= 5
-    ? giCdnArt(`UI_QualityBg_${rarity}${small ? 's' : ''}`)
+    ? `${giCdnArt(`UI_QualityBg_${rarity}${small ? 's' : ''}`)}?v=${CELL_VERSION}`
     : ''
 }
+
+/**
+ * Bumped when gi-cdn re-encodes the cells (2: lossless, the knot no longer
+ * smeared): browsers and the service worker keep images by URL for months.
+ */
+const CELL_VERSION = 2

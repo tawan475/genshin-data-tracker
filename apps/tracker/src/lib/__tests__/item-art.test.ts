@@ -17,8 +17,8 @@ describe('emblemFromRight', () => {
 
 describe('qualityCell', () => {
   it("is the game's bag cell for 1–5★, the small square on request, none otherwise", () => {
-    expect(qualityCell(5)).toBe(`${GI_CDN_BASE}UI_QualityBg_5.webp`)
-    expect(qualityCell(4, true)).toBe(`${GI_CDN_BASE}UI_QualityBg_4s.webp`)
+    expect(qualityCell(5)).toBe(`${GI_CDN_BASE}UI_QualityBg_5.webp?v=2`)
+    expect(qualityCell(4, true)).toBe(`${GI_CDN_BASE}UI_QualityBg_4s.webp?v=2`)
     for (const none of [0, 6, null, undefined]) expect(qualityCell(none)).toBe('')
   })
 })
