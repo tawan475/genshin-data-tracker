@@ -119,6 +119,17 @@
     "pity": "{name} · pity {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Lancez l'app de capture avant le jeu",
+      "signIn": "Connectez-vous à Teyvat.me dans l'app",
+      "open": "Ouvrez Vœux → Historique en jeu : toutes les bannières se synchronisent",
+      "openTitle": "Ensuite, chaque nouveau vœu se synchronise tant que la clé du jeu est valide (~24 h). Le jeu garde six mois d'historique."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Télécharger l'app de capture (Windows · Linux · macOS)",
+    "devices": "Appareils"
+  },
   "link": {
     "platform": "Plateforme",
     "copyFailed": "Non copié : sélectionnez la commande et copiez-la",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "Sauvegarde paimon.moe",
     "modes": {
+      "capture": "Capture",
       "link": "Lien de vœux",
       "file": "Fichier"
     },

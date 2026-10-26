@@ -119,6 +119,17 @@
     "pity": "{name} · pity {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Abra o app de captura antes do jogo",
+      "signIn": "Entre no Teyvat.me pelo app",
+      "open": "Abra Oração → Histórico no jogo: todos os banners sincronizam",
+      "openTitle": "Depois, cada nova oração sincroniza enquanto a chave do jogo durar (~24 h). O jogo guarda seis meses de histórico."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Baixar o app de captura (Windows · Linux · macOS)",
+    "devices": "Dispositivos"
+  },
   "link": {
     "platform": "Plataforma",
     "copyFailed": "Não copiado: selecione o comando e copie",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "Backup do paimon.moe",
     "modes": {
+      "capture": "Captura",
       "link": "Link de Orações",
       "file": "Arquivo"
     },

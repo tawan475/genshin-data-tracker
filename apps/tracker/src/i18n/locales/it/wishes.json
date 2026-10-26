@@ -119,6 +119,17 @@
     "pity": "{name} · pity {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Avvia l'app di cattura prima del gioco",
+      "signIn": "Accedi a Teyvat.me nell'app",
+      "open": "Apri Desiderio → Cronologia nel gioco: tutti i banner si sincronizzano",
+      "openTitle": "Poi ogni nuovo desiderio si sincronizza finché la chiave del gioco è valida (~24 h). Il gioco conserva sei mesi di cronologia."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Scarica l'app di cattura (Windows · Linux · macOS)",
+    "devices": "Dispositivi"
+  },
   "link": {
     "platform": "Piattaforma",
     "copyFailed": "Non copiato: seleziona il comando e copialo",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "Backup di paimon.moe",
     "modes": {
+      "capture": "Cattura",
       "link": "Link dei desideri",
       "file": "File"
     },

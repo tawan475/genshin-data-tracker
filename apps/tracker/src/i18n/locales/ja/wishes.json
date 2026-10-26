@@ -119,6 +119,17 @@
     "pity": "{name} · 天井 {pity}",
     "outcome": "{outcome}（{odds}）"
   },
+  "capture": {
+    "steps": {
+      "start": "ゲームより先にキャプチャアプリを起動",
+      "signIn": "アプリで Teyvat.me にサインイン",
+      "open": "ゲームで祈願 → 履歴を開く：全ての祈願が同期されます",
+      "openTitle": "その後、ゲームのキーが有効な間（約24時間）新しい祈願も同期されます。ゲームの履歴は6か月分です。"
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "キャプチャアプリをダウンロード（Windows · Linux · macOS）",
+    "devices": "デバイス"
+  },
   "link": {
     "platform": "プラットフォーム",
     "copyFailed": "コピーできませんでした：コマンドを選択してコピーしてください",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "paimon.moe バックアップ",
     "modes": {
+      "capture": "キャプチャ",
       "link": "祈願リンク",
       "file": "ファイル"
     },

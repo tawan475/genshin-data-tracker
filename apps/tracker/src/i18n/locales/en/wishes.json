@@ -119,6 +119,17 @@
     "pity": "{name} · pity {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Start the capture app before the game",
+      "signIn": "Sign in to Teyvat.me in the app",
+      "open": "Open Wish → History in game: every banner syncs",
+      "openTitle": "Then each new wish syncs while the game's key lasts (~24 h). The game keeps six months of history."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Download the capture app (Windows · Linux · macOS)",
+    "devices": "Devices"
+  },
   "link": {
     "platform": "Platform",
     "copyFailed": "Not copied: select the command and copy it",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "paimon.moe backup",
     "modes": {
+      "capture": "Capture",
       "link": "Wish link",
       "file": "File"
     },

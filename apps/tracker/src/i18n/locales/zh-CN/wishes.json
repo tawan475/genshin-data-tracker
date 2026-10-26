@@ -119,6 +119,17 @@
     "pity": "{name} · {pity} 抽",
     "outcome": "{outcome}（{odds}）"
   },
+  "capture": {
+    "steps": {
+      "start": "先启动抓包程序，再启动游戏",
+      "signIn": "在程序中登录 Teyvat.me",
+      "open": "在游戏中打开祈愿 → 历史记录：所有卡池都会同步",
+      "openTitle": "之后在游戏密钥有效期内（约 24 小时）每次祈愿都会同步。游戏只保留六个月的记录。"
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "下载抓包程序（Windows · Linux · macOS）",
+    "devices": "设备"
+  },
   "link": {
     "platform": "平台",
     "copyFailed": "未复制：请选中命令后手动复制",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "paimon.moe 备份",
     "modes": {
+      "capture": "抓包",
       "link": "祈愿链接",
       "file": "文件"
     },

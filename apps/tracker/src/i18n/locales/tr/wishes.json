@@ -119,6 +119,17 @@
     "pity": "{name} · sayaç {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Yakalama uygulamasını oyundan önce başlat",
+      "signIn": "Uygulamada Teyvat.me hesabına giriş yap",
+      "open": "Oyunda Dilek → Geçmiş'i aç: tüm afişler eşitlenir",
+      "openTitle": "Ardından oyunun anahtarı geçerli olduğu sürece (~24 sa) her yeni dilek eşitlenir. Oyun altı aylık geçmişi tutar."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Yakalama uygulamasını indir (Windows · Linux · macOS)",
+    "devices": "Cihazlar"
+  },
   "link": {
     "platform": "Platform",
     "copyFailed": "Kopyalanmadı: komutu seç ve kopyala",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "paimon.moe yedeği",
     "modes": {
+      "capture": "Yakalama",
       "link": "Dilek bağlantısı",
       "file": "Dosya"
     },

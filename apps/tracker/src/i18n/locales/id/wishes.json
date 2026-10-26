@@ -119,6 +119,17 @@
     "pity": "{name} · pity {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Jalankan aplikasi tangkap sebelum game",
+      "signIn": "Masuk ke Teyvat.me di aplikasi",
+      "open": "Buka Permohonan → Riwayat di game: semua banner tersinkron",
+      "openTitle": "Lalu setiap permohonan baru tersinkron selama kunci game berlaku (~24 jam). Game menyimpan riwayat enam bulan."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Unduh aplikasi tangkap (Windows · Linux · macOS)",
+    "devices": "Perangkat"
+  },
   "link": {
     "platform": "Platform",
     "copyFailed": "Tidak tersalin: pilih perintahnya lalu salin",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "Cadangan paimon.moe",
     "modes": {
+      "capture": "Tangkap",
       "link": "Tautan permohonan",
       "file": "File"
     },

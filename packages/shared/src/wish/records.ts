@@ -83,7 +83,8 @@ export function normalizeWishRecords(
       return
     }
     let id: bigint | null = null
-    if (record.id) {
+    // StarDB numbers the pulls it has no game id for from "0", per banner.
+    if (record.id && !/^0+$/.test(record.id)) {
       id = parseWishId(record.id)
       if (id === null) {
         issues.push({ index, message: `id "${record.id}" is not a wish id` })

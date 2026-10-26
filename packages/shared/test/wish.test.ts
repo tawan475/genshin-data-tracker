@@ -283,6 +283,17 @@ describe('wish records', () => {
     expect(banners.get(301)![0]!.time).toBe(Date.UTC(2026, 9, 13, 10, 4, 11) / 1000)
   })
 
+  it('reads small counters as missing ids (StarDB numbers id-less pulls from 0)', () => {
+    const records: WishRecord[] = ['0', '1', '1790000000000000002'].map((id, i) => ({
+      id,
+      gacha_type: '301',
+      time: `2026-10-12 21:04:1${i}`,
+      name: 'Bennett',
+    }))
+    const pulls = normalizeWishRecords(records, { timezone: 8, target: 8 }).banners.get(301)!
+    expect(pulls.map((p) => isSyntheticWishId(p.id))).toEqual([true, true, false])
+  })
+
   it('fails the batch on a malformed record', () => {
     expect(() =>
       normalizeWishRecords([{ gacha_type: '301', time: 'soon', name: 'Bennett' }], {

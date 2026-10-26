@@ -119,6 +119,17 @@
     "pity": "{name} · Pity {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Starte die Erfassungs-App vor dem Spiel",
+      "signIn": "Melde dich in der App bei Teyvat.me an",
+      "open": "Öffne im Spiel Gebet → Verlauf: alle Banner werden synchronisiert",
+      "openTitle": "Danach wird jedes neue Gebet synchronisiert, solange der Schlüssel des Spiels gilt (~24 h). Das Spiel speichert sechs Monate Verlauf."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Erfassungs-App herunterladen (Windows · Linux · macOS)",
+    "devices": "Geräte"
+  },
   "link": {
     "platform": "Plattform",
     "copyFailed": "Nicht kopiert: markiere den Befehl und kopiere ihn",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "paimon.moe-Backup",
     "modes": {
+      "capture": "Erfassung",
       "link": "Gebetslink",
       "file": "Datei"
     },

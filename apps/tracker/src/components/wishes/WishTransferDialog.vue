@@ -15,6 +15,7 @@ import FilterChip from '@/components/ui/FilterChip.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
+import WishCaptureImport from './WishCaptureImport.vue'
 import WishLinkImport from './WishLinkImport.vue'
 import type { WishHistory } from '@/data/wish-history'
 import { saveBlob } from '@/data/export'
@@ -56,9 +57,10 @@ const file = shallowRef<WishFile | null>(null)
 
 const uid = computed(() => props.account.uid?.trim() || null)
 
-/** How to import: the game's wish link (paimon.moe's way), or a file. */
-const mode = ref<'link' | 'file'>('link')
+/** How to import: the capture app, the game's wish link (paimon.moe's way), or a file. */
+const mode = ref<'capture' | 'link' | 'file'>('capture')
 const modes = computed(() => [
+  { value: 'capture' as const, label: t('wishes.transfer.modes.capture') },
   { value: 'link' as const, label: t('wishes.transfer.modes.link') },
   { value: 'file' as const, label: t('wishes.transfer.modes.file') },
 ])
@@ -207,8 +209,9 @@ async function remove() {
     <div class="flex flex-col gap-5">
       <section v-if="!readOnly" class="flex flex-col gap-3" :aria-label="$t('wishes.import')">
         <UiSegmented v-model="mode" :options="modes" :label="$t('wishes.transfer.importFrom')" />
+        <WishCaptureImport v-if="mode === 'capture'" />
         <WishLinkImport
-          v-if="open && mode === 'link'"
+          v-else-if="open && mode === 'link'"
           :account="account"
           :history="history"
           @changed="emit('changed')"

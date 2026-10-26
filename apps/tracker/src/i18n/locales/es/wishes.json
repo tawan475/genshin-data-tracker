@@ -119,6 +119,17 @@
     "pity": "{name} · garantía {pity}",
     "outcome": "{outcome} ({odds})"
   },
+  "capture": {
+    "steps": {
+      "start": "Abre la app de captura antes que el juego",
+      "signIn": "Inicia sesión en Teyvat.me en la app",
+      "open": "Abre Gachapón → Historial en el juego: se sincronizan todos los gachapones",
+      "openTitle": "Después, cada nuevo deseo se sincroniza mientras dure la clave del juego (~24 h). El juego guarda seis meses de historial."
+    },
+    "download": "GitHub Releases",
+    "downloadTitle": "Descargar la app de captura (Windows · Linux · macOS)",
+    "devices": "Dispositivos"
+  },
   "link": {
     "platform": "Plataforma",
     "copyFailed": "No copiado: selecciona el comando y cópialo",
@@ -225,6 +236,7 @@
   "transfer": {
     "backup": "Copia de paimon.moe",
     "modes": {
+      "capture": "Captura",
       "link": "Enlace de deseos",
       "file": "Archivo"
     },
