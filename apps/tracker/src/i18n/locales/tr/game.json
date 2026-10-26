@@ -120,5 +120,6 @@
     "polearm": "Mızrak",
     "bow": "Yay",
     "catalyst": "Katalizör"
-  }
+  },
+  "expProgress": "{exp} / {need} TP"
 }

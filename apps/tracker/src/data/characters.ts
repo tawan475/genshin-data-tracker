@@ -120,6 +120,12 @@ export interface CharacterView {
   friendship: number | null
   /** When the character joined the account (epoch ms), from `gi_characters`; null when unknown. */
   obtainedAt: number | null
+  /**
+   * EXP toward the next level and friendship EXP toward the next friendship
+   * level (Teyvat.me Capture); null when the snapshot holds no EXP at all.
+   */
+  exp: number | null
+  friendshipExp: number | null
   /** Normalised name, element, weapon and set names, for search. */
   haystack: string
 }
@@ -218,6 +224,10 @@ function findGaps(
 
 /** Joins characters with what they wear. Run once per inventory. */
 export function buildRoster(good: Good): Roster {
+  // EXP is stored only when above 0, so a snapshot with any knows the rest are 0.
+  const knowsExp = Object.values(good.gi_characters ?? {}).some(
+    (e) => (e.exp ?? 0) > 0 || (e.friendshipExp ?? 0) > 0,
+  )
   const weapons = new Map<string, GoodWeapon>()
   for (const weapon of good.weapons) {
     if (weapon.location && !weapons.has(weapon.location)) weapons.set(weapon.location, weapon)
@@ -296,6 +306,8 @@ export function buildRoster(good: Good): Roster {
       gaps: findGaps(c.level, weapon, equipped, bonusCount),
       // The game shows the Traveler no friendship level.
       friendship: traveler ? null : (extra?.friendship ?? null),
+      exp: knowsExp ? (extra?.exp ?? 0) : null,
+      friendshipExp: knowsExp && !traveler ? (extra?.friendshipExp ?? 0) : null,
       obtainedAt: extra?.obtainedAt !== undefined ? extra.obtainedAt * 1000 : null,
       haystack: normalizeSearch(
         [

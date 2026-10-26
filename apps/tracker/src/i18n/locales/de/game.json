@@ -120,5 +120,6 @@
     "polearm": "Stangenwaffe",
     "bow": "Bogen",
     "catalyst": "Katalysator"
-  }
+  },
+  "expProgress": "{exp} / {need} EP"
 }

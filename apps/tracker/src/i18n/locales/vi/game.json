@@ -120,5 +120,6 @@
     "polearm": "Vũ Khí Cán Dài",
     "bow": "Cung",
     "catalyst": "Pháp Khí"
-  }
+  },
+  "expProgress": "{exp} / {need} EXP"
 }

@@ -153,7 +153,12 @@ export function characterNow(
     talents[t] = Math.max(capture.talents[t], override.talents[t])
     if (override.talents[t] > capture.talents[t]) edited = true
   }
-  return { state: { level: pair.level, ascension: pair.ascension, talents }, edited }
+  // The capture's EXP belongs to the capture's level only.
+  const exp = pair === capture ? capture.exp : undefined
+  return {
+    state: { level: pair.level, ascension: pair.ascension, talents, ...(exp ? { exp } : {}) },
+    edited,
+  }
 }
 
 /** A weapon's current state: the capture's, with a hand-set one where that is ahead of it. */
@@ -166,7 +171,12 @@ export function weaponNow(
   const pair = ahead ? override : capture
   const refinement = Math.max(capture.refinement, override.refinement)
   return {
-    state: { level: pair.level, ascension: pair.ascension, refinement },
+    state: {
+      level: pair.level,
+      ascension: pair.ascension,
+      refinement,
+      ...(!ahead && capture.exp ? { exp: capture.exp } : {}),
+    },
     edited: ahead || override.refinement > capture.refinement,
   }
 }

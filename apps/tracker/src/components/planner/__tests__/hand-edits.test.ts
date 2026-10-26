@@ -147,3 +147,17 @@ describe('current state set by hand', () => {
     ).toEqual({ state: { level: 90, ascension: 6, refinement: 2 }, edited: false })
   })
 })
+
+describe("the capture's EXP", () => {
+  const talents = { auto: 1, skill: 1, burst: 1 }
+  it('stays with the capture, and goes when a hand-set level is ahead of it', () => {
+    const capture = { level: 80, ascension: 6, talents, exp: 90_000 }
+    expect(characterNow(capture, null).state.exp).toBe(90_000)
+    expect(characterNow(capture, { level: 80, ascension: 6, talents }).state.exp).toBe(90_000)
+    expect(characterNow(capture, { level: 85, ascension: 6, talents }).state.exp).toBeUndefined()
+
+    const weapon = { level: 70, ascension: 4, refinement: 1, exp: 4_000 }
+    expect(weaponNow(weapon, { level: 70, ascension: 4, refinement: 2 }).state.exp).toBe(4_000)
+    expect(weaponNow(weapon, { level: 80, ascension: 5, refinement: 1 }).state.exp).toBeUndefined()
+  })
+})

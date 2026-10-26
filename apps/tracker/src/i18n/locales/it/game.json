@@ -120,5 +120,6 @@
     "polearm": "Lancia",
     "bow": "Arco",
     "catalyst": "Catalizzatore"
-  }
+  },
+  "expProgress": "{exp} / {need} ESP"
 }

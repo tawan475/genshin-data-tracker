@@ -120,5 +120,6 @@
     "polearm": "장병기",
     "bow": "활",
     "catalyst": "법구"
-  }
+  },
+  "expProgress": "{exp} / {need} 경험치"
 }

@@ -11,6 +11,9 @@
 
 import { NEW_WEAPON, type OwnedWeapon, type WeaponState } from '@gdt/game-data/planner-math'
 
+/** `gi_exp` of a copy that came from a capture (GoodWeapon); 0 otherwise. */
+const capturedExp = (copy: OwnedWeapon) => (copy as { gi_exp?: number }).gi_exp ?? 0
+
 export interface WeaponCopy {
   state: WeaponState
   owned: boolean
@@ -38,7 +41,13 @@ export function assignWeaponCopies(
       if (!copy) return
       free.delete(copy)
       result.set(id, {
-        state: { level: copy.level, ascension: copy.ascension, refinement: copy.refinement },
+        state: {
+          level: copy.level,
+          ascension: copy.ascension,
+          refinement: copy.refinement,
+          // A capture's EXP into this level counts against the levelling cost.
+          ...(capturedExp(copy) ? { exp: capturedExp(copy) } : {}),
+        },
         owned: true,
       })
     }

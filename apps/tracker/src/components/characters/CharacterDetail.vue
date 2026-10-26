@@ -6,6 +6,7 @@ import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
 import RollValue from '@/components/ui/RollValue.vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
+import ExpProgress from '@/components/ui/ExpProgress.vue'
 import LevelText from '@/components/ui/LevelText.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiError from '@/components/ui/UiError.vue'
@@ -22,6 +23,7 @@ import {
 import { loadCharacterHistory } from '@/data/characters-history'
 import { useResource } from '@/data/use-resource'
 import { characterBanner } from '@/lib/assets'
+import { useExpNeed } from '@/lib/exp-need'
 import { formatDate, formatFullDateTime } from '@/lib/format'
 import ArtifactPiece from './ArtifactPiece.vue'
 import BuildStats from './BuildStats.vue'
@@ -64,6 +66,8 @@ const scale = computed(() => (frameWidth.value ? frameWidth.value / CARD_WIDTH :
 const c = computed(() => props.character)
 
 const boosts = useConstellationBoosts(() => c.value.key)
+const expNeed = useExpNeed()
+const levelNeed = computed(() => expNeed.value?.character(c.value.level, c.value.ascension) ?? null)
 const talents = computed(() => talentLevels(c.value.talent, c.value.constellation, boosts.value))
 const panel = computed(() => buildPanel(c.value))
 
@@ -175,15 +179,20 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
                 >
               </p>
               <p class="flex flex-wrap items-center gap-x-4 gap-y-1">
-                <LevelText
-                  :level="c.level"
-                  :ascension="c.ascension"
-                  :target="TARGET_LEVEL"
-                  class="text-lg font-medium"
-                />
+                <span class="inline-flex items-center gap-2">
+                  <LevelText
+                    :level="c.level"
+                    :ascension="c.ascension"
+                    :target="TARGET_LEVEL"
+                    class="text-lg font-medium"
+                  />
+                  <ExpProgress v-if="c.exp !== null && levelNeed" :exp="c.exp" :need="levelNeed" />
+                </span>
                 <FriendshipBadge
                   v-if="c.friendship !== null"
                   :level="c.friendship"
+                  :exp="c.friendshipExp"
+                  :need="expNeed?.friendship(c.friendship)"
                   class="text-sm text-text-secondary"
                 />
                 <ConstellationStars :value="c.constellation" :element="c.element" />

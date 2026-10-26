@@ -40,6 +40,8 @@ export interface WeaponRow {
   count: number
   /** The weapon's level cap: 90, or 70 for 1–2★. */
   maxLevel: number
+  /** EXP toward the next level (a capture's `gi_exp`; 0 when unknown). */
+  exp: number
   /** The game's weapon id ("newest" sorts by it); 0 for a key the data doesn't know. */
   gameId: number
   haystack: string
@@ -174,7 +176,7 @@ export function buildArmory(good: Good, gameId: (key: string) => number = weapon
     else if (rarity === 5) spare5++
     const id = w.location
       ? `equipped:${w.location}:${index}`
-      : `${w.key}:${w.level}:${w.ascension}:${w.refinement}:${w.lock ? 1 : 0}`
+      : `${w.key}:${w.level}:${w.ascension}:${w.refinement}:${w.lock ? 1 : 0}:${w.gi_exp ?? 0}`
     const existing = rows.get(id)
     if (existing) {
       existing.count++
@@ -197,6 +199,7 @@ export function buildArmory(good: Good, gameId: (key: string) => number = weapon
       lock: w.lock,
       count: 1,
       maxLevel: weaponMaxLevel(w.key, rarity),
+      exp: w.gi_exp ?? 0,
       gameId: gameId(w.key),
       haystack: normalize(`${name} ${w.key} ${ownerName} ${type ? WEAPON_TYPE_LABELS[type] : ''}`),
     })

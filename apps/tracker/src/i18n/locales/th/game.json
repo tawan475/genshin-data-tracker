@@ -120,5 +120,6 @@
     "polearm": "หอก",
     "bow": "ธนู",
     "catalyst": "สื่อเวท"
-  }
+  },
+  "expProgress": "{exp} / {need} EXP"
 }

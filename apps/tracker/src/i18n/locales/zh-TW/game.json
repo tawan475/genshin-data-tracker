@@ -120,5 +120,6 @@
     "polearm": "長柄武器",
     "bow": "弓",
     "catalyst": "法器"
-  }
+  },
+  "expProgress": "{exp} / {need} 經驗"
 }

@@ -15,8 +15,8 @@ importers:
   apps/tracker:
     dependencies:
       '@gdt/game-data':
-        specifier: github:tawan475/genshin-game-data#v7.1.10
-        version: git+https://git@github.com:tawan475/genshin-game-data.git#a8e3dd9f4f08b6c46dc39849f351a07842a78b0a
+        specifier: github:tawan475/genshin-game-data#v7.1.12
+        version: git+https://git@github.com:tawan475/genshin-game-data.git#edefc1bc2fac5165ae75d228b79cdbb8abe97db6
       '@gdt/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -994,9 +994,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@gdt/game-data@git+https://git@github.com:tawan475/genshin-game-data.git#a8e3dd9f4f08b6c46dc39849f351a07842a78b0a':
-    resolution: {commit: a8e3dd9f4f08b6c46dc39849f351a07842a78b0a, repo: git@github.com:tawan475/genshin-game-data.git, type: git}
-    version: 7.1.10
+  '@gdt/game-data@git+https://git@github.com:tawan475/genshin-game-data.git#edefc1bc2fac5165ae75d228b79cdbb8abe97db6':
+    resolution: {commit: edefc1bc2fac5165ae75d228b79cdbb8abe97db6, repo: git@github.com:tawan475/genshin-game-data.git, type: git}
+    version: 7.1.12
     engines: {node: '>=24.12.0'}
 
   '@img/colour@1.1.0':
@@ -3420,7 +3420,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@gdt/game-data@git+https://git@github.com:tawan475/genshin-game-data.git#a8e3dd9f4f08b6c46dc39849f351a07842a78b0a': {}
+  '@gdt/game-data@git+https://git@github.com:tawan475/genshin-game-data.git#edefc1bc2fac5165ae75d228b79cdbb8abe97db6': {}
 
   '@img/colour@1.1.0': {}
 

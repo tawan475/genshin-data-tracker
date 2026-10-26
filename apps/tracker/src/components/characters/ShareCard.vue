@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, provide, ref, watch } from 'vue'
 import { t } from '@/i18n'
+import { useExpNeed } from '@/lib/exp-need'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import {
   bonusSets,
@@ -17,7 +18,7 @@ import {
 import { SLOT_LABELS, SLOT_ORDER, type CharacterView, type SetCount } from '@/data/characters'
 import { artifactIcon, artifactSetIcon, characterBanner, weaponIcon } from '@/lib/assets'
 import { CRIT_TIER_TEXT, cvTier, isCritCirclet, rvTier } from '@/lib/crit-tiers'
-import { formatDate } from '@/lib/format'
+import { formatDate, formatNumber } from '@/lib/format'
 import { levelCap } from '@/lib/level'
 import { ROLL_QUALITY_LABEL, inferArtifactRolls, type InferredRoll } from '@/utils/artifact-rolls'
 import {
@@ -146,6 +147,26 @@ const constellations = computed(() => constellationIcons(c.value.key))
 const crown = useCrownIcon()
 const weapon = computed(() => (c.value.weapon ? weaponLines(c.value.weapon) : null))
 const cap = computed(() => levelCap(c.value.ascension, c.value.level))
+// EXP toward the next level and friendship level, in the tooltips only (the PNG has none).
+const expNeed = useExpNeed()
+const expText = (exp: number | null, need: number | null | undefined) =>
+  exp === null || need == null
+    ? ''
+    : ` · ${t('game.expProgress', { exp: formatNumber(exp), need: formatNumber(need) })}`
+const levelTitle = computed(
+  () =>
+    t('share.card.levelTitle', {
+      level: c.value.level,
+      cap: cap.value,
+      ascension: c.value.ascension,
+    }) + expText(c.value.exp, expNeed.value?.character(c.value.level, c.value.ascension)),
+)
+const friendshipTitle = computed(() =>
+  c.value.friendship === null
+    ? ''
+    : t('characters.friendship.title', { level: c.value.friendship }) +
+      expText(c.value.friendshipExp, expNeed.value?.friendship(c.value.friendship)),
+)
 const weaponCap = computed(() =>
   c.value.weapon ? levelCap(c.value.weapon.ascension, c.value.weapon.level) : 0,
 )
@@ -316,15 +337,14 @@ const ownerLine = computed(() =>
             class="flex items-baseline gap-[22px] self-start rounded-full px-[18px] py-[4px] text-[28px]"
             :class="CHIP_TEXT"
           >
-            <span
-              :title="$t('share.card.levelTitle', { level: c.level, cap, ascension: c.ascension })"
+            <span :title="levelTitle"
               ><span class="font-normal opacity-85">Lv.&nbsp;</span>
               <span class="font-bold">{{ c.level }}</span
               ><span class="font-medium opacity-70">/{{ cap }}</span></span
             >
             <template v-if="c.friendship !== null">
               <span class="opacity-50">·</span>
-              <span
+              <span :title="friendshipTitle"
                 ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
                 <span class="font-bold">{{ c.friendship }}</span></span
               >

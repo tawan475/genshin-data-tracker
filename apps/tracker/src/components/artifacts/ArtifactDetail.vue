@@ -7,7 +7,9 @@ import GameIcon from '@/components/ui/GameIcon.vue'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import RollValue from '@/components/ui/RollValue.vue'
 import RollBars from '@/components/ui/RollBars.vue'
+import ExpProgress from '@/components/ui/ExpProgress.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
+import { useExpNeed } from '@/lib/exp-need'
 import type { ArtifactRow } from '@/data/artifacts'
 import { artifactIcon, characterIcon } from '@/lib/assets'
 import { isCritCirclet } from '@/lib/crit-tiers'
@@ -38,6 +40,13 @@ const props = defineProps<{
 }>()
 
 const artifact = computed(() => props.row.artifact)
+// A bar only for a piece the capture says is partway into a level.
+const expNeed = useExpNeed()
+const expToNext = computed(() =>
+  artifact.value.gi_exp
+    ? (expNeed.value?.artifact(artifact.value.rarity, artifact.value.level) ?? null)
+    : null,
+)
 const owner = computed(() =>
   artifact.value.location ? characterName(artifact.value.location) : '',
 )
@@ -87,6 +96,7 @@ const rankTitle = computed(() =>
             +{{ artifact.level
             }}<span class="text-text-muted">/{{ maxLevel(artifact.rarity) }}</span>
           </span>
+          <ExpProgress v-if="expToNext" :exp="artifact.gi_exp ?? 0" :need="expToNext" />
           <UiBadge v-if="isNew" tone="accent" :title="$t('artifacts.detail.newTitle')">{{
             $t('artifacts.label.new')
           }}</UiBadge>

@@ -120,5 +120,6 @@
     "polearm": "Polearm",
     "bow": "Bow",
     "catalyst": "Catalyst"
-  }
+  },
+  "expProgress": "{exp} / {need} EXP"
 }

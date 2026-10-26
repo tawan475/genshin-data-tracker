@@ -256,6 +256,21 @@ export function wornByCharacter(good: Good, key: string): ReadonlyMap<ArtifactSl
   return worn
 }
 
+/** The capture's EXP into the current level (`gi_characters`), on an owned character's state. */
+function withCapturedExp(
+  found: { state: CharacterState; owned: boolean },
+  good: Good,
+  key: string,
+): { state: CharacterState; owned: boolean } {
+  if (!found.owned) return found
+  const extras = good.gi_characters ?? {}
+  // findCharacterState stands any captured Traveler in for a Traveler goal.
+  const exp = key.startsWith('Traveler')
+    ? Object.entries(extras).find(([k]) => k.startsWith('Traveler'))?.[1].exp
+    : extras[key]?.exp
+  return exp ? { ...found, state: { ...found.state, exp } } : found
+}
+
 /**
  * A character goal as the page shows it. `planner` must know the character:
  * a custom one (`custom`) is in it through `withCustomCharacters`.
@@ -270,7 +285,7 @@ export function characterGoalView(
   custom: CustomCharacter | null = null,
 ): CharacterGoalView {
   const data = planner.characters.get(key)
-  const found = findCharacterState(good.characters, key)
+  const found = withCapturedExp(findCharacterState(good.characters, key), good, key)
   const { state, edited } = characterNow(found.state, override)
   const owned = found.owned
   const { target, raised } = data

@@ -3,7 +3,9 @@ import { computed } from 'vue'
 import { t } from '@/i18n'
 import { ArrowRight, ArrowUp, Backpack, Lock } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
+import ExpProgress from '@/components/ui/ExpProgress.vue'
 import LevelText from '@/components/ui/LevelText.vue'
+import { useExpNeed } from '@/lib/exp-need'
 import RarityStars from '@/components/ui/RarityStars.vue'
 import {
   MAX_REFINEMENT,
@@ -30,6 +32,14 @@ const g = computed(() => props.group)
 const selected = computed<WeaponRow>(
   () => g.value.rows.find((r) => r.id === props.selectedId) ?? g.value.best,
 )
+// A bar only for a weapon the capture says is partway into a level.
+const expNeed = useExpNeed()
+const selectedNeed = computed(() => {
+  const w = selected.value
+  return w.exp > 0 && w.rarity
+    ? (expNeed.value?.weapon(w.rarity, w.level, w.ascension) ?? null)
+    : null
+})
 const equipped = computed(() => g.value.owners.length)
 const refinementTitle = (r: number) =>
   t('weapons.detail.refinementTitle', { rank: r, max: MAX_REFINEMENT })
@@ -58,6 +68,7 @@ const refinementTitle = (r: number) =>
           >
           <span class="text-text-muted" aria-hidden="true">·</span>
           <LevelText :level="selected.level" :ascension="selected.ascension" />
+          <ExpProgress v-if="selectedNeed" :exp="selected.exp" :need="selectedNeed" />
         </p>
         <p class="flex min-w-0 items-center gap-2 text-sm text-text-secondary">
           <span

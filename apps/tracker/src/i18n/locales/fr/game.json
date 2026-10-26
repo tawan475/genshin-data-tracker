@@ -120,5 +120,6 @@
     "polearm": "Arme d'hast",
     "bow": "Arc",
     "catalyst": "Catalyseur"
-  }
+  },
+  "expProgress": "{exp} / {need} EXP"
 }
