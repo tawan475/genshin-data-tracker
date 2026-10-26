@@ -30,7 +30,12 @@ function title(set: SetCount): string {
       class="flex min-w-0 items-center gap-2 rounded-lg border border-border-default bg-surface-raised py-1 pr-1.5 pl-1"
       :title="title(set)"
     >
-      <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" />
+      <GameIcon
+        :src="artifactSetIcon(set.setKey)"
+        :name="set.name"
+        :rarity="set.rarity"
+        size="xs"
+      />
       <span class="min-w-0 truncate text-sm">{{ set.name }}</span>
       <UiBadge tone="success" mono>
         {{ pieces }}

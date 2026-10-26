@@ -161,7 +161,13 @@ const weaponTitle = computed(() => {
             class="flex shrink-0 items-center gap-1"
             :title="`${set.name} ×${set.count}`"
           >
-            <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" eager />
+            <GameIcon
+              :src="artifactSetIcon(set.setKey)"
+              :name="set.name"
+              :rarity="set.rarity"
+              size="xs"
+              eager
+            />
             <span class="tabular font-mono">{{ set.count }}</span>
           </span>
         </span>

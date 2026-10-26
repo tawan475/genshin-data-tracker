@@ -210,7 +210,12 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
                 class="flex shrink-0 items-center gap-1"
                 :title="`${set.name} ×${set.count}`"
               >
-                <GameIcon :src="artifactSetIcon(set.setKey)" :name="set.name" size="xs" />
+                <GameIcon
+                  :src="artifactSetIcon(set.setKey)"
+                  :name="set.name"
+                  :rarity="set.rarity"
+                  size="xs"
+                />
                 <span class="tabular font-mono">{{ set.count }}</span>
               </span>
               <span v-if="!c.activeSets.length" class="text-text-muted">—</span>

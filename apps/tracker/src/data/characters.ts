@@ -69,6 +69,8 @@ export interface SetCount {
   setKey: string
   name: string
   count: number
+  /** The highest rarity among these pieces (the icon's cell art). */
+  rarity: number
   /** Piece counts at which the set grants a bonus (usually 2 and 4). */
   thresholds: readonly number[]
   /** The thresholds this character reaches. */
@@ -155,15 +157,22 @@ function isSlot(slot: string): slot is SlotKey {
 }
 
 function countSets(pieces: readonly EquippedArtifact[]): SetCount[] {
-  const counts = new Map<string, number>()
-  for (const piece of pieces) counts.set(piece.setKey, (counts.get(piece.setKey) ?? 0) + 1)
+  const counts = new Map<string, { count: number; rarity: number }>()
+  for (const piece of pieces) {
+    const seen = counts.get(piece.setKey)
+    counts.set(piece.setKey, {
+      count: (seen?.count ?? 0) + 1,
+      rarity: Math.max(seen?.rarity ?? 0, piece.rarity),
+    })
+  }
   return [...counts]
-    .map(([setKey, count]) => {
+    .map(([setKey, { count, rarity }]) => {
       const thresholds = ARTIFACT_SET_THRESHOLDS[setKey] ?? DEFAULT_THRESHOLDS
       return {
         setKey,
         name: formatSetName(setKey),
         count,
+        rarity,
         thresholds,
         active: thresholds.filter((t) => count >= t),
       }
