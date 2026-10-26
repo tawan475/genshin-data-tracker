@@ -1,5 +1,2 @@
-/**
- * Where the capture app is downloaded. It still ships under its old name
- * (irminsul) and updates itself to Teyvat.me Capture later: swap the link here.
- */
-export const CAPTURE_DOWNLOAD_URL = 'https://github.com/tawan475/irminsul/releases/latest'
+/** Where Teyvat.me Capture is downloaded: its latest GitHub release. */
+export const CAPTURE_DOWNLOAD_URL = 'https://github.com/tawan475/teyvat.me-capture/releases/latest'
