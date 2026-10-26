@@ -26,6 +26,8 @@ export interface GoodArtifact {
   astralMark?: boolean
   elixerCrafted?: boolean
   unactivatedSubstats?: GoodSubstat[]
+  /** EXP toward the next level (Teyvat.me Capture); absent = 0 or unknown. */
+  gi_exp?: number
 }
 
 export interface GoodWeapon {
@@ -35,6 +37,8 @@ export interface GoodWeapon {
   refinement: number
   location: string
   lock: boolean
+  /** EXP toward the next level (Teyvat.me Capture); absent = 0 or unknown. */
+  gi_exp?: number
 }
 
 export interface GoodCharacter {
@@ -75,6 +79,10 @@ export interface GiCharacter {
   friendship?: number
   /** When the character joined the account, unix seconds. */
   obtainedAt?: number
+  /** EXP toward the next level; absent = 0 or unknown. */
+  exp?: number
+  /** Friendship EXP toward the next friendship level; absent = 0 or unknown. */
+  friendshipExp?: number
 }
 
 /** One anecdote's entry in irminsul's `gi_anecdotes`. */

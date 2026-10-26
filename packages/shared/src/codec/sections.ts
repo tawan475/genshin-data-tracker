@@ -89,9 +89,10 @@ export function decodeCharacters(rows: readonly KeyRef[][]): GoodCharacter[] {
 }
 
 // ------------------------------------------------------------------- weapons
-// Row: [weapon, level, ascension, refinement, location character, lock]
+// Row: [weapon, level, ascension, refinement, location character, lock, exp]
+// (exp from 2026-10-26; older rows end before it and read as 0)
 
-const WEAPON_DEFAULTS: readonly KeyRef[] = [0, 1, 0, 1, 0, 0]
+const WEAPON_DEFAULTS: readonly KeyRef[] = [0, 1, 0, 1, 0, 0, 0]
 
 export function encodeWeapons(weapons: readonly GoodWeapon[]): KeyRef[][] {
   return weapons
@@ -104,6 +105,7 @@ export function encodeWeapons(weapons: readonly GoodWeapon[]): KeyRef[][] {
           w.refinement,
           toRef(CHARACTERS, w.location),
           w.lock ? 1 : 0,
+          w.gi_exp ?? 0,
         ],
         WEAPON_DEFAULTS,
       ),
@@ -119,6 +121,7 @@ export function decodeWeapons(rows: readonly KeyRef[][]): GoodWeapon[] {
     refinement: n(row[3], 1),
     location: fromRef(CHARACTERS, row[4] ?? 0),
     lock: row[5] === 1,
+    ...(n(row[6], 0) > 0 ? { gi_exp: n(row[6], 0) } : {}),
   }))
 }
 
@@ -180,6 +183,12 @@ export type ArtifactRow = [number, KeyRef, number]
 
 const LOCK = 1
 const ASTRAL_MARK = 2
+/**
+ * Flags above the two bits hold the piece's EXP toward its next level
+ * (`flags >> 2`, from 2026-10-26): rows without EXP are unchanged, and a
+ * reader that knows only the two bits still reads them right.
+ */
+const EXP_UNIT = 4
 /** In an artifacts delta, flags of -1 mean the id has no rows any more. */
 const NO_ROWS = -1
 
@@ -189,7 +198,9 @@ export function encodeArtifacts(refs: readonly ArtifactRef[]): ArtifactsSection 
       (r): ArtifactRow => [
         r.id,
         toRef(CHARACTERS, r.state.location),
-        (r.state.lock ? LOCK : 0) | (r.state.astralMark ? ASTRAL_MARK : 0),
+        (r.state.lock ? LOCK : 0) +
+          (r.state.astralMark ? ASTRAL_MARK : 0) +
+          (r.state.exp ?? 0) * EXP_UNIT,
       ],
     ),
   )
@@ -252,6 +263,7 @@ export function decodeArtifacts(
       astralMark: (flags & ASTRAL_MARK) !== 0,
       elixerCrafted: identity.elixerCrafted,
       unactivatedSubstats: identity.unactivatedSubstats,
+      ...(flags >= EXP_UNIT ? { gi_exp: Math.floor(flags / EXP_UNIT) } : {}),
     }
   })
 }
@@ -440,15 +452,22 @@ export function decodeAchievementTimes(
 
 // ----------------------------------------------------------- characterExtras
 // irminsul's `gi_characters`. Row: [character, friendship, obtained at (unix
-// seconds)], 0 where unknown, trailing zeros trimmed.
+// seconds), exp, friendship exp], 0 where unknown, trailing zeros trimmed
+// (the two EXP columns from 2026-10-26).
 
-const CHARACTER_EXTRA_DEFAULTS: readonly KeyRef[] = [0, 0, 0]
+const CHARACTER_EXTRA_DEFAULTS: readonly KeyRef[] = [0, 0, 0, 0, 0]
 
 export function encodeCharacterExtras(extras: ReadonlyMap<string, GiCharacter>): KeyRef[][] {
   return [...extras]
     .map(([key, extra]) =>
       trimDefaults(
-        [toRef(CHARACTERS, key), extra.friendship ?? 0, extra.obtainedAt ?? 0],
+        [
+          toRef(CHARACTERS, key),
+          extra.friendship ?? 0,
+          extra.obtainedAt ?? 0,
+          extra.exp ?? 0,
+          extra.friendshipExp ?? 0,
+        ],
         CHARACTER_EXTRA_DEFAULTS,
       ),
     )
@@ -461,8 +480,12 @@ export function decodeCharacterExtras(rows: readonly KeyRef[][]): Map<string, Gi
     const extra: GiCharacter = {}
     const friendship = n(row[1], 0)
     const obtainedAt = n(row[2], 0)
+    const exp = n(row[3], 0)
+    const friendshipExp = n(row[4], 0)
     if (friendship > 0) extra.friendship = friendship
     if (obtainedAt > 0) extra.obtainedAt = obtainedAt
+    if (exp > 0) extra.exp = exp
+    if (friendshipExp > 0) extra.friendshipExp = friendshipExp
     extras.set(fromRef(CHARACTERS, row[0]!), extra)
   }
   return extras

@@ -244,6 +244,7 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
       astralMark: state.astralMark,
       elixerCrafted: identity.elixerCrafted,
       unactivatedSubstats: identity.unactivatedSubstats,
+      ...(state.exp ? { gi_exp: state.exp } : {}),
     })),
     weapons: good.weapons,
     materials: Object.fromEntries(good.materials),
@@ -573,6 +574,36 @@ describe("irminsul's extra keys", () => {
       'gi_achievement_times',
       'gi_characters',
     ])
+  })
+
+  it('round-trips item, character and friendship EXP, leaving 0 out', async () => {
+    const withExp = {
+      ...sample,
+      artifacts: sample.artifacts.map((a, i) => ({ ...a, gi_exp: i === 0 ? 3_150 : 0 })),
+      weapons: sample.weapons.map((w, i) => ({ ...w, gi_exp: i === 0 ? 120_000 : 0 })),
+      gi_characters: {
+        Furina: { friendship: 9, obtainedAt: 1_694_000_000, exp: 40_000, friendshipExp: 2_100 },
+        Nahida: { friendship: 10, exp: 0, friendshipExp: 0 },
+      },
+    }
+    const { encoded, decoded } = await roundTrip(withExp)
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(withExp)))
+    expect(decoded.artifacts.filter((a) => a.gi_exp).map((a) => a.gi_exp)).toEqual([3_150])
+    expect(decoded.weapons.filter((w) => w.gi_exp).map((w) => w.gi_exp)).toEqual([120_000])
+    expect(decoded.gi_characters).toEqual({
+      Furina: { friendship: 9, obtainedAt: 1_694_000_000, exp: 40_000, friendshipExp: 2_100 },
+      Nahida: { friendship: 10 },
+    })
+    // Without any EXP, the item sections are what they were before it existed.
+    const plain = await roundTrip(sample)
+    const zero = await roundTrip({
+      ...sample,
+      artifacts: sample.artifacts.map((a) => ({ ...a, gi_exp: 0 })),
+      weapons: sample.weapons.map((w) => ({ ...w, gi_exp: 0 })),
+    })
+    expect(zero.encoded.weapons.hash).toBe(plain.encoded.weapons.hash)
+    expect(zero.encoded.artifacts.hash).toBe(plain.encoded.artifacts.hash)
+    expect(encoded.weapons.hash).not.toBe(plain.encoded.weapons.hash)
   })
 
   it('stores and hashes a file without them exactly as before they existed', async () => {

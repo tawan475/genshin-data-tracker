@@ -57,6 +57,8 @@ export interface ArtifactState {
   location: string
   lock: boolean
   astralMark: boolean
+  /** EXP toward the next level; absent = 0 or unknown. */
+  exp?: number
 }
 
 /**

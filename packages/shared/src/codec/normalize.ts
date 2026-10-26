@@ -236,8 +236,17 @@ function toWeapon(raw: Json): GoodWeapon[] {
       refinement: num(raw.refinement, 1),
       location: str(raw.location),
       lock: Boolean(raw.lock),
+      ...itemExp(raw),
     },
   ]
+}
+
+/** Above any EXP an item holds toward its next level (a 5★ weapon's 89 → 90 is ~1.1M). */
+const MAX_ITEM_EXP = 5_000_000
+
+/** `gi_exp` when it is a real, non-zero EXP; 0 and unknown are both left out. */
+function itemExp(raw: Json): { gi_exp?: number } {
+  return isIntIn(raw.gi_exp, 1, MAX_ITEM_EXP) ? { gi_exp: raw.gi_exp } : {}
 }
 
 function toArtifact(raw: Json): ArtifactOccurrence {
@@ -257,6 +266,7 @@ function toArtifact(raw: Json): ArtifactOccurrence {
       location: str(raw.location),
       lock: Boolean(raw.lock),
       astralMark: Boolean(raw.astralMark),
+      ...(isIntIn(raw.gi_exp, 1, MAX_ITEM_EXP) ? { exp: raw.gi_exp } : {}),
     },
   }
 }
@@ -356,6 +366,10 @@ function toAchievementTimes(raw: unknown): [number, number][] | null {
   return times.length > 0 ? times.sort((a, b) => a[0] - b[0]) : null
 }
 
+/** Above any character's EXP toward their next level, and any friendship step. */
+const MAX_CHARACTER_EXP = 20_000_000
+const MAX_FRIENDSHIP_EXP = 1_000_000
+
 function toCharacterExtras(raw: unknown): Map<string, GiCharacter> | null {
   if (!isObject(raw)) return null
   const extras = new Map<string, GiCharacter>()
@@ -367,7 +381,11 @@ function toCharacterExtras(raw: unknown): Map<string, GiCharacter> | null {
     if (isIntIn(value.obtainedAt, EARLIEST_GAME_TIME, LATEST_GAME_TIME)) {
       extra.obtainedAt = value.obtainedAt
     }
-    if (extra.friendship !== undefined || extra.obtainedAt !== undefined) extras.set(key, extra)
+    // 0 is left out like unknown: it is what the stored rows default to.
+    if (isIntIn(value.exp, 1, MAX_CHARACTER_EXP)) extra.exp = value.exp
+    if (isIntIn(value.friendshipExp, 1, MAX_FRIENDSHIP_EXP))
+      extra.friendshipExp = value.friendshipExp
+    if (Object.keys(extra).length > 0) extras.set(key, extra)
   }
   return extras.size > 0 ? extras : null
 }
