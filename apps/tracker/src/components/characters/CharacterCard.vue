@@ -115,7 +115,7 @@ const weaponTitle = computed(() => {
               />
               <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" />
             </p>
-            <div class="flex items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
               <ConstellationStars :value="c.constellation" :element="c.element" :label="false" />
               <TalentChips :talent="c.talent" />
             </div>

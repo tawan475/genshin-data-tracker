@@ -189,7 +189,7 @@ const pageCount = computed(() =>
           <Flag class="size-4" aria-hidden="true" />
           {{ $t('staff.storage.flagged') }}
         </FilterChip>
-        <label class="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
+        <label class="relative min-w-0 basis-full sm:min-w-48 sm:basis-0 sm:flex-1">
           <span class="sr-only">{{ $t('staff.common.search') }}</span>
           <Search
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"

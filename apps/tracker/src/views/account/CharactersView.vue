@@ -281,7 +281,7 @@ watch(
         <UiSkeleton v-for="n in 6" :key="n" class="h-16 sm:h-[4.5rem]" />
       </div>
       <UiSkeleton class="mb-4 h-40 w-full sm:h-36" />
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,21rem),1fr))] gap-3">
         <div
           v-for="n in 9"
           :key="n"
@@ -345,7 +345,7 @@ watch(
 
       <ul
         v-else-if="view === 'grid'"
-        class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,21rem),1fr))] gap-3"
         :aria-label="$t('game.characters')"
       >
         <!-- content-visibility: cards off screen skip layout and paint, so each
