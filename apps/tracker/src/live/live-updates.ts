@@ -39,6 +39,7 @@ import { LIVE_SESSION_ENDED_CLOSE, type AccountResponse, type LiveEvent } from '
 import { onScopeDispose, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { TAB_ID, api, checkSession } from '@/api'
+import { noteBookmarks } from '@/api/d1-bookmark'
 import { formatDateTime } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
@@ -287,6 +288,8 @@ export function useLiveUpdates(): void {
       }
       const event = parseLiveEvent(message.data)
       if (!event) return
+      // Before anything re-reads: its reads must reach a replica with this write.
+      noteBookmarks(event)
       post({ type: 'event', event })
       onEvent(event)
     })

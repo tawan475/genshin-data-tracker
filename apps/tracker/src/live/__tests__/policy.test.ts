@@ -100,6 +100,12 @@ describe('reconnecting', () => {
 describe('events', () => {
   it('reads data and account events and ignores anything else', () => {
     expect(parseLiveEvent('{"type":"accounts"}')).toEqual({ type: 'accounts' })
+    // The write's D1 bookmarks ride along.
+    expect(parseLiveEvent('{"type":"accounts","d1":"b1","d1l":"b2","x":1}')).toEqual({
+      type: 'accounts',
+      d1: 'b1',
+      d1l: 'b2',
+    })
     expect(
       parseLiveEvent('{"type":"data","accountId":3,"dataVersion":7,"takenAt":1000,"x":1}'),
     ).toEqual({ type: 'data', accountId: 3, dataVersion: 7, takenAt: 1000 })

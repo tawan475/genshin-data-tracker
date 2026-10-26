@@ -14,14 +14,13 @@
   ],
   "workers_dev": false,
 
-  // Run the Worker next to D1 rather than at the visitor's edge. Measured from
-  // Bangkok, each D1 round trip cost ~120 ms of network while SQL took ~5 ms,
-  // and an import makes 2-3 of them. Static assets are still served from the
-  // edge; only /api requests run in the placed Worker. Smart Placement never
-  // moved it (every answer said `Cf-Placement: local-BKK`), so it is pinned to
-  // the region of D1 `gdt`'s primary, which `wrangler d1 execute gdt --remote
-  // --json` reports as `served_by_colo: KIX` (Osaka). `gdt-live` is in HKG.
-  "placement": { "mode": "targeted", "region": "aws:ap-northeast-3" },
+  // No placement: the Worker runs at the visitor's edge, so with D1 read
+  // replication on (both databases) reads are answered by the nearest replica
+  // (worker/lib/d1-session.ts). Until 2026-10-26 it was pinned next to the
+  // primaries ("targeted", aws:ap-northeast-3: `gdt` is in KIX, `gdt-live` in
+  // HKG), which made each D1 round trip ~5 ms instead of ~120 ms from Bangkok
+  // but sent every read in the world to Osaka. Writes still go to the primary:
+  // an import's 2-3 round trips cost the distance to it.
 
   // The Vue app is served as static assets; only /api/* reaches the Worker.
   // Unknown paths fall back to index.html for client-side routing.

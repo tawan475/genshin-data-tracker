@@ -35,6 +35,7 @@ import { LIVE_SESSION_ENDED_CLOSE, type LiveAccount, type LiveEvent } from '@gdt
 import { DurableObject } from 'cloudflare:workers'
 import type { Context } from 'hono'
 import type { AppEnv } from '../env'
+import { readBookmark, requestBookmarks } from '../lib/d1-session'
 
 /** Close code for a socket whose session was ended: reconnect only with a fresh one. */
 export const SESSION_ENDED_CLOSE = LIVE_SESSION_ENDED_CLOSE
@@ -95,21 +96,28 @@ export class LiveHub extends DurableObject<Env> {
       // version and row) and what the tab needs to tell whether it missed
       // anything.
       const now = Date.now()
+      // On the primary (it writes); its bookmark goes in `hello`, so a page
+      // that re-reads what hello says changed reads a replica that has it.
+      const db = this.env.DB.withSession('first-primary')
       const [, user, accounts] = await this.serial(async () => {
-        const results = await this.env.DB.batch<Record<string, unknown>>([
-          this.env.DB.prepare(
-            'UPDATE users SET live_since = ?2 WHERE id = ?1 AND live_since IS NULL',
-          ).bind(userId, now),
-          this.env.DB.prepare(
-            `SELECT u.token_version, s.id AS sid FROM users AS u
+        const results = await db.batch<Record<string, unknown>>([
+          db
+            .prepare('UPDATE users SET live_since = ?2 WHERE id = ?1 AND live_since IS NULL')
+            .bind(userId, now),
+          db
+            .prepare(
+              `SELECT u.token_version, s.id AS sid FROM users AS u
              LEFT JOIN user_sessions AS s ON s.id = ?2 AND s.user_id = u.id
                AND s.revoked_at IS NULL AND s.expires_at > ?3
              WHERE u.id = ?1`,
-          ).bind(userId, sid, now),
-          this.env.DB.prepare(
-            `SELECT id, data_version, name, uid, server FROM genshin_accounts
+            )
+            .bind(userId, sid, now),
+          db
+            .prepare(
+              `SELECT id, data_version, name, uid, server FROM genshin_accounts
              WHERE user_id = ?1 ORDER BY id`,
-          ).bind(userId),
+            )
+            .bind(userId),
         ])
         this.flag = true
         return results
@@ -131,8 +139,10 @@ export class LiveHub extends DurableObject<Env> {
       const [client, server] = [pair[0], pair[1]]
       this.ctx.acceptWebSocket(server)
       server.serializeAttachment({ userId, ver: ver ?? current, sid } satisfies Attachment)
+      const bookmark = readBookmark(db.getBookmark())
       const hello: LiveEvent = {
         type: 'hello',
+        ...(bookmark ? { d1: bookmark } : {}),
         accounts: accounts!.results.map(
           (row): LiveAccount => ({
             id: row.id as number,
@@ -347,10 +357,12 @@ export function notifyUser(
   listener?: Listener,
 ): void {
   if (!c.env.LIVE || (listener && !listener.live)) return
+  // The write's bookmarks: the page reads from a replica that has it.
+  const marked: LiveEvent = { ...event, ...requestBookmarks(c) }
   afterResponse(
     c,
     liveHub(c.env, userId)
-      .notify(userId, event, listener?.tokenVersion)
+      .notify(userId, marked, listener?.tokenVersion)
       .catch((error: unknown) => console.warn('live_notify_failed', String(error))),
   )
 }

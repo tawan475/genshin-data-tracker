@@ -1,6 +1,7 @@
-import type { Good, MeResponse } from '@gdt/shared'
+import type { Good, LiveEvent, MeResponse } from '@gdt/shared'
 import { createExecutionContext, env, SELF, waitOnExecutionContext } from 'cloudflare:test'
 import worker from '../index'
+import { readBookmark } from '../lib/d1-session'
 
 export const ORIGIN = 'https://teyvat.me'
 
@@ -243,4 +244,18 @@ export function bigGood(overrides: Partial<Good> = {}): Good {
     gi_achievement_times: Object.fromEntries(times),
     ...overrides,
   }
+}
+
+/**
+ * A live socket message as the event it carries, without the D1 bookmarks
+ * every event may add (d1-session.ts), which must be real bookmarks when sent.
+ */
+export function liveMessage(text: string): LiveEvent {
+  const { d1, d1l, ...event } = JSON.parse(text) as LiveEvent
+  for (const bookmark of [d1, d1l]) {
+    if (bookmark !== undefined && readBookmark(bookmark) !== bookmark) {
+      throw new Error(`not a bookmark: ${bookmark}`)
+    }
+  }
+  return event as LiveEvent
 }

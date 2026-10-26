@@ -9,7 +9,15 @@ import type {
 import { env, runInDurableObject, SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
 import { SESSION_ENDED_CLOSE, liveHub, type LiveHub } from '../services/live'
-import { Client, ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
+import {
+  Client,
+  ORIGIN,
+  irminsulForm,
+  liveMessage,
+  sampleExtras,
+  sampleGood,
+  signUp,
+} from './client'
 
 const DIAG = 'test-diag-key-test-diag-key-test-diag-key'
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -32,7 +40,7 @@ async function tabOf(socket: WebSocket): Promise<Tab> {
   let wake: (() => void) | null = null
   socket.addEventListener('message', (event) => {
     const text = String(event.data)
-    queue.push(text === 'pong' ? text : JSON.parse(text))
+    queue.push(text === 'pong' ? text : liveMessage(text))
     wake?.()
   })
   const closed = new Promise<CloseEvent>((resolve) =>

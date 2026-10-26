@@ -726,9 +726,8 @@ describe('D1 cost', () => {
         return real.exec(query)
       },
       dump: () => real.dump(),
-      withSession: () => {
-        throw new Error('not used')
-      },
+      // Every request runs on a session (d1-session.ts): one counted the same way.
+      withSession: () => ({ prepare: db.prepare, batch: db.batch, getBookmark: () => null }),
     }
     return { db: db as unknown as D1Database, counter }
   }

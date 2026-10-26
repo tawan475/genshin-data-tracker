@@ -11,7 +11,7 @@ import {
 } from '@gdt/shared'
 import { env, SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
-import { ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
+import { ORIGIN, irminsulForm, liveMessage, sampleExtras, sampleGood, signUp } from './client'
 
 /** Made-up states over real anecdote ids. */
 const anecdotes: GiAnecdotes = {
@@ -188,7 +188,7 @@ describe('anecdote marks', () => {
     const messages: LiveEvent[] = []
     let wake: (() => void) | null = null
     socket.addEventListener('message', (event) => {
-      messages.push(JSON.parse(String(event.data)) as LiveEvent)
+      messages.push(liveMessage(String(event.data)))
       wake?.()
     })
     const next = async () => {

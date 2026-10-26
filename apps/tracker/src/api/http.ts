@@ -13,6 +13,7 @@
  */
 
 import type { ApiError } from '@gdt/shared'
+import { bookmarkHeaders, noteBookmarks } from './d1-bookmark'
 
 export class ApiRequestError extends Error {
   constructor(
@@ -65,12 +66,24 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
     headers.set('x-gdt-csrf', '1')
     headers.set('x-gdt-tab', TAB_ID)
   }
+  bookmarkHeaders(headers)
   let body = options.body
   if (options.json !== undefined) {
     headers.set('content-type', 'application/json')
     body = JSON.stringify(options.json)
   }
-  return fetch(path, { ...options, method, headers, body, credentials: 'same-origin' })
+  const response = await fetch(path, {
+    ...options,
+    method,
+    headers,
+    body,
+    credentials: 'same-origin',
+  })
+  noteBookmarks({
+    d1: response.headers.get('x-gdt-bookmark'),
+    d1l: response.headers.get('x-gdt-bookmark-live'),
+  })
+  return response
 }
 
 function refresh(): Promise<RefreshOutcome> {

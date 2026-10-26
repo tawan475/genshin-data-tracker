@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { getDb } from '../db/client'
 import { genshinAccounts, inventoryAdjustments, plannerTargets } from '../db/schema'
-import { ORIGIN, irminsulForm, sampleGood, signUp } from './client'
+import { ORIGIN, irminsulForm, liveMessage, sampleGood, signUp } from './client'
 
 const db = getDb(env.DB)
 
@@ -220,7 +220,7 @@ describe('planner hand edits', () => {
     const messages: LiveEvent[] = []
     let wake: (() => void) | null = null
     socket.addEventListener('message', (event) => {
-      messages.push(JSON.parse(String(event.data)) as LiveEvent)
+      messages.push(liveMessage(String(event.data)))
       wake?.()
     })
     const next = async () => {

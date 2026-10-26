@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { getDb } from '../db/client'
 import { genshinAccounts, plannerTasks } from '../db/schema'
-import { ORIGIN, signUp, type Client } from './client'
+import { ORIGIN, liveMessage, signUp, type Client } from './client'
 
 const db = getDb(env.DB)
 
@@ -47,7 +47,7 @@ async function listen(client: Client) {
   const messages: LiveEvent[] = []
   let wake: (() => void) | null = null
   socket.addEventListener('message', (event) => {
-    messages.push(JSON.parse(String(event.data)) as LiveEvent)
+    messages.push(liveMessage(String(event.data)))
     wake?.()
   })
   const next = async () => {

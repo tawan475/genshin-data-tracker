@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { secureHeaders } from 'hono/secure-headers'
 import type { AppEnv } from './env'
+import { d1Sessions } from './lib/d1-session'
 import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
@@ -48,6 +49,9 @@ app.use(async (c, next) => {
   await next()
   if (c.res.headers.has('set-cookie')) c.res.headers.set('Cache-Control', 'private, no-store')
 })
+
+// D1 read replication: each request's queries run on one session per database.
+app.use(d1Sessions)
 
 app.route('/health', health)
 app.route('/bootstrap', bootstrap)

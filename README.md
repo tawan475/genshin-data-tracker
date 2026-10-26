@@ -831,9 +831,27 @@ is.
 `v1` in `wrangler.jsonc`). Live updates need D1 migration 0010
 (`users.live_since`): apply it (`db:migrate:remote`) before deploying.
 
-Static assets are served from the edge; `/api` runs with Smart Placement (next
-to D1). Measured from Bangkok: ~5 ms of SQL per import, ~120 ms per D1 round
-trip without placement.
+Static assets and `/api` both run at the visitor's edge (no placement), for D1
+read replication.
+
+### D1 read replication
+
+Turn it on for both databases (`gdt` and `gdt-live`): Cloudflare dashboard →
+Storage & Databases → D1 → the database → Settings → Read replication →
+Enable. The code works the same with it off.
+
+Every `/api` request runs its queries on one D1 session per database
+(`worker/lib/d1-session.ts`, mounted in `worker/index.ts`): writes (any
+method but GET/HEAD) start at the primary, reads start at the newest
+bookmark the browser holds, else at any replica. The browser holds bookmarks
+in a cookie (`gdt_d1`, `gdt_d1l`; set by writes and sign-ins) and in
+localStorage (`src/api/d1-bookmark.ts`), sent as `x-gdt-bookmark` /
+`x-gdt-bookmark-live`; every answer returns its session's bookmarks in the same
+headers, and every live event carries the bookmarks of the write it reports
+(`d1`, `d1l`; `hello` too), so a page never reads older data than it wrote
+or was told about. The Durable Object, cron and maintenance use the bindings
+as they are (always the primary). Capture apps send no bookmark: their writes
+start at the primary and their few reads may lag a replica by a moment.
 
 ### The old address
 

@@ -105,6 +105,15 @@ export function parseLiveEvent(text: unknown): LiveEvent | null {
   }
   if (!value || typeof value !== 'object') return null
   const event = value as Record<string, unknown>
+  const parsed = parseEventBody(event)
+  if (!parsed) return null
+  // The write's D1 bookmarks (worker/lib/d1-session.ts), when it sent them.
+  if (typeof event.d1 === 'string') parsed.d1 = event.d1
+  if (typeof event.d1l === 'string') parsed.d1l = event.d1l
+  return parsed
+}
+
+function parseEventBody(event: Record<string, unknown>): LiveEvent | null {
   if (event.type === 'accounts') return { type: 'accounts' }
   if (event.type === 'hello') return parseHello(event.accounts)
   if (event.type === 'planner' || event.type === 'wishes') {

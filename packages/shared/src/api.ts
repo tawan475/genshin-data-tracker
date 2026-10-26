@@ -876,14 +876,18 @@ export interface ImportedAccount {
  * (or, for `planner`, an open Planner re-reads its goals and edits, the
  * Characters page its favourites and the Anecdotes page its marks; for
  * `wishes`, an open Wish History page re-reads the history).
+ * Every event may carry `d1` / `d1l`: the D1 bookmarks (main / live database)
+ * of the write it reports, which the page sends with its next reads so a
+ * replica that already has that write answers them.
  */
-export type LiveEvent =
+export type LiveEvent = (
   | { type: 'hello'; accounts: LiveAccount[] }
   | { type: 'data'; accountId: number; dataVersion: number | null; takenAt?: number }
   | { type: 'accounts' }
   | { type: 'planner'; accountId: number; tab?: string }
   | { type: 'wishes'; accountId: number; tab?: string }
   | { type: 'live'; accountId: number; seq: number }
+) & { d1?: string; d1l?: string }
 
 /** `POST /api/irminsul/changes` (live sync, docs/plans/live-sync.md §13). */
 export type LiveChangesResponse =
