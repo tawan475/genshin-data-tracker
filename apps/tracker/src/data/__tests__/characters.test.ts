@@ -180,3 +180,47 @@ describe('withFavorite', () => {
     expect(withFavorite([], 'Furina', false)).toEqual([])
   })
 })
+
+describe("the Traveler's gear", () => {
+  const withGear: Good = {
+    ...good,
+    characters: [character('TravelerCryo', 90, 4, 1), character('HuTao', 90, 1, 10)],
+    weapons: [
+      {
+        key: 'FavoniusSword',
+        level: 90,
+        ascension: 6,
+        refinement: 5,
+        location: 'Traveler',
+        lock: true,
+      },
+      { key: 'StaffOfHoma', level: 90, ascension: 6, refinement: 1, location: 'HuTao', lock: true },
+    ],
+    artifacts: [
+      {
+        setKey: 'GladiatorsFinale',
+        slotKey: 'flower',
+        rarity: 5,
+        level: 20,
+        mainStatKey: 'hp',
+        substats: [{ key: 'critRate_', value: 3.9 }],
+        location: 'Traveler',
+        lock: true,
+      },
+    ],
+    gi_characters: { TravelerCryo: { friendship: 1 }, HuTao: { friendship: 10 } },
+  }
+  const [traveler, hutao] = buildRoster(withGear).characters
+
+  it('is found under the plain Traveler location GOOD gives it', () => {
+    expect(traveler?.weapon?.key).toBe('FavoniusSword')
+    expect(traveler?.artifactCount).toBe(1)
+    expect(hutao?.weapon?.key).toBe('StaffOfHoma')
+    expect(hutao?.artifactCount).toBe(0)
+  })
+
+  it('shows the Traveler no friendship level, as the game does', () => {
+    expect(traveler?.friendship).toBeNull()
+    expect(hutao?.friendship).toBe(10)
+  })
+})

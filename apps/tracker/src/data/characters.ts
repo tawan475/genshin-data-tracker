@@ -241,11 +241,16 @@ export function buildRoster(good: Good): Roster {
 
   const characters = good.characters.map((c): CharacterView => {
     const meta = characterMeta(c.key)
-    const worn = weapons.get(c.key)
+    // GOOD names the Traveler by element (`TravelerCryo`) but their gear's
+    // location plainly `Traveler`.
+    const traveler = c.key.startsWith('Traveler')
+    const location = (map: Map<string, unknown>) =>
+      traveler && !map.has(c.key) ? 'Traveler' : c.key
+    const worn = weapons.get(location(weapons))
     const weapon: EquippedWeapon | null = worn
       ? { ...worn, name: itemName(worn.key), ...weaponInfo(worn.key) }
       : null
-    const slots = artifacts.get(c.key)
+    const slots = artifacts.get(location(artifacts))
     const pieces = SLOT_ORDER.map((slot) => slots?.get(slot) ?? null)
     const equipped = pieces.filter((p): p is EquippedArtifact => p !== null)
     const sets = countSets(equipped)
@@ -289,7 +294,8 @@ export function buildRoster(good: Good): Roster {
       critRate: Number(critRate.toFixed(1)),
       critDmg: Number(critDmg.toFixed(1)),
       gaps: findGaps(c.level, weapon, equipped, bonusCount),
-      friendship: extra?.friendship ?? null,
+      // The game shows the Traveler no friendship level.
+      friendship: traveler ? null : (extra?.friendship ?? null),
       obtainedAt: extra?.obtainedAt !== undefined ? extra.obtainedAt * 1000 : null,
       haystack: normalizeSearch(
         [
