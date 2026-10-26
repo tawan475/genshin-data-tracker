@@ -44,7 +44,7 @@ export interface AccountSection {
 export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-overview', label: 'overview', icon: LayoutDashboard, primary: true },
   { name: 'account-characters', label: 'characters', icon: Users, primary: true },
-  { name: 'account-artifacts', label: 'artifacts', icon: Gem, primary: true },
+  { name: 'account-artifacts', label: 'artifacts', icon: Gem },
   { name: 'account-weapons', label: 'weapons', icon: Swords },
   { name: 'account-materials', label: 'materials', icon: Package, primary: true },
   { name: 'account-planner', label: 'planner', icon: ClipboardList, primary: true },

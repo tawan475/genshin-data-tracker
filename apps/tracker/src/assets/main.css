@@ -188,7 +188,8 @@
   --font-cjk: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Source Han Sans TC';
 }
 :root:lang(ja) {
-  --font-cjk: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', 'Noto Sans JP';
+  --font-cjk:
+    'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', 'Noto Sans JP';
 }
 :root:lang(ko) {
   --font-cjk: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR';
@@ -276,6 +277,13 @@
     font-size: 112.5%;
     background-color: var(--surface-base);
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Phones keep the browser's 16px: 18px made every page feel zoomed in. */
+  @media (max-width: 40rem) {
+    html {
+      font-size: 100%;
+    }
   }
 
   body {
