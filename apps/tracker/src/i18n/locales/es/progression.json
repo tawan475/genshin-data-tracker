@@ -1,6 +1,7 @@
 {
   "title": "Progreso detallado",
   "figures": "Cifras",
+  "straight": "Líneas rectas",
   "atLeastOne": "Al menos una",
   "groupBy": "Agrupar por",
   "longerThanRange": "Más largo que el intervalo",

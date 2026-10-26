@@ -1,7 +1,7 @@
 /**
  * The progression charts' figures (mora, primogems, artifact and item
- * counts; the card shows the ones picked): a stepped line through the
- * captures, and the change under it either per period (hour / day / month /
+ * counts, character EXP; the card shows the ones picked): a line through the
+ * captures (stepped, or straight from each capture to the next), and the change under it either per period (hour / day / month /
  * year: each period's closing value against the period before) or per
  * snapshot (each capture that changed a figure against the capture before,
  * on the line's own time axis so every bar sits under its step). Pure: the
@@ -17,7 +17,7 @@
  * with nothing to carry (still 0 / 0) are left out rather than drawn as 0.
  */
 
-import type { TimelineGroupBy } from '@gdt/shared'
+import type { SnapshotSummary, TimelineGroupBy } from '@gdt/shared'
 import {
   DAY,
   finerBucket,
@@ -29,15 +29,24 @@ import {
   type ChartRange,
   type PointBucket,
 } from '@/data/chart-range'
-import { periodStart } from '@/data/materials-history'
+import {
+  indexAtOrBefore,
+  periodStart,
+  valueAt,
+  type MaterialsHistory,
+} from '@/data/materials-history'
 import { currencyMissing, type Capture, type Point } from '@/data/overview'
 import { nextPeriod } from '@/data/progression'
 import { dateLocale } from '@/lib/format'
 
-/** A figure the progression card can chart: a snapshot summary count. */
+/**
+ * A figure the progression card can chart: a snapshot summary count, or the
+ * character EXP held in books (from the materials, see withCharacterExp).
+ */
 export type FigureKey =
   | 'mora'
   | 'primogem'
+  | 'characterExp'
   | 'artifacts'
   | 'artifact4'
   | 'artifact3'
@@ -46,12 +55,63 @@ export type FigureKey =
 export const FIGURE_KEYS: readonly FigureKey[] = [
   'mora',
   'primogem',
+  'characterExp',
   'artifacts',
   'artifact4',
   'artifact3',
   'characters',
   'weapons',
 ]
+
+/** Character EXP per book (the game's three character EXP materials). */
+export const CHARACTER_EXP_BOOKS = {
+  HerosWit: 20_000,
+  AdventurersExperience: 5_000,
+  WanderersAdvice: 1_000,
+} as const
+
+/** What the series read from a capture: its summary, plus character EXP once known. */
+export interface ProgressionCapture {
+  at: number
+  summary: SnapshotSummary & { characterExp?: number }
+}
+
+/** A figure of a capture; character EXP is 0 until withCharacterExp adds it. */
+const figureOf = (capture: ProgressionCapture, key: FigureKey): number => capture.summary[key] ?? 0
+
+/**
+ * `captures` with the character EXP held in books at each one, from the
+ * materials history: a capture reads the snapshot it shows (a re-sighting its
+ * own), a live sync point carries the capture before it.
+ */
+export function withCharacterExp(
+  captures: readonly Capture[],
+  materials: MaterialsHistory,
+): ProgressionCapture[] {
+  const indexById = new Map(materials.ids.map((id, i) => [id, i]))
+  const books = Object.entries(CHARACTER_EXP_BOOKS).map(
+    ([key, exp]) => [materials.series.get(key), exp] as const,
+  )
+  const expAt = (index: number) =>
+    books.reduce((sum, [series, exp]) => sum + valueAt(series, index) * exp, 0)
+  let carried = 0
+  return captures.map((capture) => {
+    if (capture.snapshot !== undefined) {
+      carried = expAt(
+        indexById.get(capture.snapshot) ?? indexAtOrBefore(materials.times, capture.at),
+      )
+    }
+    return { at: capture.at, summary: { ...capture.summary, characterExp: carried } }
+  })
+}
+
+/**
+ * How the line joins captures: `stepped` holds each value until the next
+ * capture changes it; `straight` draws one straight line from each capture
+ * to the next.
+ */
+export type LineShape = 'stepped' | 'straight'
+export const LINE_SHAPES: readonly LineShape[] = ['stepped', 'straight']
 /** The figures' old name (mora and primogems were the only ones). */
 export type CurrencyKey = FigureKey
 export const CURRENCY_KEYS = FIGURE_KEYS
@@ -115,12 +175,12 @@ export interface Progression {
   truncated: boolean
 }
 
-function figures(capture: Capture): Figures {
-  return perFigure((key) => capture.summary[key])
+function figures(capture: ProgressionCapture): Figures {
+  return perFigure((key) => figureOf(capture, key))
 }
 
 /** First index whose `at` is >= `from`. */
-function lowerBound(captures: readonly Capture[], from: number): number {
+function lowerBound(captures: readonly ProgressionCapture[], from: number): number {
   let lo = 0
   let hi = captures.length
   while (lo < hi) {
@@ -133,12 +193,21 @@ function lowerBound(captures: readonly Capture[], from: number): number {
 
 /**
  * Drops repeats of a value (the step line draws them anyway), keeping the
- * final point so the line reaches the newest capture.
+ * final point so the line reaches the newest capture. A straight line also
+ * keeps the last point of each run, where its slope to the next value starts.
  */
-function dedupe(points: Point[]): Point[] {
+function dedupe(points: Point[], shape: LineShape): Point[] {
   const out: Point[] = []
+  const last = points.length - 1
   points.forEach((point, i) => {
-    if (i === 0 || point.y !== points[i - 1]!.y || i === points.length - 1) out.push(point)
+    if (
+      i === 0 ||
+      i === last ||
+      point.y !== points[i - 1]!.y ||
+      (shape === 'straight' && point.y !== points[i + 1]!.y)
+    ) {
+      out.push(point)
+    }
   })
   return out
 }
@@ -149,12 +218,13 @@ function dedupe(points: Point[]): Point[] {
  * `end` (now): the newest value is still the value until a capture says not.
  */
 function linePoints(
-  captures: readonly Capture[],
+  captures: readonly ProgressionCapture[],
   index: number,
   x0: number,
   open: Figures,
   by: PointBucket | TimelineGroupBy,
   end: number,
+  shape: LineShape,
 ): Record<FigureKey, Point[]> {
   const lines = perFigure<Point[]>((key) => [{ x: x0, y: open[key] }])
   let period = Number.NaN
@@ -162,7 +232,7 @@ function linePoints(
     const capture = captures[i]!
     const p = by === 'raw' ? Number.NaN : periodStart(capture.at, by)
     for (const key of CURRENCY_KEYS) {
-      const point = { x: capture.at, y: capture.summary[key] }
+      const point = { x: capture.at, y: figureOf(capture, key) }
       // Same period as the capture before: the later one closes it.
       if (p === period) lines[key][lines[key].length - 1] = point
       else lines[key].push(point)
@@ -174,11 +244,11 @@ function linePoints(
     const held = line[line.length - 1]!
     if (end > held.x) line.push({ x: end, y: held.y })
   }
-  return perFigure((key) => dedupe(lines[key]))
+  return perFigure((key) => dedupe(lines[key], shape))
 }
 
 /** The chart's right edge: now, or the newest capture if the clock is behind it. */
-const chartEnd = (now: number, last: Capture) => Math.max(now, last.at)
+const chartEnd = (now: number, last: ProgressionCapture) => Math.max(now, last.at)
 
 /**
  * `captures` as buildHistory returns them (oldest first). Ranges end at
@@ -186,10 +256,11 @@ const chartEnd = (now: number, last: Capture) => Math.max(now, last.at)
  * newest capture to it) and snap to whole periods of `groupBy`.
  */
 export function buildProgression(
-  allCaptures: readonly Capture[],
+  allCaptures: readonly ProgressionCapture[],
   groupBy: TimelineGroupBy,
   range: ChartRange,
   now: number = Date.now(),
+  shape: LineShape = 'stepped',
 ): Progression | null {
   const captures = allCaptures.filter((c) => !currencyMissing(c.summary))
   const first = captures[0]
@@ -214,13 +285,13 @@ export function buildProgression(
   const open = figures(baseline ?? first)
   const x0 = baseline ? from : first.at
   const lineBucket = finerBucket(pointBucket(end - x0), groupBy)
-  const lines = linePoints(captures, j, x0, open, lineBucket, end)
+  const lines = linePoints(captures, j, x0, open, lineBucket, end, shape)
 
   const periods: Period[] = []
   let previous = open
   starts.forEach((start, i) => {
     const end = starts[i + 1] ?? nextPeriod(start, groupBy)
-    let closing: Capture | null = null
+    let closing: ProgressionCapture | null = null
     let count = 0
     while (j < captures.length && captures[j]!.at < end) {
       closing = captures[j]!
@@ -258,7 +329,7 @@ export interface CaptureChange {
  * the other figure moved, get no entry: they draw no step either.
  */
 export function captureChanges(
-  captures: readonly Capture[],
+  captures: readonly ProgressionCapture[],
   index: number,
   open: number,
   key: FigureKey,
@@ -267,7 +338,7 @@ export function captureChanges(
   let previous = open
   for (let i = index; i < captures.length; i++) {
     const capture = captures[i]!
-    const value = capture.summary[key]
+    const value = figureOf(capture, key)
     if (value !== previous) changes.push({ at: capture.at, change: value - previous, value })
     previous = value
   }
@@ -277,7 +348,7 @@ export function captureChanges(
 export interface SnapshotProgression {
   /** Per figure, oldest first: one bar per capture that changed it. */
   changes: Record<FigureKey, CaptureChange[]>
-  /** Every capture as a stepped line from the value held at `domain[0]`. */
+  /** Every capture as a line from the value held at `domain[0]`. */
   lines: Record<FigureKey, Point[]>
   /** The time axis the line and the bars share: the line's start to now. */
   domain: [number, number]
@@ -296,9 +367,10 @@ export interface SnapshotProgression {
  * capture before them, as "Per hour" over years keeps the newest hours.
  */
 export function buildSnapshotProgression(
-  allCaptures: readonly Capture[],
+  allCaptures: readonly ProgressionCapture[],
   range: ChartRange,
   now: number = Date.now(),
+  shape: LineShape = 'stepped',
 ): SnapshotProgression | null {
   const captures = allCaptures.filter((c) => !currencyMissing(c.summary))
   const first = captures[0]
@@ -329,7 +401,7 @@ export function buildSnapshotProgression(
   const open = figures(baseline ?? first)
   return {
     changes: perFigure((key) => captureChanges(captures, index, open[key], key)),
-    lines: linePoints(captures, index, x0, open, 'raw', end),
+    lines: linePoints(captures, index, x0, open, 'raw', end, shape),
     domain: [x0, end],
     open,
     truncated,

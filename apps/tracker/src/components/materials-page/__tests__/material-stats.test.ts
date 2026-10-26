@@ -18,6 +18,7 @@ const at = (y: number, m: number, d: number, h = 0, min = 0) =>
 function history(times: number[], counts: number[], lastSeenAt = times.at(-1)!): MaterialsHistory {
   return {
     times,
+    ids: times.map((_, i) => i + 1),
     lastSeenAt,
     series: new Map([['Mora', { at: counts.map((_, i) => i), value: counts }]]),
     latest: new Map([['Mora', counts.at(-1)!]]),

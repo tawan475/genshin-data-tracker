@@ -1,6 +1,7 @@
 import type { SnapshotSummary } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import { DAY, HOUR } from '@/data/chart-range'
+import type { MaterialsHistory } from '@/data/materials-history'
 import type { Capture } from '@/data/overview'
 import {
   buildProgression,
@@ -12,6 +13,7 @@ import {
   SNAPSHOT_BAR_WIDTH,
   snapshotBarWidth,
   snapshotTotals,
+  withCharacterExp,
 } from '../progression-series'
 
 const at = (y: number, m: number, d: number, h = 0, min = 0) =>
@@ -236,5 +238,88 @@ describe('the right edge is now', () => {
   it('never ends before the newest capture when the clock is behind', () => {
     const s = buildSnapshotProgression(captures, '7d', last - HOUR)!
     expect(s.domain[1]).toBe(last)
+  })
+})
+
+describe('straight lines', () => {
+  const now = at(2026, 10, 12, 12)
+  const captures: Capture[] = [
+    { at: at(2026, 10, 12, 8), summary: summary(1_000, 1) },
+    { at: at(2026, 10, 12, 9), summary: summary(1_000, 1) },
+    { at: at(2026, 10, 12, 10), summary: summary(1_000, 1) },
+    { at: at(2026, 10, 12, 11), summary: summary(2_000, 1) },
+  ]
+
+  it('keeps the last capture of a run, where the slope to the next value starts', () => {
+    const stepped = buildSnapshotProgression(captures, '1d', now)!
+    expect(stepped.lines.mora.map((p) => p.x)).toEqual([
+      at(2026, 10, 12, 8),
+      at(2026, 10, 12, 11),
+      now,
+    ])
+    const straight = buildSnapshotProgression(captures, '1d', now, 'straight')!
+    expect(straight.lines.mora).toEqual([
+      { x: at(2026, 10, 12, 8), y: 1_000 },
+      { x: at(2026, 10, 12, 10), y: 1_000 },
+      { x: at(2026, 10, 12, 11), y: 2_000 },
+      { x: now, y: 2_000 },
+    ])
+    // The bars are the same either way.
+    expect(straight.changes).toEqual(stepped.changes)
+  })
+
+  it('works per period too', () => {
+    const p = buildProgression(captures, 'hour', '1d', now, 'straight')!
+    expect(p.lines.mora.map((point) => point.y)).toEqual([1_000, 1_000, 2_000, 2_000])
+  })
+})
+
+describe('character EXP', () => {
+  // Snapshots 7 and 9: books 2 / 1 / 3, then 5 / 0 / 3 (Hero's Wit / Adventurer's / Wanderer's).
+  const materials: MaterialsHistory = {
+    times: [at(2026, 10, 1), at(2026, 10, 2)],
+    ids: [7, 9],
+    lastSeenAt: at(2026, 10, 2),
+    series: new Map([
+      ['HerosWit', { at: [0, 1], value: [2, 5] }],
+      ['AdventurersExperience', { at: [0, 1], value: [1, 0] }],
+      ['WanderersAdvice', { at: [0], value: [3] }],
+      ['Mora', { at: [0], value: [9_999] }],
+    ]),
+    latest: new Map(),
+  }
+
+  it('counts the books of the snapshot each capture shows', () => {
+    const captures: Capture[] = [
+      { at: at(2026, 10, 1), summary: summary(1, 1), snapshot: 7 },
+      { at: at(2026, 10, 2), summary: summary(1, 1), snapshot: 9 },
+      // A live sync point carries the capture before it.
+      { at: at(2026, 10, 2, 12), summary: summary(2, 1) },
+      // A later sighting of snapshot 7 shows its books, not the newest snapshot's.
+      { at: at(2026, 10, 3), summary: summary(1, 1), snapshot: 7 },
+    ]
+    expect(withCharacterExp(captures, materials).map((c) => c.summary.characterExp)).toEqual([
+      2 * 20_000 + 5_000 + 3 * 1_000,
+      5 * 20_000 + 3 * 1_000,
+      5 * 20_000 + 3 * 1_000,
+      2 * 20_000 + 5_000 + 3 * 1_000,
+    ])
+  })
+
+  it('charts like the other figures', () => {
+    const captures = withCharacterExp(
+      [
+        { at: at(2026, 10, 1), summary: summary(1, 1), snapshot: 7 },
+        { at: at(2026, 10, 2), summary: summary(1, 1), snapshot: 9 },
+      ],
+      materials,
+    )
+    const s = buildSnapshotProgression(captures, 'all', at(2026, 10, 2))!
+    expect(snapshotTotals(s, 'characterExp')).toEqual({
+      last: 103_000,
+      net: 55_000,
+      gained: 55_000,
+      spent: 0,
+    })
   })
 })

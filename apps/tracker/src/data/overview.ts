@@ -105,6 +105,8 @@ export interface Capture {
   at: number
   /** As captured, except missing currency carried over from the capture before. */
   summary: SnapshotSummary
+  /** The snapshot shown (a re-sighting shows its own); none for a live sync point. */
+  snapshot?: number
 }
 
 export interface History {
@@ -137,8 +139,10 @@ export function dayKey(ms: number): string {
 export function buildHistory(snapshots: readonly SnapshotResponse[]): History {
   const captures: Capture[] = []
   for (const s of snapshots) {
-    captures.push({ at: s.takenAt, summary: s.summary })
-    if (s.lastSeenAt > s.takenAt) captures.push({ at: s.lastSeenAt, summary: s.summary })
+    captures.push({ at: s.takenAt, summary: s.summary, snapshot: s.id })
+    if (s.lastSeenAt > s.takenAt) {
+      captures.push({ at: s.lastSeenAt, summary: s.summary, snapshot: s.id })
+    }
   }
   captures.sort((a, b) => a.at - b.at)
 

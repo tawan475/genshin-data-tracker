@@ -4,18 +4,21 @@ import ChartRangeSelect from '@/components/charts/ChartRangeSelect.vue'
 import TimelineChart, { type TimelineSeries } from '@/components/charts/TimelineChart.vue'
 import { useChartRange } from '@/components/charts/use-chart-range'
 import ChangeValue from '@/components/overview/ChangeValue.vue'
-import { Settings } from 'lucide-vue-next'
+import { Settings, TrendingUp } from 'lucide-vue-next'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { axisFormat, fitGroupBy, formatWindow, groupFits } from '@/data/chart-range'
+import { loadMaterialsHistory } from '@/data/materials'
 import type { Capture, Point } from '@/data/overview'
 import { GROUP_BY_OPTIONS, nextPeriod } from '@/data/progression'
+import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
 import { clock24, formatDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { useAccount } from '@/views/account/context'
 import type { ChangeBar } from './ChangeBarChart.vue'
 import ChangeBarChart from './ChangeBarChart.vue'
 import {
@@ -28,20 +31,25 @@ import {
   periodTotals,
   SNAPSHOT_BAR_WIDTH,
   snapshotTotals,
+  withCharacterExp,
   FIGURE_KEYS,
+  LINE_SHAPES,
   type FigureKey,
+  type LineShape,
   type PeriodTotals,
   type ProgressionGroup,
 } from './progression-series'
 
 /**
- * A report card of the figures picked on it (mora, primogems, artifacts, 4★ /
- * 3★ artifacts, characters, weapons): each figure's value as a stepped line
- * and its gains and losses under it as columns, per snapshot (each capture
- * that changed the figure, under its step on the same time axis) or per
- * period. The figures (picked under the cog left of the controls), group-by and
- * range are remembered on this device per
- * card (`storage`); until a grouping is picked, ranges up to a week show
+ * A report card of the figures picked on it (mora, primogems, character EXP,
+ * artifacts, 4★ / 3★ artifacts, characters, weapons): each figure's value as
+ * a line, stepped or straight from capture to capture (the button left of the
+ * grouping), and its gains and losses under it as columns, per snapshot (each
+ * capture that changed the figure, under its step on the same time axis) or
+ * per period. Character EXP (books held) comes from the materials history,
+ * loaded only while it is picked. The figures (picked under the cog left of
+ * the controls), line shape, group-by and range are remembered on this
+ * device per card (`storage`); until a grouping is picked, ranges up to a week show
  * snapshots and longer ones days. A period too coarse for the range is
  * greyed out and the next finer one shown (6h is per hour), the choice
  * coming back with a longer range. `captures` is undefined while the
@@ -51,7 +59,7 @@ const props = withDefaults(
   defineProps<{
     captures: Capture[] | undefined
     title?: string
-    /** Storage key prefix for this card's choices (figures, group-by, range). */
+    /** Storage key prefix for this card's choices (figures, line, group-by, range). */
     storage?: string
     /** Figures shown until some are picked. */
     defaults?: readonly FigureKey[]
@@ -69,6 +77,7 @@ const props = withDefaults(
 const COLORS: Record<FigureKey, TimelineSeries['color']> = {
   mora: 2,
   primogem: 4,
+  characterExp: 1,
   artifacts: 5,
   artifact4: 6,
   artifact3: 3,
@@ -90,11 +99,41 @@ function toggleFigure(key: FigureKey) {
   picked.value = FIGURE_KEYS.filter((k) => (k === key ? !on : picked.value.includes(k)))
   writeStorage(FIGURES_KEY, picked.value.join(','))
 }
-const CHARTS = computed(() =>
-  picked.value.map((key) => ({ key, title: figureTitle(key), color: COLORS[key] })),
-)
 /** The figure chips show only while the cog beside the range is on. */
 const picking = ref(false)
+
+/** Stepped (the default) or straight lines, remembered per device. */
+const LINE_KEY = `${props.storage}-line`
+const storedLine = readStorage(LINE_KEY)
+const line = ref<LineShape>(LINE_SHAPES.find((shape) => shape === storedLine) ?? 'stepped')
+function toggleLine() {
+  line.value = line.value === 'straight' ? 'stepped' : 'straight'
+  writeStorage(LINE_KEY, line.value)
+}
+
+// Character EXP: the books in each capture's materials, loaded while picked.
+const account = useAccount()
+const wantsExp = computed(() => picked.value.includes('characterExp'))
+const books = useResource(
+  () => (wantsExp.value && account.value.latest ? account.value : null),
+  (a) => (a ? loadMaterialsHistory(a) : Promise.resolve(null)),
+)
+/** The captures the series read: with character EXP once it has loaded, undefined while it loads. */
+const seriesCaptures = computed(() => {
+  const all = props.captures
+  if (!all || !wantsExp.value || books.error.value) return all
+  if (books.loading.value) return undefined
+  const history = books.data.value
+  return history ? withCharacterExp(all, history) : all
+})
+/** Without the materials (none captured, or they failed to load) EXP has no chart. */
+const hasExp = computed(() => !books.error.value && !!books.data.value)
+
+const CHARTS = computed(() =>
+  picked.value
+    .filter((key) => key !== 'characterExp' || hasExp.value)
+    .map((key) => ({ key, title: figureTitle(key), color: COLORS[key] })),
+)
 
 const GROUPS: SegmentedOption<ProgressionGroup>[] = [
   {
@@ -155,13 +194,14 @@ onBeforeUnmount(() => clearInterval(clock))
 
 const periodic = computed(() => {
   const group = groupBy.value
-  return props.captures && group !== 'snapshot'
-    ? buildProgression(props.captures, group, range.value, now.value)
+  const all = seriesCaptures.value
+  return all && group !== 'snapshot'
+    ? buildProgression(all, group, range.value, now.value, line.value)
     : null
 })
 const perSnapshot = computed(() =>
-  props.captures && groupBy.value === 'snapshot'
-    ? buildSnapshotProgression(props.captures, range.value, now.value)
+  seriesCaptures.value && groupBy.value === 'snapshot'
+    ? buildSnapshotProgression(seriesCaptures.value, range.value, now.value, line.value)
     : null,
 )
 
@@ -304,6 +344,14 @@ function fitAxis(id: string, width: number) {
       >
         <Settings class="size-5" aria-hidden="true" />
       </UiIconButton>
+      <UiIconButton
+        :label="$t('progression.straight')"
+        :active="line === 'straight'"
+        :aria-pressed="line === 'straight'"
+        @click="toggleLine"
+      >
+        <TrendingUp class="size-5" aria-hidden="true" />
+      </UiIconButton>
       <div
         ref="groupRow"
         class="scroll-hide scroll-fade-x max-w-full min-w-0 overflow-x-auto sm:scroll-fade-none sm:overflow-visible"
@@ -332,7 +380,7 @@ function fitAxis(id: string, width: number) {
       >
     </div>
 
-    <div v-if="!captures" class="grid gap-8 lg:grid-cols-2" role="status">
+    <div v-if="!seriesCaptures" class="grid gap-8 lg:grid-cols-2" role="status">
       <span class="sr-only">{{ $t('progression.loading') }}</span>
       <div v-for="n in 2" :key="n" class="flex flex-col gap-3">
         <div class="flex justify-between gap-4">
@@ -369,7 +417,7 @@ function fitAxis(id: string, width: number) {
           :label="chart.lineLabel"
           :height="220"
           fill
-          stepped
+          :stepped="line === 'stepped'"
           :y-axis-width="yAxisWidth(chart.key)"
           :pad-right="PAD_RIGHT"
           @y-axis-fit="(width) => fitAxis(`${chart.key}-line`, width)"

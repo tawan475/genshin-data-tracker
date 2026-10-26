@@ -7,7 +7,8 @@
     "weapons": "Senjata",
     "artifacts": "Artefak",
     "artifact4": "Artefak 4★",
-    "artifact3": "Artefak 3★"
+    "artifact3": "Artefak 3★",
+    "characterExp": "Character EXP"
   },
   "server": {
     "AMERICA": "Amerika",

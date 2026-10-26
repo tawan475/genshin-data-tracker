@@ -7,7 +7,8 @@
     "weapons": "Silahlar",
     "artifacts": "Yadigarlar",
     "artifact4": "4★ Yadigar",
-    "artifact3": "3★ Yadigar"
+    "artifact3": "3★ Yadigar",
+    "characterExp": "Karakter TP"
   },
   "server": {
     "AMERICA": "Amerika",

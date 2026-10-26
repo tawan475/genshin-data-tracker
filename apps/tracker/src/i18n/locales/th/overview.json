@@ -7,7 +7,8 @@
     "weapons": "อาวุธ",
     "artifacts": "อาร์ติแฟกต์",
     "artifact4": "อาร์ติแฟกต์ 4★",
-    "artifact3": "อาร์ติแฟกต์ 3★"
+    "artifact3": "อาร์ติแฟกต์ 3★",
+    "characterExp": "Character EXP"
   },
   "server": {
     "AMERICA": "อเมริกา",

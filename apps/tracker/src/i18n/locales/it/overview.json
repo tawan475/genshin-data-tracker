@@ -7,7 +7,8 @@
     "weapons": "Armi",
     "artifacts": "Manufatti",
     "artifact4": "Manufatto 4★",
-    "artifact3": "Manufatto 3★"
+    "artifact3": "Manufatto 3★",
+    "characterExp": "ESP personaggio"
   },
   "server": {
     "AMERICA": "America",

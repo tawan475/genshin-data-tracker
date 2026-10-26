@@ -7,7 +7,8 @@
     "weapons": "武器",
     "artifacts": "聖遺物",
     "artifact4": "★4聖遺物",
-    "artifact3": "★3聖遺物"
+    "artifact3": "★3聖遺物",
+    "characterExp": "キャラクター経験値"
   },
   "server": {
     "AMERICA": "アメリカ",

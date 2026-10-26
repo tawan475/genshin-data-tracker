@@ -7,7 +7,8 @@
     "weapons": "Waffen",
     "artifacts": "Artefakte",
     "artifact4": "4★-Artefakt",
-    "artifact3": "3★-Artefakt"
+    "artifact3": "3★-Artefakt",
+    "characterExp": "Figuren-EP"
   },
   "server": {
     "AMERICA": "Amerika",

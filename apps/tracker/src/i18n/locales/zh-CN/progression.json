@@ -1,6 +1,7 @@
 {
   "title": "详细进度",
   "figures": "数据项",
+  "straight": "直线",
   "atLeastOne": "至少保留一项",
   "groupBy": "分组方式",
   "longerThanRange": "比时间范围更长",

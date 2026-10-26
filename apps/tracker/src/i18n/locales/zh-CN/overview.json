@@ -7,7 +7,8 @@
     "weapons": "武器",
     "artifacts": "圣遗物",
     "artifact4": "4★圣遗物",
-    "artifact3": "3★圣遗物"
+    "artifact3": "3★圣遗物",
+    "characterExp": "角色经验"
   },
   "server": {
     "AMERICA": "美服",

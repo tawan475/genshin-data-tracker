@@ -1,6 +1,7 @@
 {
   "title": "詳細な育成推移",
   "figures": "項目",
+  "straight": "直線",
   "atLeastOne": "1つ以上",
   "groupBy": "集計単位",
   "longerThanRange": "期間より長い",

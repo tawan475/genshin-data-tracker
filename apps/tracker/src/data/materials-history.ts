@@ -15,6 +15,7 @@
 import { decodeMaterials, fromRef, type KeyDictionary, type MaterialsSection } from '@gdt/shared'
 
 export interface MaterialsSnapshotRef {
+  id: number
   takenAt: number
   lastSeenAt: number
   /** Section hash of this snapshot's materials (a keyframe or a delta). */
@@ -32,6 +33,8 @@ export interface MaterialSeries {
 export interface MaterialsHistory {
   /** Capture time of each snapshot, oldest first (epoch ms). */
   times: number[]
+  /** Snapshot id of each entry of `times`. */
+  ids: number[]
   /** When the newest snapshot's counts were last confirmed by an upload. */
   lastSeenAt: number
   /** Every key present in any snapshot. A key absent from a snapshot counts 0. */
@@ -68,12 +71,14 @@ export function buildMaterialsHistory(
   const series = new Map<string, MaterialSeries>()
   const state = new Map<string, number>()
   const times: number[] = []
+  const ids: number[] = []
 
   let previousKeyframe: string | null = null
   let previousDelta = new Map<string, number>()
 
   snapshots.forEach((snapshot, index) => {
     times.push(snapshot.takenAt)
+    ids.push(snapshot.id)
     const base = keyframe(snapshot.materialsKeyframe)
     const delta = new Map<string, number>()
     if (snapshot.materials !== snapshot.materialsKeyframe) {
@@ -115,7 +120,7 @@ export function buildMaterialsHistory(
     previousDelta = delta
   })
 
-  return { times, lastSeenAt: snapshots.at(-1)?.lastSeenAt ?? 0, series, latest: state }
+  return { times, ids, lastSeenAt: snapshots.at(-1)?.lastSeenAt ?? 0, series, latest: state }
 }
 
 // ------------------------------------------------------------------ queries
