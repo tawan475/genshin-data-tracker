@@ -10,7 +10,12 @@
  * alone; the next login replaces it.
  */
 
-import { RESIN_MAX, RESIN_MINUTES, type ResinNow } from '@gdt/game-data/planner-estimate'
+import {
+  RESIN_MAX,
+  RESIN_MINUTES,
+  type LoginResin,
+  type ResinNow,
+} from '@gdt/game-data/planner-estimate'
 import type { ManualResin } from '@gdt/shared'
 
 export { RESIN_MAX }
@@ -40,6 +45,15 @@ export function resinReading(
     return { value: manual.value, at: manual.at, source: 'manual' }
   }
   return capture
+}
+
+/**
+ * A capture's resin clock (`gi_tasks.resin`: the resin then and when the next
+ * one comes) as a reading on the game's own timer: the last point landed one
+ * step before the next, so counting on from there gets every later one right.
+ */
+export function clockReading(clock: { value: number; nextAt: number }): LoginResin {
+  return { value: clock.value, at: clock.nextAt * 1000 - RESIN_STEP_MS }
 }
 
 /** Whether a hand-set value was replaced by a capture read after it. */

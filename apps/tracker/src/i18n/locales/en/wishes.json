@@ -110,7 +110,8 @@
       "name": "Name",
       "time": "Time",
       "pity": "Pity"
-    }
+    },
+    "path": "Epitomized Path"
   },
   "five": {
     "every": "Every 5★",

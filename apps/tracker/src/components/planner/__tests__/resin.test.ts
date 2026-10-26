@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   RESIN_STEP_MS,
+  clockReading,
   alertAt,
   fullAt,
   manualReplaced,
@@ -144,5 +145,15 @@ describe('resin alerts', () => {
     scheduleResinAlert(2, null, 200, { name: 'Alt', url: '/' }, T + 20 * MIN)
     await vi.advanceTimersByTimeAsync(60 * MIN)
     expect(shown).toHaveLength(1)
+  })
+})
+
+describe("a capture's resin clock", () => {
+  it("counts on the game's timer: the next point lands at nextAt", () => {
+    const nextAt = 1_791_000_300
+    const reading = clockReading({ value: 120, nextAt })
+    expect(resinAt(reading, nextAt * 1000 - 1)).toBe(120)
+    expect(resinAt(reading, nextAt * 1000)).toBe(121)
+    expect(resinAt(reading, nextAt * 1000 + 8 * MIN)).toBe(122)
   })
 })

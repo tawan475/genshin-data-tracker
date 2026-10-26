@@ -13,6 +13,7 @@ import {
   type PullRow,
 } from '@/data/wish-history'
 import { t } from '@/i18n'
+import { itemName } from '@/data/weapons'
 import { formatNumber } from '@/lib/format'
 import WishOddsChip from './WishOddsChip.vue'
 import WishPityTrack from './WishPityTrack.vue'
@@ -30,7 +31,12 @@ import { RARITY_TEXT, bannerInfo, wishMinute } from './wish-labels'
  * to the bottom of the window, scrolling inside. Only the chevron closes
  * it, so several can stay open.
  */
-const props = defineProps<{ stats: BannerStats; to: RouteLocationRaw }>()
+const props = defineProps<{
+  stats: BannerStats
+  to: RouteLocationRaw
+  /** The weapon banner's Epitomized Path, from the newest capture. */
+  path?: { weapon: string; points: number; max: number } | null
+}>()
 
 const LATEST = 200
 const info = computed(() => bannerInfo(props.stats.banner))
@@ -183,6 +189,19 @@ onBeforeUnmount(() => {
             :style="{ width: `${Math.min(100, (stats.pity4 / hard[1]) * 100)}%` }"
           />
         </div>
+      </div>
+
+      <div
+        v-if="path"
+        class="flex min-w-0 items-center gap-2.5 rounded-lg bg-surface-sunken px-3.5 py-2.5"
+      >
+        <span class="flex min-w-0 flex-col">
+          <span class="truncate text-xs text-text-secondary">{{ $t('wishes.card.path') }}</span>
+          <span class="truncate text-xs text-text-muted">{{ itemName(path.weapon) }}</span>
+        </span>
+        <span class="tabular ml-auto font-mono text-2xl leading-none font-bold"
+          >{{ path.points }}<span class="text-base text-text-muted">/{{ path.max }}</span></span
+        >
       </div>
 
       <button

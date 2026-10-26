@@ -551,7 +551,10 @@ export function decodeAnecdotes(section: AnecdotesSection): GiAnecdotes {
 // `c` = commissions [finished, total], `a` = the Abyss [start, end, stars,
 // maxStars], `e` = expeditions [[character ('' when unknown), id, start,
 // hours, doneAt], ...], `r` = realm currency [value, limit], `w` = Welkin
-// days. A few dozen bytes that change with every login: stored in full.
+// days, `p` = the Epitomized Path [weapon, points, max], `n` = resin [value,
+// next at] (`p` and `n` from 2026-10-26; the binary layout predates them, so
+// a section with them is stored as JSON). A few dozen bytes that change with
+// every login: stored in full.
 
 export interface TasksSection {
   c?: [finished: number, total: number]
@@ -559,16 +562,21 @@ export interface TasksSection {
   e?: [character: string, id: number, start: number, hours: number, doneAt: number][]
   r?: [value: number, limit: number]
   w?: number
+  p?: [weapon: string, points: number, max: number]
+  n?: [value: number, nextAt: number]
 }
 
 export function encodeTasks(tasks: GiTasks): TasksSection {
   const section: TasksSection = {}
   const { commissions: c, abyss: a, expeditions: e, realm: r, welkin: w } = tasks
+  const { wishPath: p, resin: n } = tasks
   if (c) section.c = [c.finished, c.total]
   if (a) section.a = [a.start, a.end, a.stars, a.maxStars]
   if (e) section.e = e.map((x) => [x.character ?? '', x.id, x.start, x.hours, x.doneAt])
   if (r) section.r = [r.value, r.limit]
   if (w) section.w = w.days
+  if (p) section.p = [p.weapon, p.points, p.max]
+  if (n) section.n = [n.value, n.nextAt]
   return section
 }
 
@@ -590,5 +598,7 @@ export function decodeTasks(section: TasksSection): GiTasks {
   }
   if (section.r) tasks.realm = { value: section.r[0], limit: section.r[1] }
   if (section.w !== undefined) tasks.welkin = { days: section.w }
+  if (section.p) tasks.wishPath = { weapon: section.p[0], points: section.p[1], max: section.p[2] }
+  if (section.n) tasks.resin = { value: section.n[0], nextAt: section.n[1] }
   return tasks
 }

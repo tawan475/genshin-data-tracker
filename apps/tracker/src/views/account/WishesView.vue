@@ -20,6 +20,8 @@ import { WISH_BANNERS, bannerInfo, formatPity, wishMinute } from '@/components/w
 import { EXPECTED_PITY, PRIMOS_PER_PULL, monthlyPulls, type BannerStats } from '@/data/wish-history'
 import { t } from '@/i18n'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { loadLatestInventory } from '@/data/account-data'
+import { useResource } from '@/data/use-resource'
 import { useAccount, useReadOnly } from './context'
 
 /**
@@ -33,6 +35,12 @@ import { useAccount, useReadOnly } from './context'
  * day) or a UIGF / paimon.moe file; live events re-read it.
  */
 const account = useAccount()
+/** The Epitomized Path, from the newest capture (Teyvat.me Capture reads it off the Wish screen). */
+const capture = useResource(
+  () => account.value,
+  (a) => (a.latest ? loadLatestInventory(a) : Promise.resolve(null)),
+)
+const wishPath = computed(() => capture.data.value?.good.gi_tasks?.wishPath ?? null)
 const readOnly = useReadOnly()
 const wishes = useWishHistory(() => account.value.id)
 const history = computed(() => wishes.history.value)
@@ -164,6 +172,7 @@ const dialog = ref(false)
             :key="b.info.banner"
             :stats="b.stats"
             :to="detail(b.info.banner)"
+            :path="b.info.banner === 302 ? wishPath : null"
           />
         </section>
 

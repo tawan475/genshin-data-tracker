@@ -137,6 +137,10 @@ export interface GiTasks {
   realm?: { value: number; limit: number }
   /** Blessing of the Welkin Moon days left. */
   welkin?: { days: number }
+  /** The weapon banner's Epitomized Path as the Wish screen last showed it (GOOD weapon key). */
+  wishPath?: { weapon: string; points: number; max: number }
+  /** Original Resin when read, and when the next one comes (unix s; one per 8 minutes). */
+  resin?: { value: number; nextAt: number }
 }
 
 export interface Good {

@@ -1414,6 +1414,29 @@ describe("irminsul's gi_tasks", () => {
     expect(alone.decoded.gi_tasks).toEqual({ expeditions: [] })
   })
 
+  it('round-trips the Epitomized Path and the resin clock, and drops them out of range', async () => {
+    const more = {
+      ...sample,
+      gi_tasks: {
+        ...tasks.gi_tasks,
+        wishPath: { weapon: 'StaffOfHoma', points: 1, max: 1 },
+        resin: { value: 124, nextAt: 1_791_000_300 },
+      },
+    }
+    const { decoded } = await roundTrip(more)
+    expect(decoded.gi_tasks?.wishPath).toEqual({ weapon: 'StaffOfHoma', points: 1, max: 1 })
+    expect(decoded.gi_tasks?.resin).toEqual({ value: 124, nextAt: 1_791_000_300 })
+    const bad = await roundTrip({
+      ...sample,
+      gi_tasks: {
+        welkin: { days: 3 },
+        wishPath: { weapon: 'StaffOfHoma', points: 2, max: 1 },
+        resin: { value: 124, nextAt: 12 },
+      },
+    })
+    expect(bad.decoded.gi_tasks).toEqual({ welkin: { days: 3 } })
+  })
+
   it('keeps the content hash of a file without them, and knows the one from before them', async () => {
     const catalog = new Catalog()
     const plain = await roundTrip(sample, catalog)

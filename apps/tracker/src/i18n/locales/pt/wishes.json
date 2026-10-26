@@ -110,7 +110,8 @@
       "name": "Nome",
       "time": "Horário",
       "pity": "Pity"
-    }
+    },
+    "path": "Caminho Divino"
   },
   "five": {
     "every": "Todos os 5★",

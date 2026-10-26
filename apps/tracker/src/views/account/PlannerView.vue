@@ -127,7 +127,7 @@ import {
 } from '@/components/planner/model'
 import type { GoalNeeds } from '@/components/planner/needs'
 import { PRESETS, applyPreset, presetById, type PresetId } from '@/components/planner/presets'
-import { resinAt, resinReading } from '@/components/planner/resin'
+import { clockReading, resinAt, resinReading } from '@/components/planner/resin'
 import type { SeelieWrites } from '@/components/planner/seelie-plan'
 import { farmsNoWeekly, partReadiness, type PartReady } from '@/components/planner/upgrade'
 import { upsertTask } from '@/components/planner/use-planner-tasks'
@@ -243,11 +243,16 @@ const notices = computed(() => gameEvents.value?.notices ?? [])
 const day = computed(() =>
   farmDay(pinned.value ?? now.value, account.value.server, domainEvents.value),
 )
-/** The capture's resin: irminsul's at login, else the snapshot's count. */
+/**
+ * The capture's resin: on the game's own clock when the newest capture has it,
+ * else irminsul's at login, else the snapshot's count.
+ */
 const resin = computed(() => {
   const at = account.value.latest?.takenAt
+  const clock = capturedTasks.value?.tasks.resin
+  const login = clock ? clockReading(clock) : player.value.resin
   return planner.value && bag.value && at !== undefined && hasCapture.value
-    ? resinNow(planner.value, bag.value, at, now.value, player.value.resin)
+    ? resinNow(planner.value, bag.value, at, now.value, login)
     : null
 })
 /** The resin to count from: the capture's, or one set by hand after it. */

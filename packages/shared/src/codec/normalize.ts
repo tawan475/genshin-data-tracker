@@ -516,6 +516,20 @@ function toTasks(raw: unknown): GiTasks | null {
   }
   const w = raw.welkin
   if (isObject(w) && isIntIn(w.days, 0, 400)) tasks.welkin = { days: w.days }
+  const p = raw.wishPath
+  if (
+    isObject(p) &&
+    typeof p.weapon === 'string' &&
+    GOOD_KEY.test(p.weapon) &&
+    isIntIn(p.max, 1, 3) &&
+    isIntIn(p.points, 0, p.max)
+  ) {
+    tasks.wishPath = { weapon: p.weapon, points: p.points, max: p.max }
+  }
+  const n = raw.resin
+  if (isObject(n) && isIntIn(n.value, 0, 2_000) && isIntIn(n.nextAt, ...TASK_TIME)) {
+    tasks.resin = { value: n.value, nextAt: n.nextAt }
+  }
   return Object.keys(tasks).length > 0 ? tasks : null
 }
 

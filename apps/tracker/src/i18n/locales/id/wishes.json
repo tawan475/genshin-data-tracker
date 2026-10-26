@@ -110,7 +110,8 @@
       "name": "Nama",
       "time": "Waktu",
       "pity": "Pity"
-    }
+    },
+    "path": "Epitomized Path"
   },
   "five": {
     "every": "Semua 5★",
