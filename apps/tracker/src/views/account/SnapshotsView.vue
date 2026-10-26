@@ -462,9 +462,20 @@ const handleBulkDelete = async () => {
       />
 
       <!-- Normal Flow Heading; the selection toolbar covers it. -->
-      <h2 class="flex h-[3.25rem] items-center text-xl font-bold transition-colors">
-        {{ $t('snapshots.heading') }}
-      </h2>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <h2 class="flex h-[3.25rem] items-center text-xl font-bold transition-colors">
+          {{ $t('snapshots.heading') }}
+        </h2>
+        <RangeFilter
+          v-if="list.length > 0"
+          v-model:from="from"
+          v-model:to="to"
+          :first-day="firstDay"
+          :last-day="lastDay"
+          :matched="filtered.length"
+          @select="selectRange"
+        />
+      </div>
 
       <LiveRow
         :live="live.data.value"
@@ -473,16 +484,6 @@ const handleBulkDelete = async () => {
         :deletable="!readOnly && owner"
         :deleting="discarding"
         @delete="discardLive"
-      />
-
-      <RangeFilter
-        v-if="list.length > 0"
-        v-model:from="from"
-        v-model:to="to"
-        :first-day="firstDay"
-        :last-day="lastDay"
-        :matched="filtered.length"
-        @select="selectRange"
       />
 
       <UiError
