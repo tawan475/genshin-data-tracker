@@ -153,6 +153,7 @@
     "targetSaved": "Destino de subida guardado",
     "targetNotSaved": "Destino de subida no guardado",
     "irminsulOn": "Irminsul en {device}",
+    "teyvatmeOn": "Teyvat.me en {device}",
     "aPc": "un PC",
     "notLoaded": "No se cargaron los dispositivos",
     "since": "Desde el {date}",

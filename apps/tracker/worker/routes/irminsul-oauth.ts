@@ -133,6 +133,7 @@ export const irminsulOAuth = new Hono<AppEnv>()
               code: params.code,
               code_verifier: params.code_verifier,
               redirect_uri: params.redirect_uri,
+              app: params.app,
             })
           : params.grant_type === 'refresh_token'
             ? await refreshGrant(c, params.refresh_token)

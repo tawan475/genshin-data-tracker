@@ -177,6 +177,15 @@ describe('discovery', () => {
 })
 
 describe('sign in, upload, refresh, sign out', () => {
+  it('names a Teyvat.me sign-in after Teyvat.me', async () => {
+    const { client, me } = await signUp()
+    const { verifier, challenge } = await pkce()
+    const code = await authorize(client, { challenge, device: 'GAMING-PC' })
+    expect((await exchange(code, verifier, { app: 'teyvatme' })).status).toBe(200)
+    const [row] = await irminsulRows(me.id)
+    expect(row).toMatchObject({ user_agent: 'Teyvat.me on GAMING-PC', device_name: 'GAMING-PC' })
+  })
+
   it('runs the whole flow in uid mode', async () => {
     const { client, username, me } = await signUp()
     const { verifier, challenge } = await pkce()

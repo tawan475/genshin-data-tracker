@@ -153,6 +153,7 @@
     "targetSaved": "บันทึกปลายทางการอัปโหลดแล้ว",
     "targetNotSaved": "บันทึกปลายทางการอัปโหลดไม่สำเร็จ",
     "irminsulOn": "Irminsul บน {device}",
+    "teyvatmeOn": "Teyvat.me บน {device}",
     "aPc": "PC เครื่องหนึ่ง",
     "notLoaded": "โหลดอุปกรณ์ไม่สำเร็จ",
     "since": "ตั้งแต่ {date}",

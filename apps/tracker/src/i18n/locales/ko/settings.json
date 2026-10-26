@@ -153,6 +153,7 @@
     "targetSaved": "업로드 대상 저장됨",
     "targetNotSaved": "업로드 대상이 저장되지 않음",
     "irminsulOn": "{device}의 Irminsul",
+    "teyvatmeOn": "{device}의 Teyvat.me",
     "aPc": "PC",
     "notLoaded": "기기를 불러오지 못함",
     "since": "{date}부터",

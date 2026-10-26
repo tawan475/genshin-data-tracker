@@ -41,6 +41,8 @@ export function describeUserAgent(userAgent: string | null | undefined): string 
   // An irminsul session's row names itself ("Irminsul on <PC>", the Worker's own text).
   const irminsul = /^Irminsul on (\S.*)$/.exec(ua)
   if (irminsul) return t('settings.devices.irminsulOn', { device: irminsul[1] })
+  const teyvatme = /^Teyvat\.me on (\S.*)$/.exec(ua)
+  if (teyvatme) return t('settings.devices.teyvatmeOn', { device: teyvatme[1] })
   const browser = find(BROWSERS, ua)
   const system = find(SYSTEMS, ua)
   if (browser && system) return t('settings.devices.browserOn', { browser, system })

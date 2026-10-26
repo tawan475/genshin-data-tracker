@@ -51,5 +51,6 @@ describe('describeUserAgent', () => {
   it("names irminsul's sessions as the Worker stored them", () => {
     expect(describeUserAgent('Irminsul on GAMING-PC')).toBe('Irminsul on GAMING-PC')
     expect(describeUserAgent('Irminsul on ')).toBe('Unknown device')
+    expect(describeUserAgent('Teyvat.me on GAMING-PC')).toBe('Teyvat.me on GAMING-PC')
   })
 })

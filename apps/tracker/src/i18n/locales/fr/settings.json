@@ -153,6 +153,7 @@
     "targetSaved": "Destination des envois enregistrée",
     "targetNotSaved": "Destination des envois non enregistrée",
     "irminsulOn": "Irminsul sur {device}",
+    "teyvatmeOn": "Teyvat.me sur {device}",
     "aPc": "un PC",
     "notLoaded": "Appareils non chargés",
     "since": "Depuis le {date}",

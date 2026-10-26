@@ -261,9 +261,11 @@ interface CodeRow {
  */
 export async function exchangeCode(
   c: Context<AppEnv>,
-  body: { code: unknown; code_verifier: unknown; redirect_uri: unknown },
+  body: { code: unknown; code_verifier: unknown; redirect_uri: unknown; app?: unknown },
 ): Promise<IrminsulTokenResponse> {
   const { code, code_verifier: verifier, redirect_uri: redirectUri } = body
+  // Teyvat.me (irminsul's successor) shares the client id and says which app it is.
+  const appName = body.app === 'teyvatme' ? 'Teyvat.me' : 'Irminsul'
   if (typeof code !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(code)) {
     throw invalidGrant('Unknown code')
   }
@@ -341,7 +343,7 @@ export async function exchangeCode(
       )
       .bind(
         owner.id,
-        `Irminsul on ${row.device_name}`,
+        `${appName} on ${row.device_name}`,
         origin.ip,
         origin.country,
         origin.city,

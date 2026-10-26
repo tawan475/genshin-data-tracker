@@ -55,6 +55,8 @@ const problem = computed<Problem | null>(() => {
 })
 
 const device = computed(() => (parsed.ok && parsed.value.device) || t('auth.link.thisPc'))
+/** Teyvat.me (irminsul's successor, same client id) adds `app=teyvatme`. */
+const appOn = route.query.app === 'teyvatme' ? 'auth.link.teyvatmeOn' : 'auth.link.irminsulOn'
 const choices = computed(() =>
   accounts.list
     .filter((account) => account.access !== 'viewer')
@@ -131,7 +133,7 @@ async function switchUser() {
         <Monitor class="size-6 shrink-0 text-paimon" aria-hidden="true" />
         <div class="min-w-0">
           <p class="font-semibold break-words text-white">
-            {{ $t('auth.link.irminsulOn', { device }) }}
+            {{ $t(appOn, { device }) }}
           </p>
           <p class="text-sm text-gray-400">{{ $t('auth.link.wantsUpload') }}</p>
         </div>

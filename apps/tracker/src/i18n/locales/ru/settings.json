@@ -153,6 +153,7 @@
     "targetSaved": "Цель загрузки сохранена",
     "targetNotSaved": "Цель загрузки не сохранена",
     "irminsulOn": "Irminsul на {device}",
+    "teyvatmeOn": "Teyvat.me на {device}",
     "aPc": "ПК",
     "notLoaded": "Устройства не загружены",
     "since": "С {date}",

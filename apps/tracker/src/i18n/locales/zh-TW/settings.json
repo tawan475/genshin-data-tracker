@@ -153,6 +153,7 @@
     "targetSaved": "上傳目標已儲存",
     "targetNotSaved": "上傳目標未儲存",
     "irminsulOn": "{device} 上的 Irminsul",
+    "teyvatmeOn": "{device} 上的 Teyvat.me",
     "aPc": "一台電腦",
     "notLoaded": "裝置列表未載入",
     "since": "登入於 {date}",

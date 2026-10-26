@@ -153,6 +153,7 @@
     "targetSaved": "Yükleme hedefi kaydedildi",
     "targetNotSaved": "Yükleme hedefi kaydedilmedi",
     "irminsulOn": "{device} üzerinde Irminsul",
+    "teyvatmeOn": "{device} üzerinde Teyvat.me",
     "aPc": "bir bilgisayar",
     "notLoaded": "Cihazlar yüklenmedi",
     "since": "{date} tarihinden beri",

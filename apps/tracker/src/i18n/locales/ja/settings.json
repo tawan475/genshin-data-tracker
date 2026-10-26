@@ -153,6 +153,7 @@
     "targetSaved": "アップロード先を保存しました",
     "targetNotSaved": "アップロード先を保存できませんでした",
     "irminsulOn": "{device} の Irminsul",
+    "teyvatmeOn": "{device} の Teyvat.me",
     "aPc": "PC",
     "notLoaded": "デバイスを読み込めませんでした",
     "since": "{date} から",
