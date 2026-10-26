@@ -107,7 +107,7 @@
     "alertTitle": "Nhựa Nguyên Chất {amount}",
     "source": {
       "manual": "đặt thủ công",
-      "player": "irminsul, lúc đăng nhập",
+      "player": "Teyvat.me Capture, lúc đăng nhập",
       "inventory": "bản chụp"
     },
     "unknown": "Nhựa Nguyên Chất: chưa rõ · hãy đặt",
@@ -377,11 +377,11 @@
     "autoWl": "Tự động ({wl})",
     "ar": "AR",
     "arTitle": "Hạng Mạo Hiểm (1–60)",
-    "arTitleIrminsul": "Hạng Mạo Hiểm (1–60) · {ar} từ irminsul",
-    "fromIrminsul": "từ irminsul",
+    "arTitleIrminsul": "Hạng Mạo Hiểm (1–60) · {ar} từ Teyvat.me Capture",
+    "fromIrminsul": "từ Teyvat.me Capture",
     "wl": "WL",
     "wlTitle": "Cấp Thế Giới (0–9)",
-    "wlTitleIrminsul": "Cấp Thế Giới (0–9) · {wl} từ irminsul",
+    "wlTitleIrminsul": "Cấp Thế Giới (0–9) · {wl} từ Teyvat.me Capture",
     "wlLabel": "Cấp Thế Giới",
     "refreshesTitle": "Số lần hồi Nhựa Nguyên Chất mỗi ngày ({per} Nhựa mỗi lần): số ngày tính theo 180 + {per} mỗi lần hồi",
     "refreshes": "Lần hồi",

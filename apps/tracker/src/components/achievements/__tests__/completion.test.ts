@@ -11,7 +11,7 @@ describe('completionText', () => {
     const time = at(2025, 3, 14, 16, 41)
     expect(completionText({ kind: 'exact', at: time })).toEqual({
       text: `Completed ${nowrap(formatDateTime(time))}`,
-      title: 'Completion time recorded by the game, read by irminsul',
+      title: 'Completion time recorded by the game, read by Teyvat.me Capture',
     })
   })
 

@@ -24,14 +24,14 @@
     "emailNotRemoved": "Email tidak terhapus"
   },
   "importKey": {
-    "title": "Irminsul (semua akun)",
+    "title": "Teyvat.me Capture (semua akun)",
     "newTitle": "Kunci impor baru?",
     "newDetail": "Kunci lama berhenti berfungsi.",
     "newKey": "Kunci baru",
     "newKeyTitle": "Kunci hanya ditampilkan sekali. Kunci baru menggantikan yang lama.",
     "notMade": "Kunci tidak dibuat",
     "revokeTitle": "Cabut kunci impor?",
-    "revokeDetail": "Irminsul berhenti mengunggah dengannya. Kunci milik masing-masing akun tetap berfungsi.",
+    "revokeDetail": "Teyvat.me Capture berhenti mengunggah dengannya. Kunci milik masing-masing akun tetap berfungsi.",
     "revoke": "Cabut",
     "revoked": "Kunci dicabut",
     "notRevoked": "Kunci tidak dicabut",

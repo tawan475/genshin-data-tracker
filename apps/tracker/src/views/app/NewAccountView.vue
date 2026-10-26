@@ -3,7 +3,7 @@ import type { AccountCreatedResponse } from '@gdt/shared'
 import { computed, ref } from 'vue'
 import AccountFields from '@/components/import/AccountFields.vue'
 import CopyField from '@/components/import/CopyField.vue'
-import IrminsulSteps from '@/components/import/IrminsulSteps.vue'
+import CaptureSteps from '@/components/import/CaptureSteps.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
@@ -109,7 +109,7 @@ function addAnother() {
             :value="created.importKey"
             :note="$t('common.shownOnce')"
           />
-          <IrminsulSteps class="border-t border-border-subtle pt-4" />
+          <CaptureSteps class="border-t border-border-subtle pt-4" />
         </div>
       </UiPanel>
       <div class="flex flex-wrap gap-2">

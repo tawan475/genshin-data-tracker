@@ -36,6 +36,7 @@
     "hint": "Tối đa {files} tệp, mỗi tệp {mb} MB. Có thể thả cả thư mục."
   },
   "key": {
+    "title": "Khóa nhập",
     "trackerUrl": "URL tracker",
     "importKey": "Khóa nhập",
     "shownOnce": "Chỉ hiện một lần",
@@ -50,9 +51,9 @@
     "notChanged": "Chưa đổi khóa"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → settings: dán cả hai",
+    "paste": "Teyvat.me Capture → Tracker → settings: dán cả hai",
     "tick": "Đánh dấu \"Auto export to tracker\"",
-    "start": "Mở Irminsul trước khi vào game"
+    "start": "Mở Teyvat.me Capture trước khi vào game"
   },
   "copy": {
     "copied": "Đã sao chép",

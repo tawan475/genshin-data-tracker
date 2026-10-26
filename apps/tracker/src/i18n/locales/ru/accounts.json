@@ -24,7 +24,7 @@
     "add": "Добавить",
     "notAdded": "Не добавлено",
     "added": "Добавлен: {name}",
-    "connect": "Подключить Irminsul",
+    "connect": "Подключить Teyvat.me Capture",
     "overview": "Обзор",
     "importFiles": "Импорт файлов",
     "addAnother": "Добавить ещё"
@@ -38,7 +38,7 @@
     "deleteAccount": "Удалить аккаунт",
     "deleteTitle": "Экспортированные файлы GOOD не затрагиваются",
     "confirmTitle": "Удалить {name}?",
-    "deletes": "Будет удалено: {loss}. Его ключ Irminsul перестанет работать.",
+    "deletes": "Будет удалено: {loss}. Его ключ Teyvat.me Capture перестанет работать.",
     "typeToConfirm": "Введите {word}",
     "confirmWord": "удалить",
     "loss": "{n} снимок | снимков: {n}",

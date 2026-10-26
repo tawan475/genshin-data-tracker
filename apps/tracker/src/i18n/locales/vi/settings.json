@@ -24,14 +24,14 @@
     "emailNotRemoved": "Chưa xóa được email"
   },
   "importKey": {
-    "title": "Irminsul (mọi tài khoản)",
+    "title": "Teyvat.me Capture (mọi tài khoản)",
     "newTitle": "Tạo khóa nhập mới?",
     "newDetail": "Khóa cũ sẽ ngừng hoạt động.",
     "newKey": "Khóa mới",
     "newKeyTitle": "Khóa chỉ hiện một lần. Khóa mới sẽ thay khóa cũ.",
     "notMade": "Chưa tạo được khóa",
     "revokeTitle": "Thu hồi khóa nhập?",
-    "revokeDetail": "Irminsul sẽ ngừng tải lên bằng khóa này. Khóa riêng của từng tài khoản vẫn hoạt động.",
+    "revokeDetail": "Teyvat.me Capture sẽ ngừng tải lên bằng khóa này. Khóa riêng của từng tài khoản vẫn hoạt động.",
     "revoke": "Thu hồi",
     "revoked": "Đã thu hồi khóa",
     "notRevoked": "Chưa thu hồi được khóa",

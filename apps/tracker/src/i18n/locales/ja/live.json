@@ -14,15 +14,16 @@
   "discarded": "ライブの変更を削除しました",
   "discardFailed": "ライブの変更を削除できませんでした",
   "settings": {
-    "title": "ライブ同期",
-    "label": "Irminsul をライブで反映",
-    "description": "Irminsul の実行中は、スナップショットの合間でも変更が数秒でここに表示されます。",
-    "devices": "このPCからのライブ同期先：{accounts}（アカウント設定）",
+    "title": "Teyvat.me Capture",
+    "devices": "このPCからのライブ同期先：{accounts}",
     "deletePoints": "グラフのポイントを削除",
     "deletePointsTitle": "ライブ同期がスナップショットの間に記録したグラフのポイントを削除します",
     "deletePointsConfirm": "このアカウントのグラフのポイントをすべて削除しますか？スナップショットは残ります。",
     "pointsDeleted": "グラフのポイントを削除しました",
-    "exportNote": "エクスポートにはライブの変更とポイントが含まれます（zip 内の live/）。"
+    "exportNote": "エクスポートにはライブの変更とポイントが含まれます（zip 内の live/）。",
+    "always": "ライブ更新オン",
+    "alwaysTitle": "アプリ起動中はスナップショットの間も変化を送信します。オフはアプリで設定します。",
+    "devicesTitle": "アプリからサインイン。セッションは「デバイス」にあります"
   },
   "session": {
     "heading": "セッション",

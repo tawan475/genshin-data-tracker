@@ -36,6 +36,7 @@
     "hint": "En fazla {files} dosya, her biri {mb} MB. Klasörler de olur."
   },
   "key": {
+    "title": "İçe aktarma anahtarı",
     "trackerUrl": "Tracker URL'si",
     "importKey": "İçe aktarma anahtarı",
     "shownOnce": "Bir kez gösterilir",
@@ -50,9 +51,9 @@
     "notChanged": "Anahtar değiştirilmedi"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → ayarlar: ikisini de yapıştır",
+    "paste": "Teyvat.me Capture → Tracker → ayarlar: ikisini de yapıştır",
     "tick": "\"Auto export to tracker\" kutusunu işaretle",
-    "start": "Irminsul'u oyundan önce başlat"
+    "start": "Teyvat.me Capture'u oyundan önce başlat"
   },
   "copy": {
     "copied": "Kopyalandı",

@@ -107,7 +107,7 @@
     "alertTitle": "Orijinal Reçine {amount}",
     "source": {
       "manual": "elle ayarlandı",
-      "player": "irminsul, girişte",
+      "player": "Teyvat.me Capture, girişte",
       "inventory": "anlık görüntü"
     },
     "unknown": "Orijinal Reçine: henüz bilinmiyor · ayarla",
@@ -377,11 +377,11 @@
     "autoWl": "Otomatik ({wl})",
     "ar": "AR",
     "arTitle": "Macera Rütbesi (1–60)",
-    "arTitleIrminsul": "Macera Rütbesi (1–60) · irminsul'dan {ar}",
-    "fromIrminsul": "irminsul'dan",
+    "arTitleIrminsul": "Macera Rütbesi (1–60) · Teyvat.me Capture'dan {ar}",
+    "fromIrminsul": "Teyvat.me Capture'dan",
     "wl": "WL",
     "wlTitle": "Dünya Seviyesi (0–9)",
-    "wlTitleIrminsul": "Dünya Seviyesi (0–9) · irminsul'dan {wl}",
+    "wlTitleIrminsul": "Dünya Seviyesi (0–9) · Teyvat.me Capture'dan {wl}",
     "wlLabel": "Dünya Seviyesi",
     "refreshesTitle": "Günlük Orijinal Reçine yenilemeleri (her biri {per} reçine): günler, 180 + yenileme başına {per} olarak hesaplanır",
     "refreshes": "Yenilemeler",

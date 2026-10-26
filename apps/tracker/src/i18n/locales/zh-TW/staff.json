@@ -41,7 +41,7 @@
     "signsOut": "在所有裝置上登出",
     "blocksSignIn": "禁止登入和上傳",
     "keepsData": "保留其資料",
-    "refusesUploads": "拒絕所有上傳，包括 Irminsul 和網站",
+    "refusesUploads": "拒絕所有上傳，包括 Teyvat.me Capture 和網站",
     "canStillSignIn": "仍可登入和檢視"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "從未使用",
     "unlink": "解除連結",
     "userKey": "使用者金鑰",
-    "userKeyTitle": "適用於所有帳號的 Irminsul 金鑰",
+    "userKeyTitle": "適用於所有帳號的 Teyvat.me Capture 金鑰",
     "revoke": "撤銷",
     "staffHistory": "管理記錄",
     "suspensionLifted": "已解除停權",
@@ -360,7 +360,7 @@
     "unlinked": "已解除連結",
     "notUnlinked": "未解除連結",
     "revokeTitle": "撤銷全帳號金鑰",
-    "revokeDetail": "Irminsul 將立即無法再用它上傳；使用者可以在設定中產生新的金鑰。",
+    "revokeDetail": "Teyvat.me Capture 將立即無法再用它上傳；使用者可以在設定中產生新的金鑰。",
     "keyRevoked": "金鑰已撤銷",
     "notRevoked": "未撤銷",
     "resetKeyTitle": "重設匯入金鑰",

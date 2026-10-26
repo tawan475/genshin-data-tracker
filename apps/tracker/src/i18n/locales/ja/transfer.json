@@ -36,6 +36,7 @@
     "hint": "最大 {files} ファイル、各 {mb} MB まで。フォルダーも使えます。"
   },
   "key": {
+    "title": "インポートキー",
     "trackerUrl": "トラッカー URL",
     "importKey": "インポートキー",
     "shownOnce": "一度だけ表示",
@@ -50,9 +51,9 @@
     "notChanged": "キーは変更されていません"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → 設定：両方を貼り付け",
+    "paste": "Teyvat.me Capture → Tracker → 設定：両方を貼り付け",
     "tick": "「Auto export to tracker」にチェック",
-    "start": "ゲームより先に Irminsul を起動"
+    "start": "ゲームより先に Teyvat.me Capture を起動"
   },
   "copy": {
     "copied": "コピーしました",

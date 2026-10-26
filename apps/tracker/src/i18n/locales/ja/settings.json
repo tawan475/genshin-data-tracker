@@ -24,14 +24,14 @@
     "emailNotRemoved": "メールアドレスを削除できませんでした"
   },
   "importKey": {
-    "title": "Irminsul（全アカウント）",
+    "title": "Teyvat.me Capture（全アカウント）",
     "newTitle": "インポートキーを再発行しますか？",
     "newDetail": "古いキーは使えなくなります。",
     "newKey": "新しいキー",
     "newKeyTitle": "キーは一度だけ表示されます。新しいキーは古いキーを置き換えます。",
     "notMade": "キーを作成できませんでした",
     "revokeTitle": "インポートキーを無効にしますか？",
-    "revokeDetail": "Irminsul はこのキーでアップロードできなくなります。各アカウントのキーは引き続き使えます。",
+    "revokeDetail": "Teyvat.me Capture はこのキーでアップロードできなくなります。各アカウントのキーは引き続き使えます。",
     "revoke": "無効化",
     "revoked": "キーを無効にしました",
     "notRevoked": "キーを無効にできませんでした",

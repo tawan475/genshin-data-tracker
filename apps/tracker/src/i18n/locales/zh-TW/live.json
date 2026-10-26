@@ -14,15 +14,16 @@
   "discarded": "已刪除即時變化",
   "discardFailed": "無法刪除即時變化",
   "settings": {
-    "title": "即時同步",
-    "label": "即時跟隨 Irminsul",
-    "description": "Irminsul 執行時，快照之間的變化會在幾秒內顯示在這裡。",
-    "devices": "此電腦即時同步到：{accounts}（帳號設定）",
+    "title": "Teyvat.me Capture",
+    "devices": "此電腦即時同步到：{accounts}",
     "deletePoints": "刪除圖表點",
     "deletePointsTitle": "刪除即時同步在快照之間保存的圖表點",
     "deletePointsConfirm": "刪除此帳號的所有圖表點？快照會保留。",
     "pointsDeleted": "已刪除圖表點",
-    "exportNote": "匯出包含即時變化和圖表點（壓縮檔中的 live/）。"
+    "exportNote": "匯出包含即時變化和圖表點（壓縮檔中的 live/）。",
+    "always": "即時更新已開啟",
+    "alwaysTitle": "程式執行時會在快照之間傳送變化。可在程式中關閉。",
+    "devicesTitle": "在程式中登入；其工作階段在「裝置」中"
   },
   "session": {
     "heading": "遊戲時段",

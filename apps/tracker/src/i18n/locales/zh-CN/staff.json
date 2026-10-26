@@ -41,7 +41,7 @@
     "signsOut": "在所有设备上登出",
     "blocksSignIn": "禁止登录和上传",
     "keepsData": "保留其数据",
-    "refusesUploads": "拒绝所有上传，包括 Irminsul 和网站",
+    "refusesUploads": "拒绝所有上传，包括 Teyvat.me Capture 和网站",
     "canStillSignIn": "仍可登录和查看"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "从未使用",
     "unlink": "解除关联",
     "userKey": "用户密钥",
-    "userKeyTitle": "适用于所有账号的 Irminsul 密钥",
+    "userKeyTitle": "适用于所有账号的 Teyvat.me Capture 密钥",
     "revoke": "撤销",
     "staffHistory": "管理记录",
     "suspensionLifted": "已解除停用",
@@ -360,7 +360,7 @@
     "unlinked": "已解除关联",
     "notUnlinked": "未解除关联",
     "revokeTitle": "撤销全账号密钥",
-    "revokeDetail": "Irminsul 将立即无法再用它上传；用户可以在设置中生成新的密钥。",
+    "revokeDetail": "Teyvat.me Capture 将立即无法再用它上传；用户可以在设置中生成新的密钥。",
     "keyRevoked": "密钥已撤销",
     "notRevoked": "未撤销",
     "resetKeyTitle": "重置导入密钥",

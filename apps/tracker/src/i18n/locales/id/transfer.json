@@ -36,6 +36,7 @@
     "hint": "Hingga {files} file, masing-masing {mb} MB. Folder juga bisa."
   },
   "key": {
+    "title": "Kunci impor",
     "trackerUrl": "URL tracker",
     "importKey": "Kunci impor",
     "shownOnce": "Ditampilkan sekali",
@@ -50,9 +51,9 @@
     "notChanged": "Kunci tidak diubah"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → settings: tempel keduanya",
+    "paste": "Teyvat.me Capture → Tracker → settings: tempel keduanya",
     "tick": "Centang \"Auto export to tracker\"",
-    "start": "Jalankan Irminsul sebelum game"
+    "start": "Jalankan Teyvat.me Capture sebelum game"
   },
   "copy": {
     "copied": "Disalin",

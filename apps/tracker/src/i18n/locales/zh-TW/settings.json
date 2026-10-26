@@ -24,14 +24,14 @@
     "emailNotRemoved": "電子郵件未移除"
   },
   "importKey": {
-    "title": "Irminsul（全部帳號）",
+    "title": "Teyvat.me Capture（全部帳號）",
     "newTitle": "產生新的匯入金鑰？",
     "newDetail": "舊金鑰將失效。",
     "newKey": "新金鑰",
     "newKeyTitle": "金鑰僅顯示一次。新金鑰會取代舊金鑰。",
     "notMade": "未產生金鑰",
     "revokeTitle": "撤銷匯入金鑰？",
-    "revokeDetail": "Irminsul 將無法再用它上傳。各帳號自己的金鑰不受影響。",
+    "revokeDetail": "Teyvat.me Capture 將無法再用它上傳。各帳號自己的金鑰不受影響。",
     "revoke": "撤銷",
     "revoked": "金鑰已撤銷",
     "notRevoked": "金鑰未撤銷",

@@ -10,7 +10,6 @@ import { accountMembers, genshinAccounts } from '../db/schema'
 import { randomToken, sha256Hex } from '../lib/crypto'
 import { ApiError, notFound } from '../lib/http'
 import { D1Meter } from '../lib/meter'
-import { LIVE_SYNC_SQL, liveSyncOn } from './live-sync'
 import { metaOf, withLegacySchema } from './storage'
 
 export type AccountRow = typeof genshinAccounts.$inferSelect
@@ -134,7 +133,6 @@ export interface AccountListRow {
   last_seen_at: number | null
   summary?: string | null
   meta: unknown
-  live_sync: unknown
   role: AccountAccess
   owner_name: string | null
 }
@@ -151,7 +149,7 @@ export function accountListStatement(
       accessibleAccountsSql(
         `a.id, a.name, a.uid, a.server, a.created_at, a.data_version, a.snapshot_count,
          a.raw_bytes, a.stored_bytes, s.id AS latest_id, s.taken_at, s.last_seen_at,
-         ${legacy ? 's.summary, ' : ''}s.meta, ${LIVE_SYNC_SQL()}`,
+         ${legacy ? 's.summary, ' : ''}s.meta`,
         {
           join: 'LEFT JOIN snapshots AS s ON s.id = a.latest_snapshot_id',
           where: '?2 IS NULL OR a.id = ?2',
@@ -182,7 +180,7 @@ export function accountsFromRows(rows: readonly AccountListRow[]): AccountRespon
             lastSeenAt: row.last_seen_at!,
             summary: metaOf(row).summary,
           },
-    liveSync: liveSyncOn(row.live_sync),
+    liveSync: true,
     access: row.role,
     ...(row.owner_name !== null ? { owner: row.owner_name } : {}),
   }))
@@ -260,8 +258,6 @@ export interface KeyAccount {
   name: string | null
   uid: string | null
   server: GenshinServer | null
-  /** The `liveSync` setting as stored (1, 0 or null: see liveSyncOn in services/live-sync). */
-  live_sync?: unknown
   /** The owner's user id: storage, quotas and the live journal count for them. */
   user_id?: number
   /** The uploader's access, on lists that include accounts shared with them. */
@@ -346,7 +342,7 @@ export async function findImportKeyOwner(
   const [account, user, accounts] = await d1.batch<Record<string, unknown>>([
     d1
       .prepare(
-        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id, u.suspended_at,
+        `SELECT a.id, a.name, a.uid, a.server, a.user_id, u.suspended_at,
            u.uploads_blocked_at
          FROM genshin_accounts AS a JOIN users AS u ON u.id = a.user_id
          WHERE a.import_key_hash = ?1`,
@@ -359,7 +355,7 @@ export async function findImportKeyOwner(
       .bind(hash),
     d1
       .prepare(
-        accessibleAccountsSql(`a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id`, {
+        accessibleAccountsSql(`a.id, a.name, a.uid, a.server, a.user_id`, {
           user: '(SELECT id FROM users WHERE import_key_hash = ?1)',
         }),
       )
@@ -429,7 +425,7 @@ export async function accountForUid(
       .bind(userId, uid, serverFromUid(uid), hash, Date.now()),
     d1
       .prepare(
-        `SELECT a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id FROM genshin_accounts AS a
+        `SELECT a.id, a.name, a.uid, a.server, a.user_id FROM genshin_accounts AS a
          WHERE a.user_id = ?1 AND a.uid = ?2`,
       )
       .bind(userId, uid),

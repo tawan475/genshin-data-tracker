@@ -36,7 +36,6 @@ import {
 import {
   deleteJournalStatements,
   liveDb,
-  liveSyncOn,
   readJournal,
   readPoints,
   storeBatch,
@@ -92,7 +91,7 @@ export const liveChanges = new Hono<AppEnv>().post('/changes', async (c) => {
   // A UID the user has no account for yet: its first snapshot makes one.
   const account = uploaderAccount(owner, String(delta.uid))
   if (!account) throw new ApiError(409, 'resync', 'No account for this UID yet: send a snapshot')
-  if (!live || !liveSyncOn(account.live_sync)) {
+  if (!live) {
     return c.json<LiveChangesResponse>({ ok: false, live: false })
   }
   const userId = uploaderUserId(owner)
@@ -125,7 +124,7 @@ export const liveAccounts = new Hono<AppEnv>()
     const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'view')
     const live = liveDb(c.env)
     c.header('Cache-Control', 'private, no-cache')
-    if (!live || !liveSyncOn((account.settings as { liveSync?: unknown } | null)?.liveSync)) {
+    if (!live) {
       return c.json<LiveJournalResponse>({ open: false })
     }
     const { response, etag } = await readJournal(live, account.id)

@@ -107,7 +107,7 @@
     "alertTitle": "原粹樹脂 {amount}",
     "source": {
       "manual": "手動設定",
-      "player": "irminsul（登入時）",
+      "player": "Teyvat.me Capture（登入時）",
       "inventory": "快照"
     },
     "unknown": "原粹樹脂：尚未知 · 點擊設定",
@@ -377,11 +377,11 @@
     "autoWl": "自動（{wl}）",
     "ar": "冒險等階",
     "arTitle": "冒險等階（1–60）",
-    "arTitleIrminsul": "冒險等階（1–60）· irminsul 讀取為 {ar}",
-    "fromIrminsul": "來自 irminsul",
+    "arTitleIrminsul": "冒險等階（1–60）· Teyvat.me Capture 讀取為 {ar}",
+    "fromIrminsul": "來自 Teyvat.me Capture",
     "wl": "世界等級",
     "wlTitle": "世界等級（0–9）",
-    "wlTitleIrminsul": "世界等級（0–9）· irminsul 讀取為 {wl}",
+    "wlTitleIrminsul": "世界等級（0–9）· Teyvat.me Capture 讀取為 {wl}",
     "wlLabel": "世界等級",
     "refreshesTitle": "每天補充原粹樹脂的次數（每次 {per}）：天數依 180 + 每次 {per} 計算",
     "refreshes": "每日補充",

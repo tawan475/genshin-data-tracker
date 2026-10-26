@@ -14,15 +14,16 @@
   "discarded": "Cambios en vivo borrados",
   "discardFailed": "No se pudieron borrar los cambios en vivo",
   "settings": {
-    "title": "Sincronización en vivo",
-    "label": "Seguir Irminsul en vivo",
-    "description": "Mientras Irminsul esté abierto, sus cambios aparecen aquí en segundos, entre capturas.",
-    "devices": "Sincronización en vivo desde este PC a: {accounts} (Ajustes de la cuenta)",
+    "title": "Teyvat.me Capture",
+    "devices": "Sincronización en vivo desde este PC a: {accounts}",
     "deletePoints": "Borrar puntos del gráfico",
     "deletePointsTitle": "Borrar los puntos del gráfico que la sincronización en vivo guardó entre capturas",
     "deletePointsConfirm": "¿Borrar todos los puntos del gráfico de esta cuenta? Las capturas se quedan.",
     "pointsDeleted": "Puntos del gráfico borrados",
-    "exportNote": "Las exportaciones incluyen los cambios y puntos en vivo (live/ en el zip)."
+    "exportNote": "Las exportaciones incluyen los cambios y puntos en vivo (live/ en el zip).",
+    "always": "Actualizaciones en vivo activas",
+    "alwaysTitle": "La app envía cambios entre instantáneas mientras se ejecuta. Se desactivan en la app.",
+    "devicesTitle": "Inicia sesión desde la app; sus sesiones están en Dispositivos"
   },
   "session": {
     "heading": "Sesiones",

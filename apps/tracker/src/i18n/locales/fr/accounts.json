@@ -24,7 +24,7 @@
     "add": "Ajouter",
     "notAdded": "Non ajouté",
     "added": "{name} ajouté",
-    "connect": "Connecter Irminsul",
+    "connect": "Connecter Teyvat.me Capture",
     "overview": "Aperçu",
     "importFiles": "Importer des fichiers",
     "addAnother": "En ajouter un autre"
@@ -38,7 +38,7 @@
     "deleteAccount": "Supprimer le compte",
     "deleteTitle": "Les fichiers GOOD exportés ne sont pas touchés",
     "confirmTitle": "Supprimer {name} ?",
-    "deletes": "Supprime {loss}. Sa clé Irminsul cessera de fonctionner.",
+    "deletes": "Supprime {loss}. Sa clé Teyvat.me Capture cessera de fonctionner.",
     "typeToConfirm": "Saisissez {word}",
     "confirmWord": "supprimer",
     "loss": "{n} instantané | {n} instantanés",

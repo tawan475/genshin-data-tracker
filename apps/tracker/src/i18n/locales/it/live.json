@@ -14,15 +14,16 @@
   "discarded": "Modifiche live eliminate",
   "discardFailed": "Impossibile eliminare le modifiche live",
   "settings": {
-    "title": "Sincronizzazione live",
-    "label": "Segui Irminsul in diretta",
-    "description": "Mentre Irminsul è attivo, le sue modifiche compaiono qui in pochi secondi, tra un'istantanea e l'altra.",
-    "devices": "Sincronizzazione live da questo PC verso: {accounts} (Impostazioni account)",
+    "title": "Teyvat.me Capture",
+    "devices": "Sincronizzazione live da questo PC verso: {accounts}",
     "deletePoints": "Elimina punti del grafico",
     "deletePointsTitle": "Elimina i punti del grafico salvati dalla sincronizzazione live tra le istantanee",
     "deletePointsConfirm": "Eliminare tutti i punti del grafico di questo account? Le istantanee restano.",
     "pointsDeleted": "Punti del grafico eliminati",
-    "exportNote": "Le esportazioni includono le modifiche e i punti live (live/ nello zip)."
+    "exportNote": "Le esportazioni includono le modifiche e i punti live (live/ nello zip).",
+    "always": "Aggiornamenti dal vivo attivi",
+    "alwaysTitle": "L'app invia le modifiche tra gli snapshot mentre è in esecuzione. Si disattivano nell'app.",
+    "devicesTitle": "Accedi dall'app; le sue sessioni sono in Dispositivi"
   },
   "session": {
     "heading": "Sessioni",

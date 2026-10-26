@@ -14,15 +14,16 @@
   "discarded": "Perubahan live dihapus",
   "discardFailed": "Tidak bisa menghapus perubahan live",
   "settings": {
-    "title": "Sinkronisasi live",
-    "label": "Ikuti Irminsul secara live",
-    "description": "Selama Irminsul berjalan, perubahannya muncul di sini dalam hitungan detik, di antara snapshot.",
-    "devices": "Sinkronisasi live dari PC ini ke: {accounts} (Pengaturan akun)",
+    "title": "Teyvat.me Capture",
+    "devices": "Sinkronisasi live dari PC ini ke: {accounts}",
     "deletePoints": "Hapus titik grafik",
     "deletePointsTitle": "Hapus titik grafik yang disimpan sinkronisasi live di antara snapshot",
     "deletePointsConfirm": "Hapus semua titik grafik akun ini? Snapshot tetap ada.",
     "pointsDeleted": "Titik grafik dihapus",
-    "exportNote": "Ekspor menyertakan perubahan dan titik live (live/ di dalam zip)."
+    "exportNote": "Ekspor menyertakan perubahan dan titik live (live/ di dalam zip).",
+    "always": "Pembaruan langsung aktif",
+    "alwaysTitle": "Aplikasi mengirim perubahan di antara snapshot selama berjalan. Matikan di aplikasi.",
+    "devicesTitle": "Masuk dari aplikasi; sesinya ada di Perangkat"
   },
   "session": {
     "heading": "Sesi",

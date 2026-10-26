@@ -14,15 +14,16 @@
   "discarded": "Changements en direct supprimés",
   "discardFailed": "Impossible de supprimer les changements en direct",
   "settings": {
-    "title": "Synchro en direct",
-    "label": "Suivre Irminsul en direct",
-    "description": "Tant qu'Irminsul tourne, ses changements apparaissent ici en quelques secondes, entre les instantanés.",
-    "devices": "Synchro en direct de ce PC vers : {accounts} (Paramètres du compte)",
+    "title": "Teyvat.me Capture",
+    "devices": "Synchro en direct de ce PC vers : {accounts}",
     "deletePoints": "Supprimer les points du graphique",
     "deletePointsTitle": "Supprimer les points du graphique conservés par la synchro en direct entre les instantanés",
     "deletePointsConfirm": "Supprimer tous les points du graphique de ce compte ? Les instantanés restent.",
     "pointsDeleted": "Points du graphique supprimés",
-    "exportNote": "Les exports incluent les changements et points en direct (live/ dans le zip)."
+    "exportNote": "Les exports incluent les changements et points en direct (live/ dans le zip).",
+    "always": "Mises à jour en direct actives",
+    "alwaysTitle": "L'app envoie les changements entre les instantanés pendant qu'elle tourne. Désactivez-les dans l'app.",
+    "devicesTitle": "Connectez-vous depuis l'app ; ses sessions sont dans Appareils"
   },
   "session": {
     "heading": "Sessions",

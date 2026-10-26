@@ -24,7 +24,7 @@
     "add": "Thêm",
     "notAdded": "Chưa thêm được",
     "added": "Đã thêm {name}",
-    "connect": "Kết nối Irminsul",
+    "connect": "Kết nối Teyvat.me Capture",
     "overview": "Tổng Quan",
     "importFiles": "Nhập tệp",
     "addAnother": "Thêm tài khoản khác"
@@ -38,7 +38,7 @@
     "deleteAccount": "Xóa tài khoản",
     "deleteTitle": "Không ảnh hưởng tới các tệp GOOD đã xuất",
     "confirmTitle": "Xóa {name}?",
-    "deletes": "Sẽ xóa {loss}. Khóa Irminsul của tài khoản sẽ ngừng hoạt động.",
+    "deletes": "Sẽ xóa {loss}. Khóa Teyvat.me Capture của tài khoản sẽ ngừng hoạt động.",
     "typeToConfirm": "Nhập {word}",
     "confirmWord": "xóa",
     "loss": "{n} bản chụp",

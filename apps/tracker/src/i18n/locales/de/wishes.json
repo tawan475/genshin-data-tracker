@@ -81,7 +81,7 @@
     "newestPull": "Neuestes Gebet, Spielzeit",
     "synced": "Synchronisiert {ago}",
     "syncedTitle": "Neue Gebete gespeichert {time}",
-    "syncHelp": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen): irminsul synchronisiert jedes Banner und danach jedes neue Gebet, solange der Schlüssel gilt (~24 Std.). Der Gebetslink des Spiels bringt auch die letzten sechs Monate. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",
+    "syncHelp": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen): Teyvat.me Capture synchronisiert jedes Banner und danach jedes neue Gebet, solange der Schlüssel gilt (~24 Std.). Der Gebetslink des Spiels bringt auch die letzten sechs Monate. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",
     "empty": "Noch keine Gebete",
     "emptyBody": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen) oder importiere über den Gebetslink des Spiels. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",
     "banners": "Banner",
@@ -148,7 +148,7 @@
       "ps3": "Füge ihn unten ein. Klappt es nicht, verknüpfe deine PlayStation mit einem HoYoverse-Konto und nutze die Schritte für PC oder Handy.",
       "pcRun": "Öffne PowerShell (Start, PowerShell eingeben) und führe aus:",
       "pcPaste": "Es kopiert den Link: füge ihn unten ein.",
-      "pcPasteTitle": "„Copy wish URL“ in irminsul liefert denselben Link"
+      "pcPasteTitle": "„Copy wish URL“ in Teyvat.me Capture liefert denselben Link"
     },
     "scriptTitle": "Liest den Web-Cache des Spiels auf diesem PC, prüft den Link einmal bei HoYoverse und kopiert ihn. Sonst nichts.",
     "copied": "Kopiert",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} schon vorhanden",
     "notImported": "Nicht importiert",
     "deleteTitle": "Gebetsverlauf löschen?",
-    "deleteDetail": "Alle {n} Gebete dieses Kontos werden entfernt. irminsul kann die letzten sechs Monate erneut abrufen.",
+    "deleteDetail": "Alle {n} Gebete dieses Kontos werden entfernt. Teyvat.me Capture kann die letzten sechs Monate erneut abrufen.",
     "deleteConfirm": "Löschen",
     "notDeleted": "Nicht gelöscht",
     "dropTitle": "UIGF-JSON (Snap Hutao, Starward, genshin-wish-export…), eine CSV für den paimon.moe-Importer oder das paimon.moe-Backup (Settings → Export)",

@@ -24,7 +24,7 @@
     "add": "新增",
     "notAdded": "未新增",
     "added": "已新增 {name}",
-    "connect": "連接 Irminsul",
+    "connect": "連接 Teyvat.me Capture",
     "overview": "總覽",
     "importFiles": "匯入檔案",
     "addAnother": "再新增一個"
@@ -38,7 +38,7 @@
     "deleteAccount": "刪除帳號",
     "deleteTitle": "已匯出的 GOOD 檔案不受影響",
     "confirmTitle": "刪除 {name}？",
-    "deletes": "將刪除 {loss}。它的 Irminsul 金鑰將失效。",
+    "deletes": "將刪除 {loss}。它的 Teyvat.me Capture 金鑰將失效。",
     "typeToConfirm": "輸入 {word}",
     "confirmWord": "刪除",
     "loss": "{n} 個快照",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Irminsul setup in its own UI's words: Tracker section, settings button, the auto-export box. */
+/** Setting the capture app up with a key, in its own UI's words: Tracker section, settings button, the auto-export box. */
 const steps = ['paste', 'tick', 'start'] as const
 </script>
 

@@ -41,7 +41,7 @@
     "signsOut": "Meldet die Person überall ab",
     "blocksSignIn": "Blockiert Anmeldung und Uploads",
     "keepsData": "Behält ihre Daten",
-    "refusesUploads": "Lehnt jeden Upload ab, von Irminsul und der Website",
+    "refusesUploads": "Lehnt jeden Upload ab, von Teyvat.me Capture und der Website",
     "canStillSignIn": "Anmelden und Ansehen bleiben möglich"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "nie genutzt",
     "unlink": "Trennen",
     "userKey": "Benutzerschlüssel",
-    "userKeyTitle": "Irminsul-Schlüssel für alle Konten",
+    "userKeyTitle": "Teyvat.me Capture-Schlüssel für alle Konten",
     "revoke": "Widerrufen",
     "staffHistory": "Team-Verlauf",
     "suspensionLifted": "Sperre aufgehoben",
@@ -360,7 +360,7 @@
     "unlinked": "Getrennt",
     "notUnlinked": "Nicht getrennt",
     "revokeTitle": "Schlüssel für alle Konten widerrufen",
-    "revokeDetail": "Irminsul kann damit sofort nicht mehr hochladen; in den Einstellungen lässt sich ein neuer erstellen.",
+    "revokeDetail": "Teyvat.me Capture kann damit sofort nicht mehr hochladen; in den Einstellungen lässt sich ein neuer erstellen.",
     "keyRevoked": "Schlüssel widerrufen",
     "notRevoked": "Nicht widerrufen",
     "resetKeyTitle": "Import-Schlüssel zurücksetzen",

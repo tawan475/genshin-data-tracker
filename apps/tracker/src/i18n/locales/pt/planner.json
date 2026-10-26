@@ -107,7 +107,7 @@
     "alertTitle": "Resina Original {amount}",
     "source": {
       "manual": "definida à mão",
-      "player": "irminsul, no login",
+      "player": "Teyvat.me Capture, no login",
       "inventory": "a captura"
     },
     "unknown": "Resina Original: ainda desconhecida · definir",
@@ -377,11 +377,11 @@
     "autoWl": "Auto ({wl})",
     "ar": "AR",
     "arTitle": "Rank de Aventura (1–60)",
-    "arTitleIrminsul": "Rank de Aventura (1–60) · {ar} do irminsul",
-    "fromIrminsul": "do irminsul",
+    "arTitleIrminsul": "Rank de Aventura (1–60) · {ar} do Teyvat.me Capture",
+    "fromIrminsul": "do Teyvat.me Capture",
     "wl": "NM",
     "wlTitle": "Nível do Mundo (0–9)",
-    "wlTitleIrminsul": "Nível do Mundo (0–9) · {wl} do irminsul",
+    "wlTitleIrminsul": "Nível do Mundo (0–9) · {wl} do Teyvat.me Capture",
     "wlLabel": "Nível do Mundo",
     "refreshesTitle": "Recargas de Resina Original por dia ({per} de resina cada): os dias contam 180 + {per} por recarga",
     "refreshes": "Recargas",

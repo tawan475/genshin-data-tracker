@@ -24,14 +24,14 @@
     "emailNotRemoved": "Email not removed"
   },
   "importKey": {
-    "title": "Irminsul (all accounts)",
+    "title": "Teyvat.me Capture (all accounts)",
     "newTitle": "New import key?",
     "newDetail": "Old key stops working.",
     "newKey": "New key",
     "newKeyTitle": "Keys are shown once. A new key replaces the old one.",
     "notMade": "No key made",
     "revokeTitle": "Revoke import key?",
-    "revokeDetail": "Irminsul stops uploading with it. Accounts' own keys keep working.",
+    "revokeDetail": "Teyvat.me Capture stops uploading with it. Accounts' own keys keep working.",
     "revoke": "Revoke",
     "revoked": "Key revoked",
     "notRevoked": "Key not revoked",

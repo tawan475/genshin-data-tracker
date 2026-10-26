@@ -81,7 +81,7 @@
     "newestPull": "最新一抽（遊戲時間）",
     "synced": "同步於 {ago}",
     "syncedTitle": "新紀錄儲存於 {time}",
-    "syncHelp": "每天在遊戲中開啟一次 祈願 → 歷史紀錄（開啟後可立即關閉）：irminsul 會同步所有卡池，並在金鑰有效期內（約 24 小時）同步每一次新的祈願。遊戲的祈願連結也能取得最近六個月的紀錄。超過 6 個月的紀錄：匯入 paimon.moe 備份或 UIGF 檔案。",
+    "syncHelp": "每天在遊戲中開啟一次 祈願 → 歷史紀錄（開啟後可立即關閉）：Teyvat.me Capture 會同步所有卡池，並在金鑰有效期內（約 24 小時）同步每一次新的祈願。遊戲的祈願連結也能取得最近六個月的紀錄。超過 6 個月的紀錄：匯入 paimon.moe 備份或 UIGF 檔案。",
     "empty": "尚無祈願紀錄",
     "emptyBody": "每天在遊戲中開啟一次 祈願 → 歷史紀錄（開啟後可立即關閉），或用遊戲的祈願連結匯入。超過 6 個月的紀錄：匯入 paimon.moe 備份或 UIGF 檔案。",
     "banners": "卡池",
@@ -148,7 +148,7 @@
       "ps3": "貼到下方。若失敗，請將 PlayStation 綁定 HoYoverse 帳號，並依 PC 或手機的步驟操作。",
       "pcRun": "開啟 PowerShell（在開始功能表輸入 PowerShell）並執行：",
       "pcPaste": "它會複製連結：貼到下方即可。",
-      "pcPasteTitle": "irminsul 的「Copy wish URL」會給出同樣的連結"
+      "pcPasteTitle": "Teyvat.me Capture 的「Copy wish URL」會給出同樣的連結"
     },
     "scriptTitle": "讀取本機遊戲的網頁快取，向 HoYoverse 驗證一次連結，然後複製。僅此而已。",
     "copied": "已複製",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} 筆已存在",
     "notImported": "未匯入",
     "deleteTitle": "刪除祈願紀錄？",
-    "deleteDetail": "將刪除此帳號的全部 {n} 抽紀錄。irminsul 可以重新取得最近六個月的紀錄。",
+    "deleteDetail": "將刪除此帳號的全部 {n} 抽紀錄。Teyvat.me Capture 可以重新取得最近六個月的紀錄。",
     "deleteConfirm": "刪除",
     "notDeleted": "未刪除",
     "dropTitle": "UIGF JSON（Snap Hutao、Starward、genshin-wish-export…）、paimon.moe 匯入器的 CSV，或 paimon.moe 的備份（Settings → Export）",

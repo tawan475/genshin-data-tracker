@@ -41,7 +41,7 @@
     "signsOut": "Đăng xuất họ khỏi mọi nơi",
     "blocksSignIn": "Chặn đăng nhập và tải lên",
     "keepsData": "Giữ dữ liệu của họ",
-    "refusesUploads": "Từ chối mọi lần tải lên, từ Irminsul và trang web",
+    "refusesUploads": "Từ chối mọi lần tải lên, từ Teyvat.me Capture và trang web",
     "canStillSignIn": "Họ vẫn có thể đăng nhập và xem"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "chưa từng dùng",
     "unlink": "Hủy liên kết",
     "userKey": "Khóa người dùng",
-    "userKeyTitle": "Khóa Irminsul cho mọi tài khoản",
+    "userKeyTitle": "Khóa Teyvat.me Capture cho mọi tài khoản",
     "revoke": "Thu hồi",
     "staffHistory": "Lịch sử quản trị",
     "suspensionLifted": "Đã gỡ đình chỉ",
@@ -360,7 +360,7 @@
     "unlinked": "Đã hủy liên kết",
     "notUnlinked": "Chưa hủy liên kết được",
     "revokeTitle": "Thu hồi khóa mọi tài khoản",
-    "revokeDetail": "Irminsul ngừng tải lên bằng khóa này ngay; họ có thể tạo khóa mới trong Thiết lập.",
+    "revokeDetail": "Teyvat.me Capture ngừng tải lên bằng khóa này ngay; họ có thể tạo khóa mới trong Thiết lập.",
     "keyRevoked": "Đã thu hồi khóa",
     "notRevoked": "Chưa thu hồi được",
     "resetKeyTitle": "Đặt lại khóa nhập",

@@ -36,6 +36,7 @@
     "hint": "До {files} файлов, до {mb} МБ каждый. Папки тоже подходят."
   },
   "key": {
+    "title": "Ключ импорта",
     "trackerUrl": "URL трекера",
     "importKey": "Ключ импорта",
     "shownOnce": "Показывается один раз",
@@ -50,9 +51,9 @@
     "notChanged": "Ключ не изменён"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → настройки: вставьте оба значения",
+    "paste": "Teyvat.me Capture → Tracker → настройки: вставьте оба значения",
     "tick": "Включите \"Auto export to tracker\"",
-    "start": "Запускайте Irminsul до игры"
+    "start": "Запускайте Teyvat.me Capture до игры"
   },
   "copy": {
     "copied": "Скопировано",

@@ -37,18 +37,12 @@ function liveGood(overrides: Record<string, unknown> = {}) {
   }
 }
 
-async function setup(liveSync = true) {
+async function setup() {
   const { client, me, username } = await signUp()
   const { account, importKey } = await client.json<AccountCreatedResponse>('/api/accounts', {
     method: 'POST',
     json: { name: 'Main', uid: String(UID), server: 'ASIA' },
   })
-  if (liveSync) {
-    await client.json(`/api/accounts/${account.id}/settings`, {
-      method: 'PATCH',
-      json: { liveSync: true },
-    })
-  }
   return { client, userId: me.id, account, importKey, username }
 }
 
@@ -104,17 +98,20 @@ const batchRows = (accountId: number) =>
     .all()
     .then((r) => r.results)
 
-describe('live sync off', () => {
-  it('imports answer without `live` and batches are refused politely', async () => {
-    const { account, importKey } = await setup(false)
-    const answer = await snapshot(importKey, liveGood(), 1_000)
-    expect(answer.live).toBeUndefined()
-    expect(answer.contentKey).toMatch(/^[0-9a-z]+$/)
-    expect(await sendOk(importKey, delta(answer.contentKey!, 1, []))).toEqual({
-      ok: false,
-      live: false,
+describe('live sync switch', () => {
+  it('is gone: every account takes changes, and an old switch off is ignored', async () => {
+    const { client, account, importKey } = await setup()
+    const off = await client.fetch(`/api/accounts/${account.id}/settings`, {
+      method: 'PATCH',
+      json: { liveSync: false },
     })
-    expect(await journalRow(account.id)).toBeNull()
+    expect(off.status).toBe(200)
+    const answer = await snapshot(importKey, liveGood(), 1_000)
+    expect(answer.live?.base).toBe(answer.contentKey)
+    expect(
+      await sendOk(importKey, delta(answer.contentKey!, 1, [['set', ['materials', 'Mora'], 7]])),
+    ).toMatchObject({ ok: true })
+    expect(await journalRow(account.id)).not.toBeNull()
   })
 })
 
@@ -356,10 +353,6 @@ describe('live sync on', () => {
     const other = await client.json<AccountCreatedResponse>('/api/accounts', {
       method: 'POST',
       json: { name: 'Alt', uid: '812345679', server: 'ASIA' },
-    })
-    await client.json(`/api/accounts/${other.account.id}/settings`, {
-      method: 'PATCH',
-      json: { liveSync: true },
     })
     const alt = liveGood({ gi_player: { ...sampleExtras(812345679).gi_player } })
     const altAnswer = await snapshot(other.importKey, alt, 1_000)

@@ -14,15 +14,16 @@
   "discarded": "Đã xóa thay đổi trực tiếp",
   "discardFailed": "Không xóa được thay đổi trực tiếp",
   "settings": {
-    "title": "Đồng bộ trực tiếp",
-    "label": "Theo dõi Irminsul trực tiếp",
-    "description": "Khi Irminsul đang chạy, các thay đổi sẽ hiện ở đây trong vài giây, giữa các bản chụp.",
-    "devices": "Đồng bộ trực tiếp từ máy này tới: {accounts} (Thiết lập tài khoản)",
+    "title": "Teyvat.me Capture",
+    "devices": "Đồng bộ trực tiếp từ máy này tới: {accounts}",
     "deletePoints": "Xóa điểm biểu đồ",
     "deletePointsTitle": "Xóa các điểm biểu đồ mà đồng bộ trực tiếp lưu giữa các bản chụp",
     "deletePointsConfirm": "Xóa mọi điểm biểu đồ của tài khoản này? Bản chụp vẫn giữ nguyên.",
     "pointsDeleted": "Đã xóa điểm biểu đồ",
-    "exportNote": "Bản xuất gồm cả thay đổi và điểm trực tiếp (live/ trong tệp zip)."
+    "exportNote": "Bản xuất gồm cả thay đổi và điểm trực tiếp (live/ trong tệp zip).",
+    "always": "Cập nhật trực tiếp đang bật",
+    "alwaysTitle": "Khi chạy, ứng dụng gửi thay đổi giữa các bản chụp. Tắt trong ứng dụng.",
+    "devicesTitle": "Đăng nhập từ ứng dụng; phiên của nó nằm trong Thiết bị"
   },
   "session": {
     "heading": "Phiên chơi",

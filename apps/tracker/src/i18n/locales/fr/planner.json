@@ -107,7 +107,7 @@
     "alertTitle": "Résine originelle {amount}",
     "source": {
       "manual": "fixée à la main",
-      "player": "irminsul, à la connexion",
+      "player": "Teyvat.me Capture, à la connexion",
       "inventory": "l'instantané"
     },
     "unknown": "Résine originelle : pas encore connue · la définir",
@@ -377,11 +377,11 @@
     "autoWl": "Auto ({wl})",
     "ar": "NA",
     "arTitle": "Niv. d'aventure (1–60)",
-    "arTitleIrminsul": "Niv. d'aventure (1–60) · {ar} d'après irminsul",
-    "fromIrminsul": "d'après irminsul",
+    "arTitleIrminsul": "Niv. d'aventure (1–60) · {ar} d'après Teyvat.me Capture",
+    "fromIrminsul": "d'après Teyvat.me Capture",
     "wl": "NM",
     "wlTitle": "Niv. du monde (0–9)",
-    "wlTitleIrminsul": "Niv. du monde (0–9) · {wl} d'après irminsul",
+    "wlTitleIrminsul": "Niv. du monde (0–9) · {wl} d'après Teyvat.me Capture",
     "wlLabel": "Niv. du monde",
     "refreshesTitle": "Recharges de Résine originelle par jour ({per} résine chacune) : les jours comptent 180 + {per} par recharge",
     "refreshes": "Recharges",

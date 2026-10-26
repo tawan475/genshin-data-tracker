@@ -24,14 +24,14 @@
     "emailNotRemoved": "E-Mail nicht entfernt"
   },
   "importKey": {
-    "title": "Irminsul (alle Konten)",
+    "title": "Teyvat.me Capture (alle Konten)",
     "newTitle": "Neuer Import-Schlüssel?",
     "newDetail": "Der alte Schlüssel funktioniert dann nicht mehr.",
     "newKey": "Neuer Schlüssel",
     "newKeyTitle": "Schlüssel werden nur einmal angezeigt. Ein neuer Schlüssel ersetzt den alten.",
     "notMade": "Kein Schlüssel erstellt",
     "revokeTitle": "Import-Schlüssel widerrufen?",
-    "revokeDetail": "Irminsul kann damit nicht mehr hochladen. Die eigenen Schlüssel der Konten funktionieren weiter.",
+    "revokeDetail": "Teyvat.me Capture kann damit nicht mehr hochladen. Die eigenen Schlüssel der Konten funktionieren weiter.",
     "revoke": "Widerrufen",
     "revoked": "Schlüssel widerrufen",
     "notRevoked": "Schlüssel nicht widerrufen",

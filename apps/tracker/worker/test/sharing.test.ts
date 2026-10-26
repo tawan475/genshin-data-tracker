@@ -198,7 +198,6 @@ describe('account sharing: what each role may do', () => {
   const OWNER_ONLY: [string, string, unknown][] = [
     ['PATCH', '', { name: 'Renamed' }],
     ['POST', '/import-key', undefined],
-    ['PATCH', '/settings', { liveSync: true }],
     ['POST', '/snapshots/delete', { ids: [1] }],
     ['DELETE', '/points', undefined],
     ['DELETE', '/live', undefined],

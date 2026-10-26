@@ -41,7 +41,7 @@
     "signsOut": "Mengeluarkan mereka di mana saja",
     "blocksSignIn": "Memblokir masuk dan unggahan",
     "keepsData": "Datanya tetap disimpan",
-    "refusesUploads": "Menolak setiap unggahan, dari Irminsul dan situs web",
+    "refusesUploads": "Menolak setiap unggahan, dari Teyvat.me Capture dan situs web",
     "canStillSignIn": "Mereka masih bisa masuk dan melihat"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "belum pernah dipakai",
     "unlink": "Lepas tautan",
     "userKey": "Kunci pengguna",
-    "userKeyTitle": "Kunci Irminsul untuk semua akun",
+    "userKeyTitle": "Kunci Teyvat.me Capture untuk semua akun",
     "revoke": "Cabut",
     "staffHistory": "Riwayat staf",
     "suspensionLifted": "Penangguhan dicabut",
@@ -360,7 +360,7 @@
     "unlinked": "Tautan dilepas",
     "notUnlinked": "Tautan tidak dilepas",
     "revokeTitle": "Cabut kunci semua akun",
-    "revokeDetail": "Irminsul langsung berhenti mengunggah dengannya; mereka bisa membuat yang baru di Pengaturan.",
+    "revokeDetail": "Teyvat.me Capture langsung berhenti mengunggah dengannya; mereka bisa membuat yang baru di Pengaturan.",
     "keyRevoked": "Kunci dicabut",
     "notRevoked": "Tidak dicabut",
     "resetKeyTitle": "Atur ulang kunci impor",

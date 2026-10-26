@@ -16,7 +16,7 @@ import { D1Meter } from '../lib/meter'
 import { accountForUid, type KeyAccount, type UploadOwner } from './accounts'
 import { importSnapshot, parseUpload, type Upload } from './import'
 import { anyListening, notifyAccount, notifyUser } from './live'
-import { liveDb, liveSyncOn, liveUsage, openJournal } from './live-sync'
+import { liveDb, liveUsage, openJournal } from './live-sync'
 
 export async function uploadAs(
   c: Context<AppEnv>,
@@ -63,7 +63,7 @@ export async function uploadAs(
   meter.report(c)
   // Live sync: this snapshot opens the account's journal (a failure leaves
   // the answer without `live`, so irminsul keeps to snapshots).
-  if (live && liveSyncOn(account.live_sync) && result.newest) {
+  if (live && result.newest) {
     try {
       const base = await openJournal(live, {
         accountId: account.id,

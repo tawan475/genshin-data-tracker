@@ -24,14 +24,14 @@
     "emailNotRemoved": "Correo no quitado"
   },
   "importKey": {
-    "title": "Irminsul (todas las cuentas)",
+    "title": "Teyvat.me Capture (todas las cuentas)",
     "newTitle": "¿Nueva clave de importación?",
     "newDetail": "La clave anterior dejará de funcionar.",
     "newKey": "Nueva clave",
     "newKeyTitle": "Las claves se muestran una vez. Una clave nueva sustituye a la anterior.",
     "notMade": "No se creó ninguna clave",
     "revokeTitle": "¿Revocar la clave de importación?",
-    "revokeDetail": "Irminsul dejará de subir con ella. Las claves propias de cada cuenta siguen funcionando.",
+    "revokeDetail": "Teyvat.me Capture dejará de subir con ella. Las claves propias de cada cuenta siguen funcionando.",
     "revoke": "Revocar",
     "revoked": "Clave revocada",
     "notRevoked": "Clave no revocada",

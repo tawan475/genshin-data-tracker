@@ -107,7 +107,7 @@
     "alertTitle": "퓨어 레진 {amount}",
     "source": {
       "manual": "직접 설정",
-      "player": "irminsul, 로그인 시",
+      "player": "Teyvat.me Capture, 로그인 시",
       "inventory": "스냅샷"
     },
     "unknown": "퓨어 레진: 아직 알 수 없음 · 설정하세요",
@@ -377,11 +377,11 @@
     "autoWl": "자동 ({wl})",
     "ar": "AR",
     "arTitle": "모험 등급 (1–60)",
-    "arTitleIrminsul": "모험 등급 (1–60) · irminsul 기준 {ar}",
-    "fromIrminsul": "irminsul 기준",
+    "arTitleIrminsul": "모험 등급 (1–60) · Teyvat.me Capture 기준 {ar}",
+    "fromIrminsul": "Teyvat.me Capture 기준",
     "wl": "WL",
     "wlTitle": "월드 레벨 (0–9)",
-    "wlTitleIrminsul": "월드 레벨 (0–9) · irminsul 기준 {wl}",
+    "wlTitleIrminsul": "월드 레벨 (0–9) · Teyvat.me Capture 기준 {wl}",
     "wlLabel": "월드 레벨",
     "refreshesTitle": "하루 퓨어 레진 충전 횟수 (1회당 레진 {per}): 일수는 180 + 충전당 {per}로 계산",
     "refreshes": "충전",

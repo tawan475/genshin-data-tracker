@@ -107,7 +107,7 @@
     "alertTitle": "Original Resin {amount}",
     "source": {
       "manual": "set by hand",
-      "player": "irminsul, at login",
+      "player": "Teyvat.me Capture, at login",
       "inventory": "the snapshot"
     },
     "unknown": "Original Resin: not known yet · set it",
@@ -377,11 +377,11 @@
     "autoWl": "Auto ({wl})",
     "ar": "AR",
     "arTitle": "Adventure Rank (1–60)",
-    "arTitleIrminsul": "Adventure Rank (1–60) · {ar} from irminsul",
-    "fromIrminsul": "from irminsul",
+    "arTitleIrminsul": "Adventure Rank (1–60) · {ar} from Teyvat.me Capture",
+    "fromIrminsul": "from Teyvat.me Capture",
     "wl": "WL",
     "wlTitle": "World Level (0–9)",
-    "wlTitleIrminsul": "World Level (0–9) · {wl} from irminsul",
+    "wlTitleIrminsul": "World Level (0–9) · {wl} from Teyvat.me Capture",
     "wlLabel": "World Level",
     "refreshesTitle": "Original Resin refreshes a day ({per} resin each): days count 180 + {per} per refresh",
     "refreshes": "Refreshes",

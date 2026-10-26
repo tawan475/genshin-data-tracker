@@ -41,7 +41,7 @@
     "signsOut": "Signs them out everywhere",
     "blocksSignIn": "Blocks sign-in and uploads",
     "keepsData": "Keeps their data",
-    "refusesUploads": "Refuses every upload, from Irminsul and the website",
+    "refusesUploads": "Refuses every upload, from Teyvat.me Capture and the website",
     "canStillSignIn": "They can still sign in and look"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "never used",
     "unlink": "Unlink",
     "userKey": "User key",
-    "userKeyTitle": "Irminsul key for all accounts",
+    "userKeyTitle": "Teyvat.me Capture key for all accounts",
     "revoke": "Revoke",
     "staffHistory": "Staff history",
     "suspensionLifted": "Suspension lifted",
@@ -360,7 +360,7 @@
     "unlinked": "Unlinked",
     "notUnlinked": "Not unlinked",
     "revokeTitle": "Revoke the all-accounts key",
-    "revokeDetail": "Irminsul stops uploading with it at once; they can make a new one in Settings.",
+    "revokeDetail": "Teyvat.me Capture stops uploading with it at once; they can make a new one in Settings.",
     "keyRevoked": "Key revoked",
     "notRevoked": "Not revoked",
     "resetKeyTitle": "Reset import key",

@@ -24,7 +24,7 @@
     "add": "추가",
     "notAdded": "추가되지 않음",
     "added": "{name} 추가됨",
-    "connect": "Irminsul 연결",
+    "connect": "Teyvat.me Capture 연결",
     "overview": "개요",
     "importFiles": "파일 가져오기",
     "addAnother": "하나 더 추가"
@@ -38,7 +38,7 @@
     "deleteAccount": "계정 삭제",
     "deleteTitle": "내보낸 GOOD 파일에는 영향이 없습니다",
     "confirmTitle": "{name}을(를) 삭제할까요?",
-    "deletes": "{loss}이(가) 삭제됩니다. 이 계정의 Irminsul 키도 더 이상 작동하지 않습니다.",
+    "deletes": "{loss}이(가) 삭제됩니다. 이 계정의 Teyvat.me Capture 키도 더 이상 작동하지 않습니다.",
     "typeToConfirm": "{word} 입력",
     "confirmWord": "삭제",
     "loss": "스냅샷 {n}개",

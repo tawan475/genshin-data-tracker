@@ -81,7 +81,7 @@
     "newestPull": "Deseo más reciente, hora del juego",
     "synced": "Sincronizado {ago}",
     "syncedTitle": "Deseos nuevos guardados {time}",
-    "syncHelp": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida): irminsul sincroniza todos los gachapones y luego cada deseo nuevo mientras dure la clave (~24 h). El enlace de deseos del juego también trae los últimos seis meses. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",
+    "syncHelp": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida): Teyvat.me Capture sincroniza todos los gachapones y luego cada deseo nuevo mientras dure la clave (~24 h). El enlace de deseos del juego también trae los últimos seis meses. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",
     "empty": "Aún no hay deseos",
     "emptyBody": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida) o importa con el enlace de deseos del juego. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",
     "banners": "Gachapones",
@@ -148,7 +148,7 @@
       "ps3": "Pégalo abajo. Si falla, vincula tu PlayStation a una cuenta de HoYoverse y usa los pasos de PC o móvil.",
       "pcRun": "Abre PowerShell (Inicio, escribe PowerShell) y ejecuta:",
       "pcPaste": "Copia el enlace: pégalo abajo.",
-      "pcPasteTitle": "El Copy wish URL de irminsul da el mismo enlace"
+      "pcPasteTitle": "El Copy wish URL de Teyvat.me Capture da el mismo enlace"
     },
     "scriptTitle": "Lee la caché web del juego en este PC, comprueba el enlace una vez con HoYoverse y lo copia. Nada más.",
     "copied": "Copiado",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} ya guardados",
     "notImported": "No importado",
     "deleteTitle": "¿Borrar el historial de deseos?",
-    "deleteDetail": "Se quitan los {n} deseos de esta cuenta. irminsul puede volver a obtener los últimos seis meses.",
+    "deleteDetail": "Se quitan los {n} deseos de esta cuenta. Teyvat.me Capture puede volver a obtener los últimos seis meses.",
     "deleteConfirm": "Borrar",
     "notDeleted": "No borrado",
     "dropTitle": "JSON UIGF (Snap Hutao, Starward, genshin-wish-export…), un CSV del importador de paimon.moe o la copia de paimon.moe (Settings → Export)",

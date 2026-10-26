@@ -9,7 +9,7 @@ import { trackerApiUrl } from '@/data/import-setup'
 import { t } from '@/i18n'
 import { useFeedback } from '@/stores/feedback'
 import CopyField from './CopyField.vue'
-import IrminsulSteps from './IrminsulSteps.vue'
+import CaptureSteps from './CaptureSteps.vue'
 
 /**
  * What Irminsul needs to upload by itself: the tracker URL and the import
@@ -50,7 +50,7 @@ async function rotate() {
 </script>
 
 <template>
-  <UiPanel title="Irminsul">
+  <UiPanel :title="$t('transfer.key.title')">
     <div class="flex flex-col gap-4">
       <CopyField :label="$t('transfer.key.trackerUrl')" :value="url" url />
       <CopyField
@@ -87,7 +87,7 @@ async function rotate() {
           />
           {{ $t('transfer.key.setup') }}
         </summary>
-        <IrminsulSteps class="pt-1 pb-1" />
+        <CaptureSteps class="pt-1 pb-1" />
       </details>
     </div>
   </UiPanel>

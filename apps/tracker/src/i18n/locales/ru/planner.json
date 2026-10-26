@@ -107,7 +107,7 @@
     "alertTitle": "Первородная смола {amount}",
     "source": {
       "manual": "задано вручную",
-      "player": "irminsul, при входе",
+      "player": "Teyvat.me Capture, при входе",
       "inventory": "снимок"
     },
     "unknown": "Первородная смола: пока неизвестно · задать",
@@ -377,11 +377,11 @@
     "autoWl": "Авто ({wl})",
     "ar": "РП",
     "arTitle": "Ранг приключений (1–60)",
-    "arTitleIrminsul": "Ранг приключений (1–60) · {ar} из irminsul",
-    "fromIrminsul": "из irminsul",
+    "arTitleIrminsul": "Ранг приключений (1–60) · {ar} из Teyvat.me Capture",
+    "fromIrminsul": "из Teyvat.me Capture",
     "wl": "УМ",
     "wlTitle": "Уровень мира (0–9)",
-    "wlTitleIrminsul": "Уровень мира (0–9) · {wl} из irminsul",
+    "wlTitleIrminsul": "Уровень мира (0–9) · {wl} из Teyvat.me Capture",
     "wlLabel": "Уровень мира",
     "refreshesTitle": "Пополнений Первородной смолы в день (по {per} смолы): в день считается 180 + {per} за пополнение",
     "refreshes": "Пополнения",

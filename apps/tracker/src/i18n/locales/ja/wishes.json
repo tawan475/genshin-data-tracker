@@ -81,7 +81,7 @@
     "newestPull": "最新の祈願（ゲーム内時刻）",
     "synced": "{ago}に同期",
     "syncedTitle": "{time} に新しい祈願を保存",
-    "syncHelp": "1日1回、ゲーム内で祈願 → 履歴を開いてください（すぐ閉じて構いません）。irminsul が全祈願を同期し、キーが有効な間（約 24 時間）は新しい祈願も同期します。ゲームの祈願リンクでも直近 6 か月分を取り込めます。6 か月より前の分は paimon.moe のバックアップか UIGF ファイルをインポートしてください。",
+    "syncHelp": "1日1回、ゲーム内で祈願 → 履歴を開いてください（すぐ閉じて構いません）。Teyvat.me Capture が全祈願を同期し、キーが有効な間（約 24 時間）は新しい祈願も同期します。ゲームの祈願リンクでも直近 6 か月分を取り込めます。6 か月より前の分は paimon.moe のバックアップか UIGF ファイルをインポートしてください。",
     "empty": "祈願はまだありません",
     "emptyBody": "1日1回、ゲーム内で祈願 → 履歴を開くか（すぐ閉じて構いません）、ゲームの祈願リンクでインポートしてください。6 か月より前の分は paimon.moe のバックアップか UIGF ファイルをインポートしてください。",
     "banners": "祈願",
@@ -148,7 +148,7 @@
       "ps3": "下に貼り付けます。失敗する場合は PlayStation を HoYoverse アカウントに連携し、PC かスマホの手順を使ってください。",
       "pcRun": "PowerShell を開き（スタートで PowerShell と入力）、次を実行します：",
       "pcPaste": "リンクがコピーされるので、下に貼り付けます。",
-      "pcPasteTitle": "irminsul の Copy wish URL でも同じリンクが得られます"
+      "pcPasteTitle": "Teyvat.me Capture の Copy wish URL でも同じリンクが得られます"
     },
     "scriptTitle": "この PC のゲームのウェブキャッシュを読み、HoYoverse でリンクを一度確認してコピーします。それ以外は何もしません。",
     "copied": "コピーしました",
@@ -248,7 +248,7 @@
     "alreadyHeld": "保存済み {n}",
     "notImported": "インポートできませんでした",
     "deleteTitle": "祈願履歴を削除しますか？",
-    "deleteDetail": "このアカウントの {n} 回分の祈願がすべて削除されます。直近 6 か月分は irminsul で再取得できます。",
+    "deleteDetail": "このアカウントの {n} 回分の祈願がすべて削除されます。直近 6 か月分は Teyvat.me Capture で再取得できます。",
     "deleteConfirm": "削除",
     "notDeleted": "削除できませんでした",
     "dropTitle": "UIGF JSON（Snap Hutao、Starward、genshin-wish-export など）、paimon.moe インポーター用 CSV、または paimon.moe のバックアップ（Settings → Export）",

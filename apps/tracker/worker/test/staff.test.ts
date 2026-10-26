@@ -720,10 +720,6 @@ describe('live sync (staff)', () => {
     const admin = await member('Admin')
     const user = await member()
     const { account, importKey } = await createAccount(user.client)
-    await user.client.json(`/api/accounts/${account.id}/settings`, {
-      method: 'PATCH',
-      json: { liveSync: true },
-    })
     const good = sampleGood(sampleExtras())
     const answer = (await (await importByKey(importKey, good, 1_000)).json()) as ImportResponse
     const sent = await SELF.fetch(`${ORIGIN}/api/irminsul/changes`, {

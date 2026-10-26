@@ -81,7 +81,7 @@
     "newestPull": "Lượt mới nhất, theo giờ game",
     "synced": "Đồng bộ {ago}",
     "syncedTitle": "Lưu cầu nguyện mới lúc {time}",
-    "syncHelp": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay): irminsul đồng bộ mọi banner, rồi từng lượt mới khi khóa còn hiệu lực (~24 giờ). Liên kết cầu nguyện của game cũng lấy được sáu tháng gần nhất. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",
+    "syncHelp": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay): Teyvat.me Capture đồng bộ mọi banner, rồi từng lượt mới khi khóa còn hiệu lực (~24 giờ). Liên kết cầu nguyện của game cũng lấy được sáu tháng gần nhất. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",
     "empty": "Chưa có lượt cầu nguyện",
     "emptyBody": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay), hoặc nhập bằng liên kết cầu nguyện của game. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",
     "banners": "Banner",
@@ -148,7 +148,7 @@
       "ps3": "Dán vào bên dưới. Nếu thất bại, hãy liên kết PlayStation với tài khoản HoYoverse rồi làm theo hướng dẫn cho PC hoặc điện thoại.",
       "pcRun": "Mở PowerShell (Start, gõ PowerShell) và chạy:",
       "pcPaste": "Lệnh sẽ sao chép liên kết: dán vào bên dưới.",
-      "pcPasteTitle": "Copy wish URL của irminsul cũng cho ra liên kết này"
+      "pcPasteTitle": "Copy wish URL của Teyvat.me Capture cũng cho ra liên kết này"
     },
     "scriptTitle": "Đọc bộ nhớ đệm web của game trên máy này, kiểm tra liên kết một lần với HoYoverse, rồi sao chép. Không làm gì khác.",
     "copied": "Đã sao chép",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} đã có",
     "notImported": "Chưa nhập được",
     "deleteTitle": "Xóa lịch sử cầu nguyện?",
-    "deleteDetail": "Toàn bộ {n} lượt của tài khoản này sẽ bị xóa. irminsul có thể lấy lại sáu tháng gần nhất.",
+    "deleteDetail": "Toàn bộ {n} lượt của tài khoản này sẽ bị xóa. Teyvat.me Capture có thể lấy lại sáu tháng gần nhất.",
     "deleteConfirm": "Xóa",
     "notDeleted": "Chưa xóa",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), CSV của trình nhập paimon.moe, hoặc bản sao lưu của paimon.moe (Settings → Export)",

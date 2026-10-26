@@ -41,7 +41,7 @@
     "signsOut": "Her yerden çıkış yaptırır",
     "blocksSignIn": "Girişi ve yüklemeleri engeller",
     "keepsData": "Verilerini korur",
-    "refusesUploads": "Irminsul'dan ve web sitesinden gelen her yüklemeyi reddeder",
+    "refusesUploads": "Teyvat.me Capture'dan ve web sitesinden gelen her yüklemeyi reddeder",
     "canStillSignIn": "Yine de giriş yapıp bakabilirler"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "hiç kullanılmadı",
     "unlink": "Bağlantıyı kaldır",
     "userKey": "Kullanıcı anahtarı",
-    "userKeyTitle": "Tüm hesaplar için Irminsul anahtarı",
+    "userKeyTitle": "Tüm hesaplar için Teyvat.me Capture anahtarı",
     "revoke": "İptal et",
     "staffHistory": "Yetkili geçmişi",
     "suspensionLifted": "Askı kaldırıldı",
@@ -360,7 +360,7 @@
     "unlinked": "Bağlantı kaldırıldı",
     "notUnlinked": "Bağlantı kaldırılmadı",
     "revokeTitle": "Tüm hesaplar anahtarını iptal et",
-    "revokeDetail": "Irminsul bununla yüklemeyi hemen bırakır; Ayarlar'dan yeni bir tane oluşturabilirler.",
+    "revokeDetail": "Teyvat.me Capture bununla yüklemeyi hemen bırakır; Ayarlar'dan yeni bir tane oluşturabilirler.",
     "keyRevoked": "Anahtar iptal edildi",
     "notRevoked": "İptal edilmedi",
     "resetKeyTitle": "İçe aktarma anahtarını sıfırla",

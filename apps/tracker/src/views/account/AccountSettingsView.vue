@@ -3,9 +3,9 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Trash2 } from 'lucide-vue-next'
 import AccountFields from '@/components/import/AccountFields.vue'
+import CapturePanel from '@/components/capture/CapturePanel.vue'
 import AccountSharingPanel from '@/components/sharing/AccountSharingPanel.vue'
 import ImportKeyPanel from '@/components/import/ImportKeyPanel.vue'
-import LiveSyncPanel from '@/components/live/LiveSyncPanel.vue'
 import SettingsSection from '@/components/settings/SettingsSection.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -31,7 +31,7 @@ import { useFeedback } from '@/stores/feedback'
 import { useAccess, useAccount } from './context'
 
 const account = useAccount()
-// Account sharing: details, keys, live sync and deleting are the owner's.
+// Account sharing: details, the capture app's keys and deleting are the owner's.
 const access = useAccess()
 const owner = computed(() => access.value === 'owner')
 const accounts = useAccounts()
@@ -205,7 +205,7 @@ async function confirmDelete() {
 
     <SettingsSection v-if="owner" :label="$t('sharing.sync')">
       <div class="flex flex-wrap items-stretch gap-4 [&>*]:min-w-0 [&>*]:flex-[1_1_24rem]">
-        <LiveSyncPanel :account="account" />
+        <CapturePanel :account="account" />
         <ImportKeyPanel :account="account" />
       </div>
     </SettingsSection>

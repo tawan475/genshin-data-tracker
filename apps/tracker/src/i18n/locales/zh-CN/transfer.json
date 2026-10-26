@@ -36,6 +36,7 @@
     "hint": "最多 {files} 个文件，每个不超过 {mb} MB，也可以拖入文件夹。"
   },
   "key": {
+    "title": "导入密钥",
     "trackerUrl": "追踪器地址",
     "importKey": "导入密钥",
     "shownOnce": "仅显示一次",
@@ -50,9 +51,9 @@
     "notChanged": "密钥未更改"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → 设置：粘贴以上两项",
+    "paste": "Teyvat.me Capture → Tracker → 设置：粘贴以上两项",
     "tick": "勾选“Auto export to tracker”",
-    "start": "先启动 Irminsul，再启动游戏"
+    "start": "先启动 Teyvat.me Capture，再启动游戏"
   },
   "copy": {
     "copied": "已复制",

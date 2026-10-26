@@ -167,9 +167,9 @@ export const accounts = new Hono<AppEnv>()
     const patch = await parseJson(c, accountSettingsPatch)
     const db = getDb(c.env.DB)
     const account = await loadAccount(db, c.get('userId'), id, 'edit')
-    // Whether irminsul streams to this account is the owner's call.
-    if (patch.liveSync !== undefined && account.access !== 'owner') throw ownerOnly()
-    const stored = deepMerge(account.settings, patch)
+    // Live sync has no switch any more (cached builds may still send one).
+    const { liveSync: _ignored, ...rest } = patch
+    const stored = deepMerge(account.settings, rest)
     const [, listener] = await c.env.DB.batch([
       c.env.DB.prepare('UPDATE genshin_accounts SET settings = ?1 WHERE id = ?2').bind(
         JSON.stringify(stored),

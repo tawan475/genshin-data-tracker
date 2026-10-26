@@ -81,7 +81,7 @@
     "newestPull": "Tiro più recente, ora del gioco",
     "synced": "Sincronizzato {ago}",
     "syncedTitle": "Nuovi desideri salvati {time}",
-    "syncHelp": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito): irminsul sincronizza ogni banner, poi ogni nuovo desiderio finché dura la chiave (~24 h). Il link dei desideri del gioco porta anche gli ultimi sei mesi. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",
+    "syncHelp": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito): Teyvat.me Capture sincronizza ogni banner, poi ogni nuovo desiderio finché dura la chiave (~24 h). Il link dei desideri del gioco porta anche gli ultimi sei mesi. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",
     "empty": "Ancora nessun desiderio",
     "emptyBody": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito), o importa con il link dei desideri del gioco. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",
     "banners": "Banner",
@@ -148,7 +148,7 @@
       "ps3": "Incollalo qui sotto. Se non funziona, collega la PlayStation a un account HoYoverse e segui i passaggi per PC o telefono.",
       "pcRun": "Apri PowerShell (Start, digita PowerShell) ed esegui:",
       "pcPaste": "Copia il link: incollalo qui sotto.",
-      "pcPasteTitle": "La funzione Copy wish URL di irminsul dà lo stesso link"
+      "pcPasteTitle": "La funzione Copy wish URL di Teyvat.me Capture dà lo stesso link"
     },
     "scriptTitle": "Legge la cache web del gioco su questo PC, controlla il link una volta con HoYoverse e lo copia. Nient'altro.",
     "copied": "Copiato",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} già presenti",
     "notImported": "Non importato",
     "deleteTitle": "Eliminare la cronologia desideri?",
-    "deleteDetail": "Tutti i {n} tiri di questo account vengono rimossi. irminsul può recuperare di nuovo gli ultimi sei mesi.",
+    "deleteDetail": "Tutti i {n} tiri di questo account vengono rimossi. Teyvat.me Capture può recuperare di nuovo gli ultimi sei mesi.",
     "deleteConfirm": "Elimina",
     "notDeleted": "Non eliminato",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), un CSV per l'importatore di paimon.moe, o il backup di paimon.moe (Settings → Export)",

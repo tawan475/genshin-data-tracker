@@ -14,15 +14,16 @@
   "discarded": "Live changes deleted",
   "discardFailed": "Could not delete the live changes",
   "settings": {
-    "title": "Live sync",
-    "label": "Follow Irminsul live",
-    "description": "While Irminsul runs, its changes show here within seconds, between snapshots.",
-    "devices": "Live sync from this PC to: {accounts} (Account settings)",
+    "title": "Teyvat.me Capture",
+    "devices": "Live sync from this PC to: {accounts}",
     "deletePoints": "Delete chart points",
     "deletePointsTitle": "Delete the chart points live sync kept between snapshots",
     "deletePointsConfirm": "Delete every chart point of this account? Snapshots stay.",
     "pointsDeleted": "Chart points deleted",
-    "exportNote": "Exports include the live changes and points (live/ in the zip)."
+    "exportNote": "Exports include the live changes and points (live/ in the zip).",
+    "always": "Live updates on",
+    "alwaysTitle": "The app sends changes between snapshots while it runs. Turn them off in the app.",
+    "devicesTitle": "Sign in from the app; its sessions are under Devices"
   },
   "session": {
     "heading": "Sessions",

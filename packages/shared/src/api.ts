@@ -221,7 +221,10 @@ export const accountSettingsPatch = z
       .array(goodKeySchema)
       .max(MAX_FAVORITE_CHARACTERS)
       .refine((keys) => new Set(keys).size === keys.length, 'Each key once'),
-    /** Live sync from irminsul (docs/plans/live-sync.md). */
+    /**
+     * Ignored: live sync is always on, the capture app decides whether to
+     * send changes. Accepted so cached builds that still send it get no 400.
+     */
     liveSync: z.boolean(),
   })
   .partial()
@@ -749,7 +752,10 @@ export interface AccountResponse {
     lastSeenAt: number
     summary: SnapshotSummary
   } | null
-  /** The account's `liveSync` setting (live sync from irminsul). */
+  /**
+   * Always true now: live sync is on for every account and the capture app
+   * decides whether to send changes. Kept for builds that still read it.
+   */
   liveSync?: boolean
   /** What this user may do here (account sharing); absent in answers from before it = owner. */
   access?: AccountAccess

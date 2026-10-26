@@ -107,7 +107,7 @@
     "alertTitle": "Ursprüngliches Harz {amount}",
     "source": {
       "manual": "von Hand gesetzt",
-      "player": "irminsul, beim Login",
+      "player": "Teyvat.me Capture, beim Login",
       "inventory": "Snapshot"
     },
     "unknown": "Ursprüngliches Harz: noch unbekannt · setzen",
@@ -377,11 +377,11 @@
     "autoWl": "Auto ({wl})",
     "ar": "AS",
     "arTitle": "Abenteuerstufe (1–60)",
-    "arTitleIrminsul": "Abenteuerstufe (1–60) · {ar} aus irminsul",
-    "fromIrminsul": "aus irminsul",
+    "arTitleIrminsul": "Abenteuerstufe (1–60) · {ar} aus Teyvat.me Capture",
+    "fromIrminsul": "aus Teyvat.me Capture",
     "wl": "WS",
     "wlTitle": "Weltstufe (0–9)",
-    "wlTitleIrminsul": "Weltstufe (0–9) · {wl} aus irminsul",
+    "wlTitleIrminsul": "Weltstufe (0–9) · {wl} aus Teyvat.me Capture",
     "wlLabel": "Weltstufe",
     "refreshesTitle": "Auffüllungen von Ursprünglichem Harz pro Tag (je {per} Harz): Tage zählen 180 + {per} pro Auffüllung",
     "refreshes": "Auffüllungen",

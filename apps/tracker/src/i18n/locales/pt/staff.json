@@ -41,7 +41,7 @@
     "signsOut": "Desconecta o usuário em todos os lugares",
     "blocksSignIn": "Bloqueia login e envios",
     "keepsData": "Mantém os dados",
-    "refusesUploads": "Recusa todos os envios, do Irminsul e do site",
+    "refusesUploads": "Recusa todos os envios, do Teyvat.me Capture e do site",
     "canStillSignIn": "O usuário ainda pode entrar e ver"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "nunca usado",
     "unlink": "Desvincular",
     "userKey": "Chave de usuário",
-    "userKeyTitle": "Chave do Irminsul para todas as contas",
+    "userKeyTitle": "Chave do Teyvat.me Capture para todas as contas",
     "revoke": "Revogar",
     "staffHistory": "Histórico da equipe",
     "suspensionLifted": "Suspensão retirada",
@@ -360,7 +360,7 @@
     "unlinked": "Desvinculado",
     "notUnlinked": "Não desvinculado",
     "revokeTitle": "Revogar a chave de todas as contas",
-    "revokeDetail": "O Irminsul deixa de enviar com ela na hora; uma nova pode ser criada em Ajustes.",
+    "revokeDetail": "O Teyvat.me Capture deixa de enviar com ela na hora; uma nova pode ser criada em Ajustes.",
     "keyRevoked": "Chave revogada",
     "notRevoked": "Não revogada",
     "resetKeyTitle": "Redefinir chave de importação",

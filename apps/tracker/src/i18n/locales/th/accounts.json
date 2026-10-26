@@ -24,7 +24,7 @@
     "add": "เพิ่ม",
     "notAdded": "เพิ่มไม่สำเร็จ",
     "added": "เพิ่ม {name} แล้ว",
-    "connect": "เชื่อมต่อ Irminsul",
+    "connect": "เชื่อมต่อ Teyvat.me Capture",
     "overview": "ภาพรวม",
     "importFiles": "นำเข้าไฟล์",
     "addAnother": "เพิ่มอีกบัญชี"
@@ -38,7 +38,7 @@
     "deleteAccount": "ลบบัญชี",
     "deleteTitle": "ไม่มีผลกับไฟล์ GOOD ที่ส่งออกไปแล้ว",
     "confirmTitle": "ลบ {name} ใช่ไหม?",
-    "deletes": "จะลบ {loss} และคีย์ Irminsul ของบัญชีนี้จะใช้งานไม่ได้อีก",
+    "deletes": "จะลบ {loss} และคีย์ Teyvat.me Capture ของบัญชีนี้จะใช้งานไม่ได้อีก",
     "typeToConfirm": "พิมพ์ {word}",
     "confirmWord": "ลบ",
     "loss": "สแนปช็อต {n} รายการ",

@@ -14,15 +14,16 @@
   "discarded": "已删除实时变化",
   "discardFailed": "无法删除实时变化",
   "settings": {
-    "title": "实时同步",
-    "label": "实时跟随 Irminsul",
-    "description": "Irminsul 运行时，快照之间的变化会在几秒内显示在这里。",
-    "devices": "此电脑实时同步到：{accounts}（账号设置）",
+    "title": "Teyvat.me Capture",
+    "devices": "此电脑实时同步到：{accounts}",
     "deletePoints": "删除图表点",
     "deletePointsTitle": "删除实时同步在快照之间保存的图表点",
     "deletePointsConfirm": "删除此账号的所有图表点？快照会保留。",
     "pointsDeleted": "已删除图表点",
-    "exportNote": "导出包含实时变化和图表点（压缩包中的 live/）。"
+    "exportNote": "导出包含实时变化和图表点（压缩包中的 live/）。",
+    "always": "实时更新已开启",
+    "alwaysTitle": "程序运行时会在快照之间发送变化。可在程序中关闭。",
+    "devicesTitle": "在程序中登录；其会话在“设备”中"
   },
   "session": {
     "heading": "游戏时段",

@@ -81,7 +81,7 @@
     "newestPull": "Pull terbaru, jam game",
     "synced": "Disinkronkan {ago}",
     "syncedTitle": "Permohonan baru disimpan {time}",
-    "syncHelp": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup): irminsul menyinkronkan setiap banner, lalu setiap permohonan baru selama kuncinya berlaku (~24 jam). Tautan permohonan game juga membawa enam bulan terakhir. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
+    "syncHelp": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup): Teyvat.me Capture menyinkronkan setiap banner, lalu setiap permohonan baru selama kuncinya berlaku (~24 jam). Tautan permohonan game juga membawa enam bulan terakhir. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
     "empty": "Belum ada permohonan",
     "emptyBody": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup), atau impor dengan tautan permohonan game. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
     "banners": "Banner",
@@ -148,7 +148,7 @@
       "ps3": "Tempel di bawah. Jika gagal, tautkan PlayStation-mu ke akun HoYoverse dan pakai langkah PC atau ponsel.",
       "pcRun": "Buka PowerShell (Start, ketik PowerShell) lalu jalankan:",
       "pcPaste": "Perintah ini menyalin tautannya: tempel di bawah.",
-      "pcPasteTitle": "Copy wish URL di irminsul memberi tautan yang sama"
+      "pcPasteTitle": "Copy wish URL di Teyvat.me Capture memberi tautan yang sama"
     },
     "scriptTitle": "Membaca cache web game di PC ini, memeriksa tautannya sekali ke HoYoverse, lalu menyalinnya. Tidak lebih.",
     "copied": "Disalin",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} sudah ada",
     "notImported": "Tidak diimpor",
     "deleteTitle": "Hapus riwayat permohonan?",
-    "deleteDetail": "Semua {n} pull akun ini dihapus. irminsul bisa mengambil enam bulan terakhir lagi.",
+    "deleteDetail": "Semua {n} pull akun ini dihapus. Teyvat.me Capture bisa mengambil enam bulan terakhir lagi.",
     "deleteConfirm": "Hapus",
     "notDeleted": "Tidak terhapus",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), CSV importer paimon.moe, atau cadangan paimon.moe (Settings → Export)",

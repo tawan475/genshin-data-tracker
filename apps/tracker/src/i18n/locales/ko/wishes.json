@@ -81,7 +81,7 @@
     "newestPull": "최신 기원, 게임 시각",
     "synced": "{ago} 동기화",
     "syncedTitle": "{time}에 새 기원 저장",
-    "syncHelp": "하루에 한 번 게임에서 기원 → 기록을 여세요 (바로 닫아도 됩니다): irminsul이 모든 배너를 동기화하고, 키가 유효한 동안(~24시간) 새 기원도 동기화합니다. 게임의 기원 링크로 최근 6개월분도 가져옵니다. 6개월보다 오래된 기록: paimon.moe 백업이나 UIGF 파일을 가져오세요.",
+    "syncHelp": "하루에 한 번 게임에서 기원 → 기록을 여세요 (바로 닫아도 됩니다): Teyvat.me Capture이 모든 배너를 동기화하고, 키가 유효한 동안(~24시간) 새 기원도 동기화합니다. 게임의 기원 링크로 최근 6개월분도 가져옵니다. 6개월보다 오래된 기록: paimon.moe 백업이나 UIGF 파일을 가져오세요.",
     "empty": "아직 기원이 없습니다",
     "emptyBody": "하루에 한 번 게임에서 기원 → 기록을 열거나 (바로 닫아도 됩니다), 게임의 기원 링크로 가져오세요. 6개월보다 오래된 기록: paimon.moe 백업이나 UIGF 파일을 가져오세요.",
     "banners": "배너",
@@ -148,7 +148,7 @@
       "ps3": "아래에 붙여넣으세요. 실패하면 PlayStation을 HoYoverse 계정에 연결하고 PC 또는 휴대폰 방법을 사용하세요.",
       "pcRun": "PowerShell을 열고 (시작에서 PowerShell 입력) 다음을 실행하세요:",
       "pcPaste": "링크가 복사됩니다: 아래에 붙여넣으세요.",
-      "pcPasteTitle": "irminsul의 Copy wish URL로도 같은 링크를 얻을 수 있습니다"
+      "pcPasteTitle": "Teyvat.me Capture의 Copy wish URL로도 같은 링크를 얻을 수 있습니다"
     },
     "scriptTitle": "이 PC의 게임 웹 캐시를 읽고, HoYoverse에서 링크를 한 번 확인한 뒤 복사합니다. 그 외에는 아무것도 하지 않습니다.",
     "copied": "복사됨",
@@ -248,7 +248,7 @@
     "alreadyHeld": "이미 보유 {n}개",
     "notImported": "가져오지 않음",
     "deleteTitle": "기원 기록을 삭제할까요?",
-    "deleteDetail": "이 계정의 기원 {n}회가 모두 삭제됩니다. irminsul은 최근 6개월분을 다시 가져올 수 있습니다.",
+    "deleteDetail": "이 계정의 기원 {n}회가 모두 삭제됩니다. Teyvat.me Capture은 최근 6개월분을 다시 가져올 수 있습니다.",
     "deleteConfirm": "삭제",
     "notDeleted": "삭제되지 않음",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), paimon.moe 가져오기 CSV, 또는 paimon.moe 백업 (Settings → Export)",

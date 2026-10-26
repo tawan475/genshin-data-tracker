@@ -107,7 +107,7 @@
     "alertTitle": "原粹树脂 {amount}",
     "source": {
       "manual": "手动设置",
-      "player": "irminsul（登录时）",
+      "player": "Teyvat.me Capture（登录时）",
       "inventory": "快照"
     },
     "unknown": "原粹树脂：尚未知 · 点击设置",
@@ -377,11 +377,11 @@
     "autoWl": "自动（{wl}）",
     "ar": "冒险等阶",
     "arTitle": "冒险等阶（1–60）",
-    "arTitleIrminsul": "冒险等阶（1–60）· irminsul 读取为 {ar}",
-    "fromIrminsul": "来自 irminsul",
+    "arTitleIrminsul": "冒险等阶（1–60）· Teyvat.me Capture 读取为 {ar}",
+    "fromIrminsul": "来自 Teyvat.me Capture",
     "wl": "世界等级",
     "wlTitle": "世界等级（0–9）",
-    "wlTitleIrminsul": "世界等级（0–9）· irminsul 读取为 {wl}",
+    "wlTitleIrminsul": "世界等级（0–9）· Teyvat.me Capture 读取为 {wl}",
     "wlLabel": "世界等级",
     "refreshesTitle": "每天补充原粹树脂的次数（每次 {per}）：天数按 180 + 每次 {per} 计算",
     "refreshes": "每日补充",

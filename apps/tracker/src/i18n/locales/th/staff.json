@@ -41,7 +41,7 @@
     "signsOut": "ออกจากระบบทุกที่",
     "blocksSignIn": "บล็อกการเข้าสู่ระบบและการอัปโหลด",
     "keepsData": "เก็บข้อมูลไว้",
-    "refusesUploads": "ปฏิเสธทุกการอัปโหลด ทั้งจาก Irminsul และเว็บไซต์",
+    "refusesUploads": "ปฏิเสธทุกการอัปโหลด ทั้งจาก Teyvat.me Capture และเว็บไซต์",
     "canStillSignIn": "ยังเข้าสู่ระบบและดูข้อมูลได้"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "ไม่เคยใช้",
     "unlink": "ยกเลิกการเชื่อมต่อ",
     "userKey": "คีย์ผู้ใช้",
-    "userKeyTitle": "คีย์ Irminsul สำหรับทุกบัญชี",
+    "userKeyTitle": "คีย์ Teyvat.me Capture สำหรับทุกบัญชี",
     "revoke": "เพิกถอน",
     "staffHistory": "ประวัติทีมงาน",
     "suspensionLifted": "ยกเลิกการระงับแล้ว",
@@ -360,7 +360,7 @@
     "unlinked": "ยกเลิกการเชื่อมต่อแล้ว",
     "notUnlinked": "ยกเลิกการเชื่อมต่อไม่สำเร็จ",
     "revokeTitle": "เพิกถอนคีย์สำหรับทุกบัญชี",
-    "revokeDetail": "Irminsul จะหยุดอัปโหลดด้วยคีย์นี้ทันที ผู้ใช้สร้างคีย์ใหม่ได้ในการตั้งค่า",
+    "revokeDetail": "Teyvat.me Capture จะหยุดอัปโหลดด้วยคีย์นี้ทันที ผู้ใช้สร้างคีย์ใหม่ได้ในการตั้งค่า",
     "keyRevoked": "เพิกถอนคีย์แล้ว",
     "notRevoked": "เพิกถอนไม่สำเร็จ",
     "resetKeyTitle": "รีเซ็ตคีย์นำเข้า",

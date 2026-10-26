@@ -81,7 +81,7 @@
     "newestPull": "Vœu le plus récent, heure du jeu",
     "synced": "Synchronisé {ago}",
     "syncedTitle": "Nouveaux vœux enregistrés {time}",
-    "syncHelp": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt) : irminsul synchronise chaque bannière, puis chaque nouveau vœu tant que la clé dure (~24 h). Le lien de vœux du jeu apporte aussi les six derniers mois. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",
+    "syncHelp": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt) : Teyvat.me Capture synchronise chaque bannière, puis chaque nouveau vœu tant que la clé dure (~24 h). Le lien de vœux du jeu apporte aussi les six derniers mois. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",
     "empty": "Aucun vœu",
     "emptyBody": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt), ou importez avec le lien de vœux du jeu. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",
     "banners": "Bannières",
@@ -148,7 +148,7 @@
       "ps3": "Collez-le ci-dessous. En cas d'échec, liez votre PlayStation à un compte HoYoverse et suivez les étapes PC ou téléphone.",
       "pcRun": "Ouvrez PowerShell (Démarrer, tapez PowerShell) et lancez :",
       "pcPaste": "Il copie le lien : collez-le ci-dessous.",
-      "pcPasteTitle": "Copy wish URL d'irminsul donne le même lien"
+      "pcPasteTitle": "Copy wish URL d'Teyvat.me Capture donne le même lien"
     },
     "scriptTitle": "Lit le cache web du jeu sur ce PC, vérifie le lien une fois auprès de HoYoverse, le copie. Rien d'autre.",
     "copied": "Copié",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} déjà présents",
     "notImported": "Non importé",
     "deleteTitle": "Supprimer l'historique des vœux ?",
-    "deleteDetail": "Les {n} vœux de ce compte sont supprimés. irminsul peut récupérer à nouveau les six derniers mois.",
+    "deleteDetail": "Les {n} vœux de ce compte sont supprimés. Teyvat.me Capture peut récupérer à nouveau les six derniers mois.",
     "deleteConfirm": "Supprimer",
     "notDeleted": "Non supprimé",
     "dropTitle": "JSON UIGF (Snap Hutao, Starward, genshin-wish-export…), un CSV de l'importeur paimon.moe, ou la sauvegarde paimon.moe (Settings → Export)",

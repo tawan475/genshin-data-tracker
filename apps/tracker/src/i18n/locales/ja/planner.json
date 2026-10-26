@@ -107,7 +107,7 @@
     "alertTitle": "天然樹脂 {amount}",
     "source": {
       "manual": "手動設定",
-      "player": "irminsul（ログイン時）",
+      "player": "Teyvat.me Capture（ログイン時）",
       "inventory": "スナップショット"
     },
     "unknown": "天然樹脂：未取得 · 設定する",
@@ -377,11 +377,11 @@
     "autoWl": "自動（{wl}）",
     "ar": "冒険ランク",
     "arTitle": "冒険ランク（1～60）",
-    "arTitleIrminsul": "冒険ランク（1～60） · irminsulから{ar}",
-    "fromIrminsul": "irminsulから",
+    "arTitleIrminsul": "冒険ランク（1～60） · Teyvat.me Captureから{ar}",
+    "fromIrminsul": "Teyvat.me Captureから",
     "wl": "世界ランク",
     "wlTitle": "世界ランク（0～9）",
-    "wlTitleIrminsul": "世界ランク（0～9） · irminsulから{wl}",
+    "wlTitleIrminsul": "世界ランク（0～9） · Teyvat.me Captureから{wl}",
     "wlLabel": "世界ランク",
     "refreshesTitle": "1日の天然樹脂の補充回数（1回につき樹脂{per}）：日数は180 + 補充1回ごとに{per}で計算",
     "refreshes": "補充",

@@ -24,7 +24,7 @@
     "add": "追加",
     "notAdded": "追加できませんでした",
     "added": "{name} を追加しました",
-    "connect": "Irminsul を接続",
+    "connect": "Teyvat.me Capture を接続",
     "overview": "概要",
     "importFiles": "ファイルをインポート",
     "addAnother": "もう1つ追加"
@@ -38,7 +38,7 @@
     "deleteAccount": "アカウントを削除",
     "deleteTitle": "エクスポート済みの GOOD ファイルには影響しません",
     "confirmTitle": "{name} を削除しますか？",
-    "deletes": "{loss}を削除します。この Irminsul キーは使えなくなります。",
+    "deletes": "{loss}を削除します。この Teyvat.me Capture キーは使えなくなります。",
     "typeToConfirm": "「{word}」と入力",
     "confirmWord": "削除",
     "loss": "スナップショット {n} 件",

@@ -24,7 +24,7 @@
     "add": "Add",
     "notAdded": "Not added",
     "added": "Added {name}",
-    "connect": "Connect Irminsul",
+    "connect": "Connect Teyvat.me Capture",
     "overview": "Overview",
     "importFiles": "Import files",
     "addAnother": "Add another"
@@ -38,7 +38,7 @@
     "deleteAccount": "Delete account",
     "deleteTitle": "Exported GOOD files are not affected",
     "confirmTitle": "Delete {name}?",
-    "deletes": "Deletes {loss}. Its Irminsul key stops working.",
+    "deletes": "Deletes {loss}. Its Teyvat.me Capture key stops working.",
     "typeToConfirm": "Type {word}",
     "confirmWord": "delete",
     "loss": "{n} snapshot | {n} snapshots",

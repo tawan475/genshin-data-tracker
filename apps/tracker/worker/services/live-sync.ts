@@ -15,14 +15,13 @@
  * - Pages read the journal merged (`readJournal`), the points per day, and may
  *   delete either.
  *
- * Live sync is per account (setting `liveSync`); without the LIVE_DB binding
- * it is off everywhere. Nothing here ever fails an import: opening a journal
+ * Live sync is on for every account wherever the LIVE_DB binding exists: the
+ * capture app decides whether to send changes, the tracker takes them. Nothing here ever fails an import: opening a journal
  * that fails leaves the import's answer without `live` (irminsul stays on
  * snapshots).
  */
 
 import {
-  LIVE_SYNC_DEFAULT,
   addPoint,
   applyFigures,
   decodeChanges,
@@ -63,16 +62,6 @@ export const DAILY_BATCHES = 2_000
 export function liveDb(env: Env): D1Database | null {
   return (env as { LIVE_DB?: D1Database }).LIVE_DB ?? null
 }
-
-/** An account's `liveSync` as `json_extract` reads it from the settings JSON (1, 0 or null). */
-export function liveSyncOn(value: unknown): boolean {
-  if (value === null || value === undefined) return LIVE_SYNC_DEFAULT
-  return value === true || value === 1 || value === '1' || value === 'true'
-}
-
-/** The SQL column KeyAccount rows carry it as (`a` = genshin_accounts). */
-export const LIVE_SYNC_SQL = (alias = 'a') =>
-  `json_extract(${alias}.settings, '$.liveSync') AS live_sync`
 
 /** A journal's base as irminsul names it: the snapshot's content key in base 36. */
 export function baseKeyOf(contentKey: number): string {

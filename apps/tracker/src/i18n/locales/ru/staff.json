@@ -41,7 +41,7 @@
     "signsOut": "Выход на всех устройствах",
     "blocksSignIn": "Запрещает вход и загрузки",
     "keepsData": "Данные сохраняются",
-    "refusesUploads": "Отклоняет все загрузки — из Irminsul и с сайта",
+    "refusesUploads": "Отклоняет все загрузки — из Teyvat.me Capture и с сайта",
     "canStillSignIn": "Входить и смотреть по-прежнему можно"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "не использовался",
     "unlink": "Отвязать",
     "userKey": "Ключ пользователя",
-    "userKeyTitle": "Ключ Irminsul для всех аккаунтов",
+    "userKeyTitle": "Ключ Teyvat.me Capture для всех аккаунтов",
     "revoke": "Отозвать",
     "staffHistory": "Действия персонала",
     "suspensionLifted": "Блокировка снята",
@@ -360,7 +360,7 @@
     "unlinked": "Отвязан",
     "notUnlinked": "Не отвязан",
     "revokeTitle": "Отозвать ключ всех аккаунтов",
-    "revokeDetail": "Irminsul сразу перестанет загружать с ним; новый можно создать в Настройках.",
+    "revokeDetail": "Teyvat.me Capture сразу перестанет загружать с ним; новый можно создать в Настройках.",
     "keyRevoked": "Ключ отозван",
     "notRevoked": "Не отозван",
     "resetKeyTitle": "Сбросить ключ импорта",

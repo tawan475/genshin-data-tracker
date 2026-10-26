@@ -107,7 +107,7 @@
     "alertTitle": "Original Resin {amount}",
     "source": {
       "manual": "diatur manual",
-      "player": "irminsul, saat login",
+      "player": "Teyvat.me Capture, saat login",
       "inventory": "snapshot"
     },
     "unknown": "Original Resin: belum diketahui · atur",
@@ -377,11 +377,11 @@
     "autoWl": "Otomatis ({wl})",
     "ar": "AR",
     "arTitle": "Rank Adventure (1–60)",
-    "arTitleIrminsul": "Rank Adventure (1–60) · {ar} dari irminsul",
-    "fromIrminsul": "dari irminsul",
+    "arTitleIrminsul": "Rank Adventure (1–60) · {ar} dari Teyvat.me Capture",
+    "fromIrminsul": "dari Teyvat.me Capture",
     "wl": "WL",
     "wlTitle": "Level Dunia (0–9)",
-    "wlTitleIrminsul": "Level Dunia (0–9) · {wl} dari irminsul",
+    "wlTitleIrminsul": "Level Dunia (0–9) · {wl} dari Teyvat.me Capture",
     "wlLabel": "Level Dunia",
     "refreshesTitle": "Isi ulang Original Resin per hari (masing-masing {per} resin): hari dihitung 180 + {per} per isi ulang",
     "refreshes": "Isi ulang",

@@ -24,14 +24,14 @@
     "emailNotRemoved": "E-posta kaldırılmadı"
   },
   "importKey": {
-    "title": "Irminsul (tüm hesaplar)",
+    "title": "Teyvat.me Capture (tüm hesaplar)",
     "newTitle": "Yeni içe aktarma anahtarı?",
     "newDetail": "Eski anahtar çalışmayı bırakır.",
     "newKey": "Yeni anahtar",
     "newKeyTitle": "Anahtarlar bir kez gösterilir. Yeni anahtar eskisinin yerini alır.",
     "notMade": "Anahtar oluşturulmadı",
     "revokeTitle": "İçe aktarma anahtarı iptal edilsin mi?",
-    "revokeDetail": "Irminsul bununla yüklemeyi bırakır. Hesapların kendi anahtarları çalışmaya devam eder.",
+    "revokeDetail": "Teyvat.me Capture bununla yüklemeyi bırakır. Hesapların kendi anahtarları çalışmaya devam eder.",
     "revoke": "İptal et",
     "revoked": "Anahtar iptal edildi",
     "notRevoked": "Anahtar iptal edilmedi",

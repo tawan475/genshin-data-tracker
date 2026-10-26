@@ -24,14 +24,14 @@
     "emailNotRemoved": "Email non rimossa"
   },
   "importKey": {
-    "title": "Irminsul (tutti gli account)",
+    "title": "Teyvat.me Capture (tutti gli account)",
     "newTitle": "Nuova chiave di importazione?",
     "newDetail": "La vecchia chiave smette di funzionare.",
     "newKey": "Nuova chiave",
     "newKeyTitle": "Le chiavi si vedono una sola volta. Una nuova chiave sostituisce la vecchia.",
     "notMade": "Nessuna chiave creata",
     "revokeTitle": "Revocare la chiave di importazione?",
-    "revokeDetail": "Irminsul smette di caricare con essa. Le chiavi dei singoli account continuano a funzionare.",
+    "revokeDetail": "Teyvat.me Capture smette di caricare con essa. Le chiavi dei singoli account continuano a funzionare.",
     "revoke": "Revoca",
     "revoked": "Chiave revocata",
     "notRevoked": "Chiave non revocata",

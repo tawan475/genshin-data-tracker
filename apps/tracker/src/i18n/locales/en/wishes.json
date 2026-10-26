@@ -81,7 +81,7 @@
     "newestPull": "Newest pull, game clock",
     "synced": "Synced {ago}",
     "syncedTitle": "New wishes stored {time}",
-    "syncHelp": "Open Wish → History in game once a day (you can close it right away): irminsul syncs every banner, then each new wish while the key lasts (~24 h). The game's wish link brings the last six months too. Older than 6 months: import a paimon.moe backup or UIGF file.",
+    "syncHelp": "Open Wish → History in game once a day (you can close it right away): Teyvat.me Capture syncs every banner, then each new wish while the key lasts (~24 h). The game's wish link brings the last six months too. Older than 6 months: import a paimon.moe backup or UIGF file.",
     "empty": "No wishes yet",
     "emptyBody": "Open Wish → History in game once a day (you can close it right away), or import with the game's wish link. Older than 6 months: import a paimon.moe backup or UIGF file.",
     "banners": "Banners",
@@ -148,7 +148,7 @@
       "ps3": "Paste it below. If it fails, link your PlayStation to a HoYoverse account and use the PC or phone steps.",
       "pcRun": "Open PowerShell (Start, type PowerShell) and run:",
       "pcPaste": "It copies the link: paste it below.",
-      "pcPasteTitle": "irminsul's Copy wish URL gives the same link"
+      "pcPasteTitle": "Teyvat.me Capture's Copy wish URL gives the same link"
     },
     "scriptTitle": "Reads the game's web cache on this PC, checks the link once with HoYoverse, copies it. Nothing else.",
     "copied": "Copied",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} already held",
     "notImported": "Not imported",
     "deleteTitle": "Delete wish history?",
-    "deleteDetail": "All {n} pulls of this account are removed. irminsul can fetch the last six months again.",
+    "deleteDetail": "All {n} pulls of this account are removed. Teyvat.me Capture can fetch the last six months again.",
     "deleteConfirm": "Delete",
     "notDeleted": "Not deleted",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), a paimon.moe importer CSV, or paimon.moe's backup (Settings → Export)",

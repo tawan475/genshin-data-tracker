@@ -36,6 +36,7 @@
     "hint": "Bis zu {files} Dateien, je {mb} MB. Ordner gehen auch."
   },
   "key": {
+    "title": "Import-Schlüssel",
     "trackerUrl": "Tracker-URL",
     "importKey": "Import-Schlüssel",
     "shownOnce": "Wird einmal gezeigt",
@@ -50,9 +51,9 @@
     "notChanged": "Schlüssel nicht geändert"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → Einstellungen: beides einfügen",
+    "paste": "Teyvat.me Capture → Tracker → Einstellungen: beides einfügen",
     "tick": "„Auto export to tracker“ ankreuzen",
-    "start": "Irminsul vor dem Spiel starten"
+    "start": "Teyvat.me Capture vor dem Spiel starten"
   },
   "copy": {
     "copied": "Kopiert",

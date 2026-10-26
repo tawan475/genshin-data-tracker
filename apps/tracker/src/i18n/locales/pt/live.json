@@ -14,15 +14,16 @@
   "discarded": "Alterações ao vivo excluídas",
   "discardFailed": "Não foi possível excluir as alterações ao vivo",
   "settings": {
-    "title": "Sincronização ao vivo",
-    "label": "Acompanhar o Irminsul ao vivo",
-    "description": "Enquanto o Irminsul estiver aberto, as alterações aparecem aqui em segundos, entre as capturas.",
-    "devices": "Sincronização ao vivo deste PC para: {accounts} (Ajustes da conta)",
+    "title": "Teyvat.me Capture",
+    "devices": "Sincronização ao vivo deste PC para: {accounts}",
     "deletePoints": "Excluir pontos do gráfico",
     "deletePointsTitle": "Excluir os pontos do gráfico que a sincronização ao vivo guardou entre as capturas",
     "deletePointsConfirm": "Excluir todos os pontos do gráfico desta conta? As capturas permanecem.",
     "pointsDeleted": "Pontos do gráfico excluídos",
-    "exportNote": "As exportações incluem as alterações e os pontos ao vivo (live/ no zip)."
+    "exportNote": "As exportações incluem as alterações e os pontos ao vivo (live/ no zip).",
+    "always": "Atualizações ao vivo ativas",
+    "alwaysTitle": "O app envia mudanças entre snapshots enquanto roda. Desative no app.",
+    "devicesTitle": "Entre pelo app; as sessões dele ficam em Dispositivos"
   },
   "session": {
     "heading": "Sessões",

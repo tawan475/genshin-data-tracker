@@ -36,6 +36,7 @@
     "hint": "最多 {files} 個檔案，每個不超過 {mb} MB，也可以拖放資料夾。"
   },
   "key": {
+    "title": "匯入金鑰",
     "trackerUrl": "追蹤器網址",
     "importKey": "匯入金鑰",
     "shownOnce": "僅顯示一次",
@@ -50,9 +51,9 @@
     "notChanged": "金鑰未變更"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → 設定：貼上以上兩項",
+    "paste": "Teyvat.me Capture → Tracker → 設定：貼上以上兩項",
     "tick": "勾選「Auto export to tracker」",
-    "start": "先啟動 Irminsul，再啟動遊戲"
+    "start": "先啟動 Teyvat.me Capture，再啟動遊戲"
   },
   "copy": {
     "copied": "已複製",

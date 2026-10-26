@@ -24,7 +24,7 @@
     "add": "Ekle",
     "notAdded": "Eklenmedi",
     "added": "{name} eklendi",
-    "connect": "Irminsul'u bağla",
+    "connect": "Teyvat.me Capture'u bağla",
     "overview": "Genel Bakış",
     "importFiles": "Dosyaları içe aktar",
     "addAnother": "Bir tane daha ekle"
@@ -38,7 +38,7 @@
     "deleteAccount": "Hesabı sil",
     "deleteTitle": "Dışa aktarılmış GOOD dosyaları etkilenmez",
     "confirmTitle": "{name} silinsin mi?",
-    "deletes": "{loss} silinir. Irminsul anahtarı çalışmayı bırakır.",
+    "deletes": "{loss} silinir. Teyvat.me Capture anahtarı çalışmayı bırakır.",
     "typeToConfirm": "{word} yaz",
     "confirmWord": "sil",
     "loss": "{n} anlık görüntü",

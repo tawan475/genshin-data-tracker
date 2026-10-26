@@ -41,7 +41,7 @@
     "signsOut": "모든 곳에서 로그아웃됩니다",
     "blocksSignIn": "로그인과 업로드가 차단됩니다",
     "keepsData": "데이터는 유지됩니다",
-    "refusesUploads": "Irminsul과 웹사이트의 모든 업로드를 거부합니다",
+    "refusesUploads": "Teyvat.me Capture과 웹사이트의 모든 업로드를 거부합니다",
     "canStillSignIn": "로그인과 열람은 계속 가능합니다"
   },
   "status": {
@@ -344,7 +344,7 @@
     "neverUsed": "사용한 적 없음",
     "unlink": "연결 해제",
     "userKey": "사용자 키",
-    "userKeyTitle": "모든 계정용 Irminsul 키",
+    "userKeyTitle": "모든 계정용 Teyvat.me Capture 키",
     "revoke": "폐기",
     "staffHistory": "스태프 기록",
     "suspensionLifted": "정지 해제됨",
@@ -360,7 +360,7 @@
     "unlinked": "연결 해제됨",
     "notUnlinked": "연결이 해제되지 않음",
     "revokeTitle": "전체 계정 키 폐기",
-    "revokeDetail": "Irminsul은 즉시 이 키로 업로드할 수 없게 되며, 사용자는 설정에서 새 키를 만들 수 있습니다.",
+    "revokeDetail": "Teyvat.me Capture은 즉시 이 키로 업로드할 수 없게 되며, 사용자는 설정에서 새 키를 만들 수 있습니다.",
     "keyRevoked": "키 폐기됨",
     "notRevoked": "폐기되지 않음",
     "resetKeyTitle": "가져오기 키 초기화",

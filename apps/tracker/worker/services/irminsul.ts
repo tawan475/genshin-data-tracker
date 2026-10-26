@@ -28,7 +28,6 @@ import {
 import { ACCESS_TTL_S, REFRESH_TTL_S, pruneSessionsStatement, requestOrigin } from '../lib/session'
 import { accessibleAccountsSql, editableBy, type KeyAccount, type KeyBlock } from './accounts'
 import { revokeLiveSession } from './live'
-import { LIVE_SYNC_SQL } from './live-sync'
 
 /** A code is good for this long after Allow (the browser hands it straight to irminsul). */
 export const CODE_TTL_MS = 60_000
@@ -208,9 +207,7 @@ export async function loadUploadSession(
   const [session, accounts] = await d1.batch<Record<string, unknown>>([
     d1.prepare(SESSION_SQL).bind(claims.sid, claims.userId, Date.now(), claims.ver),
     d1
-      .prepare(
-        accessibleAccountsSql(`a.id, a.name, a.uid, a.server, ${LIVE_SYNC_SQL()}, a.user_id`),
-      )
+      .prepare(accessibleAccountsSql(`a.id, a.name, a.uid, a.server, a.user_id`))
       .bind(claims.userId),
   ])
   const row = session!.results[0]

@@ -81,7 +81,7 @@
     "newestPull": "En yeni dilek, oyun saati",
     "synced": "{ago} senkronize edildi",
     "syncedTitle": "Yeni dilekler {time} saklandı",
-    "syncHelp": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin): irminsul her afişi, ardından anahtar geçerli kaldıkça (~24 sa) her yeni dileği senkronize eder. Oyunun dilek bağlantısı son altı ayı da getirir. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",
+    "syncHelp": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin): Teyvat.me Capture her afişi, ardından anahtar geçerli kaldıkça (~24 sa) her yeni dileği senkronize eder. Oyunun dilek bağlantısı son altı ayı da getirir. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",
     "empty": "Henüz dilek yok",
     "emptyBody": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin) veya oyunun dilek bağlantısıyla içe aktar. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",
     "banners": "Afişler",
@@ -148,7 +148,7 @@
       "ps3": "Aşağıya yapıştır. Başarısız olursa PlayStation'ını bir HoYoverse hesabına bağla ve bilgisayar veya telefon adımlarını kullan.",
       "pcRun": "PowerShell'i aç (Başlat, PowerShell yaz) ve çalıştır:",
       "pcPaste": "Bağlantıyı kopyalar: aşağıya yapıştır.",
-      "pcPasteTitle": "irminsul'un Copy wish URL düğmesi aynı bağlantıyı verir"
+      "pcPasteTitle": "Teyvat.me Capture'un Copy wish URL düğmesi aynı bağlantıyı verir"
     },
     "scriptTitle": "Bu bilgisayardaki oyunun web önbelleğini okur, bağlantıyı HoYoverse ile bir kez kontrol eder, kopyalar. Başka bir şey yapmaz.",
     "copied": "Kopyalandı",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} zaten var",
     "notImported": "İçe aktarılmadı",
     "deleteTitle": "Dilek geçmişi silinsin mi?",
-    "deleteDetail": "Bu hesabın tüm {n} dileği kaldırılır. irminsul son altı ayı tekrar getirebilir.",
+    "deleteDetail": "Bu hesabın tüm {n} dileği kaldırılır. Teyvat.me Capture son altı ayı tekrar getirebilir.",
     "deleteConfirm": "Sil",
     "notDeleted": "Silinmedi",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), paimon.moe içe aktarıcı CSV'si veya paimon.moe yedeği (Settings → Export)",

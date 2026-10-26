@@ -81,7 +81,7 @@
     "newestPull": "Oração mais recente, relógio do jogo",
     "synced": "Sincronizado {ago}",
     "syncedTitle": "Novas Orações armazenadas {time}",
-    "syncHelp": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida): o irminsul sincroniza todos os banners e depois cada Oração nova enquanto a chave durar (~24 h). O link de Orações do jogo também traz os últimos seis meses. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",
+    "syncHelp": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida): o Teyvat.me Capture sincroniza todos os banners e depois cada Oração nova enquanto a chave durar (~24 h). O link de Orações do jogo também traz os últimos seis meses. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",
     "empty": "Nenhuma Oração ainda",
     "emptyBody": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida), ou importe com o link de Orações do jogo. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",
     "banners": "Banners",
@@ -148,7 +148,7 @@
       "ps3": "Cole abaixo. Se falhar, vincule o PlayStation a uma conta HoYoverse e siga os passos de PC ou celular.",
       "pcRun": "Abra o PowerShell (Iniciar, digite PowerShell) e execute:",
       "pcPaste": "Ele copia o link: cole abaixo.",
-      "pcPasteTitle": "O Copy wish URL do irminsul dá o mesmo link"
+      "pcPasteTitle": "O Copy wish URL do Teyvat.me Capture dá o mesmo link"
     },
     "scriptTitle": "Lê o cache web do jogo neste PC, verifica o link uma vez com a HoYoverse e o copia. Nada mais.",
     "copied": "Copiado",
@@ -248,7 +248,7 @@
     "alreadyHeld": "{n} já armazenadas",
     "notImported": "Não importado",
     "deleteTitle": "Excluir o histórico de Orações?",
-    "deleteDetail": "Todas as {n} orações desta conta serão removidas. O irminsul pode buscar os últimos seis meses de novo.",
+    "deleteDetail": "Todas as {n} orações desta conta serão removidas. O Teyvat.me Capture pode buscar os últimos seis meses de novo.",
     "deleteConfirm": "Excluir",
     "notDeleted": "Não excluído",
     "dropTitle": "UIGF JSON (Snap Hutao, Starward, genshin-wish-export…), um CSV do importador do paimon.moe, ou o backup do paimon.moe (Settings → Export)",

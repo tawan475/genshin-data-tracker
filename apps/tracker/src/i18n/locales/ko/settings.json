@@ -24,14 +24,14 @@
     "emailNotRemoved": "이메일이 제거되지 않음"
   },
   "importKey": {
-    "title": "Irminsul (모든 계정)",
+    "title": "Teyvat.me Capture (모든 계정)",
     "newTitle": "새 가져오기 키를 만들까요?",
     "newDetail": "이전 키는 더 이상 작동하지 않습니다.",
     "newKey": "새 키",
     "newKeyTitle": "키는 한 번만 표시됩니다. 새 키를 만들면 이전 키를 대체합니다.",
     "notMade": "키가 만들어지지 않음",
     "revokeTitle": "가져오기 키를 폐기할까요?",
-    "revokeDetail": "Irminsul이 이 키로 업로드하지 않게 됩니다. 각 계정의 키는 계속 작동합니다.",
+    "revokeDetail": "Teyvat.me Capture이 이 키로 업로드하지 않게 됩니다. 각 계정의 키는 계속 작동합니다.",
     "revoke": "폐기",
     "revoked": "키 폐기됨",
     "notRevoked": "키가 폐기되지 않음",

@@ -24,14 +24,14 @@
     "emailNotRemoved": "邮箱未移除"
   },
   "importKey": {
-    "title": "Irminsul（全部账号）",
+    "title": "Teyvat.me Capture（全部账号）",
     "newTitle": "生成新的导入密钥？",
     "newDetail": "旧密钥将失效。",
     "newKey": "新密钥",
     "newKeyTitle": "密钥仅显示一次。新密钥会替换旧密钥。",
     "notMade": "未生成密钥",
     "revokeTitle": "吊销导入密钥？",
-    "revokeDetail": "Irminsul 将无法再用它上传。各账号自己的密钥不受影响。",
+    "revokeDetail": "Teyvat.me Capture 将无法再用它上传。各账号自己的密钥不受影响。",
     "revoke": "吊销",
     "revoked": "密钥已吊销",
     "notRevoked": "密钥未吊销",

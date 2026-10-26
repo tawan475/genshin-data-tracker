@@ -107,7 +107,7 @@
     "alertTitle": "Resina primordiale {amount}",
     "source": {
       "manual": "impostata a mano",
-      "player": "irminsul, all'accesso",
+      "player": "Teyvat.me Capture, all'accesso",
       "inventory": "l'istantanea"
     },
     "unknown": "Resina primordiale: ancora sconosciuta · impostala",
@@ -377,11 +377,11 @@
     "autoWl": "Auto ({wl})",
     "ar": "GA",
     "arTitle": "Grado avventura (1–60)",
-    "arTitleIrminsul": "Grado avventura (1–60) · {ar} da irminsul",
-    "fromIrminsul": "da irminsul",
+    "arTitleIrminsul": "Grado avventura (1–60) · {ar} da Teyvat.me Capture",
+    "fromIrminsul": "da Teyvat.me Capture",
     "wl": "LM",
     "wlTitle": "Livello del mondo (0–9)",
-    "wlTitleIrminsul": "Livello del mondo (0–9) · {wl} da irminsul",
+    "wlTitleIrminsul": "Livello del mondo (0–9) · {wl} da Teyvat.me Capture",
     "wlLabel": "Livello del mondo",
     "refreshesTitle": "Ricariche di Resina primordiale al giorno ({per} resina ciascuna): i giorni contano 180 + {per} per ricarica",
     "refreshes": "Ricariche",

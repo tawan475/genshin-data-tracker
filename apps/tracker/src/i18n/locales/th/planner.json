@@ -107,7 +107,7 @@
     "alertTitle": "Original Resin {amount}",
     "source": {
       "manual": "ตั้งเอง",
-      "player": "irminsul ตอนล็อกอิน",
+      "player": "Teyvat.me Capture ตอนล็อกอิน",
       "inventory": "สแนปช็อต"
     },
     "unknown": "Original Resin: ยังไม่ทราบ · ตั้งค่า",
@@ -377,11 +377,11 @@
     "autoWl": "อัตโนมัติ ({wl})",
     "ar": "AR",
     "arTitle": "แรงก์ผจญภัย (1–60)",
-    "arTitleIrminsul": "แรงก์ผจญภัย (1–60) · {ar} จาก irminsul",
-    "fromIrminsul": "จาก irminsul",
+    "arTitleIrminsul": "แรงก์ผจญภัย (1–60) · {ar} จาก Teyvat.me Capture",
+    "fromIrminsul": "จาก Teyvat.me Capture",
     "wl": "WL",
     "wlTitle": "ระดับโลก (0–9)",
-    "wlTitleIrminsul": "ระดับโลก (0–9) · {wl} จาก irminsul",
+    "wlTitleIrminsul": "ระดับโลก (0–9) · {wl} จาก Teyvat.me Capture",
     "wlLabel": "ระดับโลก",
     "refreshesTitle": "จำนวนครั้งที่เติม Original Resin ต่อวัน (ครั้งละ {per} Resin): นับวันละ 180 + {per} ต่อการเติม",
     "refreshes": "การเติม",

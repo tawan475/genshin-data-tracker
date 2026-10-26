@@ -36,6 +36,7 @@
     "hint": "สูงสุด {files} ไฟล์ ไฟล์ละ {mb} MB ใช้โฟลเดอร์ได้ด้วย"
   },
   "key": {
+    "title": "คีย์นำเข้า",
     "trackerUrl": "URL ของ Tracker",
     "importKey": "คีย์นำเข้า",
     "shownOnce": "แสดงเพียงครั้งเดียว",
@@ -50,9 +51,9 @@
     "notChanged": "ไม่ได้เปลี่ยนคีย์"
   },
   "steps": {
-    "paste": "Irminsul → Tracker → การตั้งค่า: วางทั้งสองค่า",
+    "paste": "Teyvat.me Capture → Tracker → การตั้งค่า: วางทั้งสองค่า",
     "tick": "ติ๊ก \"Auto export to tracker\"",
-    "start": "เปิด Irminsul ก่อนเข้าเกม"
+    "start": "เปิด Teyvat.me Capture ก่อนเข้าเกม"
   },
   "copy": {
     "copied": "คัดลอกแล้ว",

@@ -14,15 +14,16 @@
   "discarded": "Live-Änderungen gelöscht",
   "discardFailed": "Live-Änderungen konnten nicht gelöscht werden",
   "settings": {
-    "title": "Live-Sync",
-    "label": "Irminsul live folgen",
-    "description": "Solange Irminsul läuft, erscheinen seine Änderungen hier innerhalb von Sekunden, zwischen den Snapshots.",
-    "devices": "Live-Sync von diesem PC an: {accounts} (Kontoeinstellungen)",
+    "title": "Teyvat.me Capture",
+    "devices": "Live-Sync von diesem PC an: {accounts}",
     "deletePoints": "Diagrammpunkte löschen",
     "deletePointsTitle": "Die Diagrammpunkte löschen, die Live-Sync zwischen Snapshots gespeichert hat",
     "deletePointsConfirm": "Alle Diagrammpunkte dieses Kontos löschen? Snapshots bleiben.",
     "pointsDeleted": "Diagrammpunkte gelöscht",
-    "exportNote": "Exporte enthalten die Live-Änderungen und -Punkte (live/ in der ZIP)."
+    "exportNote": "Exporte enthalten die Live-Änderungen und -Punkte (live/ in der ZIP).",
+    "always": "Live-Updates an",
+    "alwaysTitle": "Die App sendet Änderungen zwischen Snapshots, solange sie läuft. Abschalten in der App.",
+    "devicesTitle": "In der App anmelden; ihre Sitzungen stehen unter Geräte"
   },
   "session": {
     "heading": "Sitzungen",
