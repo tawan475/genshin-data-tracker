@@ -120,12 +120,21 @@ describe('wish link proxy', () => {
   })
 
   it('limits pages per user', async () => {
-    const { client } = await signUp()
+    // The limiter counts in fixed one-minute windows: a run that crosses a
+    // minute boundary starts counting again, so it is run again with a new
+    // user (a run takes seconds, so the second never crosses one too).
     let status = 200
     let n = 0
-    while (status === 200 && n < 200) {
-      status = (await fetchPage(client, {})).status
-      n++
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { client } = await signUp()
+      const minute = Math.floor(Date.now() / 60_000)
+      status = 200
+      n = 0
+      while (status === 200 && n < 200) {
+        status = (await fetchPage(client, {})).status
+        n++
+      }
+      if (Math.floor(Date.now() / 60_000) === minute) break
     }
     expect(status).toBe(429)
     expect(n).toBe(121)
