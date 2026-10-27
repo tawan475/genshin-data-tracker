@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Dashboard"
   },
-  "landing": {
-    "heroLine1": "Meistere deine",
-    "heroLine2": "Genshin-Reise",
-    "tagline": "Jeder Login als Snapshot. Artefakte, Materialien, Verlauf.",
-    "openDashboard": "Dashboard öffnen",
-    "getStarted": "Loslegen",
-    "critDmg": "KSCH 21,8%"
-  },
   "appearance": "Sprache und Darstellung"
 }

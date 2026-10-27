@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Dasbor"
   },
-  "landing": {
-    "heroLine1": "Kuasai",
-    "heroLine2": "perjalanan Genshin-mu",
-    "tagline": "Setiap login, di-snapshot. Artefak, material, riwayat.",
-    "openDashboard": "Buka dasbor",
-    "getStarted": "Mulai",
-    "critDmg": "CRIT DMG 21.8%"
-  },
   "appearance": "Bahasa dan tampilan"
 }

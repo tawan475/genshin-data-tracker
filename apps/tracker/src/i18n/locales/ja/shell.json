@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "ダッシュボード"
   },
-  "landing": {
-    "heroLine1": "原神の旅を",
-    "heroLine2": "すべて記録",
-    "tagline": "ログインのたびにスナップショット。聖遺物、素材、履歴。",
-    "openDashboard": "ダッシュボードを開く",
-    "getStarted": "はじめる",
-    "critDmg": "会心ダメージ 21.8%"
-  },
   "appearance": "言語と外観"
 }

@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "대시보드"
   },
-  "landing": {
-    "heroLine1": "당신의",
-    "heroLine2": "원신 여정을 기록하세요",
-    "tagline": "로그인할 때마다 스냅샷. 성유물, 재료, 기록까지.",
-    "openDashboard": "대시보드 열기",
-    "getStarted": "시작하기",
-    "critDmg": "치명타 피해 21.8%"
-  },
   "appearance": "언어 및 화면"
 }

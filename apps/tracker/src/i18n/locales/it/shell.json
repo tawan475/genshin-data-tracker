@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Dashboard"
   },
-  "landing": {
-    "heroLine1": "Domina il tuo",
-    "heroLine2": "viaggio in Genshin",
-    "tagline": "Ogni accesso, in un'istantanea. Manufatti, materiali, cronologia.",
-    "openDashboard": "Apri la dashboard",
-    "getStarted": "Inizia",
-    "critDmg": "DAN da CRIT 21,8%"
-  },
   "appearance": "Lingua e aspetto"
 }

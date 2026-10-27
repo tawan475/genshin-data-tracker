@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "儀表板"
   },
-  "landing": {
-    "heroLine1": "掌握你的",
-    "heroLine2": "提瓦特之旅",
-    "tagline": "每次登入，自動快照。聖遺物、素材、歷史紀錄。",
-    "openDashboard": "開啟儀表板",
-    "getStarted": "開始使用",
-    "critDmg": "暴擊傷害 21.8%"
-  },
   "appearance": "語言與外觀"
 }

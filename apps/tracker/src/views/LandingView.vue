@@ -1,77 +1,45 @@
 <script setup lang="ts">
-import PublicFrame from '@/components/public/PublicFrame.vue'
-import { characterIcon } from '@/lib/assets'
-import { characterName } from '@/i18n/game-names'
-import { useSession } from '@/stores/session'
+import { ref } from 'vue'
+import LandingCapture from '@/components/landing/LandingCapture.vue'
+import LandingFaq from '@/components/landing/LandingFaq.vue'
+import LandingFooter from '@/components/landing/LandingFooter.vue'
+import LandingHero from '@/components/landing/LandingHero.vue'
+import LandingNav from '@/components/landing/LandingNav.vue'
+import LandingPrivacy from '@/components/landing/LandingPrivacy.vue'
+import LandingSteps from '@/components/landing/LandingSteps.vue'
+import LandingTracker from '@/components/landing/LandingTracker.vue'
+import AppearanceControls from '@/components/settings/AppearanceControls.vue'
+import UiModal from '@/components/ui/UiModal.vue'
+import '@/components/landing/landing.css'
 
-const session = useSession()
+/**
+ * The landing page: the capture app first, the tracker second (the user's
+ * order). Always dark (a public route). Signed in, its links lead to the
+ * dashboard instead of sign-in and sign-up.
+ */
+const languageOpen = ref(false)
 </script>
 
 <template>
-  <PublicFrame>
-    <main
-      class="relative z-10 mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 items-center gap-16 px-6 py-12 md:px-12 lg:grid-cols-2"
+  <div>
+    <div class="lp" data-theme="dark">
+      <LandingNav @language="languageOpen = true" />
+      <main>
+        <LandingHero />
+        <LandingSteps />
+        <LandingCapture />
+        <LandingTracker />
+        <LandingPrivacy />
+        <LandingFaq />
+      </main>
+      <LandingFooter />
+    </div>
+    <UiModal
+      :open="languageOpen"
+      :title="$t('settings.appearance.title')"
+      @close="languageOpen = false"
     >
-      <div class="animate-fade-up" style="animation-delay: 150ms">
-        <span
-          class="mb-6 inline-block rounded-full border border-blue-500/30 bg-blue-500/15 px-4 py-1.5 text-sm font-semibold text-blue-300"
-        >
-          Irminsul · GOOD
-        </span>
-        <h1 class="mb-6 text-5xl leading-tight font-bold tracking-tight md:text-7xl">
-          {{ $t('shell.landing.heroLine1') }} <br />
-          <span class="text-gradient">{{ $t('shell.landing.heroLine2') }}</span>
-        </h1>
-        <p class="mb-10 max-w-md text-lg text-gray-400">
-          {{ $t('shell.landing.tagline') }}
-        </p>
-        <div class="flex flex-col gap-4 sm:flex-row">
-          <RouterLink v-if="session.status === 'signed-in'" :to="{ name: 'home' }" class="btn-glow">
-            {{ $t('shell.landing.openDashboard') }}
-          </RouterLink>
-          <template v-else>
-            <RouterLink :to="{ name: 'register' }" class="btn-glow">{{
-              $t('shell.landing.getStarted')
-            }}</RouterLink>
-            <RouterLink :to="{ name: 'login' }" class="btn-glass">{{
-              $t('common.signIn')
-            }}</RouterLink>
-          </template>
-        </div>
-      </div>
-
-      <div
-        class="animate-fade-up relative h-[380px] lg:h-[480px]"
-        style="animation-delay: 300ms"
-        aria-hidden="true"
-      >
-        <div
-          class="glass-panel animate-float absolute top-[8%] left-1/2 w-[280px] -translate-x-1/2 p-6 lg:left-[8%] lg:translate-x-0"
-        >
-          <div class="mb-5 flex items-center gap-4">
-            <img
-              :src="characterIcon('Furina')"
-              alt=""
-              class="size-14 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 object-cover shadow-[0_0_15px_var(--paimon-glow)]"
-            />
-            <div>
-              <p class="text-lg font-bold">{{ characterName('Furina') }}</p>
-              <p class="text-sm text-gray-400">Lv 90 · C2</p>
-            </div>
-          </div>
-          <div class="h-1.5 overflow-hidden rounded-full bg-white/10">
-            <div class="h-full w-[85%] bg-paimon shadow-[0_0_10px_var(--paimon)]" />
-          </div>
-        </div>
-
-        <div
-          class="glass-panel animate-float-delayed absolute right-1/2 bottom-[8%] w-[240px] translate-x-1/2 p-6 lg:right-[8%] lg:translate-x-0"
-        >
-          <div class="mb-3 text-4xl text-paimon drop-shadow-[0_0_15px_rgba(245,158,11,0.6)]">✦</div>
-          <p class="mb-1 text-2xl font-bold text-emerald-400">CV 42.0</p>
-          <p class="font-medium text-gray-400">{{ $t('shell.landing.critDmg') }}</p>
-        </div>
-      </div>
-    </main>
-  </PublicFrame>
+      <AppearanceControls />
+    </UiModal>
+  </div>
 </template>

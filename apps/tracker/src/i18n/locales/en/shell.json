@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Dashboard"
   },
-  "landing": {
-    "heroLine1": "Master your",
-    "heroLine2": "Genshin journey",
-    "tagline": "Every login, snapshotted. Artifacts, materials, history.",
-    "openDashboard": "Open dashboard",
-    "getStarted": "Get started",
-    "critDmg": "Crit DMG 21.8%"
-  },
   "appearance": "Language and appearance"
 }

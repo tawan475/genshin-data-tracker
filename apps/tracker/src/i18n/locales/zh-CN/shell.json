@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "控制台"
   },
-  "landing": {
-    "heroLine1": "掌握你的",
-    "heroLine2": "提瓦特之旅",
-    "tagline": "每次登录，自动快照。圣遗物、材料、历史记录。",
-    "openDashboard": "打开控制台",
-    "getStarted": "开始使用",
-    "critDmg": "暴击伤害 21.8%"
-  },
   "appearance": "语言与外观"
 }

@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Tableau de bord"
   },
-  "landing": {
-    "heroLine1": "Maîtrisez votre",
-    "heroLine2": "aventure Genshin",
-    "tagline": "Chaque connexion, capturée. Artéfacts, matériaux, historique.",
-    "openDashboard": "Ouvrir le tableau de bord",
-    "getStarted": "Commencer",
-    "critDmg": "DGT CRIT 21,8 %"
-  },
   "appearance": "Langue et apparence"
 }

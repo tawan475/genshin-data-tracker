@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Bảng điều khiển"
   },
-  "landing": {
-    "heroLine1": "Làm chủ",
-    "heroLine2": "hành trình Genshin",
-    "tagline": "Mỗi lần đăng nhập đều được lưu lại. Thánh Di Vật, nguyên liệu, lịch sử.",
-    "openDashboard": "Mở bảng điều khiển",
-    "getStarted": "Bắt đầu",
-    "critDmg": "Sát Thương Bạo Kích 21.8%"
-  },
   "appearance": "Ngôn ngữ và giao diện"
 }

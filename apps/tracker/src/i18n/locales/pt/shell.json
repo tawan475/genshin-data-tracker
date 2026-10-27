@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Painel"
   },
-  "landing": {
-    "heroLine1": "Domine sua",
-    "heroLine2": "jornada em Genshin",
-    "tagline": "Cada login, capturado. Artefatos, materiais, histórico.",
-    "openDashboard": "Abrir painel",
-    "getStarted": "Começar",
-    "critDmg": "Dano Crítico 21,8%"
-  },
   "appearance": "Idioma e aparência"
 }

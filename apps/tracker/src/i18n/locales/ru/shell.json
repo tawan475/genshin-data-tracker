@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Панель"
   },
-  "landing": {
-    "heroLine1": "Покорите своё",
-    "heroLine2": "путешествие в Genshin",
-    "tagline": "Каждый вход — снимок. Артефакты, материалы, история.",
-    "openDashboard": "Открыть панель",
-    "getStarted": "Начать",
-    "critDmg": "Крит. урон 21.8%"
-  },
   "appearance": "Язык и оформление"
 }

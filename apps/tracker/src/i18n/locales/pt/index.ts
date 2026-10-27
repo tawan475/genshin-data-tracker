@@ -26,6 +26,7 @@ import share from './share.json'
 import ui from './ui.json'
 import live from './live.json'
 import sharing from './sharing.json'
+import landing from './landing.json'
 
 const messages: Record<string, unknown> = {
   common,
@@ -55,6 +56,7 @@ const messages: Record<string, unknown> = {
   ui,
   live,
   sharing,
+  landing,
 }
 
 export default messages

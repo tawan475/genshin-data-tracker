@@ -6,7 +6,8 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import { t } from '@/i18n'
 import { applyLocale, storedPreference } from '@/i18n/apply'
-import type { LocalePreference } from '@/i18n/locale'
+import { LANGUAGE_NAMES } from '@/i18n/language-names'
+import { LOCALES, type LocalePreference } from '@/i18n/locale'
 import { setClockPreference } from '@/lib/format'
 import { applyTheme, type ThemePreference } from '@/lib/theme'
 import { useFeedback } from '@/stores/feedback'
@@ -35,21 +36,7 @@ const themes = computed<{ value: ThemePreference; label: string }[]>(() => [
 /** Each language named in itself, whatever the language on screen. */
 const languages = computed<{ value: LocalePreference; label: string }[]>(() => [
   { value: 'system', label: t('settings.appearance.system') },
-  { value: 'en', label: 'English' },
-  { value: 'zh-CN', label: '简体中文' },
-  { value: 'zh-TW', label: '繁體中文' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'ru', label: 'Русский' },
-  { value: 'th', label: 'ไทย' },
-  { value: 'vi', label: 'Tiếng Việt' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'id', label: 'Bahasa Indonesia' },
-  { value: 'pt', label: 'Português' },
-  { value: 'it', label: 'Italiano' },
-  { value: 'tr', label: 'Türkçe' },
+  ...LOCALES.map((code) => ({ value: code, label: LANGUAGE_NAMES[code] })),
 ])
 
 const theme = computed<ThemePreference>({

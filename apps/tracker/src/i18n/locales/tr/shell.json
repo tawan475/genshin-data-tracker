@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Panel"
   },
-  "landing": {
-    "heroLine1": "Genshin yolculuğunu",
-    "heroLine2": "ustalıkla yönet",
-    "tagline": "Her giriş kaydedilir. Yadigarlar, malzemeler, geçmiş.",
-    "openDashboard": "Paneli aç",
-    "getStarted": "Başla",
-    "critDmg": "Kritik Hasar %21.8"
-  },
   "appearance": "Dil ve görünüm"
 }

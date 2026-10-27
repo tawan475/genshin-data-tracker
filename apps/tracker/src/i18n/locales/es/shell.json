@@ -100,13 +100,5 @@
   "public": {
     "dashboard": "Panel"
   },
-  "landing": {
-    "heroLine1": "Domina tu",
-    "heroLine2": "viaje en Genshin",
-    "tagline": "Cada inicio de sesión, capturado. Artefactos, materiales, historial.",
-    "openDashboard": "Abrir panel",
-    "getStarted": "Empezar",
-    "critDmg": "Daño CRIT 21.8%"
-  },
   "appearance": "Idioma y apariencia"
 }
