@@ -44,8 +44,9 @@
     "wardrobe": "Tủ Đồ",
     "aranara": "Aranara",
     "hangouts": "Sự Kiện Hẹn Hò",
-    "blueprints": "Bản Vẽ Nội Thất",
-    "events": "Sự Kiện"
+    "blueprints": "Ấm Trần Ca",
+    "events": "Sự Kiện",
+    "crafting": "Chế Tạo"
   },
   "archive": {
     "pick": "Mục Thư Viện",
@@ -105,7 +106,10 @@
     "invalidTitle": "Theo trò chơi, bộ bài này chưa dùng được",
     "deckTitle": "{characters} thẻ nhân vật + {cards} thẻ",
     "noDecks": "Không có bộ bài",
-    "proficiency": "Điểm thông thạo {n}"
+    "proficiency": "Điểm thông thạo {n}",
+    "bosses": "Thử thách boss đã mở",
+    "levels": "Màn thử thách đã chơi",
+    "tavern": "Màn ở quán rượu"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Khác",
     "respawns": "Boss và tinh anh",
     "respawnsUp": "{n}/{total} đã hồi sinh",
-    "allUp": "Tất cả đã hồi sinh"
+    "allUp": "Tất cả đã hồi sinh",
+    "domainsCleared": "Bí Cảnh đã vượt",
+    "domainsClearedHint": "Bí Cảnh đã nhận thưởng lần đầu",
+    "npcsMet": "Người đã gặp",
+    "npcsMetHint": "Người đã gặp trong danh sách của game",
+    "tribes": "Nhiệm vụ bộ tộc",
+    "tribalStates": {
+      "notOpen": "Chưa mở",
+      "locked": "Đã khóa",
+      "open": "Đang làm",
+      "finished": "Xong"
+    }
   },
   "hangouts": {
     "endings": "Kết thúc",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Đã học"
+    "learned": "Đã học",
+    "title": "Bản Vẽ Nội Thất",
+    "sets": "Bộ nội thất",
+    "companions": "Thưởng bạn đồng hành",
+    "comfort": "Tiên Lực Động Thiên",
+    "mansion": "Dinh thự",
+    "outdoor": "Ngoài trời"
   },
   "events": {
     "running": "Đang diễn ra",
@@ -195,5 +216,12 @@
     "waitingHint": "Mục đã hoàn thành nhưng chưa nhận thưởng, trong sự kiện đang diễn ra",
     "unnamed": "Sự kiện {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Bàn Chế Tạo",
+      "forging": "Rèn",
+      "processing": "Gia Công"
+    }
   }
 }

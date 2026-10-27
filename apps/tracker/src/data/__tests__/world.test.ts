@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CollectionCatalog } from '../collection-names'
-import { TEYVAT_SCENE, worldModel } from '../world'
+import { TEYVAT_SCENE, tribalRows, worldModel } from '../world'
 
 const texts = (entries: Record<string, [number, Record<string, string>][]>) =>
   Object.fromEntries(
@@ -104,5 +104,36 @@ describe('worldModel', () => {
     expect(world.offerings).toEqual([])
     expect(world.maps).toEqual([])
     expect(world.exploration).toHaveLength(1)
+  })
+})
+
+describe('tribalRows', () => {
+  it('groups the game data chapters by tribe, with the captured states', () => {
+    const natlan = {
+      data: {
+        tribalChapters: [
+          { id: 2, tribe: 1, chapter: 2053, quest: 0 },
+          { id: 1, tribe: 1, chapter: 2052, quest: 0 },
+          { id: 3, tribe: 2, chapter: 2054, quest: 0 },
+        ],
+      },
+      text: texts({
+        tribalChapters: [[1, { number: "Yupanqui's Turnfire: Act I", name: 'A Visitor' }]],
+        tribes: [[1, { name: 'Scions of the Canopy', title: '' }]],
+      }),
+      english: texts({ tribalChapters: [], tribes: [] }),
+    } as unknown as CollectionCatalog
+    const rows = tribalRows(
+      { '1': { state: 'finished', startedAt: 1 }, '2': { state: 'open' } },
+      natlan,
+    )
+    expect(rows.map((r) => [r.name, r.finished, r.chapters.map((c) => c.state)])).toEqual([
+      ['Scions of the Canopy', 1, ['finished', 'open']],
+      ['#2', 0, ['notOpen']],
+    ])
+    expect(rows[0]!.chapters[0]).toMatchObject({
+      number: "Yupanqui's Turnfire: Act I",
+      name: 'A Visitor',
+    })
   })
 })

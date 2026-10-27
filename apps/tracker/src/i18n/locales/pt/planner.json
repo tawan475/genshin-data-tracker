@@ -78,7 +78,8 @@
       "expeditions": "Expedições",
       "realm": "Moeda do Paraíso",
       "welkin": "Lua Nova",
-      "arRewards": "Recompensas de Nível de Aventura"
+      "arRewards": "Recompensas de Nível de Aventura",
+      "signIns": "Eventos de login"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "Faltam {n} dias",
       "weeklyBosses": "{n} de {total} descontos usados nesta semana",
       "arRewards": "Não resgatadas: Nível de Aventura {ranks}",
-      "arRewardsNone": "Todas resgatadas"
+      "arRewardsNone": "Todas resgatadas",
+      "signIns": "{n} eventos de login hoje",
+      "signInsNone": "Login feito em todos hoje"
     }
   },
   "view": {

@@ -44,8 +44,9 @@
     "wardrobe": "Armario",
     "aranara": "Aranara",
     "hangouts": "Eventos de encuentro",
-    "blueprints": "Planos de mobiliario",
-    "events": "Eventos"
+    "blueprints": "Tetera Caelestis",
+    "events": "Eventos",
+    "crafting": "Fabricación"
   },
   "archive": {
     "pick": "Pestaña del Archivo",
@@ -105,7 +106,10 @@
     "invalidTitle": "Según el juego, este mazo aún no se puede usar",
     "deckTitle": "{characters} cartas de personaje + {cards} cartas",
     "noDecks": "Sin mazos",
-    "proficiency": "Dominio {n}"
+    "proficiency": "Dominio {n}",
+    "bosses": "Duelos de jefe desbloqueados",
+    "levels": "Niveles de desafío jugados",
+    "tavern": "Niveles de la taberna"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Otras",
     "respawns": "Jefes y élites",
     "respawnsUp": "{n} de {total} disponibles",
-    "allUp": "Todo disponible"
+    "allUp": "Todo disponible",
+    "domainsCleared": "Dominios superados",
+    "domainsClearedHint": "Dominios con la recompensa de primera vez reclamada",
+    "npcsMet": "Personajes conocidos",
+    "npcsMetHint": "Personas conocidas, de la lista del juego",
+    "tribes": "Misiones de tribu",
+    "tribalStates": {
+      "notOpen": "Sin abrir",
+      "locked": "Bloqueado",
+      "open": "En curso",
+      "finished": "Hecho"
+    }
   },
   "hangouts": {
     "endings": "Finales",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Aprendidos"
+    "learned": "Aprendidos",
+    "title": "Planos de mobiliario",
+    "sets": "Conjuntos de mobiliario",
+    "companions": "Recompensas de compañeros",
+    "comfort": "Energía adeptal",
+    "mansion": "Mansión",
+    "outdoor": "Exterior"
   },
   "events": {
     "running": "En curso",
@@ -195,5 +216,12 @@
     "waitingHint": "Objetivos cumplidos con la recompensa pendiente, en eventos en curso",
     "unnamed": "Evento {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Mesa de síntesis",
+      "forging": "Forja",
+      "processing": "Procesamiento"
+    }
   }
 }

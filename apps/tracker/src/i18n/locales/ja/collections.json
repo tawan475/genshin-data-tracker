@@ -44,8 +44,9 @@
     "wardrobe": "クローゼット",
     "aranara": "アランナラ",
     "hangouts": "デートイベント",
-    "blueprints": "調度品の設計図",
-    "events": "イベント"
+    "blueprints": "塵歌壺",
+    "events": "イベント",
+    "crafting": "合成"
   },
   "archive": {
     "pick": "図鑑のタブ",
@@ -105,7 +106,10 @@
     "invalidTitle": "ゲーム上まだ使えないデッキです",
     "deckTitle": "キャラカード {characters} 枚 + カード {cards} 枚",
     "noDecks": "デッキなし",
-    "proficiency": "熟練度 {n}"
+    "proficiency": "熟練度 {n}",
+    "bosses": "解放済みのボス対局",
+    "levels": "挑戦したステージ",
+    "tavern": "酒場のステージ"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "その他",
     "respawns": "ボスと精鋭",
     "respawnsUp": "{total}体中{n}体が復活済み",
-    "allUp": "すべて復活済み"
+    "allUp": "すべて復活済み",
+    "domainsCleared": "クリアした秘境",
+    "domainsClearedHint": "初回クリア報酬を受け取った秘境",
+    "npcsMet": "出会った人",
+    "npcsMetHint": "ゲームの一覧で出会った人",
+    "tribes": "部族任務",
+    "tribalStates": {
+      "notOpen": "未開放",
+      "locked": "未解放",
+      "open": "進行中",
+      "finished": "完了"
+    }
   },
   "hangouts": {
     "endings": "エンディング",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "習得済み"
+    "learned": "習得済み",
+    "title": "調度品の設計図",
+    "sets": "調度品セット",
+    "companions": "仲間の報酬",
+    "comfort": "洞天仙力",
+    "mansion": "邸宅",
+    "outdoor": "屋外"
   },
   "events": {
     "running": "開催中",
@@ -195,5 +216,12 @@
     "waitingHint": "開催中のイベントで達成済みかつ未受取の項目",
     "unnamed": "イベント {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "合成台",
+      "forging": "鍛造",
+      "processing": "加工"
+    }
   }
 }

@@ -44,8 +44,9 @@
     "wardrobe": "Guarda-roupa",
     "aranara": "Aranara",
     "hangouts": "Eventos de Encontro",
-    "blueprints": "Plantas de Mobília",
-    "events": "Eventos"
+    "blueprints": "Bule de Chá",
+    "events": "Eventos",
+    "crafting": "Criação"
   },
   "archive": {
     "pick": "Aba do Arquivo",
@@ -105,7 +106,10 @@
     "invalidTitle": "Segundo o jogo, este deck ainda não pode ser usado",
     "deckTitle": "{characters} cartas de personagem + {cards} cartas",
     "noDecks": "Nenhum deck",
-    "proficiency": "Proficiência {n}"
+    "proficiency": "Proficiência {n}",
+    "bosses": "Duelos de chefe liberados",
+    "levels": "Níveis de desafio jogados",
+    "tavern": "Níveis da taverna"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Outras",
     "respawns": "Chefes e elites",
     "respawnsUp": "{n} de {total} reapareceram",
-    "allUp": "Todos reapareceram"
+    "allUp": "Todos reapareceram",
+    "domainsCleared": "Domínios concluídos",
+    "domainsClearedHint": "Domínios com a recompensa de primeira conclusão resgatada",
+    "npcsMet": "Pessoas encontradas",
+    "npcsMetHint": "Pessoas encontradas, da lista do jogo",
+    "tribes": "Missões de tribo",
+    "tribalStates": {
+      "notOpen": "Não aberto",
+      "locked": "Bloqueado",
+      "open": "Em andamento",
+      "finished": "Concluído"
+    }
   },
   "hangouts": {
     "endings": "Finais",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Aprendidas"
+    "learned": "Aprendidas",
+    "title": "Plantas de Mobília",
+    "sets": "Conjuntos de mobília",
+    "companions": "Recompensas de companheiros",
+    "comfort": "Energia Adeptal",
+    "mansion": "Mansão",
+    "outdoor": "Exterior"
   },
   "events": {
     "running": "Em andamento",
@@ -195,5 +216,12 @@
     "waitingHint": "Metas cumpridas com recompensa pendente, em eventos em andamento",
     "unnamed": "Evento {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Bancada de criação",
+      "forging": "Forja",
+      "processing": "Processamento"
+    }
   }
 }

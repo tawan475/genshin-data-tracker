@@ -78,7 +78,8 @@
       "expeditions": "Ekspedisi",
       "realm": "Realm Currency",
       "welkin": "Welkin Moon",
-      "arRewards": "Hadiah Adventure Rank"
+      "arRewards": "Hadiah Adventure Rank",
+      "signIns": "Event login"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "{n} hari tersisa",
       "weeklyBosses": "{n} dari {total} diskon terpakai minggu ini",
       "arRewards": "Belum diklaim: Adventure Rank {ranks}",
-      "arRewardsNone": "Semua sudah diklaim"
+      "arRewardsNone": "Semua sudah diklaim",
+      "signIns": "{n} event login hari ini",
+      "signInsNone": "Sudah login di semua hari ini"
     }
   },
   "view": {

@@ -44,8 +44,9 @@
     "wardrobe": "Lemari",
     "aranara": "Aranara",
     "hangouts": "Hangout Event",
-    "blueprints": "Cetak Biru Furnishing",
-    "events": "Event"
+    "blueprints": "Serenitea Pot",
+    "events": "Event",
+    "crafting": "Crafting"
   },
   "archive": {
     "pick": "Tab Arsip",
@@ -105,7 +106,10 @@
     "invalidTitle": "Menurut game, dek ini belum bisa dipakai",
     "deckTitle": "{characters} kartu karakter + {cards} kartu",
     "noDecks": "Tidak ada dek",
-    "proficiency": "Kemahiran {n}"
+    "proficiency": "Kemahiran {n}",
+    "bosses": "Duel boss terbuka",
+    "levels": "Level tantangan dimainkan",
+    "tavern": "Level tavern"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Lainnya",
     "respawns": "Boss dan elite",
     "respawnsUp": "{n} dari {total} muncul kembali",
-    "allUp": "Semua sudah muncul kembali"
+    "allUp": "Semua sudah muncul kembali",
+    "domainsCleared": "Domain diselesaikan",
+    "domainsClearedHint": "Domain yang hadiah pertama kalinya sudah diklaim",
+    "npcsMet": "Orang yang ditemui",
+    "npcsMetHint": "Orang yang ditemui dari daftar game",
+    "tribes": "Quest suku",
+    "tribalStates": {
+      "notOpen": "Belum dibuka",
+      "locked": "Terkunci",
+      "open": "Berlangsung",
+      "finished": "Selesai"
+    }
   },
   "hangouts": {
     "endings": "Ending",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Dipelajari"
+    "learned": "Dipelajari",
+    "title": "Cetak Biru Furnishing",
+    "sets": "Set furnishing",
+    "companions": "Hadiah companion",
+    "comfort": "Adeptal Energy",
+    "mansion": "Mansion",
+    "outdoor": "Luar ruangan"
   },
   "events": {
     "running": "Berlangsung",
@@ -195,5 +216,12 @@
     "waitingHint": "Target selesai yang hadiahnya belum diklaim, di event yang berlangsung",
     "unnamed": "Event {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Meja Crafting",
+      "forging": "Tempa",
+      "processing": "Pengolahan"
+    }
   }
 }

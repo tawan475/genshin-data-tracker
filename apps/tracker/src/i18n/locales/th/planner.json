@@ -78,7 +78,8 @@
       "expeditions": "ออกสำรวจ",
       "realm": "Realm Currency",
       "welkin": "พรแห่งดวงจันทร์",
-      "arRewards": "รางวัลระดับการผจญภัย"
+      "arRewards": "รางวัลระดับการผจญภัย",
+      "signIns": "กิจกรรมล็อกอิน"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "เหลือ {n} วัน",
       "weeklyBosses": "ใช้ส่วนลดสัปดาห์นี้แล้ว {n}/{total}",
       "arRewards": "ยังไม่รับ: ระดับการผจญภัย {ranks}",
-      "arRewardsNone": "รับรางวัลครบแล้ว"
+      "arRewardsNone": "รับรางวัลครบแล้ว",
+      "signIns": "วันนี้มีกิจกรรมล็อกอิน {n} รายการ",
+      "signInsNone": "วันนี้ล็อกอินครบแล้ว"
     }
   },
   "view": {

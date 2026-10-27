@@ -44,8 +44,9 @@
     "wardrobe": "衣橱",
     "aranara": "兰那罗",
     "hangouts": "邀约事件",
-    "blueprints": "摆设图纸",
-    "events": "活动"
+    "blueprints": "尘歌壶",
+    "events": "活动",
+    "crafting": "合成"
   },
   "archive": {
     "pick": "图鉴分类",
@@ -105,7 +106,10 @@
     "invalidTitle": "游戏显示该牌组暂不可用",
     "deckTitle": "角色牌 {characters} 张 + 卡牌 {cards} 张",
     "noDecks": "无牌组",
-    "proficiency": "熟练度 {n}"
+    "proficiency": "熟练度 {n}",
+    "bosses": "已解锁的对局挑战",
+    "levels": "已挑战的关卡",
+    "tavern": "酒馆关卡"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "其他",
     "respawns": "首领与精英",
     "respawnsUp": "{total}个中{n}个已刷新",
-    "allUp": "全部已刷新"
+    "allUp": "全部已刷新",
+    "domainsCleared": "已通关秘境",
+    "domainsClearedHint": "已领取首通奖励的秘境",
+    "npcsMet": "已结识的人",
+    "npcsMetHint": "游戏名单中已结识的人",
+    "tribes": "部族任务",
+    "tribalStates": {
+      "notOpen": "未开放",
+      "locked": "未解锁",
+      "open": "进行中",
+      "finished": "已完成"
+    }
   },
   "hangouts": {
     "endings": "结局",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "已习得"
+    "learned": "已习得",
+    "title": "摆设图纸",
+    "sets": "摆设套装",
+    "companions": "同伴奖励",
+    "comfort": "洞天仙力",
+    "mansion": "宅邸",
+    "outdoor": "室外"
   },
   "events": {
     "running": "进行中",
@@ -195,5 +216,12 @@
     "waitingHint": "进行中的活动里已完成但奖励未领取的项目",
     "unnamed": "活动 {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "合成台",
+      "forging": "锻造",
+      "processing": "加工"
+    }
   }
 }

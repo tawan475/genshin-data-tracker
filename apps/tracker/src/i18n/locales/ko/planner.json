@@ -78,7 +78,8 @@
       "expeditions": "탐사 파견",
       "realm": "선계 화폐",
       "welkin": "공월 축복",
-      "arRewards": "모험 등급 보상"
+      "arRewards": "모험 등급 보상",
+      "signIns": "출석 이벤트"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "{n}일 남음",
       "weeklyBosses": "이번 주 할인 {n}/{total}회 사용",
       "arRewards": "미수령: 모험 등급 {ranks}",
-      "arRewardsNone": "보상을 모두 받음"
+      "arRewardsNone": "보상을 모두 받음",
+      "signIns": "오늘 출석할 이벤트 {n}개",
+      "signInsNone": "오늘 모두 출석함"
     }
   },
   "view": {

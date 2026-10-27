@@ -78,7 +78,8 @@
       "expeditions": "Keşifler",
       "realm": "Çaydanlık Parası",
       "welkin": "Yeni Ayın Lütfu",
-      "arRewards": "Macera Rütbesi ödülleri"
+      "arRewards": "Macera Rütbesi ödülleri",
+      "signIns": "Giriş etkinlikleri"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "{n} gün kaldı",
       "weeklyBosses": "Bu hafta {total} indirimden {n} kullanıldı",
       "arRewards": "Alınmadı: Macera Rütbesi {ranks}",
-      "arRewardsNone": "Hepsi alındı"
+      "arRewardsNone": "Hepsi alındı",
+      "signIns": "Bugün {n} giriş etkinliği",
+      "signInsNone": "Bugün hepsine giriş yapıldı"
     }
   },
   "view": {

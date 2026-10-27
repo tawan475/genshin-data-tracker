@@ -1,4 +1,4 @@
-import type { GiExploration } from '@gdt/shared'
+import type { GiExploration, GiTribalState } from '@gdt/shared'
 import { idLabel, type CollectionCatalog } from './collection-names'
 
 /**
@@ -228,4 +228,55 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
     .sort((a, b) => (a.city || Infinity) - (b.city || Infinity))
 
   return { statues, reputation, offerings: offeringRows, maps, exploration: exploreRows }
+}
+
+export interface TribalChapter {
+  id: number
+  /** "Yupanqui's Turnfire: Act I" */
+  number: string
+  name: string
+  state: GiTribalState
+}
+
+export interface TribeRow {
+  tribe: number
+  name: string
+  chapters: TribalChapter[]
+  finished: number
+}
+
+/**
+ * Natlan's tribal chapters (Capture 1.11.0) by tribe, in the game data's
+ * order; chapters the capture lacks count as not open. Pure.
+ */
+export function tribalRows(
+  chapters: NonNullable<GiExploration['tribalChapters']>,
+  catalog: CollectionCatalog,
+): TribeRow[] {
+  const text = (section: 'tribalChapters' | 'tribes', id: number, column: string) => {
+    const pick = (texts: CollectionCatalog['text']) =>
+      (texts[section].get(id) as Record<string, string> | undefined)?.[column] || ''
+    return pick(catalog.text) || pick(catalog.english)
+  }
+  const byTribe = new Map<number, TribalChapter[]>()
+  for (const row of catalog.data.tribalChapters) {
+    const tribe = n(row.tribe)
+    byTribe.set(tribe, [
+      ...(byTribe.get(tribe) ?? []),
+      {
+        id: row.id,
+        number: text('tribalChapters', row.id, 'number'),
+        name: text('tribalChapters', row.id, 'name') || idLabel(row.id),
+        state: chapters[String(row.id)]?.state ?? 'notOpen',
+      },
+    ])
+  }
+  return [...byTribe]
+    .map(([tribe, list]) => ({
+      tribe,
+      name: text('tribes', tribe, 'name') || idLabel(tribe),
+      chapters: list.sort((a, b) => a.id - b.id),
+      finished: list.filter((c) => c.state === 'finished').length,
+    }))
+    .sort((a, b) => a.tribe - b.tribe)
 }

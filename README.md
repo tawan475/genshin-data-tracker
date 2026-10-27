@@ -178,8 +178,9 @@ plus hand marks in `anecdote_marks`), and the planner's Tasks: the newest
 capture's `gi_tasks` ticks Daily Commissions (all done today) and the Spiral
 Abyss (full stars in the running period) and adds Expeditions, Realm Currency
 and Welkin Moon rows (Capture 1.7.0: Trounce Domains counts the weekly
-boss discounts used, and an Adventure Rank rewards row lists unclaimed
-ranks), while the capture is newer than the row's hand state
+boss discounts used, an Adventure Rank rewards row lists unclaimed
+ranks, and a Login events row asks to sign in to running calendars not
+signed today), while the capture is newer than the row's hand state
 (`components/planner/tasks.ts` `captureRead`), and Collections
 (`/app/a/:id/collections` = a card per collection with its figure,
 `/collections/<tab>` = its page; Achievements is a card too): World
@@ -192,7 +193,12 @@ respawns from `gi_tasks.respawns`, named by the farming data), Events
 (`gi_events`: window and reward counters, named by game-data `events` (else
 the notice board when one notice matches the dates); `src/data/events.ts`), Hangout Events
 (chapters, endings by `hangoutCgs` name, pictures), Furnishing Blueprints
-(learned of the game data's 1,405), monsters seen on Living Beings, Radiant
+(learned of the game data's 1,405; the tab is "Serenitea Pot" with
+furnishing sets, companion rewards and comfort per realm from Capture
+1.8.0+), Crafting (recipes unlocked at the bench, the blacksmith,
+processing), the TCG's boss duels, levels and Tavern, the World page's
+domains cleared, NPCs met and Natlan's tribal chapters, monsters seen on
+Living Beings, Radiant
 Spincrystals (which the newest capture has, which are missing), Anecdotes
 (the old `/anecdotes` page redirects there), the Archive, the Adventurer
 Handbook, Living Beings (defeats), TCG, the wardrobe and Aranara, each from

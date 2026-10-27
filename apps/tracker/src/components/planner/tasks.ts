@@ -144,7 +144,7 @@ export interface BuiltinTask {
   /** Seelie's key for it (`tasks[].id` in its export), when it has one. */
   seelie?: string
   /** Listed only while the newest capture has this part of `gi_tasks`. */
-  capture?: 'expeditions' | 'realm' | 'welkin' | 'arRewards'
+  capture?: 'expeditions' | 'realm' | 'welkin' | 'arRewards' | 'signIns'
 }
 
 const MONDAY = 1
@@ -259,6 +259,15 @@ export const BUILTIN_TASKS: readonly BuiltinTask[] = [
     rule: { kind: 'cooldown', hours: 24 },
     soonMs: 0,
     capture: 'arRewards',
+  },
+  {
+    id: 'sign-ins',
+    get name() {
+      return t('planner.task.builtin.signIns')
+    },
+    rule: { kind: 'daily' },
+    soonMs: 3 * HOUR,
+    capture: 'signIns',
   },
 ]
 
@@ -496,6 +505,25 @@ export function captureRead(
         back: done ? nextReset(week, now, server) : null,
         text: `${used}/${b.limit}`,
         title: t('planner.tasks.capture.weeklyBosses', { n: used, total: b.limit }),
+      }
+    }
+    case 'sign-ins': {
+      // Login events running now that still have days to claim: due until signed in today.
+      const today = lastReset({ kind: 'daily' }, now, server)!
+      const open = Object.values(tasks.signIns ?? {}).filter(
+        (c) => c.start * 1000 <= now && now < c.end * 1000 && c.claimed.length < c.days,
+      )
+      if (!tasks.signIns) return null
+      const left = open.filter((c) => c.lastAt * 1000 < today).length
+      return {
+        at,
+        done: left === 0,
+        back: left === 0 ? nextReset({ kind: 'daily' }, now, server) : null,
+        text: String(left),
+        title:
+          left === 0
+            ? t('planner.tasks.capture.signInsNone')
+            : t('planner.tasks.capture.signIns', { n: left }),
       }
     }
     case 'ar-rewards': {

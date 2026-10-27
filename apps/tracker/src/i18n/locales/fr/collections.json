@@ -44,8 +44,9 @@
     "wardrobe": "Armoire",
     "aranara": "Aranaras",
     "hangouts": "Événements Rendez-vous",
-    "blueprints": "Plans d'ameublement",
-    "events": "Événements"
+    "blueprints": "Théière",
+    "events": "Événements",
+    "crafting": "Fabrication"
   },
   "archive": {
     "pick": "Onglet des Archives",
@@ -105,7 +106,10 @@
     "invalidTitle": "Selon le jeu, ce deck n'est pas encore utilisable",
     "deckTitle": "{characters} cartes de personnage + {cards} cartes",
     "noDecks": "Aucun deck",
-    "proficiency": "Maîtrise {n}"
+    "proficiency": "Maîtrise {n}",
+    "bosses": "Duels de boss débloqués",
+    "levels": "Niveaux de défi joués",
+    "tavern": "Niveaux de la taverne"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Autres",
     "respawns": "Boss et élites",
     "respawnsUp": "{n} sur {total} réapparus",
-    "allUp": "Tout est réapparu"
+    "allUp": "Tout est réapparu",
+    "domainsCleared": "Donjons réussis",
+    "domainsClearedHint": "Donjons dont la récompense de première victoire est récupérée",
+    "npcsMet": "Personnages rencontrés",
+    "npcsMetHint": "Personnes rencontrées, de la liste du jeu",
+    "tribes": "Quêtes de tribu",
+    "tribalStates": {
+      "notOpen": "Pas ouvert",
+      "locked": "Verrouillé",
+      "open": "En cours",
+      "finished": "Fait"
+    }
   },
   "hangouts": {
     "endings": "Fins",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Appris"
+    "learned": "Appris",
+    "title": "Plans d'ameublement",
+    "sets": "Ensembles d'ameublement",
+    "companions": "Récompenses de compagnons",
+    "comfort": "Énergie adeptale",
+    "mansion": "Demeure",
+    "outdoor": "Extérieur"
   },
   "events": {
     "running": "En cours",
@@ -195,5 +216,12 @@
     "waitingHint": "Objectifs remplis dont la récompense attend, dans les événements en cours",
     "unnamed": "Événement {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Établi d'artisanat",
+      "forging": "Forge",
+      "processing": "Transformation"
+    }
   }
 }

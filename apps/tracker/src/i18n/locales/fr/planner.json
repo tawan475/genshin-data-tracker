@@ -78,7 +78,8 @@
       "expeditions": "Expéditions",
       "realm": "Pièces du royaume",
       "welkin": "Astre de la nuit",
-      "arRewards": "Récompenses de rang d'aventure"
+      "arRewards": "Récompenses de rang d'aventure",
+      "signIns": "Événements de connexion"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "{n} jours restants",
       "weeklyBosses": "{n} réductions sur {total} utilisées cette semaine",
       "arRewards": "Non récupérées : rang d'aventure {ranks}",
-      "arRewardsNone": "Toutes récupérées"
+      "arRewardsNone": "Toutes récupérées",
+      "signIns": "{n} événements de connexion aujourd'hui",
+      "signInsNone": "Connecté partout aujourd'hui"
     }
   },
   "view": {

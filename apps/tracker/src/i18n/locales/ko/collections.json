@@ -44,8 +44,9 @@
     "wardrobe": "옷장",
     "aranara": "아란나라",
     "hangouts": "데이트 이벤트",
-    "blueprints": "가구 설계도",
-    "events": "이벤트"
+    "blueprints": "주전자",
+    "events": "이벤트",
+    "crafting": "합성"
   },
   "archive": {
     "pick": "도감 탭",
@@ -105,7 +106,10 @@
     "invalidTitle": "게임상 아직 사용할 수 없는 덱입니다",
     "deckTitle": "캐릭터 카드 {characters}장 + 카드 {cards}장",
     "noDecks": "덱 없음",
-    "proficiency": "숙련도 {n}"
+    "proficiency": "숙련도 {n}",
+    "bosses": "해금한 보스 대결",
+    "levels": "도전한 스테이지",
+    "tavern": "주점 스테이지"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "기타",
     "respawns": "보스와 정예",
     "respawnsUp": "{total}개 중 {n}개 부활",
-    "allUp": "모두 부활"
+    "allUp": "모두 부활",
+    "domainsCleared": "클리어한 비경",
+    "domainsClearedHint": "첫 클리어 보상을 받은 비경",
+    "npcsMet": "만난 사람",
+    "npcsMetHint": "게임 목록에서 만난 사람",
+    "tribes": "부족 임무",
+    "tribalStates": {
+      "notOpen": "미개방",
+      "locked": "잠김",
+      "open": "진행 중",
+      "finished": "완료"
+    }
   },
   "hangouts": {
     "endings": "엔딩",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "습득"
+    "learned": "습득",
+    "title": "가구 설계도",
+    "sets": "가구 세트",
+    "companions": "동료 보상",
+    "comfort": "동천 선력",
+    "mansion": "저택",
+    "outdoor": "실외"
   },
   "events": {
     "running": "진행 중",
@@ -195,5 +216,12 @@
     "waitingHint": "진행 중인 이벤트에서 달성했지만 받지 않은 보상",
     "unnamed": "이벤트 {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "합성대",
+      "forging": "단조",
+      "processing": "가공"
+    }
   }
 }

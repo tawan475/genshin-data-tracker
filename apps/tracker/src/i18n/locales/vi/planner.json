@@ -78,7 +78,8 @@
       "expeditions": "Phái Đi",
       "realm": "Tiền Động Tiên",
       "welkin": "Không Nguyệt Chúc Phúc",
-      "arRewards": "Phần thưởng Hạng Mạo Hiểm"
+      "arRewards": "Phần thưởng Hạng Mạo Hiểm",
+      "signIns": "Sự kiện đăng nhập"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "Còn {n} ngày",
       "weeklyBosses": "Đã dùng {n}/{total} lượt giảm giá tuần này",
       "arRewards": "Chưa nhận: Hạng Mạo Hiểm {ranks}",
-      "arRewardsNone": "Đã nhận hết"
+      "arRewardsNone": "Đã nhận hết",
+      "signIns": "Hôm nay còn {n} sự kiện đăng nhập",
+      "signInsNone": "Hôm nay đã đăng nhập hết"
     }
   },
   "view": {

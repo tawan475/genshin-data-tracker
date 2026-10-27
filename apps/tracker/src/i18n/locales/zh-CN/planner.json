@@ -78,7 +78,8 @@
       "expeditions": "探索派遣",
       "realm": "洞天宝钱",
       "welkin": "空月祝福",
-      "arRewards": "冒险等阶奖励"
+      "arRewards": "冒险等阶奖励",
+      "signIns": "签到活动"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "剩余 {n} 天",
       "weeklyBosses": "本周已使用{n}/{total}次减半",
       "arRewards": "未领取：冒险等阶 {ranks}",
-      "arRewardsNone": "奖励已全部领取"
+      "arRewardsNone": "奖励已全部领取",
+      "signIns": "今天还有{n}个签到活动",
+      "signInsNone": "今天已全部签到"
     }
   },
   "view": {

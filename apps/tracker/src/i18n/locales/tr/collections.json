@@ -44,8 +44,9 @@
     "wardrobe": "Giysi Dolabı",
     "aranara": "Aranara",
     "hangouts": "Buluşma Etkinlikleri",
-    "blueprints": "Mobilya Planları",
-    "events": "Etkinlikler"
+    "blueprints": "Huzur Çaydanlığı",
+    "events": "Etkinlikler",
+    "crafting": "Üretim"
   },
   "archive": {
     "pick": "Arşiv sekmesi",
@@ -105,7 +106,10 @@
     "invalidTitle": "Oyuna göre bu deste henüz kullanılamaz",
     "deckTitle": "{characters} karakter kartı + {cards} kart",
     "noDecks": "Deste yok",
-    "proficiency": "Ustalık {n}"
+    "proficiency": "Ustalık {n}",
+    "bosses": "Açılan patron düelloları",
+    "levels": "Oynanan meydan okuma seviyeleri",
+    "tavern": "Meyhane seviyeleri"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Diğer",
     "respawns": "Patronlar ve seçkinler",
     "respawnsUp": "{total} içinden {n} yeniden doğdu",
-    "allUp": "Hepsi yeniden doğdu"
+    "allUp": "Hepsi yeniden doğdu",
+    "domainsCleared": "Tamamlanan zindanlar",
+    "domainsClearedHint": "İlk tamamlama ödülü alınan zindanlar",
+    "npcsMet": "Tanışılan kişiler",
+    "npcsMetHint": "Oyunun listesinden tanışılan kişiler",
+    "tribes": "Kabile görevleri",
+    "tribalStates": {
+      "notOpen": "Açılmadı",
+      "locked": "Kilitli",
+      "open": "Sürüyor",
+      "finished": "Bitti"
+    }
   },
   "hangouts": {
     "endings": "Sonlar",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Öğrenildi"
+    "learned": "Öğrenildi",
+    "title": "Mobilya Planları",
+    "sets": "Mobilya setleri",
+    "companions": "Yol arkadaşı ödülleri",
+    "comfort": "Adept Enerjisi",
+    "mansion": "Konak",
+    "outdoor": "Dış alan"
   },
   "events": {
     "running": "Süren",
@@ -195,5 +216,12 @@
     "waitingHint": "Süren etkinliklerde ödülü bekleyen tamamlanmış hedefler",
     "unnamed": "Etkinlik {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Üretim Tezgâhı",
+      "forging": "Dövme",
+      "processing": "İşleme"
+    }
   }
 }

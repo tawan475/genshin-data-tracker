@@ -1,6 +1,7 @@
 import {
   decodeCollections,
   decodeExploration,
+  decodeExtras,
   decodeProgress,
   decodeTasks,
   decodeWardrobe,
@@ -8,6 +9,8 @@ import {
   type CollectionsSection,
   type TasksSection,
   type ExplorationSection,
+  type ExtrasSection,
+  type GiTeapot,
   type GiEvent,
   type ProgressSection,
   type GiCollections,
@@ -37,6 +40,8 @@ type Parts = Required<GiCollections> & {
   respawns: NonNullable<GiTasks['respawns']>
   /** gi_events (Capture 1.7.0), by activity id. */
   events: Record<string, GiEvent>
+  /** gi_teapot (Capture 1.8.0): the Serenitea Pot's comfort. */
+  teapot: GiTeapot
 }
 export type CapturedCollections = { [K in keyof Parts]?: Captured<Parts[K]> }
 
@@ -47,6 +52,7 @@ export const COLLECTION_SECTIONS = [
   'exploration',
   'tasks',
   'progress',
+  'extras',
 ] as const
 
 /** A decoded bundle's snapshots (oldest first) and section texts (see account-data). */
@@ -90,6 +96,10 @@ export function capturedCollections(bundle: CollectionsBundle): CapturedCollecti
         decodeProgress(JSON.parse(progress) as ProgressSection).events,
         snapshot.takenAt,
       )
+    }
+    const extras = snapshot.extras ? bundle.texts.get(snapshot.extras) : undefined
+    if (extras !== undefined) {
+      put('teapot', decodeExtras(JSON.parse(extras) as ExtrasSection).teapot, snapshot.takenAt)
     }
   }
   return out

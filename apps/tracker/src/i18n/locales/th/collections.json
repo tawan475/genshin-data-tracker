@@ -44,8 +44,9 @@
     "wardrobe": "ตู้เสื้อผ้า",
     "aranara": "Aranara",
     "hangouts": "Hangout Event",
-    "blueprints": "พิมพ์เขียวเฟอร์นิเจอร์",
-    "events": "กิจกรรม"
+    "blueprints": "Serenitea Pot",
+    "events": "กิจกรรม",
+    "crafting": "การประดิษฐ์"
   },
   "archive": {
     "pick": "แท็บอัลบั้ม",
@@ -105,7 +106,10 @@
     "invalidTitle": "ตามเกม เด็คนี้ยังใช้ไม่ได้",
     "deckTitle": "การ์ดตัวละคร {characters} + การ์ด {cards}",
     "noDecks": "ไม่มีเด็ค",
-    "proficiency": "ความชำนาญ {n}"
+    "proficiency": "ความชำนาญ {n}",
+    "bosses": "การดวลบอสที่ปลดล็อก",
+    "levels": "ด่านท้าทายที่เล่นแล้ว",
+    "tavern": "ด่านในโรงเตี๊ยม"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "อื่นๆ",
     "respawns": "บอสและอีลีท",
     "respawnsUp": "เกิดใหม่แล้ว {n} จาก {total}",
-    "allUp": "เกิดใหม่ครบแล้ว"
+    "allUp": "เกิดใหม่ครบแล้ว",
+    "domainsCleared": "ดันเจี้ยนที่ผ่านแล้ว",
+    "domainsClearedHint": "ดันเจี้ยนที่รับรางวัลผ่านครั้งแรกแล้ว",
+    "npcsMet": "คนที่ได้พบ",
+    "npcsMetHint": "คนที่ได้พบจากรายชื่อในเกม",
+    "tribes": "ภารกิจเผ่า",
+    "tribalStates": {
+      "notOpen": "ยังไม่เปิด",
+      "locked": "ล็อก",
+      "open": "กำลังดำเนินอยู่",
+      "finished": "เสร็จแล้ว"
+    }
   },
   "hangouts": {
     "endings": "ตอนจบ",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "เรียนรู้แล้ว"
+    "learned": "เรียนรู้แล้ว",
+    "title": "พิมพ์เขียวเฟอร์นิเจอร์",
+    "sets": "ชุดเฟอร์นิเจอร์",
+    "companions": "รางวัลจากเพื่อนร่วมทาง",
+    "comfort": "พลังเซียน",
+    "mansion": "คฤหาสน์",
+    "outdoor": "ภายนอก"
   },
   "events": {
     "running": "กำลังดำเนินอยู่",
@@ -195,5 +216,12 @@
     "waitingHint": "เป้าหมายที่ทำแล้วแต่ยังไม่รับรางวัล ในกิจกรรมที่กำลังดำเนินอยู่",
     "unnamed": "กิจกรรม {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "โต๊ะประดิษฐ์",
+      "forging": "การตีเหล็ก",
+      "processing": "การแปรรูป"
+    }
   }
 }

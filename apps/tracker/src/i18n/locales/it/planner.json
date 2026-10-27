@@ -78,7 +78,8 @@
       "expeditions": "Spedizioni",
       "realm": "Moneta del regno",
       "welkin": "Benedizione lunare",
-      "arRewards": "Ricompense grado avventura"
+      "arRewards": "Ricompense grado avventura",
+      "signIns": "Eventi di accesso"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "{n} giorni rimasti",
       "weeklyBosses": "{n} sconti su {total} usati questa settimana",
       "arRewards": "Da riscattare: grado avventura {ranks}",
-      "arRewardsNone": "Tutte riscattate"
+      "arRewardsNone": "Tutte riscattate",
+      "signIns": "{n} eventi di accesso oggi",
+      "signInsNone": "Accesso fatto ovunque oggi"
     }
   },
   "view": {

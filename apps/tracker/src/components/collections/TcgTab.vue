@@ -50,6 +50,21 @@ const kinds = computed(() =>
 )
 const current = computed(() => kinds.value.find((k) => k.kind === kind.value)!)
 const copies = computed(() => Object.values(owned.value).reduce((sum, card) => sum + card.count, 0))
+/** Capture 1.8.0: boss challenges unlocked (of the game data's), levels played, Tavern levels. */
+const bosses = computed(() => {
+  const list = tcg.value?.bosses
+  if (!list) return null
+  const known = new Set(props.catalog.data.tcgBosses.map((b) => b.id))
+  return { have: list.filter((id) => known.has(id)).length, total: known.size }
+})
+const levelsPlayed = computed(() =>
+  tcg.value?.levels ? Object.keys(tcg.value.levels).length : null,
+)
+const tavernLevels = computed(() =>
+  tcg.value?.tavern
+    ? Object.values(tcg.value.tavern).reduce((sum, list) => sum + list.length, 0)
+    : null,
+)
 
 const shown = computed<GridEntry[]>(() =>
   current.value.entries
@@ -114,6 +129,22 @@ const decks = computed(() =>
       </li>
       <li class="flex min-w-0">
         <UiStat :label="$t('collections.tcg.decks')" :value="decks.length" exact />
+      </li>
+      <li v-if="bosses" class="flex min-w-0">
+        <UiStat :label="$t('collections.tcg.bosses')">
+          <template #value>
+            <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+              {{ formatNumber(bosses.have)
+              }}<span class="text-sm text-text-muted"> / {{ formatNumber(bosses.total) }}</span>
+            </span>
+          </template>
+        </UiStat>
+      </li>
+      <li v-if="levelsPlayed !== null" class="flex min-w-0">
+        <UiStat :label="$t('collections.tcg.levels')" :value="levelsPlayed" exact />
+      </li>
+      <li v-if="tavernLevels !== null" class="flex min-w-0">
+        <UiStat :label="$t('collections.tcg.tavern')" :value="tavernLevels" exact />
       </li>
     </ul>
 

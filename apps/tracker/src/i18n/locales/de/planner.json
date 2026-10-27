@@ -78,7 +78,8 @@
       "expeditions": "Erkundungen",
       "realm": "Kannentaler",
       "welkin": "Mondsegen",
-      "arRewards": "Abenteuerrang-Belohnungen"
+      "arRewards": "Abenteuerrang-Belohnungen",
+      "signIns": "Login-Events"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "Noch {n} Tage",
       "weeklyBosses": "{n} von {total} Rabatten diese Woche genutzt",
       "arRewards": "Nicht abgeholt: Abenteuerrang {ranks}",
-      "arRewardsNone": "Alle abgeholt"
+      "arRewardsNone": "Alle abgeholt",
+      "signIns": "Heute noch {n} Login-Events",
+      "signInsNone": "Heute überall eingeloggt"
     }
   },
   "view": {

@@ -20,7 +20,7 @@ import type { CapturedCollections } from '@/data/collections'
 import { idLabel, type CollectionCatalog } from '@/data/collection-names'
 import { respawnRows } from '@/data/respawns'
 import { useResource } from '@/data/use-resource'
-import { worldModel, type Progress } from '@/data/world'
+import { tribalRows, worldModel, type Progress } from '@/data/world'
 import { localizeFarming } from '@/i18n/localize-farming'
 import { formatNumber, formatRelative, formatDateTime } from '@/lib/format'
 import { t } from '@/i18n'
@@ -46,6 +46,22 @@ const respawns = computed(() => {
   return respawnRows(value, data ? localizeFarming(data) : null, Date.now())
 })
 const waiting = computed(() => respawns.value.filter((r) => r.next !== null))
+
+/** Capture 1.11.0: domains whose first clear was taken, NPCs met, Natlan's tribal chapters. */
+const ofKnown = (list: number[] | undefined, known: readonly { id: number }[]) => {
+  if (!list) return null
+  const ids = new Set(known.map((k) => k.id))
+  return { have: list.filter((id) => ids.has(id)).length, total: ids.size }
+}
+const domains = computed(() =>
+  ofKnown(exploration.value?.domainsCleared, props.catalog.data.domainEntries),
+)
+const npcs = computed(() => ofKnown(props.captured.npcsMet?.value, props.catalog.data.npcsMet))
+const tribes = computed(() =>
+  exploration.value?.tribalChapters
+    ? tribalRows(exploration.value.tribalChapters, props.catalog)
+    : [],
+)
 const world = computed(() =>
   exploration.value ? worldModel(exploration.value, props.catalog) : null,
 )
@@ -115,6 +131,42 @@ const MAP_PARTS = [
             :value="reputationTotal.have"
             :max="reputationTotal.total"
             :label="$t('collections.world.reputation')"
+          />
+        </UiStat>
+      </li>
+    </ul>
+
+    <ul
+      v-if="domains || npcs"
+      class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
+      :aria-label="$t('collections.summary')"
+    >
+      <li
+        v-for="part in [
+          { key: 'domainsCleared', value: domains },
+          { key: 'npcsMet', value: npcs },
+        ]"
+        v-show="part.value"
+        :key="part.key"
+        class="flex min-w-0"
+      >
+        <UiStat
+          :label="$t(`collections.world.${part.key}`)"
+          :hint="$t(`collections.world.${part.key}Hint`)"
+        >
+          <template #value>
+            <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+              {{ formatNumber(part.value?.have ?? 0)
+              }}<span class="text-sm text-text-muted">
+                / {{ formatNumber(part.value?.total ?? 0) }}</span
+              >
+            </span>
+          </template>
+          <UiProgress
+            class="mt-1"
+            :value="part.value?.have ?? 0"
+            :max="part.value?.total ?? 0"
+            :label="$t(`collections.world.${part.key}`)"
           />
         </UiStat>
       </li>
@@ -282,6 +334,50 @@ const MAP_PARTS = [
                 :title="$t('collections.world.pointsHint')"
                 >{{ $t('collections.world.points', { n: formatNumber(area.points) }) }}</span
               >
+            </li>
+          </ul>
+        </section>
+      </div>
+    </UiPanel>
+
+    <UiPanel v-if="tribes.length" :title="$t('collections.world.tribes')" flush>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-3 p-3 sm:p-5">
+        <section
+          v-for="tribe in tribes"
+          :key="tribe.tribe"
+          class="min-w-0 rounded-xl border border-border-default bg-surface-sunken p-3"
+        >
+          <h3 class="mb-2 flex items-center justify-between gap-2 text-sm font-semibold">
+            <span class="truncate">{{ tribe.name }}</span>
+            <span class="tabular shrink-0 font-mono font-normal text-text-secondary"
+              >{{ tribe.finished }}/{{ tribe.chapters.length }}</span
+            >
+          </h3>
+          <ul class="flex flex-col gap-1.5">
+            <li
+              v-for="chapter in tribe.chapters"
+              :key="chapter.id"
+              class="flex min-w-0 items-start gap-2 text-sm"
+              :title="`${chapter.number} · ${$t(`collections.world.tribalStates.${chapter.state}`)}`"
+            >
+              <span
+                class="mt-1.5 size-2 shrink-0 rounded-full"
+                :class="
+                  chapter.state === 'finished'
+                    ? 'bg-success-text'
+                    : chapter.state === 'open'
+                      ? 'bg-accent'
+                      : 'ring-1 ring-border-strong ring-inset'
+                "
+              />
+              <span class="flex min-w-0 flex-col">
+                <span
+                  class="truncate"
+                  :class="chapter.state === 'finished' ? '' : 'text-text-secondary'"
+                  >{{ chapter.name }}</span
+                >
+                <span class="truncate text-xs text-text-muted">{{ chapter.number }}</span>
+              </span>
             </li>
           </ul>
         </section>

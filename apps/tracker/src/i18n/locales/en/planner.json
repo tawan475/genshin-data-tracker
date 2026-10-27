@@ -78,7 +78,8 @@
       "expeditions": "Expeditions",
       "realm": "Realm Currency",
       "welkin": "Welkin Moon",
-      "arRewards": "Adventure Rank rewards"
+      "arRewards": "Adventure Rank rewards",
+      "signIns": "Login events"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "{n} days left",
       "weeklyBosses": "{n} of {total} discounts used this week",
       "arRewards": "Unclaimed: Adventure Rank {ranks}",
-      "arRewardsNone": "Every reward claimed"
+      "arRewardsNone": "Every reward claimed",
+      "signIns": "{n} login events to sign in today",
+      "signInsNone": "Signed in everywhere today"
     }
   },
   "view": {

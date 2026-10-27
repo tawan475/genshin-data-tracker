@@ -541,6 +541,26 @@ describe('ticked from a capture', () => {
     expect(rowOf('weekly-bosses', old)!.capture).toBeUndefined()
   })
 
+  it('asks to sign in to running login events not signed in today', () => {
+    const calendar = (lastAt: string, claimed = [1]) => ({
+      days: 7,
+      claimed,
+      lastAt: at(lastAt) / 1000,
+      start: at('2026-10-01T00:00:00Z') / 1000,
+      end: at('2026-10-30T00:00:00Z') / 1000,
+    })
+    // Asia: the game day of Oct 13 began at Oct 12 20:00 UTC.
+    const yesterday = capture({ signIns: { '1': calendar('2026-10-12T10:00:00Z') } })
+    expect(rowOf('sign-ins', yesterday)).toMatchObject({ due: true, capture: { text: '1' } })
+    const today = capture({ signIns: { '1': calendar('2026-10-13T01:00:00Z') } })
+    expect(rowOf('sign-ins', today)).toMatchObject({ due: false })
+    const full = capture({
+      signIns: { '1': calendar('2026-10-12T10:00:00Z', [1, 2, 3, 4, 5, 6, 7]) },
+    })
+    expect(rowOf('sign-ins', full)).toMatchObject({ due: false })
+    expect(rowOf('sign-ins', capture({}))).toBeUndefined()
+  })
+
   it('lists the AR rewards row while the capture has them, due while one is unclaimed', () => {
     expect(unclaimedArRewards([2, 3, 5], 6)).toEqual([4, 6])
     expect(rowOf('ar-rewards', capture({}))).toBeUndefined()

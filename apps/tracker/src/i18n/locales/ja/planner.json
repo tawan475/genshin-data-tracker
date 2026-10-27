@@ -78,7 +78,8 @@
       "expeditions": "派遣",
       "realm": "洞天宝銭",
       "welkin": "空月の祝福",
-      "arRewards": "冒険ランク報酬"
+      "arRewards": "冒険ランク報酬",
+      "signIns": "ログインイベント"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "残り{n}日",
       "weeklyBosses": "今週の半減 {n}/{total} 回使用済み",
       "arRewards": "未受取：冒険ランク {ranks}",
-      "arRewardsNone": "すべて受取済み"
+      "arRewardsNone": "すべて受取済み",
+      "signIns": "今日まだ{n}件のログインイベント",
+      "signInsNone": "今日はすべてログイン済み"
     }
   },
   "view": {

@@ -30,6 +30,8 @@ export interface CollectionFigures {
   'living-beings': CollectionFigure | null
   tcg: CollectionFigure | null
   recipes: CollectionFigure | null
+  /** Recipes unlocked at the bench, the blacksmith and processing together. */
+  crafting: CollectionFigure | null
   wardrobe: CollectionFigure | null
   /** Hangout endings reached. */
   hangouts: CollectionFigure | null
@@ -57,6 +59,7 @@ export function collectionFigures(
   const aranara = captured.aranara?.value
   const exploration = captured.exploration?.value
   const hangouts = captured.hangouts?.value
+  const crafting = captured.crafting?.value
   const events = captured.events?.value
   const blueprints = captured.blueprints?.value
   const withCatalog = <T>(
@@ -124,6 +127,17 @@ export function collectionFigures(
         })),
       ),
     ),
+    crafting: withCatalog(crafting, (c, v) => {
+      const kinds = ['crafting', 'forging', 'processing'] as const
+      const known = kinds.map((k) => new Set(c.data[k].map((r) => r.id)))
+      return {
+        have: kinds.reduce(
+          (sum, k, i) => sum + (v[k] ?? []).filter((id) => known[i]!.has(id)).length,
+          0,
+        ),
+        total: known.reduce((sum, set) => sum + set.size, 0),
+      }
+    }),
     hangouts: hangouts
       ? (() => {
           const endings = Object.values(hangouts).flatMap((h) => Object.values(h.endings))

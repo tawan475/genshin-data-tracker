@@ -44,6 +44,30 @@ const entries = computed(() => {
   ]
 })
 const have = computed(() => entries.value.filter((e) => e.have).length)
+
+/** Furnishing sets and companions' rewards (Capture 1.11.0), each of the game data's. */
+const learnedOf = (list: number[] | undefined, known: readonly { id: number }[]) => {
+  if (!list) return null
+  const ids = new Set(known.map((k) => k.id))
+  return { have: list.filter((id) => ids.has(id)).length, total: ids.size }
+}
+const sets = computed(() =>
+  learnedOf(props.captured.furnishingSets?.value, props.catalog.data.furnitureSets),
+)
+const companions = computed(() =>
+  learnedOf(props.captured.companionRewards?.value, props.catalog.data.companionRewards),
+)
+/** Comfort per realm (Capture 1.8.0's gi_teapot): the mansion's and the outdoor blocks'. */
+const realms = computed(() =>
+  Object.entries(props.captured.teapot?.value.comfort ?? {})
+    .map(([id, r]) => ({
+      id: Number(id),
+      name: nameOf(props.catalog, 'realms', Number(id)),
+      mansion: r.mansion,
+      outdoor: r.blocks.reduce((sum, b) => sum + b, 0),
+    }))
+    .sort((a, b) => b.mansion + b.outdoor - (a.mansion + a.outdoor)),
+)
 const total = computed(() => props.catalog.data.blueprints.length)
 const shown = computed<GridEntry[]>(() =>
   entries.value
@@ -75,9 +99,59 @@ const shown = computed<GridEntry[]>(() =>
           />
         </UiStat>
       </li>
+      <li
+        v-for="part in [
+          { key: 'sets', value: sets },
+          { key: 'companions', value: companions },
+        ]"
+        v-show="part.value"
+        :key="part.key"
+        class="flex min-w-0"
+      >
+        <UiStat :label="$t(`collections.blueprints.${part.key}`)">
+          <template #value>
+            <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+              {{ formatNumber(part.value?.have ?? 0)
+              }}<span class="text-sm text-text-muted">
+                / {{ formatNumber(part.value?.total ?? 0) }}</span
+              >
+            </span>
+          </template>
+          <UiProgress
+            class="mt-1"
+            :value="part.value?.have ?? 0"
+            :max="part.value?.total ?? 0"
+            :label="$t(`collections.blueprints.${part.key}`)"
+          />
+        </UiStat>
+      </li>
     </ul>
 
-    <UiPanel :title="$t('collections.tabs.blueprints')" flush>
+    <UiPanel v-if="realms.length" :title="$t('collections.blueprints.comfort')" flush>
+      <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-2 p-3 sm:p-5">
+        <li
+          v-for="realm in realms"
+          :key="realm.id"
+          class="flex min-w-0 flex-col gap-1 rounded-xl border border-border-default bg-surface-sunken p-3 text-sm"
+        >
+          <span class="truncate font-semibold" :title="realm.name">{{ realm.name }}</span>
+          <span class="flex justify-between gap-2 text-text-secondary">
+            {{ $t('collections.blueprints.mansion') }}
+            <span class="tabular font-mono text-text-primary">{{
+              formatNumber(realm.mansion)
+            }}</span>
+          </span>
+          <span class="flex justify-between gap-2 text-text-secondary">
+            {{ $t('collections.blueprints.outdoor') }}
+            <span class="tabular font-mono text-text-primary">{{
+              formatNumber(realm.outdoor)
+            }}</span>
+          </span>
+        </li>
+      </ul>
+    </UiPanel>
+
+    <UiPanel :title="$t('collections.blueprints.title')" flush>
       <div class="flex flex-col gap-3 p-3 sm:p-5">
         <HaveFilter
           v-model="filter"
@@ -88,7 +162,7 @@ const shown = computed<GridEntry[]>(() =>
         <EntryGrid
           v-if="shown.length > 0"
           :entries="shown"
-          :label="$t('collections.tabs.blueprints')"
+          :label="$t('collections.blueprints.title')"
         />
         <UiEmpty
           v-else-if="filter === 'missing'"

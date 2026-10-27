@@ -78,7 +78,8 @@
       "expeditions": "Expediciones",
       "realm": "Intramora",
       "welkin": "Bendición Lunar",
-      "arRewards": "Recompensas de rango de aventura"
+      "arRewards": "Recompensas de rango de aventura",
+      "signIns": "Eventos de inicio de sesión"
     }
   },
   "toast": {
@@ -551,7 +552,9 @@
       "welkin": "Quedan {n} días",
       "weeklyBosses": "{n} de {total} descuentos usados esta semana",
       "arRewards": "Sin reclamar: rango de aventura {ranks}",
-      "arRewardsNone": "Todas reclamadas"
+      "arRewardsNone": "Todas reclamadas",
+      "signIns": "{n} eventos de inicio de sesión hoy",
+      "signInsNone": "Hoy ya has iniciado sesión en todos"
     }
   },
   "view": {

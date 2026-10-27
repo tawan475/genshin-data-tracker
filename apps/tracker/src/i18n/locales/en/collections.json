@@ -44,8 +44,9 @@
     "wardrobe": "Wardrobe",
     "aranara": "Aranara",
     "hangouts": "Hangout Events",
-    "blueprints": "Furnishing Blueprints",
-    "events": "Events"
+    "blueprints": "Serenitea Pot",
+    "events": "Events",
+    "crafting": "Crafting"
   },
   "archive": {
     "pick": "Archive tab",
@@ -105,7 +106,10 @@
     "invalidTitle": "The game says this deck can't be used yet",
     "deckTitle": "{characters} character cards + {cards} cards",
     "noDecks": "No decks",
-    "proficiency": "Proficiency {n}"
+    "proficiency": "Proficiency {n}",
+    "bosses": "Boss duels unlocked",
+    "levels": "Challenge levels played",
+    "tavern": "Tavern levels"
   },
   "wardrobe": {
     "kinds": {
@@ -165,7 +169,18 @@
     "otherAreas": "Other",
     "respawns": "Bosses and elites",
     "respawnsUp": "{n} of {total} up",
-    "allUp": "Everything is up"
+    "allUp": "Everything is up",
+    "domainsCleared": "Domains cleared",
+    "domainsClearedHint": "Domains whose first-clear reward was taken",
+    "npcsMet": "NPCs met",
+    "npcsMetHint": "People met, of the game's list",
+    "tribes": "Tribal quests",
+    "tribalStates": {
+      "notOpen": "Not open",
+      "locked": "Locked",
+      "open": "Open",
+      "finished": "Done"
+    }
   },
   "hangouts": {
     "endings": "Endings",
@@ -185,7 +200,13 @@
     }
   },
   "blueprints": {
-    "learned": "Learned"
+    "learned": "Learned",
+    "title": "Furnishing Blueprints",
+    "sets": "Furnishing sets",
+    "companions": "Companion rewards",
+    "comfort": "Adeptal Energy",
+    "mansion": "Mansion",
+    "outdoor": "Outdoor"
   },
   "events": {
     "running": "Running",
@@ -195,5 +216,12 @@
     "waitingHint": "Counters done whose reward is still waiting, in running events",
     "unnamed": "Event {n}",
     "window": "{start} – {end}"
+  },
+  "crafting": {
+    "kinds": {
+      "crafting": "Crafting Bench",
+      "forging": "Forging",
+      "processing": "Processing"
+    }
   }
 }
