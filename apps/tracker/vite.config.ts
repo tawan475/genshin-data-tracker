@@ -187,7 +187,6 @@ export default defineConfig(({ command }) => ({
       'chartjs-plugin-zoom',
       'vue-chartjs',
       '@vueuse/core',
-      'modern-screenshot',
       'vue-i18n',
     ],
     // The game data (a git dependency, built ESM) is served as is: pre-bundling
