@@ -279,50 +279,6 @@ const ownerLine = computed(() => ownerParts(props.owner))
               >C{{ c.constellation }}</span
             >
           </div>
-          <!-- Small text on the art sits on a translucent backing in the card's
-               theme, so it reads over any art (light or dark, the splash or the namecard) -->
-          <p
-            class="flex items-baseline gap-[22px] self-start px-[18px] text-[28px]"
-            :class="[
-              CHIP_TEXT,
-              levelBar !== null || friendshipBar !== null
-                ? 'rounded-[20px] pt-[4px] pb-[10px]'
-                : 'rounded-full py-[4px]',
-            ]"
-          >
-            <span :title="levelTitle" class="flex flex-col gap-[6px]"
-              ><span
-                ><span class="font-normal opacity-85">Lv.&nbsp;</span>
-                <span class="font-bold">{{ c.level }}</span
-                ><span class="font-medium opacity-70">/{{ cap }}</span></span
-              >
-              <span
-                v-if="levelBar !== null"
-                class="block h-[6px] overflow-hidden rounded-full bg-current/20"
-                aria-hidden="true"
-                ><span
-                  class="block h-full rounded-full bg-[#818cf8]"
-                  :style="{ width: `${levelBar}%` }"
-              /></span>
-            </span>
-            <template v-if="c.friendship !== null">
-              <span class="self-start opacity-50">·</span>
-              <span :title="friendshipTitle" class="flex flex-col gap-[6px]"
-                ><span
-                  ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
-                  <span class="font-bold">{{ c.friendship }}</span></span
-                >
-                <span
-                  v-if="friendshipBar !== null"
-                  class="block h-[6px] overflow-hidden rounded-full bg-current/20"
-                  aria-hidden="true"
-                  ><span
-                    class="block h-full rounded-full bg-[#f472b6]"
-                    :style="{ width: `${friendshipBar}%` }"
-                /></span>
-              </span>
-            </template>
-          </p>
           <GameStars v-if="c.rarity" :rarity="c.rarity" :px="34" class="pl-[2px]" />
         </div>
 
@@ -352,38 +308,81 @@ const ownerLine = computed(() => ownerParts(props.owner))
 
         <!-- Talents, then the owner and the capture date with the site, flush with the panels' foot -->
         <div class="flex flex-col gap-[22px]">
-          <ul class="flex items-end gap-[30px]" :aria-label="$t('game.talents')">
-            <li
-              v-for="t in talents"
-              :key="t.key"
-              class="flex flex-col items-center gap-[10px]"
-              :title="talentTitle(t)"
-            >
-              <ElementDisc :src="glyphs[t.key]" :element="c.element" :px="112" :glyph="90" />
-              <span
-                class="flex h-[40px] items-center gap-[6px] rounded-full bg-(--card-pill) px-[14px]"
-                :class="t.crowned ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]' : ''"
+          <div class="flex items-end gap-[30px]">
+            <ul class="flex items-end gap-[30px]" :aria-label="$t('game.talents')">
+              <li
+                v-for="t in talents"
+                :key="t.key"
+                class="flex flex-col items-center gap-[10px]"
+                :title="talentTitle(t)"
               >
-                <FadeImage
-                  v-if="t.crowned"
-                  :src="crown"
-                  :alt="$t('characters.crowned')"
-                  class="ml-[-6px] size-[30px]"
-                />
-                <span class="text-[26px] font-bold" :class="talentTone(t)">{{ t.level }}</span>
+                <ElementDisc :src="glyphs[t.key]" :element="c.element" :px="112" :glyph="90" />
+                <span
+                  class="flex h-[40px] items-center gap-[6px] rounded-full bg-(--card-pill) px-[14px]"
+                  :class="t.crowned ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]' : ''"
+                >
+                  <FadeImage
+                    v-if="t.crowned"
+                    :src="crown"
+                    :alt="$t('characters.crowned')"
+                    class="ml-[-6px] size-[30px]"
+                  />
+                  <span class="text-[26px] font-bold" :class="talentTone(t)">{{ t.level }}</span>
+                </span>
+              </li>
+            </ul>
+            <!-- Level and friendship beside the talents, each over an EXP bar of the
+               same fixed length (the canvas copy: share-card-canvas LEVEL_BOX) -->
+            <div
+              class="flex w-[260px] shrink-0 flex-col gap-[10px] rounded-[20px] px-[18px] pt-[10px] pb-[14px] text-[26px]"
+              :class="CHIP_TEXT"
+            >
+              <span :title="levelTitle" class="flex flex-col gap-[4px]"
+                ><span
+                  ><span class="font-normal opacity-85">Lv.&nbsp;</span
+                  ><span class="font-bold">{{ c.level }}</span
+                  ><span class="font-medium opacity-70">/{{ cap }}</span></span
+                >
+                <span
+                  class="block h-[6px] overflow-hidden rounded-full bg-current/20"
+                  aria-hidden="true"
+                  ><span
+                    v-if="levelBar !== null"
+                    class="block h-full rounded-full bg-[#818cf8]"
+                    :style="{ width: `${levelBar}%` }"
+                /></span>
               </span>
-            </li>
-          </ul>
+              <span
+                v-if="c.friendship !== null"
+                :title="friendshipTitle"
+                class="flex flex-col gap-[4px]"
+                ><span
+                  ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span
+                  ><span class="font-bold">{{ c.friendship }}</span></span
+                >
+                <span
+                  class="block h-[6px] overflow-hidden rounded-full bg-current/20"
+                  aria-hidden="true"
+                  ><span
+                    v-if="friendshipBar !== null"
+                    class="block h-full rounded-full bg-[#f472b6]"
+                    :style="{ width: `${friendshipBar}%` }"
+                /></span>
+              </span>
+            </div>
+          </div>
+          <!-- max-w-full: a long name gives way (truncate) so the line stays inside the column -->
           <div
-            class="flex flex-col gap-[2px] self-start rounded-[18px] px-[18px] py-[10px]"
+            class="flex max-w-full min-w-0 flex-col gap-[2px] self-start rounded-[18px] px-[18px] py-[10px]"
             :class="CHIP_TEXT"
           >
             <p v-if="ownerLine.length" class="flex min-w-0 items-center gap-[12px] text-[22px]">
               <template v-for="(part, index) in ownerLine" :key="index">
-                <span v-if="index" class="opacity-60">·</span>
-                <span class="truncate" :class="index === 0 && owner.name ? 'font-semibold' : ''">{{
-                  part
-                }}</span>
+                <span v-if="index" class="shrink-0 opacity-60">·</span>
+                <span
+                  :class="index === 0 && owner.name ? 'min-w-0 truncate font-semibold' : 'shrink-0'"
+                  >{{ part }}</span
+                >
               </template>
             </p>
             <p class="flex items-center gap-[10px] text-[16px] whitespace-nowrap opacity-80">

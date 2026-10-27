@@ -103,6 +103,8 @@ const MIDDLE = { x: PAD_X + 700 + 32, w: 528 }
 const RIGHT = { x: PAD_X + 700 + 32 + 528 + 32, w: 532 }
 /** CSS's `line-height: 1.5` (the card's inherited line height). */
 const LH = 1.5
+/** The level and friendship box beside the talents: fixed width, equal bars (ShareCard's). */
+const LEVEL_BOX = { w: 260, padX: 18, padTop: 10, padBottom: 14, rowGap: 10, barGap: 4 } as const
 
 const STAR =
   'M12 1.8l2.95 6.6 7.2.75-5.4 4.85 1.53 7.08L12 17.4l-6.28 3.68 1.53-7.08-5.4-4.85 7.2-.75z'
@@ -457,64 +459,69 @@ class CardPainter {
       this.line(chipText, x + 12, chipTop + 4, 22, 700, this.v('--card-hero'))
     }
 
-    // Level and friendship on a backing, with their EXP bars (the name's glow behind it too).
+    // The glass backings below blur this (the name's glow included).
     this.backdropCopy = p.snapshot()
-    const boxTop = top + rowH + 10
-    const bars = this.input.levelBar !== null || this.input.friendshipBar !== null
-    const boxH = bars ? 68 : 50
-    const parts = this.levelParts()
-    const boxW = 18 + parts.width + 18
-    this.glass(LEFT.x, boxTop, boxW, boxH, bars ? 20 : 25, 'chip')
-    const color = this.v('--card-hero')
-    const lineTop = boxTop + 4
-    for (const part of parts.runs) {
-      this.line(part.text, LEFT.x + 18 + part.x, lineTop, 28, part.weight, color, {
-        alpha: part.alpha,
-      })
-    }
-    for (const bar of parts.bars) {
-      const bx = LEFT.x + 18 + bar.x
-      const by = lineTop + 42 + 6
-      p.fill(bx, by, bar.w, 6, 3, withAlpha(color, 0.2))
-      p.clipped(bx, by, bar.w, 6, 3, () =>
-        p.fill(bx, by, (bar.w * bar.share) / 100, 6, 3, bar.color),
-      )
-    }
 
-    // Stars.
-    if (c.rarity) this.stars(c.rarity, LEFT.x + 2, boxTop + boxH + 10, 34, 6, STAR_SHADOW)
+    // Stars (the level and friendship sit at the foot, beside the talents).
+    if (c.rarity) this.stars(c.rarity, LEFT.x + 2, top + rowH + 10, 34, 6, STAR_SHADOW)
   }
 
-  /** "Lv. 90/90 · Friendship 10": runs of text and their bars, x from the box's padding. */
-  private levelParts() {
-    const c = this.c
-    const runs: { text: string; x: number; weight: number; alpha?: number }[] = []
-    const bars: { x: number; w: number; share: number; color: string }[] = []
-    let x = 0
-    const run = (text: string, weight: number, alpha?: number) => {
-      runs.push({ text, x, weight, alpha })
-      x += this.textWidth(text, 28, weight)
-    }
-    const cap = levelCap(c.ascension, c.level)
-    const levelX = x
-    run('Lv. ', 400, 0.85)
-    run(String(c.level), 700)
-    run(`/${cap}`, 500, 0.7)
-    if (this.input.levelBar !== null) {
-      bars.push({ x: levelX, w: x - levelX, share: this.input.levelBar, color: '#818cf8' })
-    }
+  /**
+   * "Lv. 90/90" and "Friendship 10" on a backing beside the talents, each over
+   * an EXP bar of the same fixed length (LEVEL_BOX; ShareCard's level box).
+   */
+  private levelBox(x: number, bottom: number) {
+    const { p, c } = this
+    const rows: {
+      runs: { text: string; weight: number; alpha?: number }[]
+      bar: number | null
+      color: string
+    }[] = [
+      {
+        runs: [
+          { text: 'Lv. ', weight: 400, alpha: 0.85 },
+          { text: String(c.level), weight: 700 },
+          { text: `/${levelCap(c.ascension, c.level)}`, weight: 500, alpha: 0.7 },
+        ],
+        bar: this.input.levelBar,
+        color: '#818cf8',
+      },
+    ]
     if (c.friendship !== null) {
-      x += 22
-      run('·', 400, 0.5)
-      x += 22
-      const friendX = x
-      run(`${t('game.friendship')} `, 400, 0.85)
-      run(String(c.friendship), 700)
-      if (this.input.friendshipBar !== null) {
-        bars.push({ x: friendX, w: x - friendX, share: this.input.friendshipBar, color: '#f472b6' })
-      }
+      rows.push({
+        runs: [
+          { text: `${t('game.friendship')} `, weight: 400, alpha: 0.85 },
+          { text: String(c.friendship), weight: 700 },
+        ],
+        bar: this.input.friendshipBar,
+        color: '#f472b6',
+      })
     }
-    return { runs, bars, width: x }
+    const rowH = 26 * LH + LEVEL_BOX.barGap + 6
+    const h =
+      LEVEL_BOX.padTop +
+      rows.length * rowH +
+      (rows.length - 1) * LEVEL_BOX.rowGap +
+      LEVEL_BOX.padBottom
+    const y = bottom - h
+    this.glass(x, y, LEVEL_BOX.w, h, 20, 'chip')
+    const color = this.v('--card-hero')
+    const inner = LEVEL_BOX.w - 2 * LEVEL_BOX.padX
+    rows.forEach((row, i) => {
+      const top = y + LEVEL_BOX.padTop + i * (rowH + LEVEL_BOX.rowGap)
+      let tx = x + LEVEL_BOX.padX
+      for (const run of row.runs) {
+        tx += this.line(run.text, tx, top, 26, run.weight, color, { alpha: run.alpha })
+      }
+      const bx = x + LEVEL_BOX.padX
+      const by = top + 26 * LH + LEVEL_BOX.barGap
+      p.fill(bx, by, inner, 6, 3, withAlpha(color, 0.2))
+      if (row.bar !== null) {
+        p.clipped(bx, by, inner, 6, 3, () =>
+          p.fill(bx, by, (inner * row.bar!) / 100, 6, 3, row.color),
+        )
+      }
+    })
   }
 
   constellations(icons: readonly string[]) {
@@ -609,6 +616,8 @@ class CardPainter {
       this.line(levelText, tx, py + 0.5, 26, 700, color)
       x += liW + 30
     }
+    // Level and friendship beside the talents, flush with their pills' foot.
+    this.levelBox(x, top + 162)
 
     // The owner, the capture date and the site.
     const owner = ownerParts(this.input.owner)
@@ -627,7 +636,10 @@ class CardPainter {
       dateParts.reduce((sum, part) => sum + this.textWidth(part, 16, 400), 0) +
       10 * (dateParts.length - 1)
     const boxH = 10 + (owner.length ? 35 : 0) + 24 + 10
-    this.glass(LEFT.x, boxTop, 36 + Math.max(ownerW, dateW), boxH, 18, 'chip')
+    // A long name gives way so the line stays inside the column (ShareCard: truncate).
+    const ownerMax = LEFT.w - 36
+    const nameCut = Math.max(0, ownerW - ownerMax)
+    this.glass(LEFT.x, boxTop, 36 + Math.min(ownerMax, Math.max(ownerW, dateW)), boxH, 18, 'chip')
     const color = this.v('--card-hero')
     let ox = LEFT.x + 18
     owner.forEach((part, i) => {
@@ -636,14 +648,13 @@ class CardPainter {
         ox += this.line('·', ox, boxTop + 10, 22, 400, color, { alpha: 0.6 })
         ox += 12
       }
-      ox += this.line(
-        part,
-        ox,
-        boxTop + 10,
-        22,
-        i === 0 && this.input.owner.name ? 600 : 400,
-        color,
-      )
+      const weight = i === 0 && this.input.owner.name ? 600 : 400
+      let text = part
+      if (i === 0 && nameCut > 0) {
+        p.font(weight, 22, this.family)
+        text = p.ellipsize(part, Math.max(0, this.textWidth(part, 22, weight) - nameCut))
+      }
+      ox += this.line(text, ox, boxTop + 10, 22, weight, color)
     })
     let dx = LEFT.x + 18
     const dateTop = boxTop + 10 + (owner.length ? 35 : 0)

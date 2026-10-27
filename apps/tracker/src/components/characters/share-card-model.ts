@@ -94,9 +94,13 @@ export function cardPieces(character: CharacterView): CardPiece[] {
 }
 
 /** The owner line's parts: name, "UID …", "AR …" (those shown). */
+/** The owner's name at most: the game caps a nickname at 15 characters. */
+export const OWNER_NAME_MAX = 15
+
 export function ownerParts(owner: CardOwner): string[] {
+  const name = owner.name ? Array.from(owner.name) : []
   return [
-    owner.name,
+    name.length > OWNER_NAME_MAX ? `${name.slice(0, OWNER_NAME_MAX).join('')}…` : owner.name,
     owner.uid ? `UID ${owner.uid}` : null,
     owner.ar ? `AR ${owner.ar}` : null,
   ].filter((part): part is string => !!part)
