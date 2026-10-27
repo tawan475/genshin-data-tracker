@@ -136,7 +136,7 @@ describe('email confirmation', () => {
     const [first] = mail.sent
     expect(first).toMatchObject({
       to: email,
-      from: { name: 'Genshin Tracker', email: 'no-reply@475.dev' },
+      from: { name: 'Teyvat.me', email: 'no-reply@475.dev' },
       subject: 'Confirm your email',
     })
     const token = linkToken(first, '/verify-email')

@@ -1,119 +1,155 @@
 <script setup lang="ts">
 import type { GiPlayer } from '@gdt/shared'
 import { computed } from 'vue'
-import { Mountain, Zap } from 'lucide-vue-next'
 import NamecardBackdrop from '@/components/characters/NamecardBackdrop.vue'
-import GameIcon from '@/components/ui/GameIcon.vue'
-import UiProgress from '@/components/ui/UiProgress.vue'
-import { characterBanner, characterIcon, gameIcon } from '@/lib/assets'
+import { gameIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 
 /**
- * The Traveler (Capture's `gi_player`): Adventure Rank with its EXP toward
- * the next rank, World Level against the highest it may choose, stamina and
- * Story Keys. A field the capture lacks is left out.
+ * The player's profile, laid out like the game's own profile card: the name
+ * card as the background, the profile picture, the in-game name and
+ * signature, then Adventure Rank with its EXP toward the next rank, World
+ * Level, stamina and Story Keys as rows. No UID (the user's call). What the
+ * capture lacks falls back (`profile`): the account's name, the Traveler's
+ * portrait and name card; a row the capture has no value for is left out.
  */
 const props = defineProps<{
   player: GiPlayer
   /** EXP the next rank needs (the game data's AR table); null at AR 60 or unknown. */
   need: number | null
+  profile: {
+    name: string
+    signature: string | null
+    /** The name card's picture (a full image URL), '' for none. */
+    nameCard: string
+    /** The profile picture (a full image URL), '' for none. */
+    avatar: string
+  }
 }>()
 
 /** In the game's units: 24000 is the 240 it shows. */
 const stamina = computed(() =>
   props.player.maxStamina === undefined ? null : Math.round(props.player.maxStamina / 100),
 )
-const facts = computed(() => {
+const expShare = computed(() => {
+  const exp = props.player.arExp
+  if (props.need === null) return props.player.ar === 60 ? 100 : null
+  return exp === undefined ? null : Math.min(100, (exp / props.need) * 100)
+})
+const rows = computed(() => {
   const p = props.player
   return [
     p.wl === undefined
       ? null
-      : { key: 'wl', icon: Mountain, value: p.wl, limit: p.wlLimit ?? null },
-    stamina.value === null ? null : { key: 'stamina', icon: Zap, value: stamina.value },
-    p.storyKeys === undefined
-      ? null
-      : { key: 'storyKeys', image: 'UI_ItemIcon_107', value: p.storyKeys },
-  ].filter((f) => f !== null)
+      : {
+          key: 'wl',
+          value: formatNumber(p.wl),
+          title: p.wlLimit !== undefined ? 'wlLimit' : undefined,
+        },
+    stamina.value === null ? null : { key: 'stamina', value: formatNumber(stamina.value) },
+    p.storyKeys === undefined ? null : { key: 'storyKeys', value: formatNumber(p.storyKeys) },
+  ].filter((row) => row !== null)
 })
 </script>
 
 <template>
   <section
-    class="relative isolate flex flex-wrap items-center gap-x-5 gap-y-4 overflow-hidden rounded-xl border border-border-default bg-surface-raised px-4 py-4 shadow-sm sm:px-5"
+    class="relative isolate overflow-hidden rounded-xl border border-border-default bg-surface-raised text-white shadow-sm"
     :aria-label="$t('overview.traveler.label')"
   >
     <NamecardBackdrop
-      :src="characterBanner('TravelerAnemo')"
-      class="absolute inset-y-0 right-0 -z-10 h-full w-full opacity-45 brightness-[1.35] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-[70%] dark:opacity-40 dark:brightness-[1.1]"
+      v-if="profile.nameCard"
+      :src="profile.nameCard"
+      class="absolute inset-0 -z-20 h-full w-full object-cover"
     />
-    <GameIcon
-      :src="characterIcon('Traveler')"
-      :name="$t('overview.traveler.label')"
-      :rarity="5"
-      size="lg"
-      eager
+    <!-- The game's card is light over its art; here a dark veil keeps the white text readable -->
+    <span
+      class="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/85 via-slate-950/65 to-slate-950/35"
+      aria-hidden="true"
     />
-    <div class="flex min-w-0 flex-[1_1_12rem] flex-col gap-1.5">
-      <p class="flex flex-wrap items-baseline gap-x-3">
-        <span class="font-display text-xl font-bold">{{
-          player.ar === undefined
-            ? $t('overview.traveler.label')
-            : $t('overview.traveler.ar', { n: player.ar })
-        }}</span>
-        <span
-          v-if="player.uid"
-          class="tabular font-mono text-sm text-text-muted"
-          :title="$t('overview.traveler.uid', { uid: player.uid })"
-          >{{ player.uid }}</span
-        >
-      </p>
-      <div
-        v-if="player.arExp !== undefined && need"
-        class="flex max-w-xl items-center gap-3"
-        :title="
-          $t('overview.traveler.arExp', {
-            exp: formatNumber(player.arExp),
-            need: formatNumber(need),
-          })
-        "
-      >
-        <UiProgress :value="player.arExp" :max="need" :label="$t('overview.traveler.arExpLabel')" />
-        <span class="tabular shrink-0 font-mono text-sm text-text-secondary">
-          {{ formatNumber(player.arExp)
-          }}<span class="text-text-muted"> / {{ formatNumber(need) }}</span>
-        </span>
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-4 px-4 py-5 sm:px-6">
+      <img
+        v-if="profile.avatar"
+        :src="profile.avatar"
+        alt=""
+        class="size-20 shrink-0 rounded-full bg-white/10 object-cover ring-4 ring-white/25 sm:size-24"
+      />
+      <div class="flex min-w-0 flex-[1_1_18rem] flex-col gap-3">
+        <div class="flex min-w-0 flex-col">
+          <p class="truncate font-display text-2xl font-bold drop-shadow" :title="profile.name">
+            {{ profile.name }}
+          </p>
+          <p
+            v-if="profile.signature"
+            class="truncate text-sm text-white/80"
+            :title="profile.signature"
+          >
+            {{ profile.signature }}
+          </p>
+        </div>
+        <dl class="flex max-w-2xl flex-col gap-1.5 text-sm">
+          <div v-if="player.ar !== undefined" class="flex flex-col gap-1">
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="font-medium text-white/85">{{ $t('overview.traveler.arLabel') }}</dt>
+              <dd class="tabular font-mono text-lg font-semibold">{{ player.ar }}</dd>
+            </div>
+            <div
+              v-if="expShare !== null"
+              class="flex items-center gap-3"
+              :title="
+                need !== null && player.arExp !== undefined
+                  ? $t('overview.traveler.arExp', {
+                      exp: formatNumber(player.arExp),
+                      need: formatNumber(need),
+                    })
+                  : undefined
+              "
+            >
+              <span class="shrink-0 text-xs text-white/70">{{
+                $t('overview.traveler.arExpLabel')
+              }}</span>
+              <span
+                class="block h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/20"
+                aria-hidden="true"
+                ><span
+                  class="block h-full rounded-full bg-lime-400"
+                  :style="{ width: `${expShare}%` }"
+              /></span>
+              <span
+                v-if="need !== null && player.arExp !== undefined"
+                class="tabular shrink-0 font-mono text-xs text-white/80"
+                >{{ formatNumber(player.arExp) }} / {{ formatNumber(need) }}</span
+              >
+            </div>
+          </div>
+          <div
+            v-for="row in rows"
+            :key="row.key"
+            class="flex items-baseline justify-between gap-3 border-t border-white/10 pt-1.5"
+          >
+            <dt class="flex items-center gap-1.5 font-medium text-white/85">
+              <img
+                v-if="row.key === 'storyKeys'"
+                :src="gameIcon('UI_ItemIcon_107')"
+                alt=""
+                class="size-4 object-contain"
+                aria-hidden="true"
+              />
+              {{ $t(`overview.traveler.${row.key}`) }}
+            </dt>
+            <dd
+              class="tabular font-mono text-lg font-semibold"
+              :title="
+                row.title && player.wlLimit !== undefined
+                  ? $t('overview.traveler.wlLimit', { n: player.wlLimit })
+                  : undefined
+              "
+            >
+              {{ row.value }}
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
-    <dl
-      v-if="facts.length"
-      class="grid w-full grid-cols-3 gap-x-4 gap-y-2 sm:w-auto sm:gap-x-7 sm:border-l sm:border-border-default sm:pl-5"
-    >
-      <div v-for="fact in facts" :key="fact.key" class="flex min-w-0 flex-col gap-0.5">
-        <dt class="flex items-center gap-1.5 text-sm text-text-secondary">
-          <component :is="fact.icon" v-if="'icon' in fact" class="size-4" aria-hidden="true" />
-          <img
-            v-else
-            :src="gameIcon(fact.image)"
-            alt=""
-            class="size-[1.125rem] object-contain"
-            aria-hidden="true"
-          />
-          <span class="truncate">{{ $t(`overview.traveler.${fact.key}`) }}</span>
-        </dt>
-        <dd
-          class="tabular font-mono text-xl font-medium"
-          :title="
-            'limit' in fact && fact.limit !== null
-              ? $t('overview.traveler.wlLimit', { n: fact.limit })
-              : undefined
-          "
-        >
-          {{ formatNumber(fact.value)
-          }}<span v-if="'limit' in fact && fact.limit !== null" class="text-base text-text-muted">
-            / {{ fact.limit }}</span
-          >
-        </dd>
-      </div>
-    </dl>
   </section>
 </template>

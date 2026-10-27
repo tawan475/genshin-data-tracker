@@ -145,14 +145,14 @@
       "google": "เข้าสู่ระบบด้วย Google",
       "reset": "เข้าสู่ระบบด้วยลิงก์รีเซ็ต",
       "legacy": "เข้าสู่ระบบก่อนที่จะมีรายการอุปกรณ์",
-      "irminsul": "เข้าสู่ระบบจาก Irminsul"
+      "irminsul": "เข้าสู่ระบบจาก Teyvat.me"
     },
     "auto": "อัตโนมัติ: จับคู่บัญชีตาม UID",
     "removedAccount": "บัญชีที่ถูกลบ",
     "always": "บัญชีนี้เสมอ",
     "targetSaved": "บันทึกปลายทางการอัปโหลดแล้ว",
     "targetNotSaved": "บันทึกปลายทางการอัปโหลดไม่สำเร็จ",
-    "irminsulOn": "Irminsul บน {device}",
+    "irminsulOn": "Teyvat.me บน {device}",
     "teyvatmeOn": "Teyvat.me บน {device}",
     "aPc": "PC เครื่องหนึ่ง",
     "notLoaded": "โหลดอุปกรณ์ไม่สำเร็จ",

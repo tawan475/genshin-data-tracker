@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Pengembara",
-    "ar": "Rank Adventure {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Rank Adventure",
     "arExp": "Adventure EXP {exp} / {need}",
     "arExpLabel": "Adventure EXP",
     "wl": "Level Dunia",

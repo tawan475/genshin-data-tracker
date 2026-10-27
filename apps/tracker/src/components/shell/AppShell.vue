@@ -189,7 +189,7 @@ const footButton =
           <span class="text-paimon drop-shadow-[0_0_8px_var(--paimon-glow)]" aria-hidden="true"
             >✦</span
           >
-          GDT
+          Teyvat.me
         </RouterLink>
         <UiIconButton
           :label="narrow ? $t('shell.expandMenu') : $t('shell.collapseMenu')"

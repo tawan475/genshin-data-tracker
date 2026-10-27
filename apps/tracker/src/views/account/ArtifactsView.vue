@@ -394,8 +394,8 @@ const artifactExport = useCardExport({
   state: () => [openRow.value, shareTheme.value, locale.value],
   filename: () =>
     openRow.value
-      ? `${openRow.value.artifact.setKey}-${openRow.value.artifact.slotKey}-genshin-tracker.png`
-      : 'artifact-genshin-tracker.png',
+      ? `${openRow.value.artifact.setKey}-${openRow.value.artifact.slotKey}-teyvat-me.png`
+      : 'artifact-teyvat-me.png',
   title: () => openRow.value?.setName ?? t('share.export.artifactTitle'),
   pngLabel: () => t('share.export.download'),
 })

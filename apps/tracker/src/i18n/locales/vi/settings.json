@@ -145,14 +145,14 @@
       "google": "Đăng nhập bằng Google",
       "reset": "Đăng nhập bằng liên kết đặt lại",
       "legacy": "Đăng nhập trước khi có danh sách thiết bị",
-      "irminsul": "Đăng nhập từ Irminsul"
+      "irminsul": "Đăng nhập từ Teyvat.me"
     },
     "auto": "Tự động: khớp tài khoản theo UID",
     "removedAccount": "Tài khoản đã xóa",
     "always": "Luôn là tài khoản này",
     "targetSaved": "Đã lưu nơi nhận tải lên",
     "targetNotSaved": "Chưa lưu được nơi nhận tải lên",
-    "irminsulOn": "Irminsul trên {device}",
+    "irminsulOn": "Teyvat.me trên {device}",
     "teyvatmeOn": "Teyvat.me trên {device}",
     "aPc": "một máy tính",
     "notLoaded": "Chưa tải được thiết bị",

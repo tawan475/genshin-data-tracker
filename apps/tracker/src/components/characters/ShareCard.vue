@@ -167,6 +167,24 @@ const friendshipTitle = computed(() =>
     : t('characters.friendship.title', { level: c.value.friendship }) +
       expText(c.value.friendshipExp, expNeed.value?.friendship(c.value.friendship)),
 )
+/**
+ * The bars under the level and friendship (Capture's EXP): how far to the
+ * next level, full at a cap; null when the capture has no EXP for it.
+ */
+const share = (exp: number | null, need: number | null | undefined) =>
+  need === null
+    ? 100
+    : exp === null || need === undefined
+      ? null
+      : Math.min(100, (exp / need) * 100)
+const levelBar = computed(() =>
+  share(c.value.exp, expNeed.value?.character(c.value.level, c.value.ascension)),
+)
+const friendshipBar = computed(() =>
+  c.value.friendship === null
+    ? null
+    : share(c.value.friendshipExp, expNeed.value?.friendship(c.value.friendship)),
+)
 const weaponCap = computed(() =>
   c.value.weapon ? levelCap(c.value.weapon.ascension, c.value.weapon.level) : 0,
 )
@@ -334,20 +352,45 @@ const ownerLine = computed(() =>
           <!-- Small text on the art sits on a translucent backing in the card's
                theme, so it reads over any art (light or dark, the splash or the namecard) -->
           <p
-            class="flex items-baseline gap-[22px] self-start rounded-full px-[18px] py-[4px] text-[28px]"
-            :class="CHIP_TEXT"
+            class="flex items-baseline gap-[22px] self-start px-[18px] text-[28px]"
+            :class="[
+              CHIP_TEXT,
+              levelBar !== null || friendshipBar !== null
+                ? 'rounded-[20px] pt-[4px] pb-[10px]'
+                : 'rounded-full py-[4px]',
+            ]"
           >
-            <span :title="levelTitle"
-              ><span class="font-normal opacity-85">Lv.&nbsp;</span>
-              <span class="font-bold">{{ c.level }}</span
-              ><span class="font-medium opacity-70">/{{ cap }}</span></span
-            >
-            <template v-if="c.friendship !== null">
-              <span class="opacity-50">·</span>
-              <span :title="friendshipTitle"
-                ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
-                <span class="font-bold">{{ c.friendship }}</span></span
+            <span :title="levelTitle" class="flex flex-col gap-[6px]"
+              ><span
+                ><span class="font-normal opacity-85">Lv.&nbsp;</span>
+                <span class="font-bold">{{ c.level }}</span
+                ><span class="font-medium opacity-70">/{{ cap }}</span></span
               >
+              <span
+                v-if="levelBar !== null"
+                class="block h-[6px] overflow-hidden rounded-full bg-current/20"
+                aria-hidden="true"
+                ><span
+                  class="block h-full rounded-full bg-[#818cf8]"
+                  :style="{ width: `${levelBar}%` }"
+              /></span>
+            </span>
+            <template v-if="c.friendship !== null">
+              <span class="self-start opacity-50">·</span>
+              <span :title="friendshipTitle" class="flex flex-col gap-[6px]"
+                ><span
+                  ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
+                  <span class="font-bold">{{ c.friendship }}</span></span
+                >
+                <span
+                  v-if="friendshipBar !== null"
+                  class="block h-[6px] overflow-hidden rounded-full bg-current/20"
+                  aria-hidden="true"
+                  ><span
+                    class="block h-full rounded-full bg-[#f472b6]"
+                    :style="{ width: `${friendshipBar}%` }"
+                /></span>
+              </span>
             </template>
           </p>
           <GameStars v-if="c.rarity" :rarity="c.rarity" :px="34" class="pl-[2px]" />

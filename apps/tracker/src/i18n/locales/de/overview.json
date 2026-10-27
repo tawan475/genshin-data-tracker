@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Reisender",
-    "ar": "Abenteuerstufe {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Abenteuerstufe",
     "arExp": "Abenteuer-EP {exp} / {need}",
     "arExpLabel": "Abenteuer-EP",
     "wl": "Weltstufe",

@@ -75,11 +75,14 @@ const tribes = computed(() =>
     : [],
 )
 
-// The lists behind the stats: domains on the map, Trounce Domains cleared, NPCs met.
-type ListView = 'domains' | 'cleared' | 'npcs'
+// The lists behind the stats: domains on the map, Trounce Domains cleared. (Teleport
+// Waypoints, NPCs met, the statue levels of unreleased regions and the bosses'
+// respawns are captured but not shown: the user found them unverifiable.)
+type ListView = 'domains' | 'cleared'
 const VIEW_KEY = 'collections:world-list'
 const FILTER_KEY = 'collections:world-filter'
-const view = ref<ListView>((readStorage(VIEW_KEY) as ListView | null) ?? 'domains')
+const storedView = readStorage(VIEW_KEY)
+const view = ref<ListView>(storedView === 'cleared' ? 'cleared' : 'domains')
 watch(view, (value) => writeStorage(VIEW_KEY, value === 'domains' ? null : value))
 const storedFilter = readStorage(FILTER_KEY) as HaveFilterValue | null
 const filter = ref<HaveFilterValue>(
@@ -111,19 +114,6 @@ const lists = computed(() => {
       label: t('collections.world.trounce'),
       icon: Swords,
       entries: world.value?.cleared?.map(toEntry) ?? null,
-    },
-    {
-      view: 'npcs' as const,
-      label: t('collections.world.npcsMet'),
-      icon: Users,
-      entries:
-        npcList.value?.map((row) => ({
-          id: row.id,
-          name: row.name,
-          note: row.title,
-          missing: !row.have,
-          have: row.have,
-        })) ?? null,
     },
   ].flatMap((list) => (list.entries ? [{ ...list, entries: list.entries }] : []))
 })
@@ -170,7 +160,6 @@ const offeringName = (id: number, name: string) =>
   name || t('collections.world.offering', { n: id })
 const fraction = (p: Progress) => `${formatNumber(p.have)} / ${formatNumber(p.total)}`
 const MAP_PARTS = [
-  { key: 'waypoints', icon: MapPin, label: 'collections.world.waypoints' },
   { key: 'domains', icon: Swords, label: 'collections.world.domains' },
   { key: 'areas', icon: Eye, label: 'collections.world.areas' },
 ] as const
@@ -209,6 +198,28 @@ const MAP_PARTS = [
           />
         </UiStat>
       </li>
+      <li v-if="cleared" class="flex min-w-0">
+        <UiStat
+          :label="$t('collections.world.trounce')"
+          :hint="$t('collections.world.trounceHint')"
+          button
+          @click="openList('cleared')"
+        >
+          <template #icon><Swords class="size-3.5" aria-hidden="true" /></template>
+          <template #value>
+            <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+              {{ formatNumber(cleared.have)
+              }}<span class="text-sm text-text-muted"> / {{ formatNumber(cleared.total) }}</span>
+            </span>
+          </template>
+          <UiProgress
+            class="mt-1"
+            :value="cleared.have"
+            :max="cleared.total"
+            :label="$t('collections.world.trounce')"
+          />
+        </UiStat>
+      </li>
       <li class="flex min-w-0">
         <UiStat :label="$t('collections.world.reputation')">
           <template #icon><ScrollText class="size-3.5" aria-hidden="true" /></template>
@@ -225,44 +236,6 @@ const MAP_PARTS = [
             :value="reputationTotal.have"
             :max="reputationTotal.total"
             :label="$t('collections.world.reputation')"
-          />
-        </UiStat>
-      </li>
-    </ul>
-
-    <ul
-      v-if="cleared || npcs"
-      class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
-      :aria-label="$t('collections.summary')"
-    >
-      <li
-        v-for="part in [
-          { key: 'trounce', list: 'cleared' as const, value: cleared },
-          { key: 'npcsMet', list: 'npcs' as const, value: npcs },
-        ]"
-        v-show="part.value"
-        :key="part.key"
-        class="flex min-w-0"
-      >
-        <UiStat
-          :label="$t(`collections.world.${part.key}`)"
-          :hint="$t(`collections.world.${part.key}Hint`)"
-          button
-          @click="openList(part.list)"
-        >
-          <template #value>
-            <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
-              {{ formatNumber(part.value?.have ?? 0)
-              }}<span class="text-sm text-text-muted">
-                / {{ formatNumber(part.value?.total ?? 0) }}</span
-              >
-            </span>
-          </template>
-          <UiProgress
-            class="mt-1"
-            :value="part.value?.have ?? 0"
-            :max="part.value?.total ?? 0"
-            :label="$t(`collections.world.${part.key}`)"
           />
         </UiStat>
       </li>
@@ -510,42 +483,6 @@ const MAP_PARTS = [
           </ul>
         </section>
       </div>
-    </UiPanel>
-
-    <UiPanel v-if="respawns.length" :title="$t('collections.world.respawns')" flush>
-      <template #actions>
-        <span class="text-sm text-text-secondary">{{
-          $t('collections.world.respawnsUp', {
-            n: formatNumber(respawns.length - waiting.length),
-            total: formatNumber(respawns.length),
-          })
-        }}</span>
-      </template>
-      <p v-if="!waiting.length" class="p-5 text-sm text-text-secondary">
-        {{ $t('collections.world.allUp') }}
-      </p>
-      <ul
-        v-else
-        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,17rem),1fr))] gap-2 p-3 sm:p-5"
-      >
-        <li
-          v-for="row in waiting"
-          :key="row.id"
-          class="flex min-w-0 items-center gap-2.5 rounded-xl border border-border-default bg-surface-sunken p-2.5 text-sm"
-        >
-          <Timer class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
-          <span class="min-w-0 flex-1 truncate font-medium" :title="row.name">{{ row.name }}</span>
-          <span v-if="row.spots > 1" class="tabular shrink-0 font-mono text-xs text-text-muted"
-            >{{ row.up }}/{{ row.spots }}</span
-          >
-          <time
-            class="tabular shrink-0 font-mono text-text-secondary"
-            :datetime="new Date(row.next!).toISOString()"
-            :title="formatDateTime(row.next!)"
-            >{{ formatRelative(row.next!) }}</time
-          >
-        </li>
-      </ul>
     </UiPanel>
   </div>
 </template>

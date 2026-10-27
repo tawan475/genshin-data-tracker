@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "ตัวเอก",
-    "ar": "แรงก์ผจญภัย {n}",
-    "uid": "UID {uid}",
+    "arLabel": "แรงก์ผจญภัย",
     "arExp": "EXP ผจญภัย {exp} / {need}",
     "arExpLabel": "EXP ผจญภัย",
     "wl": "ระดับโลก",

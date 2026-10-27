@@ -145,14 +145,14 @@
       "google": "Sesión iniciada con Google",
       "reset": "Sesión iniciada con un enlace de restablecimiento",
       "legacy": "Sesión iniciada antes de que se listaran los dispositivos",
-      "irminsul": "Sesión iniciada desde Irminsul"
+      "irminsul": "Sesión iniciada desde Teyvat.me"
     },
     "auto": "Automático: buscar la cuenta por UID",
     "removedAccount": "Cuenta eliminada",
     "always": "Siempre esta cuenta",
     "targetSaved": "Destino de subida guardado",
     "targetNotSaved": "Destino de subida no guardado",
-    "irminsulOn": "Irminsul en {device}",
+    "irminsulOn": "Teyvat.me en {device}",
     "teyvatmeOn": "Teyvat.me en {device}",
     "aPc": "un PC",
     "notLoaded": "No se cargaron los dispositivos",

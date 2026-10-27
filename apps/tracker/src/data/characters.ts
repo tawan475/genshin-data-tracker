@@ -304,10 +304,10 @@ export function buildRoster(good: Good): Roster {
       critRate: Number(critRate.toFixed(1)),
       critDmg: Number(critDmg.toFixed(1)),
       gaps: findGaps(c.level, weapon, equipped, bonusCount),
-      // The game shows the Traveler no friendship level.
-      friendship: traveler ? null : (extra?.friendship ?? null),
+      // The game shows the Traveler, Manekin and Manekina no friendship level.
+      friendship: noFriendship(c.key) ? null : (extra?.friendship ?? null),
       exp: knowsExp ? (extra?.exp ?? 0) : null,
-      friendshipExp: knowsExp && !traveler ? (extra?.friendshipExp ?? 0) : null,
+      friendshipExp: knowsExp && !noFriendship(c.key) ? (extra?.friendshipExp ?? 0) : null,
       obtainedAt: extra?.obtainedAt !== undefined ? extra.obtainedAt * 1000 : null,
       haystack: normalizeSearch(
         [
@@ -693,6 +693,10 @@ const compareBy: Record<CharacterSort, (a: CharacterView, b: CharacterView) => n
   friendship: (a, b) => (a.friendship ?? 0) - (b.friendship ?? 0),
   obtained: (a, b) => (a.obtainedAt ?? 0) - (b.obtainedAt ?? 0),
 }
+
+/** Playable characters the game gives no friendship level: the Traveler, Manekin and Manekina. */
+export const noFriendship = (key: string): boolean =>
+  key.startsWith('Traveler') || key === 'Manekin' || key === 'Manekina'
 
 /** Sorts on a value a character may lack; those characters go last either way. */
 const unknownFor: Partial<Record<CharacterSort, (c: CharacterView) => boolean>> = {

@@ -145,14 +145,14 @@
       "google": "Connecté avec Google",
       "reset": "Connecté avec un lien de réinitialisation",
       "legacy": "Connecté avant que les appareils soient listés",
-      "irminsul": "Connecté depuis Irminsul"
+      "irminsul": "Connecté depuis Teyvat.me"
     },
     "auto": "Auto : compte choisi selon l'UID",
     "removedAccount": "Compte supprimé",
     "always": "Toujours ce compte",
     "targetSaved": "Destination des envois enregistrée",
     "targetNotSaved": "Destination des envois non enregistrée",
-    "irminsulOn": "Irminsul sur {device}",
+    "irminsulOn": "Teyvat.me sur {device}",
     "teyvatmeOn": "Teyvat.me sur {device}",
     "aPc": "un PC",
     "notLoaded": "Appareils non chargés",

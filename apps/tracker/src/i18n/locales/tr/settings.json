@@ -145,14 +145,14 @@
       "google": "Google ile giriş yapıldı",
       "reset": "Sıfırlama bağlantısıyla giriş yapıldı",
       "legacy": "Cihazlar listelenmeden önce giriş yapıldı",
-      "irminsul": "Irminsul'dan giriş yapıldı"
+      "irminsul": "Teyvat.me'dan giriş yapıldı"
     },
     "auto": "Otomatik: hesabı UID'ye göre eşle",
     "removedAccount": "Kaldırılmış hesap",
     "always": "Her zaman bu hesap",
     "targetSaved": "Yükleme hedefi kaydedildi",
     "targetNotSaved": "Yükleme hedefi kaydedilmedi",
-    "irminsulOn": "{device} üzerinde Irminsul",
+    "irminsulOn": "{device} üzerinde Teyvat.me",
     "teyvatmeOn": "{device} üzerinde Teyvat.me",
     "aPc": "bir bilgisayar",
     "notLoaded": "Cihazlar yüklenmedi",

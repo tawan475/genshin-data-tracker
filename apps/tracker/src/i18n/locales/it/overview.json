@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Viaggiatore",
-    "ar": "Grado avventura {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Grado avventura",
     "arExp": "ESP avventura {exp} / {need}",
     "arExpLabel": "ESP avventura",
     "wl": "Livello del mondo",

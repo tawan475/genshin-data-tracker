@@ -145,14 +145,14 @@
       "google": "Вход через Google",
       "reset": "Вход по ссылке сброса",
       "legacy": "Вход до появления списка устройств",
-      "irminsul": "Вход из Irminsul"
+      "irminsul": "Вход из Teyvat.me"
     },
     "auto": "Авто: аккаунт по UID",
     "removedAccount": "Удалённый аккаунт",
     "always": "Всегда этот аккаунт",
     "targetSaved": "Цель загрузки сохранена",
     "targetNotSaved": "Цель загрузки не сохранена",
-    "irminsulOn": "Irminsul на {device}",
+    "irminsulOn": "Teyvat.me на {device}",
     "teyvatmeOn": "Teyvat.me на {device}",
     "aPc": "ПК",
     "notLoaded": "Устройства не загружены",

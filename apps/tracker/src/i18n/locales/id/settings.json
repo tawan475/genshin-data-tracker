@@ -145,14 +145,14 @@
       "google": "Masuk dengan Google",
       "reset": "Masuk dengan tautan atur ulang",
       "legacy": "Masuk sebelum perangkat didaftar",
-      "irminsul": "Masuk dari Irminsul"
+      "irminsul": "Masuk dari Teyvat.me"
     },
     "auto": "Otomatis: cocokkan akun menurut UID",
     "removedAccount": "Akun yang dihapus",
     "always": "Selalu akun ini",
     "targetSaved": "Tujuan unggahan tersimpan",
     "targetNotSaved": "Tujuan unggahan tidak tersimpan",
-    "irminsulOn": "Irminsul di {device}",
+    "irminsulOn": "Teyvat.me di {device}",
     "teyvatmeOn": "Teyvat.me di {device}",
     "aPc": "sebuah PC",
     "notLoaded": "Perangkat tidak termuat",

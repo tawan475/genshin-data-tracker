@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Nhà Lữ Hành",
-    "ar": "Hạng Mạo Hiểm {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Hạng Mạo Hiểm",
     "arExp": "EXP Mạo Hiểm {exp} / {need}",
     "arExpLabel": "EXP Mạo Hiểm",
     "wl": "Cấp Thế Giới",

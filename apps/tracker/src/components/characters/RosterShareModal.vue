@@ -138,7 +138,7 @@ const exporter = useCardExport({
   },
   open: () => props.open,
   state: () => [props.characters, theme.value, owner.value, locale.value, boostTable.value],
-  filename: () => 'characters-genshin-tracker.png',
+  filename: () => 'characters-teyvat-me.png',
   title: () => t('game.characters'),
   pngLabel: () => t('share.export.download'),
 })

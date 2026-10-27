@@ -17,8 +17,6 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
-import LiveStrip from '@/components/live/LiveStrip.vue'
-import SessionList from '@/components/snapshots/SessionList.vue'
 import { loadAccountPlayer, loadLive, loadPoints, loadSnapshots } from '@/data/account-data'
 import {
   buildHistory,
@@ -29,6 +27,7 @@ import {
 } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
+import { characterBanner, characterIcon } from '@/lib/assets'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useAccount } from './context'
@@ -74,9 +73,6 @@ const live = useResource(
   () => account.value,
   (a) => loadLive(a),
 )
-// The strip's "updated 20 s ago" moves every 10 s while a journal is open.
-const liveNow = shallowRef(Date.now())
-useIntervalFn(() => (liveNow.value = Date.now()), 10_000)
 /** The journal's figures when it follows the newest snapshot (the tiles show them). */
 const liveFigures = computed(() => {
   const journal = live.data.value
@@ -101,6 +97,18 @@ const traveler = computed(() => {
   const need = typeof row?.exp === 'number' && row.exp > 0 ? row.exp : null
   return { profile, need }
 })
+
+/**
+ * The profile card's name, signature, name card and picture. Capture doesn't
+ * send the in-game ones yet: the account's name, the Traveler's name card and
+ * portrait stand in.
+ */
+const profileCard = computed(() => ({
+  name: accounts.displayName(account.value),
+  signature: null,
+  nameCard: characterBanner('TravelerAnemo'),
+  avatar: characterIcon('Traveler'),
+}))
 
 // Derived once per data version; the components below only read.
 const history = computed(() => (list.value ? buildHistory(list.value) : null))
@@ -260,8 +268,13 @@ const importRoute = computed(() => ({
   </UiPanel>
 
   <template v-else>
-    <LiveStrip v-if="list" class="mb-3" :live="live.data.value" :snapshots="list" :now="liveNow" />
-    <TravelerPanel v-if="traveler" class="mb-3" :player="traveler.profile" :need="traveler.need" />
+    <TravelerPanel
+      v-if="traveler"
+      class="mb-3"
+      :player="traveler.profile"
+      :need="traveler.need"
+      :profile="profileCard"
+    />
     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       <UiStat
         v-for="tile in tiles"
@@ -296,7 +309,6 @@ const importRoute = computed(() => ({
     />
 
     <div v-if="list && history?.captures.length" class="mt-6 flex flex-col gap-6">
-      <SessionList :snapshots="list" :live="live.data.value" :account="account" :limit="1" />
       <DetailedProgression
         :captures="chartCaptures"
         :title="$t('overview.progression')"

@@ -145,14 +145,14 @@
       "google": "Signed in with Google",
       "reset": "Signed in with a reset link",
       "legacy": "Signed in before devices were listed",
-      "irminsul": "Signed in from Irminsul"
+      "irminsul": "Signed in from Teyvat.me"
     },
     "auto": "Auto: match the account by UID",
     "removedAccount": "Removed account",
     "always": "Always this account",
     "targetSaved": "Upload target saved",
     "targetNotSaved": "Upload target not saved",
-    "irminsulOn": "Irminsul on {device}",
+    "irminsulOn": "Teyvat.me on {device}",
     "teyvatmeOn": "Teyvat.me on {device}",
     "aPc": "a PC",
     "notLoaded": "Devices not loaded",

@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Gezgin",
-    "ar": "Macera Rütbesi {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Macera Rütbesi",
     "arExp": "Macera TP {exp} / {need}",
     "arExpLabel": "Macera TP",
     "wl": "Dünya Seviyesi",

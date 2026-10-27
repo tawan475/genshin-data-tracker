@@ -145,14 +145,14 @@
       "google": "Google로 로그인",
       "reset": "재설정 링크로 로그인",
       "legacy": "기기 목록 도입 전에 로그인",
-      "irminsul": "Irminsul에서 로그인"
+      "irminsul": "Teyvat.me에서 로그인"
     },
     "auto": "자동: UID로 계정 매칭",
     "removedAccount": "삭제된 계정",
     "always": "항상 이 계정",
     "targetSaved": "업로드 대상 저장됨",
     "targetNotSaved": "업로드 대상이 저장되지 않음",
-    "irminsulOn": "{device}의 Irminsul",
+    "irminsulOn": "{device}의 Teyvat.me",
     "teyvatmeOn": "{device}의 Teyvat.me",
     "aPc": "PC",
     "notLoaded": "기기를 불러오지 못함",

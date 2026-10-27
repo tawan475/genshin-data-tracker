@@ -145,14 +145,14 @@
       "google": "Accesso con Google",
       "reset": "Accesso con link di reimpostazione",
       "legacy": "Accesso prima dell'elenco dei dispositivi",
-      "irminsul": "Accesso da Irminsul"
+      "irminsul": "Accesso da Teyvat.me"
     },
     "auto": "Auto: account scelto in base all'UID",
     "removedAccount": "Account rimosso",
     "always": "Sempre questo account",
     "targetSaved": "Destinazione dei caricamenti salvata",
     "targetNotSaved": "Destinazione dei caricamenti non salvata",
-    "irminsulOn": "Irminsul su {device}",
+    "irminsulOn": "Teyvat.me su {device}",
     "teyvatmeOn": "Teyvat.me su {device}",
     "aPc": "un PC",
     "notLoaded": "Dispositivi non caricati",

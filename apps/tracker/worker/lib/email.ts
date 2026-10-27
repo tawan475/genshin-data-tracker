@@ -24,7 +24,7 @@ interface EmailEnv {
   SITE_URL?: string
 }
 
-export const BRAND = 'Genshin Tracker'
+export const BRAND = 'Teyvat.me'
 export const SITE_ORIGIN = 'https://teyvat.me'
 /**
  * The address the site had before teyvat.me. It still serves the API

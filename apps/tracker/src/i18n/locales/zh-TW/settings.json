@@ -145,14 +145,14 @@
       "google": "使用 Google 登入",
       "reset": "使用重設連結登入",
       "legacy": "在裝置列表功能上線前登入",
-      "irminsul": "從 Irminsul 登入"
+      "irminsul": "從 Teyvat.me 登入"
     },
     "auto": "自動：依 UID 對應帳號",
     "removedAccount": "已刪除的帳號",
     "always": "一律使用此帳號",
     "targetSaved": "上傳目標已儲存",
     "targetNotSaved": "上傳目標未儲存",
-    "irminsulOn": "{device} 上的 Irminsul",
+    "irminsulOn": "{device} 上的 Teyvat.me",
     "teyvatmeOn": "{device} 上的 Teyvat.me",
     "aPc": "一台電腦",
     "notLoaded": "裝置列表未載入",

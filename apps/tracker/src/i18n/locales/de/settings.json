@@ -145,14 +145,14 @@
       "google": "Mit Google angemeldet",
       "reset": "Mit Reset-Link angemeldet",
       "legacy": "Angemeldet, bevor Geräte gelistet wurden",
-      "irminsul": "Über Irminsul angemeldet"
+      "irminsul": "Über Teyvat.me angemeldet"
     },
     "auto": "Auto: Konto nach UID zuordnen",
     "removedAccount": "Entferntes Konto",
     "always": "Immer dieses Konto",
     "targetSaved": "Upload-Ziel gespeichert",
     "targetNotSaved": "Upload-Ziel nicht gespeichert",
-    "irminsulOn": "Irminsul auf {device}",
+    "irminsulOn": "Teyvat.me auf {device}",
     "teyvatmeOn": "Teyvat.me auf {device}",
     "aPc": "einem PC",
     "notLoaded": "Geräte nicht geladen",

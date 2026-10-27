@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "主人公",
-    "ar": "冒険ランク {n}",
-    "uid": "UID {uid}",
+    "arLabel": "冒険ランク",
     "arExp": "冒険経験 {exp} / {need}",
     "arExpLabel": "冒険経験",
     "wl": "世界ランク",

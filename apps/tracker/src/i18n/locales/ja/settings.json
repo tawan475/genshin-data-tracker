@@ -145,14 +145,14 @@
       "google": "Google でログイン",
       "reset": "リセットリンクでログイン",
       "legacy": "デバイス一覧の導入前にログイン",
-      "irminsul": "Irminsul からログイン"
+      "irminsul": "Teyvat.me からログイン"
     },
     "auto": "自動：UID でアカウントを判定",
     "removedAccount": "削除されたアカウント",
     "always": "常にこのアカウント",
     "targetSaved": "アップロード先を保存しました",
     "targetNotSaved": "アップロード先を保存できませんでした",
-    "irminsulOn": "{device} の Irminsul",
+    "irminsulOn": "{device} の Teyvat.me",
     "teyvatmeOn": "{device} の Teyvat.me",
     "aPc": "PC",
     "notLoaded": "デバイスを読み込めませんでした",

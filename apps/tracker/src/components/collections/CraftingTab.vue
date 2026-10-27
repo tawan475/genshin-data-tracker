@@ -21,7 +21,8 @@ import { t } from '@/i18n'
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
-const KINDS = ['crafting', 'forging', 'processing'] as const
+// Processing is captured but not shown: its game data names most recipes "Fish" (the user).
+const KINDS = ['crafting', 'forging'] as const
 type Kind = (typeof KINDS)[number]
 
 const crafting = computed(() => props.captured.crafting?.value ?? null)

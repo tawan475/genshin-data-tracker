@@ -88,7 +88,7 @@ const exporter = useCardExport({
   node: () => exportCard.value?.$el as HTMLElement | undefined,
   open: () => c.value !== null,
   state: () => [c.value, theme.value, owner.value, boosts.value, locale.value],
-  filename: () => `${c.value?.key ?? 'character'}-genshin-tracker.png`,
+  filename: () => `${c.value?.key ?? 'character'}-teyvat-me.png`,
   title: () => c.value?.name ?? t('share.export.buildTitle'),
   pngLabel: () => t('share.export.downloadSized', { size: '1920 × 1080' }),
 })

@@ -168,7 +168,7 @@ function exportUigf() {
   if (!history) return
   const json = buildUigf(
     [{ uid: uid.value ?? '', timezone: history.timezone, pulls: pulls.value }],
-    { name: 'Genshin Tracker', version: '1' },
+    { name: 'Teyvat.me', version: '1' },
   )
   saveBlob(
     new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' }),

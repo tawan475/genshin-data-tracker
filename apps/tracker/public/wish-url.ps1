@@ -1,4 +1,4 @@
-# Genshin Tracker: copies the wish history link the game left in its web cache.
+# Teyvat.me: copies the wish history link the game left in its web cache.
 #
 #   & ([scriptblock]::Create((irm 'https://teyvat.me/wish-url.ps1')))
 #

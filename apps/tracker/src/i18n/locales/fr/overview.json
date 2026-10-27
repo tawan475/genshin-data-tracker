@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Voyageur",
-    "ar": "Niv. d'aventure {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Niv. d'aventure",
     "arExp": "EXP d'aventure {exp} / {need}",
     "arExpLabel": "EXP d'aventure",
     "wl": "Niv. du monde",

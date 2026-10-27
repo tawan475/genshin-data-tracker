@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "主角",
-    "ar": "冒险等阶 {n}",
-    "uid": "UID {uid}",
+    "arLabel": "冒险等阶",
     "arExp": "冒险阅历 {exp} / {need}",
     "arExpLabel": "冒险阅历",
     "wl": "世界等级",

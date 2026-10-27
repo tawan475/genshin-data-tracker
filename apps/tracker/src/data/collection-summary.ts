@@ -29,7 +29,7 @@ export interface CollectionFigures {
   'living-beings': CollectionFigure | null
   tcg: CollectionFigure | null
   recipes: CollectionFigure | null
-  /** Recipes unlocked at the bench, the blacksmith and processing together. */
+  /** Recipes unlocked at the bench and the blacksmith together (processing isn't shown). */
   crafting: CollectionFigure | null
   wardrobe: CollectionFigure | null
   /** Hangout endings reached. */
@@ -120,7 +120,7 @@ export function collectionFigures(
       ),
     ),
     crafting: withCatalog(crafting, (c, v) => {
-      const kinds = ['crafting', 'forging', 'processing'] as const
+      const kinds = ['crafting', 'forging'] as const
       const known = kinds.map((k) => new Set(c.data[k].map((r) => r.id)))
       return {
         have: kinds.reduce(

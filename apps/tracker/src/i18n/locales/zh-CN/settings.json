@@ -145,14 +145,14 @@
       "google": "使用 Google 登录",
       "reset": "使用重置链接登录",
       "legacy": "在设备列表功能上线前登录",
-      "irminsul": "从 Irminsul 登录"
+      "irminsul": "从 Teyvat.me 登录"
     },
     "auto": "自动：按 UID 匹配账号",
     "removedAccount": "已删除的账号",
     "always": "始终使用此账号",
     "targetSaved": "上传目标已保存",
     "targetNotSaved": "上传目标未保存",
-    "irminsulOn": "{device} 上的 Irminsul",
+    "irminsulOn": "{device} 上的 Teyvat.me",
     "teyvatmeOn": "{device} 上的 Teyvat.me",
     "aPc": "一台电脑",
     "notLoaded": "设备列表未加载",

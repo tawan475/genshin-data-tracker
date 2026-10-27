@@ -27,7 +27,7 @@ const session = useSession()
           class="flex items-center gap-3 text-2xl font-bold tracking-tight text-white"
         >
           <span class="text-3xl text-paimon drop-shadow-[0_0_10px_var(--paimon-glow)]">✦</span>
-          <span>Genshin Tracker</span>
+          <span>Teyvat.me</span>
         </RouterLink>
         <div class="flex items-center gap-3">
           <AppearanceButton tone="public" />

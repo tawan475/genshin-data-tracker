@@ -73,8 +73,7 @@
   },
   "traveler": {
     "label": "Viajante",
-    "ar": "Rank de Aventura {n}",
-    "uid": "UID {uid}",
+    "arLabel": "Rank de Aventura",
     "arExp": "EXP de Aventura {exp} / {need}",
     "arExpLabel": "EXP de Aventura",
     "wl": "Nível do Mundo",

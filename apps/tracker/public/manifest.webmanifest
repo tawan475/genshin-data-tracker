@@ -1,7 +1,7 @@
 {
   "id": "/app",
-  "name": "Genshin Tracker",
-  "short_name": "GI Tracker",
+  "name": "Teyvat.me",
+  "short_name": "Teyvat.me",
   "description": "Your Genshin Impact inventory over time: snapshots, artifacts, materials and exports.",
   "start_url": "/app",
   "scope": "/",

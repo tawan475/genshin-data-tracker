@@ -48,8 +48,8 @@ describe('describeUserAgent', () => {
     expect(describeUserAgent('')).toBe('Unknown device')
   })
 
-  it("names irminsul's sessions as the Worker stored them", () => {
-    expect(describeUserAgent('Irminsul on GAMING-PC')).toBe('Irminsul on GAMING-PC')
+  it('names capture app sessions Teyvat.me, irminsul ones included', () => {
+    expect(describeUserAgent('Irminsul on GAMING-PC')).toBe('Teyvat.me on GAMING-PC')
     expect(describeUserAgent('Irminsul on ')).toBe('Unknown device')
     expect(describeUserAgent('Teyvat.me on GAMING-PC')).toBe('Teyvat.me on GAMING-PC')
   })
