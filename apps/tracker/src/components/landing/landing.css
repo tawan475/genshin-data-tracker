@@ -1658,3 +1658,87 @@
     filter: none;
   }
 }
+
+/*
+ * The hero fills the first screen and the video is the biggest thing on it
+ * (the user, 2026-10-27: "make the first page like 90% of the page"). The
+ * hero is the screen's height under the top bar; --vh, the height the video
+ * is sized from, stops at 1440px (on a taller screen the column width is the
+ * limit anyway). Small viewport height where the browser has it, so a mobile
+ * toolbar never pushes the hero past the fold.
+ */
+.lp .e-hero {
+  --vh: min(100svh, 1440px);
+  min-height: calc(100svh - 72px);
+  display: flex;
+  align-items: center;
+  padding: 24px 0 40px;
+}
+@supports not (height: 100svh) {
+  .lp .e-hero {
+    --vh: min(100vh, 1440px);
+    min-height: calc(100vh - 72px);
+  }
+}
+.lp .e-hero .e-band {
+  /* flex: the text keeps its natural width, the video takes all the rest */
+  display: flex;
+  align-items: center;
+  max-width: min(96vw, 2600px);
+  gap: clamp(32px, 3vw, 80px);
+}
+.lp .e-hero .e-media {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.lp .wrap.nav {
+  max-width: min(96vw, 2600px);
+}
+.lp .e-hero .h1 {
+  font-size: clamp(52px, 4vw, 104px);
+  white-space: nowrap;
+}
+.lp .e-hero .lead {
+  font-size: clamp(18px, 1.15vw, 26px);
+  line-height: 1.45;
+}
+.lp .e-hero .e-txt {
+  flex: 0 0 auto;
+  max-width: 600px;
+  /* the one-line title may be wider than that on the largest screens */
+  min-width: min-content;
+}
+.lp .e-player {
+  gap: 14px;
+}
+.lp .e-stage.pc {
+  width: min(100%, calc((var(--vh, 1080px) - 330px) * 16 / 9));
+  margin: 0 auto;
+}
+.lp .e-vid.phone {
+  width: min(100%, calc((var(--vh, 1080px) - 250px) * 1080 / 2340));
+}
+@media (max-width: 960px) {
+  .lp .e-hero {
+    min-height: 0;
+    padding: 32px 0 56px;
+  }
+  .lp .e-hero .e-band {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lp .e-hero .e-txt {
+    flex: none;
+    max-width: none;
+    min-width: 0;
+  }
+  .lp .e-hero .h1 {
+    white-space: normal;
+  }
+  .lp .e-stage.pc {
+    width: 100%;
+  }
+  .lp .e-vid.phone {
+    width: min(300px, 100%);
+  }
+}
