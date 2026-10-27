@@ -82,6 +82,11 @@ const note = (tab: ArchiveTab, id: number): string | undefined => {
     const name = typeof series === 'number' ? nameOf(props.catalog, 'bookSeries', series) : ''
     return name && !name.startsWith('#') ? name : undefined
   }
+  // One entry per set and rarity: the rarity tells them apart.
+  if (tab === 'artifacts') {
+    const level = props.catalog.data.artifacts.find((row) => row.id === id)?.level
+    return typeof level === 'number' ? `${level}★` : undefined
+  }
   return undefined
 }
 const pictured = computed(() => current.value.entries.some((entry) => entry.icon))

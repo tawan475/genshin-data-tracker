@@ -80,13 +80,13 @@ export const ARCHIVE_SECTIONS: Readonly<
   Record<ArchiveTab, { section: CollectionSection; icon: 'icon' | 'image' | null }>
 > = {
   quests: { section: 'quests', icon: null },
-  weapons: { section: 'weapons', icon: null },
+  weapons: { section: 'weapons', icon: 'icon' },
   livingBeings: { section: 'livingBeings', icon: 'icon' },
   materials: { section: 'materials', icon: 'icon' },
   books: { section: 'books', icon: 'icon' },
   tutorials: { section: 'tutorials', icon: 'icon' },
   viewpoints: { section: 'viewpoints', icon: 'image' },
-  artifacts: { section: 'artifacts', icon: null },
+  artifacts: { section: 'artifacts', icon: 'icon' },
 }
 
 /** Every entry of an Archive tab. */
