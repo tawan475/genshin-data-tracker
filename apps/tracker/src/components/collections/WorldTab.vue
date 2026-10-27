@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import {
   CheckCheck,
+  ChevronDown,
   Compass,
   Eye,
   Flame,
@@ -161,7 +162,8 @@ const reputationTotal = computed(() =>
  * are open is remembered per device.
  */
 const OPEN_KEY = 'collections:world-open'
-const PANELS = ['lists', 'statues', 'reputation', 'exploration', 'tribes'] as const
+// Statues and Reputation share one row and fold together (`statues`).
+const PANELS = ['lists', 'statues', 'exploration', 'tribes'] as const
 const open = reactive(
   Object.fromEntries(PANELS.map((id) => [id, false])) as Record<(typeof PANELS)[number], boolean>,
 )
@@ -176,6 +178,22 @@ watch(open, (value) => {
   const ids = PANELS.filter((id) => value[id])
   writeStorage(OPEN_KEY, ids.length ? JSON.stringify(ids) : null)
 })
+
+/** Exploration's regions fold one by one (all folded at first), remembered per device. */
+const CITIES_KEY = 'collections:world-cities'
+const openCities = ref<Set<number>>(new Set())
+try {
+  openCities.value = new Set(JSON.parse(readStorage(CITIES_KEY) ?? '[]') as number[])
+} catch {
+  // A bad stored value: all folded.
+}
+function toggleCity(city: number) {
+  const next = new Set(openCities.value)
+  if (next.has(city)) next.delete(city)
+  else next.add(city)
+  openCities.value = next
+  writeStorage(CITIES_KEY, next.size ? JSON.stringify([...next]) : null)
+}
 
 /** The open list's domains per region, had of total ("Mondstadt 12 / 14"). */
 const regionCounts = computed(() => {
@@ -414,7 +432,7 @@ const MAP_PARTS = [
 
       <UiPanel
         v-if="world.reputation.length"
-        v-model:open="open.reputation"
+        v-model:open="open.statues"
         class="min-w-0 flex-[999_1_20rem]"
         :title="$t('collections.world.reputation')"
         collapsible
@@ -488,22 +506,39 @@ const MAP_PARTS = [
           <Sparkles class="size-3.5" aria-hidden="true" />{{ $t('collections.world.pointsOnly') }}
         </span>
       </template>
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4 p-3 sm:p-5">
+      <div
+        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] items-start gap-x-4 gap-y-2 p-3 sm:p-5"
+      >
         <section v-for="city in world.exploration" :key="city.city" class="min-w-0">
-          <h3 class="mb-1.5 flex min-w-0 items-center gap-1.5 text-sm font-semibold">
-            <Landmark class="size-3.5 shrink-0 text-text-muted" aria-hidden="true" />
-            <span class="min-w-0 flex-1 truncate">{{
-              city.name || $t('collections.world.otherAreas')
-            }}</span>
-            <span
-              v-if="cityAverage(city.areas) !== null"
-              class="tabular shrink-0 font-mono"
-              :class="cityAverage(city.areas)! >= 100 ? 'text-success-text' : 'text-accent-text'"
-              :title="$t('collections.world.regionAverage')"
-              >{{ cityAverage(city.areas) }}%</span
+          <h3 class="min-w-0 text-sm font-semibold">
+            <button
+              type="button"
+              class="flex w-full min-w-0 items-center gap-1.5 rounded-md py-1 text-left hover:bg-surface-overlay/50"
+              :aria-expanded="openCities.has(city.city)"
+              @click="toggleCity(city.city)"
             >
+              <ChevronDown
+                class="size-3.5 shrink-0 text-text-muted transition-transform"
+                :class="openCities.has(city.city) ? '' : '-rotate-90'"
+                aria-hidden="true"
+              />
+              <Landmark class="size-3.5 shrink-0 text-text-muted" aria-hidden="true" />
+              <span class="min-w-0 flex-1 truncate">{{
+                city.name || $t('collections.world.otherAreas')
+              }}</span>
+              <span
+                v-if="cityAverage(city.areas) !== null"
+                class="tabular shrink-0 font-mono"
+                :class="cityAverage(city.areas)! >= 100 ? 'text-success-text' : 'text-accent-text'"
+                :title="$t('collections.world.regionAverage')"
+                >{{ cityAverage(city.areas) }}%</span
+              >
+            </button>
           </h3>
-          <ul class="flex flex-col divide-y divide-border-default">
+          <ul
+            v-show="openCities.has(city.city)"
+            class="mt-1 flex flex-col divide-y divide-border-default"
+          >
             <li
               v-for="area in city.areas"
               :key="area.area"

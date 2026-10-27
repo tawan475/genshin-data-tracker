@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ChevronDown } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   title?: string
   description?: string
   flush?: boolean
@@ -9,6 +9,18 @@ defineProps<{
   collapsible?: boolean
 }>()
 const open = defineModel<boolean>('open', { default: true })
+
+/**
+ * A collapsible panel's whole header folds it (the user's call: the chevron
+ * alone was too small a target); its own controls (a view switch, the
+ * chevron button) keep their clicks. Keyboard users have the buttons.
+ */
+function onHeader(event: MouseEvent) {
+  if (!props.collapsible) return
+  const target = event.target as HTMLElement | null
+  if (target?.closest('button, a, input, select, textarea, label, [role="radio"]')) return
+  open.value = !open.value
+}
 </script>
 
 <template>
@@ -17,7 +29,11 @@ const open = defineModel<boolean>('open', { default: true })
     <header
       v-if="title || $slots.actions || $slots.header"
       class="flex min-h-[calc(3.75rem+1px)] flex-wrap items-center justify-between gap-3 px-5 py-3.5"
-      :class="!collapsible || open ? 'border-b border-border-default' : ''"
+      :class="[
+        !collapsible || open ? 'border-b border-border-default' : '',
+        collapsible ? 'cursor-pointer' : '',
+      ]"
+      @click="onHeader"
     >
       <slot name="header">
         <button
