@@ -1742,3 +1742,19 @@
     width: min(300px, 100%);
   }
 }
+
+/* the video at about half the screen, on the row's right edge (the user's drawn box) */
+.lp .e-hero .e-media {
+  justify-content: flex-end;
+}
+.lp .e-hero .e-player {
+  width: min(100%, 50vw, calc((var(--vh, 1080px) - 330px) * 16 / 9));
+}
+.lp .e-hero .e-stage.pc {
+  width: 100%;
+}
+@media (max-width: 960px) {
+  .lp .e-hero .e-player {
+    width: 100%;
+  }
+}
