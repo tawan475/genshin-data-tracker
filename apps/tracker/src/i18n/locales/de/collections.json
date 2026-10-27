@@ -174,6 +174,15 @@
     "domainsClearedHint": "Sphären, deren Erstabschluss-Belohnung abgeholt ist",
     "npcsMet": "Getroffene Personen",
     "npcsMetHint": "Getroffene Personen aus der Liste des Spiels",
+    "trounce": "Gebietssäuberung",
+    "trounceHint": "Gebietssäuberungen, die mindestens einmal abgeschlossen sind (nur diese meldet das Spiel)",
+    "lists": "Listen",
+    "domainKinds": {
+      "blessing": "Sphäre des Segens",
+      "mastery": "Sphäre des Verständnisses",
+      "forgery": "Sphäre der Kriegskunst",
+      "trounce": "Gebietssäuberung"
+    },
     "tribes": "Stammesaufträge",
     "tribalStates": {
       "notOpen": "Nicht offen",

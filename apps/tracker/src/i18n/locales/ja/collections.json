@@ -174,6 +174,15 @@
     "domainsClearedHint": "初回クリア報酬を受け取った秘境",
     "npcsMet": "出会った人",
     "npcsMetHint": "ゲームの一覧で出会った人",
+    "trounce": "征討領域",
+    "trounceHint": "一度でもクリアした征討領域（ゲームが知らせるのはこれだけ）",
+    "lists": "一覧",
+    "domainKinds": {
+      "blessing": "祈聖秘境",
+      "mastery": "熟知秘境",
+      "forgery": "煉武秘境",
+      "trounce": "征討領域"
+    },
     "tribes": "部族任務",
     "tribalStates": {
       "notOpen": "未開放",

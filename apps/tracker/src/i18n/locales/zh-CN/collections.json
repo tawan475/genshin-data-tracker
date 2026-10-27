@@ -174,6 +174,15 @@
     "domainsClearedHint": "已领取首通奖励的秘境",
     "npcsMet": "已结识的人",
     "npcsMetHint": "游戏名单中已结识的人",
+    "trounce": "征讨领域",
+    "trounceHint": "至少通关过一次的征讨领域（游戏只报告这些）",
+    "lists": "列表",
+    "domainKinds": {
+      "blessing": "祝圣秘境",
+      "mastery": "精通秘境",
+      "forgery": "炼武秘境",
+      "trounce": "征讨领域"
+    },
     "tribes": "部族任务",
     "tribalStates": {
       "notOpen": "未开放",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CollectionCatalog } from '../collection-names'
-import { TEYVAT_SCENE, tribalRows, worldModel } from '../world'
+import { TEYVAT_SCENE, npcRows, tribalRows, worldModel } from '../world'
 
 const texts = (entries: Record<string, [number, Record<string, string>][]>) =>
   Object.fromEntries(
@@ -27,7 +27,19 @@ const catalog = {
       { id: 300002, scene: 3, point: 2, kind: 'waypoint', area: 1, gadget: 0 },
       { id: 300003, scene: 3, point: 3, kind: 'domain', area: 2, gadget: 0 },
       { id: 300004, scene: 3, point: 4, kind: 'mark', area: 2, gadget: 0 },
+      { id: 300005, scene: 3, point: 5, kind: 'domain', area: 1, gadget: 0 },
+      { id: 300006, scene: 3, point: 6, kind: 'domain', area: 2, gadget: 0 },
+      { id: 300007, scene: 3, point: 7, kind: 'domain', area: 2, gadget: 0 },
       { id: 500001, scene: 5, point: 1, kind: 'waypoint', area: 200, gadget: 0 },
+    ],
+    domainEntries: [
+      { id: 1, type: 'reliquary', scene: 3, point: 3, picture: '', onMap: 1 },
+      { id: 1006, type: 'dungeon_entry_type_trial', scene: 3, point: 5, picture: '', onMap: 1 },
+      // A quest's instance: a domain point the map never shows.
+      { id: 1012, type: 'dungeon_entry_type_normal', scene: 3, point: 6, picture: '', onMap: 0 },
+      // An event's domain, long gone.
+      { id: 1032, type: 'dungeon_entry_type_activity', scene: 3, point: 7, picture: '', onMap: 1 },
+      { id: 1016, type: 'dungeon_entry_type_trial', scene: 3, point: 99, picture: '', onMap: 0 },
     ],
   },
   text: texts({
@@ -41,8 +53,12 @@ const catalog = {
       [20000, { name: 'Enkanomiya' }],
     ],
     offerings: [[1, { name: '', available: 'Frostbearing Tree Offering(s) Available' }]],
+    domainEntries: [
+      [1, { name: 'Midsummer Courtyard' }],
+      [1006, { name: 'Confront Stormterror' }],
+    ],
   }),
-  english: texts({ cities: [], areas: [], offerings: [] }),
+  english: texts({ cities: [], areas: [], offerings: [], domainEntries: [] }),
 } as unknown as CollectionCatalog
 
 describe('worldModel', () => {
@@ -78,10 +94,33 @@ describe('worldModel', () => {
         scene: TEYVAT_SCENE,
         name: null,
         waypoints: { have: 1, total: 2 },
-        domains: { have: 1, total: 1 },
+        domains: { have: 1, total: 2 },
         areas: { have: 1, total: 3 },
       },
     ])
+    // Only the entrances the map shows, by region; the quest's and the event's stay out.
+    expect(world.domains).toEqual([
+      {
+        id: 1,
+        name: 'Midsummer Courtyard',
+        kind: 'blessing',
+        scene: 3,
+        city: 1,
+        region: 'Mondstadt',
+        have: true,
+      },
+      {
+        id: 1006,
+        name: 'Confront Stormterror',
+        kind: 'trounce',
+        scene: 3,
+        city: 1,
+        region: 'Mondstadt',
+        have: false,
+      },
+    ])
+    // No list of first clears in this capture.
+    expect(world.cleared).toBeNull()
     // Points until the game data has an area's total; then a percentage.
     expect(world.exploration).toEqual([
       {
@@ -104,6 +143,56 @@ describe('worldModel', () => {
     expect(world.offerings).toEqual([])
     expect(world.maps).toEqual([])
     expect(world.exploration).toHaveLength(1)
+    expect(world.domains).toEqual([])
+  })
+
+  it('counts first clears against the Trounce Domains, plus any other entrance named', () => {
+    const world = worldModel({ domainsCleared: [1006, 1, 4242] }, catalog)
+    expect(world.cleared?.map((d) => [d.id, d.name, d.kind, d.have])).toEqual([
+      [1, 'Midsummer Courtyard', 'blessing', true],
+      [1006, 'Confront Stormterror', 'trounce', true],
+      [1016, '#1016', 'trounce', false],
+      [4242, '#4242', 'other', true],
+    ])
+  })
+
+  it('takes every domain point a DungeonEntry names with game data before onMap', () => {
+    const older = {
+      ...catalog,
+      data: {
+        ...catalog.data,
+        domainEntries: catalog.data.domainEntries.map((row) => {
+          const { onMap: _, ...older } = row as typeof row & { onMap?: number }
+          return older
+        }),
+      },
+    } as unknown as CollectionCatalog
+    const world = worldModel({ scenes: { '3': { points: [3, 6], areas: [] } } }, older)
+    expect(world.domains.map((d) => [d.id, d.have])).toEqual([
+      [1, true],
+      [1006, false],
+      [1012, true],
+    ])
+  })
+})
+
+describe('npcRows', () => {
+  it('lists the game data NPCs with the ones met, unknown ids last', () => {
+    const npcs = {
+      data: {
+        npcsMet: [
+          { id: 2, character: 0 },
+          { id: 3, character: 0 },
+        ],
+      },
+      text: texts({ npcsMet: [[2, { name: 'Paimon', title: 'Traveling Companion' }]] }),
+      english: texts({ npcsMet: [[3, { name: 'Katheryne', title: '' }]] }),
+    } as unknown as CollectionCatalog
+    expect(npcRows([3, 9], npcs)).toEqual([
+      { id: 2, name: 'Paimon', title: 'Traveling Companion', have: false },
+      { id: 3, name: 'Katheryne', title: '', have: true },
+      { id: 9, name: '#9', title: '', have: true },
+    ])
   })
 })
 
