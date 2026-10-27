@@ -125,10 +125,6 @@ watch(
 )
 
 const exporter = useCardExport({
-  width: 0,
-  height: 0,
-  scale: ROSTER_SCALE,
-  node: () => undefined,
   draw: async () => {
     if (!drawing.value) redraw()
     if (!drawing.value) throw new Error('Closed')

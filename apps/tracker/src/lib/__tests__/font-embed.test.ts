@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fontFaceRules, parseGoogleFontCss } from '@/lib/font-embed'
+import { fontFiles, parseGoogleFontCss } from '@/lib/font-embed'
 
 // The shape Google Fonts answers for a variable family with several weights.
 const CSS = `
@@ -56,22 +56,22 @@ describe('share image fonts', () => {
     })
   })
 
-  it('inlines one face per latin file, its weights as a range', () => {
-    const rules = fontFaceRules(
-      parseGoogleFontCss(CSS),
-      new Map([
-        ['https://fonts.gstatic.com/s/outfit/v1/latin.woff2', 'data:font/woff2;base64,AAA'],
-        ['https://fonts.gstatic.com/s/outfit/v1/ext.woff2', 'data:font/woff2;base64,BBB'],
-        ['https://fonts.gstatic.com/s/outfit/v1/vi.woff2', 'data:font/woff2;base64,CCC'],
-      ]),
-    )
-    expect(rules.split('\n')).toEqual([
-      "@font-face{font-family:'Outfit';font-style:normal;font-weight:300;src:url(data:font/woff2;base64,BBB) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5;}",
-      "@font-face{font-family:'Outfit';font-style:normal;font-weight:300 800;src:url(data:font/woff2;base64,AAA) format('woff2');unicode-range:U+0000-00FF, U+0131;}",
+  it('lists one file per latin URL, its weights as a range', () => {
+    expect(fontFiles(parseGoogleFontCss(CSS))).toEqual([
+      {
+        family: "'Outfit'",
+        style: 'normal',
+        url: 'https://fonts.gstatic.com/s/outfit/v1/ext.woff2',
+        range: 'U+0100-02BA, U+02BD-02C5',
+        weight: '300',
+      },
+      {
+        family: "'Outfit'",
+        style: 'normal',
+        url: 'https://fonts.gstatic.com/s/outfit/v1/latin.woff2',
+        range: 'U+0000-00FF, U+0131',
+        weight: '300 800',
+      },
     ])
-  })
-
-  it('leaves out files that could not be fetched', () => {
-    expect(fontFaceRules(parseGoogleFontCss(CSS), new Map())).toBe('')
   })
 })

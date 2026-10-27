@@ -1,37 +1,15 @@
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { Check, Copy, Download, Share2, TriangleAlert } from 'lucide-vue-next'
 import { t } from '@/i18n'
-import { openExportFrame, type ExportFrame } from './export-frame'
-import {
-  canCopyImage,
-  canShareFiles,
-  copyPng,
-  downloadBlob,
-  renderPng,
-  sharePng,
-} from './share-image'
+import { canCopyImage, canShareFiles, copyPng, downloadBlob, sharePng } from './share-image'
 
 export type ExportAction = 'png' | 'copy' | 'share'
 type FailureKey = 'exportFailed' | 'copyFailed' | 'shareFailed'
 
 export interface CardExportOptions {
-  /**
-   * The hidden frame's viewport in CSS pixels and the PNG's scale; the PNG is
-   * that size too unless `measure` says otherwise.
-   */
-  width: number
-  height: number
-  scale: number
-  /** The PNG's size in CSS pixels from the laid-out card (a card whose height varies). */
-  measure?: (node: HTMLElement) => { width: number; height: number }
-  /** The card the export draws, rendered into `frame.mount` (a Teleport). */
-  node: () => HTMLElement | undefined
-  /**
-   * Draws the PNG itself (a card drawn on a canvas, the roster): no hidden
-   * frame, no DOM capture; `node` and the frame's size are then unused.
-   */
-  draw?: () => Promise<{ blob: Blob; missing: number }>
-  /** Whether there is a card to draw (false closes the frame). */
+  /** Draws the card on a canvas and encodes it: the PNG, and how many images it lacks. */
+  draw: () => Promise<{ blob: Blob; missing: number }>
+  /** Whether there is a card to draw. */
   open: () => boolean
   /** What the PNG depends on; a change drops the drawn one. */
   state: () => unknown
@@ -43,20 +21,16 @@ export interface CardExportOptions {
 }
 
 /**
- * Exporting a share card as a PNG (the character card, the artifact card):
- * drawn on demand in its own hidden fixed-size iframe (lib/export-frame), so
- * the picture is the same at any window size, zoom or aspect ratio, and kept
- * until something on the card changes. `warm` (pointing at the actions,
- * opening a phone menu) starts it silently, so the click that follows
- * answers at once: the share sheet and Safari's clipboard need the click to
- * still be current. A click still waiting shows a spinner in its own icon;
- * a result swaps the icon (a check, or a warning with the reason in the
- * tooltip). The frame stays for the next export and goes when the card does.
+ * Exporting a share card as a PNG (the character card, the artifact card,
+ * the roster): drawn on a canvas on demand (`draw`; the same picture at any
+ * window size, zoom or aspect ratio) and kept until something on the card
+ * changes. `warm` (pointing at the actions, opening a phone menu) starts it
+ * silently, so the click that follows answers at once: the share sheet and
+ * Safari's clipboard need the click to still be current. A click still
+ * waiting shows a spinner in its own icon; a result swaps the icon (a
+ * check, or a warning with the reason in the tooltip).
  */
 export function useCardExport(options: CardExportOptions) {
-  /** The hidden iframe the export draws in; opened on first use, closed with the card. */
-  const frame = shallowRef<ExportFrame | null>(null)
-  let opening: Promise<ExportFrame> | null = null
   const result = shallowRef<Promise<Blob> | null>(null)
   /** The drawn PNG is ready (no wait on a click). */
   const ready = ref(false)
@@ -78,53 +52,10 @@ export function useCardExport(options: CardExportOptions) {
     failure.value = null
   })
 
-  async function imagesLoaded(root: HTMLElement): Promise<void> {
-    await Promise.all(
-      [...root.querySelectorAll('img')].map((img) =>
-        img.complete ? undefined : img.decode().catch(() => undefined),
-      ),
-    )
-  }
-
-  function ensureFrame(): Promise<ExportFrame> {
-    if (frame.value) return Promise.resolve(frame.value)
-    opening ??= openExportFrame(options.width, options.height).then((opened) => {
-      opening = null
-      if (!options.open()) {
-        opened.destroy() // the card closed meanwhile
-        throw new Error('Closed')
-      }
-      frame.value = opened
-      return opened
-    })
-    return opening
-  }
-
-  function closeFrame() {
-    frame.value?.destroy()
-    frame.value = null
-  }
-
   function render(): Promise<Blob> {
     const id = ++generation
     const promise = (async () => {
-      if (options.draw) {
-        const drawn = await options.draw()
-        if (id === generation) {
-          missing.value = drawn.missing
-          ready.value = true
-        }
-        return drawn.blob
-      }
-      const target = await ensureFrame()
-      await target.sync()
-      await nextTick()
-      const node = options.node()
-      if (!node) throw new Error('No card')
-      await imagesLoaded(node)
-      await target.fontsReady()
-      const size = options.measure?.(node) ?? { width: options.width, height: options.height }
-      const drawn = await renderPng(node, { ...size, scale: options.scale })
+      const drawn = await options.draw()
       if (id === generation) {
         missing.value = drawn.missing
         ready.value = true
@@ -229,15 +160,12 @@ export function useCardExport(options: CardExportOptions) {
     () => options.open(),
     (isOpen) => {
       if (isOpen) return
-      closeFrame()
       done.value = null
       failure.value = null
     },
   )
-  onBeforeUnmount(closeFrame)
 
   return {
-    frame,
     ready,
     missing,
     waiting,

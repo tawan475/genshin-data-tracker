@@ -1,7 +1,7 @@
 /**
- * Google Fonts' CSS turned into self-contained @font-face rules, for the
- * share card's PNG export (lib/share-image): an SVG drawn as an image can't
- * load the page's fonts, so they go in as data URLs. Pure, no DOM.
+ * Google Fonts' CSS read as font files, for the share cards drawn on a
+ * canvas (lib/card-canvas), which register Outfit once more with tabular
+ * figures on. Pure, no DOM.
  */
 
 /** One @font-face of Google's answer, with the subset its comment names ("latin", "latin-ext"). */
@@ -37,14 +37,21 @@ export function parseGoogleFontCss(css: string): GoogleFontFace[] {
   return faces
 }
 
+/** One font file of the kept subsets, with every weight it serves. */
+export interface GoogleFontFile {
+  family: string
+  style: string
+  url: string
+  range: string
+  /** "300 800" for a variable file, "400" for one weight. */
+  weight: string
+}
+
 /**
- * One @font-face per font file of the kept subsets, its weights as a range
- * (Google serves Outfit as one variable file for every weight).
+ * The kept subsets' files, one per URL, their weights as a range (Google
+ * serves Outfit as one variable file for every weight).
  */
-export function fontFaceRules(
-  faces: readonly GoogleFontFace[],
-  dataUrls: ReadonlyMap<string, string>,
-) {
+export function fontFiles(faces: readonly GoogleFontFace[]): GoogleFontFile[] {
   const files = new Map<string, GoogleFontFace & { weights: number[] }>()
   for (const face of faces) {
     if (!KEEP_SUBSETS.has(face.subset)) continue
@@ -52,18 +59,15 @@ export function fontFaceRules(
     if (file) file.weights.push(face.weight)
     else files.set(face.url, { ...face, weights: [face.weight] })
   }
-  return [...files.values()]
-    .filter((f) => dataUrls.has(f.url))
-    .map((f) => {
-      const low = Math.min(...f.weights)
-      const high = Math.max(...f.weights)
-      return (
-        `@font-face{font-family:${f.family};font-style:${f.style};` +
-        `font-weight:${low === high ? low : `${low} ${high}`};` +
-        `src:url(${dataUrls.get(f.url)}) format('woff2');` +
-        (f.range ? `unicode-range:${f.range};` : '') +
-        '}'
-      )
-    })
-    .join('\n')
+  return [...files.values()].map((f) => {
+    const low = Math.min(...f.weights)
+    const high = Math.max(...f.weights)
+    return {
+      family: f.family,
+      style: f.style,
+      url: f.url,
+      range: f.range,
+      weight: low === high ? String(low) : `${low} ${high}`,
+    }
+  })
 }

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import type { AccountResponse } from '@gdt/shared'
 import UiModal from '@/components/ui/UiModal.vue'
 import { buildPanel, shareUid, talentLevels } from '@/data/character-build'
 import { useFavoriteCharacters } from '@/data/favorite-characters'
 import type { CharacterView } from '@/data/characters'
+import { canvasPng } from '@/lib/card-canvas'
+import { useExpNeed } from '@/lib/exp-need'
 import { readJson, writeJson } from '@/lib/storage'
 import { resolvedTheme } from '@/lib/theme'
 import { useCardExport } from '@/lib/use-card-export'
@@ -15,23 +17,21 @@ import ShareActions from '@/components/share/ShareActions.vue'
 import ShareMenu from '@/components/share/ShareMenu.vue'
 import CharacterDetail from './CharacterDetail.vue'
 import FavoriteStar from './FavoriteStar.vue'
-import ShareCard from './ShareCard.vue'
-import { CARD_HEIGHT, CARD_SCALE, CARD_WIDTH, type CardOwner } from './share-card'
-import { useConstellationBoosts } from './use-boosts'
+import { CARD_SCALE, type CardOwner } from './share-card'
+import { drawShareCard } from './share-card-canvas'
+import { expShare } from './share-card-model'
+import { useConstellationBoosts, useCrownIcon } from './use-boosts'
 
 /**
  * The character details dialog, which is also the share card. From `lg`
  * the details are the card itself (CharacterDetail `showcase`), and the
  * header carries its options (theme, name, UID) and PNG / Copy / Share; on
  * narrower screens the details stack and one header button opens the same
- * options and actions. Every export draws its own copy of the card in a
- * hidden 1920×1080 iframe (lib/export-frame), so the PNG is the same at any
- * window size, zoom or aspect ratio; the iframe stays for the next export
- * and goes when the dialog closes. The PNG is the card at 1920×1080
- * (lib/share-image). Options are
- * remembered on this device; the UID is off until asked for (it's
- * personal) and falls back to the newest capture's when the account has
- * none.
+ * options and actions. The PNG is the card drawn on a canvas at 1920×1080
+ * (share-card-canvas), the same at any window size, zoom or aspect ratio,
+ * whatever the details show. Options are remembered on this device; the
+ * UID is off until asked for (it's personal) and falls back to the newest
+ * capture's when the account has none.
  */
 const props = defineProps<{
   character: CharacterView | null
@@ -77,22 +77,51 @@ const talents = computed(() =>
 )
 
 // ------------------------------------------------------------------ export
-// Drawn on demand in its own hidden 1920×1080 frame and kept until something on
-// the card changes (lib/use-card-export).
+// Drawn on a canvas on demand (pointing at the actions starts it) and kept until
+// something on the card changes (lib/use-card-export).
 
-const exportCard = useTemplateRef<InstanceType<typeof ShareCard>>('exportCard')
+const expNeed = useExpNeed()
+const crown = useCrownIcon()
 const exporter = useCardExport({
-  width: CARD_WIDTH,
-  height: CARD_HEIGHT,
-  scale: CARD_SCALE,
-  node: () => exportCard.value?.$el as HTMLElement | undefined,
+  draw: async () => {
+    const character = c.value
+    if (!character) throw new Error('Closed')
+    const drawn = await drawShareCard(
+      {
+        character,
+        panel: panel.value,
+        talents: talents.value,
+        theme: theme.value,
+        owner: owner.value,
+        takenAt: takenAt.value,
+        crown: crown.value,
+        levelBar: expShare(
+          character.exp,
+          expNeed.value?.character(character.level, character.ascension),
+        ),
+        friendshipBar:
+          character.friendship === null
+            ? null
+            : expShare(character.friendshipExp, expNeed.value?.friendship(character.friendship)),
+      },
+      CARD_SCALE,
+    )
+    return { blob: await canvasPng(drawn.canvas), missing: drawn.missing }
+  },
   open: () => c.value !== null,
-  state: () => [c.value, theme.value, owner.value, boosts.value, locale.value],
+  state: () => [
+    c.value,
+    theme.value,
+    owner.value,
+    boosts.value,
+    locale.value,
+    crown.value,
+    expNeed.value,
+  ],
   filename: () => `${c.value?.key ?? 'character'}-teyvat-me.png`,
   title: () => c.value?.name ?? t('share.export.buildTitle'),
   pngLabel: () => t('share.export.downloadSized', { size: '1920 × 1080' }),
 })
-const frame = exporter.frame
 </script>
 
 <template>
@@ -143,19 +172,5 @@ const frame = exporter.frame
       :owner="owner"
       :taken-at="takenAt"
     />
-
-    <!-- The card the export draws: in the hidden 1920×1080 iframe, never on the page -->
-    <Teleport v-if="frame && character" :to="frame.mount">
-      <ShareCard
-        ref="exportCard"
-        :character="character"
-        :panel="panel"
-        :talents="talents"
-        :theme="theme"
-        :owner="owner"
-        :taken-at="takenAt"
-        still
-      />
-    </Teleport>
   </UiModal>
 </template>

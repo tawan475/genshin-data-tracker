@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { useExpNeed } from '@/lib/exp-need'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
@@ -15,18 +15,13 @@ import {
   type StatRow,
   type TalentLevel,
 } from '@/data/character-build'
-import { SLOT_LABELS, SLOT_ORDER, type CharacterView, type SetCount } from '@/data/characters'
+import { SLOT_LABELS, type CharacterView, type SetCount } from '@/data/characters'
 import { artifactIcon, artifactSetIcon, characterBanner, weaponIcon } from '@/lib/assets'
-import { CRIT_TIER_TEXT, cvTier, isCritCirclet, rvTier } from '@/lib/crit-tiers'
+import { CRIT_TIER_TEXT, cvTier, rvTier } from '@/lib/crit-tiers'
 import { formatDate, formatNumber } from '@/lib/format'
 import { levelCap } from '@/lib/level'
-import { ROLL_QUALITY_LABEL, inferArtifactRolls, type InferredRoll } from '@/utils/artifact-rolls'
-import {
-  formatRollValue,
-  formatSetName,
-  formatStatShort,
-  formatStatValue,
-} from '@/utils/artifact-stats'
+import { ROLL_QUALITY_LABEL, type InferredRoll } from '@/utils/artifact-rolls'
+import { formatRollValue, formatStatShort, formatStatValue } from '@/utils/artifact-stats'
 import { LIGHT_ART, type ArtTone } from './art-tone'
 import CardRollBars from './CardRollBars.vue'
 import ElementDisc from './ElementDisc.vue'
@@ -36,11 +31,8 @@ import SplashArt from './SplashArt.vue'
 import { CONSTELLATION_MAX_STYLE, isMaxConstellation, refinementStyle } from './max-badges'
 import { artTone } from './measure-art'
 import {
-  BAND_CV_ON,
   BAND_EMBLEM,
-  BAND_TIER_COLOR,
   CARD_HEIGHT,
-  CARD_STILL,
   CARD_THEMES,
   CARD_WIDTH,
   EMBLEM_URL,
@@ -55,6 +47,7 @@ import {
   splashPlace,
   type CardOwner,
 } from './share-card'
+import { cardPieces, expShare, ownerParts } from './share-card-model'
 import { constellationIcons, talentIcons } from './talent-icons'
 import { ELEMENT_TEXT } from './tokens'
 import { useCrownIcon } from './use-boosts'
@@ -69,8 +62,9 @@ import { useCrownIcon } from './use-boosts'
  * piece's band (main stat, stars, CV and RV left of the icon) carry the
  * game's item header art: its rarity's gradient under the emblem
  * (share-card QUALITY_ART, EMBLEM; from gi-cdn), alike in both themes.
- * The wide character details show it scaled to their width, and the PNG is
- * this card at 1× (lib/share-image).
+ * The wide character details show it scaled to their width; the PNG is the
+ * same card drawn on a canvas (share-card-canvas), which follows this one:
+ * a change here is a change there.
  *
  * Its own palette (share-card CARD_THEMES, light or dark whatever the
  * page's), sizes in px (not the page's rem), no viewport breakpoints and no
@@ -85,10 +79,7 @@ const props = defineProps<{
   owner: CardOwner
   /** When the capture was taken (epoch ms). */
   takenAt: number | null
-  /** Drawn for the PNG export: images show as soon as they load, no fade. */
-  still?: boolean
 }>()
-provide(CARD_STILL, props.still)
 
 /** Tailwind's rem-based spacing pinned to 4px, so stray utilities don't follow the page's root size. */
 const ROOT = computed(() => ({
@@ -167,23 +158,14 @@ const friendshipTitle = computed(() =>
     : t('characters.friendship.title', { level: c.value.friendship }) +
       expText(c.value.friendshipExp, expNeed.value?.friendship(c.value.friendship)),
 )
-/**
- * The bars under the level and friendship (Capture's EXP): how far to the
- * next level, full at a cap; null when the capture has no EXP for it.
- */
-const share = (exp: number | null, need: number | null | undefined) =>
-  need === null
-    ? 100
-    : exp === null || need === undefined
-      ? null
-      : Math.min(100, (exp / need) * 100)
+/** The bars under the level and friendship (share-card-model expShare). */
 const levelBar = computed(() =>
-  share(c.value.exp, expNeed.value?.character(c.value.level, c.value.ascension)),
+  expShare(c.value.exp, expNeed.value?.character(c.value.level, c.value.ascension)),
 )
 const friendshipBar = computed(() =>
   c.value.friendship === null
     ? null
-    : share(c.value.friendshipExp, expNeed.value?.friendship(c.value.friendship)),
+    : expShare(c.value.friendshipExp, expNeed.value?.friendship(c.value.friendship)),
 )
 const weaponCap = computed(() =>
   c.value.weapon ? levelCap(c.value.weapon.ascension, c.value.weapon.level) : 0,
@@ -215,53 +197,8 @@ function talentTone(talent: TalentLevel): string {
       : 'text-(--card-text)'
 }
 
-/**
- * A pill's colour on a band (BAND_TIER_COLOR): akasha's tiers are 5★ scales,
- * so 1–4★ pieces stay untiered; a CV above 0 below the first tier is white.
- */
-function bandCv(rarity: number, cv: number, critCirclet: boolean) {
-  const tier = rarity < 5 ? 0 : cvTier(cv, 'artifact', critCirclet)
-  return {
-    color: tier ? BAND_TIER_COLOR[tier] : cv > 0 ? BAND_CV_ON : BAND_TIER_COLOR[0],
-    top: tier === 6,
-  }
-}
-function bandRv(rarity: number, rv: number) {
-  const tier = rarity < 5 || rv <= 0 ? 0 : rvTier(rv)
-  return { color: BAND_TIER_COLOR[tier], top: tier === 6 }
-}
-
 /** Four substat lines per piece, empty ones kept, so the rows line up across the five. */
-const pieces = computed(() =>
-  SLOT_ORDER.map((slot, index) => {
-    const piece = c.value.artifacts[index] ?? null
-    if (!piece) {
-      return { slot, piece, lines: [], cv: null, rv: null, title: SLOT_LABELS[slot] }
-    }
-    const rolls = inferArtifactRolls(piece)
-    const lines: {
-      key: string
-      value: number
-      rolls: readonly InferredRoll[]
-      inactive: boolean
-    }[] = [
-      ...piece.substats.map((s, i) => ({ ...s, rolls: rolls[i] ?? [], inactive: false })),
-      ...(piece.unactivatedSubstats ?? []).map((s) => ({ ...s, rolls: [], inactive: true })),
-    ].slice(0, 4)
-    const rollCount =
-      piece.totalRolls && piece.totalRolls > 0
-        ? piece.totalRolls
-        : rolls.reduce((sum, r) => sum + r.length, 0)
-    const cv = bandCv(piece.rarity, piece.cv, isCritCirclet(piece.slotKey, piece.mainStatKey))
-    const rv = bandRv(piece.rarity, piece.rv)
-    const title = [
-      formatSetName(piece.setKey),
-      `${SLOT_LABELS[slot]} +${piece.level} · ${piece.rarity}★`,
-      t('share.card.pieceTitle', { cv: piece.cv.toFixed(1), rv: piece.rv, n: rollCount }),
-    ].join('\n')
-    return { slot, piece, lines, cv, rv, title }
-  }),
-)
+const pieces = computed(() => cardPieces(c.value))
 /** The sets listed: 2 pieces or more (a single piece grants nothing). */
 const bonus = computed(() => bonusSets(c.value.sets))
 const rv = computed(() => buildRv(c.value.artifacts))
@@ -278,13 +215,7 @@ function rollTitle(key: string, rolls: readonly InferredRoll[]): string {
     .join(' + ')
 }
 
-const ownerLine = computed(() =>
-  [
-    props.owner.name,
-    props.owner.uid ? `UID ${props.owner.uid}` : null,
-    props.owner.ar ? `AR ${props.owner.ar}` : null,
-  ].filter((part): part is string => !!part),
-)
+const ownerLine = computed(() => ownerParts(props.owner))
 </script>
 
 <template>
@@ -306,7 +237,6 @@ const ownerLine = computed(() =>
       :character-key="c.key"
       :name="c.name"
       :rarity="c.rarity"
-      :eager="still"
       class="absolute h-[1100px] w-[2200px]"
       :style="{ left: `${splash.left}px`, top: `${splash.top}px` }"
       :full="splashFull(c.key)"

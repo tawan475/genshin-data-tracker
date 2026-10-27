@@ -48,7 +48,7 @@ import { useConstellationBoosts } from './use-boosts'
  * Narrow: the same build stacked to read on a phone (splash art with the
  * constellations, level, talents with C3/C5, weapon, the in-game stats,
  * sets, the five pieces). The export draws its own copy of the card
- * (CharacterModal, in a hidden iframe), whatever this shows.
+ * (CharacterModal, on a canvas: share-card-canvas), whatever this shows.
  */
 const props = defineProps<{
   character: CharacterView

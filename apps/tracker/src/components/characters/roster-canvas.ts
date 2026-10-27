@@ -12,6 +12,7 @@ import type { TalentLevel } from '@/data/character-build'
 import type { CharacterView } from '@/data/characters'
 import type { Element } from '@/data/game-meta'
 import { characterIcon, elementIcon, elementIconLight } from '@/lib/assets'
+import { canvasPng } from '@/lib/card-canvas'
 import { qualityCell } from '@/lib/item-art'
 import {
   ROSTER_GAP,
@@ -535,12 +536,7 @@ function drawTile(
   })
 }
 
-/** The drawn card as a PNG. */
+/** The drawn card as a PNG, encoded off the page's thread (lib/card-canvas). */
 export function rosterPng(drawn: DrawnRoster): Promise<Blob> {
-  return new Promise((resolve, reject) =>
-    drawn.canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))),
-      'image/png',
-    ),
-  )
+  return canvasPng(drawn.canvas)
 }

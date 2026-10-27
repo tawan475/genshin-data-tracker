@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { isDecoded, markDecoded } from '@/lib/image-preload'
-import { CARD_STILL } from './share-card'
 
 /**
  * A character image that never shows the previous character's picture: a
  * new <img> per `src` (keyed), invisible until its own picture has loaded,
  * then faded in; at once when it was preloaded and decoded already
- * (lib/image-preload), or inside a card drawn for the export (CARD_STILL).
+ * (lib/image-preload).
  * Whatever sits behind it (a disc, a rarity strip) shows meanwhile.
  * Attributes (class, alt) go to the <img>.
  */
 const props = defineProps<{ src: string }>()
-const still = inject(CARD_STILL, false)
-
-const loaded = ref(still || isDecoded(props.src))
+const loaded = ref(isDecoded(props.src))
 watch(
   () => props.src,
-  (src) => (loaded.value = still || isDecoded(src)),
+  (src) => (loaded.value = isDecoded(src)),
 )
 
 function onLoad() {

@@ -9,13 +9,9 @@ import ArtifactBag from '@/components/artifacts/ArtifactBag.vue'
 import { useProgressive } from '@/components/planner/use-progressive'
 import ArtifactCard from '@/components/artifacts/ArtifactCard.vue'
 import ArtifactDetail from '@/components/artifacts/ArtifactDetail.vue'
-import ArtifactShareCard from '@/components/artifacts/ArtifactShareCard.vue'
+import { drawArtifactCard } from '@/components/artifacts/artifact-canvas'
 import { artifactPieceName } from '@/components/artifacts/piece-name'
-import {
-  ARTIFACT_SHARE_FRAME_HEIGHT,
-  ARTIFACT_SHARE_SCALE,
-  ARTIFACT_SHARE_WIDTH,
-} from '@/components/artifacts/card-style'
+import { ARTIFACT_SHARE_SCALE, ARTIFACT_SHARE_WIDTH } from '@/components/artifacts/card-style'
 import ShareActions from '@/components/share/ShareActions.vue'
 import ShareMenu from '@/components/share/ShareMenu.vue'
 import ArtifactSetBreakdown from '@/components/artifacts/ArtifactSetBreakdown.vue'
@@ -71,6 +67,7 @@ import { useResource } from '@/data/use-resource'
 import { readJson, writeJson } from '@/lib/storage'
 import { resolvedTheme } from '@/lib/theme'
 import { useCardExport } from '@/lib/use-card-export'
+import { canvasPng } from '@/lib/card-canvas'
 import { formatNumber } from '@/lib/format'
 import { useAccount, useReadOnly } from './context'
 
@@ -373,7 +370,7 @@ const openIndex = computed(() => (openRow.value ? stepList.value.indexOf(openRow
 const openRank = computed(() => (openRow.value ? cvRank(rows.value, openRow.value) : undefined))
 
 // ----------------------------------------------------------------- share
-// The open artifact's share picture (ArtifactShareCard: the card alone), with
+// The open artifact's share picture (artifact-canvas: the card alone), with
 // the share card's theme (one remembered set, `share-card`) and its export
 // (lib/use-card-export): PNG / Copy / Share in the dialog's header.
 
@@ -383,13 +380,12 @@ watch(shareTheme, (theme) =>
   writeJson('share-card', { ...readJson<object>('share-card', {}), theme }),
 )
 const wide = useMediaQuery('(min-width: 1024px)')
-const exportArtifact = useTemplateRef<InstanceType<typeof ArtifactShareCard>>('exportArtifact')
 const artifactExport = useCardExport({
-  width: ARTIFACT_SHARE_WIDTH,
-  height: ARTIFACT_SHARE_FRAME_HEIGHT,
-  scale: ARTIFACT_SHARE_SCALE,
-  measure: (node) => ({ width: ARTIFACT_SHARE_WIDTH, height: Math.ceil(node.offsetHeight) }),
-  node: () => exportArtifact.value?.$el as HTMLElement | undefined,
+  draw: async () => {
+    if (!openRow.value) throw new Error('Closed')
+    const drawn = await drawArtifactCard(openRow.value, shareTheme.value, ARTIFACT_SHARE_SCALE)
+    return { blob: await canvasPng(drawn.canvas), missing: drawn.missing }
+  },
   open: () => openRow.value !== null,
   state: () => [openRow.value, shareTheme.value, locale.value],
   filename: () =>
@@ -399,7 +395,6 @@ const artifactExport = useCardExport({
   title: () => openRow.value?.setName ?? t('share.export.artifactTitle'),
   pngLabel: () => t('share.export.download'),
 })
-const shareFrame = artifactExport.frame
 /** The dialog's title: the piece's own name, else its set's. */
 const openTitle = computed(() =>
   openRow.value
@@ -655,9 +650,5 @@ const GRID =
         with-card
       />
     </div>
-    <!-- The picture the export draws: in a hidden fixed-size iframe, never on the page -->
-    <Teleport v-if="shareFrame && openRow" :to="shareFrame.mount">
-      <ArtifactShareCard ref="exportArtifact" :row="openRow" :theme="shareTheme" />
-    </Teleport>
   </UiModal>
 </template>
