@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Trophy } from 'lucide-vue-next'
 import CollectionCard from './CollectionCard.vue'
 import { COLLECTION_TABS, TAB_ICON, TAB_LABEL, TAB_PART } from './tabs'
+import { useHubExtras } from './use-hub-extras'
 import type { CollectionCatalog } from '@/data/collection-names'
 import { collectionFigures } from '@/data/collection-summary'
 import type { CapturedCollections } from '@/data/collections'
@@ -15,6 +16,7 @@ import { t } from '@/i18n'
  * The Collections hub: a card per collection (Achievements first, which
  * keeps its own page), each with its figure and capture time, opening the
  * collection's page. Figures wait for the game data; the cards don't.
+ * Achievements and Anecdotes count hand marks too, as their pages do.
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog | null }>()
 
@@ -31,6 +33,8 @@ const figures = computed(() =>
   collectionFigures(props.captured, props.catalog, spincrystals.data.value ?? null),
 )
 
+const extras = useHubExtras()
+
 const cards = computed(() =>
   COLLECTION_TABS.map((tab) => {
     const part = TAB_PART[tab]
@@ -39,8 +43,13 @@ const cards = computed(() =>
       title: t(`collections.tabs.${TAB_LABEL[tab]}`),
       icon: TAB_ICON[tab],
       to: to('account-collections', tab),
-      figure: tab === 'anecdotes' ? undefined : figures.value[tab],
-      takenAt: part ? (props.captured[part]?.takenAt ?? null) : null,
+      figure: tab === 'anecdotes' ? extras.anecdote.value.figure : figures.value[tab],
+      takenAt:
+        tab === 'anecdotes'
+          ? extras.anecdote.value.takenAt
+          : part
+            ? (props.captured[part]?.takenAt ?? null)
+            : null,
     }
   }),
 )
@@ -52,6 +61,8 @@ const cards = computed(() =>
       :to="to('account-achievements')"
       :title="$t('achievements.title')"
       :icon="Trophy"
+      :figure="extras.achievement.value.figure"
+      :taken-at="extras.achievement.value.takenAt"
     />
     <CollectionCard
       v-for="card in cards"

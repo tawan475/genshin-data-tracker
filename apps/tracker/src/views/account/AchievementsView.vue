@@ -10,17 +10,10 @@ import {
   watch,
 } from 'vue'
 import { CheckCheck, Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
-import {
-  decodeAchievementTimes,
-  decodeAchievements,
-  decodeProgress,
-  type AchievementTimesSection,
-} from '@gdt/shared'
 import { achievementText, loadAchievements } from '@gdt/game-data'
 import {
   DEFAULT_ACHIEVEMENT_FILTERS,
   achievementVersions,
-  captureAchievements,
   countAchievements,
   filterAchievements,
   groupAchievements,
@@ -33,7 +26,6 @@ import {
   summarizeAchievements,
   type AchievementEntry,
   type AchievementFilters,
-  type CapturedAchievements,
   type DoneState,
   type ProgressCount,
 } from '@/data/achievement-progress'
@@ -51,7 +43,7 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import { loadBundle, type AccountRef } from '@/data/account-data'
+import { NO_CAPTURED_ACHIEVEMENTS, loadCapturedAchievements } from '@/data/achievement-capture'
 import { useResource } from '@/data/use-resource'
 import { gameIcon, loadGameIcons } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
@@ -82,49 +74,13 @@ const game = useResource(
   },
 )
 
-const NONE: CapturedAchievements = {
-  ids: new Set(),
-  takenAt: null,
-  firstTakenAt: null,
-  firstSeen: new Map(),
-  lastMissing: new Map(),
-  completedAt: new Map(),
-}
-
-async function loadCaptured(a: AccountRef): Promise<CapturedAchievements> {
-  const bundle = await loadBundle(a, {
-    sections: ['achievements', 'achievementTimes', 'progress'],
-  })
-  const json = (key: string) => {
-    const text = bundle.texts.get(key)
-    return text === undefined ? null : JSON.parse(text)
-  }
-  // Capture 1.7.0: the newest snapshot's progress on unfinished ones.
-  const withProgress = [...bundle.snapshots].reverse().find((s) => s.progress)
-  const parts = withProgress?.progress ? decodeProgress(json(withProgress.progress)) : null
-  const progress = parts?.achievementProgress
-    ? new Map(Object.entries(parts.achievementProgress).map(([id, p]) => [Number(id), p]))
-    : undefined
-  const captured = captureAchievements(
-    bundle.snapshots.map((s) => ({
-      takenAt: s.takenAt,
-      key: s.achievements,
-      timesKey: s.achievementTimes,
-    })),
-    (key) => decodeAchievements(json(key) ?? []),
-    (key) => {
-      // A delta names its full base, which the bundle carries along.
-      const section: AchievementTimesSection = json(key) ?? { i: [], t: [] }
-      return decodeAchievementTimes(section, section.b ? json(section.b) : null)
-    },
-  )
-  return progress ? { ...captured, progress } : captured
-}
-
 // Tagged with the account, so a switch shows a skeleton, not the last account's data.
 const capture = useResource(
   () => account.value,
-  async (a) => ({ accountId: a.id, captured: a.latest ? await loadCaptured(a) : NONE }),
+  async (a) => ({
+    accountId: a.id,
+    captured: a.latest ? await loadCapturedAchievements(a) : NO_CAPTURED_ACHIEVEMENTS,
+  }),
 )
 const captured = computed(() => {
   const value = capture.data.value
@@ -134,7 +90,7 @@ const captured = computed(() => {
 const marks = useAchievementMarks(() => account.value.id)
 
 const state = computed<DoneState>(() => ({
-  captured: captured.value?.ids ?? NONE.ids,
+  captured: captured.value?.ids ?? NO_CAPTURED_ACHIEVEMENTS.ids,
   marked: marks.marked.value,
 }))
 const ready = computed(

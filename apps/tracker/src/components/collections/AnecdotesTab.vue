@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { CheckCheck, Clock, Info, SearchX } from 'lucide-vue-next'
-import { decodeAnecdotes as decodeAnecdotesSection, type AnecdotesSection } from '@gdt/shared'
 import { anecdoteText, loadAnecdotes } from '@gdt/game-data'
 import {
   DEFAULT_ANECDOTE_FILTERS,
   NO_CAPTURED_ANECDOTES,
   anecdoteProgress,
-  capturedAnecdotes,
   countShown,
   filterAnecdotes,
   hasAnecdoteFilters,
@@ -24,7 +22,7 @@ import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import { loadBundle, type AccountRef } from '@/data/account-data'
+import { loadCapturedAnecdotes } from '@/data/anecdote-capture'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -55,24 +53,12 @@ const game = useResource(
   },
 )
 
-async function loadCaptured(a: AccountRef): Promise<CapturedAnecdotes> {
-  const bundle = await loadBundle(a, { sections: ['anecdotes'] })
-  // Oldest first: the newest snapshot that has them.
-  const newest = [...bundle.snapshots].reverse().find((s) => s.anecdotes)
-  const text = newest?.anecdotes ? bundle.texts.get(newest.anecdotes) : undefined
-  if (!newest || text === undefined) return NO_CAPTURED_ANECDOTES
-  return capturedAnecdotes(
-    decodeAnecdotesSection(JSON.parse(text) as AnecdotesSection),
-    newest.takenAt,
-  )
-}
-
 // Tagged with the account, so a switch shows a skeleton, not the last account's data.
 const capture = useResource(
   () => account.value,
   async (a) => ({
     accountId: a.id,
-    captured: a.latest ? await loadCaptured(a) : NO_CAPTURED_ANECDOTES,
+    captured: a.latest ? await loadCapturedAnecdotes(a) : NO_CAPTURED_ANECDOTES,
   }),
 )
 const captured = computed(() => {

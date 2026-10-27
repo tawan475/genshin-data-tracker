@@ -1,0 +1,86 @@
+import { computed } from 'vue'
+import { loadAchievements, loadAnecdotes } from '@gdt/game-data'
+import { useAchievementMarks } from '@/components/achievements/use-achievement-marks'
+import { useAnecdoteMarks } from '@/components/anecdotes/use-anecdote-marks'
+import { NO_CAPTURED_ACHIEVEMENTS, loadCapturedAchievements } from '@/data/achievement-capture'
+import { groupAchievements, summarizeAchievements } from '@/data/achievement-progress'
+import { loadCapturedAnecdotes } from '@/data/anecdote-capture'
+import { NO_CAPTURED_ANECDOTES, anecdoteProgress } from '@/data/anecdote-progress'
+import type { CollectionFigure } from '@/data/collection-summary'
+import { useResource } from '@/data/use-resource'
+import { useAccount, useReadOnly } from '@/views/account/context'
+
+export interface HubExtra {
+  figure: CollectionFigure | null
+  takenAt: number | null
+}
+
+/**
+ * The hub's Achievements and Anecdotes cards, counted as their pages count:
+ * done = the newest capture's plus those marked by hand, of the game data's
+ * total. Null figures until the data and the marks have loaded.
+ */
+export function useHubExtras() {
+  const account = useAccount()
+  const readOnly = useReadOnly()
+
+  const achievements = useResource(
+    () => account.value,
+    async (a) => {
+      const [data, captured] = await Promise.all([
+        loadAchievements(),
+        a.latest ? loadCapturedAchievements(a) : NO_CAPTURED_ACHIEVEMENTS,
+      ])
+      return { accountId: a.id, entries: groupAchievements(data), byId: data.byId, captured }
+    },
+  )
+  const achievementMarks = useAchievementMarks(() => account.value.id)
+
+  const anecdotes = useResource(
+    () => account.value,
+    async (a) => {
+      const [data, captured] = await Promise.all([
+        loadAnecdotes(),
+        a.latest ? loadCapturedAnecdotes(a) : NO_CAPTURED_ANECDOTES,
+      ])
+      return { accountId: a.id, data, captured }
+    },
+  )
+  const anecdoteMarks = useAnecdoteMarks(() => account.value.id, readOnly)
+
+  const achievement = computed<HubExtra>(() => {
+    const value = achievements.data.value
+    if (
+      !value ||
+      value.accountId !== account.value.id ||
+      achievementMarks.loadedFor.value !== account.value.id
+    )
+      return { figure: null, takenAt: null }
+    const summary = summarizeAchievements(
+      value.entries,
+      { captured: value.captured.ids, marked: achievementMarks.marked.value },
+      value.byId,
+    )
+    return {
+      figure: { have: summary.done, total: summary.total },
+      takenAt: value.captured.takenAt,
+    }
+  })
+
+  const anecdote = computed<HubExtra>(() => {
+    const value = anecdotes.data.value
+    if (
+      !value ||
+      value.accountId !== account.value.id ||
+      anecdoteMarks.loadedFor.value !== account.value.id
+    )
+      return { figure: null, takenAt: null }
+    const progress = anecdoteProgress(value.data, value.captured, anecdoteMarks.marked.value)
+    return {
+      figure: { have: progress.done, total: progress.total },
+      takenAt: value.captured.takenAt,
+    }
+  })
+
+  return { achievement, anecdote }
+}
