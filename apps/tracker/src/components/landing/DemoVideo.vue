@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
-import { Maximize, Monitor, Pause, Play, Smartphone, Volume2, VolumeX } from 'lucide-vue-next'
+import { Maximize, Monitor, Pause, Play, Smartphone } from 'lucide-vue-next'
 import {
   afterEnd,
   chapterStates,
@@ -21,7 +21,8 @@ import {
  * screen and resumes unless the visitor paused it. At the end it holds the
  * last frame, fades, and plays the other version (a phone replays Android).
  * The file loads only once the player nears the screen. Reduced motion: no
- * autoplay, no fades.
+ * autoplay, no fades. The recordings have no sound: always muted, no volume
+ * control.
  */
 const userAgent = navigator.userAgent
 const phone = isPhone(userAgent)
@@ -31,7 +32,6 @@ const platform = ref<DemoPlatform>(initialPlatform(userAgent))
 const time = ref(0)
 const duration = ref(0)
 const playing = ref(false)
-const muted = ref(true)
 const fading = ref(false)
 /** Between the end and the next version's start: no big play button over the held frame. */
 const ending = ref(false)
@@ -58,6 +58,7 @@ const chapters = computed(() => chapterStates(info.value.chapters, shown.value, 
 const percent = computed(() =>
   length.value ? Math.round((shown.value / length.value) * 1000) / 10 : 0,
 )
+/** The progress bar's screen-reader value (no time is shown). */
 const timeText = computed(() => `${clock(shown.value)} / ${clock(length.value)}`)
 
 function later(ms: number, run: () => void) {
@@ -99,7 +100,7 @@ function attach(element: HTMLVideoElement | undefined) {
   // Function refs run on every render: only a new element counts.
   if (element === video.value) return
   video.value = element
-  element.muted = muted.value
+  element.muted = true
   element.defaultMuted = true
   maybePlay()
 }
@@ -190,17 +191,6 @@ function seek(event: Event) {
   cancelFade()
   if (video.value) video.value.currentTime = value
   time.value = value
-}
-
-function toggleMute() {
-  muted.value = !muted.value
-  const element = video.value
-  if (!element) return
-  element.muted = muted.value
-  if (!muted.value && element.paused) {
-    userPaused = false
-    play()
-  }
 }
 
 function fullScreen() {
@@ -330,17 +320,6 @@ onBeforeUnmount(() => {
             :aria-valuetext="timeText"
             @input="seek"
           />
-          <span class="e-time" aria-hidden="true">{{ timeText }}</span>
-          <button
-            type="button"
-            class="e-cb"
-            :aria-label="muted ? $t('landing.video.unmute') : $t('landing.video.mute')"
-            :aria-pressed="!muted"
-            @click="toggleMute"
-          >
-            <VolumeX v-if="muted" class="ic s" aria-hidden="true" />
-            <Volume2 v-else class="ic s" aria-hidden="true" />
-          </button>
           <button
             type="button"
             class="e-cb"

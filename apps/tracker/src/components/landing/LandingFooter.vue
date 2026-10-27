@@ -38,7 +38,7 @@ async function pickLanguage(event: Event) {
         </RouterLink>
         <p class="disc-t">{{ $t('landing.footer.disclaimer') }}</p>
       </div>
-      <div class="foot-col">
+      <div class="foot-col foot-r">
         <nav class="flinks" :aria-label="$t('landing.footer.label')">
           <RouterLink :to="{ name: 'home' }">{{ $t('landing.footer.tracker') }}</RouterLink>
           <a :href="DOWNLOAD_URL">{{ $t('landing.footer.download') }}</a>
