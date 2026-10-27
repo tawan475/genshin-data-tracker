@@ -52,6 +52,7 @@ const PAGES: Record<string, (hint: AccountHint) => Promise<unknown>[]> = {
   materials: (h) => [loadMaterialsHistory(h), loadLatestInventory(h)],
   achievements: (h) => [loadBundle(h, { sections: ['achievements', 'achievementTimes'] })],
   anecdotes: (h) => [loadBundle(h, { sections: ['anecdotes'] })],
+  collections: (h) => [loadBundle(h, { sections: ['collections'] })],
 }
 
 /** Starts the data of the account page at `path`, when this device has seen the account. */

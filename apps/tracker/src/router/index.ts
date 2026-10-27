@@ -301,6 +301,12 @@ const router = createRouter({
               () => import('@/views/account/AnecdotesView.vue'),
             ),
             account(
+              'collections',
+              'account-collections',
+              'collections',
+              () => import('@/views/account/CollectionsView.vue'),
+            ),
+            account(
               'wishes',
               'account-wishes',
               'wishHistory',

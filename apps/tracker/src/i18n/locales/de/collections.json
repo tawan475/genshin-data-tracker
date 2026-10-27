@@ -1,0 +1,31 @@
+{
+  "title": "Sammlungen",
+  "newestCapture": "Neueste Erfassung",
+  "newestCaptureTitle": "Neueste Erfassung: {time}",
+  "notCaptured": "Nicht erfasst",
+  "notCapturedTitle": "Noch keine Erfassung mit Sammlungen: Teyvat.me Capture ab 1.3.0 liest sie aus dem Spiel",
+  "loadFailed": "Laden fehlgeschlagen",
+  "loading": "Lädt",
+  "spincrystals": {
+    "title": "Strahlende Drehkristalle",
+    "summary": "Zusammenfassung",
+    "collected": "Gesammelt",
+    "collectedHint": "In der Musikliste der Kanne der Vergänglichkeit, laut neuester Erfassung",
+    "collectedLabel": "Gesammelte Strahlende Drehkristalle",
+    "unknown": "{n} neuer als die Spieldaten",
+    "missing": "Fehlend",
+    "missingHint": "Noch nicht in der Musikliste der Kanne der Vergänglichkeit",
+    "show": "Anzeigen",
+    "filters": {
+      "all": "Alle",
+      "missing": "Fehlend",
+      "have": "Gesammelt"
+    },
+    "stateHave": "gesammelt",
+    "stateMissing": "fehlt",
+    "notCaptured": "Noch nicht erfasst",
+    "notCapturedBody": "Teyvat.me Capture ab 1.3.0 liest sie beim Einloggen.",
+    "allCollected": "Alle gesammelt",
+    "noneCollected": "Noch keine gesammelt"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "Koleksi",
+  "newestCapture": "Tangkapan terbaru",
+  "newestCaptureTitle": "Tangkapan terbaru: {time}",
+  "notCaptured": "Belum tertangkap",
+  "notCapturedTitle": "Belum ada tangkapan dengan koleksi: Teyvat.me Capture 1.3.0 atau lebih baru mencatatnya dari game",
+  "loadFailed": "Gagal memuat",
+  "loading": "Memuat",
+  "spincrystals": {
+    "title": "Radiant Spincrystal",
+    "summary": "Ringkasan",
+    "collected": "Terkumpul",
+    "collectedHint": "Di daftar musik Serenitea Pot, menurut tangkapan terbaru",
+    "collectedLabel": "Radiant Spincrystal terkumpul",
+    "unknown": "{n} lebih baru dari data game",
+    "missing": "Belum Dimiliki",
+    "missingHint": "Belum ada di daftar musik Serenitea Pot",
+    "show": "Tampilkan",
+    "filters": {
+      "all": "Semua",
+      "missing": "Belum Dimiliki",
+      "have": "Terkumpul"
+    },
+    "stateHave": "terkumpul",
+    "stateMissing": "belum dimiliki",
+    "notCaptured": "Belum tertangkap",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 atau lebih baru membacanya saat login.",
+    "allCollected": "Semua terkumpul",
+    "noneCollected": "Belum ada yang terkumpul"
+  }
+}

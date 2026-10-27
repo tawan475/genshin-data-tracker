@@ -1,0 +1,31 @@
+{
+  "title": "Коллекции",
+  "newestCapture": "Последний снимок",
+  "newestCaptureTitle": "Последний снимок: {time}",
+  "notCaptured": "Не снято",
+  "notCapturedTitle": "Пока нет снимков с коллекциями: Teyvat.me Capture 1.3.0 или новее записывает их из игры",
+  "loadFailed": "Не удалось загрузить",
+  "loading": "Загрузка",
+  "spincrystals": {
+    "title": "Лучистые кристаллы",
+    "summary": "Сводка",
+    "collected": "Собрано",
+    "collectedHint": "В списке музыки Чайника безмятежности, по последнему снимку",
+    "collectedLabel": "Собрано лучистых кристаллов",
+    "unknown": "Новее игровых данных: {n}",
+    "missing": "Нет в наличии",
+    "missingHint": "Ещё нет в списке музыки Чайника безмятежности",
+    "show": "Показать",
+    "filters": {
+      "all": "Все",
+      "missing": "Нет в наличии",
+      "have": "Собрано"
+    },
+    "stateHave": "собрано",
+    "stateMissing": "нет в наличии",
+    "notCaptured": "Пока не снято",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 или новее считывает их при входе в игру.",
+    "allCollected": "Все собраны",
+    "noneCollected": "Пока ни одного"
+  }
+}

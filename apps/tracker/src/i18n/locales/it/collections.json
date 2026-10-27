@@ -1,0 +1,31 @@
+{
+  "title": "Collezioni",
+  "newestCapture": "Ultima cattura",
+  "newestCaptureTitle": "Ultima cattura: {time}",
+  "notCaptured": "Non catturati",
+  "notCapturedTitle": "Nessuna cattura ha ancora collezioni: Teyvat.me Capture 1.3.0 o successivo le registra dal gioco",
+  "loadFailed": "Caricamento non riuscito",
+  "loading": "Caricamento",
+  "spincrystals": {
+    "title": "Voltacristalli radiosi",
+    "summary": "Riepilogo",
+    "collected": "Ottenuti",
+    "collectedHint": "Nella lista musicale della Serenteiera, secondo l'ultima cattura",
+    "collectedLabel": "Voltacristalli radiosi ottenuti",
+    "unknown": "{n} più recenti dei dati di gioco",
+    "missing": "Mancanti",
+    "missingHint": "Non ancora nella lista musicale della Serenteiera",
+    "show": "Mostra",
+    "filters": {
+      "all": "Tutti",
+      "missing": "Mancanti",
+      "have": "Ottenuti"
+    },
+    "stateHave": "ottenuto",
+    "stateMissing": "mancante",
+    "notCaptured": "Non ancora catturati",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 o successivo li legge all'accesso.",
+    "allCollected": "Tutti ottenuti",
+    "noneCollected": "Nessuno ottenuto"
+  }
+}

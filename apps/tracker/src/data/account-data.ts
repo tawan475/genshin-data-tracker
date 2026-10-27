@@ -54,6 +54,7 @@ export type SectionName =
   | 'achievementTimes'
   | 'characterExtras'
   | 'anecdotes'
+  | 'collections'
 
 export interface DecodedBundle {
   snapshots: BundleSnapshot[]

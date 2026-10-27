@@ -1,0 +1,31 @@
+{
+  "title": "Coleções",
+  "newestCapture": "Captura mais recente",
+  "newestCaptureTitle": "Captura mais recente: {time}",
+  "notCaptured": "Não capturado",
+  "notCapturedTitle": "Nenhuma captura tem coleções ainda: o Teyvat.me Capture 1.3.0 ou mais recente as registra do jogo",
+  "loadFailed": "Falha ao carregar",
+  "loading": "Carregando",
+  "spincrystals": {
+    "title": "Cristais Rodopiantes Radiantes",
+    "summary": "Resumo",
+    "collected": "Coletados",
+    "collectedHint": "Na lista de músicas do Bule de Relachá, segundo a captura mais recente",
+    "collectedLabel": "Cristais Rodopiantes Radiantes coletados",
+    "unknown": "{n} mais novas que os dados do jogo",
+    "missing": "Não possuídos",
+    "missingHint": "Ainda fora da lista de músicas do Bule de Relachá",
+    "show": "Mostrar",
+    "filters": {
+      "all": "Todas",
+      "missing": "Não possuídos",
+      "have": "Coletados"
+    },
+    "stateHave": "coletado",
+    "stateMissing": "não possuído",
+    "notCaptured": "Ainda não capturado",
+    "notCapturedBody": "O Teyvat.me Capture 1.3.0 ou mais recente os lê ao entrar no jogo.",
+    "allCollected": "Todos coletados",
+    "noneCollected": "Nenhum coletado ainda"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "คอลเลกชัน",
+  "newestCapture": "การสแกนล่าสุด",
+  "newestCaptureTitle": "การสแกนล่าสุด: {time}",
+  "notCaptured": "ยังไม่ได้สแกน",
+  "notCapturedTitle": "ยังไม่มีการสแกนที่มีคอลเลกชัน: Teyvat.me Capture 1.3.0 ขึ้นไปจะบันทึกจากเกม",
+  "loadFailed": "โหลดไม่สำเร็จ",
+  "loading": "กำลังโหลด",
+  "spincrystals": {
+    "title": "Radiant Spincrystal",
+    "summary": "สรุป",
+    "collected": "รวบรวมแล้ว",
+    "collectedHint": "ในรายการเพลงของ Serenitea Pot ตามการสแกนล่าสุด",
+    "collectedLabel": "Radiant Spincrystal ที่รวบรวมแล้ว",
+    "unknown": "{n} ใหม่กว่าข้อมูลเกม",
+    "missing": "ยังไม่มี",
+    "missingHint": "ยังไม่อยู่ในรายการเพลงของ Serenitea Pot",
+    "show": "แสดง",
+    "filters": {
+      "all": "ทั้งหมด",
+      "missing": "ยังไม่มี",
+      "have": "รวบรวมแล้ว"
+    },
+    "stateHave": "รวบรวมแล้ว",
+    "stateMissing": "ยังไม่มี",
+    "notCaptured": "ยังไม่ได้สแกน",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
+    "allCollected": "รวบรวมครบแล้ว",
+    "noneCollected": "ยังไม่ได้รวบรวม"
+  }
+}

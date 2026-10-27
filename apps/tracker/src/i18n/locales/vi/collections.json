@@ -1,0 +1,31 @@
+{
+  "title": "Bộ sưu tập",
+  "newestCapture": "Bản ghi mới nhất",
+  "newestCaptureTitle": "Bản ghi mới nhất: {time}",
+  "notCaptured": "Chưa ghi",
+  "notCapturedTitle": "Chưa có bản ghi nào có bộ sưu tập: Teyvat.me Capture 1.3.0 trở lên ghi lại từ trò chơi",
+  "loadFailed": "Tải thất bại",
+  "loading": "Đang tải",
+  "spincrystals": {
+    "title": "Ngọc Thạch Âm Vang",
+    "summary": "Tóm tắt",
+    "collected": "Đã thu thập",
+    "collectedHint": "Trong danh sách nhạc của Ấm Trần Ca, theo bản ghi mới nhất",
+    "collectedLabel": "Ngọc Thạch Âm Vang đã thu thập",
+    "unknown": "{n} mới hơn dữ liệu game",
+    "missing": "Chưa có",
+    "missingHint": "Chưa có trong danh sách nhạc của Ấm Trần Ca",
+    "show": "Hiển thị",
+    "filters": {
+      "all": "Tất cả",
+      "missing": "Chưa có",
+      "have": "Đã thu thập"
+    },
+    "stateHave": "đã thu thập",
+    "stateMissing": "chưa có",
+    "notCaptured": "Chưa ghi",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 trở lên đọc khi đăng nhập.",
+    "allCollected": "Đã thu thập tất cả",
+    "noneCollected": "Chưa thu thập cái nào"
+  }
+}

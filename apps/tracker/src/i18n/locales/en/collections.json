@@ -1,0 +1,31 @@
+{
+  "title": "Collections",
+  "newestCapture": "Newest capture",
+  "newestCaptureTitle": "Newest capture: {time}",
+  "notCaptured": "Not captured",
+  "notCapturedTitle": "No capture has collections yet: Teyvat.me Capture 1.3.0 or newer records them from the game",
+  "loadFailed": "Load failed",
+  "loading": "Loading",
+  "spincrystals": {
+    "title": "Radiant Spincrystals",
+    "summary": "Summary",
+    "collected": "Collected",
+    "collectedHint": "In the Serenitea Pot's music list, in the newest capture",
+    "collectedLabel": "Radiant Spincrystals collected",
+    "unknown": "{n} newer than the game data",
+    "missing": "Missing",
+    "missingHint": "Not in the Serenitea Pot's music list yet",
+    "show": "Show",
+    "filters": {
+      "all": "All",
+      "missing": "Missing",
+      "have": "Have"
+    },
+    "stateHave": "have",
+    "stateMissing": "missing",
+    "notCaptured": "Not captured yet",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 or newer reads them at login.",
+    "allCollected": "All collected",
+    "noneCollected": "None collected yet"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "Koleksiyonlar",
+  "newestCapture": "En yeni tarama",
+  "newestCaptureTitle": "En yeni tarama: {time}",
+  "notCaptured": "Taranmadı",
+  "notCapturedTitle": "Henüz koleksiyon içeren tarama yok: Teyvat.me Capture 1.3.0 veya üstü bunları oyundan kaydeder",
+  "loadFailed": "Yüklenemedi",
+  "loading": "Yükleniyor",
+  "spincrystals": {
+    "title": "Parlak Burgu Kristaller",
+    "summary": "Özet",
+    "collected": "Alındı",
+    "collectedHint": "Dinginçay Çaydanlığı'nın müzik listesinde, en yeni taramaya göre",
+    "collectedLabel": "Alınan Parlak Burgu Kristaller",
+    "unknown": "{n} oyun verisinden yeni",
+    "missing": "Eksik",
+    "missingHint": "Henüz Dinginçay Çaydanlığı'nın müzik listesinde değil",
+    "show": "Göster",
+    "filters": {
+      "all": "Tümü",
+      "missing": "Eksik",
+      "have": "Alındı"
+    },
+    "stateHave": "alındı",
+    "stateMissing": "eksik",
+    "notCaptured": "Henüz taranmadı",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 veya üstü bunları girişte okur.",
+    "allCollected": "Hepsi alındı",
+    "noneCollected": "Henüz hiç yok"
+  }
+}

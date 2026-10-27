@@ -1,0 +1,31 @@
+{
+  "title": "Collections",
+  "newestCapture": "Capture la plus récente",
+  "newestCaptureTitle": "Capture la plus récente : {time}",
+  "notCaptured": "Non capturé",
+  "notCapturedTitle": "Aucune capture n'a encore de collections : Teyvat.me Capture 1.3.0 ou plus récent les relève dans le jeu",
+  "loadFailed": "Échec du chargement",
+  "loading": "Chargement",
+  "spincrystals": {
+    "title": "Gyrocristaux radiants",
+    "summary": "Résumé",
+    "collected": "Collectés",
+    "collectedHint": "Dans la liste de musique de la Sérénithéière, d'après la capture la plus récente",
+    "collectedLabel": "Gyrocristaux radiants collectés",
+    "unknown": "{n} plus récente(s) que les données du jeu",
+    "missing": "Manquants",
+    "missingHint": "Pas encore dans la liste de musique de la Sérénithéière",
+    "show": "Afficher",
+    "filters": {
+      "all": "Tous",
+      "missing": "Manquants",
+      "have": "Collectés"
+    },
+    "stateHave": "collecté",
+    "stateMissing": "manquant",
+    "notCaptured": "Pas encore capturé",
+    "notCapturedBody": "Teyvat.me Capture 1.3.0 ou plus récent les lit à la connexion.",
+    "allCollected": "Tous collectés",
+    "noneCollected": "Aucun collecté"
+  }
+}

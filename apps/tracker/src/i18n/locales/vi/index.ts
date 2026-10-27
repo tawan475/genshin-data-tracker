@@ -21,6 +21,7 @@ import snapshots from './snapshots.json'
 import transfer from './transfer.json'
 import wishes from './wishes.json'
 import anecdotes from './anecdotes.json'
+import collections from './collections.json'
 import share from './share.json'
 import ui from './ui.json'
 import live from './live.json'
@@ -49,6 +50,7 @@ const messages: Record<string, unknown> = {
   transfer,
   wishes,
   anecdotes,
+  collections,
   share,
   ui,
   live,
