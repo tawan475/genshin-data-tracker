@@ -1,7 +1,8 @@
 /*
  * The sign-in pages (views/AuthFrame.vue, design "Sign-in B"): the landing's
- * top bar, then a brand panel on the left and the form column on the right;
- * stacked under a small heading on phones. Dark only, under `.lp` like the
+ * top bar, then the brand and the form side by side in one centred row (the
+ * user's call: on wide screens they sat at the far edges), the glow behind
+ * the whole page; stacked under a small heading on phones. Dark only, under `.lp` like the
  * landing (components/landing/landing.css holds the shared tokens).
  */
 
@@ -9,14 +10,21 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 60% 55% at 38% 50%, rgba(99, 102, 241, 0.2), transparent 70%),
+    var(--band);
 }
+/* The top bar's row lines up with the content row below. */
 .lp.au-page .wrap {
-  max-width: none;
-  padding: 0 max(24px, 5vw);
+  max-width: 1200px;
 }
 .lp .au-split {
   flex: 1;
   display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   min-height: 0;
 }
 .lp .au-side {
@@ -26,11 +34,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 28px;
-  padding: 56px max(24px, 5vw);
-  background:
-    radial-gradient(ellipse 80% 60% at 30% 40%, rgba(99, 102, 241, 0.22), transparent 70%),
-    var(--band);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 56px 64px 56px 32px;
 }
 .lp .au-side .h1 {
   margin: 0;
@@ -68,7 +72,6 @@
 .lp .au-pts b {
   color: var(--tx);
   font-weight: 600;
-  margin-right: 6px;
 }
 .lp .au-mini {
   display: grid;
@@ -101,12 +104,13 @@
   white-space: nowrap;
 }
 .lp .au-formside {
-  flex: 0 0 auto;
-  width: min(560px, 46%);
+  flex: 0 0 480px;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px max(24px, 4vw);
+  padding: 48px 32px 48px 64px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 .lp .au-card {
   width: 100%;
@@ -220,13 +224,12 @@
   }
   .lp .au-split {
     flex-direction: column;
+    align-items: stretch;
   }
   .lp .au-side {
     flex: none;
     padding: 28px 16px 8px;
     gap: 10px;
-    border-right: 0;
-    background: transparent;
   }
   .lp .au-side .h1 {
     font-size: 34px;
@@ -240,9 +243,11 @@
     display: none;
   }
   .lp .au-formside {
+    flex: none;
     width: 100%;
     padding: 16px 16px 48px;
     align-items: flex-start;
+    border-left: 0;
   }
   .lp .au-h h1 {
     font-size: 26px;

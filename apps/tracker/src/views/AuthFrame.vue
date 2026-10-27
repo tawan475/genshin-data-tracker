@@ -74,22 +74,19 @@ const SAMPLE = [
           <li>
             <span class="pi"><Power class="ic" aria-hidden="true" /></span>
             <span
-              ><b>{{ $t('auth.side.capture') }}</b
-              >{{ $t('auth.side.captureText') }}</span
+              ><b>{{ $t('auth.side.capture') }}</b> {{ $t('auth.side.captureText') }}</span
             >
           </li>
           <li>
             <span class="pi"><TrendingUp class="ic" aria-hidden="true" /></span>
             <span
-              ><b>{{ $t('auth.side.track') }}</b
-              >{{ $t('auth.side.trackText') }}</span
+              ><b>{{ $t('auth.side.track') }}</b> {{ $t('auth.side.trackText') }}</span
             >
           </li>
           <li>
             <span class="pi"><ClipboardList class="ic" aria-hidden="true" /></span>
             <span
-              ><b>{{ $t('auth.side.plan') }}</b
-              >{{ $t('auth.side.planText') }}</span
+              ><b>{{ $t('auth.side.plan') }}</b> {{ $t('auth.side.planText') }}</span
             >
           </li>
         </ul>
