@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { Check, Gift, Search, SearchX } from 'lucide-vue-next'
 import NotCaptured from './NotCaptured.vue'
+import PageBackdrop from '@/components/ui/PageBackdrop.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiInput from '@/components/ui/UiInput.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
@@ -64,6 +65,13 @@ const sorts = computed(() =>
   })),
 )
 const shown = computed(() => shownSongs(songs.value, filter.value, search.value, sort.value))
+/** The page backdrop's wall: the first covers in the game's order (design "Page backdrop"). */
+const wall = computed(() =>
+  songs.value
+    .map((song) => cover(song.icon))
+    .filter(Boolean)
+    .slice(0, 72),
+)
 
 const difficulty = (d: number) => t(`collections.music.difficulty.${d}`)
 function boxTitle(b: Beatmap): string {
@@ -86,7 +94,8 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
 
 <template>
   <NotCaptured v-if="!captured" :title="$t('collections.tabs.music')" />
-  <div v-else class="flex flex-col gap-4">
+  <div v-else class="relative isolate flex flex-col gap-4">
+    <PageBackdrop :images="wall" />
     <ul
       class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
       :aria-label="$t('collections.summary')"
@@ -187,13 +196,22 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
           <li
             v-for="song in shown"
             :key="song.id"
-            class="flex min-w-0 flex-col gap-3 rounded-md border p-3 [content-visibility:auto] [contain-intrinsic-size:auto_9rem]"
+            class="song relative isolate flex min-w-0 flex-col gap-3 overflow-hidden rounded-md border p-3 [content-visibility:auto] [contain-intrinsic-size:auto_9rem]"
             :class="
               song.played
-                ? 'border-border-default bg-surface-sunken'
-                : 'border-dashed border-border-strong'
+                ? 'border-transparent bg-surface-sunken'
+                : 'unplayed border-dashed border-border-strong'
             "
           >
+            <!-- The song's own cover washed over the card's top-right corner (design "Card B") -->
+            <img
+              v-if="cover(song.icon)"
+              class="art"
+              :src="cover(song.icon)"
+              alt=""
+              loading="lazy"
+              aria-hidden="true"
+            />
             <div class="flex min-w-0 items-center gap-3">
               <img
                 v-if="cover(song.icon)"
@@ -206,12 +224,12 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
               <span v-else class="size-14 flex-none rounded-full bg-surface-overlay" />
               <span class="flex min-w-0 flex-col">
                 <span
-                  class="truncate font-semibold"
+                  class="song-text truncate font-semibold"
                   :class="song.played ? 'text-text-primary' : 'text-text-secondary'"
                   :title="song.name"
                   >{{ song.name }}</span
                 >
-                <span v-if="song.artist" class="truncate text-xs text-text-muted">{{
+                <span v-if="song.artist" class="song-text truncate text-xs text-text-muted">{{
                   song.artist
                 }}</span>
               </span>
@@ -226,7 +244,7 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
                     ? 'border-dashed border-border-strong'
                     : b.rewarded && !b.claimed
                       ? 'border-warning-text/60 bg-surface-raised'
-                      : 'border-border-default bg-surface-raised'
+                      : 'score'
                 "
                 :title="boxTitle(b)"
               >
@@ -271,3 +289,36 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
     </UiPanel>
   </div>
 </template>
+
+<style scoped>
+/* Design "Card B": the cover, blurred, fills the top-right corner and fades out
+   toward the bottom-left, so the name and the score boxes sit on the card's
+   own colour. No backdrop-filter (it repaints on every scroll frame). */
+.song .art {
+  position: absolute;
+  z-index: -1;
+  inset: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  object-fit: cover;
+  pointer-events: none;
+  filter: blur(5px) saturate(1.2);
+  opacity: 0.5;
+  mask-image: linear-gradient(250deg, #000 12%, rgba(0, 0, 0, 0.45) 42%, transparent 72%);
+}
+[data-theme='dark'] .song .art {
+  filter: blur(5px) saturate(1.35);
+  opacity: 0.6;
+}
+.song.unplayed .art {
+  filter: grayscale(1) blur(5px);
+  opacity: 0.2;
+}
+.song-text {
+  text-shadow: 0 0 12px color-mix(in srgb, var(--surface-sunken) 90%, transparent);
+}
+.score {
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
+  border-color: color-mix(in srgb, var(--border-default) 80%, transparent);
+}
+</style>
