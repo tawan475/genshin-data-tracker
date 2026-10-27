@@ -24,7 +24,7 @@ const icon = computed(
 
 <template>
   <div class="flex flex-col items-center gap-6 text-center" role="alert">
-    <component :is="icon" class="size-10 text-paimon" aria-hidden="true" />
+    <component :is="icon" class="size-10 text-accent-text" aria-hidden="true" />
     <p class="text-gray-200">{{ problem.text }}</p>
     <RouterLink v-if="retry" :to="retry" class="btn-glow w-full rounded-xl">{{
       retryLabel

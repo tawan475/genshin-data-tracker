@@ -124,13 +124,15 @@ async function switchUser() {
     <LinkProblem v-if="problem" :problem="problem" />
 
     <div v-else-if="done" class="flex flex-col items-center gap-6 text-center" role="status">
-      <CircleCheck class="size-10 text-paimon" aria-hidden="true" />
+      <CircleCheck class="size-10 text-accent-text" aria-hidden="true" />
       <p class="text-gray-200">{{ $t('auth.link.closeTab') }}</p>
     </div>
 
     <form v-else class="flex flex-col gap-5" @submit.prevent="allow">
-      <div class="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
-        <Monitor class="size-6 shrink-0 text-paimon" aria-hidden="true" />
+      <div
+        class="flex items-center gap-3 rounded-xl border border-indigo-400/35 bg-indigo-500/10 p-3.5"
+      >
+        <Monitor class="size-6 shrink-0 text-accent-text" aria-hidden="true" />
         <div class="min-w-0">
           <p class="font-semibold break-words text-white">
             {{ $t(appOn, { device }) }}
@@ -153,16 +155,20 @@ async function switchUser() {
         </legend>
         <label
           class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors"
-          :class="mode === 'uid' ? 'border-paimon/60 bg-white/10' : 'border-white/10 bg-white/5'"
+          :class="
+            mode === 'uid' ? 'border-indigo-400/60 bg-indigo-500/10' : 'border-white/10 bg-white/5'
+          "
           :title="$t('auth.link.autoTitle')"
         >
-          <input v-model="mode" type="radio" value="uid" class="size-4 accent-amber-500" />
+          <input v-model="mode" type="radio" value="uid" class="size-4 accent-indigo-500" />
           <span class="text-gray-100">{{ $t('auth.link.auto') }}</span>
         </label>
         <div
           class="flex flex-col gap-3 rounded-xl border p-3 transition-colors"
           :class="[
-            mode === 'account' ? 'border-paimon/60 bg-white/10' : 'border-white/10 bg-white/5',
+            mode === 'account'
+              ? 'border-indigo-400/60 bg-indigo-500/10'
+              : 'border-white/10 bg-white/5',
             choices.length ? '' : 'opacity-60',
           ]"
           :title="choices.length ? $t('auth.link.alwaysTitle') : $t('auth.link.noAccounts')"
@@ -175,7 +181,7 @@ async function switchUser() {
               v-model="mode"
               type="radio"
               value="account"
-              class="size-4 accent-amber-500"
+              class="size-4 accent-indigo-500"
               :disabled="!choices.length"
             />
             <span class="text-gray-100">{{ $t('auth.link.always') }}</span>
@@ -219,7 +225,7 @@ async function switchUser() {
       </i18n-t>
       <button
         type="button"
-        class="font-semibold text-paimon hover:underline"
+        class="font-semibold text-accent-text hover:underline"
         :disabled="busy !== null"
         @click="switchUser"
       >

@@ -101,7 +101,7 @@ const title = computed(() => problem.value?.title ?? t('auth.reset.title'))
       :retry-label="$t('auth.reset.requestNew')"
     />
     <div v-else-if="username === null" class="flex justify-center py-6" aria-busy="true">
-      <UiSpinner class="size-6 text-paimon" />
+      <UiSpinner class="size-6 text-accent-text" />
     </div>
     <template v-else>
       <i18n-t keypath="auth.reset.forUser" tag="p" class="-mt-4 mb-6 text-center text-gray-400">
@@ -164,7 +164,7 @@ const title = computed(() => problem.value?.title ?? t('auth.reset.title'))
       </form>
     </template>
     <template #footer>
-      <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">
+      <RouterLink :to="{ name: 'login' }" class="font-semibold text-accent-text hover:underline">
         {{ $t('auth.backToSignIn') }}
       </RouterLink>
     </template>

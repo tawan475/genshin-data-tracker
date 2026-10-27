@@ -1,0 +1,256 @@
+/*
+ * The sign-in pages (views/AuthFrame.vue, design "Sign-in B"): the landing's
+ * top bar, then a brand panel on the left and the form column on the right;
+ * stacked under a small heading on phones. Dark only, under `.lp` like the
+ * landing (components/landing/landing.css holds the shared tokens).
+ */
+
+.lp.au-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.lp.au-page .wrap {
+  max-width: none;
+  padding: 0 max(24px, 5vw);
+}
+.lp .au-split {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.lp .au-side {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: 56px max(24px, 5vw);
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 40%, rgba(99, 102, 241, 0.22), transparent 70%),
+    var(--band);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+.lp .au-side .h1 {
+  margin: 0;
+  font-size: clamp(48px, 4.4vw, 84px);
+}
+.lp .au-side .lead {
+  max-width: 460px;
+}
+.lp .au-pts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lp .au-pts li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  color: var(--tx2);
+}
+.lp .au-pts .pi {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--acCon);
+  color: var(--acOn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.lp .au-pts b {
+  color: var(--tx);
+  font-weight: 600;
+  margin-right: 6px;
+}
+.lp .au-mini {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 420px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.lp .au-mini div {
+  background: var(--over);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.lp .au-mini b {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.lp .au-mini span {
+  font-size: 12px;
+  color: var(--tx2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lp .au-formside {
+  flex: 0 0 auto;
+  width: min(560px, 46%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px max(24px, 4vw);
+}
+.lp .au-card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.lp .au-h {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lp .au-h h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.lp .au-h p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--tx2);
+}
+.lp .au-foot {
+  margin: 0;
+  font-size: 14px;
+  color: var(--tx3);
+  text-align: center;
+}
+.lp .au-foot a,
+.lp .au-foot button {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* The fields and buttons the pages share (class names kept from the old frame). */
+.lp .glass-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--band);
+  color: var(--tx);
+  font-family: inherit;
+  font-size: 16px;
+}
+.lp .glass-input::placeholder {
+  color: #64748b;
+}
+.lp .glass-input:focus {
+  outline: none;
+  border-color: var(--ac);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+.lp .glass-input[aria-invalid='true'] {
+  border-color: rgba(248, 113, 113, 0.6);
+}
+.lp .glass-input option {
+  background: var(--bg);
+}
+.lp .btn-glow,
+.lp .btn-glass {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.lp .btn-glow {
+  background: var(--ac);
+  color: #ffffff;
+  box-shadow: 0 10px 28px -12px rgba(99, 102, 241, 0.8);
+}
+.lp .btn-glow:hover {
+  background: var(--acHover);
+}
+/* Empty form, waiting for the human check, submitting: greyed. */
+.lp .btn-glow:disabled {
+  background: var(--over);
+  color: var(--tx3);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.lp .btn-glass {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tx);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+.lp .btn-glass:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+.lp .btn-glass:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 860px) {
+  .lp.au-page .wrap {
+    padding: 0 16px;
+  }
+  .lp .au-split {
+    flex-direction: column;
+  }
+  .lp .au-side {
+    flex: none;
+    padding: 28px 16px 8px;
+    gap: 10px;
+    border-right: 0;
+    background: transparent;
+  }
+  .lp .au-side .h1 {
+    font-size: 34px;
+  }
+  .lp .au-side .lead {
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .lp .au-pts,
+  .lp .au-mini {
+    display: none;
+  }
+  .lp .au-formside {
+    width: 100%;
+    padding: 16px 16px 48px;
+    align-items: flex-start;
+  }
+  .lp .au-h h1 {
+    font-size: 26px;
+    line-height: 32px;
+  }
+}
+
+/* Links and marks in the forms: the accent text colour (`.lp a` would inherit). */
+.lp.au-page .text-accent-text {
+  color: var(--acTx);
+}

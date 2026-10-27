@@ -66,7 +66,7 @@ const signedIn = computed(() => session.status === 'signed-in')
       </RouterLink>
     </div>
     <div v-else class="flex justify-center py-6" aria-busy="true">
-      <UiSpinner class="size-6 text-paimon" />
+      <UiSpinner class="size-6 text-accent-text" />
     </div>
   </AuthFrame>
 </template>

@@ -16,7 +16,7 @@ declare module 'vue-router' {
     auth?: boolean
     /** Only for signed-out visitors (login, register). */
     guest?: boolean
-    /** A public page (PublicFrame): the whole document is dark while it shows. */
+    /** A public page (landing, AuthFrame): the whole document is dark while it shows. */
     public?: boolean
     /** The page's title: a key of the `shell.page` messages (top bar and tab title). */
     title?: PageKey

@@ -1,43 +1,126 @@
 <script setup lang="ts">
-import PublicFrame from '@/components/public/PublicFrame.vue'
+import { computed, ref } from 'vue'
+import { ClipboardList, Globe, Power, TrendingUp } from 'lucide-vue-next'
+import { useRoute } from 'vue-router'
+import AppearanceControls from '@/components/settings/AppearanceControls.vue'
+import UiModal from '@/components/ui/UiModal.vue'
+import { LANGUAGE_NAMES } from '@/i18n/language-names'
+import { locale } from '@/i18n/locale'
+import { formatNumber } from '@/lib/format'
+import { useSession } from '@/stores/session'
+import '@/components/landing/landing.css'
+import '@/components/auth/auth.css'
 
-/** The glass card the sign-in and sign-up forms sit in. */
-defineProps<{ title: string }>()
+/**
+ * The sign-in pages' frame (design "Sign-in B"): the landing's top bar, the
+ * brand panel on the left, the form on the right; on phones the panel
+ * shrinks to a small heading above the form. Always dark (a public route).
+ */
+defineProps<{ title: string; subtitle?: string }>()
+
+const session = useSession()
+const route = useRoute()
+const languageOpen = ref(false)
+const languageName = computed(() => LANGUAGE_NAMES[locale.value])
+const short = computed(() => locale.value.split('-')[0]!.toUpperCase())
+
+/** The top bar's one button: where this page isn't. */
+const cta = computed(() =>
+  session.status === 'signed-in'
+    ? { to: { name: 'home' }, label: 'shell.public.dashboard' }
+    : route.name === 'login'
+      ? { to: { name: 'register' }, label: 'auth.createAccount' }
+      : { to: { name: 'login' }, label: 'common.signIn' },
+)
+
+/** A made-up account for the panel's strip (labelled as a sample). */
+const SAMPLE = [
+  { n: 92, label: 'shell.nav.characters' },
+  { n: 341, label: 'shell.nav.weapons' },
+  { n: 1684, label: 'shell.nav.artifacts' },
+]
 </script>
 
 <template>
-  <PublicFrame>
-    <div class="animate-fade-up relative z-10 flex flex-1 items-center justify-center p-6">
-      <div class="glass-panel w-full max-w-md bg-slate-900/80 p-8 sm:p-10">
-        <h1 class="mb-8 text-center text-3xl font-bold">{{ title }}</h1>
-        <slot />
-        <p v-if="$slots.footer" class="mt-6 text-center text-sm text-gray-400">
-          <slot name="footer" />
-        </p>
-      </div>
-    </div>
-  </PublicFrame>
-</template>
+  <div class="lp au-page" data-theme="dark">
+    <header class="sky top">
+      <nav class="wrap nav" :aria-label="$t('landing.nav.label')">
+        <RouterLink :to="{ name: 'landing' }" class="brand">
+          <span class="spark" aria-hidden="true">✦</span>Teyvat.me
+        </RouterLink>
+        <div class="nav-r">
+          <button
+            class="lang"
+            type="button"
+            aria-haspopup="dialog"
+            :aria-label="`${$t('settings.appearance.language')}: ${languageName}`"
+            :title="$t('settings.appearance.language')"
+            @click="languageOpen = true"
+          >
+            <Globe class="ic" aria-hidden="true" />
+            <span class="long">{{ languageName }}</span>
+            <span class="short">{{ short }}</span>
+          </button>
+          <RouterLink :to="cta.to" class="btn btn-sm btn-g">{{ $t(cta.label) }}</RouterLink>
+        </div>
+      </nav>
+    </header>
 
-<style>
-/* Shared by the auth forms: the original dark glass fields with the paimon focus glow. */
-.glass-input {
-  width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid rgb(255 255 255 / 0.1);
-  background: rgb(0 0 0 / 0.2);
-  padding: 0.85rem 1rem;
-  font-size: 1rem;
-  color: white;
-  transition: all 0.2s;
-}
-.glass-input:focus {
-  outline: none;
-  border-color: var(--paimon);
-  background: rgb(0 0 0 / 0.3);
-  box-shadow: 0 0 0 3px var(--paimon-glow);
-}
-.glass-input[aria-invalid='true'] {
-  border-color: rgb(248 113 113 / 0.6);
-}
-</style>
+    <div class="au-split">
+      <aside class="au-side">
+        <p class="h1"><span class="spark" aria-hidden="true">✦</span> Teyvat.me</p>
+        <p class="lead">{{ $t('landing.hero.lead') }}</p>
+        <ul class="au-pts">
+          <li>
+            <span class="pi"><Power class="ic" aria-hidden="true" /></span>
+            <span
+              ><b>{{ $t('auth.side.capture') }}</b
+              >{{ $t('auth.side.captureText') }}</span
+            >
+          </li>
+          <li>
+            <span class="pi"><TrendingUp class="ic" aria-hidden="true" /></span>
+            <span
+              ><b>{{ $t('auth.side.track') }}</b
+              >{{ $t('auth.side.trackText') }}</span
+            >
+          </li>
+          <li>
+            <span class="pi"><ClipboardList class="ic" aria-hidden="true" /></span>
+            <span
+              ><b>{{ $t('auth.side.plan') }}</b
+              >{{ $t('auth.side.planText') }}</span
+            >
+          </li>
+        </ul>
+        <div class="au-mini" :aria-label="$t('auth.side.sample')" :title="$t('auth.side.sample')">
+          <div v-for="item in SAMPLE" :key="item.label">
+            <b class="tab">{{ formatNumber(item.n) }}</b>
+            <span>{{ $t(item.label) }}</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="au-formside">
+        <div class="au-card">
+          <div class="au-h">
+            <h1>{{ title }}</h1>
+            <p v-if="subtitle">{{ subtitle }}</p>
+          </div>
+          <div><slot /></div>
+          <p v-if="$slots.footer" class="au-foot">
+            <slot name="footer" />
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <UiModal
+      :open="languageOpen"
+      :title="$t('settings.appearance.language')"
+      @close="languageOpen = false"
+    >
+      <AppearanceControls language-only />
+    </UiModal>
+  </div>
+</template>

@@ -49,11 +49,27 @@ async function go(provider: OAuthProvider) {
 </script>
 
 <template>
-  <div v-if="providers.length" class="mt-6 flex flex-col gap-3">
-    <div class="flex items-center gap-3 text-xs tracking-wider text-gray-500 uppercase">
+  <div v-if="providers.length" class="mt-6 flex flex-col gap-4">
+    <div class="flex items-center gap-3 text-sm text-gray-400">
       <span class="h-px flex-1 bg-white/10" />
       {{ $t('common.or') }}
       <span class="h-px flex-1 bg-white/10" />
+    </div>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-2.5">
+      <button
+        v-for="provider in providers"
+        :key="provider"
+        type="button"
+        class="btn-glass min-w-0 px-3"
+        :disabled="busy !== null"
+        :aria-label="$t('auth.oauth.continueWith', { provider: providerLabel(provider) })"
+        :title="$t('auth.oauth.continueWith', { provider: providerLabel(provider) })"
+        @click="go(provider)"
+      >
+        <UiSpinner v-if="busy === provider" class="size-5 shrink-0" />
+        <ProviderMark v-else :provider="provider" class="size-5 shrink-0" />
+        <span class="truncate">{{ providerLabel(provider) }}</span>
+      </button>
     </div>
     <p
       v-if="showNudge"
@@ -62,18 +78,6 @@ async function go(provider: OAuthProvider) {
     >
       {{ $t('auth.oauth.cantSignIn', { providers: providerNames(providers) }) }}
     </p>
-    <button
-      v-for="provider in providers"
-      :key="provider"
-      type="button"
-      class="btn-glass w-full rounded-xl px-4 text-sm sm:text-base"
-      :disabled="busy !== null"
-      @click="go(provider)"
-    >
-      <UiSpinner v-if="busy === provider" class="size-5 shrink-0" />
-      <ProviderMark v-else :provider="provider" class="size-5 shrink-0" />
-      <span>{{ $t('auth.oauth.continueWith', { provider: providerLabel(provider) }) }}</span>
-    </button>
     <p v-if="error" class="text-sm text-red-300" role="alert">{{ error }}</p>
   </div>
 </template>

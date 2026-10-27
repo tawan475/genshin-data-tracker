@@ -120,7 +120,7 @@ async function cancel() {
 <template>
   <AuthFrame :title="gone ? $t('auth.oauth.ranOut') : $t('auth.oauth.notLinkedYet')">
     <div v-if="gone" class="flex flex-col items-center gap-6 text-center" role="alert">
-      <TimerOff class="size-10 text-paimon" aria-hidden="true" />
+      <TimerOff class="size-10 text-accent-text" aria-hidden="true" />
       <p class="text-gray-200">{{ $t('auth.oauth.startAgain') }}</p>
       <RouterLink :to="{ name: 'login' }" class="btn-glow w-full rounded-xl">{{
         $t('common.signIn')
@@ -167,7 +167,7 @@ async function cancel() {
           class="flex cursor-pointer items-center gap-3 text-sm text-gray-300"
           :title="$t('auth.oauth.useEmailTitle')"
         >
-          <input v-model="useEmail" type="checkbox" class="size-4 accent-amber-500" />
+          <input v-model="useEmail" type="checkbox" class="size-4 accent-indigo-500" />
           {{ $t('auth.oauth.useEmail') }}
         </label>
         <div class="mt-2 flex flex-col">
@@ -206,7 +206,7 @@ async function cancel() {
     </template>
 
     <div v-else class="flex justify-center py-6" aria-busy="true">
-      <UiSpinner class="size-6 text-paimon" />
+      <UiSpinner class="size-6 text-accent-text" />
     </div>
 
     <template v-if="pending && !gone" #footer>

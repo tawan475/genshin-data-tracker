@@ -36,7 +36,7 @@ async function submit() {
 <template>
   <AuthFrame :title="$t('auth.forgot.title')">
     <div v-if="sent" class="flex flex-col items-center gap-4 text-center" role="status">
-      <MailCheck class="size-10 text-paimon" aria-hidden="true" />
+      <MailCheck class="size-10 text-accent-text" aria-hidden="true" />
       <p class="text-balance text-gray-200">
         {{ $t('auth.forgot.sent') }}
       </p>
@@ -72,7 +72,7 @@ async function submit() {
       </form>
     </template>
     <template #footer>
-      <RouterLink :to="{ name: 'login' }" class="font-semibold text-paimon hover:underline">
+      <RouterLink :to="{ name: 'login' }" class="font-semibold text-accent-text hover:underline">
         {{ $t('auth.backToSignIn') }}
       </RouterLink>
     </template>

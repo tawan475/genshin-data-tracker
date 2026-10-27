@@ -89,7 +89,7 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame :title="$t('auth.welcomeBack')">
+  <AuthFrame :title="$t('auth.welcomeBack')" :subtitle="linking ? undefined : $t('auth.signInSub')">
     <p
       v-if="linking"
       class="mb-4 flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-gray-200"
@@ -123,7 +123,7 @@ async function submit() {
           <RouterLink
             v-if="emailFeatures"
             :to="{ name: 'forgot-password' }"
-            class="text-sm text-paimon hover:underline"
+            class="text-sm text-accent-text hover:underline"
             :title="$t('auth.forgotPasswordTitle')"
           >
             {{ $t('auth.forgotPassword') }}
@@ -163,7 +163,7 @@ async function submit() {
       <template v-if="linking">
         <RouterLink
           :to="{ name: 'oauth-continue' }"
-          class="font-semibold text-paimon hover:underline"
+          class="font-semibold text-accent-text hover:underline"
           :title="$t('auth.backTitle')"
         >
           {{ $t('common.back') }}
@@ -173,7 +173,7 @@ async function submit() {
         {{ $t('auth.newHere') }}
         <RouterLink
           :to="{ name: 'register', query: next ? { next } : {} }"
-          class="font-semibold text-paimon hover:underline"
+          class="font-semibold text-accent-text hover:underline"
         >
           {{ $t('auth.createAnAccount') }}
         </RouterLink>

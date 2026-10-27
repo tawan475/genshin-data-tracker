@@ -193,7 +193,7 @@ async function submit() {
       {{ $t('auth.haveAccount') }}
       <RouterLink
         :to="{ name: 'login', query: next ? { next } : {} }"
-        class="font-semibold text-paimon hover:underline"
+        class="font-semibold text-accent-text hover:underline"
       >
         {{ $t('common.signIn') }}
       </RouterLink>
