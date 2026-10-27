@@ -99,6 +99,12 @@ export function materialName(key: string): string {
   return loaded.get(target)?.name(key) || resolveMaterialName(key, loaded.get('en'))
 }
 
+/** A material's English name (for links to English guides), loaded beside any language's. Reactive. */
+export function materialEnglishName(key: string): string {
+  if (!namesLoading.has(locale.value)) void preloadMaterialNames(locale.value)
+  return resolveMaterialName(key, names.value.get('en'))
+}
+
 /**
  * A material's rarity for its backdrop (see resolveMaterialRarity): the
  * index's once it is in (the first call starts loading it), `fallback`

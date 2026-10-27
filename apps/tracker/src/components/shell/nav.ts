@@ -12,7 +12,6 @@ import {
   Shield,
   Sparkles,
   Swords,
-  Trophy,
   UserCog,
   Users,
   type LucideIcon,
@@ -48,12 +47,16 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-weapons', label: 'weapons', icon: Swords },
   { name: 'account-materials', label: 'materials', icon: Package, primary: true },
   { name: 'account-planner', label: 'planner', icon: ClipboardList, primary: true },
-  { name: 'account-achievements', label: 'achievements', icon: Trophy },
   { name: 'account-collections', label: 'collections', icon: Library },
   { name: 'account-wishes', label: 'wishes', icon: Sparkles },
   { name: 'account-snapshots', label: 'snapshots', icon: History },
   { name: 'account-settings', label: 'manage', icon: UserCog },
 ]
+
+/** Pages without a nav entry of their own, lit as the section they open from. */
+export const NAV_PARENT: Readonly<Record<string, string>> = {
+  'account-achievements': 'account-collections',
+}
 
 export interface StaffSection extends AccountSection {
   /** The node the page needs (the Worker checks it again). */

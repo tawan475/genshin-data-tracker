@@ -26,7 +26,8 @@
     "notCaptured": "Belum tertangkap",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 atau lebih baru membacanya saat login.",
     "allCollected": "Semua terkumpul",
-    "noneCollected": "Belum ada yang terkumpul"
+    "noneCollected": "Belum ada yang terkumpul",
+    "guide": "Panduan di wiki"
   },
   "tabsLabel": "Koleksi",
   "summary": "Ringkasan",

@@ -28,7 +28,7 @@ import { useStaff } from '@/stores/staff'
 import AccountSwitcher from './AccountSwitcher.vue'
 import AppearanceButton from './AppearanceButton.vue'
 import { t } from '@/i18n'
-import { ACCOUNT_SECTIONS, STAFF_SECTIONS, pageTitle } from './nav'
+import { ACCOUNT_SECTIONS, NAV_PARENT, STAFF_SECTIONS, pageTitle } from './nav'
 import { NAV_COLLAPSED_KEY, useNavCollapse } from './nav-collapse'
 import SectionLabel from './SectionLabel.vue'
 
@@ -140,10 +140,14 @@ async function signOut() {
   await router.push({ name: 'login' })
 }
 
+const routeSection = computed(() => {
+  const name = String(route.name ?? '')
+  return NAV_PARENT[name] ?? name
+})
 const isActive = (name: string) =>
   name.startsWith('staff-')
     ? staffActive(name)
-    : route.name === name || String(route.name ?? '').startsWith(`${name}-`)
+    : routeSection.value === name || routeSection.value.startsWith(`${name}-`)
 const navClass = (active: boolean) =>
   active
     ? 'bg-surface-overlay text-text-primary'

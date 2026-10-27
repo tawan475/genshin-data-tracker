@@ -26,7 +26,8 @@
     "notCaptured": "Пока не снято",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 или новее считывает их при входе в игру.",
     "allCollected": "Все собраны",
-    "noneCollected": "Пока ни одного"
+    "noneCollected": "Пока ни одного",
+    "guide": "Гайд на вики"
   },
   "tabsLabel": "Коллекция",
   "summary": "Сводка",

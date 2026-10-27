@@ -26,7 +26,8 @@
     "notCaptured": "아직 캡처 없음",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 이상이 로그인할 때 읽습니다.",
     "allCollected": "모두 수집 완료",
-    "noneCollected": "아직 수집한 것 없음"
+    "noneCollected": "아직 수집한 것 없음",
+    "guide": "위키 공략"
   },
   "tabsLabel": "컬렉션",
   "summary": "요약",

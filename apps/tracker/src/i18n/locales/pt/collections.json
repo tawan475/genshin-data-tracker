@@ -26,7 +26,8 @@
     "notCaptured": "Ainda não capturado",
     "notCapturedBody": "O Teyvat.me Capture 1.3.0 ou mais recente os lê ao entrar no jogo.",
     "allCollected": "Todos coletados",
-    "noneCollected": "Nenhum coletado ainda"
+    "noneCollected": "Nenhum coletado ainda",
+    "guide": "Guia na wiki"
   },
   "tabsLabel": "Coleção",
   "summary": "Resumo",

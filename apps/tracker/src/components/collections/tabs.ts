@@ -1,7 +1,18 @@
 import { defineAsyncComponent, type Component } from 'vue'
+import {
+  Archive,
+  BookMarked,
+  BookOpen,
+  CookingPot,
+  Disc3,
+  Layers,
+  PawPrint,
+  Shirt,
+  Sprout,
+} from 'lucide-vue-next'
 import type { CapturedCollections } from '@/data/collections'
 
-/** The Collections page's tabs, in their order; the slug is the URL's last segment. */
+/** The collections, in the hub's order; the slug is the URL's last segment (`/collections/archive`). */
 export const COLLECTION_TABS = [
   'spincrystals',
   'anecdotes',
@@ -68,5 +79,15 @@ export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
   aranara: defineAsyncComponent(() => import('./AranaraTab.vue')),
 }
 
-/** The last tab opened on this device. */
-export const LAST_TAB_KEY = 'collections:tab'
+/** Each collection's card icon. */
+export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
+  spincrystals: Disc3,
+  anecdotes: BookOpen,
+  archive: Archive,
+  handbook: BookMarked,
+  'living-beings': PawPrint,
+  tcg: Layers,
+  recipes: CookingPot,
+  wardrobe: Shirt,
+  aranara: Sprout,
+}

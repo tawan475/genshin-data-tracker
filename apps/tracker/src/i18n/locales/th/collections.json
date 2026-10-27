@@ -26,7 +26,8 @@
     "notCaptured": "ยังไม่ได้สแกน",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
     "allCollected": "รวบรวมครบแล้ว",
-    "noneCollected": "ยังไม่ได้รวบรวม"
+    "noneCollected": "ยังไม่ได้รวบรวม",
+    "guide": "คู่มือบนวิกิ"
   },
   "tabsLabel": "คอลเลกชัน",
   "summary": "สรุป",

@@ -26,7 +26,8 @@
     "notCaptured": "Non ancora catturati",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 o successivo li legge all'accesso.",
     "allCollected": "Tutti ottenuti",
-    "noneCollected": "Nessuno ottenuto"
+    "noneCollected": "Nessuno ottenuto",
+    "guide": "Guida sulla wiki"
   },
   "tabsLabel": "Collezione",
   "summary": "Riepilogo",

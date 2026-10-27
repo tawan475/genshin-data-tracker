@@ -26,7 +26,8 @@
     "notCaptured": "Henüz taranmadı",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 veya üstü bunları girişte okur.",
     "allCollected": "Hepsi alındı",
-    "noneCollected": "Henüz hiç yok"
+    "noneCollected": "Henüz hiç yok",
+    "guide": "Wiki rehberi"
   },
   "tabsLabel": "Koleksiyon",
   "summary": "Özet",

@@ -10,6 +10,7 @@ import UiStat from '@/components/ui/UiStat.vue'
 import {
   SPINCRYSTAL_ICON,
   filterSpincrystals,
+  spincrystalGuide,
   type SpincrystalFilter,
   type SpincrystalProgress,
   type SpincrystalRow,
@@ -17,7 +18,7 @@ import {
 import { gameIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
-import { materialName, materialRarity } from '@/utils/materials'
+import { materialEnglishName, materialName, materialRarity } from '@/utils/materials'
 import { t } from '@/i18n'
 
 /**
@@ -67,7 +68,9 @@ const collectedHint = computed(() => {
 
 const state = (row: SpincrystalRow) =>
   t(`collections.spincrystals.${row.have ? 'stateHave' : 'stateMissing'}`)
-const tileTitle = (row: SpincrystalRow) => `${materialName(row.key)} · ${state(row)}`
+const tileTitle = (row: SpincrystalRow) =>
+  `${materialName(row.key)} · ${state(row)} · ${t('collections.spincrystals.guide')}`
+const guide = (row: SpincrystalRow) => spincrystalGuide(row, materialEnglishName(row.key))
 </script>
 
 <template>
@@ -143,41 +146,47 @@ const tileTitle = (row: SpincrystalRow) => `${materialName(row.key)} · ${state(
           class="grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-1.5"
           :aria-label="title"
         >
-          <li
-            v-for="row in numbered"
-            :key="row.id"
-            class="tabular flex h-9 min-w-0 items-center justify-center rounded-md border font-mono text-sm"
-            :class="
-              row.have
-                ? 'border-accent-text/40 bg-accent/15 font-medium text-accent-text'
-                : 'border-dashed border-border-strong text-text-muted'
-            "
-            :title="tileTitle(row)"
-          >
-            <span class="sr-only">{{ tileTitle(row) }}</span>
-            <span aria-hidden="true">{{ row.number }}</span>
+          <li v-for="row in numbered" :key="row.id" class="flex min-w-0">
+            <a
+              :href="guide(row)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="tabular flex h-9 w-full min-w-0 items-center justify-center rounded-md border font-mono text-sm transition-colors"
+              :class="
+                row.have
+                  ? 'border-accent-text/40 bg-accent/15 font-medium text-accent-text hover:bg-accent/25'
+                  : 'border-dashed border-border-strong text-text-muted hover:border-solid hover:text-text-primary'
+              "
+              :title="tileTitle(row)"
+            >
+              <span class="sr-only">{{ tileTitle(row) }}</span>
+              <span aria-hidden="true">{{ row.number }}</span>
+            </a>
           </li>
         </ul>
         <ul
           v-if="named.length > 0"
           class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-1.5"
         >
-          <li
-            v-for="row in named"
-            :key="row.id"
-            class="flex min-h-9 min-w-0 items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm leading-snug"
-            :class="
-              row.have
-                ? 'border-accent-text/40 bg-accent/15 font-medium text-accent-text'
-                : 'border-dashed border-border-strong text-text-muted'
-            "
-            :title="tileTitle(row)"
-          >
-            <Music class="size-3.5 shrink-0" aria-hidden="true" />
-            <span class="sr-only">{{ tileTitle(row) }}</span>
-            <span class="line-clamp-2 min-w-0 break-words" aria-hidden="true">{{
-              materialName(row.key)
-            }}</span>
+          <li v-for="row in named" :key="row.id" class="flex min-w-0">
+            <a
+              :href="guide(row)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm leading-snug transition-colors"
+              :class="
+                row.have
+                  ? 'border-accent-text/40 bg-accent/15 font-medium text-accent-text hover:bg-accent/25'
+                  : 'border-dashed border-border-strong text-text-muted hover:border-solid hover:text-text-primary'
+              "
+              :title="tileTitle(row)"
+            >
+              <Music class="size-3.5 shrink-0" aria-hidden="true" />
+              <span class="sr-only">{{ tileTitle(row) }}</span>
+              <span class="line-clamp-2 min-w-0 break-words" aria-hidden="true">{{
+                materialName(row.key)
+              }}</span>
+            </a>
           </li>
         </ul>
       </div>

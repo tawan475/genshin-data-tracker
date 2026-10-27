@@ -26,7 +26,8 @@
     "notCaptured": "Chưa ghi",
     "notCapturedBody": "Teyvat.me Capture 1.3.0 trở lên đọc khi đăng nhập.",
     "allCollected": "Đã thu thập tất cả",
-    "noneCollected": "Chưa thu thập cái nào"
+    "noneCollected": "Chưa thu thập cái nào",
+    "guide": "Hướng dẫn trên wiki"
   },
   "tabsLabel": "Bộ sưu tập",
   "summary": "Tóm tắt",
