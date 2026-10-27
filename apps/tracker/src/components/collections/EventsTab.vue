@@ -8,6 +8,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
+import { nameOf, idLabel, type CollectionCatalog } from '@/data/collection-names'
 import { loadGameEvents } from '@/data/domain-events'
 import { eventRows } from '@/data/events'
 import { locale } from '@/i18n/locale'
@@ -17,10 +18,10 @@ import { t } from '@/i18n'
 
 /**
  * Events (Capture 1.7.0's `gi_events`): each event in the newest capture with
- * its window and reward counters, running ones first. Titles come from the
- * notice board where one notice matches the event's dates.
+ * its window and reward counters, running ones first, named by the game data
+ * (else the notice board, where one notice matches the event's dates).
  */
-const props = defineProps<{ captured: CapturedCollections }>()
+const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
 const account = useAccount()
 const events = computed(() => props.captured.events?.value ?? null)
@@ -32,7 +33,12 @@ watch(
 )
 const title = (notice: GameNotice) => notice.title[locale.value] || notice.title.en
 const rows = computed(() =>
-  events.value ? eventRows(events.value, board.value?.notices ?? [], title, Date.now()) : [],
+  events.value
+    ? eventRows(events.value, board.value?.notices ?? [], title, Date.now(), (id) => {
+        const name = nameOf(props.catalog, 'events', id)
+        return name === idLabel(id) ? '' : name
+      })
+    : [],
 )
 const running = computed(() => rows.value.filter((r) => r.running))
 const waiting = computed(() => running.value.reduce((sum, r) => sum + r.waiting, 0))

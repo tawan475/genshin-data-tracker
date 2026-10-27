@@ -74,6 +74,7 @@ export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections 
 /** Tabs that list the game data's collections (names, totals): they wait for it. */
 export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
   'world',
+  'events',
   'archive',
   'handbook',
   'living-beings',

@@ -180,8 +180,8 @@ domains and areas revealed, Statues of The Seven, reputation, offerings,
 exploration per area as points over `exploreTotal` (capped at 100%), Statues
 against `statueMaxLevel`; `src/data/world.ts`; plus bosses' and elites'
 respawns from `gi_tasks.respawns`, named by the farming data), Events
-(`gi_events`: window and reward counters, titled from the notice board when
-one notice matches the dates; `src/data/events.ts`), Hangout Events
+(`gi_events`: window and reward counters, named by game-data `events` (else
+the notice board when one notice matches the dates); `src/data/events.ts`), Hangout Events
 (chapters, endings by `hangoutCgs` name, pictures), Furnishing Blueprints
 (learned of the game data's 1,405), monsters seen on Living Beings, Radiant
 Spincrystals (which the newest capture has, which are missing), Anecdotes

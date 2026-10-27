@@ -2,15 +2,16 @@ import type { GameNotice, GiEvent } from '@gdt/shared'
 
 /**
  * The events in the newest capture (Capture 1.7.0's `gi_events`: by activity
- * id, its window and reward counters). The capture names none and the notice
- * board keys its notices by announcement id, so an event takes the title of
- * the one notice whose dates match its own (within a day, either end); with
- * none or several it stays unnamed. Pure.
+ * id, its window and reward counters), named by the game data
+ * (`@gdt/game-data/collections` `events`, from v7.1.19). An event it does not
+ * name takes the title of the one notice whose dates match its own (within a
+ * day, either end; the board keys notices by announcement id); with none or
+ * several it stays unnamed. The notice still lends its banner. Pure.
  */
 
 export interface EventRow {
   id: number
-  /** The matching notice's title, null when none matches alone. */
+  /** The game data's name, else the matching notice's title; null when neither. */
   name: string | null
   image: string | null
   /** Epoch ms. */
@@ -33,6 +34,8 @@ export function eventRows(
   notices: readonly GameNotice[],
   title: (notice: GameNotice) => string,
   now: number,
+  /** The game data's name of an activity id ('' when it has none). */
+  gameName: (id: number) => string = () => '',
 ): EventRow[] {
   const boards = notices.filter((n) => n.kind === 'event')
   return Object.entries(events)
@@ -47,7 +50,7 @@ export function eventRows(
       const counters = Object.values(e.progress ?? {})
       return {
         id: Number(key),
-        name: notice ? title(notice) : null,
+        name: gameName(Number(key)) || (notice ? title(notice) : null),
         image: notice?.image ?? null,
         start,
         end,

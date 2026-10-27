@@ -123,3 +123,16 @@ describe('eventRows', () => {
     expect(rows[1]).toMatchObject({ id: 2002, name: null, running: false, total: 0 })
   })
 })
+
+describe('eventRows with game data names', () => {
+  it("prefers the game data's name over a notice title", () => {
+    const rows = eventRows(
+      { '2003': { schedule: 1, start: 1_790_000_000, end: 1_791_000_000 } },
+      [],
+      () => 'notice',
+      1_790_500_000_000,
+      (id) => (id === 2003 ? 'Lantern Rite' : ''),
+    )
+    expect(rows[0]).toMatchObject({ name: 'Lantern Rite', running: true })
+  })
+})
