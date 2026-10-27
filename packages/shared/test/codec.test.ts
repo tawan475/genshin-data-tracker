@@ -48,7 +48,7 @@ import {
   type StoredSnapshot,
 } from '../src'
 import { MATERIALS } from '../src/dictionary/materials'
-import { syntheticCollections, syntheticWardrobe } from './synthetic'
+import { syntheticCollections, syntheticRecipes, syntheticWardrobe } from './synthetic'
 
 /** Stands in for the D1 catalog: assigns ids to new hashes, remembers identities. */
 class Catalog {
@@ -1810,5 +1810,61 @@ describe("Teyvat.me Capture 1.4.0's collections and wardrobe", () => {
       const back = decodeSectionBlob(kindCode(kind, false), extended, null, null)
       expect(JSON.stringify(back.value), kind).toBe(JSON.stringify(value))
     }
+  })
+})
+
+// ------------------------------------------- gi_collections.recipes (1.5.0)
+
+describe("Teyvat.me Capture 1.5.0's recipes", () => {
+  const recipes = syntheticRecipes(6)
+  const base = {
+    ...sample,
+    gi_collections: syntheticCollections(6),
+    gi_wardrobe: syntheticWardrobe(6),
+  }
+  const withRecipes = { ...base, gi_collections: { ...base.gi_collections, recipes } }
+
+  it('round-trips inside collections2, last of its parts', async () => {
+    const { encoded, decoded } = await roundTrip(withRecipes)
+    expect(decoded.gi_collections!.recipes).toEqual(recipes)
+    expect(Object.keys(decoded.gi_collections!).at(-1)).toBe('recipes')
+    expect(Object.keys(JSON.parse(encoded.collections2!.json)).at(-1)).toBe('p')
+    const blob = encodeSectionBlob(
+      'collections2',
+      JSON.parse(encoded.collections2!.json),
+      false,
+      null,
+    )
+    expect(blob.payload[0]).toBe(0x10)
+    // Recipes alone make a collections2 of their own.
+    const alone = await roundTrip({ ...sample, gi_collections: { recipes: { '1001': 0 } } })
+    expect(alone.decoded.gi_collections).toEqual({ recipes: { '1001': 0 } })
+  })
+
+  it('knows the hash a tracker from before recipes gave the same file', async () => {
+    const catalog = new Catalog()
+    const before = await roundTrip(base, catalog)
+    const after = await roundTrip(withRecipes, catalog)
+    expect(after.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    expect(after.encoded.preRecipesContentHash).toBe(before.encoded.contentHash)
+    expect(before.encoded.preRecipesContentHash).toBe(before.encoded.contentHash)
+    // Without other parts or a wardrobe: the hash of the file without collections2.
+    const plain = await roundTrip(sample, catalog)
+    const only = await roundTrip({ ...sample, gi_collections: { recipes } }, catalog)
+    expect(only.encoded.preRecipesContentHash).toBe(plain.encoded.contentHash)
+  })
+
+  it('drops the list when one entry is bad, and keeps the rest', () => {
+    const read = (value: unknown) =>
+      normalizeGood({ ...sample, gi_collections: { spincrystals: [141_001], recipes: value } })
+        .collections
+    for (const bad of [{ '1001': -1 }, { '1001': 1.5 }, { x: 1 }, { '01001': 1 }, [1], 'x']) {
+      expect(read(bad)).toEqual({ spincrystals: [141_001] })
+    }
+    const tooMany = Object.fromEntries(
+      Array.from({ length: GOOD_LIMITS.recipes + 1 }, (_, i) => [String(1_000 + i), 0]),
+    )
+    expect(read(tooMany)).toEqual({ spincrystals: [141_001] })
+    expect(read({ '5502': 30, '1001': 0 })!.recipes).toEqual({ '1001': 0, '5502': 30 })
   })
 })

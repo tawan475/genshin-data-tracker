@@ -576,6 +576,8 @@ function toCollections(raw: unknown): GiCollections | null {
   if (aranara) collections.aranara = aranara
   const tcg = toTcg(raw.tcg)
   if (tcg) collections.tcg = tcg
+  const recipes = toRecipes(raw.recipes)
+  if (recipes) collections.recipes = recipes
   return Object.keys(collections).length > 0 ? collections : null
 }
 
@@ -750,6 +752,15 @@ function toTcg(raw: unknown): GiCollections['tcg'] | null {
     tcg.currentDeck = raw.currentDeck
   }
   return tcg
+}
+
+/** Unlocked recipes: recipe id -> proficiency (whole numbers; 0 when none yet). */
+function toRecipes(raw: unknown): GiCollections['recipes'] | null {
+  const entries = idEntries(raw, 1, 999_999, GOOD_LIMITS.recipes)
+  if (!entries || entries.some(([, proficiency]) => !isIntIn(proficiency, 0, 100_000))) {
+    return null
+  }
+  return byId(entries as [number, number][])
 }
 
 /** Text the player typed (a deck or team name): kept as is, only bounded. */

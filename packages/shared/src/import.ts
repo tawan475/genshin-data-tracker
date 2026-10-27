@@ -66,6 +66,8 @@ export const GOOD_LIMITS = {
   wardrobeOwned: 3_000,
   teams: 200,
   teamCharacters: 8,
+  /** Unlocked cooking recipes: 284 in the 7.1 game data, 252 in a real capture. */
+  recipes: 2_000,
   /** UTF-16 units of a deck or team name the player typed. */
   playerText: 100,
   /** An artifact has at most 4 substats (and unactivated ones). */

@@ -628,7 +628,8 @@ export function decodeTasks(section: TasksSection): GiTasks {
 //       chapter, progress, total, state]]}, both by id, state = PROGRESS_STATES index;
 // `r` = Aranara [[type, id, state]] by type then id, state = ARANARA_STATES index;
 // `g` = TCG {c: [[card id, count, proficiency (0: none)]] by id, k?: [[deck id,
-//       name, valid (1/0), [character cards], [cards]]] by id, u?: current deck}.
+//       name, valid (1/0), [character cards], [cards]]] by id, u?: current deck};
+// `p` = recipes [[recipe id, proficiency]] by id (Capture 1.5.0).
 // The game sends all of it at login: a relogin with nothing new stores
 // nothing, a few more defeats a few bytes (compressed against the last one).
 
@@ -659,6 +660,7 @@ export interface CollectionsSection {
   h?: { c: ProgressRow[]; t: TargetRow[] }
   r?: AranaraRow[]
   g?: { c: CardRow[]; k?: DeckRow[]; u?: number }
+  p?: [id: number, proficiency: number][]
 }
 
 const ids = (record: Record<string, unknown>) =>
@@ -674,7 +676,7 @@ export function encodeCollections(collections: GiCollections): CollectionsSectio
 /** The `collections2` section: every later part (null when the capture has none). */
 export function encodeCollections2(collections: GiCollections): CollectionsSection | null {
   const section: CollectionsSection = {}
-  const { archive, defeats, handbook, aranara, tcg } = collections
+  const { archive, defeats, handbook, aranara, tcg, recipes } = collections
   if (archive) {
     const a: ArchiveSection = {}
     for (const tab of ARCHIVE_TABS) if (archive[tab]) a[tab] = [...archive[tab]]
@@ -724,6 +726,7 @@ export function encodeCollections2(collections: GiCollections): CollectionsSecti
     if (tcg.currentDeck !== undefined) g.u = tcg.currentDeck
     section.g = g
   }
+  if (recipes) section.p = ids(recipes).map((id) => [id, recipes[String(id)]!])
   return Object.keys(section).length > 0 ? section : null
 }
 
@@ -791,6 +794,9 @@ export function decodeCollections(section: CollectionsSection): GiCollections {
     }
     if (section.g.u !== undefined) tcg.currentDeck = section.g.u
     collections.tcg = tcg
+  }
+  if (section.p) {
+    collections.recipes = Object.fromEntries(section.p.map(([id, n]) => [String(id), n]))
   }
   return collections
 }

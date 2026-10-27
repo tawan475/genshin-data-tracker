@@ -174,6 +174,12 @@ export interface EncodedSnapshot extends ExtraSections {
    * `gi_wardrobe` was kept, so re-uploading it stays a no-op.
    */
   preWardrobeContentHash: string
+  /**
+   * The content hash with the recipes left out of collections2 (equal to
+   * `contentHash` without recipes): what a tracker from before Capture
+   * 1.5.0's recipes stored such a file as, so re-uploading it stays a no-op.
+   */
+  preRecipesContentHash: string
 }
 
 /** The sections that do not depend on catalog ids, materials in full. */
@@ -317,29 +323,48 @@ export async function completeSnapshot(
       )
     : preCollectionsContentHash
   // Capture 1.4.0's keys last, the same way, with empty places for what a file lacks.
-  const preWardrobeContentHash = sections.collections2
-    ? await sha256Hex128(
-        [
-          ...withExtras,
-          sections.anecdotes?.hash ?? '',
-          sections.tasks?.hash ?? '',
-          sections.collections?.hash ?? '',
-          sections.collections2.hash,
-        ].join(':'),
-      )
-    : preCollections2ContentHash
-  const contentHash = sections.wardrobe
-    ? await sha256Hex128(
-        [
-          ...withExtras,
-          sections.anecdotes?.hash ?? '',
-          sections.tasks?.hash ?? '',
-          sections.collections?.hash ?? '',
-          sections.collections2?.hash ?? '',
-          sections.wardrobe.hash,
-        ].join(':'),
-      )
-    : preWardrobeContentHash
+  const tail = async (collections2: Section | null) => {
+    const preWardrobe = collections2
+      ? await sha256Hex128(
+          [
+            ...withExtras,
+            sections.anecdotes?.hash ?? '',
+            sections.tasks?.hash ?? '',
+            sections.collections?.hash ?? '',
+            collections2.hash,
+          ].join(':'),
+        )
+      : preCollections2ContentHash
+    const content = sections.wardrobe
+      ? await sha256Hex128(
+          [
+            ...withExtras,
+            sections.anecdotes?.hash ?? '',
+            sections.tasks?.hash ?? '',
+            sections.collections?.hash ?? '',
+            collections2?.hash ?? '',
+            sections.wardrobe.hash,
+          ].join(':'),
+        )
+      : preWardrobe
+    return { preWardrobe, content }
+  }
+  const { preWardrobe: preWardrobeContentHash, content: contentHash } = await tail(
+    sections.collections2,
+  )
+  // The recipes (1.5.0) live inside collections2: what this file hashed to
+  // where collections2 did not have them yet.
+  const collections = prepared.good.collections
+  const preRecipesContentHash = collections?.recipes
+    ? (
+        await tail(
+          await optionalSection(
+            'collections2',
+            encodeCollections2({ ...collections, recipes: undefined }),
+          ),
+        )
+      ).content
+    : contentHash
   return {
     ...sections,
     artifacts,
@@ -353,6 +378,7 @@ export async function completeSnapshot(
     preCollectionsContentHash,
     preCollections2ContentHash,
     preWardrobeContentHash,
+    preRecipesContentHash,
   }
 }
 

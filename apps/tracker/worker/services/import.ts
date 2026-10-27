@@ -288,6 +288,7 @@ async function importOnce(
   const preCollectionsKey = contentKey(encoded.preCollectionsContentHash)
   const preCollections2Key = contentKey(encoded.preCollections2ContentHash)
   const preWardrobeKey = contentKey(encoded.preWardrobeContentHash)
+  const preRecipesKey = contentKey(encoded.preRecipesContentHash)
   const response = (
     status: ImportResponse['status'],
     snapshotId: number,
@@ -322,14 +323,16 @@ async function importOnce(
         row.content_key === preTasksKey ||
         row.content_key === preCollectionsKey ||
         row.content_key === preCollections2Key ||
-        row.content_key === preWardrobeKey
+        row.content_key === preWardrobeKey ||
+        row.content_key === preRecipesKey
       : row.content_hash === encoded.contentHash ||
         row.content_hash === encoded.legacyContentHash ||
         row.content_hash === encoded.preAnecdotesContentHash ||
         row.content_hash === encoded.preTasksContentHash ||
         row.content_hash === encoded.preCollectionsContentHash ||
         row.content_hash === encoded.preCollections2ContentHash ||
-        row.content_hash === encoded.preWardrobeContentHash
+        row.content_hash === encoded.preWardrobeContentHash ||
+        row.content_hash === encoded.preRecipesContentHash
   const sameInventory = (row: LatestRow) =>
     row.content_key !== null ? row.content_key === key : row.content_hash === encoded.contentHash
 

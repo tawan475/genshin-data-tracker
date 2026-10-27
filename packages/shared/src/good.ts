@@ -171,6 +171,8 @@ export interface GiCollections {
     decks?: Record<string, { name: string; characters: number[]; cards: number[]; valid: boolean }>
     currentDeck?: number
   }
+  /** Every unlocked cooking recipe (Capture 1.5.0): recipe id -> proficiency (0: none yet). */
+  recipes?: Record<string, number>
 }
 
 /** The Archive's tabs, in the order they are stored (append-only). */

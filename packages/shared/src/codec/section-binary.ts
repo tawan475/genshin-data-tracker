@@ -770,6 +770,12 @@ const tcgPart: TaggedPart = {
   },
 }
 
+// `p`: recipes (rows by id: proficiency).
+const recipesPart: TaggedPart = {
+  write: (w, value) => writeById(w, value, 2, ([, proficiency]) => w.uint(uint(proficiency))),
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint()]),
+}
+
 /** collections2's parts, by index (append-only). */
 const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['a', archivePart],
@@ -777,6 +783,7 @@ const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['h', handbookPart],
   ['r', aranaraPart],
   ['g', tcgPart],
+  ['p', recipesPart],
 ]
 
 const collections2Layout = taggedLayout('collections2', COLLECTION2_PARTS)

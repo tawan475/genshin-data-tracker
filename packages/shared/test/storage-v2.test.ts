@@ -222,6 +222,7 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
               },
             }
           : {}),
+        ...(rand() < 0.6 ? { p: byId(1_000, n * 4, () => [int(rand, 0, 30)]) } : {}),
       }
     }
     case 'wardrobe': {

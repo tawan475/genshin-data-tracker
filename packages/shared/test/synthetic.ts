@@ -395,3 +395,11 @@ export function syntheticWardrobe(seed = 1): NonNullable<Good['gi_wardrobe']> {
     currentTeam: 3,
   }
 }
+
+/** `gi_collections.recipes` at a real capture's scale (Capture 1.5.0): 252 unlocked, some mastered. */
+export function syntheticRecipes(seed = 1): Record<string, number> {
+  const rand = random(seed)
+  return Object.fromEntries(
+    ids(rand, 1_001, 4_500, 252).map((id) => [String(id), rand() < 0.3 ? 0 : int(rand, 1, 30)]),
+  )
+}

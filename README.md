@@ -143,7 +143,10 @@ TCG cards and decks) as `collections2` and `gi_wardrobe` (outfits, gliders,
 weapon skins and trails owned and worn, saved teams) as `wardrobe`
 (`snapshots.collections2_ref` / `wardrobe_ref`, migration 0031; the
 deployed collections layout cannot learn new parts, hence the second
-section). Deck and team names are the player's text, stored as is; a part
+section; its layout and the wardrobe's are tagged, so an older build skips
+a part it does not know). Capture 1.5.0's `gi_collections.recipes` (recipe
+id -> proficiency) is collections2's part `p`. Deck and team names are the
+player's text, stored as is; a part
 that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before
 they existed, and exports (GOOD rebuild, zip) write them back after

@@ -10,7 +10,11 @@ import {
 } from '@gdt/shared'
 import { SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
-import { syntheticCollections, syntheticWardrobe } from '../../../../packages/shared/test/synthetic'
+import {
+  syntheticCollections,
+  syntheticRecipes,
+  syntheticWardrobe,
+} from '../../../../packages/shared/test/synthetic'
 import { ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 /** Made-up values in the shape Teyvat.me Capture sends: 120 of the 206. */
@@ -201,5 +205,31 @@ describe("Teyvat.me Capture 1.4.0's collections and wardrobe", () => {
       status: 'unchanged',
       snapshotId: created.snapshotId,
     })
+  })
+})
+
+describe("Teyvat.me Capture 1.5.0's recipes", () => {
+  const full = syntheticCollections(10)
+  const recipes = syntheticRecipes(10)
+
+  it('stores and exports them, and a capture stored before them stays a no-op', async () => {
+    const { client, account, importKey } = await setup()
+    const before = (await (
+      await importByKey(importKey, sampleGood({ gi_collections: full }), 1_000)
+    ).json()) as ImportResponse
+    expect(before.status).toBe('created')
+    const again = await importByKey(
+      importKey,
+      sampleGood({ gi_collections: { ...full, recipes } }),
+      1_000,
+    )
+    expect(await again.json()).toMatchObject({ status: 'unchanged', snapshotId: before.snapshotId })
+    const later = (await (
+      await importByKey(importKey, sampleGood({ gi_collections: { ...full, recipes } }), 2_000)
+    ).json()) as ImportResponse
+    expect(later.status).toBe('created')
+    expect(later.storedSize).toBeLessThan(2_000)
+    const latest = await client.json<Good>(`/api/accounts/${account.id}/latest/good`)
+    expect(latest.gi_collections!.recipes).toEqual(recipes)
   })
 })
