@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { secureHeaders } from 'hono/secure-headers'
 import type { AppEnv } from './env'
 import { d1Sessions } from './lib/d1-session'
+import { withRange } from './lib/byte-range'
 import { ApiError, errorBody } from './lib/http'
 import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
@@ -92,7 +93,13 @@ export { LiveHub } from './services/live'
 const EVENTS_CRON = '7 * * * *'
 
 export default {
-  fetch: app.fetch,
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    // The landing page's files (its demo videos need byte ranges): the asset, sliced.
+    if (new URL(request.url).pathname.startsWith('/landing/')) {
+      return env.ASSETS.fetch(request.url).then((asset) => withRange(request, asset))
+    }
+    return app.fetch(request, env, ctx)
+  },
   async scheduled(controller, env, ctx) {
     // Hourly: the game's notice board and HoYoLAB (services/game-events.ts).
     if (controller.cron === EVENTS_CRON) {
