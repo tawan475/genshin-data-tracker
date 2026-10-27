@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 trở lên đọc khi đăng nhập.",
     "allCollected": "Đã thu thập tất cả",
     "noneCollected": "Chưa thu thập cái nào"
+  },
+  "tabsLabel": "Bộ sưu tập",
+  "summary": "Tóm tắt",
+  "notCapturedPart": "Chưa ghi",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 trở lên đọc khi đăng nhập.",
+  "namesSoon": "Tên và biểu tượng có trong dữ liệu trò chơi tiếp theo; trước đó hiển thị ID.",
+  "namesComing": "Sắp có tên",
+  "namesComingBody": "Danh sách hiện khi dữ liệu trò chơi có tên.",
+  "tabs": {
+    "spincrystals": "Ngọc Thạch Âm Vang",
+    "anecdotes": "Giai Thoại",
+    "archive": "Thư Viện",
+    "handbook": "Bằng Chứng Mạo Hiểm",
+    "livingBeings": "Sách Sinh Vật",
+    "tcg": "Thất Thánh Triệu Hồi",
+    "wardrobe": "Tủ Đồ",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Mục Thư Viện",
+    "unlocked": "Đã mở khóa",
+    "unlockedHint": "Mục Thư Viện đã mở khóa, mọi mục",
+    "none": "Chưa mở khóa",
+    "tabs": {
+      "quests": "Nhiệm vụ",
+      "weapons": "Vũ Khí",
+      "livingBeings": "Sách Sinh Vật",
+      "materials": "Nguyên Liệu",
+      "books": "Sách",
+      "tutorials": "Giáo Trình",
+      "viewpoints": "Điểm Nhìn",
+      "artifacts": "Thánh Di Vật"
+    }
+  },
+  "defeats": {
+    "kinds": "Mục",
+    "kindsHint": "Sinh vật có số lần đánh bại hoặc thu phục",
+    "defeated": "Đánh Bại",
+    "captured": "Đã Thu Phục",
+    "capturedHint": "Trong {n} loài sinh vật",
+    "defeatedN": "Đánh bại {n}",
+    "capturedN": "Thu phục {n}"
+  },
+  "handbook": {
+    "show": "Hiển thị",
+    "chapters": "Chương",
+    "waiting": "Phần thưởng chờ nhận",
+    "waitingHint": "Đã đạt mục tiêu, chưa nhận thưởng",
+    "noneShown": "Không có gì",
+    "filters": {
+      "all": "Tất cả",
+      "open": "Đang Tiến Hành",
+      "complete": "Đã Hoàn Thành",
+      "claimed": "Đã nhận"
+    },
+    "states": {
+      "open": "Đang Tiến Hành",
+      "complete": "Đã Hoàn Thành",
+      "claimed": "Đã nhận"
+    }
+  },
+  "tcg": {
+    "cards": "Thẻ Bài",
+    "characterCards": "Thẻ Nhân Vật",
+    "actionCards": "Thẻ Hành Động",
+    "copies": "Bản sao",
+    "copiesHint": "Mọi bản sao của mọi thẻ",
+    "decks": "Bộ Bài",
+    "inUse": "Đang dùng",
+    "invalid": "Chưa đủ",
+    "invalidTitle": "Theo trò chơi, bộ bài này chưa dùng được",
+    "deckTitle": "{characters} thẻ nhân vật + {cards} thẻ",
+    "noDecks": "Không có bộ bài"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Trang Phục",
+      "gliders": "Phong Chi Dực",
+      "weaponSkins": "Ngoại Hình Vũ Khí",
+      "trails": "Vệt kéo"
+    },
+    "wornBy": "{n} người mặc",
+    "expiring": "{n} sắp hết hạn",
+    "teams": "Đội Nhóm",
+    "inUse": "Đang dùng",
+    "noTeams": "Không có đội",
+    "items": "Vật phẩm"
+  },
+  "aranara": {
+    "type": "Bộ sưu tập {n}",
+    "states": {
+      "none": "Chưa tìm thấy",
+      "collectable": "Có thể nhận",
+      "collected": "Đã Thu Thập",
+      "finished": "Xong"
+    }
   }
 }

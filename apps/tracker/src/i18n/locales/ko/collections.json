@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 이상이 로그인할 때 읽습니다.",
     "allCollected": "모두 수집 완료",
     "noneCollected": "아직 수집한 것 없음"
+  },
+  "tabsLabel": "컬렉션",
+  "summary": "요약",
+  "notCapturedPart": "아직 캡처 없음",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 이상이 로그인할 때 읽습니다.",
+  "namesSoon": "이름과 아이콘은 다음 게임 데이터와 함께 추가됩니다. 그때까지는 ID로 표시합니다.",
+  "namesComing": "이름 준비 중",
+  "namesComingBody": "게임 데이터에 이름이 들어오면 목록을 표시합니다.",
+  "tabs": {
+    "spincrystals": "빛나는 결정",
+    "anecdotes": "여행 일화집",
+    "archive": "도감",
+    "handbook": "모험 핸드북",
+    "livingBeings": "생물지",
+    "tcg": "일곱 성인의 소환",
+    "wardrobe": "옷장",
+    "aranara": "아란나라"
+  },
+  "archive": {
+    "pick": "도감 탭",
+    "unlocked": "해금",
+    "unlockedHint": "해금한 도감 항목(모든 탭)",
+    "none": "해금한 항목 없음",
+    "tabs": {
+      "quests": "임무",
+      "weapons": "무기",
+      "livingBeings": "생물지",
+      "materials": "재료",
+      "books": "서적",
+      "tutorials": "튜토리얼",
+      "viewpoints": "시점",
+      "artifacts": "성유물"
+    }
+  },
+  "defeats": {
+    "kinds": "항목",
+    "kindsHint": "처치 또는 포획 기록이 있는 생물",
+    "defeated": "처치",
+    "captured": "포획 완료",
+    "capturedHint": "생물 {n}종",
+    "defeatedN": "{n} 처치",
+    "capturedN": "{n} 포획"
+  },
+  "handbook": {
+    "show": "표시",
+    "chapters": "챕터",
+    "waiting": "받지 않은 보상",
+    "waitingHint": "목표 달성, 보상 미수령",
+    "noneShown": "해당 없음",
+    "filters": {
+      "all": "전체",
+      "open": "진행 중",
+      "complete": "완료",
+      "claimed": "수령 완료"
+    },
+    "states": {
+      "open": "진행 중",
+      "complete": "완료",
+      "claimed": "수령 완료"
+    }
+  },
+  "tcg": {
+    "cards": "카드",
+    "characterCards": "캐릭터 카드",
+    "actionCards": "행동 카드",
+    "copies": "보유 수",
+    "copiesHint": "모든 카드의 보유 수",
+    "decks": "카드 덱",
+    "inUse": "사용 중",
+    "invalid": "미완성",
+    "invalidTitle": "게임상 아직 사용할 수 없는 덱입니다",
+    "deckTitle": "캐릭터 카드 {characters}장 + 카드 {cards}장",
+    "noDecks": "덱 없음"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "코스튬",
+      "gliders": "바람의 날개",
+      "weaponSkins": "무기 외형",
+      "trails": "잔상"
+    },
+    "wornBy": "{n}명 착용",
+    "expiring": "{n}개 기한 있음",
+    "teams": "소대",
+    "inUse": "사용 중",
+    "noTeams": "소대 없음",
+    "items": "아이템"
+  },
+  "aranara": {
+    "type": "컬렉션 {n}",
+    "states": {
+      "none": "찾지 못함",
+      "collectable": "수령 가능",
+      "collected": "수집 완료",
+      "finished": "완료"
+    }
   }
 }

@@ -55,6 +55,8 @@ export type SectionName =
   | 'characterExtras'
   | 'anecdotes'
   | 'collections'
+  | 'collections2'
+  | 'wardrobe'
 
 export interface DecodedBundle {
   snapshots: BundleSnapshot[]

@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 ou plus récent les lit à la connexion.",
     "allCollected": "Tous collectés",
     "noneCollected": "Aucun collecté"
+  },
+  "tabsLabel": "Collection",
+  "summary": "Résumé",
+  "notCapturedPart": "Pas encore capturé",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ou plus récent le lit à la connexion.",
+  "namesSoon": "Noms et icônes arrivent avec les prochaines données du jeu ; d'ici là, des ID.",
+  "namesComing": "Noms à venir",
+  "namesComingBody": "La liste apparaîtra quand les données du jeu auront leurs noms.",
+  "tabs": {
+    "spincrystals": "Gyrocristaux radiants",
+    "anecdotes": "Anecdotes",
+    "archive": "Archives",
+    "handbook": "Guide de l'aventurier",
+    "livingBeings": "Bestiaire",
+    "tcg": "Invocation des Sept : JCC",
+    "wardrobe": "Armoire",
+    "aranara": "Aranaras"
+  },
+  "archive": {
+    "pick": "Onglet des Archives",
+    "unlocked": "Débloqués",
+    "unlockedHint": "Entrées des Archives débloquées, tous onglets",
+    "none": "Rien de débloqué",
+    "tabs": {
+      "quests": "Quêtes",
+      "weapons": "Armes",
+      "livingBeings": "Bestiaire",
+      "materials": "Matériaux",
+      "books": "Livres",
+      "tutorials": "Tutoriels",
+      "viewpoints": "Points de vue",
+      "artifacts": "Artéfacts"
+    }
+  },
+  "defeats": {
+    "kinds": "Entrées",
+    "kindsHint": "Créatures avec des éliminations ou captures",
+    "defeated": "Éliminés",
+    "captured": "Capturés",
+    "capturedHint": "Sur {n} espèces de créatures",
+    "defeatedN": "{n} éliminés",
+    "capturedN": "{n} capturés"
+  },
+  "handbook": {
+    "show": "Afficher",
+    "chapters": "Chapitres",
+    "waiting": "Récompenses en attente",
+    "waitingHint": "Objectifs atteints, récompense non récupérée",
+    "noneShown": "Rien ici",
+    "filters": {
+      "all": "Tous",
+      "open": "En cours",
+      "complete": "Terminé",
+      "claimed": "Récupéré"
+    },
+    "states": {
+      "open": "En cours",
+      "complete": "Terminé",
+      "claimed": "Récupéré"
+    }
+  },
+  "tcg": {
+    "cards": "Cartes",
+    "characterCards": "Cartes de personnage",
+    "actionCards": "Cartes d'action",
+    "copies": "Exemplaires",
+    "copiesHint": "Tous les exemplaires de toutes les cartes",
+    "decks": "Decks",
+    "inUse": "Utilisé",
+    "invalid": "Incomplet",
+    "invalidTitle": "Selon le jeu, ce deck n'est pas encore utilisable",
+    "deckTitle": "{characters} cartes de personnage + {cards} cartes",
+    "noDecks": "Aucun deck"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Tenues",
+      "gliders": "Planeurs",
+      "weaponSkins": "Apparences d'arme",
+      "trails": "Traînées"
+    },
+    "wornBy": "Porté par {n}",
+    "expiring": "{n} expirent",
+    "teams": "Escouades",
+    "inUse": "Utilisée",
+    "noTeams": "Aucune escouade",
+    "items": "Objets"
+  },
+  "aranara": {
+    "type": "Collection {n}",
+    "states": {
+      "none": "Non trouvé",
+      "collectable": "À récupérer",
+      "collected": "Collecté",
+      "finished": "Terminé"
+    }
   }
 }

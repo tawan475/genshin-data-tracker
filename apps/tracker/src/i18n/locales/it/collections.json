@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 o successivo li legge all'accesso.",
     "allCollected": "Tutti ottenuti",
     "noneCollected": "Nessuno ottenuto"
+  },
+  "tabsLabel": "Collezione",
+  "summary": "Riepilogo",
+  "notCapturedPart": "Non ancora catturato",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 o successivo lo legge all'accesso.",
+  "namesSoon": "Nomi e icone arrivano con i prossimi dati di gioco; fino ad allora, ID.",
+  "namesComing": "Nomi in arrivo",
+  "namesComingBody": "L'elenco appare quando i dati di gioco avranno i nomi.",
+  "tabs": {
+    "spincrystals": "Voltacristalli radiosi",
+    "anecdotes": "Aneddoti",
+    "archive": "Archivio",
+    "handbook": "Manuale dell'avventuriere",
+    "livingBeings": "Esseri viventi",
+    "tcg": "GCC Invokazione del genio",
+    "wardrobe": "Guardaroba",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Scheda dell'Archivio",
+    "unlocked": "Sbloccate",
+    "unlockedHint": "Voci dell'Archivio sbloccate, tutte le schede",
+    "none": "Niente di sbloccato",
+    "tabs": {
+      "quests": "Missioni",
+      "weapons": "Armi",
+      "livingBeings": "Esseri viventi",
+      "materials": "Materiali",
+      "books": "Libri",
+      "tutorials": "Tutorial",
+      "viewpoints": "Punti di osservazione",
+      "artifacts": "Manufatti"
+    }
+  },
+  "defeats": {
+    "kinds": "Voci",
+    "kindsHint": "Esseri viventi con sconfitte o catture",
+    "defeated": "Sconfitti",
+    "captured": "Catturati",
+    "capturedHint": "Su {n} tipi di creature",
+    "defeatedN": "{n} sconfitti",
+    "capturedN": "{n} catturati"
+  },
+  "handbook": {
+    "show": "Mostra",
+    "chapters": "Capitoli",
+    "waiting": "Ricompense in attesa",
+    "waitingHint": "Obiettivi raggiunti, ricompensa non riscattata",
+    "noneShown": "Niente qui",
+    "filters": {
+      "all": "Tutti",
+      "open": "In corso",
+      "complete": "Completato",
+      "claimed": "Riscattato"
+    },
+    "states": {
+      "open": "In corso",
+      "complete": "Completato",
+      "claimed": "Riscattato"
+    }
+  },
+  "tcg": {
+    "cards": "Carte",
+    "characterCards": "Carte personaggio",
+    "actionCards": "Carte azione",
+    "copies": "Copie",
+    "copiesHint": "Tutte le copie di tutte le carte",
+    "decks": "Mazzi",
+    "inUse": "In uso",
+    "invalid": "Incompleto",
+    "invalidTitle": "Secondo il gioco questo mazzo non è ancora utilizzabile",
+    "deckTitle": "{characters} carte personaggio + {cards} carte",
+    "noDecks": "Nessun mazzo"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Completi",
+      "gliders": "Alianti",
+      "weaponSkins": "Aspetti dell'arma",
+      "trails": "Scie"
+    },
+    "wornBy": "Indossato da {n}",
+    "expiring": "{n} in scadenza",
+    "teams": "Squadre",
+    "inUse": "In uso",
+    "noTeams": "Nessuna squadra",
+    "items": "Oggetti"
+  },
+  "aranara": {
+    "type": "Collezione {n}",
+    "states": {
+      "none": "Non trovato",
+      "collectable": "Da raccogliere",
+      "collected": "Ottenuto",
+      "finished": "Finito"
+    }
   }
 }

@@ -155,8 +155,12 @@ capture's `gi_tasks` ticks Daily Commissions (all done today) and the Spiral
 Abyss (full stars in the running period) and adds Expeditions, Realm Currency
 and Welkin Moon rows, while the capture is newer than the row's hand state
 (`components/planner/tasks.ts` `captureRead`), and Collections
-(`/app/a/:id/collections`): which Radiant Spincrystals the newest capture
-with `gi_collections` has, and which are missing.
+(`/app/a/:id/collections/<tab>`, the last tab per device): Radiant
+Spincrystals (which the newest capture has, which are missing), Anecdotes
+(the old `/anecdotes` page redirects there), the Archive, the Adventurer
+Handbook, Living Beings (defeats), TCG, the wardrobe and Aranara, each from
+the newest snapshot with that part. Names for the 1.4.0 parts wait for the
+game data (`src/data/collection-names.ts`: ids until then).
 
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`; artifact sets,

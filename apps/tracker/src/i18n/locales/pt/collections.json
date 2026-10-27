@@ -27,5 +27,101 @@
     "notCapturedBody": "O Teyvat.me Capture 1.3.0 ou mais recente os lê ao entrar no jogo.",
     "allCollected": "Todos coletados",
     "noneCollected": "Nenhum coletado ainda"
+  },
+  "tabsLabel": "Coleção",
+  "summary": "Resumo",
+  "notCapturedPart": "Ainda não capturado",
+  "notCapturedPartBody": "O Teyvat.me Capture 1.4.0 ou mais recente o lê ao entrar no jogo.",
+  "namesSoon": "Nomes e ícones chegam com os próximos dados do jogo; até lá, IDs.",
+  "namesComing": "Nomes a caminho",
+  "namesComingBody": "A lista aparece quando os dados do jogo tiverem os nomes.",
+  "tabs": {
+    "spincrystals": "Cristais Rodopiantes Radiantes",
+    "anecdotes": "Anedotas",
+    "archive": "Arquivo",
+    "handbook": "Licença de Aventura",
+    "livingBeings": "Seres Vivos",
+    "tcg": "Chamado Sagrado dos Sete",
+    "wardrobe": "Guarda-roupa",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Aba do Arquivo",
+    "unlocked": "Desbloqueados",
+    "unlockedHint": "Entradas do Arquivo desbloqueadas, todas as abas",
+    "none": "Nada desbloqueado",
+    "tabs": {
+      "quests": "Missões",
+      "weapons": "Armas",
+      "livingBeings": "Seres Vivos",
+      "materials": "Materiais",
+      "books": "Livros",
+      "tutorials": "Tutorial",
+      "viewpoints": "Pontos de Vista",
+      "artifacts": "Artefatos"
+    }
+  },
+  "defeats": {
+    "kinds": "Entradas",
+    "kindsHint": "Seres vivos com derrotas ou capturas",
+    "defeated": "Derrotados",
+    "captured": "Capturados",
+    "capturedHint": "De {n} tipos de criatura",
+    "defeatedN": "{n} derrotados",
+    "capturedN": "{n} capturados"
+  },
+  "handbook": {
+    "show": "Mostrar",
+    "chapters": "Capítulos",
+    "waiting": "Recompensas pendentes",
+    "waitingHint": "Objetivos concluídos, recompensa não resgatada",
+    "noneShown": "Nada aqui",
+    "filters": {
+      "all": "Todas",
+      "open": "Em Progresso",
+      "complete": "Concluído",
+      "claimed": "Resgatado"
+    },
+    "states": {
+      "open": "Em Progresso",
+      "complete": "Concluído",
+      "claimed": "Resgatado"
+    }
+  },
+  "tcg": {
+    "cards": "Cartas",
+    "characterCards": "Cartas de Personagem",
+    "actionCards": "Cartas de Ação",
+    "copies": "Cópias",
+    "copiesHint": "Todas as cópias de todas as cartas",
+    "decks": "Decks",
+    "inUse": "Em uso",
+    "invalid": "Incompleto",
+    "invalidTitle": "Segundo o jogo, este deck ainda não pode ser usado",
+    "deckTitle": "{characters} cartas de personagem + {cards} cartas",
+    "noDecks": "Nenhum deck"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Vestuário",
+      "gliders": "Planadores",
+      "weaponSkins": "Aparências de arma",
+      "trails": "Rastros"
+    },
+    "wornBy": "Usado por {n}",
+    "expiring": "{n} expirando",
+    "teams": "Equipes",
+    "inUse": "Em uso",
+    "noTeams": "Nenhuma equipe",
+    "items": "Itens"
+  },
+  "aranara": {
+    "type": "Coleção {n}",
+    "states": {
+      "none": "Não encontrado",
+      "collectable": "Pronto para coletar",
+      "collected": "Coletado",
+      "finished": "Concluído"
+    }
   }
 }

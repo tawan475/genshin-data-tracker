@@ -7,6 +7,7 @@ import {
   loadSnapshots,
   type AccountRef,
 } from './account-data'
+import { COLLECTION_SECTIONS } from './collection-parts'
 import { loadMaterialsHistory } from './materials'
 import { preload } from './use-resource'
 
@@ -51,15 +52,23 @@ const PAGES: Record<string, (hint: AccountHint) => Promise<unknown>[]> = {
   planner: (h) => [loadLatestInventory(h), loadAccountPlayer(h)],
   materials: (h) => [loadMaterialsHistory(h), loadLatestInventory(h)],
   achievements: (h) => [loadBundle(h, { sections: ['achievements', 'achievementTimes'] })],
-  anecdotes: (h) => [loadBundle(h, { sections: ['anecdotes'] })],
-  collections: (h) => [loadBundle(h, { sections: ['collections'] })],
+  collections: (h) => [loadBundle(h, { sections: [...COLLECTION_SECTIONS] })],
+  'collections/anecdotes': (h) => [loadBundle(h, { sections: ['anecdotes'] })],
 }
 
 /** Starts the data of the account page at `path`, when this device has seen the account. */
 export function prefetchAccountPage(path: string): void {
-  const match = /^\/app\/a\/(\d+)(?:\/([a-z]+))?\/?$/.exec(path)
+  const match = /^\/app\/a\/(\d+)(?:\/([a-z]+(?:\/[a-z-]+)?))?\/?$/.exec(path)
   if (!match) return
-  const page = PAGES[match[2] ?? '']
+  // Collections' tabs share one bundle, but for Anecdotes (also its old path).
+  const segment = match[2] ?? ''
+  const name =
+    segment === 'anecdotes' || segment === 'collections/anecdotes'
+      ? 'collections/anecdotes'
+      : segment.startsWith('collections/')
+        ? 'collections'
+        : segment
+  const page = PAGES[name]
   const hint = page && readHint(Number(match[1]))
   if (!page || !hint) return
   for (const promise of page(hint)) preload(promise)

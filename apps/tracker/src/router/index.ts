@@ -294,14 +294,16 @@ const router = createRouter({
               'achievements',
               () => import('@/views/account/AchievementsView.vue'),
             ),
+            // A tab of Collections now.
+            {
+              path: 'anecdotes',
+              redirect: (to) => ({
+                name: 'account-collections',
+                params: { ...to.params, tab: 'anecdotes' },
+              }),
+            },
             account(
-              'anecdotes',
-              'account-anecdotes',
-              'anecdotes',
-              () => import('@/views/account/AnecdotesView.vue'),
-            ),
-            account(
-              'collections',
+              'collections/:tab(spincrystals|anecdotes|archive|handbook|living-beings|tcg|wardrobe|aranara)?',
               'account-collections',
               'collections',
               () => import('@/views/account/CollectionsView.vue'),

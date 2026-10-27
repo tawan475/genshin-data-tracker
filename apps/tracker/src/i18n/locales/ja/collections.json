@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 以降がログイン時に読み取ります。",
     "allCollected": "すべて収集済み",
     "noneCollected": "まだ収集していません"
+  },
+  "tabsLabel": "コレクション",
+  "summary": "概要",
+  "notCapturedPart": "まだキャプチャされていません",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 以降がログイン時に読み取ります。",
+  "namesSoon": "名前とアイコンは次のゲームデータで追加されます。それまではIDを表示します。",
+  "namesComing": "名前は準備中",
+  "namesComingBody": "ゲームデータに名前が入ると一覧を表示します。",
+  "tabs": {
+    "spincrystals": "旋曜玉帛",
+    "anecdotes": "秘話",
+    "archive": "図鑑",
+    "handbook": "冒険の証",
+    "livingBeings": "生物誌",
+    "tcg": "七聖召喚",
+    "wardrobe": "クローゼット",
+    "aranara": "アランナラ"
+  },
+  "archive": {
+    "pick": "図鑑のタブ",
+    "unlocked": "解放済み",
+    "unlockedHint": "解放済みの図鑑項目（全タブ）",
+    "none": "解放済みなし",
+    "tabs": {
+      "quests": "任務",
+      "weapons": "武器",
+      "livingBeings": "生物誌",
+      "materials": "材料",
+      "books": "書籍",
+      "tutorials": "チュートリアル",
+      "viewpoints": "視点",
+      "artifacts": "聖遺物"
+    }
+  },
+  "defeats": {
+    "kinds": "項目",
+    "kindsHint": "討伐数または捕獲数のある生物",
+    "defeated": "討伐",
+    "captured": "捕獲済み",
+    "capturedHint": "{n} 種類の生物",
+    "defeatedN": "{n} 体討伐",
+    "capturedN": "{n} 体捕獲"
+  },
+  "handbook": {
+    "show": "表示",
+    "chapters": "章",
+    "waiting": "未受取の報酬",
+    "waitingHint": "目標達成、報酬は未受取",
+    "noneShown": "該当なし",
+    "filters": {
+      "all": "すべて",
+      "open": "進行中",
+      "complete": "完了",
+      "claimed": "受取済"
+    },
+    "states": {
+      "open": "進行中",
+      "complete": "完了",
+      "claimed": "受取済"
+    }
+  },
+  "tcg": {
+    "cards": "カード",
+    "characterCards": "キャラカード",
+    "actionCards": "アクションカード",
+    "copies": "枚数",
+    "copiesHint": "全カードの所持枚数",
+    "decks": "デッキ",
+    "inUse": "使用中",
+    "invalid": "未完成",
+    "invalidTitle": "ゲーム上まだ使えないデッキです",
+    "deckTitle": "キャラカード {characters} 枚 + カード {cards} 枚",
+    "noDecks": "デッキなし"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "コスチューム",
+      "gliders": "風の翼",
+      "weaponSkins": "武器の外観",
+      "trails": "トレイル"
+    },
+    "wornBy": "{n} 人が装備",
+    "expiring": "{n} 件が期限付き",
+    "teams": "小隊",
+    "inUse": "使用中",
+    "noTeams": "小隊なし",
+    "items": "アイテム"
+  },
+  "aranara": {
+    "type": "コレクション {n}",
+    "states": {
+      "none": "未発見",
+      "collectable": "受取可能",
+      "collected": "収集済み",
+      "finished": "完了"
+    }
   }
 }

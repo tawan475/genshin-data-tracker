@@ -19,7 +19,6 @@ import AnecdoteGroup from '@/components/anecdotes/AnecdoteGroup.vue'
 import AnecdoteSummary from '@/components/anecdotes/AnecdoteSummary.vue'
 import AnecdoteToolbar, { type AreaTab } from '@/components/anecdotes/AnecdoteToolbar.vue'
 import { useAnecdoteMarks } from '@/components/anecdotes/use-anecdote-marks'
-import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
@@ -32,10 +31,11 @@ import { readStorage, writeStorage } from '@/lib/storage'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { t } from '@/i18n'
 import { locale } from '@/i18n/locale'
-import { useAccount, useReadOnly } from './context'
+import { useAccount, useReadOnly } from '@/views/account/context'
 
 /**
- * Anecdotes ("Travel Accounts"): done = the newest capture that carried
+ * The Collections page's Anecdotes tab ("Travel Accounts"; its own page
+ * before, `/anecdotes` redirects here): done = the newest capture that carried
  * irminsul's `gi_anecdotes`, plus the ones marked by hand. Area tabs with
  * done / total, then each NPC's anecdotes (hidden ones too, marked).
  */
@@ -183,27 +183,25 @@ function unmark(id: number) {
 
 <template>
   <div>
-    <PageHeader :title="$t('anecdotes.title')">
-      <template v-if="ready && captured" #meta>
-        <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
-          <Clock class="size-4" aria-hidden="true" />
-          <span class="sr-only">{{ $t('anecdotes.newestCapture') }}</span>
-          <time
-            :datetime="newestCapture.iso"
-            :title="$t('anecdotes.newestCaptureTitle', { time: newestCapture.title })"
-            >{{ newestCapture.ago }}</time
-          >
-        </p>
-        <p
-          v-else
-          class="flex items-center gap-1.5 text-text-secondary"
-          :title="$t('anecdotes.notCapturedTitle')"
+    <div v-if="ready && captured" class="mb-4">
+      <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
+        <Clock class="size-4" aria-hidden="true" />
+        <span class="sr-only">{{ $t('anecdotes.newestCapture') }}</span>
+        <time
+          :datetime="newestCapture.iso"
+          :title="$t('anecdotes.newestCaptureTitle', { time: newestCapture.title })"
+          >{{ newestCapture.ago }}</time
         >
-          <Info class="size-4 shrink-0" aria-hidden="true" />
-          {{ $t('anecdotes.notCaptured') }}
-        </p>
-      </template>
-    </PageHeader>
+      </p>
+      <p
+        v-else
+        class="flex items-center gap-1.5 text-text-secondary"
+        :title="$t('anecdotes.notCapturedTitle')"
+      >
+        <Info class="size-4 shrink-0" aria-hidden="true" />
+        {{ $t('anecdotes.notCaptured') }}
+      </p>
+    </div>
 
     <UiError
       v-if="loadError && !ready"

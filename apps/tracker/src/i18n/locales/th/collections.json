@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
     "allCollected": "รวบรวมครบแล้ว",
     "noneCollected": "ยังไม่ได้รวบรวม"
+  },
+  "tabsLabel": "คอลเลกชัน",
+  "summary": "สรุป",
+  "notCapturedPart": "ยังไม่ได้สแกน",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
+  "namesSoon": "ชื่อและไอคอนจะมาพร้อมข้อมูลเกมชุดถัดไป ระหว่างนี้แสดงเป็น ID",
+  "namesComing": "ชื่อกำลังมา",
+  "namesComingBody": "รายการจะแสดงเมื่อข้อมูลเกมมีชื่อแล้ว",
+  "tabs": {
+    "spincrystals": "Radiant Spincrystal",
+    "anecdotes": "เกร็ดน่ารู้",
+    "archive": "อัลบั้ม",
+    "handbook": "คู่มือนักผจญภัย",
+    "livingBeings": "สิ่งมีชีวิต",
+    "tcg": "เกมกลเจ็ดอัจฉริยะ",
+    "wardrobe": "ตู้เสื้อผ้า",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "แท็บอัลบั้ม",
+    "unlocked": "ปลดล็อกแล้ว",
+    "unlockedHint": "รายการอัลบั้มที่ปลดล็อกแล้ว ทุกแท็บ",
+    "none": "ยังไม่ได้ปลดล็อก",
+    "tabs": {
+      "quests": "เควสต์",
+      "weapons": "อาวุธ",
+      "livingBeings": "สิ่งมีชีวิต",
+      "materials": "วัสดุ",
+      "books": "หนังสือ",
+      "tutorials": "แนะนำการเล่น",
+      "viewpoints": "มุมมอง",
+      "artifacts": "อาร์ติแฟกต์"
+    }
+  },
+  "defeats": {
+    "kinds": "รายการ",
+    "kindsHint": "สิ่งมีชีวิตที่มีจำนวนกำจัดหรือกำราบ",
+    "defeated": "กำจัด",
+    "captured": "กำราบแล้ว",
+    "capturedHint": "จากสิ่งมีชีวิต {n} ชนิด",
+    "defeatedN": "กำจัด {n}",
+    "capturedN": "กำราบ {n}"
+  },
+  "handbook": {
+    "show": "แสดง",
+    "chapters": "บท",
+    "waiting": "รางวัลรอรับ",
+    "waitingHint": "เป้าหมายสำเร็จ ยังไม่รับรางวัล",
+    "noneShown": "ไม่มีรายการ",
+    "filters": {
+      "all": "ทั้งหมด",
+      "open": "กำลังดำเนินการ",
+      "complete": "เสร็จสิ้น",
+      "claimed": "ได้รับแล้ว"
+    },
+    "states": {
+      "open": "กำลังดำเนินการ",
+      "complete": "เสร็จสิ้น",
+      "claimed": "ได้รับแล้ว"
+    }
+  },
+  "tcg": {
+    "cards": "การ์ด",
+    "characterCards": "การ์ดตัวละคร",
+    "actionCards": "การ์ดแอคชัน",
+    "copies": "จำนวนใบ",
+    "copiesHint": "จำนวนทุกใบของทุกการ์ด",
+    "decks": "เด็ค",
+    "inUse": "ใช้งานอยู่",
+    "invalid": "ไม่ครบ",
+    "invalidTitle": "ตามเกม เด็คนี้ยังใช้ไม่ได้",
+    "deckTitle": "การ์ดตัวละคร {characters} + การ์ด {cards}",
+    "noDecks": "ไม่มีเด็ค"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "คอสตูม",
+      "gliders": "เครื่องร่อนเวหา",
+      "weaponSkins": "รูปลักษณ์ของอาวุธ",
+      "trails": "เอฟเฟกต์วิ่ง"
+    },
+    "wornBy": "สวมใส่ {n} คน",
+    "expiring": "มีกำหนดหมดอายุ {n}",
+    "teams": "หน่วยย่อย",
+    "inUse": "ใช้งานอยู่",
+    "noTeams": "ไม่มีหน่วย",
+    "items": "ไอเทม"
+  },
+  "aranara": {
+    "type": "คอลเลกชัน {n}",
+    "states": {
+      "none": "ยังไม่พบ",
+      "collectable": "พร้อมรับ",
+      "collected": "รวบรวมแล้ว",
+      "finished": "เสร็จแล้ว"
+    }
   }
 }

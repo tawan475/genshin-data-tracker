@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 or newer reads them at login.",
     "allCollected": "All collected",
     "noneCollected": "None collected yet"
+  },
+  "tabsLabel": "Collection",
+  "summary": "Summary",
+  "notCapturedPart": "Not captured yet",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 or newer reads it at login.",
+  "namesSoon": "Names and icons come with the next game data; ids until then.",
+  "namesComing": "Names coming",
+  "namesComingBody": "The list shows once the game data has their names.",
+  "tabs": {
+    "spincrystals": "Radiant Spincrystals",
+    "anecdotes": "Anecdotes",
+    "archive": "Archive",
+    "handbook": "Adventurer Handbook",
+    "livingBeings": "Living Beings",
+    "tcg": "Genius Invokation TCG",
+    "wardrobe": "Wardrobe",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Archive tab",
+    "unlocked": "Unlocked",
+    "unlockedHint": "Archive entries unlocked, every tab",
+    "none": "None unlocked",
+    "tabs": {
+      "quests": "Quests",
+      "weapons": "Weapons",
+      "livingBeings": "Living Beings",
+      "materials": "Materials",
+      "books": "Books",
+      "tutorials": "Tutorials",
+      "viewpoints": "Viewpoints",
+      "artifacts": "Artifacts"
+    }
+  },
+  "defeats": {
+    "kinds": "Entries",
+    "kindsHint": "Living Beings with a defeat or capture count",
+    "defeated": "Defeated",
+    "captured": "Captured",
+    "capturedHint": "Across {n} kinds of creature",
+    "defeatedN": "{n} defeated",
+    "capturedN": "{n} captured"
+  },
+  "handbook": {
+    "show": "Show",
+    "chapters": "Chapters",
+    "waiting": "Rewards waiting",
+    "waitingHint": "Targets done, reward not claimed yet",
+    "noneShown": "Nothing here",
+    "filters": {
+      "all": "All",
+      "open": "In progress",
+      "complete": "Completed",
+      "claimed": "Claimed"
+    },
+    "states": {
+      "open": "In progress",
+      "complete": "Completed",
+      "claimed": "Claimed"
+    }
+  },
+  "tcg": {
+    "cards": "Cards",
+    "characterCards": "Character Cards",
+    "actionCards": "Action Cards",
+    "copies": "Copies",
+    "copiesHint": "Every copy of every card",
+    "decks": "Decks",
+    "inUse": "In use",
+    "invalid": "Incomplete",
+    "invalidTitle": "The game says this deck can't be used yet",
+    "deckTitle": "{characters} character cards + {cards} cards",
+    "noDecks": "No decks"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Outfits",
+      "gliders": "Wind Gliders",
+      "weaponSkins": "Weapon appearances",
+      "trails": "Trails"
+    },
+    "wornBy": "Worn by {n}",
+    "expiring": "{n} expiring",
+    "teams": "Teams",
+    "inUse": "In use",
+    "noTeams": "No teams",
+    "items": "Items"
+  },
+  "aranara": {
+    "type": "Collection {n}",
+    "states": {
+      "none": "Not found",
+      "collectable": "Ready to collect",
+      "collected": "Collected",
+      "finished": "Done"
+    }
   }
 }

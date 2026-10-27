@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 или новее считывает их при входе в игру.",
     "allCollected": "Все собраны",
     "noneCollected": "Пока ни одного"
+  },
+  "tabsLabel": "Коллекция",
+  "summary": "Сводка",
+  "notCapturedPart": "Пока не снято",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 или новее считывает это при входе в игру.",
+  "namesSoon": "Названия и значки появятся со следующими игровыми данными; пока — ID.",
+  "namesComing": "Названия скоро",
+  "namesComingBody": "Список появится, когда в игровых данных будут названия.",
+  "tabs": {
+    "spincrystals": "Лучистые кристаллы",
+    "anecdotes": "Путевой дневник",
+    "archive": "Архив",
+    "handbook": "Приключения",
+    "livingBeings": "Существа",
+    "tcg": "Священный призыв семерых",
+    "wardrobe": "Гардероб",
+    "aranara": "Аранары"
+  },
+  "archive": {
+    "pick": "Раздел архива",
+    "unlocked": "Открыто",
+    "unlockedHint": "Открытые записи архива, все разделы",
+    "none": "Ничего не открыто",
+    "tabs": {
+      "quests": "Задания",
+      "weapons": "Оружие",
+      "livingBeings": "Существа",
+      "materials": "Материалы",
+      "books": "Книги",
+      "tutorials": "Обучение",
+      "viewpoints": "Точки обзора",
+      "artifacts": "Артефакты"
+    }
+  },
+  "defeats": {
+    "kinds": "Записи",
+    "kindsHint": "Существа с победами или поимками",
+    "defeated": "Побеждено",
+    "captured": "Приручено",
+    "capturedHint": "Видов существ: {n}",
+    "defeatedN": "Побеждено: {n}",
+    "capturedN": "Приручено: {n}"
+  },
+  "handbook": {
+    "show": "Показать",
+    "chapters": "Главы",
+    "waiting": "Награды ждут",
+    "waitingHint": "Цели выполнены, награда не получена",
+    "noneShown": "Ничего нет",
+    "filters": {
+      "all": "Все",
+      "open": "В процессе",
+      "complete": "Завершено",
+      "claimed": "Получено"
+    },
+    "states": {
+      "open": "В процессе",
+      "complete": "Завершено",
+      "claimed": "Получено"
+    }
+  },
+  "tcg": {
+    "cards": "Карты",
+    "characterCards": "Карты персонажей",
+    "actionCards": "Карты действий",
+    "copies": "Копии",
+    "copiesHint": "Все копии всех карт",
+    "decks": "Колоды",
+    "inUse": "Используется",
+    "invalid": "Неполная",
+    "invalidTitle": "По данным игры, эту колоду пока нельзя использовать",
+    "deckTitle": "Карт персонажей: {characters} + карт: {cards}",
+    "noDecks": "Нет колод"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Костюмы",
+      "gliders": "Воздушные планеры",
+      "weaponSkins": "Облик оружия",
+      "trails": "Следы"
+    },
+    "wornBy": "Носят: {n}",
+    "expiring": "Истекает: {n}",
+    "teams": "Отряды",
+    "inUse": "Используется",
+    "noTeams": "Нет отрядов",
+    "items": "Предметы"
+  },
+  "aranara": {
+    "type": "Коллекция {n}",
+    "states": {
+      "none": "Не найдено",
+      "collectable": "Можно забрать",
+      "collected": "Собрано",
+      "finished": "Готово"
+    }
   }
 }

@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 veya üstü bunları girişte okur.",
     "allCollected": "Hepsi alındı",
     "noneCollected": "Henüz hiç yok"
+  },
+  "tabsLabel": "Koleksiyon",
+  "summary": "Özet",
+  "notCapturedPart": "Henüz taranmadı",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 veya üstü bunu girişte okur.",
+  "namesSoon": "Adlar ve simgeler sonraki oyun verisiyle gelir; o zamana dek kimlik numaraları.",
+  "namesComing": "Adlar yolda",
+  "namesComingBody": "Oyun verisinde adları olunca liste görünür.",
+  "tabs": {
+    "spincrystals": "Parlak Burgu Kristaller",
+    "anecdotes": "Seyahat Notları",
+    "archive": "Arşiv",
+    "handbook": "Maceracının El Kitabı",
+    "livingBeings": "Canlılar",
+    "tcg": "Dehanın Yakarışı Kart Oyunu",
+    "wardrobe": "Giysi Dolabı",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Arşiv sekmesi",
+    "unlocked": "Açılan",
+    "unlockedHint": "Açılan arşiv girdileri, tüm sekmeler",
+    "none": "Açılan yok",
+    "tabs": {
+      "quests": "Görevler",
+      "weapons": "Silahlar",
+      "livingBeings": "Canlılar",
+      "materials": "Malzemeler",
+      "books": "Kitaplar",
+      "tutorials": "Eğitimler",
+      "viewpoints": "Seyir Yerleri",
+      "artifacts": "Yadigarlar"
+    }
+  },
+  "defeats": {
+    "kinds": "Girdiler",
+    "kindsHint": "Yenilen veya yakalanan sayısı olan canlılar",
+    "defeated": "Yenilen",
+    "captured": "Yakalanan",
+    "capturedHint": "{n} tür canlı",
+    "defeatedN": "{n} yenildi",
+    "capturedN": "{n} yakalandı"
+  },
+  "handbook": {
+    "show": "Göster",
+    "chapters": "Bölümler",
+    "waiting": "Bekleyen ödüller",
+    "waitingHint": "Hedef tamam, ödül alınmadı",
+    "noneShown": "Burada bir şey yok",
+    "filters": {
+      "all": "Tümü",
+      "open": "Devam Ediyor",
+      "complete": "Tamamlandı",
+      "claimed": "Alındı"
+    },
+    "states": {
+      "open": "Devam Ediyor",
+      "complete": "Tamamlandı",
+      "claimed": "Alındı"
+    }
+  },
+  "tcg": {
+    "cards": "Kartlar",
+    "characterCards": "Karakter Kartları",
+    "actionCards": "Eylem Kartları",
+    "copies": "Kopyalar",
+    "copiesHint": "Tüm kartların tüm kopyaları",
+    "decks": "Desteler",
+    "inUse": "Kullanımda",
+    "invalid": "Eksik",
+    "invalidTitle": "Oyuna göre bu deste henüz kullanılamaz",
+    "deckTitle": "{characters} karakter kartı + {cards} kart",
+    "noDecks": "Deste yok"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Giysiler",
+      "gliders": "Kanatlar",
+      "weaponSkins": "Silah Görünümleri",
+      "trails": "İzler"
+    },
+    "wornBy": "{n} kişi giyiyor",
+    "expiring": "{n} süresi dolacak",
+    "teams": "Takımlar",
+    "inUse": "Kullanımda",
+    "noTeams": "Takım yok",
+    "items": "Eşyalar"
+  },
+  "aranara": {
+    "type": "Koleksiyon {n}",
+    "states": {
+      "none": "Bulunmadı",
+      "collectable": "Alınabilir",
+      "collected": "Alındı",
+      "finished": "Bitti"
+    }
   }
 }

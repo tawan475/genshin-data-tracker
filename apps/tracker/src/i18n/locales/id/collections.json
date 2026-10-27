@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture 1.3.0 atau lebih baru membacanya saat login.",
     "allCollected": "Semua terkumpul",
     "noneCollected": "Belum ada yang terkumpul"
+  },
+  "tabsLabel": "Koleksi",
+  "summary": "Ringkasan",
+  "notCapturedPart": "Belum tertangkap",
+  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 atau lebih baru membacanya saat login.",
+  "namesSoon": "Nama dan ikon datang bersama data game berikutnya; sampai saat itu, ID.",
+  "namesComing": "Nama segera hadir",
+  "namesComingBody": "Daftar muncul setelah data game memiliki namanya.",
+  "tabs": {
+    "spincrystals": "Radiant Spincrystal",
+    "anecdotes": "Anekdot",
+    "archive": "Arsip",
+    "handbook": "Panduan Petualang",
+    "livingBeings": "Makhluk Hidup",
+    "tcg": "Genius Invokation TCG",
+    "wardrobe": "Lemari",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Tab Arsip",
+    "unlocked": "Terbuka",
+    "unlockedHint": "Entri Arsip yang terbuka, semua tab",
+    "none": "Belum ada yang terbuka",
+    "tabs": {
+      "quests": "Quest",
+      "weapons": "Senjata",
+      "livingBeings": "Makhluk Hidup",
+      "materials": "Material",
+      "books": "Buku-Buku",
+      "tutorials": "Tutorial",
+      "viewpoints": "Sudut Pandang",
+      "artifacts": "Artefak"
+    }
+  },
+  "defeats": {
+    "kinds": "Entri",
+    "kindsHint": "Makhluk Hidup dengan jumlah dikalahkan atau ditangkap",
+    "defeated": "Dikalahkan",
+    "captured": "Ditangkap",
+    "capturedHint": "Dari {n} jenis makhluk",
+    "defeatedN": "{n} dikalahkan",
+    "capturedN": "{n} ditangkap"
+  },
+  "handbook": {
+    "show": "Tampilkan",
+    "chapters": "Bab",
+    "waiting": "Hadiah menunggu",
+    "waitingHint": "Target selesai, hadiah belum diambil",
+    "noneShown": "Tidak ada",
+    "filters": {
+      "all": "Semua",
+      "open": "Sedang Berlangsung",
+      "complete": "Selesai",
+      "claimed": "Telah Diambil"
+    },
+    "states": {
+      "open": "Sedang Berlangsung",
+      "complete": "Selesai",
+      "claimed": "Telah Diambil"
+    }
+  },
+  "tcg": {
+    "cards": "Kartu",
+    "characterCards": "Kartu Karakter",
+    "actionCards": "Kartu Aksi",
+    "copies": "Salinan",
+    "copiesHint": "Semua salinan semua kartu",
+    "decks": "Dek",
+    "inUse": "Dipakai",
+    "invalid": "Belum lengkap",
+    "invalidTitle": "Menurut game, dek ini belum bisa dipakai",
+    "deckTitle": "{characters} kartu karakter + {cards} kartu",
+    "noDecks": "Tidak ada dek"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Kostum",
+      "gliders": "Wind Glider",
+      "weaponSkins": "Tampilan Senjata",
+      "trails": "Jejak"
+    },
+    "wornBy": "Dipakai {n}",
+    "expiring": "{n} akan kedaluwarsa",
+    "teams": "Beregu",
+    "inUse": "Dipakai",
+    "noTeams": "Tidak ada regu",
+    "items": "Item"
+  },
+  "aranara": {
+    "type": "Koleksi {n}",
+    "states": {
+      "none": "Belum ditemukan",
+      "collectable": "Siap diambil",
+      "collected": "Telah Terkumpul",
+      "finished": "Selesai"
+    }
   }
 }

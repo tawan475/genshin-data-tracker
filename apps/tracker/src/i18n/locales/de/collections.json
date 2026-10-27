@@ -27,5 +27,101 @@
     "notCapturedBody": "Teyvat.me Capture ab 1.3.0 liest sie beim Einloggen.",
     "allCollected": "Alle gesammelt",
     "noneCollected": "Noch keine gesammelt"
+  },
+  "tabsLabel": "Sammlung",
+  "summary": "Zusammenfassung",
+  "notCapturedPart": "Noch nicht erfasst",
+  "notCapturedPartBody": "Teyvat.me Capture ab 1.4.0 liest es beim Einloggen.",
+  "namesSoon": "Namen und Symbole kommen mit den nächsten Spieldaten; bis dahin IDs.",
+  "namesComing": "Namen folgen",
+  "namesComingBody": "Die Liste erscheint, sobald die Spieldaten ihre Namen haben.",
+  "tabs": {
+    "spincrystals": "Strahlende Drehkristalle",
+    "anecdotes": "Anekdoten",
+    "archive": "Handbuch",
+    "handbook": "Abenteurerlizenz",
+    "livingBeings": "Lebewesen",
+    "tcg": "Geniale Beschwörung",
+    "wardrobe": "Garderobe",
+    "aranara": "Aranara"
+  },
+  "archive": {
+    "pick": "Handbuch-Reiter",
+    "unlocked": "Freigeschaltet",
+    "unlockedHint": "Freigeschaltete Handbucheinträge, alle Reiter",
+    "none": "Nichts freigeschaltet",
+    "tabs": {
+      "quests": "Aufträge",
+      "weapons": "Waffen",
+      "livingBeings": "Lebewesen",
+      "materials": "Material",
+      "books": "Büchersammlung",
+      "tutorials": "Einführungen",
+      "viewpoints": "Blickwinkel",
+      "artifacts": "Artefakte"
+    }
+  },
+  "defeats": {
+    "kinds": "Einträge",
+    "kindsHint": "Lebewesen mit besiegten oder gefangenen",
+    "defeated": "Besiegt",
+    "captured": "Gefangen",
+    "capturedHint": "Über {n} Arten von Kreaturen",
+    "defeatedN": "{n} besiegt",
+    "capturedN": "{n} gefangen"
+  },
+  "handbook": {
+    "show": "Anzeigen",
+    "chapters": "Kapitel",
+    "waiting": "Belohnungen offen",
+    "waitingHint": "Ziele erreicht, Belohnung noch nicht eingesammelt",
+    "noneShown": "Nichts hier",
+    "filters": {
+      "all": "Alle",
+      "open": "Im Gange",
+      "complete": "Abgeschlossen",
+      "claimed": "Eingesammelt"
+    },
+    "states": {
+      "open": "Im Gange",
+      "complete": "Abgeschlossen",
+      "claimed": "Eingesammelt"
+    }
+  },
+  "tcg": {
+    "cards": "Karten",
+    "characterCards": "Figurenkarten",
+    "actionCards": "Aktionskarten",
+    "copies": "Exemplare",
+    "copiesHint": "Alle Exemplare aller Karten",
+    "decks": "Decks",
+    "inUse": "In Benutzung",
+    "invalid": "Unvollständig",
+    "invalidTitle": "Laut Spiel ist dieses Deck noch nicht spielbar",
+    "deckTitle": "{characters} Figurenkarten + {cards} Karten",
+    "noDecks": "Keine Decks"
+  },
+  "wardrobe": {
+    "kinds": {
+      "outfits": "Kleidung",
+      "gliders": "Windgleiter",
+      "weaponSkins": "Aussehen der Waffe",
+      "trails": "Schweife"
+    },
+    "wornBy": "Getragen von {n}",
+    "expiring": "{n} laufen ab",
+    "teams": "Truppen",
+    "inUse": "In Benutzung",
+    "noTeams": "Keine Truppen",
+    "items": "Gegenstände"
+  },
+  "aranara": {
+    "type": "Sammlung {n}",
+    "states": {
+      "none": "Nicht gefunden",
+      "collectable": "Bereit zum Einsammeln",
+      "collected": "Gesammelt",
+      "finished": "Erledigt"
+    }
   }
 }

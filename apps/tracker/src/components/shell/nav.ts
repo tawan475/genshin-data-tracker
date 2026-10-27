@@ -1,7 +1,6 @@
 import type { PermissionNode } from '@gdt/shared'
 import type { RouteMeta } from 'vue-router'
 import {
-  BookOpen,
   ClipboardList,
   Gem,
   HardDrive,
@@ -50,7 +49,6 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
   { name: 'account-materials', label: 'materials', icon: Package, primary: true },
   { name: 'account-planner', label: 'planner', icon: ClipboardList, primary: true },
   { name: 'account-achievements', label: 'achievements', icon: Trophy },
-  { name: 'account-anecdotes', label: 'anecdotes', icon: BookOpen },
   { name: 'account-collections', label: 'collections', icon: Library },
   { name: 'account-wishes', label: 'wishes', icon: Sparkles },
   { name: 'account-snapshots', label: 'snapshots', icon: History },
