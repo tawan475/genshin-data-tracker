@@ -104,7 +104,7 @@ const RIGHT = { x: PAD_X + 700 + 32 + 528 + 32, w: 532 }
 /** CSS's `line-height: 1.5` (the card's inherited line height). */
 const LH = 1.5
 /** The level and friendship box beside the talents: fixed width, equal bars (ShareCard's). */
-const LEVEL_BOX = { w: 260, padX: 18, padTop: 10, padBottom: 14, rowGap: 10, barGap: 4 } as const
+const LEVEL_BOX = { w: 260, h: 162, padX: 18, rowGap: 10, barGap: 4 } as const
 
 const STAR =
   'M12 1.8l2.95 6.6 7.2.75-5.4 4.85 1.53 7.08L12 17.4l-6.28 3.68 1.53-7.08-5.4-4.85 7.2-.75z'
@@ -467,10 +467,11 @@ class CardPainter {
   }
 
   /**
-   * "Lv. 90/90" and "Friendship 10" on a backing beside the talents, each over
-   * an EXP bar of the same fixed length (LEVEL_BOX; ShareCard's level box).
+   * "Lv. 90/90" and "Friendship 10" on a backing beside the talents, as tall
+   * as they are, each over an EXP bar of the same fixed length (LEVEL_BOX;
+   * ShareCard's level box).
    */
-  private levelBox(x: number, bottom: number) {
+  private levelBox(x: number, y: number) {
     const { p, c } = this
     const rows: {
       runs: { text: string; weight: number; alpha?: number }[]
@@ -498,17 +499,14 @@ class CardPainter {
       })
     }
     const rowH = 26 * LH + LEVEL_BOX.barGap + 6
-    const h =
-      LEVEL_BOX.padTop +
-      rows.length * rowH +
-      (rows.length - 1) * LEVEL_BOX.rowGap +
-      LEVEL_BOX.padBottom
-    const y = bottom - h
-    this.glass(x, y, LEVEL_BOX.w, h, 20, 'chip')
+    // As tall as the talents (circle top to pill foot), the rows centred in it.
+    const content = rows.length * rowH + (rows.length - 1) * LEVEL_BOX.rowGap
+    const contentTop = y + (LEVEL_BOX.h - content) / 2
+    this.glass(x, y, LEVEL_BOX.w, LEVEL_BOX.h, 20, 'chip')
     const color = this.v('--card-hero')
     const inner = LEVEL_BOX.w - 2 * LEVEL_BOX.padX
     rows.forEach((row, i) => {
-      const top = y + LEVEL_BOX.padTop + i * (rowH + LEVEL_BOX.rowGap)
+      const top = contentTop + i * (rowH + LEVEL_BOX.rowGap)
       let tx = x + LEVEL_BOX.padX
       for (const run of row.runs) {
         tx += this.line(run.text, tx, top, 26, run.weight, color, { alpha: run.alpha })
@@ -527,7 +525,7 @@ class CardPainter {
   constellations(icons: readonly string[]) {
     icons.forEach((src, index) => {
       const x = LEFT.x + LEFT.w - 84
-      const y = TOP + 150 + index * (84 + 16)
+      const y = TOP + 130 + index * (84 + 12)
       this.disc(x, y, 84, src, null, index >= this.c.constellation, `C${index + 1}`)
     })
   }
@@ -616,8 +614,8 @@ class CardPainter {
       this.line(levelText, tx, py + 0.5, 26, 700, color)
       x += liW + 30
     }
-    // Level and friendship beside the talents, flush with their pills' foot.
-    this.levelBox(x, top + 162)
+    // Level and friendship beside the talents, as tall as they are.
+    this.levelBox(x, top)
 
     // The owner, the capture date and the site.
     const owner = ownerParts(this.input.owner)

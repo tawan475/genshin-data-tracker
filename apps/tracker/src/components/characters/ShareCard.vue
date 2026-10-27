@@ -283,7 +283,7 @@ const ownerLine = computed(() => ownerParts(props.owner))
         </div>
 
         <ol
-          class="absolute top-[150px] right-0 flex flex-col gap-[16px]"
+          class="absolute top-[130px] right-0 flex flex-col gap-[12px]"
           :aria-label="$t('characters.constellation.title', { level: c.constellation })"
         >
           <li
@@ -331,10 +331,11 @@ const ownerLine = computed(() => ownerParts(props.owner))
                 </span>
               </li>
             </ul>
-            <!-- Level and friendship beside the talents, each over an EXP bar of the
-               same fixed length (the canvas copy: share-card-canvas LEVEL_BOX) -->
+            <!-- Level and friendship beside the talents, as tall as they are (circle
+               top to pill foot), each over an EXP bar of the same fixed length
+               (the canvas copy: share-card-canvas LEVEL_BOX) -->
             <div
-              class="flex w-[260px] shrink-0 flex-col gap-[10px] rounded-[20px] px-[18px] pt-[10px] pb-[14px] text-[26px]"
+              class="flex h-[162px] w-[260px] shrink-0 flex-col justify-center gap-[10px] rounded-[20px] px-[18px] text-[26px]"
               :class="CHIP_TEXT"
             >
               <span :title="levelTitle" class="flex flex-col gap-[4px]"
