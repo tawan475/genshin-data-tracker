@@ -91,10 +91,17 @@ const playerData = useResource(
   () => 'player,wardrobe',
   async () => {
     const data = await loadCollections(['player', 'wardrobe'])
+    const icons = (rows: { id: number; icon: unknown }[]) =>
+      new Map(rows.flatMap((r) => (typeof r.icon === 'string' && r.icon ? [[r.id, r.icon]] : [])))
     const pictures = new Map<number, string>()
     for (const row of data.namecards)
       if (typeof row.picture === 'string') pictures.set(row.id, row.picture)
-    return { arLevels: data.arLevels, nameCards: pictures }
+    return {
+      arLevels: data.arLevels,
+      nameCards: pictures,
+      avatars: icons(data.profilePictures),
+      frames: icons(data.profileFrames),
+    }
   },
 )
 const traveler = computed(() => {
@@ -107,18 +114,22 @@ const traveler = computed(() => {
 
 /**
  * The profile card's name, signature, name card and picture, as Teyvat.me
- * Capture 1.14+ sends them. Older captures stand in with the account's name
- * and the Traveler's name card; the picture is the Traveler's until the game
- * data has the profile picture table.
+ * Capture 1.14+ sends them (picture and frame from the game data's player
+ * topic). Older captures stand in with the account's name, the Traveler's
+ * name card and portrait.
  */
 const profileCard = computed(() => {
   const p = player.data.value
-  const picture = p?.nameCard ? playerData.data.value?.nameCards.get(p.nameCard) : undefined
+  const data = playerData.data.value
+  const picture = p?.nameCard ? data?.nameCards.get(p.nameCard) : undefined
+  const avatar = p?.profilePicture?.id ? data?.avatars.get(p.profilePicture.id) : undefined
+  const frame = p?.profilePicture?.frameId ? data?.frames.get(p.profilePicture.frameId) : undefined
   return {
     name: p?.nickname || accounts.displayName(account.value),
     signature: p?.signature || null,
     nameCard: picture ? gameIcon(picture) : characterBanner('TravelerAnemo'),
-    avatar: characterIcon('Traveler'),
+    avatar: (avatar && gameIcon(avatar)) || characterIcon('Traveler'),
+    frame: frame ? gameIcon(frame) : '',
   }
 })
 

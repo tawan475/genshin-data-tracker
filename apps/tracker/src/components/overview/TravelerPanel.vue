@@ -24,6 +24,8 @@ const props = defineProps<{
     nameCard: string
     /** The profile picture (a full image URL), '' for none. */
     avatar: string
+    /** Its frame (a full image URL), '' for none. */
+    frame: string
   }
 }>()
 
@@ -68,12 +70,21 @@ const rows = computed(() => {
       aria-hidden="true"
     />
     <div class="flex flex-wrap items-center gap-x-6 gap-y-4 px-4 py-5 sm:px-6">
-      <img
-        v-if="profile.avatar"
-        :src="profile.avatar"
-        alt=""
-        class="size-20 shrink-0 rounded-full bg-white/10 object-cover ring-4 ring-white/25 sm:size-24"
-      />
+      <span v-if="profile.avatar" class="relative size-20 shrink-0 sm:size-24">
+        <img
+          :src="profile.avatar"
+          alt=""
+          class="size-full rounded-full bg-white/10 object-cover"
+          :class="profile.frame ? '' : 'ring-4 ring-white/25'"
+        />
+        <!-- The game's frame is a ring about 1.2x the picture, centred on it -->
+        <img
+          v-if="profile.frame"
+          :src="profile.frame"
+          alt=""
+          class="pointer-events-none absolute -inset-[10%] size-[120%] max-w-none object-contain"
+        />
+      </span>
       <div class="flex min-w-0 flex-[1_1_18rem] flex-col gap-3">
         <div class="flex min-w-0 flex-col">
           <p class="truncate font-display text-2xl font-bold drop-shadow" :title="profile.name">
