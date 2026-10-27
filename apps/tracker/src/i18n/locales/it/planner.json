@@ -394,7 +394,9 @@
     "passivesTitle": "Shogun Raiden, Vagabondo: −50% Mora per l'ascensione delle armi",
     "passives": "Passive Mora",
     "craftingTitle": "La lista della vista Farm di cosa convertire, creare e forgiare",
-    "crafting": "Lista di creazione"
+    "crafting": "Lista di creazione",
+    "gems": "Gemme",
+    "gemsTitle": "Conta le gemme dell'ascensione. Disattivato: escono da ogni costo e i boss si farmano solo per i loro materiali"
   },
   "roster": {
     "search": "Cerca personaggi",

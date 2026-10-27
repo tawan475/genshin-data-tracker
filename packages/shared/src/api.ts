@@ -201,6 +201,7 @@ export const accountSettingsPatch = z
           )
           .max(4),
         crafting: z.boolean(),
+        gems: z.boolean(),
       })
       .partial()
       .strict(),

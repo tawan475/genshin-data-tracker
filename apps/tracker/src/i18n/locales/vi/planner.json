@@ -394,7 +394,9 @@
     "passivesTitle": "Raiden Shogun, Kẻ Lang Thang: −50% Mora khi đột phá vũ khí",
     "passives": "Nội tại Mora",
     "craftingTitle": "Danh sách những gì cần chuyển hóa, ghép và rèn trong chế độ Farm",
-    "crafting": "Danh sách ghép"
+    "crafting": "Danh sách ghép",
+    "gems": "Đá quý",
+    "gemsTitle": "Tính đá quý đột phá. Tắt: không tính vào mọi chi phí, boss chỉ cày để lấy nguyên liệu boss"
   },
   "roster": {
     "search": "Tìm nhân vật",

@@ -394,7 +394,9 @@
     "passivesTitle": "Shougun Raiden, Wanderer: −50 % Mora beim Waffenaufstieg",
     "passives": "Mora-Passive",
     "craftingTitle": "Checkliste der Farm-Ansicht: was umzuwandeln, herzustellen und zu schmieden ist",
-    "crafting": "Herstell-Checkliste"
+    "crafting": "Herstell-Checkliste",
+    "gems": "Edelsteine",
+    "gemsTitle": "Aufstiegs-Edelsteine zählen. Aus: Sie fallen aus allen Kosten, Bosse werden nur für ihre Bossmaterialien gefarmt"
   },
   "roster": {
     "search": "Figuren suchen",

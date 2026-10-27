@@ -394,7 +394,9 @@
     "passivesTitle": "Raiden Shogun, Wanderer: −50% Mora for weapon ascension",
     "passives": "Mora passives",
     "craftingTitle": "The Farm view's checklist of what to convert, craft and forge",
-    "crafting": "Crafting checklist"
+    "crafting": "Crafting checklist",
+    "gems": "Gemstones",
+    "gemsTitle": "Count ascension gemstones. Off: they leave every cost, so bosses are farmed for their boss materials only"
   },
   "roster": {
     "search": "Search characters",

@@ -394,7 +394,9 @@
     "passivesTitle": "雷電將軍、流浪者：武器突破摩拉 −50%",
     "passives": "摩拉減免天賦",
     "craftingTitle": "刷取檢視中需轉換、合成和鍛造的清單",
-    "crafting": "製作清單"
+    "crafting": "製作清單",
+    "gems": "元素晶石",
+    "gemsTitle": "計入突破用的晶石。關閉後，所有消耗中不再計算晶石，首領只為首領素材而刷"
   },
   "roster": {
     "search": "搜尋角色",

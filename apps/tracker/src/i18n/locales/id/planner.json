@@ -394,7 +394,9 @@
     "passivesTitle": "Raiden Shogun, Wanderer: −50% Mora untuk ascension senjata",
     "passives": "Pasif Mora",
     "craftingTitle": "Daftar periksa di tampilan Farming untuk yang dikonversi, di-craft dan di-forge",
-    "crafting": "Daftar crafting"
+    "crafting": "Daftar crafting",
+    "gems": "Batu permata",
+    "gemsTitle": "Hitung batu permata ascension. Mati: tidak masuk biaya apa pun, boss hanya di-farm untuk material boss"
   },
   "roster": {
     "search": "Cari karakter",

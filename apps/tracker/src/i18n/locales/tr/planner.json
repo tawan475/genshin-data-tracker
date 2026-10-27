@@ -394,7 +394,9 @@
     "passivesTitle": "Şogun Raiden, Avare: silah yükseltmede −%50 Mora",
     "passives": "Mora pasifleri",
     "craftingTitle": "Toplama görünümünde neyin dönüştürüleceği, üretileceği ve işleneceğinin kontrol listesi",
-    "crafting": "Simya kontrol listesi"
+    "crafting": "Simya kontrol listesi",
+    "gems": "Taşlar",
+    "gemsTitle": "Yükseltme taşlarını say. Kapalı: hiçbir maliyette yer almaz, patronlar yalnızca patron malzemeleri için kasılır"
   },
   "roster": {
     "search": "Karakter ara",

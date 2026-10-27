@@ -735,3 +735,29 @@ export function entryInputs(
   }
   return list
 }
+
+/**
+ * The requirement cache with ascension gemstones left out of every cost (the
+ * Planner setting "Gemstones" off). Each requirement maps to one stripped
+ * object, so a card whose cost did not change keeps its object.
+ */
+export function withoutGems(cache: RequirementCache, planner: PlannerData): RequirementCache {
+  const isGem = (key: string) => planner.materialsByKey.get(key)?.kind === 'gem'
+  const stripped = new WeakMap<Requirement, Requirement>()
+  const strip = (requirement: Requirement | null) => {
+    if (!requirement || ![...requirement.items.keys()].some(isGem)) return requirement
+    let out = stripped.get(requirement)
+    if (!out) {
+      out = {
+        ...requirement,
+        items: new Map([...requirement.items].filter(([key]) => !isGem(key))),
+      }
+      stripped.set(requirement, out)
+    }
+    return out
+  }
+  return {
+    character: (key, current, target) => strip(cache.character(key, current, target)),
+    weapon: (key, current, target) => strip(cache.weapon(key, current, target)),
+  }
+}

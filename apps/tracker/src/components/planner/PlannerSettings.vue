@@ -60,7 +60,7 @@ function setWl(value: number | null) {
   if (value !== props.settings.wl) emit('change', { wl: value })
 }
 
-function setOption(key: 'azoth' | 'passives' | 'crafting', value: boolean) {
+function setOption(key: 'azoth' | 'passives' | 'crafting' | 'gems', value: boolean) {
   emit('change', { planner: { [key]: value } })
 }
 
@@ -168,6 +168,13 @@ function commitSteps() {
         />
       </label>
       <div class="flex flex-col border-t border-border-subtle pt-2">
+        <div :title="$t('planner.settings.gemsTitle')">
+          <UiSwitch
+            :model-value="settings.planner.gems !== false"
+            :label="$t('planner.settings.gems')"
+            @update:model-value="setOption('gems', $event)"
+          />
+        </div>
         <div :title="$t('planner.settings.azothTitle')">
           <UiSwitch
             :model-value="settings.planner.azoth"

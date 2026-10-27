@@ -53,6 +53,12 @@ export interface PlannerSettings {
   resinSteps: number[]
   /** Show the Crafting checklist on the Farm view (most craft on demand, so it can be hidden). */
   crafting: boolean
+  /**
+   * Count ascension gemstones in the plan. Off: gems drop out of every cost,
+   * so bosses are farmed for their boss materials only (gems come from
+   * elsewhere: the shop, events, Dust of Azoth).
+   */
+  gems: boolean
 }
 
 /**
@@ -116,7 +122,14 @@ export const ACCOUNT_SETTINGS_DEFAULTS: AccountSettings = {
   traveler: 'F',
   ar: null,
   wl: null,
-  planner: { azoth: false, passives: true, refreshes: 0, resinSteps: [-40, 60], crafting: true },
+  planner: {
+    azoth: false,
+    passives: true,
+    refreshes: 0,
+    resinSteps: [-40, 60],
+    crafting: true,
+    gems: true,
+  },
   resin: null,
   favoriteCharacters: [],
 }

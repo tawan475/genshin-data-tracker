@@ -394,7 +394,9 @@
     "passivesTitle": "Shogun Raiden, Andarilho: −50% de Mora na ascensão de armas",
     "passives": "Passivas de Mora",
     "craftingTitle": "A lista da exibição de farm do que converter, sintetizar e forjar",
-    "crafting": "Lista de síntese"
+    "crafting": "Lista de síntese",
+    "gems": "Gemas",
+    "gemsTitle": "Conta as gemas de ascensão. Desligado: saem de todos os custos e os chefes são farmados só pelos materiais de chefe"
   },
   "roster": {
     "search": "Buscar personagens",

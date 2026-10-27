@@ -394,7 +394,9 @@
     "passivesTitle": "Shogun Raiden, Trotamundos: −50% de Mora para la ascensión de armas",
     "passives": "Pasivas de Mora",
     "craftingTitle": "La lista de la vista de farmeo con lo que hay que transformar, sintetizar y forjar",
-    "crafting": "Lista de síntesis"
+    "crafting": "Lista de síntesis",
+    "gems": "Gemas",
+    "gemsTitle": "Cuenta las gemas de ascensión. Desactivado: salen de todos los costes y los jefes se farmean solo por sus materiales"
   },
   "roster": {
     "search": "Buscar personajes",

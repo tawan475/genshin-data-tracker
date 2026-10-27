@@ -20,7 +20,7 @@ import { preloadMaterialRarities } from '@/utils/materials'
 import { countChange, effectiveInventory, replacedAdjustments } from './hand-edits'
 import { withCustomCharacters } from './custom-character'
 import { keepUnchanged } from './keep-unchanged'
-import { buildBoard, type Board } from './model'
+import { buildBoard, withoutGems, type Board } from './model'
 import { usePlannerState } from './use-planner-state'
 import { usePlannerTargets } from './use-planner-targets'
 import { usePlannerTasks } from './use-planner-tasks'
@@ -197,9 +197,15 @@ export function usePlannerModel(
   }))
 
   // One per planner data (new only when a custom character changes): each goal's cost once per state.
-  const requirementCache = computed(() =>
+  const fullRequirements = computed(() =>
     planner.value ? createRequirementCache(planner.value) : null,
   )
+  /** Without gemstones when the setting says so (bosses then farm only their boss materials). */
+  const requirementCache = computed(() => {
+    const cache = fullRequirements.value
+    if (!cache || !planner.value || settings.value.planner.gems !== false) return cache
+    return withoutGems(cache, planner.value)
+  })
   /**
    * The goal cards. A card equal to the one before keeps its object, so only
    * the cards that changed re-render (keep-unchanged.ts).
