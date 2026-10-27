@@ -85,19 +85,22 @@ const note = (tab: ArchiveTab, id: number): string | undefined => {
   return undefined
 }
 const pictured = computed(() => current.value.entries.some((entry) => entry.icon))
-/** Tabs whose entries have a wiki page each (tutorials and viewpoints don't). */
-const GUIDED: ReadonlySet<ArchiveTab> = new Set([
-  'quests',
-  'weapons',
-  'livingBeings',
-  'materials',
-  'books',
-  'artifacts',
-])
+/**
+ * Every tab's entries have a wiki page each; tutorials and viewpoints as
+ * subpages (`Tutorial/Wind Catcher`, `Viewpoint/Manor of Daybreak`: 735 of
+ * 742 and 263 of 264 found at 7.1).
+ */
+const WIKI_PREFIX: Readonly<Partial<Record<ArchiveTab, string>>> = {
+  tutorials: 'Tutorial/',
+  viewpoints: 'Viewpoint/',
+}
 const guide = (id: number) =>
-  GUIDED.has(chosen.value)
-    ? wikiGuide(props.catalog, ARCHIVE_SECTIONS[chosen.value].section, id)
-    : undefined
+  wikiGuide(
+    props.catalog,
+    ARCHIVE_SECTIONS[chosen.value].section,
+    id,
+    WIKI_PREFIX[chosen.value] ?? '',
+  )
 const shown = computed<GridEntry[]>(() =>
   current.value.entries
     .filter((entry) => filter.value === 'all' || entry.have === (filter.value === 'have'))

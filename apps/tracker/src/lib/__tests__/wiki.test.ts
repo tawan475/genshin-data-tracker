@@ -9,5 +9,9 @@ describe('wikiPage', () => {
     expect(wikiPage('Radiant Spincrystal "A Letter from the Wind: II"')).toBe(
       'https://genshin-impact.fandom.com/wiki/Radiant_Spincrystal_%22A_Letter_from_the_Wind:_II%22',
     )
+    // Subpages: the Archive's tutorials and viewpoints.
+    expect(wikiPage('Viewpoint/Manor of Daybreak')).toBe(
+      'https://genshin-impact.fandom.com/wiki/Viewpoint/Manor_of_Daybreak',
+    )
   })
 })

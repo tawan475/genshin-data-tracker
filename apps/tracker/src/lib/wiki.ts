@@ -5,10 +5,11 @@
  */
 const WIKI = 'https://genshin-impact.fandom.com/wiki/'
 
-/** The wiki page titled `title` (spaces as underscores, `:` and `,` kept, the rest escaped). */
+/** The wiki page titled `title` (spaces as underscores, `:`, `,` and `/` kept, the rest escaped). */
 export function wikiPage(title: string): string {
   const path = encodeURIComponent(title.trim().replace(/ /g, '_'))
     .replace(/%3A/g, ':')
     .replace(/%2C/g, ',')
+    .replace(/%2F/g, '/')
   return `${WIKI}${path}`
 }

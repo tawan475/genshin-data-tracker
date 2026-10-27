@@ -49,9 +49,11 @@ export function wikiGuide(
   catalog: CollectionCatalog,
   section: CollectionSection,
   id: number,
+  /** A subpage family, as the wiki files tutorials (`Tutorial/`) and viewpoints (`Viewpoint/`). */
+  prefix = '',
 ): string | undefined {
   const english = (catalog.english[section].get(id) as Record<string, string> | undefined)?.name
-  return english ? wikiPage(english) : undefined
+  return english ? wikiPage(prefix + english) : undefined
 }
 
 const str = (value: unknown) => (typeof value === 'string' ? value : '')
