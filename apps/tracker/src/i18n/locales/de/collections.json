@@ -132,7 +132,8 @@
       "collectable": "Bereit zum Einsammeln",
       "collected": "Gesammelt",
       "finished": "Erledigt"
-    }
+    },
+    "guide": "Anleitung"
   },
   "recipes": {
     "unlocked": "Freigeschaltet",

@@ -132,7 +132,8 @@
       "collectable": "Listo para recoger",
       "collected": "Recogido",
       "finished": "Terminado"
-    }
+    },
+    "guide": "Guía"
   },
   "recipes": {
     "unlocked": "Desbloqueadas",

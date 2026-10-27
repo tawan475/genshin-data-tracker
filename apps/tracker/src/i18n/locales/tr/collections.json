@@ -132,7 +132,8 @@
       "collectable": "Alınabilir",
       "collected": "Alındı",
       "finished": "Bitti"
-    }
+    },
+    "guide": "Rehber"
   },
   "recipes": {
     "unlocked": "Açıldı",

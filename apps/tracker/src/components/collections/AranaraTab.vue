@@ -22,7 +22,7 @@ import { t } from '@/i18n'
 /**
  * The Aranara collection: every entry the game data lists (15 at 7.1), each
  * with its captured state ("not found" when the capture lacks it), linking to
- * the wiki's guide for finding them.
+ * Game8's Mysterious Clipboard guide for finding them.
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
@@ -119,7 +119,7 @@ const entryName = (id: number) => t('collections.aranara.entry', { n: formatNumb
           rel="noopener noreferrer"
           class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-text-secondary hover:bg-surface-overlay hover:text-text-primary"
         >
-          {{ $t('collections.guide') }}
+          {{ $t('collections.aranara.guide') }}
           <ExternalLink class="size-3.5" aria-hidden="true" />
         </a>
       </template>
@@ -132,7 +132,7 @@ const entryName = (id: number) => t('collections.aranara.entry', { n: formatNumb
             rel="noopener noreferrer"
             class="group flex w-full min-w-0 items-center gap-3 rounded-xl border p-2.5 transition-colors"
             :class="STATE[entry.state].tile"
-            :title="`${entryName(entry.id)} · ${stateLabel(entry.state)} · ${$t('collections.guide')}`"
+            :title="`${entryName(entry.id)} · ${stateLabel(entry.state)} · ${$t('collections.aranara.guide')}`"
           >
             <span
               class="tabular grid size-10 shrink-0 place-items-center rounded-full font-mono text-base font-semibold"

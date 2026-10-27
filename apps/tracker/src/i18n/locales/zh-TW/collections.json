@@ -132,7 +132,8 @@
       "collectable": "可領取",
       "collected": "已收集",
       "finished": "已完成"
-    }
+    },
+    "guide": "攻略"
   },
   "recipes": {
     "unlocked": "已解鎖",

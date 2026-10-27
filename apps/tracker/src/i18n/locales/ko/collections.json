@@ -132,7 +132,8 @@
       "collectable": "수령 가능",
       "collected": "수집 완료",
       "finished": "완료"
-    }
+    },
+    "guide": "공략"
   },
   "recipes": {
     "unlocked": "해금 완료",

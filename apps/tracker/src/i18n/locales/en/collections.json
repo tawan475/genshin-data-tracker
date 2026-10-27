@@ -132,7 +132,8 @@
       "collectable": "Ready to collect",
       "collected": "Collected",
       "finished": "Done"
-    }
+    },
+    "guide": "Guide"
   },
   "recipes": {
     "unlocked": "Unlocked",

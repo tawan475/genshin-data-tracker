@@ -11,9 +11,8 @@ export interface AranaraEntry {
   state: GiAranaraState
 }
 
-/** The wiki's guide to the Material-Collecting Aranara: where each one waits. */
-export const ARANARA_GUIDE =
-  'https://genshin-impact.fandom.com/wiki/Material-Collecting_Aranara#Location'
+/** Game8's guide to the Mysterious Clipboard (the Aranara collection): where each one is. */
+export const ARANARA_GUIDE = 'https://game8.co/games/Genshin-Impact/archives/386802'
 
 export function aranaraEntries(
   rows: readonly { id: number }[],

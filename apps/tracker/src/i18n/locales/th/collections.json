@@ -132,7 +132,8 @@
       "collectable": "พร้อมรับ",
       "collected": "รวบรวมแล้ว",
       "finished": "เสร็จแล้ว"
-    }
+    },
+    "guide": "คู่มือ"
   },
   "recipes": {
     "unlocked": "ปลดล็อกแล้ว",

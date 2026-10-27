@@ -132,7 +132,8 @@
       "collectable": "Можно забрать",
       "collected": "Собрано",
       "finished": "Готово"
-    }
+    },
+    "guide": "Гайд"
   },
   "recipes": {
     "unlocked": "Открыто",

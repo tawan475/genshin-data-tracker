@@ -132,7 +132,8 @@
       "collectable": "Siap diambil",
       "collected": "Telah Terkumpul",
       "finished": "Selesai"
-    }
+    },
+    "guide": "Panduan"
   },
   "recipes": {
     "unlocked": "Terbuka",

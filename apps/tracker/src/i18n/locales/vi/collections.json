@@ -132,7 +132,8 @@
       "collectable": "Có thể nhận",
       "collected": "Đã Thu Thập",
       "finished": "Xong"
-    }
+    },
+    "guide": "Hướng dẫn"
   },
   "recipes": {
     "unlocked": "Đã Mở",

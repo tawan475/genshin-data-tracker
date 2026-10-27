@@ -132,7 +132,8 @@
       "collectable": "受取可能",
       "collected": "収集済み",
       "finished": "完了"
-    }
+    },
+    "guide": "攻略"
   },
   "recipes": {
     "unlocked": "開放済み",
