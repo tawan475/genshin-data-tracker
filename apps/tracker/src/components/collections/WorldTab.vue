@@ -28,7 +28,14 @@ import type { CapturedCollections } from '@/data/collections'
 import { idLabel, type CollectionCatalog } from '@/data/collection-names'
 import { respawnRows } from '@/data/respawns'
 import { useResource } from '@/data/use-resource'
-import { npcRows, tribalRows, worldModel, type DomainRow, type Progress } from '@/data/world'
+import {
+  explorationPercent,
+  npcRows,
+  tribalRows,
+  worldModel,
+  type DomainRow,
+  type Progress,
+} from '@/data/world'
 import { localizeFarming } from '@/i18n/localize-farming'
 import { formatNumber, formatRelative, formatDateTime } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -207,6 +214,38 @@ const regionCounts = computed(() => {
   return [...byRegion].map(([region, p]) => ({ region, ...p }))
 })
 
+/** A share with one decimal (floored, so 100% means all of it); null without a total. */
+const share = (have: number, total: number): number | null =>
+  total > 0 ? Math.floor((have / total) * 1000) / 10 : null
+const sumOf = <T,>(rows: readonly T[], f: (row: T) => number) =>
+  rows.reduce((sum, row) => sum + f(row), 0)
+/** Each panel's figure in its header (the user's call, like the regions'). */
+const percents = computed(() => {
+  const w = world.value
+  const capped = (rows: readonly { level: number; max: number }[]) =>
+    share(
+      sumOf(rows, (r) => Math.min(r.level, r.max)),
+      sumOf(rows, (r) => r.max),
+    )
+  return {
+    map: w
+      ? share(
+          sumOf(w.maps, (m) => m.domains.have + m.areas.have),
+          sumOf(w.maps, (m) => m.domains.total + m.areas.total),
+        )
+      : null,
+    lists: current.value ? share(currentHave.value, current.value.entries.length) : null,
+    statues: w ? capped(w.statues) : null,
+    reputation: share(reputationTotal.value.have, reputationTotal.value.total),
+    offerings: w ? capped(w.offerings.filter((o) => o.max > 0)) : null,
+    exploration: w ? explorationPercent(w) : null,
+    tribes: share(
+      sumOf(tribes.value, (t) => t.finished),
+      sumOf(tribes.value, (t) => t.chapters.length),
+    ),
+  }
+})
+
 /** A region's average exploration of the areas with a known total; null without any. */
 function cityAverage(areas: readonly { percent: number | null }[]): number | null {
   const known = areas.flatMap((a) => (a.percent === null ? [] : [a.percent]))
@@ -301,6 +340,14 @@ const MAP_PARTS = [
     </ul>
 
     <UiPanel v-if="world.maps.length" :title="$t('collections.world.map')" flush>
+      <template #actions>
+        <span
+          v-if="percents.map !== null"
+          class="tabular font-mono text-sm"
+          :class="percents.map >= 100 ? 'text-success-text' : 'text-accent-text'"
+          >{{ percents.map }}%</span
+        >
+      </template>
       <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,17rem),1fr))] gap-3 p-3 sm:p-5">
         <li
           v-for="map in world.maps"
@@ -344,6 +391,14 @@ const MAP_PARTS = [
       collapsible
       flush
     >
+      <template #actions>
+        <span
+          v-if="percents.lists !== null"
+          class="tabular font-mono text-sm"
+          :class="percents.lists >= 100 ? 'text-success-text' : 'text-accent-text'"
+          >{{ percents.lists }}%</span
+        >
+      </template>
       <template #header>
         <div
           class="scroll-hide scroll-fade-x -mx-5 flex max-w-full overflow-x-auto px-5 sm:mx-0 sm:px-0"
@@ -394,6 +449,14 @@ const MAP_PARTS = [
         collapsible
         flush
       >
+        <template #actions>
+          <span
+            v-if="percents.statues !== null"
+            class="tabular font-mono text-sm"
+            :class="percents.statues >= 100 ? 'text-success-text' : 'text-accent-text'"
+            >{{ percents.statues }}%</span
+          >
+        </template>
         <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,12rem),1fr))] gap-2 p-3 sm:p-5">
           <li
             v-for="statue in world.statues"
@@ -431,6 +494,14 @@ const MAP_PARTS = [
         collapsible
         flush
       >
+        <template #actions>
+          <span
+            v-if="percents.reputation !== null"
+            class="tabular font-mono text-sm"
+            :class="percents.reputation >= 100 ? 'text-success-text' : 'text-accent-text'"
+            >{{ percents.reputation }}%</span
+          >
+        </template>
         <ul class="flex flex-col gap-3 p-3 sm:p-5">
           <li v-for="rep in world.reputation" :key="rep.city" class="flex flex-col gap-1">
             <div class="flex items-baseline justify-between gap-2 text-sm">
@@ -452,6 +523,14 @@ const MAP_PARTS = [
       collapsible
       flush
     >
+      <template #actions>
+        <span
+          v-if="percents.offerings !== null"
+          class="tabular font-mono text-sm"
+          :class="percents.offerings >= 100 ? 'text-success-text' : 'text-accent-text'"
+          >{{ percents.offerings }}%</span
+        >
+      </template>
       <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-2 p-3 sm:p-5">
         <li
           v-for="offering in world.offerings"
@@ -493,6 +572,12 @@ const MAP_PARTS = [
       flush
     >
       <template #actions>
+        <span
+          v-if="percents.exploration !== null"
+          class="tabular font-mono text-sm"
+          :class="percents.exploration >= 100 ? 'text-success-text' : 'text-accent-text'"
+          >{{ percents.exploration }}%</span
+        >
         <span
           v-if="world.exploration.some((c) => c.areas.some((a) => a.percent === null))"
           class="flex items-center gap-1 text-xs text-text-muted"
@@ -567,6 +652,14 @@ const MAP_PARTS = [
       collapsible
       flush
     >
+      <template #actions>
+        <span
+          v-if="percents.tribes !== null"
+          class="tabular font-mono text-sm"
+          :class="percents.tribes >= 100 ? 'text-success-text' : 'text-accent-text'"
+          >{{ percents.tribes }}%</span
+        >
+      </template>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-3 p-3 sm:p-5">
         <section
           v-for="tribe in tribes"

@@ -59,7 +59,10 @@ function onHeader(event: MouseEvent) {
         </div>
       </slot>
       <!-- min-w-0: a row of actions that scrolls sideways on phones stays inside the header. -->
-      <div v-if="$slots.actions" class="flex max-w-full min-w-0 flex-wrap items-center gap-2">
+      <div
+        v-if="$slots.actions"
+        class="ml-auto flex max-w-full min-w-0 flex-wrap items-center gap-2"
+      >
         <slot name="actions" />
       </div>
       <button
