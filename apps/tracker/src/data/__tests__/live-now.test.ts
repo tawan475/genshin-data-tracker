@@ -98,7 +98,13 @@ describe('withJournal', () => {
     ])
     // Lock only: same catalog piece. Levelled: a new identity. Added: none yet.
     expect(now.artifactIds).toEqual([10, 11, -1, -1])
-    expect(now.live).toEqual({ seq: 2, updatedAt: 5_000, changes: 5, materials: ['Mora'] })
+    expect(now.live).toEqual({
+      seq: 2,
+      updatedAt: 5_000,
+      changes: 5,
+      materials: ['Mora'],
+      player: [],
+    })
   })
 
   it('ignores a journal on another snapshot, or an empty one', () => {

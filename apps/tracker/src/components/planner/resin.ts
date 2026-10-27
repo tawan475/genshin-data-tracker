@@ -56,6 +56,41 @@ export function clockReading(clock: { value: number; nextAt: number }): LoginRes
   return { value: clock.value, at: clock.nextAt * 1000 - RESIN_STEP_MS }
 }
 
+/**
+ * Resin the live journal set (`gi_player.resin`: spent or refilled in game
+ * since the login) as a reading. The journal keeps only the last value and
+ * when its last batch came, so the reading is dated then, on the login
+ * clock's grid when there is one (the game's timer runs on when resin is
+ * spent): never more than the game has, at worst a point or two less.
+ */
+export function liveReading(
+  value: number,
+  updatedAt: number,
+  clock: { value: number; nextAt: number } | null | undefined,
+): LoginResin {
+  if (!clock) return { value, at: updatedAt }
+  const tick = clockReading(clock).at
+  const steps = Math.floor((updatedAt - tick) / RESIN_STEP_MS)
+  return { value, at: steps >= 0 ? tick + steps * RESIN_STEP_MS : updatedAt }
+}
+
+/**
+ * The capture's resin before live sync: the login's clock, unless a later
+ * snapshot of the session read a different count (`gi_player.resin`, the
+ * clock stays the login's): then that count, on the clock's grid.
+ */
+export function capturedResin(
+  clock: { value: number; nextAt: number } | null | undefined,
+  player: LoginResin | null,
+): LoginResin | null {
+  if (!clock) return player
+  const login = clockReading(clock)
+  if (player && player.value !== clock.value && player.at > login.at) {
+    return liveReading(player.value, player.at, clock)
+  }
+  return login
+}
+
 /** Whether a hand-set value was replaced by a capture read after it. */
 export function manualReplaced(
   captured: Pick<ResinNow, 'known' | 'at'> | null,

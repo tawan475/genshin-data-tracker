@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   RESIN_STEP_MS,
   clockReading,
+  liveReading,
+  capturedResin,
   alertAt,
   fullAt,
   manualReplaced,
@@ -23,6 +25,33 @@ import {
 
 const T = Date.parse('2026-10-06T10:00:00Z')
 const MIN = 60_000
+
+describe('resin spent in game (live sync)', () => {
+  it("counts from the journal's value on the login clock's grid, never ahead of the game", () => {
+    // Login: 160 with the next point at T + 3 min; resin spent to 20, last batch at T + 61 min.
+    const clock = { value: 160, nextAt: (T + 3 * MIN) / 1000 }
+    const reading = liveReading(20, T + 61 * MIN, clock)
+    // The clock's ticks fall at T - 5 + 8k min: the last one by T + 61 is T + 59.
+    expect(reading).toEqual({ value: 20, at: T + 59 * MIN })
+    expect(resinAt(reading, T + 66 * MIN)).toBe(20)
+    expect(resinAt(reading, T + 67 * MIN)).toBe(21)
+    // Hours later: still regenerating from 20, not full from the login's 160.
+    expect(resinAt(reading, T + 4 * 60 * MIN)).toBe(20 + Math.floor((4 * 60 - 59) / 8))
+    // Without a clock: dated at the batch.
+    expect(liveReading(20, T, null)).toEqual({ value: 20, at: T })
+  })
+
+  it("prefers a later snapshot's count over the login's clock when they differ", () => {
+    const clock = { value: 160, nextAt: (T + 3 * MIN) / 1000 }
+    expect(capturedResin(clock, { value: 160, at: T })).toEqual(clockReading(clock))
+    expect(capturedResin(clock, { value: 40, at: T + 61 * MIN })).toEqual({
+      value: 40,
+      at: T + 59 * MIN,
+    })
+    expect(capturedResin(null, { value: 40, at: T })).toEqual({ value: 40, at: T })
+    expect(capturedResin(clock, null)).toEqual(clockReading(clock))
+  })
+})
 
 describe('resin readings', () => {
   const login = { known: true, atSnapshot: 100, at: T, source: 'player' as const }

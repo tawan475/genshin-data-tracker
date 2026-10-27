@@ -27,6 +27,8 @@ export interface LiveApplied {
   changes: number
   /** Material keys the journal set or removed (they supersede older hand edits). */
   materials: string[]
+  /** `gi_player` fields the journal set (resin spent in game arrives this way). */
+  player: string[]
 }
 
 /**
@@ -69,6 +71,13 @@ export function withJournal<T extends JournalTarget>(
         ...new Set(
           live.changes.flatMap(([, path]) =>
             path[0] === 'materials' && path.length === 2 ? [String(path[1])] : [],
+          ),
+        ),
+      ],
+      player: [
+        ...new Set(
+          live.changes.flatMap(([, path]) =>
+            path[0] === 'gi_player' && path.length === 2 ? [String(path[1])] : [],
           ),
         ),
       ],
