@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { t } from '@/i18n'
 import { Heart, Wrench } from 'lucide-vue-next'
-import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
@@ -19,6 +18,7 @@ import { useExpNeed } from '@/lib/exp-need'
 import { formatDate, formatFullDateTime, formatNumber, formatShort } from '@/lib/format'
 import { formatLevel } from '@/lib/level'
 import FavoriteStar from './FavoriteStar.vue'
+import { CONSTELLATION_MAX_STYLE, isMaxConstellation } from './max-badges'
 import NamecardBackdrop from './NamecardBackdrop.vue'
 import TalentChips from './TalentChips.vue'
 
@@ -168,6 +168,18 @@ const weaponTitle = computed(() => {
                 :target="TARGET_LEVEL"
                 class="flex-none text-sm text-text-primary"
               />
+              <!-- Constellation as a number, like the roster card (gold at C6); no stars -->
+              <span
+                class="tabular inline-flex h-6 flex-none items-center rounded-md px-1.5 font-mono text-sm leading-none"
+                :class="
+                  isMaxConstellation(c.constellation)
+                    ? 'font-bold'
+                    : 'bg-surface-raised/80 font-medium text-text-primary ring-1 ring-border-subtle'
+                "
+                :style="isMaxConstellation(c.constellation) ? CONSTELLATION_MAX_STYLE : undefined"
+                :title="$t('characters.constellation.title', { level: c.constellation })"
+                >C{{ c.constellation }}</span
+              >
               <span class="flex-1" aria-hidden="true" />
               <UiBadge v-if="c.gaps.length" tone="warning" mono class="shrink-0" :title="gapText">
                 <Wrench class="size-3.5" aria-hidden="true" />
@@ -214,8 +226,7 @@ const weaponTitle = computed(() => {
                 </span>
               </div>
             </div>
-            <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-              <ConstellationStars :value="c.constellation" :element="c.element" :label="false" />
+            <div class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
               <TalentChips :talent="c.talent" />
             </div>
           </div>
@@ -240,12 +251,6 @@ const weaponTitle = computed(() => {
             eager
           />
           <span class="tabular font-mono">R{{ c.weapon.refinement }}</span>
-          <LevelText
-            v-if="c.weapon.level < TARGET_LEVEL"
-            :level="c.weapon.level"
-            :ascension="c.weapon.ascension"
-            :target="TARGET_LEVEL"
-          />
         </span>
         <span
           v-else
