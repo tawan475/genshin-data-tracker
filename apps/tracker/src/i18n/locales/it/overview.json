@@ -70,5 +70,16 @@
     "first": "Prima istantanea",
     "currencyMissing": "Mora e primogemme assenti",
     "noCurrency": "Nessuna valuta"
+  },
+  "traveler": {
+    "label": "Viaggiatore",
+    "ar": "Grado avventura {n}",
+    "uid": "UID {uid}",
+    "arExp": "ESP avventura {exp} / {need}",
+    "arExpLabel": "ESP avventura",
+    "wl": "Livello del mondo",
+    "wlLimit": "Può salire al livello del mondo {n}",
+    "stamina": "Vigore",
+    "storyKeys": "Chiavi della storia"
   }
 }

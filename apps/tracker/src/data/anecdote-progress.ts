@@ -22,6 +22,8 @@ export interface CapturedAnecdotes {
   /** The book's tabs the player has; null when no capture said. */
   unlockedAreas: ReadonlySet<number> | null
   reward: GiAnecdotes['reward'] | null
+  /** The last wish (whom the player chose to meet next, and when); null when the capture had none. */
+  wish: GiAnecdotes['wish'] | null
   /** When that capture was taken (epoch ms); null without one. */
   takenAt: number | null
 }
@@ -30,7 +32,16 @@ export const NO_CAPTURED_ANECDOTES: CapturedAnecdotes = {
   entries: new Map(),
   unlockedAreas: null,
   reward: null,
+  wish: null,
   takenAt: null,
+}
+
+/**
+ * When the next wish opens (epoch ms): the last one plus the cooldown; null
+ * without a last wish.
+ */
+export function nextWishAt(wish: GiAnecdotes['wish'] | null, cooldownHours: number): number | null {
+  return wish ? (wish.lastWishTime + cooldownHours * 3600) * 1000 : null
 }
 
 export function capturedAnecdotes(
@@ -44,6 +55,7 @@ export function capturedAnecdotes(
     ),
     unlockedAreas: new Set(section.unlockedAreas),
     reward: section.reward ?? null,
+    wish: section.wish ?? null,
     takenAt,
   }
 }

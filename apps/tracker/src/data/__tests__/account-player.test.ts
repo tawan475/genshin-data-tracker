@@ -54,7 +54,21 @@ describe('accountPlayer', () => {
       ],
       decode,
     )
-    expect(player).toEqual({ ar: 58, wl: 8, resin: null })
+    expect(player).toEqual({ ar: 58, wl: 8, resin: null, profile: { ar: 58, wl: 8 } })
+  })
+
+  it("keeps the newest snapshot's whole section as the profile", () => {
+    const player = accountPlayer(
+      [
+        { takenAt: 100, key: 'login2' },
+        { takenAt: 200, key: 'login1' },
+      ],
+      decode,
+    )
+    expect(player.profile).toEqual(players.login1)
+    expect(
+      accountPlayer([{ takenAt: 1, key: 'login1' }, { takenAt: 2 }], decode).profile,
+    ).toBeNull()
   })
 
   it('knows nothing without player sections', () => {

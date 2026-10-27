@@ -46,7 +46,8 @@
     "hangouts": "데이트 이벤트",
     "blueprints": "주전자",
     "events": "이벤트",
-    "crafting": "합성"
+    "crafting": "합성",
+    "music": "음악 게임"
   },
   "archive": {
     "pick": "도감 탭",
@@ -206,7 +207,18 @@
     "companions": "동료 보상",
     "comfort": "동천 선력",
     "mansion": "저택",
-    "outdoor": "실외"
+    "outdoor": "실외",
+    "comfortHint": "보유한 동천 중 최고치",
+    "giftSets": "선물 세트",
+    "allSets": "전체",
+    "rewardLeft": "보상 미수령",
+    "realms": "동천",
+    "view": "보기",
+    "setMissing": "{name} · 미습득",
+    "setClaimed": "동행 동료 보상 {n} / {total} 수령",
+    "rewardClaimed": "{name} · 보상 수령",
+    "rewardWaiting": "{name} · 보상 대기",
+    "noRewardLeft": "남은 보상 없음"
   },
   "events": {
     "running": "진행 중",
@@ -223,5 +235,36 @@
       "forging": "단조",
       "processing": "가공"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "전체",
+      "played": "플레이함",
+      "left": "보상 미수령"
+    },
+    "sort": {
+      "game": "게임 순서",
+      "score": "최고 점수",
+      "name": "이름"
+    },
+    "sortLabel": "정렬",
+    "difficulty": {
+      "1": "쉬움",
+      "2": "보통",
+      "3": "어려움",
+      "4": "마스터"
+    },
+    "score": "점수 {n}",
+    "notPlayed": "플레이 안 함",
+    "rewardClaimed": "보상 수령",
+    "rewardWaiting": "보상 대기",
+    "rewardLocked": "보상 미획득",
+    "songsPlayed": "플레이한 곡",
+    "beatmapsPlayed": "플레이한 악보",
+    "rewards": "보상",
+    "rewardsLeft": "남은 보상",
+    "rewardsLeftHint": "플레이함, 보상 미수령",
+    "songs": "곡",
+    "search": "곡 검색"
   }
 }

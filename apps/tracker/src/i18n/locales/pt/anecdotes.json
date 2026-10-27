@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} Gemas Essenciais a cada {every} anedotas registradas",
     "rewardPer": "a cada {every}",
     "active": "Ativas",
-    "activeHint": "Em andamento no jogo (na captura mais recente)"
+    "activeHint": "Em andamento no jogo (na captura mais recente)",
+    "wish": "Próximo desejo",
+    "wishIn": "{h} h {m} min",
+    "wishReady": "Pronto",
+    "wishLast": "Último desejo {time}",
+    "wishNext": "Próximo desejo {time}"
   },
   "toolbar": {
     "label": "Filtrar anedotas",

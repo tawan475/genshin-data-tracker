@@ -46,7 +46,8 @@
     "hangouts": "Hangout Events",
     "blueprints": "Serenitea Pot",
     "events": "Events",
-    "crafting": "Crafting"
+    "crafting": "Crafting",
+    "music": "Music Game"
   },
   "archive": {
     "pick": "Archive tab",
@@ -206,7 +207,18 @@
     "companions": "Companion rewards",
     "comfort": "Adeptal Energy",
     "mansion": "Mansion",
-    "outdoor": "Outdoor"
+    "outdoor": "Outdoor",
+    "comfortHint": "The highest of your realms",
+    "giftSets": "Gift sets",
+    "allSets": "All",
+    "rewardLeft": "Reward left",
+    "realms": "Realms",
+    "view": "View",
+    "setMissing": "{name} · not learned",
+    "setClaimed": "{n} of {total} companion rewards claimed",
+    "rewardClaimed": "{name} · reward claimed",
+    "rewardWaiting": "{name} · reward waiting",
+    "noRewardLeft": "No rewards left"
   },
   "events": {
     "running": "Running",
@@ -223,5 +235,36 @@
       "forging": "Forging",
       "processing": "Processing"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "All",
+      "played": "Played",
+      "left": "Reward left"
+    },
+    "sort": {
+      "game": "Game order",
+      "score": "Best score",
+      "name": "Name"
+    },
+    "sortLabel": "Sort",
+    "difficulty": {
+      "1": "Easy",
+      "2": "Normal",
+      "3": "Hard",
+      "4": "Pro"
+    },
+    "score": "Score {n}",
+    "notPlayed": "Not played",
+    "rewardClaimed": "Reward claimed",
+    "rewardWaiting": "Reward waiting",
+    "rewardLocked": "Reward not earned",
+    "songsPlayed": "Songs played",
+    "beatmapsPlayed": "Charts played",
+    "rewards": "Rewards",
+    "rewardsLeft": "Rewards left",
+    "rewardsLeftHint": "Played, reward not claimed",
+    "songs": "Songs",
+    "search": "Search songs"
   }
 }

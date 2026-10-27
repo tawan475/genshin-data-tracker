@@ -217,6 +217,9 @@ function unmark(id: number) {
         :captured="captured"
         :reward-every="game.data.value.data.constants.rewardEvery"
         :reward-primogems="game.data.value.data.constants.rewardPrimogems"
+        :wish-cooldown-hours="game.data.value.data.constants.wishCooldownHours"
+        :text="game.data.value.text"
+        :english="game.data.value.english"
       />
 
       <div class="flex flex-col gap-4">

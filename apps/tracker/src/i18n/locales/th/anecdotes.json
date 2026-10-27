@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} Primogem ทุก ๆ {every} เกร็ดน่ารู้ที่บันทึก",
     "rewardPer": "ต่อ {every}",
     "active": "กำลังทำ",
-    "activeHint": "กำลังดำเนินอยู่ในเกม (ในการสแกนล่าสุด)"
+    "activeHint": "กำลังดำเนินอยู่ในเกม (ในการสแกนล่าสุด)",
+    "wish": "คำอธิษฐานถัดไป",
+    "wishIn": "{h} ชม. {m} นาที",
+    "wishReady": "พร้อม",
+    "wishLast": "อธิษฐานล่าสุด {time}",
+    "wishNext": "คำอธิษฐานถัดไป {time}"
   },
   "toolbar": {
     "label": "กรองเกร็ดน่ารู้",

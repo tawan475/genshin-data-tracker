@@ -46,7 +46,8 @@
     "hangouts": "Buluşma Etkinlikleri",
     "blueprints": "Huzur Çaydanlığı",
     "events": "Etkinlikler",
-    "crafting": "Üretim"
+    "crafting": "Üretim",
+    "music": "Müzik Oyunu"
   },
   "archive": {
     "pick": "Arşiv sekmesi",
@@ -206,7 +207,18 @@
     "companions": "Yol arkadaşı ödülleri",
     "comfort": "Adept Enerjisi",
     "mansion": "Konak",
-    "outdoor": "Dış alan"
+    "outdoor": "Dış alan",
+    "comfortHint": "Diyarlarının en yükseği",
+    "giftSets": "Hediye Setleri",
+    "allSets": "Tümü",
+    "rewardLeft": "Ödül bekliyor",
+    "realms": "Diyarlar",
+    "view": "Görünüm",
+    "setMissing": "{name} · öğrenilmedi",
+    "setClaimed": "Yoldaş ödüllerinin {n} / {total} tanesi alındı",
+    "rewardClaimed": "{name} · ödül alındı",
+    "rewardWaiting": "{name} · ödül bekliyor",
+    "noRewardLeft": "Bekleyen ödül yok"
   },
   "events": {
     "running": "Süren",
@@ -223,5 +235,36 @@
       "forging": "Dövme",
       "processing": "İşleme"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Tümü",
+      "played": "Oynanan",
+      "left": "Ödül bekliyor"
+    },
+    "sort": {
+      "game": "Oyun sırası",
+      "score": "En iyi puan",
+      "name": "Ad"
+    },
+    "sortLabel": "Sırala",
+    "difficulty": {
+      "1": "Kolay",
+      "2": "Normal",
+      "3": "Zor",
+      "4": "Profesyonel"
+    },
+    "score": "Puan {n}",
+    "notPlayed": "Oynanmadı",
+    "rewardClaimed": "Ödül alındı",
+    "rewardWaiting": "Ödül bekliyor",
+    "rewardLocked": "Ödül kazanılmadı",
+    "songsPlayed": "Oynanan şarkılar",
+    "beatmapsPlayed": "Oynanan notalar",
+    "rewards": "Ödüller",
+    "rewardsLeft": "Bekleyen ödüller",
+    "rewardsLeftHint": "Oynandı, ödül alınmadı",
+    "songs": "Şarkılar",
+    "search": "Şarkı ara"
   }
 }

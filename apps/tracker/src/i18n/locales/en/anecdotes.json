@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} primogems for every {every} anecdotes recorded",
     "rewardPer": "per {every}",
     "active": "Active",
-    "activeHint": "Going on now in the game (in the newest capture)"
+    "activeHint": "Going on now in the game (in the newest capture)",
+    "wish": "Next wish",
+    "wishIn": "{h}h {m}m",
+    "wishReady": "Ready",
+    "wishLast": "Last wish {time}",
+    "wishNext": "Next wish {time}"
   },
   "toolbar": {
     "label": "Filter anecdotes",

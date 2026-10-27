@@ -46,7 +46,8 @@
     "hangouts": "デートイベント",
     "blueprints": "塵歌壺",
     "events": "イベント",
-    "crafting": "合成"
+    "crafting": "合成",
+    "music": "音楽ゲーム"
   },
   "archive": {
     "pick": "図鑑のタブ",
@@ -206,7 +207,18 @@
     "companions": "仲間の報酬",
     "comfort": "洞天仙力",
     "mansion": "邸宅",
-    "outdoor": "屋外"
+    "outdoor": "屋外",
+    "comfortHint": "洞天の中で最も高い値",
+    "giftSets": "ギフトセット",
+    "allSets": "すべて",
+    "rewardLeft": "報酬未受取",
+    "realms": "洞天",
+    "view": "表示",
+    "setMissing": "{name} · 未習得",
+    "setClaimed": "同行する仲間の報酬 {n} / {total} を受取済み",
+    "rewardClaimed": "{name} · 報酬受取済み",
+    "rewardWaiting": "{name} · 報酬未受取",
+    "noRewardLeft": "未受取の報酬はありません"
   },
   "events": {
     "running": "開催中",
@@ -223,5 +235,36 @@
       "forging": "鍛造",
       "processing": "加工"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "すべて",
+      "played": "プレイ済み",
+      "left": "報酬未受取"
+    },
+    "sort": {
+      "game": "ゲーム順",
+      "score": "ベストスコア",
+      "name": "名前"
+    },
+    "sortLabel": "並び替え",
+    "difficulty": {
+      "1": "イージー",
+      "2": "ノーマル",
+      "3": "ハード",
+      "4": "プロ"
+    },
+    "score": "スコア {n}",
+    "notPlayed": "未プレイ",
+    "rewardClaimed": "報酬受取済み",
+    "rewardWaiting": "報酬未受取",
+    "rewardLocked": "報酬未獲得",
+    "songsPlayed": "プレイした曲",
+    "beatmapsPlayed": "プレイした譜面",
+    "rewards": "報酬",
+    "rewardsLeft": "未受取の報酬",
+    "rewardsLeftHint": "プレイ済み、報酬未受取",
+    "songs": "曲",
+    "search": "曲を検索"
   }
 }

@@ -46,7 +46,8 @@
     "hangouts": "邀约事件",
     "blueprints": "尘歌壶",
     "events": "活动",
-    "crafting": "合成"
+    "crafting": "合成",
+    "music": "音乐游戏"
   },
   "archive": {
     "pick": "图鉴分类",
@@ -206,7 +207,18 @@
     "companions": "同伴奖励",
     "comfort": "洞天仙力",
     "mansion": "宅邸",
-    "outdoor": "室外"
+    "outdoor": "室外",
+    "comfortHint": "所有洞天中的最高值",
+    "giftSets": "赠礼套装",
+    "allSets": "全部",
+    "rewardLeft": "奖励未领",
+    "realms": "洞天",
+    "view": "视图",
+    "setMissing": "{name} · 未学会",
+    "setClaimed": "已领取 {n} / {total} 份同行伙伴奖励",
+    "rewardClaimed": "{name} · 奖励已领取",
+    "rewardWaiting": "{name} · 奖励待领取",
+    "noRewardLeft": "没有待领取的奖励"
   },
   "events": {
     "running": "进行中",
@@ -223,5 +235,36 @@
       "forging": "锻造",
       "processing": "加工"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "全部",
+      "played": "已游玩",
+      "left": "奖励未领"
+    },
+    "sort": {
+      "game": "游戏顺序",
+      "score": "最高分",
+      "name": "名称"
+    },
+    "sortLabel": "排序",
+    "difficulty": {
+      "1": "简单",
+      "2": "普通",
+      "3": "困难",
+      "4": "大师"
+    },
+    "score": "得分 {n}",
+    "notPlayed": "未游玩",
+    "rewardClaimed": "奖励已领取",
+    "rewardWaiting": "奖励待领取",
+    "rewardLocked": "未获得奖励",
+    "songsPlayed": "已游玩歌曲",
+    "beatmapsPlayed": "已游玩谱面",
+    "rewards": "奖励",
+    "rewardsLeft": "未领奖励",
+    "rewardsLeftHint": "已游玩，奖励未领取",
+    "songs": "歌曲",
+    "search": "搜索歌曲"
   }
 }

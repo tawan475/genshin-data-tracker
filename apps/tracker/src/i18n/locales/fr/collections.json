@@ -46,7 +46,8 @@
     "hangouts": "Événements Rendez-vous",
     "blueprints": "Théière",
     "events": "Événements",
-    "crafting": "Fabrication"
+    "crafting": "Fabrication",
+    "music": "Jeu musical"
   },
   "archive": {
     "pick": "Onglet des Archives",
@@ -206,7 +207,18 @@
     "companions": "Récompenses de compagnons",
     "comfort": "Énergie adeptale",
     "mansion": "Demeure",
-    "outdoor": "Extérieur"
+    "outdoor": "Extérieur",
+    "comfortHint": "La plus élevée de vos domaines",
+    "giftSets": "Sets cadeau",
+    "allSets": "Tous",
+    "rewardLeft": "Récompense en attente",
+    "realms": "Domaines",
+    "view": "Vue",
+    "setMissing": "{name} · non appris",
+    "setClaimed": "{n} récompenses de compagnons sur {total} récupérées",
+    "rewardClaimed": "{name} · récompense récupérée",
+    "rewardWaiting": "{name} · récompense en attente",
+    "noRewardLeft": "Aucune récompense en attente"
   },
   "events": {
     "running": "En cours",
@@ -223,5 +235,36 @@
       "forging": "Forge",
       "processing": "Transformation"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Toutes",
+      "played": "Jouées",
+      "left": "Récompense en attente"
+    },
+    "sort": {
+      "game": "Ordre du jeu",
+      "score": "Meilleur score",
+      "name": "Nom"
+    },
+    "sortLabel": "Trier",
+    "difficulty": {
+      "1": "Facile",
+      "2": "Normal",
+      "3": "Difficile",
+      "4": "Expert"
+    },
+    "score": "Score {n}",
+    "notPlayed": "Pas jouée",
+    "rewardClaimed": "Récompense récupérée",
+    "rewardWaiting": "Récompense en attente",
+    "rewardLocked": "Récompense non obtenue",
+    "songsPlayed": "Chansons jouées",
+    "beatmapsPlayed": "Partitions jouées",
+    "rewards": "Récompenses",
+    "rewardsLeft": "Récompenses en attente",
+    "rewardsLeftHint": "Jouée, récompense non récupérée",
+    "songs": "Chansons",
+    "search": "Rechercher une chanson"
   }
 }

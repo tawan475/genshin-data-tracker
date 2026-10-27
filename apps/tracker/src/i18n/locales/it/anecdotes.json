@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} primogemme ogni {every} aneddoti registrati",
     "rewardPer": "ogni {every}",
     "active": "In corso",
-    "activeHint": "In corso ora nel gioco (nell'ultima cattura)"
+    "activeHint": "In corso ora nel gioco (nell'ultima cattura)",
+    "wish": "Prossimo desiderio",
+    "wishIn": "{h} h {m} min",
+    "wishReady": "Pronto",
+    "wishLast": "Ultimo desiderio {time}",
+    "wishNext": "Prossimo desiderio {time}"
   },
   "toolbar": {
     "label": "Filtra aneddoti",

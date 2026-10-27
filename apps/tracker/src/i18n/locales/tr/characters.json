@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, yetenekler {auto} {skill} {burst}",
     "friendship": ", arkadaşlık {n}",
     "toDo": "yapılacak: {gaps}",
-    "critDetail": "Yadigarlardan Kritik %{rate} / %{dmg}"
+    "critDetail": "Yadigarlardan Kritik %{rate} / %{dmg}",
+    "levelMax": "Bu yükselişin en yüksek seviyesi",
+    "levelExp": "Seviye TP {exp} / {need}",
+    "friendshipExp": "Arkadaşlık {level} · {exp} / {need} TP",
+    "max": "Maks.",
+    "since": "{date} tarihinden beri",
+    "obtainedAt": "Edinildi: {date}"
   },
   "piece": {
     "levelTitle": "+{level}/{max} · {rarity}★",

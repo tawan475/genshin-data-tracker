@@ -46,7 +46,8 @@
     "hangouts": "Hangout Event",
     "blueprints": "Serenitea Pot",
     "events": "Event",
-    "crafting": "Crafting"
+    "crafting": "Crafting",
+    "music": "Game Musik"
   },
   "archive": {
     "pick": "Tab Arsip",
@@ -206,7 +207,18 @@
     "companions": "Hadiah companion",
     "comfort": "Adeptal Energy",
     "mansion": "Mansion",
-    "outdoor": "Luar ruangan"
+    "outdoor": "Luar ruangan",
+    "comfortHint": "Tertinggi dari realm-mu",
+    "giftSets": "Set Hadiah",
+    "allSets": "Semua",
+    "rewardLeft": "Hadiah belum diambil",
+    "realms": "Realm",
+    "view": "Tampilan",
+    "setMissing": "{name} · belum dipelajari",
+    "setClaimed": "{n} dari {total} hadiah Rekan Perjalanan diambil",
+    "rewardClaimed": "{name} · hadiah diambil",
+    "rewardWaiting": "{name} · hadiah menunggu",
+    "noRewardLeft": "Tidak ada hadiah tersisa"
   },
   "events": {
     "running": "Berlangsung",
@@ -223,5 +235,36 @@
       "forging": "Tempa",
       "processing": "Pengolahan"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Semua",
+      "played": "Dimainkan",
+      "left": "Hadiah belum diambil"
+    },
+    "sort": {
+      "game": "Urutan game",
+      "score": "Skor terbaik",
+      "name": "Nama"
+    },
+    "sortLabel": "Urutkan",
+    "difficulty": {
+      "1": "Mudah",
+      "2": "Normal",
+      "3": "Sulit",
+      "4": "Master"
+    },
+    "score": "Skor {n}",
+    "notPlayed": "Belum dimainkan",
+    "rewardClaimed": "Hadiah diambil",
+    "rewardWaiting": "Hadiah menunggu",
+    "rewardLocked": "Hadiah belum didapat",
+    "songsPlayed": "Lagu dimainkan",
+    "beatmapsPlayed": "Partitur dimainkan",
+    "rewards": "Hadiah",
+    "rewardsLeft": "Hadiah tersisa",
+    "rewardsLeftHint": "Dimainkan, hadiah belum diambil",
+    "songs": "Lagu",
+    "search": "Cari lagu"
   }
 }

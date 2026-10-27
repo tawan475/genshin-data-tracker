@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, Thiên Phú {auto} {skill} {burst}",
     "friendship": ", Độ Yêu Thích {n}",
     "toDo": "cần làm: {gaps}",
-    "critDetail": "Bạo kích {rate}% / {dmg}% từ Thánh Di Vật"
+    "critDetail": "Bạo kích {rate}% / {dmg}% từ Thánh Di Vật",
+    "levelMax": "Cấp cao nhất của lần đột phá này",
+    "levelExp": "EXP cấp {exp} / {need}",
+    "friendshipExp": "Yêu Thích {level} · {exp} / {need} EXP",
+    "max": "Tối đa",
+    "since": "Từ {date}",
+    "obtainedAt": "Nhận ngày {date}"
   },
   "piece": {
     "levelTitle": "+{level} / {max} · {rarity}★",

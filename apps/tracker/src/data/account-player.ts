@@ -9,13 +9,10 @@
  */
 
 import type { LoginResin } from '@gdt/game-data/planner-estimate'
+import type { GiPlayer } from '@gdt/shared'
 
-/** The `gi_player` fields read here (the stored section has more). */
-export interface PlayerValues {
-  ar?: number
-  wl?: number
-  resin?: number
-}
+/** One snapshot's `gi_player`. */
+export type PlayerValues = GiPlayer
 
 /** One snapshot's player section, as a bundle lists it. */
 export interface PlayerSection {
@@ -33,9 +30,11 @@ export interface AccountPlayer {
    * would be stale), with the time of the first snapshot of its session.
    */
   resin: LoginResin | null
+  /** The newest snapshot's whole section (Overview's Traveler panel); null when it has none. */
+  profile: GiPlayer | null
 }
 
-export const NO_PLAYER: AccountPlayer = { ar: null, wl: null, resin: null }
+export const NO_PLAYER: AccountPlayer = { ar: null, wl: null, resin: null, profile: null }
 
 /** Each distinct section is decoded once. */
 export function accountPlayer(
@@ -72,5 +71,5 @@ export function accountPlayer(
     resin = { value, at }
   }
 
-  return { ar, wl, resin }
+  return { ar, wl, resin, profile: newest?.key ? values(newest.key) : null }
 }

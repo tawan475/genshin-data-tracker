@@ -46,7 +46,8 @@
     "hangouts": "Eventos de encuentro",
     "blueprints": "Tetera Caelestis",
     "events": "Eventos",
-    "crafting": "Fabricación"
+    "crafting": "Fabricación",
+    "music": "Juego musical"
   },
   "archive": {
     "pick": "Pestaña del Archivo",
@@ -206,7 +207,18 @@
     "companions": "Recompensas de compañeros",
     "comfort": "Energía adeptal",
     "mansion": "Mansión",
-    "outdoor": "Exterior"
+    "outdoor": "Exterior",
+    "comfortHint": "La más alta de tus dimensiones",
+    "giftSets": "Conjuntos de regalo",
+    "allSets": "Todos",
+    "rewardLeft": "Recompensa pendiente",
+    "realms": "Dimensiones",
+    "view": "Vista",
+    "setMissing": "{name} · no aprendido",
+    "setClaimed": "{n} de {total} recompensas de personajes reclamadas",
+    "rewardClaimed": "{name} · recompensa reclamada",
+    "rewardWaiting": "{name} · recompensa pendiente",
+    "noRewardLeft": "No quedan recompensas"
   },
   "events": {
     "running": "En curso",
@@ -223,5 +235,36 @@
       "forging": "Forja",
       "processing": "Procesamiento"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Todas",
+      "played": "Jugadas",
+      "left": "Recompensa pendiente"
+    },
+    "sort": {
+      "game": "Orden del juego",
+      "score": "Mejor puntuación",
+      "name": "Nombre"
+    },
+    "sortLabel": "Ordenar",
+    "difficulty": {
+      "1": "Fácil",
+      "2": "Normal",
+      "3": "Difícil",
+      "4": "Experto"
+    },
+    "score": "Puntuación {n}",
+    "notPlayed": "Sin jugar",
+    "rewardClaimed": "Recompensa reclamada",
+    "rewardWaiting": "Recompensa pendiente",
+    "rewardLocked": "Recompensa no obtenida",
+    "songsPlayed": "Canciones jugadas",
+    "beatmapsPlayed": "Partituras jugadas",
+    "rewards": "Recompensas",
+    "rewardsLeft": "Recompensas pendientes",
+    "rewardsLeftHint": "Jugada, recompensa sin reclamar",
+    "songs": "Canciones",
+    "search": "Buscar canciones"
   }
 }

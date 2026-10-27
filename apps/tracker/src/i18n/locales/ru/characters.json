@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, таланты {auto} {skill} {burst}",
     "friendship": ", дружба {n}",
     "toDo": "сделать: {gaps}",
-    "critDetail": "Крит {rate}% / {dmg}% от артефактов"
+    "critDetail": "Крит {rate}% / {dmg}% от артефактов",
+    "levelMax": "Наибольший уровень этого возвышения",
+    "levelExp": "Опыт уровня {exp} / {need}",
+    "friendshipExp": "Дружба {level} · {exp} / {need} опыта",
+    "max": "Макс.",
+    "since": "С {date}",
+    "obtainedAt": "Получен {date}"
   },
   "piece": {
     "levelTitle": "+{level} из {max} · {rarity}★",

@@ -54,7 +54,12 @@
     "rewardHint": "每記錄 {every} 則逸聞獲得 {primogems} 原石",
     "rewardPer": "/ {every} 則",
     "active": "進行中",
-    "activeHint": "正在遊戲中進行（依最新擷取）"
+    "activeHint": "正在遊戲中進行（依最新擷取）",
+    "wish": "下次許願",
+    "wishIn": "{h}小時{m}分",
+    "wishReady": "可許願",
+    "wishLast": "上次許願 {time}",
+    "wishNext": "下次許願 {time}"
   },
   "toolbar": {
     "label": "篩選逸聞",

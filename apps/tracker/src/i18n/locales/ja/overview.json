@@ -70,5 +70,16 @@
     "first": "最初のスナップショット",
     "currencyMissing": "モラと原石がありません",
     "noCurrency": "通貨なし"
+  },
+  "traveler": {
+    "label": "主人公",
+    "ar": "冒険ランク {n}",
+    "uid": "UID {uid}",
+    "arExp": "冒険経験 {exp} / {need}",
+    "arExpLabel": "冒険経験",
+    "wl": "世界ランク",
+    "wlLimit": "世界ランク {n} まで上げられます",
+    "stamina": "スタミナ",
+    "storyKeys": "伝説の鍵"
   }
 }

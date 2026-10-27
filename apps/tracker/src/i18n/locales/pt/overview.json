@@ -70,5 +70,16 @@
     "first": "Primeira captura",
     "currencyMissing": "Mora e Gemas Essenciais ausentes",
     "noCurrency": "Sem moedas"
+  },
+  "traveler": {
+    "label": "Viajante",
+    "ar": "Rank de Aventura {n}",
+    "uid": "UID {uid}",
+    "arExp": "EXP de Aventura {exp} / {need}",
+    "arExpLabel": "EXP de Aventura",
+    "wl": "Nível do Mundo",
+    "wlLimit": "Pode subir ao Nível do Mundo {n}",
+    "stamina": "Stamina",
+    "storyKeys": "Chaves de Lendas"
   }
 }

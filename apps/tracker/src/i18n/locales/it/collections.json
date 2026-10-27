@@ -46,7 +46,8 @@
     "hangouts": "Eventi Appuntamento",
     "blueprints": "Teiera della serenità",
     "events": "Eventi",
-    "crafting": "Creazione"
+    "crafting": "Creazione",
+    "music": "Gioco musicale"
   },
   "archive": {
     "pick": "Scheda dell'Archivio",
@@ -206,7 +207,18 @@
     "companions": "Ricompense dei compagni",
     "comfort": "Energia adeptale",
     "mansion": "Dimora",
-    "outdoor": "Esterno"
+    "outdoor": "Esterno",
+    "comfortHint": "Il più alto dei tuoi reami",
+    "giftSets": "Set da regalo",
+    "allSets": "Tutti",
+    "rewardLeft": "Ricompensa da ritirare",
+    "realms": "Reami",
+    "view": "Vista",
+    "setMissing": "{name} · non appreso",
+    "setClaimed": "{n} ricompense dei compagni su {total} ritirate",
+    "rewardClaimed": "{name} · ricompensa ritirata",
+    "rewardWaiting": "{name} · ricompensa da ritirare",
+    "noRewardLeft": "Nessuna ricompensa da ritirare"
   },
   "events": {
     "running": "In corso",
@@ -223,5 +235,36 @@
       "forging": "Forgiatura",
       "processing": "Lavorazione"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Tutte",
+      "played": "Giocate",
+      "left": "Ricompensa da ritirare"
+    },
+    "sort": {
+      "game": "Ordine del gioco",
+      "score": "Miglior punteggio",
+      "name": "Nome"
+    },
+    "sortLabel": "Ordina",
+    "difficulty": {
+      "1": "Facile",
+      "2": "Normale",
+      "3": "Difficile",
+      "4": "Pro"
+    },
+    "score": "Punteggio {n}",
+    "notPlayed": "Non giocata",
+    "rewardClaimed": "Ricompensa ritirata",
+    "rewardWaiting": "Ricompensa da ritirare",
+    "rewardLocked": "Ricompensa non ottenuta",
+    "songsPlayed": "Brani giocati",
+    "beatmapsPlayed": "Spartiti giocati",
+    "rewards": "Ricompense",
+    "rewardsLeft": "Ricompense da ritirare",
+    "rewardsLeftHint": "Giocata, ricompensa non ritirata",
+    "songs": "Brani",
+    "search": "Cerca brani"
   }
 }

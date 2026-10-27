@@ -10,6 +10,7 @@ import {
   HeartHandshake,
   Layers,
   Map as MapIcon,
+  Music,
   PawPrint,
   Shirt,
   Sofa,
@@ -33,6 +34,7 @@ export const COLLECTION_TABS = [
   'wardrobe',
   'hangouts',
   'blueprints',
+  'music',
   'aranara',
 ] as const
 export type CollectionTab = (typeof COLLECTION_TABS)[number]
@@ -55,6 +57,7 @@ export const TAB_LABEL = {
   wardrobe: 'wardrobe',
   hangouts: 'hangouts',
   blueprints: 'blueprints',
+  music: 'music',
   aranara: 'aranara',
 } as const satisfies Record<CollectionTab, string>
 
@@ -73,6 +76,7 @@ export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections 
   wardrobe: 'wardrobe',
   hangouts: 'hangouts',
   blueprints: 'blueprints',
+  music: 'musicGame',
   aranara: 'aranara',
 }
 
@@ -89,6 +93,7 @@ export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
   'wardrobe',
   'hangouts',
   'blueprints',
+  'music',
   'aranara',
 ])
 
@@ -107,6 +112,7 @@ export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
   wardrobe: defineAsyncComponent(() => import('./WardrobeTab.vue')),
   hangouts: defineAsyncComponent(() => import('./HangoutsTab.vue')),
   blueprints: defineAsyncComponent(() => import('./BlueprintsTab.vue')),
+  music: defineAsyncComponent(() => import('./MusicTab.vue')),
   aranara: defineAsyncComponent(() => import('./AranaraTab.vue')),
 }
 
@@ -125,6 +131,7 @@ export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
   wardrobe: Shirt,
   hangouts: HeartHandshake,
   blueprints: Sofa,
+  music: Music,
   aranara: Sprout,
 }
 
@@ -143,6 +150,7 @@ export const TAB_TOPICS: Readonly<Record<CollectionTab, readonly CollectionTopic
   wardrobe: ['wardrobe'],
   hangouts: ['hangouts'],
   blueprints: ['home'],
+  music: ['music'],
   aranara: ['aranara'],
 }
 
@@ -155,5 +163,6 @@ export const HUB_TOPICS: readonly CollectionTopic[] = [
   'crafting',
   'wardrobe',
   'home',
+  'music',
   'aranara',
 ]

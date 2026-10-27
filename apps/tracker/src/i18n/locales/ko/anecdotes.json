@@ -54,7 +54,12 @@
     "rewardHint": "일화 {every}개를 기록할 때마다 원석 {primogems}개",
     "rewardPer": "{every}개당",
     "active": "진행 중",
-    "activeHint": "게임에서 진행 중 (최신 캡처 기준)"
+    "activeHint": "게임에서 진행 중 (최신 캡처 기준)",
+    "wish": "다음 소원",
+    "wishIn": "{h}시간 {m}분",
+    "wishReady": "가능",
+    "wishLast": "지난 소원 {time}",
+    "wishNext": "다음 소원 {time}"
   },
   "toolbar": {
     "label": "일화 필터",

@@ -46,7 +46,8 @@
     "hangouts": "Verabredungen",
     "blueprints": "Teekanne der Gelassenheit",
     "events": "Events",
-    "crafting": "Herstellung"
+    "crafting": "Herstellung",
+    "music": "Musikspiel"
   },
   "archive": {
     "pick": "Handbuch-Reiter",
@@ -206,7 +207,18 @@
     "companions": "Begleiterbelohnungen",
     "comfort": "Adeptenenergie",
     "mansion": "Anwesen",
-    "outdoor": "Außen"
+    "outdoor": "Außen",
+    "comfortHint": "Der höchste deiner Bereiche",
+    "giftSets": "Geschenk-Sets",
+    "allSets": "Alle",
+    "rewardLeft": "Belohnung offen",
+    "realms": "Bereiche",
+    "view": "Ansicht",
+    "setMissing": "{name} · nicht gelernt",
+    "setClaimed": "{n} von {total} Gefährten-Belohnungen erhalten",
+    "rewardClaimed": "{name} · Belohnung erhalten",
+    "rewardWaiting": "{name} · Belohnung offen",
+    "noRewardLeft": "Keine Belohnungen offen"
   },
   "events": {
     "running": "Laufend",
@@ -223,5 +235,36 @@
       "forging": "Schmieden",
       "processing": "Verarbeitung"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Alle",
+      "played": "Gespielt",
+      "left": "Belohnung offen"
+    },
+    "sort": {
+      "game": "Spielreihenfolge",
+      "score": "Bestpunktzahl",
+      "name": "Name"
+    },
+    "sortLabel": "Sortieren",
+    "difficulty": {
+      "1": "Leicht",
+      "2": "Normal",
+      "3": "Schwierig",
+      "4": "Experte"
+    },
+    "score": "Punktzahl {n}",
+    "notPlayed": "Nicht gespielt",
+    "rewardClaimed": "Belohnung erhalten",
+    "rewardWaiting": "Belohnung offen",
+    "rewardLocked": "Belohnung nicht verdient",
+    "songsPlayed": "Gespielte Lieder",
+    "beatmapsPlayed": "Gespielte Notenblätter",
+    "rewards": "Belohnungen",
+    "rewardsLeft": "Offene Belohnungen",
+    "rewardsLeftHint": "Gespielt, Belohnung nicht abgeholt",
+    "songs": "Lieder",
+    "search": "Lieder suchen"
   }
 }

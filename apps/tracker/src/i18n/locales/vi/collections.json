@@ -46,7 +46,8 @@
     "hangouts": "Sự Kiện Hẹn Hò",
     "blueprints": "Ấm Trần Ca",
     "events": "Sự Kiện",
-    "crafting": "Chế Tạo"
+    "crafting": "Chế Tạo",
+    "music": "Trò chơi âm nhạc"
   },
   "archive": {
     "pick": "Mục Thư Viện",
@@ -206,7 +207,18 @@
     "companions": "Thưởng bạn đồng hành",
     "comfort": "Tiên Lực Động Thiên",
     "mansion": "Dinh thự",
-    "outdoor": "Ngoài trời"
+    "outdoor": "Ngoài trời",
+    "comfortHint": "Cao nhất trong các động thiên của bạn",
+    "giftSets": "Bộ Quà Tặng",
+    "allSets": "Tất cả",
+    "rewardLeft": "Chưa nhận thưởng",
+    "realms": "Động thiên",
+    "view": "Xem",
+    "setMissing": "{name} · chưa học",
+    "setClaimed": "Đã nhận {n} / {total} phần thưởng Bạn Đồng Hành",
+    "rewardClaimed": "{name} · đã nhận thưởng",
+    "rewardWaiting": "{name} · chờ nhận thưởng",
+    "noRewardLeft": "Không còn phần thưởng"
   },
   "events": {
     "running": "Đang diễn ra",
@@ -223,5 +235,36 @@
       "forging": "Rèn",
       "processing": "Gia Công"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Tất cả",
+      "played": "Đã chơi",
+      "left": "Chưa nhận thưởng"
+    },
+    "sort": {
+      "game": "Thứ tự trong game",
+      "score": "Điểm cao nhất",
+      "name": "Tên"
+    },
+    "sortLabel": "Sắp xếp",
+    "difficulty": {
+      "1": "Dễ",
+      "2": "Thường",
+      "3": "Khó",
+      "4": "Bậc Thầy"
+    },
+    "score": "Điểm {n}",
+    "notPlayed": "Chưa chơi",
+    "rewardClaimed": "Đã nhận thưởng",
+    "rewardWaiting": "Chờ nhận thưởng",
+    "rewardLocked": "Chưa đạt thưởng",
+    "songsPlayed": "Bài đã chơi",
+    "beatmapsPlayed": "Bản nhạc đã chơi",
+    "rewards": "Phần thưởng",
+    "rewardsLeft": "Thưởng chưa nhận",
+    "rewardsLeftHint": "Đã chơi, chưa nhận thưởng",
+    "songs": "Bài hát",
+    "search": "Tìm bài hát"
   }
 }

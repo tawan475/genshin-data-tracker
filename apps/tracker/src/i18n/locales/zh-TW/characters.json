@@ -103,7 +103,13 @@
     "label": "{name}，{level}，{constellation}命，天賦 {auto} {skill} {burst}",
     "friendship": "，好感度 {n}",
     "toDo": "待辦：{gaps}",
-    "critDetail": "聖遺物暴擊 {rate}% / {dmg}%"
+    "critDetail": "聖遺物暴擊 {rate}% / {dmg}%",
+    "levelMax": "目前突破的最高等級",
+    "levelExp": "等級經驗 {exp} / {need}",
+    "friendshipExp": "好感 {level} · {exp} / {need} 經驗",
+    "max": "已滿",
+    "since": "{date} 起",
+    "obtainedAt": "獲得於 {date}"
   },
   "piece": {
     "levelTitle": "+{level}/{max} · {rarity}★",

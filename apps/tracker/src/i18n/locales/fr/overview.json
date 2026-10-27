@@ -70,5 +70,16 @@
     "first": "Premier instantané",
     "currencyMissing": "Mora et Primo-gemmes absents",
     "noCurrency": "Aucune devise"
+  },
+  "traveler": {
+    "label": "Voyageur",
+    "ar": "Niv. d'aventure {n}",
+    "uid": "UID {uid}",
+    "arExp": "EXP d'aventure {exp} / {need}",
+    "arExpLabel": "EXP d'aventure",
+    "wl": "Niv. du monde",
+    "wlLimit": "Peut monter au Niv. du monde {n}",
+    "stamina": "Endurance",
+    "storyKeys": "Clés des légendes"
   }
 }

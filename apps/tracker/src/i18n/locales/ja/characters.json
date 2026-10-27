@@ -103,7 +103,13 @@
     "label": "{name}、{level}、C{constellation}、天賦 {auto} {skill} {burst}",
     "friendship": "、好感度 {n}",
     "toDo": "やること：{gaps}",
-    "critDetail": "聖遺物の会心 {rate}% / {dmg}%"
+    "critDetail": "聖遺物の会心 {rate}% / {dmg}%",
+    "levelMax": "この突破での最大レベル",
+    "levelExp": "レベル経験値 {exp} / {need}",
+    "friendshipExp": "好感度 {level} · {exp} / {need} 経験値",
+    "max": "最大",
+    "since": "{date} から",
+    "obtainedAt": "入手日 {date}"
   },
   "piece": {
     "levelTitle": "+{level}/{max} · ★{rarity}",

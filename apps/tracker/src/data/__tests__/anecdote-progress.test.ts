@@ -8,6 +8,7 @@ import {
   countShown,
   filterAnecdotes,
   markTarget,
+  nextWishAt,
   plainText,
   shortTitle,
   splitDone,
@@ -244,5 +245,21 @@ describe('the real game data', () => {
     expect(p.total).toBeLessThan(data.anecdotes.length)
     expect(p.areas.map((a) => a.area)).toEqual(data.areas.map((a) => a.id))
     for (const a of data.counted) expect(data.npcById.has(a.npc), String(a.id)).toBe(true)
+  })
+})
+
+describe('next wish', () => {
+  it('opens the cooldown after the last wish', () => {
+    const captured = capturedAnecdotes(
+      { anecdotes: {}, unlockedAreas: [], wish: { npcId: 9801, lastWishTime: 1_700_000_000 } },
+      1,
+    )
+    expect(captured.wish).toEqual({ npcId: 9801, lastWishTime: 1_700_000_000 })
+    expect(nextWishAt(captured.wish, 48)).toBe((1_700_000_000 + 48 * 3600) * 1000)
+  })
+
+  it('is unknown without a wish', () => {
+    expect(capturedAnecdotes({ anecdotes: {}, unlockedAreas: [] }, 1).wish).toBeNull()
+    expect(nextWishAt(NO_CAPTURED_ANECDOTES.wish, 48)).toBeNull()
   })
 })

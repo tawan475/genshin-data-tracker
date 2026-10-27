@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, พรสวรรค์ {auto} {skill} {burst}",
     "friendship": ", ความประทับใจ {n}",
     "toDo": "สิ่งที่ต้องทำ: {gaps}",
-    "critDetail": "คริ {rate}% / {dmg}% จากอาร์ติแฟกต์"
+    "critDetail": "คริ {rate}% / {dmg}% จากอาร์ติแฟกต์",
+    "levelMax": "เลเวลสูงสุดของขั้นทะลวงนี้",
+    "levelExp": "EXP เลเวล {exp} / {need}",
+    "friendshipExp": "ความประทับใจ {level} · {exp} / {need} EXP",
+    "max": "สูงสุด",
+    "since": "ตั้งแต่ {date}",
+    "obtainedAt": "ได้รับเมื่อ {date}"
   },
   "piece": {
     "levelTitle": "+{level} จาก {max} · {rarity}★",

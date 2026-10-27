@@ -70,5 +70,16 @@
     "first": "สแนปช็อตแรก",
     "currencyMissing": "ไม่มี Mora และ Primogem",
     "noCurrency": "ไม่มีสกุลเงิน"
+  },
+  "traveler": {
+    "label": "ตัวเอก",
+    "ar": "แรงก์ผจญภัย {n}",
+    "uid": "UID {uid}",
+    "arExp": "EXP ผจญภัย {exp} / {need}",
+    "arExpLabel": "EXP ผจญภัย",
+    "wl": "ระดับโลก",
+    "wlLimit": "เพิ่มได้ถึงระดับโลก {n}",
+    "stamina": "พลังกาย",
+    "storyKeys": "กุญแจในตำนาน"
   }
 }

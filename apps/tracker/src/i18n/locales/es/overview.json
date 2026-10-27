@@ -70,5 +70,16 @@
     "first": "Primera captura",
     "currencyMissing": "Faltan Mora y protogemas",
     "noCurrency": "Sin monedas"
+  },
+  "traveler": {
+    "label": "Viajero",
+    "ar": "Rango de Aventura {n}",
+    "uid": "UID {uid}",
+    "arExp": "EXP de Aventura {exp} / {need}",
+    "arExpLabel": "EXP de Aventura",
+    "wl": "Nivel de Mundo",
+    "wlLimit": "Puede subir al Nivel de Mundo {n}",
+    "stamina": "Aguante",
+    "storyKeys": "Llaves legendarias"
   }
 }

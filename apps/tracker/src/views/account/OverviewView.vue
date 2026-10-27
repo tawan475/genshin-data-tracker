@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { loadCollections } from '@gdt/game-data/collections'
 import type { SnapshotResponse } from '@gdt/shared'
 import { computed, shallowRef, watch } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
@@ -9,6 +10,7 @@ import DetailedProgression from '@/components/progression/DetailedProgression.vu
 import MonthlyAnalysisCard from '@/components/progression/MonthlyAnalysisCard.vue'
 import OverviewSkeleton from '@/components/overview/OverviewSkeleton.vue'
 import RecentSnapshots from '@/components/overview/RecentSnapshots.vue'
+import TravelerPanel from '@/components/overview/TravelerPanel.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
@@ -17,7 +19,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import LiveStrip from '@/components/live/LiveStrip.vue'
 import SessionList from '@/components/snapshots/SessionList.vue'
-import { loadLive, loadPoints, loadSnapshots } from '@/data/account-data'
+import { loadAccountPlayer, loadLive, loadPoints, loadSnapshots } from '@/data/account-data'
 import {
   buildHistory,
   currencyMissing,
@@ -81,6 +83,23 @@ const liveFigures = computed(() => {
   const latest = account.value.latest
   if (!journal?.open || !latest || journal.base?.snapshotId !== latest.id) return null
   return journal.changes?.length ? (journal.figures ?? null) : null
+})
+
+// The Traveler (gi_player of the newest snapshot) and the EXP its next rank needs.
+const player = useResource(
+  () => account.value,
+  async (a) => (a.latest ? (await loadAccountPlayer(a)).profile : null),
+)
+const arLevels = useResource(
+  () => 'player',
+  async () => (await loadCollections(['player'])).arLevels,
+)
+const traveler = computed(() => {
+  const profile = player.data.value
+  if (!profile || (profile.ar === undefined && profile.wl === undefined)) return null
+  const row = arLevels.data.value?.find((r) => r.id === profile.ar)
+  const need = typeof row?.exp === 'number' && row.exp > 0 ? row.exp : null
+  return { profile, need }
 })
 
 // Derived once per data version; the components below only read.
@@ -242,6 +261,7 @@ const importRoute = computed(() => ({
 
   <template v-else>
     <LiveStrip v-if="list" class="mb-3" :live="live.data.value" :snapshots="list" :now="liveNow" />
+    <TravelerPanel v-if="traveler" class="mb-3" :player="traveler.profile" :need="traveler.need" />
     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       <UiStat
         v-for="tile in tiles"

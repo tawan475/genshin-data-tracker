@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} Primo-gemmes toutes les {every} anecdotes enregistrées",
     "rewardPer": "par {every}",
     "active": "En cours",
-    "activeHint": "En cours dans le jeu (dans la capture la plus récente)"
+    "activeHint": "En cours dans le jeu (dans la capture la plus récente)",
+    "wish": "Prochain vœu",
+    "wishIn": "{h} h {m} min",
+    "wishReady": "Prêt",
+    "wishLast": "Dernier vœu {time}",
+    "wishNext": "Prochain vœu {time}"
   },
   "toolbar": {
     "label": "Filtrer les anecdotes",

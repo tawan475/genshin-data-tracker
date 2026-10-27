@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} primogem untuk setiap {every} anekdot yang tercatat",
     "rewardPer": "per {every}",
     "active": "Aktif",
-    "activeHint": "Sedang berlangsung di game (di tangkapan terbaru)"
+    "activeHint": "Sedang berlangsung di game (di tangkapan terbaru)",
+    "wish": "Permohonan berikutnya",
+    "wishIn": "{h} jam {m} mnt",
+    "wishReady": "Siap",
+    "wishLast": "Permohonan terakhir {time}",
+    "wishNext": "Permohonan berikutnya {time}"
   },
   "toolbar": {
     "label": "Filter anekdot",

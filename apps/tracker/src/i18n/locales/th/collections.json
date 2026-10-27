@@ -46,7 +46,8 @@
     "hangouts": "Hangout Event",
     "blueprints": "Serenitea Pot",
     "events": "กิจกรรม",
-    "crafting": "การประดิษฐ์"
+    "crafting": "การประดิษฐ์",
+    "music": "เกมดนตรี"
   },
   "archive": {
     "pick": "แท็บอัลบั้ม",
@@ -206,7 +207,18 @@
     "companions": "รางวัลจากเพื่อนร่วมทาง",
     "comfort": "พลังเซียน",
     "mansion": "คฤหาสน์",
-    "outdoor": "ภายนอก"
+    "outdoor": "ภายนอก",
+    "comfortHint": "ค่าสูงสุดในอาณาเขตของคุณ",
+    "giftSets": "เซ็ตรางวัล",
+    "allSets": "ทั้งหมด",
+    "rewardLeft": "ยังไม่รับรางวัล",
+    "realms": "อาณาเขต",
+    "view": "มุมมอง",
+    "setMissing": "{name} · ยังไม่ได้เรียนรู้",
+    "setClaimed": "รับรางวัลเพื่อนร่วมทางแล้ว {n} / {total}",
+    "rewardClaimed": "{name} · รับรางวัลแล้ว",
+    "rewardWaiting": "{name} · รอรับรางวัล",
+    "noRewardLeft": "ไม่มีรางวัลค้าง"
   },
   "events": {
     "running": "กำลังดำเนินอยู่",
@@ -223,5 +235,36 @@
       "forging": "การตีเหล็ก",
       "processing": "การแปรรูป"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "ทั้งหมด",
+      "played": "เล่นแล้ว",
+      "left": "ยังไม่รับรางวัล"
+    },
+    "sort": {
+      "game": "ลำดับในเกม",
+      "score": "คะแนนสูงสุด",
+      "name": "ชื่อ"
+    },
+    "sortLabel": "เรียง",
+    "difficulty": {
+      "1": "ง่าย",
+      "2": "ธรรมดา",
+      "3": "ยาก",
+      "4": "มาสเตอร์"
+    },
+    "score": "คะแนน {n}",
+    "notPlayed": "ยังไม่เล่น",
+    "rewardClaimed": "รับรางวัลแล้ว",
+    "rewardWaiting": "รอรับรางวัล",
+    "rewardLocked": "ยังไม่ได้รางวัล",
+    "songsPlayed": "เพลงที่เล่นแล้ว",
+    "beatmapsPlayed": "โน้ตที่เล่นแล้ว",
+    "rewards": "รางวัล",
+    "rewardsLeft": "รางวัลค้างรับ",
+    "rewardsLeftHint": "เล่นแล้ว ยังไม่รับรางวัล",
+    "songs": "เพลง",
+    "search": "ค้นหาเพลง"
   }
 }

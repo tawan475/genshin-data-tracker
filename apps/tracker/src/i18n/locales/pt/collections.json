@@ -46,7 +46,8 @@
     "hangouts": "Eventos de Encontro",
     "blueprints": "Bule de Chá",
     "events": "Eventos",
-    "crafting": "Criação"
+    "crafting": "Criação",
+    "music": "Jogo Musical"
   },
   "archive": {
     "pick": "Aba do Arquivo",
@@ -206,7 +207,18 @@
     "companions": "Recompensas de companheiros",
     "comfort": "Energia Adeptal",
     "mansion": "Mansão",
-    "outdoor": "Exterior"
+    "outdoor": "Exterior",
+    "comfortHint": "O maior dos seus reinos",
+    "giftSets": "Conjuntos de Presente",
+    "allSets": "Todos",
+    "rewardLeft": "Recompensa pendente",
+    "realms": "Reinos",
+    "view": "Visualização",
+    "setMissing": "{name} · não aprendido",
+    "setClaimed": "{n} de {total} recompensas de companheiros coletadas",
+    "rewardClaimed": "{name} · recompensa coletada",
+    "rewardWaiting": "{name} · recompensa pendente",
+    "noRewardLeft": "Nenhuma recompensa pendente"
   },
   "events": {
     "running": "Em andamento",
@@ -223,5 +235,36 @@
       "forging": "Forja",
       "processing": "Processamento"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Todas",
+      "played": "Jogadas",
+      "left": "Recompensa pendente"
+    },
+    "sort": {
+      "game": "Ordem do jogo",
+      "score": "Melhor pontuação",
+      "name": "Nome"
+    },
+    "sortLabel": "Ordenar",
+    "difficulty": {
+      "1": "Fácil",
+      "2": "Normal",
+      "3": "Difícil",
+      "4": "Mestre"
+    },
+    "score": "Pontuação {n}",
+    "notPlayed": "Não jogada",
+    "rewardClaimed": "Recompensa coletada",
+    "rewardWaiting": "Recompensa pendente",
+    "rewardLocked": "Recompensa não obtida",
+    "songsPlayed": "Músicas jogadas",
+    "beatmapsPlayed": "Partituras jogadas",
+    "rewards": "Recompensas",
+    "rewardsLeft": "Recompensas pendentes",
+    "rewardsLeftHint": "Jogada, recompensa não coletada",
+    "songs": "Músicas",
+    "search": "Buscar músicas"
   }
 }

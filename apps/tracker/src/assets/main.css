@@ -52,6 +52,8 @@
   --danger-border: #fecaca;
   --success-text: #047857;
   --warning-text: #b45309;
+  /* Friendship: the roster card's heart and bar (pink-600; data, not a state). */
+  --friendship: #db2777;
   --focus-ring: #6366f1;
   --paimon: #f59e0b;
   --paimon-glow: rgba(245, 158, 11, 0.4);
@@ -133,6 +135,7 @@
   --danger-border: rgba(127, 29, 29, 0.6);
   --success-text: #6ee7b7;
   --warning-text: #fcd34d;
+  --friendship: #f472b6;
   --focus-ring: #818cf8;
   --shadow-overlay: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
@@ -230,6 +233,7 @@
   --color-danger-border: var(--danger-border);
   --color-success-text: var(--success-text);
   --color-warning-text: var(--warning-text);
+  --color-friendship: var(--friendship);
   --color-focus-ring: var(--focus-ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);

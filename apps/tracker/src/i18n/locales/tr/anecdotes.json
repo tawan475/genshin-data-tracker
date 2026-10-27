@@ -54,7 +54,12 @@
     "rewardHint": "Kaydedilen her {every} anekdot için {primogems} köken taşı",
     "rewardPer": "{every} başına",
     "active": "Etkin",
-    "activeHint": "Şu an oyunda devam ediyor (en yeni taramada)"
+    "activeHint": "Şu an oyunda devam ediyor (en yeni taramada)",
+    "wish": "Sonraki dilek",
+    "wishIn": "{h} sa {m} dk",
+    "wishReady": "Hazır",
+    "wishLast": "Son dilek {time}",
+    "wishNext": "Sonraki dilek {time}"
   },
   "toolbar": {
     "label": "Anekdotları filtrele",

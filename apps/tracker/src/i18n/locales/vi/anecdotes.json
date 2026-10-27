@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} Nguyên Thạch cho mỗi {every} giai thoại được ghi lại",
     "rewardPer": "mỗi {every}",
     "active": "Đang làm",
-    "activeHint": "Đang diễn ra trong game (trong bản ghi mới nhất)"
+    "activeHint": "Đang diễn ra trong game (trong bản ghi mới nhất)",
+    "wish": "Điều ước tiếp theo",
+    "wishIn": "{h} giờ {m} phút",
+    "wishReady": "Sẵn sàng",
+    "wishLast": "Điều ước trước {time}",
+    "wishNext": "Điều ước tiếp theo {time}"
   },
   "toolbar": {
     "label": "Lọc giai thoại",

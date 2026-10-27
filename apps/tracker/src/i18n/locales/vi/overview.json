@@ -70,5 +70,16 @@
     "first": "Bản chụp đầu tiên",
     "currencyMissing": "Thiếu Mora và Nguyên Thạch",
     "noCurrency": "Không có tiền tệ"
+  },
+  "traveler": {
+    "label": "Nhà Lữ Hành",
+    "ar": "Hạng Mạo Hiểm {n}",
+    "uid": "UID {uid}",
+    "arExp": "EXP Mạo Hiểm {exp} / {need}",
+    "arExpLabel": "EXP Mạo Hiểm",
+    "wl": "Cấp Thế Giới",
+    "wlLimit": "Có thể nâng lên Cấp Thế Giới {n}",
+    "stamina": "Thể Lực",
+    "storyKeys": "Chìa Khóa Truyền Thuyết"
   }
 }

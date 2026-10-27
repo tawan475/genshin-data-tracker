@@ -54,6 +54,11 @@ export function formatCompact(value: number): string {
   return Math.abs(value) < 10_000 ? formatNumber(value) : numberFormat(COMPACT).format(value)
 }
 
+/** Compact from 1,000 on ("2.9K"): a figure in a narrow place (a roster card's bars). */
+export function formatShort(value: number): string {
+  return Math.abs(value) < 1_000 ? formatNumber(value) : numberFormat(COMPACT).format(value)
+}
+
 export function formatSigned(value: number): string {
   if (value === 0) return '0'
   return `${value > 0 ? '+' : '−'}${formatCompact(Math.abs(value))}`

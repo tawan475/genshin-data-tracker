@@ -70,5 +70,16 @@
     "first": "Erster Snapshot",
     "currencyMissing": "Mora und Urgesteine fehlen",
     "noCurrency": "Keine Währung"
+  },
+  "traveler": {
+    "label": "Reisender",
+    "ar": "Abenteuerstufe {n}",
+    "uid": "UID {uid}",
+    "arExp": "Abenteuer-EP {exp} / {need}",
+    "arExpLabel": "Abenteuer-EP",
+    "wl": "Weltstufe",
+    "wlLimit": "Kann auf Weltstufe {n} erhöht werden",
+    "stamina": "Ausdauer",
+    "storyKeys": "Legendenschlüssel"
   }
 }

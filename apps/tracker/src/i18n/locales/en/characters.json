@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, talents {auto} {skill} {burst}",
     "friendship": ", friendship {n}",
     "toDo": "to do: {gaps}",
-    "critDetail": "CRIT {rate}% / {dmg}% from artifacts"
+    "critDetail": "CRIT {rate}% / {dmg}% from artifacts",
+    "levelMax": "Highest level for this ascension",
+    "levelExp": "Level EXP {exp} / {need}",
+    "friendshipExp": "Friendship {level} · {exp} / {need} EXP",
+    "max": "Max",
+    "since": "Since {date}",
+    "obtainedAt": "Obtained {date}"
   },
   "piece": {
     "levelTitle": "+{level} of {max} · {rarity}★",

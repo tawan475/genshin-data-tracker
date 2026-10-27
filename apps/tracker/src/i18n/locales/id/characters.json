@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, talenta {auto} {skill} {burst}",
     "friendship": ", persahabatan {n}",
     "toDo": "yang perlu: {gaps}",
-    "critDetail": "CRIT {rate}% / {dmg}% dari artefak"
+    "critDetail": "CRIT {rate}% / {dmg}% dari artefak",
+    "levelMax": "Level tertinggi ascension ini",
+    "levelExp": "EXP level {exp} / {need}",
+    "friendshipExp": "Persahabatan {level} · {exp} / {need} EXP",
+    "max": "Maks",
+    "since": "Sejak {date}",
+    "obtainedAt": "Didapat {date}"
   },
   "piece": {
     "levelTitle": "+{level} dari {max} · {rarity}★",

@@ -46,7 +46,8 @@
     "hangouts": "Встречи",
     "blueprints": "Чайник безмятежности",
     "events": "События",
-    "crafting": "Создание"
+    "crafting": "Создание",
+    "music": "Музыкальная игра"
   },
   "archive": {
     "pick": "Раздел архива",
@@ -206,7 +207,18 @@
     "companions": "Награды спутников",
     "comfort": "Энергия обители",
     "mansion": "Особняк",
-    "outdoor": "Снаружи"
+    "outdoor": "Снаружи",
+    "comfortHint": "Наибольшее из ваших царств",
+    "giftSets": "Подарочные наборы",
+    "allSets": "Все",
+    "rewardLeft": "Награда не получена",
+    "realms": "Царства",
+    "view": "Вид",
+    "setMissing": "{name} · не изучено",
+    "setClaimed": "Получено наград компаньонов: {n} из {total}",
+    "rewardClaimed": "{name} · награда получена",
+    "rewardWaiting": "{name} · награда ждёт",
+    "noRewardLeft": "Наград не осталось"
   },
   "events": {
     "running": "Идут",
@@ -223,5 +235,36 @@
       "forging": "Ковка",
       "processing": "Обработка"
     }
+  },
+  "music": {
+    "filters": {
+      "all": "Все",
+      "played": "Сыгранные",
+      "left": "Награда не получена"
+    },
+    "sort": {
+      "game": "Порядок игры",
+      "score": "Лучший счёт",
+      "name": "Название"
+    },
+    "sortLabel": "Сортировка",
+    "difficulty": {
+      "1": "Лёгкая",
+      "2": "Обычная",
+      "3": "Тяжёлая",
+      "4": "Мастер"
+    },
+    "score": "Счёт {n}",
+    "notPlayed": "Не сыграно",
+    "rewardClaimed": "Награда получена",
+    "rewardWaiting": "Награда ждёт",
+    "rewardLocked": "Награда не заработана",
+    "songsPlayed": "Сыгранные песни",
+    "beatmapsPlayed": "Сыгранные партитуры",
+    "rewards": "Награды",
+    "rewardsLeft": "Награды не получены",
+    "rewardsLeftHint": "Сыграно, награда не получена",
+    "songs": "Песни",
+    "search": "Поиск песен"
   }
 }

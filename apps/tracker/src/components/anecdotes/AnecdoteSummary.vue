@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { AnecdoteProgress, CapturedAnecdotes } from '@/data/anecdote-progress'
+import { computed, shallowRef } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
+import { Sparkles } from 'lucide-vue-next'
+import type { AnecdoteTexts } from '@gdt/game-data'
+import { characterInfo } from '@gdt/game-data/catalog'
+import { toGoodKey } from '@gdt/game-data/good-key'
+import { nextWishAt, type AnecdoteProgress, type CapturedAnecdotes } from '@/data/anecdote-progress'
+import GameIcon from '@/components/ui/GameIcon.vue'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
-import { materialIcon } from '@/lib/assets'
+import { characterIcon, materialIcon } from '@/lib/assets'
 import { t } from '@/i18n'
-import { formatNumber } from '@/lib/format'
+import { formatDateTime, formatNumber } from '@/lib/format'
 
 /**
  * Done / total, the stamps toward the next reward (the newest capture's
@@ -17,7 +23,51 @@ const props = defineProps<{
   captured: CapturedAnecdotes
   rewardEvery: number
   rewardPrimogems: number
+  /** Hours between two wishes (the game data's constant). */
+  wishCooldownHours: number
+  text: AnecdoteTexts
+  /** English names, for the portrait's GOOD key. */
+  english: AnecdoteTexts
 }>()
+
+// The countdown moves once a minute.
+const now = shallowRef(Date.now())
+useIntervalFn(() => (now.value = Date.now()), 60_000)
+
+/**
+ * The next wish (choosing whom to meet): when it opens, how long until then
+ * ("31h 12m", "Ready" once open), and the NPC wished for last with their
+ * portrait when the game data knows them as a character.
+ */
+const wish = computed(() => {
+  const w = props.captured.wish
+  const at = nextWishAt(w, props.wishCooldownHours)
+  if (!w || at === null) return null
+  const left = Math.max(0, at - now.value)
+  const hours = Math.floor(left / 3_600_000)
+  const minutes = Math.ceil((left % 3_600_000) / 60_000)
+  const npc = w.npcId !== undefined ? (props.text.npcs.get(w.npcId) ?? null) : null
+  const english = w.npcId !== undefined ? props.english.npcs.get(w.npcId) : undefined
+  const key = english ? toGoodKey(english) : ''
+  return {
+    ready: left === 0,
+    value:
+      left === 0
+        ? t('anecdotes.summary.wishReady')
+        : minutes === 60
+          ? t('anecdotes.summary.wishIn', { h: hours + 1, m: 0 })
+          : t('anecdotes.summary.wishIn', { h: hours, m: minutes }),
+    npc,
+    portrait: key && characterInfo(key) ? characterIcon(key) : '',
+    hint: [
+      t('anecdotes.summary.wishLast', { time: formatDateTime(w.lastWishTime * 1000) }),
+      npc,
+      t('anecdotes.summary.wishNext', { time: formatDateTime(at) }),
+    ]
+      .filter(Boolean)
+      .join(' · '),
+  }
+})
 
 const primogem = materialIcon('Primogem')
 
@@ -49,7 +99,8 @@ const stampsTitle = computed(() =>
 
 <template>
   <ul
-    class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
+    class="grid grid-cols-2 gap-2 sm:gap-3"
+    :class="wish ? 'md:grid-cols-3 xl:grid-cols-5' : 'md:grid-cols-4'"
     :aria-label="$t('anecdotes.summary.label')"
   >
     <li class="flex min-w-0">
@@ -114,6 +165,19 @@ const stampsTitle = computed(() =>
         exact
         :hint="$t('anecdotes.summary.activeHint')"
       />
+    </li>
+    <li v-if="wish" class="flex min-w-0">
+      <UiStat
+        :label="$t('anecdotes.summary.wish')"
+        :value="wish.value"
+        :tone="wish.ready ? 'success' : undefined"
+        :hint="wish.hint"
+      >
+        <template v-if="wish.npc" #media>
+          <GameIcon :src="wish.portrait" :name="wish.npc" :rarity="4" size="md" />
+        </template>
+        <template #icon><Sparkles class="size-3.5" aria-hidden="true" /></template>
+      </UiStat>
     </li>
   </ul>
 </template>

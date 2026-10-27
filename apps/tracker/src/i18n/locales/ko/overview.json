@@ -70,5 +70,16 @@
     "first": "첫 스냅샷",
     "currencyMissing": "모라와 원석 없음",
     "noCurrency": "화폐 없음"
+  },
+  "traveler": {
+    "label": "주인공",
+    "ar": "모험 등급 {n}",
+    "uid": "UID {uid}",
+    "arExp": "모험 경력 {exp} / {need}",
+    "arExpLabel": "모험 경력",
+    "wl": "월드 레벨",
+    "wlLimit": "월드 레벨 {n}까지 올릴 수 있음",
+    "stamina": "스태미나",
+    "storyKeys": "전설의 열쇠"
   }
 }

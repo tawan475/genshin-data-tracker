@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} protogemas cada {every} anécdotas registradas",
     "rewardPer": "cada {every}",
     "active": "Activas",
-    "activeHint": "En curso ahora en el juego (en la captura más reciente)"
+    "activeHint": "En curso ahora en el juego (en la captura más reciente)",
+    "wish": "Próximo deseo",
+    "wishIn": "{h} h {m} min",
+    "wishReady": "Listo",
+    "wishLast": "Último deseo {time}",
+    "wishNext": "Próximo deseo {time}"
   },
   "toolbar": {
     "label": "Filtrar anécdotas",

@@ -54,7 +54,12 @@
     "rewardHint": "秘話を{every}件記録するごとに原石 {primogems}",
     "rewardPer": "{every}件ごと",
     "active": "進行中",
-    "activeHint": "ゲーム内で進行中（最新キャプチャ時点）"
+    "activeHint": "ゲーム内で進行中（最新キャプチャ時点）",
+    "wish": "次の願い",
+    "wishIn": "{h}時間{m}分",
+    "wishReady": "願えます",
+    "wishLast": "前回の願い {time}",
+    "wishNext": "次の願い {time}"
   },
   "toolbar": {
     "label": "秘話を絞り込む",

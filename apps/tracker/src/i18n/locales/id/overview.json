@@ -70,5 +70,16 @@
     "first": "Snapshot pertama",
     "currencyMissing": "Mora dan primogem tidak ada",
     "noCurrency": "Tidak ada mata uang"
+  },
+  "traveler": {
+    "label": "Pengembara",
+    "ar": "Rank Adventure {n}",
+    "uid": "UID {uid}",
+    "arExp": "Adventure EXP {exp} / {need}",
+    "arExpLabel": "Adventure EXP",
+    "wl": "Level Dunia",
+    "wlLimit": "Bisa dinaikkan ke Level Dunia {n}",
+    "stamina": "Stamina",
+    "storyKeys": "Kunci Story"
   }
 }

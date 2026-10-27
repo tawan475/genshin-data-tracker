@@ -70,5 +70,16 @@
     "first": "İlk anlık görüntü",
     "currencyMissing": "Mora ve köken taşları eksik",
     "noCurrency": "Para birimi yok"
+  },
+  "traveler": {
+    "label": "Gezgin",
+    "ar": "Macera Rütbesi {n}",
+    "uid": "UID {uid}",
+    "arExp": "Macera TP {exp} / {need}",
+    "arExpLabel": "Macera TP",
+    "wl": "Dünya Seviyesi",
+    "wlLimit": "Dünya Seviyesi {n} olarak yükseltilebilir",
+    "stamina": "Dayanıklılık",
+    "storyKeys": "Hikaye Anahtarı"
   }
 }

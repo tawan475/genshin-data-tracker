@@ -8,6 +8,7 @@ import {
   type CollectionCatalog,
 } from './collection-names'
 import type { CapturedCollections } from './collection-parts'
+import { musicSongs, musicSummary } from './music'
 import { recipeRows } from './recipes'
 import { spincrystalProgress, type Spincrystal } from './spincrystals'
 import { TEYVAT_SCENE, worldModel } from './world'
@@ -36,6 +37,8 @@ export interface CollectionFigures {
   /** Hangout endings reached. */
   hangouts: CollectionFigure | null
   blueprints: CollectionFigure | null
+  /** Music game rewards claimed, of the beatmaps with a reward. */
+  music: CollectionFigure | null
   aranara: CollectionFigure | null
 }
 
@@ -62,6 +65,7 @@ export function collectionFigures(
   const crafting = captured.crafting?.value
   const events = captured.events?.value
   const blueprints = captured.blueprints?.value
+  const music = captured.musicGame?.value
   const withCatalog = <T>(
     value: T | undefined,
     count: (c: CollectionCatalog, v: T) => CollectionFigure,
@@ -150,6 +154,10 @@ export function collectionFigures(
     blueprints: withCatalog(blueprints, (c, v) => {
       const known = new Set(c.data.blueprints.map((b) => b.id))
       return { have: v.filter((id) => known.has(id)).length, total: known.size }
+    }),
+    music: withCatalog(music, (c, v) => {
+      const s = musicSummary(musicSongs(c, v))
+      return { have: s.rewardsClaimed, total: s.rewards }
     }),
     aranara: withCatalog(aranara, (c, v) => ({
       have: Object.values(v).reduce(

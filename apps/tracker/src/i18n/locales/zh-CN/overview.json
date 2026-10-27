@@ -70,5 +70,16 @@
     "first": "首个快照",
     "currencyMissing": "缺少摩拉和原石",
     "noCurrency": "无货币"
+  },
+  "traveler": {
+    "label": "主角",
+    "ar": "冒险等阶 {n}",
+    "uid": "UID {uid}",
+    "arExp": "冒险阅历 {exp} / {need}",
+    "arExpLabel": "冒险阅历",
+    "wl": "世界等级",
+    "wlLimit": "可提升至世界等级 {n}",
+    "stamina": "体力",
+    "storyKeys": "传说钥匙"
   }
 }

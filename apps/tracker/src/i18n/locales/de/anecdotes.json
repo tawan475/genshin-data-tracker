@@ -54,7 +54,12 @@
     "rewardHint": "{primogems} Urgesteine je {every} festgehaltene Anekdoten",
     "rewardPer": "je {every}",
     "active": "Aktiv",
-    "activeHint": "Läuft gerade im Spiel (in der neuesten Erfassung)"
+    "activeHint": "Läuft gerade im Spiel (in der neuesten Erfassung)",
+    "wish": "Nächster Wunsch",
+    "wishIn": "{h} Std. {m} Min.",
+    "wishReady": "Bereit",
+    "wishLast": "Letzter Wunsch {time}",
+    "wishNext": "Nächster Wunsch {time}"
   },
   "toolbar": {
     "label": "Anekdoten filtern",

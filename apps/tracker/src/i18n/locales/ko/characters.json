@@ -103,7 +103,13 @@
     "label": "{name}, {level}, C{constellation}, 특성 {auto} {skill} {burst}",
     "friendship": ", 호감도 {n}",
     "toDo": "할 일: {gaps}",
-    "critDetail": "성유물 치명타 {rate}% / {dmg}%"
+    "critDetail": "성유물 치명타 {rate}% / {dmg}%",
+    "levelMax": "이 돌파의 최대 레벨",
+    "levelExp": "레벨 경험치 {exp} / {need}",
+    "friendshipExp": "호감도 {level} · {exp} / {need} 경험치",
+    "max": "최대",
+    "since": "{date}부터",
+    "obtainedAt": "획득일 {date}"
   },
   "piece": {
     "levelTitle": "+{level}/{max} · {rarity}★",

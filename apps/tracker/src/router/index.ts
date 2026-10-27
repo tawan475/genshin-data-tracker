@@ -303,7 +303,7 @@ const router = createRouter({
               }),
             },
             account(
-              'collections/:tab(world|events|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|aranara)?',
+              'collections/:tab(world|events|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|music|aranara)?',
               'account-collections',
               'collections',
               () => import('@/views/account/CollectionsView.vue'),
