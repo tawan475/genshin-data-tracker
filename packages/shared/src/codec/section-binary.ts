@@ -618,7 +618,7 @@ function readUintList(r: ByteReader): number[] {
 }
 
 // ------------------------------------------------------------ tagged parts
-// collections2, wardrobe and exploration are tagged layouts: each present part is written
+// collections2, wardrobe, exploration and progress are tagged layouts: each present part is written
 // as its index in the layout's part list (append-only), its byte length and
 // its bytes, in list order. A decoder skips a part whose index it does not
 // know, so a part a later build adds never makes an older build refuse the
@@ -776,6 +776,33 @@ const recipesPart: TaggedPart = {
   read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint()]),
 }
 
+// Capture 1.7.0's parts: `u` Hangout chapters (rows by id: state, endings
+// (rows by id: state), pictures (an ascending list), pictures in all); `m`
+// monsters seen and `f` blueprints (ascending lists; `b` is the delta base's key).
+const hangoutsPart: TaggedPart = {
+  write(w, value) {
+    writeById(w, value, 5, ([, state, endings, pictures, total]) => {
+      w.uint(uint(state))
+      writeById(w, endings, 2, ([, s]) => w.uint(uint(s)))
+      writeAscending(w, array(pictures).map(uint))
+      w.uint(uint(total))
+    })
+  },
+  read: (r) =>
+    readById(r, checkedCount(r), (id) => [
+      id,
+      r.uint(),
+      readById(r, checkedCount(r), (e) => [e, r.uint()]),
+      readAscending(r),
+      r.uint(),
+    ]),
+}
+
+const ascendingPart: TaggedPart = {
+  write: (w, value) => writeAscending(w, array(value).map(uint)),
+  read: (r) => readAscending(r),
+}
+
 /** collections2's parts, by index (append-only). */
 const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['a', archivePart],
@@ -784,6 +811,9 @@ const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['r', aranaraPart],
   ['g', tcgPart],
   ['p', recipesPart],
+  ['u', hangoutsPart],
+  ['m', ascendingPart],
+  ['f', ascendingPart],
 ]
 
 const collections2Layout = taggedLayout('collections2', COLLECTION2_PARTS)
@@ -892,6 +922,39 @@ const EXPLORATION_PARTS: readonly (readonly [string, TaggedPart])[] = [
 
 const explorationLayout = taggedLayout('exploration', EXPLORATION_PARTS)
 
+// progress (Capture 1.7.0): `a` achievement progress (rows by id: progress,
+// total); `e` events (rows by id: schedule, start, end, counters (rows by
+// watcher: progress, total, claimed)).
+const achievementProgressPart: TaggedPart = {
+  write: (w, value) =>
+    writeById(w, value, 3, ([, progress, total]) => w.uint(uint(progress)).uint(uint(total))),
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint()]),
+}
+
+const eventsPart: TaggedPart = {
+  write(w, value) {
+    writeById(w, value, 5, ([, schedule, start, end, counters]) => {
+      w.uint(uint(schedule)).uint(uint(start)).uint(uint(end))
+      writeById(w, counters, 4, ([, progress, total, claimed]) => {
+        w.uint(uint(progress)).uint(uint(total)).uint(uint(claimed))
+      })
+    })
+  },
+  read: (r) =>
+    readById(r, checkedCount(r), (id) => [
+      id,
+      r.uint(),
+      r.uint(),
+      r.uint(),
+      readById(r, checkedCount(r), (wid) => [wid, r.uint(), r.uint(), r.uint()]),
+    ]),
+}
+
+const progressLayout = taggedLayout('progress', [
+  ['a', achievementProgressPart],
+  ['e', eventsPart],
+])
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -907,6 +970,7 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   collections2: collections2Layout,
   wardrobe: wardrobeLayout,
   exploration: explorationLayout,
+  progress: progressLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */

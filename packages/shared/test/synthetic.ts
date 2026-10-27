@@ -438,3 +438,73 @@ export function syntheticExploration(seed = 1): NonNullable<Good['gi_exploration
     reputation: Object.fromEntries([1, 2, 3, 4, 5].map((city) => [String(city), int(rand, 8, 10)])),
   }
 }
+
+/**
+ * Capture 1.7.0's keys at a real capture's scale (made-up ids): 19 Hangout
+ * chapters with 5-6 endings and their pictures, ~2,300 monsters seen, 1,171
+ * blueprints; weekly bosses, 103 respawning bosses (211 spots), AR rewards;
+ * 15 unfinished achievements, 15 events with 81 counters.
+ */
+export function synthetic17(seed = 1) {
+  const rand = random(seed)
+  const hangouts = Object.fromEntries(
+    Array.from({ length: 19 }, (_, i) => {
+      const chapter = 101_401 + i * 100
+      const endings = Object.fromEntries(
+        Array.from({ length: int(rand, 5, 6) }, (_, n) => [
+          String(chapter * 100 + n + 1),
+          pick(rand, ['locked', 'unclaimed', 'claimed'] as const),
+        ]),
+      )
+      const total = int(rand, 8, 14)
+      return [
+        String(chapter),
+        {
+          ...(rand() < 0.9
+            ? { state: pick(rand, ['closed', 'locked', 'open', 'accepted'] as const) }
+            : {}),
+          endings,
+          pictures: ids(rand, chapter * 10, 40, int(rand, 0, total)),
+          picturesTotal: total,
+        },
+      ]
+    }),
+  )
+  const respawns = Object.fromEntries(
+    ids(rand, 1_000, 5_000, 103).map((id) => [
+      String(id),
+      Array.from({ length: int(rand, 1, 4) }, () => int(rand, 1.79e9, 1.8e9)).sort((a, b) => a - b),
+    ]),
+  )
+  return {
+    collections: {
+      hangouts,
+      monstersSeen: ids(rand, 20_010_101, 600_000, 2_300),
+      blueprints: ids(rand, 360_101, 20_000, 1_171),
+    },
+    tasks: {
+      weeklyBosses: { left: 3, limit: 3, cost: 30, fullCost: 60 },
+      respawns,
+      arRewards: ids(rand, 2, 59, 40),
+    },
+    achievementProgress: Object.fromEntries(
+      ids(rand, 80_000, 20_000, 15).map((id) => [String(id), { progress: 0, total: 1 }]),
+    ),
+    events: Object.fromEntries(
+      ids(rand, 2_001_000, 20_000, 15).map((id) => [
+        String(id),
+        {
+          schedule: int(rand, 1, 999_999),
+          start: int(rand, 1.79e9, 1.795e9),
+          end: int(rand, 1.795e9, 1.8e9),
+          progress: Object.fromEntries(
+            ids(rand, 1, 900_000, int(rand, 3, 7)).map((w) => [
+              String(w),
+              { progress: int(rand, 0, 10), total: 10, claimed: rand() < 0.8 },
+            ]),
+          ),
+        },
+      ]),
+    ),
+  }
+}

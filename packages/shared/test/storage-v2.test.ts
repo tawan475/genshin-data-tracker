@@ -254,6 +254,34 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
         ...(rand() < 0.5 ? { c: int(rand, 1, 4) } : {}),
       }
     }
+    case 'progress':
+      return {
+        ...(rand() < 0.7
+          ? {
+              a: sortedIds(int(rand, 0, 20)).map((_, i, all) => [
+                all.slice(0, i + 1).reduce((x, y) => x + y, 0),
+                int(rand, 0, 5),
+                int(rand, 1, 5),
+              ]),
+            }
+          : {}),
+        ...(rand() < 0.7
+          ? {
+              e: sortedIds(int(rand, 0, 8)).map((_, i, all) => [
+                all.slice(0, i + 1).reduce((x, y) => x + y, 0),
+                int(rand, 0, 9_999),
+                int(rand, 1.7e9, 1.8e9),
+                int(rand, 1.7e9, 1.8e9),
+                sortedIds(int(rand, 0, 6)).map((_, j, ws) => [
+                  ws.slice(0, j + 1).reduce((x, y) => x + y, 0),
+                  int(rand, 0, 10),
+                  int(rand, 1, 10),
+                  int(rand, 0, 1),
+                ]),
+              ]),
+            }
+          : {}),
+      }
     case 'exploration': {
       const rows = (cells: () => number[]) =>
         sortedIds(int(rand, 0, 20)).map((_, i, all) => [
@@ -409,6 +437,7 @@ describe('section blobs', () => {
       collections2: 12,
       wardrobe: 13,
       exploration: 14,
+      progress: 15,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -469,6 +498,7 @@ describe('section blobs', () => {
       'collections2',
       'wardrobe',
       'exploration',
+      'progress',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')

@@ -149,7 +149,15 @@ id -> proficiency) is collections2's part `p`. Capture 1.6.0's
 `gi_exploration` (Statues, offerings, map points and areas per scene,
 exploration points per area, reputation) is `exploration`
 (`snapshots.exploration_ref`, migration 0032; tagged like the wardrobe; a
-relogin with nothing new stores 0 bytes). Deck and team names are the
+relogin with nothing new stores 0 bytes). Capture 1.7.0's keys: gi_tasks'
+`weeklyBosses`, `respawns` and `arRewards` join the `tasks` section (as JSON
+letters `q`/`m`/`k`: the deployed binary layout refuses new flags, old
+decoders ignore unknown letters), gi_collections' `hangouts`,
+`monstersSeen` and `blueprints` are collections2 parts `u`/`m`/`f`, and
+`gi_achievement_progress` + `gi_events` are the `progress` section (kind 15,
+the last code below the delta flag; later kinds take 32+; migration 0033).
+No section may use the letter `b` (every blob strips it: a delta's base).
+`pre17ContentHash` keeps re-uploads of older captures no-ops. Deck and team names are the
 player's text, stored as is; a part
 that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before

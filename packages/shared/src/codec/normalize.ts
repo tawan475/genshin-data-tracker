@@ -11,7 +11,9 @@ import type {
   GiProgress,
   GiProgressState,
   GiTasks,
+  GiEvent,
   GiExploration,
+  GiHangout,
   GiWardrobe,
   GiWardrobeKind,
   GoodCharacter,
@@ -22,6 +24,8 @@ import {
   ARANARA_STATES,
   ARCHIVE_TABS,
   PROGRESS_STATES,
+  ENDING_STATES,
+  HANGOUT_STATES,
   WARDROBE_KINDS,
   type ArchiveTab,
 } from '../good'
@@ -75,6 +79,10 @@ export interface NormalizedGood {
   wardrobe: GiWardrobe | null
   /** `gi_exploration`, the parts that pass their checks whole (see toExploration). */
   exploration: GiExploration | null
+  /** `gi_achievement_progress`, kept only when every entry passes. */
+  achievementProgress: Record<string, { progress: number; total: number }> | null
+  /** `gi_events`, kept only when every event passes. */
+  events: Record<string, GiEvent> | null
 }
 
 export class GoodFormatError extends Error {
@@ -147,6 +155,8 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     collections: toCollections(input.gi_collections),
     wardrobe: toWardrobe(input.gi_wardrobe),
     exploration: toExploration(input.gi_exploration),
+    achievementProgress: toAchievementProgress(input.gi_achievement_progress),
+    events: toEvents(input.gi_events),
   }
   const itemGuids = toItemGuids(input)
   if (itemGuids) good.itemGuids = itemGuids
@@ -553,6 +563,24 @@ function toTasks(raw: unknown): GiTasks | null {
   if (isObject(n) && isIntIn(n.value, 0, 2_000) && isIntIn(n.nextAt, ...TASK_TIME)) {
     tasks.resin = { value: n.value, nextAt: n.nextAt }
   }
+  // Capture 1.7.0.
+  const b = raw.weeklyBosses
+  if (
+    isObject(b) &&
+    isIntIn(b.limit, 0, 100) &&
+    isIntIn(b.left, 0, b.limit) &&
+    isIntIn(b.cost, 0, 1_000) &&
+    isIntIn(b.fullCost, 0, 1_000)
+  ) {
+    tasks.weeklyBosses = { left: b.left, limit: b.limit, cost: b.cost, fullCost: b.fullCost }
+  }
+  const spots = idEntries(raw.respawns, 1, 99_999_999, GOOD_LIMITS.respawns)
+  if (spots) {
+    const times = spots.map(([id, list]) => [id, timeList(list)] as const)
+    if (times.every(([, list]) => list)) tasks.respawns = byId(times as [number, number[]][])
+  }
+  const ranks = idList(raw.arRewards, 1, 100, 100)
+  if (ranks) tasks.arRewards = ranks
   return Object.keys(tasks).length > 0 ? tasks : null
 }
 
@@ -565,6 +593,13 @@ const COLLECTION_ITEM = [100_000, 999_999] as const
  * have); the rest of the key still counts. Lists are rewritten ascending, so
  * equal content hashes equal.
  */
+/** Unix times, ascending (duplicates kept: two spots can respawn together); null when any is bad. */
+function timeList(raw: unknown): number[] | null {
+  if (!Array.isArray(raw) || raw.length > GOOD_LIMITS.respawnSpots) return null
+  if (!raw.every((at) => isIntIn(at, ...TASK_TIME))) return null
+  return [...(raw as number[])].sort((a, b) => a - b)
+}
+
 function toCollections(raw: unknown): GiCollections | null {
   if (!isObject(raw)) return null
   const collections: GiCollections = {}
@@ -582,6 +617,13 @@ function toCollections(raw: unknown): GiCollections | null {
   if (tcg) collections.tcg = tcg
   const recipes = toRecipes(raw.recipes)
   if (recipes) collections.recipes = recipes
+  // Capture 1.7.0.
+  const hangouts = toHangouts(raw.hangouts)
+  if (hangouts) collections.hangouts = hangouts
+  const seen = idList(raw.monstersSeen, 1, 999_999_999, GOOD_LIMITS.monstersSeen)
+  if (seen) collections.monstersSeen = seen
+  const blueprints = idList(raw.blueprints, ...COLLECTION_ITEM, GOOD_LIMITS.blueprints)
+  if (blueprints) collections.blueprints = blueprints
   return Object.keys(collections).length > 0 ? collections : null
 }
 
@@ -767,6 +809,39 @@ function toRecipes(raw: unknown): GiCollections['recipes'] | null {
   return byId(entries as [number, number][])
 }
 
+/** Hangout Events by chapter: all of it passes, or the part goes. */
+function toHangouts(raw: unknown): GiCollections['hangouts'] | null {
+  const chapters = idEntries(raw, 1, 99_999_999, GOOD_LIMITS.hangouts)
+  if (!chapters) return null
+  const out: [number, GiHangout][] = []
+  for (const [id, value] of chapters) {
+    if (!isObject(value) || !isIntIn(value.picturesTotal, 0, GOOD_LIMITS.hangoutPictures))
+      return null
+    if (
+      value.state !== undefined &&
+      !(HANGOUT_STATES as readonly unknown[]).includes(value.state)
+    ) {
+      return null
+    }
+    const endings = idEntries(value.endings, 1, 999_999_999, GOOD_LIMITS.hangoutEndings)
+    if (!endings || endings.some(([, s]) => !(ENDING_STATES as readonly unknown[]).includes(s))) {
+      return null
+    }
+    const pictures = idList(value.pictures, 0, 999_999_999, GOOD_LIMITS.hangoutPictures)
+    if (!pictures) return null
+    out.push([
+      id,
+      {
+        ...(value.state !== undefined ? { state: value.state as GiHangout['state'] } : {}),
+        endings: byId(endings as [number, GiHangout['endings'][string]][]),
+        pictures,
+        picturesTotal: value.picturesTotal,
+      },
+    ])
+  }
+  return byId(out)
+}
+
 /** Text the player typed (a deck or team name): kept as is, only bounded. */
 function isPlayerText(value: unknown): value is string {
   return typeof value === 'string' && value.length <= GOOD_LIMITS.playerText
@@ -879,6 +954,59 @@ function toExploration(raw: unknown): GiExploration | null {
   const reputation = numberEntries(raw.reputation, LEVEL, GOOD_LIMITS.explorationCities)
   if (reputation) exploration.reputation = reputation
   return Object.keys(exploration).length > 0 ? exploration : null
+}
+
+/** `gi_achievement_progress` (Capture 1.7.0): unfinished achievements' progress. */
+function toAchievementProgress(raw: unknown): NormalizedGood['achievementProgress'] {
+  const entries = idEntries(raw, 1, 9_999_999, GOOD_LIMITS.achievementProgress)
+  if (!entries) return null
+  const ok = entries.every(
+    ([, v]) => isObject(v) && isIntIn(v.total, 0, COUNT[1]) && isIntIn(v.progress, ...COUNT),
+  )
+  if (!ok) return null
+  return byId(
+    (entries as [number, { progress: number; total: number }][]).map(([id, v]) => [
+      id,
+      { progress: v.progress, total: v.total },
+    ]),
+  )
+}
+
+/** `gi_events` (Capture 1.7.0): events by activity id with their counters. */
+function toEvents(raw: unknown): NormalizedGood['events'] {
+  const events = idEntries(raw, 1, 99_999_999, GOOD_LIMITS.events)
+  if (!events) return null
+  const out: [number, GiEvent][] = []
+  for (const [id, e] of events) {
+    if (
+      !isObject(e) ||
+      !isIntIn(e.schedule, 0, 99_999_999) ||
+      !isIntIn(e.start, 0, TASK_TIME[1]) ||
+      !isIntIn(e.end, 0, TASK_TIME[1])
+    ) {
+      return null
+    }
+    const event: GiEvent = { schedule: e.schedule, start: e.start, end: e.end }
+    if (e.progress !== undefined) {
+      const counters = idEntries(e.progress, 0, 999_999_999, GOOD_LIMITS.eventCounters)
+      if (!counters) return null
+      const rows: [number, NonNullable<GiEvent['progress']>[string]][] = []
+      for (const [watcher, c] of counters) {
+        if (
+          !isObject(c) ||
+          !isIntIn(c.progress, ...COUNT) ||
+          !isIntIn(c.total, ...COUNT) ||
+          typeof c.claimed !== 'boolean'
+        ) {
+          return null
+        }
+        rows.push([watcher, { progress: c.progress, total: c.total, claimed: c.claimed }])
+      }
+      event.progress = byId(rows)
+    }
+    out.push([id, event])
+  }
+  return byId(out)
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

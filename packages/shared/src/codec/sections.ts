@@ -22,14 +22,23 @@ import type {
   GiProgress,
   GiProgressState,
   GiTasks,
+  GiEvent,
   GiExploration,
+  GiHangout,
   GiWardrobe,
   GiWardrobeKind,
   GoodArtifact,
   GoodCharacter,
   GoodWeapon,
 } from '../good'
-import { ARANARA_STATES, ARCHIVE_TABS, PROGRESS_STATES, WARDROBE_KINDS } from '../good'
+import {
+  ARANARA_STATES,
+  ARCHIVE_TABS,
+  ENDING_STATES,
+  HANGOUT_STATES,
+  PROGRESS_STATES,
+  WARDROBE_KINDS,
+} from '../good'
 import { sha256Hex128 } from '../hash'
 import { compareTuples, deltaDecode, deltaEncode, trimDefaults } from './order'
 
@@ -53,6 +62,9 @@ export type SectionKind =
   | 'collections2'
   | 'wardrobe'
   | 'exploration'
+  // Capture 1.7.0's gi_achievement_progress and gi_events (the last kind code
+  // below the delta flag; a later kind takes 32 and up, see section-blob.ts).
+  | 'progress'
 
 export interface Section {
   kind: SectionKind
@@ -579,6 +591,11 @@ export interface TasksSection {
   w?: number
   p?: [weapon: string, points: number, max: number]
   n?: [value: number, nextAt: number]
+  // Capture 1.7.0 (letters the deployed builds ignore; the section is JSON then;
+  // never `b`, every section's delta-base key).
+  q?: [left: number, limit: number, cost: number, fullCost: number]
+  m?: [id: number, times: number[]][]
+  k?: number[]
 }
 
 export function encodeTasks(tasks: GiTasks): TasksSection {
@@ -592,6 +609,10 @@ export function encodeTasks(tasks: GiTasks): TasksSection {
   if (w) section.w = w.days
   if (p) section.p = [p.weapon, p.points, p.max]
   if (n) section.n = [n.value, n.nextAt]
+  const { weeklyBosses: b, respawns: m, arRewards: k } = tasks
+  if (b) section.q = [b.left, b.limit, b.cost, b.fullCost]
+  if (m) section.m = ids(m).map((id) => [id, [...m[String(id)]!]])
+  if (k) section.k = [...k]
   return section
 }
 
@@ -615,6 +636,14 @@ export function decodeTasks(section: TasksSection): GiTasks {
   if (section.w !== undefined) tasks.welkin = { days: section.w }
   if (section.p) tasks.wishPath = { weapon: section.p[0], points: section.p[1], max: section.p[2] }
   if (section.n) tasks.resin = { value: section.n[0], nextAt: section.n[1] }
+  if (section.q) {
+    const [left, limit, cost, fullCost] = section.q
+    tasks.weeklyBosses = { left, limit, cost, fullCost }
+  }
+  if (section.m) {
+    tasks.respawns = Object.fromEntries(section.m.map(([id, times]) => [String(id), [...times]]))
+  }
+  if (section.k) tasks.arRewards = [...section.k]
   return tasks
 }
 
@@ -663,7 +692,21 @@ export interface CollectionsSection {
   r?: AranaraRow[]
   g?: { c: CardRow[]; k?: DeckRow[]; u?: number }
   p?: [id: number, proficiency: number][]
+  // Capture 1.7.0.
+  u?: HangoutRow[]
+  m?: number[]
+  /** Blueprints (`b` is the delta base's key in every section). */
+  f?: number[]
 }
+
+/** A Hangout chapter: id, state (HANGOUT_STATES index + 1, 0 = none sent), endings [id, ENDING_STATES index] by id, pictures found, pictures in all. */
+export type HangoutRow = [
+  id: number,
+  state: number,
+  endings: [id: number, state: number][],
+  pictures: number[],
+  total: number,
+]
 
 const ids = (record: Record<string, unknown>) =>
   Object.keys(record)
@@ -729,6 +772,20 @@ export function encodeCollections2(collections: GiCollections): CollectionsSecti
     section.g = g
   }
   if (recipes) section.p = ids(recipes).map((id) => [id, recipes[String(id)]!])
+  const { hangouts, monstersSeen, blueprints } = collections
+  if (hangouts) {
+    section.u = ids(hangouts).map((id) => {
+      const h = hangouts[String(id)]!
+      const state = h.state ? HANGOUT_STATES.indexOf(h.state) + 1 : 0
+      const endings = ids(h.endings).map((e): [number, number] => [
+        e,
+        ENDING_STATES.indexOf(h.endings[String(e)]!),
+      ])
+      return [id, state, endings, [...h.pictures], h.picturesTotal]
+    })
+  }
+  if (monstersSeen) section.m = [...monstersSeen]
+  if (blueprints) section.f = [...blueprints]
   return Object.keys(section).length > 0 ? section : null
 }
 
@@ -800,6 +857,23 @@ export function decodeCollections(section: CollectionsSection): GiCollections {
   if (section.p) {
     collections.recipes = Object.fromEntries(section.p.map(([id, n]) => [String(id), n]))
   }
+  if (section.u) {
+    collections.hangouts = Object.fromEntries(
+      section.u.map(([id, state, endings, pictures, total]) => {
+        const h: GiHangout = {
+          endings: Object.fromEntries(
+            endings.map(([e, s]) => [String(e), ENDING_STATES[s] ?? 'locked']),
+          ),
+          pictures: [...pictures],
+          picturesTotal: total,
+        }
+        const named = HANGOUT_STATES[state - 1]
+        return [String(id), named ? { state: named, ...h } : h]
+      }),
+    )
+  }
+  if (section.m) collections.monstersSeen = [...section.m]
+  if (section.f) collections.blueprints = [...section.f]
   return collections
 }
 
@@ -938,4 +1012,73 @@ export function decodeExploration(section: ExplorationSection): GiExploration {
   if (section.x) exploration.explore = fromPairs(section.x)
   if (section.r) exploration.reputation = fromPairs(section.r)
   return exploration
+}
+
+// ------------------------------------------------------------------ progress
+// Capture 1.7.0's `gi_achievement_progress` (`a`: [achievement, progress,
+// total] by id) and `gi_events` (`e`: [activity, schedule, start, end,
+// [watcher, progress, total, claimed 0/1] by id] by id), each only when the
+// capture had it. Its own section: the counters move from login to login.
+
+export type EventRow = [
+  id: number,
+  schedule: number,
+  start: number,
+  end: number,
+  counters: [watcher: number, progress: number, total: number, claimed: number][],
+]
+
+export interface ProgressSection {
+  a?: [id: number, progress: number, total: number][]
+  e?: EventRow[]
+}
+
+export interface GiProgressParts {
+  achievementProgress?: Record<string, { progress: number; total: number }>
+  events?: Record<string, GiEvent>
+}
+
+export function encodeProgress(parts: GiProgressParts): ProgressSection | null {
+  const section: ProgressSection = {}
+  const { achievementProgress: a, events: e } = parts
+  if (a) section.a = ids(a).map((id) => [id, a[String(id)]!.progress, a[String(id)]!.total])
+  if (e) {
+    section.e = ids(e).map((id) => {
+      const event = e[String(id)]!
+      const counters = event.progress
+        ? ids(event.progress).map((w): EventRow[4][number] => {
+            const c = event.progress![String(w)]!
+            return [w, c.progress, c.total, c.claimed ? 1 : 0]
+          })
+        : []
+      return [id, event.schedule, event.start, event.end, counters]
+    })
+  }
+  return Object.keys(section).length > 0 ? section : null
+}
+
+export function decodeProgress(section: ProgressSection): GiProgressParts {
+  const parts: GiProgressParts = {}
+  if (section.a) {
+    parts.achievementProgress = Object.fromEntries(
+      section.a.map(([id, progress, total]) => [String(id), { progress, total }]),
+    )
+  }
+  if (section.e) {
+    parts.events = Object.fromEntries(
+      section.e.map(([id, schedule, start, end, counters]) => {
+        const event: GiEvent = { schedule, start, end }
+        if (counters.length > 0) {
+          event.progress = Object.fromEntries(
+            counters.map(([w, progress, total, claimed]) => [
+              String(w),
+              { progress, total, claimed: claimed === 1 },
+            ]),
+          )
+        }
+        return [String(id), event]
+      }),
+    )
+  }
+  return parts
 }

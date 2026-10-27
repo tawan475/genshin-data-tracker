@@ -141,6 +141,12 @@ export interface GiTasks {
   wishPath?: { weapon: string; points: number; max: number }
   /** Original Resin when read, and when the next one comes (unix s; one per 8 minutes). */
   resin?: { value: number; nextAt: number }
+  /** This week's discounted weekly boss rewards: left of limit, the resin each costs and its full price (Capture 1.7.0). */
+  weeklyBosses?: { left: number; limit: number; cost: number; fullCost: number }
+  /** Bosses and elites by InvestigationMonsterConfigData id: when each spot respawns (unix s, ascending; past = up). */
+  respawns?: Record<string, number[]>
+  /** Adventure Ranks (2-60) whose reward was claimed; one at or below the AR not listed is unclaimed. */
+  arRewards?: number[]
 }
 
 /**
@@ -173,6 +179,34 @@ export interface GiCollections {
   }
   /** Every unlocked cooking recipe (Capture 1.5.0): recipe id -> proficiency (0: none yet). */
   recipes?: Record<string, number>
+  /** Hangout Events by chapter (Capture 1.7.0): its state, each ending's (CoopReward id) and the pictures found. */
+  hangouts?: Record<string, GiHangout>
+  /** Monster ids the player has seen (variants too), ascending. */
+  monstersSeen?: number[]
+  /** Furnishing blueprints learned, by item id, ascending. */
+  blueprints?: number[]
+}
+
+export const HANGOUT_STATES = ['closed', 'locked', 'open', 'accepted'] as const
+export type GiHangoutState = (typeof HANGOUT_STATES)[number]
+export const ENDING_STATES = ['locked', 'unclaimed', 'claimed'] as const
+export type GiEndingState = (typeof ENDING_STATES)[number]
+
+export interface GiHangout {
+  state?: GiHangoutState
+  endings: Record<string, GiEndingState>
+  /** Picture ids found, ascending, of `picturesTotal`. */
+  pictures: number[]
+  picturesTotal: number
+}
+
+/** One event's counters (Capture 1.7.0 `gi_events`), by watcher id. */
+export interface GiEvent {
+  schedule: number
+  /** Unix seconds. */
+  start: number
+  end: number
+  progress?: Record<string, { progress: number; total: number; claimed: boolean }>
 }
 
 /** The Archive's tabs, in the order they are stored (append-only). */
@@ -266,6 +300,10 @@ export interface Good {
   gi_collections?: GiCollections
   gi_wardrobe?: GiWardrobe
   gi_exploration?: GiExploration
+  /** Unfinished achievements' progress (Capture 1.7.0). */
+  gi_achievement_progress?: Record<string, { progress: number; total: number }>
+  /** Events by activity id (NewActivityExcelConfigData), with their counters. */
+  gi_events?: Record<string, GiEvent>
 }
 
 /**

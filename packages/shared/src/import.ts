@@ -77,6 +77,21 @@ export const GOOD_LIMITS = {
   scenePoints: 20_000,
   /** Exploration areas (71 real). */
   exploreAreas: 3_000,
+  // Capture 1.7.0: past one of these a part is dropped.
+  /** Hangout chapters (19 real), endings per chapter (6 real), pictures per chapter. */
+  hangouts: 500,
+  hangoutEndings: 100,
+  hangoutPictures: 500,
+  /** Monsters seen (~2,300 real) and furnishing blueprints (1,171 real). */
+  monstersSeen: 20_000,
+  blueprints: 20_000,
+  /** Bosses and elites with respawn spots (103 real), spots per one (211 in all). */
+  respawns: 3_000,
+  respawnSpots: 200,
+  /** Unfinished achievements with progress (15 real), events (15 real) and one event's counters. */
+  achievementProgress: 5_000,
+  events: 500,
+  eventCounters: 1_000,
   /** UTF-16 units of a deck or team name the player typed. */
   playerText: 100,
   /** An artifact has at most 4 substats (and unactivated ones). */

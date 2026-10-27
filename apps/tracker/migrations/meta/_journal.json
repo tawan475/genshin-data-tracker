@@ -218,6 +218,13 @@
       "when": 1793081498647,
       "tag": "0032_exploration",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1793084734973,
+      "tag": "0033_progress",
+      "breakpoints": true
     }
   ]
 }

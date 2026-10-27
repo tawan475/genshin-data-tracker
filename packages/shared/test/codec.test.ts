@@ -12,6 +12,7 @@ import {
   decodeSnapshot,
   decodeTasks,
   decodeExploration,
+  decodeProgress,
   decodeWardrobe,
   deflateRaw,
   deltaPaysOff,
@@ -25,6 +26,7 @@ import {
   encodeSnapshot,
   encodeTasks,
   encodeExploration,
+  encodeProgress,
   encodeWardrobe,
   extraSectionsOf,
   GOOD_LIMITS,
@@ -53,6 +55,7 @@ import { MATERIALS } from '../src/dictionary/materials'
 import {
   syntheticCollections,
   syntheticExploration,
+  synthetic17,
   syntheticRecipes,
   syntheticWardrobe,
 } from './synthetic'
@@ -141,6 +144,7 @@ async function storedOf(
     collections2: await optionalViaStorage(encoded.collections2),
     wardrobe: await optionalViaStorage(encoded.wardrobe),
     exploration: await optionalViaStorage(encoded.exploration),
+    progress: await optionalViaStorage(encoded.progress),
   }
 }
 
@@ -279,6 +283,8 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
   if (good.collections) expected.gi_collections = good.collections
   if (good.wardrobe) expected.gi_wardrobe = good.wardrobe
   if (good.exploration) expected.gi_exploration = good.exploration
+  if (good.achievementProgress) expected.gi_achievement_progress = good.achievementProgress
+  if (good.events) expected.gi_events = good.events
   return expected
 }
 
@@ -1960,5 +1966,115 @@ describe("Teyvat.me Capture 1.6.0's exploration", () => {
     const extended = new Uint8Array([...blob.payload, 99, 3, 7, 7, 7])
     const later = decodeSectionBlob(kindCode('exploration', false), extended, null, null)
     expect(JSON.stringify(later.value)).toBe(JSON.stringify(value))
+  })
+})
+
+// ------------------------------------------------------------- Capture 1.7.0
+
+describe("Teyvat.me Capture 1.7.0's keys", () => {
+  const new17 = synthetic17(8)
+  const base = {
+    ...sample,
+    gi_tasks: { welkin: { days: 30 } },
+    gi_collections: syntheticCollections(8),
+    gi_exploration: syntheticExploration(8),
+  }
+  const input = {
+    ...base,
+    gi_tasks: { ...base.gi_tasks, ...new17.tasks },
+    gi_collections: { ...base.gi_collections, ...new17.collections },
+    gi_achievement_progress: new17.achievementProgress,
+    gi_events: new17.events,
+  }
+
+  it("round-trips every part at a real capture's scale", async () => {
+    const { encoded, decoded } = await roundTrip(input)
+    expect(extraSectionsOf(encoded).at(-1)!.kind).toBe('progress')
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_tasks).toEqual(input.gi_tasks)
+    expect(decoded.gi_collections!.hangouts).toEqual(new17.collections.hangouts)
+    expect(decoded.gi_collections!.monstersSeen).toHaveLength(2_300)
+    expect(decoded.gi_achievement_progress).toEqual(new17.achievementProgress)
+    expect(decoded.gi_events).toEqual(new17.events)
+    expect(Object.keys(decoded).slice(-2)).toEqual(['gi_achievement_progress', 'gi_events'])
+  })
+
+  it('knows the hash a tracker from before 1.7.0 gave the same file', async () => {
+    const catalog = new Catalog()
+    const before = await roundTrip(base, catalog)
+    const after = await roundTrip(input, catalog)
+    expect(after.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    expect(after.encoded.pre17ContentHash).toBe(before.encoded.contentHash)
+    expect(before.encoded.pre17ContentHash).toBe(before.encoded.contentHash)
+    // Each 1.7.0 part alone, too.
+    for (const part of [
+      { gi_tasks: { ...base.gi_tasks, arRewards: [2, 3] } },
+      { gi_collections: { ...base.gi_collections, blueprints: [360_101] } },
+      { gi_events: new17.events },
+    ]) {
+      const one = await roundTrip({ ...base, ...part }, catalog)
+      expect(one.encoded.pre17ContentHash).toBe(before.encoded.contentHash)
+    }
+    // Only 1.7.0 task parts: the file had no tasks before.
+    const plain = await roundTrip(sample, catalog)
+    const tasksOnly = await roundTrip({ ...sample, gi_tasks: new17.tasks }, catalog)
+    expect(tasksOnly.encoded.pre17ContentHash).toBe(plain.encoded.contentHash)
+  })
+
+  it('drops a bad part and keeps the rest', () => {
+    const read = (patch: object) => normalizeGood({ ...input, ...patch })
+    const t = (tasks: object) => read({ gi_tasks: { ...input.gi_tasks, ...tasks } }).tasks!
+    expect(
+      'weeklyBosses' in t({ weeklyBosses: { left: 4, limit: 3, cost: 30, fullCost: 60 } }),
+    ).toBe(false)
+    expect('respawns' in t({ respawns: { '1001': [1] } })).toBe(false)
+    expect('arRewards' in t({ arRewards: [2, 2] })).toBe(false)
+    expect(t({ respawns: { '1001': [1_790_000_100, 1_790_000_000] } }).respawns).toEqual({
+      '1001': [1_790_000_000, 1_790_000_100],
+    })
+    const c = (collections: object) =>
+      read({ gi_collections: { ...input.gi_collections, ...collections } }).collections!
+    expect(
+      'hangouts' in
+        c({ hangouts: { '101401': { endings: { '1': 'done' }, pictures: [], picturesTotal: 1 } } }),
+    ).toBe(false)
+    expect('monstersSeen' in c({ monstersSeen: [5, 5] })).toBe(false)
+    expect(c({ blueprints: [1] }).monstersSeen).toHaveLength(2_300)
+    expect(
+      read({ gi_achievement_progress: { '80001': { progress: -1, total: 1 } } })
+        .achievementProgress,
+    ).toBeNull()
+    expect(
+      read({
+        gi_events: {
+          '1': { schedule: 1, start: 1, end: 2, progress: { '5': { progress: 1, total: 1 } } },
+        },
+      }).events,
+    ).toBeNull()
+  })
+
+  it('stores collections2 and progress in their binary layouts, the tasks as JSON', async () => {
+    const good = normalizeGood(input)
+    const c2 = JSON.parse(JSON.stringify(encodeCollections2(good.collections!)))
+    const progress = JSON.parse(
+      JSON.stringify(
+        encodeProgress({ achievementProgress: good.achievementProgress!, events: good.events! }),
+      ),
+    )
+    for (const [kind, value, decode] of [
+      ['collections2', c2, decodeCollections],
+      ['progress', progress, decodeProgress],
+    ] as const) {
+      const blob = encodeSectionBlob(kind, value, false, null)
+      expect(blob.payload[0], kind).toBe(0x10)
+      const back = decodeSectionBlob(kindCode(kind, false), blob.data, null, null)
+      expect(JSON.stringify(back.value)).toBe(JSON.stringify(value))
+      expect(decode(back.value as never)).toEqual(decode(value as never))
+    }
+    expect(encodeSectionBlob('progress', progress, false, null).data.length).toBeLessThan(1_500)
+    // The deployed tasks layout has no place for the new letters: JSON, which old decoders read.
+    const tasks = JSON.parse(JSON.stringify(encodeTasks(good.tasks!)))
+    expect(encodeSectionBlob('tasks', tasks, false, null).payload[0]).toBe(0x00)
+    expect(decodeTasks(tasks)).toEqual(good.tasks)
   })
 })
