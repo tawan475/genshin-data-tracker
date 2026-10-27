@@ -163,7 +163,7 @@ const reputationTotal = computed(() =>
  */
 const OPEN_KEY = 'collections:world-open'
 // Statues and Reputation share one row and fold together (`statues`).
-const PANELS = ['lists', 'statues', 'exploration', 'tribes'] as const
+const PANELS = ['lists', 'statues', 'offerings', 'exploration', 'tribes'] as const
 const open = reactive(
   Object.fromEntries(PANELS.map((id) => [id, false])) as Record<(typeof PANELS)[number], boolean>,
 )
@@ -215,13 +215,6 @@ function cityAverage(areas: readonly { percent: number | null }[]): number | nul
 }
 
 const sceneName = (name: string | null) => name ?? t('collections.world.teyvat')
-/**
- * Offerings are hidden for now (user's call, 2026-10-27): captures showed a
- * whole list missing or another world's values; back once the capture's
- * source is settled.
- */
-const OFFERINGS_PAUSED = true
-
 const offeringName = (id: number, name: string) =>
   name || t('collections.world.offering', { n: id })
 const fraction = (p: Progress) => `${formatNumber(p.have)} / ${formatNumber(p.total)}`
@@ -453,8 +446,10 @@ const MAP_PARTS = [
     </div>
 
     <UiPanel
-      v-if="!OFFERINGS_PAUSED && world.offerings.length"
+      v-if="world.offerings.length"
+      v-model:open="open.offerings"
       :title="$t('collections.world.offerings')"
+      collapsible
       flush
     >
       <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-2 p-3 sm:p-5">
