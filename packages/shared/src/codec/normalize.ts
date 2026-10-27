@@ -398,11 +398,16 @@ const PICTURE_FIELDS: readonly [keyof GiProfilePicture, number, number][] = [
   ['frameId', 1, 99_999_999],
 ]
 
-/** A name or signature as the game allows them, with a margin; control characters refused. */
-function profileText(value: unknown, min: number, max: number): string | undefined {
+/**
+ * A name or signature as the game allows them, with a margin. Control
+ * characters are refused, except line breaks where `lines` (the signature box
+ * allows them).
+ */
+function profileText(value: unknown, min: number, max: number, lines = false): string | undefined {
   if (typeof value !== 'string' || value.length < min || value.length > max) return undefined
   // eslint-disable-next-line no-control-regex
-  return /[\u0000-\u001f\u007f]/.test(value) ? undefined : value
+  const control = lines ? /[\u0000-\u0009\u000b-\u001f\u007f]/ : /[\u0000-\u001f\u007f]/
+  return control.test(value) ? undefined : value
 }
 
 function toPlayer(raw: unknown): GiPlayer | null {
@@ -417,7 +422,7 @@ function toPlayer(raw: unknown): GiPlayer | null {
   }
   const nickname = profileText(raw.nickname, 1, 64)
   if (nickname !== undefined) player.nickname = nickname
-  const signature = profileText(raw.signature, 0, 256)
+  const signature = profileText(raw.signature, 0, 256, true)
   if (signature !== undefined) player.signature = signature
   if (isIntIn(raw.nameCard, 210_000, 219_999)) player.nameCard = raw.nameCard
   if (isObject(raw.profilePicture)) {

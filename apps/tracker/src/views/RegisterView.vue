@@ -104,7 +104,7 @@ async function submit() {
 </script>
 
 <template>
-  <AuthFrame :title="$t('auth.createAccount')">
+  <AuthFrame :title="$t('auth.createAccount')" :subtitle="$t('auth.registerSub')">
     <p
       v-if="serverError"
       class="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300"

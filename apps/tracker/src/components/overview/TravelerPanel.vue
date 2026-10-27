@@ -81,7 +81,7 @@ const rows = computed(() => {
           </p>
           <p
             v-if="profile.signature"
-            class="truncate text-sm text-white/80"
+            class="line-clamp-3 text-sm whitespace-pre-line text-white/80"
             :title="profile.signature"
           >
             {{ profile.signature }}

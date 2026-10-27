@@ -827,7 +827,7 @@ describe("irminsul's extra keys", () => {
       gi_player: {
         ar: 60,
         nickname: 'x'.repeat(65),
-        signature: 'line\nbreak',
+        signature: 'tab\there',
         nameCard: 110001,
         profilePicture: { id: 0, avatarId: 1, frameId: 'a' },
         birthday: { month: 13, day: 1 },
@@ -839,6 +839,12 @@ describe("irminsul's extra keys", () => {
       gi_player: { profilePicture: { avatarId: 10000007, costumeId: 200301, extra: 1 } },
     })
     expect(kept.player).toEqual({ profilePicture: { avatarId: 10000007, costumeId: 200301 } })
+    // The signature box allows line breaks; the name doesn't.
+    const lines = normalizeGood({
+      ...sample,
+      gi_player: { nickname: 'two\nlines', signature: 'two\nlines' },
+    })
+    expect(lines.player).toEqual({ signature: 'two\nlines' })
   })
 
   it('keeps the edges of every range', () => {
