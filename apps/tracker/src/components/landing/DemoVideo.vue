@@ -88,17 +88,33 @@ const onScreen = () => inView || !!document.fullscreenElement
 
 /** A new <video> (one per version, keyed): set up, then play if it should. */
 function attach(element: HTMLVideoElement | undefined) {
+  // A version switch unmounts the old <video> after the new one is attached,
+  // and its ref then reports null: keep the new one (only a video that has
+  // left the page is let go). Without this the controls lost the video and
+  // the play button stuck.
+  if (!element) {
+    if (video.value && !video.value.isConnected) video.value = undefined
+    return
+  }
   // Function refs run on every render: only a new element counts.
   if (element === video.value) return
   video.value = element
-  if (!element) return
   element.muted = muted.value
   element.defaultMuted = true
   maybePlay()
 }
 
+/**
+ * Whether an event comes from the video on show. Switching versions removes
+ * the old <video>, and the browser then fires its `pause` late, after the new
+ * one has started: without this check that marked the playing video paused
+ * (the big play button stuck over it).
+ */
+const current = (event: Event) => event.target === video.value
+
 /** Autoplay starts as soon as the file loads, which may be before it is on screen. */
-function onPlay() {
+function onPlay(event: Event) {
+  if (!current(event)) return
   if (!asked && !onScreen()) {
     video.value?.pause()
     return
@@ -117,7 +133,12 @@ function pick(next: DemoPlatform, automatic = false) {
   playing.value = false
 }
 
-function onEnded() {
+function onPause(event: Event) {
+  if (current(event)) playing.value = false
+}
+
+function onEnded(event: Event) {
+  if (!current(event)) return
   cancelFade()
   const next = afterEnd(platform.value, { phone, reducedMotion })
   if (!next) return
@@ -270,10 +291,12 @@ onBeforeUnmount(() => {
             platform === 'android' ? $t('landing.video.androidLabel') : $t('landing.video.pcLabel')
           "
           @click="toggle"
-          @timeupdate="time = ($event.target as HTMLVideoElement).currentTime"
-          @loadedmetadata="duration = ($event.target as HTMLVideoElement).duration || 0"
+          @timeupdate="current($event) && (time = ($event.target as HTMLVideoElement).currentTime)"
+          @loadedmetadata="
+            current($event) && (duration = ($event.target as HTMLVideoElement).duration || 0)
+          "
           @play="onPlay"
-          @pause="playing = false"
+          @pause="onPause"
           @ended="onEnded"
         />
         <button

@@ -1337,19 +1337,23 @@
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  height: 100%;
 }
 .lp .e-chap:hover {
   color: var(--tx);
-  background: rgba(255, 255, 255, 0.05);
 }
+/* Whole labels (two lines at most), never cut to "Open Gens…". */
 .lp .e-chap b {
   font-weight: 500;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 .lp .e-chap .bar {
   display: block;
+  margin-top: auto;
   height: 3px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.14);
