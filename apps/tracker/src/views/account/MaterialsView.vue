@@ -136,9 +136,8 @@ const byKey = computed(() => new Map(items.value.map((item) => [item.key, item])
 const wallet = computed<WalletItem[]>(() => {
   const list: WalletItem[] = []
   for (const key of WALLET_KEYS) {
-    const item = byKey.value.get(key)
-    // Mora and Primogems always; the rest only while held.
-    if (!item || (item.count === 0 && key !== 'Mora' && key !== 'Primogem')) continue
+    // Every currency, at 0 too (the user's call): a capture may leave a 0 out entirely.
+    const item = byKey.value.get(key) ?? materialItem(key, 0)
     list.push({
       key,
       label: walletLabel(key) ?? item.name,

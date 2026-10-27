@@ -20,7 +20,7 @@ export type TabKey = BagTab | 'other'
 
 /**
  * Currency and wish items: the wallet strip above the bag, in this order.
- * Only the ones an account's snapshots hold are shown. In the bag they sit
+ * All of them are shown, at 0 too. In the bag they sit
  * where the game puts them (Fates in Precious Items, Mora under Other).
  */
 export const WALLET_KEYS = [
