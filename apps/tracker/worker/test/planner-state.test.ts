@@ -220,7 +220,11 @@ describe('planner hand edits', () => {
     const messages: LiveEvent[] = []
     let wake: (() => void) | null = null
     socket.addEventListener('message', (event) => {
-      messages.push(liveMessage(String(event.data)))
+      const message = liveMessage(String(event.data))
+      // Creating the account in setup() announces it in the background
+      // (waitUntil); on a slow runner that lands after the socket opens.
+      if (message.type === 'accounts') return
+      messages.push(message)
       wake?.()
     })
     const next = async () => {
