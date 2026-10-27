@@ -33,6 +33,7 @@
   "notCapturedPart": "Belum tertangkap",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 atau lebih baru membacanya saat login.",
   "tabs": {
+    "world": "Dunia",
     "spincrystals": "Radiant Spincrystal",
     "anecdotes": "Anekdot",
     "archive": "Arsip",
@@ -137,5 +138,24 @@
       "locked": "Belum Terbuka"
     }
   },
-  "guide": "Panduan di wiki"
+  "guide": "Panduan di wiki",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Peta",
+    "waypoints": "Teleport Waypoint",
+    "domains": "Domain",
+    "areas": "Area terbuka",
+    "inTeyvat": "{what} di Teyvat",
+    "reputation": "Reputasi",
+    "statues": "Patung The Seven",
+    "level": "Lv. {n}",
+    "oculi": "{n} Oculus",
+    "offerings": "Persembahan",
+    "offering": "Persembahan {n}",
+    "exploration": "Kemajuan Eksplorasi",
+    "points": "{n} poin",
+    "pointsOnly": "Poin",
+    "pointsHint": "Poin eksplorasi dari tangkapan terbaru: persentase butuh total tiap area, yang belum ada di data game",
+    "otherAreas": "Lainnya"
+  }
 }

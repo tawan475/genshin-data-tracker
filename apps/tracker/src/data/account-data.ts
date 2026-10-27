@@ -57,6 +57,7 @@ export type SectionName =
   | 'collections'
   | 'collections2'
   | 'wardrobe'
+  | 'exploration'
 
 export interface DecodedBundle {
   snapshots: BundleSnapshot[]

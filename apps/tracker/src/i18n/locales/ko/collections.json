@@ -33,6 +33,7 @@
   "notCapturedPart": "아직 캡처 없음",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 이상이 로그인할 때 읽습니다.",
   "tabs": {
+    "world": "월드",
     "spincrystals": "빛나는 결정",
     "anecdotes": "여행 일화집",
     "archive": "도감",
@@ -137,5 +138,24 @@
       "locked": "미해금"
     }
   },
-  "guide": "위키 공략"
+  "guide": "위키 공략",
+  "world": {
+    "teyvat": "티바트",
+    "map": "맵",
+    "waypoints": "워프 포인트",
+    "domains": "비경",
+    "areas": "개방한 지역",
+    "inTeyvat": "티바트의 {what}",
+    "reputation": "평판",
+    "statues": "일곱신상",
+    "level": "Lv.{n}",
+    "oculi": "신의 눈동자 {n}개",
+    "offerings": "봉납",
+    "offering": "봉납 {n}",
+    "exploration": "탐사도",
+    "points": "{n}점",
+    "pointsOnly": "점수",
+    "pointsHint": "최신 캡처의 탐사 점수: 비율에는 지역별 총점이 필요하지만 게임 데이터에 아직 없습니다",
+    "otherAreas": "기타"
+  }
 }

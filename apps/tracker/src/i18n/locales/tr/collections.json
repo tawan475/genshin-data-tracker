@@ -33,6 +33,7 @@
   "notCapturedPart": "Henüz taranmadı",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 veya üstü bunu girişte okur.",
   "tabs": {
+    "world": "Dünya",
     "spincrystals": "Parlak Burgu Kristaller",
     "anecdotes": "Seyahat Notları",
     "archive": "Arşiv",
@@ -137,5 +138,24 @@
       "locked": "Kilitli"
     }
   },
-  "guide": "Wiki rehberi"
+  "guide": "Wiki rehberi",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Harita",
+    "waypoints": "Işınlanma Portalları",
+    "domains": "Zindanlar",
+    "areas": "Açılan bölgeler",
+    "inTeyvat": "Teyvat'taki {what}",
+    "reputation": "İtibar",
+    "statues": "Yedilerin Heykelleri",
+    "level": "Sv. {n}",
+    "oculi": "{n} Oculus",
+    "offerings": "Adaklar",
+    "offering": "Adak {n}",
+    "exploration": "Keşif İlerlemesi",
+    "points": "{n} puan",
+    "pointsOnly": "Puan",
+    "pointsHint": "En son yakalamadaki keşif puanları: yüzde için her bölgenin toplamı gerekir, oyun verisinde henüz yok",
+    "otherAreas": "Diğer"
+  }
 }

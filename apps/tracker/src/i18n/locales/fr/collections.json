@@ -33,6 +33,7 @@
   "notCapturedPart": "Pas encore capturé",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ou plus récent le lit à la connexion.",
   "tabs": {
+    "world": "Monde",
     "spincrystals": "Gyrocristaux radiants",
     "anecdotes": "Anecdotes",
     "archive": "Archives",
@@ -137,5 +138,24 @@
       "locked": "Verrouillées"
     }
   },
-  "guide": "Guide sur le wiki"
+  "guide": "Guide sur le wiki",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Carte",
+    "waypoints": "Points de téléportation",
+    "domains": "Donjons",
+    "areas": "Zones révélées",
+    "inTeyvat": "{what} à Teyvat",
+    "reputation": "Réputation",
+    "statues": "Statues des Sept",
+    "level": "Niv. {n}",
+    "oculi": "{n} oculi",
+    "offerings": "Offrandes",
+    "offering": "Offrande {n}",
+    "exploration": "Exploration",
+    "points": "{n} pts",
+    "pointsOnly": "Points",
+    "pointsHint": "Points d'exploration de la dernière capture : le pourcentage demande le total de chaque zone, absent des données du jeu pour l'instant",
+    "otherAreas": "Autres"
+  }
 }

@@ -33,6 +33,7 @@
   "notCapturedPart": "まだキャプチャされていません",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 以降がログイン時に読み取ります。",
   "tabs": {
+    "world": "ワールド",
     "spincrystals": "旋曜玉帛",
     "anecdotes": "秘話",
     "archive": "図鑑",
@@ -137,5 +138,24 @@
       "locked": "未開放"
     }
   },
-  "guide": "Wiki の攻略"
+  "guide": "Wiki の攻略",
+  "world": {
+    "teyvat": "テイワット",
+    "map": "マップ",
+    "waypoints": "ワープポイント",
+    "domains": "秘境",
+    "areas": "解放済みエリア",
+    "inTeyvat": "テイワットの{what}",
+    "reputation": "評判",
+    "statues": "七天神像",
+    "level": "Lv.{n}",
+    "oculi": "神の瞳 {n}個",
+    "offerings": "奉納",
+    "offering": "奉納 {n}",
+    "exploration": "探索度",
+    "points": "{n} pt",
+    "pointsOnly": "ポイント",
+    "pointsHint": "最新キャプチャの探索ポイント：割合には各エリアの合計が必要ですが、ゲームデータにまだありません",
+    "otherAreas": "その他"
+  }
 }

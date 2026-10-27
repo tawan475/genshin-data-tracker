@@ -10,6 +10,7 @@ import {
 import type { CapturedCollections } from './collection-parts'
 import { recipeRows } from './recipes'
 import { spincrystalProgress, type Spincrystal } from './spincrystals'
+import { TEYVAT_SCENE, worldModel } from './world'
 
 /**
  * One figure per Collections card, counted the way its page counts: `have`
@@ -19,6 +20,8 @@ import { spincrystalProgress, type Spincrystal } from './spincrystals'
 export type CollectionFigure = { have: number; total: number } | { count: number }
 
 export interface CollectionFigures {
+  /** Teleport Waypoints unlocked in Teyvat. */
+  world: CollectionFigure | null
   spincrystals: CollectionFigure | null
   archive: CollectionFigure | null
   handbook: CollectionFigure | null
@@ -47,12 +50,17 @@ export function collectionFigures(
   const recipes = captured.recipes?.value
   const wardrobe = captured.wardrobe?.value
   const aranara = captured.aranara?.value
+  const exploration = captured.exploration?.value
   const withCatalog = <T>(
     value: T | undefined,
     count: (c: CollectionCatalog, v: T) => CollectionFigure,
   ) => (value !== undefined && catalog ? count(catalog, value) : null)
 
   return {
+    world: withCatalog(exploration, (c, v) => {
+      const teyvat = worldModel(v, c).maps.find((m) => m.scene === TEYVAT_SCENE)
+      return teyvat ? teyvat.waypoints : { have: 0, total: 0 }
+    }),
     spincrystals:
       spin && spincrystals
         ? (({ have, total }) => ({ have, total }))(spincrystalProgress(spincrystals, spin))

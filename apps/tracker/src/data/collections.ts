@@ -13,7 +13,7 @@ export {
 
 const decoded = new WeakMap<DecodedBundle, CapturedCollections>()
 
-/** The account's captured collections (one bundle of the three sections, cached). */
+/** The account's captured collections (one bundle of their sections, cached). */
 export async function loadCapturedCollections(account: AccountRef): Promise<CapturedCollections> {
   const bundle = await loadBundle(account, { sections: [...COLLECTION_SECTIONS] })
   let value = decoded.get(bundle)

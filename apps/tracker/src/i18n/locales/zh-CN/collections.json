@@ -33,6 +33,7 @@
   "notCapturedPart": "尚未捕获",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 或更新版本会在登录时读取。",
   "tabs": {
+    "world": "世界",
     "spincrystals": "旋曜玉帛",
     "anecdotes": "游逸旅账",
     "archive": "图鉴",
@@ -137,5 +138,24 @@
       "locked": "未解锁"
     }
   },
-  "guide": "Wiki 攻略"
+  "guide": "Wiki 攻略",
+  "world": {
+    "teyvat": "提瓦特",
+    "map": "地图",
+    "waypoints": "传送锚点",
+    "domains": "秘境",
+    "areas": "已解锁区域",
+    "inTeyvat": "提瓦特的{what}",
+    "reputation": "声望",
+    "statues": "七天神像",
+    "level": "{n}级",
+    "oculi": "{n}个神瞳",
+    "offerings": "供奉",
+    "offering": "供奉 {n}",
+    "exploration": "探索度",
+    "points": "{n} 点",
+    "pointsOnly": "点数",
+    "pointsHint": "最新捕获的探索点数：百分比需要各区域的总数，游戏数据尚未提供",
+    "otherAreas": "其他"
+  }
 }

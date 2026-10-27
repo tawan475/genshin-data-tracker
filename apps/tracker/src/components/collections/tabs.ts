@@ -6,6 +6,7 @@ import {
   CookingPot,
   Disc3,
   Layers,
+  Map as MapIcon,
   PawPrint,
   Shirt,
   Sprout,
@@ -14,6 +15,7 @@ import type { CapturedCollections } from '@/data/collections'
 
 /** The collections, in the hub's order; the slug is the URL's last segment (`/collections/archive`). */
 export const COLLECTION_TABS = [
+  'world',
   'spincrystals',
   'anecdotes',
   'archive',
@@ -31,6 +33,7 @@ export const isCollectionTab = (value: unknown): value is CollectionTab =>
 
 /** A tab's label: `collections.tabs.<key>`. */
 export const TAB_LABEL = {
+  world: 'world',
   spincrystals: 'spincrystals',
   anecdotes: 'anecdotes',
   archive: 'archive',
@@ -44,6 +47,7 @@ export const TAB_LABEL = {
 
 /** The captured part a tab shows (its capture time is the tab's), null for Anecdotes. */
 export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections | null>> = {
+  world: 'exploration',
   spincrystals: 'spincrystals',
   anecdotes: null,
   archive: 'archive',
@@ -57,6 +61,7 @@ export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections 
 
 /** Tabs that list the game data's collections (names, totals): they wait for it. */
 export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
+  'world',
   'archive',
   'handbook',
   'living-beings',
@@ -68,6 +73,7 @@ export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
 
 /** Each tab's component, loaded when the tab is first shown. */
 export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
+  world: defineAsyncComponent(() => import('./WorldTab.vue')),
   spincrystals: defineAsyncComponent(() => import('./SpincrystalsTab.vue')),
   anecdotes: defineAsyncComponent(() => import('./AnecdotesTab.vue')),
   archive: defineAsyncComponent(() => import('./ArchiveTab.vue')),
@@ -81,6 +87,7 @@ export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
 
 /** Each collection's card icon. */
 export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
+  world: MapIcon,
   spincrystals: Disc3,
   anecdotes: BookOpen,
   archive: Archive,

@@ -33,6 +33,7 @@
   "notCapturedPart": "Not captured yet",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 or newer reads it at login.",
   "tabs": {
+    "world": "World",
     "spincrystals": "Radiant Spincrystals",
     "anecdotes": "Anecdotes",
     "archive": "Archive",
@@ -137,5 +138,24 @@
       "locked": "Locked"
     }
   },
-  "guide": "Wiki guide"
+  "guide": "Wiki guide",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Map",
+    "waypoints": "Teleport Waypoints",
+    "domains": "Domains",
+    "areas": "Areas revealed",
+    "inTeyvat": "{what} in Teyvat",
+    "reputation": "Reputation",
+    "statues": "Statues of The Seven",
+    "level": "Lv. {n}",
+    "oculi": "{n} Oculi",
+    "offerings": "Offerings",
+    "offering": "Offering {n}",
+    "exploration": "Exploration Progress",
+    "points": "{n} pts",
+    "pointsOnly": "Points",
+    "pointsHint": "Exploration points from the newest capture: the percentage needs each area's total, which the game data does not have yet",
+    "otherAreas": "Other"
+  }
 }

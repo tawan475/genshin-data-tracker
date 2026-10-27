@@ -1,9 +1,12 @@
 import {
   decodeCollections,
+  decodeExploration,
   decodeWardrobe,
   type BundleSnapshot,
   type CollectionsSection,
+  type ExplorationSection,
   type GiCollections,
+  type GiExploration,
   type GiWardrobe,
   type WardrobeSection,
 } from '@gdt/shared'
@@ -11,7 +14,7 @@ import {
 /**
  * What the captures say the player has collected: each part of
  * `gi_collections` (sections `collections` + `collections2`) and
- * `gi_wardrobe` from the newest snapshot that has that part, with that
+ * `gi_wardrobe` and `gi_exploration` from the newest snapshot that has that part, with that
  * snapshot's time. A part no capture had is absent (absent is not "none").
  */
 
@@ -21,10 +24,15 @@ export interface Captured<T> {
   takenAt: number
 }
 
-type Parts = Required<GiCollections> & { wardrobe: GiWardrobe }
+type Parts = Required<GiCollections> & { wardrobe: GiWardrobe; exploration: GiExploration }
 export type CapturedCollections = { [K in keyof Parts]?: Captured<Parts[K]> }
 
-export const COLLECTION_SECTIONS = ['collections', 'collections2', 'wardrobe'] as const
+export const COLLECTION_SECTIONS = [
+  'collections',
+  'collections2',
+  'wardrobe',
+  'exploration',
+] as const
 
 /** A decoded bundle's snapshots (oldest first) and section texts (see account-data). */
 export interface CollectionsBundle {
@@ -50,6 +58,11 @@ export function capturedCollections(bundle: CollectionsBundle): CapturedCollecti
     const wardrobe = snapshot.wardrobe ? bundle.texts.get(snapshot.wardrobe) : undefined
     if (wardrobe !== undefined) {
       put('wardrobe', decodeWardrobe(JSON.parse(wardrobe) as WardrobeSection), snapshot.takenAt)
+    }
+    const exploration = snapshot.exploration ? bundle.texts.get(snapshot.exploration) : undefined
+    if (exploration !== undefined) {
+      const value = decodeExploration(JSON.parse(exploration) as ExplorationSection)
+      put('exploration', value, snapshot.takenAt)
     }
   }
   return out

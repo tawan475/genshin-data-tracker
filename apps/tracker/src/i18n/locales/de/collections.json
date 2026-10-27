@@ -33,6 +33,7 @@
   "notCapturedPart": "Noch nicht erfasst",
   "notCapturedPartBody": "Teyvat.me Capture ab 1.4.0 liest es beim Einloggen.",
   "tabs": {
+    "world": "Welt",
     "spincrystals": "Strahlende Drehkristalle",
     "anecdotes": "Anekdoten",
     "archive": "Handbuch",
@@ -137,5 +138,24 @@
       "locked": "Noch nicht freigeschaltet"
     }
   },
-  "guide": "Anleitung im Wiki"
+  "guide": "Anleitung im Wiki",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Karte",
+    "waypoints": "Teleportationspunkte",
+    "domains": "Sphären",
+    "areas": "Aufgedeckte Gebiete",
+    "inTeyvat": "{what} in Teyvat",
+    "reputation": "Ansehen",
+    "statues": "Statuen der Sieben",
+    "level": "St. {n}",
+    "oculi": "{n} Okuli",
+    "offerings": "Opfergaben",
+    "offering": "Opfergabe {n}",
+    "exploration": "Erkundungsfortschritt",
+    "points": "{n} Pkt.",
+    "pointsOnly": "Punkte",
+    "pointsHint": "Erkundungspunkte der neuesten Aufnahme: Der Prozentwert braucht die Gesamtpunkte jedes Gebiets, die den Spieldaten noch fehlen",
+    "otherAreas": "Sonstige"
+  }
 }

@@ -33,6 +33,7 @@
   "notCapturedPart": "ยังไม่ได้สแกน",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
   "tabs": {
+    "world": "โลก",
     "spincrystals": "Radiant Spincrystal",
     "anecdotes": "เกร็ดน่ารู้",
     "archive": "อัลบั้ม",
@@ -137,5 +138,24 @@
       "locked": "ยังไม่ปลดล็อก"
     }
   },
-  "guide": "คู่มือบนวิกิ"
+  "guide": "คู่มือบนวิกิ",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "แผนที่",
+    "waypoints": "จุดเทเลพอร์ต",
+    "domains": "ดันเจี้ยน",
+    "areas": "พื้นที่ที่ปลดล็อก",
+    "inTeyvat": "{what} ใน Teyvat",
+    "reputation": "ชื่อเสียง",
+    "statues": "Statue of The Seven",
+    "level": "Lv.{n}",
+    "oculi": "Oculus {n} ชิ้น",
+    "offerings": "การถวาย",
+    "offering": "การถวาย {n}",
+    "exploration": "ความคืบหน้าการสำรวจ",
+    "points": "{n} แต้ม",
+    "pointsOnly": "แต้ม",
+    "pointsHint": "แต้มการสำรวจจากการจับข้อมูลล่าสุด: เปอร์เซ็นต์ต้องใช้คะแนนรวมของแต่ละพื้นที่ ซึ่งข้อมูลเกมยังไม่มี",
+    "otherAreas": "อื่นๆ"
+  }
 }

@@ -163,7 +163,12 @@ Abyss (full stars in the running period) and adds Expeditions, Realm Currency
 and Welkin Moon rows, while the capture is newer than the row's hand state
 (`components/planner/tasks.ts` `captureRead`), and Collections
 (`/app/a/:id/collections` = a card per collection with its figure,
-`/collections/<tab>` = its page; Achievements is a card too): Radiant
+`/collections/<tab>` = its page; Achievements is a card too): World
+(`gi_exploration` against `@gdt/game-data` v7.1.15's cities, areas,
+offerings and scene points: each visited scene's Teleport Waypoints,
+domains and areas revealed, Statues of The Seven, reputation, offerings,
+exploration points per area, a percentage once the game data has the
+totals; `src/data/world.ts`), Radiant
 Spincrystals (which the newest capture has, which are missing), Anecdotes
 (the old `/anecdotes` page redirects there), the Archive, the Adventurer
 Handbook, Living Beings (defeats), TCG, the wardrobe and Aranara, each from

@@ -33,6 +33,7 @@
   "notCapturedPart": "Chưa ghi",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 trở lên đọc khi đăng nhập.",
   "tabs": {
+    "world": "Thế Giới",
     "spincrystals": "Ngọc Thạch Âm Vang",
     "anecdotes": "Giai Thoại",
     "archive": "Thư Viện",
@@ -137,5 +138,24 @@
       "locked": "Chưa Mở"
     }
   },
-  "guide": "Hướng dẫn trên wiki"
+  "guide": "Hướng dẫn trên wiki",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Bản Đồ",
+    "waypoints": "Điểm dịch chuyển",
+    "domains": "Bí Cảnh",
+    "areas": "Khu vực đã mở",
+    "inTeyvat": "{what} ở Teyvat",
+    "reputation": "Danh Vọng",
+    "statues": "Thất Thiên Thần Tượng",
+    "level": "Cấp {n}",
+    "oculi": "{n} Thần Đồng",
+    "offerings": "Cúng Dâng",
+    "offering": "Cúng Dâng {n}",
+    "exploration": "Độ thám hiểm",
+    "points": "{n} điểm",
+    "pointsOnly": "Điểm",
+    "pointsHint": "Điểm thám hiểm từ lần ghi mới nhất: phần trăm cần tổng của từng khu vực, dữ liệu game chưa có",
+    "otherAreas": "Khác"
+  }
 }

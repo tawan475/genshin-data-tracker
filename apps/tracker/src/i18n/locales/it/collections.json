@@ -33,6 +33,7 @@
   "notCapturedPart": "Non ancora catturato",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 o successivo lo legge all'accesso.",
   "tabs": {
+    "world": "Mondo",
     "spincrystals": "Voltacristalli radiosi",
     "anecdotes": "Aneddoti",
     "archive": "Archivio",
@@ -137,5 +138,24 @@
       "locked": "Bloccate"
     }
   },
-  "guide": "Guida sulla wiki"
+  "guide": "Guida sulla wiki",
+  "world": {
+    "teyvat": "Teyvat",
+    "map": "Mappa",
+    "waypoints": "Portali di teletrasporto",
+    "domains": "Domini",
+    "areas": "Zone rivelate",
+    "inTeyvat": "{what} a Teyvat",
+    "reputation": "Reputazione",
+    "statues": "Statue dei Sette",
+    "level": "Liv. {n}",
+    "oculi": "{n} oculi",
+    "offerings": "Offerte",
+    "offering": "Offerta {n}",
+    "exploration": "Progressi esplorazione",
+    "points": "{n} pt",
+    "pointsOnly": "Punti",
+    "pointsHint": "Punti esplorazione dall'ultima cattura: la percentuale richiede il totale di ogni zona, che i dati di gioco non hanno ancora",
+    "otherAreas": "Altre"
+  }
 }
