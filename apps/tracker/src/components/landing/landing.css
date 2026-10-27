@@ -888,6 +888,10 @@
   transform: scale(0.97);
   filter: blur(6px);
 }
+/* a click on PC / Android: the same fade, quicker (DemoVideo SWITCH_FADE_MS) */
+.lp .e-vid.quick {
+  transition-duration: 0.22s;
+}
 .lp .e-v {
   display: block;
   width: 100%;
@@ -1081,6 +1085,46 @@
 .lp .e-stage.phone .e-chap .bar {
   width: 48px;
   flex: none;
+  /* beside the label here, so centred on it (the PC list pins its bars to the bottom) */
+  margin-top: 0;
+  align-self: center;
+}
+/*
+ * Android, where the phone and its chapters sit side by side: the PC / Android
+ * switch goes into the chapters' column, above the list (the user's drawing),
+ * and the phone gets the height the switch took above it.
+ */
+@media (min-width: 1100px) {
+  .lp .e-player:has(.e-stage.phone) {
+    display: grid;
+    /* the phone's column sized here: a percentage width on the phone made it take all the space */
+    grid-template-columns: calc(var(--block) * 1080 / 2340) 240px;
+    grid-template-rows: auto auto;
+    column-gap: 28px;
+    row-gap: 18px;
+    justify-content: center;
+    align-items: center;
+  }
+  .lp .e-player .e-stage.phone {
+    display: contents;
+  }
+  .lp .e-player:has(.e-stage.phone) .e-seg {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    justify-self: start;
+  }
+  .lp .e-player:has(.e-stage.phone) .e-vid.phone {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 100%;
+    height: var(--block);
+  }
+  .lp .e-player:has(.e-stage.phone) .e-chaps {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+  }
 }
 .lp .e-stage.phone .e-chap.current {
   background: rgba(255, 255, 255, 0.06);
@@ -1747,6 +1791,34 @@
 .lp .e-hero .e-media {
   justify-content: flex-end;
 }
+/*
+ * One width for the whole page, centred (the user: "everything is spread out",
+ * then "a little too wide, push it together in the middle"): the top bar, the
+ * hero and the sections below share it, so the logo lines up with the title
+ * and the sections' edges.
+ */
+@media (min-width: 961px) {
+  .lp .e-hero .e-band,
+  .lp .wrap.nav,
+  .lp .wrap {
+    max-width: min(92vw, calc(40vw + 640px));
+  }
+}
+/*
+ * The hero sits near the top of the screen rather than in its middle (the
+ * user: too much empty space above the video); it still fills the screen.
+ */
+/*
+ * The hero's own height, not the whole screen (the user: "no need to make it
+ * eat the entire page"): the next section follows right under the video.
+ */
+@media (min-width: 961px) {
+  .lp .e-hero {
+    min-height: 0;
+    align-items: flex-start;
+    padding: clamp(28px, 6vh, 96px) 0 clamp(40px, 7vh, 112px);
+  }
+}
 .lp .e-hero .e-player {
   width: min(100%, 50vw, calc((var(--vh, 1080px) - 330px) * 16 / 9));
 }
@@ -1756,5 +1828,23 @@
 @media (max-width: 960px) {
   .lp .e-hero .e-player {
     width: 100%;
+  }
+}
+
+/*
+ * The same hero height for PC and Android (the user: swapping shouldn't move
+ * the page): the player is as tall as the PC layout (switch, 16:9 video,
+ * chapters), worked out from its own width, and the phone is sized to it.
+ */
+@media (min-width: 1100px) {
+  .lp .e-hero .e-media {
+    container-type: inline-size;
+  }
+  .lp .e-hero .e-player {
+    --pw: min(100cqw, 50vw, calc((var(--vh, 1080px) - 330px) * 16 / 9));
+    /* switch 48 + gap 14 + video + gap 16 + chapters 43 */
+    --block: calc(var(--pw) * 9 / 16 + 121px);
+    width: var(--pw);
+    min-height: var(--block);
   }
 }

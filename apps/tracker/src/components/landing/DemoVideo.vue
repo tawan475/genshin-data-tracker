@@ -29,6 +29,12 @@ const phone = isPhone(userAgent)
 const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 const platform = ref<DemoPlatform>(initialPlatform(userAgent))
+/** The switch's choice, shown at once while the video fades over to it. */
+const chosen = ref<DemoPlatform>(platform.value)
+/** The fade is a click's (quick), not the end of a video's. */
+const quick = ref(false)
+/** A click's fade, each way (landing.css `.e-vid.fade.quick`). */
+const SWITCH_FADE_MS = 220
 const time = ref(0)
 const duration = ref(0)
 const playing = ref(false)
@@ -70,6 +76,7 @@ function cancelFade() {
   timers = []
   fading.value = false
   ending.value = false
+  quick.value = false
 }
 
 /** Plays at the visitor's request (a button, a chapter, the video itself). */
@@ -124,8 +131,26 @@ function onPlay(event: Event) {
   playing.value = true
 }
 
+/** A click on the switch: a quick fade out, the other version, a fade in (no fade with reduced motion). */
+function choose(next: DemoPlatform) {
+  cancelFade()
+  chosen.value = next
+  if (next === platform.value) return
+  if (reducedMotion) return pick(next)
+  quick.value = true
+  fading.value = true
+  later(SWITCH_FADE_MS, () => {
+    pick(next, true)
+    later(FADE_IN_DELAY_MS, () => {
+      fading.value = false
+      later(SWITCH_FADE_MS, () => (quick.value = false))
+    })
+  })
+}
+
 function pick(next: DemoPlatform, automatic = false) {
   if (!automatic) cancelFade()
+  chosen.value = next
   if (next === platform.value) return
   userPaused = false
   platform.value = next
@@ -246,17 +271,17 @@ onBeforeUnmount(() => {
     <div class="e-seg" role="group" :aria-label="$t('landing.video.platform')">
       <button
         type="button"
-        :class="{ on: platform === 'pc' }"
-        :aria-pressed="platform === 'pc'"
-        @click="pick('pc')"
+        :class="{ on: chosen === 'pc' }"
+        :aria-pressed="chosen === 'pc'"
+        @click="choose('pc')"
       >
         <Monitor class="ic s" aria-hidden="true" />PC
       </button>
       <button
         type="button"
-        :class="{ on: platform === 'android' }"
-        :aria-pressed="platform === 'android'"
-        @click="pick('android')"
+        :class="{ on: chosen === 'android' }"
+        :aria-pressed="chosen === 'android'"
+        @click="choose('android')"
       >
         <Smartphone class="ic s" aria-hidden="true" />Android
       </button>
@@ -265,7 +290,10 @@ onBeforeUnmount(() => {
       <div
         ref="frame"
         class="e-vid"
-        :class="[platform === 'android' ? 'phone' : 'pc', { paused: !playing, fade: fading }]"
+        :class="[
+          platform === 'android' ? 'phone' : 'pc',
+          { paused: !playing, fade: fading, quick },
+        ]"
       >
         <video
           :key="platform"
