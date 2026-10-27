@@ -12,7 +12,10 @@ import {
   type SortDirection,
 } from '@/data/characters'
 import { artifactSetIcon, characterIcon, weaponIcon } from '@/lib/assets'
+import { useExpNeed } from '@/lib/exp-need'
+import { formatNumber } from '@/lib/format'
 import { formatLevel } from '@/lib/level'
+import { t } from '@/i18n'
 import FavoriteStar from './FavoriteStar.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
 import SortHeader from './SortHeader.vue'
@@ -49,6 +52,41 @@ function ariaSort(key: CharacterSort) {
 }
 
 const gapText = (c: CharacterView) => c.gaps.map((g) => g.text).join(' · ')
+
+/**
+ * The cards' two bars as thin lines under the Lv and Friendship cells (design
+ * 2C): full at the cap, else the EXP toward the next level; none when the
+ * capture sent no EXP.
+ */
+const expNeed = useExpNeed()
+function levelBar(c: CharacterView): { percent: number; title: string } | null {
+  const need = expNeed.value?.character(c.level, c.ascension)
+  if (need === undefined || (need !== null && c.exp === null)) return null
+  if (need === null) return { percent: 100, title: t('characters.card.levelMax') }
+  return {
+    percent: Math.min(100, ((c.exp ?? 0) / need) * 100),
+    title: t('characters.card.levelExp', {
+      exp: formatNumber(c.exp ?? 0),
+      need: formatNumber(need),
+    }),
+  }
+}
+function friendshipBar(c: CharacterView): { percent: number; title: string } | null {
+  if (c.friendship === null) return null
+  const need = expNeed.value?.friendship(c.friendship)
+  if (need === undefined) return null
+  if (need === null)
+    return { percent: 100, title: t('characters.friendship.title', { level: c.friendship }) }
+  if (c.friendshipExp === null) return null
+  return {
+    percent: Math.min(100, (c.friendshipExp / need) * 100),
+    title: t('characters.card.friendshipExp', {
+      level: c.friendship,
+      exp: formatNumber(c.friendshipExp),
+      need: formatNumber(need),
+    }),
+  }
+}
 const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
 </script>
 
@@ -169,13 +207,33 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
               <span class="min-w-0 truncate font-medium">{{ c.name }}</span>
             </button>
           </td>
-          <td class="px-2 py-1.5 text-right">
+          <td class="px-2 py-1.5 text-right" :title="levelBar(c)?.title">
             <LevelText :level="c.level" :ascension="c.ascension" :target="TARGET_LEVEL" bare />
+            <span
+              v-if="levelBar(c)"
+              class="mt-1 block h-[3px] overflow-hidden rounded-full bg-surface-sunken"
+              aria-hidden="true"
+              ><span
+                class="block h-full rounded-full bg-accent"
+                :style="{ width: `${levelBar(c)!.percent}%` }"
+            /></span>
           </td>
           <td class="tabular px-2 py-1.5 text-right font-mono">{{ c.constellation }}</td>
-          <td v-if="friendship" class="hidden px-2 py-1.5 text-right md:table-cell">
+          <td
+            v-if="friendship"
+            class="hidden px-2 py-1.5 text-right md:table-cell"
+            :title="friendshipBar(c)?.title"
+          >
             <FriendshipBadge v-if="c.friendship !== null" :level="c.friendship" bare />
             <span v-else class="text-text-muted">—</span>
+            <span
+              v-if="friendshipBar(c)"
+              class="mt-1 ml-auto block h-[3px] w-full max-w-16 overflow-hidden rounded-full bg-surface-sunken"
+              aria-hidden="true"
+              ><span
+                class="block h-full rounded-full bg-friendship"
+                :style="{ width: `${friendshipBar(c)!.percent}%` }"
+            /></span>
           </td>
           <td class="hidden px-2 py-1.5 sm:table-cell">
             <TalentChips :talent="c.talent" />
