@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { GameNotice } from '@gdt/shared'
 import type { FarmingData } from '@gdt/game-data/farming'
 import type { CollectionCatalog } from '../collection-names'
-import { eventRows } from '../events'
 import { hangoutChapters } from '../hangouts'
 import { respawnRows } from '../respawns'
 
@@ -74,65 +72,5 @@ describe('respawnRows', () => {
       { id: 2, name: 'Abyss Mage', kind: 'enemy', spots: 2, up: 1, next: 1_800_000_600_000 },
     ])
     expect(respawnRows({ '9': [1] }, null, now)[0]).toMatchObject({ name: '#9', up: 1, next: null })
-  })
-})
-
-describe('eventRows', () => {
-  const notice = (id: string, start: string, end: string | null): GameNotice => ({
-    id,
-    kind: 'event',
-    start,
-    end,
-    title: { en: id },
-    image: null,
-    tag: null,
-  })
-
-  it('takes the title of the one notice with the same dates, and counts the rewards', () => {
-    const start = Date.parse('2026-10-20T04:00:00Z') / 1000
-    const end = Date.parse('2026-11-03T03:59:00Z') / 1000
-    const rows = eventRows(
-      {
-        '2001': {
-          schedule: 1,
-          start,
-          end,
-          progress: {
-            '1': { progress: 3, total: 3, claimed: true },
-            '2': { progress: 5, total: 5, claimed: false },
-            '3': { progress: 1, total: 5, claimed: false },
-          },
-        },
-        '2002': { schedule: 2, start: start - 30 * 86_400, end: start - 86_400 },
-      },
-      [
-        notice('Frostlands', '2026-10-20T12:00', '2026-11-03T15:00'),
-        notice('Other', '2026-09-01T10:00', null),
-      ],
-      (n) => n.title.en,
-      Date.parse('2026-10-27T00:00:00Z'),
-    )
-    expect(rows[0]).toMatchObject({
-      id: 2001,
-      name: 'Frostlands',
-      running: true,
-      claimed: 1,
-      waiting: 1,
-      total: 3,
-    })
-    expect(rows[1]).toMatchObject({ id: 2002, name: null, running: false, total: 0 })
-  })
-})
-
-describe('eventRows with game data names', () => {
-  it("prefers the game data's name over a notice title", () => {
-    const rows = eventRows(
-      { '2003': { schedule: 1, start: 1_790_000_000, end: 1_791_000_000 } },
-      [],
-      () => 'notice',
-      1_790_500_000_000,
-      (id) => (id === 2003 ? 'Lantern Rite' : ''),
-    )
-    expect(rows[0]).toMatchObject({ name: 'Lantern Rite', running: true })
   })
 })

@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Eventos de Encontro",
     "blueprints": "Bule de Chá",
-    "events": "Eventos",
     "crafting": "Criação",
     "music": "Jogo Musical"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · recompensa coletada",
     "rewardWaiting": "{name} · recompensa pendente",
     "noRewardLeft": "Nenhuma recompensa pendente"
-  },
-  "events": {
-    "running": "Em andamento",
-    "ended": "Encerrado",
-    "claimed": "Recompensas resgatadas",
-    "waiting": "Recompensas a resgatar",
-    "waitingHint": "Metas cumpridas com recompensa pendente, em eventos em andamento",
-    "unnamed": "Evento {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

@@ -23,8 +23,6 @@ export type CollectionFigure = { have: number; total: number } | { count: number
 export interface CollectionFigures {
   /** Teleport Waypoints unlocked in Teyvat. */
   world: CollectionFigure | null
-  /** Rewards claimed in the running events. */
-  events: CollectionFigure | null
   spincrystals: CollectionFigure | null
   archive: CollectionFigure | null
   handbook: CollectionFigure | null
@@ -63,7 +61,6 @@ export function collectionFigures(
   const exploration = captured.exploration?.value
   const hangouts = captured.hangouts?.value
   const crafting = captured.crafting?.value
-  const events = captured.events?.value
   const blueprints = captured.blueprints?.value
   const music = captured.musicGame?.value
   const withCatalog = <T>(
@@ -76,15 +73,6 @@ export function collectionFigures(
       const teyvat = worldModel(v, c).maps.find((m) => m.scene === TEYVAT_SCENE)
       return teyvat ? teyvat.waypoints : { have: 0, total: 0 }
     }),
-    events: events
-      ? (() => {
-          const now = Date.now() / 1000
-          const counters = Object.values(events)
-            .filter((e) => e.start <= now && now < e.end)
-            .flatMap((e) => Object.values(e.progress ?? {}))
-          return { have: counters.filter((c) => c.claimed).length, total: counters.length }
-        })()
-      : null,
     spincrystals:
       spin && spincrystals
         ? (({ have, total }) => ({ have, total }))(spincrystalProgress(spincrystals, spin))

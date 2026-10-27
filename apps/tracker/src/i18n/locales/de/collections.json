@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Verabredungen",
     "blueprints": "Teekanne der Gelassenheit",
-    "events": "Events",
     "crafting": "Herstellung",
     "music": "Musikspiel"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · Belohnung erhalten",
     "rewardWaiting": "{name} · Belohnung offen",
     "noRewardLeft": "Keine Belohnungen offen"
-  },
-  "events": {
-    "running": "Laufend",
-    "ended": "Beendet",
-    "claimed": "Belohnungen abgeholt",
-    "waiting": "Abzuholende Belohnungen",
-    "waitingHint": "Erfüllte Ziele mit wartender Belohnung in laufenden Events",
-    "unnamed": "Event {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

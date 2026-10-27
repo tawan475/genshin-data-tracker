@@ -45,7 +45,6 @@
     "aranara": "兰那罗",
     "hangouts": "邀约事件",
     "blueprints": "尘歌壶",
-    "events": "活动",
     "crafting": "合成",
     "music": "音乐游戏"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · 奖励已领取",
     "rewardWaiting": "{name} · 奖励待领取",
     "noRewardLeft": "没有待领取的奖励"
-  },
-  "events": {
-    "running": "进行中",
-    "ended": "已结束",
-    "claimed": "已领取奖励",
-    "waiting": "待领取奖励",
-    "waitingHint": "进行中的活动里已完成但奖励未领取的项目",
-    "unnamed": "活动 {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

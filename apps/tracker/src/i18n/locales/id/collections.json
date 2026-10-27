@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Hangout Event",
     "blueprints": "Serenitea Pot",
-    "events": "Event",
     "crafting": "Crafting",
     "music": "Game Musik"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · hadiah diambil",
     "rewardWaiting": "{name} · hadiah menunggu",
     "noRewardLeft": "Tidak ada hadiah tersisa"
-  },
-  "events": {
-    "running": "Berlangsung",
-    "ended": "Berakhir",
-    "claimed": "Hadiah diklaim",
-    "waiting": "Hadiah belum diklaim",
-    "waitingHint": "Target selesai yang hadiahnya belum diklaim, di event yang berlangsung",
-    "unnamed": "Event {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

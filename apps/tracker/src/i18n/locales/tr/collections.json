@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Buluşma Etkinlikleri",
     "blueprints": "Huzur Çaydanlığı",
-    "events": "Etkinlikler",
     "crafting": "Üretim",
     "music": "Müzik Oyunu"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · ödül alındı",
     "rewardWaiting": "{name} · ödül bekliyor",
     "noRewardLeft": "Bekleyen ödül yok"
-  },
-  "events": {
-    "running": "Süren",
-    "ended": "Bitti",
-    "claimed": "Alınan ödüller",
-    "waiting": "Alınacak ödüller",
-    "waitingHint": "Süren etkinliklerde ödülü bekleyen tamamlanmış hedefler",
-    "unnamed": "Etkinlik {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

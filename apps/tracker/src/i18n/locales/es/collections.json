@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Eventos de encuentro",
     "blueprints": "Tetera Caelestis",
-    "events": "Eventos",
     "crafting": "Fabricación",
     "music": "Juego musical"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · recompensa reclamada",
     "rewardWaiting": "{name} · recompensa pendiente",
     "noRewardLeft": "No quedan recompensas"
-  },
-  "events": {
-    "running": "En curso",
-    "ended": "Terminado",
-    "claimed": "Recompensas reclamadas",
-    "waiting": "Recompensas por reclamar",
-    "waitingHint": "Objetivos cumplidos con la recompensa pendiente, en eventos en curso",
-    "unnamed": "Evento {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

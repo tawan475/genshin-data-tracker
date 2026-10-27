@@ -45,7 +45,6 @@
     "aranara": "Aranaras",
     "hangouts": "Événements Rendez-vous",
     "blueprints": "Théière",
-    "events": "Événements",
     "crafting": "Fabrication",
     "music": "Jeu musical"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · récompense récupérée",
     "rewardWaiting": "{name} · récompense en attente",
     "noRewardLeft": "Aucune récompense en attente"
-  },
-  "events": {
-    "running": "En cours",
-    "ended": "Terminé",
-    "claimed": "Récompenses récupérées",
-    "waiting": "Récompenses à récupérer",
-    "waitingHint": "Objectifs remplis dont la récompense attend, dans les événements en cours",
-    "unnamed": "Événement {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

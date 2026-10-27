@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Eventi Appuntamento",
     "blueprints": "Teiera della serenità",
-    "events": "Eventi",
     "crafting": "Creazione",
     "music": "Gioco musicale"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · ricompensa ritirata",
     "rewardWaiting": "{name} · ricompensa da ritirare",
     "noRewardLeft": "Nessuna ricompensa da ritirare"
-  },
-  "events": {
-    "running": "In corso",
-    "ended": "Terminato",
-    "claimed": "Ricompense riscattate",
-    "waiting": "Ricompense da riscattare",
-    "waitingHint": "Obiettivi completati con ricompensa in attesa, negli eventi in corso",
-    "unnamed": "Evento {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

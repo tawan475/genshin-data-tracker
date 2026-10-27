@@ -45,7 +45,6 @@
     "aranara": "Аранары",
     "hangouts": "Встречи",
     "blueprints": "Чайник безмятежности",
-    "events": "События",
     "crafting": "Создание",
     "music": "Музыкальная игра"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · награда получена",
     "rewardWaiting": "{name} · награда ждёт",
     "noRewardLeft": "Наград не осталось"
-  },
-  "events": {
-    "running": "Идут",
-    "ended": "Завершено",
-    "claimed": "Получено наград",
-    "waiting": "Награды к получению",
-    "waitingHint": "Выполненные задачи с неполученной наградой в идущих событиях",
-    "unnamed": "Событие {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

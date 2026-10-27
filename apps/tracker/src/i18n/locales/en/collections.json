@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Hangout Events",
     "blueprints": "Serenitea Pot",
-    "events": "Events",
     "crafting": "Crafting",
     "music": "Music Game"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · reward claimed",
     "rewardWaiting": "{name} · reward waiting",
     "noRewardLeft": "No rewards left"
-  },
-  "events": {
-    "running": "Running",
-    "ended": "Ended",
-    "claimed": "Rewards claimed",
-    "waiting": "Rewards to claim",
-    "waitingHint": "Counters done whose reward is still waiting, in running events",
-    "unnamed": "Event {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

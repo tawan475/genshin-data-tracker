@@ -45,7 +45,6 @@
     "aranara": "アランナラ",
     "hangouts": "デートイベント",
     "blueprints": "塵歌壺",
-    "events": "イベント",
     "crafting": "合成",
     "music": "音楽ゲーム"
   },
@@ -228,15 +227,6 @@
     "rewardClaimed": "{name} · 報酬受取済み",
     "rewardWaiting": "{name} · 報酬未受取",
     "noRewardLeft": "未受取の報酬はありません"
-  },
-  "events": {
-    "running": "開催中",
-    "ended": "終了",
-    "claimed": "受取済みの報酬",
-    "waiting": "未受取の報酬",
-    "waitingHint": "開催中のイベントで達成済みかつ未受取の項目",
-    "unnamed": "イベント {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {
