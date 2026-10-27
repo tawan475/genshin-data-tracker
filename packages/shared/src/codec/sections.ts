@@ -599,7 +599,8 @@ export interface TasksSection {
   n?: [value: number, nextAt: number]
   // Capture 1.7.0 (letters the deployed builds ignore; the section is JSON then;
   // never `b`, every section's delta-base key).
-  q?: [left: number, limit: number, cost: number, fullCost: number]
+  /** `used` appended from Capture 1.14.0 (see GiTasks.weeklyBosses). */
+  q?: [left: number, limit: number, cost: number, fullCost: number, used?: number]
   m?: [id: number, times: number[]][]
   k?: number[]
   // Capture 1.9.0: sign-in calendars.
@@ -618,7 +619,12 @@ export function encodeTasks(tasks: GiTasks): TasksSection {
   if (p) section.p = [p.weapon, p.points, p.max]
   if (n) section.n = [n.value, n.nextAt]
   const { weeklyBosses: b, respawns: m, arRewards: k } = tasks
-  if (b) section.q = [b.left, b.limit, b.cost, b.fullCost]
+  if (b) {
+    section.q =
+      b.used === undefined
+        ? [b.left, b.limit, b.cost, b.fullCost]
+        : [b.left, b.limit, b.cost, b.fullCost, b.used]
+  }
   if (m) section.m = ids(m).map((id) => [id, [...m[String(id)]!]])
   if (k) section.k = [...k]
   const i = tasks.signIns
@@ -652,8 +658,8 @@ export function decodeTasks(section: TasksSection): GiTasks {
   if (section.p) tasks.wishPath = { weapon: section.p[0], points: section.p[1], max: section.p[2] }
   if (section.n) tasks.resin = { value: section.n[0], nextAt: section.n[1] }
   if (section.q) {
-    const [left, limit, cost, fullCost] = section.q
-    tasks.weeklyBosses = { left, limit, cost, fullCost }
+    const [left, limit, cost, fullCost, used] = section.q
+    tasks.weeklyBosses = { left, limit, cost, fullCost, ...(used !== undefined ? { used } : {}) }
   }
   if (section.m) {
     tasks.respawns = Object.fromEntries(section.m.map(([id, times]) => [String(id), [...times]]))

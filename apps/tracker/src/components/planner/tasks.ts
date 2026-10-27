@@ -497,8 +497,10 @@ export function captureRead(
       const b = tasks.weeklyBosses
       const week = { kind: 'weekly', weekday: MONDAY } as const
       if (!b || at < lastReset(week, now, server)!) return null
-      const used = b.limit - b.left
-      const done = b.left === 0
+      // Captures before Capture 1.14.0 (no `used`) sent the discounts used as `left`.
+      const left = b.used === undefined ? b.limit - b.left : b.left
+      const used = b.limit - left
+      const done = left === 0
       return {
         at,
         done,

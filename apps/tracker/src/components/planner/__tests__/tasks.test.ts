@@ -531,14 +531,23 @@ describe('ticked from a capture', () => {
   })
 
   it("ticks Trounce Domains when this week's discounts are used, and counts them otherwise", () => {
-    const used = { left: 0, limit: 3, cost: 30, fullCost: 60 }
+    // Capture 1.14.0+: `left` is the count left, `used` beside it.
+    const used = { left: 0, used: 3, limit: 3, cost: 30, fullCost: 60 }
     const done = rowOf('weekly-bosses', capture({ weeklyBosses: used }))!
     expect(done).toMatchObject({ due: false, capture: { text: '3/3' } })
-    const one = rowOf('weekly-bosses', capture({ weeklyBosses: { ...used, left: 2 } }))!
+    const one = rowOf('weekly-bosses', capture({ weeklyBosses: { ...used, left: 2, used: 1 } }))!
     expect(one).toMatchObject({ due: true, capture: { text: '1/3' } })
     // Last week's count says nothing about this week (Monday Oct 12, 04:00 Asia).
     const old = capture({ weeklyBosses: used }, '2026-10-11T19:00:00Z')
     expect(rowOf('weekly-bosses', old)!.capture).toBeUndefined()
+  })
+
+  it('reads captures before Capture 1.14.0 the other way round: their `left` was the count used', () => {
+    const before = { limit: 3, cost: 30, fullCost: 60 }
+    const allUsed = rowOf('weekly-bosses', capture({ weeklyBosses: { ...before, left: 3 } }))!
+    expect(allUsed).toMatchObject({ due: false, capture: { text: '3/3' } })
+    const fresh = rowOf('weekly-bosses', capture({ weeklyBosses: { ...before, left: 0 } }))!
+    expect(fresh).toMatchObject({ due: true, capture: { text: '0/3' } })
   })
 
   it('asks to sign in to running login events not signed in today', () => {

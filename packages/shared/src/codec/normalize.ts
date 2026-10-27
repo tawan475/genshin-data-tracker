@@ -628,7 +628,14 @@ function toTasks(raw: unknown): GiTasks | null {
     isIntIn(b.cost, 0, 1_000) &&
     isIntIn(b.fullCost, 0, 1_000)
   ) {
-    tasks.weeklyBosses = { left: b.left, limit: b.limit, cost: b.cost, fullCost: b.fullCost }
+    tasks.weeklyBosses = {
+      left: b.left,
+      limit: b.limit,
+      cost: b.cost,
+      fullCost: b.fullCost,
+      // Capture 1.14.0: present means `left` really is the count left.
+      ...(isIntIn(b.used, 0, b.limit) ? { used: b.used } : {}),
+    }
   }
   const spots = idEntries(raw.respawns, 1, 99_999_999, GOOD_LIMITS.respawns)
   if (spots) {

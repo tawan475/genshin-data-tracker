@@ -163,7 +163,12 @@ export interface GiTasks {
   /** Original Resin when read, and when the next one comes (unix s; one per 8 minutes). */
   resin?: { value: number; nextAt: number }
   /** This week's discounted weekly boss rewards: left of limit, the resin each costs and its full price (Capture 1.7.0). */
-  weeklyBosses?: { left: number; limit: number; cost: number; fullCost: number }
+  /**
+   * Weekly boss discounts. Before Capture 1.14.0 (no `used`) `left` held the
+   * discounts USED: discounts left = limit - left. From 1.14.0 `left` is the
+   * count left and `used` beside it. cost / fullCost are the two fixed prices.
+   */
+  weeklyBosses?: { left: number; limit: number; cost: number; fullCost: number; used?: number }
   /** Bosses and elites by InvestigationMonsterConfigData id: when each spot respawns (unix s, ascending; past = up). */
   respawns?: Record<string, number[]>
   /** Adventure Ranks (2-60) whose reward was claimed; one at or below the AR not listed is unclaimed. */

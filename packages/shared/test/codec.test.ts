@@ -2077,6 +2077,14 @@ describe("Teyvat.me Capture 1.7.0's keys", () => {
     expect(
       'weeklyBosses' in t({ weeklyBosses: { left: 4, limit: 3, cost: 30, fullCost: 60 } }),
     ).toBe(false)
+    // Capture 1.14.0's `used` is kept beside `left`; one out of range is left out.
+    const boss = { left: 2, limit: 3, cost: 30, fullCost: 60 }
+    expect(t({ weeklyBosses: { ...boss, used: 1 } }).weeklyBosses).toEqual({ ...boss, used: 1 })
+    expect(t({ weeklyBosses: { ...boss, used: 4 } }).weeklyBosses).toEqual(boss)
+    expect(decodeTasks(encodeTasks({ weeklyBosses: { ...boss, used: 1 } }))).toEqual({
+      weeklyBosses: { ...boss, used: 1 },
+    })
+    expect(decodeTasks(encodeTasks({ weeklyBosses: boss }))).toEqual({ weeklyBosses: boss })
     expect('respawns' in t({ respawns: { '1001': [1] } })).toBe(false)
     expect('arRewards' in t({ arRewards: [2, 2] })).toBe(false)
     expect(t({ respawns: { '1001': [1_790_000_100, 1_790_000_000] } }).respawns).toEqual({
