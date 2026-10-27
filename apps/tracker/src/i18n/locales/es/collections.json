@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Eventos de encuentro",
     "blueprints": "Tetera Caelestis",
-    "events": "Eventos",
     "crafting": "Fabricación"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "Energía adeptal",
     "mansion": "Mansión",
     "outdoor": "Exterior"
-  },
-  "events": {
-    "running": "En curso",
-    "ended": "Terminado",
-    "claimed": "Recompensas reclamadas",
-    "waiting": "Recompensas por reclamar",
-    "waitingHint": "Objetivos cumplidos con la recompensa pendiente, en eventos en curso",
-    "unnamed": "Evento {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

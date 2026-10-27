@@ -45,7 +45,6 @@
     "aranara": "アランナラ",
     "hangouts": "デートイベント",
     "blueprints": "塵歌壺",
-    "events": "イベント",
     "crafting": "合成"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "洞天仙力",
     "mansion": "邸宅",
     "outdoor": "屋外"
-  },
-  "events": {
-    "running": "開催中",
-    "ended": "終了",
-    "claimed": "受取済みの報酬",
-    "waiting": "未受取の報酬",
-    "waitingHint": "開催中のイベントで達成済みかつ未受取の項目",
-    "unnamed": "イベント {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

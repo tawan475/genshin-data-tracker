@@ -45,7 +45,6 @@
     "aranara": "아란나라",
     "hangouts": "데이트 이벤트",
     "blueprints": "주전자",
-    "events": "이벤트",
     "crafting": "합성"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "동천 선력",
     "mansion": "저택",
     "outdoor": "실외"
-  },
-  "events": {
-    "running": "진행 중",
-    "ended": "종료",
-    "claimed": "받은 보상",
-    "waiting": "받을 보상",
-    "waitingHint": "진행 중인 이벤트에서 달성했지만 받지 않은 보상",
-    "unnamed": "이벤트 {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

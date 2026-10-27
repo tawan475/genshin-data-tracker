@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Eventi Appuntamento",
     "blueprints": "Teiera della serenità",
-    "events": "Eventi",
     "crafting": "Creazione"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "Energia adeptale",
     "mansion": "Dimora",
     "outdoor": "Esterno"
-  },
-  "events": {
-    "running": "In corso",
-    "ended": "Terminato",
-    "claimed": "Ricompense riscattate",
-    "waiting": "Ricompense da riscattare",
-    "waitingHint": "Obiettivi completati con ricompensa in attesa, negli eventi in corso",
-    "unnamed": "Evento {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

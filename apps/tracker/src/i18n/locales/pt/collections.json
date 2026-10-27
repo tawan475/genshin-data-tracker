@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Eventos de Encontro",
     "blueprints": "Bule de Chá",
-    "events": "Eventos",
     "crafting": "Criação"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "Energia Adeptal",
     "mansion": "Mansão",
     "outdoor": "Exterior"
-  },
-  "events": {
-    "running": "Em andamento",
-    "ended": "Encerrado",
-    "claimed": "Recompensas resgatadas",
-    "waiting": "Recompensas a resgatar",
-    "waitingHint": "Metas cumpridas com recompensa pendente, em eventos em andamento",
-    "unnamed": "Evento {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

@@ -302,8 +302,13 @@ const router = createRouter({
                 params: { ...to.params, tab: 'anecdotes' },
               }),
             },
+            // The Events tab is gone (2026-10-27): old links open the hub.
+            {
+              path: 'collections/events',
+              redirect: (to) => ({ name: 'account-collections', params: to.params }),
+            },
             account(
-              'collections/:tab(world|events|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|aranara)?',
+              'collections/:tab(world|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|aranara)?',
               'account-collections',
               'collections',
               () => import('@/views/account/CollectionsView.vue'),

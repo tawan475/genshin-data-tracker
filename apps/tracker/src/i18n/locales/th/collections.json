@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Hangout Event",
     "blueprints": "Serenitea Pot",
-    "events": "กิจกรรม",
     "crafting": "การประดิษฐ์"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "พลังเซียน",
     "mansion": "คฤหาสน์",
     "outdoor": "ภายนอก"
-  },
-  "events": {
-    "running": "กำลังดำเนินอยู่",
-    "ended": "สิ้นสุดแล้ว",
-    "claimed": "รางวัลที่รับแล้ว",
-    "waiting": "รางวัลที่ยังไม่รับ",
-    "waitingHint": "เป้าหมายที่ทำแล้วแต่ยังไม่รับรางวัล ในกิจกรรมที่กำลังดำเนินอยู่",
-    "unnamed": "กิจกรรม {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

@@ -45,7 +45,6 @@
     "aranara": "Aranara",
     "hangouts": "Sự Kiện Hẹn Hò",
     "blueprints": "Ấm Trần Ca",
-    "events": "Sự Kiện",
     "crafting": "Chế Tạo"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "Tiên Lực Động Thiên",
     "mansion": "Dinh thự",
     "outdoor": "Ngoài trời"
-  },
-  "events": {
-    "running": "Đang diễn ra",
-    "ended": "Đã kết thúc",
-    "claimed": "Thưởng đã nhận",
-    "waiting": "Thưởng chưa nhận",
-    "waitingHint": "Mục đã hoàn thành nhưng chưa nhận thưởng, trong sự kiện đang diễn ra",
-    "unnamed": "Sự kiện {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {

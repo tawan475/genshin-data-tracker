@@ -45,7 +45,6 @@
     "aranara": "兰那罗",
     "hangouts": "邀约事件",
     "blueprints": "尘歌壶",
-    "events": "活动",
     "crafting": "合成"
   },
   "archive": {
@@ -216,15 +215,6 @@
     "comfort": "洞天仙力",
     "mansion": "宅邸",
     "outdoor": "室外"
-  },
-  "events": {
-    "running": "进行中",
-    "ended": "已结束",
-    "claimed": "已领取奖励",
-    "waiting": "待领取奖励",
-    "waitingHint": "进行中的活动里已完成但奖励未领取的项目",
-    "unnamed": "活动 {n}",
-    "window": "{start} – {end}"
   },
   "crafting": {
     "kinds": {
