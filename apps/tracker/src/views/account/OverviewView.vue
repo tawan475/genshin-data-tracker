@@ -27,7 +27,7 @@ import {
 } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
-import { characterBanner, characterIcon } from '@/lib/assets'
+import { characterBanner, characterIcon, gameIcon } from '@/lib/assets'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useAccount } from './context'
@@ -86,29 +86,41 @@ const player = useResource(
   () => account.value,
   async (a) => (a.latest ? (await loadAccountPlayer(a)).profile : null),
 )
-const arLevels = useResource(
-  () => 'player',
-  async () => (await loadCollections(['player'])).arLevels,
+// The AR table and the name cards' art (the wardrobe chunk, ~30 KB).
+const playerData = useResource(
+  () => 'player,wardrobe',
+  async () => {
+    const data = await loadCollections(['player', 'wardrobe'])
+    const pictures = new Map<number, string>()
+    for (const row of data.namecards)
+      if (typeof row.picture === 'string') pictures.set(row.id, row.picture)
+    return { arLevels: data.arLevels, nameCards: pictures }
+  },
 )
 const traveler = computed(() => {
   const profile = player.data.value
   if (!profile || (profile.ar === undefined && profile.wl === undefined)) return null
-  const row = arLevels.data.value?.find((r) => r.id === profile.ar)
+  const row = playerData.data.value?.arLevels.find((r) => r.id === profile.ar)
   const need = typeof row?.exp === 'number' && row.exp > 0 ? row.exp : null
   return { profile, need }
 })
 
 /**
- * The profile card's name, signature, name card and picture. Capture doesn't
- * send the in-game ones yet: the account's name, the Traveler's name card and
- * portrait stand in.
+ * The profile card's name, signature, name card and picture, as Teyvat.me
+ * Capture 1.14+ sends them. Older captures stand in with the account's name
+ * and the Traveler's name card; the picture is the Traveler's until the game
+ * data has the profile picture table.
  */
-const profileCard = computed(() => ({
-  name: accounts.displayName(account.value),
-  signature: null,
-  nameCard: characterBanner('TravelerAnemo'),
-  avatar: characterIcon('Traveler'),
-}))
+const profileCard = computed(() => {
+  const p = player.data.value
+  const picture = p?.nameCard ? playerData.data.value?.nameCards.get(p.nameCard) : undefined
+  return {
+    name: p?.nickname || accounts.displayName(account.value),
+    signature: p?.signature || null,
+    nameCard: picture ? gameIcon(picture) : characterBanner('TravelerAnemo'),
+    avatar: characterIcon('Traveler'),
+  }
+})
 
 // Derived once per data version; the components below only read.
 const history = computed(() => (list.value ? buildHistory(list.value) : null))

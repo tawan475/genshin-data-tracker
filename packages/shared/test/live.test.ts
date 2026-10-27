@@ -128,6 +128,25 @@ describe('GOOD-X delta contract', () => {
     })
   })
 
+  it("sets Capture 1.14's profile fields, whole or one id at a time", () => {
+    const applied = applyDelta(base, [
+      ['set', ['gi_player', 'nickname'], 'player01'],
+      ['set', ['gi_player', 'signature'], ''],
+      ['set', ['gi_player', 'profilePicture'], { id: 1001, frameId: 100016 }],
+      ['set', ['gi_player', 'profilePicture', 'frameId'], 100017],
+      ['set', ['gi_player', 'birthday', 'month'], 3],
+      ['set', ['gi_player', 'resin'], 'not a number'],
+      ['set', ['gi_player', 'ar', 'x'], 1],
+    ])
+    expect(applied.gi_player).toMatchObject({
+      nickname: 'player01',
+      signature: '',
+      profilePicture: { id: 1001, frameId: 100017 },
+      birthday: { month: 3 },
+    })
+    expect(applied.gi_player!.resin).toBe(base.gi_player?.resin)
+  })
+
   it('sets the resin clock (Capture 1.12.0) and ignores the rest of gi_tasks', () => {
     const withTasks: LiveGood = {
       ...base,

@@ -802,6 +802,45 @@ describe("irminsul's extra keys", () => {
     expect(normalizeGood({ ...sample, gi_player: [1], gi_characters: null }).player).toBeNull()
   })
 
+  it("round-trips Capture 1.14's profile fields after the old ones", async () => {
+    const profile = {
+      nickname: 'player01',
+      signature: '',
+      nameCard: 210001,
+      profilePicture: { id: 1001, frameId: 100016 },
+      birthday: { month: 1, day: 2 },
+    }
+    const withProfile = { ...sample, gi_player: { ...extras.gi_player, ...profile } }
+    const { decoded } = await roundTrip(withProfile)
+    expect(decoded.gi_player).toEqual(withProfile.gi_player)
+    expect(Object.keys(decoded.gi_player!)).toEqual(Object.keys(withProfile.gi_player))
+
+    const without = await roundTrip({ ...sample, ...extras })
+    const plain = await roundTrip({ ...sample, ...extras, gi_player: { ...extras.gi_player } })
+    // A capture without them keeps the hash it always had.
+    expect(plain.encoded.player!.hash).toBe(without.encoded.player!.hash)
+  })
+
+  it('drops profile values the game could not send', () => {
+    const good = normalizeGood({
+      ...sample,
+      gi_player: {
+        ar: 60,
+        nickname: 'x'.repeat(65),
+        signature: 'line\nbreak',
+        nameCard: 110001,
+        profilePicture: { id: 0, avatarId: 1, frameId: 'a' },
+        birthday: { month: 13, day: 1 },
+      },
+    })
+    expect(good.player).toEqual({ ar: 60 })
+    const kept = normalizeGood({
+      ...sample,
+      gi_player: { profilePicture: { avatarId: 10000007, costumeId: 200301, extra: 1 } },
+    })
+    expect(kept.player).toEqual({ profilePicture: { avatarId: 10000007, costumeId: 200301 } })
+  })
+
   it('keeps the edges of every range', () => {
     const good = normalizeGood({
       ...sample,

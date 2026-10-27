@@ -16,7 +16,8 @@
  * | `characters.<key>.talent.auto\|skill\|burst` | number |
  * | `weapons.<guid>` / `artifacts.<guid>` | `add` a whole GOOD item; `del` (hint `{rarity}`) |
  * | `weapons.<guid>.<field>` / `artifacts.<guid>.<field>` | that field's new value |
- * | `gi_player.<field>` | number (`del` = gone) |
+ * | `gi_player.<field>` | number (`del` = gone); `nickname`/`signature` a string, `profilePicture`/`birthday` an object of numbers |
+ * | `gi_player.profilePicture\|birthday.<field>` | number |
  * | `gi_characters.<key>.<field>` | number; `del` of `gi_characters.<key>` drops the entry |
  * | `achievements.<id>` | finish time, unix seconds (0: finished, time unknown); `del` |
  * | `anecdotes.<id>` | `{state, finishCount}`; `del` |
@@ -123,6 +124,11 @@ const ANECDOTE_FIELDS = new Set(['unlockedAreas', 'reward', 'wish'])
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
+/** `gi_player`'s text and object fields (Teyvat.me Capture 1.14+); the rest are numbers. */
+const PLAYER_TEXTS = new Set(['nickname', 'signature'])
+const PLAYER_GROUPS = new Set(['profilePicture', 'birthday'])
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
 const isNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
 
@@ -198,15 +204,26 @@ export function applyDelta(good: LiveGood, changes: readonly DeltaChange[]): Liv
         break
       }
       case 'gi_player': {
+        if (parts.length === 3 && op === 'set' && isNumber(value) && PLAYER_GROUPS.has(name!)) {
+          const player = own('gi_player', (p) => ({ ...p })) as Record<string, unknown>
+          const group = player[name!]
+          player[name!] = { ...(isPlainObject(group) ? group : {}), [field!]: value }
+          break
+        }
         if (parts.length !== 2) break
         if (op === 'del') {
           if (next.gi_player && name in next.gi_player) {
             const player = own('gi_player', (p) => ({ ...p })) as Record<string, unknown>
             delete player[name]
           }
-        } else if (op === 'set' && isNumber(value)) {
+        } else if (
+          op === 'set' &&
+          (isNumber(value) ||
+            (typeof value === 'string' && PLAYER_TEXTS.has(name!)) ||
+            (isPlainObject(value) && PLAYER_GROUPS.has(name!)))
+        ) {
           const player = own('gi_player', (p) => ({ ...p })) as Record<string, unknown>
-          player[name] = value
+          player[name] = isPlainObject(value) ? { ...value } : value
         }
         break
       }

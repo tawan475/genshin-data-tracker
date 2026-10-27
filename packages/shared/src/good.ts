@@ -71,6 +71,27 @@ export interface GiPlayer {
   maxStamina?: number
   /** The game-data dump commit the exporting irminsul build carries. */
   gameData?: string
+  /** In-game name (Teyvat.me Capture 1.14+, like the rest below). Personal data. */
+  nickname?: string
+  /** Profile signature; '' when the player set none. Personal data. */
+  signature?: string
+  /** The name card shown on the profile: its item id (210001…). */
+  nameCard?: number
+  /** The profile picture: 7.1 sends `id` + `frameId`; older shapes name an avatar and costume. */
+  profilePicture?: GiProfilePicture
+  /** Absent when the player never set one. */
+  birthday?: { month: number; day: number }
+}
+
+/** `gi_player.profilePicture`: whichever ids the game sent. */
+export interface GiProfilePicture {
+  /** A ProfilePictureExcelConfigData id, e.g. 1001. */
+  id?: number
+  /** An avatar id (10000xxx), older clients only. */
+  avatarId?: number
+  costumeId?: number
+  /** The picture frame, e.g. 100016. */
+  frameId?: number
 }
 
 /** One character's entry in irminsul's `gi_characters`. */

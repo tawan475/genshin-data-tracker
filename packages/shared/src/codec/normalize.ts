@@ -8,6 +8,7 @@ import type {
   GiCollections,
   GiExpedition,
   GiPlayer,
+  GiProfilePicture,
   GiProgress,
   GiProgressState,
   GiTasks,
@@ -379,21 +380,60 @@ const PLAYER_FIELDS: readonly [keyof GiPlayer, number, number][] = [
   ['maxStamina', 1, 100_000],
 ]
 
-/** The order of a stored player section's keys: PLAYER_FIELDS, then `gameData`. */
+/** The profile fields (Teyvat.me Capture 1.14+), stored after `gameData`. Append only. */
+const PROFILE_KEYS = ['nickname', 'signature', 'nameCard', 'profilePicture', 'birthday'] as const
+
+/** The order of a stored player section's keys: PLAYER_FIELDS, `gameData`, then the profile. */
 export const PLAYER_KEY_ORDER: readonly string[] = [
   ...PLAYER_FIELDS.map(([field]) => field),
   'gameData',
+  ...PROFILE_KEYS,
 ]
+
+/** `profilePicture`'s ids and their ranges, in stored order. */
+const PICTURE_FIELDS: readonly [keyof GiProfilePicture, number, number][] = [
+  ['id', 1, 99_999_999],
+  ['avatarId', 10_000_000, 10_999_999],
+  ['costumeId', 1, 99_999_999],
+  ['frameId', 1, 99_999_999],
+]
+
+/** A name or signature as the game allows them, with a margin; control characters refused. */
+function profileText(value: unknown, min: number, max: number): string | undefined {
+  if (typeof value !== 'string' || value.length < min || value.length > max) return undefined
+  // eslint-disable-next-line no-control-regex
+  return /[\u0000-\u001f\u007f]/.test(value) ? undefined : value
+}
 
 function toPlayer(raw: unknown): GiPlayer | null {
   if (!isObject(raw)) return null
-  const player: Record<string, number | string> = {}
+  const player: Record<string, unknown> = {}
   for (const [field, min, max] of PLAYER_FIELDS) {
     const value = raw[field]
     if (isIntIn(value, min, max)) player[field] = value
   }
   if (typeof raw.gameData === 'string' && /^[0-9a-f]{1,64}$/.test(raw.gameData)) {
     player.gameData = raw.gameData
+  }
+  const nickname = profileText(raw.nickname, 1, 64)
+  if (nickname !== undefined) player.nickname = nickname
+  const signature = profileText(raw.signature, 0, 256)
+  if (signature !== undefined) player.signature = signature
+  if (isIntIn(raw.nameCard, 210_000, 219_999)) player.nameCard = raw.nameCard
+  if (isObject(raw.profilePicture)) {
+    const picture: Record<string, number> = {}
+    for (const [field, min, max] of PICTURE_FIELDS) {
+      const value = raw.profilePicture[field]
+      if (isIntIn(value, min, max)) picture[field] = value
+    }
+    if (Object.keys(picture).length > 0) player.profilePicture = picture
+  }
+  if (
+    isObject(raw.birthday) &&
+    isIntIn(raw.birthday.month, 1, 12) &&
+    isIntIn(raw.birthday.day, 1, 31)
+  ) {
+    player.birthday = { month: raw.birthday.month, day: raw.birthday.day }
   }
   // A key that only names the game data says nothing about the account.
   const known = Object.keys(player).filter((key) => key !== 'gameData')
