@@ -56,6 +56,7 @@ import {
   REFRESH_RESIN,
   SECTION_RESIN,
   clampRefreshes,
+  bossCards,
   farmHeadline,
   resinDays,
   scheduleDays,
@@ -156,7 +157,12 @@ const sections = computed(() => {
   return list
 })
 const schedule = computed(() => scheduleDays(input.value, domainDay.value))
-const headline = computed(() => farmHeadline(props.plan, input.value.refreshes))
+const headline = computed(() =>
+  farmHeadline(props.plan, input.value.refreshes, {
+    planner: props.planner,
+    bosses: bossCards(input.value),
+  }),
+)
 
 // ------------------------------------------------------------ headline
 

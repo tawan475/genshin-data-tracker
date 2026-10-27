@@ -858,7 +858,11 @@ function combine(runs: readonly CardRun[], input: FarmInput): CardRun | null {
 // ------------------------------------------------------------------ headline
 
 export interface FarmHeadline {
-  /** Domains, normal boss drops and ley lines (Seelie's headline; gems and weekly bosses apart). */
+  /**
+   * Domains, normal bosses and ley lines (weekly bosses apart). A boss counts
+   * its card's runs, so the gems it drops beside its own material count too
+   * (the Gemstones setting off: none), and so do gem-only boss cards.
+   */
   runs: number
   resin: number
   condensed: number
@@ -872,18 +876,36 @@ export interface FarmHeadline {
   /** Sources the account's AR/WL can't farm yet. */
   locked: number
   weekly: { claims: number; weeks: number; resin: number; resinMax: number; partial: boolean }
-  /** Normal boss runs for gems (not in `resin`). */
+  /** Normal boss runs for gems alone (the most they take; in `resin` past the boss materials' runs). */
   gems: { runs: number; resin: number }
 }
 
-export function farmHeadline(plan: FarmPlan, refreshes: number): FarmHeadline {
+/**
+ * The headline: the plan's total with its normal boss runs replaced by the
+ * boss cards' (`cards.bosses`: `bossCards`), which also farm the gems.
+ */
+export function farmHeadline(
+  plan: FarmPlan,
+  refreshes: number,
+  cards?: { planner: PlannerData; bosses: readonly FarmCard[] },
+): FarmHeadline {
   const t = plan.total
   const w = plan.weeklyTotal
+  const bossRuns = plan.groups.filter((g) => g.kind === 'boss' && g.missing > 0 && g.run)
+  const cardRuns = (cards?.bosses ?? []).flatMap((c) => (c.run ? [c.run] : []))
+  /** What the cards take past the boss materials' own runs (never less). */
+  const extra = (pick: (r: { runs: number; resin: number }) => number) => {
+    if (cardRuns.length === 0) return 0
+    const cardSum = cardRuns.reduce((sum, r) => sum + pick(r), 0)
+    return Math.max(0, cardSum - bossRuns.reduce((sum, g) => sum + pick(g.run!), 0))
+  }
+  const resin = t.resin + extra((r) => r.resin)
+  const condensed = cards ? condensedResin(cards.planner) : 0
   return {
-    runs: t.runs,
-    resin: t.resin,
-    condensed: t.condensed,
-    days: resinDays(t.resin, refreshes),
+    runs: t.runs + extra((r) => r.runs),
+    resin,
+    condensed: condensed > 0 ? Math.ceil(resin / condensed) : t.condensed,
+    days: resinDays(resin, refreshes),
     daily: dailyResin(refreshes),
     partial: t.partial,
     upperBound: t.upperBound === true,

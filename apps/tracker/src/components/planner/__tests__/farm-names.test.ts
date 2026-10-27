@@ -119,6 +119,28 @@ describe('boss cards', () => {
     expect(farmHeadline(wl8.plan, 0).upperBound).toBe(false)
   })
 
+  it('counts the gem runs past the boss material in the headline, like the cards', () => {
+    // Few seeds, many gems: the card runs for the gems (and a gem-only card for Agate).
+    const i = input([
+      goal('character:Venti', { HurricaneSeed: 2, VayudaTurquoiseGemstone: 6 }),
+      goal('character:HuTao', { AgnidusAgateSliver: 3 }),
+    ])
+    const cards = bossCards(i)
+    const cardResin = cards.reduce((sum, c) => sum + (c.run?.resin ?? 0), 0)
+    const bossResin = i.plan.groups
+      .filter((g) => g.kind === 'boss' && g.run)
+      .reduce((sum, g) => sum + g.run!.resin, 0)
+    expect(cardResin).toBeGreaterThan(bossResin)
+    const headline = farmHeadline(i.plan, 0, { planner, bosses: cards })
+    expect(headline.resin).toBe(i.plan.total.resin - bossResin + cardResin)
+    expect(headline.days).toBe(Math.ceil(headline.resin / 180))
+    // Gemstones off: no gem lines, so the headline is the plan's.
+    const gemless = input([goal('character:Venti', { HurricaneSeed: 2 })])
+    expect(farmHeadline(gemless.plan, 0, { planner, bosses: bossCards(gemless) }).resin).toBe(
+      gemless.plan.total.resin,
+    )
+  })
+
   it('never greys a boss for its handbook Adventure Rank', () => {
     const card = bossCards(input([goal('character:Venti', { HurricaneSeed: 46 })], { ar: 5 }))[0]!
     expect(card.lock).toBeNull()
