@@ -162,8 +162,11 @@ and Welkin Moon rows, while the capture is newer than the row's hand state
 Spincrystals (which the newest capture has, which are missing), Anecdotes
 (the old `/anecdotes` page redirects there), the Archive, the Adventurer
 Handbook, Living Beings (defeats), TCG, the wardrobe and Aranara, each from
-the newest snapshot with that part. Names for the 1.4.0 parts wait for the
-game data (`src/data/collection-names.ts`: ids until then).
+the newest snapshot with that part, against `@gdt/game-data/collections`
+(names in every language, icons, totals; `src/data/collection-names.ts`):
+each Archive tab, TCG cards and wardrobe kind shows All / Missing / Have, and
+a Recipes tab (Capture 1.5.0) shows unlocked, locked and mastered recipes.
+Aranara entries stay numbered (the game names none).
 
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`; artifact sets,

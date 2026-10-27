@@ -32,9 +32,6 @@
   "summary": "Özet",
   "notCapturedPart": "Henüz taranmadı",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 veya üstü bunu girişte okur.",
-  "namesSoon": "Adlar ve simgeler sonraki oyun verisiyle gelir; o zamana dek kimlik numaraları.",
-  "namesComing": "Adlar yolda",
-  "namesComingBody": "Oyun verisinde adları olunca liste görünür.",
   "tabs": {
     "spincrystals": "Parlak Burgu Kristaller",
     "anecdotes": "Seyahat Notları",
@@ -42,11 +39,13 @@
     "handbook": "Maceracının El Kitabı",
     "livingBeings": "Canlılar",
     "tcg": "Dehanın Yakarışı Kart Oyunu",
+    "recipes": "Tarifler",
     "wardrobe": "Giysi Dolabı",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Arşiv sekmesi",
+    "show": "Göster",
     "unlocked": "Açılan",
     "unlockedHint": "Açılan arşiv girdileri, tüm sekmeler",
     "none": "Açılan yok",
@@ -99,7 +98,8 @@
     "invalid": "Eksik",
     "invalidTitle": "Oyuna göre bu deste henüz kullanılamaz",
     "deckTitle": "{characters} karakter kartı + {cards} kart",
-    "noDecks": "Deste yok"
+    "noDecks": "Deste yok",
+    "proficiency": "Ustalık {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Takımlar",
     "inUse": "Kullanımda",
     "noTeams": "Takım yok",
-    "items": "Eşyalar"
+    "items": "Eşyalar",
+    "trialUntil": "{time} tarihine kadar deneme"
   },
   "aranara": {
     "type": "Koleksiyon {n}",
+    "entry": "No. {n}",
+    "found": "Bulundu",
+    "foundHint": "Defterdekilerden bulunan Aranara",
     "states": {
       "none": "Bulunmadı",
       "collectable": "Alınabilir",
       "collected": "Alındı",
       "finished": "Bitti"
+    }
+  },
+  "recipes": {
+    "unlocked": "Açıldı",
+    "filters": {
+      "all": "Tümü",
+      "unmastered": "Ustalaşılmadı",
+      "mastered": "Ustalaşıldı",
+      "locked": "Kilitli"
     }
   }
 }

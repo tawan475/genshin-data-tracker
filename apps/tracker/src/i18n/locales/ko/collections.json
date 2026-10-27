@@ -32,9 +32,6 @@
   "summary": "요약",
   "notCapturedPart": "아직 캡처 없음",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 이상이 로그인할 때 읽습니다.",
-  "namesSoon": "이름과 아이콘은 다음 게임 데이터와 함께 추가됩니다. 그때까지는 ID로 표시합니다.",
-  "namesComing": "이름 준비 중",
-  "namesComingBody": "게임 데이터에 이름이 들어오면 목록을 표시합니다.",
   "tabs": {
     "spincrystals": "빛나는 결정",
     "anecdotes": "여행 일화집",
@@ -42,11 +39,13 @@
     "handbook": "모험 핸드북",
     "livingBeings": "생물지",
     "tcg": "일곱 성인의 소환",
+    "recipes": "레시피",
     "wardrobe": "옷장",
     "aranara": "아란나라"
   },
   "archive": {
     "pick": "도감 탭",
+    "show": "표시",
     "unlocked": "해금",
     "unlockedHint": "해금한 도감 항목(모든 탭)",
     "none": "해금한 항목 없음",
@@ -99,7 +98,8 @@
     "invalid": "미완성",
     "invalidTitle": "게임상 아직 사용할 수 없는 덱입니다",
     "deckTitle": "캐릭터 카드 {characters}장 + 카드 {cards}장",
-    "noDecks": "덱 없음"
+    "noDecks": "덱 없음",
+    "proficiency": "숙련도 {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "소대",
     "inUse": "사용 중",
     "noTeams": "소대 없음",
-    "items": "아이템"
+    "items": "아이템",
+    "trialUntil": "{time}까지 체험"
   },
   "aranara": {
     "type": "컬렉션 {n}",
+    "entry": "No.{n}",
+    "found": "찾기 완료",
+    "foundHint": "노트에 있는 아란나라 중 찾은 수",
     "states": {
       "none": "찾지 못함",
       "collectable": "수령 가능",
       "collected": "수집 완료",
       "finished": "완료"
+    }
+  },
+  "recipes": {
+    "unlocked": "해금 완료",
+    "filters": {
+      "all": "전체",
+      "unmastered": "숙련 미완료",
+      "mastered": "숙련 완료",
+      "locked": "미해금"
     }
   }
 }

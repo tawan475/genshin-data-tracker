@@ -32,9 +32,6 @@
   "summary": "Résumé",
   "notCapturedPart": "Pas encore capturé",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ou plus récent le lit à la connexion.",
-  "namesSoon": "Noms et icônes arrivent avec les prochaines données du jeu ; d'ici là, des ID.",
-  "namesComing": "Noms à venir",
-  "namesComingBody": "La liste apparaîtra quand les données du jeu auront leurs noms.",
   "tabs": {
     "spincrystals": "Gyrocristaux radiants",
     "anecdotes": "Anecdotes",
@@ -42,11 +39,13 @@
     "handbook": "Guide de l'aventurier",
     "livingBeings": "Bestiaire",
     "tcg": "Invocation des Sept : JCC",
+    "recipes": "Recettes",
     "wardrobe": "Armoire",
     "aranara": "Aranaras"
   },
   "archive": {
     "pick": "Onglet des Archives",
+    "show": "Afficher",
     "unlocked": "Débloqués",
     "unlockedHint": "Entrées des Archives débloquées, tous onglets",
     "none": "Rien de débloqué",
@@ -99,7 +98,8 @@
     "invalid": "Incomplet",
     "invalidTitle": "Selon le jeu, ce deck n'est pas encore utilisable",
     "deckTitle": "{characters} cartes de personnage + {cards} cartes",
-    "noDecks": "Aucun deck"
+    "noDecks": "Aucun deck",
+    "proficiency": "Maîtrise {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Escouades",
     "inUse": "Utilisée",
     "noTeams": "Aucune escouade",
-    "items": "Objets"
+    "items": "Objets",
+    "trialUntil": "À l'essai jusqu'au {time}"
   },
   "aranara": {
     "type": "Collection {n}",
+    "entry": "N° {n}",
+    "found": "Trouvés",
+    "foundHint": "Aranaras trouvés parmi ceux du carnet",
     "states": {
       "none": "Non trouvé",
       "collectable": "À récupérer",
       "collected": "Collecté",
       "finished": "Terminé"
+    }
+  },
+  "recipes": {
+    "unlocked": "Débloquées",
+    "filters": {
+      "all": "Toutes",
+      "unmastered": "Non maîtrisées",
+      "mastered": "Maîtrisées",
+      "locked": "Verrouillées"
     }
   }
 }

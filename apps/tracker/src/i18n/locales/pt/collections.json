@@ -32,9 +32,6 @@
   "summary": "Resumo",
   "notCapturedPart": "Ainda não capturado",
   "notCapturedPartBody": "O Teyvat.me Capture 1.4.0 ou mais recente o lê ao entrar no jogo.",
-  "namesSoon": "Nomes e ícones chegam com os próximos dados do jogo; até lá, IDs.",
-  "namesComing": "Nomes a caminho",
-  "namesComingBody": "A lista aparece quando os dados do jogo tiverem os nomes.",
   "tabs": {
     "spincrystals": "Cristais Rodopiantes Radiantes",
     "anecdotes": "Anedotas",
@@ -42,11 +39,13 @@
     "handbook": "Licença de Aventura",
     "livingBeings": "Seres Vivos",
     "tcg": "Chamado Sagrado dos Sete",
+    "recipes": "Receitas",
     "wardrobe": "Guarda-roupa",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Aba do Arquivo",
+    "show": "Mostrar",
     "unlocked": "Desbloqueados",
     "unlockedHint": "Entradas do Arquivo desbloqueadas, todas as abas",
     "none": "Nada desbloqueado",
@@ -99,7 +98,8 @@
     "invalid": "Incompleto",
     "invalidTitle": "Segundo o jogo, este deck ainda não pode ser usado",
     "deckTitle": "{characters} cartas de personagem + {cards} cartas",
-    "noDecks": "Nenhum deck"
+    "noDecks": "Nenhum deck",
+    "proficiency": "Proficiência {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Equipes",
     "inUse": "Em uso",
     "noTeams": "Nenhuma equipe",
-    "items": "Itens"
+    "items": "Itens",
+    "trialUntil": "Em teste até {time}"
   },
   "aranara": {
     "type": "Coleção {n}",
+    "entry": "N.º {n}",
+    "found": "Encontrados",
+    "foundHint": "Aranara encontrados dos listados no caderno",
     "states": {
       "none": "Não encontrado",
       "collectable": "Pronto para coletar",
       "collected": "Coletado",
       "finished": "Concluído"
+    }
+  },
+  "recipes": {
+    "unlocked": "Desbloqueadas",
+    "filters": {
+      "all": "Todas",
+      "unmastered": "Não dominadas",
+      "mastered": "Dominadas",
+      "locked": "Bloqueadas"
     }
   }
 }

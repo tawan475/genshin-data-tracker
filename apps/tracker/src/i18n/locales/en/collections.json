@@ -32,9 +32,6 @@
   "summary": "Summary",
   "notCapturedPart": "Not captured yet",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 or newer reads it at login.",
-  "namesSoon": "Names and icons come with the next game data; ids until then.",
-  "namesComing": "Names coming",
-  "namesComingBody": "The list shows once the game data has their names.",
   "tabs": {
     "spincrystals": "Radiant Spincrystals",
     "anecdotes": "Anecdotes",
@@ -42,11 +39,13 @@
     "handbook": "Adventurer Handbook",
     "livingBeings": "Living Beings",
     "tcg": "Genius Invokation TCG",
+    "recipes": "Recipes",
     "wardrobe": "Wardrobe",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Archive tab",
+    "show": "Show",
     "unlocked": "Unlocked",
     "unlockedHint": "Archive entries unlocked, every tab",
     "none": "None unlocked",
@@ -99,7 +98,8 @@
     "invalid": "Incomplete",
     "invalidTitle": "The game says this deck can't be used yet",
     "deckTitle": "{characters} character cards + {cards} cards",
-    "noDecks": "No decks"
+    "noDecks": "No decks",
+    "proficiency": "Proficiency {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Teams",
     "inUse": "In use",
     "noTeams": "No teams",
-    "items": "Items"
+    "items": "Items",
+    "trialUntil": "Trial until {time}"
   },
   "aranara": {
     "type": "Collection {n}",
+    "entry": "No. {n}",
+    "found": "Found",
+    "foundHint": "Aranara found, of those the notebook lists",
     "states": {
       "none": "Not found",
       "collectable": "Ready to collect",
       "collected": "Collected",
       "finished": "Done"
+    }
+  },
+  "recipes": {
+    "unlocked": "Unlocked",
+    "filters": {
+      "all": "All",
+      "unmastered": "Not mastered",
+      "mastered": "Mastered",
+      "locked": "Locked"
     }
   }
 }

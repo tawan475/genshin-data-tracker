@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import IdGrid from './IdGrid.vue'
+import EntryGrid from './EntryGrid.vue'
 import NotCaptured from './NotCaptured.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
-import { livingBeingName, nameOr } from '@/data/collection-names'
+import { livingBeing, type CollectionCatalog } from '@/data/collection-names'
 import { formatNumber } from '@/lib/format'
 import { t } from '@/i18n'
 
@@ -14,7 +14,7 @@ import { t } from '@/i18n'
  * Living Beings: enemies defeated and creatures captured per Living Beings
  * entry (only those with a count), most defeated first.
  */
-const props = defineProps<{ captured: CapturedCollections }>()
+const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
 const rows = computed(() =>
   Object.entries(props.captured.defeats?.value ?? {})
@@ -32,14 +32,17 @@ const entries = computed(() =>
   rows.value
     .filter((r) => !onlyCaptured.value || r.captured > 0)
     .map((r) => {
-      const name = nameOr(livingBeingName(r.id), r.id)
+      const being = livingBeing(props.catalog, r.id)
+      const name = being.name
       const counts = [t('collections.defeats.defeatedN', { n: formatNumber(r.defeated) })]
       if (r.captured)
         counts.push(t('collections.defeats.capturedN', { n: formatNumber(r.captured) }))
       return {
         id: r.id,
         name,
+        icon: being.icon,
         figure: formatNumber(onlyCaptured.value ? r.captured : r.defeated),
+        note: r.captured ? counts[1] : undefined,
         title: [name, ...counts].join(' · '),
       }
     }),
@@ -87,8 +90,7 @@ const entries = computed(() =>
         >
       </template>
       <div class="flex flex-col gap-3 p-3 sm:p-5">
-        <p class="text-sm text-text-muted">{{ $t('collections.namesSoon') }}</p>
-        <IdGrid :entries="entries" :label="$t('collections.tabs.livingBeings')" min="10rem" />
+        <EntryGrid :entries="entries" :label="$t('collections.tabs.livingBeings')" min="15rem" />
       </div>
     </UiPanel>
   </div>

@@ -32,9 +32,6 @@
   "summary": "Resumen",
   "notCapturedPart": "Aún sin capturar",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 o posterior lo lee al iniciar sesión.",
-  "namesSoon": "Los nombres e iconos llegan con los próximos datos del juego; hasta entonces, IDs.",
-  "namesComing": "Nombres en camino",
-  "namesComingBody": "La lista aparecerá cuando los datos del juego tengan sus nombres.",
   "tabs": {
     "spincrystals": "Girocristales radiantes",
     "anecdotes": "Anécdotas",
@@ -42,11 +39,13 @@
     "handbook": "Manual del aventurero",
     "livingBeings": "Seres vivos",
     "tcg": "Invocación de los Sabios",
+    "recipes": "Recetas",
     "wardrobe": "Armario",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Pestaña del Archivo",
+    "show": "Mostrar",
     "unlocked": "Desbloqueados",
     "unlockedHint": "Entradas del Archivo desbloqueadas, todas las pestañas",
     "none": "Nada desbloqueado",
@@ -99,7 +98,8 @@
     "invalid": "Incompleto",
     "invalidTitle": "Según el juego, este mazo aún no se puede usar",
     "deckTitle": "{characters} cartas de personaje + {cards} cartas",
-    "noDecks": "Sin mazos"
+    "noDecks": "Sin mazos",
+    "proficiency": "Dominio {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Escuadrones",
     "inUse": "En uso",
     "noTeams": "Sin escuadrones",
-    "items": "Objetos"
+    "items": "Objetos",
+    "trialUntil": "De prueba hasta {time}"
   },
   "aranara": {
     "type": "Colección {n}",
+    "entry": "N.º {n}",
+    "found": "Encontradas",
+    "foundHint": "Aranara encontrados de los que lista el cuaderno",
     "states": {
       "none": "Sin encontrar",
       "collectable": "Listo para recoger",
       "collected": "Recogido",
       "finished": "Terminado"
+    }
+  },
+  "recipes": {
+    "unlocked": "Desbloqueadas",
+    "filters": {
+      "all": "Todas",
+      "unmastered": "Sin dominar",
+      "mastered": "Dominadas",
+      "locked": "Bloqueadas"
     }
   }
 }

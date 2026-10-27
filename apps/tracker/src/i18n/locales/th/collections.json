@@ -32,9 +32,6 @@
   "summary": "สรุป",
   "notCapturedPart": "ยังไม่ได้สแกน",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
-  "namesSoon": "ชื่อและไอคอนจะมาพร้อมข้อมูลเกมชุดถัดไป ระหว่างนี้แสดงเป็น ID",
-  "namesComing": "ชื่อกำลังมา",
-  "namesComingBody": "รายการจะแสดงเมื่อข้อมูลเกมมีชื่อแล้ว",
   "tabs": {
     "spincrystals": "Radiant Spincrystal",
     "anecdotes": "เกร็ดน่ารู้",
@@ -42,11 +39,13 @@
     "handbook": "คู่มือนักผจญภัย",
     "livingBeings": "สิ่งมีชีวิต",
     "tcg": "เกมกลเจ็ดอัจฉริยะ",
+    "recipes": "สูตรอาหาร",
     "wardrobe": "ตู้เสื้อผ้า",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "แท็บอัลบั้ม",
+    "show": "แสดง",
     "unlocked": "ปลดล็อกแล้ว",
     "unlockedHint": "รายการอัลบั้มที่ปลดล็อกแล้ว ทุกแท็บ",
     "none": "ยังไม่ได้ปลดล็อก",
@@ -99,7 +98,8 @@
     "invalid": "ไม่ครบ",
     "invalidTitle": "ตามเกม เด็คนี้ยังใช้ไม่ได้",
     "deckTitle": "การ์ดตัวละคร {characters} + การ์ด {cards}",
-    "noDecks": "ไม่มีเด็ค"
+    "noDecks": "ไม่มีเด็ค",
+    "proficiency": "ความชำนาญ {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "หน่วยย่อย",
     "inUse": "ใช้งานอยู่",
     "noTeams": "ไม่มีหน่วย",
-    "items": "ไอเทม"
+    "items": "ไอเทม",
+    "trialUntil": "ทดลองใช้ถึง {time}"
   },
   "aranara": {
     "type": "คอลเลกชัน {n}",
+    "entry": "ลำดับที่ {n}",
+    "found": "ค้นพบแล้ว",
+    "foundHint": "Aranara ที่พบแล้ว จากที่มีในสมุดบันทึก",
     "states": {
       "none": "ยังไม่พบ",
       "collectable": "พร้อมรับ",
       "collected": "รวบรวมแล้ว",
       "finished": "เสร็จแล้ว"
+    }
+  },
+  "recipes": {
+    "unlocked": "ปลดล็อกแล้ว",
+    "filters": {
+      "all": "ทั้งหมด",
+      "unmastered": "ยังไม่ชำนาญ",
+      "mastered": "ชำนาญแล้ว",
+      "locked": "ยังไม่ปลดล็อก"
     }
   }
 }

@@ -6,11 +6,12 @@ import UiBadge from '@/components/ui/UiBadge.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
-import { aranaraName, nameOr } from '@/data/collection-names'
+import { aranaraTotal, type CollectionCatalog } from '@/data/collection-names'
+import { formatNumber } from '@/lib/format'
 import { t } from '@/i18n'
 
 /** Aranara collections: each entry's state, by collection type. */
-const props = defineProps<{ captured: CapturedCollections }>()
+const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
 const aranara = computed(() => props.captured.aranara?.value ?? null)
 const types = computed(() =>
@@ -21,7 +22,8 @@ const types = computed(() =>
         .map(([id, state]) => ({
           id: Number(id),
           state,
-          name: nameOr(aranaraName(Number(type), Number(id)), Number(id)),
+          // The notebook names none of them: numbered as the game numbers them.
+          name: t('collections.aranara.entry', { n: formatNumber(Number(id)) }),
         }))
         .sort((a, b) => a.id - b.id),
     }))
@@ -35,6 +37,10 @@ const counts = computed(() => {
   for (const { entries } of types.value) for (const entry of entries) out[entry.state]++
   return out
 })
+/** Entries the player has found (any state but "not found"). */
+const found = computed(() =>
+  types.value.reduce((sum, g) => sum + g.entries.filter((e) => e.state !== 'none').length, 0),
+)
 const TONE = {
   none: 'neutral',
   collectable: 'accent',
@@ -51,7 +57,22 @@ const stateLabel = (state: GiAranaraState) => t(`collections.aranara.states.${st
       class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
       :aria-label="$t('collections.summary')"
     >
-      <li v-for="state in ARANARA_STATES" :key="state" class="flex min-w-0">
+      <li class="flex min-w-0">
+        <UiStat
+          :label="$t('collections.aranara.found')"
+          :hint="$t('collections.aranara.foundHint')"
+        >
+          <template #value>
+            <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
+              {{ formatNumber(found)
+              }}<span class="text-sm text-text-muted">
+                / {{ formatNumber(aranaraTotal(catalog)) }}</span
+              >
+            </span>
+          </template>
+        </UiStat>
+      </li>
+      <li v-for="state in ARANARA_STATES.slice(1)" :key="state" class="flex min-w-0">
         <UiStat :label="stateLabel(state)" :value="counts[state]" exact />
       </li>
     </ul>
@@ -77,6 +98,5 @@ const stateLabel = (state: GiAranaraState) => t(`collections.aranara.states.${st
         </li>
       </ul>
     </UiPanel>
-    <p class="text-sm text-text-muted">{{ $t('collections.namesSoon') }}</p>
   </div>
 </template>

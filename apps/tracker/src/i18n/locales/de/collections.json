@@ -32,9 +32,6 @@
   "summary": "Zusammenfassung",
   "notCapturedPart": "Noch nicht erfasst",
   "notCapturedPartBody": "Teyvat.me Capture ab 1.4.0 liest es beim Einloggen.",
-  "namesSoon": "Namen und Symbole kommen mit den nächsten Spieldaten; bis dahin IDs.",
-  "namesComing": "Namen folgen",
-  "namesComingBody": "Die Liste erscheint, sobald die Spieldaten ihre Namen haben.",
   "tabs": {
     "spincrystals": "Strahlende Drehkristalle",
     "anecdotes": "Anekdoten",
@@ -42,11 +39,13 @@
     "handbook": "Abenteurerlizenz",
     "livingBeings": "Lebewesen",
     "tcg": "Geniale Beschwörung",
+    "recipes": "Rezepte",
     "wardrobe": "Garderobe",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Handbuch-Reiter",
+    "show": "Anzeigen",
     "unlocked": "Freigeschaltet",
     "unlockedHint": "Freigeschaltete Handbucheinträge, alle Reiter",
     "none": "Nichts freigeschaltet",
@@ -99,7 +98,8 @@
     "invalid": "Unvollständig",
     "invalidTitle": "Laut Spiel ist dieses Deck noch nicht spielbar",
     "deckTitle": "{characters} Figurenkarten + {cards} Karten",
-    "noDecks": "Keine Decks"
+    "noDecks": "Keine Decks",
+    "proficiency": "Übung {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Truppen",
     "inUse": "In Benutzung",
     "noTeams": "Keine Truppen",
-    "items": "Gegenstände"
+    "items": "Gegenstände",
+    "trialUntil": "Zum Probieren bis {time}"
   },
   "aranara": {
     "type": "Sammlung {n}",
+    "entry": "Nr. {n}",
+    "found": "Gefunden",
+    "foundHint": "Gefundene Aranara von denen im Notizbuch",
     "states": {
       "none": "Nicht gefunden",
       "collectable": "Bereit zum Einsammeln",
       "collected": "Gesammelt",
       "finished": "Erledigt"
+    }
+  },
+  "recipes": {
+    "unlocked": "Freigeschaltet",
+    "filters": {
+      "all": "Alle",
+      "unmastered": "Nicht gemeistert",
+      "mastered": "Gemeistert",
+      "locked": "Noch nicht freigeschaltet"
     }
   }
 }

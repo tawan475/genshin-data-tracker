@@ -32,9 +32,6 @@
   "summary": "Сводка",
   "notCapturedPart": "Пока не снято",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 или новее считывает это при входе в игру.",
-  "namesSoon": "Названия и значки появятся со следующими игровыми данными; пока — ID.",
-  "namesComing": "Названия скоро",
-  "namesComingBody": "Список появится, когда в игровых данных будут названия.",
   "tabs": {
     "spincrystals": "Лучистые кристаллы",
     "anecdotes": "Путевой дневник",
@@ -42,11 +39,13 @@
     "handbook": "Приключения",
     "livingBeings": "Существа",
     "tcg": "Священный призыв семерых",
+    "recipes": "Рецепты",
     "wardrobe": "Гардероб",
     "aranara": "Аранары"
   },
   "archive": {
     "pick": "Раздел архива",
+    "show": "Показать",
     "unlocked": "Открыто",
     "unlockedHint": "Открытые записи архива, все разделы",
     "none": "Ничего не открыто",
@@ -99,7 +98,8 @@
     "invalid": "Неполная",
     "invalidTitle": "По данным игры, эту колоду пока нельзя использовать",
     "deckTitle": "Карт персонажей: {characters} + карт: {cards}",
-    "noDecks": "Нет колод"
+    "noDecks": "Нет колод",
+    "proficiency": "Мастерство: {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Отряды",
     "inUse": "Используется",
     "noTeams": "Нет отрядов",
-    "items": "Предметы"
+    "items": "Предметы",
+    "trialUntil": "Пробный до {time}"
   },
   "aranara": {
     "type": "Коллекция {n}",
+    "entry": "№ {n}",
+    "found": "Найдено",
+    "foundHint": "Найдено аранар из записанных в блокноте",
     "states": {
       "none": "Не найдено",
       "collectable": "Можно забрать",
       "collected": "Собрано",
       "finished": "Готово"
+    }
+  },
+  "recipes": {
+    "unlocked": "Открыто",
+    "filters": {
+      "all": "Все",
+      "unmastered": "Не освоены",
+      "mastered": "Освоены",
+      "locked": "Закрыто"
     }
   }
 }

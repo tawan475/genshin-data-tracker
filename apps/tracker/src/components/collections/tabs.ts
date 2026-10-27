@@ -9,6 +9,7 @@ export const COLLECTION_TABS = [
   'handbook',
   'living-beings',
   'tcg',
+  'recipes',
   'wardrobe',
   'aranara',
 ] as const
@@ -25,6 +26,7 @@ export const TAB_LABEL = {
   handbook: 'handbook',
   'living-beings': 'livingBeings',
   tcg: 'tcg',
+  recipes: 'recipes',
   wardrobe: 'wardrobe',
   aranara: 'aranara',
 } as const satisfies Record<CollectionTab, string>
@@ -37,9 +39,21 @@ export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections 
   handbook: 'handbook',
   'living-beings': 'defeats',
   tcg: 'tcg',
+  recipes: 'recipes',
   wardrobe: 'wardrobe',
   aranara: 'aranara',
 }
+
+/** Tabs that list the game data's collections (names, totals): they wait for it. */
+export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
+  'archive',
+  'handbook',
+  'living-beings',
+  'tcg',
+  'recipes',
+  'wardrobe',
+  'aranara',
+])
 
 /** Each tab's component, loaded when the tab is first shown. */
 export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
@@ -49,6 +63,7 @@ export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
   handbook: defineAsyncComponent(() => import('./HandbookTab.vue')),
   'living-beings': defineAsyncComponent(() => import('./LivingBeingsTab.vue')),
   tcg: defineAsyncComponent(() => import('./TcgTab.vue')),
+  recipes: defineAsyncComponent(() => import('./RecipesTab.vue')),
   wardrobe: defineAsyncComponent(() => import('./WardrobeTab.vue')),
   aranara: defineAsyncComponent(() => import('./AranaraTab.vue')),
 }

@@ -10,7 +10,7 @@ import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.v
 import UiStat from '@/components/ui/UiStat.vue'
 import { ChevronRight, SearchX } from 'lucide-vue-next'
 import type { CapturedCollections } from '@/data/collections'
-import { handbookChapterName, handbookTargetName, nameOr } from '@/data/collection-names'
+import { handbookNames, type CollectionCatalog } from '@/data/collection-names'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { t } from '@/i18n'
@@ -19,7 +19,7 @@ import { t } from '@/i18n'
  * The Adventurer Handbook: each chapter's progress and state, its targets
  * under it, filtered by state (open / complete = reward waiting / claimed).
  */
-const props = defineProps<{ captured: CapturedCollections }>()
+const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
 type Filter = 'all' | GiProgressState
 const FILTERS: Filter[] = ['all', 'open', 'complete', 'claimed']
@@ -48,16 +48,17 @@ const options = computed<SegmentedOption<Filter>[]>(() =>
   })),
 )
 
+const names = computed(() => handbookNames(props.catalog))
 const chapters = computed(() =>
   Object.entries(handbook.value?.chapters ?? {})
     .map(([id, chapter]) => ({
       id: Number(id),
       ...chapter,
-      name: nameOr(handbookChapterName(Number(id)), Number(id)),
+      name: names.value.chapter(Number(id)),
       targets: targets.value
         .filter((tg) => tg.chapter === Number(id))
         .filter((tg) => filter.value === 'all' || tg.state === filter.value)
-        .map((tg) => ({ ...tg, name: nameOr(handbookTargetName(tg.id), tg.id) })),
+        .map((tg) => ({ ...tg, name: names.value.target(tg.id).name })),
     }))
     .filter((chapter) => filter.value === 'all' || chapter.targets.length > 0)
     .sort((a, b) => a.id - b.id),
@@ -148,7 +149,7 @@ const progressText = (p: GiProgress) => `${formatNumber(p.progress)} / ${formatN
             :title="`${target.name} · ${stateLabel(target.state)}`"
           >
             <span
-              class="min-w-0 flex-1 truncate text-text-secondary"
+              class="line-clamp-2 min-w-0 flex-1 text-text-secondary"
               :class="target.name.startsWith('#') && 'tabular font-mono'"
               >{{ target.name }}</span
             >
@@ -163,6 +164,5 @@ const progressText = (p: GiProgress) => `${formatNumber(p.progress)} / ${formatN
         <template #icon><SearchX aria-hidden="true" /></template>
       </UiEmpty>
     </UiPanel>
-    <p class="text-sm text-text-muted">{{ $t('collections.namesSoon') }}</p>
   </div>
 </template>

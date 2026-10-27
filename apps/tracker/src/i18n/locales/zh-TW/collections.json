@@ -32,9 +32,6 @@
   "summary": "概覽",
   "notCapturedPart": "尚未擷取",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 或更新版本會在登入時讀取。",
-  "namesSoon": "名稱和圖示將隨下一版遊戲資料提供，在此之前顯示 ID。",
-  "namesComing": "名稱即將提供",
-  "namesComingBody": "遊戲資料有名稱後顯示列表。",
   "tabs": {
     "spincrystals": "旋曜玉帛",
     "anecdotes": "遊逸旅帳",
@@ -42,11 +39,13 @@
     "handbook": "冒險之證",
     "livingBeings": "生物誌",
     "tcg": "七聖召喚",
+    "recipes": "食譜",
     "wardrobe": "衣櫥",
     "aranara": "蘭那羅"
   },
   "archive": {
     "pick": "圖鑑分類",
+    "show": "顯示",
     "unlocked": "已解鎖",
     "unlockedHint": "已解鎖的圖鑑條目（全部分類）",
     "none": "尚未解鎖",
@@ -99,7 +98,8 @@
     "invalid": "不完整",
     "invalidTitle": "遊戲顯示該牌組暫不可用",
     "deckTitle": "角色牌 {characters} 張 + 卡牌 {cards} 張",
-    "noDecks": "無牌組"
+    "noDecks": "無牌組",
+    "proficiency": "熟練度 {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "小隊",
     "inUse": "使用中",
     "noTeams": "無小隊",
-    "items": "物品"
+    "items": "物品",
+    "trialUntil": "試用至 {time}"
   },
   "aranara": {
     "type": "收集 {n}",
+    "entry": "第 {n} 號",
+    "found": "已尋得",
+    "foundHint": "筆記中列出的蘭那羅裡已尋得的數量",
     "states": {
       "none": "未找到",
       "collectable": "可領取",
       "collected": "已收集",
       "finished": "已完成"
+    }
+  },
+  "recipes": {
+    "unlocked": "已解鎖",
+    "filters": {
+      "all": "全部",
+      "unmastered": "未精通",
+      "mastered": "已精通",
+      "locked": "未解鎖"
     }
   }
 }

@@ -32,9 +32,6 @@
   "summary": "Tóm tắt",
   "notCapturedPart": "Chưa ghi",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 trở lên đọc khi đăng nhập.",
-  "namesSoon": "Tên và biểu tượng có trong dữ liệu trò chơi tiếp theo; trước đó hiển thị ID.",
-  "namesComing": "Sắp có tên",
-  "namesComingBody": "Danh sách hiện khi dữ liệu trò chơi có tên.",
   "tabs": {
     "spincrystals": "Ngọc Thạch Âm Vang",
     "anecdotes": "Giai Thoại",
@@ -42,11 +39,13 @@
     "handbook": "Bằng Chứng Mạo Hiểm",
     "livingBeings": "Sách Sinh Vật",
     "tcg": "Thất Thánh Triệu Hồi",
+    "recipes": "Công Thức",
     "wardrobe": "Tủ Đồ",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Mục Thư Viện",
+    "show": "Hiển thị",
     "unlocked": "Đã mở khóa",
     "unlockedHint": "Mục Thư Viện đã mở khóa, mọi mục",
     "none": "Chưa mở khóa",
@@ -99,7 +98,8 @@
     "invalid": "Chưa đủ",
     "invalidTitle": "Theo trò chơi, bộ bài này chưa dùng được",
     "deckTitle": "{characters} thẻ nhân vật + {cards} thẻ",
-    "noDecks": "Không có bộ bài"
+    "noDecks": "Không có bộ bài",
+    "proficiency": "Điểm thông thạo {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Đội Nhóm",
     "inUse": "Đang dùng",
     "noTeams": "Không có đội",
-    "items": "Vật phẩm"
+    "items": "Vật phẩm",
+    "trialUntil": "Dùng thử đến {time}"
   },
   "aranara": {
     "type": "Bộ sưu tập {n}",
+    "entry": "Số {n}",
+    "found": "Đã Tìm Thấy",
+    "foundHint": "Aranara đã tìm thấy trong số có trong sổ",
     "states": {
       "none": "Chưa tìm thấy",
       "collectable": "Có thể nhận",
       "collected": "Đã Thu Thập",
       "finished": "Xong"
+    }
+  },
+  "recipes": {
+    "unlocked": "Đã Mở",
+    "filters": {
+      "all": "Tất cả",
+      "unmastered": "Chưa thông thạo",
+      "mastered": "Đã thông thạo",
+      "locked": "Chưa Mở"
     }
   }
 }

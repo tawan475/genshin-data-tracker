@@ -32,9 +32,6 @@
   "summary": "Ringkasan",
   "notCapturedPart": "Belum tertangkap",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 atau lebih baru membacanya saat login.",
-  "namesSoon": "Nama dan ikon datang bersama data game berikutnya; sampai saat itu, ID.",
-  "namesComing": "Nama segera hadir",
-  "namesComingBody": "Daftar muncul setelah data game memiliki namanya.",
   "tabs": {
     "spincrystals": "Radiant Spincrystal",
     "anecdotes": "Anekdot",
@@ -42,11 +39,13 @@
     "handbook": "Panduan Petualang",
     "livingBeings": "Makhluk Hidup",
     "tcg": "Genius Invokation TCG",
+    "recipes": "Resep",
     "wardrobe": "Lemari",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Tab Arsip",
+    "show": "Tampilkan",
     "unlocked": "Terbuka",
     "unlockedHint": "Entri Arsip yang terbuka, semua tab",
     "none": "Belum ada yang terbuka",
@@ -99,7 +98,8 @@
     "invalid": "Belum lengkap",
     "invalidTitle": "Menurut game, dek ini belum bisa dipakai",
     "deckTitle": "{characters} kartu karakter + {cards} kartu",
-    "noDecks": "Tidak ada dek"
+    "noDecks": "Tidak ada dek",
+    "proficiency": "Kemahiran {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Beregu",
     "inUse": "Dipakai",
     "noTeams": "Tidak ada regu",
-    "items": "Item"
+    "items": "Item",
+    "trialUntil": "Coba sampai {time}"
   },
   "aranara": {
     "type": "Koleksi {n}",
+    "entry": "No. {n}",
+    "found": "Sudah Ditemukan",
+    "foundHint": "Aranara yang ditemukan dari yang ada di buku catatan",
     "states": {
       "none": "Belum ditemukan",
       "collectable": "Siap diambil",
       "collected": "Telah Terkumpul",
       "finished": "Selesai"
+    }
+  },
+  "recipes": {
+    "unlocked": "Terbuka",
+    "filters": {
+      "all": "Semua",
+      "unmastered": "Belum mahir",
+      "mastered": "Mahir",
+      "locked": "Belum Terbuka"
     }
   }
 }

@@ -5,12 +5,14 @@ import CaptureTime from '@/components/collections/CaptureTime.vue'
 import {
   COLLECTION_TABS,
   LAST_TAB_KEY,
+  NEEDS_CATALOG,
   TAB_COMPONENTS,
   TAB_LABEL,
   TAB_PART,
   isCollectionTab,
   type CollectionTab,
 } from '@/components/collections/tabs'
+import { useCollectionCatalog } from '@/components/collections/use-catalog'
 import { useCapturedCollections } from '@/components/collections/use-captured'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
@@ -48,6 +50,16 @@ const tabs = computed(() =>
 )
 
 const { captured, resource } = useCapturedCollections()
+const catalog = useCollectionCatalog()
+const needsCatalog = computed(() => NEEDS_CATALOG.has(tab.value))
+const ready = computed(() => !!captured.value && (!needsCatalog.value || !!catalog.data.value))
+const loadError = computed(
+  () => resource.error.value ?? (needsCatalog.value ? catalog.error.value : undefined),
+)
+function retry() {
+  if (resource.error.value) void resource.reload()
+  if (catalog.error.value) void catalog.reload()
+}
 const part = computed(() => {
   const key = TAB_PART[tab.value]
   return key ? captured.value?.[key] : undefined
@@ -75,14 +87,19 @@ const part = computed(() => {
 
     <component :is="TAB_COMPONENTS.anecdotes" v-if="tab === 'anecdotes'" />
     <UiError
-      v-else-if="resource.error.value && !captured"
+      v-else-if="loadError && !ready"
       :title="$t('collections.loadFailed')"
-      :error="resource.error.value"
-      @retry="resource.reload()"
+      :error="loadError"
+      @retry="retry"
     />
-    <template v-else-if="captured">
+    <template v-else-if="ready && captured">
       <CaptureTime class="mb-4" :taken-at="part?.takenAt" />
-      <component :is="TAB_COMPONENTS[tab]" :key="tab" :captured="captured" />
+      <component
+        :is="TAB_COMPONENTS[tab]"
+        :key="tab"
+        :captured="captured"
+        v-bind="needsCatalog ? { catalog: catalog.data.value } : {}"
+      />
     </template>
     <div v-else aria-busy="true" :aria-label="$t('collections.loading')">
       <div class="mb-4 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4 lg:mb-6">

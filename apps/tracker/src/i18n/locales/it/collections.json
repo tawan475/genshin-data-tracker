@@ -32,9 +32,6 @@
   "summary": "Riepilogo",
   "notCapturedPart": "Non ancora catturato",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 o successivo lo legge all'accesso.",
-  "namesSoon": "Nomi e icone arrivano con i prossimi dati di gioco; fino ad allora, ID.",
-  "namesComing": "Nomi in arrivo",
-  "namesComingBody": "L'elenco appare quando i dati di gioco avranno i nomi.",
   "tabs": {
     "spincrystals": "Voltacristalli radiosi",
     "anecdotes": "Aneddoti",
@@ -42,11 +39,13 @@
     "handbook": "Manuale dell'avventuriere",
     "livingBeings": "Esseri viventi",
     "tcg": "GCC Invokazione del genio",
+    "recipes": "Ricette",
     "wardrobe": "Guardaroba",
     "aranara": "Aranara"
   },
   "archive": {
     "pick": "Scheda dell'Archivio",
+    "show": "Mostra",
     "unlocked": "Sbloccate",
     "unlockedHint": "Voci dell'Archivio sbloccate, tutte le schede",
     "none": "Niente di sbloccato",
@@ -99,7 +98,8 @@
     "invalid": "Incompleto",
     "invalidTitle": "Secondo il gioco questo mazzo non è ancora utilizzabile",
     "deckTitle": "{characters} carte personaggio + {cards} carte",
-    "noDecks": "Nessun mazzo"
+    "noDecks": "Nessun mazzo",
+    "proficiency": "Competenza {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "Squadre",
     "inUse": "In uso",
     "noTeams": "Nessuna squadra",
-    "items": "Oggetti"
+    "items": "Oggetti",
+    "trialUntil": "In prova fino al {time}"
   },
   "aranara": {
     "type": "Collezione {n}",
+    "entry": "N. {n}",
+    "found": "Trovati",
+    "foundHint": "Aranara trovati tra quelli del taccuino",
     "states": {
       "none": "Non trovato",
       "collectable": "Da raccogliere",
       "collected": "Ottenuto",
       "finished": "Finito"
+    }
+  },
+  "recipes": {
+    "unlocked": "Sbloccate",
+    "filters": {
+      "all": "Tutte",
+      "unmastered": "Non padroneggiate",
+      "mastered": "Padroneggiate",
+      "locked": "Bloccate"
     }
   }
 }

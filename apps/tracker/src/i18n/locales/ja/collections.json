@@ -32,9 +32,6 @@
   "summary": "概要",
   "notCapturedPart": "まだキャプチャされていません",
   "notCapturedPartBody": "Teyvat.me Capture 1.4.0 以降がログイン時に読み取ります。",
-  "namesSoon": "名前とアイコンは次のゲームデータで追加されます。それまではIDを表示します。",
-  "namesComing": "名前は準備中",
-  "namesComingBody": "ゲームデータに名前が入ると一覧を表示します。",
   "tabs": {
     "spincrystals": "旋曜玉帛",
     "anecdotes": "秘話",
@@ -42,11 +39,13 @@
     "handbook": "冒険の証",
     "livingBeings": "生物誌",
     "tcg": "七聖召喚",
+    "recipes": "レシピ",
     "wardrobe": "クローゼット",
     "aranara": "アランナラ"
   },
   "archive": {
     "pick": "図鑑のタブ",
+    "show": "表示",
     "unlocked": "解放済み",
     "unlockedHint": "解放済みの図鑑項目（全タブ）",
     "none": "解放済みなし",
@@ -99,7 +98,8 @@
     "invalid": "未完成",
     "invalidTitle": "ゲーム上まだ使えないデッキです",
     "deckTitle": "キャラカード {characters} 枚 + カード {cards} 枚",
-    "noDecks": "デッキなし"
+    "noDecks": "デッキなし",
+    "proficiency": "熟練度 {n}"
   },
   "wardrobe": {
     "kinds": {
@@ -113,15 +113,28 @@
     "teams": "小隊",
     "inUse": "使用中",
     "noTeams": "小隊なし",
-    "items": "アイテム"
+    "items": "アイテム",
+    "trialUntil": "{time} までテストプレイ"
   },
   "aranara": {
     "type": "コレクション {n}",
+    "entry": "No.{n}",
+    "found": "発見済み",
+    "foundHint": "ノートに載っているアランナラのうち見つけた数",
     "states": {
       "none": "未発見",
       "collectable": "受取可能",
       "collected": "収集済み",
       "finished": "完了"
+    }
+  },
+  "recipes": {
+    "unlocked": "開放済み",
+    "filters": {
+      "all": "すべて",
+      "unmastered": "未習得",
+      "mastered": "習得済み",
+      "locked": "未開放"
     }
   }
 }
