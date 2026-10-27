@@ -22,6 +22,7 @@ import type {
   GiProgress,
   GiProgressState,
   GiTasks,
+  GiExploration,
   GiWardrobe,
   GiWardrobeKind,
   GoodArtifact,
@@ -51,6 +52,7 @@ export type SectionKind =
   // collections layout cannot learn them (see section-binary.ts).
   | 'collections2'
   | 'wardrobe'
+  | 'exploration'
 
 export interface Section {
   kind: SectionKind
@@ -873,4 +875,67 @@ export function decodeWardrobe(section: WardrobeSection): GiWardrobe {
   }
   if (section.c !== undefined) wardrobe.currentTeam = section.c
   return wardrobe
+}
+
+// --------------------------------------------------------------- exploration
+// Teyvat.me Capture's `gi_exploration` (1.6.0), each part only when the
+// capture had it, rows by id: `s` Statues [city, level, Oculi], `f`
+// offerings [id, level], `p` scenes [scene, map points, areas] (ids
+// ascending), `x` exploration [area, points], `r` reputation [city, level].
+// Its own section: the map's long lists rarely change, so a relogin with
+// nothing new shares it.
+
+export interface ExplorationSection {
+  s?: [city: number, level: number, oculi: number][]
+  f?: [id: number, level: number][]
+  p?: [scene: number, points: number[], areas: number[]][]
+  x?: [area: number, points: number][]
+  r?: [city: number, level: number][]
+}
+
+const pairs = (record: Record<string, number>): [number, number][] =>
+  ids(record).map((id) => [id, record[String(id)]!])
+const fromPairs = (rows: readonly (readonly [number, number])[]): Record<string, number> =>
+  Object.fromEntries(rows.map(([id, value]) => [String(id), value]))
+
+export function encodeExploration(exploration: GiExploration): ExplorationSection {
+  const section: ExplorationSection = {}
+  const { statues, offerings, scenes, explore, reputation } = exploration
+  if (statues) {
+    section.s = ids(statues).map((city) => {
+      const statue = statues[String(city)]!
+      return [city, statue.level, statue.oculi]
+    })
+  }
+  if (offerings) section.f = pairs(offerings)
+  if (scenes) {
+    section.p = ids(scenes).map((scene) => {
+      const value = scenes[String(scene)]!
+      return [scene, [...value.points], [...value.areas]]
+    })
+  }
+  if (explore) section.x = pairs(explore)
+  if (reputation) section.r = pairs(reputation)
+  return section
+}
+
+export function decodeExploration(section: ExplorationSection): GiExploration {
+  const exploration: GiExploration = {}
+  if (section.s) {
+    exploration.statues = Object.fromEntries(
+      section.s.map(([city, level, oculi]) => [String(city), { level, oculi }]),
+    )
+  }
+  if (section.f) exploration.offerings = fromPairs(section.f)
+  if (section.p) {
+    exploration.scenes = Object.fromEntries(
+      section.p.map(([scene, points, areas]) => [
+        String(scene),
+        { points: [...points], areas: [...areas] },
+      ]),
+    )
+  }
+  if (section.x) exploration.explore = fromPairs(section.x)
+  if (section.r) exploration.reputation = fromPairs(section.r)
+  return exploration
 }

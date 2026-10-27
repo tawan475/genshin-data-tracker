@@ -12,6 +12,7 @@ import {
   decodeCharacterExtras,
   decodeCharacters,
   decodeCollections,
+  decodeExploration,
   decodeMaterials,
   decodePlayer,
   decodeTasks,
@@ -28,6 +29,7 @@ import {
   encodeCharacters,
   encodeCollections,
   encodeCollections2,
+  encodeExploration,
   encodeMaterialsDelta,
   encodeMaterialsFull,
   encodeTasks,
@@ -115,6 +117,7 @@ export interface ExtraSections {
   collections: Section | null
   collections2: Section | null
   wardrobe: Section | null
+  exploration: Section | null
 }
 
 export interface EncodedSnapshot extends ExtraSections {
@@ -175,6 +178,12 @@ export interface EncodedSnapshot extends ExtraSections {
    */
   preWardrobeContentHash: string
   /**
+   * The content hash with the exploration left out (equal to `contentHash`
+   * when there is none): what this capture has if it was stored before
+   * `gi_exploration` was kept, so re-uploading it stays a no-op.
+   */
+  preExplorationContentHash: string
+  /**
    * The content hash with the recipes left out of collections2 (equal to
    * `contentHash` without recipes): what a tracker from before Capture
    * 1.5.0's recipes stored such a file as, so re-uploading it stays a no-op.
@@ -201,6 +210,7 @@ export function extraSectionsOf(sections: ExtraSections): Section[] {
     sections.collections,
     sections.collections2,
     sections.wardrobe,
+    sections.exploration,
   ].filter((s): s is Section => s !== null)
 }
 
@@ -227,6 +237,7 @@ export async function encodeStaticSections(
     collections,
     collections2,
     wardrobe,
+    exploration,
   ] = await Promise.all([
     makeSection('characters', encodeCharacters(good.characters)),
     makeSection('weapons', encodeWeapons(good.weapons)),
@@ -244,6 +255,7 @@ export async function encodeStaticSections(
     optionalSection('collections', good.collections && encodeCollections(good.collections)),
     optionalSection('collections2', good.collections && encodeCollections2(good.collections)),
     good.wardrobe ? makeSection('wardrobe', encodeWardrobe(good.wardrobe)) : null,
+    good.exploration ? makeSection('exploration', encodeExploration(good.exploration)) : null,
   ])
   return {
     characters,
@@ -258,6 +270,7 @@ export async function encodeStaticSections(
     collections,
     collections2,
     wardrobe,
+    exploration,
   }
 }
 
@@ -347,11 +360,27 @@ export async function completeSnapshot(
           ].join(':'),
         )
       : preWardrobe
-    return { preWardrobe, content }
+    // Capture 1.6.0's exploration after the wardrobe, the same way.
+    const withExploration = sections.exploration
+      ? await sha256Hex128(
+          [
+            ...withExtras,
+            sections.anecdotes?.hash ?? '',
+            sections.tasks?.hash ?? '',
+            sections.collections?.hash ?? '',
+            collections2?.hash ?? '',
+            sections.wardrobe?.hash ?? '',
+            sections.exploration.hash,
+          ].join(':'),
+        )
+      : content
+    return { preWardrobe, preExploration: content, content: withExploration }
   }
-  const { preWardrobe: preWardrobeContentHash, content: contentHash } = await tail(
-    sections.collections2,
-  )
+  const {
+    preWardrobe: preWardrobeContentHash,
+    preExploration: preExplorationContentHash,
+    content: contentHash,
+  } = await tail(sections.collections2)
   // The recipes (1.5.0) live inside collections2: what this file hashed to
   // where collections2 did not have them yet.
   const collections = prepared.good.collections
@@ -378,6 +407,7 @@ export async function completeSnapshot(
     preCollectionsContentHash,
     preCollections2ContentHash,
     preWardrobeContentHash,
+    preExplorationContentHash,
     preRecipesContentHash,
   }
 }
@@ -507,6 +537,7 @@ export interface StoredSnapshot {
   collections?: string | null
   collections2?: string | null
   wardrobe?: string | null
+  exploration?: string | null
 }
 
 const parseOrNull = <T>(text: string | null | undefined): T | null =>
@@ -564,5 +595,8 @@ export function decodeSnapshot(
     }
   }
   if (stored.wardrobe) good.gi_wardrobe = decodeWardrobe(JSON.parse(stored.wardrobe))
+  if (stored.exploration) {
+    good.gi_exploration = decodeExploration(JSON.parse(stored.exploration))
+  }
   return good
 }

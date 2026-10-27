@@ -224,6 +224,26 @@ export interface GiWardrobe {
   currentTeam?: number
 }
 
+/**
+ * Teyvat.me Capture's `gi_exploration` (1.6.0): the world's progress at
+ * login, each part optional (absent = not captured, never "none"). Ids are
+ * the game's own: cities (CityConfigData), offerings
+ * (OfferingOpenStateConfigData), scenes, map points and areas (scene point
+ * files), WorldAreaConfigData `areaID1` for exploration.
+ */
+export interface GiExploration {
+  /** Statues of The Seven by city: level (1 = never levelled) and Oculi offered. */
+  statues?: Record<string, { level: number; oculi: number }>
+  /** Offering (Frostbearing Tree, Sacred Sakura, …) -> its level. */
+  offerings?: Record<string, number>
+  /** By scene: map points unlocked and areas revealed (ids ascending). */
+  scenes?: Record<string, { points: number[]; areas: number[] }>
+  /** Exploration area -> raw exploration points (the game's total is in the game data). */
+  explore?: Record<string, number>
+  /** City -> reputation level. */
+  reputation?: Record<string, number>
+}
+
 export interface Good {
   format: string
   version: number
@@ -245,6 +265,7 @@ export interface Good {
   gi_tasks?: GiTasks
   gi_collections?: GiCollections
   gi_wardrobe?: GiWardrobe
+  gi_exploration?: GiExploration
 }
 
 /**

@@ -145,7 +145,11 @@ weapon skins and trails owned and worn, saved teams) as `wardrobe`
 deployed collections layout cannot learn new parts, hence the second
 section; its layout and the wardrobe's are tagged, so an older build skips
 a part it does not know). Capture 1.5.0's `gi_collections.recipes` (recipe
-id -> proficiency) is collections2's part `p`. Deck and team names are the
+id -> proficiency) is collections2's part `p`. Capture 1.6.0's
+`gi_exploration` (Statues, offerings, map points and areas per scene,
+exploration points per area, reputation) is `exploration`
+(`snapshots.exploration_ref`, migration 0032; tagged like the wardrobe; a
+relogin with nothing new stores 0 bytes). Deck and team names are the
 player's text, stored as is; a part
 that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before
@@ -158,7 +162,8 @@ capture's `gi_tasks` ticks Daily Commissions (all done today) and the Spiral
 Abyss (full stars in the running period) and adds Expeditions, Realm Currency
 and Welkin Moon rows, while the capture is newer than the row's hand state
 (`components/planner/tasks.ts` `captureRead`), and Collections
-(`/app/a/:id/collections/<tab>`, the last tab per device): Radiant
+(`/app/a/:id/collections` = a card per collection with its figure,
+`/collections/<tab>` = its page; Achievements is a card too): Radiant
 Spincrystals (which the newest capture has, which are missing), Anecdotes
 (the old `/anecdotes` page redirects there), the Archive, the Adventurer
 Handbook, Living Beings (defeats), TCG, the wardrobe and Aranara, each from
@@ -166,7 +171,10 @@ the newest snapshot with that part, against `@gdt/game-data/collections`
 (names in every language, icons, totals; `src/data/collection-names.ts`):
 each Archive tab, TCG cards and wardrobe kind shows All / Missing / Have, and
 a Recipes tab (Capture 1.5.0) shows unlocked, locked and mastered recipes.
-Aranara entries stay numbered (the game names none).
+Aranara entries stay numbered (the game names none); all the game data
+lists show, those the capture lacks as not found. Radiant Spincrystals,
+Anecdotes and Aranara link to their Genshin Impact Fandom wiki guides
+(`src/lib/wiki.ts`: page titles are the game's English names).
 
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`; artifact sets,

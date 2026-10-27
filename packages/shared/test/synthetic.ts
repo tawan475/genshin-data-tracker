@@ -403,3 +403,38 @@ export function syntheticRecipes(seed = 1): Record<string, number> {
     ids(rand, 1_001, 4_500, 252).map((id) => [String(id), rand() < 0.3 ? 0 : int(rand, 1, 30)]),
   )
 }
+
+/**
+ * `gi_exploration` at a real capture's scale (Capture 1.6.0; made-up ids):
+ * 16 Statues (7 at 10, one at 6 with 2 Oculi, the rest at 1), 22 offerings,
+ * 8 scenes (Teyvat with ~893 points and 65 areas), 71 areas, 5 reputations.
+ */
+export function syntheticExploration(seed = 1): NonNullable<Good['gi_exploration']> {
+  const rand = random(seed)
+  const cities = [1, 2, 3, 4, 5, 6, 7, 8, 9, 99, 100, 101, 102, 103, 104, 105]
+  const scene = (points: number, areas: number) => ({
+    points: ids(rand, 1, points * 3, points),
+    areas: ids(rand, 1, areas * 2, areas),
+  })
+  return {
+    statues: Object.fromEntries(
+      cities.map((city) => [
+        String(city),
+        city <= 7
+          ? { level: 10, oculi: 0 }
+          : city === 8
+            ? { level: 6, oculi: 2 }
+            : { level: 1, oculi: 0 },
+      ]),
+    ),
+    offerings: Object.fromEntries(ids(rand, 1, 60, 22).map((id) => [String(id), int(rand, 5, 50)])),
+    scenes: Object.fromEntries([
+      ['3', scene(893, 65)],
+      ...[5, 6, 10, 11, 101, 102, 103].map((id) => [String(id), scene(int(rand, 10, 47), 3)]),
+    ]),
+    explore: Object.fromEntries(
+      ids(rand, 1, 200, 71).map((id) => [String(id), int(rand, 0, 1_000)]),
+    ),
+    reputation: Object.fromEntries([1, 2, 3, 4, 5].map((city) => [String(city), int(rand, 8, 10)])),
+  }
+}

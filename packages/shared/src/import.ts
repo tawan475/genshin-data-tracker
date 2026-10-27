@@ -68,6 +68,15 @@ export const GOOD_LIMITS = {
   teamCharacters: 8,
   /** Unlocked cooking recipes: 284 in the 7.1 game data, 252 in a real capture. */
   recipes: 2_000,
+  // gi_exploration (Capture 1.6.0): past one of these a part is dropped.
+  /** Cities with a Statue or a reputation (16 real) and offerings (22 real). */
+  explorationCities: 500,
+  offerings: 500,
+  /** Scenes with map points (8 real) and one scene's points (~893 in Teyvat) or areas (65). */
+  scenes: 500,
+  scenePoints: 20_000,
+  /** Exploration areas (71 real). */
+  exploreAreas: 3_000,
   /** UTF-16 units of a deck or team name the player typed. */
   playerText: 100,
   /** An artifact has at most 4 substats (and unactivated ones). */

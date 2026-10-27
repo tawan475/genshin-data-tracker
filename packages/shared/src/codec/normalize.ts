@@ -11,6 +11,7 @@ import type {
   GiProgress,
   GiProgressState,
   GiTasks,
+  GiExploration,
   GiWardrobe,
   GiWardrobeKind,
   GoodCharacter,
@@ -72,6 +73,8 @@ export interface NormalizedGood {
   collections: GiCollections | null
   /** `gi_wardrobe`, the parts that pass their checks whole (see toWardrobe). */
   wardrobe: GiWardrobe | null
+  /** `gi_exploration`, the parts that pass their checks whole (see toExploration). */
+  exploration: GiExploration | null
 }
 
 export class GoodFormatError extends Error {
@@ -143,6 +146,7 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     tasks: toTasks(input.gi_tasks),
     collections: toCollections(input.gi_collections),
     wardrobe: toWardrobe(input.gi_wardrobe),
+    exploration: toExploration(input.gi_exploration),
   }
   const itemGuids = toItemGuids(input)
   if (itemGuids) good.itemGuids = itemGuids
@@ -820,6 +824,61 @@ function toWardrobe(raw: unknown): GiWardrobe | null {
   }
   if (isIntIn(raw.currentTeam, 0, 1_000)) wardrobe.currentTeam = raw.currentTeam
   return Object.keys(wardrobe).length > 0 ? wardrobe : null
+}
+
+/** The game's config ids (cities, offerings, scenes, map points, areas). */
+const GAME_ID = [0, 99_999_999] as const
+/** A level (Statue, offering, reputation): the game's go to 50 at most. */
+const LEVEL = [0, 1_000] as const
+
+/** Entries whose values are all whole numbers in `range`, by id; null when any is not. */
+function numberEntries(raw: unknown, range: readonly [number, number], cap: number) {
+  const entries = idEntries(raw, ...GAME_ID, cap)
+  return entries && entries.every(([, value]) => isIntIn(value, ...range))
+    ? byId(entries as [number, number][])
+    : null
+}
+
+/**
+ * Teyvat.me Capture's `gi_exploration` (1.6.0). Each part is kept only when
+ * all of it passes; rewritten in id order, so equal content hashes equal.
+ */
+function toExploration(raw: unknown): GiExploration | null {
+  if (!isObject(raw)) return null
+  const exploration: GiExploration = {}
+  const statues = idEntries(raw.statues, ...GAME_ID, GOOD_LIMITS.explorationCities)
+  if (
+    statues &&
+    statues.every(
+      ([, s]) => isObject(s) && isIntIn(s.level, ...LEVEL) && isIntIn(s.oculi, ...COUNT),
+    )
+  ) {
+    exploration.statues = byId(
+      (statues as [number, { level: number; oculi: number }][]).map(([id, s]) => [
+        id,
+        { level: s.level, oculi: s.oculi },
+      ]),
+    )
+  }
+  const offerings = numberEntries(raw.offerings, LEVEL, GOOD_LIMITS.offerings)
+  if (offerings) exploration.offerings = offerings
+  const scenes = idEntries(raw.scenes, ...GAME_ID, GOOD_LIMITS.scenes)
+  if (scenes) {
+    const out: [number, { points: number[]; areas: number[] }][] = []
+    for (const [id, scene] of scenes) {
+      if (!isObject(scene)) break
+      const points = idList(scene.points, ...GAME_ID, GOOD_LIMITS.scenePoints)
+      const areas = idList(scene.areas, ...GAME_ID, GOOD_LIMITS.scenePoints)
+      if (!points || !areas) break
+      out.push([id, { points, areas }])
+    }
+    if (out.length === scenes.length) exploration.scenes = byId(out)
+  }
+  const explore = numberEntries(raw.explore, COUNT, GOOD_LIMITS.exploreAreas)
+  if (explore) exploration.explore = explore
+  const reputation = numberEntries(raw.reputation, LEVEL, GOOD_LIMITS.explorationCities)
+  if (reputation) exploration.reputation = reputation
+  return Object.keys(exploration).length > 0 ? exploration : null
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

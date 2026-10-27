@@ -254,6 +254,32 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
         ...(rand() < 0.5 ? { c: int(rand, 1, 4) } : {}),
       }
     }
+    case 'exploration': {
+      const rows = (cells: () => number[]) =>
+        sortedIds(int(rand, 0, 20)).map((_, i, all) => [
+          all.slice(0, i + 1).reduce((a, b) => a + b, 0),
+          ...cells(),
+        ])
+      const ascending = (count: number) => {
+        let id = 0
+        return Array.from({ length: count }, () => (id += int(rand, 1, 9)))
+      }
+      return {
+        ...(rand() < 0.8 ? { s: rows(() => [int(rand, 1, 10), int(rand, 0, 30)]) } : {}),
+        ...(rand() < 0.7 ? { f: rows(() => [int(rand, 1, 50)]) } : {}),
+        ...(rand() < 0.7
+          ? {
+              p: rows(() => []).map(([id]) => [
+                id,
+                ascending(int(rand, 0, 900)),
+                ascending(int(rand, 0, 60)),
+              ]),
+            }
+          : {}),
+        ...(rand() < 0.7 ? { x: rows(() => [int(rand, 0, 1_000)]) } : {}),
+        ...(rand() < 0.5 ? { r: rows(() => [int(rand, 1, 10)]) } : {}),
+      }
+    }
   }
 }
 
@@ -382,6 +408,7 @@ describe('section blobs', () => {
       collections: 11,
       collections2: 12,
       wardrobe: 13,
+      exploration: 14,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -441,6 +468,7 @@ describe('section blobs', () => {
       'collections',
       'collections2',
       'wardrobe',
+      'exploration',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')

@@ -11,6 +11,7 @@ import {
   decodeSectionBlob,
   decodeSnapshot,
   decodeTasks,
+  decodeExploration,
   decodeWardrobe,
   deflateRaw,
   deltaPaysOff,
@@ -23,6 +24,7 @@ import {
   encodeSectionBlob,
   encodeSnapshot,
   encodeTasks,
+  encodeExploration,
   encodeWardrobe,
   extraSectionsOf,
   GOOD_LIMITS,
@@ -48,7 +50,12 @@ import {
   type StoredSnapshot,
 } from '../src'
 import { MATERIALS } from '../src/dictionary/materials'
-import { syntheticCollections, syntheticRecipes, syntheticWardrobe } from './synthetic'
+import {
+  syntheticCollections,
+  syntheticExploration,
+  syntheticRecipes,
+  syntheticWardrobe,
+} from './synthetic'
 
 /** Stands in for the D1 catalog: assigns ids to new hashes, remembers identities. */
 class Catalog {
@@ -133,6 +140,7 @@ async function storedOf(
     collections: await optionalViaStorage(encoded.collections),
     collections2: await optionalViaStorage(encoded.collections2),
     wardrobe: await optionalViaStorage(encoded.wardrobe),
+    exploration: await optionalViaStorage(encoded.exploration),
   }
 }
 
@@ -270,6 +278,7 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
   if (good.tasks) expected.gi_tasks = good.tasks
   if (good.collections) expected.gi_collections = good.collections
   if (good.wardrobe) expected.gi_wardrobe = good.wardrobe
+  if (good.exploration) expected.gi_exploration = good.exploration
   return expected
 }
 
@@ -1866,5 +1875,90 @@ describe("Teyvat.me Capture 1.5.0's recipes", () => {
     )
     expect(read(tooMany)).toEqual({ spincrystals: [141_001] })
     expect(read({ '5502': 30, '1001': 0 })!.recipes).toEqual({ '1001': 0, '5502': 30 })
+  })
+})
+
+// ---------------------------------------------------- gi_exploration (1.6.0)
+
+describe("Teyvat.me Capture 1.6.0's exploration", () => {
+  const exploration = syntheticExploration(5)
+  const base = {
+    ...sample,
+    gi_collections: syntheticCollections(5),
+    gi_wardrobe: syntheticWardrobe(5),
+  }
+  const input = { ...base, gi_exploration: exploration }
+
+  it("round-trips every part at a real capture's scale, last", async () => {
+    const { encoded, decoded } = await roundTrip(input)
+    expect(extraSectionsOf(encoded).at(-1)!.kind).toBe('exploration')
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_exploration).toEqual(exploration)
+    expect(Object.keys(decoded).at(-1)).toBe('gi_exploration')
+    expect(decoded.gi_exploration!.scenes!['3']!.points).toHaveLength(893)
+  })
+
+  it('knows the hash a tracker from before the exploration gave the same file', async () => {
+    const catalog = new Catalog()
+    const before = await roundTrip(base, catalog)
+    const after = await roundTrip(input, catalog)
+    expect(after.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    expect(after.encoded.preExplorationContentHash).toBe(before.encoded.contentHash)
+    expect(before.encoded.preExplorationContentHash).toBe(before.encoded.contentHash)
+    // The older steps still name what older trackers stored.
+    expect(after.encoded.preWardrobeContentHash).toBe(before.encoded.preWardrobeContentHash)
+    const plain = await roundTrip(sample, catalog)
+    const only = await roundTrip({ ...sample, gi_exploration: exploration }, catalog)
+    expect(only.encoded.preExplorationContentHash).toBe(plain.encoded.contentHash)
+    expect(only.encoded.preWardrobeContentHash).toBe(plain.encoded.contentHash)
+  })
+
+  it('drops a bad part and keeps the rest', () => {
+    const read = (value: unknown) => normalizeGood({ ...sample, gi_exploration: value }).exploration
+    const bad = (part: string, value: unknown) => {
+      const got = read({ ...exploration, [part]: value })
+      expect(got && part in got, part).toBe(false)
+      const kept = part === 'statues' ? 'offerings' : 'statues'
+      expect(got?.[kept], part).toEqual(exploration[kept])
+    }
+    bad('statues', { '1': { level: 10 } })
+    bad('statues', { '1': { level: -1, oculi: 0 } })
+    bad('offerings', { '1': 2.5 })
+    bad('offerings', { x: 1 })
+    bad('scenes', { '3': { points: [1, 1], areas: [] } })
+    bad('scenes', { '3': { points: [1] } })
+    bad('explore', { '1': -1 })
+    bad('reputation', { '1': 'ten' })
+    const tooMany = Object.fromEntries(
+      Array.from({ length: GOOD_LIMITS.exploreAreas + 1 }, (_, i) => [String(i), 1]),
+    )
+    bad('explore', tooMany)
+    expect(read({ nothing: true })).toBeNull()
+    expect(read([1])).toBeNull()
+    // Rewritten in id order, so the hash does not depend on the key order.
+    expect(Object.keys(read({ offerings: { '20': 1, '3': 2 } })!.offerings!)).toEqual(['3', '20'])
+  })
+
+  it('stores it in its binary layout, small, and a new map point costs a few bytes', () => {
+    const value = JSON.parse(JSON.stringify(encodeExploration(exploration)))
+    const blob = encodeSectionBlob('exploration', value, false, null)
+    expect(blob.payload[0]).toBe(0x10)
+    const back = decodeSectionBlob(kindCode('exploration', false), blob.data, null, null)
+    expect(JSON.stringify(back.value)).toBe(JSON.stringify(value))
+    expect(decodeExploration(back.value as never)).toEqual(exploration)
+    expect(blob.data.length).toBeLessThan(2_500)
+    const next = structuredClone(value)
+    next.p[0][1].push(next.p[0][1].at(-1) + 1)
+    next.x[3][1] += 12
+    const changed = encodeSectionBlob('exploration', next, false, {
+      value,
+      payload: blob.payload,
+    })
+    expect(changed.usesBase).toBe(true)
+    expect(changed.data.length).toBeLessThan(120)
+    // A part a later build writes is skipped by this decoder, which reads the rest.
+    const extended = new Uint8Array([...blob.payload, 99, 3, 7, 7, 7])
+    const later = decodeSectionBlob(kindCode('exploration', false), extended, null, null)
+    expect(JSON.stringify(later.value)).toBe(JSON.stringify(value))
   })
 })

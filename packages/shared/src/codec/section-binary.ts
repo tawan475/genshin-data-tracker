@@ -618,7 +618,7 @@ function readUintList(r: ByteReader): number[] {
 }
 
 // ------------------------------------------------------------ tagged parts
-// collections2 and wardrobe are tagged layouts: each present part is written
+// collections2, wardrobe and exploration are tagged layouts: each present part is written
 // as its index in the layout's part list (append-only), its byte length and
 // its bytes, in list order. A decoder skips a part whose index it does not
 // know, so a part a later build adds never makes an older build refuse the
@@ -855,6 +855,43 @@ const WARDROBE_PARTS: readonly (readonly [string, TaggedPart])[] = [
 
 const wardrobeLayout = taggedLayout('wardrobe', WARDROBE_PARTS)
 
+// exploration: `s` Statues (rows by city: level, Oculi), `f` offerings and
+// `x` exploration points and `r` reputation (rows by id: the number), `p`
+// scenes (rows by scene: the map points, then the areas, each an ascending
+// list).
+
+const levelsPart: TaggedPart = {
+  write: (w, value) => writeById(w, value, 2, ([, n]) => w.uint(uint(n))),
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint()]),
+}
+
+const statuesPart: TaggedPart = {
+  write: (w, value) =>
+    writeById(w, value, 3, ([, level, oculi]) => w.uint(uint(level)).uint(uint(oculi))),
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint()]),
+}
+
+const scenesPart: TaggedPart = {
+  write(w, value) {
+    writeById(w, value, 3, ([, points, areas]) => {
+      writeAscending(w, array(points).map(uint))
+      writeAscending(w, array(areas).map(uint))
+    })
+  },
+  read: (r) => readById(r, checkedCount(r), (id) => [id, readAscending(r), readAscending(r)]),
+}
+
+/** exploration's parts, by index (append-only). */
+const EXPLORATION_PARTS: readonly (readonly [string, TaggedPart])[] = [
+  ['s', statuesPart],
+  ['f', levelsPart],
+  ['p', scenesPart],
+  ['x', levelsPart],
+  ['r', levelsPart],
+]
+
+const explorationLayout = taggedLayout('exploration', EXPLORATION_PARTS)
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -869,6 +906,7 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   collections: collectionsLayout,
   collections2: collections2Layout,
   wardrobe: wardrobeLayout,
+  exploration: explorationLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */

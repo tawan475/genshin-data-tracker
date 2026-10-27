@@ -211,6 +211,7 @@ async function importOnce(
     sections.collections,
     sections.collections2,
     sections.wardrobe,
+    sections.exploration,
   ]
     .filter((s): s is Section => s !== null)
     .map((s) => shortHashHex(s.hash))
@@ -288,6 +289,7 @@ async function importOnce(
   const preCollectionsKey = contentKey(encoded.preCollectionsContentHash)
   const preCollections2Key = contentKey(encoded.preCollections2ContentHash)
   const preWardrobeKey = contentKey(encoded.preWardrobeContentHash)
+  const preExplorationKey = contentKey(encoded.preExplorationContentHash)
   const preRecipesKey = contentKey(encoded.preRecipesContentHash)
   const response = (
     status: ImportResponse['status'],
@@ -313,7 +315,8 @@ async function importOnce(
     contentKey: key,
   })
   // The same capture, also when it was stored before irminsul's extra keys
-  // (or later its anecdotes, tasks, collections, then Capture 1.4.0's keys) were kept
+  // (or later its anecdotes, tasks, collections, Capture 1.4.0's keys, then
+  // its exploration) were kept
   // (its hash then left them out), in either storage format.
   const sameCapture = (row: SameTimeRow) =>
     row.content_key !== null
@@ -324,6 +327,7 @@ async function importOnce(
         row.content_key === preCollectionsKey ||
         row.content_key === preCollections2Key ||
         row.content_key === preWardrobeKey ||
+        row.content_key === preExplorationKey ||
         row.content_key === preRecipesKey
       : row.content_hash === encoded.contentHash ||
         row.content_hash === encoded.legacyContentHash ||
@@ -332,6 +336,7 @@ async function importOnce(
         row.content_hash === encoded.preCollectionsContentHash ||
         row.content_hash === encoded.preCollections2ContentHash ||
         row.content_hash === encoded.preWardrobeContentHash ||
+        row.content_hash === encoded.preExplorationContentHash ||
         row.content_hash === encoded.preRecipesContentHash
   const sameInventory = (row: LatestRow) =>
     row.content_key !== null ? row.content_key === key : row.content_hash === encoded.contentHash
