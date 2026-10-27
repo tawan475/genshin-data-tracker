@@ -77,7 +77,8 @@
       "transformer": "Parametric Transformer",
       "expeditions": "Expeditions",
       "realm": "Realm Currency",
-      "welkin": "Welkin Moon"
+      "welkin": "Welkin Moon",
+      "arRewards": "Adventure Rank rewards"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} of {total} back",
       "nobodyOut": "Nobody out",
       "realm": "{value} of {limit} in the jar",
-      "welkin": "{n} days left"
+      "welkin": "{n} days left",
+      "weeklyBosses": "{n} of {total} discounts used this week",
+      "arRewards": "Unclaimed: Adventure Rank {ranks}",
+      "arRewardsNone": "Every reward claimed"
     }
   },
   "view": {

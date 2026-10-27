@@ -77,7 +77,8 @@
       "transformer": "Modificatore parametrico",
       "expeditions": "Spedizioni",
       "realm": "Moneta del regno",
-      "welkin": "Benedizione lunare"
+      "welkin": "Benedizione lunare",
+      "arRewards": "Ricompense grado avventura"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} su {total} rientrati",
       "nobodyOut": "Nessuno in spedizione",
       "realm": "{value} su {limit} nel vaso",
-      "welkin": "{n} giorni rimasti"
+      "welkin": "{n} giorni rimasti",
+      "weeklyBosses": "{n} sconti su {total} usati questa settimana",
+      "arRewards": "Da riscattare: grado avventura {ranks}",
+      "arRewardsNone": "Tutte riscattate"
     }
   },
   "view": {

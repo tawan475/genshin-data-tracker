@@ -84,7 +84,8 @@
     "hiddenTitle": "Versteckte Errungenschaft",
     "hidden": "Versteckt",
     "markedByHand": "Von Hand markiert",
-    "guide": "Guide auf stardb.gg"
+    "guide": "Guide auf stardb.gg",
+    "progressTitle": "Fortschritt in der neuesten Aufnahme"
   },
   "completion": {
     "tier": "Stufe {n} · {text}",

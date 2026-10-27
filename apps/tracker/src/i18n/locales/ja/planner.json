@@ -77,7 +77,8 @@
       "transformer": "参量物質変化器",
       "expeditions": "派遣",
       "realm": "洞天宝銭",
-      "welkin": "空月の祝福"
+      "welkin": "空月の祝福",
+      "arRewards": "冒険ランク報酬"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n}/{total}帰還",
       "nobodyOut": "派遣なし",
       "realm": "宝銭 {value}/{limit}",
-      "welkin": "残り{n}日"
+      "welkin": "残り{n}日",
+      "weeklyBosses": "今週の半減 {n}/{total} 回使用済み",
+      "arRewards": "未受取：冒険ランク {ranks}",
+      "arRewardsNone": "すべて受取済み"
     }
   },
   "view": {

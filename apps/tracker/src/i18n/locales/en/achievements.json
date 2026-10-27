@@ -84,7 +84,8 @@
     "hiddenTitle": "Hidden achievement",
     "hidden": "Hidden",
     "markedByHand": "Marked by hand",
-    "guide": "Guide on stardb.gg"
+    "guide": "Guide on stardb.gg",
+    "progressTitle": "Progress in the newest capture"
   },
   "completion": {
     "tier": "Tier {n} · {text}",

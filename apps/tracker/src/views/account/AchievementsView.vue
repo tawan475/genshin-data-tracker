@@ -13,6 +13,7 @@ import { CheckCheck, Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
 import {
   decodeAchievementTimes,
   decodeAchievements,
+  decodeProgress,
   type AchievementTimesSection,
 } from '@gdt/shared'
 import { achievementText, loadAchievements } from '@gdt/game-data'
@@ -91,12 +92,20 @@ const NONE: CapturedAchievements = {
 }
 
 async function loadCaptured(a: AccountRef): Promise<CapturedAchievements> {
-  const bundle = await loadBundle(a, { sections: ['achievements', 'achievementTimes'] })
+  const bundle = await loadBundle(a, {
+    sections: ['achievements', 'achievementTimes', 'progress'],
+  })
   const json = (key: string) => {
     const text = bundle.texts.get(key)
     return text === undefined ? null : JSON.parse(text)
   }
-  return captureAchievements(
+  // Capture 1.7.0: the newest snapshot's progress on unfinished ones.
+  const withProgress = [...bundle.snapshots].reverse().find((s) => s.progress)
+  const parts = withProgress?.progress ? decodeProgress(json(withProgress.progress)) : null
+  const progress = parts?.achievementProgress
+    ? new Map(Object.entries(parts.achievementProgress).map(([id, p]) => [Number(id), p]))
+    : undefined
+  const captured = captureAchievements(
     bundle.snapshots.map((s) => ({
       takenAt: s.takenAt,
       key: s.achievements,
@@ -109,6 +118,7 @@ async function loadCaptured(a: AccountRef): Promise<CapturedAchievements> {
       return decodeAchievementTimes(section, section.b ? json(section.b) : null)
     },
   )
+  return progress ? { ...captured, progress } : captured
 }
 
 // Tagged with the account, so a switch shows a skeleton, not the last account's data.

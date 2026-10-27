@@ -77,7 +77,8 @@
       "transformer": "Parametrik Dönüştürücü",
       "expeditions": "Keşifler",
       "realm": "Çaydanlık Parası",
-      "welkin": "Yeni Ayın Lütfu"
+      "welkin": "Yeni Ayın Lütfu",
+      "arRewards": "Macera Rütbesi ödülleri"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{total} keşiften {n} döndü",
       "nobodyOut": "Kimse keşifte değil",
       "realm": "Kapta {limit} üzerinden {value}",
-      "welkin": "{n} gün kaldı"
+      "welkin": "{n} gün kaldı",
+      "weeklyBosses": "Bu hafta {total} indirimden {n} kullanıldı",
+      "arRewards": "Alınmadı: Macera Rütbesi {ranks}",
+      "arRewardsNone": "Hepsi alındı"
     }
   },
   "view": {

@@ -42,7 +42,10 @@
     "tcg": "Geniale Beschwörung",
     "recipes": "Rezepte",
     "wardrobe": "Garderobe",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Verabredungen",
+    "blueprints": "Einrichtungsbaupläne",
+    "events": "Events"
   },
   "archive": {
     "pick": "Handbuch-Reiter",
@@ -68,7 +71,9 @@
     "captured": "Gefangen",
     "capturedHint": "Über {n} Arten von Kreaturen",
     "defeatedN": "{n} besiegt",
-    "capturedN": "{n} gefangen"
+    "capturedN": "{n} gefangen",
+    "seen": "Gesehene Monster",
+    "seenHint": "Alle getroffenen Monster, Varianten eingeschlossen"
   },
   "handbook": {
     "show": "Anzeigen",
@@ -156,6 +161,38 @@
     "points": "{n} Pkt.",
     "pointsOnly": "Punkte",
     "pointsHint": "Erkundungspunkte der neuesten Aufnahme: Der Prozentwert braucht die Gesamtpunkte jedes Gebiets, die den Spieldaten noch fehlen",
-    "otherAreas": "Sonstige"
+    "otherAreas": "Sonstige",
+    "respawns": "Bosse und Elite",
+    "respawnsUp": "{n} von {total} wieder da",
+    "allUp": "Alle wieder da"
+  },
+  "hangouts": {
+    "endings": "Enden",
+    "pictures": "Bilder",
+    "unclaimed": "Abzuholende Belohnungen",
+    "unclaimedHint": "Erreichte Enden, deren Belohnung noch wartet",
+    "endingStates": {
+      "locked": "Gesperrt",
+      "unclaimed": "Belohnung wartet",
+      "claimed": "Abgeholt"
+    },
+    "states": {
+      "closed": "Geschlossen",
+      "locked": "Gesperrt",
+      "open": "Offen",
+      "accepted": "Läuft"
+    }
+  },
+  "blueprints": {
+    "learned": "Gelernt"
+  },
+  "events": {
+    "running": "Laufend",
+    "ended": "Beendet",
+    "claimed": "Belohnungen abgeholt",
+    "waiting": "Abzuholende Belohnungen",
+    "waitingHint": "Erfüllte Ziele mit wartender Belohnung in laufenden Events",
+    "unnamed": "Event {n}",
+    "window": "{start} – {end}"
   }
 }

@@ -42,7 +42,10 @@
     "tcg": "Thất Thánh Triệu Hồi",
     "recipes": "Công Thức",
     "wardrobe": "Tủ Đồ",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Sự Kiện Hẹn Hò",
+    "blueprints": "Bản Vẽ Nội Thất",
+    "events": "Sự Kiện"
   },
   "archive": {
     "pick": "Mục Thư Viện",
@@ -68,7 +71,9 @@
     "captured": "Đã Thu Phục",
     "capturedHint": "Trong {n} loài sinh vật",
     "defeatedN": "Đánh bại {n}",
-    "capturedN": "Thu phục {n}"
+    "capturedN": "Thu phục {n}",
+    "seen": "Quái đã gặp",
+    "seenHint": "Mọi quái đã gặp, kể cả biến thể"
   },
   "handbook": {
     "show": "Hiển thị",
@@ -156,6 +161,38 @@
     "points": "{n} điểm",
     "pointsOnly": "Điểm",
     "pointsHint": "Điểm thám hiểm từ lần ghi mới nhất: phần trăm cần tổng của từng khu vực, dữ liệu game chưa có",
-    "otherAreas": "Khác"
+    "otherAreas": "Khác",
+    "respawns": "Boss và tinh anh",
+    "respawnsUp": "{n}/{total} đã hồi sinh",
+    "allUp": "Tất cả đã hồi sinh"
+  },
+  "hangouts": {
+    "endings": "Kết thúc",
+    "pictures": "Hình ảnh",
+    "unclaimed": "Phần thưởng chưa nhận",
+    "unclaimedHint": "Kết thúc đã đạt nhưng chưa nhận thưởng",
+    "endingStates": {
+      "locked": "Đã khóa",
+      "unclaimed": "Chờ nhận thưởng",
+      "claimed": "Đã nhận"
+    },
+    "states": {
+      "closed": "Đã đóng",
+      "locked": "Đã khóa",
+      "open": "Có thể làm",
+      "accepted": "Đang làm"
+    }
+  },
+  "blueprints": {
+    "learned": "Đã học"
+  },
+  "events": {
+    "running": "Đang diễn ra",
+    "ended": "Đã kết thúc",
+    "claimed": "Thưởng đã nhận",
+    "waiting": "Thưởng chưa nhận",
+    "waitingHint": "Mục đã hoàn thành nhưng chưa nhận thưởng, trong sự kiện đang diễn ra",
+    "unnamed": "Sự kiện {n}",
+    "window": "{start} – {end}"
   }
 }

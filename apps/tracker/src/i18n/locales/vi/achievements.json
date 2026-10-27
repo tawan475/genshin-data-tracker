@@ -84,7 +84,8 @@
     "hiddenTitle": "Thành tựu ẩn",
     "hidden": "Ẩn",
     "markedByHand": "Đánh dấu thủ công",
-    "guide": "Hướng dẫn trên stardb.gg"
+    "guide": "Hướng dẫn trên stardb.gg",
+    "progressTitle": "Tiến độ trong lần ghi mới nhất"
   },
   "completion": {
     "tier": "Bậc {n} · {text}",

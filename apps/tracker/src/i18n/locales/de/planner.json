@@ -77,7 +77,8 @@
       "transformer": "Parameterwandler",
       "expeditions": "Erkundungen",
       "realm": "Kannentaler",
-      "welkin": "Mondsegen"
+      "welkin": "Mondsegen",
+      "arRewards": "Abenteuerrang-Belohnungen"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} von {total} zurück",
       "nobodyOut": "Niemand unterwegs",
       "realm": "{value} von {limit} im Krug",
-      "welkin": "Noch {n} Tage"
+      "welkin": "Noch {n} Tage",
+      "weeklyBosses": "{n} von {total} Rabatten diese Woche genutzt",
+      "arRewards": "Nicht abgeholt: Abenteuerrang {ranks}",
+      "arRewardsNone": "Alle abgeholt"
     }
   },
   "view": {

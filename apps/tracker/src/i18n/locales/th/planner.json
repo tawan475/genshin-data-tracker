@@ -77,7 +77,8 @@
       "transformer": "Parametric Transformer",
       "expeditions": "ออกสำรวจ",
       "realm": "Realm Currency",
-      "welkin": "พรแห่งดวงจันทร์"
+      "welkin": "พรแห่งดวงจันทร์",
+      "arRewards": "รางวัลระดับการผจญภัย"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "กลับมา {n} จาก {total}",
       "nobodyOut": "ไม่มีใครออกสำรวจ",
       "realm": "{value} จาก {limit} ในโถ",
-      "welkin": "เหลือ {n} วัน"
+      "welkin": "เหลือ {n} วัน",
+      "weeklyBosses": "ใช้ส่วนลดสัปดาห์นี้แล้ว {n}/{total}",
+      "arRewards": "ยังไม่รับ: ระดับการผจญภัย {ranks}",
+      "arRewardsNone": "รับรางวัลครบแล้ว"
     }
   },
   "view": {

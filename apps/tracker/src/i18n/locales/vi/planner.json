@@ -77,7 +77,8 @@
       "transformer": "Máy Biến Đổi Tham Số",
       "expeditions": "Phái Đi",
       "realm": "Tiền Động Tiên",
-      "welkin": "Không Nguyệt Chúc Phúc"
+      "welkin": "Không Nguyệt Chúc Phúc",
+      "arRewards": "Phần thưởng Hạng Mạo Hiểm"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "Đã về {n} / {total}",
       "nobodyOut": "Không ai đang đi",
       "realm": "{value} / {limit} trong hũ",
-      "welkin": "Còn {n} ngày"
+      "welkin": "Còn {n} ngày",
+      "weeklyBosses": "Đã dùng {n}/{total} lượt giảm giá tuần này",
+      "arRewards": "Chưa nhận: Hạng Mạo Hiểm {ranks}",
+      "arRewardsNone": "Đã nhận hết"
     }
   },
   "view": {

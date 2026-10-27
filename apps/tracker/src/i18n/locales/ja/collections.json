@@ -42,7 +42,10 @@
     "tcg": "七聖召喚",
     "recipes": "レシピ",
     "wardrobe": "クローゼット",
-    "aranara": "アランナラ"
+    "aranara": "アランナラ",
+    "hangouts": "デートイベント",
+    "blueprints": "調度品の設計図",
+    "events": "イベント"
   },
   "archive": {
     "pick": "図鑑のタブ",
@@ -68,7 +71,9 @@
     "captured": "捕獲済み",
     "capturedHint": "{n} 種類の生物",
     "defeatedN": "{n} 体討伐",
-    "capturedN": "{n} 体捕獲"
+    "capturedN": "{n} 体捕獲",
+    "seen": "遭遇した魔物",
+    "seenHint": "遭遇したすべての魔物（亜種を含む）"
   },
   "handbook": {
     "show": "表示",
@@ -156,6 +161,38 @@
     "points": "{n} pt",
     "pointsOnly": "ポイント",
     "pointsHint": "最新キャプチャの探索ポイント：割合には各エリアの合計が必要ですが、ゲームデータにまだありません",
-    "otherAreas": "その他"
+    "otherAreas": "その他",
+    "respawns": "ボスと精鋭",
+    "respawnsUp": "{total}体中{n}体が復活済み",
+    "allUp": "すべて復活済み"
+  },
+  "hangouts": {
+    "endings": "エンディング",
+    "pictures": "ピクチャー",
+    "unclaimed": "未受取の報酬",
+    "unclaimedHint": "達成済みで報酬が未受取のエンディング",
+    "endingStates": {
+      "locked": "未開放",
+      "unclaimed": "報酬あり",
+      "claimed": "受取済み"
+    },
+    "states": {
+      "closed": "終了",
+      "locked": "未開放",
+      "open": "開放中",
+      "accepted": "進行中"
+    }
+  },
+  "blueprints": {
+    "learned": "習得済み"
+  },
+  "events": {
+    "running": "開催中",
+    "ended": "終了",
+    "claimed": "受取済みの報酬",
+    "waiting": "未受取の報酬",
+    "waitingHint": "開催中のイベントで達成済みかつ未受取の項目",
+    "unnamed": "イベント {n}",
+    "window": "{start} – {end}"
   }
 }

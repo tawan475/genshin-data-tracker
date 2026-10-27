@@ -54,6 +54,7 @@ export type SectionName =
   | 'achievementTimes'
   | 'characterExtras'
   | 'anecdotes'
+  | 'tasks'
   | 'collections'
   | 'collections2'
   | 'wardrobe'

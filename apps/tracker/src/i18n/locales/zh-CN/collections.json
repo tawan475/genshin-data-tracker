@@ -42,7 +42,10 @@
     "tcg": "七圣召唤",
     "recipes": "食谱",
     "wardrobe": "衣橱",
-    "aranara": "兰那罗"
+    "aranara": "兰那罗",
+    "hangouts": "邀约事件",
+    "blueprints": "摆设图纸",
+    "events": "活动"
   },
   "archive": {
     "pick": "图鉴分类",
@@ -68,7 +71,9 @@
     "captured": "已收服",
     "capturedHint": "共 {n} 种生物",
     "defeatedN": "击倒 {n}",
-    "capturedN": "收服 {n}"
+    "capturedN": "收服 {n}",
+    "seen": "已遇见的怪物",
+    "seenHint": "遇见过的所有怪物，包括变体"
   },
   "handbook": {
     "show": "显示",
@@ -156,6 +161,38 @@
     "points": "{n} 点",
     "pointsOnly": "点数",
     "pointsHint": "最新捕获的探索点数：百分比需要各区域的总数，游戏数据尚未提供",
-    "otherAreas": "其他"
+    "otherAreas": "其他",
+    "respawns": "首领与精英",
+    "respawnsUp": "{total}个中{n}个已刷新",
+    "allUp": "全部已刷新"
+  },
+  "hangouts": {
+    "endings": "结局",
+    "pictures": "图片",
+    "unclaimed": "待领取奖励",
+    "unclaimedHint": "已达成但奖励未领取的结局",
+    "endingStates": {
+      "locked": "未解锁",
+      "unclaimed": "奖励待领取",
+      "claimed": "已领取"
+    },
+    "states": {
+      "closed": "已关闭",
+      "locked": "未解锁",
+      "open": "可进行",
+      "accepted": "进行中"
+    }
+  },
+  "blueprints": {
+    "learned": "已习得"
+  },
+  "events": {
+    "running": "进行中",
+    "ended": "已结束",
+    "claimed": "已领取奖励",
+    "waiting": "待领取奖励",
+    "waitingHint": "进行中的活动里已完成但奖励未领取的项目",
+    "unnamed": "活动 {n}",
+    "window": "{start} – {end}"
   }
 }

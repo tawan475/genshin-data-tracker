@@ -22,6 +22,8 @@ export type CollectionFigure = { have: number; total: number } | { count: number
 export interface CollectionFigures {
   /** Teleport Waypoints unlocked in Teyvat. */
   world: CollectionFigure | null
+  /** Rewards claimed in the running events. */
+  events: CollectionFigure | null
   spincrystals: CollectionFigure | null
   archive: CollectionFigure | null
   handbook: CollectionFigure | null
@@ -29,6 +31,9 @@ export interface CollectionFigures {
   tcg: CollectionFigure | null
   recipes: CollectionFigure | null
   wardrobe: CollectionFigure | null
+  /** Hangout endings reached. */
+  hangouts: CollectionFigure | null
+  blueprints: CollectionFigure | null
   aranara: CollectionFigure | null
 }
 
@@ -51,6 +56,9 @@ export function collectionFigures(
   const wardrobe = captured.wardrobe?.value
   const aranara = captured.aranara?.value
   const exploration = captured.exploration?.value
+  const hangouts = captured.hangouts?.value
+  const events = captured.events?.value
+  const blueprints = captured.blueprints?.value
   const withCatalog = <T>(
     value: T | undefined,
     count: (c: CollectionCatalog, v: T) => CollectionFigure,
@@ -61,6 +69,15 @@ export function collectionFigures(
       const teyvat = worldModel(v, c).maps.find((m) => m.scene === TEYVAT_SCENE)
       return teyvat ? teyvat.waypoints : { have: 0, total: 0 }
     }),
+    events: events
+      ? (() => {
+          const now = Date.now() / 1000
+          const counters = Object.values(events)
+            .filter((e) => e.start <= now && now < e.end)
+            .flatMap((e) => Object.values(e.progress ?? {}))
+          return { have: counters.filter((c) => c.claimed).length, total: counters.length }
+        })()
+      : null,
     spincrystals:
       spin && spincrystals
         ? (({ have, total }) => ({ have, total }))(spincrystalProgress(spincrystals, spin))
@@ -107,6 +124,19 @@ export function collectionFigures(
         })),
       ),
     ),
+    hangouts: hangouts
+      ? (() => {
+          const endings = Object.values(hangouts).flatMap((h) => Object.values(h.endings))
+          return {
+            have: endings.filter((state) => state !== 'locked').length,
+            total: endings.length,
+          }
+        })()
+      : null,
+    blueprints: withCatalog(blueprints, (c, v) => {
+      const known = new Set(c.data.blueprints.map((b) => b.id))
+      return { have: v.filter((id) => known.has(id)).length, total: known.size }
+    }),
     aranara: withCatalog(aranara, (c, v) => ({
       have: Object.values(v).reduce(
         (sum, entries) => sum + Object.values(entries).filter((state) => state !== 'none').length,

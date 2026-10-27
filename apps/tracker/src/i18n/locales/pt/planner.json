@@ -77,7 +77,8 @@
       "transformer": "Transformador Paramétrico",
       "expeditions": "Expedições",
       "realm": "Moeda do Paraíso",
-      "welkin": "Lua Nova"
+      "welkin": "Lua Nova",
+      "arRewards": "Recompensas de Nível de Aventura"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} de {total} de volta",
       "nobodyOut": "Ninguém fora",
       "realm": "{value} de {limit} no jarro",
-      "welkin": "Faltam {n} dias"
+      "welkin": "Faltam {n} dias",
+      "weeklyBosses": "{n} de {total} descontos usados nesta semana",
+      "arRewards": "Não resgatadas: Nível de Aventura {ranks}",
+      "arRewardsNone": "Todas resgatadas"
     }
   },
   "view": {

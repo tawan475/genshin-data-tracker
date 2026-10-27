@@ -77,7 +77,8 @@
       "transformer": "Transformateur paramétrique",
       "expeditions": "Expéditions",
       "realm": "Pièces du royaume",
-      "welkin": "Astre de la nuit"
+      "welkin": "Astre de la nuit",
+      "arRewards": "Récompenses de rang d'aventure"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} sur {total} revenus",
       "nobodyOut": "Personne en expédition",
       "realm": "{value} sur {limit} dans l'urne",
-      "welkin": "{n} jours restants"
+      "welkin": "{n} jours restants",
+      "weeklyBosses": "{n} réductions sur {total} utilisées cette semaine",
+      "arRewards": "Non récupérées : rang d'aventure {ranks}",
+      "arRewardsNone": "Toutes récupérées"
     }
   },
   "view": {

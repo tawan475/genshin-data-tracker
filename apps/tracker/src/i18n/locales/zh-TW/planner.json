@@ -77,7 +77,8 @@
       "transformer": "參數質變儀",
       "expeditions": "探索派遣",
       "realm": "洞天寶錢",
-      "welkin": "空月祝福"
+      "welkin": "空月祝福",
+      "arRewards": "冒險等階獎勵"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "已返回 {n}/{total}",
       "nobodyOut": "無人派遣",
       "realm": "聚寶盆中 {value}/{limit}",
-      "welkin": "剩餘 {n} 天"
+      "welkin": "剩餘 {n} 天",
+      "weeklyBosses": "本週已使用{n}/{total}次減半",
+      "arRewards": "未領取：冒險等階 {ranks}",
+      "arRewardsNone": "獎勵已全部領取"
     }
   },
   "view": {

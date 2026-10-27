@@ -75,6 +75,14 @@ const entries = computed(() =>
           :hint="$t('collections.defeats.capturedHint', { n: formatNumber(totals.capturedKinds) })"
         />
       </li>
+      <li v-if="captured.monstersSeen" class="flex min-w-0">
+        <UiStat
+          :label="$t('collections.defeats.seen')"
+          :value="captured.monstersSeen.value.length"
+          exact
+          :hint="$t('collections.defeats.seenHint')"
+        />
+      </li>
     </ul>
 
     <UiPanel flush>

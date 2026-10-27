@@ -77,7 +77,8 @@
       "transformer": "Parametric Transformer",
       "expeditions": "Ekspedisi",
       "realm": "Realm Currency",
-      "welkin": "Welkin Moon"
+      "welkin": "Welkin Moon",
+      "arRewards": "Hadiah Adventure Rank"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} dari {total} kembali",
       "nobodyOut": "Tidak ada yang pergi",
       "realm": "{value} dari {limit} di wadah",
-      "welkin": "{n} hari tersisa"
+      "welkin": "{n} hari tersisa",
+      "weeklyBosses": "{n} dari {total} diskon terpakai minggu ini",
+      "arRewards": "Belum diklaim: Adventure Rank {ranks}",
+      "arRewardsNone": "Semua sudah diklaim"
     }
   },
   "view": {

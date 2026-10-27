@@ -42,7 +42,10 @@
     "tcg": "일곱 성인의 소환",
     "recipes": "레시피",
     "wardrobe": "옷장",
-    "aranara": "아란나라"
+    "aranara": "아란나라",
+    "hangouts": "데이트 이벤트",
+    "blueprints": "가구 설계도",
+    "events": "이벤트"
   },
   "archive": {
     "pick": "도감 탭",
@@ -68,7 +71,9 @@
     "captured": "포획 완료",
     "capturedHint": "생물 {n}종",
     "defeatedN": "{n} 처치",
-    "capturedN": "{n} 포획"
+    "capturedN": "{n} 포획",
+    "seen": "만난 몬스터",
+    "seenHint": "만난 모든 몬스터(변종 포함)"
   },
   "handbook": {
     "show": "표시",
@@ -156,6 +161,38 @@
     "points": "{n}점",
     "pointsOnly": "점수",
     "pointsHint": "최신 캡처의 탐사 점수: 비율에는 지역별 총점이 필요하지만 게임 데이터에 아직 없습니다",
-    "otherAreas": "기타"
+    "otherAreas": "기타",
+    "respawns": "보스와 정예",
+    "respawnsUp": "{total}개 중 {n}개 부활",
+    "allUp": "모두 부활"
+  },
+  "hangouts": {
+    "endings": "엔딩",
+    "pictures": "그림",
+    "unclaimed": "받을 보상",
+    "unclaimedHint": "달성했지만 보상을 받지 않은 엔딩",
+    "endingStates": {
+      "locked": "잠김",
+      "unclaimed": "보상 대기",
+      "claimed": "수령 완료"
+    },
+    "states": {
+      "closed": "종료",
+      "locked": "잠김",
+      "open": "진행 가능",
+      "accepted": "진행 중"
+    }
+  },
+  "blueprints": {
+    "learned": "습득"
+  },
+  "events": {
+    "running": "진행 중",
+    "ended": "종료",
+    "claimed": "받은 보상",
+    "waiting": "받을 보상",
+    "waitingHint": "진행 중인 이벤트에서 달성했지만 받지 않은 보상",
+    "unnamed": "이벤트 {n}",
+    "window": "{start} – {end}"
   }
 }

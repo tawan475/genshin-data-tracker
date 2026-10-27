@@ -84,7 +84,8 @@
     "hiddenTitle": "Obiettivo nascosto",
     "hidden": "Nascosto",
     "markedByHand": "Segnato a mano",
-    "guide": "Guida su stardb.gg"
+    "guide": "Guida su stardb.gg",
+    "progressTitle": "Progressi nell'ultima cattura"
   },
   "completion": {
     "tier": "Livello {n} · {text}",

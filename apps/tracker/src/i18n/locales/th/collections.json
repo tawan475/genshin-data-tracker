@@ -42,7 +42,10 @@
     "tcg": "เกมกลเจ็ดอัจฉริยะ",
     "recipes": "สูตรอาหาร",
     "wardrobe": "ตู้เสื้อผ้า",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Hangout Event",
+    "blueprints": "พิมพ์เขียวเฟอร์นิเจอร์",
+    "events": "กิจกรรม"
   },
   "archive": {
     "pick": "แท็บอัลบั้ม",
@@ -68,7 +71,9 @@
     "captured": "กำราบแล้ว",
     "capturedHint": "จากสิ่งมีชีวิต {n} ชนิด",
     "defeatedN": "กำจัด {n}",
-    "capturedN": "กำราบ {n}"
+    "capturedN": "กำราบ {n}",
+    "seen": "มอนสเตอร์ที่พบ",
+    "seenHint": "มอนสเตอร์ทั้งหมดที่เคยพบ รวมถึงชนิดย่อย"
   },
   "handbook": {
     "show": "แสดง",
@@ -156,6 +161,38 @@
     "points": "{n} แต้ม",
     "pointsOnly": "แต้ม",
     "pointsHint": "แต้มการสำรวจจากการจับข้อมูลล่าสุด: เปอร์เซ็นต์ต้องใช้คะแนนรวมของแต่ละพื้นที่ ซึ่งข้อมูลเกมยังไม่มี",
-    "otherAreas": "อื่นๆ"
+    "otherAreas": "อื่นๆ",
+    "respawns": "บอสและอีลีท",
+    "respawnsUp": "เกิดใหม่แล้ว {n} จาก {total}",
+    "allUp": "เกิดใหม่ครบแล้ว"
+  },
+  "hangouts": {
+    "endings": "ตอนจบ",
+    "pictures": "ภาพ",
+    "unclaimed": "รางวัลที่ยังไม่รับ",
+    "unclaimedHint": "ตอนจบที่ไปถึงแล้วแต่ยังไม่รับรางวัล",
+    "endingStates": {
+      "locked": "ล็อก",
+      "unclaimed": "มีรางวัลรอรับ",
+      "claimed": "รับแล้ว"
+    },
+    "states": {
+      "closed": "ปิดแล้ว",
+      "locked": "ล็อก",
+      "open": "เปิดอยู่",
+      "accepted": "กำลังดำเนินการ"
+    }
+  },
+  "blueprints": {
+    "learned": "เรียนรู้แล้ว"
+  },
+  "events": {
+    "running": "กำลังดำเนินอยู่",
+    "ended": "สิ้นสุดแล้ว",
+    "claimed": "รางวัลที่รับแล้ว",
+    "waiting": "รางวัลที่ยังไม่รับ",
+    "waitingHint": "เป้าหมายที่ทำแล้วแต่ยังไม่รับรางวัล ในกิจกรรมที่กำลังดำเนินอยู่",
+    "unnamed": "กิจกรรม {n}",
+    "window": "{start} – {end}"
   }
 }

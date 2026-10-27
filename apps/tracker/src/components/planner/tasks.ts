@@ -144,7 +144,7 @@ export interface BuiltinTask {
   /** Seelie's key for it (`tasks[].id` in its export), when it has one. */
   seelie?: string
   /** Listed only while the newest capture has this part of `gi_tasks`. */
-  capture?: 'expeditions' | 'realm' | 'welkin'
+  capture?: 'expeditions' | 'realm' | 'welkin' | 'arRewards'
 }
 
 const MONDAY = 1
@@ -250,6 +250,15 @@ export const BUILTIN_TASKS: readonly BuiltinTask[] = [
     rule: { kind: 'cooldown', hours: 7 * 24 },
     soonMs: 0,
     capture: 'welkin',
+  },
+  {
+    id: 'ar-rewards',
+    get name() {
+      return t('planner.task.builtin.arRewards')
+    },
+    rule: { kind: 'cooldown', hours: 24 },
+    soonMs: 0,
+    capture: 'arRewards',
   },
 ]
 
@@ -359,6 +368,16 @@ export const customUndone = (task: Pick<CustomTask, 'every'>, due: number) => du
 export interface CapturedTasks {
   at: number
   tasks: GiTasks
+  /** The capture's Adventure Rank (`gi_player.ar`), for the AR rewards row. */
+  ar?: number
+}
+
+/** Adventure Ranks at or below `ar` (2-60) whose reward the capture does not list as claimed. */
+export function unclaimedArRewards(claimed: readonly number[], ar: number): number[] {
+  const held = new Set(claimed)
+  const out: number[] = []
+  for (let rank = 2; rank <= Math.min(ar, 60); rank++) if (!held.has(rank)) out.push(rank)
+  return out
 }
 
 /** What a capture says about a built-in task now. */
@@ -463,6 +482,35 @@ export function captureRead(
         back: null,
         text: `${r.value}/${r.limit}`,
         title: t('planner.tasks.capture.realm', { value: r.value, limit: r.limit }),
+      }
+    }
+    case 'weekly-bosses': {
+      const b = tasks.weeklyBosses
+      const week = { kind: 'weekly', weekday: MONDAY } as const
+      if (!b || at < lastReset(week, now, server)!) return null
+      const used = b.limit - b.left
+      const done = b.left === 0
+      return {
+        at,
+        done,
+        back: done ? nextReset(week, now, server) : null,
+        text: `${used}/${b.limit}`,
+        title: t('planner.tasks.capture.weeklyBosses', { n: used, total: b.limit }),
+      }
+    }
+    case 'ar-rewards': {
+      const claimed = tasks.arRewards
+      if (!claimed || capture.ar === undefined) return null
+      const open = unclaimedArRewards(claimed, capture.ar)
+      return {
+        at,
+        done: open.length === 0,
+        back: null,
+        text: String(open.length),
+        title:
+          open.length === 0
+            ? t('planner.tasks.capture.arRewardsNone')
+            : t('planner.tasks.capture.arRewards', { ranks: open.join(', ') }),
       }
     }
     case 'welkin': {

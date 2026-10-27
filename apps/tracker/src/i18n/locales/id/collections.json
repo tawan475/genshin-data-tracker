@@ -42,7 +42,10 @@
     "tcg": "Genius Invokation TCG",
     "recipes": "Resep",
     "wardrobe": "Lemari",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Hangout Event",
+    "blueprints": "Cetak Biru Furnishing",
+    "events": "Event"
   },
   "archive": {
     "pick": "Tab Arsip",
@@ -68,7 +71,9 @@
     "captured": "Ditangkap",
     "capturedHint": "Dari {n} jenis makhluk",
     "defeatedN": "{n} dikalahkan",
-    "capturedN": "{n} ditangkap"
+    "capturedN": "{n} ditangkap",
+    "seen": "Monster yang ditemui",
+    "seenHint": "Semua monster yang ditemui, termasuk varian"
   },
   "handbook": {
     "show": "Tampilkan",
@@ -156,6 +161,38 @@
     "points": "{n} poin",
     "pointsOnly": "Poin",
     "pointsHint": "Poin eksplorasi dari tangkapan terbaru: persentase butuh total tiap area, yang belum ada di data game",
-    "otherAreas": "Lainnya"
+    "otherAreas": "Lainnya",
+    "respawns": "Boss dan elite",
+    "respawnsUp": "{n} dari {total} muncul kembali",
+    "allUp": "Semua sudah muncul kembali"
+  },
+  "hangouts": {
+    "endings": "Ending",
+    "pictures": "Gambar",
+    "unclaimed": "Hadiah belum diklaim",
+    "unclaimedHint": "Ending tercapai yang hadiahnya belum diklaim",
+    "endingStates": {
+      "locked": "Terkunci",
+      "unclaimed": "Hadiah menunggu",
+      "claimed": "Diklaim"
+    },
+    "states": {
+      "closed": "Ditutup",
+      "locked": "Terkunci",
+      "open": "Terbuka",
+      "accepted": "Berlangsung"
+    }
+  },
+  "blueprints": {
+    "learned": "Dipelajari"
+  },
+  "events": {
+    "running": "Berlangsung",
+    "ended": "Berakhir",
+    "claimed": "Hadiah diklaim",
+    "waiting": "Hadiah belum diklaim",
+    "waitingHint": "Target selesai yang hadiahnya belum diklaim, di event yang berlangsung",
+    "unnamed": "Event {n}",
+    "window": "{start} – {end}"
   }
 }

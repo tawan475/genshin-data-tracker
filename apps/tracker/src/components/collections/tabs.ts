@@ -3,12 +3,15 @@ import {
   Archive,
   BookMarked,
   BookOpen,
+  CalendarDays,
   CookingPot,
   Disc3,
+  HeartHandshake,
   Layers,
   Map as MapIcon,
   PawPrint,
   Shirt,
+  Sofa,
   Sprout,
 } from 'lucide-vue-next'
 import type { CapturedCollections } from '@/data/collections'
@@ -16,6 +19,7 @@ import type { CapturedCollections } from '@/data/collections'
 /** The collections, in the hub's order; the slug is the URL's last segment (`/collections/archive`). */
 export const COLLECTION_TABS = [
   'world',
+  'events',
   'spincrystals',
   'anecdotes',
   'archive',
@@ -24,6 +28,8 @@ export const COLLECTION_TABS = [
   'tcg',
   'recipes',
   'wardrobe',
+  'hangouts',
+  'blueprints',
   'aranara',
 ] as const
 export type CollectionTab = (typeof COLLECTION_TABS)[number]
@@ -34,6 +40,7 @@ export const isCollectionTab = (value: unknown): value is CollectionTab =>
 /** A tab's label: `collections.tabs.<key>`. */
 export const TAB_LABEL = {
   world: 'world',
+  events: 'events',
   spincrystals: 'spincrystals',
   anecdotes: 'anecdotes',
   archive: 'archive',
@@ -42,12 +49,15 @@ export const TAB_LABEL = {
   tcg: 'tcg',
   recipes: 'recipes',
   wardrobe: 'wardrobe',
+  hangouts: 'hangouts',
+  blueprints: 'blueprints',
   aranara: 'aranara',
 } as const satisfies Record<CollectionTab, string>
 
 /** The captured part a tab shows (its capture time is the tab's), null for Anecdotes. */
 export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections | null>> = {
   world: 'exploration',
+  events: 'events',
   spincrystals: 'spincrystals',
   anecdotes: null,
   archive: 'archive',
@@ -56,6 +66,8 @@ export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections 
   tcg: 'tcg',
   recipes: 'recipes',
   wardrobe: 'wardrobe',
+  hangouts: 'hangouts',
+  blueprints: 'blueprints',
   aranara: 'aranara',
 }
 
@@ -68,12 +80,15 @@ export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
   'tcg',
   'recipes',
   'wardrobe',
+  'hangouts',
+  'blueprints',
   'aranara',
 ])
 
 /** Each tab's component, loaded when the tab is first shown. */
 export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
   world: defineAsyncComponent(() => import('./WorldTab.vue')),
+  events: defineAsyncComponent(() => import('./EventsTab.vue')),
   spincrystals: defineAsyncComponent(() => import('./SpincrystalsTab.vue')),
   anecdotes: defineAsyncComponent(() => import('./AnecdotesTab.vue')),
   archive: defineAsyncComponent(() => import('./ArchiveTab.vue')),
@@ -82,12 +97,15 @@ export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
   tcg: defineAsyncComponent(() => import('./TcgTab.vue')),
   recipes: defineAsyncComponent(() => import('./RecipesTab.vue')),
   wardrobe: defineAsyncComponent(() => import('./WardrobeTab.vue')),
+  hangouts: defineAsyncComponent(() => import('./HangoutsTab.vue')),
+  blueprints: defineAsyncComponent(() => import('./BlueprintsTab.vue')),
   aranara: defineAsyncComponent(() => import('./AranaraTab.vue')),
 }
 
 /** Each collection's card icon. */
 export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
   world: MapIcon,
+  events: CalendarDays,
   spincrystals: Disc3,
   anecdotes: BookOpen,
   archive: Archive,
@@ -96,5 +114,7 @@ export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
   tcg: Layers,
   recipes: CookingPot,
   wardrobe: Shirt,
+  hangouts: HeartHandshake,
+  blueprints: Sofa,
   aranara: Sprout,
 }

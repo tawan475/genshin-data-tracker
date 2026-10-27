@@ -77,7 +77,8 @@
       "transformer": "Transmutador paramétrico",
       "expeditions": "Expediciones",
       "realm": "Intramora",
-      "welkin": "Bendición Lunar"
+      "welkin": "Bendición Lunar",
+      "arRewards": "Recompensas de rango de aventura"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "{n} de {total} de vuelta",
       "nobodyOut": "Nadie fuera",
       "realm": "{value} de {limit} en el tarro",
-      "welkin": "Quedan {n} días"
+      "welkin": "Quedan {n} días",
+      "weeklyBosses": "{n} de {total} descuentos usados esta semana",
+      "arRewards": "Sin reclamar: rango de aventura {ranks}",
+      "arRewardsNone": "Todas reclamadas"
     }
   },
   "view": {

@@ -168,7 +168,9 @@ settings are empty) and resin, the Anecdotes checklist (captured progress
 plus hand marks in `anecdote_marks`), and the planner's Tasks: the newest
 capture's `gi_tasks` ticks Daily Commissions (all done today) and the Spiral
 Abyss (full stars in the running period) and adds Expeditions, Realm Currency
-and Welkin Moon rows, while the capture is newer than the row's hand state
+and Welkin Moon rows (Capture 1.7.0: Trounce Domains counts the weekly
+boss discounts used, and an Adventure Rank rewards row lists unclaimed
+ranks), while the capture is newer than the row's hand state
 (`components/planner/tasks.ts` `captureRead`), and Collections
 (`/app/a/:id/collections` = a card per collection with its figure,
 `/collections/<tab>` = its page; Achievements is a card too): World
@@ -176,7 +178,12 @@ and Welkin Moon rows, while the capture is newer than the row's hand state
 offerings and scene points: each visited scene's Teleport Waypoints,
 domains and areas revealed, Statues of The Seven, reputation, offerings,
 exploration per area as points over `exploreTotal` (capped at 100%; no
-Statue top levels yet); `src/data/world.ts`), Radiant
+Statue top levels yet); `src/data/world.ts`; plus bosses' and elites'
+respawns from `gi_tasks.respawns`, named by the farming data), Events
+(`gi_events`: window and reward counters, titled from the notice board when
+one notice matches the dates; `src/data/events.ts`), Hangout Events
+(chapters, endings by `hangoutCgs` name, pictures), Furnishing Blueprints
+(learned of the game data's 1,405), monsters seen on Living Beings, Radiant
 Spincrystals (which the newest capture has, which are missing), Anecdotes
 (the old `/anecdotes` page redirects there), the Archive, the Adventurer
 Handbook, Living Beings (defeats), TCG, the wardrobe and Aranara, each from

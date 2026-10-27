@@ -84,7 +84,8 @@
     "hiddenTitle": "Скрытое достижение",
     "hidden": "Скрытое",
     "markedByHand": "Отмечено вручную",
-    "guide": "Гайд на stardb.gg"
+    "guide": "Гайд на stardb.gg",
+    "progressTitle": "Прогресс в последнем захвате"
   },
   "completion": {
     "tier": "Уровень {n} · {text}",

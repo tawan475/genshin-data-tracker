@@ -97,7 +97,10 @@ export function usePlannerModel(
   const capturedTasks = computed<CapturedTasks | null>(() => {
     const inventory = data.value?.inventory
     const tasks = inventory?.good.gi_tasks
-    return inventory && tasks ? { at: inventory.snapshot.takenAt, tasks } : null
+    const ar = inventory?.good.gi_player?.ar
+    return inventory && tasks
+      ? { at: inventory.snapshot.takenAt, tasks, ...(ar !== undefined ? { ar } : {}) }
+      : null
   })
 
   const store = usePlannerTargets(accountId)

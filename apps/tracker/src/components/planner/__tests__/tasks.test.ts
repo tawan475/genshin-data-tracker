@@ -36,6 +36,7 @@ import {
   snoozedInput,
   taskInput,
   taskRows,
+  unclaimedArRewards,
   undoneInput,
   weekdayOf,
   welkinDays,
@@ -527,5 +528,24 @@ describe('ticked from a capture', () => {
     const soon = rowOf('welkin', capture({ welkin: { days: 10 } }), [], at('2026-10-19T21:00:00Z'))!
     expect(soon).toMatchObject({ due: true })
     expect(rowOf('welkin', capture({ welkin: { days: 2 } }))).toMatchObject({ due: true })
+  })
+
+  it("ticks Trounce Domains when this week's discounts are used, and counts them otherwise", () => {
+    const used = { left: 0, limit: 3, cost: 30, fullCost: 60 }
+    const done = rowOf('weekly-bosses', capture({ weeklyBosses: used }))!
+    expect(done).toMatchObject({ due: false, capture: { text: '3/3' } })
+    const one = rowOf('weekly-bosses', capture({ weeklyBosses: { ...used, left: 2 } }))!
+    expect(one).toMatchObject({ due: true, capture: { text: '1/3' } })
+    // Last week's count says nothing about this week (Monday Oct 12, 04:00 Asia).
+    const old = capture({ weeklyBosses: used }, '2026-10-11T19:00:00Z')
+    expect(rowOf('weekly-bosses', old)!.capture).toBeUndefined()
+  })
+
+  it('lists the AR rewards row while the capture has them, due while one is unclaimed', () => {
+    expect(unclaimedArRewards([2, 3, 5], 6)).toEqual([4, 6])
+    expect(rowOf('ar-rewards', capture({}))).toBeUndefined()
+    const c = (claimed: number[]) => ({ ...capture({ arRewards: claimed }), ar: 4 })
+    expect(rowOf('ar-rewards', c([2, 3]))).toMatchObject({ due: true, capture: { text: '1' } })
+    expect(rowOf('ar-rewards', c([2, 3, 4]))).toMatchObject({ due: false })
   })
 })

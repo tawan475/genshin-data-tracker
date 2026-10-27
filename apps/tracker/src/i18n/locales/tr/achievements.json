@@ -84,7 +84,8 @@
     "hiddenTitle": "Gizli Başarım",
     "hidden": "Gizli",
     "markedByHand": "Elle işaretlendi",
-    "guide": "stardb.gg rehberi"
+    "guide": "stardb.gg rehberi",
+    "progressTitle": "En son yakalamadaki ilerleme"
   },
   "completion": {
     "tier": "Kademe {n} · {text}",

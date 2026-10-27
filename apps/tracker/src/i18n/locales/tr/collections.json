@@ -42,7 +42,10 @@
     "tcg": "Dehanın Yakarışı Kart Oyunu",
     "recipes": "Tarifler",
     "wardrobe": "Giysi Dolabı",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Buluşma Etkinlikleri",
+    "blueprints": "Mobilya Planları",
+    "events": "Etkinlikler"
   },
   "archive": {
     "pick": "Arşiv sekmesi",
@@ -68,7 +71,9 @@
     "captured": "Yakalanan",
     "capturedHint": "{n} tür canlı",
     "defeatedN": "{n} yenildi",
-    "capturedN": "{n} yakalandı"
+    "capturedN": "{n} yakalandı",
+    "seen": "Görülen canavarlar",
+    "seenHint": "Karşılaşılan tüm canavarlar, türevler dahil"
   },
   "handbook": {
     "show": "Göster",
@@ -156,6 +161,38 @@
     "points": "{n} puan",
     "pointsOnly": "Puan",
     "pointsHint": "En son yakalamadaki keşif puanları: yüzde için her bölgenin toplamı gerekir, oyun verisinde henüz yok",
-    "otherAreas": "Diğer"
+    "otherAreas": "Diğer",
+    "respawns": "Patronlar ve seçkinler",
+    "respawnsUp": "{total} içinden {n} yeniden doğdu",
+    "allUp": "Hepsi yeniden doğdu"
+  },
+  "hangouts": {
+    "endings": "Sonlar",
+    "pictures": "Resimler",
+    "unclaimed": "Alınacak ödüller",
+    "unclaimedHint": "Ödülü bekleyen ulaşılmış sonlar",
+    "endingStates": {
+      "locked": "Kilitli",
+      "unclaimed": "Ödül bekliyor",
+      "claimed": "Alındı"
+    },
+    "states": {
+      "closed": "Kapalı",
+      "locked": "Kilitli",
+      "open": "Açık",
+      "accepted": "Sürüyor"
+    }
+  },
+  "blueprints": {
+    "learned": "Öğrenildi"
+  },
+  "events": {
+    "running": "Süren",
+    "ended": "Bitti",
+    "claimed": "Alınan ödüller",
+    "waiting": "Alınacak ödüller",
+    "waitingHint": "Süren etkinliklerde ödülü bekleyen tamamlanmış hedefler",
+    "unnamed": "Etkinlik {n}",
+    "window": "{start} – {end}"
   }
 }

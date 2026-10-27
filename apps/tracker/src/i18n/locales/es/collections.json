@@ -42,7 +42,10 @@
     "tcg": "Invocación de los Sabios",
     "recipes": "Recetas",
     "wardrobe": "Armario",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Eventos de encuentro",
+    "blueprints": "Planos de mobiliario",
+    "events": "Eventos"
   },
   "archive": {
     "pick": "Pestaña del Archivo",
@@ -68,7 +71,9 @@
     "captured": "Capturados",
     "capturedHint": "De {n} tipos de criaturas",
     "defeatedN": "{n} derrotados",
-    "capturedN": "{n} capturados"
+    "capturedN": "{n} capturados",
+    "seen": "Monstruos vistos",
+    "seenHint": "Todos los monstruos vistos, variantes incluidas"
   },
   "handbook": {
     "show": "Mostrar",
@@ -156,6 +161,38 @@
     "points": "{n} pts",
     "pointsOnly": "Puntos",
     "pointsHint": "Puntos de exploración de la última captura: el porcentaje necesita el total de cada zona, que los datos del juego aún no tienen",
-    "otherAreas": "Otras"
+    "otherAreas": "Otras",
+    "respawns": "Jefes y élites",
+    "respawnsUp": "{n} de {total} disponibles",
+    "allUp": "Todo disponible"
+  },
+  "hangouts": {
+    "endings": "Finales",
+    "pictures": "Imágenes",
+    "unclaimed": "Recompensas por reclamar",
+    "unclaimedHint": "Finales alcanzados con la recompensa pendiente",
+    "endingStates": {
+      "locked": "Bloqueado",
+      "unclaimed": "Recompensa pendiente",
+      "claimed": "Reclamado"
+    },
+    "states": {
+      "closed": "Cerrado",
+      "locked": "Bloqueado",
+      "open": "Disponible",
+      "accepted": "En curso"
+    }
+  },
+  "blueprints": {
+    "learned": "Aprendidos"
+  },
+  "events": {
+    "running": "En curso",
+    "ended": "Terminado",
+    "claimed": "Recompensas reclamadas",
+    "waiting": "Recompensas por reclamar",
+    "waitingHint": "Objetivos cumplidos con la recompensa pendiente, en eventos en curso",
+    "unnamed": "Evento {n}",
+    "window": "{start} – {end}"
   }
 }

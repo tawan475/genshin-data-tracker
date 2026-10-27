@@ -1,12 +1,18 @@
 import {
   decodeCollections,
   decodeExploration,
+  decodeProgress,
+  decodeTasks,
   decodeWardrobe,
   type BundleSnapshot,
   type CollectionsSection,
+  type TasksSection,
   type ExplorationSection,
+  type GiEvent,
+  type ProgressSection,
   type GiCollections,
   type GiExploration,
+  type GiTasks,
   type GiWardrobe,
   type WardrobeSection,
 } from '@gdt/shared'
@@ -24,7 +30,14 @@ export interface Captured<T> {
   takenAt: number
 }
 
-type Parts = Required<GiCollections> & { wardrobe: GiWardrobe; exploration: GiExploration }
+type Parts = Required<GiCollections> & {
+  wardrobe: GiWardrobe
+  exploration: GiExploration
+  /** gi_tasks' respawn times (Capture 1.7.0), shown on the World page. */
+  respawns: NonNullable<GiTasks['respawns']>
+  /** gi_events (Capture 1.7.0), by activity id. */
+  events: Record<string, GiEvent>
+}
 export type CapturedCollections = { [K in keyof Parts]?: Captured<Parts[K]> }
 
 export const COLLECTION_SECTIONS = [
@@ -32,6 +45,8 @@ export const COLLECTION_SECTIONS = [
   'collections2',
   'wardrobe',
   'exploration',
+  'tasks',
+  'progress',
 ] as const
 
 /** A decoded bundle's snapshots (oldest first) and section texts (see account-data). */
@@ -63,6 +78,18 @@ export function capturedCollections(bundle: CollectionsBundle): CapturedCollecti
     if (exploration !== undefined) {
       const value = decodeExploration(JSON.parse(exploration) as ExplorationSection)
       put('exploration', value, snapshot.takenAt)
+    }
+    const tasks = snapshot.tasks ? bundle.texts.get(snapshot.tasks) : undefined
+    if (tasks !== undefined) {
+      put('respawns', decodeTasks(JSON.parse(tasks) as TasksSection).respawns, snapshot.takenAt)
+    }
+    const progress = snapshot.progress ? bundle.texts.get(snapshot.progress) : undefined
+    if (progress !== undefined) {
+      put(
+        'events',
+        decodeProgress(JSON.parse(progress) as ProgressSection).events,
+        snapshot.takenAt,
+      )
     }
   }
   return out

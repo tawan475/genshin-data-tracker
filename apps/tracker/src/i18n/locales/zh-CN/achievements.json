@@ -84,7 +84,8 @@
     "hiddenTitle": "隐藏成就",
     "hidden": "隐藏",
     "markedByHand": "手动标记",
-    "guide": "stardb.gg 上的攻略"
+    "guide": "stardb.gg 上的攻略",
+    "progressTitle": "最新捕获中的进度"
   },
   "completion": {
     "tier": "第 {n} 阶段 · {text}",

@@ -9,26 +9,43 @@ import {
   ScrollText,
   Sparkles,
   Swords,
+  Timer,
 } from 'lucide-vue-next'
+import { loadFarming } from '@gdt/game-data/farming'
 import NotCaptured from './NotCaptured.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
 import { idLabel, type CollectionCatalog } from '@/data/collection-names'
+import { respawnRows } from '@/data/respawns'
+import { useResource } from '@/data/use-resource'
 import { worldModel, type Progress } from '@/data/world'
-import { formatNumber } from '@/lib/format'
+import { localizeFarming } from '@/i18n/localize-farming'
+import { formatNumber, formatRelative, formatDateTime } from '@/lib/format'
 import { t } from '@/i18n'
 
 /**
  * The World (Capture 1.6.0's `gi_exploration`): each scene's map (Teleport
  * Waypoints, domains, areas revealed), the Statues of The Seven, reputation,
  * offerings and exploration per region. Exploration shows raw points until
- * the game data carries each area's total.
+ * the game data carries each area's total. Bosses' and elites' respawns
+ * (Capture 1.7.0) come from the newest capture's `gi_tasks`.
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
 const exploration = computed(() => props.captured.exploration?.value ?? null)
+const farming = useResource(
+  () => 0,
+  () => loadFarming().catch(() => null),
+)
+const respawns = computed(() => {
+  const value = props.captured.respawns?.value
+  if (!value) return []
+  const data = farming.data.value
+  return respawnRows(value, data ? localizeFarming(data) : null, Date.now())
+})
+const waiting = computed(() => respawns.value.filter((r) => r.next !== null))
 const world = computed(() =>
   exploration.value ? worldModel(exploration.value, props.catalog) : null,
 )
@@ -264,6 +281,42 @@ const MAP_PARTS = [
           </ul>
         </section>
       </div>
+    </UiPanel>
+
+    <UiPanel v-if="respawns.length" :title="$t('collections.world.respawns')" flush>
+      <template #actions>
+        <span class="text-sm text-text-secondary">{{
+          $t('collections.world.respawnsUp', {
+            n: formatNumber(respawns.length - waiting.length),
+            total: formatNumber(respawns.length),
+          })
+        }}</span>
+      </template>
+      <p v-if="!waiting.length" class="p-5 text-sm text-text-secondary">
+        {{ $t('collections.world.allUp') }}
+      </p>
+      <ul
+        v-else
+        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,17rem),1fr))] gap-2 p-3 sm:p-5"
+      >
+        <li
+          v-for="row in waiting"
+          :key="row.id"
+          class="flex min-w-0 items-center gap-2.5 rounded-xl border border-border-default bg-surface-sunken p-2.5 text-sm"
+        >
+          <Timer class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
+          <span class="min-w-0 flex-1 truncate font-medium" :title="row.name">{{ row.name }}</span>
+          <span v-if="row.spots > 1" class="tabular shrink-0 font-mono text-xs text-text-muted"
+            >{{ row.up }}/{{ row.spots }}</span
+          >
+          <time
+            class="tabular shrink-0 font-mono text-text-secondary"
+            :datetime="new Date(row.next!).toISOString()"
+            :title="formatDateTime(row.next!)"
+            >{{ formatRelative(row.next!) }}</time
+          >
+        </li>
+      </ul>
     </UiPanel>
   </div>
 </template>

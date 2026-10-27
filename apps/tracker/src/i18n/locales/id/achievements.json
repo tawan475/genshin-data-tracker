@@ -84,7 +84,8 @@
     "hiddenTitle": "Achievement tersembunyi",
     "hidden": "Tersembunyi",
     "markedByHand": "Ditandai manual",
-    "guide": "Panduan di stardb.gg"
+    "guide": "Panduan di stardb.gg",
+    "progressTitle": "Kemajuan di tangkapan terbaru"
   },
   "completion": {
     "tier": "Tingkat {n} · {text}",

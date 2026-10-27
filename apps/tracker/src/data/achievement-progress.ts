@@ -33,6 +33,11 @@ export interface AchievementSection {
 export type AchievementTime = readonly [number, number]
 
 export interface CapturedAchievements {
+  /**
+   * Unfinished achievements' progress from the newest snapshot that has it
+   * (Teyvat.me Capture 1.7.0's `gi_achievement_progress`); absent before.
+   */
+  progress?: ReadonlyMap<number, { progress: number; total: number }>
   /** Ids completed in the newest snapshot that has any. */
   ids: ReadonlySet<number>
   /** When that snapshot was taken; null when no snapshot has achievements. */

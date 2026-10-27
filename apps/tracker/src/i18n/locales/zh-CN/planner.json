@@ -77,7 +77,8 @@
       "transformer": "参量质变仪",
       "expeditions": "探索派遣",
       "realm": "洞天宝钱",
-      "welkin": "空月祝福"
+      "welkin": "空月祝福",
+      "arRewards": "冒险等阶奖励"
     }
   },
   "toast": {
@@ -545,7 +546,10 @@
       "expeditions": "已返回 {n}/{total}",
       "nobodyOut": "无人派遣",
       "realm": "聚宝盆中 {value}/{limit}",
-      "welkin": "剩余 {n} 天"
+      "welkin": "剩余 {n} 天",
+      "weeklyBosses": "本周已使用{n}/{total}次减半",
+      "arRewards": "未领取：冒险等阶 {ranks}",
+      "arRewardsNone": "奖励已全部领取"
     }
   },
   "view": {

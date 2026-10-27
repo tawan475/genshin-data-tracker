@@ -42,7 +42,10 @@
     "tcg": "Genius Invokation TCG",
     "recipes": "Recipes",
     "wardrobe": "Wardrobe",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Hangout Events",
+    "blueprints": "Furnishing Blueprints",
+    "events": "Events"
   },
   "archive": {
     "pick": "Archive tab",
@@ -68,7 +71,9 @@
     "captured": "Captured",
     "capturedHint": "Across {n} kinds of creature",
     "defeatedN": "{n} defeated",
-    "capturedN": "{n} captured"
+    "capturedN": "{n} captured",
+    "seen": "Monsters seen",
+    "seenHint": "Every monster met, variants too"
   },
   "handbook": {
     "show": "Show",
@@ -156,6 +161,38 @@
     "points": "{n} pts",
     "pointsOnly": "Points",
     "pointsHint": "Exploration points from the newest capture: the percentage needs each area's total, which the game data does not have yet",
-    "otherAreas": "Other"
+    "otherAreas": "Other",
+    "respawns": "Bosses and elites",
+    "respawnsUp": "{n} of {total} up",
+    "allUp": "Everything is up"
+  },
+  "hangouts": {
+    "endings": "Endings",
+    "pictures": "Pictures",
+    "unclaimed": "Rewards to claim",
+    "unclaimedHint": "Endings reached whose reward is still waiting",
+    "endingStates": {
+      "locked": "Locked",
+      "unclaimed": "Reward waiting",
+      "claimed": "Claimed"
+    },
+    "states": {
+      "closed": "Closed",
+      "locked": "Locked",
+      "open": "Open",
+      "accepted": "In progress"
+    }
+  },
+  "blueprints": {
+    "learned": "Learned"
+  },
+  "events": {
+    "running": "Running",
+    "ended": "Ended",
+    "claimed": "Rewards claimed",
+    "waiting": "Rewards to claim",
+    "waitingHint": "Counters done whose reward is still waiting, in running events",
+    "unnamed": "Event {n}",
+    "window": "{start} – {end}"
   }
 }

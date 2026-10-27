@@ -42,7 +42,10 @@
     "tcg": "Chamado Sagrado dos Sete",
     "recipes": "Receitas",
     "wardrobe": "Guarda-roupa",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Eventos de Encontro",
+    "blueprints": "Plantas de Mobília",
+    "events": "Eventos"
   },
   "archive": {
     "pick": "Aba do Arquivo",
@@ -68,7 +71,9 @@
     "captured": "Capturados",
     "capturedHint": "De {n} tipos de criatura",
     "defeatedN": "{n} derrotados",
-    "capturedN": "{n} capturados"
+    "capturedN": "{n} capturados",
+    "seen": "Monstros vistos",
+    "seenHint": "Todos os monstros encontrados, variantes incluídas"
   },
   "handbook": {
     "show": "Mostrar",
@@ -156,6 +161,38 @@
     "points": "{n} pts",
     "pointsOnly": "Pontos",
     "pointsHint": "Pontos de exploração da captura mais recente: a porcentagem precisa do total de cada área, que os dados do jogo ainda não têm",
-    "otherAreas": "Outras"
+    "otherAreas": "Outras",
+    "respawns": "Chefes e elites",
+    "respawnsUp": "{n} de {total} reapareceram",
+    "allUp": "Todos reapareceram"
+  },
+  "hangouts": {
+    "endings": "Finais",
+    "pictures": "Imagens",
+    "unclaimed": "Recompensas a resgatar",
+    "unclaimedHint": "Finais alcançados com recompensa pendente",
+    "endingStates": {
+      "locked": "Bloqueado",
+      "unclaimed": "Recompensa pendente",
+      "claimed": "Resgatado"
+    },
+    "states": {
+      "closed": "Encerrado",
+      "locked": "Bloqueado",
+      "open": "Disponível",
+      "accepted": "Em andamento"
+    }
+  },
+  "blueprints": {
+    "learned": "Aprendidas"
+  },
+  "events": {
+    "running": "Em andamento",
+    "ended": "Encerrado",
+    "claimed": "Recompensas resgatadas",
+    "waiting": "Recompensas a resgatar",
+    "waitingHint": "Metas cumpridas com recompensa pendente, em eventos em andamento",
+    "unnamed": "Evento {n}",
+    "window": "{start} – {end}"
   }
 }

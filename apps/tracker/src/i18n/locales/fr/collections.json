@@ -42,7 +42,10 @@
     "tcg": "Invocation des Sept : JCC",
     "recipes": "Recettes",
     "wardrobe": "Armoire",
-    "aranara": "Aranaras"
+    "aranara": "Aranaras",
+    "hangouts": "Événements Rendez-vous",
+    "blueprints": "Plans d'ameublement",
+    "events": "Événements"
   },
   "archive": {
     "pick": "Onglet des Archives",
@@ -68,7 +71,9 @@
     "captured": "Capturés",
     "capturedHint": "Sur {n} espèces de créatures",
     "defeatedN": "{n} éliminés",
-    "capturedN": "{n} capturés"
+    "capturedN": "{n} capturés",
+    "seen": "Monstres vus",
+    "seenHint": "Tous les monstres rencontrés, variantes comprises"
   },
   "handbook": {
     "show": "Afficher",
@@ -156,6 +161,38 @@
     "points": "{n} pts",
     "pointsOnly": "Points",
     "pointsHint": "Points d'exploration de la dernière capture : le pourcentage demande le total de chaque zone, absent des données du jeu pour l'instant",
-    "otherAreas": "Autres"
+    "otherAreas": "Autres",
+    "respawns": "Boss et élites",
+    "respawnsUp": "{n} sur {total} réapparus",
+    "allUp": "Tout est réapparu"
+  },
+  "hangouts": {
+    "endings": "Fins",
+    "pictures": "Images",
+    "unclaimed": "Récompenses à récupérer",
+    "unclaimedHint": "Fins atteintes dont la récompense attend",
+    "endingStates": {
+      "locked": "Verrouillé",
+      "unclaimed": "Récompense en attente",
+      "claimed": "Récupéré"
+    },
+    "states": {
+      "closed": "Terminé",
+      "locked": "Verrouillé",
+      "open": "Disponible",
+      "accepted": "En cours"
+    }
+  },
+  "blueprints": {
+    "learned": "Appris"
+  },
+  "events": {
+    "running": "En cours",
+    "ended": "Terminé",
+    "claimed": "Récompenses récupérées",
+    "waiting": "Récompenses à récupérer",
+    "waitingHint": "Objectifs remplis dont la récompense attend, dans les événements en cours",
+    "unnamed": "Événement {n}",
+    "window": "{start} – {end}"
   }
 }

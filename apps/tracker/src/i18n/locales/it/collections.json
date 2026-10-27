@@ -42,7 +42,10 @@
     "tcg": "GCC Invokazione del genio",
     "recipes": "Ricette",
     "wardrobe": "Guardaroba",
-    "aranara": "Aranara"
+    "aranara": "Aranara",
+    "hangouts": "Eventi Appuntamento",
+    "blueprints": "Progetti d'arredo",
+    "events": "Eventi"
   },
   "archive": {
     "pick": "Scheda dell'Archivio",
@@ -68,7 +71,9 @@
     "captured": "Catturati",
     "capturedHint": "Su {n} tipi di creature",
     "defeatedN": "{n} sconfitti",
-    "capturedN": "{n} catturati"
+    "capturedN": "{n} catturati",
+    "seen": "Mostri visti",
+    "seenHint": "Tutti i mostri incontrati, varianti incluse"
   },
   "handbook": {
     "show": "Mostra",
@@ -156,6 +161,38 @@
     "points": "{n} pt",
     "pointsOnly": "Punti",
     "pointsHint": "Punti esplorazione dall'ultima cattura: la percentuale richiede il totale di ogni zona, che i dati di gioco non hanno ancora",
-    "otherAreas": "Altre"
+    "otherAreas": "Altre",
+    "respawns": "Boss ed élite",
+    "respawnsUp": "{n} su {total} ricomparsi",
+    "allUp": "Tutti ricomparsi"
+  },
+  "hangouts": {
+    "endings": "Finali",
+    "pictures": "Immagini",
+    "unclaimed": "Ricompense da riscattare",
+    "unclaimedHint": "Finali raggiunti con ricompensa in attesa",
+    "endingStates": {
+      "locked": "Bloccato",
+      "unclaimed": "Ricompensa in attesa",
+      "claimed": "Riscattato"
+    },
+    "states": {
+      "closed": "Chiuso",
+      "locked": "Bloccato",
+      "open": "Disponibile",
+      "accepted": "In corso"
+    }
+  },
+  "blueprints": {
+    "learned": "Appresi"
+  },
+  "events": {
+    "running": "In corso",
+    "ended": "Terminato",
+    "claimed": "Ricompense riscattate",
+    "waiting": "Ricompense da riscattare",
+    "waitingHint": "Obiettivi completati con ricompensa in attesa, negli eventi in corso",
+    "unnamed": "Evento {n}",
+    "window": "{start} – {end}"
   }
 }

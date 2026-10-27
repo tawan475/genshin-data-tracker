@@ -42,6 +42,12 @@ const tiers = computed(() =>
   props.entry.tiers.map((tier) => ({ tier, source: doneSource(props.state, tier.id) })),
 )
 const doneCount = computed(() => tiers.value.filter((t) => t.source).length)
+/** The captured progress on the first tier left (Capture 1.7.0), when the capture has one. */
+const progressText = computed(() => {
+  const left = tiers.value.find((t) => !t.source)
+  const p = left ? props.capture.progress?.get(left.tier.id) : undefined
+  return p ? `${formatNumber(p.progress)}/${formatNumber(p.total)}` : null
+})
 const complete = computed(() => doneCount.value === tiers.value.length)
 const chain = computed(() => tiers.value.length > 1)
 /** The tier to describe: the first one left, or the last. */
@@ -180,6 +186,12 @@ const FILL: Record<DoneSource, string> = {
       </div>
 
       <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
+        <span
+          v-if="progressText"
+          class="tabular font-mono text-text-secondary"
+          :title="$t('achievements.row.progressTitle')"
+          >{{ progressText }}</span
+        >
         <span
           v-if="chain"
           class="-my-1 -ml-1.5 flex items-center"

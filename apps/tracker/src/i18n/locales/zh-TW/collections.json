@@ -42,7 +42,10 @@
     "tcg": "七聖召喚",
     "recipes": "食譜",
     "wardrobe": "衣櫥",
-    "aranara": "蘭那羅"
+    "aranara": "蘭那羅",
+    "hangouts": "邀約事件",
+    "blueprints": "擺設圖紙",
+    "events": "活動"
   },
   "archive": {
     "pick": "圖鑑分類",
@@ -68,7 +71,9 @@
     "captured": "已收服",
     "capturedHint": "共 {n} 種生物",
     "defeatedN": "擊倒 {n}",
-    "capturedN": "收服 {n}"
+    "capturedN": "收服 {n}",
+    "seen": "已遇見的怪物",
+    "seenHint": "遇見過的所有怪物，包括變體"
   },
   "handbook": {
     "show": "顯示",
@@ -156,6 +161,38 @@
     "points": "{n} 點",
     "pointsOnly": "點數",
     "pointsHint": "最新擷取的探索點數：百分比需要各區域的總數，遊戲資料尚未提供",
-    "otherAreas": "其他"
+    "otherAreas": "其他",
+    "respawns": "首領與精英",
+    "respawnsUp": "{total}個中{n}個已刷新",
+    "allUp": "全部已刷新"
+  },
+  "hangouts": {
+    "endings": "結局",
+    "pictures": "圖片",
+    "unclaimed": "待領取獎勵",
+    "unclaimedHint": "已達成但獎勵未領取的結局",
+    "endingStates": {
+      "locked": "未解鎖",
+      "unclaimed": "獎勵待領取",
+      "claimed": "已領取"
+    },
+    "states": {
+      "closed": "已關閉",
+      "locked": "未解鎖",
+      "open": "可進行",
+      "accepted": "進行中"
+    }
+  },
+  "blueprints": {
+    "learned": "已習得"
+  },
+  "events": {
+    "running": "進行中",
+    "ended": "已結束",
+    "claimed": "已領取獎勵",
+    "waiting": "待領取獎勵",
+    "waitingHint": "進行中的活動裡已完成但獎勵未領取的項目",
+    "unnamed": "活動 {n}",
+    "window": "{start} – {end}"
   }
 }
