@@ -90,7 +90,15 @@ export interface UserSettings {
   use24Hour: boolean
   /** The site's language: `system` follows the browser (the default). */
   language: 'system' | SiteLanguage
+  /**
+   * The phone tab bar's pages (`shell.nav` keys of an account's sections, at
+   * most TAB_BAR_MAX), shown in the sidebar's order; "More" holds the rest.
+   */
+  tabBar: string[]
 }
+
+/** Pages the phone tab bar holds besides "More". */
+export const TAB_BAR_MAX = 4
 
 /** What a PATCH may carry: any subset, nested objects included. */
 export type UserSettingsPatch = Partial<UserSettings>
@@ -108,6 +116,7 @@ export const USER_SETTINGS_DEFAULTS: UserSettings = {
   theme: 'system',
   use24Hour: false,
   language: 'system',
+  tabBar: ['overview', 'characters', 'materials', 'planner'],
 }
 
 export const MATERIALS_GRAPH_DEFAULTS: MaterialsGraphSettings = {

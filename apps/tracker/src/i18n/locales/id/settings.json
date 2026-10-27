@@ -48,7 +48,10 @@
     "themeNotSaved": "Tidak bisa menyimpan tema",
     "clockNotSaved": "Tidak bisa menyimpan pengaturan jam",
     "language": "Bahasa",
-    "languageNotSaved": "Tidak bisa menyimpan bahasa"
+    "languageNotSaved": "Tidak bisa menyimpan bahasa",
+    "tabBar": "Bilah tab ponsel",
+    "tabBarHint": "Hingga {n} halaman di bilah bawah ponsel; Lainnya berisi sisanya",
+    "tabBarNotSaved": "Tidak dapat menyimpan bilah tab"
   },
   "password": {
     "title": "Kata sandi",

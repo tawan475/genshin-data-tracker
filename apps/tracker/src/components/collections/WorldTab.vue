@@ -156,6 +156,13 @@ const reputationTotal = computed(() =>
 )
 
 const sceneName = (name: string | null) => name ?? t('collections.world.teyvat')
+/**
+ * Offerings are hidden for now (user's call, 2026-10-27): captures showed a
+ * whole list missing or another world's values; back once the capture's
+ * source is settled.
+ */
+const OFFERINGS_PAUSED = true
+
 const offeringName = (id: number, name: string) =>
   name || t('collections.world.offering', { n: id })
 const fraction = (p: Progress) => `${formatNumber(p.have)} / ${formatNumber(p.total)}`
@@ -364,7 +371,11 @@ const MAP_PARTS = [
       </UiPanel>
     </div>
 
-    <UiPanel v-if="world.offerings.length" :title="$t('collections.world.offerings')" flush>
+    <UiPanel
+      v-if="!OFFERINGS_PAUSED && world.offerings.length"
+      :title="$t('collections.world.offerings')"
+      flush
+    >
       <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-2 p-3 sm:p-5">
         <li
           v-for="offering in world.offerings"

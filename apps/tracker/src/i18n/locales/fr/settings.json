@@ -48,7 +48,10 @@
     "themeNotSaved": "Impossible d'enregistrer le thème",
     "clockNotSaved": "Impossible d'enregistrer le réglage de l'horloge",
     "language": "Langue",
-    "languageNotSaved": "Impossible d'enregistrer la langue"
+    "languageNotSaved": "Impossible d'enregistrer la langue",
+    "tabBar": "Barre d'onglets mobile",
+    "tabBarHint": "Jusqu'à {n} pages dans la barre du bas sur mobile ; Plus contient le reste",
+    "tabBarNotSaved": "Impossible d'enregistrer la barre d'onglets"
   },
   "password": {
     "title": "Mot de passe",

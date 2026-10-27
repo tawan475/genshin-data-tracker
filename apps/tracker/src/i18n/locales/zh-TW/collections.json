@@ -33,6 +33,7 @@
   "notCapturedPart": "尚未擷取",
   "notCapturedPartBody": "Teyvat.me Capture 會在登入時讀取。仍為空？請更新應用程式。",
   "tabs": {
+    "achievements": "成就",
     "world": "世界",
     "spincrystals": "旋曜玉帛",
     "anecdotes": "遊逸旅帳",
@@ -42,7 +43,7 @@
     "tcg": "七聖召喚",
     "recipes": "食譜",
     "wardrobe": "衣櫥",
-    "aranara": "蘭那羅",
+    "aranara": "森林書：神秘的剪貼簿",
     "hangouts": "邀約事件",
     "blueprints": "塵歌壺",
     "crafting": "合成",

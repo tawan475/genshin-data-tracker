@@ -17,6 +17,8 @@ import {
   nameOf,
   questChapter,
   type CollectionCatalog,
+  ARCHIVE_SECTIONS,
+  wikiGuide,
 } from '@/data/collection-names'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -83,6 +85,19 @@ const note = (tab: ArchiveTab, id: number): string | undefined => {
   return undefined
 }
 const pictured = computed(() => current.value.entries.some((entry) => entry.icon))
+/** Tabs whose entries have a wiki page each (tutorials and viewpoints don't). */
+const GUIDED: ReadonlySet<ArchiveTab> = new Set([
+  'quests',
+  'weapons',
+  'livingBeings',
+  'materials',
+  'books',
+  'artifacts',
+])
+const guide = (id: number) =>
+  GUIDED.has(chosen.value)
+    ? wikiGuide(props.catalog, ARCHIVE_SECTIONS[chosen.value].section, id)
+    : undefined
 const shown = computed<GridEntry[]>(() =>
   current.value.entries
     .filter((entry) => filter.value === 'all' || entry.have === (filter.value === 'have'))
@@ -92,7 +107,14 @@ const shown = computed<GridEntry[]>(() =>
       ...(pictured.value ? { icon: entry.icon } : {}),
       note: note(chosen.value, entry.id),
       missing: !entry.have,
-      title: [entry.name, note(chosen.value, entry.id)].filter(Boolean).join(' · '),
+      title: [
+        entry.name,
+        note(chosen.value, entry.id),
+        guide(entry.id) ? t('collections.guide') : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      href: guide(entry.id),
     })),
 )
 </script>

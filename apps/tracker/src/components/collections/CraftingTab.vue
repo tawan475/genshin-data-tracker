@@ -10,7 +10,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
-import { idLabel, nameOf, type CollectionCatalog } from '@/data/collection-names'
+import { idLabel, nameOf, wikiGuide, type CollectionCatalog } from '@/data/collection-names'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { t } from '@/i18n'
@@ -66,7 +66,16 @@ const current = computed(() => kinds.value.find((k) => k.kind === kind.value)!)
 const shown = computed<GridEntry[]>(() =>
   current.value.entries
     .filter((e) => filter.value === 'all' || e.have === (filter.value === 'have'))
-    .map((e) => ({ id: e.id, name: e.name, missing: !e.have, title: e.name })),
+    .map((e) => {
+      const href = wikiGuide(props.catalog, current.value.kind, e.id)
+      return {
+        id: e.id,
+        name: e.name,
+        missing: !e.have,
+        title: href ? `${e.name} · ${t('collections.guide')}` : e.name,
+        href,
+      }
+    }),
 )
 </script>
 

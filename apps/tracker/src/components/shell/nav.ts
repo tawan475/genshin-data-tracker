@@ -35,7 +35,7 @@ export interface AccountSection {
   /** The label's message (`shell.nav.<label>`). */
   label: NavKey
   icon: LucideIcon
-  /** Shown in the mobile tab bar (the rest live under "More"). */
+  /** Staff: shown in the mobile tab bar (the rest live under "More"); accounts use `settings.tabBar`. */
   primary?: boolean
 }
 
@@ -54,9 +54,7 @@ export const ACCOUNT_SECTIONS: AccountSection[] = [
 ]
 
 /** Pages without a nav entry of their own, lit as the section they open from. */
-export const NAV_PARENT: Readonly<Record<string, string>> = {
-  'account-achievements': 'account-collections',
-}
+export const NAV_PARENT: Readonly<Record<string, string>> = {}
 
 export interface StaffSection extends AccountSection {
   /** The node the page needs (the Worker checks it again). */

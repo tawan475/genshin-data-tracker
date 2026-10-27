@@ -63,7 +63,15 @@ describe('collection names', () => {
     expect(tcgCardName(en, 1101)).toBe('Ganyu')
     const outfits = wardrobeEntries(en, 'outfits')
     expect(outfits.length).toBeLessThan(en.data.outfits.length)
-    expect(wardrobeEntries(en, 'gliders').length).toBe(en.data.gliders.length)
+    // Hidden gliders (event ones listed once owned) only for their owners.
+    const hidden = en.data.gliders.filter((g) => g.hidden === 1)
+    expect(hidden.length).toBeGreaterThan(0)
+    expect(wardrobeEntries(en, 'gliders').length).toBe(en.data.gliders.length - hidden.length)
+    const owned = new Set([hidden[0]!.id])
+    expect(wardrobeEntries(en, 'gliders', owned).map((g) => g.id)).toContain(hidden[0]!.id)
+    // The quest's Exaiphanes Blade is never listed; nothing without a name is.
+    expect(wardrobeEntries(en, 'weaponSkins').some((s) => s.id === 390002)).toBe(false)
+    expect(wardrobeEntries(en, 'outfits').every((o) => !o.name.startsWith('#'))).toBe(true)
     expect(recipeEntries(en).every((r) => r.max > 0)).toBe(true)
     expect(aranaraTotal(en)).toBeGreaterThan(0)
   })

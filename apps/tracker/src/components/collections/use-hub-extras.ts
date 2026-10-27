@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { loadAchievements, loadAnecdotes } from '@gdt/game-data'
 import { useAchievementMarks } from '@/components/achievements/use-achievement-marks'
 import { useAnecdoteMarks } from '@/components/anecdotes/use-anecdote-marks'
@@ -18,7 +18,9 @@ export interface HubExtra {
 /**
  * The hub's Achievements and Anecdotes cards, counted as their pages count:
  * done = the newest capture's plus those marked by hand, of the game data's
- * total. Null figures until the data and the marks have loaded.
+ * total. Null figures until the data and the marks have loaded; `ready`
+ * once both are in, or after READY_CAP_MS (a failed load must not hold the
+ * hub back), so the hub shows every card at once.
  */
 export function useHubExtras() {
   const account = useAccount()
@@ -82,5 +84,17 @@ export function useHubExtras() {
     }
   })
 
-  return { achievement, anecdote }
+  const capped = ref(false)
+  const timer = setTimeout(() => (capped.value = true), READY_CAP_MS)
+  onBeforeUnmount(() => clearTimeout(timer))
+  const ready = computed(
+    () => capped.value || (achievement.value.figure !== null && anecdote.value.figure !== null),
+  )
+
+  return { achievement, anecdote, ready }
 }
+
+export type HubExtras = ReturnType<typeof useHubExtras>
+
+/** How long the hub waits for the Achievements and Anecdotes figures at most. */
+const READY_CAP_MS = 2000

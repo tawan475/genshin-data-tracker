@@ -108,13 +108,6 @@ export interface WorldModel {
   cleared: DomainRow[] | null
 }
 
-/**
- * Regions the game data has but the game doesn't yet (Snezhnaya, city 8): the
- * capture reports a statue level for it, which the user saw as wrong. Left
- * out of the statues and the exploration list.
- */
-export const UNRELEASED_CITIES: ReadonlySet<number> = new Set([8])
-
 const n = (value: unknown): number => (typeof value === 'number' ? value : 0)
 const ids = (value: unknown): number[] => (Array.isArray(value) ? (value as number[]) : [])
 const byId = <T>(record: Record<string, T> | undefined) =>
@@ -152,7 +145,7 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
   // Statues of The Seven: the cities whose Statue has levels (the game data's top level).
   const statueMax = new Map(cities.map((c) => [c.id, n(c.statueMaxLevel)]))
   const statues: StatueRow[] = byId(exploration.statues)
-    .filter(([city]) => (statueMax.get(city) ?? 0) > 0 && !UNRELEASED_CITIES.has(city))
+    .filter(([city]) => (statueMax.get(city) ?? 0) > 0)
     .map(([city, s]) => ({
       city,
       name: cityName(city),
@@ -319,7 +312,6 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
     ])
   }
   const exploreRows: ExploreCity[] = [...exploreByCity]
-    .filter(([city]) => !UNRELEASED_CITIES.has(city))
     .map(([city, list]) => ({
       city,
       name: city ? cityName(city) : '',
@@ -417,4 +409,16 @@ export function tribalRows(
       finished: list.filter((c) => c.state === 'finished').length,
     }))
     .sort((a, b) => a.tribe - b.tribe)
+}
+
+/**
+ * The hub's World figure: the average exploration percent of the areas the
+ * capture lists (those with a total in the game data); null without any.
+ */
+export function explorationPercent(model: WorldModel): number | null {
+  const percents = model.exploration.flatMap((city) =>
+    city.areas.flatMap((area) => (area.percent === null ? [] : [area.percent])),
+  )
+  if (percents.length === 0) return null
+  return Math.floor((percents.reduce((sum, p) => sum + p, 0) / percents.length) * 10) / 10
 }

@@ -33,6 +33,7 @@
   "notCapturedPart": "아직 캡처 없음",
   "notCapturedPartBody": "Teyvat.me Capture가 로그인할 때 읽습니다. 계속 비어 있으면 앱을 업데이트하세요.",
   "tabs": {
+    "achievements": "업적",
     "world": "월드",
     "spincrystals": "빛나는 결정",
     "anecdotes": "여행 일화집",
@@ -42,7 +43,7 @@
     "tcg": "일곱 성인의 소환",
     "recipes": "레시피",
     "wardrobe": "옷장",
-    "aranara": "아란나라",
+    "aranara": "숲의 책: 신비한 스크랩북",
     "hangouts": "데이트 이벤트",
     "blueprints": "주전자",
     "crafting": "합성",

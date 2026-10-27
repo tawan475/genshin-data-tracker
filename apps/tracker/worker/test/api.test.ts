@@ -91,7 +91,12 @@ describe('auth', () => {
   it('registers, reads /me, and refuses a duplicate name', async () => {
     const { client, username, me } = await signUp()
     expect(me.username).toBe(username)
-    expect(me.settings).toEqual({ theme: 'system', use24Hour: false, language: 'system' })
+    expect(me.settings).toEqual({
+      theme: 'system',
+      use24Hour: false,
+      language: 'system',
+      tabBar: ['overview', 'characters', 'materials', 'planner'],
+    })
     expect((await client.json<{ id: number }>('/api/auth/me')).id).toBe(me.id)
 
     // The language is a user setting like the theme; an unknown one is refused.
@@ -103,6 +108,17 @@ describe('auth', () => {
     )
     expect((await patch({ language: 'ja' })).status).toBe(200)
     expect((await patch({ language: 'xx' })).status).toBe(400)
+
+    // The phone tab bar: up to four pages, each once; an empty bar is allowed.
+    const bar = await patch({ tabBar: ['overview', 'collections', 'wishes'] })
+    expect(((await bar.json()) as { settings: { tabBar: string[] } }).settings.tabBar).toEqual([
+      'overview',
+      'collections',
+      'wishes',
+    ])
+    expect((await patch({ tabBar: [] })).status).toBe(200)
+    expect((await patch({ tabBar: ['a', 'b', 'c', 'd', 'e'] })).status).toBe(400)
+    expect((await patch({ tabBar: ['overview', 'overview'] })).status).toBe(400)
 
     const again = await new Client().fetch('/api/auth/register', {
       method: 'POST',
@@ -487,6 +503,46 @@ describe('accounts and imports', () => {
       status: 'unchanged',
       snapshotId: created.snapshotId,
     })
+  })
+
+  it("fills the account's missing UID, server and name from the capture, never replacing them", async () => {
+    const { client } = await signUp()
+    const blank = await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: {},
+    })
+    const capture = (uid: number, nickname: string) =>
+      sampleGood({ ...sampleExtras(uid), gi_player: { ...sampleExtras(uid).gi_player, nickname } })
+    expect((await importByKey(blank.importKey, capture(712345678, 'player01'), 1_000)).status).toBe(
+      201,
+    )
+    expect(await client.json<AccountResponse>(`/api/accounts/${blank.account.id}`)).toMatchObject({
+      uid: '712345678',
+      server: 'EUROPE',
+      name: 'player01',
+    })
+
+    // Set values stay: a later capture with another name changes nothing.
+    await importByKey(blank.importKey, capture(712345678, 'player02'), 2_000)
+    expect((await client.json<AccountResponse>(`/api/accounts/${blank.account.id}`)).name).toBe(
+      'player01',
+    )
+
+    // Another account of the owner has the UID: this one is left without it (and its name).
+    const named = await createAccount(client)
+    const second = await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: {},
+    })
+    await importByKey(second.importKey, capture(812345678, 'player03'), 1_000)
+    expect(await client.json<AccountResponse>(`/api/accounts/${second.account.id}`)).toMatchObject({
+      uid: null,
+      server: null,
+      name: null,
+    })
+    expect((await client.json<AccountResponse>(`/api/accounts/${named.account.id}`)).name).toBe(
+      'Main',
+    )
   })
 
   it("warns, and still stores the file, when its UID is not the account's", async () => {

@@ -33,6 +33,7 @@
   "notCapturedPart": "Noch nicht erfasst",
   "notCapturedPartBody": "Teyvat.me Capture liest es beim Einloggen. Noch leer? Aktualisiere die App.",
   "tabs": {
+    "achievements": "Errungenschaften",
     "world": "Welt",
     "spincrystals": "Strahlende Drehkristalle",
     "anecdotes": "Anekdoten",
@@ -42,7 +43,7 @@
     "tcg": "Geniale Beschwörung",
     "recipes": "Rezepte",
     "wardrobe": "Garderobe",
-    "aranara": "Aranara",
+    "aranara": "Aranyaka: Mysteriöses Einklebebuch",
     "hangouts": "Verabredungen",
     "blueprints": "Teekanne der Gelassenheit",
     "crafting": "Herstellung",

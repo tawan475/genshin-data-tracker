@@ -29,6 +29,7 @@ import AccountSwitcher from './AccountSwitcher.vue'
 import AppearanceButton from './AppearanceButton.vue'
 import { t } from '@/i18n'
 import { ACCOUNT_SECTIONS, NAV_PARENT, STAFF_SECTIONS, pageTitle } from './nav'
+import { USER_SETTINGS_DEFAULTS } from '@gdt/shared/settings'
 import { NAV_COLLAPSED_KEY, useNavCollapse } from './nav-collapse'
 import SectionLabel from './SectionLabel.vue'
 
@@ -117,11 +118,14 @@ const sections = computed(() =>
       }))
     : [],
 )
-const primary = computed(() =>
-  staffMode.value
-    ? staffSections.value.filter((s) => s.primary)
-    : sections.value.filter((s) => s.primary),
-)
+/** The phone tab bar: the pages the user picked (Settings → Appearance), in the sidebar's order. */
+const primary = computed(() => {
+  if (staffMode.value) return staffSections.value.filter((s) => s.primary)
+  const picked = new Set(session.settings.tabBar ?? USER_SETTINGS_DEFAULTS.tabBar)
+  return sections.value.filter((s) =>
+    picked.has(ACCOUNT_SECTIONS.find((a) => a.name === s.name)!.label),
+  )
+})
 const title = computed(() => pageTitle(route.meta))
 
 // Flips what is painted; from "system" it pins the opposite theme.

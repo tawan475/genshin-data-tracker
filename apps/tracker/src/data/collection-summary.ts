@@ -11,17 +11,21 @@ import type { CapturedCollections } from './collection-parts'
 import { musicSongs, musicSummary } from './music'
 import { recipeRows } from './recipes'
 import { spincrystalProgress, type Spincrystal } from './spincrystals'
-import { TEYVAT_SCENE, worldModel } from './world'
+import { explorationPercent, worldModel } from './world'
 
 /**
  * One figure per Collections card, counted the way its page counts: `have`
  * of `total` the game data lists, or a bare `count` where the game has no
  * total (Living Beings). Null when no capture has that part. Pure.
  */
-export type CollectionFigure = { have: number; total: number } | { count: number }
+export type CollectionFigure =
+  | { have: number; total: number }
+  | { count: number }
+  /** A share out of 100 (World: average exploration). */
+  | { percent: number }
 
 export interface CollectionFigures {
-  /** Teleport Waypoints unlocked in Teyvat. */
+  /** Average exploration of the captured areas (the waypoint count wasn't reliable). */
   world: CollectionFigure | null
   spincrystals: CollectionFigure | null
   archive: CollectionFigure | null
@@ -69,10 +73,9 @@ export function collectionFigures(
   ) => (value !== undefined && catalog ? count(catalog, value) : null)
 
   return {
-    world: withCatalog(exploration, (c, v) => {
-      const teyvat = worldModel(v, c).maps.find((m) => m.scene === TEYVAT_SCENE)
-      return teyvat ? teyvat.waypoints : { have: 0, total: 0 }
-    }),
+    world: withCatalog(exploration, (c, v) => ({
+      percent: explorationPercent(worldModel(v, c)) ?? 0,
+    })),
     spincrystals:
       spin && spincrystals
         ? (({ have, total }) => ({ have, total }))(spincrystalProgress(spincrystals, spin))
@@ -97,7 +100,11 @@ export function collectionFigures(
       : null,
     'living-beings':
       defeats !== undefined
-        ? { count: Object.values(defeats).filter((d) => d.defeated > 0).length }
+        ? // As the page lists them: defeated, or only captured (creatures).
+          {
+            count: Object.values(defeats).filter((d) => d.defeated > 0 || (d.captured ?? 0) > 0)
+              .length,
+          }
         : null,
     tcg: withCatalog(tcg, (c, v) => {
       const owned = v.cards ?? {}
@@ -113,10 +120,10 @@ export function collectionFigures(
     }),
     wardrobe: withCatalog(wardrobe, (c, v) =>
       ofSets(
-        WARDROBE_KINDS.map((kind) => ({
-          owned: new Set(v[kind]?.owned ?? []),
-          known: wardrobeEntries(c, kind),
-        })),
+        WARDROBE_KINDS.map((kind) => {
+          const owned = new Set(v[kind]?.owned ?? [])
+          return { owned, known: wardrobeEntries(c, kind, owned) }
+        }),
       ),
     ),
     crafting: withCatalog(crafting, (c, v) => {

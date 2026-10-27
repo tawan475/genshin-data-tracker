@@ -28,6 +28,7 @@ import {
   GoodFormatError,
   GoodLimitError,
   SLOTS,
+  serverFromUid,
   artifactKeyString,
   compactSubstats,
   completeSnapshot,
@@ -381,6 +382,7 @@ async function importOnce(
         )
         .bind(accountId),
       listenerStatement(d1, accountId),
+      ...fillAccountStatements(d1, accountId, prepared),
     ])
     return response('unchanged', latest.id, 0, dataVersionOf(bumped) ?? null, listenerOf(listening))
   }
@@ -432,6 +434,7 @@ async function importOnce(
       takenAt,
       contentKey: key,
     }),
+    ...fillAccountStatements(d1, accountId, prepared),
     recomputeAccount(d1, accountId),
     listenerStatement(d1, accountId),
   )
@@ -524,6 +527,54 @@ function uidWarnings(account: ImportTarget, prepared: PreparedSnapshot): ImportW
       message: `This file is UID ${captured}, but the account is UID ${linked}. Stored anyway.`,
     },
   ]
+}
+
+/**
+ * Fills what the account lacks from the capture's `gi_player`: the UID (unless
+ * another of the owner's accounts has it), then, when the account's UID is
+ * the capture's, the server it implies and the in-game name. Never replaces
+ * what is set. Rides in the import's own batch: no extra round trip.
+ */
+function fillAccountStatements(
+  d1: D1Database,
+  accountId: number,
+  prepared: PreparedSnapshot,
+): D1PreparedStatement[] {
+  const player = prepared.good.player
+  if (player?.uid === undefined) return []
+  const uid = String(player.uid)
+  // After the UID statement: only an account that is (now) this UID's.
+  const sameUid = 'uid = ?2'
+  const statements = [
+    d1
+      .prepare(
+        `UPDATE genshin_accounts SET uid = ?2 WHERE id = ?1 AND (uid IS NULL OR uid = '')
+         AND NOT EXISTS (SELECT 1 FROM genshin_accounts AS o
+           WHERE o.user_id = genshin_accounts.user_id AND o.uid = ?2)`,
+      )
+      .bind(accountId, uid),
+  ]
+  const server = serverFromUid(uid)
+  if (server) {
+    statements.push(
+      d1
+        .prepare(
+          `UPDATE genshin_accounts SET server = ?3 WHERE id = ?1 AND server IS NULL AND ${sameUid}`,
+        )
+        .bind(accountId, uid, server),
+    )
+  }
+  if (player.nickname) {
+    statements.push(
+      d1
+        .prepare(
+          `UPDATE genshin_accounts SET name = ?3 WHERE id = ?1 AND (name IS NULL OR name = '')
+           AND ${sameUid}`,
+        )
+        .bind(accountId, uid, player.nickname.slice(0, 64)),
+    )
+  }
+  return statements
 }
 
 /** v1 catalog rows (not repacked yet) by identity hash. */

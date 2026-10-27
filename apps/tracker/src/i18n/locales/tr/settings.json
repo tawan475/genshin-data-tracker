@@ -48,7 +48,10 @@
     "themeNotSaved": "Tema kaydedilemedi",
     "clockNotSaved": "Saat ayarı kaydedilemedi",
     "language": "Dil",
-    "languageNotSaved": "Dil kaydedilemedi"
+    "languageNotSaved": "Dil kaydedilemedi",
+    "tabBar": "Telefon sekme çubuğu",
+    "tabBarHint": "Telefonun alt çubuğunda en fazla {n} sayfa; gerisi Daha fazla'da",
+    "tabBarNotSaved": "Sekme çubuğu kaydedilemedi"
   },
   "password": {
     "title": "Şifre",

@@ -13,7 +13,7 @@ import UiProgress from '@/components/ui/UiProgress.vue'
 import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
-import { idLabel, nameOf, type CollectionCatalog } from '@/data/collection-names'
+import { idLabel, nameOf, wikiGuide, type CollectionCatalog } from '@/data/collection-names'
 import { companionCards, furnishingSetCards } from '@/data/teapot'
 import { t } from '@/i18n'
 import { characterIcon, gameIcon } from '@/lib/assets'
@@ -61,7 +61,20 @@ const total = computed(() => props.catalog.data.blueprints.length)
 const shown = computed<GridEntry[]>(() =>
   entries.value
     .filter((e) => filter.value === 'all' || e.have === (filter.value === 'have'))
-    .map((e) => ({ id: e.id, name: e.name, icon: e.icon, missing: !e.have, title: e.name })),
+    .map((e) => {
+      // The furnishing's page ("Glug in One Go"); a blueprint shares its id.
+      const href =
+        wikiGuide(props.catalog, 'furnishings', e.id) ??
+        wikiGuide(props.catalog, 'blueprints', e.id)
+      return {
+        id: e.id,
+        name: e.name,
+        icon: e.icon,
+        missing: !e.have,
+        title: href ? `${e.name} · ${t('collections.guide')}` : e.name,
+        href,
+      }
+    }),
 )
 
 // ------------------------------------------------------------------ sets and companions

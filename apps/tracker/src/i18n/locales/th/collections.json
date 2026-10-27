@@ -33,6 +33,7 @@
   "notCapturedPart": "ยังไม่ได้สแกน",
   "notCapturedPartBody": "Teyvat.me Capture จะอ่านตอนเข้าสู่ระบบ ยังว่างอยู่? อัปเดตแอป",
   "tabs": {
+    "achievements": "ความสำเร็จ",
     "world": "โลก",
     "spincrystals": "Radiant Spincrystal",
     "anecdotes": "เกร็ดน่ารู้",
@@ -42,7 +43,7 @@
     "tcg": "เกมกลเจ็ดอัจฉริยะ",
     "recipes": "สูตรอาหาร",
     "wardrobe": "ตู้เสื้อผ้า",
-    "aranara": "Aranara",
+    "aranara": "ตำราอรัญญกา: สมุดลึกลับ",
     "hangouts": "Hangout Event",
     "blueprints": "Serenitea Pot",
     "crafting": "การประดิษฐ์",

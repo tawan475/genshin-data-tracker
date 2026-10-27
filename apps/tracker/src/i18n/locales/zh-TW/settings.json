@@ -48,7 +48,10 @@
     "themeNotSaved": "無法儲存主題",
     "clockNotSaved": "無法儲存時鐘設定",
     "language": "語言",
-    "languageNotSaved": "無法儲存語言"
+    "languageNotSaved": "無法儲存語言",
+    "tabBar": "手機底部欄",
+    "tabBarHint": "手機底部欄最多 {n} 個頁面，其餘在「更多」中",
+    "tabBarNotSaved": "無法儲存底部欄"
   },
   "password": {
     "title": "密碼",

@@ -33,6 +33,7 @@
   "notCapturedPart": "Ainda não capturado",
   "notCapturedPartBody": "O Teyvat.me Capture o lê ao entrar no jogo. Ainda vazio? Atualize o app.",
   "tabs": {
+    "achievements": "Conquistas",
     "world": "Mundo",
     "spincrystals": "Cristais Rodopiantes Radiantes",
     "anecdotes": "Anedotas",
@@ -42,7 +43,7 @@
     "tcg": "Chamado Sagrado dos Sete",
     "recipes": "Receitas",
     "wardrobe": "Guarda-roupa",
-    "aranara": "Aranara",
+    "aranara": "Aranyaka: Álbum Misterioso",
     "hangouts": "Eventos de Encontro",
     "blueprints": "Bule de Chá",
     "crafting": "Criação",

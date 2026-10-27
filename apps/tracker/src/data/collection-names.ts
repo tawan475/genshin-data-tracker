@@ -1,5 +1,6 @@
 import type { ArchiveTab, WardrobeKind } from '@gdt/shared'
 import type { CollectionData, CollectionSection, CollectionTexts } from '@gdt/game-data/collections'
+import { wikiPage } from '@/lib/wiki'
 
 /**
  * What the Collections tabs list, from the game data's collections
@@ -38,6 +39,19 @@ export function nameOf(
   const pick = (texts: CollectionTexts) =>
     (texts[section].get(id) as Record<string, string> | undefined)?.[column] || ''
   return pick(catalog.text) || pick(catalog.english) || idLabel(id)
+}
+
+/**
+ * The Fandom wiki page of an entry, titled with its English name ("Glug in One
+ * Go"); undefined when the game data has none.
+ */
+export function wikiGuide(
+  catalog: CollectionCatalog,
+  section: CollectionSection,
+  id: number,
+): string | undefined {
+  const english = (catalog.english[section].get(id) as Record<string, string> | undefined)?.name
+  return english ? wikiPage(english) : undefined
 }
 
 const str = (value: unknown) => (typeof value === 'string' ? value : '')
@@ -133,19 +147,34 @@ export const WARDROBE_SECTIONS: Readonly<Record<WardrobeKind, CollectionSection>
   trails: 'trails',
 }
 
+/** Weapon appearances never listed (the user's call): the quest's Exaiphanes Blade. */
+const NEVER_LISTED: ReadonlySet<number> = new Set([390002, 390003])
+
 /**
- * Every item of a wardrobe kind a player can own: the default outfits every
- * character wears from the start are left out (the capture lists only the
- * others).
+ * Every item of a wardrobe kind a player can own, as the game's wardrobe lists
+ * them: not the default outfits every character starts with, and hidden ones
+ * (event items the game lists once owned; debug ones nobody owns) only when
+ * `owned` has them. Owned ids the game data lacks aren't listed (bare codes).
  */
-export function wardrobeEntries(catalog: CollectionCatalog, kind: WardrobeKind): CatalogEntry[] {
+export function wardrobeEntries(
+  catalog: CollectionCatalog,
+  kind: WardrobeKind,
+  owned: ReadonlySet<number> = new Set(),
+): CatalogEntry[] {
   const section = WARDROBE_SECTIONS[kind]
-  const defaults = new Set(
-    kind === 'outfits'
-      ? catalog.data.outfits.filter((row) => num(row.isDefault) === 1).map((row) => row.id)
-      : [],
+  const rows = catalog.data[section] as unknown as Record<string, unknown>[]
+  const left = new Set(
+    rows
+      .filter(
+        (row) =>
+          (kind === 'outfits' && num(row.isDefault) === 1) ||
+          (num(row.hidden) === 1 && !owned.has(row.id as number)),
+      )
+      .map((row) => row.id as number),
   )
-  return entriesOf(catalog, section).filter((entry) => !defaults.has(entry.id))
+  return entriesOf(catalog, section).filter(
+    (entry) => !left.has(entry.id) && !NEVER_LISTED.has(entry.id),
+  )
 }
 
 /** Recipes: name, icon, rarity and the proficiency that masters it, in the game's order. */

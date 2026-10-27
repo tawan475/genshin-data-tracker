@@ -48,7 +48,10 @@
     "themeNotSaved": "No se pudo guardar el tema",
     "clockNotSaved": "No se pudo guardar el ajuste del reloj",
     "language": "Idioma",
-    "languageNotSaved": "No se pudo guardar el idioma"
+    "languageNotSaved": "No se pudo guardar el idioma",
+    "tabBar": "Barra de pestañas del móvil",
+    "tabBarHint": "Hasta {n} páginas en la barra inferior del móvil; Más contiene el resto",
+    "tabBarNotSaved": "No se pudo guardar la barra de pestañas"
   },
   "password": {
     "title": "Contraseña",

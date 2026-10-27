@@ -406,7 +406,7 @@ async function importIds(ids: number[]): Promise<boolean> {
 
 <template>
   <div>
-    <PageHeader :title="$t('achievements.title')">
+    <PageHeader :title="$t('achievements.title')" bare>
       <template v-if="ready && captured" #meta>
         <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
           <Clock class="size-4" aria-hidden="true" />

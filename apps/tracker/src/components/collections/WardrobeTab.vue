@@ -6,14 +6,11 @@ import EntryGrid, { type GridEntry } from './EntryGrid.vue'
 import HaveFilter, { type HaveFilterValue } from './HaveFilter.vue'
 import NotCaptured from './NotCaptured.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
-import GameIcon from '@/components/ui/GameIcon.vue'
-import UiBadge from '@/components/ui/UiBadge.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
-import { idLabel, wardrobeEntries, type CollectionCatalog } from '@/data/collection-names'
-import { characterIcon } from '@/lib/assets'
+import { wardrobeEntries, type CollectionCatalog } from '@/data/collection-names'
 import { formatDateTime, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { characterName } from '@/i18n/game-names'
@@ -21,8 +18,9 @@ import { t } from '@/i18n'
 
 /**
  * The wardrobe: per kind (outfits, gliders, weapon appearances, trails)
- * what is owned of what the game has, who wears what and which trials run
- * out, then the saved teams by the names the player gave them.
+ * what is owned of what the game has, who wears the shared ones (gliders,
+ * weapon appearances) and which trials run out. The saved teams moved to
+ * the Characters page.
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
@@ -43,22 +41,19 @@ const filter = ref<HaveFilterValue>(
 )
 watch(filter, (value) => writeStorage(FILTER_KEY, value === 'all' ? null : value))
 
+const SHARED: ReadonlySet<WardrobeKind> = new Set(['gliders', 'weaponSkins'])
+
 const kinds = computed(() =>
   WARDROBE_KINDS.map((k) => {
     const value = wardrobe.value?.[k]
     const owned = new Set(value?.owned ?? [])
-    const known = wardrobeEntries(props.catalog, k)
-    const knownIds = new Set(known.map((entry) => entry.id))
+    // Only what the game data has: an owned id it lacks would show as a bare code (the user's call).
+    const known = wardrobeEntries(props.catalog, k, owned)
     const wearers = new Map<number, string[]>()
     for (const [key, id] of Object.entries(value?.worn ?? {})) {
       wearers.set(id, [...(wearers.get(id) ?? []), key])
     }
-    const entries = [
-      ...known.map((entry) => ({ ...entry, have: owned.has(entry.id) })),
-      ...[...owned]
-        .filter((id) => !knownIds.has(id))
-        .map((id) => ({ id, name: idLabel(id), icon: '', order: Infinity, have: true })),
-    ]
+    const entries = known.map((entry) => ({ ...entry, have: owned.has(entry.id) }))
     return {
       kind: k,
       label: t(`collections.wardrobe.kinds.${k}`),
@@ -66,7 +61,9 @@ const kinds = computed(() =>
       entries,
       have: known.filter((entry) => owned.has(entry.id)).length,
       total: known.length,
-      wearers,
+      // Only gliders and weapon appearances are shared; an outfit or trail is one character's.
+      wearers: SHARED.has(k) ? wearers : new Map<number, string[]>(),
+      shared: SHARED.has(k),
       expires: value?.expires ?? {},
       worn: value ? Object.keys(value.worn).length : 0,
     }
@@ -97,12 +94,6 @@ const shown = computed<GridEntry[]>(() => {
       }
     })
 })
-
-const teams = computed(() =>
-  Object.entries(wardrobe.value?.teams ?? {})
-    .map(([slot, team]) => ({ slot: Number(slot), ...team }))
-    .sort((a, b) => a.slot - b.slot),
-)
 </script>
 
 <template>
@@ -116,9 +107,11 @@ const teams = computed(() =>
         <UiStat
           :label="k.label"
           :hint="
-            k.captured
-              ? $t('collections.wardrobe.wornBy', { n: formatNumber(k.worn) })
-              : $t('collections.notCapturedPart')
+            !k.captured
+              ? $t('collections.notCapturedPart')
+              : k.shared
+                ? $t('collections.wardrobe.wornBy', { n: formatNumber(k.worn) })
+                : undefined
           "
         >
           <template #value>
@@ -172,40 +165,6 @@ const teams = computed(() =>
         </template>
         <UiEmpty v-else :title="$t('collections.notCapturedPart')" />
       </div>
-    </UiPanel>
-
-    <UiPanel :title="$t('collections.wardrobe.teams')" flush>
-      <ul
-        v-if="teams.length > 0"
-        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-px bg-border-subtle"
-      >
-        <li
-          v-for="team in teams"
-          :key="team.slot"
-          class="flex min-w-0 flex-col gap-2 bg-surface-raised px-4 py-3"
-        >
-          <div class="flex min-w-0 items-center gap-2">
-            <span class="tabular shrink-0 font-mono text-xs text-text-muted">{{ team.slot }}</span>
-            <span class="min-w-0 flex-1 truncate font-medium" :title="team.name">{{
-              team.name || '—'
-            }}</span>
-            <UiBadge v-if="team.slot === wardrobe.currentTeam" tone="accent">{{
-              $t('collections.wardrobe.inUse')
-            }}</UiBadge>
-          </div>
-          <div class="flex gap-1.5">
-            <GameIcon
-              v-for="(key, i) in team.characters"
-              :key="`${key}-${i}`"
-              :src="characterIcon(key)"
-              :name="characterName(key)"
-              :title="characterName(key)"
-              size="sm"
-            />
-          </div>
-        </li>
-      </ul>
-      <UiEmpty v-else :title="$t('collections.wardrobe.noTeams')" />
     </UiPanel>
   </div>
 </template>

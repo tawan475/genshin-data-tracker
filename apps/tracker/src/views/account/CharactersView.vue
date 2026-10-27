@@ -10,6 +10,7 @@ import CharacterToolbar from '@/components/characters/CharacterToolbar.vue'
 import { useProgressive } from '@/components/planner/use-progressive'
 import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import SavedTeams from '@/components/characters/SavedTeams.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
@@ -379,6 +380,8 @@ watch(
         @open="open"
         @favorite="toggleFavorite"
       />
+
+      <SavedTeams class="mt-6" />
     </template>
 
     <CharacterModal

@@ -2,14 +2,13 @@
 import type { GiPlayer } from '@gdt/shared'
 import { computed } from 'vue'
 import NamecardBackdrop from '@/components/characters/NamecardBackdrop.vue'
-import { gameIcon } from '@/lib/assets'
 import { formatNumber } from '@/lib/format'
 
 /**
  * The player's profile, laid out like the game's own profile card: the name
  * card as the background, the profile picture, the in-game name and
  * signature, then Adventure Rank with its EXP toward the next rank, World
- * Level, stamina and Story Keys as rows. No UID (the user's call). What the
+ * Level and stamina as rows (no Story Keys: the user's call). No UID (the user's call). What the
  * capture lacks falls back (`profile`): the account's name, the Traveler's
  * portrait and name card; a row the capture has no value for is left out.
  */
@@ -49,7 +48,6 @@ const rows = computed(() => {
           title: p.wlLimit !== undefined ? 'wlLimit' : undefined,
         },
     stamina.value === null ? null : { key: 'stamina', value: formatNumber(stamina.value) },
-    p.storyKeys === undefined ? null : { key: 'storyKeys', value: formatNumber(p.storyKeys) },
   ].filter((row) => row !== null)
 })
 </script>
@@ -70,19 +68,21 @@ const rows = computed(() => {
       aria-hidden="true"
     />
     <div class="flex flex-wrap items-center gap-x-6 gap-y-4 px-4 py-5 sm:px-6">
-      <span v-if="profile.avatar" class="relative size-20 shrink-0 sm:size-24">
+      <span v-if="profile.avatar" class="relative size-24 shrink-0 sm:size-28">
+        <!-- With a frame, the picture sits inside the game's ring (~80% of it) -->
         <img
           :src="profile.avatar"
           alt=""
-          class="size-full rounded-full bg-white/10 object-cover"
-          :class="profile.frame ? '' : 'ring-4 ring-white/25'"
+          class="absolute rounded-full bg-white/10 object-cover"
+          :class="
+            profile.frame ? 'inset-[11%] size-[78%]' : 'inset-[8%] size-[84%] ring-4 ring-white/25'
+          "
         />
-        <!-- The game's frame is a ring about 1.2x the picture, centred on it -->
         <img
           v-if="profile.frame"
           :src="profile.frame"
           alt=""
-          class="pointer-events-none absolute -inset-[10%] size-[120%] max-w-none object-contain"
+          class="pointer-events-none absolute inset-0 size-full object-contain"
         />
       </span>
       <div class="flex min-w-0 flex-[1_1_18rem] flex-col gap-3">
@@ -139,13 +139,6 @@ const rows = computed(() => {
             class="flex items-baseline justify-between gap-3 border-t border-white/10 pt-1.5"
           >
             <dt class="flex items-center gap-1.5 font-medium text-white/85">
-              <img
-                v-if="row.key === 'storyKeys'"
-                :src="gameIcon('UI_ItemIcon_107')"
-                alt=""
-                class="size-4 object-contain"
-                aria-hidden="true"
-              />
               {{ $t(`overview.traveler.${row.key}`) }}
             </dt>
             <dd

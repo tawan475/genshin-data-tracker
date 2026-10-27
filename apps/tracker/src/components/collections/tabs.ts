@@ -14,12 +14,14 @@ import {
   Shirt,
   Sofa,
   Sprout,
+  Trophy,
 } from 'lucide-vue-next'
 import type { CollectionTopic } from '@gdt/game-data/collections'
 import type { CapturedCollections } from '@/data/collections'
 
 /** The collections, in the hub's order; the slug is the URL's last segment (`/collections/archive`). */
 export const COLLECTION_TABS = [
+  'achievements',
   'world',
   'spincrystals',
   'anecdotes',
@@ -42,6 +44,7 @@ export const isCollectionTab = (value: unknown): value is CollectionTab =>
 
 /** A tab's label: `collections.tabs.<key>`. */
 export const TAB_LABEL = {
+  achievements: 'achievements',
   world: 'world',
   spincrystals: 'spincrystals',
   anecdotes: 'anecdotes',
@@ -58,8 +61,12 @@ export const TAB_LABEL = {
   aranara: 'aranara',
 } as const satisfies Record<CollectionTab, string>
 
-/** The captured part a tab shows (its capture time is the tab's), null for Anecdotes. */
+/**
+ * The captured part a tab shows (its capture time is the tab's); null for
+ * Achievements and Anecdotes, which load their own data and hand marks.
+ */
 export const TAB_PART: Readonly<Record<CollectionTab, keyof CapturedCollections | null>> = {
+  achievements: null,
   world: 'exploration',
   spincrystals: 'spincrystals',
   anecdotes: null,
@@ -94,6 +101,8 @@ export const NEEDS_CATALOG: ReadonlySet<CollectionTab> = new Set([
 
 /** Each tab's component, loaded when the tab is first shown. */
 export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
+  // Its own page, kept as it was (the user's call), shown here like the rest.
+  achievements: defineAsyncComponent(() => import('@/views/account/AchievementsView.vue')),
   world: defineAsyncComponent(() => import('./WorldTab.vue')),
   spincrystals: defineAsyncComponent(() => import('./SpincrystalsTab.vue')),
   anecdotes: defineAsyncComponent(() => import('./AnecdotesTab.vue')),
@@ -112,6 +121,7 @@ export const TAB_COMPONENTS: Readonly<Record<CollectionTab, Component>> = {
 
 /** Each collection's card icon. */
 export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
+  achievements: Trophy,
   world: MapIcon,
   spincrystals: Disc3,
   anecdotes: BookOpen,
@@ -130,6 +140,7 @@ export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
 
 /** The game data topics each collection's page reads (its chunks only). */
 export const TAB_TOPICS: Readonly<Record<CollectionTab, readonly CollectionTopic[]>> = {
+  achievements: [],
   world: ['world', 'domains', 'npcs', 'natlan'],
   spincrystals: [],
   anecdotes: [],

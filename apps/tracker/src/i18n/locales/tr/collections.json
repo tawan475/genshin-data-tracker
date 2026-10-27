@@ -33,6 +33,7 @@
   "notCapturedPart": "Henüz taranmadı",
   "notCapturedPartBody": "Teyvat.me Capture bunu girişte okur. Hâlâ boş mu? Uygulamayı güncelle.",
   "tabs": {
+    "achievements": "Başarımlar",
     "world": "Dünya",
     "spincrystals": "Parlak Burgu Kristaller",
     "anecdotes": "Seyahat Notları",
@@ -42,7 +43,7 @@
     "tcg": "Dehanın Yakarışı Kart Oyunu",
     "recipes": "Tarifler",
     "wardrobe": "Giysi Dolabı",
-    "aranara": "Aranara",
+    "aranara": "Aranyaka: Gizemli Pano",
     "hangouts": "Buluşma Etkinlikleri",
     "blueprints": "Huzur Çaydanlığı",
     "crafting": "Üretim",

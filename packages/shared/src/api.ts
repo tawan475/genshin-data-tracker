@@ -5,7 +5,7 @@
 
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
-import { MAX_FAVORITE_CHARACTERS, SITE_LANGUAGES } from './settings'
+import { MAX_FAVORITE_CHARACTERS, SITE_LANGUAGES, TAB_BAR_MAX } from './settings'
 import type { OAuthProvider } from './oauth'
 import type {
   AccountSettings,
@@ -167,6 +167,10 @@ export const userSettingsPatch = z
     theme: z.enum(['system', 'light', 'dark']),
     use24Hour: z.boolean(),
     language: z.enum(['system', ...SITE_LANGUAGES]),
+    tabBar: z
+      .array(z.string().regex(/^[a-z][a-zA-Z]{0,23}$/))
+      .max(TAB_BAR_MAX)
+      .refine((pages) => new Set(pages).size === pages.length, 'Each page once'),
   })
   .partial()
   .strict()

@@ -48,7 +48,10 @@
     "themeNotSaved": "Could not save the theme",
     "clockNotSaved": "Could not save the clock setting",
     "language": "Language",
-    "languageNotSaved": "Could not save the language"
+    "languageNotSaved": "Could not save the language",
+    "tabBar": "Phone tab bar",
+    "tabBarHint": "Up to {n} pages for the phone's bottom bar; More holds the rest",
+    "tabBarNotSaved": "Could not save the tab bar"
   },
   "password": {
     "title": "Password",

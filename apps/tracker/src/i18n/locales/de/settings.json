@@ -48,7 +48,10 @@
     "themeNotSaved": "Design konnte nicht gespeichert werden",
     "clockNotSaved": "Uhr-Einstellung konnte nicht gespeichert werden",
     "language": "Sprache",
-    "languageNotSaved": "Sprache konnte nicht gespeichert werden"
+    "languageNotSaved": "Sprache konnte nicht gespeichert werden",
+    "tabBar": "Tab-Leiste am Handy",
+    "tabBarHint": "Bis zu {n} Seiten in der unteren Leiste am Handy; Mehr enthält den Rest",
+    "tabBarNotSaved": "Tab-Leiste konnte nicht gespeichert werden"
   },
   "password": {
     "title": "Passwort",

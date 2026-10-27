@@ -48,7 +48,10 @@
     "themeNotSaved": "无法保存主题",
     "clockNotSaved": "无法保存时钟设置",
     "language": "语言",
-    "languageNotSaved": "无法保存语言"
+    "languageNotSaved": "无法保存语言",
+    "tabBar": "手机底部栏",
+    "tabBarHint": "手机底部栏最多 {n} 个页面，其余在“更多”中",
+    "tabBarNotSaved": "无法保存底部栏"
   },
   "password": {
     "title": "密码",

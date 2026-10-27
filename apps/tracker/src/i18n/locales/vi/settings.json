@@ -48,7 +48,10 @@
     "themeNotSaved": "Không lưu được chủ đề",
     "clockNotSaved": "Không lưu được thiết lập đồng hồ",
     "language": "Ngôn ngữ",
-    "languageNotSaved": "Không lưu được ngôn ngữ"
+    "languageNotSaved": "Không lưu được ngôn ngữ",
+    "tabBar": "Thanh tab trên điện thoại",
+    "tabBarHint": "Tối đa {n} trang ở thanh dưới trên điện thoại; phần còn lại ở Thêm",
+    "tabBarNotSaved": "Không lưu được thanh tab"
   },
   "password": {
     "title": "Mật khẩu",

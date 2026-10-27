@@ -33,6 +33,7 @@
   "notCapturedPart": "Пока не снято",
   "notCapturedPartBody": "Teyvat.me Capture считывает это при входе в игру. Всё ещё пусто? Обновите приложение.",
   "tabs": {
+    "achievements": "Достижения",
     "world": "Мир",
     "spincrystals": "Лучистые кристаллы",
     "anecdotes": "Путевой дневник",
@@ -42,7 +43,7 @@
     "tcg": "Священный призыв семерых",
     "recipes": "Рецепты",
     "wardrobe": "Гардероб",
-    "aranara": "Аранары",
+    "aranara": "Араньяка: Таинственный альбом",
     "hangouts": "Встречи",
     "blueprints": "Чайник безмятежности",
     "crafting": "Создание",

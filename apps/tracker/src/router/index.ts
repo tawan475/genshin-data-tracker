@@ -288,12 +288,14 @@ const router = createRouter({
               'planner',
               () => import('@/views/account/PlannerView.vue'),
             ),
-            account(
-              'achievements',
-              'account-achievements',
-              'achievements',
-              () => import('@/views/account/AchievementsView.vue'),
-            ),
+            // A tab of Collections now (2026-10-27), with the others' back button.
+            {
+              path: 'achievements',
+              redirect: (to) => ({
+                name: 'account-collections',
+                params: { ...to.params, tab: 'achievements' },
+              }),
+            },
             // A tab of Collections now.
             {
               path: 'anecdotes',
@@ -308,7 +310,7 @@ const router = createRouter({
               redirect: (to) => ({ name: 'account-collections', params: to.params }),
             },
             account(
-              'collections/:tab(world|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|music|aranara)?',
+              'collections/:tab(achievements|world|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|music|aranara)?',
               'account-collections',
               'collections',
               () => import('@/views/account/CollectionsView.vue'),

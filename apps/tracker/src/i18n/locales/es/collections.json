@@ -33,6 +33,7 @@
   "notCapturedPart": "Aún sin capturar",
   "notCapturedPartBody": "Teyvat.me Capture lo lee al iniciar sesión. ¿Sigue vacío? Actualiza la app.",
   "tabs": {
+    "achievements": "Logros",
     "world": "Mundo",
     "spincrystals": "Girocristales radiantes",
     "anecdotes": "Anécdotas",
@@ -42,7 +43,7 @@
     "tcg": "Invocación de los Sabios",
     "recipes": "Recetas",
     "wardrobe": "Armario",
-    "aranara": "Aranara",
+    "aranara": "Escrituras Araniaka: Álbum misterioso",
     "hangouts": "Eventos de encuentro",
     "blueprints": "Tetera Caelestis",
     "crafting": "Fabricación",

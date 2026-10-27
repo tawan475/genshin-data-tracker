@@ -4,11 +4,17 @@
  * (screen readers still get one h1 per page); visible are the page's own
  * figures and actions.
  */
-defineProps<{ title: string; description?: string; eyebrow?: string }>()
+defineProps<{
+  title: string
+  description?: string
+  eyebrow?: string
+  /** Inside a page that has its own (a Collections tab): no second h1. */
+  bare?: boolean
+}>()
 </script>
 
 <template>
-  <h1 class="sr-only">{{ title }}</h1>
+  <h1 v-if="!bare" class="sr-only">{{ title }}</h1>
   <header
     v-if="$slots.meta || $slots.actions"
     class="mb-6 flex flex-wrap items-center justify-between gap-3"

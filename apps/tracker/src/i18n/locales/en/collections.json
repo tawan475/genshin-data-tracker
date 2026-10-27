@@ -33,6 +33,7 @@
   "notCapturedPart": "Not captured yet",
   "notCapturedPartBody": "Teyvat.me Capture reads it at login. Still empty? Update the app.",
   "tabs": {
+    "achievements": "Achievements",
     "world": "World",
     "spincrystals": "Radiant Spincrystals",
     "anecdotes": "Anecdotes",
@@ -42,7 +43,7 @@
     "tcg": "Genius Invokation TCG",
     "recipes": "Recipes",
     "wardrobe": "Wardrobe",
-    "aranara": "Aranara",
+    "aranara": "Aranyaka Mysterious Clipboard",
     "hangouts": "Hangout Events",
     "blueprints": "Serenitea Pot",
     "crafting": "Crafting",

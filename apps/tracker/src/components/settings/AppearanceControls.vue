@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { UserSettings } from '@gdt/shared'
+import { TAB_BAR_MAX, USER_SETTINGS_DEFAULTS } from '@gdt/shared/settings'
 import { computed, ref } from 'vue'
+import { ACCOUNT_SECTIONS } from '@/components/shell/nav'
+import FilterChip from '@/components/ui/FilterChip.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
@@ -52,6 +55,16 @@ const use24Hour = computed<boolean>({
   get: () => session.settings.use24Hour,
   set: (value) => void save({ use24Hour: value }, t('settings.appearance.clockNotSaved')),
 })
+/** The phone tab bar's pages: toggled here, kept in the sidebar's order, at most TAB_BAR_MAX. */
+const tabBar = computed(() => new Set(session.settings.tabBar ?? USER_SETTINGS_DEFAULTS.tabBar))
+function toggleTab(label: string) {
+  const picked = new Set(tabBar.value)
+  if (picked.has(label)) picked.delete(label)
+  else if (picked.size < TAB_BAR_MAX) picked.add(label)
+  else return
+  const order = ACCOUNT_SECTIONS.map((s) => s.label as string)
+  void save({ tabBar: order.filter((l) => picked.has(l)) }, t('settings.appearance.tabBarNotSaved'))
+}
 const signedIn = computed(() => session.status === 'signed-in')
 /** Theme and clock: the app's pages, signed in. */
 const full = computed(() => signedIn.value && !props.languageOnly)
@@ -96,6 +109,10 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
     restored.language = before.language
     changed = true
   }
+  if (patch.tabBar !== undefined && me.settings.tabBar === patch.tabBar) {
+    restored.tabBar = before.tabBar
+    changed = true
+  }
   if (changed) session.me = { ...me, settings: restored }
 }
 </script>
@@ -124,8 +141,28 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
         class="w-44"
       />
     </div>
-    <div v-if="full" class="pt-1">
+    <div v-if="full" class="py-3">
       <UiSwitch v-model="use24Hour" :label="$t('settings.appearance.clock24')" />
+    </div>
+    <div v-if="full" class="flex flex-col gap-2 pt-3">
+      <span class="text-base" :title="$t('settings.appearance.tabBarHint', { n: TAB_BAR_MAX })"
+        >{{ $t('settings.appearance.tabBar') }}
+        <span class="text-sm text-text-muted tabular-nums"
+          >{{ tabBar.size }}/{{ TAB_BAR_MAX }}</span
+        ></span
+      >
+      <div class="flex flex-wrap gap-2" role="group" :aria-label="$t('settings.appearance.tabBar')">
+        <FilterChip
+          v-for="section in ACCOUNT_SECTIONS"
+          :key="section.name"
+          :pressed="tabBar.has(section.label)"
+          :disabled="!tabBar.has(section.label) && tabBar.size >= TAB_BAR_MAX"
+          @toggle="toggleTab(section.label)"
+        >
+          <component :is="section.icon" class="size-4" aria-hidden="true" />
+          {{ $t(`shell.nav.${section.label}`) }}
+        </FilterChip>
+      </div>
     </div>
   </div>
 </template>

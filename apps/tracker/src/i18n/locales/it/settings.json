@@ -48,7 +48,10 @@
     "themeNotSaved": "Impossibile salvare il tema",
     "clockNotSaved": "Impossibile salvare l'impostazione dell'orologio",
     "language": "Lingua",
-    "languageNotSaved": "Impossibile salvare la lingua"
+    "languageNotSaved": "Impossibile salvare la lingua",
+    "tabBar": "Barra delle schede del telefono",
+    "tabBarHint": "Fino a {n} pagine nella barra in basso del telefono; Altro contiene il resto",
+    "tabBarNotSaved": "Impossibile salvare la barra delle schede"
   },
   "password": {
     "title": "Password",

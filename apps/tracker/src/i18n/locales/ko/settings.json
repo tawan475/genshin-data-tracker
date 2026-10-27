@@ -48,7 +48,10 @@
     "themeNotSaved": "테마를 저장할 수 없습니다",
     "clockNotSaved": "시계 설정을 저장할 수 없습니다",
     "language": "언어",
-    "languageNotSaved": "언어를 저장할 수 없습니다"
+    "languageNotSaved": "언어를 저장할 수 없습니다",
+    "tabBar": "휴대폰 탭 바",
+    "tabBarHint": "휴대폰 하단 바에 최대 {n}개 페이지, 나머지는 더보기에",
+    "tabBarNotSaved": "탭 바를 저장할 수 없습니다"
   },
   "password": {
     "title": "비밀번호",

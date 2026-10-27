@@ -27,7 +27,8 @@ describe('collectionFigures', () => {
         { id: 141_002, key: 'RadiantSpincrystal2', number: 2 },
       ],
     )
-    expect(figures['living-beings']).toEqual({ count: 1 })
+    // As the page lists them: defeated, or captured only (a creature).
+    expect(figures['living-beings']).toEqual({ count: 2 })
     expect(figures.handbook).toEqual({ have: 1, total: 2 })
     expect(figures.spincrystals).toEqual({ have: 1, total: 2 })
     // These wait for the game data's lists.

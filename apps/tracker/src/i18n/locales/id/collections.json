@@ -33,6 +33,7 @@
   "notCapturedPart": "Belum tertangkap",
   "notCapturedPartBody": "Teyvat.me Capture membacanya saat login. Masih kosong? Perbarui aplikasinya.",
   "tabs": {
+    "achievements": "Achievement",
     "world": "Dunia",
     "spincrystals": "Radiant Spincrystal",
     "anecdotes": "Anekdot",
@@ -42,7 +43,7 @@
     "tcg": "Genius Invokation TCG",
     "recipes": "Resep",
     "wardrobe": "Lemari",
-    "aranara": "Aranara",
+    "aranara": "Aranyaka: Papan Klip Misterius",
     "hangouts": "Hangout Event",
     "blueprints": "Serenitea Pot",
     "crafting": "Crafting",

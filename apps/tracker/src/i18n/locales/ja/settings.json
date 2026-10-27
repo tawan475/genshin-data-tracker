@@ -48,7 +48,10 @@
     "themeNotSaved": "テーマを保存できませんでした",
     "clockNotSaved": "時刻表示の設定を保存できませんでした",
     "language": "言語",
-    "languageNotSaved": "言語を保存できませんでした"
+    "languageNotSaved": "言語を保存できませんでした",
+    "tabBar": "スマホのタブバー",
+    "tabBarHint": "スマホ下部のバーに最大 {n} ページ。残りは「その他」に",
+    "tabBarNotSaved": "タブバーを保存できませんでした"
   },
   "password": {
     "title": "パスワード",

@@ -33,6 +33,7 @@
   "notCapturedPart": "まだキャプチャされていません",
   "notCapturedPartBody": "Teyvat.me Capture がログイン時に読み取ります。空のままならアプリを更新してください。",
   "tabs": {
+    "achievements": "アチーブメント",
     "world": "ワールド",
     "spincrystals": "旋曜玉帛",
     "anecdotes": "秘話",
@@ -42,7 +43,7 @@
     "tcg": "七聖召喚",
     "recipes": "レシピ",
     "wardrobe": "クローゼット",
-    "aranara": "アランナラ",
+    "aranara": "森林書：不思議なクリップボード",
     "hangouts": "デートイベント",
     "blueprints": "塵歌壺",
     "crafting": "合成",

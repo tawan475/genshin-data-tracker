@@ -15,6 +15,7 @@ import {
 } from '@/components/collections/tabs'
 import { topicsKey, useCollectionCatalog } from '@/components/collections/use-catalog'
 import { useCapturedCollections } from '@/components/collections/use-captured'
+import { useHubExtras } from '@/components/collections/use-hub-extras'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
@@ -25,7 +26,7 @@ import { t } from '@/i18n'
 /**
  * Collections: a bare `/collections` is the hub, a card per collection the
  * captures carry (Teyvat.me Capture's `gi_collections` and `gi_wardrobe`,
- * the Anecdotes book, and a link to Achievements); `/collections/<slug>`
+ * Achievements and the Anecdotes book); `/collections/<slug>`
  * is that collection's page, from the newest snapshot that has it.
  * Read-only but for Anecdotes' hand marks, so viewers of a shared account
  * see what the owner sees.
@@ -39,6 +40,9 @@ const title = computed(() =>
 )
 
 const { captured, resource } = useCapturedCollections()
+// Started here, beside the captures, so the hub's Achievements and Anecdotes
+// cards arrive with the rest instead of flashing "Not captured".
+const extras = useHubExtras()
 const topics = computed(() => (tab.value ? TAB_TOPICS[tab.value] : HUB_TOPICS))
 const catalog = useCollectionCatalog(
   () => topics.value,
@@ -77,10 +81,11 @@ const part = computed(() => {
           <ArrowLeft class="size-5" aria-hidden="true" />
         </UiIconButton>
         <h2 class="min-w-0 flex-1 truncate text-lg font-semibold">{{ title }}</h2>
-        <CaptureTime v-if="tab !== 'anecdotes' && ready" :taken-at="part?.takenAt" />
+        <CaptureTime v-if="TAB_PART[tab] && ready" :taken-at="part?.takenAt" />
       </div>
 
-      <component :is="TAB_COMPONENTS.anecdotes" v-if="tab === 'anecdotes'" />
+      <!-- Achievements and Anecdotes load their own data and hand marks. -->
+      <component :is="TAB_COMPONENTS[tab]" v-if="TAB_PART[tab] === null" />
       <UiError
         v-else-if="loadError && !ready"
         :title="$t('collections.loadFailed')"
@@ -109,7 +114,12 @@ const part = computed(() => {
         :error="resource.error.value"
         @retry="retry"
       />
-      <CollectionsHub v-else-if="captured" :captured="captured" :catalog="catalogHere" />
+      <CollectionsHub
+        v-else-if="captured && extras.ready.value"
+        :captured="captured"
+        :catalog="catalogHere"
+        :extras="extras"
+      />
       <div
         v-else
         class="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] sm:gap-3"

@@ -9,7 +9,7 @@ import { t } from '@/i18n'
 
 /**
  * One card of the Collections hub: the collection's name, its figure (have
- * of total, or a count with its label) and when it was captured. Opens the
+ * of total, a percent, or a count with its label) and when it was captured. Opens the
  * collection's page.
  */
 const props = defineProps<{
@@ -67,6 +67,13 @@ const time = computed(() =>
         <span class="text-sm text-text-secondary tabular-nums">{{ percent }}%</span>
       </span>
       <UiProgress :value="figure.have" :max="figure.total" :label="title" />
+    </span>
+    <span v-else-if="figure && 'percent' in figure" class="mt-auto flex flex-col gap-1.5">
+      <span class="text-lg font-semibold tabular-nums sm:text-xl"
+        >{{ formatNumber(figure.percent)
+        }}<span class="text-sm font-normal text-text-muted">%</span></span
+      >
+      <UiProgress :value="figure.percent" :max="100" :label="title" />
     </span>
     <span v-else-if="figure && 'count' in figure" class="mt-auto flex items-baseline gap-2">
       <span class="text-lg font-semibold tabular-nums sm:text-xl">{{
