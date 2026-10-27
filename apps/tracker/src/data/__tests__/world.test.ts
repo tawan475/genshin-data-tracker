@@ -16,7 +16,8 @@ const catalog = {
     areas: [
       { id: 1100, scene: 3, area1: 1, area2: 0, level: 1, city: 1 },
       { id: 1101, scene: 3, area1: 1, area2: 101, level: 2, city: 1 },
-      { id: 1200, scene: 3, area1: 2, area2: 0, level: 1, city: 1, total: 200 },
+      { id: 1200, scene: 3, area1: 2, area2: 0, level: 1, city: 1, exploreTotal: 200 },
+      { id: 1300, scene: 3, area1: 3, area2: 0, level: 1, city: 1, exploreTotal: 100 },
       { id: 9900, scene: 51195, area1: 99, area2: 0, level: 1, city: 9 },
       { id: 20000, scene: 5, area1: 200, area2: 0, level: 1, city: 3 },
     ],
@@ -51,7 +52,7 @@ describe('worldModel', () => {
         statues: { '1': { level: 10, oculi: 0 }, '9': { level: 1, oculi: 0 } },
         offerings: { '1': 5 },
         scenes: { '3': { points: [1, 3, 4], areas: [1] } },
-        explore: { '1': 120, '2': 150 },
+        explore: { '1': 120, '2': 150, '3': 112 },
         reputation: { '1': 8 },
       },
       catalog,
@@ -69,7 +70,7 @@ describe('worldModel', () => {
         name: null,
         waypoints: { have: 1, total: 2 },
         domains: { have: 1, total: 1 },
-        areas: { have: 1, total: 2 },
+        areas: { have: 1, total: 3 },
       },
     ])
     // Points until the game data has an area's total; then a percentage.
@@ -80,6 +81,8 @@ describe('worldModel', () => {
         areas: [
           { area: 1, name: 'Starfell Valley', points: 120, percent: null },
           { area: 2, name: 'Galesong Hill', points: 150, percent: 75 },
+          // Fully explored areas run a little past their total: 100%.
+          { area: 3, name: '#3', points: 112, percent: 100 },
         ],
       },
     ])

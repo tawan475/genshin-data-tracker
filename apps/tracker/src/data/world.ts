@@ -4,11 +4,12 @@ import { idLabel, type CollectionCatalog } from './collection-names'
 /**
  * The World page (Teyvat.me Capture's `gi_exploration`) against the game
  * data's cities, map areas, offerings and scene points
- * (`@gdt/game-data/collections` from v7.1.15). Pure.
+ * (`@gdt/game-data/collections` from v7.1.16). Pure.
  *
- * Exploration comes as raw points per area: a percentage needs the area's
- * total, which the game data does not carry yet (`total` on an area once it
- * does); until then the page shows the points.
+ * Exploration comes as raw points per area; the percentage is points over
+ * the area's `exploreTotal`, capped at 100 (a fully explored area has a few
+ * points more than its total, as in game). An area without a total shows
+ * its points.
  */
 
 /** Teyvat, the overworld scene: named by the page (the game names it nowhere). */
@@ -199,7 +200,7 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
   const exploreByCity = new Map<number, ExploreArea[]>()
   for (const [area, points] of byId(exploration.explore)) {
     const top = topAreas.get(area)
-    const total = top ? n((top.row as Record<string, unknown>).total) : 0
+    const total = top ? n(top.row.exploreTotal) : 0
     const city = top?.city ?? 0
     exploreByCity.set(city, [
       ...(exploreByCity.get(city) ?? []),
