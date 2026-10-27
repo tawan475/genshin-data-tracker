@@ -208,7 +208,7 @@ each Archive tab, TCG cards and wardrobe kind shows All / Missing / Have, and
 a Recipes tab (Capture 1.5.0) shows unlocked, locked and mastered recipes.
 Aranara entries stay numbered (the game names none); all the game data
 lists show, those the capture lacks as not found. Radiant Spincrystals,
-Anecdotes and Aranara link to guides (the Fandom wiki; the Aranara to Game8's Mysterious Clipboard page)
+Anecdotes, recipes and Aranara link to guides (the Fandom wiki; the Aranara to Game8's Mysterious Clipboard page)
 (`src/lib/wiki.ts`: page titles are the game's English names).
 
 Character, weapon and material keys are stored as ids from the static,

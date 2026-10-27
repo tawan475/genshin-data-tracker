@@ -13,6 +13,7 @@ import { idLabel, recipeEntries, type CollectionCatalog } from '@/data/collectio
 import { recipeRows, type RecipeFilter } from '@/data/recipes'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { wikiPage } from '@/lib/wiki'
 import { t } from '@/i18n'
 
 /**
@@ -70,10 +71,19 @@ const shown = computed<GridEntry[]>(() =>
               ? t('collections.recipes.filters.locked')
               : undefined,
         missing: row.state === 'locked',
-        title: [row.name, '★'.repeat(row.rarity), figure].filter(Boolean).join(' · '),
+        title: [row.name, '★'.repeat(row.rarity), figure, t('collections.guide')]
+          .filter(Boolean)
+          .join(' · '),
+        href: guide(row.id),
       }
     }),
 )
+
+/** The dish's wiki page: titled with its English name ("Sweet Madame"). */
+function guide(id: number): string | undefined {
+  const english = (props.catalog.english.recipes.get(id) as { name?: string } | undefined)?.name
+  return english ? wikiPage(english) : undefined
+}
 </script>
 
 <template>
