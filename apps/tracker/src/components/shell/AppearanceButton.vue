@@ -29,7 +29,13 @@ const open = ref(false)
   >
     <Globe class="size-5" aria-hidden="true" />
   </button>
-  <UiModal :open="open" :title="$t('settings.appearance.title')" @close="open = false">
-    <AppearanceControls />
+  <UiModal
+    :open="open"
+    :title="
+      tone === 'public' ? $t('settings.appearance.language') : $t('settings.appearance.title')
+    "
+    @close="open = false"
+  >
+    <AppearanceControls :language-only="tone === 'public'" />
   </UiModal>
 </template>

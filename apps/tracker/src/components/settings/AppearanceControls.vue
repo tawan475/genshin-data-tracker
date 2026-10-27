@@ -22,8 +22,13 @@ import { useSession } from '@/stores/session'
  * follows it to the user's other devices. Signed out (the public pages, which
  * are always dark) only the language shows, kept on this device.
  */
-/** `inline`: side by side on Settings (the top bar's modal stacks them). */
-const props = defineProps<{ inline?: boolean }>()
+/**
+ * `inline`: side by side on Settings (the top bar's modal stacks them).
+ * `languageOnly`: the public pages (always dark): theme and clock would
+ * change nothing there (a theme pick only flashed the page), so only the
+ * language shows, signed in or not.
+ */
+const props = defineProps<{ inline?: boolean; languageOnly?: boolean }>()
 const session = useSession()
 const feedback = useFeedback()
 
@@ -48,6 +53,8 @@ const use24Hour = computed<boolean>({
   set: (value) => void save({ use24Hour: value }, t('settings.appearance.clockNotSaved')),
 })
 const signedIn = computed(() => session.status === 'signed-in')
+/** Theme and clock: the app's pages, signed in. */
+const full = computed(() => signedIn.value && !props.languageOnly)
 /** Signed out: the pick made on this device. */
 const localLanguage = ref<LocalePreference>(storedPreference())
 const language = computed<LocalePreference>({
@@ -101,13 +108,13 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
         : 'flex flex-col divide-y divide-border-subtle'
     "
   >
-    <div v-if="signedIn" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-3">
+    <div v-if="full" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-3">
       <span class="text-base">{{ $t('settings.appearance.theme') }}</span>
       <UiSegmented v-model="theme" :options="themes" :label="$t('settings.appearance.theme')" />
     </div>
     <div
       class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
-      :class="signedIn ? 'py-3' : 'pb-1'"
+      :class="full ? 'py-3' : 'pb-1'"
     >
       <span class="text-base">{{ $t('settings.appearance.language') }}</span>
       <UiSelect
@@ -117,7 +124,7 @@ function rollback(patch: Partial<UserSettings>, before: UserSettings) {
         class="w-44"
       />
     </div>
-    <div v-if="signedIn" class="pt-1">
+    <div v-if="full" class="pt-1">
       <UiSwitch v-model="use24Hour" :label="$t('settings.appearance.clock24')" />
     </div>
   </div>

@@ -36,10 +36,10 @@ const languageOpen = ref(false)
     </div>
     <UiModal
       :open="languageOpen"
-      :title="$t('settings.appearance.title')"
+      :title="$t('settings.appearance.language')"
       @close="languageOpen = false"
     >
-      <AppearanceControls />
+      <AppearanceControls language-only />
     </UiModal>
   </div>
 </template>
