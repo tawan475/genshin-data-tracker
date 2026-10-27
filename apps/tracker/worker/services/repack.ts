@@ -204,6 +204,7 @@ function v1Sections(row: V1Row): Record<Slot, { hash: string; base: string | nul
     // Kept only since v2: a v1 row never has them.
     anecdotes: null,
     tasks: null,
+    collections: null,
   }
 }
 

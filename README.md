@@ -133,7 +133,11 @@ count per met anecdote, unlocked areas, stamp progress) as `anecdotes`,
 `gi_tasks` (contract v1, the game's state at login: commissions done today,
 the Abyss period's stars, who is out on an expedition and when they are back,
 the realm currency jar, Welkin days; each part kept only when all of it is in
-range) as `tasks` (`snapshots.tasks_ref`, migration 0028). A file
+range) as `tasks` (`snapshots.tasks_ref`, migration 0028), and Teyvat.me
+Capture's `gi_collections` (from 1.3.0: the Radiant Spincrystals in the
+Serenitea Pot's music list by item id; each part kept only when every entry
+passes; later parts append) as `collections` (`snapshots.collections_ref`,
+migration 0030). A file
 without them stores and hashes exactly as before
 they existed, and exports (GOOD rebuild, zip) write them back after
 `timestamp`. The app uses them for the achievements' real completion times,
@@ -143,7 +147,9 @@ plus hand marks in `anecdote_marks`), and the planner's Tasks: the newest
 capture's `gi_tasks` ticks Daily Commissions (all done today) and the Spiral
 Abyss (full stars in the running period) and adds Expeditions, Realm Currency
 and Welkin Moon rows, while the capture is newer than the row's hand state
-(`components/planner/tasks.ts` `captureRead`).
+(`components/planner/tasks.ts` `captureRead`), and Collections
+(`/app/a/:id/collections`): which Radiant Spincrystals the newest capture
+with `gi_collections` has, and which are missing.
 
 Character, weapon and material keys are stored as ids from the static,
 append-only dictionary in `packages/shared/src/dictionary`; artifact sets,

@@ -143,6 +143,19 @@ export interface GiTasks {
   resin?: { value: number; nextAt: number }
 }
 
+/**
+ * Teyvat.me Capture's `gi_collections`: what the player has collected, from
+ * the lists the game sends at every login. Each part is absent when it was
+ * not captured (absent never means "none"); more parts will follow.
+ */
+export interface GiCollections {
+  /**
+   * The Radiant Spincrystals in the Serenitea Pot's music list, by item id
+   * (141001 = "Radiant Spincrystal 1"), ascending.
+   */
+  spincrystals?: number[]
+}
+
 export interface Good {
   format: string
   version: number
@@ -162,6 +175,7 @@ export interface Good {
   gi_characters?: Record<string, GiCharacter>
   gi_anecdotes?: GiAnecdotes
   gi_tasks?: GiTasks
+  gi_collections?: GiCollections
 }
 
 /**

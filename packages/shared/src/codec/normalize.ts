@@ -4,6 +4,7 @@ import type {
   GiAnecdote,
   GiAnecdotes,
   GiCharacter,
+  GiCollections,
   GiExpedition,
   GiPlayer,
   GiTasks,
@@ -55,6 +56,8 @@ export interface NormalizedGood {
   capture?: GiCapture | null
   /** `gi_tasks`, the parts that pass their checks whole (see toTasks). */
   tasks: GiTasks | null
+  /** `gi_collections`, the parts that pass their checks whole (see toCollections). */
+  collections: GiCollections | null
 }
 
 export class GoodFormatError extends Error {
@@ -124,6 +127,7 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     characterExtras: toCharacterExtras(input.gi_characters),
     anecdotes: toAnecdotes(input.gi_anecdotes),
     tasks: toTasks(input.gi_tasks),
+    collections: toCollections(input.gi_collections),
   }
   const itemGuids = toItemGuids(input)
   if (itemGuids) good.itemGuids = itemGuids
@@ -151,6 +155,11 @@ function checkCounts(input: Json, achievements: unknown[] | null): void {
       'anecdotes',
       count(isObject(input.gi_anecdotes) ? input.gi_anecdotes.anecdotes : null),
       GOOD_LIMITS.anecdotes,
+    ],
+    [
+      'Radiant Spincrystals',
+      count(isObject(input.gi_collections) ? input.gi_collections.spincrystals : null),
+      GOOD_LIMITS.spincrystals,
     ],
   ]
   for (const [what, n, max] of caps) {
@@ -531,6 +540,31 @@ function toTasks(raw: unknown): GiTasks | null {
     tasks.resin = { value: n.value, nextAt: n.nextAt }
   }
   return Object.keys(tasks).length > 0 ? tasks : null
+}
+
+/** Item ids in `gi_collections`: the game's item ids have six digits. */
+const COLLECTION_ITEM = [100_000, 999_999] as const
+
+/**
+ * Teyvat.me Capture's `gi_collections`. Each part is kept only when every
+ * entry in it passes (a partial list would say the player lacks what they
+ * have); the rest of the key still counts. Lists are rewritten ascending, so
+ * equal content hashes equal.
+ */
+function toCollections(raw: unknown): GiCollections | null {
+  if (!isObject(raw)) return null
+  const collections: GiCollections = {}
+  const s = raw.spincrystals
+  // Longer lists were refused whole by checkCounts.
+  if (Array.isArray(s) && s.length <= GOOD_LIMITS.spincrystals) {
+    const ids = new Set<number>()
+    for (const id of s) {
+      if (!isIntIn(id, ...COLLECTION_ITEM) || ids.has(id)) break
+      ids.add(id)
+    }
+    if (ids.size === s.length) collections.spincrystals = [...ids].sort((a, b) => a - b)
+  }
+  return Object.keys(collections).length > 0 ? collections : null
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

@@ -7,6 +7,7 @@ import {
   decodeAchievementTimes,
   decodeAnecdotes,
   decodeArtifacts,
+  decodeCollections,
   decodeSectionBlob,
   decodeSnapshot,
   decodeTasks,
@@ -16,6 +17,7 @@ import {
   encodeAchievementTimesDelta,
   encodeAnecdotes,
   encodeArtifactsDelta,
+  encodeCollections,
   encodeSectionBlob,
   encodeSnapshot,
   encodeTasks,
@@ -124,6 +126,7 @@ async function storedOf(
     characterExtras: await optionalViaStorage(encoded.characterExtras),
     anecdotes: await optionalViaStorage(encoded.anecdotes),
     tasks: await optionalViaStorage(encoded.tasks),
+    collections: await optionalViaStorage(encoded.collections),
   }
 }
 
@@ -259,6 +262,7 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
   if (good.characterExtras) expected.gi_characters = Object.fromEntries(good.characterExtras)
   if (good.anecdotes) expected.gi_anecdotes = good.anecdotes
   if (good.tasks) expected.gi_tasks = good.tasks
+  if (good.collections) expected.gi_collections = good.collections
   return expected
 }
 
@@ -446,6 +450,10 @@ describe('snapshot codec', () => {
       ['achievement times', { gi_achievement_times: keyed(GOOD_LIMITS.achievements + 1) }],
       ['character extras', { gi_characters: keyed(GOOD_LIMITS.characters + 1) }],
       ['anecdotes', { gi_anecdotes: { anecdotes: keyed(GOOD_LIMITS.anecdotes + 1) } }],
+      [
+        'Radiant Spincrystals',
+        { gi_collections: { spincrystals: times(GOOD_LIMITS.spincrystals + 1) } },
+      ],
     ]
     for (const [what, fields] of over) {
       await limitError({ ...sample, ...fields }, 'too_many_items', new RegExp(` ${what}; at most`))
@@ -1531,5 +1539,125 @@ describe("irminsul's gi_tasks", () => {
       expect(JSON.stringify(back.value)).toBe(JSON.stringify(clean))
       expect(decodeTasks(back.value as typeof value)).toEqual(decodeTasks(clean))
     }
+  })
+})
+
+// ------------------------------------------------------------- gi_collections
+
+/** 120 of the 141001-141306 range, ascending (made up, as a capture sends them). */
+function spincrystalIds(count = 120, seed = 7): number[] {
+  let x = seed
+  const ids = new Set<number>()
+  while (ids.size < count) {
+    x = (x * 1_103_515_245 + 12_345) % 2 ** 31
+    ids.add(141_001 + (x % 306))
+  }
+  return [...ids].sort((a, b) => a - b)
+}
+
+const collections = {
+  gi_collections: { spincrystals: spincrystalIds() },
+} satisfies Partial<Good>
+
+describe("Teyvat.me Capture's gi_collections", () => {
+  it('round-trips, ids ascending, last of the extra keys', async () => {
+    const input = { ...sample, ...extras, ...anecdotes, ...tasks, ...collections }
+    const { encoded, decoded } = await roundTrip(input)
+    expect(extraSectionsOf(encoded).map((s) => s.kind)).toEqual([
+      'player',
+      'achievementTimes',
+      'characterExtras',
+      'anecdotes',
+      'tasks',
+      'collections',
+    ])
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_collections).toEqual(collections.gi_collections)
+    expect(decoded.gi_collections!.spincrystals).toHaveLength(120)
+    expect(Object.keys(decoded).slice(-2)).toEqual(['gi_tasks', 'gi_collections'])
+    // Sent out of order: stored ascending. An empty list is a list (none yet).
+    const shuffled = [...collections.gi_collections.spincrystals].reverse()
+    const unsorted = await roundTrip({ ...sample, gi_collections: { spincrystals: shuffled } })
+    expect(unsorted.decoded.gi_collections).toEqual(collections.gi_collections)
+    const none = await roundTrip({ ...sample, gi_collections: { spincrystals: [] } })
+    expect(none.decoded.gi_collections).toEqual({ spincrystals: [] })
+    // Absent is not "none": no section at all.
+    const absent = await roundTrip({ ...sample, gi_collections: {} })
+    expect(absent.encoded.collections).toBeNull()
+    expect('gi_collections' in absent.decoded).toBe(false)
+  })
+
+  it('keeps the content hash of a file without them, and knows the one from before them', async () => {
+    const catalog = new Catalog()
+    const plain = await roundTrip(sample, catalog)
+    const before = await roundTrip({ ...sample, ...extras, ...anecdotes, ...tasks }, catalog)
+    const all = await roundTrip(
+      { ...sample, ...extras, ...anecdotes, ...tasks, ...collections },
+      catalog,
+    )
+    const only = await roundTrip({ ...sample, ...collections }, catalog)
+    const noTasks = await roundTrip({ ...sample, ...extras, ...anecdotes, ...collections }, catalog)
+    const anecdotesOnly = await roundTrip({ ...sample, ...extras, ...anecdotes }, catalog)
+
+    expect(plain.encoded.preCollectionsContentHash).toBe(plain.encoded.contentHash)
+    expect(before.encoded.preCollectionsContentHash).toBe(before.encoded.contentHash)
+    expect(all.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    expect(all.encoded.preCollectionsContentHash).toBe(before.encoded.contentHash)
+    expect(all.encoded.preTasksContentHash).toBe(before.encoded.preTasksContentHash)
+    expect(only.encoded.preCollectionsContentHash).toBe(plain.encoded.contentHash)
+    expect(only.encoded.contentHash).not.toBe(plain.encoded.contentHash)
+    expect(noTasks.encoded.preCollectionsContentHash).toBe(anecdotesOnly.encoded.contentHash)
+    expect(new Set([all, only, noTasks].map((x) => x.encoded.contentHash)).size).toBe(3)
+
+    // One more Spincrystal is another capture.
+    const more = spincrystalIds(121)
+    const later = await roundTrip(
+      { ...sample, ...extras, ...anecdotes, ...tasks, gi_collections: { spincrystals: more } },
+      catalog,
+    )
+    expect(later.encoded.contentHash).not.toBe(all.encoded.contentHash)
+    expect(later.encoded.preCollectionsContentHash).toBe(all.encoded.preCollectionsContentHash)
+  })
+
+  it('keeps a part only when every entry passes', () => {
+    const read = (raw: unknown) => normalizeGood({ ...sample, gi_collections: raw }).collections
+    const ids = collections.gi_collections.spincrystals
+    expect(read({ spincrystals: [100_000, 999_999] })).toEqual({ spincrystals: [100_000, 999_999] })
+    for (const bad of [
+      [...ids, ids[0]],
+      [...ids, 99_999],
+      [...ids, 1_000_000],
+      [...ids, 141_001.5],
+      [...ids, '141001'],
+      [...ids, null],
+      [...ids, -141_001],
+    ]) {
+      expect(read({ spincrystals: bad })).toBeNull()
+    }
+    // A part this build does not know yet is not stored (and not a reason to drop the rest).
+    expect(read({ spincrystals: [141_002], handbook: [1] })).toEqual({ spincrystals: [141_002] })
+    for (const raw of [{ handbook: [1] }, { spincrystals: 'x' }, {}, [141_001], 'x', null]) {
+      expect(read(raw)).toBeNull()
+    }
+  })
+
+  it('stores the section in its binary layout, and a later part as JSON', () => {
+    const value = encodeCollections(normalizeGood({ ...sample, ...collections }).collections!)
+    expect(value).toEqual({ s: collections.gi_collections.spincrystals })
+    for (const v of [value, { s: [] }, { s: [141_306] }, {}]) {
+      const blob = encodeSectionBlob('collections', v, false, null)
+      expect(blob.payload[0]).toBe(0x10)
+      const back = decodeSectionBlob(kindCode('collections', false), blob.data, null, null)
+      expect(JSON.stringify(back.value)).toBe(JSON.stringify(v))
+      expect(decodeCollections(back.value as typeof value)).toEqual(decodeCollections(v))
+    }
+    // 120 ids: a byte or two each before compression.
+    expect(encodeSectionBlob('collections', value, false, null).data.length).toBeLessThan(140)
+    // A part a later build adds is kept whole, as JSON, by this one's decoder too.
+    const later = { s: [141_001], h: [[1, 2]] }
+    const blob = encodeSectionBlob('collections', later, false, null)
+    expect(blob.payload[0]).toBe(0x00)
+    const back = decodeSectionBlob(kindCode('collections', false), blob.data, null, null)
+    expect(back.value).toEqual(later)
   })
 })

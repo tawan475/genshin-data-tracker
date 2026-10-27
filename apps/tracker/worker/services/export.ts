@@ -49,6 +49,7 @@ export const SECTION_NAMES = [
   'characterExtras',
   'anecdotes',
   'tasks',
+  'collections',
 ] as const satisfies readonly Slot[]
 export type SectionName = (typeof SECTION_NAMES)[number]
 
@@ -211,6 +212,7 @@ function toBundleSnapshotV2(
     characterExtras: ref('characterExtras'),
     anecdotes: ref('anecdotes'),
     tasks: ref('tasks'),
+    collections: ref('collections'),
     ...(playerVars.resin !== undefined || playerVars.arExp !== undefined ? { playerVars } : {}),
   }
 }
@@ -324,6 +326,7 @@ function v1AsV2(entry: BundleSnapshot): BundleSnapshotV2 {
     characterExtras: entry.characterExtras ?? null,
     anecdotes: entry.anecdotes ?? null,
     tasks: entry.tasks ?? null,
+    collections: entry.collections ?? null,
   }
 }
 
@@ -376,6 +379,7 @@ export async function buildGood(
         snapshot.characterExtras,
         snapshot.anecdotes,
         snapshot.tasks,
+        snapshot.collections,
       ].filter((key): key is string => !!key),
     )
     text = (key) => decoded.get(key)!

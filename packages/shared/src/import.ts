@@ -39,6 +39,12 @@ export const GOOD_LIMITS = {
    * (`@gdt/game-data` anecdotes.json) × about 12 (irminsul's bound too).
    */
   anecdotes: 2_000,
+  /**
+   * Item ids in `gi_collections.spincrystals`: 206 Radiant Spincrystals in
+   * the 7.1 game data (`@gdt/game-data` materials.json, icon
+   * `UI_ItemIcon_BGM_Common`) × about 10.
+   */
+  spincrystals: 2_000,
   /** An artifact has at most 4 substats (and unactivated ones). */
   substats: 6,
   /**

@@ -495,6 +495,55 @@ const tasksLayout: Layout = {
   },
 }
 
+// collections: flags (bit 0 = `s`), then each present part in that order:
+// `s` as the count then the ids ascending, the first as is and each next as
+// its distance from the one before (at least 1). A part this layout does not
+// know makes the encoder throw, so such a section is stored as JSON.
+
+const COLLECTION_PARTS = ['s'] as const
+
+const collectionsLayout: Layout = {
+  variants: [0],
+  encode(w, { value, delta }) {
+    if (delta) throw new TypeError('Collections have no deltas')
+    const v = fields(value, COLLECTION_PARTS, COLLECTION_PARTS)
+    let flags = 0
+    COLLECTION_PARTS.forEach((part, bit) => {
+      if (v[part] !== undefined) flags |= 1 << bit
+    })
+    w.byte(flags)
+    if (v.s !== undefined) {
+      const ids = array(v.s).map(uint)
+      w.uint(ids.length)
+      let previous = -1
+      for (const id of ids) {
+        if (id <= previous) throw new RangeError('Not ascending')
+        w.uint(previous < 0 ? id : id - previous)
+        previous = id
+      }
+    }
+  },
+  decode(r) {
+    const flags = r.byte()
+    if (flags >= 1 << COLLECTION_PARTS.length) {
+      throw new CorruptDataError(`Unknown collections flags ${flags}`)
+    }
+    const section: Record<string, unknown> = {}
+    if (flags & 1) {
+      const count = r.uint()
+      if (count > r.remaining) throw new CorruptDataError('Count past the data')
+      const s: number[] = []
+      let previous = 0
+      for (let n = 0; n < count; n++) {
+        previous = n === 0 ? r.uint() : previous + r.uint()
+        s.push(previous)
+      }
+      section.s = s
+    }
+    return section
+  },
+}
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -506,6 +555,7 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   player: playerLayout,
   anecdotes: anecdotesLayout,
   tasks: tasksLayout,
+  collections: collectionsLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */

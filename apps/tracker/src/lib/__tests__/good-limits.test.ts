@@ -9,6 +9,7 @@ import achievementsJson from '@gdt/game-data/data/achievements.json'
 import anecdotesJson from '@gdt/game-data/data/anecdotes.json'
 import catalogJson from '@gdt/game-data/data/catalog.json'
 import materialsJson from '@gdt/game-data/data/materials.json'
+import { entryIcon } from '@gdt/game-data'
 import { GOOD_LIMITS } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 
@@ -21,6 +22,13 @@ describe('GOOD_LIMITS', () => {
       ['materialKeys', Object.keys(materialsJson.materials).length],
       ['achievements', achievementsJson.rows.length],
       ['anecdotes', anecdotesJson.anecdotes.length],
+      [
+        'spincrystals',
+        Object.values(materialsJson.materials).filter(
+          (entry) =>
+            entryIcon(entry as Parameters<typeof entryIcon>[0]) === 'UI_ItemIcon_BGM_Common',
+        ).length,
+      ],
     ]
     for (const [cap, count] of counts) {
       expect(count, cap).toBeGreaterThan(0)

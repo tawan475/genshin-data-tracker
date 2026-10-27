@@ -15,6 +15,7 @@ import { CHARACTERS, WEAPONS, fromRef, toRef, type KeyDictionary, type KeyRef } 
 import type {
   GiAnecdotes,
   GiCharacter,
+  GiCollections,
   GiPlayer,
   GiTasks,
   GoodArtifact,
@@ -38,6 +39,7 @@ export type SectionKind =
   | 'characterExtras'
   | 'anecdotes'
   | 'tasks'
+  | 'collections'
 
 export interface Section {
   kind: SectionKind
@@ -601,4 +603,27 @@ export function decodeTasks(section: TasksSection): GiTasks {
   if (section.p) tasks.wishPath = { weapon: section.p[0], points: section.p[1], max: section.p[2] }
   if (section.n) tasks.resin = { value: section.n[0], nextAt: section.n[1] }
   return tasks
+}
+
+// --------------------------------------------------------------- collections
+// Teyvat.me Capture's `gi_collections`, each part only when the capture had
+// it: `s` = the Radiant Spincrystals' item ids, ascending. Changes only when
+// the player collects something: a relogin stores nothing. Later parts take
+// new letters (append-only); the binary layout knows only `s`, so a section
+// with a later part is stored as JSON until a new layout version learns it.
+
+export interface CollectionsSection {
+  s?: number[]
+}
+
+export function encodeCollections(collections: GiCollections): CollectionsSection {
+  const section: CollectionsSection = {}
+  if (collections.spincrystals) section.s = [...collections.spincrystals]
+  return section
+}
+
+export function decodeCollections(section: CollectionsSection): GiCollections {
+  const collections: GiCollections = {}
+  if (section.s) collections.spincrystals = [...section.s]
+  return collections
 }

@@ -154,6 +154,10 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
         ...(rand() < 0.8 ? { w: int(rand, 0, 180) } : {}),
       }
     }
+    case 'collections': {
+      let id = 141_000
+      return rand() < 0.9 ? { s: Array.from({ length: n * 4 }, () => (id += int(rand, 1, 3))) } : {}
+    }
   }
 }
 
@@ -279,6 +283,7 @@ describe('section blobs', () => {
       characterExtras: 8,
       anecdotes: 9,
       tasks: 10,
+      collections: 11,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -335,6 +340,7 @@ describe('section blobs', () => {
       'characterExtras',
       'anecdotes',
       'tasks',
+      'collections',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')
@@ -528,6 +534,7 @@ async function v1File(
         characterExtras: encoded.characterExtras?.json ?? null,
         anecdotes: encoded.anecdotes?.json ?? null,
         tasks: encoded.tasks?.json ?? null,
+        collections: encoded.collections?.json ?? null,
       },
       catalog,
       MATERIALS,
@@ -688,6 +695,7 @@ class V2Store {
       characterExtras: refs.characterExtras ?? null,
       anecdotes: refs.anecdotes ?? null,
       tasks: refs.tasks ?? null,
+      collections: refs.collections ?? null,
       ...(Object.keys(vars).length > 0 ? { playerVars: vars } : {}),
     }
     // The blobs the snapshot needs, bases included, as the server sends them.
