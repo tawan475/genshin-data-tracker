@@ -21,6 +21,7 @@
  * | `achievements.<id>` | finish time, unix seconds (0: finished, time unknown); `del` |
  * | `anecdotes.<id>` | `{state, finishCount}`; `del` |
  * | `gi_anecdotes.unlockedAreas\|reward\|wish` | that value; `del` |
+ * | `gi_tasks.resin` | `{value, nextAt}`: the resin clock (Capture 1.12.0); `del` |
  *
  * Items (weapons, artifacts) are named by the game's guid, `gi_guid` on the
  * item; an item without one never appears in a journal. Unknown paths are
@@ -261,6 +262,20 @@ export function applyDelta(good: LiveGood, changes: readonly DeltaChange[]): Liv
         }
         break
       }
+      case 'gi_tasks': {
+        // Only the resin clock moves within a session (Capture 1.12.0).
+        if (parts.length !== 2 || name !== 'resin') break
+        if (op === 'del') {
+          if (next.gi_tasks?.resin) {
+            const tasks = own('gi_tasks', (t) => ({ ...t }))!
+            delete tasks.resin
+          }
+        } else if (op === 'set' && isResinClock(value)) {
+          const tasks = own('gi_tasks', (t) => ({ ...t }))!
+          tasks.resin = { value: value.value, nextAt: value.nextAt }
+        }
+        break
+      }
       case 'gi_anecdotes': {
         if (parts.length !== 2 || !ANECDOTE_FIELDS.has(name)) break
         if (op === 'del' && !next.gi_anecdotes) break
@@ -274,6 +289,18 @@ export function applyDelta(good: LiveGood, changes: readonly DeltaChange[]): Liv
     }
   }
   return next
+}
+
+function isResinClock(value: unknown): value is { value: number; nextAt: number } {
+  if (!value || typeof value !== 'object') return false
+  const v = value as Record<string, unknown>
+  return (
+    Number.isInteger(v.value) &&
+    (v.value as number) >= 0 &&
+    (v.value as number) <= 2_000 &&
+    Number.isInteger(v.nextAt) &&
+    (v.nextAt as number) > 0
+  )
 }
 
 function copyBook(book: GiAnecdotes | undefined): GiAnecdotes {

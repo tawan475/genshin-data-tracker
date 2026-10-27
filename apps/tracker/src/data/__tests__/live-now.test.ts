@@ -104,6 +104,7 @@ describe('withJournal', () => {
       changes: 5,
       materials: ['Mora'],
       player: [],
+      tasks: [],
     })
   })
 

@@ -29,6 +29,8 @@ export interface LiveApplied {
   materials: string[]
   /** `gi_player` fields the journal set (resin spent in game arrives this way). */
   player: string[]
+  /** `gi_tasks` parts the journal set (the resin clock, Capture 1.12.0). */
+  tasks: string[]
 }
 
 /**
@@ -78,6 +80,13 @@ export function withJournal<T extends JournalTarget>(
         ...new Set(
           live.changes.flatMap(([, path]) =>
             path[0] === 'gi_player' && path.length === 2 ? [String(path[1])] : [],
+          ),
+        ),
+      ],
+      tasks: [
+        ...new Set(
+          live.changes.flatMap(([, path]) =>
+            path[0] === 'gi_tasks' && path.length === 2 ? [String(path[1])] : [],
           ),
         ),
       ],

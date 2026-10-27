@@ -5,7 +5,7 @@ import { createRequirementCache, planTotals, type PlanOptions } from '@gdt/game-
 import type { AccountResponse, CustomCharacter, Good } from '@gdt/shared'
 import { computed, onBeforeUnmount, ref, watch, type ComputedRef } from 'vue'
 import { NO_PLAYER } from '@/data/account-player'
-import { liveReading } from './resin'
+import { clockReading, liveReading } from './resin'
 import { loadAccountPlayer, loadLatestInventory } from '@/data/account-data'
 import type { CapturedTasks } from './tasks'
 import { usePlannerSettings } from '@/data/planner-settings'
@@ -168,15 +168,20 @@ export function usePlannerModel(
   /** What irminsul read at the newest login; an AR/WL setting wins over it. */
   const player = computed(() => data.value?.player ?? NO_PLAYER)
   /**
-   * Resin the live journal set since the login (spent in game reaches the
-   * tracker as `gi_player.resin`), null when it set none: it wins over the
-   * login's clock and count.
+   * Resin the live journal set since the login, null when it set none: the
+   * game's own clock (`gi_tasks.resin`, Capture 1.12.0), else the count
+   * (`gi_player.resin`, spent in game). It wins over the login's clock and count.
    */
   const liveResin = computed(() => {
     const inventory = data.value?.inventory
-    const value = inventory?.good.gi_player?.resin
-    if (!inventory?.live?.player.includes('resin') || value === undefined) return null
-    return liveReading(value, inventory.live.updatedAt, inventory.good.gi_tasks?.resin)
+    const live = inventory?.live
+    if (!live) return null
+    // The game's own clock, when Capture sends it (1.12.0): exact.
+    const clock = inventory.good.gi_tasks?.resin
+    if (live.tasks.includes('resin') && clock) return clockReading(clock)
+    const value = inventory.good.gi_player?.resin
+    if (!live.player.includes('resin') || value === undefined) return null
+    return liveReading(value, live.updatedAt, clock)
   })
   const ar = computed(() => settings.value.ar ?? player.value.ar)
   const wl = computed(() => settings.value.wl ?? player.value.wl)

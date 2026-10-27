@@ -113,6 +113,7 @@ describe('GOOD-X delta contract', () => {
       ['del', ['anecdotes', '100001']],
       ['del', ['gi_anecdotes', 'reward']],
       ['del', ['gi_player', 'resin']],
+      ['del', ['gi_tasks', 'resin']],
     ])
     expect(applied).toEqual(bare)
     const filled = applyDelta(bare, [
@@ -124,6 +125,28 @@ describe('GOOD-X delta contract', () => {
     expect(filled.gi_anecdotes).toEqual({
       anecdotes: { '100001': { state: 3, finishCount: 1 } },
       unlockedAreas: [],
+    })
+  })
+
+  it('sets the resin clock (Capture 1.12.0) and ignores the rest of gi_tasks', () => {
+    const withTasks: LiveGood = {
+      ...base,
+      gi_tasks: { welkin: { days: 3 }, resin: { value: 20, nextAt: 1 } },
+    }
+    const applied = applyDelta(withTasks, [
+      ['set', ['gi_tasks', 'resin'], { value: 21, nextAt: 1_791_756_416 }],
+      ['set', ['gi_tasks', 'welkin'], { days: 99 }],
+      ['set', ['gi_tasks', 'resin', 'value'], 5],
+    ])
+    expect(applied.gi_tasks).toEqual({
+      welkin: { days: 3 },
+      resin: { value: 21, nextAt: 1_791_756_416 },
+    })
+    expect(withTasks.gi_tasks!.resin).toEqual({ value: 20, nextAt: 1 })
+    const bad = applyDelta(withTasks, [['set', ['gi_tasks', 'resin'], { value: -1, nextAt: 5 }]])
+    expect(bad.gi_tasks!.resin).toEqual({ value: 20, nextAt: 1 })
+    expect(applyDelta(withTasks, [['del', ['gi_tasks', 'resin']]]).gi_tasks).toEqual({
+      welkin: { days: 3 },
     })
   })
 })
