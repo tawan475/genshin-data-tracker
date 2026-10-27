@@ -24,10 +24,16 @@ const emit = defineEmits<{ open: [key: string] }>()
 
 <template>
   <ul
-    class="scroll-hide scroll-fade-x -mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:scroll-fade-none sm:grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] sm:overflow-visible sm:px-0 sm:pb-0"
+    class="scroll-hide scroll-fade-x -mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:scroll-fade-none sm:overflow-visible sm:px-0 sm:pb-0 sm:[--per:4] lg:[--per:6]"
     :aria-label="$t('materials.wallet.label')"
   >
-    <li v-for="item in items" :key="item.key" class="flex w-32 shrink-0 snap-start sm:w-auto">
+    <!-- Wider screens: rows of --per tiles; a short last row stretches to the full
+         width, so the rows end even (the user's call: 11 tiles left a ragged row). -->
+    <li
+      v-for="item in items"
+      :key="item.key"
+      class="flex w-32 shrink-0 snap-start sm:w-auto sm:grow sm:basis-[calc((100%-(var(--per)-1)*0.5rem)/var(--per))]"
+    >
       <UiStat
         button
         :label="item.label"
