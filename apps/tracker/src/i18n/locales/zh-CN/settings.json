@@ -72,7 +72,10 @@
     "setToast": "密码已设置",
     "setDetail": "现在也可以用密码登录。",
     "changedToast": "密码已修改",
-    "changedDetail": "其他所有设备均已退出登录，本设备保持登录。"
+    "changedDetail": "其他所有设备均已退出登录，本设备保持登录。",
+    "rowHint": "更改后，你的其他设备将退出登录",
+    "setHint": "设置后也可用用户名登录",
+    "dialogNote": "其他所有设备都会退出登录。"
   },
   "connected": {
     "title": "关联账号",
@@ -187,5 +190,12 @@
     "body": "所有账号、快照和登录方式",
     "dialogTitle": "删除我的用户",
     "deleted": "你的用户已删除"
+  },
+  "sections": {
+    "account": "你的身份和登录方式",
+    "appearance": "主题、语言和手机底部栏",
+    "app": "安装和服务器状态",
+    "danger": "危险操作",
+    "dangerUser": "删除你的用户"
   }
 }

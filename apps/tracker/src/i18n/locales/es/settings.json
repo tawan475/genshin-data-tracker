@@ -72,7 +72,10 @@
     "setToast": "Contraseña establecida",
     "setDetail": "También puedes iniciar sesión con ella.",
     "changedToast": "Contraseña cambiada",
-    "changedDetail": "Se cerró la sesión en todos los demás dispositivos. Este sigue con la sesión iniciada."
+    "changedDetail": "Se cerró la sesión en todos los demás dispositivos. Este sigue con la sesión iniciada.",
+    "rowHint": "Al cambiarla se cierra la sesión en tus otros dispositivos",
+    "setHint": "Crea una para iniciar sesión también con tu usuario",
+    "dialogNote": "Se cerrará la sesión en todos los demás dispositivos."
   },
   "connected": {
     "title": "Cuentas conectadas",
@@ -187,5 +190,12 @@
     "body": "Todas las cuentas, capturas e inicios de sesión",
     "dialogTitle": "Borrar mi usuario",
     "deleted": "Tu usuario se ha borrado"
+  },
+  "sections": {
+    "account": "Quién eres y cómo inicias sesión",
+    "appearance": "Tema, idioma y la barra de pestañas del móvil",
+    "app": "Instalación y estado del servidor",
+    "danger": "Zona de peligro",
+    "dangerUser": "Eliminar tu usuario"
   }
 }

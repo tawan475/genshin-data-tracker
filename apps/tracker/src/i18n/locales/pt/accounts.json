@@ -42,6 +42,12 @@
     "typeToConfirm": "Digite {word}",
     "confirmWord": "excluir",
     "loss": "{n} captura | {n} capturas",
-    "deleted": "{name} excluída"
+    "deleted": "{name} excluída",
+    "sections": {
+      "account": "Nome, UID, servidor e o Viajante",
+      "sharing": "Quem mais pode ver ou editar esta conta",
+      "capture": "Envio pelo Teyvat.me Capture",
+      "danger": "Excluir esta conta e seu histórico"
+    }
   }
 }

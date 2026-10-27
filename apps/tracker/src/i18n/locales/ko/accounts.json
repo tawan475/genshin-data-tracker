@@ -42,6 +42,12 @@
     "typeToConfirm": "{word} 입력",
     "confirmWord": "삭제",
     "loss": "스냅샷 {n}개",
-    "deleted": "{name} 삭제됨"
+    "deleted": "{name} 삭제됨",
+    "sections": {
+      "account": "이름, UID, 서버, 여행자",
+      "sharing": "이 계정을 보거나 편집할 수 있는 사람",
+      "capture": "Teyvat.me Capture에서 업로드",
+      "danger": "이 계정과 기록 삭제"
+    }
   }
 }

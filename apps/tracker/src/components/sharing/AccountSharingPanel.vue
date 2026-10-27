@@ -181,12 +181,54 @@ async function leave() {
       <UiSkeleton v-for="n in 2" :key="n" class="h-10 w-full" />
     </div>
     <template v-else>
-      <ul class="flex flex-col divide-y divide-border-subtle">
+      <form
+        v-if="owner"
+        class="flex max-w-[760px] flex-wrap items-end gap-3"
+        novalidate
+        @submit.prevent="invite"
+      >
+        <UiField
+          v-slot="{ id, describedBy }"
+          :label="$t('common.username')"
+          :error="inviteError"
+          class="min-w-0 flex-[999_1_16rem]"
+        >
+          <UiInput
+            :id="id"
+            v-model="username"
+            :aria-describedby="describedBy"
+            :invalid="!!inviteError"
+            :disabled="busy !== null || full"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+          />
+        </UiField>
+        <div class="flex flex-wrap items-center gap-3">
+          <UiSegmented v-model="role" :options="roles" :label="$t('sharing.roleLabel')" />
+          <UiButton
+            type="submit"
+            variant="primary"
+            :loading="busy === 'invite'"
+            :disabled="busy !== null || full || !username.trim()"
+            :title="full ? $t('sharing.limitTitle', { n: ACCOUNT_MEMBER_LIMIT }) : undefined"
+          >
+            {{ $t('sharing.invite') }}
+          </UiButton>
+        </div>
+        <p v-if="full" class="basis-full text-sm text-text-muted">
+          {{ $t('sharing.fullHint', { n: ACCOUNT_MEMBER_LIMIT }) }}
+        </p>
+      </form>
+      <ul
+        class="grid grid-cols-1 gap-x-7"
+        :class="[members.length >= 4 ? 'md:grid-cols-2' : '', owner ? 'mt-4' : '']"
+      >
         <li
           v-for="member in members"
           :key="member.userId"
-          class="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5 first:pt-0 last:pb-0"
-          :class="member.acceptedAt === null ? 'opacity-75' : ''"
+          class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border-subtle py-2.5"
+          :class="member.acceptedAt === null ? 'opacity-80' : ''"
         >
           <span
             class="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-overlay text-sm font-semibold"
@@ -233,43 +275,12 @@ async function leave() {
           </template>
         </li>
       </ul>
-
-      <form
-        v-if="owner"
-        class="mt-4 flex flex-wrap items-end gap-3 border-t border-border-default pt-4"
-        novalidate
-        @submit.prevent="invite"
+      <p
+        v-if="owner && members.length === 1"
+        class="mt-4 rounded-lg border border-dashed border-border-strong px-4 py-3 text-sm text-text-muted"
       >
-        <UiField
-          v-slot="{ id, describedBy }"
-          :label="$t('common.username')"
-          :error="inviteError"
-          class="min-w-0 flex-[999_1_16rem]"
-        >
-          <UiInput
-            :id="id"
-            v-model="username"
-            :aria-describedby="describedBy"
-            :invalid="!!inviteError"
-            :disabled="busy !== null || full"
-            autocomplete="off"
-            autocapitalize="none"
-            spellcheck="false"
-          />
-        </UiField>
-        <div class="flex flex-wrap items-center gap-3">
-          <UiSegmented v-model="role" :options="roles" :label="$t('sharing.roleLabel')" />
-          <UiButton
-            type="submit"
-            variant="primary"
-            :loading="busy === 'invite'"
-            :disabled="busy !== null || full || !username.trim()"
-            :title="full ? $t('sharing.limitTitle', { n: ACCOUNT_MEMBER_LIMIT }) : undefined"
-          >
-            {{ $t('sharing.invite') }}
-          </UiButton>
-        </div>
-      </form>
+        {{ $t('sharing.onlyYou') }}
+      </p>
       <div v-else class="mt-4 flex justify-end border-t border-border-default pt-4">
         <UiButton variant="danger" :loading="busy === 'leave'" @click="leave">
           {{ $t('sharing.leave') }}

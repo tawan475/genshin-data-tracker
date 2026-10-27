@@ -38,5 +38,7 @@
   "accept": "Annehmen",
   "decline": "Ablehnen",
   "accepted": "Konto hinzugefügt",
-  "answerFailed": "Konnte nicht auf die Einladung antworten"
+  "answerFailed": "Konnte nicht auf die Einladung antworten",
+  "onlyYou": "Nur du. Lade jemanden ein, dieses Konto zu sehen oder zu bearbeiten.",
+  "fullHint": "{n} von {n} Mitgliedern. Entferne jemanden, um jemand anderen einzuladen."
 }

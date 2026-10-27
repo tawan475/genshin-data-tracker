@@ -4,6 +4,7 @@ import { computed, nextTick, ref } from 'vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
 import UiInput from '@/components/ui/UiInput.vue'
+import UiModal from '@/components/ui/UiModal.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { ApiRequestError } from '@/api'
 import { t } from '@/i18n'
@@ -12,10 +13,14 @@ import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 
 /**
- * Change password: the server signs every other device out; this one stays
- * signed in. An account made with Discord or Google has none yet: it sets
- * one with just the session.
+ * Change password: one short row; the form opens in a dialog (design "Picked
+ * mix"). The server checks the current password (what stops a device left
+ * signed in from locking the owner out) and signs every other device out;
+ * this one stays signed in. An account made with Discord or Google has none
+ * yet: it sets one with just the session.
  */
+// The card and its dialog are two roots: the parent's class goes to the card.
+defineOptions({ inheritAttrs: false })
 const session = useSession()
 const feedback = useFeedback()
 
@@ -29,6 +34,17 @@ const currentServerError = ref('')
 const formError = ref('')
 const busy = ref(false)
 const form = ref<HTMLFormElement>()
+const open = ref(false)
+
+function openDialog() {
+  current.value = ''
+  next.value = ''
+  confirm.value = ''
+  touched.value = false
+  formError.value = ''
+  currentServerError.value = ''
+  open.value = true
+}
 
 const currentError = computed(() =>
   setting.value
@@ -80,6 +96,7 @@ async function submit() {
     next.value = ''
     confirm.value = ''
     touched.value = false
+    open.value = false
     feedback.toast(
       first
         ? {
@@ -107,8 +124,37 @@ async function submit() {
 </script>
 
 <template>
-  <UiPanel :title="setting ? $t('settings.password.setTitle') : $t('settings.password.title')">
-    <form ref="form" class="flex max-w-md flex-col gap-4" novalidate @submit.prevent="submit">
+  <UiPanel
+    v-bind="$attrs"
+    :title="setting ? $t('settings.password.setTitle') : $t('settings.password.title')"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="min-w-0">
+        <p v-if="!setting" class="font-mono tracking-widest text-text-secondary" aria-hidden="true">
+          ••••••••••
+        </p>
+        <p class="text-sm text-text-muted">
+          {{ setting ? $t('settings.password.setHint') : $t('settings.password.rowHint') }}
+        </p>
+      </div>
+      <UiButton @click="openDialog">
+        {{ setting ? $t('settings.password.set') : $t('settings.password.change') }}
+      </UiButton>
+    </div>
+  </UiPanel>
+
+  <UiModal
+    :open="open"
+    :title="setting ? $t('settings.password.setTitle') : $t('settings.password.change')"
+    @close="open = false"
+  >
+    <form
+      id="password-form"
+      ref="form"
+      class="flex flex-col gap-4"
+      novalidate
+      @submit.prevent="submit"
+    >
       <!-- Lets password managers file the new password under the right login. -->
       <input
         type="text"
@@ -138,45 +184,51 @@ async function submit() {
           @update:model-value="editCurrent"
         />
       </UiField>
-      <UiField
-        v-slot="{ id, describedBy }"
-        :label="setting ? $t('common.password') : $t('settings.password.new')"
-        :hint="$t('settings.password.atLeast', { n: MIN_PASSWORD_LENGTH })"
-        :error="touched ? nextError : ''"
-      >
-        <UiInput
-          :id="id"
-          v-model="next"
-          type="password"
-          autocomplete="new-password"
-          :aria-describedby="describedBy"
-          :invalid="touched && !!nextError"
-          :disabled="busy"
-          required
-        />
-      </UiField>
-      <UiField
-        v-slot="{ id, describedBy }"
-        :label="setting ? $t('settings.password.confirm') : $t('settings.password.confirmNew')"
-        :error="touched ? confirmError : ''"
-      >
-        <UiInput
-          :id="id"
-          v-model="confirm"
-          type="password"
-          autocomplete="new-password"
-          :aria-describedby="describedBy"
-          :invalid="touched && !!confirmError"
-          :disabled="busy"
-          required
-        />
-      </UiField>
-      <p v-if="formError" class="text-sm text-danger-text" role="alert">{{ formError }}</p>
-      <div class="flex flex-wrap items-center gap-3">
-        <UiButton type="submit" variant="primary" :loading="busy">
-          {{ setting ? $t('settings.password.set') : $t('settings.password.change') }}
-        </UiButton>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <UiField
+          v-slot="{ id, describedBy }"
+          :label="setting ? $t('common.password') : $t('settings.password.new')"
+          :hint="$t('settings.password.atLeast', { n: MIN_PASSWORD_LENGTH })"
+          :error="touched ? nextError : ''"
+        >
+          <UiInput
+            :id="id"
+            v-model="next"
+            type="password"
+            autocomplete="new-password"
+            :aria-describedby="describedBy"
+            :invalid="touched && !!nextError"
+            :disabled="busy"
+            required
+          />
+        </UiField>
+        <UiField
+          v-slot="{ id, describedBy }"
+          :label="setting ? $t('settings.password.confirm') : $t('settings.password.confirmNew')"
+          :error="touched ? confirmError : ''"
+        >
+          <UiInput
+            :id="id"
+            v-model="confirm"
+            type="password"
+            autocomplete="new-password"
+            :aria-describedby="describedBy"
+            :invalid="touched && !!confirmError"
+            :disabled="busy"
+            required
+          />
+        </UiField>
       </div>
+      <p v-if="!setting" class="text-sm text-text-muted">
+        {{ $t('settings.password.dialogNote') }}
+      </p>
+      <p v-if="formError" class="text-sm text-danger-text" role="alert">{{ formError }}</p>
     </form>
-  </UiPanel>
+    <template #footer>
+      <UiButton :disabled="busy" @click="open = false">{{ $t('common.cancel') }}</UiButton>
+      <UiButton type="submit" form="password-form" variant="primary" :loading="busy">
+        {{ setting ? $t('settings.password.set') : $t('settings.password.change') }}
+      </UiButton>
+    </template>
+  </UiModal>
 </template>

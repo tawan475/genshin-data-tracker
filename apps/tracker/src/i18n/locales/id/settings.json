@@ -72,7 +72,10 @@
     "setToast": "Kata sandi diatur",
     "setDetail": "Kamu juga bisa masuk dengannya.",
     "changedToast": "Kata sandi diubah",
-    "changedDetail": "Semua perangkat lain sudah dikeluarkan. Perangkat ini tetap masuk."
+    "changedDetail": "Semua perangkat lain sudah dikeluarkan. Perangkat ini tetap masuk.",
+    "rowHint": "Menggantinya akan mengeluarkan perangkatmu yang lain",
+    "setHint": "Buat kata sandi agar bisa masuk dengan nama pengguna juga",
+    "dialogNote": "Semua perangkat lain akan dikeluarkan."
   },
   "connected": {
     "title": "Akun terhubung",
@@ -187,5 +190,12 @@
     "body": "Setiap akun, snapshot dan cara masuk",
     "dialogTitle": "Hapus penggunaku",
     "deleted": "Penggunamu sudah dihapus"
+  },
+  "sections": {
+    "account": "Siapa kamu dan cara masuk",
+    "appearance": "Tema, bahasa, dan bilah tab ponsel",
+    "app": "Instalasi dan status server",
+    "danger": "Zona bahaya",
+    "dangerUser": "Hapus penggunamu"
   }
 }

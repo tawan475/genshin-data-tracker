@@ -72,7 +72,10 @@
     "setToast": "密碼已設定",
     "setDetail": "現在也可以用密碼登入。",
     "changedToast": "密碼已變更",
-    "changedDetail": "其他所有裝置皆已登出，本裝置維持登入。"
+    "changedDetail": "其他所有裝置皆已登出，本裝置維持登入。",
+    "rowHint": "變更後，你的其他裝置將登出",
+    "setHint": "設定後也可用使用者名稱登入",
+    "dialogNote": "其他所有裝置都會登出。"
   },
   "connected": {
     "title": "連結帳號",
@@ -187,5 +190,12 @@
     "body": "所有帳號、快照和登入方式",
     "dialogTitle": "刪除我的使用者",
     "deleted": "你的使用者已刪除"
+  },
+  "sections": {
+    "account": "你的身分和登入方式",
+    "appearance": "主題、語言和手機底部欄",
+    "app": "安裝和伺服器狀態",
+    "danger": "危險操作",
+    "dangerUser": "刪除你的使用者"
   }
 }

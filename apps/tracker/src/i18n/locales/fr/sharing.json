@@ -38,5 +38,7 @@
   "accept": "Accepter",
   "decline": "Refuser",
   "accepted": "Compte ajouté",
-  "answerFailed": "Impossible de répondre à l'invitation"
+  "answerFailed": "Impossible de répondre à l'invitation",
+  "onlyYou": "Vous seul. Invitez un ami à voir ou modifier ce compte.",
+  "fullHint": "{n} membres sur {n}. Retirez quelqu'un pour en inviter un autre."
 }

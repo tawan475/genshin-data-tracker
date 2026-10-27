@@ -72,7 +72,10 @@
     "setToast": "Passwort festgelegt",
     "setDetail": "Du kannst dich jetzt auch damit anmelden.",
     "changedToast": "Passwort geändert",
-    "changedDetail": "Alle anderen Geräte wurden abgemeldet. Dieses bleibt angemeldet."
+    "changedDetail": "Alle anderen Geräte wurden abgemeldet. Dieses bleibt angemeldet.",
+    "rowHint": "Eine Änderung meldet deine anderen Geräte ab",
+    "setHint": "Lege eines fest, um dich auch mit deinem Benutzernamen anzumelden",
+    "dialogNote": "Alle anderen Geräte werden abgemeldet."
   },
   "connected": {
     "title": "Verknüpfte Konten",
@@ -187,5 +190,12 @@
     "body": "Alle Konten, Snapshots und Anmeldungen",
     "dialogTitle": "Meinen Benutzer löschen",
     "deleted": "Dein Benutzer wurde gelöscht"
+  },
+  "sections": {
+    "account": "Wer du bist und wie du dich anmeldest",
+    "appearance": "Design, Sprache und die Tab-Leiste am Handy",
+    "app": "Installation und Serverstatus",
+    "danger": "Gefahrenbereich",
+    "dangerUser": "Deinen Benutzer löschen"
   }
 }

@@ -42,6 +42,12 @@
     "typeToConfirm": "{word} eingeben",
     "confirmWord": "löschen",
     "loss": "{n} Snapshot | {n} Snapshots",
-    "deleted": "{name} gelöscht"
+    "deleted": "{name} gelöscht",
+    "sections": {
+      "account": "Name, UID, Server und der Reisende",
+      "sharing": "Wer dieses Konto noch sehen oder bearbeiten darf",
+      "capture": "Hochladen aus Teyvat.me Capture",
+      "danger": "Dieses Konto und seinen Verlauf löschen"
+    }
   }
 }

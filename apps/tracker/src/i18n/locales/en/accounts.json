@@ -42,6 +42,12 @@
     "typeToConfirm": "Type {word}",
     "confirmWord": "delete",
     "loss": "{n} snapshot | {n} snapshots",
-    "deleted": "Deleted {name}"
+    "deleted": "Deleted {name}",
+    "sections": {
+      "account": "Name, UID, server and the Traveler",
+      "sharing": "Who else can see or edit this account",
+      "capture": "Upload from Teyvat.me Capture",
+      "danger": "Delete this account and its history"
+    }
   }
 }

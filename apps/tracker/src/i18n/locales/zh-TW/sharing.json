@@ -38,5 +38,7 @@
   "accept": "接受",
   "decline": "拒絕",
   "accepted": "已加入帳號",
-  "answerFailed": "無法回應邀請"
+  "answerFailed": "無法回應邀請",
+  "onlyYou": "只有你。邀請好友查看或編輯此帳號。",
+  "fullHint": "{n}/{n} 名成員。移除一人後才能再邀請。"
 }

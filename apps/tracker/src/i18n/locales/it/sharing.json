@@ -38,5 +38,7 @@
   "accept": "Accetta",
   "decline": "Rifiuta",
   "accepted": "Account aggiunto",
-  "answerFailed": "Impossibile rispondere all'invito"
+  "answerFailed": "Impossibile rispondere all'invito",
+  "onlyYou": "Solo tu. Invita un amico a vedere o modificare questo account.",
+  "fullHint": "{n} membri su {n}. Rimuovi qualcuno per invitarne un altro."
 }

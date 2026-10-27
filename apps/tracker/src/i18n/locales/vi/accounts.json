@@ -42,6 +42,12 @@
     "typeToConfirm": "Nhập {word}",
     "confirmWord": "xóa",
     "loss": "{n} bản chụp",
-    "deleted": "Đã xóa {name}"
+    "deleted": "Đã xóa {name}",
+    "sections": {
+      "account": "Tên, UID, máy chủ và Nhà Lữ Hành",
+      "sharing": "Ai khác có thể xem hoặc sửa tài khoản này",
+      "capture": "Tải lên từ Teyvat.me Capture",
+      "danger": "Xóa tài khoản này và lịch sử"
+    }
   }
 }

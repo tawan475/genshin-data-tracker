@@ -72,7 +72,10 @@
     "setToast": "Password impostata",
     "setDetail": "Puoi usarla anche per accedere.",
     "changedToast": "Password modificata",
-    "changedDetail": "Tutti gli altri dispositivi sono stati disconnessi. Questo resta connesso."
+    "changedDetail": "Tutti gli altri dispositivi sono stati disconnessi. Questo resta connesso.",
+    "rowHint": "Cambiarla disconnette gli altri tuoi dispositivi",
+    "setHint": "Impostala per accedere anche con il tuo nome utente",
+    "dialogNote": "Tutti gli altri dispositivi vengono disconnessi."
   },
   "connected": {
     "title": "Account collegati",
@@ -187,5 +190,12 @@
     "body": "Tutti gli account, le istantanee e gli accessi",
     "dialogTitle": "Elimina il mio utente",
     "deleted": "Il tuo utente è stato eliminato"
+  },
+  "sections": {
+    "account": "Chi sei e come accedi",
+    "appearance": "Tema, lingua e barra delle schede del telefono",
+    "app": "Installazione e stato del server",
+    "danger": "Zona pericolosa",
+    "dangerUser": "Elimina il tuo utente"
   }
 }

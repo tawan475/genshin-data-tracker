@@ -42,6 +42,12 @@
     "typeToConfirm": "Ketik {word}",
     "confirmWord": "hapus",
     "loss": "{n} snapshot",
-    "deleted": "{name} dihapus"
+    "deleted": "{name} dihapus",
+    "sections": {
+      "account": "Nama, UID, server, dan Pengembara",
+      "sharing": "Siapa lagi yang bisa melihat atau mengedit akun ini",
+      "capture": "Unggah dari Teyvat.me Capture",
+      "danger": "Hapus akun ini dan riwayatnya"
+    }
   }
 }

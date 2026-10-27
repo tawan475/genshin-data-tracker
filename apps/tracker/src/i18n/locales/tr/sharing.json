@@ -38,5 +38,7 @@
   "accept": "Kabul et",
   "decline": "Reddet",
   "accepted": "Hesap eklendi",
-  "answerFailed": "Davete yanıt verilemedi"
+  "answerFailed": "Davete yanıt verilemedi",
+  "onlyYou": "Sadece sen. Bu hesabı görmesi veya düzenlemesi için bir arkadaşını davet et.",
+  "fullHint": "{n}/{n} üye. Başka birini davet etmek için birini çıkar."
 }

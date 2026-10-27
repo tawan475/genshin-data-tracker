@@ -72,7 +72,10 @@
     "setToast": "Password set",
     "setDetail": "You can sign in with it too.",
     "changedToast": "Password changed",
-    "changedDetail": "Every other device was signed out. This one stays signed in."
+    "changedDetail": "Every other device was signed out. This one stays signed in.",
+    "rowHint": "Changing it signs your other devices out",
+    "setHint": "Set one to sign in with your username too",
+    "dialogNote": "Every other device is signed out."
   },
   "connected": {
     "title": "Connected accounts",
@@ -187,5 +190,12 @@
     "body": "Every account, snapshot and sign-in",
     "dialogTitle": "Delete my user",
     "deleted": "Your user is deleted"
+  },
+  "sections": {
+    "account": "Who you are and how you sign in",
+    "appearance": "Theme, language and the phone tab bar",
+    "app": "Install and server status",
+    "danger": "Danger zone",
+    "dangerUser": "Delete your user"
   }
 }

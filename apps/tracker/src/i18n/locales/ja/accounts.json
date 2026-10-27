@@ -42,6 +42,12 @@
     "typeToConfirm": "「{word}」と入力",
     "confirmWord": "削除",
     "loss": "スナップショット {n} 件",
-    "deleted": "{name} を削除しました"
+    "deleted": "{name} を削除しました",
+    "sections": {
+      "account": "名前、UID、サーバー、旅人",
+      "sharing": "このアカウントを閲覧・編集できる人",
+      "capture": "Teyvat.me Capture からのアップロード",
+      "danger": "このアカウントと履歴を削除"
+    }
   }
 }

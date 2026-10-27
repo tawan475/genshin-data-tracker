@@ -72,7 +72,10 @@
     "setToast": "Mot de passe défini",
     "setDetail": "Vous pouvez aussi vous connecter avec.",
     "changedToast": "Mot de passe modifié",
-    "changedDetail": "Tous les autres appareils ont été déconnectés. Celui-ci reste connecté."
+    "changedDetail": "Tous les autres appareils ont été déconnectés. Celui-ci reste connecté.",
+    "rowHint": "Le changer déconnecte vos autres appareils",
+    "setHint": "Définissez-en un pour vous connecter aussi avec votre nom d'utilisateur",
+    "dialogNote": "Tous les autres appareils sont déconnectés."
   },
   "connected": {
     "title": "Comptes connectés",
@@ -187,5 +190,12 @@
     "body": "Tous les comptes, instantanés et connexions",
     "dialogTitle": "Supprimer mon utilisateur",
     "deleted": "Votre utilisateur est supprimé"
+  },
+  "sections": {
+    "account": "Qui vous êtes et comment vous vous connectez",
+    "appearance": "Thème, langue et barre d'onglets mobile",
+    "app": "Installation et état du serveur",
+    "danger": "Zone dangereuse",
+    "dangerUser": "Supprimer votre utilisateur"
   }
 }

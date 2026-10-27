@@ -42,6 +42,12 @@
     "typeToConfirm": "Escribe {word}",
     "confirmWord": "borrar",
     "loss": "{n} captura | {n} capturas",
-    "deleted": "{name} borrada"
+    "deleted": "{name} borrada",
+    "sections": {
+      "account": "Nombre, UID, servidor y el Viajero",
+      "sharing": "Quién más puede ver o editar esta cuenta",
+      "capture": "Subir desde Teyvat.me Capture",
+      "danger": "Eliminar esta cuenta y su historial"
+    }
   }
 }

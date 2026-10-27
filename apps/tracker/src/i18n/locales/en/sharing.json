@@ -38,5 +38,7 @@
   "accept": "Accept",
   "decline": "Decline",
   "accepted": "Account added",
-  "answerFailed": "Could not answer the invite"
+  "answerFailed": "Could not answer the invite",
+  "onlyYou": "Only you. Invite a friend to view or edit this account.",
+  "fullHint": "{n} of {n} members. Remove someone to invite another."
 }

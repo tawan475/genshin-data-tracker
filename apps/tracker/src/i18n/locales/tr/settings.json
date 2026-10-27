@@ -72,7 +72,10 @@
     "setToast": "Şifre belirlendi",
     "setDetail": "Onunla da giriş yapabilirsin.",
     "changedToast": "Şifre değiştirildi",
-    "changedDetail": "Diğer tüm cihazlardan çıkış yapıldı. Bu cihaz giriş yapmış kalır."
+    "changedDetail": "Diğer tüm cihazlardan çıkış yapıldı. Bu cihaz giriş yapmış kalır.",
+    "rowHint": "Değiştirmek diğer cihazlarının oturumunu kapatır",
+    "setHint": "Kullanıcı adınla da giriş yapmak için bir şifre belirle",
+    "dialogNote": "Diğer tüm cihazların oturumu kapatılır."
   },
   "connected": {
     "title": "Bağlı hesaplar",
@@ -187,5 +190,12 @@
     "body": "Tüm hesaplar, anlık görüntüler ve girişler",
     "dialogTitle": "Kullanıcımı sil",
     "deleted": "Kullanıcın silindi"
+  },
+  "sections": {
+    "account": "Kim olduğun ve nasıl giriş yaptığın",
+    "appearance": "Tema, dil ve telefon sekme çubuğu",
+    "app": "Kurulum ve sunucu durumu",
+    "danger": "Tehlikeli bölge",
+    "dangerUser": "Kullanıcını sil"
   }
 }

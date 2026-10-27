@@ -42,6 +42,12 @@
     "typeToConfirm": "{word} yaz",
     "confirmWord": "sil",
     "loss": "{n} anlık görüntü",
-    "deleted": "{name} silindi"
+    "deleted": "{name} silindi",
+    "sections": {
+      "account": "Ad, UID, sunucu ve Gezgin",
+      "sharing": "Bu hesabı başka kimler görebilir veya düzenleyebilir",
+      "capture": "Teyvat.me Capture'dan yükleme",
+      "danger": "Bu hesabı ve geçmişini sil"
+    }
   }
 }

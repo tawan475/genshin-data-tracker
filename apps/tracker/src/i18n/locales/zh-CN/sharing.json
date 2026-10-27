@@ -38,5 +38,7 @@
   "accept": "接受",
   "decline": "拒绝",
   "accepted": "已添加账号",
-  "answerFailed": "无法回应邀请"
+  "answerFailed": "无法回应邀请",
+  "onlyYou": "只有你。邀请好友查看或编辑此账号。",
+  "fullHint": "{n}/{n} 名成员。移除一人后才能再邀请。"
 }

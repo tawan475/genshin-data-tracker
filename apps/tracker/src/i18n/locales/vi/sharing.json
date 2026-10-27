@@ -38,5 +38,7 @@
   "accept": "Chấp nhận",
   "decline": "Từ chối",
   "accepted": "Đã thêm tài khoản",
-  "answerFailed": "Không trả lời được lời mời"
+  "answerFailed": "Không trả lời được lời mời",
+  "onlyYou": "Chỉ có bạn. Mời bạn bè xem hoặc sửa tài khoản này.",
+  "fullHint": "{n}/{n} thành viên. Xóa bớt một người để mời người khác."
 }

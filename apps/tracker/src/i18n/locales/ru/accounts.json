@@ -42,6 +42,12 @@
     "typeToConfirm": "Введите {word}",
     "confirmWord": "удалить",
     "loss": "{n} снимок | снимков: {n}",
-    "deleted": "Удалён: {name}"
+    "deleted": "Удалён: {name}",
+    "sections": {
+      "account": "Имя, UID, сервер и Путешественник",
+      "sharing": "Кто ещё может смотреть или изменять этот аккаунт",
+      "capture": "Загрузка из Teyvat.me Capture",
+      "danger": "Удалить этот аккаунт и его историю"
+    }
   }
 }

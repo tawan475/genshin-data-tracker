@@ -38,5 +38,7 @@
   "accept": "Aceitar",
   "decline": "Recusar",
   "accepted": "Conta adicionada",
-  "answerFailed": "Não foi possível responder ao convite"
+  "answerFailed": "Não foi possível responder ao convite",
+  "onlyYou": "Só você. Convide um amigo para ver ou editar esta conta.",
+  "fullHint": "{n} de {n} membros. Remova alguém para convidar outra pessoa."
 }

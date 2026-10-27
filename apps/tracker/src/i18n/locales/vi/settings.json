@@ -72,7 +72,10 @@
     "setToast": "Đã đặt mật khẩu",
     "setDetail": "Bạn cũng có thể đăng nhập bằng mật khẩu này.",
     "changedToast": "Đã đổi mật khẩu",
-    "changedDetail": "Mọi thiết bị khác đã bị đăng xuất. Thiết bị này vẫn đăng nhập."
+    "changedDetail": "Mọi thiết bị khác đã bị đăng xuất. Thiết bị này vẫn đăng nhập.",
+    "rowHint": "Đổi mật khẩu sẽ đăng xuất các thiết bị khác của bạn",
+    "setHint": "Đặt mật khẩu để đăng nhập bằng tên người dùng",
+    "dialogNote": "Mọi thiết bị khác sẽ bị đăng xuất."
   },
   "connected": {
     "title": "Tài khoản liên kết",
@@ -187,5 +190,12 @@
     "body": "Mọi tài khoản, bản chụp và cách đăng nhập",
     "dialogTitle": "Xóa người dùng của tôi",
     "deleted": "Đã xóa người dùng của bạn"
+  },
+  "sections": {
+    "account": "Bạn là ai và cách đăng nhập",
+    "appearance": "Giao diện, ngôn ngữ và thanh tab trên điện thoại",
+    "app": "Cài đặt và trạng thái máy chủ",
+    "danger": "Vùng nguy hiểm",
+    "dangerUser": "Xóa người dùng của bạn"
   }
 }

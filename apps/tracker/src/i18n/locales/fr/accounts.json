@@ -42,6 +42,12 @@
     "typeToConfirm": "Saisissez {word}",
     "confirmWord": "supprimer",
     "loss": "{n} instantané | {n} instantanés",
-    "deleted": "{name} supprimé"
+    "deleted": "{name} supprimé",
+    "sections": {
+      "account": "Nom, UID, serveur et le Voyageur",
+      "sharing": "Qui d'autre peut voir ou modifier ce compte",
+      "capture": "Envoi depuis Teyvat.me Capture",
+      "danger": "Supprimer ce compte et son historique"
+    }
   }
 }

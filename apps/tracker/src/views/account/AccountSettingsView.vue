@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Trash2 } from 'lucide-vue-next'
+import { Link2, Radio, Trash2, TriangleAlert, Users } from 'lucide-vue-next'
 import AccountFields from '@/components/import/AccountFields.vue'
 import CapturePanel from '@/components/capture/CapturePanel.vue'
 import AccountSharingPanel from '@/components/sharing/AccountSharingPanel.vue'
@@ -159,72 +159,91 @@ async function confirmDelete() {
 <template>
   <PageHeader :title="$t('accounts.settings.title')" />
 
-  <div class="flex flex-col gap-8">
-    <SettingsSection :label="$t('shell.section.account')">
-      <div class="flex flex-wrap items-stretch gap-4">
-        <UiPanel :title="$t('accounts.settings.details')" class="min-w-0 flex-[999_1_32rem]">
-          <form class="flex flex-col gap-5" novalidate @submit.prevent="save">
-            <AccountFields
-              :key="account.id"
-              v-model="form"
-              :errors="errors"
-              :disabled="saving || !owner"
-            />
-            <div v-if="owner" class="flex flex-wrap gap-2">
-              <UiButton type="submit" variant="primary" :loading="saving" :disabled="!dirty">
-                {{ $t('common.save') }}
-              </UiButton>
-              <UiButton v-if="dirty" variant="ghost" :disabled="saving" @click="resetForm">
-                {{ $t('common.reset') }}
-              </UiButton>
-            </div>
-          </form>
-        </UiPanel>
-
-        <UiPanel :title="$t('accounts.settings.traveler')" class="min-w-0 flex-[1_1_16rem]">
-          <div class="flex flex-wrap items-center gap-4">
-            <img
-              :src="characterIcon('Traveler')"
-              alt=""
-              class="size-12 rounded-lg bg-surface-overlay object-cover"
-            />
-            <UiSegmented
-              :model-value="travelerGender"
-              :options="travelerOptions"
-              :label="$t('accounts.settings.traveler')"
-              @update:model-value="setTraveler"
-            />
-          </div>
-        </UiPanel>
-      </div>
-    </SettingsSection>
-
-    <SettingsSection :label="$t('sharing.section')">
-      <AccountSharingPanel :account="account" />
-    </SettingsSection>
-
-    <SettingsSection v-if="owner" :label="$t('sharing.sync')">
-      <div class="flex flex-wrap items-stretch gap-4 [&>*]:min-w-0 [&>*]:flex-[1_1_24rem]">
-        <CapturePanel :account="account" />
-        <ImportKeyPanel :account="account" />
-      </div>
-    </SettingsSection>
-
-    <section
-      v-if="owner"
-      class="rounded-xl border border-danger-border bg-surface-raised shadow-sm"
+  <div class="mx-auto flex w-full max-w-[1500px] flex-col">
+    <SettingsSection
+      :label="$t('shell.section.account')"
+      :description="$t('accounts.settings.sections.account')"
+      :icon="Users"
     >
-      <div class="flex flex-wrap items-center justify-between gap-4 p-5">
-        <div class="min-w-0">
-          <h2 class="text-base font-semibold">{{ $t('accounts.settings.deleteAccount') }}</h2>
-          <p class="tabular font-mono text-sm text-text-secondary">{{ loss }}</p>
+      <UiPanel :title="$t('accounts.settings.details')" class="min-w-0">
+        <form class="flex flex-col gap-5" novalidate @submit.prevent="save">
+          <AccountFields
+            :key="account.id"
+            v-model="form"
+            :errors="errors"
+            :disabled="saving || !owner"
+          />
+          <div v-if="owner" class="flex flex-wrap gap-2">
+            <UiButton type="submit" variant="primary" :loading="saving" :disabled="!dirty">
+              {{ $t('common.save') }}
+            </UiButton>
+            <UiButton v-if="dirty" variant="ghost" :disabled="saving" @click="resetForm">
+              {{ $t('common.reset') }}
+            </UiButton>
+          </div>
+        </form>
+      </UiPanel>
+
+      <UiPanel :title="$t('accounts.settings.traveler')" class="min-w-0">
+        <div class="flex flex-wrap items-center gap-4">
+          <img
+            :src="characterIcon('Traveler')"
+            alt=""
+            class="size-12 rounded-lg bg-surface-overlay object-cover"
+          />
+          <UiSegmented
+            :model-value="travelerGender"
+            :options="travelerOptions"
+            :label="$t('accounts.settings.traveler')"
+            @update:model-value="setTraveler"
+          />
         </div>
-        <UiButton variant="danger" :title="$t('accounts.settings.deleteTitle')" @click="openDelete">
-          <Trash2 class="size-4" aria-hidden="true" />
-          {{ $t('common.delete') }}
-        </UiButton>
-      </div>
-    </section>
+      </UiPanel>
+    </SettingsSection>
+
+    <SettingsSection
+      :label="$t('sharing.section')"
+      :description="$t('accounts.settings.sections.sharing')"
+      :icon="Link2"
+    >
+      <AccountSharingPanel :account="account" class="col-span-full" />
+    </SettingsSection>
+
+    <SettingsSection
+      v-if="owner"
+      :label="$t('sharing.sync')"
+      :description="$t('accounts.settings.sections.capture')"
+      :icon="Radio"
+    >
+      <CapturePanel :account="account" class="min-w-0" />
+      <ImportKeyPanel :account="account" class="min-w-0" />
+    </SettingsSection>
+
+    <SettingsSection
+      v-if="owner"
+      :label="$t('settings.sections.danger')"
+      :description="$t('accounts.settings.sections.danger')"
+      :icon="TriangleAlert"
+    >
+      <section
+        class="col-span-full rounded-xl border border-danger-border bg-surface-raised shadow-sm"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-4 p-5">
+          <div class="min-w-0">
+            <h2 class="text-base font-semibold">{{ $t('accounts.settings.deleteAccount') }}</h2>
+            <p class="tabular font-mono text-sm text-text-secondary">{{ loss }}</p>
+          </div>
+          <UiButton
+            variant="danger"
+            :title="$t('accounts.settings.deleteTitle')"
+            @click="openDelete"
+          >
+            <Trash2 class="size-4" aria-hidden="true" />
+            {{ $t('common.delete') }}
+          </UiButton>
+        </div>
+      </section>
+    </SettingsSection>
   </div>
 
   <UiModal

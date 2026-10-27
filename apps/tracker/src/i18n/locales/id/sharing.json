@@ -38,5 +38,7 @@
   "accept": "Terima",
   "decline": "Tolak",
   "accepted": "Akun ditambahkan",
-  "answerFailed": "Tidak bisa menjawab undangan"
+  "answerFailed": "Tidak bisa menjawab undangan",
+  "onlyYou": "Hanya kamu. Undang teman untuk melihat atau mengedit akun ini.",
+  "fullHint": "{n} dari {n} anggota. Keluarkan seseorang untuk mengundang yang lain."
 }

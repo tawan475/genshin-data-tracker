@@ -72,7 +72,10 @@
     "setToast": "Senha definida",
     "setDetail": "Ela também pode ser usada para entrar.",
     "changedToast": "Senha alterada",
-    "changedDetail": "Todos os outros dispositivos foram desconectados. Este continua conectado."
+    "changedDetail": "Todos os outros dispositivos foram desconectados. Este continua conectado.",
+    "rowHint": "Ao trocar, seus outros dispositivos saem da conta",
+    "setHint": "Crie uma para entrar também com seu nome de usuário",
+    "dialogNote": "Todos os outros dispositivos saem da conta."
   },
   "connected": {
     "title": "Contas conectadas",
@@ -187,5 +190,12 @@
     "body": "Todas as contas, capturas e logins",
     "dialogTitle": "Excluir meu usuário",
     "deleted": "Seu usuário foi excluído"
+  },
+  "sections": {
+    "account": "Quem você é e como entra",
+    "appearance": "Tema, idioma e a barra de abas do celular",
+    "app": "Instalação e status do servidor",
+    "danger": "Zona de perigo",
+    "dangerUser": "Excluir seu usuário"
   }
 }

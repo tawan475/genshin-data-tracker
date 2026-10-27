@@ -42,6 +42,12 @@
     "typeToConfirm": "Scrivi {word}",
     "confirmWord": "elimina",
     "loss": "{n} istantanea | {n} istantanee",
-    "deleted": "{name} eliminato"
+    "deleted": "{name} eliminato",
+    "sections": {
+      "account": "Nome, UID, server e il Viaggiatore",
+      "sharing": "Chi altro può vedere o modificare questo account",
+      "capture": "Caricamento da Teyvat.me Capture",
+      "danger": "Elimina questo account e la sua cronologia"
+    }
   }
 }

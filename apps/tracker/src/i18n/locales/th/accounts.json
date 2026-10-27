@@ -42,6 +42,12 @@
     "typeToConfirm": "พิมพ์ {word}",
     "confirmWord": "ลบ",
     "loss": "สแนปช็อต {n} รายการ",
-    "deleted": "ลบ {name} แล้ว"
+    "deleted": "ลบ {name} แล้ว",
+    "sections": {
+      "account": "ชื่อ UID เซิร์ฟเวอร์ และนักเดินทาง",
+      "sharing": "ใครอีกบ้างที่ดูหรือแก้ไขบัญชีนี้ได้",
+      "capture": "อัปโหลดจาก Teyvat.me Capture",
+      "danger": "ลบบัญชีนี้และประวัติ"
+    }
   }
 }

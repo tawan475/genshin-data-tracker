@@ -42,6 +42,12 @@
     "typeToConfirm": "輸入 {word}",
     "confirmWord": "刪除",
     "loss": "{n} 個快照",
-    "deleted": "已刪除 {name}"
+    "deleted": "已刪除 {name}",
+    "sections": {
+      "account": "名稱、UID、伺服器和旅行者",
+      "sharing": "還有誰可以查看或編輯此帳號",
+      "capture": "從 Teyvat.me Capture 上傳",
+      "danger": "刪除此帳號及其歷史紀錄"
+    }
   }
 }
