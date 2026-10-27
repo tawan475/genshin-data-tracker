@@ -190,7 +190,8 @@
       "locked": "未解锁",
       "open": "进行中",
       "finished": "已完成"
-    }
+    },
+    "regionAverage": "该地区各区域的平均探索度"
   },
   "hangouts": {
     "endings": "结局",

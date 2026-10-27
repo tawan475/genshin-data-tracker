@@ -190,7 +190,8 @@
       "locked": "잠김",
       "open": "진행 중",
       "finished": "완료"
-    }
+    },
+    "regionAverage": "지역 내 구역의 평균 탐사도"
   },
   "hangouts": {
     "endings": "엔딩",

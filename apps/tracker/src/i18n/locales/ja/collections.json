@@ -190,7 +190,8 @@
       "locked": "未解放",
       "open": "進行中",
       "finished": "完了"
-    }
+    },
+    "regionAverage": "地域内エリアの平均探索度"
   },
   "hangouts": {
     "endings": "エンディング",

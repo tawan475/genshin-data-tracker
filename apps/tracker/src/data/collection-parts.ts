@@ -25,6 +25,9 @@ import {
  * `gi_collections` (sections `collections` + `collections2`) and
  * `gi_wardrobe` and `gi_exploration` from the newest snapshot that has that part, with that
  * snapshot's time. A part no capture had is absent (absent is not "none").
+ * `gi_exploration` goes one level further: each of its parts (statues,
+ * offerings, explore…) from the newest snapshot that has it, since a capture
+ * often lacks one (the game sends some after the login snapshot is taken).
  */
 
 export interface Captured<T> {
@@ -83,7 +86,12 @@ export function capturedCollections(bundle: CollectionsBundle): CapturedCollecti
     const exploration = snapshot.exploration ? bundle.texts.get(snapshot.exploration) : undefined
     if (exploration !== undefined) {
       const value = decodeExploration(JSON.parse(exploration) as ExplorationSection)
-      put('exploration', value, snapshot.takenAt)
+      if (!out.exploration) put('exploration', value, snapshot.takenAt)
+      else {
+        // An older capture fills only the parts the newer ones lack.
+        const merged = out.exploration.value as Record<string, unknown>
+        for (const [part, v] of Object.entries(value)) if (!(part in merged)) merged[part] = v
+      }
     }
     const tasks = snapshot.tasks ? bundle.texts.get(snapshot.tasks) : undefined
     if (tasks !== undefined) {

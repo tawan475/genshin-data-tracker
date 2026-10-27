@@ -190,7 +190,8 @@
       "locked": "Locked",
       "open": "Open",
       "finished": "Done"
-    }
+    },
+    "regionAverage": "Average exploration of the region's areas"
   },
   "hangouts": {
     "endings": "Endings",

@@ -190,7 +190,8 @@
       "locked": "Kilitli",
       "open": "Sürüyor",
       "finished": "Bitti"
-    }
+    },
+    "regionAverage": "Bölgedeki alanların ortalama keşif oranı"
   },
   "hangouts": {
     "endings": "Sonlar",

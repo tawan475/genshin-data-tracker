@@ -190,7 +190,8 @@
       "locked": "Bloccato",
       "open": "In corso",
       "finished": "Fatto"
-    }
+    },
+    "regionAverage": "Esplorazione media delle aree della regione"
   },
   "hangouts": {
     "endings": "Finali",

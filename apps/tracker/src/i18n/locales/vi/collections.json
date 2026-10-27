@@ -190,7 +190,8 @@
       "locked": "Đã khóa",
       "open": "Đang làm",
       "finished": "Xong"
-    }
+    },
+    "regionAverage": "Tiến độ khám phá trung bình của các khu vực trong vùng"
   },
   "hangouts": {
     "endings": "Kết thúc",

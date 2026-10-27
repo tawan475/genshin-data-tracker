@@ -1,6 +1,7 @@
 import {
   encodeCollections,
   encodeCollections2,
+  encodeExploration,
   encodeWardrobe,
   type BundleSnapshot,
   type GiCollections,
@@ -38,6 +39,21 @@ describe('capturedCollections', () => {
     expect(captured.defeats?.value).toEqual({ '20010001': { defeated: 3 } })
     expect(captured.wardrobe).toEqual({ value: { currentTeam: 2 }, takenAt: 2_000 })
     expect(captured.handbook).toBeUndefined()
+  })
+
+  it("fills a newer capture's missing exploration parts from older ones", () => {
+    const texts = new Map<string, string>([
+      ['e1', JSON.stringify(encodeExploration({ offerings: { '1': 12 }, explore: { '1': 100 } }))],
+      ['e2', JSON.stringify(encodeExploration({ explore: { '1': 200 } }))],
+    ])
+    const captured = capturedCollections({
+      snapshots: [snapshot(1, { exploration: 'e1' }), snapshot(2, { exploration: 'e2' })],
+      texts,
+    })
+    expect(captured.exploration).toEqual({
+      value: { explore: { '1': 200 }, offerings: { '1': 12 } },
+      takenAt: 2_000,
+    })
   })
 
   it('is empty for a bundle without collections', () => {

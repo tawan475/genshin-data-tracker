@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import {
   CheckCheck,
   Compass,
@@ -141,6 +141,7 @@ const listModel = computed({
 /** A stat opens its list. */
 function openList(value: ListView) {
   view.value = value
+  open.lists = true
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   document
     .getElementById('world-lists')
@@ -154,6 +155,46 @@ const reputationTotal = computed(() =>
     { have: 0, total: 0 },
   ),
 )
+
+/**
+ * Below the stats and the map, panels start folded (the user's call); which
+ * are open is remembered per device.
+ */
+const OPEN_KEY = 'collections:world-open'
+const PANELS = ['lists', 'statues', 'reputation', 'exploration', 'tribes'] as const
+const open = reactive(
+  Object.fromEntries(PANELS.map((id) => [id, false])) as Record<(typeof PANELS)[number], boolean>,
+)
+try {
+  for (const id of JSON.parse(readStorage(OPEN_KEY) ?? '[]') as string[]) {
+    if ((PANELS as readonly string[]).includes(id)) open[id as (typeof PANELS)[number]] = true
+  }
+} catch {
+  // A bad stored value: everything folded.
+}
+watch(open, (value) => {
+  const ids = PANELS.filter((id) => value[id])
+  writeStorage(OPEN_KEY, ids.length ? JSON.stringify(ids) : null)
+})
+
+/** The open list's domains per region, had of total ("Mondstadt 12 / 14"). */
+const regionCounts = computed(() => {
+  const rows = current.value?.view === 'cleared' ? world.value?.cleared : world.value?.domains
+  const byRegion = new Map<string, Progress>()
+  for (const row of rows ?? []) {
+    const key = row.region || t('collections.world.otherAreas')
+    const sum = byRegion.get(key) ?? { have: 0, total: 0 }
+    byRegion.set(key, { have: sum.have + (row.have ? 1 : 0), total: sum.total + 1 })
+  }
+  return [...byRegion].map(([region, p]) => ({ region, ...p }))
+})
+
+/** A region's average exploration of the areas with a known total; null without any. */
+function cityAverage(areas: readonly { percent: number | null }[]): number | null {
+  const known = areas.flatMap((a) => (a.percent === null ? [] : [a.percent]))
+  if (!known.length) return null
+  return Math.floor((known.reduce((sum, p) => sum + p, 0) / known.length) * 10) / 10
+}
 
 const sceneName = (name: string | null) => name ?? t('collections.world.teyvat')
 /**
@@ -283,7 +324,15 @@ const MAP_PARTS = [
       </ul>
     </UiPanel>
 
-    <UiPanel v-if="current" id="world-lists" class="scroll-mt-20" flush>
+    <UiPanel
+      v-if="current"
+      id="world-lists"
+      v-model:open="open.lists"
+      class="scroll-mt-20"
+      :title="current.label"
+      collapsible
+      flush
+    >
       <template #header>
         <div
           class="scroll-hide scroll-fade-x -mx-5 flex max-w-full overflow-x-auto px-5 sm:mx-0 sm:px-0"
@@ -296,6 +345,16 @@ const MAP_PARTS = [
         </div>
       </template>
       <div class="flex flex-col gap-3 p-3 sm:p-5">
+        <ul v-if="regionCounts.length > 1" class="flex flex-wrap gap-1.5">
+          <li
+            v-for="r in regionCounts"
+            :key="r.region"
+            class="tabular rounded-md border border-border-default bg-surface-sunken px-2 py-1 text-xs"
+            :class="r.have >= r.total ? 'text-success-text' : 'text-text-secondary'"
+          >
+            {{ r.region }} <span class="font-mono">{{ r.have }}/{{ r.total }}</span>
+          </li>
+        </ul>
         <HaveFilter
           v-model="filter"
           :have="currentHave"
@@ -318,8 +377,10 @@ const MAP_PARTS = [
     <div class="flex flex-wrap gap-4">
       <UiPanel
         v-if="world.statues.length"
+        v-model:open="open.statues"
         class="min-w-0 flex-[999_1_28rem]"
         :title="$t('collections.world.statues')"
+        collapsible
         flush
       >
         <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,12rem),1fr))] gap-2 p-3 sm:p-5">
@@ -353,8 +414,10 @@ const MAP_PARTS = [
 
       <UiPanel
         v-if="world.reputation.length"
+        v-model:open="open.reputation"
         class="min-w-0 flex-[999_1_20rem]"
         :title="$t('collections.world.reputation')"
+        collapsible
         flush
       >
         <ul class="flex flex-col gap-3 p-3 sm:p-5">
@@ -409,7 +472,13 @@ const MAP_PARTS = [
       </ul>
     </UiPanel>
 
-    <UiPanel v-if="world.exploration.length" :title="$t('collections.world.exploration')" flush>
+    <UiPanel
+      v-if="world.exploration.length"
+      v-model:open="open.exploration"
+      :title="$t('collections.world.exploration')"
+      collapsible
+      flush
+    >
       <template #actions>
         <span
           v-if="world.exploration.some((c) => c.areas.some((a) => a.percent === null))"
@@ -423,7 +492,16 @@ const MAP_PARTS = [
         <section v-for="city in world.exploration" :key="city.city" class="min-w-0">
           <h3 class="mb-1.5 flex min-w-0 items-center gap-1.5 text-sm font-semibold">
             <Landmark class="size-3.5 shrink-0 text-text-muted" aria-hidden="true" />
-            <span class="truncate">{{ city.name || $t('collections.world.otherAreas') }}</span>
+            <span class="min-w-0 flex-1 truncate">{{
+              city.name || $t('collections.world.otherAreas')
+            }}</span>
+            <span
+              v-if="cityAverage(city.areas) !== null"
+              class="tabular shrink-0 font-mono"
+              :class="cityAverage(city.areas)! >= 100 ? 'text-success-text' : 'text-accent-text'"
+              :title="$t('collections.world.regionAverage')"
+              >{{ cityAverage(city.areas) }}%</span
+            >
           </h3>
           <ul class="flex flex-col divide-y divide-border-default">
             <li
@@ -452,7 +530,13 @@ const MAP_PARTS = [
       </div>
     </UiPanel>
 
-    <UiPanel v-if="tribes.length" :title="$t('collections.world.tribes')" flush>
+    <UiPanel
+      v-if="tribes.length"
+      v-model:open="open.tribes"
+      :title="$t('collections.world.tribes')"
+      collapsible
+      flush
+    >
       <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-3 p-3 sm:p-5">
         <section
           v-for="tribe in tribes"

@@ -190,7 +190,8 @@
       "locked": "Terkunci",
       "open": "Berlangsung",
       "finished": "Selesai"
-    }
+    },
+    "regionAverage": "Rata-rata eksplorasi area di wilayah ini"
   },
   "hangouts": {
     "endings": "Ending",

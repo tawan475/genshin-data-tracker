@@ -190,7 +190,8 @@
       "locked": "Gesperrt",
       "open": "Läuft",
       "finished": "Erledigt"
-    }
+    },
+    "regionAverage": "Durchschnittliche Erkundung der Gebiete der Region"
   },
   "hangouts": {
     "endings": "Enden",
