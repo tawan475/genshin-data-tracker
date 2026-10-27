@@ -3,7 +3,7 @@
   "newestCapture": "การสแกนล่าสุด",
   "newestCaptureTitle": "การสแกนล่าสุด: {time}",
   "notCaptured": "ยังไม่ได้สแกน",
-  "notCapturedTitle": "ยังไม่มีการสแกนที่มีคอลเลกชัน: Teyvat.me Capture 1.3.0 ขึ้นไปจะบันทึกจากเกม",
+  "notCapturedTitle": "ยังไม่มีการจับข้อมูลที่มีคอลเลกชัน: Teyvat.me Capture จะอ่านจากเกมตอนเข้าสู่ระบบ",
   "loadFailed": "โหลดไม่สำเร็จ",
   "loading": "กำลังโหลด",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "รวบรวมแล้ว",
     "stateMissing": "ยังไม่มี",
     "notCaptured": "ยังไม่ได้สแกน",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
+    "notCapturedBody": "Teyvat.me Capture จะอ่านตอนเข้าสู่ระบบ ยังว่างอยู่? อัปเดตแอป",
     "allCollected": "รวบรวมครบแล้ว",
     "noneCollected": "ยังไม่ได้รวบรวม"
   },
   "tabsLabel": "คอลเลกชัน",
   "summary": "สรุป",
   "notCapturedPart": "ยังไม่ได้สแกน",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ขึ้นไปจะอ่านตอนเข้าสู่ระบบ",
+  "notCapturedPartBody": "Teyvat.me Capture จะอ่านตอนเข้าสู่ระบบ ยังว่างอยู่? อัปเดตแอป",
   "tabs": {
     "world": "โลก",
     "spincrystals": "Radiant Spincrystal",

@@ -3,7 +3,7 @@
   "newestCapture": "Последний снимок",
   "newestCaptureTitle": "Последний снимок: {time}",
   "notCaptured": "Не снято",
-  "notCapturedTitle": "Пока нет снимков с коллекциями: Teyvat.me Capture 1.3.0 или новее записывает их из игры",
+  "notCapturedTitle": "Ни в одном захвате ещё нет коллекций: Teyvat.me Capture считывает их из игры при входе",
   "loadFailed": "Не удалось загрузить",
   "loading": "Загрузка",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "собрано",
     "stateMissing": "нет в наличии",
     "notCaptured": "Пока не снято",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 или новее считывает их при входе в игру.",
+    "notCapturedBody": "Teyvat.me Capture считывает их при входе в игру. Всё ещё пусто? Обновите приложение.",
     "allCollected": "Все собраны",
     "noneCollected": "Пока ни одного"
   },
   "tabsLabel": "Коллекция",
   "summary": "Сводка",
   "notCapturedPart": "Пока не снято",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 или новее считывает это при входе в игру.",
+  "notCapturedPartBody": "Teyvat.me Capture считывает это при входе в игру. Всё ещё пусто? Обновите приложение.",
   "tabs": {
     "world": "Мир",
     "spincrystals": "Лучистые кристаллы",

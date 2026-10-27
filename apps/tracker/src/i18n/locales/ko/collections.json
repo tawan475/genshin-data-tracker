@@ -3,7 +3,7 @@
   "newestCapture": "최신 캡처",
   "newestCaptureTitle": "최신 캡처: {time}",
   "notCaptured": "캡처 없음",
-  "notCapturedTitle": "아직 컬렉션이 담긴 캡처가 없습니다. Teyvat.me Capture 1.3.0 이상이 게임에서 기록합니다",
+  "notCapturedTitle": "수집 정보가 있는 캡처가 아직 없습니다: Teyvat.me Capture가 로그인할 때 게임에서 읽습니다",
   "loadFailed": "불러오기 실패",
   "loading": "불러오는 중",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "수집 완료",
     "stateMissing": "미보유",
     "notCaptured": "아직 캡처 없음",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 이상이 로그인할 때 읽습니다.",
+    "notCapturedBody": "Teyvat.me Capture가 로그인할 때 읽습니다. 계속 비어 있으면 앱을 업데이트하세요.",
     "allCollected": "모두 수집 완료",
     "noneCollected": "아직 수집한 것 없음"
   },
   "tabsLabel": "컬렉션",
   "summary": "요약",
   "notCapturedPart": "아직 캡처 없음",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 이상이 로그인할 때 읽습니다.",
+  "notCapturedPartBody": "Teyvat.me Capture가 로그인할 때 읽습니다. 계속 비어 있으면 앱을 업데이트하세요.",
   "tabs": {
     "world": "월드",
     "spincrystals": "빛나는 결정",

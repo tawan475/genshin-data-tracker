@@ -3,7 +3,7 @@
   "newestCapture": "Newest capture",
   "newestCaptureTitle": "Newest capture: {time}",
   "notCaptured": "Not captured",
-  "notCapturedTitle": "No capture has collections yet: Teyvat.me Capture 1.3.0 or newer records them from the game",
+  "notCapturedTitle": "No capture has collections yet: Teyvat.me Capture records them from the game at login",
   "loadFailed": "Load failed",
   "loading": "Loading",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "have",
     "stateMissing": "missing",
     "notCaptured": "Not captured yet",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 or newer reads them at login.",
+    "notCapturedBody": "Teyvat.me Capture reads them at login. Still empty? Update the app.",
     "allCollected": "All collected",
     "noneCollected": "None collected yet"
   },
   "tabsLabel": "Collection",
   "summary": "Summary",
   "notCapturedPart": "Not captured yet",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 or newer reads it at login.",
+  "notCapturedPartBody": "Teyvat.me Capture reads it at login. Still empty? Update the app.",
   "tabs": {
     "world": "World",
     "spincrystals": "Radiant Spincrystals",

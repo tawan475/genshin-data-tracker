@@ -3,7 +3,7 @@
   "newestCapture": "En yeni tarama",
   "newestCaptureTitle": "En yeni tarama: {time}",
   "notCaptured": "Taranmadı",
-  "notCapturedTitle": "Henüz koleksiyon içeren tarama yok: Teyvat.me Capture 1.3.0 veya üstü bunları oyundan kaydeder",
+  "notCapturedTitle": "Henüz koleksiyon içeren bir yakalama yok: Teyvat.me Capture bunları girişte oyundan okur",
   "loadFailed": "Yüklenemedi",
   "loading": "Yükleniyor",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "alındı",
     "stateMissing": "eksik",
     "notCaptured": "Henüz taranmadı",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 veya üstü bunları girişte okur.",
+    "notCapturedBody": "Teyvat.me Capture bunları girişte okur. Hâlâ boş mu? Uygulamayı güncelle.",
     "allCollected": "Hepsi alındı",
     "noneCollected": "Henüz hiç yok"
   },
   "tabsLabel": "Koleksiyon",
   "summary": "Özet",
   "notCapturedPart": "Henüz taranmadı",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 veya üstü bunu girişte okur.",
+  "notCapturedPartBody": "Teyvat.me Capture bunu girişte okur. Hâlâ boş mu? Uygulamayı güncelle.",
   "tabs": {
     "world": "Dünya",
     "spincrystals": "Parlak Burgu Kristaller",

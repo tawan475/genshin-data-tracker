@@ -3,7 +3,7 @@
   "newestCapture": "Ultima cattura",
   "newestCaptureTitle": "Ultima cattura: {time}",
   "notCaptured": "Non catturati",
-  "notCapturedTitle": "Nessuna cattura ha ancora collezioni: Teyvat.me Capture 1.3.0 o successivo le registra dal gioco",
+  "notCapturedTitle": "Nessuna cattura ha ancora collezioni: Teyvat.me Capture le legge dal gioco all'accesso",
   "loadFailed": "Caricamento non riuscito",
   "loading": "Caricamento",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "ottenuto",
     "stateMissing": "mancante",
     "notCaptured": "Non ancora catturati",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 o successivo li legge all'accesso.",
+    "notCapturedBody": "Teyvat.me Capture le legge all'accesso. Ancora vuoto? Aggiorna l'app.",
     "allCollected": "Tutti ottenuti",
     "noneCollected": "Nessuno ottenuto"
   },
   "tabsLabel": "Collezione",
   "summary": "Riepilogo",
   "notCapturedPart": "Non ancora catturato",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 o successivo lo legge all'accesso.",
+  "notCapturedPartBody": "Teyvat.me Capture lo legge all'accesso. Ancora vuoto? Aggiorna l'app.",
   "tabs": {
     "world": "Mondo",
     "spincrystals": "Voltacristalli radiosi",

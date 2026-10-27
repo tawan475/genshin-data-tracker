@@ -3,7 +3,7 @@
   "newestCapture": "Captura mais recente",
   "newestCaptureTitle": "Captura mais recente: {time}",
   "notCaptured": "Não capturado",
-  "notCapturedTitle": "Nenhuma captura tem coleções ainda: o Teyvat.me Capture 1.3.0 ou mais recente as registra do jogo",
+  "notCapturedTitle": "Nenhuma captura tem coleções ainda: o Teyvat.me Capture as lê do jogo ao entrar",
   "loadFailed": "Falha ao carregar",
   "loading": "Carregando",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "coletado",
     "stateMissing": "não possuído",
     "notCaptured": "Ainda não capturado",
-    "notCapturedBody": "O Teyvat.me Capture 1.3.0 ou mais recente os lê ao entrar no jogo.",
+    "notCapturedBody": "O Teyvat.me Capture as lê ao entrar no jogo. Ainda vazio? Atualize o app.",
     "allCollected": "Todos coletados",
     "noneCollected": "Nenhum coletado ainda"
   },
   "tabsLabel": "Coleção",
   "summary": "Resumo",
   "notCapturedPart": "Ainda não capturado",
-  "notCapturedPartBody": "O Teyvat.me Capture 1.4.0 ou mais recente o lê ao entrar no jogo.",
+  "notCapturedPartBody": "O Teyvat.me Capture o lê ao entrar no jogo. Ainda vazio? Atualize o app.",
   "tabs": {
     "world": "Mundo",
     "spincrystals": "Cristais Rodopiantes Radiantes",

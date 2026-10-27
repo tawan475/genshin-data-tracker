@@ -3,7 +3,7 @@
   "newestCapture": "Capture la plus récente",
   "newestCaptureTitle": "Capture la plus récente : {time}",
   "notCaptured": "Non capturé",
-  "notCapturedTitle": "Aucune capture n'a encore de collections : Teyvat.me Capture 1.3.0 ou plus récent les relève dans le jeu",
+  "notCapturedTitle": "Aucune capture n'a encore de collections : Teyvat.me Capture les lit dans le jeu à la connexion",
   "loadFailed": "Échec du chargement",
   "loading": "Chargement",
   "spincrystals": {
@@ -24,14 +24,14 @@
     "stateHave": "collecté",
     "stateMissing": "manquant",
     "notCaptured": "Pas encore capturé",
-    "notCapturedBody": "Teyvat.me Capture 1.3.0 ou plus récent les lit à la connexion.",
+    "notCapturedBody": "Teyvat.me Capture les lit à la connexion. Toujours vide ? Mettez l'appli à jour.",
     "allCollected": "Tous collectés",
     "noneCollected": "Aucun collecté"
   },
   "tabsLabel": "Collection",
   "summary": "Résumé",
   "notCapturedPart": "Pas encore capturé",
-  "notCapturedPartBody": "Teyvat.me Capture 1.4.0 ou plus récent le lit à la connexion.",
+  "notCapturedPartBody": "Teyvat.me Capture le lit à la connexion. Toujours vide ? Mettez l'appli à jour.",
   "tabs": {
     "world": "Monde",
     "spincrystals": "Gyrocristaux radiants",
