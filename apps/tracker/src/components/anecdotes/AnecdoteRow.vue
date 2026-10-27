@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Check, ChevronDown, EyeOff, Repeat } from 'lucide-vue-next'
+import { Check, ChevronDown, ExternalLink, EyeOff, Repeat } from 'lucide-vue-next'
 import type { AnecdoteTexts } from '@gdt/game-data'
 import {
   markTarget,
@@ -12,15 +12,18 @@ import {
 import UiBadge from '@/components/ui/UiBadge.vue'
 import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
+import { wikiPage } from '@/lib/wiki'
 
 /**
  * One anecdote: the round button marks it done by hand (a captured one is
  * green and stays done); the title opens its text (the hint until it is
- * done, then what happened).
+ * done, then what happened); the link opens its wiki guide.
  */
 const props = defineProps<{
   entry: AnecdoteEntry
   text: AnecdoteTexts
+  /** The English text: the wiki's pages are titled with it (`Nefer: Reliable or Not`). */
+  english?: AnecdoteTexts
   readOnly: boolean
 }>()
 const emit = defineEmits<{ mark: [id: number]; unmark: [id: number] }>()
@@ -38,6 +41,10 @@ const body = computed(() => {
   return props.entry.source ? w.summary || w.hint : w.hint || w.summary
 })
 const runs = computed(() => textRuns(body.value))
+const guide = computed(() => {
+  const english = (props.english ?? props.text).anecdotes.get(props.entry.anecdote.id)
+  return english?.title ? wikiPage(plainText(english.title)) : null
+})
 
 const target = computed(() => markTarget(props.entry))
 const status = computed(() => {
@@ -118,6 +125,17 @@ const FILL = {
           >
             <Repeat class="size-3" aria-hidden="true" />{{ formatNumber(entry.finishCount) }}
           </UiBadge>
+          <a
+            v-if="guide"
+            :href="guide"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="-m-1.5 grid size-7 place-items-center rounded-md text-text-muted hover:bg-surface-overlay hover:text-text-primary"
+            :title="$t('collections.guide')"
+          >
+            <ExternalLink class="size-3.5" aria-hidden="true" />
+            <span class="sr-only">{{ $t('collections.guide') }}: {{ title }}</span>
+          </a>
           <span
             v-if="entry.anecdote.hidden"
             class="text-text-muted"

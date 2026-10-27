@@ -62,14 +62,14 @@ describe('spincrystalProgress', () => {
 })
 
 describe('spincrystalGuide', () => {
-  it('links the numbered ones to their wiki page and searches the song-named ones', () => {
+  it('links each to its wiki page, by number or by its English name', () => {
     expect(spincrystalGuide({ number: 55 }, 'Radiant Spincrystal 55')).toBe(
       'https://genshin-impact.fandom.com/wiki/Radiant_Spincrystal_55',
     )
     expect(
       spincrystalGuide({ number: null }, 'Radiant Spincrystal "The Long Way Home: Part I"'),
     ).toBe(
-      'https://genshin-impact.fandom.com/wiki/Special:Search?query=Radiant%20Spincrystal%20%22The%20Long%20Way%20Home%3A%20Part%20I%22',
+      'https://genshin-impact.fandom.com/wiki/Radiant_Spincrystal_%22The_Long_Way_Home:_Part_I%22',
     )
   })
 })

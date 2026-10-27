@@ -1,4 +1,5 @@
 import { entryIcon, entryId } from '@gdt/game-data'
+import { wikiPage } from '@/lib/wiki'
 
 /**
  * Radiant Spincrystals (the Serenitea Pot's music list): every one the game
@@ -90,15 +91,11 @@ export function filterSpincrystals(
   return filter === 'all' ? [...rows] : rows.filter((r) => r.have === (filter === 'have'))
 }
 
-const WIKI = 'https://genshin-impact.fandom.com/wiki/'
-
 /**
  * A Spincrystal's guide on the Genshin Impact Fandom wiki (where it is
- * found): the numbered ones by page title (`Radiant_Spincrystal_55`), the
- * song-named ones by a search for their English name.
+ * found): its page, titled `Radiant Spincrystal 55`, or the song-named
+ * one's English name (`Radiant Spincrystal "A Letter from the Wind: II"`).
  */
 export function spincrystalGuide(row: Pick<Spincrystal, 'number'>, englishName: string): string {
-  return row.number !== null
-    ? `${WIKI}Radiant_Spincrystal_${row.number}`
-    : `${WIKI}Special:Search?query=${encodeURIComponent(englishName)}`
+  return wikiPage(row.number !== null ? `Radiant Spincrystal ${row.number}` : englishName)
 }

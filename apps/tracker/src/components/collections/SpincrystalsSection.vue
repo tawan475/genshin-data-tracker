@@ -69,7 +69,7 @@ const collectedHint = computed(() => {
 const state = (row: SpincrystalRow) =>
   t(`collections.spincrystals.${row.have ? 'stateHave' : 'stateMissing'}`)
 const tileTitle = (row: SpincrystalRow) =>
-  `${materialName(row.key)} · ${state(row)} · ${t('collections.spincrystals.guide')}`
+  `${materialName(row.key)} · ${state(row)} · ${t('collections.guide')}`
 const guide = (row: SpincrystalRow) => spincrystalGuide(row, materialEnglishName(row.key))
 </script>
 
