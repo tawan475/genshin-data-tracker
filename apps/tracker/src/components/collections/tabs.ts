@@ -15,6 +15,7 @@ import {
   Sofa,
   Sprout,
 } from 'lucide-vue-next'
+import type { CollectionTopic } from '@gdt/game-data/collections'
 import type { CapturedCollections } from '@/data/collections'
 
 /** The collections, in the hub's order; the slug is the URL's last segment (`/collections/archive`). */
@@ -126,3 +127,33 @@ export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
   blueprints: Sofa,
   aranara: Sprout,
 }
+
+/** The game data topics each collection's page reads (its chunks only). */
+export const TAB_TOPICS: Readonly<Record<CollectionTab, readonly CollectionTopic[]>> = {
+  world: ['world', 'domains', 'npcs', 'natlan'],
+  events: ['events'],
+  spincrystals: [],
+  anecdotes: [],
+  archive: ['archive'],
+  handbook: ['handbook'],
+  'living-beings': ['archive'],
+  tcg: ['tcg'],
+  recipes: ['recipes'],
+  crafting: ['crafting'],
+  wardrobe: ['wardrobe'],
+  hangouts: ['hangouts'],
+  blueprints: ['home'],
+  aranara: ['aranara'],
+}
+
+/** What the hub's card figures count against (collection-summary.ts). */
+export const HUB_TOPICS: readonly CollectionTopic[] = [
+  'world',
+  'archive',
+  'tcg',
+  'recipes',
+  'crafting',
+  'wardrobe',
+  'home',
+  'aranara',
+]

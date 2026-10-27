@@ -5,13 +5,15 @@ import { ArrowLeft } from 'lucide-vue-next'
 import CaptureTime from '@/components/collections/CaptureTime.vue'
 import CollectionsHub from '@/components/collections/CollectionsHub.vue'
 import {
+  HUB_TOPICS,
   NEEDS_CATALOG,
+  TAB_TOPICS,
   TAB_COMPONENTS,
   TAB_LABEL,
   TAB_PART,
   isCollectionTab,
 } from '@/components/collections/tabs'
-import { useCollectionCatalog } from '@/components/collections/use-catalog'
+import { topicsKey, useCollectionCatalog } from '@/components/collections/use-catalog'
 import { useCapturedCollections } from '@/components/collections/use-captured'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiError from '@/components/ui/UiError.vue'
@@ -37,9 +39,18 @@ const title = computed(() =>
 )
 
 const { captured, resource } = useCapturedCollections()
-const catalog = useCollectionCatalog()
+const topics = computed(() => (tab.value ? TAB_TOPICS[tab.value] : HUB_TOPICS))
+const catalog = useCollectionCatalog(
+  () => topics.value,
+  () => !!tab.value,
+)
+/** The catalog once it holds this page's topics (the last page's stays until then). */
+const catalogHere = computed(() => {
+  const value = catalog.data.value
+  return value && value.topics === topicsKey(topics.value) ? value : null
+})
 const needsCatalog = computed(() => !!tab.value && NEEDS_CATALOG.has(tab.value))
-const ready = computed(() => !!captured.value && (!needsCatalog.value || !!catalog.data.value))
+const ready = computed(() => !!captured.value && (!needsCatalog.value || !!catalogHere.value))
 const loadError = computed(
   () => resource.error.value ?? (needsCatalog.value ? catalog.error.value : undefined),
 )
@@ -81,7 +92,7 @@ const part = computed(() => {
         v-else-if="ready && captured"
         :key="tab"
         :captured="captured"
-        v-bind="needsCatalog ? { catalog: catalog.data.value } : {}"
+        v-bind="needsCatalog ? { catalog: catalogHere } : {}"
       />
       <div v-else aria-busy="true" :aria-label="$t('collections.loading')">
         <div class="mb-4 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4 lg:mb-6">
@@ -98,11 +109,7 @@ const part = computed(() => {
         :error="resource.error.value"
         @retry="retry"
       />
-      <CollectionsHub
-        v-else-if="captured"
-        :captured="captured"
-        :catalog="catalog.data.value ?? null"
-      />
+      <CollectionsHub v-else-if="captured" :captured="captured" :catalog="catalogHere" />
       <div
         v-else
         class="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] sm:gap-3"
