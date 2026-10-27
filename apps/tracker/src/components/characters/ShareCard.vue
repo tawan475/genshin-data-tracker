@@ -289,11 +289,11 @@ const ownerLine = computed(() => ownerParts(props.owner))
               c.friendship !== null ? 'grid-cols-[1fr_auto_1fr]' : 'grid-cols-1',
               CHIP_TEXT,
               levelBar !== null || friendshipBar !== null
-                ? 'rounded-[20px] pt-[4px] pb-[10px]'
+                ? 'rounded-[20px] py-[10px] leading-[32px]'
                 : 'rounded-full py-[4px]',
             ]"
           >
-            <span :title="levelTitle" class="flex flex-col gap-[6px]"
+            <span :title="levelTitle" class="flex flex-col gap-[2px]"
               ><span
                 ><span class="font-normal opacity-85">Lv.&nbsp;</span>
                 <span class="font-bold">{{ c.level }}</span
@@ -310,7 +310,7 @@ const ownerLine = computed(() => ownerParts(props.owner))
             </span>
             <template v-if="c.friendship !== null">
               <span class="self-start opacity-50">·</span>
-              <span :title="friendshipTitle" class="flex flex-col gap-[6px]"
+              <span :title="friendshipTitle" class="flex flex-col gap-[2px]"
                 ><span
                   ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
                   <span class="font-bold">{{ c.friendship }}</span></span

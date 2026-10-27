@@ -461,20 +461,23 @@ class CardPainter {
     this.backdropCopy = p.snapshot()
     const boxTop = top + rowH + 10
     const bars = this.input.levelBar !== null || this.input.friendshipBar !== null
-    const boxH = bars ? 68 : 50
+    // With bars: the text on a 32 px line, its bar 2 px under it, even padding (the user's spacing).
+    const boxH = bars ? 60 : 50
     const parts = this.levelParts()
     const boxW = 18 + parts.width + 18
     this.glass(LEFT.x, boxTop, boxW, boxH, bars ? 20 : 25, 'chip')
     const color = this.v('--card-hero')
-    const lineTop = boxTop + 4
+    const lineH = bars ? 32 : 42
+    const lineTop = boxTop + (bars ? 10 : 4)
     for (const part of parts.runs) {
       this.line(part.text, LEFT.x + 18 + part.x, lineTop, 28, part.weight, color, {
         alpha: part.alpha,
+        lineHeight: lineH,
       })
     }
     for (const bar of parts.bars) {
       const bx = LEFT.x + 18 + bar.x
-      const by = lineTop + 42 + 6
+      const by = lineTop + lineH + 2
       p.fill(bx, by, bar.w, 6, 3, withAlpha(color, 0.2))
       p.clipped(bx, by, bar.w, 6, 3, () =>
         p.fill(bx, by, (bar.w * bar.share) / 100, 6, 3, bar.color),
