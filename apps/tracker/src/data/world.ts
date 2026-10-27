@@ -4,7 +4,7 @@ import { idLabel, type CollectionCatalog } from './collection-names'
 /**
  * The World page (Teyvat.me Capture's `gi_exploration`) against the game
  * data's cities, map areas, offerings and scene points
- * (`@gdt/game-data/collections` from v7.1.16). Pure.
+ * (`@gdt/game-data/collections` from v7.1.17). Pure.
  *
  * Exploration comes as raw points per area; the percentage is points over
  * the area's `exploreTotal`, capped at 100 (a fully explored area has a few
@@ -25,6 +25,8 @@ export interface StatueRow {
   name: string
   statue: string
   level: number
+  /** The Statue's top level. */
+  max: number
   oculi: number
 }
 
@@ -78,9 +80,14 @@ const ids = (value: unknown): number[] => (Array.isArray(value) ? (value as numb
 const byId = <T>(record: Record<string, T> | undefined) =>
   Object.entries(record ?? {}).map(([id, value]) => [Number(id), value] as const)
 
-function nameIn(catalog: CollectionCatalog, section: 'cities' | 'areas' | 'offerings', id: number) {
+function nameIn(
+  catalog: CollectionCatalog,
+  section: 'cities' | 'areas' | 'offerings',
+  id: number,
+  column = 'name',
+) {
   const pick = (texts: CollectionCatalog['text']) =>
-    (texts[section].get(id) as { name?: string } | undefined)?.name || ''
+    (texts[section].get(id) as Record<string, string> | undefined)?.[column] || ''
   return pick(catalog.text) || pick(catalog.english)
 }
 function statueName(catalog: CollectionCatalog, city: number) {
@@ -102,18 +109,16 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
     const top = topAreas.get(area1)
     return (top && nameIn(catalog, 'areas', top.row.id)) || idLabel(area1)
   }
-  const overworldCities = new Set(
-    [...topAreas.values()].filter((a) => a.scene === TEYVAT_SCENE).map((a) => a.city),
-  )
-
-  // Statues of The Seven: the cities that have one in the overworld.
+  // Statues of The Seven: the cities whose Statue has levels (the game data's top level).
+  const statueMax = new Map(cities.map((c) => [c.id, n(c.statueMaxLevel)]))
   const statues: StatueRow[] = byId(exploration.statues)
-    .filter(([city]) => overworldCities.has(city) && statueName(catalog, city))
+    .filter(([city]) => (statueMax.get(city) ?? 0) > 0)
     .map(([city, s]) => ({
       city,
       name: cityName(city),
       statue: statueName(catalog, city),
       level: s.level,
+      max: statueMax.get(city)!,
       oculi: s.oculi,
     }))
     .sort((a, b) => a.city - b.city)
@@ -135,7 +140,9 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
     ? [
         ...offerings.map((o) => ({
           id: o.id,
-          name: nameIn(catalog, 'offerings', o.id),
+          // The older offerings have no name in the game text: their "… Offering(s) Available" line.
+          name:
+            nameIn(catalog, 'offerings', o.id) || nameIn(catalog, 'offerings', o.id, 'available'),
           level: offeringLevels.get(o.id) ?? 0,
           max: n(o.maxLevel),
         })),

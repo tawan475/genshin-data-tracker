@@ -170,13 +170,18 @@ const MAP_PARTS = [
             :title="statue.statue"
           >
             <span
-              class="tabular grid size-10 shrink-0 place-items-center rounded-full bg-accent/15 font-mono font-semibold text-accent-text"
+              class="tabular grid size-10 shrink-0 place-items-center rounded-full font-mono font-semibold"
+              :class="
+                statue.level >= statue.max
+                  ? 'bg-success-text/15 text-success-text'
+                  : 'bg-accent/15 text-accent-text'
+              "
               >{{ statue.level }}</span
             >
             <span class="flex min-w-0 flex-col">
               <span class="truncate text-sm font-medium">{{ statue.name }}</span>
               <span class="truncate text-xs text-text-secondary">
-                {{ $t('collections.world.level', { n: statue.level }) }}
+                {{ $t('collections.world.level', { n: statue.level }) }} / {{ statue.max }}
                 <template v-if="statue.oculi">
                   · {{ $t('collections.world.oculi', { n: formatNumber(statue.oculi) }) }}</template
                 >

@@ -174,11 +174,11 @@ ranks), while the capture is newer than the row's hand state
 (`components/planner/tasks.ts` `captureRead`), and Collections
 (`/app/a/:id/collections` = a card per collection with its figure,
 `/collections/<tab>` = its page; Achievements is a card too): World
-(`gi_exploration` against `@gdt/game-data` v7.1.16's cities, areas,
+(`gi_exploration` against `@gdt/game-data` v7.1.17's cities, areas,
 offerings and scene points: each visited scene's Teleport Waypoints,
 domains and areas revealed, Statues of The Seven, reputation, offerings,
-exploration per area as points over `exploreTotal` (capped at 100%; no
-Statue top levels yet); `src/data/world.ts`; plus bosses' and elites'
+exploration per area as points over `exploreTotal` (capped at 100%), Statues
+against `statueMaxLevel`; `src/data/world.ts`; plus bosses' and elites'
 respawns from `gi_tasks.respawns`, named by the farming data), Events
 (`gi_events`: window and reward counters, titled from the notice board when
 one notice matches the dates; `src/data/events.ts`), Hangout Events
