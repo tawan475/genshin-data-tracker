@@ -26,6 +26,11 @@ export interface CardExportOptions {
   measure?: (node: HTMLElement) => { width: number; height: number }
   /** The card the export draws, rendered into `frame.mount` (a Teleport). */
   node: () => HTMLElement | undefined
+  /**
+   * Draws the PNG itself (a card drawn on a canvas, the roster): no hidden
+   * frame, no DOM capture; `node` and the frame's size are then unused.
+   */
+  draw?: () => Promise<{ blob: Blob; missing: number }>
   /** Whether there is a card to draw (false closes the frame). */
   open: () => boolean
   /** What the PNG depends on; a change drops the drawn one. */
@@ -103,6 +108,14 @@ export function useCardExport(options: CardExportOptions) {
   function render(): Promise<Blob> {
     const id = ++generation
     const promise = (async () => {
+      if (options.draw) {
+        const drawn = await options.draw()
+        if (id === generation) {
+          missing.value = drawn.missing
+          ready.value = true
+        }
+        return drawn.blob
+      }
       const target = await ensureFrame()
       await target.sync()
       await nextTick()

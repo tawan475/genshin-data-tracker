@@ -162,6 +162,26 @@ export function elementIcon(element: Element): string {
   return gameIcon(elementImage(GAME_ELEMENTS[element]) ?? '')
 }
 
+/** The game's file names for the elements (`UI_Buff_Element_<name>`). */
+const ELEMENT_FILES: Readonly<Record<Element, string>> = {
+  anemo: 'Wind',
+  geo: 'Roach',
+  electro: 'Elect',
+  dendro: 'Grass',
+  hydro: 'Water',
+  pyro: 'Fire',
+  cryo: 'Frost',
+}
+
+/**
+ * The light element icon of the game's character list (no dark rim, a soft
+ * glow): `UI_Buff_Element_*`, which nanoka lacks, on gi-cdn (publish.json
+ * `extra`). The roster card's tiles.
+ */
+export function elementIconLight(element: Element): string {
+  return giCdnArt(`UI_Buff_Element_${ELEMENT_FILES[element]}`)
+}
+
 /** Loaded lazily (large); call before rendering material icons. */
 export async function loadMaterialIcons(): Promise<void> {
   if (materialIndex) return

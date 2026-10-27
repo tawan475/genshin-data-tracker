@@ -152,7 +152,8 @@ describe("ties, in the game's order", () => {
   })
 
   it("is the Default sort: the game's order, turned round whole when ascending", () => {
-    const order = ['Xiangling', 'HuTao', 'Bennett', 'Furina', 'Diluc']
+    // Level, then 5★ first, the game's elements (Hydro before Pyro), newest obtained first.
+    const order = ['Furina', 'HuTao', 'Xiangling', 'Bennett', 'Diluc']
     expect(CHARACTER_SORTS[0]?.value).toBe('default')
     expect(keys(sortCharacters(list, 'default', 'desc'))).toEqual(order)
     expect(keys(sortCharacters(list, 'default', 'asc'))).toEqual([...order].reverse())

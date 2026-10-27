@@ -1,5 +1,5 @@
 /**
- * The roster share card (RosterShareCard): every character as the game's
+ * The roster share card (roster-canvas): every character as the game's
  * bag cell, on the share card's palette. Its width follows the roster
  * (`rosterColumns`) so a small roster isn't a strip and a big one stays
  * near 16:10; its height is as laid out.
@@ -14,9 +14,8 @@ export const ROSTER_GAP = 12
 export const ROSTER_PAD = 48
 export const ROSTER_MIN_COLUMNS = 9
 export const ROSTER_MAX_COLUMNS = 14
-/** The hidden frame's viewport: wide enough for the most columns, tall enough for ~250 characters. */
+/** The widest the card gets (the most columns). */
 export const ROSTER_FRAME_WIDTH = 1920
-export const ROSTER_FRAME_HEIGHT = 3200
 export const ROSTER_SCALE = 1.5
 
 /**

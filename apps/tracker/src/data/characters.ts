@@ -654,13 +654,34 @@ const elementRank = (e: Element | null) => (e ? ELEMENTS.indexOf(e) : ELEMENTS.l
 const obtainedOrder = (a: CharacterView, b: CharacterView) =>
   (a.obtainedAt ?? Number.MAX_SAFE_INTEGER) - (b.obtainedAt ?? Number.MAX_SAFE_INTEGER)
 
+/**
+ * The game's own character list (sorted by Level): Geo, Anemo, Cryo, Electro,
+ * Dendro, Hydro, Pyro (the game's element ids, high first), element-changing
+ * characters last.
+ */
+const GAME_ELEMENTS: readonly Element[] = [
+  'geo',
+  'anemo',
+  'cryo',
+  'electro',
+  'dendro',
+  'hydro',
+  'pyro',
+]
+const gameElementRank = (e: Element | null) => (e ? GAME_ELEMENTS.indexOf(e) : GAME_ELEMENTS.length)
+/** Newest obtained first, unknown dates last. */
+const newestFirst = (a: CharacterView, b: CharacterView) =>
+  (b.obtainedAt ?? Number.MIN_SAFE_INTEGER) - (a.obtainedAt ?? Number.MIN_SAFE_INTEGER)
+
 const compareBy: Record<CharacterSort, (a: CharacterView, b: CharacterView) => number> = {
-  // Descending is the game's order: level high first, then element and date obtained in order.
+  // Descending is the game's order: level high first, then 5★ before 4★, the
+  // game's element order, and the newest obtained first.
   default: (a, b) =>
     a.level - b.level ||
     a.ascension - b.ascension ||
-    elementRank(b.element) - elementRank(a.element) ||
-    obtainedOrder(b, a),
+    (a.rarity ?? 0) - (b.rarity ?? 0) ||
+    gameElementRank(b.element) - gameElementRank(a.element) ||
+    newestFirst(b, a),
   level: (a, b) => a.level - b.level || a.ascension - b.ascension,
   constellation: (a, b) => a.constellation - b.constellation,
   talents: (a, b) => a.talentTotal - b.talentTotal,
