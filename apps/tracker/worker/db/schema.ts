@@ -194,7 +194,7 @@ export const snapshots = sqliteTable(
     /** Bytes of the sections this snapshot newly stored (shared ones cost nothing). */
     storedSize: integer('stored_size').notNull(),
     deletedAt: integer('deleted_at'),
-    // Storage format v2 (@gdt/shared codec/store-v2.ts): the eleven sections
+    // Storage format v2 (@gdt/shared codec/store-v2.ts): the thirteen sections
     // by `section_blobs.id`, NULL for an optional one the capture lacked.
     // The v1 columns (hex hashes, summary JSON, format/version/source) were
     // dropped by migration 0017 once repack had converted every row.
@@ -214,6 +214,10 @@ export const snapshots = sqliteTable(
     tasksRef: integer('tasks_ref'),
     /** Teyvat.me Capture's `gi_collections` (added in 0030). */
     collectionsRef: integer('collections_ref'),
+    /** gi_collections' parts from Teyvat.me Capture 1.4.0 on (added in 0031). */
+    collections2Ref: integer('collections2_ref'),
+    /** Teyvat.me Capture's `gi_wardrobe` (added in 0031). */
+    wardrobeRef: integer('wardrobe_ref'),
     /** Summary, GOOD header and per-login player values (codec/snapshot-meta.ts). */
     meta: bytes('meta'),
   },

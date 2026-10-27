@@ -11,6 +11,7 @@ import {
   decodeSectionBlob,
   decodeSnapshot,
   decodeTasks,
+  decodeWardrobe,
   deflateRaw,
   deltaPaysOff,
   encodeAchievementTimes,
@@ -18,9 +19,11 @@ import {
   encodeAnecdotes,
   encodeArtifactsDelta,
   encodeCollections,
+  encodeCollections2,
   encodeSectionBlob,
   encodeSnapshot,
   encodeTasks,
+  encodeWardrobe,
   extraSectionsOf,
   GOOD_LIMITS,
   GoodFormatError,
@@ -45,6 +48,7 @@ import {
   type StoredSnapshot,
 } from '../src'
 import { MATERIALS } from '../src/dictionary/materials'
+import { syntheticCollections, syntheticWardrobe } from './synthetic'
 
 /** Stands in for the D1 catalog: assigns ids to new hashes, remembers identities. */
 class Catalog {
@@ -127,6 +131,8 @@ async function storedOf(
     anecdotes: await optionalViaStorage(encoded.anecdotes),
     tasks: await optionalViaStorage(encoded.tasks),
     collections: await optionalViaStorage(encoded.collections),
+    collections2: await optionalViaStorage(encoded.collections2),
+    wardrobe: await optionalViaStorage(encoded.wardrobe),
   }
 }
 
@@ -263,6 +269,7 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
   if (good.anecdotes) expected.gi_anecdotes = good.anecdotes
   if (good.tasks) expected.gi_tasks = good.tasks
   if (good.collections) expected.gi_collections = good.collections
+  if (good.wardrobe) expected.gi_wardrobe = good.wardrobe
   return expected
 }
 
@@ -450,10 +457,6 @@ describe('snapshot codec', () => {
       ['achievement times', { gi_achievement_times: keyed(GOOD_LIMITS.achievements + 1) }],
       ['character extras', { gi_characters: keyed(GOOD_LIMITS.characters + 1) }],
       ['anecdotes', { gi_anecdotes: { anecdotes: keyed(GOOD_LIMITS.anecdotes + 1) } }],
-      [
-        'Radiant Spincrystals',
-        { gi_collections: { spincrystals: times(GOOD_LIMITS.spincrystals + 1) } },
-      ],
     ]
     for (const [what, fields] of over) {
       await limitError({ ...sample, ...fields }, 'too_many_items', new RegExp(` ${what}; at most`))
@@ -1642,14 +1645,16 @@ describe("Teyvat.me Capture's gi_collections", () => {
   })
 
   it('stores the section in its binary layout, and a later part as JSON', () => {
-    const value = encodeCollections(normalizeGood({ ...sample, ...collections }).collections!)
+    const value = encodeCollections(normalizeGood({ ...sample, ...collections }).collections!)!
     expect(value).toEqual({ s: collections.gi_collections.spincrystals })
     for (const v of [value, { s: [] }, { s: [141_306] }, {}]) {
       const blob = encodeSectionBlob('collections', v, false, null)
       expect(blob.payload[0]).toBe(0x10)
       const back = decodeSectionBlob(kindCode('collections', false), blob.data, null, null)
       expect(JSON.stringify(back.value)).toBe(JSON.stringify(v))
-      expect(decodeCollections(back.value as typeof value)).toEqual(decodeCollections(v))
+      expect(decodeCollections(back.value as NonNullable<typeof value>)).toEqual(
+        decodeCollections(v),
+      )
     }
     // 120 ids: a byte or two each before compression.
     expect(encodeSectionBlob('collections', value, false, null).data.length).toBeLessThan(140)
@@ -1659,5 +1664,151 @@ describe("Teyvat.me Capture's gi_collections", () => {
     expect(blob.payload[0]).toBe(0x00)
     const back = decodeSectionBlob(kindCode('collections', false), blob.data, null, null)
     expect(back.value).toEqual(later)
+  })
+})
+
+// ------------------------------------- gi_collections' 1.4.0 parts, gi_wardrobe
+
+describe("Teyvat.me Capture 1.4.0's collections and wardrobe", () => {
+  const full = syntheticCollections(4)
+  const wardrobe = syntheticWardrobe(4)
+  const input = { ...sample, ...extras, gi_collections: full, gi_wardrobe: wardrobe }
+
+  it("round-trips every part at a real capture's scale, the wardrobe last", async () => {
+    const { encoded, decoded } = await roundTrip(input)
+    expect(
+      extraSectionsOf(encoded)
+        .map((s) => s.kind)
+        .slice(-3),
+    ).toEqual(['collections', 'collections2', 'wardrobe'])
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_collections).toEqual(normalizeGood(input).collections)
+    expect(decoded.gi_wardrobe).toEqual(normalizeGood(input).wardrobe)
+    expect(Object.keys(decoded).slice(-2)).toEqual(['gi_collections', 'gi_wardrobe'])
+    // The player's own text, as typed.
+    expect(decoded.gi_collections!.tcg!.decks!['3']!.name).toBe(full.tcg!.decks!['3']!.name)
+    expect(decoded.gi_wardrobe!.teams!['1']!.name).toBe('Abyss ★ Floor 12 — second half')
+    const a = decoded.gi_collections!.archive!
+    expect([a.quests, a.weapons, a.livingBeings, a.materials].map((l) => l!.length)).toEqual([
+      488, 164, 538, 1_006,
+    ])
+    expect(Object.keys(decoded.gi_collections!.defeats!)).toHaveLength(502)
+    expect(Object.keys(decoded.gi_collections!.handbook!.targets)).toHaveLength(244)
+  })
+
+  it('keeps the hash of a file without the new parts, and knows the one from before the wardrobe', async () => {
+    const catalog = new Catalog()
+    const spincrystalsOnly = { ...sample, gi_collections: { spincrystals: full.spincrystals } }
+    const before = await roundTrip(spincrystalsOnly, catalog)
+    // The section of a file with only spincrystals is the one 1.3.0 stored.
+    expect(encodeCollections({ spincrystals: full.spincrystals! })).toEqual({
+      s: full.spincrystals,
+    })
+    // A 1.4.0 file as the deployed tracker stored it (only the Spincrystals
+    // of gi_collections, no wardrobe): the same capture, a no-op re-upload.
+    const all = await roundTrip({ ...sample, gi_collections: full, gi_wardrobe: wardrobe }, catalog)
+    expect(all.encoded.preCollections2ContentHash).toBe(before.encoded.contentHash)
+    expect(new Set([all.encoded.contentHash, all.encoded.preWardrobeContentHash]).size).toBe(2)
+    const withWardrobe = await roundTrip({ ...spincrystalsOnly, gi_wardrobe: wardrobe }, catalog)
+    expect(before.encoded.preWardrobeContentHash).toBe(before.encoded.contentHash)
+    expect(withWardrobe.encoded.preWardrobeContentHash).toBe(before.encoded.contentHash)
+    expect(withWardrobe.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    const plain = await roundTrip(sample, catalog)
+    const wardrobeOnly = await roundTrip({ ...sample, gi_wardrobe: wardrobe }, catalog)
+    expect(wardrobeOnly.encoded.preWardrobeContentHash).toBe(plain.encoded.contentHash)
+    expect(plain.encoded.preWardrobeContentHash).toBe(plain.encoded.contentHash)
+  })
+
+  it('drops a bad part and keeps the rest', () => {
+    const read = (collections: unknown, wardrobeRaw?: unknown) =>
+      normalizeGood({ ...sample, gi_collections: collections, gi_wardrobe: wardrobeRaw })
+    const bad = (part: string, value: unknown) => {
+      const good = read({ ...full, [part]: value })
+      expect(good.collections && part in good.collections, part).toBe(false)
+      const kept = part === 'spincrystals' ? 'archive' : 'spincrystals'
+      expect(good.collections?.[kept], part).toEqual(
+        normalizeGood({ ...sample, gi_collections: full }).collections![kept],
+      )
+    }
+    bad('archive', { quests: [10_000_001, 10_000_001] })
+    bad('defeats', { '20010001': { defeated: -1 } })
+    bad('defeats', { '1': { defeated: 3 } })
+    bad('handbook', {
+      chapters: { '10001': { progress: 1, total: 2, state: 'done' } },
+      targets: {},
+    })
+    bad('aranara', { '1': { '1': 'lost' } })
+    bad('tcg', { cards: { '1101': { count: 1.5 } } })
+    bad('tcg', {
+      cards: {},
+      decks: { '0': { name: 'x'.repeat(101), characters: [], cards: [], valid: true } },
+    })
+    bad(
+      'spincrystals',
+      Array.from({ length: GOOD_LIMITS.spincrystals + 1 }, (_, i) => 141_001 + i),
+    )
+    // One bad tab drops only that tab.
+    const tab = read({ archive: { quests: [10_000_001], weapons: [1] } }).collections
+    expect(tab).toEqual({ archive: { quests: [10_000_001] } })
+    // Wardrobe: a bad kind goes, the rest stays.
+    const w = read(null, { ...wardrobe, gliders: { owned: [1, 1], worn: {} } }).wardrobe!
+    expect('gliders' in w).toBe(false)
+    expect(w.outfits).toEqual(normalizeGood({ ...sample, gi_wardrobe: wardrobe }).wardrobe!.outfits)
+    expect(
+      read(null, { teams: { '1': { name: 'A', characters: ['Not a key!'] } } }).wardrobe,
+    ).toBeNull()
+    expect(read(null, { currentTeam: 2 }).wardrobe).toEqual({ currentTeam: 2 })
+  })
+
+  it('stores the 1.4.0 parts and the wardrobe in their binary layouts, small', () => {
+    const collectionsValue = JSON.parse(
+      JSON.stringify(encodeCollections2(normalizeGood(input).collections!)),
+    )
+    const wardrobeValue = JSON.parse(JSON.stringify(encodeWardrobe(normalizeGood(input).wardrobe!)))
+    // The Spincrystals stay in the `collections` section as 1.3.0 stored them
+    // (the deployed builds' layout); the later parts have their own section.
+    expect(encodeCollections(normalizeGood(input).collections!)).toEqual({ s: full.spincrystals })
+    expect('s' in collectionsValue).toBe(false)
+    for (const [kind, value, layout, decode] of [
+      ['collections2', collectionsValue, 0x10, decodeCollections],
+      ['wardrobe', wardrobeValue, 0x10, decodeWardrobe],
+      ['collections', { s: full.spincrystals }, 0x10, decodeCollections],
+    ] as const) {
+      const blob = encodeSectionBlob(kind, value, false, null)
+      expect(blob.payload[0], kind).toBe(layout)
+      const back = decodeSectionBlob(kindCode(kind, false), blob.data, null, null)
+      expect(JSON.stringify(back.value)).toBe(JSON.stringify(value))
+      expect(decode(back.value as never)).toEqual(decode(value as never))
+    }
+    // About 3.5k Archive ids, 502 defeats, 244 targets, 104 cards and 4 decks.
+    const last = encodeSectionBlob('collections2', collectionsValue, false, null)
+    expect(last.data.length).toBeLessThan(12_000)
+    expect(encodeSectionBlob('wardrobe', wardrobeValue, false, null).data.length).toBeLessThan(
+      1_500,
+    )
+    // A few more defeats cost a few bytes against the last section.
+    const next = structuredClone(collectionsValue)
+    next.d[0][1] += 3
+    next.d[10][1] += 1
+    const changed = encodeSectionBlob('collections2', next, false, {
+      value: collectionsValue,
+      payload: last.payload,
+    })
+    expect(changed.usesBase).toBe(true)
+    expect(changed.data.length).toBeLessThan(200)
+    // A part this build does not know: JSON (its encoder refuses it whole).
+    const later = { ...collectionsValue, z: [1] }
+    expect(encodeSectionBlob('collections2', later, false, null).payload[0]).toBe(0x00)
+    // A part a later build writes (an index this build has none for) is
+    // skipped by this decoder, which reads the rest.
+    for (const [kind, value] of [
+      ['collections2', collectionsValue],
+      ['wardrobe', wardrobeValue],
+    ] as const) {
+      const payload = encodeSectionBlob(kind, value, false, null).payload
+      const extended = new Uint8Array([...payload, 99, 3, 7, 7, 7])
+      const back = decodeSectionBlob(kindCode(kind, false), extended, null, null)
+      expect(JSON.stringify(back.value), kind).toBe(JSON.stringify(value))
+    }
   })
 })

@@ -154,6 +154,72 @@ export interface GiCollections {
    * (141001 = "Radiant Spincrystal 1"), ascending.
    */
   spincrystals?: number[]
+  /** The Archive's unlocked entries by tab, codex ids ascending (Capture 1.4.0). */
+  archive?: Partial<Record<ArchiveTab, number[]>>
+  /** By Living Beings codex id: enemies defeated, creatures captured (absent at 0). */
+  defeats?: Record<string, { defeated: number; captured?: number }>
+  /** The Adventurer Handbook: its chapters, and every target keyed by its quest id. */
+  handbook?: {
+    chapters: Record<string, GiProgress>
+    targets: Record<string, GiProgress & { chapter: number }>
+  }
+  /** Aranara collections, by collection type then id. */
+  aranara?: Record<string, Record<string, GiAranaraState>>
+  /** Genius Invokation TCG: cards owned, saved decks (`name` is the player's text), the deck in use. */
+  tcg?: {
+    cards: Record<string, { count: number; proficiency?: number }>
+    decks?: Record<string, { name: string; characters: number[]; cards: number[]; valid: boolean }>
+    currentDeck?: number
+  }
+}
+
+/** The Archive's tabs, in the order they are stored (append-only). */
+export const ARCHIVE_TABS = [
+  'quests',
+  'weapons',
+  'livingBeings',
+  'materials',
+  'books',
+  'tutorials',
+  'viewpoints',
+  'artifacts',
+] as const
+export type ArchiveTab = (typeof ARCHIVE_TABS)[number]
+
+/** Progress of a Handbook chapter or target; "complete" = done, its reward not taken yet. */
+export interface GiProgress {
+  progress: number
+  total: number
+  state: GiProgressState
+}
+export const PROGRESS_STATES = ['open', 'complete', 'claimed'] as const
+export type GiProgressState = (typeof PROGRESS_STATES)[number]
+export const ARANARA_STATES = ['none', 'collectable', 'collected', 'finished'] as const
+export type GiAranaraState = (typeof ARANARA_STATES)[number]
+
+/** Owned ids of one kind of cosmetic, and who wears which. */
+export interface GiWardrobeKind {
+  owned: number[]
+  /** By character key, as GOOD's weapon `location` has it ("Traveler" for any Traveler). */
+  worn: Record<string, number>
+  /** Owned only until then (unix seconds; trial weapon skins). */
+  expires?: Record<string, number>
+}
+
+/** The wardrobe's kinds of cosmetics, in the order they are stored (append-only). */
+export const WARDROBE_KINDS = ['outfits', 'gliders', 'weaponSkins', 'trails'] as const
+export type WardrobeKind = (typeof WARDROBE_KINDS)[number]
+
+/** Teyvat.me Capture's `gi_wardrobe` (1.4.0): cosmetics and saved teams, each part optional. */
+export interface GiWardrobe {
+  outfits?: GiWardrobeKind
+  gliders?: GiWardrobeKind
+  weaponSkins?: GiWardrobeKind
+  trails?: GiWardrobeKind
+  /** Saved teams by slot; `name` is the player's own text, `characters` character keys. */
+  teams?: Record<string, { name: string; characters: string[] }>
+  /** The team slot in use. */
+  currentTeam?: number
 }
 
 export interface Good {
@@ -176,6 +242,7 @@ export interface Good {
   gi_anecdotes?: GiAnecdotes
   gi_tasks?: GiTasks
   gi_collections?: GiCollections
+  gi_wardrobe?: GiWardrobe
 }
 
 /**

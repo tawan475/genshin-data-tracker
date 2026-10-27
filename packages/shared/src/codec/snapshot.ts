@@ -15,6 +15,7 @@ import {
   decodeMaterials,
   decodePlayer,
   decodeTasks,
+  decodeWardrobe,
   decodeWeapons,
   deltaPaysOff,
   encodeAchievements,
@@ -26,15 +27,18 @@ import {
   encodeCharacterExtras,
   encodeCharacters,
   encodeCollections,
+  encodeCollections2,
   encodeMaterialsDelta,
   encodeMaterialsFull,
   encodeTasks,
+  encodeWardrobe,
   encodeWeapons,
   makeSection,
   type AchievementTimesSection,
   type ArtifactsSection,
   type MaterialsSection,
   type Section,
+  type SectionKind,
 } from './sections'
 
 /**
@@ -109,6 +113,8 @@ export interface ExtraSections {
   anecdotes: Section | null
   tasks: Section | null
   collections: Section | null
+  collections2: Section | null
+  wardrobe: Section | null
 }
 
 export interface EncodedSnapshot extends ExtraSections {
@@ -155,6 +161,19 @@ export interface EncodedSnapshot extends ExtraSections {
    * `gi_collections` was kept, so re-uploading it stays a no-op.
    */
   preCollectionsContentHash: string
+  /**
+   * The content hash with Capture 1.4.0's keys left out (gi_collections'
+   * later parts and gi_wardrobe; equal to `contentHash` without them): what
+   * the tracker stored such a file as before it kept them, so re-uploading
+   * it stays a no-op.
+   */
+  preCollections2ContentHash: string
+  /**
+   * The content hash with the wardrobe left out (equal to `contentHash` when
+   * there is none): what this capture has if it was stored before
+   * `gi_wardrobe` was kept, so re-uploading it stays a no-op.
+   */
+  preWardrobeContentHash: string
 }
 
 /** The sections that do not depend on catalog ids, materials in full. */
@@ -174,6 +193,8 @@ export function extraSectionsOf(sections: ExtraSections): Section[] {
     sections.anecdotes,
     sections.tasks,
     sections.collections,
+    sections.collections2,
+    sections.wardrobe,
   ].filter((s): s is Section => s !== null)
 }
 
@@ -198,6 +219,8 @@ export async function encodeStaticSections(
     anecdotes,
     tasks,
     collections,
+    collections2,
+    wardrobe,
   ] = await Promise.all([
     makeSection('characters', encodeCharacters(good.characters)),
     makeSection('weapons', encodeWeapons(good.weapons)),
@@ -212,7 +235,9 @@ export async function encodeStaticSections(
       : null,
     good.anecdotes ? makeSection('anecdotes', encodeAnecdotes(good.anecdotes)) : null,
     good.tasks ? makeSection('tasks', encodeTasks(good.tasks)) : null,
-    good.collections ? makeSection('collections', encodeCollections(good.collections)) : null,
+    optionalSection('collections', good.collections && encodeCollections(good.collections)),
+    optionalSection('collections2', good.collections && encodeCollections2(good.collections)),
+    good.wardrobe ? makeSection('wardrobe', encodeWardrobe(good.wardrobe)) : null,
   ])
   return {
     characters,
@@ -225,7 +250,14 @@ export async function encodeStaticSections(
     anecdotes,
     tasks,
     collections,
+    collections2,
+    wardrobe,
   }
+}
+
+/** A section of `value`, or null for none. */
+function optionalSection(kind: SectionKind, value: object | null): Promise<Section> | null {
+  return value ? makeSection(kind, value) : null
 }
 
 /**
@@ -274,7 +306,7 @@ export async function completeSnapshot(
     : preTasksContentHash
   // The collections (kept later still) after the tasks, the same way, with
   // empty places for anecdotes and tasks a file lacks.
-  const contentHash = sections.collections
+  const preCollections2ContentHash = sections.collections
     ? await sha256Hex128(
         [
           ...withExtras,
@@ -284,6 +316,30 @@ export async function completeSnapshot(
         ].join(':'),
       )
     : preCollectionsContentHash
+  // Capture 1.4.0's keys last, the same way, with empty places for what a file lacks.
+  const preWardrobeContentHash = sections.collections2
+    ? await sha256Hex128(
+        [
+          ...withExtras,
+          sections.anecdotes?.hash ?? '',
+          sections.tasks?.hash ?? '',
+          sections.collections?.hash ?? '',
+          sections.collections2.hash,
+        ].join(':'),
+      )
+    : preCollections2ContentHash
+  const contentHash = sections.wardrobe
+    ? await sha256Hex128(
+        [
+          ...withExtras,
+          sections.anecdotes?.hash ?? '',
+          sections.tasks?.hash ?? '',
+          sections.collections?.hash ?? '',
+          sections.collections2?.hash ?? '',
+          sections.wardrobe.hash,
+        ].join(':'),
+      )
+    : preWardrobeContentHash
   return {
     ...sections,
     artifacts,
@@ -295,6 +351,8 @@ export async function completeSnapshot(
     preAnecdotesContentHash,
     preTasksContentHash,
     preCollectionsContentHash,
+    preCollections2ContentHash,
+    preWardrobeContentHash,
   }
 }
 
@@ -421,6 +479,8 @@ export interface StoredSnapshot {
   anecdotes?: string | null
   tasks?: string | null
   collections?: string | null
+  collections2?: string | null
+  wardrobe?: string | null
 }
 
 const parseOrNull = <T>(text: string | null | undefined): T | null =>
@@ -471,8 +531,12 @@ export function decodeSnapshot(
   }
   if (stored.anecdotes) good.gi_anecdotes = decodeAnecdotes(JSON.parse(stored.anecdotes))
   if (stored.tasks) good.gi_tasks = decodeTasks(JSON.parse(stored.tasks))
-  if (stored.collections) {
-    good.gi_collections = decodeCollections(JSON.parse(stored.collections))
+  if (stored.collections || stored.collections2) {
+    good.gi_collections = {
+      ...(stored.collections ? decodeCollections(JSON.parse(stored.collections)) : {}),
+      ...(stored.collections2 ? decodeCollections(JSON.parse(stored.collections2)) : {}),
+    }
   }
+  if (stored.wardrobe) good.gi_wardrobe = decodeWardrobe(JSON.parse(stored.wardrobe))
   return good
 }

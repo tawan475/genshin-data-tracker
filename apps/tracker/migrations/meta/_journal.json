@@ -204,6 +204,13 @@
       "when": 1793071409715,
       "tag": "0030_collections_capture",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1793075003120,
+      "tag": "0031_collections2_wardrobe",
+      "breakpoints": true
     }
   ]
 }

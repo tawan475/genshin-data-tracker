@@ -4,13 +4,25 @@ import type {
   GiAnecdote,
   GiAnecdotes,
   GiCharacter,
+  GiAranaraState,
   GiCollections,
   GiExpedition,
   GiPlayer,
+  GiProgress,
+  GiProgressState,
   GiTasks,
+  GiWardrobe,
+  GiWardrobeKind,
   GoodCharacter,
   GoodSubstat,
   GoodWeapon,
+} from '../good'
+import {
+  ARANARA_STATES,
+  ARCHIVE_TABS,
+  PROGRESS_STATES,
+  WARDROBE_KINDS,
+  type ArchiveTab,
 } from '../good'
 import { GOOD_LIMITS } from '../import'
 import { readCapture, type GiCapture } from '../live/capture'
@@ -58,6 +70,8 @@ export interface NormalizedGood {
   tasks: GiTasks | null
   /** `gi_collections`, the parts that pass their checks whole (see toCollections). */
   collections: GiCollections | null
+  /** `gi_wardrobe`, the parts that pass their checks whole (see toWardrobe). */
+  wardrobe: GiWardrobe | null
 }
 
 export class GoodFormatError extends Error {
@@ -128,6 +142,7 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     anecdotes: toAnecdotes(input.gi_anecdotes),
     tasks: toTasks(input.gi_tasks),
     collections: toCollections(input.gi_collections),
+    wardrobe: toWardrobe(input.gi_wardrobe),
   }
   const itemGuids = toItemGuids(input)
   if (itemGuids) good.itemGuids = itemGuids
@@ -155,11 +170,6 @@ function checkCounts(input: Json, achievements: unknown[] | null): void {
       'anecdotes',
       count(isObject(input.gi_anecdotes) ? input.gi_anecdotes.anecdotes : null),
       GOOD_LIMITS.anecdotes,
-    ],
-    [
-      'Radiant Spincrystals',
-      count(isObject(input.gi_collections) ? input.gi_collections.spincrystals : null),
-      GOOD_LIMITS.spincrystals,
     ],
   ]
   for (const [what, n, max] of caps) {
@@ -554,17 +564,251 @@ const COLLECTION_ITEM = [100_000, 999_999] as const
 function toCollections(raw: unknown): GiCollections | null {
   if (!isObject(raw)) return null
   const collections: GiCollections = {}
-  const s = raw.spincrystals
-  // Longer lists were refused whole by checkCounts.
-  if (Array.isArray(s) && s.length <= GOOD_LIMITS.spincrystals) {
-    const ids = new Set<number>()
-    for (const id of s) {
-      if (!isIntIn(id, ...COLLECTION_ITEM) || ids.has(id)) break
-      ids.add(id)
-    }
-    if (ids.size === s.length) collections.spincrystals = [...ids].sort((a, b) => a - b)
-  }
+  const spincrystals = idList(raw.spincrystals, ...COLLECTION_ITEM, GOOD_LIMITS.spincrystals)
+  if (spincrystals) collections.spincrystals = spincrystals
+  const archive = toArchive(raw.archive)
+  if (archive) collections.archive = archive
+  const defeats = toDefeats(raw.defeats)
+  if (defeats) collections.defeats = defeats
+  const handbook = toHandbook(raw.handbook)
+  if (handbook) collections.handbook = handbook
+  const aranara = toAranara(raw.aranara)
+  if (aranara) collections.aranara = aranara
+  const tcg = toTcg(raw.tcg)
+  if (tcg) collections.tcg = tcg
   return Object.keys(collections).length > 0 ? collections : null
+}
+
+/** Each Archive tab's codex id block (the game numbers codex entries by tab). */
+const ARCHIVE_BLOCKS: Readonly<Record<ArchiveTab, readonly [number, number]>> = {
+  quests: [10_000_000, 19_999_999],
+  livingBeings: [20_000_000, 29_999_999],
+  artifacts: [30_000_000, 39_999_999],
+  weapons: [30_000_000, 39_999_999],
+  materials: [40_000_000, 49_999_999],
+  books: [50_000_000, 59_999_999],
+  tutorials: [60_000_000, 69_999_999],
+  viewpoints: [70_000_000, 79_999_999],
+}
+
+/** Ids, each a whole number in [min, max], none twice, at most `cap`: ascending; else null. */
+function idList(raw: unknown, min: number, max: number, cap: number): number[] | null {
+  if (!Array.isArray(raw) || raw.length > cap) return null
+  const ids = new Set<number>()
+  for (const id of raw) {
+    if (!isIntIn(id, min, max) || ids.has(id)) return null
+    ids.add(id)
+  }
+  return [...ids].sort((a, b) => a - b)
+}
+
+const DECIMAL_ID = /^(0|[1-9][0-9]{0,14})$/
+
+/** An object keyed by decimal ids in [min, max], at most `cap` of them, by id; else null. */
+function idEntries(
+  raw: unknown,
+  min: number,
+  max: number,
+  cap: number,
+): [number, unknown][] | null {
+  if (!isObject(raw)) return null
+  const entries = Object.entries(raw)
+  if (entries.length > cap) return null
+  const out: [number, unknown][] = []
+  for (const [key, value] of entries) {
+    const id = DECIMAL_ID.test(key) ? Number(key) : NaN
+    if (!isIntIn(id, min, max)) return null
+    out.push([id, value])
+  }
+  return out.sort((a, b) => a[0] - b[0])
+}
+
+/** A record from entries sorted by id, keyed by the decimal ids. */
+const byId = <T>(entries: [number, T][]): Record<string, T> =>
+  Object.fromEntries(entries.map(([id, value]) => [String(id), value]))
+
+function toArchive(raw: unknown): GiCollections['archive'] | null {
+  if (!isObject(raw)) return null
+  const archive: NonNullable<GiCollections['archive']> = {}
+  for (const tab of ARCHIVE_TABS) {
+    const ids = idList(raw[tab], ...ARCHIVE_BLOCKS[tab], GOOD_LIMITS.archiveTab)
+    if (ids) archive[tab] = ids
+  }
+  return Object.keys(archive).length > 0 ? archive : null
+}
+
+const COUNT = [0, 1_000_000_000] as const
+
+function toDefeats(raw: unknown): GiCollections['defeats'] | null {
+  const entries = idEntries(raw, ...ARCHIVE_BLOCKS.livingBeings, GOOD_LIMITS.defeats)
+  if (!entries) return null
+  const out: [number, { defeated: number; captured?: number }][] = []
+  for (const [id, value] of entries) {
+    if (!isObject(value) || !isIntIn(value.defeated, ...COUNT)) return null
+    if (value.captured !== undefined && !isIntIn(value.captured, ...COUNT)) return null
+    out.push([
+      id,
+      value.captured
+        ? { defeated: value.defeated, captured: value.captured }
+        : { defeated: value.defeated },
+    ])
+  }
+  return byId(out)
+}
+
+function toProgress(value: unknown): GiProgress | null {
+  if (
+    !isObject(value) ||
+    !isIntIn(value.progress, ...COUNT) ||
+    !isIntIn(value.total, ...COUNT) ||
+    !(PROGRESS_STATES as readonly unknown[]).includes(value.state)
+  ) {
+    return null
+  }
+  return { progress: value.progress, total: value.total, state: value.state as GiProgressState }
+}
+
+function toHandbook(raw: unknown): GiCollections['handbook'] | null {
+  if (!isObject(raw)) return null
+  const chapters = idEntries(raw.chapters, 1, 999_999, GOOD_LIMITS.handbookChapters)
+  const targets = idEntries(raw.targets, 1, 999_999_999, GOOD_LIMITS.handbookTargets)
+  if (!chapters || !targets) return null
+  const c: [number, GiProgress][] = []
+  for (const [id, value] of chapters) {
+    const progress = toProgress(value)
+    if (!progress) return null
+    c.push([id, progress])
+  }
+  const t: [number, GiProgress & { chapter: number }][] = []
+  for (const [id, value] of targets) {
+    const progress = toProgress(value)
+    if (!progress || !isObject(value) || !isIntIn(value.chapter, 1, 999_999)) return null
+    t.push([id, { ...progress, chapter: value.chapter }])
+  }
+  return { chapters: byId(c), targets: byId(t) }
+}
+
+function toAranara(raw: unknown): GiCollections['aranara'] | null {
+  const types = idEntries(raw, 1, 1_000, GOOD_LIMITS.aranara)
+  if (!types) return null
+  const out: [number, Record<string, GiAranaraState>][] = []
+  let total = 0
+  for (const [type, value] of types) {
+    const entries = idEntries(value, 1, 99_999_999, GOOD_LIMITS.aranara)
+    if (!entries || (total += entries.length) > GOOD_LIMITS.aranara) return null
+    if (entries.some(([, state]) => !(ARANARA_STATES as readonly unknown[]).includes(state))) {
+      return null
+    }
+    out.push([type, byId(entries as [number, GiAranaraState][])])
+  }
+  return out.length > 0 ? byId(out) : null
+}
+
+/** A TCG card id (character cards below 10000, action cards above). */
+const CARD_ID = [1, 999_999] as const
+
+type TcgDeck = { name: string; characters: number[]; cards: number[]; valid: boolean }
+
+function toTcg(raw: unknown): GiCollections['tcg'] | null {
+  if (!isObject(raw)) return null
+  const cards = idEntries(raw.cards, ...CARD_ID, GOOD_LIMITS.tcgCards)
+  if (!cards) return null
+  const c: [number, { count: number; proficiency?: number }][] = []
+  for (const [id, value] of cards) {
+    if (!isObject(value) || !isIntIn(value.count, 0, 10_000)) return null
+    if (value.proficiency !== undefined && !isIntIn(value.proficiency, ...COUNT)) return null
+    c.push([
+      id,
+      value.proficiency
+        ? { count: value.count, proficiency: value.proficiency }
+        : { count: value.count },
+    ])
+  }
+  const tcg: NonNullable<GiCollections['tcg']> = { cards: byId(c) }
+  if (raw.decks !== undefined) {
+    const decks = idEntries(raw.decks, 0, 1_000_000, GOOD_LIMITS.tcgDecks)
+    if (!decks) return null
+    const cardList = (value: unknown, cap: number) =>
+      Array.isArray(value) && value.length <= cap && value.every((id) => isIntIn(id, ...CARD_ID))
+        ? [...(value as number[])]
+        : null
+    const d: [number, TcgDeck][] = []
+    for (const [id, value] of decks) {
+      if (!isObject(value) || !isPlayerText(value.name) || typeof value.valid !== 'boolean') {
+        return null
+      }
+      // In the deck's own order (a deck holds a card up to twice).
+      const characters = cardList(value.characters, GOOD_LIMITS.deckCharacters)
+      const deckCards = cardList(value.cards, GOOD_LIMITS.deckCards)
+      if (!characters || !deckCards) return null
+      d.push([id, { name: value.name, characters, cards: deckCards, valid: value.valid }])
+    }
+    tcg.decks = byId(d)
+  }
+  if (raw.currentDeck !== undefined) {
+    if (!isIntIn(raw.currentDeck, 0, 1_000_000)) return null
+    tcg.currentDeck = raw.currentDeck
+  }
+  return tcg
+}
+
+/** Text the player typed (a deck or team name): kept as is, only bounded. */
+function isPlayerText(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= GOOD_LIMITS.playerText
+}
+
+/** Cosmetic ids (outfits, gliders, weapon skins, trails). */
+const COSMETIC_ID = [1, 99_999_999] as const
+
+const byKey = ([a]: [string, unknown], [b]: [string, unknown]) => (a < b ? -1 : a > b ? 1 : 0)
+
+function toWardrobeKind(raw: unknown): GiWardrobeKind | null {
+  if (!isObject(raw)) return null
+  const owned = idList(raw.owned, ...COSMETIC_ID, GOOD_LIMITS.wardrobeOwned)
+  if (!owned || !isObject(raw.worn)) return null
+  const worn = Object.entries(raw.worn)
+  if (worn.length > GOOD_LIMITS.characters) return null
+  if (worn.some(([key, id]) => !GOOD_KEY.test(key) || !isIntIn(id, ...COSMETIC_ID))) return null
+  const kind: GiWardrobeKind = {
+    owned,
+    worn: Object.fromEntries(worn.sort(byKey)) as Record<string, number>,
+  }
+  if (raw.expires !== undefined) {
+    const expires = idEntries(raw.expires, ...COSMETIC_ID, GOOD_LIMITS.wardrobeOwned)
+    if (!expires || expires.some(([, at]) => !isIntIn(at, ...TASK_TIME))) return null
+    kind.expires = byId(expires as [number, number][])
+  }
+  return kind
+}
+
+/**
+ * Teyvat.me Capture's `gi_wardrobe` (1.4.0). Each part is kept only when all
+ * of it passes; team names are the player's text, kept as is.
+ */
+function toWardrobe(raw: unknown): GiWardrobe | null {
+  if (!isObject(raw)) return null
+  const wardrobe: GiWardrobe = {}
+  for (const kind of WARDROBE_KINDS) {
+    const value = toWardrobeKind(raw[kind])
+    if (value) wardrobe[kind] = value
+  }
+  const teams = idEntries(raw.teams, 0, 1_000, GOOD_LIMITS.teams)
+  const isTeam = (team: unknown): team is { name: string; characters: string[] } =>
+    isObject(team) &&
+    isPlayerText(team.name) &&
+    Array.isArray(team.characters) &&
+    team.characters.length <= GOOD_LIMITS.teamCharacters &&
+    team.characters.every((key) => typeof key === 'string' && GOOD_KEY.test(key))
+  if (teams && teams.every(([, team]) => isTeam(team))) {
+    wardrobe.teams = byId(
+      (teams as [number, { name: string; characters: string[] }][]).map(([slot, team]) => [
+        slot,
+        { name: team.name, characters: [...team.characters] },
+      ]),
+    )
+  }
+  if (isIntIn(raw.currentTeam, 0, 1_000)) wardrobe.currentTeam = raw.currentTeam
+  return Object.keys(wardrobe).length > 0 ? wardrobe : null
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

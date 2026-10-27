@@ -155,8 +155,103 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
       }
     }
     case 'collections': {
-      let id = 141_000
-      return rand() < 0.9 ? { s: Array.from({ length: n * 4 }, () => (id += int(rand, 1, 3))) } : {}
+      const ascending = (from: number, length: number) => {
+        let id = from
+        return Array.from({ length }, () => (id += int(rand, 1, 3)))
+      }
+      const byId = <T extends unknown[]>(from: number, length: number, rest: () => T) =>
+        ascending(from, length).map((id) => [id, ...rest()])
+      return rand() < 0.9 ? { s: ascending(141_000, n * 4) } : {}
+    }
+    case 'collections2': {
+      const ascending = (from: number, length: number) => {
+        let id = from
+        return Array.from({ length }, () => (id += int(rand, 1, 3)))
+      }
+      const byId = <T extends unknown[]>(from: number, length: number, rest: () => T) =>
+        ascending(from, length).map((id) => [id, ...rest()])
+      return {
+        ...(rand() < 0.7
+          ? {
+              a: {
+                quests: ascending(10_000_000, n * 8),
+                ...(rand() < 0.5 ? { livingBeings: ascending(20_000_000, n * 9) } : {}),
+                materials: ascending(40_000_000, n * 17),
+              },
+            }
+          : {}),
+        ...(rand() < 0.7
+          ? {
+              d: byId(20_000_000, n * 8, () => [
+                int(rand, 1, 9_999),
+                rand() < 0.1 ? int(rand, 1, 50) : 0,
+              ]),
+            }
+          : {}),
+        ...(rand() < 0.7
+          ? {
+              h: {
+                c: byId(10_000, 22, () => [int(rand, 0, 10), 10, int(rand, 0, 2)]),
+                t: byId(300_000, n * 4, () => [10_001, int(rand, 0, 5), 5, int(rand, 0, 2)]),
+              },
+            }
+          : {}),
+        ...(rand() < 0.5
+          ? {
+              r: [
+                [1, 1, int(rand, 0, 3)],
+                [1, 4, int(rand, 0, 3)],
+              ],
+            }
+          : {}),
+        ...(rand() < 0.7
+          ? {
+              g: {
+                c: byId(1_000, n * 2, () => [int(rand, 1, 2), rand() < 0.3 ? int(rand, 1, 20) : 0]),
+                ...(rand() < 0.7
+                  ? {
+                      k: byId(0, 4, () => [
+                        pick(rand, ['Deck', 'Ünï ★', '']),
+                        int(rand, 0, 1),
+                        [1101, 1201, 1301],
+                        Array.from({ length: 30 }, () => int(rand, 211_011, 333_020)),
+                      ]),
+                    }
+                  : {}),
+                ...(rand() < 0.5 ? { u: int(rand, 0, 3) } : {}),
+              },
+            }
+          : {}),
+      }
+    }
+    case 'wardrobe': {
+      const kind = () => {
+        let id = 0
+        const owned = Array.from({ length: int(rand, 0, 30) }, () => (id += int(rand, 1, 5)))
+        return {
+          o: owned,
+          w: [
+            ['Furina', owned[0] ?? 1],
+            ['Traveler', 140_001],
+          ],
+          ...(rand() < 0.5 ? { e: [[owned[0] ?? 1, int(rand, 1.7e9, 1.9e9)]] } : {}),
+        }
+      }
+      return {
+        ...(rand() < 0.8 ? { o: kind() } : {}),
+        ...(rand() < 0.8 ? { g: kind() } : {}),
+        ...(rand() < 0.5 ? { s: kind() } : {}),
+        ...(rand() < 0.5 ? { t: kind() } : {}),
+        ...(rand() < 0.7
+          ? {
+              m: [
+                [1, 'Team ★', ['Furina', 'Bennett']],
+                [3, '', []],
+              ],
+            }
+          : {}),
+        ...(rand() < 0.5 ? { c: int(rand, 1, 4) } : {}),
+      }
     }
   }
 }
@@ -284,6 +379,8 @@ describe('section blobs', () => {
       anecdotes: 9,
       tasks: 10,
       collections: 11,
+      collections2: 12,
+      wardrobe: 13,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -341,6 +438,8 @@ describe('section blobs', () => {
       'anecdotes',
       'tasks',
       'collections',
+      'collections2',
+      'wardrobe',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')
@@ -535,6 +634,8 @@ async function v1File(
         anecdotes: encoded.anecdotes?.json ?? null,
         tasks: encoded.tasks?.json ?? null,
         collections: encoded.collections?.json ?? null,
+        collections2: encoded.collections2?.json ?? null,
+        wardrobe: encoded.wardrobe?.json ?? null,
       },
       catalog,
       MATERIALS,
@@ -696,6 +797,8 @@ class V2Store {
       anecdotes: refs.anecdotes ?? null,
       tasks: refs.tasks ?? null,
       collections: refs.collections ?? null,
+      collections2: refs.collections2 ?? null,
+      wardrobe: refs.wardrobe ?? null,
       ...(Object.keys(vars).length > 0 ? { playerVars: vars } : {}),
     }
     // The blobs the snapshot needs, bases included, as the server sends them.

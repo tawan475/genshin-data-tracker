@@ -209,6 +209,8 @@ async function importOnce(
     sections.anecdotes,
     sections.tasks,
     sections.collections,
+    sections.collections2,
+    sections.wardrobe,
   ]
     .filter((s): s is Section => s !== null)
     .map((s) => shortHashHex(s.hash))
@@ -284,6 +286,8 @@ async function importOnce(
   const preAnecdotesKey = contentKey(encoded.preAnecdotesContentHash)
   const preTasksKey = contentKey(encoded.preTasksContentHash)
   const preCollectionsKey = contentKey(encoded.preCollectionsContentHash)
+  const preCollections2Key = contentKey(encoded.preCollections2ContentHash)
+  const preWardrobeKey = contentKey(encoded.preWardrobeContentHash)
   const response = (
     status: ImportResponse['status'],
     snapshotId: number,
@@ -308,7 +312,7 @@ async function importOnce(
     contentKey: key,
   })
   // The same capture, also when it was stored before irminsul's extra keys
-  // (or later its anecdotes, then its tasks, then its collections) were kept
+  // (or later its anecdotes, tasks, collections, then Capture 1.4.0's keys) were kept
   // (its hash then left them out), in either storage format.
   const sameCapture = (row: SameTimeRow) =>
     row.content_key !== null
@@ -316,12 +320,16 @@ async function importOnce(
         row.content_key === legacyKey ||
         row.content_key === preAnecdotesKey ||
         row.content_key === preTasksKey ||
-        row.content_key === preCollectionsKey
+        row.content_key === preCollectionsKey ||
+        row.content_key === preCollections2Key ||
+        row.content_key === preWardrobeKey
       : row.content_hash === encoded.contentHash ||
         row.content_hash === encoded.legacyContentHash ||
         row.content_hash === encoded.preAnecdotesContentHash ||
         row.content_hash === encoded.preTasksContentHash ||
-        row.content_hash === encoded.preCollectionsContentHash
+        row.content_hash === encoded.preCollectionsContentHash ||
+        row.content_hash === encoded.preCollections2ContentHash ||
+        row.content_hash === encoded.preWardrobeContentHash
   const sameInventory = (row: LatestRow) =>
     row.content_key !== null ? row.content_key === key : row.content_hash === encoded.contentHash
 

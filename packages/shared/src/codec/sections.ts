@@ -13,15 +13,22 @@
 import type { ArtifactIdentity, ArtifactState } from '../artifact'
 import { CHARACTERS, WEAPONS, fromRef, toRef, type KeyDictionary, type KeyRef } from '../dictionary'
 import type {
+  ArchiveTab,
   GiAnecdotes,
+  GiAranaraState,
   GiCharacter,
   GiCollections,
   GiPlayer,
+  GiProgress,
+  GiProgressState,
   GiTasks,
+  GiWardrobe,
+  GiWardrobeKind,
   GoodArtifact,
   GoodCharacter,
   GoodWeapon,
 } from '../good'
+import { ARANARA_STATES, ARCHIVE_TABS, PROGRESS_STATES, WARDROBE_KINDS } from '../good'
 import { sha256Hex128 } from '../hash'
 import { compareTuples, deltaDecode, deltaEncode, trimDefaults } from './order'
 
@@ -40,6 +47,10 @@ export type SectionKind =
   | 'anecdotes'
   | 'tasks'
   | 'collections'
+  // gi_collections' parts from Capture 1.4.0 on: the deployed builds'
+  // collections layout cannot learn them (see section-binary.ts).
+  | 'collections2'
+  | 'wardrobe'
 
 export interface Section {
   kind: SectionKind
@@ -606,24 +617,254 @@ export function decodeTasks(section: TasksSection): GiTasks {
 }
 
 // --------------------------------------------------------------- collections
-// Teyvat.me Capture's `gi_collections`, each part only when the capture had
-// it: `s` = the Radiant Spincrystals' item ids, ascending. Changes only when
-// the player collects something: a relogin stores nothing. Later parts take
-// new letters (append-only); the binary layout knows only `s`, so a section
-// with a later part is stored as JSON until a new layout version learns it.
+// Teyvat.me Capture's `gi_collections`, in two sections: `collections` holds
+// `s` (what 1.3.0 sent, in the layout the deployed builds decode) and
+// `collections2` the parts from 1.4.0 on, in its own binary layout. Both use
+// this shape (letters append-only; keys always in this order):
+// `s` = the Radiant Spincrystals' item ids, ascending;
+// `a` = the Archive: {tab: codex ids ascending}, tabs in ARCHIVE_TABS order;
+// `d` = defeats [[Living Beings codex id, defeated, captured (0: none)], ...] by id;
+// `h` = the Handbook {c: [[chapter id, progress, total, state]], t: [[quest id,
+//       chapter, progress, total, state]]}, both by id, state = PROGRESS_STATES index;
+// `r` = Aranara [[type, id, state]] by type then id, state = ARANARA_STATES index;
+// `g` = TCG {c: [[card id, count, proficiency (0: none)]] by id, k?: [[deck id,
+//       name, valid (1/0), [character cards], [cards]]] by id, u?: current deck}.
+// The game sends all of it at login: a relogin with nothing new stores
+// nothing, a few more defeats a few bytes (compressed against the last one).
+
+export type ArchiveSection = Partial<Record<ArchiveTab, number[]>>
+export type DefeatRow = [id: number, defeated: number, captured: number]
+export type ProgressRow = [id: number, progress: number, total: number, state: number]
+export type TargetRow = [
+  questId: number,
+  chapter: number,
+  progress: number,
+  total: number,
+  state: number,
+]
+export type AranaraRow = [type: number, id: number, state: number]
+export type CardRow = [id: number, count: number, proficiency: number]
+export type DeckRow = [
+  id: number,
+  name: string,
+  valid: number,
+  characters: number[],
+  cards: number[],
+]
 
 export interface CollectionsSection {
   s?: number[]
+  a?: ArchiveSection
+  d?: DefeatRow[]
+  h?: { c: ProgressRow[]; t: TargetRow[] }
+  r?: AranaraRow[]
+  g?: { c: CardRow[]; k?: DeckRow[]; u?: number }
 }
 
-export function encodeCollections(collections: GiCollections): CollectionsSection {
+const ids = (record: Record<string, unknown>) =>
+  Object.keys(record)
+    .map(Number)
+    .sort((a, b) => a - b)
+
+/** The `collections` section: the Radiant Spincrystals (null without them). */
+export function encodeCollections(collections: GiCollections): CollectionsSection | null {
+  return collections.spincrystals ? { s: [...collections.spincrystals] } : null
+}
+
+/** The `collections2` section: every later part (null when the capture has none). */
+export function encodeCollections2(collections: GiCollections): CollectionsSection | null {
   const section: CollectionsSection = {}
-  if (collections.spincrystals) section.s = [...collections.spincrystals]
-  return section
+  const { archive, defeats, handbook, aranara, tcg } = collections
+  if (archive) {
+    const a: ArchiveSection = {}
+    for (const tab of ARCHIVE_TABS) if (archive[tab]) a[tab] = [...archive[tab]]
+    section.a = a
+  }
+  if (defeats) {
+    section.d = ids(defeats).map((id) => {
+      const entry = defeats[String(id)]!
+      return [id, entry.defeated, entry.captured ?? 0]
+    })
+  }
+  if (handbook) {
+    const state = (s: GiProgressState) => PROGRESS_STATES.indexOf(s)
+    section.h = {
+      c: ids(handbook.chapters).map((id) => {
+        const p = handbook.chapters[String(id)]!
+        return [id, p.progress, p.total, state(p.state)]
+      }),
+      t: ids(handbook.targets).map((id) => {
+        const p = handbook.targets[String(id)]!
+        return [id, p.chapter, p.progress, p.total, state(p.state)]
+      }),
+    }
+  }
+  if (aranara) {
+    section.r = ids(aranara).flatMap((type) => {
+      const entries = aranara[String(type)]!
+      return ids(entries).map(
+        (id): AranaraRow => [type, id, ARANARA_STATES.indexOf(entries[String(id)]!)],
+      )
+    })
+  }
+  if (tcg) {
+    const g: NonNullable<CollectionsSection['g']> = {
+      c: ids(tcg.cards).map((id) => {
+        const card = tcg.cards[String(id)]!
+        return [id, card.count, card.proficiency ?? 0]
+      }),
+    }
+    if (tcg.decks) {
+      const decks = tcg.decks
+      g.k = ids(decks).map((id) => {
+        const deck = decks[String(id)]!
+        return [id, deck.name, deck.valid ? 1 : 0, [...deck.characters], [...deck.cards]]
+      })
+    }
+    if (tcg.currentDeck !== undefined) g.u = tcg.currentDeck
+    section.g = g
+  }
+  return Object.keys(section).length > 0 ? section : null
 }
 
+/**
+ * Either section back (each holds its own letters); `gi_collections` is the
+ * `collections` one's parts, then the `collections2` one's.
+ */
 export function decodeCollections(section: CollectionsSection): GiCollections {
   const collections: GiCollections = {}
   if (section.s) collections.spincrystals = [...section.s]
+  if (section.a) {
+    const archive: ArchiveSection = {}
+    for (const tab of ARCHIVE_TABS) if (section.a[tab]) archive[tab] = [...section.a[tab]]
+    collections.archive = archive
+  }
+  if (section.d) {
+    collections.defeats = Object.fromEntries(
+      section.d.map(([id, defeated, captured]) => [
+        String(id),
+        captured ? { defeated, captured } : { defeated },
+      ]),
+    )
+  }
+  if (section.h) {
+    const progress = (p: number, total: number, state: number): GiProgress => ({
+      progress: p,
+      total,
+      state: PROGRESS_STATES[state] ?? 'open',
+    })
+    collections.handbook = {
+      chapters: Object.fromEntries(
+        section.h.c.map(([id, p, total, state]) => [String(id), progress(p, total, state)]),
+      ),
+      targets: Object.fromEntries(
+        section.h.t.map(([id, chapter, p, total, state]) => [
+          String(id),
+          { ...progress(p, total, state), chapter },
+        ]),
+      ),
+    }
+  }
+  if (section.r) {
+    const aranara: Record<string, Record<string, GiAranaraState>> = {}
+    for (const [type, id, state] of section.r) {
+      ;(aranara[String(type)] ??= {})[String(id)] = ARANARA_STATES[state] ?? 'none'
+    }
+    collections.aranara = aranara
+  }
+  if (section.g) {
+    const tcg: NonNullable<GiCollections['tcg']> = {
+      cards: Object.fromEntries(
+        section.g.c.map(([id, count, proficiency]) => [
+          String(id),
+          proficiency ? { count, proficiency } : { count },
+        ]),
+      ),
+    }
+    if (section.g.k) {
+      tcg.decks = Object.fromEntries(
+        section.g.k.map(([id, name, valid, characters, cards]) => [
+          String(id),
+          { name, characters: [...characters], cards: [...cards], valid: valid === 1 },
+        ]),
+      )
+    }
+    if (section.g.u !== undefined) tcg.currentDeck = section.g.u
+    collections.tcg = tcg
+  }
   return collections
+}
+
+// ------------------------------------------------------------------ wardrobe
+// Teyvat.me Capture's `gi_wardrobe`, each part only when the capture had it:
+// `o` outfits, `g` gliders, `s` weapon skins, `t` trails, each {o: owned ids
+// ascending, w: [[character key, id]] by key, e?: [[id, expires at]] by id};
+// `m` = teams [[slot, name, [character keys]]] by slot (names as typed);
+// `c` = the team slot in use. Its own section: swapping an outfit or a team
+// changes only this one.
+
+export type WardrobeKindSection = {
+  o: number[]
+  w: [key: string, id: number][]
+  e?: [id: number, at: number][]
+}
+export type TeamRow = [slot: number, name: string, characters: string[]]
+
+export interface WardrobeSection {
+  o?: WardrobeKindSection
+  g?: WardrobeKindSection
+  s?: WardrobeKindSection
+  t?: WardrobeKindSection
+  m?: TeamRow[]
+  c?: number
+}
+
+/** Wardrobe kind -> its letter in the section, in WARDROBE_KINDS order. */
+const WARDROBE_LETTERS = { outfits: 'o', gliders: 'g', weaponSkins: 's', trails: 't' } as const
+
+export function encodeWardrobe(wardrobe: GiWardrobe): WardrobeSection {
+  const section: WardrobeSection = {}
+  for (const kind of WARDROBE_KINDS) {
+    const value = wardrobe[kind]
+    if (!value) continue
+    const entry: WardrobeKindSection = {
+      o: [...value.owned],
+      w: Object.entries(value.worn).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+    }
+    if (value.expires) {
+      const expires = value.expires
+      entry.e = ids(expires).map((id) => [id, expires[String(id)]!])
+    }
+    section[WARDROBE_LETTERS[kind]] = entry
+  }
+  if (wardrobe.teams) {
+    const teams = wardrobe.teams
+    section.m = ids(teams).map((slot) => {
+      const team = teams[String(slot)]!
+      return [slot, team.name, [...team.characters]]
+    })
+  }
+  if (wardrobe.currentTeam !== undefined) section.c = wardrobe.currentTeam
+  return section
+}
+
+export function decodeWardrobe(section: WardrobeSection): GiWardrobe {
+  const wardrobe: GiWardrobe = {}
+  for (const kind of WARDROBE_KINDS) {
+    const entry = section[WARDROBE_LETTERS[kind]]
+    if (!entry) continue
+    const value: GiWardrobeKind = { owned: [...entry.o], worn: Object.fromEntries(entry.w) }
+    if (entry.e) value.expires = Object.fromEntries(entry.e.map(([id, at]) => [String(id), at]))
+    wardrobe[kind] = value
+  }
+  if (section.m) {
+    wardrobe.teams = Object.fromEntries(
+      section.m.map(([slot, name, characters]) => [
+        String(slot),
+        { name, characters: [...characters] },
+      ]),
+    )
+  }
+  if (section.c !== undefined) wardrobe.currentTeam = section.c
+  return wardrobe
 }

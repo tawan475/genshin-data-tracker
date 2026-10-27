@@ -205,6 +205,8 @@ function v1Sections(row: V1Row): Record<Slot, { hash: string; base: string | nul
     anecdotes: null,
     tasks: null,
     collections: null,
+    collections2: null,
+    wardrobe: null,
   }
 }
 

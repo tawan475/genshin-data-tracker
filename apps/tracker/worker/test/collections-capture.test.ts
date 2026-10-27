@@ -10,6 +10,7 @@ import {
 } from '@gdt/shared'
 import { SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
+import { syntheticCollections, syntheticWardrobe } from '../../../../packages/shared/test/synthetic'
 import { ORIGIN, irminsulForm, sampleExtras, sampleGood, signUp } from './client'
 
 /** Made-up values in the shape Teyvat.me Capture sends: 120 of the 206. */
@@ -121,16 +122,84 @@ describe('gi_collections in captures', () => {
     expect(latest.gi_tasks).toEqual({ welkin: { days: 3 } })
   })
 
-  it('refuses a file with far more than the game has', async () => {
-    const { importKey } = await setup()
+  it('drops a list longer than the game could have, and keeps the upload', async () => {
+    const { client, account, importKey } = await setup()
     const response = await importByKey(
       importKey,
       sampleGood({
-        gi_collections: { spincrystals: Array.from({ length: 2_001 }, (_, i) => 141_001 + i) },
+        gi_collections: {
+          spincrystals: Array.from({ length: 2_001 }, (_, i) => 141_001 + i),
+          archive: { quests: [10_000_001] },
+        },
       }),
       1_000,
     )
-    expect(response.status).toBe(422)
-    expect(await response.json()).toMatchObject({ error: { code: 'too_many_items' } })
+    expect(response.status).toBe(201)
+    const latest = await client.json<Good>(`/api/accounts/${account.id}/latest/good`)
+    expect(latest.gi_collections).toEqual({ archive: { quests: [10_000_001] } })
+  })
+})
+
+describe("Teyvat.me Capture 1.4.0's collections and wardrobe", () => {
+  const full = syntheticCollections(9)
+  const wardrobe = syntheticWardrobe(9)
+
+  it('stores them, a relogin with nothing new stores 0 bytes, and exports them', async () => {
+    const { client, account, importKey } = await setup()
+    const good = sampleGood({ gi_collections: full, gi_wardrobe: wardrobe })
+    const first = (await (await importByKey(importKey, good, 1_000)).json()) as ImportResponse
+    expect(first.status).toBe('created')
+    // The same state at the next login (another snapshot time, nothing new).
+    const again = (await (await importByKey(importKey, good, 2_000)).json()) as ImportResponse
+    expect(again.status).toBe('unchanged')
+    expect(again.storedSize).toBe(0)
+    // A swapped glider: only the wardrobe changes, and costs a little.
+    const swapped = structuredClone(wardrobe)
+    const [wearer] = Object.keys(swapped.gliders!.worn)
+    swapped.gliders!.worn[wearer!] = swapped.gliders!.owned.at(-1)!
+    const third = (await (
+      await importByKey(
+        importKey,
+        sampleGood({ gi_collections: full, gi_wardrobe: swapped }),
+        3_000,
+      )
+    ).json()) as ImportResponse
+    expect(third.status).toBe('created')
+    expect(third.storedSize).toBeLessThan(200)
+
+    const exported = await client.json<Good>(
+      `/api/accounts/${account.id}/snapshots/${first.snapshotId}/good`,
+    )
+    expect(Object.keys(exported).slice(-2)).toEqual(['gi_collections', 'gi_wardrobe'])
+    expect(exported.gi_collections!.tcg!.decks!['3']!.name).toBe(full.tcg!.decks!['3']!.name)
+    expect(exported.gi_wardrobe!.teams!['1']!.name).toBe(wardrobe.teams!['1']!.name)
+    const latest = await client.json<Good>(`/api/accounts/${account.id}/latest/good`)
+    expect(latest.gi_wardrobe!.gliders!.worn[wearer!]).toBe(swapped.gliders!.owned.at(-1))
+
+    const { snapshots, texts } = await decodeBundle(
+      await (
+        await client.fetch(`/api/accounts/${account.id}/bundle?sections=wardrobe&format=2`)
+      ).arrayBuffer(),
+    )
+    expect(snapshots).toHaveLength(2)
+    expect(new Set(snapshots.map((s) => s.wardrobe)).size).toBe(2)
+    expect([...texts.keys()].sort()).toEqual(snapshots.map((s) => s.wardrobe!).sort())
+  })
+
+  it('keeps re-uploading a capture a no-op when it was stored before the wardrobe', async () => {
+    const { importKey } = await setup()
+    const spincrystalsOnly = { spincrystals: full.spincrystals! }
+    const created = (await (
+      await importByKey(importKey, sampleGood({ gi_collections: spincrystalsOnly }), 1_000)
+    ).json()) as ImportResponse
+    const again = await importByKey(
+      importKey,
+      sampleGood({ gi_collections: spincrystalsOnly, gi_wardrobe: wardrobe }),
+      1_000,
+    )
+    expect(await again.json()).toMatchObject({
+      status: 'unchanged',
+      snapshotId: created.snapshotId,
+    })
   })
 })

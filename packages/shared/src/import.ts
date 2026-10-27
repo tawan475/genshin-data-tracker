@@ -45,6 +45,29 @@ export const GOOD_LIMITS = {
    * `UI_ItemIcon_BGM_Common`) × about 10.
    */
   spincrystals: 2_000,
+  // gi_collections' other parts and gi_wardrobe (Capture 1.4.0). Past one of
+  // these a part is dropped (the rest of the upload is kept), unlike the caps
+  // above, which refuse the file.
+  /** Codex ids in one Archive tab: the largest real one is 1,006 (materials). */
+  archiveTab: 10_000,
+  /** Living Beings with a defeat count: 538 codex entries at 7.1, 502 in a real capture. */
+  defeats: 3_000,
+  /** Adventurer Handbook chapters (22 real) and targets (244 real). */
+  handbookChapters: 200,
+  handbookTargets: 3_000,
+  /** Aranara collection entries (11 real). */
+  aranara: 2_000,
+  /** TCG cards owned (104 real); decks (4 real); a deck's 3 characters and 30 cards. */
+  tcgCards: 5_000,
+  tcgDecks: 100,
+  deckCharacters: 10,
+  deckCards: 60,
+  /** Owned ids of one wardrobe kind (24 weapon skins real), and saved teams (14 real). */
+  wardrobeOwned: 3_000,
+  teams: 200,
+  teamCharacters: 8,
+  /** UTF-16 units of a deck or team name the player typed. */
+  playerText: 100,
   /** An artifact has at most 4 substats (and unactivated ones). */
   substats: 6,
   /**

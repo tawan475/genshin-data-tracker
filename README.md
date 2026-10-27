@@ -137,7 +137,14 @@ range) as `tasks` (`snapshots.tasks_ref`, migration 0028), and Teyvat.me
 Capture's `gi_collections` (from 1.3.0: the Radiant Spincrystals in the
 Serenitea Pot's music list by item id; each part kept only when every entry
 passes; later parts append) as `collections` (`snapshots.collections_ref`,
-migration 0030). A file
+migration 0030), and from Capture 1.4.0 gi_collections' other parts (the
+Archive by tab, defeats per Living Being, the Adventurer Handbook, Aranara,
+TCG cards and decks) as `collections2` and `gi_wardrobe` (outfits, gliders,
+weapon skins and trails owned and worn, saved teams) as `wardrobe`
+(`snapshots.collections2_ref` / `wardrobe_ref`, migration 0031; the
+deployed collections layout cannot learn new parts, hence the second
+section). Deck and team names are the player's text, stored as is; a part
+that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before
 they existed, and exports (GOOD rebuild, zip) write them back after
 `timestamp`. The app uses them for the achievements' real completion times,

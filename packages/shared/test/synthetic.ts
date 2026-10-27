@@ -247,3 +247,151 @@ export function playOn(good: Good, step: number): Good {
     timestamp: (good.timestamp ?? 0) + 3_600_000,
   }
 }
+
+// ------------------------------------------------------- Capture 1.4.0 parts
+
+/** `n` distinct ids in [from, from + span), ascending. */
+function ids(rand: () => number, from: number, span: number, n: number): number[] {
+  const out = new Set<number>()
+  while (out.size < n) out.add(from + Math.floor(rand() * span))
+  return [...out].sort((a, b) => a - b)
+}
+
+/**
+ * `gi_collections` at a real capture's scale (made-up ids in the right
+ * blocks): Archive 488 / 164 / 538 / 1,006 / 243 / 748 / 233 / 111, 502
+ * defeats (14 with captures), 22 Handbook chapters and 244 targets, 11
+ * Aranara, 104 TCG cards and 4 decks of 3 + 30.
+ */
+export function syntheticCollections(seed = 1): NonNullable<Good['gi_collections']> {
+  const rand = random(seed)
+  const living = ids(rand, 20_010_000, 900_000, 538)
+  const defeats: Record<string, { defeated: number; captured?: number }> = {}
+  living.slice(0, 502).forEach((id, i) => {
+    defeats[String(id)] =
+      i < 14
+        ? { defeated: int(rand, 1, 400), captured: int(rand, 1, 40) }
+        : { defeated: int(rand, 1, 9_999) }
+  })
+  const chapters: Record<
+    string,
+    { progress: number; total: number; state: 'open' | 'complete' | 'claimed' }
+  > = {}
+  const targets: Record<
+    string,
+    { progress: number; total: number; state: 'open' | 'complete' | 'claimed'; chapter: number }
+  > = {}
+  const chapterIds = Array.from(
+    { length: 22 },
+    (_, i) => 10_001 + Math.floor(i / 5) * 10_000 + (i % 5),
+  )
+  for (const [c, chapter] of chapterIds.entries()) {
+    const done = c < 15
+    chapters[String(chapter)] = {
+      progress: done ? 11 : int(rand, 0, 10),
+      total: 11,
+      state: done ? 'claimed' : 'open',
+    }
+    for (let t = 0; t < 12 && Object.keys(targets).length < 244; t++) {
+      const total = int(rand, 1, 20)
+      const progress = done ? total : int(rand, 0, total)
+      targets[String(300_000 + c * 100 + t)] = {
+        progress,
+        total,
+        state: done
+          ? 'claimed'
+          : progress === total
+            ? rand() < 0.5
+              ? 'complete'
+              : 'claimed'
+            : 'open',
+        chapter,
+      }
+    }
+  }
+  const cards: Record<string, { count: number; proficiency?: number }> = {}
+  for (const id of [...ids(rand, 1_101, 2_000, 40), ...ids(rand, 211_011, 120_000, 64)]) {
+    cards[String(id)] =
+      id < 10_000 && rand() < 0.4
+        ? { count: 1, proficiency: int(rand, 1, 30) }
+        : { count: int(rand, 1, 2) }
+  }
+  const cardIds = Object.keys(cards).map(Number)
+  const decks: Record<
+    string,
+    { name: string; characters: number[]; cards: number[]; valid: boolean }
+  > = {}
+  for (let d = 0; d < 4; d++) {
+    decks[String(d)] = {
+      name: ['Mono Pyro', 'Freeze ★', 'Deck 3', 'あいうえお かきくけこ さしすせそ たちつてと'][d]!,
+      characters: cardIds.filter((id) => id < 10_000).slice(d * 3, d * 3 + 3),
+      cards: Array.from({ length: 30 }, () =>
+        pick(
+          rand,
+          cardIds.filter((id) => id > 10_000),
+        ),
+      ),
+      valid: d !== 2,
+    }
+  }
+  return {
+    spincrystals: ids(rand, 141_001, 306, 120),
+    archive: {
+      quests: ids(rand, 10_000_000, 900_000, 488),
+      weapons: ids(rand, 30_200_000, 90_000, 164),
+      livingBeings: living,
+      materials: ids(rand, 40_000_000, 900_000, 1_006),
+      books: ids(rand, 50_000_000, 900_000, 243),
+      tutorials: ids(rand, 60_000_000, 900_000, 748),
+      viewpoints: ids(rand, 70_000_000, 900_000, 233),
+      artifacts: ids(rand, 30_100_000, 90_000, 111),
+    },
+    defeats,
+    handbook: { chapters, targets },
+    aranara: {
+      '1': Object.fromEntries(
+        ids(rand, 1, 30, 11).map((id, i) => [
+          String(id),
+          (['none', 'collectable', 'collected', 'finished'] as const)[i % 4]!,
+        ]),
+      ),
+    },
+    tcg: { cards, decks, currentDeck: 1 },
+  }
+}
+
+/** `gi_wardrobe` at a real capture's scale: 20 outfits, 13 gliders worn by 103, 24 weapon skins (20 expiring), 16 trails, 14 teams. */
+export function syntheticWardrobe(seed = 1): NonNullable<Good['gi_wardrobe']> {
+  const rand = random(seed)
+  const characters = CHARACTERS.keys.slice(0, 103)
+  const kind = (from: number, n: number, wearers: number, expiring = 0) => {
+    const owned = ids(rand, from, 2_000, n)
+    return {
+      owned,
+      worn: Object.fromEntries(characters.slice(0, wearers).map((key) => [key, pick(rand, owned)])),
+      ...(expiring > 0
+        ? {
+            expires: Object.fromEntries(
+              owned.slice(0, expiring).map((id) => [String(id), int(rand, 1.79e9, 1.8e9)]),
+            ),
+          }
+        : {}),
+    }
+  }
+  return {
+    outfits: kind(200_000, 20, 18),
+    gliders: kind(140_000, 13, 103),
+    weaponSkins: kind(11_000, 24, 4, 20),
+    trails: kind(330_000, 16, 0),
+    teams: Object.fromEntries(
+      Array.from({ length: 14 }, (_, i) => [
+        String(i + 1),
+        {
+          name: i === 0 ? 'Abyss ★ Floor 12 — second half' : `Team ${i + 1}`,
+          characters: characters.slice(i * 4, i * 4 + 4),
+        },
+      ]),
+    ),
+    currentTeam: 3,
+  }
+}

@@ -22,6 +22,7 @@
  */
 
 import type { KeyRef } from '../dictionary'
+import { ARCHIVE_TABS } from '../good'
 import { ByteReader, ByteWriter, CorruptDataError } from './bytes'
 import type { SectionKind } from './sections'
 
@@ -499,6 +500,13 @@ const tasksLayout: Layout = {
 // `s` as the count then the ids ascending, the first as is and each next as
 // its distance from the one before (at least 1). A part this layout does not
 // know makes the encoder throw, so such a section is stored as JSON.
+//
+// This layout is what the deployed builds decode, and their decoder refuses
+// any other flag, so it never learns a part: every later part (`a`, `d`, `h`,
+// `r`, `g`, Capture 1.4.0) makes the section JSON, which every build reads.
+// The JSON of thousands of codex ids deflates to a few bytes each, and a
+// changed section is compressed against the last one (store-v2), so a few
+// more defeats still cost a few bytes.
 
 const COLLECTION_PARTS = ['s'] as const
 
@@ -544,6 +552,302 @@ const collectionsLayout: Layout = {
   },
 }
 
+// ------------------------------------------- helpers for the layouts below
+
+/** A row of exactly `n` cells. */
+function row(value: unknown, n: number): unknown[] {
+  const cells = array(value)
+  if (cells.length !== n) throw new TypeError(`Not a row of ${n}`)
+  return cells
+}
+
+function writeAscending(w: ByteWriter, ids: readonly number[]): void {
+  w.uint(ids.length)
+  let previous = -1
+  for (const id of ids) {
+    if (id <= previous) throw new RangeError('Not ascending')
+    w.uint(previous < 0 ? id : id - previous)
+    previous = id
+  }
+}
+
+function checkedCount(r: ByteReader): number {
+  const count = r.uint()
+  if (count > r.remaining) throw new CorruptDataError('Count past the data')
+  return count
+}
+
+/** Reads `count` rows whose first cell is an ascending id stored as a distance. */
+function readById<T>(r: ByteReader, count: number, rest: (id: number) => T): T[] {
+  const out: T[] = []
+  let previous = 0
+  for (let n = 0; n < count; n++) {
+    previous = n === 0 ? r.uint() : previous + r.uint()
+    out.push(rest(previous))
+  }
+  return out
+}
+
+function readAscending(r: ByteReader): number[] {
+  return readById(r, checkedCount(r), (id) => id)
+}
+
+/** Rows sorted by their first cell (an id), the ids as distances, then `cells` per row. */
+function writeById(w: ByteWriter, rows: unknown, n: number, cells: (row: unknown[]) => void) {
+  const list = array(rows).map((entry) => row(entry, n))
+  w.uint(list.length)
+  let previous = -1
+  for (const entry of list) {
+    const id = uint(entry[0])
+    if (id <= previous) throw new RangeError('Not ascending')
+    w.uint(previous < 0 ? id : id - previous)
+    previous = id
+    cells(entry)
+  }
+}
+
+function uintList(w: ByteWriter, value: unknown): void {
+  const list = array(value).map(uint)
+  w.uint(list.length)
+  for (const n of list) w.uint(n)
+}
+
+function readUintList(r: ByteReader): number[] {
+  const count = checkedCount(r)
+  return Array.from({ length: count }, () => r.uint())
+}
+
+// ------------------------------------------------------------ tagged parts
+// collections2 and wardrobe are tagged layouts: each present part is written
+// as its index in the layout's part list (append-only), its byte length and
+// its bytes, in list order. A decoder skips a part whose index it does not
+// know, so a part a later build adds never makes an older build refuse the
+// section: it reads the parts it knows. A part this build's encoder does not
+// know (a key it has no index for) makes it throw, so that section is stored
+// as JSON instead.
+
+interface TaggedPart {
+  write(w: ByteWriter, value: unknown): void
+  read(r: ByteReader): unknown
+}
+
+function taggedLayout(what: string, parts: readonly (readonly [string, TaggedPart])[]): Layout {
+  const keys = parts.map(([key]) => key)
+  return {
+    variants: [0],
+    encode(w, { value, delta }) {
+      if (delta) throw new TypeError(`${what} has no deltas`)
+      const v = fields(value, keys, keys)
+      parts.forEach(([key, part], index) => {
+        if (v[key] === undefined) return
+        const body = new ByteWriter()
+        part.write(body, v[key])
+        const bytes = body.finish()
+        w.uint(index).uint(bytes.length).bytes(bytes)
+      })
+    },
+    decode(r) {
+      const section: Record<string, unknown> = {}
+      let last = -1
+      while (!r.done) {
+        const index = r.uint()
+        const bytes = r.bytes(r.uint())
+        if (index <= last) throw new CorruptDataError(`${what} parts out of order`)
+        last = index
+        const part = parts[index]
+        if (!part) continue // written by a later build
+        const body = new ByteReader(bytes)
+        section[part[0]] = part[1].read(body)
+        if (!body.done) throw new CorruptDataError(`${what} part ${part[0]} has bytes left`)
+      }
+      return section
+    },
+  }
+}
+
+// collections2 (gi_collections' parts from Capture 1.4.0 on). Ids sorted
+// ascending are stored as distances (see writeAscending); every number is
+// unsigned.
+// `a`: a byte of tab flags (ARCHIVE_TABS order), then each present tab's
+// ascending list. `d`: the count, then per row the id, defeated, captured.
+// `h`: chapters (count; id, progress, total, state), then targets (count;
+// quest id, chapter, progress, total, state). `r`: the count, then per row
+// type, id, state. `g`: a byte of flags (bit 0 = `k`, 1 = `u`), the cards
+// (count; id, count, proficiency), the decks (count; id, name (a string),
+// valid, the character cards and the cards, each count + ids as they are),
+// then the current deck.
+
+const archivePart: TaggedPart = {
+  write(w, value) {
+    const a = fields(value, ARCHIVE_TABS, ARCHIVE_TABS)
+    let tabs = 0
+    ARCHIVE_TABS.forEach((tab, bit) => {
+      if (a[tab] !== undefined) tabs |= 1 << bit
+    })
+    w.byte(tabs)
+    for (const tab of ARCHIVE_TABS) {
+      if (a[tab] !== undefined) writeAscending(w, array(a[tab]).map(uint))
+    }
+  },
+  read(r) {
+    const tabs = r.byte()
+    const a: Record<string, number[]> = {}
+    ARCHIVE_TABS.forEach((tab, bit) => {
+      if (tabs & (1 << bit)) a[tab] = readAscending(r)
+    })
+    return a
+  },
+}
+
+const defeatsPart: TaggedPart = {
+  write(w, value) {
+    writeById(w, value, 3, ([, defeated, captured]) => w.uint(uint(defeated)).uint(uint(captured)))
+  },
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint()]),
+}
+
+const handbookPart: TaggedPart = {
+  write(w, value) {
+    const h = fields(value, ['c', 't'])
+    writeById(w, h.c, 4, ([, progress, total, state]) => {
+      w.uint(uint(progress)).uint(uint(total)).uint(uint(state))
+    })
+    writeById(w, h.t, 5, ([, chapter, progress, total, state]) => {
+      w.uint(uint(chapter)).uint(uint(progress)).uint(uint(total)).uint(uint(state))
+    })
+  },
+  read(r) {
+    const c = readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint(), r.uint()])
+    const t = readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint(), r.uint(), r.uint()])
+    return { c, t }
+  },
+}
+
+const aranaraPart: TaggedPart = {
+  write(w, value) {
+    const rows = array(value).map((entry) => row(entry, 3).map(uint))
+    w.uint(rows.length)
+    for (const [type, id, state] of rows) w.uint(type!).uint(id!).uint(state!)
+  },
+  read(r) {
+    const count = checkedCount(r)
+    return Array.from({ length: count }, () => [r.uint(), r.uint(), r.uint()])
+  },
+}
+
+const tcgPart: TaggedPart = {
+  write(w, value) {
+    const g = fields(value, ['c', 'k', 'u'], ['k', 'u'])
+    w.byte((g.k !== undefined ? 1 : 0) | (g.u !== undefined ? 2 : 0))
+    writeById(w, g.c, 3, ([, count, proficiency]) => w.uint(uint(count)).uint(uint(proficiency)))
+    if (g.k !== undefined) {
+      writeById(w, g.k, 5, ([, name, valid, characters, cards]) => {
+        if (typeof name !== 'string') throw new TypeError('Not a deck name')
+        w.string(name).uint(uint(valid))
+        uintList(w, characters)
+        uintList(w, cards)
+      })
+    }
+    if (g.u !== undefined) w.uint(uint(g.u))
+  },
+  read(r) {
+    const parts = r.byte()
+    if (parts >= 4) throw new CorruptDataError(`Unknown TCG flags ${parts}`)
+    const g: Record<string, unknown> = {
+      c: readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint()]),
+    }
+    if (parts & 1) {
+      g.k = readById(r, checkedCount(r), (id) => [
+        id,
+        r.string(),
+        r.uint(),
+        readUintList(r),
+        readUintList(r),
+      ])
+    }
+    if (parts & 2) g.u = r.uint()
+    return g
+  },
+}
+
+/** collections2's parts, by index (append-only). */
+const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
+  ['a', archivePart],
+  ['d', defeatsPart],
+  ['h', handbookPart],
+  ['r', aranaraPart],
+  ['g', tcgPart],
+]
+
+const collections2Layout = taggedLayout('collections2', COLLECTION2_PARTS)
+
+// wardrobe: `o`, `g`, `s`, `t` (outfits, gliders, weapon skins, trails) each
+// a byte (bit 0 = `e`), its owned ids (an ascending list), who wears what
+// (count; character key (a string), id), then the expiries (rows by id: id,
+// time); `m`: teams (rows by slot: name, character keys as count + strings);
+// `c`: the team in use.
+
+const wardrobeKindPart: TaggedPart = {
+  write(w, value) {
+    const kind = fields(value, ['o', 'w', 'e'], ['e'])
+    w.byte(kind.e !== undefined ? 1 : 0)
+    writeAscending(w, array(kind.o).map(uint))
+    const worn = array(kind.w).map((entry) => row(entry, 2))
+    w.uint(worn.length)
+    for (const [key, id] of worn) {
+      if (typeof key !== 'string') throw new TypeError('Not a character key')
+      w.string(key).uint(uint(id))
+    }
+    if (kind.e !== undefined) writeById(w, kind.e, 2, ([, at]) => w.uint(uint(at)))
+  },
+  read(r) {
+    const parts = r.byte()
+    if (parts >= 2) throw new CorruptDataError(`Unknown wardrobe kind flags ${parts}`)
+    const kind: Record<string, unknown> = { o: readAscending(r) }
+    const count = checkedCount(r)
+    kind.w = Array.from({ length: count }, () => [r.string(), r.uint()])
+    if (parts & 1) kind.e = readById(r, checkedCount(r), (id) => [id, r.uint()])
+    return kind
+  },
+}
+
+const teamsPart: TaggedPart = {
+  write(w, value) {
+    writeById(w, value, 3, ([, name, characters]) => {
+      if (typeof name !== 'string') throw new TypeError('Not a team name')
+      const keys = array(characters)
+      w.string(name).uint(keys.length)
+      for (const key of keys) {
+        if (typeof key !== 'string') throw new TypeError('Not a character key')
+        w.string(key)
+      }
+    })
+  },
+  read: (r) =>
+    readById(r, checkedCount(r), (slot) => {
+      const name = r.string()
+      const count = checkedCount(r)
+      return [slot, name, Array.from({ length: count }, () => r.string())]
+    }),
+}
+
+const numberPart: TaggedPart = {
+  write: (w, value) => void w.uint(uint(value)),
+  read: (r) => r.uint(),
+}
+
+/** wardrobe's parts, by index (append-only). */
+const WARDROBE_PARTS: readonly (readonly [string, TaggedPart])[] = [
+  ['o', wardrobeKindPart],
+  ['g', wardrobeKindPart],
+  ['s', wardrobeKindPart],
+  ['t', wardrobeKindPart],
+  ['m', teamsPart],
+  ['c', numberPart],
+]
+
+const wardrobeLayout = taggedLayout('wardrobe', WARDROBE_PARTS)
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -556,6 +860,8 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   anecdotes: anecdotesLayout,
   tasks: tasksLayout,
   collections: collectionsLayout,
+  collections2: collections2Layout,
+  wardrobe: wardrobeLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */
