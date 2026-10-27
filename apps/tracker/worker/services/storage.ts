@@ -53,7 +53,7 @@ export function toBytes(data: unknown): Uint8Array {
   throw new Error('Not a BLOB value')
 }
 
-/** `snapshots` columns of the fifteen v2 section slots. */
+/** `snapshots` columns of the sixteen v2 section slots. */
 export const REF_COLUMNS: Readonly<Record<Slot, string>> = {
   characters: 'characters_ref',
   weapons: 'weapons_ref',
@@ -70,6 +70,7 @@ export const REF_COLUMNS: Readonly<Record<Slot, string>> = {
   wardrobe: 'wardrobe_ref',
   exploration: 'exploration_ref',
   progress: 'progress_ref',
+  extras: 'extras_ref',
 }
 export const REFS_SQL = SLOTS.map((slot) => REF_COLUMNS[slot]).join(', ')
 
@@ -121,6 +122,7 @@ export interface StoredRow {
   wardrobe_ref: number | null
   exploration_ref: number | null
   progress_ref: number | null
+  extras_ref: number | null
   meta: unknown
 }
 

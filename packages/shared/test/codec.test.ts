@@ -26,6 +26,7 @@ import {
   encodeSnapshot,
   encodeTasks,
   encodeExploration,
+  encodeExtras,
   encodeProgress,
   encodeWardrobe,
   extraSectionsOf,
@@ -56,6 +57,7 @@ import {
   syntheticCollections,
   syntheticExploration,
   synthetic17,
+  synthetic18,
   syntheticRecipes,
   syntheticWardrobe,
 } from './synthetic'
@@ -145,6 +147,7 @@ async function storedOf(
     wardrobe: await optionalViaStorage(encoded.wardrobe),
     exploration: await optionalViaStorage(encoded.exploration),
     progress: await optionalViaStorage(encoded.progress),
+    extras: await optionalViaStorage(encoded.extras),
   }
 }
 
@@ -285,6 +288,8 @@ function expectedGood(input: unknown): Omit<Good, 'timestamp'> {
   if (good.exploration) expected.gi_exploration = good.exploration
   if (good.achievementProgress) expected.gi_achievement_progress = good.achievementProgress
   if (good.events) expected.gi_events = good.events
+  if (good.teapot) expected.gi_teapot = good.teapot
+  if (good.miliastra) expected.gi_miliastra = good.miliastra
   return expected
 }
 
@@ -2076,5 +2081,111 @@ describe("Teyvat.me Capture 1.7.0's keys", () => {
     const tasks = JSON.parse(JSON.stringify(encodeTasks(good.tasks!)))
     expect(encodeSectionBlob('tasks', tasks, false, null).payload[0]).toBe(0x00)
     expect(decodeTasks(tasks)).toEqual(good.tasks)
+  })
+})
+
+// ------------------------------------------------------ Capture 1.8.0-1.11.0
+
+describe("Teyvat.me Capture 1.8.0-1.11.0's keys", () => {
+  const new18 = synthetic18(9)
+  const collections = { ...syntheticCollections(9), ...synthetic17(9).collections }
+  const base = {
+    ...sample,
+    gi_tasks: { welkin: { days: 30 }, ...synthetic17(9).tasks },
+    gi_collections: collections,
+    gi_exploration: syntheticExploration(9),
+    gi_events: synthetic17(9).events,
+  }
+  const input = {
+    ...base,
+    gi_tasks: { ...base.gi_tasks, ...new18.tasks },
+    gi_collections: {
+      ...collections,
+      ...new18.collections,
+      tcg: { ...collections.tcg!, ...new18.tcg },
+    },
+    gi_exploration: { ...base.gi_exploration, ...new18.exploration },
+    gi_teapot: new18.teapot,
+    gi_miliastra: new18.miliastra,
+  }
+
+  it("round-trips every part at a real capture's scale", async () => {
+    const { encoded, decoded } = await roundTrip(input)
+    expect(extraSectionsOf(encoded).at(-1)!.kind).toBe('extras')
+    expect(canonical(decoded)).toEqual(canonical(expectedGood(input)))
+    expect(decoded.gi_collections!.tcg).toEqual(input.gi_collections.tcg)
+    expect(decoded.gi_collections!.crafting).toEqual(new18.collections.crafting)
+    expect(decoded.gi_collections!.musicGame).toEqual(new18.collections.musicGame)
+    expect(decoded.gi_tasks!.signIns).toEqual(new18.tasks.signIns)
+    expect(decoded.gi_exploration).toEqual(input.gi_exploration)
+    expect(decoded.gi_teapot).toEqual(new18.teapot)
+    expect(decoded.gi_miliastra).toEqual(new18.miliastra)
+    expect(Object.keys(decoded).slice(-2)).toEqual(['gi_teapot', 'gi_miliastra'])
+  })
+
+  it('knows the hashes trackers from before 1.8.0 and 1.7.0 gave the same file', async () => {
+    const catalog = new Catalog()
+    const before = await roundTrip(base, catalog)
+    const after = await roundTrip(input, catalog)
+    expect(after.encoded.contentHash).not.toBe(before.encoded.contentHash)
+    expect(after.encoded.pre18ContentHash).toBe(before.encoded.contentHash)
+    expect(after.encoded.pre17ContentHash).toBe(before.encoded.pre17ContentHash)
+    expect(before.encoded.pre18ContentHash).toBe(before.encoded.contentHash)
+    for (const part of [
+      { gi_tasks: { ...base.gi_tasks, ...new18.tasks } },
+      { gi_collections: { ...collections, tcg: { ...collections.tcg!, bosses: [1] } } },
+      { gi_exploration: { ...base.gi_exploration, domainsCleared: [1006] } },
+      { gi_teapot: new18.teapot },
+    ]) {
+      const one = await roundTrip({ ...base, ...part }, catalog)
+      expect(one.encoded.pre18ContentHash).toBe(before.encoded.contentHash)
+    }
+  })
+
+  it('drops a bad part and keeps the rest', () => {
+    const read = (patch: object) => normalizeGood({ ...input, ...patch })
+    const c = (more: object) =>
+      read({ gi_collections: { ...input.gi_collections, ...more } }).collections!
+    expect('crafting' in c({ crafting: { forging: [1, 1] } })).toBe(false)
+    expect(c({ crafting: { forging: [1, 1], crafting: [5] } }).crafting).toEqual({ crafting: [5] })
+    expect('musicGame' in c({ musicGame: { '1': { score: -1, claimed: true } } })).toBe(false)
+    const tcg = c({ tcg: { ...input.gi_collections.tcg, bosses: [2, 2] } }).tcg!
+    expect('bosses' in tcg).toBe(false)
+    expect(tcg.levels).toEqual(new18.tcg.levels)
+    const t = read({
+      gi_tasks: { signIns: { '1': { days: 7, claimed: [1], lastAt: 1, start: 1 } } },
+    })
+    expect(t.tasks).toBeNull()
+    const e = read({
+      gi_exploration: { ...input.gi_exploration, tribalChapters: { '1': { state: 'done' } } },
+    }).exploration!
+    expect('tribalChapters' in e).toBe(false)
+    expect(read({ gi_teapot: { comfort: { '1': { mansion: 1 } } } }).teapot).toBeNull()
+    expect(read({ gi_miliastra: { cosmetics: { '1': -5 } } }).miliastra).toBeNull()
+  })
+
+  it('stores the new parts in their binary layouts; old decoders skip them', () => {
+    const good = normalizeGood(input)
+    const values = {
+      collections2: JSON.parse(JSON.stringify(encodeCollections2(good.collections!))),
+      exploration: JSON.parse(JSON.stringify(encodeExploration(good.exploration!))),
+      extras: JSON.parse(
+        JSON.stringify(encodeExtras({ teapot: good.teapot!, miliastra: good.miliastra! })),
+      ),
+    }
+    for (const [kind, value] of Object.entries(values) as [
+      'collections2' | 'exploration' | 'extras',
+      unknown,
+    ][]) {
+      const blob = encodeSectionBlob(kind, value, false, null)
+      expect(blob.payload[0], kind).toBe(0x10)
+      const back = decodeSectionBlob(kindCode(kind, false), blob.data, null, null)
+      expect(JSON.stringify(back.value), kind).toBe(JSON.stringify(value))
+    }
+    // The deployed TCG part keeps its flags: the later TCG parts are their own part `v`.
+    expect(Object.keys(values.collections2.g)).toEqual(
+      ['c', 'k', 'u'].filter((k) => k in values.collections2.g),
+    )
+    expect(values.collections2.v).toBeDefined()
   })
 })

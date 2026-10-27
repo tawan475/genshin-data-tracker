@@ -157,7 +157,16 @@ decoders ignore unknown letters), gi_collections' `hangouts`,
 `gi_achievement_progress` + `gi_events` are the `progress` section (kind 15,
 the last code below the delta flag; later kinds take 32+; migration 0033).
 No section may use the letter `b` (every blob strips it: a delta's base).
-`pre17ContentHash` keeps re-uploads of older captures no-ops. Deck and team names are the
+`pre17ContentHash` keeps re-uploads of older captures no-ops. Capture
+1.8.0-1.11.0: gi_collections' `crafting`, `musicGame`, `furnishingSets`,
+`companionRewards`, `npcsMet` and the TCG's `levels`/`bosses`/`tavern` are
+collections2 parts `k`/`y`/`e`/`o`/`n`/`v` (the deployed TCG part `g`
+refuses new flags, hence `v`), gi_tasks' `signIns` is tasks letter `i`,
+gi_exploration's `domainsCleared`/`tribalChapters` are exploration parts
+`d`/`t`, and the new top-level `gi_teapot` / `gi_miliastra` are the
+`extras` section (kind 32, the first code past the delta flag's range;
+migration 0034; later top-level keys append a part there).
+`pre18ContentHash` keeps re-uploads no-ops. Deck and team names are the
 player's text, stored as is; a part
 that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before
@@ -193,7 +202,7 @@ each Archive tab, TCG cards and wardrobe kind shows All / Missing / Have, and
 a Recipes tab (Capture 1.5.0) shows unlocked, locked and mastered recipes.
 Aranara entries stay numbered (the game names none); all the game data
 lists show, those the capture lacks as not found. Radiant Spincrystals,
-Anecdotes and Aranara link to their Genshin Impact Fandom wiki guides
+Anecdotes and Aranara link to guides (the Fandom wiki; the Aranara to Game8's Mysterious Clipboard page)
 (`src/lib/wiki.ts`: page titles are the game's English names).
 
 Character, weapon and material keys are stored as ids from the static,

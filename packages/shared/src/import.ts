@@ -92,6 +92,27 @@ export const GOOD_LIMITS = {
   achievementProgress: 5_000,
   events: 500,
   eventCounters: 1_000,
+  // Capture 1.8.0-1.11.0: past one of these a part is dropped.
+  /** Recipes of one kind (crafting 578, forging 46, processing 44 real). */
+  craftingRecipes: 5_000,
+  /** TCG challenge levels played, challenges per level, bosses, Tavern characters and levels each. */
+  tcgLevels: 2_000,
+  tcgChallenges: 100,
+  tcgBosses: 1_000,
+  tavern: 1_000,
+  /** Music game beatmaps, sign-in calendars, realms and their blocks, Miliastra cosmetics. */
+  beatmaps: 5_000,
+  signIns: 500,
+  signInDays: 100,
+  realms: 100,
+  realmBlocks: 100,
+  miliastra: 20_000,
+  /** Furnishing sets (97 real), companion rewards (41), NPCs met (158), domains cleared (13), tribal chapters (18). */
+  furnishingSets: 5_000,
+  companionRewards: 5_000,
+  npcsMet: 20_000,
+  domainsCleared: 5_000,
+  tribalChapters: 1_000,
   /** UTF-16 units of a deck or team name the player typed. */
   playerText: 100,
   /** An artifact has at most 4 substats (and unactivated ones). */

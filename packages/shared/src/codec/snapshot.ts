@@ -1,6 +1,6 @@
 import { hashArtifactIdentity, type ArtifactIdentity } from '../artifact'
 import type { KeyDictionary } from '../dictionary'
-import type { GiCollections, GiTasks, Good } from '../good'
+import type { GiCollections, GiExploration, GiTasks, Good } from '../good'
 import { sha256Hex128 } from '../hash'
 import { deflateRaw } from './compress'
 import { normalizeGood, type NormalizedGood, type NormalizeOptions } from './normalize'
@@ -13,6 +13,7 @@ import {
   decodeCharacters,
   decodeCollections,
   decodeExploration,
+  decodeExtras,
   decodeProgress,
   decodeMaterials,
   decodePlayer,
@@ -31,6 +32,7 @@ import {
   encodeCollections,
   encodeCollections2,
   encodeExploration,
+  encodeExtras,
   encodeProgress,
   encodeMaterialsDelta,
   encodeMaterialsFull,
@@ -121,6 +123,7 @@ export interface ExtraSections {
   wardrobe: Section | null
   exploration: Section | null
   progress: Section | null
+  extras: Section | null
 }
 
 export interface EncodedSnapshot extends ExtraSections {
@@ -193,6 +196,12 @@ export interface EncodedSnapshot extends ExtraSections {
    */
   pre17ContentHash: string
   /**
+   * The content hash a tracker from before Capture 1.8.0 gave this file
+   * (the parts 1.8.0-1.11.0 added to the tasks, collections2 and exploration
+   * left out, no extras section), so re-uploading it stays a no-op.
+   */
+  pre18ContentHash: string
+  /**
    * The content hash with the recipes left out of collections2 (equal to
    * `contentHash` without recipes): what a tracker from before Capture
    * 1.5.0's recipes stored such a file as, so re-uploading it stays a no-op.
@@ -221,6 +230,7 @@ export function extraSectionsOf(sections: ExtraSections): Section[] {
     sections.wardrobe,
     sections.exploration,
     sections.progress,
+    sections.extras,
   ].filter((s): s is Section => s !== null)
 }
 
@@ -249,6 +259,7 @@ export async function encodeStaticSections(
     wardrobe,
     exploration,
     progress,
+    extras,
   ] = await Promise.all([
     makeSection('characters', encodeCharacters(good.characters)),
     makeSection('weapons', encodeWeapons(good.weapons)),
@@ -274,6 +285,13 @@ export async function encodeStaticSections(
         ...(good.events ? { events: good.events } : {}),
       }),
     ),
+    optionalSection(
+      'extras',
+      encodeExtras({
+        ...(good.teapot ? { teapot: good.teapot } : {}),
+        ...(good.miliastra ? { miliastra: good.miliastra } : {}),
+      }),
+    ),
   ])
   return {
     characters,
@@ -290,6 +308,7 @@ export async function encodeStaticSections(
     wardrobe,
     exploration,
     progress,
+    extras,
   }
 }
 
@@ -345,7 +364,9 @@ export async function completeSnapshot(
   const chain = async (
     tasks: Section | null,
     collections2: Section | null,
+    exploration: Section | null,
     progress: Section | null,
+    extras: Section | null,
   ) => {
     const hash = (parts: string[]) => sha256Hex128([...withExtras, ...parts].join(':'))
     const anecdotes = sections.anecdotes?.hash ?? ''
@@ -369,18 +390,27 @@ export async function completeSnapshot(
       collections2?.hash ?? '',
       sections.wardrobe?.hash ?? '',
     ]
-    const preProgress = sections.exploration
-      ? await hash([...upToWardrobe, sections.exploration.hash])
+    const preProgress = exploration
+      ? await hash([...upToWardrobe, exploration.hash])
       : preExploration
     // Capture 1.7.0's achievement progress and events.
-    const content = progress
-      ? await hash([...upToWardrobe, sections.exploration?.hash ?? '', progress.hash])
-      : preProgress
+    const upToExploration = [...upToWardrobe, exploration?.hash ?? '']
+    const preExtras = progress ? await hash([...upToExploration, progress.hash]) : preProgress
+    // Capture 1.8.0's new top-level keys.
+    const content = extras
+      ? await hash([...upToExploration, progress?.hash ?? '', extras.hash])
+      : preExtras
     return { preCollections, preCollections2, preWardrobe, preExploration, preProgress, content }
   }
-  const full = await chain(sections.tasks, sections.collections2, sections.progress)
+  const full = await chain(
+    sections.tasks,
+    sections.collections2,
+    sections.exploration,
+    sections.progress,
+    sections.extras,
+  )
   const contentHash = full.content
-  const collections = prepared.good.collections
+  const { tasks, collections, exploration } = prepared.good
   // The recipes (1.5.0) live inside collections2: what this file hashed to
   // where collections2 did not have them yet.
   const preRecipesContentHash = collections?.recipes
@@ -391,33 +421,57 @@ export async function completeSnapshot(
             'collections2',
             encodeCollections2({ ...collections, recipes: undefined }),
           ),
+          sections.exploration,
           sections.progress,
+          sections.extras,
         )
       ).content
     : contentHash
-  // Capture 1.7.0 grew the tasks and collections2 and added the progress
-  // section: what a tracker from before it stored the same file as.
-  const tasks = prepared.good.tasks
-  const grewTasks = !!tasks && TASKS_17.some((key) => tasks[key] !== undefined)
-  const grewCollections =
-    !!collections && COLLECTIONS_17.some((key) => collections[key] !== undefined)
-  const pre17ContentHash =
-    grewTasks || grewCollections || sections.progress
-      ? (
-          await chain(
-            grewTasks
-              ? await optionalSection('tasks', nonEmpty(encodeTasks(withoutKeys(tasks!, TASKS_17))))
-              : sections.tasks,
-            grewCollections
-              ? await optionalSection(
-                  'collections2',
-                  encodeCollections2(withoutKeys(collections!, COLLECTIONS_17)),
-                )
-              : sections.collections2,
-            null,
-          )
-        ).content
-      : contentHash
+  /**
+   * The content hash a tracker from before `era` gave this file: the parts
+   * that era and later ones added are left out of the sections they grew, and
+   * the sections they added are absent.
+   */
+  const asOf = async (era: 17 | 18) => {
+    const taskKeys = era === 17 ? [...TASKS_17, ...TASKS_18] : TASKS_18
+    const collectionKeys = era === 17 ? [...COLLECTIONS_17, ...COLLECTIONS_18] : COLLECTIONS_18
+    const grewTasks = !!tasks && taskKeys.some((key) => tasks[key] !== undefined)
+    const grewCollections =
+      !!collections &&
+      (collectionKeys.some((key) => collections[key] !== undefined) ||
+        (!!collections.tcg && TCG_18.some((key) => collections.tcg![key] !== undefined)))
+    const grewExploration =
+      !!exploration && EXPLORATION_18.some((key) => exploration[key] !== undefined)
+    const added = era === 17 ? sections.progress || sections.extras : sections.extras
+    if (!grewTasks && !grewCollections && !grewExploration && !added) return contentHash
+    const olderCollections = (c: GiCollections) => {
+      const out = withoutKeys(c, collectionKeys)
+      return out.tcg ? { ...out, tcg: withoutKeys(out.tcg, TCG_18) } : out
+    }
+    return (
+      await chain(
+        grewTasks
+          ? await optionalSection('tasks', nonEmpty(encodeTasks(withoutKeys(tasks!, taskKeys))))
+          : sections.tasks,
+        grewCollections
+          ? await optionalSection(
+              'collections2',
+              encodeCollections2(olderCollections(collections!)),
+            )
+          : sections.collections2,
+        grewExploration
+          ? await optionalSection(
+              'exploration',
+              nonEmpty(encodeExploration(withoutKeys(exploration!, EXPLORATION_18))),
+            )
+          : sections.exploration,
+        era === 17 ? null : sections.progress,
+        null,
+      )
+    ).content
+  }
+  const pre17ContentHash = await asOf(17)
+  const pre18ContentHash = await asOf(18)
   return {
     ...sections,
     artifacts,
@@ -434,6 +488,7 @@ export async function completeSnapshot(
     preExplorationContentHash: full.preExploration,
     preRecipesContentHash,
     pre17ContentHash,
+    pre18ContentHash,
   }
 }
 
@@ -448,10 +503,24 @@ const COLLECTIONS_17 = [
   'monstersSeen',
   'blueprints',
 ] as const satisfies readonly (keyof GiCollections)[]
+/** Capture 1.8.0-1.11.0's parts of the sections they grew (see pre18ContentHash). */
+const TASKS_18 = ['signIns'] as const satisfies readonly (keyof GiTasks)[]
+const COLLECTIONS_18 = [
+  'crafting',
+  'musicGame',
+  'furnishingSets',
+  'companionRewards',
+  'npcsMet',
+] as const satisfies readonly (keyof GiCollections)[]
+const TCG_18 = ['levels', 'bosses', 'tavern'] as const
+const EXPLORATION_18 = [
+  'domainsCleared',
+  'tribalChapters',
+] as const satisfies readonly (keyof GiExploration)[]
 
-function withoutKeys<T extends object>(value: T, keys: readonly (keyof T)[]): T {
+function withoutKeys<T extends object>(value: T, keys: readonly PropertyKey[]): T {
   const out = { ...value }
-  for (const key of keys) delete out[key]
+  for (const key of keys) delete (out as Record<PropertyKey, unknown>)[key]
   return out
 }
 
@@ -585,6 +654,7 @@ export interface StoredSnapshot {
   wardrobe?: string | null
   exploration?: string | null
   progress?: string | null
+  extras?: string | null
 }
 
 const parseOrNull = <T>(text: string | null | undefined): T | null =>
@@ -649,6 +719,11 @@ export function decodeSnapshot(
     const parts = decodeProgress(JSON.parse(stored.progress))
     if (parts.achievementProgress) good.gi_achievement_progress = parts.achievementProgress
     if (parts.events) good.gi_events = parts.events
+  }
+  if (stored.extras) {
+    const parts = decodeExtras(JSON.parse(stored.extras))
+    if (parts.teapot) good.gi_teapot = parts.teapot
+    if (parts.miliastra) good.gi_miliastra = parts.miliastra
   }
   return good
 }

@@ -508,3 +508,83 @@ export function synthetic17(seed = 1) {
     ),
   }
 }
+
+/**
+ * Capture 1.8.0-1.11.0's keys at a real capture's scale (made-up ids): 578 /
+ * 46 / 44 recipes, TCG levels, bosses and Tavern, the music game, sign-in
+ * calendars, 97 furnishing sets, 41 companion rewards, 158 NPCs met, 13
+ * domains cleared, 18 tribal chapters; the Serenitea Pot's comfort and
+ * Miliastra cosmetics.
+ */
+export function synthetic18(seed = 1) {
+  const rand = random(seed)
+  const levels = (n: number) =>
+    Object.fromEntries(
+      ids(rand, 1_000, 5_000, n).map((id) => [String(id), ids(rand, 1, 20, int(rand, 0, 4))]),
+    )
+  return {
+    collections: {
+      crafting: {
+        crafting: ids(rand, 1_000, 20_000, 578),
+        forging: ids(rand, 11_001, 2_000, 46),
+        processing: ids(rand, 1_001, 2_000, 44),
+      },
+      musicGame: Object.fromEntries(
+        ids(rand, 1, 600, 120).map((id) => [
+          String(id),
+          rand() < 0.2
+            ? { claimed: false }
+            : { score: int(rand, 0, 1_000_000), claimed: rand() < 0.7 },
+        ]),
+      ),
+      furnishingSets: ids(rand, 1, 300, 97),
+      companionRewards: ids(rand, 1, 400, 41),
+      npcsMet: ids(rand, 2, 1_052, 158),
+    },
+    tcg: { levels: levels(40), bosses: ids(rand, 1, 60, 12), tavern: levels(20) },
+    tasks: {
+      signIns: Object.fromEntries(
+        ids(rand, 1, 300, 3).map((id) => [
+          String(id),
+          {
+            days: 7,
+            claimed: ids(rand, 1, 7, int(rand, 0, 7)),
+            lastAt: int(rand, 1.79e9, 1.8e9),
+            start: 1_790_000_000,
+            end: 1_791_000_000,
+          },
+        ]),
+      ),
+    },
+    exploration: {
+      domainsCleared: ids(rand, 1_006, 120, 13),
+      tribalChapters: Object.fromEntries(
+        Array.from({ length: 18 }, (_, i) => [
+          String(i + 1),
+          i < 10
+            ? { state: 'finished' as const, startedAt: int(rand, 1.7e9, 1.8e9) }
+            : { state: pick(rand, ['notOpen', 'locked', 'open'] as const) },
+        ]),
+      ),
+    },
+    teapot: {
+      comfort: Object.fromEntries(
+        [1, 2, 3].map((id) => [
+          String(id),
+          {
+            mansion: int(rand, 0, 30_000),
+            blocks: Array.from({ length: 4 }, () => int(rand, 0, 20_000)),
+          },
+        ]),
+      ),
+    },
+    miliastra: {
+      cosmetics: Object.fromEntries(
+        ids(rand, 1, 9_999, 30).map((id) => [
+          String(id),
+          rand() < 0.3 ? 0 : int(rand, 1.79e9, 1.8e9),
+        ]),
+      ),
+    },
+  }
+}

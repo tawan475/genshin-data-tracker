@@ -147,6 +147,18 @@ export interface GiTasks {
   respawns?: Record<string, number[]>
   /** Adventure Ranks (2-60) whose reward was claimed; one at or below the AR not listed is unclaimed. */
   arRewards?: number[]
+  /** Login events' calendars by config id (Capture 1.9.0): days signed in, days claimed, last sign-in, open/close. */
+  signIns?: Record<string, GiSignIn>
+}
+
+export interface GiSignIn {
+  days: number
+  /** Days whose reward was claimed, ascending. */
+  claimed: number[]
+  /** Unix seconds. */
+  lastAt: number
+  start: number
+  end: number
 }
 
 /**
@@ -176,6 +188,12 @@ export interface GiCollections {
     cards: Record<string, { count: number; proficiency?: number }>
     decks?: Record<string, { name: string; characters: number[]; cards: number[]; valid: boolean }>
     currentDeck?: number
+    /** Challenge levels played (GCGLevel id) -> the challenge ids finished in each (Capture 1.8.0). */
+    levels?: Record<string, number[]>
+    /** Boss challenges unlocked (GCGBossLevel ids, ascending). */
+    bosses?: number[]
+    /** The Tavern: by character id, the level ids unlocked with them. */
+    tavern?: Record<string, number[]>
   }
   /** Every unlocked cooking recipe (Capture 1.5.0): recipe id -> proficiency (0: none yet). */
   recipes?: Record<string, number>
@@ -185,6 +203,16 @@ export interface GiCollections {
   monstersSeen?: number[]
   /** Furnishing blueprints learned, by item id, ascending. */
   blueprints?: number[]
+  /** Recipes unlocked (Capture 1.8.0): crafting bench (Combine), blacksmith (Forge), processing (Compound). */
+  crafting?: { crafting?: number[]; forging?: number[]; processing?: number[] }
+  /** The music game by beatmap id (Capture 1.9.0): best score (absent if never played), reward taken. */
+  musicGame?: Record<string, { score?: number; claimed: boolean }>
+  /** Furnishing sets learned (FurnitureSuite ids, Capture 1.11.0). */
+  furnishingSets?: number[]
+  /** Companions' Serenitea Pot rewards collected (HomeWorldEvent ids). */
+  companionRewards?: number[]
+  /** NPCs met (NpcFirstMet ids). */
+  npcsMet?: number[]
 }
 
 export const HANGOUT_STATES = ['closed', 'locked', 'open', 'accepted'] as const
@@ -276,6 +304,25 @@ export interface GiExploration {
   explore?: Record<string, number>
   /** City -> reputation level. */
   reputation?: Record<string, number>
+  /** Domains whose first-clear reward was taken (DungeonEntry ids, ascending; Capture 1.11.0). */
+  domainsCleared?: number[]
+  /** Natlan's tribal chapters by TribalQuestChapter id: state, and when it started (unix s). */
+  tribalChapters?: Record<string, { state: GiTribalState; startedAt?: number }>
+}
+
+export const TRIBAL_STATES = ['notOpen', 'locked', 'open', 'finished'] as const
+export type GiTribalState = (typeof TRIBAL_STATES)[number]
+
+/** Teyvat.me Capture's `gi_teapot` (1.8.0): the Serenitea Pot. */
+export interface GiTeapot {
+  /** Comfort by realm (HomeWorldModule id): the mansion's and each outdoor block's. */
+  comfort?: Record<string, { mansion: number; blocks: number[] }>
+}
+
+/** Teyvat.me Capture's `gi_miliastra` (1.9.0): Miliastra Wonderland. */
+export interface GiMiliastra {
+  /** Cosmetics owned by id: when obtained (unix s), 0 when the game sent no time. */
+  cosmetics?: Record<string, number>
 }
 
 export interface Good {
@@ -304,6 +351,8 @@ export interface Good {
   gi_achievement_progress?: Record<string, { progress: number; total: number }>
   /** Events by activity id (NewActivityExcelConfigData), with their counters. */
   gi_events?: Record<string, GiEvent>
+  gi_teapot?: GiTeapot
+  gi_miliastra?: GiMiliastra
 }
 
 /**

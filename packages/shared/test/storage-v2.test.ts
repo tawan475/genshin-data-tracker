@@ -254,6 +254,26 @@ function randomSection(rand: () => number, kind: SectionKind, delta: boolean): u
         ...(rand() < 0.5 ? { c: int(rand, 1, 4) } : {}),
       }
     }
+    case 'extras':
+      return {
+        ...(rand() < 0.7
+          ? {
+              t: sortedIds(int(rand, 0, 5)).map((_, i, all) => [
+                all.slice(0, i + 1).reduce((x, y) => x + y, 0),
+                int(rand, 0, 30_000),
+                Array.from({ length: int(rand, 0, 5) }, () => int(rand, 0, 20_000)),
+              ]),
+            }
+          : {}),
+        ...(rand() < 0.6
+          ? {
+              m: sortedIds(int(rand, 0, 20)).map((_, i, all) => [
+                all.slice(0, i + 1).reduce((x, y) => x + y, 0),
+                rand() < 0.3 ? 0 : int(rand, 1.7e9, 1.8e9),
+              ]),
+            }
+          : {}),
+      }
     case 'progress':
       return {
         ...(rand() < 0.7
@@ -438,6 +458,7 @@ describe('section blobs', () => {
       wardrobe: 13,
       exploration: 14,
       progress: 15,
+      extras: 32,
     })
     expect(KIND_DELTA).toBe(0x10)
     expect(LEGACY_FORMAT).toBe(0x01)
@@ -499,6 +520,7 @@ describe('section blobs', () => {
       'wardrobe',
       'exploration',
       'progress',
+      'extras',
     ])
     expect(contentKey('ffffffffffff' + '0'.repeat(20))).toBe(2 ** 47 - 1)
     expect(shortHashHex('0123456789abcdef' + 'f'.repeat(16))).toBe('0123456789abcdef')

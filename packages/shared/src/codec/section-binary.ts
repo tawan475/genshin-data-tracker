@@ -803,6 +803,49 @@ const ascendingPart: TaggedPart = {
   read: (r) => readAscending(r),
 }
 
+// Capture 1.8.0-1.11.0's parts: `k` recipes unlocked (a byte of flags c/f/p,
+// then each present ascending list); `v` the TCG's later parts (flags l/s/t;
+// rows by id of ascending lists, an ascending list); `y` the music game
+// (rows by id: score + 1, claimed); `e`, `o`, `n` ascending lists.
+const idListRows = {
+  write: (w: ByteWriter, value: unknown) =>
+    writeById(w, value, 2, ([, list]) => writeAscending(w, array(list).map(uint))),
+  read: (r: ByteReader) => readById(r, checkedCount(r), (id) => [id, readAscending(r)]),
+}
+
+function flaggedLists(letters: readonly string[], kinds: readonly ('list' | 'rows')[]): TaggedPart {
+  return {
+    write(w, value) {
+      const v = fields(value, letters, letters)
+      let flags = 0
+      letters.forEach((letter, bit) => {
+        if (v[letter] !== undefined) flags |= 1 << bit
+      })
+      w.byte(flags)
+      letters.forEach((letter, i) => {
+        if (v[letter] === undefined) return
+        if (kinds[i] === 'rows') idListRows.write(w, v[letter])
+        else writeAscending(w, array(v[letter]).map(uint))
+      })
+    },
+    read(r) {
+      const flags = r.byte()
+      const out: Record<string, unknown> = {}
+      letters.forEach((letter, bit) => {
+        if (!(flags & (1 << bit))) return
+        out[letter] = kinds[bit] === 'rows' ? idListRows.read(r) : readAscending(r)
+      })
+      return out
+    },
+  }
+}
+
+const musicPart: TaggedPart = {
+  write: (w, value) =>
+    writeById(w, value, 3, ([, score, claimed]) => w.uint(uint(score)).uint(uint(claimed))),
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint(), r.uint()]),
+}
+
 /** collections2's parts, by index (append-only). */
 const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['a', archivePart],
@@ -814,6 +857,12 @@ const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['u', hangoutsPart],
   ['m', ascendingPart],
   ['f', ascendingPart],
+  ['k', flaggedLists(['c', 'f', 'p'], ['list', 'list', 'list'])],
+  ['v', flaggedLists(['l', 's', 't'], ['rows', 'list', 'rows'])],
+  ['y', musicPart],
+  ['e', ascendingPart],
+  ['o', ascendingPart],
+  ['n', ascendingPart],
 ]
 
 const collections2Layout = taggedLayout('collections2', COLLECTION2_PARTS)
@@ -918,6 +967,8 @@ const EXPLORATION_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['p', scenesPart],
   ['x', levelsPart],
   ['r', levelsPart],
+  ['d', ascendingPart],
+  ['t', statuesPart],
 ]
 
 const explorationLayout = taggedLayout('exploration', EXPLORATION_PARTS)
@@ -955,6 +1006,22 @@ const progressLayout = taggedLayout('progress', [
   ['e', eventsPart],
 ])
 
+// extras (Capture 1.8.0+): `t` the Serenitea Pot's comfort (rows by realm:
+// mansion, the blocks as count + numbers); `m` Miliastra cosmetics (rows by id: time).
+const comfortPart: TaggedPart = {
+  write: (w, value) =>
+    writeById(w, value, 3, ([, mansion, blocks]) => {
+      w.uint(uint(mansion))
+      uintList(w, blocks)
+    }),
+  read: (r) => readById(r, checkedCount(r), (id) => [id, r.uint(), readUintList(r)]),
+}
+
+const extrasLayout = taggedLayout('extras', [
+  ['t', comfortPart],
+  ['m', levelsPart],
+])
+
 const LAYOUTS: Record<SectionKind, Layout> = {
   characters: rowsLayout,
   weapons: rowsLayout,
@@ -971,6 +1038,7 @@ const LAYOUTS: Record<SectionKind, Layout> = {
   wardrobe: wardrobeLayout,
   exploration: explorationLayout,
   progress: progressLayout,
+  extras: extrasLayout,
 }
 
 /** Every variant the kind's layout offers, encoded (the caller keeps the smallest). */

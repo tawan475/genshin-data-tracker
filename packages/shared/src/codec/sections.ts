@@ -25,6 +25,9 @@ import type {
   GiEvent,
   GiExploration,
   GiHangout,
+  GiMiliastra,
+  GiSignIn,
+  GiTeapot,
   GiWardrobe,
   GiWardrobeKind,
   GoodArtifact,
@@ -36,6 +39,7 @@ import {
   ARCHIVE_TABS,
   ENDING_STATES,
   HANGOUT_STATES,
+  TRIBAL_STATES,
   PROGRESS_STATES,
   WARDROBE_KINDS,
 } from '../good'
@@ -65,6 +69,8 @@ export type SectionKind =
   // Capture 1.7.0's gi_achievement_progress and gi_events (the last kind code
   // below the delta flag; a later kind takes 32 and up, see section-blob.ts).
   | 'progress'
+  // Capture 1.8.0+'s new top-level keys (gi_teapot, gi_miliastra, later ones): kind 32.
+  | 'extras'
 
 export interface Section {
   kind: SectionKind
@@ -596,6 +602,8 @@ export interface TasksSection {
   q?: [left: number, limit: number, cost: number, fullCost: number]
   m?: [id: number, times: number[]][]
   k?: number[]
+  // Capture 1.9.0: sign-in calendars.
+  i?: [id: number, days: number, claimed: number[], lastAt: number, start: number, end: number][]
 }
 
 export function encodeTasks(tasks: GiTasks): TasksSection {
@@ -613,6 +621,13 @@ export function encodeTasks(tasks: GiTasks): TasksSection {
   if (b) section.q = [b.left, b.limit, b.cost, b.fullCost]
   if (m) section.m = ids(m).map((id) => [id, [...m[String(id)]!]])
   if (k) section.k = [...k]
+  const i = tasks.signIns
+  if (i) {
+    section.i = ids(i).map((id) => {
+      const c = i[String(id)]!
+      return [id, c.days, [...c.claimed], c.lastAt, c.start, c.end]
+    })
+  }
   return section
 }
 
@@ -644,6 +659,14 @@ export function decodeTasks(section: TasksSection): GiTasks {
     tasks.respawns = Object.fromEntries(section.m.map(([id, times]) => [String(id), [...times]]))
   }
   if (section.k) tasks.arRewards = [...section.k]
+  if (section.i) {
+    tasks.signIns = Object.fromEntries(
+      section.i.map(([id, days, claimed, lastAt, start, end]): [string, GiSignIn] => [
+        String(id),
+        { days, claimed: [...claimed], lastAt, start, end },
+      ]),
+    )
+  }
   return tasks
 }
 
@@ -697,7 +720,19 @@ export interface CollectionsSection {
   m?: number[]
   /** Blueprints (`b` is the delta base's key in every section). */
   f?: number[]
+  // Capture 1.8.0-1.11.0.
+  /** Recipes unlocked: `c` crafting bench, `f` blacksmith, `p` processing. */
+  k?: { c?: number[]; f?: number[]; p?: number[] }
+  /** The TCG's later parts: `l` levels [level, challenges], `s` bosses, `t` Tavern [character, levels]. */
+  v?: { l?: IdListRow[]; s?: number[]; t?: IdListRow[] }
+  /** The music game: [beatmap, best score + 1 (0: never played), claimed 0/1]. */
+  y?: [id: number, score: number, claimed: number][]
+  e?: number[]
+  o?: number[]
+  n?: number[]
 }
+
+export type IdListRow = [id: number, ids: number[]]
 
 /** A Hangout chapter: id, state (HANGOUT_STATES index + 1, 0 = none sent), endings [id, ENDING_STATES index] by id, pictures found, pictures in all. */
 export type HangoutRow = [
@@ -786,6 +821,32 @@ export function encodeCollections2(collections: GiCollections): CollectionsSecti
   }
   if (monstersSeen) section.m = [...monstersSeen]
   if (blueprints) section.f = [...blueprints]
+  const { crafting, musicGame, furnishingSets, companionRewards, npcsMet } = collections
+  if (crafting) {
+    section.k = {
+      ...(crafting.crafting ? { c: [...crafting.crafting] } : {}),
+      ...(crafting.forging ? { f: [...crafting.forging] } : {}),
+      ...(crafting.processing ? { p: [...crafting.processing] } : {}),
+    }
+  }
+  const lists = (record: Record<string, number[]>): IdListRow[] =>
+    ids(record).map((id) => [id, [...record[String(id)]!]])
+  if (tcg && (tcg.levels || tcg.bosses || tcg.tavern)) {
+    section.v = {
+      ...(tcg.levels ? { l: lists(tcg.levels) } : {}),
+      ...(tcg.bosses ? { s: [...tcg.bosses] } : {}),
+      ...(tcg.tavern ? { t: lists(tcg.tavern) } : {}),
+    }
+  }
+  if (musicGame) {
+    section.y = ids(musicGame).map((id) => {
+      const s = musicGame[String(id)]!
+      return [id, s.score === undefined ? 0 : s.score + 1, s.claimed ? 1 : 0]
+    })
+  }
+  if (furnishingSets) section.e = [...furnishingSets]
+  if (companionRewards) section.o = [...companionRewards]
+  if (npcsMet) section.n = [...npcsMet]
   return Object.keys(section).length > 0 ? section : null
 }
 
@@ -874,6 +935,34 @@ export function decodeCollections(section: CollectionsSection): GiCollections {
   }
   if (section.m) collections.monstersSeen = [...section.m]
   if (section.f) collections.blueprints = [...section.f]
+  if (section.k) {
+    const k = section.k
+    collections.crafting = {
+      ...(k.c ? { crafting: [...k.c] } : {}),
+      ...(k.f ? { forging: [...k.f] } : {}),
+      ...(k.p ? { processing: [...k.p] } : {}),
+    }
+  }
+  if (section.v) {
+    const rows = (list: IdListRow[]) =>
+      Object.fromEntries(list.map(([id, list2]) => [String(id), [...list2]]))
+    const tcg: NonNullable<GiCollections['tcg']> = collections.tcg ?? { cards: {} }
+    if (section.v.l) tcg.levels = rows(section.v.l)
+    if (section.v.s) tcg.bosses = [...section.v.s]
+    if (section.v.t) tcg.tavern = rows(section.v.t)
+    collections.tcg = tcg
+  }
+  if (section.y) {
+    collections.musicGame = Object.fromEntries(
+      section.y.map(([id, score, claimed]) => [
+        String(id),
+        score === 0 ? { claimed: claimed === 1 } : { score: score - 1, claimed: claimed === 1 },
+      ]),
+    )
+  }
+  if (section.e) collections.furnishingSets = [...section.e]
+  if (section.o) collections.companionRewards = [...section.o]
+  if (section.n) collections.npcsMet = [...section.n]
   return collections
 }
 
@@ -965,6 +1054,9 @@ export interface ExplorationSection {
   p?: [scene: number, points: number[], areas: number[]][]
   x?: [area: number, points: number][]
   r?: [city: number, level: number][]
+  // Capture 1.11.0: `d` domains cleared (ascending), `t` tribal chapters [id, TRIBAL_STATES index, started at (0: not)].
+  d?: number[]
+  t?: [id: number, state: number, startedAt: number][]
 }
 
 const pairs = (record: Record<string, number>): [number, number][] =>
@@ -990,6 +1082,14 @@ export function encodeExploration(exploration: GiExploration): ExplorationSectio
   }
   if (explore) section.x = pairs(explore)
   if (reputation) section.r = pairs(reputation)
+  const { domainsCleared, tribalChapters } = exploration
+  if (domainsCleared) section.d = [...domainsCleared]
+  if (tribalChapters) {
+    section.t = ids(tribalChapters).map((id) => {
+      const c = tribalChapters[String(id)]!
+      return [id, TRIBAL_STATES.indexOf(c.state), c.startedAt ?? 0]
+    })
+  }
   return section
 }
 
@@ -1011,6 +1111,18 @@ export function decodeExploration(section: ExplorationSection): GiExploration {
   }
   if (section.x) exploration.explore = fromPairs(section.x)
   if (section.r) exploration.reputation = fromPairs(section.r)
+  if (section.d) exploration.domainsCleared = [...section.d]
+  if (section.t) {
+    exploration.tribalChapters = Object.fromEntries(
+      section.t.map(([id, state, startedAt]) => [
+        String(id),
+        {
+          state: TRIBAL_STATES[state] ?? 'notOpen',
+          ...(startedAt ? { startedAt } : {}),
+        },
+      ]),
+    )
+  }
   return exploration
 }
 
@@ -1079,6 +1191,53 @@ export function decodeProgress(section: ProgressSection): GiProgressParts {
         return [String(id), event]
       }),
     )
+  }
+  return parts
+}
+
+// -------------------------------------------------------------------- extras
+// Capture 1.8.0+'s new top-level keys, each a part: `t` gi_teapot's comfort
+// [realm, mansion, [blocks]] by realm; `m` gi_miliastra's cosmetics [id, at
+// (0: no time sent)] by id. Later top-level keys append a letter here
+// instead of taking a section kind of their own.
+
+export interface ExtrasSection {
+  t?: [realm: number, mansion: number, blocks: number[]][]
+  m?: [id: number, at: number][]
+}
+
+export interface GiExtrasParts {
+  teapot?: GiTeapot
+  miliastra?: GiMiliastra
+}
+
+export function encodeExtras(parts: GiExtrasParts): ExtrasSection | null {
+  const section: ExtrasSection = {}
+  const comfort = parts.teapot?.comfort
+  if (comfort) {
+    section.t = ids(comfort).map((id) => {
+      const r = comfort[String(id)]!
+      return [id, r.mansion, [...r.blocks]]
+    })
+  }
+  const cosmetics = parts.miliastra?.cosmetics
+  if (cosmetics) section.m = ids(cosmetics).map((id) => [id, cosmetics[String(id)]!])
+  return Object.keys(section).length > 0 ? section : null
+}
+
+export function decodeExtras(section: ExtrasSection): GiExtrasParts {
+  const parts: GiExtrasParts = {}
+  if (section.t) {
+    parts.teapot = {
+      comfort: Object.fromEntries(
+        section.t.map(([id, mansion, blocks]) => [String(id), { mansion, blocks: [...blocks] }]),
+      ),
+    }
+  }
+  if (section.m) {
+    parts.miliastra = {
+      cosmetics: Object.fromEntries(section.m.map(([id, at]) => [String(id), at])),
+    }
   }
   return parts
 }

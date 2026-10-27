@@ -60,6 +60,7 @@ export interface BundleSnapshot {
   wardrobe?: string | null
   exploration?: string | null
   progress?: string | null
+  extras?: string | null
   // The full sections `artifacts` and `achievementTimes` are deltas of; null
   // when they are stored in full (and absent from bundles written before
   // they could be deltas).
@@ -108,6 +109,8 @@ export interface BundleSnapshotV2 {
   exploration?: BundleKey | null
   /** Absent from manifests written before Capture 1.7.0's progress was kept. */
   progress?: BundleKey | null
+  /** Absent from manifests written before Capture 1.8.0's extras were kept. */
+  extras?: BundleKey | null
   /** The player values a v2 player section leaves out (absent: none). */
   playerVars?: PlayerVars
 }
@@ -270,6 +273,7 @@ export function v1SnapshotOf(snapshot: BundleSnapshotV2): {
       wardrobe: optionalKey(snapshot.wardrobe),
       exploration: optionalKey(snapshot.exploration),
       progress: optionalKey(snapshot.progress),
+      extras: optionalKey(snapshot.extras),
     },
     player:
       merged !== null && merged !== player ? [merged, player!, snapshot.playerVars ?? {}] : null,
@@ -427,6 +431,7 @@ export function storedSnapshotOf(
     wardrobe: optional(snapshot.wardrobe),
     exploration: optional(snapshot.exploration),
     progress: optional(snapshot.progress),
+    extras: optional(snapshot.extras),
   }
 }
 
@@ -454,6 +459,7 @@ export function sectionHashesOf(snapshot: BundleSnapshot): string[] {
     snapshot.wardrobe,
     snapshot.exploration,
     snapshot.progress,
+    snapshot.extras,
   ].filter((hash): hash is string => !!hash)
 }
 

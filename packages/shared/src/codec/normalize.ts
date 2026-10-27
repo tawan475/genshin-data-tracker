@@ -14,6 +14,10 @@ import type {
   GiEvent,
   GiExploration,
   GiHangout,
+  GiMiliastra,
+  GiSignIn,
+  GiTeapot,
+  GiTribalState,
   GiWardrobe,
   GiWardrobeKind,
   GoodCharacter,
@@ -26,6 +30,7 @@ import {
   PROGRESS_STATES,
   ENDING_STATES,
   HANGOUT_STATES,
+  TRIBAL_STATES,
   WARDROBE_KINDS,
   type ArchiveTab,
 } from '../good'
@@ -83,6 +88,10 @@ export interface NormalizedGood {
   achievementProgress: Record<string, { progress: number; total: number }> | null
   /** `gi_events`, kept only when every event passes. */
   events: Record<string, GiEvent> | null
+  /** `gi_teapot`, the parts that pass whole. */
+  teapot: GiTeapot | null
+  /** `gi_miliastra`, the parts that pass whole. */
+  miliastra: GiMiliastra | null
 }
 
 export class GoodFormatError extends Error {
@@ -157,6 +166,8 @@ export function normalizeGood(input: unknown, options: NormalizeOptions = {}): N
     exploration: toExploration(input.gi_exploration),
     achievementProgress: toAchievementProgress(input.gi_achievement_progress),
     events: toEvents(input.gi_events),
+    teapot: toTeapot(input.gi_teapot),
+    miliastra: toMiliastra(input.gi_miliastra),
   }
   const itemGuids = toItemGuids(input)
   if (itemGuids) good.itemGuids = itemGuids
@@ -581,6 +592,26 @@ function toTasks(raw: unknown): GiTasks | null {
   }
   const ranks = idList(raw.arRewards, 1, 100, 100)
   if (ranks) tasks.arRewards = ranks
+  // Capture 1.9.0.
+  const calendars = idEntries(raw.signIns, 1, 99_999_999, GOOD_LIMITS.signIns)
+  if (calendars) {
+    const out: [number, GiSignIn][] = []
+    for (const [id, c] of calendars) {
+      if (
+        !isObject(c) ||
+        !isIntIn(c.days, 0, GOOD_LIMITS.signInDays) ||
+        !isIntIn(c.lastAt, 0, TASK_TIME[1]) ||
+        !isIntIn(c.start, 0, TASK_TIME[1]) ||
+        !isIntIn(c.end, 0, TASK_TIME[1])
+      ) {
+        break
+      }
+      const claimed = idList(c.claimed, 0, GOOD_LIMITS.signInDays, GOOD_LIMITS.signInDays)
+      if (!claimed) break
+      out.push([id, { days: c.days, claimed, lastAt: c.lastAt, start: c.start, end: c.end }])
+    }
+    if (out.length === calendars.length) tasks.signIns = byId(out)
+  }
   return Object.keys(tasks).length > 0 ? tasks : null
 }
 
@@ -624,6 +655,41 @@ function toCollections(raw: unknown): GiCollections | null {
   if (seen) collections.monstersSeen = seen
   const blueprints = idList(raw.blueprints, ...COLLECTION_ITEM, GOOD_LIMITS.blueprints)
   if (blueprints) collections.blueprints = blueprints
+  // Capture 1.8.0-1.11.0.
+  if (isObject(raw.crafting)) {
+    const crafting: NonNullable<GiCollections['crafting']> = {}
+    for (const kind of ['crafting', 'forging', 'processing'] as const) {
+      const ids = idList(raw.crafting[kind], 1, 99_999_999, GOOD_LIMITS.craftingRecipes)
+      if (ids) crafting[kind] = ids
+    }
+    if (Object.keys(crafting).length > 0) collections.crafting = crafting
+  }
+  const songs = idEntries(raw.musicGame, 1, 999_999_999, GOOD_LIMITS.beatmaps)
+  if (
+    songs &&
+    songs.every(
+      ([, s]) =>
+        isObject(s) &&
+        typeof s.claimed === 'boolean' &&
+        (s.score === undefined || isIntIn(s.score, ...COUNT)),
+    )
+  ) {
+    collections.musicGame = byId(
+      (songs as [number, { score?: number; claimed: boolean }][]).map(([id, s]) => [
+        id,
+        s.score === undefined ? { claimed: s.claimed } : { score: s.score, claimed: s.claimed },
+      ]),
+    )
+  }
+  const lists = [
+    ['furnishingSets', GOOD_LIMITS.furnishingSets],
+    ['companionRewards', GOOD_LIMITS.companionRewards],
+    ['npcsMet', GOOD_LIMITS.npcsMet],
+  ] as const
+  for (const [key, cap] of lists) {
+    const ids = idList(raw[key], 0, 999_999_999, cap)
+    if (ids) collections[key] = ids
+  }
   return Object.keys(collections).length > 0 ? collections : null
 }
 
@@ -797,6 +863,13 @@ function toTcg(raw: unknown): GiCollections['tcg'] | null {
     if (!isIntIn(raw.currentDeck, 0, 1_000_000)) return null
     tcg.currentDeck = raw.currentDeck
   }
+  // Capture 1.8.0: each kept only when all of it passes (the rest of the TCG stays).
+  const levels = idLists(raw.levels, GOOD_LIMITS.tcgLevels, GOOD_LIMITS.tcgChallenges)
+  if (levels) tcg.levels = levels
+  const bosses = idList(raw.bosses, 0, 999_999_999, GOOD_LIMITS.tcgBosses)
+  if (bosses) tcg.bosses = bosses
+  const tavern = idLists(raw.tavern, GOOD_LIMITS.tavern, GOOD_LIMITS.tcgChallenges)
+  if (tavern) tcg.tavern = tavern
   return tcg
 }
 
@@ -807,6 +880,19 @@ function toRecipes(raw: unknown): GiCollections['recipes'] | null {
     return null
   }
   return byId(entries as [number, number][])
+}
+
+/** id -> ascending id list, by id; null when any entry fails. */
+function idLists(raw: unknown, cap: number, each: number): Record<string, number[]> | null {
+  const entries = idEntries(raw, 0, 999_999_999, cap)
+  if (!entries) return null
+  const out: [number, number[]][] = []
+  for (const [id, list] of entries) {
+    const ids = idList(list, 0, 999_999_999, each)
+    if (!ids) return null
+    out.push([id, ids])
+  }
+  return byId(out)
 }
 
 /** Hangout Events by chapter: all of it passes, or the part goes. */
@@ -953,6 +1039,26 @@ function toExploration(raw: unknown): GiExploration | null {
   if (explore) exploration.explore = explore
   const reputation = numberEntries(raw.reputation, LEVEL, GOOD_LIMITS.explorationCities)
   if (reputation) exploration.reputation = reputation
+  // Capture 1.11.0.
+  const cleared = idList(raw.domainsCleared, ...GAME_ID, GOOD_LIMITS.domainsCleared)
+  if (cleared) exploration.domainsCleared = cleared
+  const chapters = idEntries(raw.tribalChapters, ...GAME_ID, GOOD_LIMITS.tribalChapters)
+  if (
+    chapters &&
+    chapters.every(
+      ([, c]) =>
+        isObject(c) &&
+        (TRIBAL_STATES as readonly unknown[]).includes(c.state) &&
+        (c.startedAt === undefined || isIntIn(c.startedAt, ...TASK_TIME)),
+    )
+  ) {
+    exploration.tribalChapters = byId(
+      (chapters as [number, { state: GiTribalState; startedAt?: number }][]).map(([id, c]) => [
+        id,
+        c.startedAt === undefined ? { state: c.state } : { state: c.state, startedAt: c.startedAt },
+      ]),
+    )
+  }
   return Object.keys(exploration).length > 0 ? exploration : null
 }
 
@@ -1007,6 +1113,37 @@ function toEvents(raw: unknown): NormalizedGood['events'] {
     out.push([id, event])
   }
   return byId(out)
+}
+
+/** `gi_teapot` (Capture 1.8.0): comfort by realm. */
+function toTeapot(raw: unknown): GiTeapot | null {
+  if (!isObject(raw)) return null
+  const realms = idEntries(raw.comfort, ...GAME_ID, GOOD_LIMITS.realms)
+  if (!realms) return null
+  const out: [number, { mansion: number; blocks: number[] }][] = []
+  for (const [id, r] of realms) {
+    if (!isObject(r) || !isIntIn(r.mansion, ...COUNT)) return null
+    const blocks = r.blocks
+    if (
+      !Array.isArray(blocks) ||
+      blocks.length > GOOD_LIMITS.realmBlocks ||
+      !blocks.every((b) => isIntIn(b, ...COUNT))
+    ) {
+      return null
+    }
+    out.push([id, { mansion: r.mansion, blocks: [...(blocks as number[])] }])
+  }
+  return { comfort: byId(out) }
+}
+
+/** `gi_miliastra` (Capture 1.9.0): cosmetics owned and when (0: no time sent). */
+function toMiliastra(raw: unknown): GiMiliastra | null {
+  if (!isObject(raw)) return null
+  const cosmetics = idEntries(raw.cosmetics, 0, 999_999_999, GOOD_LIMITS.miliastra)
+  if (!cosmetics || !cosmetics.every(([, at]) => at === 0 || isIntIn(at, ...TASK_TIME))) {
+    return null
+  }
+  return { cosmetics: byId(cosmetics as [number, number][]) }
 }
 
 function isIntIn(value: unknown, min: number, max: number): value is number {

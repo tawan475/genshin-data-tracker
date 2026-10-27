@@ -39,7 +39,7 @@ import {
 } from './sections'
 import { splitPlayer, type PlayerVars } from './snapshot-meta'
 
-/** The fifteen section slots of a v2 snapshot row, in column order (append-only). */
+/** The sixteen section slots of a v2 snapshot row, in column order (append-only). */
 export const SLOTS = [
   'characters',
   'weapons',
@@ -56,6 +56,7 @@ export const SLOTS = [
   'wardrobe',
   'exploration',
   'progress',
+  'extras',
 ] as const satisfies readonly SectionKind[]
 export type Slot = (typeof SLOTS)[number]
 

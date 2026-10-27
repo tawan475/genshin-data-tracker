@@ -50,6 +50,7 @@ export const SECTION_KIND_CODES: Readonly<Record<SectionKind, number>> = {
   // The last code below KIND_DELTA. Later kinds take codes without its bit:
   // 32-47, 64-79, … (old builds decode only the kinds they ask a bundle for).
   progress: 15,
+  extras: 32,
 }
 
 export const KIND_DELTA = 0x10

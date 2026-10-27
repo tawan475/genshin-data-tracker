@@ -213,6 +213,7 @@ async function importOnce(
     sections.wardrobe,
     sections.exploration,
     sections.progress,
+    sections.extras,
   ]
     .filter((s): s is Section => s !== null)
     .map((s) => shortHashHex(s.hash))
@@ -292,6 +293,7 @@ async function importOnce(
   const preWardrobeKey = contentKey(encoded.preWardrobeContentHash)
   const preExplorationKey = contentKey(encoded.preExplorationContentHash)
   const pre17Key = contentKey(encoded.pre17ContentHash)
+  const pre18Key = contentKey(encoded.pre18ContentHash)
   const preRecipesKey = contentKey(encoded.preRecipesContentHash)
   const response = (
     status: ImportResponse['status'],
@@ -318,7 +320,7 @@ async function importOnce(
   })
   // The same capture, also when it was stored before irminsul's extra keys
   // (or later its anecdotes, tasks, collections, Capture 1.4.0's keys, then
-  // its exploration, then Capture 1.7.0's parts) were kept
+  // its exploration, then Capture 1.7.0's, then 1.8.0's parts) were kept
   // (its hash then left them out), in either storage format.
   const sameCapture = (row: SameTimeRow) =>
     row.content_key !== null
@@ -331,6 +333,7 @@ async function importOnce(
         row.content_key === preWardrobeKey ||
         row.content_key === preExplorationKey ||
         row.content_key === pre17Key ||
+        row.content_key === pre18Key ||
         row.content_key === preRecipesKey
       : row.content_hash === encoded.contentHash ||
         row.content_hash === encoded.legacyContentHash ||
@@ -341,6 +344,7 @@ async function importOnce(
         row.content_hash === encoded.preWardrobeContentHash ||
         row.content_hash === encoded.preExplorationContentHash ||
         row.content_hash === encoded.pre17ContentHash ||
+        row.content_hash === encoded.pre18ContentHash ||
         row.content_hash === encoded.preRecipesContentHash
   const sameInventory = (row: LatestRow) =>
     row.content_key !== null ? row.content_key === key : row.content_hash === encoded.contentHash

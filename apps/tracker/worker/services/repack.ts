@@ -209,6 +209,7 @@ function v1Sections(row: V1Row): Record<Slot, { hash: string; base: string | nul
     wardrobe: null,
     exploration: null,
     progress: null,
+    extras: null,
   }
 }
 
