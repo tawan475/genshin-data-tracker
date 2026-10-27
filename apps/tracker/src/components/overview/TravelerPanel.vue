@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import type { GiPlayer } from '@gdt/shared'
 import { computed } from 'vue'
-import { Mountain, Zap } from 'lucide-vue-next'
-import NamecardBackdrop from '@/components/characters/NamecardBackdrop.vue'
-import { formatNumber } from '@/lib/format'
+import { Cake, Compass, Heart, Mountain, Swords, Trophy } from 'lucide-vue-next'
+import { dateLocale, formatNumber } from '@/lib/format'
 
 /**
- * The player's card on Overview, design 1B (the user's pick) with the
- * in-game profile: one row of the profile picture (its frame over it), the
- * in-game name and signature with Adventure Rank and its EXP toward the next
- * rank, then World Level and stamina as columns behind a divider; the name
- * card fades in from the right. No UID, no Story Keys (the user's calls).
- * What the capture lacks falls back (`profile`): the account's name, the
- * Traveler's portrait and name card; a figure the capture has no value for
- * is left out.
+ * The player's card on Overview, design "Shaded panels" (the user's pick,
+ * 2026-10-28): the name card covers the whole card; the profile picture (its
+ * frame over it), then a name panel (in-game name, signature, UID at its
+ * foot) and two stat panels: Adventure Rank (EXP along the row), World
+ * Level, Total Achievements; Characters at max Friendship, Spiral Abyss
+ * stars, Birthday. Panels share one look (a dark glass, the only backdrop
+ * blur on the page). Rows without data are hidden, an empty panel too. The
+ * layout follows the card's own width (container queries): wide, laptop
+ * (picture + name on the left half, the stats below), phone (stacked).
+ * Older captures fall back (`profile`): the account's name, the Traveler's
+ * portrait, the default name card.
  */
 const props = defineProps<{
   player: GiPlayer
@@ -22,131 +24,356 @@ const props = defineProps<{
   profile: {
     name: string
     signature: string | null
-    /** The name card's picture (a full image URL), '' for none. */
+    /** The name card's picture (a full image URL). */
     nameCard: string
     /** The profile picture (a full image URL), '' for none. */
     avatar: string
     /** Its frame (a full image URL), '' for none. */
     frame: string
+    /** The account's UID, null when unknown. */
+    uid: string | null
+  }
+  stats: {
+    /** Achievements done (newest capture ∪ hand marks); null until counted. */
+    achievements: number | null
+    /** Characters at friendship 10; null when the capture has no friendship. */
+    maxFriendship: number | null
+    /** Spiral Abyss stars this period; null when not captured or out of date. */
+    abyssStars: number | null
   }
 }>()
 
-/** In the game's units: 24000 is the 240 it shows. */
-const stamina = computed(() =>
-  props.player.maxStamina === undefined ? null : Math.round(props.player.maxStamina / 100),
-)
-const expShare = computed(() => {
-  const exp = props.player.arExp
-  if (props.need === null) return props.player.ar === 60 ? 100 : null
-  return exp === undefined ? null : Math.min(100, (exp / props.need) * 100)
+/** EXP toward the next rank: shown below AR 60 with a known need. */
+const exp = computed(() => {
+  const value = props.player.arExp
+  if (props.need === null || value === undefined) return null
+  return { value, need: props.need, share: Math.min(100, (value / props.need) * 100) }
 })
-const hasColumns = computed(() => props.player.wl !== undefined || stamina.value !== null)
+const birthday = computed(() => {
+  const b = props.player.birthday
+  if (!b) return null
+  return new Date(2000, b.month - 1, b.day).toLocaleDateString(dateLocale(), {
+    month: 'short',
+    day: 'numeric',
+  })
+})
+const left = computed(() =>
+  [
+    props.player.ar === undefined
+      ? null
+      : { key: 'ar', icon: Compass, label: 'arLabel', value: formatNumber(props.player.ar) },
+    props.player.wl === undefined
+      ? null
+      : { key: 'wl', icon: Mountain, label: 'wl', value: formatNumber(props.player.wl) },
+    props.stats.achievements === null
+      ? null
+      : {
+          key: 'achievements',
+          icon: Trophy,
+          label: 'achievements',
+          value: formatNumber(props.stats.achievements),
+        },
+  ].filter((row) => row !== null),
+)
+const right = computed(() =>
+  [
+    props.stats.maxFriendship === null
+      ? null
+      : {
+          key: 'friendship',
+          icon: Heart,
+          label: 'maxFriendship',
+          value: formatNumber(props.stats.maxFriendship),
+        },
+    props.stats.abyssStars === null
+      ? null
+      : { key: 'abyss', icon: Swords, label: 'abyss', value: `${props.stats.abyssStars} ★` },
+    birthday.value === null
+      ? null
+      : { key: 'birthday', icon: Cake, label: 'birthday', value: birthday.value },
+  ].filter((row) => row !== null),
+)
 </script>
 
 <template>
-  <section
-    class="relative isolate overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-sm"
-    :aria-label="$t('overview.traveler.label')"
-  >
-    <NamecardBackdrop
-      v-if="profile.nameCard"
-      :src="profile.nameCard"
-      class="absolute inset-y-0 right-0 -z-10 h-full w-[70%] object-cover opacity-40 brightness-110 [mask-image:linear-gradient(to_left,black_40%,transparent)]"
-    />
-    <div class="flex flex-wrap items-center gap-x-6 gap-y-4 px-4 py-4 sm:px-6">
-      <span v-if="profile.avatar" class="relative size-24 shrink-0">
-        <!-- With a frame, the picture sits inside the game's ring (~80% of it) -->
-        <img
-          :src="profile.avatar"
-          alt=""
-          class="absolute rounded-full bg-surface-overlay object-cover"
-          :class="
-            profile.frame
-              ? 'inset-[11%] size-[78%]'
-              : 'inset-[6%] size-[88%] ring-2 ring-border-strong'
-          "
-        />
-        <img
-          v-if="profile.frame"
-          :src="profile.frame"
-          alt=""
-          class="pointer-events-none absolute inset-0 size-full object-contain"
-        />
-      </span>
-
-      <div class="flex min-w-0 flex-[1_1_18rem] flex-col gap-2">
-        <div class="min-w-0">
-          <p class="truncate font-display text-xl font-bold" :title="profile.name">
-            {{ profile.name }}
-          </p>
-          <p
-            v-if="profile.signature"
-            class="line-clamp-2 text-sm whitespace-pre-line text-text-secondary"
-            :title="profile.signature"
-          >
+  <section class="player-card" :aria-label="$t('overview.traveler.label')">
+    <img :src="profile.nameCard" alt="" class="art" />
+    <div class="grid-box">
+      <div class="head">
+        <span class="pfp" aria-hidden="true">
+          <img
+            v-if="profile.avatar"
+            :src="profile.avatar"
+            alt=""
+            :class="profile.frame ? 'framed' : 'ringed'"
+          />
+          <img v-if="profile.frame" :src="profile.frame" alt="" class="frame" />
+        </span>
+        <div class="panel name-panel">
+          <p class="name" :title="profile.name">{{ profile.name }}</p>
+          <p v-if="profile.signature" class="signature" :title="profile.signature">
             {{ profile.signature }}
           </p>
-        </div>
-        <div v-if="player.ar !== undefined" class="flex max-w-[560px] flex-col gap-1">
-          <p class="flex items-baseline gap-2">
-            <span class="text-sm text-text-secondary">{{ $t('overview.traveler.arLabel') }}</span>
-            <span class="tabular font-mono text-lg font-semibold">{{ player.ar }}</span>
+          <p v-if="profile.uid" class="uid">
+            {{ $t('overview.traveler.uid', { uid: profile.uid }) }}
           </p>
-          <div
-            v-if="expShare !== null"
-            class="flex items-center gap-3"
-            :title="
-              need !== null && player.arExp !== undefined
-                ? $t('overview.traveler.arExp', {
-                    exp: formatNumber(player.arExp),
-                    need: formatNumber(need),
-                  })
-                : undefined
-            "
-          >
-            <span
-              class="block h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface-sunken"
-              aria-hidden="true"
-              ><span class="block h-full rounded-full bg-accent" :style="{ width: `${expShare}%` }"
-            /></span>
-            <span
-              v-if="need !== null && player.arExp !== undefined"
-              class="tabular shrink-0 font-mono text-sm text-text-secondary"
-              >{{ formatNumber(player.arExp) }} / {{ formatNumber(need) }}</span
-            >
-          </div>
         </div>
       </div>
 
-      <dl
-        v-if="hasColumns"
-        class="grid grid-cols-2 gap-x-7 gap-y-2 max-sm:w-full max-sm:border-t max-sm:pt-3 sm:border-l sm:pl-6 border-border-default"
-      >
-        <div v-if="player.wl !== undefined" class="flex flex-col">
-          <dt class="flex items-center gap-1.5 text-sm text-text-secondary">
-            <Mountain class="size-4" aria-hidden="true" />{{ $t('overview.traveler.wl') }}
-          </dt>
+      <dl v-if="left.length" class="panel stats s">
+        <div v-for="row in left" :key="row.key" class="row">
+          <span class="tile"><component :is="row.icon" class="size-4" aria-hidden="true" /></span>
+          <dt class="label">{{ $t(`overview.traveler.${row.label}`) }}</dt>
           <dd
-            class="tabular font-mono text-xl font-medium"
+            class="value"
             :title="
-              player.wlLimit !== undefined
+              row.key === 'wl' && player.wlLimit !== undefined
                 ? $t('overview.traveler.wlLimit', { n: player.wlLimit })
-                : undefined
+                : row.key === 'ar' && exp
+                  ? $t('overview.traveler.arExp', {
+                      exp: formatNumber(exp.value),
+                      need: formatNumber(exp.need),
+                    })
+                  : undefined
             "
           >
-            {{ player.wl
-            }}<span v-if="player.wlLimit !== undefined" class="text-sm text-text-muted">
-              / {{ player.wlLimit }}</span
-            >
+            <span v-if="row.key === 'ar' && exp" class="exp"
+              >{{ formatNumber(exp.value) }} / {{ formatNumber(exp.need) }}</span
+            >{{ row.value }}
           </dd>
+          <span v-if="row.key === 'ar' && exp" class="bar" aria-hidden="true"
+            ><span :style="{ width: `${exp.share}%` }"
+          /></span>
         </div>
-        <div v-if="stamina !== null" class="flex flex-col">
-          <dt class="flex items-center gap-1.5 text-sm text-text-secondary">
-            <Zap class="size-4" aria-hidden="true" />{{ $t('overview.traveler.stamina') }}
-          </dt>
-          <dd class="tabular font-mono text-xl font-medium">{{ formatNumber(stamina) }}</dd>
+      </dl>
+
+      <dl v-if="right.length" class="panel stats r">
+        <div v-for="row in right" :key="row.key" class="row">
+          <span class="tile"><component :is="row.icon" class="size-4" aria-hidden="true" /></span>
+          <dt class="label">{{ $t(`overview.traveler.${row.label}`) }}</dt>
+          <dd class="value">{{ row.value }}</dd>
         </div>
       </dl>
     </div>
   </section>
 </template>
+
+<style scoped>
+/* The same in both themes: the art is the card; white text with a shadow. */
+.player-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  container-type: inline-size;
+  color: #fff;
+  text-shadow:
+    0 1px 3px rgb(2 6 23 / 0.7),
+    0 0 12px rgb(2 6 23 / 0.35);
+}
+.player-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgb(2 6 23 / 0.1);
+}
+.art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Phone (default): stacked. */
+.grid-box {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'h' 's' 'r';
+}
+.head {
+  grid-area: h;
+  display: flex;
+  gap: 16px;
+  min-width: 0;
+}
+.s {
+  grid-area: s;
+}
+.r {
+  grid-area: r;
+}
+
+.pfp {
+  position: relative;
+  flex: none;
+  align-self: center;
+  width: 88px;
+  height: 88px;
+}
+.pfp img {
+  position: absolute;
+  object-fit: cover;
+}
+.pfp .framed {
+  inset: 11%;
+  width: 78%;
+  height: 78%;
+  border-radius: 9999px;
+}
+.pfp .ringed {
+  inset: 5%;
+  width: 90%;
+  height: 90%;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.75);
+}
+.pfp .frame {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.panel {
+  min-width: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgb(2 6 23 / 0.34);
+  backdrop-filter: blur(14px);
+}
+.name-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.name {
+  margin: 0;
+  overflow: hidden;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.signature {
+  margin: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 16px;
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.uid {
+  margin: auto 0 0;
+  font-size: 14.5px;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats {
+  margin: 0;
+}
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  font-size: 16px;
+}
+.tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.16);
+}
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.value {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.exp {
+  margin-right: 6px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+.bar {
+  position: absolute;
+  left: 42px;
+  right: 2px;
+  bottom: 4px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.22);
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: #fff;
+}
+
+/* A phone's row is too narrow for the EXP figures beside the label: the bar and the tooltip keep them. */
+@container (max-width: 420px) {
+  .exp {
+    display: none;
+  }
+}
+
+/* Laptop: picture and name on the left half, the stat panels side by side below. */
+@container (min-width: 640px) {
+  .grid-box {
+    gap: 16px;
+    padding: 16px 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 'h .' 's r';
+  }
+  .pfp {
+    width: 128px;
+    height: 128px;
+  }
+}
+
+/* Wide: picture, name panel beside it, empty space, two stat panels; panels equal (≤ 400 px). */
+@container (min-width: 1180px) {
+  .grid-box {
+    align-items: stretch;
+    grid-template-columns: 128px minmax(0, 400px) minmax(16px, 1fr) minmax(0, 400px) minmax(
+        0,
+        400px
+      );
+    grid-template-areas: 'p w . s r';
+  }
+  .head {
+    display: contents;
+  }
+  .pfp {
+    grid-area: p;
+  }
+  .name-panel {
+    grid-area: w;
+  }
+}
+</style>

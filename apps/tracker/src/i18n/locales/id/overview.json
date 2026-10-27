@@ -78,7 +78,10 @@
     "arExpLabel": "Adventure EXP",
     "wl": "Level Dunia",
     "wlLimit": "Bisa dinaikkan ke Level Dunia {n}",
-    "stamina": "Stamina",
-    "storyKeys": "Kunci Story"
+    "achievements": "Total Achievement",
+    "maxFriendship": "Jumlah Karakter dengan Level Persahabatan maksimum",
+    "abyss": "Spiral Abyss",
+    "birthday": "Ulang Tahun",
+    "uid": "UID {uid}"
   }
 }

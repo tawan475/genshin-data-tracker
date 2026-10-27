@@ -78,7 +78,10 @@
     "arExpLabel": "冒險閱歷",
     "wl": "世界等級",
     "wlLimit": "可提升至世界等級 {n}",
-    "stamina": "體力",
-    "storyKeys": "傳說鑰匙"
+    "achievements": "成就總數",
+    "maxFriendship": "好感度已滿的角色",
+    "abyss": "深境螺旋",
+    "birthday": "生日",
+    "uid": "UID {uid}"
   }
 }

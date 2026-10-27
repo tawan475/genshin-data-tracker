@@ -78,7 +78,10 @@
     "arExpLabel": "EXP ผจญภัย",
     "wl": "ระดับโลก",
     "wlLimit": "เพิ่มได้ถึงระดับโลก {n}",
-    "stamina": "พลังกาย",
-    "storyKeys": "กุญแจในตำนาน"
+    "achievements": "ความสำเร็จทั้งหมด",
+    "maxFriendship": "ตัวละครที่ระดับความประทับใจเต็มแล้ว",
+    "abyss": "Spiral Abyss",
+    "birthday": "วันเกิด",
+    "uid": "UID {uid}"
   }
 }

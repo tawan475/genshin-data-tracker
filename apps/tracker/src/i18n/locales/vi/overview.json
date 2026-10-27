@@ -78,7 +78,10 @@
     "arExpLabel": "EXP Mạo Hiểm",
     "wl": "Cấp Thế Giới",
     "wlLimit": "Có thể nâng lên Cấp Thế Giới {n}",
-    "stamina": "Thể Lực",
-    "storyKeys": "Chìa Khóa Truyền Thuyết"
+    "achievements": "Tổng Số Thành Tựu",
+    "maxFriendship": "Nhân vật có độ yêu thích đã đầy",
+    "abyss": "La Hoàn Thâm Cảnh",
+    "birthday": "Sinh nhật",
+    "uid": "UID {uid}"
   }
 }

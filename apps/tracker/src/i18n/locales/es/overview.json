@@ -78,7 +78,10 @@
     "arExpLabel": "EXP de Aventura",
     "wl": "Nivel de Mundo",
     "wlLimit": "Puede subir al Nivel de Mundo {n}",
-    "stamina": "Aguante",
-    "storyKeys": "Llaves legendarias"
+    "achievements": "Logros totales",
+    "maxFriendship": "Personajes con Niv. de Amistad al máximo",
+    "abyss": "Espiral del Abismo",
+    "birthday": "Cumpleaños",
+    "uid": "UID {uid}"
   }
 }

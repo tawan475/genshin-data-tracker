@@ -78,7 +78,10 @@
     "arExpLabel": "Macera TP",
     "wl": "Dünya Seviyesi",
     "wlLimit": "Dünya Seviyesi {n} olarak yükseltilebilir",
-    "stamina": "Dayanıklılık",
-    "storyKeys": "Hikaye Anahtarı"
+    "achievements": "Toplam Başarım",
+    "maxFriendship": "Maks. Arkadaşlık Seviyesindeki Karakterler",
+    "abyss": "Hiçlik Sarmalı",
+    "birthday": "Doğum Günü",
+    "uid": "UID {uid}"
   }
 }

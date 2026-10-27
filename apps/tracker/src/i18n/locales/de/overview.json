@@ -78,7 +78,10 @@
     "arExpLabel": "Abenteuer-EP",
     "wl": "Weltstufe",
     "wlLimit": "Kann auf Weltstufe {n} erhöht werden",
-    "stamina": "Ausdauer",
-    "storyKeys": "Legendenschlüssel"
+    "achievements": "Gesamtzahl der Errungenschaften",
+    "maxFriendship": "Figuren, deren Freundschaft die höchste Stufe erreicht hat",
+    "abyss": "Gewundener Abgrund",
+    "birthday": "Geburtstag",
+    "uid": "UID {uid}"
   }
 }

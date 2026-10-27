@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { loadAchievements } from '@gdt/game-data'
 import { loadCollections } from '@gdt/game-data/collections'
-import type { SnapshotResponse } from '@gdt/shared'
+import { decodeTasks, type SnapshotResponse, type TasksSection } from '@gdt/shared'
 import { computed, shallowRef, watch } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { Clock, Eye, History, Upload } from 'lucide-vue-next'
@@ -11,13 +12,22 @@ import MonthlyAnalysisCard from '@/components/progression/MonthlyAnalysisCard.vu
 import OverviewSkeleton from '@/components/overview/OverviewSkeleton.vue'
 import RecentSnapshots from '@/components/overview/RecentSnapshots.vue'
 import TravelerPanel from '@/components/overview/TravelerPanel.vue'
+import { useAchievementMarks } from '@/components/achievements/use-achievement-marks'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
-import { loadAccountPlayer, loadLive, loadPoints, loadSnapshots } from '@/data/account-data'
+import { NO_CAPTURED_ACHIEVEMENTS, loadCapturedAchievements } from '@/data/achievement-capture'
+import { groupAchievements, summarizeAchievements } from '@/data/achievement-progress'
+import {
+  loadAccountPlayer,
+  loadBundle,
+  loadLive,
+  loadPoints,
+  loadSnapshots,
+} from '@/data/account-data'
 import {
   buildHistory,
   currencyMissing,
@@ -27,7 +37,8 @@ import {
 } from '@/data/overview'
 import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
-import { characterBanner, characterIcon, gameIcon } from '@/lib/assets'
+import { travelerGender } from '@/data/traveler'
+import { gameIcon } from '@/lib/assets'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useAccount } from './context'
@@ -116,7 +127,7 @@ const traveler = computed(() => {
  * The profile card's name, signature, name card and picture, as Teyvat.me
  * Capture 1.14+ sends them (picture and frame from the game data's player
  * topic). Older captures stand in with the account's name, the Traveler's
- * name card and portrait.
+ * circle portrait (the account's twin) and the default name card.
  */
 const profileCard = computed(() => {
   const p = player.data.value
@@ -124,12 +135,72 @@ const profileCard = computed(() => {
   const picture = p?.nameCard ? data?.nameCards.get(p.nameCard) : undefined
   const avatar = p?.profilePicture?.id ? data?.avatars.get(p.profilePicture.id) : undefined
   const frame = p?.profilePicture?.frameId ? data?.frames.get(p.profilePicture.frameId) : undefined
+  const twin = travelerGender.value === 'M' ? 'PlayerBoy' : 'PlayerGirl'
   return {
     name: p?.nickname || accounts.displayName(account.value),
     signature: p?.signature || null,
-    nameCard: picture ? gameIcon(picture) : characterBanner('TravelerAnemo'),
-    avatar: (avatar && gameIcon(avatar)) || characterIcon('Traveler'),
-    frame: frame ? gameIcon(frame) : '',
+    nameCard: gameIcon(picture ?? 'UI_NameCardPic_0_P'),
+    avatar: gameIcon(avatar ?? `UI_AvatarIcon_${twin}_Circle`),
+    frame: frame && avatar ? gameIcon(frame) : '',
+    uid: account.value.uid ? String(account.value.uid) : null,
+  }
+})
+
+// The card's figures: achievements as the Achievements page counts them
+// (newest capture plus hand marks); from the newest snapshot alone, the
+// characters at friendship 10 and this Spiral Abyss period's stars.
+const achievementData = useResource(
+  () => account.value,
+  async (a) => {
+    const [data, captured] = await Promise.all([
+      loadAchievements(),
+      a.latest ? loadCapturedAchievements(a) : NO_CAPTURED_ACHIEVEMENTS,
+    ])
+    return { accountId: a.id, entries: groupAchievements(data), byId: data.byId, captured }
+  },
+)
+const achievementMarks = useAchievementMarks(() => account.value.id)
+const latestParts = useResource(
+  () => account.value,
+  async (a) => {
+    if (!a.latest) return null
+    const bundle = await loadBundle(a, {
+      ids: [a.latest.id],
+      sections: ['characterExtras', 'tasks'],
+    })
+    const snapshot = bundle.snapshots.at(-1)
+    const text = (key: string | null | undefined) => (key ? bundle.texts.get(key) : undefined)
+    const extras = text(snapshot?.characterExtras)
+    const tasks = text(snapshot?.tasks)
+    const rows = extras === undefined ? null : (JSON.parse(extras) as unknown[][])
+    return {
+      accountId: a.id,
+      // Captures before friendship was read have none above 0: unknown, not 0.
+      maxFriendship: rows?.some((row) => Number(row[1]) > 0)
+        ? rows.filter((row) => row[1] === 10).length
+        : null,
+      abyss:
+        tasks === undefined ? null : (decodeTasks(JSON.parse(tasks) as TasksSection).abyss ?? null),
+    }
+  },
+)
+const cardStats = computed(() => {
+  const id = account.value.id
+  const achievements = achievementData.data.value
+  const parts = latestParts.data.value?.accountId === id ? latestParts.data.value : null
+  const abyss = parts?.abyss
+  return {
+    achievements:
+      achievements?.accountId === id && achievementMarks.loadedFor.value === id
+        ? summarizeAchievements(
+            achievements.entries,
+            { captured: achievements.captured.ids, marked: achievementMarks.marked.value },
+            achievements.byId,
+          ).done
+        : null,
+    maxFriendship: parts?.maxFriendship ?? null,
+    // Only while the captured period is still running.
+    abyssStars: abyss && abyss.end * 1000 > nowMs.value ? abyss.stars : null,
   }
 })
 
@@ -297,6 +368,7 @@ const importRoute = computed(() => ({
       :player="traveler.profile"
       :need="traveler.need"
       :profile="profileCard"
+      :stats="cardStats"
     />
     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       <UiStat

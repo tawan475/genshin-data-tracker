@@ -78,7 +78,10 @@
     "arExpLabel": "EXP d'aventure",
     "wl": "Niv. du monde",
     "wlLimit": "Peut monter au Niv. du monde {n}",
-    "stamina": "Endurance",
-    "storyKeys": "Clés des légendes"
+    "achievements": "Total des succès",
+    "maxFriendship": "Personnages avec le Niv. max d'affinité",
+    "abyss": "Profondeurs spiralées",
+    "birthday": "Anniversaire",
+    "uid": "UID {uid}"
   }
 }

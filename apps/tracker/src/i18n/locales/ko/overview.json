@@ -78,7 +78,10 @@
     "arExpLabel": "모험 경력",
     "wl": "월드 레벨",
     "wlLimit": "월드 레벨 {n}까지 올릴 수 있음",
-    "stamina": "스태미나",
-    "storyKeys": "전설의 열쇠"
+    "achievements": "업적 총합",
+    "maxFriendship": "호감도가 가득 찬 캐릭터",
+    "abyss": "나선 비경",
+    "birthday": "생일",
+    "uid": "UID {uid}"
   }
 }

@@ -78,7 +78,10 @@
     "arExpLabel": "冒険経験",
     "wl": "世界ランク",
     "wlLimit": "世界ランク {n} まで上げられます",
-    "stamina": "スタミナ",
-    "storyKeys": "伝説の鍵"
+    "achievements": "合計アチーブメント数",
+    "maxFriendship": "好感度MAXのキャラクター",
+    "abyss": "深境螺旋",
+    "birthday": "誕生日",
+    "uid": "UID {uid}"
   }
 }

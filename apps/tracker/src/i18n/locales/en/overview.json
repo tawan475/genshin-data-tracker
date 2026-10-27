@@ -78,7 +78,10 @@
     "arExpLabel": "Adventure EXP",
     "wl": "World Level",
     "wlLimit": "Can raise to World Level {n}",
-    "stamina": "Stamina",
-    "storyKeys": "Story Keys"
+    "achievements": "Total Achievements",
+    "maxFriendship": "Characters at max Friendship",
+    "abyss": "Spiral Abyss",
+    "birthday": "Birthday",
+    "uid": "UID {uid}"
   }
 }
