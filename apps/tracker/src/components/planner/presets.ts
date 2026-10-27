@@ -2,7 +2,9 @@
  * Goal presets, pure: one click sets a character goal (and, picking
  * several characters, every one of them). A preset never sets a goal below
  * where the character is now: each part is the preset's or now's, whichever
- * is higher. "Talents only" and "Level only" leave the other part at now.
+ * is higher. "Talents only" and "Level only" leave the other part at now;
+ * Imaginarium Theater asks level 70/70 only (the Theater's entry level) and
+ * Custom starts at now, every part set by hand. No preset touches weapons.
  */
 
 import type { AscensionPhase } from '@gdt/game-data'
@@ -11,7 +13,7 @@ import type { CharacterTarget } from '@gdt/shared'
 import { t } from '@/i18n'
 import { goalAtLeast } from './level-grid'
 
-export type PresetId = 'max' | '90-9' | '80-8' | 'talents' | 'level'
+export type PresetId = 'max' | '90-9' | '80-8' | 'talents' | 'level' | 'theater' | 'custom'
 
 export interface Preset {
   id: PresetId
@@ -77,6 +79,28 @@ export const PRESETS: readonly Preset[] = [
       return t('planner.preset.level.title')
     },
     level: { level: 90, ascension: 6 },
+    talents: null,
+  },
+  {
+    id: 'theater',
+    get label() {
+      return t('planner.preset.theater.label')
+    },
+    get title() {
+      return t('planner.preset.theater.title')
+    },
+    level: { level: 70, ascension: 4 },
+    talents: null,
+  },
+  {
+    id: 'custom',
+    get label() {
+      return t('planner.preset.custom.label')
+    },
+    get title() {
+      return t('planner.preset.custom.title')
+    },
+    level: null,
     talents: null,
   },
 ]

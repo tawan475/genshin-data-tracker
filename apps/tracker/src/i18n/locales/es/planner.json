@@ -63,6 +63,14 @@
     "level": {
       "label": "Solo nivel",
       "title": "Nivel 90, talentos como ahora"
+    },
+    "theater": {
+      "label": "Teatro Fantasía",
+      "title": "Nivel 70/70, el mínimo del teatro; talentos como están"
+    },
+    "custom": {
+      "label": "Personalizado",
+      "title": "Empieza en el estado actual: ajusta cada parte tú"
     }
   },
   "task": {

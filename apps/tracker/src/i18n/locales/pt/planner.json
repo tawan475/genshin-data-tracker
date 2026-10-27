@@ -63,6 +63,14 @@
     "level": {
       "label": "Só nível",
       "title": "Nível 90, talentos como estão"
+    },
+    "theater": {
+      "label": "Teatro das Realidades Imaginárias",
+      "title": "Nível 70/70, o mínimo do teatro; talentos como estão"
+    },
+    "custom": {
+      "label": "Personalizado",
+      "title": "Começa no estado atual: defina cada parte você mesmo"
     }
   },
   "task": {

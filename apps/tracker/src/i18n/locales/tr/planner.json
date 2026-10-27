@@ -63,6 +63,14 @@
     "level": {
       "label": "Yalnızca seviye",
       "title": "Seviye 90, yetenekler olduğu gibi"
+    },
+    "theater": {
+      "label": "Hayal Dünyası Tiyatrosu",
+      "title": "Seviye 70/70, tiyatronun giriş seviyesi; yetenekler olduğu gibi"
+    },
+    "custom": {
+      "label": "Özel",
+      "title": "Şu anki durumdan başlar: her parçayı kendin ayarla"
     }
   },
   "task": {

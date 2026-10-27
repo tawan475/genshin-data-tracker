@@ -63,6 +63,14 @@
     "level": {
       "label": "Solo livello",
       "title": "Livello 90, talenti come ora"
+    },
+    "theater": {
+      "label": "Teatro immaginario",
+      "title": "Livello 70/70, il minimo del teatro; talenti invariati"
+    },
+    "custom": {
+      "label": "Personalizzato",
+      "title": "Parte dallo stato attuale: imposta ogni parte da te"
     }
   },
   "task": {

@@ -63,6 +63,14 @@
     "level": {
       "label": "Level saja",
       "title": "Level 90, talenta seperti sekarang"
+    },
+    "theater": {
+      "label": "Imaginarium Theater",
+      "title": "Level 70/70, level masuk Theater; talenta tetap"
+    },
+    "custom": {
+      "label": "Kustom",
+      "title": "Mulai dari kondisi sekarang: atur tiap bagian sendiri"
     }
   },
   "task": {

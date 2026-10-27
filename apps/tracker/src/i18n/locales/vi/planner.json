@@ -63,6 +63,14 @@
     "level": {
       "label": "Chỉ cấp",
       "title": "Cấp 90, giữ Thiên Phú hiện tại"
+    },
+    "theater": {
+      "label": "Nhà Hát Giả Tưởng",
+      "title": "Cấp 70/70, mức tối thiểu của nhà hát; thiên phú giữ nguyên"
+    },
+    "custom": {
+      "label": "Tùy chỉnh",
+      "title": "Bắt đầu từ hiện tại: tự đặt từng phần"
     }
   },
   "task": {

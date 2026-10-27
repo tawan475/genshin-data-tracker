@@ -63,6 +63,14 @@
     "level": {
       "label": "Nur Stufe",
       "title": "Stufe 90, Talente wie jetzt"
+    },
+    "theater": {
+      "label": "Theater der träumerischen Realität",
+      "title": "Stufe 70/70, die Mindeststufe des Theaters; Talente bleiben"
+    },
+    "custom": {
+      "label": "Eigene",
+      "title": "Beginnt beim aktuellen Stand: jeden Teil selbst festlegen"
     }
   },
   "task": {

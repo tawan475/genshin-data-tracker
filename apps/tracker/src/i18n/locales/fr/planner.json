@@ -63,6 +63,14 @@
     "level": {
       "label": "Niveau seul",
       "title": "Niveau 90, aptitudes inchangées"
+    },
+    "theater": {
+      "label": "Théâtre de l'imaginarium",
+      "title": "Niveau 70/70, le minimum du théâtre ; aptitudes inchangées"
+    },
+    "custom": {
+      "label": "Personnalisé",
+      "title": "Part de l'état actuel : réglez chaque partie vous-même"
     }
   },
   "task": {

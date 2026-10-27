@@ -63,6 +63,14 @@
     "level": {
       "label": "Level only",
       "title": "Level 90, talents as now"
+    },
+    "theater": {
+      "label": "Imaginarium Theater",
+      "title": "Level 70/70, the Theater's entry level; talents as they are"
+    },
+    "custom": {
+      "label": "Custom",
+      "title": "Starts at now: set each part yourself"
     }
   },
   "task": {

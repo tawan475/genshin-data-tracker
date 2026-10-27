@@ -46,6 +46,24 @@ describe('goal presets', () => {
     })
   })
 
+  it('asks 70/70 for the Imaginarium Theater and nothing for Custom', () => {
+    const low = { level: 40, ascension: 1, talents: { auto: 1, skill: 4, burst: 2 } }
+    expect(applyPreset(preset('theater'), low, {}, phases)).toMatchObject({
+      level: 70,
+      ascension: 4,
+      talents: low.talents,
+    })
+    expect(applyPreset(preset('theater'), now, {}, phases)).toMatchObject({
+      level: 70,
+      ascension: 4,
+    })
+    expect(applyPreset(preset('custom'), low, {}, phases)).toMatchObject({
+      level: 40,
+      ascension: 1,
+      talents: low.talents,
+    })
+  })
+
   it("keeps the goal's own fields and its paused state", () => {
     const base = { note: 'C2 first', favorite: true, priority: 3, active: false }
     expect(applyPreset(preset('max'), now, base, phases)).toMatchObject(base)
@@ -61,13 +79,15 @@ describe('goal presets', () => {
     )
   })
 
-  it('has the five presets, ids unique', () => {
+  it('has the seven presets, ids unique', () => {
     expect(PRESETS.map((p) => p.label)).toEqual([
       'Max',
       '90/9/9/9',
       '80/8/8/8',
       'Talents only',
       'Level only',
+      'Imaginarium Theater',
+      'Custom',
     ])
     expect(presetById('nope')).toBeNull()
   })
