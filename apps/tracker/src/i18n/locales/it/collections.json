@@ -175,6 +175,15 @@
     "domainsClearedHint": "Domini con la ricompensa del primo completamento riscattata",
     "npcsMet": "Personaggi incontrati",
     "npcsMetHint": "Persone incontrate, dall'elenco del gioco",
+    "trounce": "Dominio della conquista",
+    "trounceHint": "Domini della conquista completati almeno una volta (il gioco segnala solo questi)",
+    "lists": "Elenchi",
+    "domainKinds": {
+      "blessing": "Dominio della benedizione",
+      "mastery": "Dominio della maestria",
+      "forgery": "Dominio della forgiatura",
+      "trounce": "Dominio della conquista"
+    },
     "tribes": "Missioni delle tribù",
     "tribalStates": {
       "notOpen": "Non aperto",

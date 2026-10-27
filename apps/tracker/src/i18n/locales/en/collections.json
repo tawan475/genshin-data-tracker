@@ -175,6 +175,15 @@
     "domainsClearedHint": "Domains whose first-clear reward was taken",
     "npcsMet": "NPCs met",
     "npcsMetHint": "People met, of the game's list",
+    "trounce": "Trounce Domains",
+    "trounceHint": "Trounce Domains cleared at least once (the only domains the game reports as cleared)",
+    "lists": "Lists",
+    "domainKinds": {
+      "blessing": "Domain of Blessing",
+      "mastery": "Domain of Mastery",
+      "forgery": "Domain of Forgery",
+      "trounce": "Trounce Domain"
+    },
     "tribes": "Tribal quests",
     "tribalStates": {
       "notOpen": "Not open",

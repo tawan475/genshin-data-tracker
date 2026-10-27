@@ -175,6 +175,15 @@
     "domainsClearedHint": "ดันเจี้ยนที่รับรางวัลผ่านครั้งแรกแล้ว",
     "npcsMet": "คนที่ได้พบ",
     "npcsMetHint": "คนที่ได้พบจากรายชื่อในเกม",
+    "trounce": "Trounce Domain",
+    "trounceHint": "Trounce Domain ที่ผ่านอย่างน้อยหนึ่งครั้ง (เกมแจ้งเฉพาะส่วนนี้)",
+    "lists": "รายการ",
+    "domainKinds": {
+      "blessing": "ดันเจี้ยนแห่งพร",
+      "mastery": "ดันเจี้ยนแห่งการพัฒนา",
+      "forgery": "ดันเจี้ยนแห่งการต่อสู้",
+      "trounce": "Trounce Domain"
+    },
     "tribes": "ภารกิจเผ่า",
     "tribalStates": {
       "notOpen": "ยังไม่เปิด",

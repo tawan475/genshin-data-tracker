@@ -175,6 +175,15 @@
     "domainsClearedHint": "İlk tamamlama ödülü alınan zindanlar",
     "npcsMet": "Tanışılan kişiler",
     "npcsMetHint": "Oyunun listesinden tanışılan kişiler",
+    "trounce": "Ezici Zindan",
+    "trounceHint": "En az bir kez tamamlanan Ezici Zindanlar (oyun yalnızca bunları bildirir)",
+    "lists": "Listeler",
+    "domainKinds": {
+      "blessing": "Yadigar Zindanı",
+      "mastery": "Ustalık Zindanı",
+      "forgery": "Döküm Zindanı",
+      "trounce": "Ezici Zindan"
+    },
     "tribes": "Kabile görevleri",
     "tribalStates": {
       "notOpen": "Açılmadı",

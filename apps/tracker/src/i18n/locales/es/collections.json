@@ -175,6 +175,15 @@
     "domainsClearedHint": "Dominios con la recompensa de primera vez reclamada",
     "npcsMet": "Personajes conocidos",
     "npcsMetHint": "Personas conocidas, de la lista del juego",
+    "trounce": "Dominio de la cruzada",
+    "trounceHint": "Dominios de la cruzada superados al menos una vez (el juego solo informa de estos)",
+    "lists": "Listas",
+    "domainKinds": {
+      "blessing": "Dominio de la bendición",
+      "mastery": "Dominio de la maestría",
+      "forgery": "Dominio de la forja",
+      "trounce": "Dominio de la cruzada"
+    },
     "tribes": "Misiones de tribu",
     "tribalStates": {
       "notOpen": "Sin abrir",

@@ -1,28 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
+  CheckCheck,
   Compass,
   Eye,
   Flame,
   Landmark,
   MapPin,
   ScrollText,
+  SearchX,
   Sparkles,
   Swords,
   Timer,
+  Users,
 } from 'lucide-vue-next'
 import { loadFarming } from '@gdt/game-data/farming'
+import EntryGrid, { type GridEntry } from './EntryGrid.vue'
+import HaveFilter, { type HaveFilterValue } from './HaveFilter.vue'
 import NotCaptured from './NotCaptured.vue'
+import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiProgress from '@/components/ui/UiProgress.vue'
+import UiSegmented, { type SegmentedOption } from '@/components/ui/UiSegmented.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import type { CapturedCollections } from '@/data/collections'
 import { idLabel, type CollectionCatalog } from '@/data/collection-names'
 import { respawnRows } from '@/data/respawns'
 import { useResource } from '@/data/use-resource'
-import { tribalRows, worldModel, type Progress } from '@/data/world'
+import { npcRows, tribalRows, worldModel, type DomainRow, type Progress } from '@/data/world'
 import { localizeFarming } from '@/i18n/localize-farming'
 import { formatNumber, formatRelative, formatDateTime } from '@/lib/format'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { t } from '@/i18n'
 
 /**
@@ -30,7 +38,9 @@ import { t } from '@/i18n'
  * Waypoints, domains, areas revealed), the Statues of The Seven, reputation,
  * offerings and exploration per region. Exploration shows raw points until
  * the game data carries each area's total. Bosses' and elites' respawns
- * (Capture 1.7.0) come from the newest capture's `gi_tasks`.
+ * (Capture 1.7.0) come from the newest capture's `gi_tasks`. The domain,
+ * Trounce Domain and NPC stats open their list in one panel (a view switch
+ * in its header), entries had and missing.
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
@@ -47,24 +57,106 @@ const respawns = computed(() => {
 })
 const waiting = computed(() => respawns.value.filter((r) => r.next !== null))
 
-/** Capture 1.11.0: domains whose first clear was taken, NPCs met, Natlan's tribal chapters. */
-const ofKnown = (list: number[] | undefined, known: readonly { id: number }[]) => {
-  if (!list) return null
-  const ids = new Set(known.map((k) => k.id))
-  return { have: list.filter((id) => ids.has(id)).length, total: ids.size }
-}
-const domains = computed(() =>
-  ofKnown(exploration.value?.domainsCleared, props.catalog.data.domainEntries),
+const world = computed(() =>
+  exploration.value ? worldModel(exploration.value, props.catalog) : null,
 )
-const npcs = computed(() => ofKnown(props.captured.npcsMet?.value, props.catalog.data.npcsMet))
+/** Capture 1.11.0: Trounce Domains cleared once, NPCs met, Natlan's tribal chapters. */
+const npcList = computed(() => {
+  const met = props.captured.npcsMet?.value
+  return met ? npcRows(met, props.catalog) : null
+})
+const counted = (rows: readonly { have: boolean }[] | null | undefined) =>
+  rows ? { have: rows.filter((r) => r.have).length, total: rows.length } : null
+const cleared = computed(() => counted(world.value?.cleared))
+const npcs = computed(() => counted(npcList.value))
 const tribes = computed(() =>
   exploration.value?.tribalChapters
     ? tribalRows(exploration.value.tribalChapters, props.catalog)
     : [],
 )
-const world = computed(() =>
-  exploration.value ? worldModel(exploration.value, props.catalog) : null,
+
+// The lists behind the stats: domains on the map, Trounce Domains cleared, NPCs met.
+type ListView = 'domains' | 'cleared' | 'npcs'
+const VIEW_KEY = 'collections:world-list'
+const FILTER_KEY = 'collections:world-filter'
+const view = ref<ListView>((readStorage(VIEW_KEY) as ListView | null) ?? 'domains')
+watch(view, (value) => writeStorage(VIEW_KEY, value === 'domains' ? null : value))
+const storedFilter = readStorage(FILTER_KEY) as HaveFilterValue | null
+const filter = ref<HaveFilterValue>(
+  storedFilter === 'missing' || storedFilter === 'have' ? storedFilter : 'all',
 )
+watch(filter, (value) => writeStorage(FILTER_KEY, value === 'all' ? null : value))
+
+const domainNote = (row: DomainRow) =>
+  [row.region, row.kind === 'other' ? '' : t(`collections.world.domainKinds.${row.kind}`)]
+    .filter(Boolean)
+    .join(' · ')
+const lists = computed(() => {
+  const toEntry = (row: DomainRow): GridEntry & { have: boolean } => ({
+    id: row.id,
+    name: row.name,
+    note: domainNote(row),
+    missing: !row.have,
+    have: row.have,
+  })
+  return [
+    {
+      view: 'domains' as const,
+      label: t('collections.world.domains'),
+      icon: Swords,
+      entries: world.value?.domains.length ? world.value.domains.map(toEntry) : null,
+    },
+    {
+      view: 'cleared' as const,
+      label: t('collections.world.trounce'),
+      icon: Swords,
+      entries: world.value?.cleared?.map(toEntry) ?? null,
+    },
+    {
+      view: 'npcs' as const,
+      label: t('collections.world.npcsMet'),
+      icon: Users,
+      entries:
+        npcList.value?.map((row) => ({
+          id: row.id,
+          name: row.name,
+          note: row.title,
+          missing: !row.have,
+          have: row.have,
+        })) ?? null,
+    },
+  ].flatMap((list) => (list.entries ? [{ ...list, entries: list.entries }] : []))
+})
+const current = computed(
+  () => lists.value.find((l) => l.view === view.value) ?? lists.value[0] ?? null,
+)
+const currentHave = computed(() => current.value?.entries.filter((e) => e.have).length ?? 0)
+const shown = computed<GridEntry[]>(() =>
+  (current.value?.entries ?? []).filter(
+    (e) => filter.value === 'all' || e.have === (filter.value === 'have'),
+  ),
+)
+const viewOptions = computed<SegmentedOption<ListView>[]>(() =>
+  lists.value.map((l) => ({
+    value: l.view,
+    label: l.label,
+    icon: l.icon,
+    count: l.entries.filter((e) => e.have).length,
+  })),
+)
+const listModel = computed({
+  get: () => current.value?.view ?? 'domains',
+  set: (value: ListView) => (view.value = value),
+})
+/** A stat opens its list. */
+function openList(value: ListView) {
+  view.value = value
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  document
+    .getElementById('world-lists')
+    ?.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' })
+}
+const hasList = (value: ListView) => lists.value.some((l) => l.view === value)
 const teyvat = computed(() => world.value?.maps.find((m) => m.name === null) ?? null)
 const reputationTotal = computed(() =>
   (world.value?.reputation ?? []).reduce(
@@ -95,6 +187,8 @@ const MAP_PARTS = [
         <UiStat
           :label="$t(part.label)"
           :hint="$t('collections.world.inTeyvat', { what: $t(part.label) })"
+          :button="part.key === 'domains' && hasList('domains')"
+          @click="part.key === 'domains' && hasList('domains') && openList('domains')"
         >
           <template #icon
             ><component :is="part.icon" class="size-3.5" aria-hidden="true"
@@ -137,14 +231,14 @@ const MAP_PARTS = [
     </ul>
 
     <ul
-      v-if="domains || npcs"
+      v-if="cleared || npcs"
       class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
       :aria-label="$t('collections.summary')"
     >
       <li
         v-for="part in [
-          { key: 'domainsCleared', value: domains },
-          { key: 'npcsMet', value: npcs },
+          { key: 'trounce', list: 'cleared' as const, value: cleared },
+          { key: 'npcsMet', list: 'npcs' as const, value: npcs },
         ]"
         v-show="part.value"
         :key="part.key"
@@ -153,6 +247,8 @@ const MAP_PARTS = [
         <UiStat
           :label="$t(`collections.world.${part.key}`)"
           :hint="$t(`collections.world.${part.key}Hint`)"
+          button
+          @click="openList(part.list)"
         >
           <template #value>
             <span class="tabular truncate font-mono text-lg font-medium sm:text-xl">
@@ -205,6 +301,38 @@ const MAP_PARTS = [
           </dl>
         </li>
       </ul>
+    </UiPanel>
+
+    <UiPanel v-if="current" id="world-lists" class="scroll-mt-20" flush>
+      <template #header>
+        <div
+          class="scroll-hide scroll-fade-x -mx-5 flex max-w-full overflow-x-auto px-5 sm:mx-0 sm:px-0"
+        >
+          <UiSegmented
+            v-model="listModel"
+            :options="viewOptions"
+            :label="$t('collections.world.lists')"
+          />
+        </div>
+      </template>
+      <div class="flex flex-col gap-3 p-3 sm:p-5">
+        <HaveFilter
+          v-model="filter"
+          :have="currentHave"
+          :total="current.entries.length"
+          :label="$t('collections.archive.show')"
+        />
+        <EntryGrid v-if="shown.length > 0" :entries="shown" :label="current.label" />
+        <UiEmpty
+          v-else-if="filter === 'missing'"
+          :title="$t('collections.spincrystals.allCollected')"
+        >
+          <template #icon><CheckCheck class="text-success-text" aria-hidden="true" /></template>
+        </UiEmpty>
+        <UiEmpty v-else :title="$t('collections.archive.none')">
+          <template #icon><SearchX aria-hidden="true" /></template>
+        </UiEmpty>
+      </div>
     </UiPanel>
 
     <div class="flex flex-wrap gap-4">

@@ -175,6 +175,15 @@
     "domainsClearedHint": "Bí Cảnh đã nhận thưởng lần đầu",
     "npcsMet": "Người đã gặp",
     "npcsMetHint": "Người đã gặp trong danh sách của game",
+    "trounce": "Vùng Đất Thảo Phạt",
+    "trounceHint": "Vùng Đất Thảo Phạt đã vượt qua ít nhất một lần (trò chơi chỉ báo những nơi này)",
+    "lists": "Danh sách",
+    "domainKinds": {
+      "blessing": "Bí Cảnh Chúc Phúc",
+      "mastery": "Bí Cảnh Tinh Thông",
+      "forgery": "Bí Cảnh Luyện Võ",
+      "trounce": "Vùng Đất Thảo Phạt"
+    },
     "tribes": "Nhiệm vụ bộ tộc",
     "tribalStates": {
       "notOpen": "Chưa mở",
