@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useElementSize } from '@vueuse/core'
-import { Wrench } from 'lucide-vue-next'
+import { BookOpen, Wrench } from 'lucide-vue-next'
 import ConstellationStars from '@/components/ui/ConstellationStars.vue'
 import CritValue from '@/components/ui/CritValue.vue'
 import RollValue from '@/components/ui/RollValue.vue'
@@ -9,10 +9,12 @@ import ElementIcon from '@/components/ui/ElementIcon.vue'
 import ExpProgress from '@/components/ui/ExpProgress.vue'
 import LevelText from '@/components/ui/LevelText.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
+import UiButton from '@/components/ui/UiButton.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import type { AccountRef } from '@/data/account-data'
 import { buildPanel, buildRv, talentLevels } from '@/data/character-build'
+import { guidesFor } from '@/data/character-guides'
 import {
   ELEMENT_LABELS,
   SLOT_ORDER,
@@ -30,6 +32,8 @@ import BuildStats from './BuildStats.vue'
 import CharacterTimeline from './CharacterTimeline.vue'
 import ConstellationIcons from './ConstellationIcons.vue'
 import FriendshipBadge from './FriendshipBadge.vue'
+import GuidesDialog from './GuidesDialog.vue'
+import GuidesSection from './GuidesSection.vue'
 import GameStars from './GameStars.vue'
 import NamecardBackdrop from './NamecardBackdrop.vue'
 import SetBonuses from './SetBonuses.vue'
@@ -90,6 +94,14 @@ const history = useResource(
   (account) => loadCharacterHistory(account),
 )
 const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
+
+// Guides: the footer button and the Videos chip open the dialog.
+const guides = computed(() => guidesFor(c.value.key))
+const guidesOpen = ref(false)
+watch(
+  () => c.value.key,
+  () => (guidesOpen.value = false),
+)
 </script>
 
 <template>
@@ -114,11 +126,18 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           />
         </div>
       </div>
-      <p v-if="c.gaps.length" class="flex flex-wrap items-center gap-1.5">
-        <Wrench class="size-4 text-warning-text" aria-hidden="true" />
-        <span class="sr-only">{{ $t('characters.detail.toDo') }}</span>
-        <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
-      </p>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <template v-if="c.gaps.length">
+          <Wrench class="size-4 text-warning-text" aria-hidden="true" />
+          <span class="sr-only">{{ $t('characters.detail.toDo') }}</span>
+          <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
+        </template>
+        <UiButton size="sm" class="ml-auto" @click="guidesOpen = true">
+          <BookOpen class="size-4" aria-hidden="true" />
+          {{ $t('characters.guides.button') }}
+        </UiButton>
+      </div>
+      <GuidesSection :guides="guides" @videos="guidesOpen = true" />
     </template>
 
     <template v-else>
@@ -208,14 +227,20 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           </div>
         </div>
 
-        <p
-          v-if="c.gaps.length"
-          class="relative flex flex-wrap items-center gap-1.5 border-t border-border-default bg-surface-base/80 px-4 py-2 sm:px-5"
+        <!-- What is left to do (the "needs work" badges), the Guides button at the right -->
+        <div
+          class="relative flex min-h-12 flex-wrap items-center gap-1.5 border-t border-border-default bg-surface-base/80 py-2 pr-3 pl-4 sm:pl-5"
         >
-          <Wrench class="size-4 text-warning-text" aria-hidden="true" />
-          <span class="sr-only">{{ $t('characters.detail.toDo') }}</span>
-          <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
-        </p>
+          <template v-if="c.gaps.length">
+            <Wrench class="size-4 text-warning-text" aria-hidden="true" />
+            <span class="sr-only">{{ $t('characters.detail.toDo') }}</span>
+            <UiBadge v-for="gap in c.gaps" :key="gap.kind" tone="warning">{{ gap.text }}</UiBadge>
+          </template>
+          <UiButton size="sm" class="ml-auto" @click="guidesOpen = true">
+            <BookOpen class="size-4" aria-hidden="true" />
+            {{ $t('characters.guides.button') }}
+          </UiButton>
+        </div>
       </section>
 
       <section class="min-w-0" aria-labelledby="detail-artifacts">
@@ -247,6 +272,8 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
           />
         </div>
       </section>
+
+      <GuidesSection :guides="guides" @videos="guidesOpen = true" />
     </template>
 
     <section aria-labelledby="detail-changes">
@@ -267,5 +294,13 @@ const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
       </p>
       <CharacterTimeline v-else :changes="changes" :reset-key="c.key" />
     </section>
+
+    <GuidesDialog
+      :open="guidesOpen"
+      :character-key="c.key"
+      :name="c.name"
+      :guides="guides"
+      @close="guidesOpen = false"
+    />
   </div>
 </template>

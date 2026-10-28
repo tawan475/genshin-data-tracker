@@ -166,5 +166,19 @@
     "empty": "Aucun personnage",
     "import": "Importer",
     "noMatches": "Aucun résultat"
+  },
+  "guides": {
+    "button": "Guides",
+    "title": "Guides",
+    "written": "Guides écrits",
+    "videos": "Vidéos",
+    "videosCount": "Vidéos · {n}",
+    "quickBuild": "Build rapide",
+    "inDepth": "Approfondi",
+    "buildSheet": "Fiche de builds",
+    "search": "Rechercher",
+    "noVideos": "Aucune vidéo choisie pour ce personnage pour l’instant.",
+    "picked": "Choisis à la main pour chaque personnage",
+    "suggest": "Proposer un guide"
   }
 }

@@ -166,5 +166,19 @@
     "empty": "Tidak ada karakter",
     "import": "Impor",
     "noMatches": "Tidak ada yang cocok"
+  },
+  "guides": {
+    "button": "Panduan",
+    "title": "Panduan",
+    "written": "Panduan tertulis",
+    "videos": "Video",
+    "videosCount": "Video · {n}",
+    "quickBuild": "Build cepat",
+    "inDepth": "Mendalam",
+    "buildSheet": "Lembar build",
+    "search": "Cari",
+    "noVideos": "Belum ada video yang dipilih untuk karakter ini.",
+    "picked": "Dipilih manual untuk tiap karakter",
+    "suggest": "Usulkan panduan"
   }
 }

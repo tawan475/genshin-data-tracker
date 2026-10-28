@@ -166,5 +166,19 @@
     "empty": "Karakter yok",
     "import": "İçe aktar",
     "noMatches": "Eşleşme yok"
+  },
+  "guides": {
+    "button": "Rehberler",
+    "title": "Rehberler",
+    "written": "Yazılı rehberler",
+    "videos": "Videolar",
+    "videosCount": "Videolar · {n}",
+    "quickBuild": "Hızlı build",
+    "inDepth": "Ayrıntılı",
+    "buildSheet": "Build tablosu",
+    "search": "Ara",
+    "noVideos": "Bu karakter için henüz video seçilmedi.",
+    "picked": "Her karakter için elle seçildi",
+    "suggest": "Rehber öner"
   }
 }

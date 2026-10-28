@@ -166,5 +166,19 @@
     "empty": "Keine Figuren",
     "import": "Importieren",
     "noMatches": "Keine Treffer"
+  },
+  "guides": {
+    "button": "Guides",
+    "title": "Guides",
+    "written": "Textguides",
+    "videos": "Videos",
+    "videosCount": "Videos · {n}",
+    "quickBuild": "Schnell-Build",
+    "inDepth": "Ausführlich",
+    "buildSheet": "Build-Tabelle",
+    "search": "Suche",
+    "noVideos": "Für diese Figur sind noch keine Videos ausgewählt.",
+    "picked": "Für jede Figur von Hand ausgewählt",
+    "suggest": "Guide vorschlagen"
   }
 }

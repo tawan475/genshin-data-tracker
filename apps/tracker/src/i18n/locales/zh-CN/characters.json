@@ -166,5 +166,19 @@
     "empty": "没有角色",
     "import": "导入",
     "noMatches": "无匹配结果"
+  },
+  "guides": {
+    "button": "攻略",
+    "title": "攻略",
+    "written": "图文攻略",
+    "videos": "视频",
+    "videosCount": "视频 · {n}",
+    "quickBuild": "速览配装",
+    "inDepth": "深度",
+    "buildSheet": "配装表",
+    "search": "搜索",
+    "noVideos": "还没有为该角色挑选视频。",
+    "picked": "为每个角色手动挑选",
+    "suggest": "推荐攻略"
   }
 }

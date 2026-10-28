@@ -166,5 +166,19 @@
     "empty": "キャラクターなし",
     "import": "インポート",
     "noMatches": "該当なし"
+  },
+  "guides": {
+    "button": "ガイド",
+    "title": "ガイド",
+    "written": "攻略記事",
+    "videos": "動画",
+    "videosCount": "動画 · {n}",
+    "quickBuild": "簡易ビルド",
+    "inDepth": "詳細",
+    "buildSheet": "ビルド表",
+    "search": "検索",
+    "noVideos": "このキャラクターの動画はまだ選ばれていません。",
+    "picked": "キャラクターごとに手作業で選定",
+    "suggest": "ガイドを提案"
   }
 }

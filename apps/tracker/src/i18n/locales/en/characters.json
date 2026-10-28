@@ -166,5 +166,19 @@
     "empty": "No characters",
     "import": "Import",
     "noMatches": "No matches"
+  },
+  "guides": {
+    "button": "Guides",
+    "title": "Guides",
+    "written": "Written guides",
+    "videos": "Videos",
+    "videosCount": "Videos · {n}",
+    "quickBuild": "Quick build",
+    "inDepth": "In-depth",
+    "buildSheet": "Build sheet",
+    "search": "Search",
+    "noVideos": "No videos picked for this character yet.",
+    "picked": "Picked by hand for each character",
+    "suggest": "Suggest a guide"
   }
 }
