@@ -756,6 +756,8 @@ export interface AccountResponse {
     takenAt: number
     lastSeenAt: number
     summary: SnapshotSummary
+    /** The GOOD file's `source` ("Irminsul": Teyvat.me Capture or irminsul); absent before 2026-10-28. */
+    source?: string
   } | null
   /**
    * Always true now: live sync is on for every account and the capture app
@@ -992,6 +994,11 @@ export interface BootstrapResponse {
   account: ({ id: number } & AccountSettingsResponse) | null
   /** Invites waiting for this user (account sharing). */
   invitations?: InvitationResponse[]
+  /**
+   * The user's most recently seen signed-in capture app (Teyvat.me Capture or
+   * irminsul): the top bar's Capture button. Null: none signed in.
+   */
+  capture?: { device: string | null; lastSeenAt: number } | null
 }
 
 export interface AchievementMarksResponse {

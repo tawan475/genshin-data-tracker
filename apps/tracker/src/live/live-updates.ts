@@ -47,7 +47,7 @@ import { useSession } from '@/stores/session'
 import { onTabMessage, postToTabs, tabsCanTalk, type TabMessage } from './channel'
 import { importingAccounts, onApplyPending, updatesHeld } from './holds'
 import { requestLeadership } from './leader'
-import { noteLiveChange } from './journal'
+import { liveSeenAt, noteLiveChange } from './journal'
 import { emitPlannerChange } from './planner-changes'
 import { emitWishChange } from './wish-changes'
 import {
@@ -218,6 +218,7 @@ export function useLiveUpdates(): void {
     }
     if (event.type === 'live') {
       // Live sync: the account's journal moved; its "now" views re-read it.
+      liveSeenAt.set(event.accountId, Date.now())
       noteLiveChange(event.accountId)
       return
     }

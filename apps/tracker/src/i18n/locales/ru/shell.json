@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "Панель"
   },
-  "appearance": "Язык и оформление"
+  "appearance": "Язык и оформление",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "Живая синхронизация включена",
+    "lastUpload": "Последняя загрузка {time}",
+    "none": "Нет подключённых устройств Capture",
+    "get": "Скачать Teyvat.me Capture"
+  }
 }

@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "ダッシュボード"
   },
-  "appearance": "言語と外観"
+  "appearance": "言語と外観",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "ライブ同期オン",
+    "lastUpload": "最終アップロード {time}",
+    "none": "Capture の端末が未接続",
+    "get": "Teyvat.me Capture を入手"
+  }
 }

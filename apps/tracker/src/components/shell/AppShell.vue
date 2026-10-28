@@ -27,6 +27,8 @@ import { useSession } from '@/stores/session'
 import { useStaff } from '@/stores/staff'
 import AccountSwitcher from './AccountSwitcher.vue'
 import AppearanceButton from './AppearanceButton.vue'
+import CaptureButton from './CaptureButton.vue'
+import DiscordButton from './DiscordButton.vue'
 import { t } from '@/i18n'
 import { ACCOUNT_SECTIONS, NAV_PARENT, STAFF_SECTIONS, pageTitle } from './nav'
 import { USER_SETTINGS_DEFAULTS } from '@gdt/shared/settings'
@@ -353,7 +355,7 @@ const footButton =
         <UiIconButton :label="$t('shell.openMenu')" class="-ml-2 lg:hidden" @click="drawer = true">
           <Menu class="size-5" aria-hidden="true" />
         </UiIconButton>
-        <span class="truncate text-lg font-semibold">{{ title }}</span>
+        <span class="truncate text-lg font-semibold sm:shrink-0">{{ title }}</span>
         <template v-if="staffMode">
           <template v-if="staff.topRole">
             <div class="hidden h-4 w-px bg-border-strong sm:block" />
@@ -401,6 +403,8 @@ const footButton =
           </span>
         </template>
         <div class="ml-auto flex shrink-0 items-center gap-2">
+          <DiscordButton />
+          <CaptureButton :account="staffMode ? undefined : current" />
           <AppearanceButton />
           <RouterLink
             v-if="currentId && !staffMode && current?.access !== 'viewer'"

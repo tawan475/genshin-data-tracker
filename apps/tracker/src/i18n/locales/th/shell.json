@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "แดชบอร์ด"
   },
-  "appearance": "ภาษาและการแสดงผล"
+  "appearance": "ภาษาและการแสดงผล",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "ซิงก์สดเปิดอยู่",
+    "lastUpload": "อัปโหลดล่าสุด {time}",
+    "none": "ยังไม่ได้เชื่อมต่ออุปกรณ์ Capture",
+    "get": "ดาวน์โหลด Teyvat.me Capture"
+  }
 }

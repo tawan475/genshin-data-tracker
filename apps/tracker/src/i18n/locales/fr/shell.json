@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "Tableau de bord"
   },
-  "appearance": "Langue et apparence"
+  "appearance": "Langue et apparence",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "Synchro en direct active",
+    "lastUpload": "Dernier envoi {time}",
+    "none": "Aucun appareil Capture lié",
+    "get": "Obtenir Teyvat.me Capture"
+  }
 }

@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "Bảng điều khiển"
   },
-  "appearance": "Ngôn ngữ và giao diện"
+  "appearance": "Ngôn ngữ và giao diện",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "Đồng bộ trực tiếp đang bật",
+    "lastUpload": "Lần tải lên cuối {time}",
+    "none": "Chưa liên kết thiết bị Capture nào",
+    "get": "Tải Teyvat.me Capture"
+  }
 }

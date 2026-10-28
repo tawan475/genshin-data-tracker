@@ -1,3 +1,4 @@
+import { shallowRef } from 'vue'
 import type { BootstrapResponse } from '@gdt/shared'
 import { api } from '@/api'
 import { routeAccountId } from '@/lib/route-account'
@@ -13,11 +14,18 @@ import { routeAccountId } from '@/lib/route-account'
 let first: Promise<BootstrapResponse> | null = null
 let listTaken = false
 
+/** The user's newest signed-in capture app, from the bootstrap (the top bar's Capture button). */
+export const captureDevice = shallowRef<BootstrapResponse['capture']>(null)
+
 /** Starts the bootstrap request, once per page load. */
 export function bootstrapOnce(): Promise<BootstrapResponse> {
   if (!first) {
     first = api.bootstrap(routeAccountId(window.location.pathname))
     listTaken = false
+    first.then(
+      (answer) => (captureDevice.value = answer.capture ?? null),
+      () => undefined,
+    )
   }
   return first
 }
@@ -33,4 +41,5 @@ export function takeBootstrap(): Promise<BootstrapResponse> | null {
 export function forgetBootstrap(): void {
   first = null
   listTaken = false
+  captureDevice.value = null
 }

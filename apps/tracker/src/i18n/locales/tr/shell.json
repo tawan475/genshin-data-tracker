@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "Panel"
   },
-  "appearance": "Dil ve görünüm"
+  "appearance": "Dil ve görünüm",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "Canlı eşitleme açık",
+    "lastUpload": "Son yükleme {time}",
+    "none": "Bağlı Capture cihazı yok",
+    "get": "Teyvat.me Capture’ı indir"
+  }
 }

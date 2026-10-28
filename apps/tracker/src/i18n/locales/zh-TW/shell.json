@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "儀表板"
   },
-  "appearance": "語言與外觀"
+  "appearance": "語言與外觀",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "即時同步已開啟",
+    "lastUpload": "上次上傳 {time}",
+    "none": "未連接 Capture 裝置",
+    "get": "取得 Teyvat.me Capture"
+  }
 }

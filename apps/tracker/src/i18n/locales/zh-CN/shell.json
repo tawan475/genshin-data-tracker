@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "控制台"
   },
-  "appearance": "语言与外观"
+  "appearance": "语言与外观",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "实时同步已开启",
+    "lastUpload": "上次上传 {time}",
+    "none": "未连接 Capture 设备",
+    "get": "获取 Teyvat.me Capture"
+  }
 }

@@ -5,7 +5,7 @@ import type {
   BootstrapResponse,
   MeResponse,
 } from '@gdt/shared'
-import { SELF } from 'cloudflare:test'
+import { env, SELF } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
 import { Client, ORIGIN, irminsulForm, sampleGood, signUp } from './client'
 
@@ -51,6 +51,26 @@ describe('bootstrap', () => {
     )
     expect(body.account).toEqual({ id: account.id, ...settings })
     expect(body.account!.settings.traveler).toBe('M')
+    // The capture upload names its source; no capture app signed in yet.
+    expect(body.accounts.find((a) => a.id === account.id)!.latest!.source).toBe('Irminsul')
+    expect(body.capture).toBeNull()
+  })
+
+  it('names the newest signed-in capture app, not ended or browser sessions', async () => {
+    const { client, me } = await signUp()
+    const now = Date.now()
+    const insert = (method: string, device: string | null, seen: number, revoked: number | null) =>
+      env.DB.prepare(
+        `INSERT INTO user_sessions (user_id, method, device_name, created_at, last_seen_at,
+           expires_at, revoked_at) VALUES (?1, ?2, ?3, ?4, ?4, ?5, ?6)`,
+      )
+        .bind(me.id, method, device, seen, now + 86_400_000, revoked)
+        .run()
+    await insert('irminsul', 'OLD-PC', now - 60_000, null)
+    await insert('irminsul', 'GAMING-PC', now - 1_000, null)
+    await insert('irminsul', 'GONE-PC', now, now)
+    const body = await client.json<BootstrapResponse>('/api/bootstrap')
+    expect(body.capture).toEqual({ device: 'GAMING-PC', lastSeenAt: now - 1_000 })
   })
 
   it("never answers another user's account settings", async () => {

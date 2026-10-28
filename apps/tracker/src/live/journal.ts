@@ -11,6 +11,9 @@ import { updatesHeld } from './holds'
 /** Account id -> journal version (0 until its first `live` event). */
 export const liveVersions = reactive(new Map<number, number>())
 
+/** Account id -> when its last `live` event arrived (ms): the top bar's Capture button. */
+export const liveSeenAt = reactive(new Map<number, number>())
+
 const waiting = new Set<number>()
 
 function bump(accountId: number): void {

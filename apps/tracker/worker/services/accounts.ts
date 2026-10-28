@@ -174,12 +174,16 @@ export function accountsFromRows(rows: readonly AccountListRow[]): AccountRespon
     latest:
       row.latest_id === null
         ? null
-        : {
-            id: row.latest_id,
-            takenAt: row.taken_at!,
-            lastSeenAt: row.last_seen_at!,
-            summary: metaOf(row).summary,
-          },
+        : (() => {
+            const meta = metaOf(row)
+            return {
+              id: row.latest_id,
+              takenAt: row.taken_at!,
+              lastSeenAt: row.last_seen_at!,
+              summary: meta.summary,
+              source: meta.source,
+            }
+          })(),
     liveSync: true,
     access: row.role,
     ...(row.owner_name !== null ? { owner: row.owner_name } : {}),

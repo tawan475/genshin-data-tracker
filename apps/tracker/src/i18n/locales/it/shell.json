@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "Dashboard"
   },
-  "appearance": "Lingua e aspetto"
+  "appearance": "Lingua e aspetto",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "Sincronizzazione live attiva",
+    "lastUpload": "Ultimo caricamento {time}",
+    "none": "Nessun dispositivo Capture collegato",
+    "get": "Scarica Teyvat.me Capture"
+  }
 }

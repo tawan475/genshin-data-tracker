@@ -16,6 +16,13 @@ import { invitationsFromRows, invitationsStatement } from '../services/sharing'
 import { withLegacySchema } from '../services/storage'
 import { toMe } from './auth'
 
+/** The newest signed-in capture app's row, as the bootstrap answers it. */
+export function captureFromRow(
+  row: { device_name: string | null; last_seen_at: number } | undefined,
+): BootstrapResponse['capture'] {
+  return row ? { device: row.device_name, lastSeenAt: row.last_seen_at } : null
+}
+
 /**
  * GET /api/bootstrap?account=<id>: the user, their accounts and the opened
  * account's settings in one request and one D1 round trip, so the app's
@@ -40,10 +47,18 @@ export const bootstrap = new Hono<AppEnv>().get('/', requireUser, async (c) => {
         )
         .bind(accountId ?? 0, userId),
       invitationsStatement(d1, userId, Date.now()),
+      // The top bar's Capture button: the newest signed-in capture app.
+      d1
+        .prepare(
+          `SELECT device_name, last_seen_at FROM user_sessions
+             WHERE user_id = ?1 AND method = 'irminsul' AND revoked_at IS NULL AND expires_at > ?2
+             ORDER BY last_seen_at DESC LIMIT 1`,
+        )
+        .bind(userId, Date.now()),
     ]),
   )
   meter.report(c)
-  const [user, roles, list, settings, invited] = results
+  const [user, roles, list, settings, invited, device] = results
   const found = meFromResults(userId, user, roles)
   if (!found) throw new ApiError(401, 'unauthenticated', 'Not signed in')
   const accounts = accountsFromRows((list?.results ?? []) as unknown as AccountListRow[])
@@ -63,6 +78,9 @@ export const bootstrap = new Hono<AppEnv>().get('/', requireUser, async (c) => {
         }
       : null,
     invitations: invitationsFromRows(invited?.results ?? []),
+    capture: captureFromRow(
+      device?.results[0] as { device_name: string | null; last_seen_at: number } | undefined,
+    ),
   }
   c.header('Cache-Control', 'private, no-store')
   return c.json(body)

@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "대시보드"
   },
-  "appearance": "언어 및 화면"
+  "appearance": "언어 및 화면",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "실시간 동기화 켜짐",
+    "lastUpload": "마지막 업로드 {time}",
+    "none": "연결된 Capture 기기 없음",
+    "get": "Teyvat.me Capture 받기"
+  }
 }

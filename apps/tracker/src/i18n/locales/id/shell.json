@@ -100,5 +100,13 @@
   "public": {
     "dashboard": "Dasbor"
   },
-  "appearance": "Bahasa dan tampilan"
+  "appearance": "Bahasa dan tampilan",
+  "discord": "Discord",
+  "capture": {
+    "name": "Teyvat.me Capture",
+    "live": "Sinkron langsung aktif",
+    "lastUpload": "Unggahan terakhir {time}",
+    "none": "Belum ada perangkat Capture terhubung",
+    "get": "Dapatkan Teyvat.me Capture"
+  }
 }
