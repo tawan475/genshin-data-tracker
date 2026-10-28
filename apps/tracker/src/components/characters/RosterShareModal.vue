@@ -78,7 +78,9 @@ const shown = shallowRef<DrawnRoster | null>(null)
 const host = useTemplateRef<HTMLElement>('host')
 watch([shown, host], ([drawn, el]) => {
   if (!el || !drawn) return
-  drawn.canvas.className = 'block h-auto w-full'
+  // As big as the dialog allows, whole: width-bound, or height-bound on a short screen.
+  drawn.canvas.className =
+    'mx-auto block h-auto w-auto max-w-full rounded-xl max-h-[calc(100dvh-6rem)] sm:max-h-[calc(90dvh-6rem)]'
   drawn.canvas.setAttribute('role', 'img')
   drawn.canvas.setAttribute('aria-label', t('characters.roster.title'))
   el.replaceChildren(drawn.canvas)
@@ -144,7 +146,12 @@ const pngSize = computed(() =>
 </script>
 
 <template>
-  <UiModal :open="open" :title="$t('characters.roster.title')" size="wide" @close="$emit('close')">
+  <UiModal
+    :open="open"
+    :title="$t('characters.roster.title')"
+    size="detail"
+    @close="$emit('close')"
+  >
     <template #heading>
       <h2 class="mr-auto min-w-0 flex-1 truncate text-lg font-semibold">
         {{ $t('characters.roster.title') }}
@@ -167,7 +174,7 @@ const pngSize = computed(() =>
     </template>
 
     <!-- The card: the canvas the PNG is encoded from, scaled to fit -->
-    <div v-show="shown" ref="host" class="w-full overflow-hidden rounded-xl" />
+    <div v-show="shown" ref="host" class="w-full" />
     <UiSkeleton v-if="!shown" class="aspect-[16/11] w-full rounded-xl" />
   </UiModal>
 </template>
