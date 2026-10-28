@@ -108,5 +108,6 @@
     "lastUpload": "อัปโหลดล่าสุด {time}",
     "none": "ยังไม่ได้เชื่อมต่ออุปกรณ์ Capture",
     "get": "ดาวน์โหลด Teyvat.me Capture"
-  }
+  },
+  "lastSync": "ซิงก์ {time}"
 }

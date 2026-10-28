@@ -1,7 +1,5 @@
 {
   "title": "Conquistas",
-  "newestCapture": "Captura mais recente",
-  "newestCaptureTitle": "Captura mais recente: {time}",
   "notCaptured": "Não capturado",
   "notCapturedTitle": "Abra o menu de Conquistas no jogo com o Teyvat.me Capture aberto para capturá-las",
   "importTitle": "Importar conquistas concluídas de uma exportação do Seelie, um backup do paimon.moe ou um arquivo do stardb / Teyvat.me Capture",

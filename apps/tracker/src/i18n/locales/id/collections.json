@@ -1,7 +1,5 @@
 {
   "title": "Koleksi",
-  "newestCapture": "Tangkapan terbaru",
-  "newestCaptureTitle": "Tangkapan terbaru: {time}",
   "notCaptured": "Belum tertangkap",
   "notCapturedTitle": "Belum ada tangkapan dengan koleksi: Teyvat.me Capture membacanya dari game saat login",
   "loadFailed": "Gagal memuat",

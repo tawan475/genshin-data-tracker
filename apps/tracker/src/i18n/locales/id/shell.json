@@ -108,5 +108,6 @@
     "lastUpload": "Unggahan terakhir {time}",
     "none": "Belum ada perangkat Capture terhubung",
     "get": "Dapatkan Teyvat.me Capture"
-  }
+  },
+  "lastSync": "Disinkronkan {time}"
 }

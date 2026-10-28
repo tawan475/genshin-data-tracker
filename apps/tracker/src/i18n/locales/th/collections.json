@@ -1,7 +1,5 @@
 {
   "title": "คอลเลกชัน",
-  "newestCapture": "การสแกนล่าสุด",
-  "newestCaptureTitle": "การสแกนล่าสุด: {time}",
   "notCaptured": "ยังไม่ได้สแกน",
   "notCapturedTitle": "ยังไม่มีการจับข้อมูลที่มีคอลเลกชัน: Teyvat.me Capture จะอ่านจากเกมตอนเข้าสู่ระบบ",
   "loadFailed": "โหลดไม่สำเร็จ",

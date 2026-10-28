@@ -43,6 +43,8 @@ const kinds = computed(() =>
     const known = props.catalog.data[k].map((r) => ({
       id: r.id,
       name: nameOf(props.catalog, k, r.id),
+      // The made item's icon (game data v7.1.27).
+      icon: String(r.icon ?? ''),
       have: owned.has(r.id),
     }))
     const knownIds = new Set(known.map((r) => r.id))
@@ -50,7 +52,7 @@ const kinds = computed(() =>
       ...known,
       ...[...owned]
         .filter((id) => !knownIds.has(id))
-        .map((id) => ({ id, name: idLabel(id), have: true })),
+        .map((id) => ({ id, name: idLabel(id), icon: '', have: true })),
     ]
     return {
       kind: k,
@@ -71,6 +73,7 @@ const shown = computed<GridEntry[]>(() =>
       return {
         id: e.id,
         name: e.name,
+        icon: e.icon,
         missing: !e.have,
         title: href ? `${e.name} · ${t('collections.guide')}` : e.name,
         href,

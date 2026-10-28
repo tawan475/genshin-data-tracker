@@ -1,8 +1,6 @@
 {
   "title": "Anekdot",
   "area": "Area {id}",
-  "newestCapture": "Tangkapan terbaru",
-  "newestCaptureTitle": "Tangkapan terbaru: {time}",
   "notCaptured": "Belum tertangkap",
   "notCapturedTitle": "Belum ada tangkapan yang berisi anekdot: Teyvat.me Capture merekamnya dari game",
   "loadFailed": "Gagal memuat",

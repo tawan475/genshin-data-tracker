@@ -69,7 +69,8 @@ const part = computed(() => {
 </script>
 
 <template>
-  <div>
+  <!-- relative isolate: a tab's PageBackdrop sits under the whole page (Music) -->
+  <div class="relative isolate">
     <PageHeader :title="title" />
 
     <template v-if="tab">

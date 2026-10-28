@@ -1,6 +1,5 @@
 {
   "title": "วัสดุ",
-  "newestSnapshot": "สแนปช็อตล่าสุด",
   "since": "ตั้งแต่ {date}",
   "oneSnapshot": "มีสแนปช็อตเดียว",
   "changesTitle": "การเปลี่ยนแปลง {hint}",

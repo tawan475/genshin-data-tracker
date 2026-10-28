@@ -1,7 +1,5 @@
 {
   "title": "Obiettivi",
-  "newestCapture": "Ultima cattura",
-  "newestCaptureTitle": "Ultima cattura: {time}",
   "notCaptured": "Non catturati",
   "notCapturedTitle": "Apri il menu Obiettivi nel gioco mentre Teyvat.me Capture è attivo per catturarli",
   "importTitle": "Importa gli obiettivi completati da un'esportazione di Seelie, un backup di paimon.moe o un file stardb / Teyvat.me Capture",

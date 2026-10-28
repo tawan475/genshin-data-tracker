@@ -1,6 +1,5 @@
 {
   "title": "材料",
-  "newestSnapshot": "最新快照",
   "since": "自 {date} 起",
   "oneSnapshot": "仅有一个快照",
   "changesTitle": "变化（{hint}）",

@@ -1,7 +1,5 @@
 {
   "title": "Sammlungen",
-  "newestCapture": "Neueste Erfassung",
-  "newestCaptureTitle": "Neueste Erfassung: {time}",
   "notCaptured": "Nicht erfasst",
   "notCapturedTitle": "Noch keine Aufnahme hat Sammlungen: Teyvat.me Capture liest sie beim Einloggen aus dem Spiel",
   "loadFailed": "Laden fehlgeschlagen",

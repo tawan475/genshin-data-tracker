@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Deseo más reciente, hora del juego",
-    "synced": "Sincronizado {ago}",
-    "syncedTitle": "Deseos nuevos guardados {time}",
     "syncHelp": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida): Teyvat.me Capture sincroniza todos los gachapones y luego cada deseo nuevo mientras dure la clave (~24 h). El enlace de deseos del juego también trae los últimos seis meses. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",
     "empty": "Aún no hay deseos",
     "emptyBody": "Abre Gachapón → Historial en el juego una vez al día (puedes cerrarlo enseguida) o importa con el enlace de deseos del juego. Más de 6 meses: importa una copia de paimon.moe o un archivo UIGF.",

@@ -592,7 +592,6 @@
     "notExported": "未导出",
     "exported": "已导出 Seelie 文件",
     "view": "视图",
-    "newest": "最新抓取",
     "noCapture": "无抓取数据：数量为手动输入",
     "import": "导入",
     "replaced": "{n} 处手动修改已被抓取数据取代",

@@ -108,5 +108,6 @@
     "lastUpload": "Último envio {time}",
     "none": "Nenhum dispositivo do Capture vinculado",
     "get": "Baixar o Teyvat.me Capture"
-  }
+  },
+  "lastSync": "Sincronizado {time}"
 }

@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Tiro più recente, ora del gioco",
-    "synced": "Sincronizzato {ago}",
-    "syncedTitle": "Nuovi desideri salvati {time}",
     "syncHelp": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito): Teyvat.me Capture sincronizza ogni banner, poi ogni nuovo desiderio finché dura la chiave (~24 h). Il link dei desideri del gioco porta anche gli ultimi sei mesi. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",
     "empty": "Ancora nessun desiderio",
     "emptyBody": "Apri Desiderio → Cronologia nel gioco una volta al giorno (puoi chiuderla subito), o importa con il link dei desideri del gioco. Oltre i 6 mesi: importa un backup di paimon.moe o un file UIGF.",

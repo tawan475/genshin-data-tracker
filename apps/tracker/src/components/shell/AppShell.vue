@@ -29,6 +29,7 @@ import AccountSwitcher from './AccountSwitcher.vue'
 import AppearanceButton from './AppearanceButton.vue'
 import CaptureButton from './CaptureButton.vue'
 import DiscordButton from './DiscordButton.vue'
+import LastSync from './LastSync.vue'
 import { t } from '@/i18n'
 import { ACCOUNT_SECTIONS, NAV_PARENT, STAFF_SECTIONS, pageTitle } from './nav'
 import { USER_SETTINGS_DEFAULTS } from '@gdt/shared/settings'
@@ -400,6 +401,7 @@ const footButton =
             <span v-if="!current.name && !current.uid" class="truncate">{{
               accounts.displayName(current)
             }}</span>
+            <LastSync :account="current" />
           </span>
         </template>
         <div class="ml-auto flex shrink-0 items-center gap-2">
@@ -417,7 +419,10 @@ const footButton =
         </div>
       </header>
 
-      <main class="min-w-0 flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <!-- overflow-x-clip: page art reaching past the content (PageBackdrop) never scrolls sideways -->
+      <main
+        class="min-w-0 flex-1 overflow-x-clip pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0"
+      >
         <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 lg:py-8">
           <slot />
         </div>

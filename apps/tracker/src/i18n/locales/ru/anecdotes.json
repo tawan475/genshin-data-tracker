@@ -1,8 +1,6 @@
 {
   "title": "Истории",
   "area": "Область {id}",
-  "newestCapture": "Последний снимок",
-  "newestCaptureTitle": "Последний снимок: {time}",
   "notCaptured": "Не снято",
   "notCapturedTitle": "Ни в одном снимке пока нет историй: Teyvat.me Capture записывает их из игры",
   "loadFailed": "Не удалось загрузить",

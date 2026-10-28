@@ -108,5 +108,6 @@
     "lastUpload": "Lần tải lên cuối {time}",
     "none": "Chưa liên kết thiết bị Capture nào",
     "get": "Tải Teyvat.me Capture"
-  }
+  },
+  "lastSync": "Đồng bộ {time}"
 }

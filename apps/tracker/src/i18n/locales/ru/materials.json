@@ -1,6 +1,5 @@
 {
   "title": "Материалы",
-  "newestSnapshot": "Последний снимок",
   "since": "с {date}",
   "oneSnapshot": "Только один снимок",
   "changesTitle": "Изменения {hint}",

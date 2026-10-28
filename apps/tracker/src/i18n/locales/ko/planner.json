@@ -592,7 +592,6 @@
     "notExported": "내보내지 않음",
     "exported": "Seelie용으로 내보냄",
     "view": "보기",
-    "newest": "최신 캡처",
     "noCapture": "캡처 없음: 수량은 직접 입력한 값",
     "import": "가져오기",
     "replaced": "직접 수정 {n}개가 캡처로 대체됨",

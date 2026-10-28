@@ -1,9 +1,12 @@
 <script setup lang="ts">
 /**
  * Game art behind the top of a page: a faint tilted wall of round images
- * fading into the page's ground (design "Page backdrop", 2026-10-27). The
- * parent must be `relative isolate`; this sits under its content. Made for
- * the Music Game page's song covers, meant for other pages' art later.
+ * fading into the page's ground (design "Page backdrop", 2026-10-27). It
+ * starts right under the top bar and reaches a little past the content on
+ * both sides, fading out there (the user: content `xl`, art about `2xl`), so
+ * the page's root view (straight inside the shell's content box) must be
+ * `relative isolate`; this sits under its content. Made for the Music Game
+ * page's song covers, meant for other pages' art later.
  */
 defineProps<{ images: readonly string[] }>()
 </script>
@@ -18,15 +21,22 @@ defineProps<{ images: readonly string[] }>()
 </template>
 
 <style scoped>
+/* The shell's content box: py-6, lg:py-8 (AppShell); main clips what passes its sides. */
 .page-backdrop {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: -5rem;
+  left: -6rem;
+  right: -6rem;
+  top: -1.5rem;
   height: 560px;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent, #000 6rem, #000 calc(100% - 6rem), transparent);
+}
+@media (min-width: 1024px) {
+  .page-backdrop {
+    top: -2rem;
+  }
 }
 .wall {
   position: absolute;

@@ -21,7 +21,7 @@ async function loadMaterials(
 
 <script setup lang="ts">
 import { computed, ref, shallowRef, watch } from 'vue'
-import { Clock, Package, Upload } from 'lucide-vue-next'
+import { Package, Upload } from 'lucide-vue-next'
 import { useChartRange } from '@/components/charts/use-chart-range'
 import MaterialDetail from '@/components/materials-page/MaterialDetail.vue'
 import MaterialsBag from '@/components/materials-page/MaterialsBag.vue'
@@ -62,7 +62,7 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { loadMaterialsHistory, type MaterialsHistory } from '@/data/materials'
 import { useResource } from '@/data/use-resource'
-import { formatDate, formatDateTime, formatRelative } from '@/lib/format'
+import { formatDate } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { preloadMaterialNames, preloadMaterialRarities } from '@/utils/materials'
 import { t } from '@/i18n'
@@ -149,14 +149,6 @@ const wallet = computed<WalletItem[]>(() => {
   return list
 })
 
-const newest = computed(() => {
-  const times = history.value?.times
-  const at = times?.[times.length - 1]
-  return at === undefined
-    ? null
-    : { iso: new Date(at).toISOString(), ago: formatRelative(at), title: formatDateTime(at) }
-})
-
 // ------------------------------------------------------------------ inventory editor
 
 const planning = readOnly ? null : usePlannerModel(account)
@@ -229,13 +221,6 @@ const importTo = computed(() => ({
 
 <template>
   <PageHeader :title="$t('materials.title')">
-    <template v-if="newest" #meta>
-      <p class="flex items-center gap-1.5 text-text-secondary">
-        <Clock class="size-4" aria-hidden="true" />
-        <span class="sr-only">{{ $t('materials.newestSnapshot') }}</span>
-        <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
-      </p>
-    </template>
     <template v-if="history" #actions>
       <span :title="$t('materials.changesTitle', { hint })">
         <UiSelect

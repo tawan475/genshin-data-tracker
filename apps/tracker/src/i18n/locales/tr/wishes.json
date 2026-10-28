@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "En yeni dilek, oyun saati",
-    "synced": "{ago} senkronize edildi",
-    "syncedTitle": "Yeni dilekler {time} saklandı",
     "syncHelp": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin): Teyvat.me Capture her afişi, ardından anahtar geçerli kaldıkça (~24 sa) her yeni dileği senkronize eder. Oyunun dilek bağlantısı son altı ayı da getirir. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",
     "empty": "Henüz dilek yok",
     "emptyBody": "Oyunda günde bir kez Dilek → Geçmiş'i aç (hemen kapatabilirsin) veya oyunun dilek bağlantısıyla içe aktar. 6 aydan eski: bir paimon.moe yedeği veya UIGF dosyası içe aktar.",

@@ -1,8 +1,6 @@
 {
   "title": "Anécdotas",
   "area": "Zona {id}",
-  "newestCapture": "Captura más reciente",
-  "newestCaptureTitle": "Captura más reciente: {time}",
   "notCaptured": "Sin capturar",
   "notCapturedTitle": "Ninguna captura tiene anécdotas todavía: Teyvat.me Capture las registra desde el juego",
   "loadFailed": "Error al cargar",

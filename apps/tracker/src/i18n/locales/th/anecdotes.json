@@ -1,8 +1,6 @@
 {
   "title": "เกร็ดน่ารู้",
   "area": "พื้นที่ {id}",
-  "newestCapture": "การสแกนล่าสุด",
-  "newestCaptureTitle": "การสแกนล่าสุด: {time}",
   "notCaptured": "ยังไม่ได้สแกน",
   "notCapturedTitle": "ยังไม่มีการสแกนใดที่มีเกร็ดน่ารู้: Teyvat.me Capture จะบันทึกจากในเกม",
   "loadFailed": "โหลดไม่สำเร็จ",

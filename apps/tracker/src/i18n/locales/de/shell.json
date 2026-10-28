@@ -108,5 +108,6 @@
     "lastUpload": "Letzter Upload {time}",
     "none": "Kein Capture-Gerät verbunden",
     "get": "Teyvat.me Capture holen"
-  }
+  },
+  "lastSync": "Synchronisiert {time}"
 }

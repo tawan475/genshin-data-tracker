@@ -1,7 +1,5 @@
 {
   "title": "Colecciones",
-  "newestCapture": "Captura más reciente",
-  "newestCaptureTitle": "Captura más reciente: {time}",
   "notCaptured": "Sin capturar",
   "notCapturedTitle": "Ninguna captura tiene colecciones aún: Teyvat.me Capture las lee del juego al iniciar sesión",
   "loadFailed": "Error al cargar",

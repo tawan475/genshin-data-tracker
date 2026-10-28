@@ -1,7 +1,5 @@
 {
   "title": "Collections",
-  "newestCapture": "Capture la plus récente",
-  "newestCaptureTitle": "Capture la plus récente : {time}",
   "notCaptured": "Non capturé",
   "notCapturedTitle": "Aucune capture n'a encore de collections : Teyvat.me Capture les lit dans le jeu à la connexion",
   "loadFailed": "Échec du chargement",

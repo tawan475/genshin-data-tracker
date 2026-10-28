@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
-import { CheckCheck, Clock, Info, SearchX } from 'lucide-vue-next'
+import { CheckCheck, Info, SearchX } from 'lucide-vue-next'
 import { anecdoteText, loadAnecdotes } from '@gdt/game-data'
 import {
   DEFAULT_ANECDOTE_FILTERS,
@@ -26,7 +26,7 @@ import { loadCapturedAnecdotes } from '@/data/anecdote-capture'
 import { useResource } from '@/data/use-resource'
 import { loadGameIcons } from '@/lib/assets'
 import { readStorage, writeStorage } from '@/lib/storage'
-import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import { t } from '@/i18n'
 import { locale } from '@/i18n/locale'
 import { useAccount, useReadOnly } from '@/views/account/context'
@@ -96,12 +96,8 @@ const areaTabs = computed<AreaTab[]>(
     })) ?? [],
 )
 
-const newestCapture = computed(() => {
-  const at = captured.value?.takenAt
-  return at == null
-    ? null
-    : { iso: new Date(at).toISOString(), ago: formatRelative(at), title: formatDateTime(at) }
-})
+/** When the account last synced is in the top bar; here only that it never was. */
+const notCaptured = computed(() => captured.value?.takenAt == null)
 
 // ------------------------------------------------------------------ filters
 
@@ -169,18 +165,8 @@ function unmark(id: number) {
 
 <template>
   <div>
-    <div v-if="ready && captured" class="mb-4">
-      <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
-        <Clock class="size-4" aria-hidden="true" />
-        <span class="sr-only">{{ $t('anecdotes.newestCapture') }}</span>
-        <time
-          :datetime="newestCapture.iso"
-          :title="$t('anecdotes.newestCaptureTitle', { time: newestCapture.title })"
-          >{{ newestCapture.ago }}</time
-        >
-      </p>
+    <div v-if="ready && captured && notCaptured" class="mb-4">
       <p
-        v-else
         class="flex items-center gap-1.5 text-text-secondary"
         :title="$t('anecdotes.notCapturedTitle')"
       >

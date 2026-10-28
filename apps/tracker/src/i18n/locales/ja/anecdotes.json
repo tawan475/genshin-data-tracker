@@ -1,8 +1,6 @@
 {
   "title": "秘話",
   "area": "エリア {id}",
-  "newestCapture": "最新キャプチャ",
-  "newestCaptureTitle": "最新キャプチャ：{time}",
   "notCaptured": "未キャプチャ",
   "notCapturedTitle": "秘話を含むキャプチャはまだありません：Teyvat.me Capture がゲームから記録します",
   "loadFailed": "読み込み失敗",

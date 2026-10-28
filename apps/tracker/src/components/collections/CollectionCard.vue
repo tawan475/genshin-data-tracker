@@ -4,13 +4,13 @@ import type { RouteLocationRaw } from 'vue-router'
 import { ChevronRight } from 'lucide-vue-next'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import type { CollectionFigure } from '@/data/collection-summary'
-import { formatNumber, formatRelative, formatDateTime } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import { t } from '@/i18n'
 
 /**
  * One card of the Collections hub: the collection's name, its figure (have
- * of total, a percent, or a count with its label) and when it was captured. Opens the
- * collection's page.
+ * of total, a percent, or a count with its label), or that it was never captured (when
+ * the account last synced is in the top bar). Opens the collection's page.
  */
 const props = defineProps<{
   to: RouteLocationRaw
@@ -26,11 +26,6 @@ const percent = computed(() =>
   props.figure && 'total' in props.figure && props.figure.total > 0
     ? Math.floor((props.figure.have / props.figure.total) * 100)
     : null,
-)
-const time = computed(() =>
-  props.takenAt == null
-    ? null
-    : { ago: formatRelative(props.takenAt), title: formatDateTime(props.takenAt) },
 )
 </script>
 
@@ -84,14 +79,10 @@ const time = computed(() =>
     <span v-else class="mt-auto" />
 
     <span
-      v-if="figure !== undefined"
+      v-if="figure !== undefined && takenAt == null"
       class="truncate text-xs text-text-muted"
-      :title="
-        time
-          ? t('collections.newestCaptureTitle', { time: time.title })
-          : t('collections.notCapturedTitle')
-      "
-      >{{ time ? time.ago : t('collections.notCaptured') }}</span
+      :title="t('collections.notCapturedTitle')"
+      >{{ t('collections.notCaptured') }}</span
     >
   </RouterLink>
 </template>

@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Vœu le plus récent, heure du jeu",
-    "synced": "Synchronisé {ago}",
-    "syncedTitle": "Nouveaux vœux enregistrés {time}",
     "syncHelp": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt) : Teyvat.me Capture synchronise chaque bannière, puis chaque nouveau vœu tant que la clé dure (~24 h). Le lien de vœux du jeu apporte aussi les six derniers mois. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",
     "empty": "Aucun vœu",
     "emptyBody": "Ouvrez Vœux → Historique dans le jeu une fois par jour (vous pouvez le fermer aussitôt), ou importez avec le lien de vœux du jeu. Au-delà de 6 mois : importez une sauvegarde paimon.moe ou un fichier UIGF.",

@@ -1,6 +1,5 @@
 {
   "title": "Materialien",
-  "newestSnapshot": "Neuester Snapshot",
   "since": "seit {date}",
   "oneSnapshot": "Nur ein Snapshot",
   "changesTitle": "Änderungen {hint}",

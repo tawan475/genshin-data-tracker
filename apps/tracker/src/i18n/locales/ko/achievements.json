@@ -1,7 +1,5 @@
 {
   "title": "업적",
-  "newestCapture": "최신 캡처",
-  "newestCaptureTitle": "최신 캡처: {time}",
   "notCaptured": "캡처 없음",
   "notCapturedTitle": "Teyvat.me Capture 실행 중에 게임의 업적 메뉴를 열면 캡처됩니다",
   "importTitle": "Seelie 내보내기, paimon.moe 백업 또는 stardb / Teyvat.me Capture 파일에서 완료한 업적 가져오기",

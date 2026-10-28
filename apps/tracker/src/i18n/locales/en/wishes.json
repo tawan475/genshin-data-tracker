@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Newest pull, game clock",
-    "synced": "Synced {ago}",
-    "syncedTitle": "New wishes stored {time}",
     "syncHelp": "Open Wish → History in game once a day (you can close it right away): Teyvat.me Capture syncs every banner, then each new wish while the key lasts (~24 h). The game's wish link brings the last six months too. Older than 6 months: import a paimon.moe backup or UIGF file.",
     "empty": "No wishes yet",
     "emptyBody": "Open Wish → History in game once a day (you can close it right away), or import with the game's wish link. Older than 6 months: import a paimon.moe backup or UIGF file.",

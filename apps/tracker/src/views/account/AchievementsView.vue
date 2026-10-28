@@ -9,7 +9,7 @@ import {
   shallowRef,
   watch,
 } from 'vue'
-import { CheckCheck, Clock, FileUp, Info, SearchX } from 'lucide-vue-next'
+import { CheckCheck, FileUp, Info, SearchX } from 'lucide-vue-next'
 import { achievementText, loadAchievements } from '@gdt/game-data'
 import {
   DEFAULT_ACHIEVEMENT_FILTERS,
@@ -46,7 +46,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { NO_CAPTURED_ACHIEVEMENTS, loadCapturedAchievements } from '@/data/achievement-capture'
 import { useResource } from '@/data/use-resource'
 import { gameIcon, loadGameIcons } from '@/lib/assets'
-import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import { readJson, writeJson } from '@/lib/storage'
 import { t } from '@/i18n'
 import { locale } from '@/i18n/locale'
@@ -169,12 +169,8 @@ const listedCategories = computed(() =>
 )
 const versions = computed(() => achievementVersions(entries.value))
 
-const newestCapture = computed(() => {
-  const at = captured.value?.takenAt
-  return at == null
-    ? null
-    : { iso: new Date(at).toISOString(), ago: formatRelative(at), title: formatDateTime(at) }
-})
+/** When the account last synced is in the top bar; here only that it never was. */
+const notCaptured = computed(() => captured.value?.takenAt == null)
 
 // ------------------------------------------------------------------ filters
 
@@ -407,18 +403,8 @@ async function importIds(ids: number[]): Promise<boolean> {
 <template>
   <div>
     <PageHeader :title="$t('achievements.title')" bare>
-      <template v-if="ready && captured" #meta>
-        <p v-if="newestCapture" class="flex items-center gap-1.5 text-text-secondary">
-          <Clock class="size-4" aria-hidden="true" />
-          <span class="sr-only">{{ $t('achievements.newestCapture') }}</span>
-          <time
-            :datetime="newestCapture.iso"
-            :title="$t('achievements.newestCaptureTitle', { time: newestCapture.title })"
-            >{{ newestCapture.ago }}</time
-          >
-        </p>
+      <template v-if="ready && captured && notCaptured" #meta>
         <p
-          v-else
           class="flex items-center gap-1.5 text-text-secondary"
           :title="$t('achievements.notCapturedTitle')"
         >

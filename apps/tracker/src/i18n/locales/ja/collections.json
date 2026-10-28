@@ -1,7 +1,5 @@
 {
   "title": "コレクション",
-  "newestCapture": "最新キャプチャ",
-  "newestCaptureTitle": "最新キャプチャ：{time}",
   "notCaptured": "未キャプチャ",
   "notCapturedTitle": "コレクションを含むキャプチャはまだありません：Teyvat.me Capture がログイン時にゲームから読み取ります",
   "loadFailed": "読み込み失敗",

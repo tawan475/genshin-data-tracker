@@ -1,8 +1,6 @@
 {
   "title": "Anedotas",
   "area": "Área {id}",
-  "newestCapture": "Captura mais recente",
-  "newestCaptureTitle": "Captura mais recente: {time}",
   "notCaptured": "Não capturado",
   "notCapturedTitle": "Nenhuma captura tem anedotas ainda: o Teyvat.me Capture as registra do jogo",
   "loadFailed": "Falha ao carregar",

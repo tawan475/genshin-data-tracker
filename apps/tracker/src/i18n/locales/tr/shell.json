@@ -108,5 +108,6 @@
     "lastUpload": "Son yükleme {time}",
     "none": "Bağlı Capture cihazı yok",
     "get": "Teyvat.me Capture’ı indir"
-  }
+  },
+  "lastSync": "{time} senkronize edildi"
 }

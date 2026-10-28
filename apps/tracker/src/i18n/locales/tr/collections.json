@@ -1,7 +1,5 @@
 {
   "title": "Koleksiyonlar",
-  "newestCapture": "En yeni tarama",
-  "newestCaptureTitle": "En yeni tarama: {time}",
   "notCaptured": "Taranmadı",
   "notCapturedTitle": "Henüz koleksiyon içeren bir yakalama yok: Teyvat.me Capture bunları girişte oyundan okur",
   "loadFailed": "Yüklenemedi",

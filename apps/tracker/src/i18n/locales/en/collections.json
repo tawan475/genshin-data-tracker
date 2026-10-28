@@ -1,7 +1,5 @@
 {
   "title": "Collections",
-  "newestCapture": "Newest capture",
-  "newestCaptureTitle": "Newest capture: {time}",
   "notCaptured": "Not captured",
   "notCapturedTitle": "No capture has collections yet: Teyvat.me Capture records them from the game at login",
   "loadFailed": "Load failed",

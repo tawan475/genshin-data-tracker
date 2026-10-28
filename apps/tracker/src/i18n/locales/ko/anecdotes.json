@@ -1,8 +1,6 @@
 {
   "title": "여행 일화집",
   "area": "지역 {id}",
-  "newestCapture": "최신 캡처",
-  "newestCaptureTitle": "최신 캡처: {time}",
   "notCaptured": "캡처 없음",
   "notCapturedTitle": "아직 일화가 담긴 캡처가 없습니다. Teyvat.me Capture이 게임에서 기록합니다",
   "loadFailed": "불러오기 실패",

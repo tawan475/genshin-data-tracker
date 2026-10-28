@@ -1,8 +1,6 @@
 {
   "title": "Aneddoti",
   "area": "Area {id}",
-  "newestCapture": "Ultima cattura",
-  "newestCaptureTitle": "Ultima cattura: {time}",
   "notCaptured": "Non catturati",
   "notCapturedTitle": "Nessuna cattura contiene ancora aneddoti: Teyvat.me Capture li registra dal gioco",
   "loadFailed": "Caricamento non riuscito",

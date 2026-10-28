@@ -1,7 +1,5 @@
 {
   "title": "ความสำเร็จ",
-  "newestCapture": "การสแกนล่าสุด",
-  "newestCaptureTitle": "การสแกนล่าสุด: {time}",
   "notCaptured": "ยังไม่ได้สแกน",
   "notCapturedTitle": "เปิดเมนูความสำเร็จในเกมขณะที่ Teyvat.me Capture ทำงานเพื่อสแกน",
   "importTitle": "นำเข้าความสำเร็จที่ทำแล้วจากไฟล์ส่งออกของ Seelie, ไฟล์สำรองของ paimon.moe หรือไฟล์ stardb / Teyvat.me Capture",

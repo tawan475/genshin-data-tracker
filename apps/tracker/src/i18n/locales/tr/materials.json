@@ -1,6 +1,5 @@
 {
   "title": "Malzemeler",
-  "newestSnapshot": "En yeni anlık görüntü",
   "since": "{date} tarihinden beri",
   "oneSnapshot": "Yalnızca bir anlık görüntü",
   "changesTitle": "Değişimler {hint}",

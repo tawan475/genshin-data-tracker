@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Oração mais recente, relógio do jogo",
-    "synced": "Sincronizado {ago}",
-    "syncedTitle": "Novas Orações armazenadas {time}",
     "syncHelp": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida): o Teyvat.me Capture sincroniza todos os banners e depois cada Oração nova enquanto a chave durar (~24 h). O link de Orações do jogo também traz os últimos seis meses. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",
     "empty": "Nenhuma Oração ainda",
     "emptyBody": "Abra Oração → Histórico no jogo uma vez por dia (pode fechar logo em seguida), ou importe com o link de Orações do jogo. Mais de 6 meses atrás: importe um backup do paimon.moe ou um arquivo UIGF.",

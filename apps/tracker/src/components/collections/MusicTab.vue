@@ -94,7 +94,7 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
 
 <template>
   <NotCaptured v-if="!captured" :title="$t('collections.tabs.music')" />
-  <div v-else class="relative isolate flex flex-col gap-4">
+  <div v-else class="flex flex-col gap-4">
     <PageBackdrop :images="wall" />
     <ul
       class="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4"
@@ -297,9 +297,13 @@ const cover = (icon: string) => (icon ? giCdnArt(`${icon}_S`) : '')
 .song .art {
   position: absolute;
   z-index: -1;
-  inset: -10px;
-  width: calc(100% + 20px);
-  height: calc(100% + 20px);
+  /* The cover is round: a square wider than the card's diagonal keeps its edge outside the card. */
+  top: 50%;
+  left: 50%;
+  width: 125%;
+  aspect-ratio: 1;
+  max-width: none;
+  transform: translate(-50%, -50%);
   object-fit: cover;
   pointer-events: none;
   filter: blur(5px) saturate(1.2);

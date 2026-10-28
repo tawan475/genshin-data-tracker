@@ -108,5 +108,6 @@
     "lastUpload": "마지막 업로드 {time}",
     "none": "연결된 Capture 기기 없음",
     "get": "Teyvat.me Capture 받기"
-  }
+  },
+  "lastSync": "{time} 동기화"
 }

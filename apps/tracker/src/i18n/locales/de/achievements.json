@@ -1,7 +1,5 @@
 {
   "title": "Errungenschaften",
-  "newestCapture": "Neueste Erfassung",
-  "newestCaptureTitle": "Neueste Erfassung: {time}",
   "notCaptured": "Nicht erfasst",
   "notCapturedTitle": "Öffne im Spiel das Menü „Errungenschaften“, während Teyvat.me Capture läuft, um sie zu erfassen",
   "importTitle": "Erledigte Errungenschaften aus einem Seelie-Export, einem paimon.moe-Backup oder einer stardb-/Teyvat.me Capture-Datei importieren",

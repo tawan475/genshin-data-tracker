@@ -1,8 +1,6 @@
 {
   "title": "Giai Thoại",
   "area": "Khu vực {id}",
-  "newestCapture": "Bản ghi mới nhất",
-  "newestCaptureTitle": "Bản ghi mới nhất: {time}",
   "notCaptured": "Chưa ghi",
   "notCapturedTitle": "Chưa bản ghi nào có giai thoại: Teyvat.me Capture ghi lại chúng từ game",
   "loadFailed": "Tải thất bại",

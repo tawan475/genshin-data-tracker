@@ -108,5 +108,6 @@
     "lastUpload": "最終アップロード {time}",
     "none": "Capture の端末が未接続",
     "get": "Teyvat.me Capture を入手"
-  }
+  },
+  "lastSync": "{time}に同期"
 }

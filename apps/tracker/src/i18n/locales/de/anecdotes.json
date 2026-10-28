@@ -1,8 +1,6 @@
 {
   "title": "Anekdoten",
   "area": "Gebiet {id}",
-  "newestCapture": "Neueste Erfassung",
-  "newestCaptureTitle": "Neueste Erfassung: {time}",
   "notCaptured": "Nicht erfasst",
   "notCapturedTitle": "Noch keine Erfassung mit Anekdoten: Teyvat.me Capture liest sie aus dem Spiel",
   "loadFailed": "Laden fehlgeschlagen",

@@ -108,5 +108,6 @@
     "lastUpload": "上次上傳 {time}",
     "none": "未連接 Capture 裝置",
     "get": "取得 Teyvat.me Capture"
-  }
+  },
+  "lastSync": "同步於 {time}"
 }

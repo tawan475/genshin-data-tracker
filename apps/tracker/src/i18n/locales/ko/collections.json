@@ -1,7 +1,5 @@
 {
   "title": "컬렉션",
-  "newestCapture": "최신 캡처",
-  "newestCaptureTitle": "최신 캡처: {time}",
   "notCaptured": "캡처 없음",
   "notCapturedTitle": "수집 정보가 있는 캡처가 아직 없습니다: Teyvat.me Capture가 로그인할 때 게임에서 읽습니다",
   "loadFailed": "불러오기 실패",

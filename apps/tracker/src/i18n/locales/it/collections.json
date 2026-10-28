@@ -1,7 +1,5 @@
 {
   "title": "Collezioni",
-  "newestCapture": "Ultima cattura",
-  "newestCaptureTitle": "Ultima cattura: {time}",
   "notCaptured": "Non catturati",
   "notCapturedTitle": "Nessuna cattura ha ancora collezioni: Teyvat.me Capture le legge dal gioco all'accesso",
   "loadFailed": "Caricamento non riuscito",

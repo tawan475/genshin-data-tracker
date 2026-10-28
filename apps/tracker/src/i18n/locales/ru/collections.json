@@ -1,7 +1,5 @@
 {
   "title": "Коллекции",
-  "newestCapture": "Последний снимок",
-  "newestCaptureTitle": "Последний снимок: {time}",
   "notCaptured": "Не снято",
   "notCapturedTitle": "Ни в одном захвате ещё нет коллекций: Teyvat.me Capture считывает их из игры при входе",
   "loadFailed": "Не удалось загрузить",

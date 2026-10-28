@@ -32,7 +32,6 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import {
   CheckSquare,
-  Clock,
   Eye,
   EyeOff,
   FileInput,
@@ -150,7 +149,7 @@ import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { t } from '@/i18n'
-import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
 import { materialName } from '@/utils/materials'
@@ -1547,12 +1546,6 @@ watch(accountId, () => {
 
 // ------------------------------------------------------------------ chrome
 
-const newest = computed(() => {
-  const at = account.value.latest?.takenAt
-  return at === undefined
-    ? null
-    : { iso: new Date(at).toISOString(), ago: formatRelative(at), title: formatDateTime(at) }
-})
 const importTo = computed(() => ({
   name: 'account-import',
   params: { accountId: account.value.id },
@@ -1593,12 +1586,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :options="TABS"
           :label="$t('planner.view.view')"
         />
-        <p v-if="newest && hasCapture" class="flex items-center gap-1.5">
-          <Clock class="size-4" aria-hidden="true" />
-          <span class="sr-only">{{ $t('planner.view.newest') }}</span>
-          <time :datetime="newest.iso" :title="newest.title">{{ newest.ago }}</time>
-        </p>
-        <p v-else class="flex items-center gap-1.5">
+        <p v-if="!hasCapture || !account.latest" class="flex items-center gap-1.5">
           <Info class="size-4" aria-hidden="true" />
           {{ $t('planner.view.noCapture') }}
           <RouterLink :to="importTo" class="font-medium text-accent-text hover:underline">{{

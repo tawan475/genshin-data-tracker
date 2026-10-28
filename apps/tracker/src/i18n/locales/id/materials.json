@@ -1,6 +1,5 @@
 {
   "title": "Material",
-  "newestSnapshot": "Snapshot terbaru",
   "since": "sejak {date}",
   "oneSnapshot": "Hanya satu snapshot",
   "changesTitle": "Perubahan {hint}",

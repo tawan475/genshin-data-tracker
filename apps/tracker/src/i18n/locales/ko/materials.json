@@ -1,6 +1,5 @@
 {
   "title": "재료",
-  "newestSnapshot": "최신 스냅샷",
   "since": "{date} 이후",
   "oneSnapshot": "스냅샷 1개뿐",
   "changesTitle": "변화 {hint}",

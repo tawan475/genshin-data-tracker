@@ -592,7 +592,6 @@
     "notExported": "Not exported",
     "exported": "Exported for Seelie",
     "view": "View",
-    "newest": "Newest capture",
     "noCapture": "No capture: counts are yours",
     "import": "Import",
     "replaced": "{n} hand edit replaced by the capture | {n} hand edits replaced by the capture",

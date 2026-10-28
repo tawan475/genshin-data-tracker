@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Neuestes Gebet, Spielzeit",
-    "synced": "Synchronisiert {ago}",
-    "syncedTitle": "Neue Gebete gespeichert {time}",
     "syncHelp": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen): Teyvat.me Capture synchronisiert jedes Banner und danach jedes neue Gebet, solange der Schlüssel gilt (~24 Std.). Der Gebetslink des Spiels bringt auch die letzten sechs Monate. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",
     "empty": "Noch keine Gebete",
     "emptyBody": "Öffne einmal am Tag im Spiel Gebet → Verlauf (du kannst ihn gleich wieder schließen) oder importiere über den Gebetslink des Spiels. Älter als 6 Monate: importiere ein paimon.moe-Backup oder eine UIGF-Datei.",

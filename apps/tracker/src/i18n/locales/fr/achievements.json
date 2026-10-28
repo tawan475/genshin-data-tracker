@@ -1,7 +1,5 @@
 {
   "title": "Succès",
-  "newestCapture": "Capture la plus récente",
-  "newestCaptureTitle": "Capture la plus récente : {time}",
   "notCaptured": "Non capturé",
   "notCapturedTitle": "Ouvrez le menu Succès du jeu pendant qu'Teyvat.me Capture tourne pour les capturer",
   "importTitle": "Importer les succès obtenus depuis un export Seelie, une sauvegarde paimon.moe ou un fichier stardb / Teyvat.me Capture",

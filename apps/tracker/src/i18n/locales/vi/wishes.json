@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Lượt mới nhất, theo giờ game",
-    "synced": "Đồng bộ {ago}",
-    "syncedTitle": "Lưu cầu nguyện mới lúc {time}",
     "syncHelp": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay): Teyvat.me Capture đồng bộ mọi banner, rồi từng lượt mới khi khóa còn hiệu lực (~24 giờ). Liên kết cầu nguyện của game cũng lấy được sáu tháng gần nhất. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",
     "empty": "Chưa có lượt cầu nguyện",
     "emptyBody": "Mỗi ngày mở Cầu Nguyện → Lịch Sử trong game một lần (có thể đóng ngay), hoặc nhập bằng liên kết cầu nguyện của game. Cũ hơn 6 tháng: nhập bản sao lưu paimon.moe hoặc tệp UIGF.",

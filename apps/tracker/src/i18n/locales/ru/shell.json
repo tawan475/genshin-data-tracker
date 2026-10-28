@@ -108,5 +108,6 @@
     "lastUpload": "Последняя загрузка {time}",
     "none": "Нет подключённых устройств Capture",
     "get": "Скачать Teyvat.me Capture"
-  }
+  },
+  "lastSync": "Синхронизировано {time}"
 }

@@ -1,34 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Clock, Info } from 'lucide-vue-next'
-import { formatDateTime, formatRelative } from '@/lib/format'
+import { Info } from 'lucide-vue-next'
 
-/** A tab's "newest capture" line: when the part shown was captured, or that it was not. */
-const props = defineProps<{ takenAt: number | null | undefined }>()
-
-const time = computed(() =>
-  props.takenAt == null
-    ? null
-    : {
-        iso: new Date(props.takenAt).toISOString(),
-        ago: formatRelative(props.takenAt),
-        title: formatDateTime(props.takenAt),
-      },
-)
+/**
+ * A tab's note that the part shown was never captured. When the account last
+ * synced is in the top bar, not on each page.
+ */
+defineProps<{ takenAt: number | null | undefined }>()
 </script>
 
 <template>
-  <p v-if="time" class="flex items-center gap-1.5 text-text-secondary">
-    <Clock class="size-4" aria-hidden="true" />
-    <span class="sr-only">{{ $t('collections.newestCapture') }}</span>
-    <time
-      :datetime="time.iso"
-      :title="$t('collections.newestCaptureTitle', { time: time.title })"
-      >{{ time.ago }}</time
-    >
-  </p>
   <p
-    v-else
+    v-if="takenAt == null"
     class="flex items-center gap-1.5 text-text-secondary"
     :title="$t('collections.notCapturedTitle')"
   >

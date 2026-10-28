@@ -4,7 +4,7 @@ import { loadCollections } from '@gdt/game-data/collections'
 import { decodeTasks, type SnapshotResponse, type TasksSection } from '@gdt/shared'
 import { computed, shallowRef, watch } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
-import { Clock, Eye, History, Upload } from 'lucide-vue-next'
+import { History, Upload } from 'lucide-vue-next'
 import ChangeValue from '@/components/overview/ChangeValue.vue'
 import LowRarityStat from '@/components/overview/LowRarityStat.vue'
 import DetailedProgression from '@/components/progression/DetailedProgression.vue'
@@ -39,7 +39,6 @@ import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
 import { travelerGender } from '@/data/traveler'
 import { gameIcon } from '@/lib/assets'
-import { formatDateTime, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useAccount } from './context'
 
@@ -285,41 +284,17 @@ const lowRarity = computed(() => {
 
 interface MetaItem {
   key: string
-  text?: string
+  text: string
   mono?: boolean
-  icon?: typeof Clock
-  label?: string
-  time?: { iso: string; ago: string; title: string }
 }
 
-/** UID · server · [clock] 3 days ago · [eye] 2 hours ago. */
+/** UID · server (when the account last synced is in the top bar). */
 const meta = computed<MetaItem[]>(() => {
   const a = account.value
-  const latest = a.latest
   const items: MetaItem[] = []
   if (a.uid) items.push({ key: 'uid', text: a.uid, mono: true })
   const server = serverLabel(a.server)
   if (server) items.push({ key: 'server', text: server })
-  if (!latest) return items
-  const moment = (ms: number, key: 'overview.lastCapturedAt' | 'overview.seenAgainAt') => ({
-    iso: new Date(ms).toISOString(),
-    ago: formatRelative(ms, nowMs.value),
-    title: t(key, { time: formatDateTime(ms) }),
-  })
-  items.push({
-    key: 'captured',
-    icon: Clock,
-    label: t('overview.lastCaptured'),
-    time: moment(latest.takenAt, 'overview.lastCapturedAt'),
-  })
-  if (latest.lastSeenAt > latest.takenAt) {
-    items.push({
-      key: 'seen',
-      icon: Eye,
-      label: t('overview.seenAgain'),
-      time: moment(latest.lastSeenAt, 'overview.seenAgainAt'),
-    })
-  }
   return items
 })
 
@@ -335,17 +310,7 @@ const importRoute = computed(() => ({
       <p v-if="meta.length" class="mt-1 flex flex-wrap items-center text-text-secondary">
         <template v-for="(item, index) in meta" :key="item.key">
           <span v-if="index" class="px-2" aria-hidden="true">·</span>
-          <span
-            class="inline-flex items-center gap-1.5"
-            :class="item.mono ? 'tabular font-mono' : ''"
-          >
-            <component :is="item.icon" v-if="item.icon" class="size-4" aria-hidden="true" />
-            <span v-if="item.label" class="sr-only">{{ item.label }}</span>
-            <time v-if="item.time" :datetime="item.time.iso" :title="item.time.title">{{
-              item.time.ago
-            }}</time>
-            <template v-else>{{ item.text }}</template>
-          </span>
+          <span :class="item.mono ? 'tabular font-mono' : ''">{{ item.text }}</span>
         </template>
       </p>
     </template>

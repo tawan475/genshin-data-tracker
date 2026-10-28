@@ -1,7 +1,5 @@
 {
   "title": "Achievements",
-  "newestCapture": "Newest capture",
-  "newestCaptureTitle": "Newest capture: {time}",
   "notCaptured": "Not captured",
   "notCapturedTitle": "Open the in-game Achievements menu while Teyvat.me Capture runs to capture them",
   "importTitle": "Import done achievements from a Seelie export, a paimon.moe backup or a stardb / Teyvat.me Capture file",

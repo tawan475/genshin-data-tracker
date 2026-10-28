@@ -1,7 +1,5 @@
 {
   "title": "Достижения",
-  "newestCapture": "Последний снимок",
-  "newestCaptureTitle": "Последний снимок: {time}",
   "notCaptured": "Не снято",
   "notCapturedTitle": "Откройте в игре меню «Достижения», пока работает Teyvat.me Capture, чтобы снять их",
   "importTitle": "Импорт выполненных достижений из экспорта Seelie, резервной копии paimon.moe или файла stardb / Teyvat.me Capture",

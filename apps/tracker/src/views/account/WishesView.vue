@@ -19,7 +19,7 @@ import { useWishStats } from '@/components/wishes/use-wish-stats'
 import { WISH_BANNERS, bannerInfo, formatPity, wishMinute } from '@/components/wishes/wish-labels'
 import { EXPECTED_PITY, PRIMOS_PER_PULL, monthlyPulls, type BannerStats } from '@/data/wish-history'
 import { t } from '@/i18n'
-import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import { loadLatestInventory } from '@/data/account-data'
 import { useResource } from '@/data/use-resource'
 import { useAccount, useReadOnly } from './context'
@@ -86,16 +86,6 @@ const newest = computed(() => {
   for (const pulls of h.banners.values()) time = Math.max(time, pulls.at(-1)?.time ?? -1)
   return time < 0 ? null : wishMinute(time)
 })
-/** When new pulls last arrived, if the server says. */
-const synced = computed(() => {
-  const at = history.value?.updatedAt
-  if (!at) return null
-  return {
-    text: t('wishes.overview.synced', { ago: formatRelative(at) }),
-    title: t('wishes.overview.syncedTitle', { time: formatDateTime(at) }),
-    fresh: Date.now() - at < 26 * 3600 * 1000,
-  }
-})
 
 const ready = computed(() => !!history.value && !!stats.value)
 const loadError = computed(() => wishes.error.value ?? statsError.value)
@@ -119,17 +109,6 @@ const dialog = ref(false)
           >
             <Clock class="size-4" aria-hidden="true" />
             <span class="tabular font-mono">{{ newest }}</span>
-          </span>
-          <span
-            v-if="synced"
-            class="inline-flex items-center gap-2 rounded-full border border-border-default px-3 py-0.5 text-xs"
-            :title="synced.title"
-          >
-            <span
-              class="size-2 rounded-full"
-              :class="synced.fresh ? 'bg-success-text' : 'bg-text-muted'"
-              aria-hidden="true"
-            />{{ synced.text }}
           </span>
         </p>
       </template>

@@ -1,8 +1,6 @@
 {
   "title": "Anecdotes",
   "area": "Area {id}",
-  "newestCapture": "Newest capture",
-  "newestCaptureTitle": "Newest capture: {time}",
   "notCaptured": "Not captured",
   "notCapturedTitle": "No capture has anecdotes yet: Teyvat.me Capture records them from the game",
   "loadFailed": "Load failed",

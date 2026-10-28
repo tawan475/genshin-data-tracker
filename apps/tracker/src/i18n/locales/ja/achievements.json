@@ -1,7 +1,5 @@
 {
   "title": "アチーブメント",
-  "newestCapture": "最新キャプチャ",
-  "newestCaptureTitle": "最新キャプチャ：{time}",
   "notCaptured": "未キャプチャ",
   "notCapturedTitle": "Teyvat.me Capture の実行中にゲーム内のアチーブメント画面を開くとキャプチャされます",
   "importTitle": "Seelie のエクスポート、paimon.moe のバックアップ、または stardb / Teyvat.me Capture のファイルから達成済みアチーブメントをインポートします",

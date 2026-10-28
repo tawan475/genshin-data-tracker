@@ -1,7 +1,5 @@
 {
   "title": "成就",
-  "newestCapture": "最新捕获",
-  "newestCaptureTitle": "最新捕获：{time}",
   "notCaptured": "尚未捕获",
   "notCapturedTitle": "在 Teyvat.me Capture 运行时打开游戏内的成就菜单即可捕获",
   "importTitle": "从 Seelie 导出文件、paimon.moe 备份或 stardb / Teyvat.me Capture 文件导入已完成的成就",

@@ -79,8 +79,6 @@
   },
   "overview": {
     "newestPull": "Pull terbaru, jam game",
-    "synced": "Disinkronkan {ago}",
-    "syncedTitle": "Permohonan baru disimpan {time}",
     "syncHelp": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup): Teyvat.me Capture menyinkronkan setiap banner, lalu setiap permohonan baru selama kuncinya berlaku (~24 jam). Tautan permohonan game juga membawa enam bulan terakhir. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
     "empty": "Belum ada permohonan",
     "emptyBody": "Buka Permohonan → Riwayat di game sekali sehari (bisa langsung ditutup), atau impor dengan tautan permohonan game. Lebih dari 6 bulan: impor cadangan paimon.moe atau file UIGF.",
