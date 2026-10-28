@@ -39,10 +39,11 @@ describe('guidesFor', () => {
         found: true,
       },
       { type: 'kqm', url: 'https://keqingmains.com/raiden/', found: true },
+      // Not listed for this character: the site's index.
       {
         type: 'helper',
         url: 'https://genshin-impact-helper-team.github.io/genshin-builds/',
-        found: true,
+        found: false,
       },
     ])
     expect(links).toEqual([{ url: 'https://example.com/raiden', title: 'Notes' }])
@@ -57,9 +58,20 @@ describe('guidesFor', () => {
     expect(sites.map((s) => [s.url, s.found])).toEqual([
       ['https://www.prydwen.gg/genshin-impact/characters', false],
       ['https://keqingmains.com/#search', false],
-      ['https://genshin-impact-helper-team.github.io/genshin-builds/', true],
+      ['https://genshin-impact-helper-team.github.io/genshin-builds/', false],
     ])
     expect(videos).toEqual([])
+  })
+
+  it("makes each site's page from the key when the entry has no url", () => {
+    const sites = guidesFor('HuTao', {
+      HuTao: [{ type: 'prydwen' }, { type: 'kqm' }, { type: 'helper' }],
+    }).sites.map((s) => s.url)
+    expect(sites).toEqual([
+      'https://www.prydwen.gg/genshin-impact/characters/hu-tao',
+      'https://keqingmains.com/hu-tao/',
+      'https://genshin-impact-helper-team.github.io/genshin-builds/en/hu-tao/',
+    ])
   })
 
   it('reads video ids from watch, youtu.be and shorts links', () => {

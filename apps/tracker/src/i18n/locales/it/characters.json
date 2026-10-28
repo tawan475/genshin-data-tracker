@@ -173,12 +173,6 @@
     "written": "Guide scritte",
     "videos": "Video",
     "videosCount": "Video · {n}",
-    "quickBuild": "Build rapida",
-    "inDepth": "Approfondita",
-    "buildSheet": "Scheda build",
-    "search": "Cerca",
-    "noVideos": "Ancora nessun video scelto per questo personaggio.",
-    "picked": "Scelte a mano per ogni personaggio",
-    "suggest": "Suggerisci una guida"
+    "search": "Cerca"
   }
 }

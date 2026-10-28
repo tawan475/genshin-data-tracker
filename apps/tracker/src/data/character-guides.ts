@@ -1,17 +1,18 @@
 /**
  * Guides per character: the Guides button and section in the character
- * detail (CharacterGuides.vue). Edit `characterGuides` freely, no code
- * needed:
+ * detail (GuidesSection.vue, GuidesDialog.vue). Edit `characterGuides`
+ * freely, no code needed:
  * - `prydwen`, `kqm`, `helper`: the three sites, always shown in that order.
  *   Without `url` a site's page is made from the key in kebab case
  *   (`RaidenShogun` → prydwen.gg/genshin-impact/characters/raiden-shogun,
- *   keqingmains.com/raiden-shogun/); give `url` where the site's page
- *   differs. A character (or site) not listed links to the site's search.
+ *   keqingmains.com/raiden-shogun/, …/genshin-builds/en/raiden-shogun/);
+ *   give `url` where the site's page differs. A character (or site) not
+ *   listed links to the site's search.
  * - `youtube`: a video (`watch?v=`, `youtu.be/` or `shorts/` link) with its
  *   `title` and `channel`; listed in this order.
  * - `link`: any other page, with a `title`; after the three sites.
  * The pages below were checked on 2026-10-28 (Prydwen's character list,
- * KQM's guides and quick guides).
+ * KQM's guides and quick guides, Helper Team's character pages).
  */
 
 export type GuideType = 'prydwen' | 'kqm' | 'helper' | 'youtube' | 'link'
@@ -295,7 +296,10 @@ export const characterGuides: Record<string, Guide[]> = {
   RaidenShogun: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/raiden/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/shogun-raiden/',
+    },
   ],
   Razor: [{ type: 'prydwen' }, { type: 'kqm' }, { type: 'helper' }],
   Rosaria: [{ type: 'prydwen' }, { type: 'kqm' }, { type: 'helper' }],
@@ -342,33 +346,57 @@ export const characterGuides: Record<string, Guide[]> = {
   TravelerAnemo: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/anemo-traveler/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/anemo-traveler/',
+    },
   ],
-  TravelerCryo: [{ type: 'prydwen' }, { type: 'helper' }],
+  TravelerCryo: [
+    { type: 'prydwen' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/cryo-traveler/',
+    },
+  ],
   TravelerDendro: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/q/dendro-traveler-quickguide/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/dendro-traveler/',
+    },
   ],
   TravelerElectro: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/electro-traveler/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/electro-traveler/',
+    },
   ],
   TravelerGeo: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/geo-traveler/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/geo-traveler/',
+    },
   ],
   TravelerHydro: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/q/hydro-traveler-quickguide/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/hydro-traveler/',
+    },
   ],
   TravelerPyro: [
     { type: 'prydwen' },
     { type: 'kqm', url: 'https://keqingmains.com/q/pyro-traveler-quickguide/' },
-    { type: 'helper' },
+    {
+      type: 'helper',
+      url: 'https://genshin-impact-helper-team.github.io/genshin-builds/en/pyro-traveler/',
+    },
   ],
   Varesa: [
     { type: 'prydwen' },
@@ -480,7 +508,7 @@ export function guideSlug(key: string): string {
 function defaultUrl(type: SiteType, key: string): string {
   if (type === 'prydwen') return `${SEARCH.prydwen}/${guideSlug(key)}`
   if (type === 'kqm') return `https://keqingmains.com/${guideSlug(key)}/`
-  return HELPER
+  return `${HELPER}en/${guideSlug(key)}/`
 }
 
 /** A YouTube video's id from a watch, youtu.be or shorts link; null if none. */
@@ -508,7 +536,7 @@ export function guidesFor(
   const entries = table[key] ?? []
   const sites = SITES.map((type): ResolvedSite => {
     const entry = entries.find((guide) => guide.type === type)
-    if (!entry) return { type, url: SEARCH[type], found: type === 'helper' }
+    if (!entry) return { type, url: SEARCH[type], found: false }
     return { type, url: entry.url ?? defaultUrl(type, key), found: true }
   })
   const links = entries.flatMap((guide) =>

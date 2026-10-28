@@ -173,12 +173,6 @@
     "written": "Yazılı rehberler",
     "videos": "Videolar",
     "videosCount": "Videolar · {n}",
-    "quickBuild": "Hızlı build",
-    "inDepth": "Ayrıntılı",
-    "buildSheet": "Build tablosu",
-    "search": "Ara",
-    "noVideos": "Bu karakter için henüz video seçilmedi.",
-    "picked": "Her karakter için elle seçildi",
-    "suggest": "Rehber öner"
+    "search": "Ara"
   }
 }

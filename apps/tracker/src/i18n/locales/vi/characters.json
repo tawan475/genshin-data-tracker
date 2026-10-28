@@ -173,12 +173,6 @@
     "written": "Bài hướng dẫn",
     "videos": "Video",
     "videosCount": "Video · {n}",
-    "quickBuild": "Build nhanh",
-    "inDepth": "Chuyên sâu",
-    "buildSheet": "Bảng build",
-    "search": "Tìm kiếm",
-    "noVideos": "Chưa có video nào được chọn cho nhân vật này.",
-    "picked": "Chọn thủ công cho từng nhân vật",
-    "suggest": "Đề xuất hướng dẫn"
+    "search": "Tìm kiếm"
   }
 }

@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ExternalLink, Link, Play } from 'lucide-vue-next'
+import { ExternalLink, Link } from 'lucide-vue-next'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import type { CharacterGuides } from '@/data/character-guides'
 import { characterIcon } from '@/lib/assets'
-import { GUIDE_SITES, YOUTUBE_RED, pageLabel } from './guide-marks'
+import { GUIDE_SITES, YOUTUBE_LOGO, pageLabel } from './guide-marks'
 
 /**
  * One character's guides (option C of the design, 2026-10-28): the written
  * guides (the three sites, then other links), then the videos picked for
- * them in `data/character-guides.ts`. Every row opens in a new tab.
+ * them in `data/character-guides.ts` (no Videos part without any). Every
+ * row opens in a new tab.
  */
 defineProps<{
   open: boolean
@@ -20,7 +21,7 @@ defineProps<{
 }>()
 defineEmits<{ close: [] }>()
 
-/** Thumbnails that failed: the play mark stands in. */
+/** Thumbnails that failed: YouTube's logo stands in. */
 const broken = ref(new Set<string>())
 </script>
 
@@ -48,15 +49,11 @@ const broken = ref(new Set<string>())
       <ul class="flex flex-col gap-0.5">
         <li v-for="site in guides.sites" :key="site.type">
           <a :href="site.url" target="_blank" rel="noopener noreferrer" class="row">
-            <span class="mark" :style="{ background: GUIDE_SITES[site.type].color }">{{
-              GUIDE_SITES[site.type].letter
-            }}</span>
+            <img :src="GUIDE_SITES[site.type].logo" alt="" class="mark" />
             <span class="flex min-w-0 flex-1 flex-col gap-0.5">
               <span class="flex min-w-0 items-center gap-2 font-semibold">
                 {{ GUIDE_SITES[site.type].name }}
-                <UiBadge>{{
-                  $t(`characters.guides.${site.found ? GUIDE_SITES[site.type].purpose : 'search'}`)
-                }}</UiBadge>
+                <UiBadge v-if="!site.found">{{ $t('characters.guides.search') }}</UiBadge>
               </span>
               <span class="sub">{{ pageLabel(site.url) }}</span>
             </span>
@@ -65,9 +62,7 @@ const broken = ref(new Set<string>())
         </li>
         <li v-for="link in guides.links" :key="link.url">
           <a :href="link.url" target="_blank" rel="noopener noreferrer" class="row">
-            <span class="mark bg-surface-overlay text-text-secondary"
-              ><Link class="size-5" aria-hidden="true"
-            /></span>
+            <span class="mark link-mark"><Link class="size-5" aria-hidden="true" /></span>
             <span class="flex min-w-0 flex-1 flex-col gap-0.5">
               <span class="truncate font-semibold">{{ link.title }}</span>
               <span class="sub">{{ pageLabel(link.url) }}</span>
@@ -77,39 +72,32 @@ const broken = ref(new Set<string>())
         </li>
       </ul>
 
-      <h3 class="label mt-1">{{ $t('characters.guides.videos') }}</h3>
-      <ul v-if="guides.videos.length" class="flex flex-col gap-0.5">
-        <li v-for="video in guides.videos" :key="video.url">
-          <a :href="video.url" target="_blank" rel="noopener noreferrer" class="row">
-            <span class="thumb">
-              <img
-                v-if="!broken.has(video.id)"
-                :src="`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`"
-                alt=""
-                loading="lazy"
-                class="absolute inset-0 size-full object-cover"
-                @error="broken = new Set([...broken, video.id])"
-              />
-              <span v-else class="play" :style="{ background: YOUTUBE_RED }"
-                ><Play class="size-3.5 fill-current" aria-hidden="true"
-              /></span>
-            </span>
-            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span class="video-title" :title="video.title">{{ video.title || video.url }}</span>
-              <span v-if="video.channel" class="sub">{{ video.channel }}</span>
-            </span>
-            <ExternalLink class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
-          </a>
-        </li>
-      </ul>
-      <p v-else class="rounded-lg border border-dashed border-border-strong p-3.5 text-text-muted">
-        {{ $t('characters.guides.noVideos') }}
-      </p>
+      <template v-if="guides.videos.length">
+        <h3 class="label mt-1">{{ $t('characters.guides.videos') }}</h3>
+        <ul class="flex flex-col gap-0.5">
+          <li v-for="video in guides.videos" :key="video.url">
+            <a :href="video.url" target="_blank" rel="noopener noreferrer" class="row">
+              <span class="thumb">
+                <img
+                  v-if="!broken.has(video.id)"
+                  :src="`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`"
+                  alt=""
+                  loading="lazy"
+                  class="absolute inset-0 size-full object-cover"
+                  @error="broken = new Set([...broken, video.id])"
+                />
+                <img v-else :src="YOUTUBE_LOGO" alt="" class="size-8" />
+              </span>
+              <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span class="video-title" :title="video.title">{{ video.title || video.url }}</span>
+                <span v-if="video.channel" class="sub">{{ video.channel }}</span>
+              </span>
+              <ExternalLink class="size-4 shrink-0 text-text-muted" aria-hidden="true" />
+            </a>
+          </li>
+        </ul>
+      </template>
     </div>
-
-    <template #footer>
-      <p class="text-sm text-text-muted">{{ $t('characters.guides.picked') }}</p>
-    </template>
   </UiModal>
 </template>
 
@@ -139,16 +127,18 @@ const broken = ref(new Set<string>())
   background: color-mix(in srgb, var(--color-text-muted) 12%, transparent);
 }
 .mark {
-  display: inline-flex;
   flex: none;
-  align-items: center;
-  justify-content: center;
   width: 2.22rem;
   height: 2.22rem;
+  object-fit: contain;
+}
+.link-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.625rem;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 700;
+  background: var(--color-surface-overlay);
+  color: var(--color-text-secondary);
 }
 .sub {
   overflow: hidden;
@@ -168,15 +158,6 @@ const broken = ref(new Set<string>())
   overflow: hidden;
   border-radius: 0.5rem;
   background: var(--color-surface-overlay);
-}
-.play {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.67rem;
-  height: 1.17rem;
-  border-radius: 0.33rem;
-  color: #fff;
 }
 .video-title {
   display: -webkit-box;

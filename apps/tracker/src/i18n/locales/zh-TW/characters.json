@@ -173,12 +173,6 @@
     "written": "圖文攻略",
     "videos": "影片",
     "videosCount": "影片 · {n}",
-    "quickBuild": "速覽配裝",
-    "inDepth": "深度",
-    "buildSheet": "配裝表",
-    "search": "搜尋",
-    "noVideos": "還沒有為該角色挑選影片。",
-    "picked": "為每個角色手動挑選",
-    "suggest": "推薦攻略"
+    "search": "搜尋"
   }
 }

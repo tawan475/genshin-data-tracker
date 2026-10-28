@@ -173,12 +173,6 @@
     "written": "글 가이드",
     "videos": "영상",
     "videosCount": "영상 · {n}",
-    "quickBuild": "빠른 빌드",
-    "inDepth": "심층",
-    "buildSheet": "빌드 시트",
-    "search": "검색",
-    "noVideos": "이 캐릭터의 영상은 아직 선정되지 않았습니다.",
-    "picked": "캐릭터마다 직접 고름",
-    "suggest": "가이드 제안"
+    "search": "검색"
   }
 }
