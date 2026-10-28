@@ -21,21 +21,34 @@ export const isLocale = (value: unknown): value is Locale =>
 
 /**
  * The browser's languages as one of ours: the first tag whose language we
- * have decides (Chinese: Traditional for Taiwan, Hong Kong, Macau and any
- * Hant tag, else Simplified; `in` is Indonesian's old code); English when
- * none is ours. Kept in step with the inline script in index.html.
+ * have decides; English when none is ours. Chinese (and Cantonese, `yue`):
+ * the script says which (Hant/Hans), else the region (Taiwan, Hong Kong,
+ * Macau read Traditional), else Simplified for `zh` and Traditional for
+ * `yue`. `in` is Indonesian's old code. Kept in step with the inline script
+ * in index.html (`first-paint.test.ts` runs it over the same tags).
  */
 export function detectLocale(languages: readonly string[]): Locale {
   for (const raw of languages) {
-    const tag = raw.toLowerCase()
-    if (tag.startsWith('zh')) {
-      return /hant|-tw|-hk|-mo/.test(tag) ? 'zh-TW' : 'zh-CN'
+    const parts = String(raw).toLowerCase().split(/[-_]/)
+    const base = parts[0]
+    if (base === 'zh' || base === 'yue') {
+      if (parts.includes('hant')) return 'zh-TW'
+      if (parts.includes('hans')) return 'zh-CN'
+      if (parts.some((p) => p === 'tw' || p === 'hk' || p === 'mo')) return 'zh-TW'
+      return base === 'yue' ? 'zh-TW' : 'zh-CN'
     }
-    const base = tag.split(/[-_]/)[0]
     const code = base === 'in' ? 'id' : base
     if (isLocale(code)) return code
   }
   return 'en'
+}
+
+/** The browser's languages, most wanted first (`navigator.language` where the list is missing). */
+export function browserLanguages(
+  nav: Pick<Navigator, 'language' | 'languages'>,
+): readonly string[] {
+  if (nav.languages?.length) return nav.languages
+  return nav.language ? [nav.language] : []
 }
 
 /**

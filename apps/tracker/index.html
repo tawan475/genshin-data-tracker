@@ -38,14 +38,26 @@
           var ours = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'fr', 'ru', 'th', 'vi', 'de', 'id', 'pt', 'it', 'tr']
           if (ours.indexOf(lang) < 0) {
             lang = 'en'
-            var tags = navigator.languages || []
+            var tags =
+              navigator.languages && navigator.languages.length
+                ? navigator.languages
+                : navigator.language
+                  ? [navigator.language]
+                  : []
             for (var i = 0; i < tags.length; i++) {
-              var tag = String(tags[i]).toLowerCase()
-              if (tag.indexOf('zh') === 0) {
-                lang = /hant|-tw|-hk|-mo/.test(tag) ? 'zh-TW' : 'zh-CN'
+              var parts = String(tags[i]).toLowerCase().split(/[-_]/)
+              var base = parts[0]
+              if (base === 'zh' || base === 'yue') {
+                var p = '-' + parts.join('-') + '-'
+                lang = /-hant-/.test(p)
+                  ? 'zh-TW'
+                  : /-hans-/.test(p)
+                    ? 'zh-CN'
+                    : /-(tw|hk|mo)-/.test(p) || base === 'yue'
+                      ? 'zh-TW'
+                      : 'zh-CN'
                 break
               }
-              var base = tag.split(/[-_]/)[0]
               if (base === 'in') base = 'id'
               if (ours.indexOf(base) >= 0) {
                 lang = base

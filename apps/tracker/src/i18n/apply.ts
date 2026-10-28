@@ -1,7 +1,13 @@
 import { readStorage, writeStorage } from '@/lib/storage'
 import { quietTransition } from '@/lib/view-transition'
 import { i18n, setLocale } from './index'
-import { detectLocale, isLocale, type Locale, type LocalePreference } from './locale'
+import {
+  browserLanguages,
+  detectLocale,
+  isLocale,
+  type Locale,
+  type LocalePreference,
+} from './locale'
 
 /**
  * Choosing and showing the language in the browser (the DOM side of
@@ -17,7 +23,15 @@ export function storedPreference(): LocalePreference {
 
 /** The language a preference shows. */
 export function resolveLocale(preference: LocalePreference): Locale {
-  return preference === 'system' ? detectLocale(navigator.languages ?? []) : preference
+  return preference === 'system' ? detectLocale(browserLanguages(navigator)) : preference
+}
+
+/** The preference on screen: `system` follows the browser when its languages change. */
+let shown: LocalePreference | null = null
+if (typeof window !== 'undefined') {
+  window.addEventListener('languagechange', () => {
+    if (shown === 'system') void applyLocale('system', { animate: true })
+  })
 }
 
 /**
@@ -31,6 +45,7 @@ export async function applyLocale(
   { persist = false, animate = false } = {},
 ): Promise<void> {
   if (persist) writeStorage('lang', preference === 'system' ? null : preference)
+  shown = preference
   const target = resolveLocale(preference)
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   await setLocale(target, (show) => {

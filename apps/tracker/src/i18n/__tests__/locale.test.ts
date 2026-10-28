@@ -19,6 +19,19 @@ describe('detectLocale', () => {
     expect(detectLocale(['zh-TW'])).toBe('zh-TW')
     expect(detectLocale(['zh-HK'])).toBe('zh-TW')
     expect(detectLocale(['zh-Hant-SG'])).toBe('zh-TW')
+    expect(detectLocale(['zh-MO'])).toBe('zh-TW')
+    expect(detectLocale(['zh-SG'])).toBe('zh-CN')
+  })
+
+  it('lets the script decide over the region', () => {
+    expect(detectLocale(['zh-Hans-HK'])).toBe('zh-CN')
+    expect(detectLocale(['zh-Hant-CN'])).toBe('zh-TW')
+  })
+
+  it('reads Cantonese as Traditional unless it says Hans', () => {
+    expect(detectLocale(['yue'])).toBe('zh-TW')
+    expect(detectLocale(['yue-HK'])).toBe('zh-TW')
+    expect(detectLocale(['yue-Hans-CN'])).toBe('zh-CN')
   })
 
   it("reads Indonesian's old code and falls back to English", () => {
