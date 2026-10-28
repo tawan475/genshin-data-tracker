@@ -168,21 +168,17 @@ export function worldModel(exploration: GiExploration, catalog: CollectionCatalo
         }))
     : []
 
+  // Only the offerings the game data lists: the capture also carries ended events' ones (the
+  // Michiae Casket, 4), which the data leaves out and the game no longer shows.
   const offeringLevels = new Map(byId(exploration.offerings))
   const offeringRows: OfferingRow[] = exploration.offerings
-    ? [
-        ...offerings.map((o) => ({
-          id: o.id,
-          // The older offerings have no name in the game text: their "… Offering(s) Available" line.
-          name:
-            nameIn(catalog, 'offerings', o.id) || nameIn(catalog, 'offerings', o.id, 'available'),
-          level: offeringLevels.get(o.id) ?? 0,
-          max: n(o.maxLevel),
-        })),
-        ...[...offeringLevels]
-          .filter(([id]) => !offerings.some((o) => o.id === id))
-          .map(([id, level]) => ({ id, name: '', level, max: 0 })),
-      ]
+    ? offerings.map((o) => ({
+        id: o.id,
+        // The older offerings have no name in the game text: their "… Offering(s) Available" line.
+        name: nameIn(catalog, 'offerings', o.id) || nameIn(catalog, 'offerings', o.id, 'available'),
+        level: offeringLevels.get(o.id) ?? 0,
+        max: n(o.maxLevel),
+      }))
     : []
 
   // Domain entrances. The scene point class "domain" also holds quest, event and minigame

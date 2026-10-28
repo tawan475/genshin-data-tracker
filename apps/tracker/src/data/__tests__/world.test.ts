@@ -66,7 +66,8 @@ describe('worldModel', () => {
     const world = worldModel(
       {
         statues: { '1': { level: 10, oculi: 0 }, '9': { level: 1, oculi: 0 } },
-        offerings: { '1': 5 },
+        // 4: an ended event's offering (the Michiae Casket), not in the data: left out.
+        offerings: { '1': 5, '4': 0 },
         scenes: { '3': { points: [1, 3, 4], areas: [1] } },
         explore: { '1': 120, '2': 150, '3': 112 },
         reputation: { '1': 8 },
