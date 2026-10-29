@@ -350,8 +350,11 @@ const footButton =
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
+      <!-- Solid, no backdrop blur (also the tab bar below): a blurred bar redraws
+           everything scrolling under it on every frame, over 90% of a scroll
+           frame's work on a long page (measured 2026-10-30). -->
       <header
-        class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border-default bg-surface-nav/90 px-4 shadow-sm backdrop-blur sm:px-8"
+        class="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border-default bg-surface-nav px-4 shadow-sm sm:px-8"
       >
         <UiIconButton :label="$t('shell.openMenu')" class="-ml-2 lg:hidden" @click="drawer = true">
           <Menu class="size-5" aria-hidden="true" />
@@ -431,7 +434,7 @@ const footButton =
 
     <nav
       v-if="primary.length"
-      class="fixed inset-x-0 bottom-0 z-30 flex border-t border-border-default bg-surface-nav/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      class="fixed inset-x-0 bottom-0 z-30 flex border-t border-border-default bg-surface-nav pb-[env(safe-area-inset-bottom)] lg:hidden"
       :aria-label="staffMode ? $t('shell.section.staff') : $t('shell.section.account')"
     >
       <RouterLink

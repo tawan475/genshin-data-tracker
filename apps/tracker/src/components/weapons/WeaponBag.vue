@@ -11,8 +11,9 @@ import WeaponTile from './WeaponTile.vue'
 /**
  * The game's weapon bag: one tile per copy (identical spare copies stacked),
  * in rarity sections with a divider each ("5★ 58"). Above them, the
- * sections as jump chips. Sections off screen skip layout and paint; the
- * tiles mount a screenful first, the rest over the next frames.
+ * sections as jump chips. The tiles mount a screenful first, the rest over
+ * the next frames; no content-visibility (sections coming into view styled
+ * and laid out mid-scroll: the stutter, measured 2026-10-30).
  */
 const props = defineProps<{ sections: RaritySection[]; selected?: string | null }>()
 defineEmits<{ open: [row: WeaponRow] }>()
@@ -86,7 +87,7 @@ const copies = (n: number) => t('weapons.group.copies', { count: formatNumber(n)
       v-for="section in visible"
       :id="sectionId(section.rarity)"
       :key="section.rarity"
-      class="scroll-mt-20 [contain-intrinsic-size:auto_24rem] [content-visibility:auto]"
+      class="scroll-mt-20"
       :aria-labelledby="`${sectionId(section.rarity)}-h`"
     >
       <h2

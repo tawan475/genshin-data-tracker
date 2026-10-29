@@ -30,7 +30,7 @@ const title = computed(() =>
         level >= 10
           ? 'font-bold'
           : [
-              'bg-surface-raised/80 ring-1 ring-border-subtle backdrop-blur-sm',
+              'bg-surface-raised/90 ring-1 ring-border-subtle',
               level >= 9 ? 'font-medium text-text-primary' : 'text-text-secondary',
             ]
       "

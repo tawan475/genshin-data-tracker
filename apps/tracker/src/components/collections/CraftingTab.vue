@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { CheckCheck, SearchX } from 'lucide-vue-next'
+import { CheckCheck, Search, SearchX } from 'lucide-vue-next'
 import EntryGrid, { type GridEntry } from './EntryGrid.vue'
 import HaveFilter, { type HaveFilterValue } from './HaveFilter.vue'
 import NotCaptured from './NotCaptured.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
+import UiInput from '@/components/ui/UiInput.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiProgress from '@/components/ui/UiProgress.vue'
 import UiStat from '@/components/ui/UiStat.vue'
+import { normalizeSearch } from '@/lib/search'
 import type { CapturedCollections } from '@/data/collections'
 import { idLabel, nameOf, wikiGuide, type CollectionCatalog } from '@/data/collection-names'
 import { formatNumber } from '@/lib/format'
@@ -36,6 +38,9 @@ const filter = ref<HaveFilterValue>(
   storedFilter === 'missing' || storedFilter === 'have' ? storedFilter : 'all',
 )
 watch(filter, (value) => writeStorage(FILTER_KEY, value === 'all' ? null : value))
+
+/** By name (accents and case ignored), within the list and filter picked. */
+const search = ref('')
 
 const kinds = computed(() =>
   KINDS.map((k) => {
@@ -65,9 +70,11 @@ const kinds = computed(() =>
   }),
 )
 const current = computed(() => kinds.value.find((k) => k.kind === kind.value)!)
+const needle = computed(() => normalizeSearch(search.value).trim())
 const shown = computed<GridEntry[]>(() =>
   current.value.entries
     .filter((e) => filter.value === 'all' || e.have === (filter.value === 'have'))
+    .filter((e) => !needle.value || normalizeSearch(e.name).includes(needle.value))
     .map((e) => {
       const href = wikiGuide(props.catalog, current.value.kind, e.id)
       return {
@@ -126,20 +133,39 @@ const shown = computed<GridEntry[]>(() =>
         </div>
       </template>
       <div class="flex flex-col gap-3 p-3 sm:p-5">
-        <HaveFilter
-          v-model="filter"
-          :have="current.have"
-          :total="current.total"
-          :label="$t('collections.archive.show')"
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="relative min-w-0 basis-full sm:w-72 sm:basis-auto">
+            <span class="sr-only">{{ $t('materials.search') }}</span>
+            <Search
+              class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-muted"
+              aria-hidden="true"
+            />
+            <UiInput
+              v-model="search"
+              type="search"
+              class="pl-9"
+              :placeholder="$t('materials.search')"
+              autocomplete="off"
+            />
+          </label>
+          <HaveFilter
+            v-model="filter"
+            :have="current.have"
+            :total="current.total"
+            :label="$t('collections.archive.show')"
+          />
+        </div>
         <EntryGrid v-if="shown.length > 0" :entries="shown" :label="current.label" />
         <UiEmpty
-          v-else-if="filter === 'missing'"
+          v-else-if="filter === 'missing' && !needle"
           :title="$t('collections.spincrystals.allCollected')"
         >
           <template #icon><CheckCheck class="text-success-text" aria-hidden="true" /></template>
         </UiEmpty>
-        <UiEmpty v-else :title="$t('collections.archive.none')">
+        <UiEmpty
+          v-else
+          :title="needle ? $t('characters.page.noMatches') : $t('collections.archive.none')"
+        >
           <template #icon><SearchX aria-hidden="true" /></template>
         </UiEmpty>
       </div>

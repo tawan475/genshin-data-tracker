@@ -320,6 +320,8 @@ watch(
     <template v-else-if="roster">
       <StatStrip class="mb-4" :items="strip" @toggle="toggleStrip" />
 
+      <SavedTeams class="mb-4" />
+
       <CharacterToolbar
         v-model:filters="filters"
         v-model:sort="sort"
@@ -349,14 +351,15 @@ watch(
         class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,21rem),1fr))] gap-3"
         :aria-label="$t('game.characters')"
       >
-        <!-- content-visibility: cards off screen skip layout and paint, so each
-             chunk of the roster lays out only what shows. It clips paint to the
-             box: the padding (undone by the margin) keeps the focus ring and
-             shadow inside it. -->
+        <!-- No content-visibility here: a roster is ~130 cards, and skipping off-
+             screen ones made every card coming into view style, lay out and
+             paint on that scroll frame (~34 ms a frame on a slowed phone, ~6 ms
+             without, measured 2026-10-30). The progressive mount above still
+             spreads the first render. -->
         <li
           v-for="(c, i) in visible"
           :key="c.key"
-          class="-m-1 flex p-1 [contain-intrinsic-size:auto_11rem] [content-visibility:auto]"
+          class="flex"
           @pointerenter="void preloadCharacter(c)"
           @focusin="void preloadCharacter(c)"
         >
@@ -380,8 +383,6 @@ watch(
         @open="open"
         @favorite="toggleFavorite"
       />
-
-      <SavedTeams class="mt-6" />
     </template>
 
     <CharacterModal

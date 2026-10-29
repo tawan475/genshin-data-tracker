@@ -306,11 +306,7 @@ function close() {
           class="flex flex-col gap-2"
           :aria-label="$t('game.weapons')"
         >
-          <li
-            v-for="group in shownGroups"
-            :key="group.key"
-            class="[contain-intrinsic-size:auto_5rem] [content-visibility:auto]"
-          >
+          <li v-for="group in shownGroups" :key="group.key">
             <WeaponGroupRow :group="group" @open="open(group.key, $event)" />
           </li>
         </ul>

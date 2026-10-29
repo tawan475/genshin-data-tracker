@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex flex-col gap-2">
     <section v-for="g in visible" :key="g.rarity" :aria-label="`${g.rarity}★`">
-      <h2 class="sticky top-16 z-10 -mx-1 bg-surface-base/95 px-1 backdrop-blur-sm">
+      <h2 class="sticky top-16 z-10 -mx-1 bg-surface-base px-1">
         <button
           type="button"
           class="flex min-h-10 w-full items-center gap-2 text-sm font-medium"
@@ -163,11 +163,7 @@ onBeforeUnmount(() => {
         <ul
           class="grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] gap-3 pt-2 pb-2 sm:grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] sm:gap-4"
         >
-          <li
-            v-for="row in g.shown"
-            :key="row.id"
-            class="flex [contain-intrinsic-size:auto_6rem] [content-visibility:auto]"
-          >
+          <li v-for="row in g.shown" :key="row.id" class="flex">
             <ArtifactTile
               :row="row"
               :is-new="isNewPiece(row, previous)"

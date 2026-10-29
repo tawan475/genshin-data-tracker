@@ -583,11 +583,7 @@ const GRID =
             {{ formatSlotName(group.slot) }}
           </h2>
           <ul :class="GRID">
-            <li
-              v-for="row in group.rows"
-              :key="row.id"
-              class="flex [contain-intrinsic-size:auto_16rem] [content-visibility:auto]"
-            >
+            <li v-for="row in group.rows" :key="row.id" class="flex">
               <ArtifactCard
                 :row="row"
                 :is-new="isNewPiece(row, previous)"

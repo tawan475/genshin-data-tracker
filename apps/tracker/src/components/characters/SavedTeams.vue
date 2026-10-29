@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { useCapturedCollections } from '@/components/collections/use-captured'
 import { characterIcon } from '@/lib/assets'
 import { characterName } from '@/i18n/game-names'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 /**
  * The saved teams (Teyvat.me Capture's `gi_wardrobe.teams`) by the names the
  * player gave them, the one in use marked; moved here from Collections →
- * Wardrobe (the user's call). Nothing shows until a capture has them.
+ * Wardrobe (the user's call), at the top of the roster (at its foot it was
+ * hard to find, the user). It folds from its header, remembered per device.
+ * Nothing shows until a capture has them.
  */
 const { captured } = useCapturedCollections()
 const wardrobe = computed(() => captured.value?.wardrobe?.value ?? null)
@@ -19,10 +22,19 @@ const teams = computed(() =>
     .map(([slot, team]) => ({ slot: Number(slot), ...team }))
     .sort((a, b) => a.slot - b.slot),
 )
+const FOLD_KEY = 'characters:teams-folded'
+const open = ref(readStorage(FOLD_KEY) !== '1')
+watch(open, (value) => writeStorage(FOLD_KEY, value ? null : '1'))
 </script>
 
 <template>
-  <UiPanel v-if="teams.length > 0" :title="$t('collections.wardrobe.teams')" flush>
+  <UiPanel
+    v-if="teams.length > 0"
+    v-model:open="open"
+    :title="$t('collections.wardrobe.teams')"
+    collapsible
+    flush
+  >
     <ul class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] overflow-hidden">
       <li
         v-for="team in teams"
