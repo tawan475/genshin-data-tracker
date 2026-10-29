@@ -138,6 +138,52 @@ export const TAB_ICON: Readonly<Record<CollectionTab, Component>> = {
   aranara: Sprout,
 }
 
+/**
+ * A hub card's game picture (design B4, 2026-10-30): one whole picture in the
+ * card's top-right corner, faded toward the bottom-left. Square pictures are
+ * the base box × `scale`; tall ones `height` × the base box high, `ratio` wide.
+ */
+export interface CardArt {
+  name: string
+  /** Served by gi-cdn by hand (its publish.json `extra`), not nanoka. */
+  cdn?: true
+  scale?: number
+  tall?: { ratio: number; height: number; radius?: number }
+  /** Degrees, static. */
+  rotate?: number
+  /** Its own corner: [top, right] px on phones and from `sm`. */
+  place?: { base: [number, number]; sm: [number, number] }
+}
+
+export const TAB_ART: Readonly<Record<CollectionTab, CardArt>> = {
+  achievements: { name: 'UI_AchievementIcon_1_1' },
+  world: { name: 'UI_ItemIcon_107001' },
+  spincrystals: { name: 'UI_ItemIcon_BGM_Common', scale: 0.92 },
+  anecdotes: { name: 'UI_ItemIcon_220124', rotate: 8 },
+  archive: { name: 'UI_ItemIcon_121036' },
+  handbook: { name: 'UI_ItemIcon_100226' },
+  'living-beings': { name: 'UI_ItemIcon_112007' },
+  tcg: {
+    name: 'UI_Gcg_CardBack_00',
+    cdn: true,
+    tall: { ratio: 420 / 720, height: 1.14, radius: 6 },
+    rotate: 10,
+  },
+  recipes: { name: 'UI_ItemIcon_Recipe_1004' },
+  crafting: { name: 'UI_EquipIcon_Catalyst_Proto' },
+  wardrobe: {
+    name: 'UI_Gacha_FlycloakIcon_Glider',
+    cdn: true,
+    tall: { ratio: 223 / 717, height: 1.5 },
+    rotate: 55,
+    place: { base: [-2, 39], sm: [-8, 66] },
+  },
+  hangouts: { name: 'UI_ItemIcon_121209', rotate: 6 },
+  blueprints: { name: 'UI_ItemIcon_220026' },
+  music: { name: 'UI_ItemIcon_220025' },
+  aranara: { name: 'UI_ItemIcon_220055' },
+}
+
 /** The game data topics each collection's page reads (its chunks only). */
 export const TAB_TOPICS: Readonly<Record<CollectionTab, readonly CollectionTopic[]>> = {
   achievements: [],

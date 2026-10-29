@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import CollectionCard from './CollectionCard.vue'
-import { COLLECTION_TABS, TAB_ICON, TAB_LABEL, TAB_PART } from './tabs'
+import { COLLECTION_TABS, TAB_ART, TAB_ICON, TAB_LABEL, TAB_PART } from './tabs'
 import type { HubExtras } from './use-hub-extras'
 import type { CollectionCatalog } from '@/data/collection-names'
 import { collectionFigures } from '@/data/collection-summary'
@@ -46,6 +46,7 @@ const cards = computed(() =>
       tab,
       title: t(`collections.tabs.${TAB_LABEL[tab]}`),
       icon: TAB_ICON[tab],
+      art: TAB_ART[tab],
       to: to('account-collections', tab),
       figure:
         tab === 'achievements' || tab === 'anecdotes'
@@ -70,6 +71,7 @@ const cards = computed(() =>
       :to="card.to"
       :title="card.title"
       :icon="card.icon"
+      :art="card.art"
       :figure="card.figure"
       :count-label="$t('collections.defeats.kinds')"
       :taken-at="card.takenAt"
