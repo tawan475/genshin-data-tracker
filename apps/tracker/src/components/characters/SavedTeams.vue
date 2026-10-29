@@ -12,7 +12,7 @@ import { readStorage, writeStorage } from '@/lib/storage'
  * The saved teams (Teyvat.me Capture's `gi_wardrobe.teams`) by the names the
  * player gave them, the one in use marked; moved here from Collections →
  * Wardrobe (the user's call), at the top of the roster (at its foot it was
- * hard to find, the user). It folds from its header, remembered per device.
+ * hard to find, the user). Folded by default; its header opens it, remembered per device.
  * Nothing shows until a capture has them.
  */
 const { captured } = useCapturedCollections()
@@ -22,9 +22,10 @@ const teams = computed(() =>
     .map(([slot, team]) => ({ slot: Number(slot), ...team }))
     .sort((a, b) => a.slot - b.slot),
 )
-const FOLD_KEY = 'characters:teams-folded'
-const open = ref(readStorage(FOLD_KEY) !== '1')
-watch(open, (value) => writeStorage(FOLD_KEY, value ? null : '1'))
+// Folded by default (open it took too much room, the user); opened, it stays open on this device.
+const OPEN_KEY = 'characters:teams-open'
+const open = ref(readStorage(OPEN_KEY) === '1')
+watch(open, (value) => writeStorage(OPEN_KEY, value ? '1' : null))
 </script>
 
 <template>

@@ -436,9 +436,11 @@ class CardPainter {
       const nameMax = LEFT.x + LEFT.w - x - 18 - 6 - chipW
       const name = p.ellipsize(c.name, nameMax)
       nameW = p.measure(name)
-      // The h1 cuts its glow at its box (truncate: overflow hidden).
+      // The h1 cuts its glow at its box (truncate: overflow hidden), with room
+      // above and below the line for accents and descenders (Xiangling's g).
       const nameTop = top + (rowH - size) / 2
-      p.clipped(x, nameTop, nameW, size, 0, () =>
+      const room = Math.round(size * 0.3)
+      p.clipped(x, nameTop - room, nameW, size + 2 * room, 0, () =>
         p.text(name, x, p.baseline(nameTop, size), hero['--card-hero']!, {
           shadows: parseShadows(hero['--card-hero-shadow']!),
         }),
@@ -460,15 +462,16 @@ class CardPainter {
     // Level and friendship on a backing, with their EXP bars (the name's glow behind it too).
     this.backdropCopy = p.snapshot()
     const boxTop = top + rowH + 10
-    const bars = this.input.levelBar !== null || this.input.friendshipBar !== null
-    // With bars: the text on a 32 px line, its bar 2 px under it, even padding (the user's spacing).
-    const boxH = bars ? 60 : 50
+    // Both bars always show (an unknown share is an empty bar): a card without
+    // them looked broken next to one with (the user, 2026-10-30). The text on a
+    // 32 px line, its bar 2 px under it, even padding (the user's spacing).
+    const boxH = 60
     const parts = this.levelParts()
     const boxW = 18 + parts.width + 18
-    this.glass(LEFT.x, boxTop, boxW, boxH, bars ? 20 : 25, 'chip')
+    this.glass(LEFT.x, boxTop, boxW, boxH, 20, 'chip')
     const color = this.v('--card-hero')
-    const lineH = bars ? 32 : 42
-    const lineTop = boxTop + (bars ? 10 : 4)
+    const lineH = 32
+    const lineTop = boxTop + 10
     for (const part of parts.runs) {
       this.line(part.text, LEFT.x + 18 + part.x, lineTop, 28, part.weight, color, {
         alpha: part.alpha,
@@ -490,8 +493,9 @@ class CardPainter {
 
   /**
    * "Lv. 90/90 · Friendship 10": runs of text and their bars, x from the box's
-   * padding. Both halves take the wider one's width, so the two bars are the
-   * same length (the user's call; ShareCard's grid does the same).
+   * padding. Both halves are as wide as the widest either can be ("Lv.
+   * 100/100", "Friendship 10"), so the box and both bars keep one length
+   * whatever the numbers (the user's call; ShareCard's grid does the same).
    */
   private levelParts() {
     const c = this.c
@@ -512,7 +516,20 @@ class CardPainter {
           ]
     const widthOf = (parts: typeof level) =>
       parts.reduce((sum, part) => sum + this.textWidth(part.text, 28, part.weight), 0)
-    const slot = Math.max(widthOf(level), friendship ? widthOf(friendship) : 0)
+    const widest = [
+      { text: 'Lv. ', weight: 400 },
+      { text: '100', weight: 700 },
+      { text: '/100', weight: 500 },
+    ]
+    const widestFriendship = [
+      { text: `${t('game.friendship')} `, weight: 400 },
+      { text: '10', weight: 700 },
+    ]
+    const slot = Math.max(
+      widthOf(level),
+      widthOf(widest),
+      friendship ? Math.max(widthOf(friendship), widthOf(widestFriendship)) : 0,
+    )
     const place = (parts: typeof level, from: number) => {
       let x = from
       for (const part of parts) {
@@ -521,18 +538,14 @@ class CardPainter {
       }
     }
     place(level, 0)
-    if (this.input.levelBar !== null) {
-      bars.push({ x: 0, w: slot, share: this.input.levelBar, color: '#818cf8' })
-    }
+    bars.push({ x: 0, w: slot, share: this.input.levelBar ?? 0, color: '#818cf8' })
     let x = slot
     if (friendship) {
       x += 22
       runs.push({ text: '·', x, weight: 400, alpha: 0.5 })
       x += this.textWidth('·', 28, 400) + 22
       place(friendship, x)
-      if (this.input.friendshipBar !== null) {
-        bars.push({ x, w: slot, share: this.input.friendshipBar, color: '#f472b6' })
-      }
+      bars.push({ x, w: slot, share: this.input.friendshipBar ?? 0, color: '#f472b6' })
       x += slot
     }
     return { runs, bars, width: x }

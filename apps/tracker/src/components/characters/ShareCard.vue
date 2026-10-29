@@ -260,8 +260,10 @@ const ownerLine = computed(() => ownerParts(props.owner))
               decorative
               class="size-[60px]! [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.45))]"
             />
+            <!-- The padding (undone by the margin) gives accents and descenders room
+                 inside truncate's clip (Xiangling's g was cut). -->
             <h1
-              class="m-0 min-w-0 truncate leading-none font-bold tracking-[-0.5px]"
+              class="m-0 -my-[0.3em] min-w-0 truncate py-[0.3em] leading-none font-bold tracking-[-0.5px]"
               :class="HERO"
               :style="{ fontSize: `${nameSize(c.name)}px`, ...headerStyle }"
             >
@@ -281,47 +283,55 @@ const ownerLine = computed(() => ownerParts(props.owner))
           </div>
           <!-- Small text on the art sits on a translucent backing in the card's
                theme, so it reads over any art (light or dark, the splash or the namecard).
-               A grid: level and friendship share one column width, so both bars are the
-               same length (the canvas copy: share-card-canvas levelParts). -->
+               A grid: level and friendship share one column width, as wide as the widest
+               either can be (an invisible "Lv. 100/100" / "Friendship 10" under each), so
+               the box and both bars keep one length whatever the numbers; both bars always
+               show, empty when the EXP is unknown (the canvas copy: share-card-canvas levelParts). -->
           <p
             class="grid items-baseline gap-x-[22px] self-start px-[18px] text-[28px]"
             :class="[
               c.friendship !== null ? 'grid-cols-[1fr_auto_1fr]' : 'grid-cols-1',
               CHIP_TEXT,
-              levelBar !== null || friendshipBar !== null
-                ? 'rounded-[20px] py-[10px] leading-[32px]'
-                : 'rounded-full py-[4px]',
+              'rounded-[20px] py-[10px] leading-[32px]',
             ]"
           >
             <span :title="levelTitle" class="flex flex-col gap-[2px]"
-              ><span
-                ><span class="font-normal opacity-85">Lv.&nbsp;</span>
-                <span class="font-bold">{{ c.level }}</span
-                ><span class="font-medium opacity-70">/{{ cap }}</span></span
+              ><span class="grid"
+                ><span class="[grid-area:1/1] whitespace-nowrap"
+                  ><span class="font-normal opacity-85">Lv.&nbsp;</span>
+                  <span class="font-bold">{{ c.level }}</span
+                  ><span class="font-medium opacity-70">/{{ cap }}</span></span
+                ><span class="invisible [grid-area:1/1] whitespace-nowrap" aria-hidden="true"
+                  ><span class="font-normal">Lv.&nbsp;</span> <span class="font-bold">100</span
+                  ><span class="font-medium">/100</span></span
+                ></span
               >
               <span
-                v-if="levelBar !== null"
                 class="block h-[6px] overflow-hidden rounded-full bg-current/20"
                 aria-hidden="true"
                 ><span
                   class="block h-full rounded-full bg-[#818cf8]"
-                  :style="{ width: `${levelBar}%` }"
+                  :style="{ width: `${levelBar ?? 0}%` }"
               /></span>
             </span>
             <template v-if="c.friendship !== null">
               <span class="self-start opacity-50">·</span>
               <span :title="friendshipTitle" class="flex flex-col gap-[2px]"
-                ><span
-                  ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
-                  <span class="font-bold">{{ c.friendship }}</span></span
+                ><span class="grid"
+                  ><span class="[grid-area:1/1] whitespace-nowrap"
+                    ><span class="font-normal opacity-85">{{ $t('game.friendship') }}&nbsp;</span>
+                    <span class="font-bold">{{ c.friendship }}</span></span
+                  ><span class="invisible [grid-area:1/1] whitespace-nowrap" aria-hidden="true"
+                    ><span class="font-normal">{{ $t('game.friendship') }}&nbsp;</span>
+                    <span class="font-bold">10</span></span
+                  ></span
                 >
                 <span
-                  v-if="friendshipBar !== null"
                   class="block h-[6px] overflow-hidden rounded-full bg-current/20"
                   aria-hidden="true"
                   ><span
                     class="block h-full rounded-full bg-[#f472b6]"
-                    :style="{ width: `${friendshipBar}%` }"
+                    :style="{ width: `${friendshipBar ?? 0}%` }"
                 /></span>
               </span>
             </template>
