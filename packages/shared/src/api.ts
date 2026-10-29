@@ -956,7 +956,8 @@ export interface LiveAccount {
  * capture may be another account's). Stored anyway, as asked.
  */
 export interface ImportWarning {
-  code: 'uid_mismatch'
+  /** `uid_changed`: an upload to a picked account gave it the capture's UID. */
+  code: 'uid_mismatch' | 'uid_changed'
   message: string
 }
 

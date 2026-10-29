@@ -38,7 +38,7 @@ import { checkEtag } from '../lib/etag'
 import { ApiError, idParam, parseJson, rateLimit } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { requireUser } from '../lib/session'
-import { uploaderAccount, uploaderOf, uploaderUserId } from '../lib/uploader'
+import { uploaderAccountTaking, uploaderOf, uploaderUserId } from '../lib/uploader'
 import { accountForUid, loadAccount, uploadsRefused } from '../services/accounts'
 import {
   listenerOf,
@@ -72,8 +72,10 @@ export const wishSync = new Hono<AppEnv>()
   .get('/cursor', async (c) => {
     const uid = uidQuery(c)
     const owner = await uploaderOf(c, c.env.IMPORT_LIMITER, 'wishes-cursor')
-    const account = uploaderAccount(owner, uid)
     const meter = new D1Meter()
+    // A picked account takes the sync's UID here, the sync's first call.
+    const { account, uidChanged } = await uploaderAccountTaking(c.env.DB, meter, owner, uid)
+    if (uidChanged) notifyUser(c, uploaderUserId(owner), { type: 'accounts' })
     const { newest, newestTime } = account
       ? await wishCursor(c.env.DB, meter, account)
       : { newest: { ...EMPTY_NEWEST }, newestTime: { ...EMPTY_NEWEST } }
@@ -87,7 +89,8 @@ export const wishSync = new Hono<AppEnv>()
     const body = await parseJson(c, wishImportRequest)
     const meter = new D1Meter()
     const userId = uploaderUserId(owner)
-    let account = uploaderAccount(owner, body.uid)
+    const taken = await uploaderAccountTaking(c.env.DB, meter, owner, body.uid)
+    let account = taken.account
     let created = false
     if (!account && owner.scope === 'user') {
       ;({ account, created } = await accountForUid(
@@ -99,7 +102,8 @@ export const wishSync = new Hono<AppEnv>()
       ))
     }
     if (!account) throw new Error('No account for a wish import')
-    if (created) notifyUser(c, userId, { type: 'accounts' })
+    // A new account, or a picked one's new UID: the account list changed.
+    if (created || taken.uidChanged) notifyUser(c, userId, { type: 'accounts' })
     const { response, changed, listener } = await importWishes(
       c.env.DB,
       account,

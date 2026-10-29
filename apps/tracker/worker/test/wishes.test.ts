@@ -206,18 +206,29 @@ describe('wish sync (irminsul)', () => {
     expect((await ok<WishImportResponse>(older.response)).added).toBe(banner.length - 100)
   }, 60_000)
 
-  it('drops records of another UID and refuses a key of another account', async () => {
-    const { importKey } = await setup()
+  it("drops records of another UID; an account key's account takes the sync's UID", async () => {
+    const { importKey, client, account } = await setup()
     const records = newestFirst('200').slice(0, 5)
     const mixed = [...records, { ...records[0]!, id: '1999999999999999999', uid: '822222222' }]
     const body = await ok<WishImportResponse>((await sync(importKey, mixed)).response)
     expect(body).toMatchObject({ added: 5, skipped: 1 })
 
-    const wrong = await cursor(importKey, '822222222')
-    expect(wrong.response.status).toBe(409)
-    expect(await errorOf(wrong.response)).toBe('uid_mismatch')
-    const wrongImport = await sync(importKey, [], { uid: '822222222' })
-    expect(wrongImport.response.status).toBe(409)
+    // Like its snapshots: the account picked is this data's, whatever UID it had.
+    const moved = await cursor(importKey, '822222222')
+    expect(moved.response.status).toBe(200)
+    expect((await client.json<AccountResponse>(`/api/accounts/${account.id}`)).uid).toBe(
+      '822222222',
+    )
+    expect((await sync(importKey, [], { uid: '822222222' })).response.status).toBe(200)
+
+    // Unless another of the owner's accounts has that UID.
+    await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: { name: 'Alt', uid: '833333333' },
+    })
+    const clash = await cursor(importKey, '833333333')
+    expect(clash.response.status).toBe(409)
+    expect(await errorOf(clash.response)).toBe('uid_mismatch')
   })
 
   it('refuses malformed records whole', async () => {
@@ -503,7 +514,7 @@ describe('wish sync signed in (Bearer)', () => {
     expect(again.cost['round-trips']).toBe(1)
   })
 
-  it("uploads to the session's one account in account mode, refusing another UID", async () => {
+  it("uploads to the session's one account in account mode, which takes another UID", async () => {
     const { client } = await signUp()
     const { account } = await client.json<AccountCreatedResponse>('/api/accounts', {
       method: 'POST',
@@ -514,9 +525,10 @@ describe('wish sync signed in (Bearer)', () => {
     const body = await ok<WishImportResponse>((await sync(bearer, history.slice(0, 10))).response)
     expect(body).toMatchObject({ accountId: account.id, added: 10 })
     const other = await sync(bearer, [], { uid: '822222222' })
-    expect(other.response.status).toBe(409)
-    expect(await errorOf(other.response)).toBe('uid_mismatch')
-    expect((await cursor(bearer, '822222222')).response.status).toBe(409)
+    expect(other.response.status).toBe(200)
+    expect((await client.json<AccountResponse>(`/api/accounts/${account.id}`)).uid).toBe(
+      '822222222',
+    )
 
     // Its account deleted: nowhere to go until another target is chosen.
     await client.fetch(`/api/accounts/${account.id}`, { method: 'DELETE' })

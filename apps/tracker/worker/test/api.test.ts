@@ -545,24 +545,37 @@ describe('accounts and imports', () => {
     )
   })
 
-  it("warns, and still stores the file, when its UID is not the account's", async () => {
+  it("gives a picked account the capture's UID, unless another account has it", async () => {
     const { client } = await signUp()
     const { account, importKey } = await createAccount(client)
-    const other = await importByKey(importKey, sampleGood(sampleExtras(811111111)), 1_000)
+    const other = await importByKey(importKey, sampleGood(sampleExtras(711111111)), 1_000)
     expect(other.status).toBe(201)
     const body = (await other.json()) as ImportResponse
     expect(body.warnings).toEqual([
-      { code: 'uid_mismatch', message: expect.stringContaining('UID 811111111') },
+      { code: 'uid_changed', message: expect.stringContaining('was 812345678') },
     ])
-
-    const own = (await (
-      await importByKey(importKey, sampleGood(sampleExtras(812345678)), 2_000)
+    // The server follows the UID.
+    expect(await client.json<AccountResponse>(`/api/accounts/${account.id}`)).toMatchObject({
+      uid: '711111111',
+      server: 'EUROPE',
+    })
+    const again = (await (
+      await importByKey(importKey, sampleGood(sampleExtras(711111111)), 2_000)
     ).json()) as ImportResponse
-    expect(own.status).toBe('created')
-    expect(own).not.toHaveProperty('warnings')
-    // The account's UID is never changed by an upload.
+    expect(again).not.toHaveProperty('warnings')
+
+    // Another of the owner's accounts has the UID: both keep theirs, the file is stored with a warning.
+    await client.json<AccountCreatedResponse>('/api/accounts', {
+      method: 'POST',
+      json: { name: 'Alt', uid: '812345678' },
+    })
+    const clash = await importByKey(importKey, sampleGood(sampleExtras(812345678)), 3_000)
+    expect(clash.status).toBe(201)
+    expect(((await clash.json()) as ImportResponse).warnings).toEqual([
+      { code: 'uid_mismatch', message: expect.stringContaining('UID 812345678') },
+    ])
     expect((await client.json<AccountResponse>(`/api/accounts/${account.id}`)).uid).toBe(
-      '812345678',
+      '711111111',
     )
 
     // An account without a UID has nothing to compare.
@@ -953,7 +966,7 @@ describe('user import key', () => {
     await expect(attempt).rejects.toMatchObject({ status: 409, code: 'ambiguous_uid' })
   })
 
-  it("leaves account keys as they were: the key's account, whatever the UID", async () => {
+  it("keeps account keys on the key's account, which takes the capture's UID", async () => {
     const { client } = await signUp()
     const { account, importKey } = await createAccount(client)
     await newUserKey(client)
@@ -962,10 +975,10 @@ describe('user import key', () => {
     expect(result.body.account).toEqual({
       id: account.id,
       name: 'Main',
-      uid: '812345678',
+      uid: '712345678',
       created: false,
     })
-    expect(result.body.warnings).toEqual([expect.objectContaining({ code: 'uid_mismatch' })])
+    expect(result.body.warnings).toEqual([expect.objectContaining({ code: 'uid_changed' })])
     // A file without a UID is fine on an account key.
     expect((await upload(importKey, sampleGood(), 2_000)).status).toBe(201)
     expect(await client.json<AccountResponse[]>('/api/accounts')).toHaveLength(1)

@@ -320,10 +320,13 @@ zips are built in the browser; the server only rebuilds single GOOD files.
   `timestamp`, header `x-import-key`) and `GET .../verify-key`. Any 2xx is
   success; 401/403 makes the capture app re-verify. Re-uploading a capture is a no-op
   (also when it was first stored before the extra keys were kept). Responses
-  only gain fields: an import whose `gi_player.uid` is not the account's UID is
-  stored anyway and answers with `warnings: [{code: "uid_mismatch", …}]` (also
-  logged); an account's UID is never set from a file. Import keys are stored as
-  SHA-256 and shown once.
+  only gain fields: an upload to a picked account (an account key, or a
+  device set to one account) whose `gi_player.uid` is not the account's UID
+  gives the account that UID (the server follows) and answers with
+  `warnings: [{code: "uid_changed", …}]`, except when another of the owner's
+  accounts has it or the account is shared with the uploader: then it is
+  stored anyway with `uid_mismatch` (also logged). An account without a UID
+  takes the file's silently. Import keys are stored as SHA-256 and shown once.
 - **Import keys, two kinds.** An account key (`gdt_ik_…`, `POST
   /api/accounts/:id/import-key`) always uploads to its account. A user key
   (`gdt_uk_…`, one per user: `POST /api/me/import-key` makes or replaces it,
@@ -463,7 +466,8 @@ game id held per banner, and the newest pull's time with backup pulls
 included, on the account's server clock like the game's records; from
 `wish_chunks.newest_time`, migration 0024, or the last chunk for chunks
 stored before it; a user key's unknown UID answers
-`accountId: null`; an account key of another UID is 409 `uid_mismatch`), and
+`accountId: null`; a picked account takes the asked UID as its snapshots do,
+409 `uid_mismatch` only when another of the owner's accounts has it), and
 `POST /api/wishes/import` `{uid, timezone, region, lang, records}` (≤ 2,000
 records as the API lists them, any order, overlap fine; another UID's records
 are skipped) → `{accountId, added, known, skipped?, replaced?, newest}`. A

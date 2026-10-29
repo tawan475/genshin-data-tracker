@@ -396,6 +396,42 @@ export async function findImportKeyOwner(
  * cannot make two: the (user_id, uid) unique index lets one INSERT through and
  * both read the row back in the same batch.
  */
+/**
+ * An upload to a picked account (an account key, or a device set to one
+ * account) gives it the capture's UID: a mistyped or old UID is replaced and
+ * the server follows (the user's rule: picking an account means "this data is
+ * that account"). Only over a UID that is set (an empty one the import fills).
+ * Not on an account shared with the uploader (its identity is
+ * the owner's), nor when another of the owner's accounts has that UID (they
+ * stay apart; the upload warns as before). True when the UID changed;
+ * `account` then carries the new one.
+ */
+export async function takeAccountUid(
+  d1: D1Database,
+  meter: D1Meter,
+  account: KeyAccount,
+  uid: string,
+): Promise<boolean> {
+  const linked = account.uid?.trim()
+  // No UID yet: the import fills it as for any account (with the name and server).
+  if (!linked || linked === uid || (account.role ?? 'owner') !== 'owner') return false
+  const server = serverFromUid(uid)
+  const [updated] = await meter.batch(d1, 'uid', [
+    d1
+      .prepare(
+        `UPDATE genshin_accounts SET uid = ?2, server = coalesce(?3, server)
+         WHERE id = ?1 AND NOT EXISTS (SELECT 1 FROM genshin_accounts AS o
+           WHERE o.user_id = genshin_accounts.user_id AND o.uid = ?2 AND o.id <> ?1)
+         RETURNING id`,
+      )
+      .bind(account.id, uid, server),
+  ])
+  if (!updated?.results.length) return false
+  account.uid = uid
+  if (server) account.server = server
+  return true
+}
+
 export async function accountForUid(
   d1: D1Database,
   meter: D1Meter,

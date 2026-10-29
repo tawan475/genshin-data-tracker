@@ -3,9 +3,10 @@
  * (routes/public) or a signed-in irminsul's session (routes/irminsul). Both
  * answer the same: the import's response with the `account` it went to.
  *
- * An account owner uploads to that account; a user owner to the user's
- * account whose UID is the file's `gi_player.uid`, made on the first upload
- * of a new UID (422 `uid_required` for a file without one).
+ * An account owner uploads to that account, which takes the file's
+ * `gi_player.uid` when it differs (`takeAccountUid`); a user owner to the
+ * user's account whose UID is the file's, made on the first upload of a new
+ * UID (422 `uid_required` for a file without one).
  */
 
 import { preparedItemIndex, type ImportResponse, type PreparedSnapshot } from '@gdt/shared'
@@ -13,7 +14,7 @@ import type { Context } from 'hono'
 import type { AppEnv } from '../env'
 import { ApiError } from '../lib/http'
 import { D1Meter } from '../lib/meter'
-import { accountForUid, type KeyAccount, type UploadOwner } from './accounts'
+import { accountForUid, takeAccountUid, type KeyAccount, type UploadOwner } from './accounts'
 import { importSnapshot, parseUpload, type Upload } from './import'
 import { anyListening, notifyAccount, notifyUser } from './live'
 import { liveDb, liveUsage, openJournal } from './live-sync'
@@ -30,9 +31,16 @@ export async function uploadAs(
   let userId: number
   let created = false
   let parsed: PreparedSnapshot | undefined
+  let uidWas: string | null | undefined
   if (owner.scope === 'account') {
     account = owner.account
     userId = owner.userId
+    parsed = await parseUpload(upload.text)
+    const uid = parsed.good.player?.uid
+    const was = account.uid
+    if (uid !== undefined && (await takeAccountUid(c.env.DB, meter, account, String(uid)))) {
+      uidWas = was
+    }
   } else {
     userId = owner.user.id
     parsed = await parseUpload(upload.text)
@@ -61,6 +69,18 @@ export async function uploadAs(
   })
   const { response, dataVersion, listener } = result
   meter.report(c)
+  if (uidWas !== undefined) {
+    response.warnings = [
+      ...(response.warnings ?? []),
+      {
+        code: 'uid_changed',
+        message: uidWas
+          ? `The account's UID was ${uidWas}; it is now ${account.uid}, this capture's.`
+          : `The account's UID is now ${account.uid}, this capture's.`,
+      },
+    ]
+    notifyUser(c, userId, { type: 'accounts' })
+  }
   // Live sync: this snapshot opens the account's journal (a failure leaves
   // the answer without `live`, so irminsul keeps to snapshots).
   if (live && result.newest) {

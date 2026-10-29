@@ -19,6 +19,7 @@ import {
   hashImportKey,
   pickByUid,
   sharedReadOnly,
+  takeAccountUid,
   uploadsRefused,
   type ImportKeyOwner,
   type KeyAccount,
@@ -27,6 +28,7 @@ import {
 import { configUrl, loadUploadSession } from '../services/irminsul'
 import { pageOrigin } from './email'
 import { ApiError, clientIp, rateLimit } from './http'
+import type { D1Meter } from './meter'
 import {
   bearerToken,
   irminsulSessionEnded,
@@ -104,6 +106,22 @@ export async function uploaderOf(
 /** The owner's user id. */
 export function uploaderUserId(owner: UploadOwner): number {
   return owner.scope === 'account' ? owner.userId : owner.user.id
+}
+
+/**
+ * The account a UID's records belong to for an upload that may name it
+ * (wish history): a picked account first takes that UID (`takeAccountUid`,
+ * as its snapshots do), else as `uploaderAccount`.
+ */
+export async function uploaderAccountTaking(
+  d1: D1Database,
+  meter: D1Meter,
+  owner: UploadOwner,
+  uid: string,
+): Promise<{ account: KeyAccount | null; uidChanged: boolean }> {
+  const uidChanged =
+    owner.scope === 'account' && (await takeAccountUid(d1, meter, owner.account, uid))
+  return { account: uploaderAccount(owner, uid), uidChanged }
 }
 
 /**
