@@ -393,18 +393,21 @@ function weeklyCard(weekly: FarmWeekly, input: FarmInput): FarmCard | null {
     detail: '',
     domain: null,
     resinPerRun: input.drops?.weekly.discountResin ?? input.drops?.weekly.resin ?? 0,
-    run: run
-      ? {
-          runs: run.runs,
-          resin: run.resinMin,
-          resinMax: run.resinMax,
-          condensed: condensed > 0 ? Math.ceil(run.resinMin / condensed) : 0,
-          days: run.weeks,
-          weekly: true,
-          bracket: run.bracket,
-          upperBound: run.upperBound === true,
-        }
-      : null,
+    // No claims when held materials (Dream Solvent conversions) cover the whole
+    // shortage: the estimate is 0 (-0 from its rounding), so no run line.
+    run:
+      run && run.runs > 0
+        ? {
+            runs: run.runs,
+            resin: run.resinMin,
+            resinMax: run.resinMax,
+            condensed: condensed > 0 ? Math.ceil(run.resinMin / condensed) : 0,
+            days: run.weeks,
+            weekly: true,
+            bracket: run.bracket,
+            upperBound: run.upperBound === true,
+          }
+        : null,
     status: weekly.status,
     lock,
     lines,

@@ -142,11 +142,12 @@ const weaponTitle = computed(() => {
            phones stutter while scrolling); from sm the foot shows a blurred
            copy of it (a filtered image is drawn once, unlike a backdrop blur,
            which repaints on every scroll frame), left out on phones for the
-           same reason. Loaded up front: the roster shows every card. -->
+           same reason, as is the art's brightness filter (a little more
+           opacity instead). Loaded up front: the roster shows every card. -->
       <NamecardBackdrop
         :src="characterBanner(c.key)"
         :priority="priority"
-        class="absolute inset-y-0 right-0 h-full w-full opacity-45 brightness-[1.35] saturate-[1.1] sm:w-5/6 dark:opacity-40 dark:brightness-[1.1]"
+        class="absolute inset-y-0 right-0 h-full w-full opacity-55 sm:w-5/6 sm:opacity-45 sm:brightness-[1.35] sm:saturate-[1.1] dark:opacity-45 dark:sm:opacity-40 dark:sm:brightness-[1.1]"
       />
       <span
         class="pointer-events-none absolute inset-y-0 right-0 w-full bg-linear-to-l from-transparent from-35% to-surface-raised to-95% sm:w-5/6"

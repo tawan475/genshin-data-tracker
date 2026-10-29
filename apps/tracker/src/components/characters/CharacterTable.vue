@@ -25,7 +25,8 @@ import TalentChips from './TalentChips.vue'
  * open the details like the cards do; the first column is the favourite
  * star. Every column shows at every width: the table scrolls sideways in its
  * own box with the star and the name pinned at its left (a phone saw only
- * Lv, C and CV, and could not reach the rest).
+ * Lv, C and CV, and could not reach the rest). Its pictures load up front:
+ * lazy ones off to the side loaded and decoded mid-swipe, which stuttered.
  */
 const props = defineProps<{
   characters: CharacterView[]
@@ -220,6 +221,7 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
                   :name="c.name"
                   :rarity="c.rarity ?? undefined"
                   size="sm"
+                  eager
                 />
                 <ElementIcon v-if="c.element" :element="c.element" class="hidden sm:block" />
                 <span class="min-w-0 truncate font-medium">{{ c.name }}</span>
@@ -286,6 +288,7 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
                   :name="c.weapon.name"
                   :rarity="c.weapon.rarity ?? undefined"
                   size="xs"
+                  eager
                 />
                 <span class="tabular font-mono">R{{ c.weapon.refinement }}</span>
                 <LevelText
@@ -310,6 +313,7 @@ const isFavorite = (c: CharacterView) => props.favorites?.has(c.key) ?? false
                     :name="set.name"
                     :rarity="set.rarity"
                     size="xs"
+                    eager
                   />
                   <span class="tabular font-mono">{{ set.count }}</span>
                 </span>
