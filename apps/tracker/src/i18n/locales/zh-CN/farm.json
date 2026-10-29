@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "圣遗物",
       "meaning": "等级已达成，圣遗物未完成"
+    },
+    "unset": {
+      "label": "设定目标",
+      "meaning": "自定义：尚未设定任何目标。打开以设定等级和天赋"
     }
   },
   "bracket": {

@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Lv",
+    "exp": "EXP",
     "c": "C",
     "critTitle": "CRIT Rate / CRIT DMG from artifacts",
     "crit": "Crit",

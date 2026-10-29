@@ -318,6 +318,11 @@ export const characterTarget = z.object({
   constellation: z.number().int().min(0).max(6).optional(),
   /** Sets and main stats to farm (no material cost). */
   artifacts: artifactGoal.optional(),
+  /**
+   * Made by the Custom preset (goal = now) and not set yet: listed with the
+   * goals to do ("Set a goal"), not as done, until a goal part is set.
+   */
+  unset: z.literal(true).optional(),
 })
 
 /** Planner goal for a weapon (several may be the same weapon: each has its own id). */

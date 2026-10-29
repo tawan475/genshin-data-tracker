@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "聖遺物",
       "meaning": "等級已達成，聖遺物未完成"
+    },
+    "unset": {
+      "label": "設定目標",
+      "meaning": "自訂：尚未設定任何目標。打開以設定等級和天賦"
     }
   },
   "bracket": {

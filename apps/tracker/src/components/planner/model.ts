@@ -451,7 +451,7 @@ export function buildBoard(
       owner: c.key,
       name: c.name,
       active: c.target.active || weapons.some((w) => w.target.active),
-      done: materialsDone && (c.artifacts?.complete ?? true),
+      done: materialsDone && (c.artifacts?.complete ?? true) && !c.target.unset,
       materialsDone,
       artifacts: c.artifacts,
       note: c.target.note ?? '',

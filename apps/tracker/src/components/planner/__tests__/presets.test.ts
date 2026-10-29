@@ -64,6 +64,16 @@ describe('goal presets', () => {
     })
   })
 
+  it('marks a Custom goal unset (not done), and the other presets clear the mark', () => {
+    const custom = applyPreset(preset('custom'), now, {}, phases)
+    expect(custom.unset).toBe(true)
+    expect(applyPreset(preset('max'), now, custom, phases).unset).toBeUndefined()
+    expect(applyPreset(preset('custom'), now, { note: 'x' }, phases)).toMatchObject({
+      note: 'x',
+      unset: true,
+    })
+  })
+
   it("keeps the goal's own fields and its paused state", () => {
     const base = { note: 'C2 first', favorite: true, priority: 3, active: false }
     expect(applyPreset(preset('max'), now, base, phases)).toMatchObject(base)

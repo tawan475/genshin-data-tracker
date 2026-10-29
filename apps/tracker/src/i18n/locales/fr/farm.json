@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Artéfacts",
       "meaning": "Niveaux atteints, artéfacts restants"
+    },
+    "unset": {
+      "label": "Fixer un objectif",
+      "meaning": "Personnalisé : aucun objectif pour l’instant. Ouvrez-le pour fixer le niveau et les aptitudes"
     }
   },
   "bracket": {

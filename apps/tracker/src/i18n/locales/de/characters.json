@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "St.",
+    "exp": "EP",
     "c": "C",
     "critTitle": "KT / Kritischer Schaden aus Artefakten",
     "crit": "Krit",

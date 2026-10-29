@@ -137,14 +137,20 @@ const weaponTitle = computed(() => {
       @click="$emit('open')"
     >
       <!-- The namecard under the whole card (light: lighter and softer; dark: a
-           little dimmer, the user's tuning); the foot
-           shows a blurred copy of it (a filtered image is drawn once, unlike a
-           backdrop blur, which repaints on every scroll frame). Loaded up front:
-           the roster shows every card. -->
+           little dimmer, the user's tuning), faded out to the left by a gradient
+           of the card's own ground laid over it (a mask-image per card made
+           phones stutter while scrolling); from sm the foot shows a blurred
+           copy of it (a filtered image is drawn once, unlike a backdrop blur,
+           which repaints on every scroll frame), left out on phones for the
+           same reason. Loaded up front: the roster shows every card. -->
       <NamecardBackdrop
         :src="characterBanner(c.key)"
         :priority="priority"
-        class="absolute inset-y-0 right-0 h-full w-full opacity-45 brightness-[1.35] saturate-[1.1] [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-40 dark:brightness-[1.1]"
+        class="absolute inset-y-0 right-0 h-full w-full opacity-45 brightness-[1.35] saturate-[1.1] sm:w-5/6 dark:opacity-40 dark:brightness-[1.1]"
+      />
+      <span
+        class="pointer-events-none absolute inset-y-0 right-0 w-full bg-linear-to-l from-transparent from-35% to-surface-raised to-95% sm:w-5/6"
+        aria-hidden="true"
       />
       <div class="relative w-full">
         <div class="relative flex w-full items-start gap-3 p-3">
@@ -240,7 +246,11 @@ const weaponTitle = computed(() => {
         <NamecardBackdrop
           :src="characterBanner(c.key)"
           :priority="priority"
-          class="absolute right-0 bottom-0 -z-10 h-[calc(100%+6rem)] w-full opacity-35 blur-md [mask-image:linear-gradient(to_left,black_35%,transparent_95%)] sm:w-5/6 dark:opacity-30"
+          class="absolute right-0 bottom-0 -z-10 hidden h-[calc(100%+6rem)] w-5/6 opacity-35 blur-md sm:block dark:opacity-30"
+        />
+        <span
+          class="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden w-5/6 bg-linear-to-l from-transparent from-35% to-surface-raised/75 to-95% sm:block"
+          aria-hidden="true"
         />
         <span v-if="c.weapon" class="flex shrink-0 items-center gap-1.5" :title="weaponTitle">
           <GameIcon

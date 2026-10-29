@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Artefatos",
       "meaning": "Níveis alcançados, faltam os artefatos"
+    },
+    "unset": {
+      "label": "Defina uma meta",
+      "meaning": "Personalizado: ainda sem meta. Abra para definir o nível e os talentos"
     }
   },
   "bracket": {

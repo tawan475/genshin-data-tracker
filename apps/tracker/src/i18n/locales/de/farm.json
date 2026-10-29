@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Artefakte",
       "meaning": "Stufen erreicht, Artefakte fehlen noch"
+    },
+    "unset": {
+      "label": "Ziel festlegen",
+      "meaning": "Benutzerdefiniert: noch kein Ziel. Öffnen, um Stufe und Talente festzulegen"
     }
   },
   "bracket": {

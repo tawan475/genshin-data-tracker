@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Sv.",
+    "exp": "TP",
     "c": "C",
     "critTitle": "Yadigarlardan Kritik Oranı / Kritik Hasar",
     "crit": "Kritik",

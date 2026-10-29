@@ -89,6 +89,18 @@ export const ARTIFACTS_LEFT = {
   dot: 'bg-accent',
 }
 
+/** A goal made by the Custom preset that asks nothing yet (`unset`). */
+export const GOAL_UNSET = {
+  get label() {
+    return t('farm.readiness.unset.label')
+  },
+  get meaning() {
+    return t('farm.readiness.unset.meaning')
+  },
+  badge: 'bg-accent/10 text-accent-text',
+  dot: 'bg-accent',
+}
+
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI']
 
 export function bracketText(b: Bracket): string {

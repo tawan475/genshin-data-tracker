@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Manufatti",
       "meaning": "Livelli raggiunti, mancano i manufatti"
+    },
+    "unset": {
+      "label": "Imposta un obiettivo",
+      "meaning": "Personalizzato: ancora nessun obiettivo. Aprilo per impostare livello e talenti"
     }
   },
   "bracket": {

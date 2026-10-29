@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Nv.",
+    "exp": "EXP",
     "c": "C",
     "critTitle": "Taxa Crítica / Dano Crítico dos artefatos",
     "crit": "Crít.",

@@ -4,7 +4,9 @@
  * where the character is now: each part is the preset's or now's, whichever
  * is higher. "Talents only" and "Level only" leave the other part at now;
  * Imaginarium Theater asks level 70/70 only (the Theater's entry level) and
- * Custom starts at now, every part set by hand. No preset touches weapons.
+ * Custom starts at now, every part set by hand: its goal is marked `unset` so
+ * it waits with the goals to do instead of landing as done (the other presets
+ * clear the mark). No preset touches weapons.
  */
 
 import type { AscensionPhase } from '@gdt/game-data'
@@ -135,5 +137,11 @@ export function applyPreset(
     },
     now,
   )
-  return { ...base, ...goal, active: base.active ?? true }
+  const { unset: _unset, ...rest } = base
+  return {
+    ...rest,
+    ...goal,
+    active: base.active ?? true,
+    ...(preset.id === 'custom' ? { unset: true as const } : {}),
+  }
 }

@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Artefak",
       "meaning": "Level tercapai, artefak belum"
+    },
+    "unset": {
+      "label": "Atur target",
+      "meaning": "Kustom: belum ada target. Buka untuk mengatur level dan talenta"
     }
   },
   "bracket": {

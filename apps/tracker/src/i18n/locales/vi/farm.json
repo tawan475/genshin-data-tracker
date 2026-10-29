@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Thánh Di Vật",
       "meaning": "Đã đạt cấp, còn Thánh Di Vật"
+    },
+    "unset": {
+      "label": "Đặt mục tiêu",
+      "meaning": "Tùy chỉnh: chưa đặt mục tiêu. Mở ra để đặt cấp và thiên phú"
     }
   },
   "bracket": {

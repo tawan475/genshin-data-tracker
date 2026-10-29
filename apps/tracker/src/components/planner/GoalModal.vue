@@ -174,16 +174,30 @@ watch(
 
 // ------------------------------------------------------------- character
 
+/** A goal part set by hand ends a Custom goal's `unset` mark (presets.ts). */
 function setCharacter(next: CharacterTarget & { custom?: CustomCharacter }) {
+  const was = stored.value
+  if (next.unset && was && goalChanged(was, next)) {
+    const { unset: _unset, ...rest } = next
+    next = rest
+  }
   emit('character', next)
 }
+const goalChanged = (a: CharacterTarget, b: CharacterTarget) =>
+  a.level !== b.level ||
+  a.ascension !== b.ascension ||
+  a.talents.auto !== b.talents.auto ||
+  a.talents.skill !== b.talents.skill ||
+  a.talents.burst !== b.talents.burst ||
+  JSON.stringify(a.artifacts ?? null) !== JSON.stringify(b.artifacts ?? null)
 
 function setNow(next: CharacterState) {
   emit('characterNow', next)
   const goal = stored.value
   if (!goal) return
   const raised = goalAtLeast(goal, next)
-  if (JSON.stringify(raised) !== JSON.stringify(goal)) setCharacter(raised)
+  // Raised along with now: still nothing asked, so an `unset` mark stays.
+  if (JSON.stringify(raised) !== JSON.stringify(goal)) emit('character', raised)
 }
 
 function pickNow(step: LevelStep) {

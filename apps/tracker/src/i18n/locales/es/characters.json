@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Niv.",
+    "exp": "EXP",
     "c": "C",
     "critTitle": "Prob. CRIT / Daño CRIT de los artefactos",
     "crit": "CRIT",

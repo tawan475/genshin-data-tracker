@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Yadigarlar",
       "meaning": "Seviyelere ulaşıldı, yadigarlar kaldı"
+    },
+    "unset": {
+      "label": "Hedef belirle",
+      "meaning": "Özel: henüz hedef yok. Seviyeyi ve yetenekleri belirlemek için aç"
     }
   },
   "bracket": {

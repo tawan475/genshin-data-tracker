@@ -24,6 +24,10 @@
     "artifacts": {
       "label": "Artifacts",
       "meaning": "Levels reached, artifacts to go"
+    },
+    "unset": {
+      "label": "Set a goal",
+      "meaning": "Custom: nothing asked yet. Open it to set the level and talents"
     }
   },
   "bracket": {

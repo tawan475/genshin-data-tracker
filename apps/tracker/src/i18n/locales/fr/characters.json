@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Niv.",
+    "exp": "EXP",
     "c": "C",
     "critTitle": "Taux CRIT / DGT CRIT venant des artéfacts",
     "crit": "CRIT",

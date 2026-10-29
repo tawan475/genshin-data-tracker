@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Cấp",
+    "exp": "EXP",
     "c": "C",
     "critTitle": "Tỷ Lệ Bạo Kích / Sát Thương Bạo Kích từ Thánh Di Vật",
     "crit": "Bạo kích",

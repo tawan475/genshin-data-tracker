@@ -134,6 +134,7 @@
   },
   "table": {
     "lv": "Liv.",
+    "exp": "ESP",
     "c": "C",
     "critTitle": "Tasso di CRIT / DAN da CRIT dai manufatti",
     "crit": "CRIT",

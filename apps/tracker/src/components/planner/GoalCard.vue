@@ -29,7 +29,7 @@ import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { formatSetName } from '@/utils/artifact-stats'
 import { characterParts, weaponPart, type DonePart } from './done'
-import { ARTIFACTS_LEFT, READINESS } from './farm-format'
+import { ARTIFACTS_LEFT, GOAL_UNSET, READINESS } from './farm-format'
 import GoalPortrait from './GoalPortrait.vue'
 import { fromTouch, useItemPopover } from './item-popover'
 import { expName, type FocusChip } from './material-filter'
@@ -241,6 +241,8 @@ const portrait = computed(() => {
 
 const status = computed(() => {
   const e = props.entry
+  // A Custom goal that asks nothing yet (else its readiness as usual).
+  if (e.character?.target.unset && e.materialsDone && !e.artifacts) return GOAL_UNSET
   if (e.done) return READINESS.done
   if (e.materialsDone && e.artifacts) return ARTIFACTS_LEFT
   return props.needs ? READINESS[props.needs.status] : null
