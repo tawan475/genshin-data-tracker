@@ -7,8 +7,9 @@ import { formatNumber } from '@/lib/format'
 
 /**
  * The biggest sets among the current matches as icon + count chips (name in
- * the tooltip); picking one filters to it. On phones one row that scrolls
- * sideways (the clipped edge fades); from sm the chips wrap.
+ * the tooltip); picking one filters to it. Always one row that scrolls
+ * sideways (the clipped edge fades): wrapping, it stacked one chip per line
+ * when the count and the view switch beside it left it little room.
  */
 const props = withDefaults(
   defineProps<{ sets: SetOption[]; selected: readonly string[]; limit?: number }>(),
@@ -22,7 +23,7 @@ const rest = computed(() => props.sets.length - top.value.length)
 
 <template>
   <div
-    class="scroll-hide scroll-fade-x -my-1 flex min-w-0 items-center gap-2 overflow-x-auto px-0.5 py-1 sm:scroll-fade-none sm:flex-wrap sm:overflow-visible"
+    class="scroll-hide scroll-fade-x -my-1 flex min-w-0 items-center gap-2 overflow-x-auto px-0.5 py-1"
     role="group"
     :aria-label="$t('artifacts.topSets.label')"
   >

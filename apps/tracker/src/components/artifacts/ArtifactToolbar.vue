@@ -405,21 +405,22 @@ function clearAll() {
 
       <div class="flex min-w-0 flex-auto gap-2 sm:flex-none">
         <UiButton
-          class="min-w-0 flex-1 sm:flex-none"
+          class="flex-[1_0_auto] sm:flex-none"
           :class="filters.sets.length ? 'border-accent-text!' : ''"
           :title="setsTitle"
           aria-haspopup="dialog"
+          :aria-label="$t('characters.sets')"
           @click="pickerOpen = true"
         >
           <Gem class="size-4 shrink-0" aria-hidden="true" />
-          {{ $t('characters.sets') }}
+          <span class="max-sm:sr-only">{{ $t('characters.sets') }}</span>
           <span v-if="filters.sets.length" class="tabular font-mono text-accent-text">
             {{ filters.sets.length }}
           </span>
           <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
         </UiButton>
         <UiButton
-          class="min-w-0 flex-1 sm:flex-none"
+          class="flex-[1_0_auto] sm:flex-none"
           :class="filters.owners.length ? 'border-accent-text!' : ''"
           :title="$t('artifacts.toolbar.equippedByTitle', { names: ownersTitle })"
           aria-haspopup="dialog"
@@ -433,9 +434,9 @@ function clearAll() {
           </span>
           <ChevronDown class="ml-auto size-4 shrink-0 text-text-muted" aria-hidden="true" />
         </UiButton>
-        <label class="shrink-0" :title="sortTitle">
+        <label class="w-32 min-w-0 shrink" :title="sortTitle">
           <span class="sr-only">{{ $t('artifacts.toolbar.sortBy') }}</span>
-          <UiSelect v-model="sort" :options="sortOptions" class="w-32" />
+          <UiSelect v-model="sort" :options="sortOptions" />
         </label>
         <UiIconButton
           :label="
