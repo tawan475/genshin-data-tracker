@@ -22,7 +22,15 @@ import {
   giCdnArt,
   weaponIcon,
 } from '@/lib/assets'
-import { CardImages, Painter, cardFonts, linearGradient, parseShadows } from '@/lib/card-canvas'
+import {
+  CARD_CORNER,
+  CardImages,
+  Painter,
+  cardFonts,
+  linearGradient,
+  parseShadows,
+  roundCorners,
+} from '@/lib/card-canvas'
 import { cvTier, rvTier } from '@/lib/crit-tiers'
 import { formatDate } from '@/lib/format'
 import { emblemBox } from '@/lib/item-art'
@@ -172,6 +180,7 @@ export async function drawTeamCard(input: TeamDrawing, scale = 1): Promise<Drawn
     card.ground(height)
     card.header()
     input.members.forEach((member, index) => card.row(member, teamRowTop(index)))
+    roundCorners(p.canvas, CARD_CORNER, scale)
     return { canvas: p.canvas, missing: images.missing + (portraits?.missing ?? 0) }
   } finally {
     p.done()

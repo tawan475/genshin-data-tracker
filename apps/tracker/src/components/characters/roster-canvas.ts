@@ -12,7 +12,7 @@ import type { TalentLevel } from '@/data/character-build'
 import type { CharacterView } from '@/data/characters'
 import type { Element } from '@/data/game-meta'
 import { characterIcon, elementIcon, elementIconLight } from '@/lib/assets'
-import { canvasPng } from '@/lib/card-canvas'
+import { CARD_CORNER, canvasPng, roundCorners } from '@/lib/card-canvas'
 import { qualityCell } from '@/lib/item-art'
 import {
   ROSTER_GAP,
@@ -400,6 +400,8 @@ export async function drawRoster(input: RosterDrawing, scale: number): Promise<D
     drawTile(ctx, c, input.talents.get(c.key) ?? [], images, x, y, family)
   })
 
+  // The same share of its width as on the 1920px cards.
+  roundCorners(canvas, (CARD_CORNER * width) / 1920, scale)
   return { canvas, missing: images.missing, width, height }
 }
 

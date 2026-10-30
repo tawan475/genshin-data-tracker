@@ -87,7 +87,7 @@ watch([shown, host], ([drawn, el]) => {
   if (!el || !drawn) return
   // As big as the dialog allows, whole: width-bound, or height-bound on a short screen.
   drawn.canvas.className =
-    'mx-auto block h-auto w-auto max-w-full rounded-xl max-h-[calc(100dvh-6rem)] sm:max-h-[calc(90dvh-6rem)]'
+    'mx-auto block h-auto w-auto max-w-full max-h-[calc(100dvh-6rem)] sm:max-h-[calc(90dvh-6rem)]'
   drawn.canvas.setAttribute('role', 'img')
   drawn.canvas.setAttribute('aria-label', title.value)
   el.replaceChildren(drawn.canvas)

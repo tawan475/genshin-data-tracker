@@ -699,6 +699,27 @@ export function iconPath(
 
 // ------------------------------------------------------------------ the PNG
 
+/** The share cards' corner radius in CSS px at the 1920px width (the artifact card: its 12px at 2.7×). */
+export const CARD_CORNER = 32
+
+/**
+ * Cuts the painted card's corners round, `radius` CSS px at `scale`: what
+ * lies outside turns transparent, so the PNG (download, copy, share) and
+ * the preview drawn from it have the same edge in both themes.
+ */
+export function roundCorners(canvas: HTMLCanvasElement, radius: number, scale: number): void {
+  const ctx = canvas.getContext('2d')!
+  ctx.save()
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.globalAlpha = 1
+  ctx.globalCompositeOperation = 'destination-in'
+  ctx.fillStyle = '#000'
+  ctx.beginPath()
+  ctx.roundRect(0, 0, canvas.width, canvas.height, radius * scale)
+  ctx.fill()
+  ctx.restore()
+}
+
 /** The PNG encoder (card-png.worker), started on the first export and kept. */
 let encoder: Worker | null = null
 let jobs = 0

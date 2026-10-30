@@ -23,12 +23,14 @@ import {
   weaponIcon,
 } from '@/lib/assets'
 import {
+  CARD_CORNER,
   CardImages,
   Painter,
   cardFonts,
   linearGradient,
   parseInsetRing,
   parseShadows,
+  roundCorners,
 } from '@/lib/card-canvas'
 import { cvTier, rvTier } from '@/lib/crit-tiers'
 import { formatDate } from '@/lib/format'
@@ -161,6 +163,7 @@ export async function drawShareCard(input: CardDrawing, scale = 1): Promise<Draw
     card.stats()
     card.sets()
     pieces.forEach((piece, index) => card.piece(piece, index))
+    roundCorners(p.canvas, CARD_CORNER, scale)
     return { canvas: p.canvas, missing: images.missing + (portraitImages?.missing ?? 0) }
   } finally {
     p.done()
