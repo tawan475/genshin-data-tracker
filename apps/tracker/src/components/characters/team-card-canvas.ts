@@ -3,9 +3,10 @@
  * (the team's name, the owner, the capture date) over one 1824×446 row per
  * character, each a condensed build card: its namecard and splash, name,
  * level and friendship, constellations, talents; the weapon and the stat
- * panel; the five pieces side by side and the sets with the build's CV / RV.
- * Same palette and parts as the build card (card-paint); geometry in
- * team-card.
+ * panel; the five pieces side by side over a card of the sets with the
+ * build's RV / CV. Behind it all, blurred, the city painting of the region
+ * most members are from (teamRegion), showing through the rows. Same palette
+ * and parts as the build card (card-paint); geometry in team-card.
  */
 
 import { bonusSets, buildRv, weaponLines } from '@/data/character-build'
@@ -70,7 +71,9 @@ import {
   TEAM_PAD_X,
   TEAM_PAD_Y,
   TEAM_ROW,
+  regionBackground,
   teamCardHeight,
+  teamRegion,
   teamRowTop,
 } from './team-card'
 import { constellationIcons, talentIcons } from './talent-icons'
@@ -112,11 +115,23 @@ const INNER_H = TEAM_ROW - 2 * ROW_PAD
 const WHO_X = ROW_X + ROW_PAD
 const MID_X = WHO_X + ROW_COLUMNS.who + ROW_COLUMN_GAP
 const PIECES_X = MID_X + ROW_COLUMNS.middle + ROW_COLUMN_GAP
-const PIECE_GAP = 12
+const PIECE_GAP = 8
 const PIECE_W = (ROW_COLUMNS.pieces - 4 * PIECE_GAP) / 5
 const PIECE_H = INNER_H - 12 - ROW_SETS
 const BAND_H = 104
 const BAND_ICON = 72
+/** A substat's roll bars: each this wide, this far apart, this tall at the top tier. */
+const BAR_W = 4
+const BAR_PITCH = 6
+const BAR_H = 20
+/** The city painting's filter, and the veil of the card's ground over it, per theme. */
+const CITY_FILTER = {
+  dark: { blur: 18, saturate: 1.05, brightness: 0.72 },
+  light: { blur: 18, saturate: 1.05, brightness: 1.05 },
+} as const
+const CITY_VEIL = { dark: 0.42, light: 0.38 } as const
+/** How much of a row's namecard shows over the city painting. */
+const ROW_NAMECARD = 0.62
 const WEAPON_TILE = 88
 const CONSTELLATION = 46
 const TALENT = 66
@@ -160,7 +175,8 @@ function rowImages(member: TeamMember, crown: string): string[] {
 
 /** The card at `scale` device pixels per CSS pixel (1: the PNG). */
 export async function drawTeamCard(input: TeamDrawing, scale = 1): Promise<DrawnTeam> {
-  const urls = [EMBLEM_URL, ...input.members.flatMap((m) => rowImages(m, input.crown))]
+  const city = regionBackground(teamRegion(input.members.map((m) => m.character.key)))
+  const urls = [EMBLEM_URL, city, ...input.members.flatMap((m) => rowImages(m, input.crown))]
   const [images, fonts] = await Promise.all([
     CardImages.load(urls),
     cardFonts([400, 500, 600, 700]),
@@ -177,7 +193,7 @@ export async function drawTeamCard(input: TeamDrawing, scale = 1): Promise<Drawn
   const p = new Painter(TEAM_CARD_WIDTH, height, scale)
   try {
     const card = new TeamPainter(p, input, images, fonts.tabular, portraits)
-    card.ground(height)
+    card.ground(height, city)
     card.header()
     input.members.forEach((member, index) => card.row(member, teamRowTop(index)))
     roundCorners(p.canvas, CARD_CORNER, scale)
@@ -200,9 +216,20 @@ class TeamPainter extends CardPaint {
     super(p, input.theme, images, family)
   }
 
-  ground(height: number) {
-    this.ctx.fillStyle = this.v('--card-ground')
-    this.ctx.fillRect(0, 0, TEAM_CARD_WIDTH, height)
+  /** The card's ground: the city painting, blurred so it doesn't distract, under a veil of the theme's ground. */
+  ground(height: number, city: string) {
+    const { p, ctx } = this
+    const ground = this.v('--card-ground')
+    ctx.fillStyle = ground
+    ctx.fillRect(0, 0, TEAM_CARD_WIDTH, height)
+    const painting = this.images.get(city)
+    if (!painting) return
+    // Oversized so the blur has no edge.
+    p.filtered(CITY_FILTER[this.cardTheme], () =>
+      p.cover(painting, -60, -60, TEAM_CARD_WIDTH + 120, height + 120),
+    )
+    ctx.fillStyle = withAlpha(ground, CITY_VEIL[this.cardTheme])
+    ctx.fillRect(0, 0, TEAM_CARD_WIDTH, height)
   }
 
   // -------------------------------------------------- header
@@ -274,10 +301,11 @@ class TeamPainter extends CardPaint {
     const { p, ctx } = this
     const k = ROW_SPLASH_SCALE
     p.clipped(ROW_X, top, ROW_W, TEAM_ROW, 26, () => {
-      ctx.fillStyle = this.v('--card-ground')
-      ctx.fillRect(ROW_X, top, ROW_W, TEAM_ROW)
+      // The city shows through: the namecard over it, not over the plain ground.
       const namecard = this.images.get(characterBanner(c.key))
       if (namecard) {
+        ctx.save()
+        ctx.globalAlpha = ROW_NAMECARD
         const filter = /blur\(([\d.]+)px\) saturate\(([\d.]+)\) brightness\(([\d.]+)\)/.exec(
           this.v('--card-namecard-filter'),
         )
@@ -289,6 +317,7 @@ class TeamPainter extends CardPaint {
           },
           () => p.cover(namecard, ROW_X - 40, top - 30, ROW_W + 80, TEAM_ROW + 60),
         )
+        ctx.restore()
       }
       this.gradients(this.v('--card-scrim'), top)
       if (c.element) this.glowAt(c, top)
@@ -718,8 +747,8 @@ class TeamPainter extends CardPaint {
     })
 
     // The main stat and its value.
-    const left = x + 10
-    const right = x + w - 10
+    const left = x + 8
+    const right = x + w - 8
     let y = top + BAND_H + 8
     this.line(formatStatShort(piece.mainStatKey), left, y, 16, 400, this.v('--card-muted'), {
       lineHeight: 22,
@@ -735,7 +764,7 @@ class TeamPainter extends CardPaint {
     const bottom = top + PIECE_H - 8
     const lineH = (bottom - y) / 4
     const most = Math.max(1, ...slot.lines.map((line) => (line.inactive ? 0 : line.rolls.length)))
-    const barsW = most * 4 - 1
+    const barsW = most * BAR_PITCH - (BAR_PITCH - BAR_W)
     for (let n = 0; n < 4; n++) {
       const line = slot.lines[n]
       if (!line) continue
@@ -755,67 +784,110 @@ class TeamPainter extends CardPaint {
       })
       if (!line.inactive) {
         line.rolls.forEach((roll, k) => {
-          const bh = Math.round(18 * ROLL_TIER[roll.quality]!)
-          p.fill(barsX + k * 4, ly + 3 + 18 - bh, 3, bh, 1, this.v(`--card-roll-${roll.quality}`))
+          const bh = Math.round(BAR_H * ROLL_TIER[roll.quality]!)
+          p.fill(
+            barsX + k * BAR_PITCH,
+            ly + (24 - BAR_H) / 2 + BAR_H - bh,
+            BAR_W,
+            bh,
+            1.5,
+            this.v(`--card-roll-${roll.quality}`),
+          )
         })
       }
       this.ctx.restore()
     }
   }
 
-  /** The sets worn for a bonus, then the build's RV and CV. */
+  /**
+   * The card under the pieces: the sets worn for a bonus, one line each
+   * (one set larger), and the build's RV and CV as large figures at the right.
+   */
   private sets(c: CharacterView, top: number) {
     const { p } = this
     const x = PIECES_X
     const w = ROW_COLUMNS.pieces
-    this.glass(x, top, w, ROW_SETS, 14, 'panel')
-    const left = x + 14
-    const right = x + w - 16
+    const h = ROW_SETS
+    this.glass(x, top, w, h, 16, 'panel')
+    const left = x + 18
+    const right = x + w - 22
     const muted = this.v('--card-muted')
     if (!c.artifactCount) {
-      this.line(t('characters.detail.noArtifacts'), left, top + 9, 18, 400, muted, {
-        lineHeight: 26,
+      this.line(t('characters.detail.noArtifacts'), left, top + (h - 28) / 2, 20, 400, muted, {
+        lineHeight: 28,
       })
       return
     }
 
-    // Right: "Build  RV 1,036%  CV 214.6", in the build card's tiers.
+    // Right: "Build" over "RV 1,036%  CV 214.6", in the build card's tiers.
     const rv = buildRv(c.artifacts)
+    const rvText = `${rv}%`
     const cvText = c.cv.toFixed(1)
     const rvTone = rv > 0 ? this.tier(rvTier(rv, 'build')) : { color: this.v('--card-text') }
     const cvTone = c.cv > 0 ? this.tier(cvTier(c.cv, 'build')) : { color: this.v('--card-text') }
-    const ty = top + (ROW_SETS - 26) / 2
-    let rx = right - this.textWidth(cvText, 18, 700)
-    this.line(cvText, rx, ty, 18, 700, cvTone.color, { shadows: cvTone.shadows, lineHeight: 26 })
-    rx -= this.textWidth('CV ', 18, 400)
-    this.line('CV ', rx, ty, 18, 400, muted, { lineHeight: 26 })
-    rx -= 16 + this.textWidth(`${rv}%`, 18, 700)
-    this.line(`${rv}%`, rx, ty, 18, 700, rvTone.color, { shadows: rvTone.shadows, lineHeight: 26 })
-    rx -= this.textWidth('RV ', 18, 400)
-    this.line('RV ', rx, ty, 18, 400, muted, { lineHeight: 26 })
-    rx -= 16 + this.textWidth(t('characters.detail.build'), 18, 400)
-    this.line(t('characters.detail.build'), rx, ty, 18, 400, muted, { lineHeight: 26 })
+    const figures = 22 + 2 + 38
+    const capTop = top + (h - figures) / 2
+    const valueTop = capTop + 22 + 2
+    const labelW = (text: string) => this.textWidth(text, 18, 500)
+    const blockW =
+      labelW('RV ') +
+      this.textWidth(rvText, 30, 700) +
+      24 +
+      labelW('CV ') +
+      this.textWidth(cvText, 30, 700)
+    let rx = right - blockW
+    const end = rx - 28
+    this.line(t('characters.detail.build'), rx, capTop, 15, 500, muted, { lineHeight: 22 })
+    const label = (text: string) => {
+      rx += this.line(text, rx, valueTop + 6, 18, 500, muted, { lineHeight: 30 })
+    }
+    label('RV ')
+    rx += this.line(rvText, rx, valueTop, 30, 700, rvTone.color, {
+      shadows: rvTone.shadows,
+      lineHeight: 38,
+    })
+    rx += 24
+    label('CV ')
+    this.line(cvText, rx, valueTop, 30, 700, cvTone.color, {
+      shadows: cvTone.shadows,
+      lineHeight: 38,
+    })
 
-    // Left: each set's icon, its piece bonus and its name.
-    let sx = left
-    const end = rx - 20
-    for (const { set, pieces } of bonusSets(c.sets)) {
-      if (sx + 30 + 8 + 30 > end) break
-      p.image(this.images.get(artifactSetIcon(set.setKey)), sx, top + 7, 30, 30)
-      sx += 30 + 8
+    // Left: each set's icon, its piece count and its name; a lone set larger.
+    const sets = bonusSets(c.sets)
+    const one = sets.length === 1
+    const icon = one ? 48 : 32
+    const size = one ? 24 : 19
+    const lineH = one ? 48 : 34
+    const gap = 6
+    let y = top + (h - (sets.length * lineH + (sets.length - 1) * gap)) / 2
+    for (const { set, pieces } of sets) {
+      let sx = left
+      p.image(this.images.get(artifactSetIcon(set.setKey)), sx, y + (lineH - icon) / 2, icon, icon)
+      sx += icon + 10
       const count = String(pieces)
-      const chipW = Math.max(26, this.textWidth(count, 17, 700) + 14)
-      p.fill(sx, top + 9, chipW, 26, 7, this.v('--card-set-on-bg'))
-      this.line(count, sx + chipW / 2, top + 9, 17, 700, this.v('--card-set-on'), {
+      const chipH = one ? 30 : 26
+      const chipW = Math.max(chipH, this.textWidth(count, size - 2, 700) + 14)
+      const chipTop = y + (lineH - chipH) / 2
+      p.fill(sx, chipTop, chipW, chipH, 7, this.v('--card-set-on-bg'))
+      this.line(count, sx + chipW / 2, chipTop, size - 2, 700, this.v('--card-set-on'), {
         align: 'center',
-        lineHeight: 26,
+        lineHeight: chipH,
       })
-      sx += chipW + 8
-      sx += this.line(set.name, sx, ty, 18, 400, this.v('--card-text'), {
-        lineHeight: 26,
-        max: Math.max(0, end - sx),
-      })
-      sx += 20
+      sx += chipW + 10
+      this.line(
+        set.name,
+        sx,
+        y + (lineH - size * 1.3) / 2,
+        size,
+        one ? 600 : 500,
+        this.v('--card-text'),
+        {
+          lineHeight: size * 1.3,
+          max: Math.max(0, end - sx),
+        },
+      )
+      y += lineH + gap
     }
   }
 }

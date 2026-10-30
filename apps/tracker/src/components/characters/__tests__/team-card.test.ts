@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CharacterView } from '@/data/characters'
 import {
+  DEFAULT_TEAM_REGION,
   MAX_PICKS,
   ROW_COLUMNS,
   ROW_COLUMN_GAP,
@@ -11,6 +12,7 @@ import {
   teamCardHeight,
   teamFileName,
   teamMembers,
+  teamRegion,
   teamRowTop,
   togglePick,
 } from '../team-card'
@@ -88,5 +90,27 @@ describe('teamFileName', () => {
   it('falls back to the characters', () => {
     expect(teamFileName(null, ['HuTao', 'Yelan'])).toBe('HuTao-Yelan-teyvat-me.png')
     expect(teamFileName('♡♡', ['HuTao'])).toBe('HuTao-teyvat-me.png')
+  })
+})
+
+describe('teamRegion', () => {
+  it('takes the region most members are from', () => {
+    // Liyue: Xingqiu, Yelan, Zhongli; Mondstadt: Bennett.
+    expect(teamRegion(['Xingqiu', 'Bennett', 'Yelan', 'Zhongli'])).toBe(2)
+    // Two from Mondstadt beat one each from Liyue and Inazuma.
+    expect(teamRegion(['Bennett', 'Sucrose', 'Xiangling', 'RaidenShogun'])).toBe(1)
+    expect(teamRegion(['Furina', 'Neuvillette'])).toBe(5)
+  })
+
+  it('counts the Harbingers as Snezhnaya and leaves out the Traveler and the regionless', () => {
+    expect(teamRegion(['Tartaglia', 'Arlecchino', 'KaedeharaKazuha'])).toBe(8)
+    expect(teamRegion(['TravelerAnemo', 'Aloy', 'Skirk', 'Nahida'])).toBe(4)
+  })
+
+  it('falls back to the default on a tie or with nobody from a region', () => {
+    expect(teamRegion(['Bennett', 'Xingqiu'])).toBe(DEFAULT_TEAM_REGION)
+    expect(teamRegion(['TravelerAnemo', 'Aloy'])).toBe(DEFAULT_TEAM_REGION)
+    expect(teamRegion(['NotACharacter'])).toBe(DEFAULT_TEAM_REGION)
+    expect(teamRegion([])).toBe(DEFAULT_TEAM_REGION)
   })
 })

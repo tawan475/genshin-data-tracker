@@ -2,11 +2,15 @@
  * The team card (team-card-canvas): two to four characters, one row each,
  * under a header with the team's name and the owner. As wide as the build
  * card (1920px); its height follows the count, and two rows are exactly the
- * build card's 1920×1080. Also what the picker (BuildPicker) needs: the
- * picks' order and the team members found in the roster.
+ * build card's 1920×1080. Behind it, blurred, the city painting of the
+ * region most members are from (the game's Party Setup scenes). Also what
+ * the picker (BuildPicker) needs: the picks' order and the team members
+ * found in the roster.
  */
 
+import { characterInfo } from '@gdt/game-data/catalog'
 import type { CharacterView } from '@/data/characters'
+import { giCdnArt } from '@/lib/assets'
 
 export const TEAM_CARD_WIDTH = 1920
 /** The PNG is the card at 1×, like the build card. */
@@ -24,7 +28,7 @@ export const ROW_COLUMNS = { who: 480, middle: 380, pieces: 876 } as const
 export const ROW_COLUMN_GAP = 24
 /** The weapon panel's height in the middle column, the sets strip under the pieces. */
 export const ROW_WEAPON = 116
-export const ROW_SETS = 44
+export const ROW_SETS = 88
 /** The splash in a row: the build card's place, scaled (head and shoulders show). */
 export const ROW_SPLASH_SCALE = 0.62
 
@@ -72,6 +76,36 @@ export function teamMembers(
     if (found.length === max) break
   }
   return found
+}
+
+/** The region a team stands in when none leads: Mondstadt (CityConfigData id 1). */
+export const DEFAULT_TEAM_REGION = 1
+
+/**
+ * The region whose city backs the card (a CityConfigData id, 1 Mondstadt …
+ * 8 Snezhnaya): the one more members are from than any other. The Traveler
+ * and characters from no region don't count; a tie, or nobody from a
+ * region, gives the default.
+ */
+export function teamRegion(keys: readonly string[]): number {
+  const counts = new Map<number, number>()
+  for (const key of keys) {
+    const region = characterInfo(key)?.region
+    if (region) counts.set(region, (counts.get(region) ?? 0) + 1)
+  }
+  let best = DEFAULT_TEAM_REGION
+  let most = 0
+  let tied = false
+  for (const [region, count] of counts) {
+    if (count > most) [best, most, tied] = [region, count, false]
+    else if (count === most) tied = true
+  }
+  return most && !tied ? best : DEFAULT_TEAM_REGION
+}
+
+/** A region's city painting on gi-cdn (`UI_QuestHubLogPic_CityBg_<id>`, 1024×576). */
+export function regionBackground(region: number): string {
+  return giCdnArt(`UI_QuestHubLogPic_CityBg_${region}`)
 }
 
 /** The PNG's name: the team's, else the characters' keys (`HuTao-Yelan-teyvat-me.png`). */
