@@ -1,5 +1,6 @@
 import {
   catalogFromRows,
+  asLeyline,
   decodeSnapshot,
   encodeSnapshot,
   hashArtifactIdentity,
@@ -408,7 +409,9 @@ describe('accounts and imports', () => {
     const exported = await client.json<Good>(
       `/api/accounts/${account.id}/snapshots/${created.snapshotId}/good`,
     )
-    expect(canonical(exported)).toEqual(canonical({ ...good, timestamp: 1_780_000_000_000 }))
+    expect(canonical(exported)).toEqual(
+      canonical(asLeyline({ ...good, timestamp: 1_780_000_000_000 })),
+    )
 
     // Browser-side export: bundle + catalog decode to the same files.
     const bundleResponse = await client.fetch(`/api/accounts/${account.id}/bundle`)
@@ -455,7 +458,7 @@ describe('accounts and imports', () => {
     const exported = await client.json<Good>(
       `/api/accounts/${account.id}/snapshots/${first.snapshotId}/good`,
     )
-    expect(canonical(exported)).toEqual(canonical({ ...good, timestamp: 1_000 }))
+    expect(canonical(exported)).toEqual(canonical(asLeyline({ ...good, timestamp: 1_000 })))
     const latest = await client.json<Good>(`/api/accounts/${account.id}/latest/good`)
     expect(latest.gi_player?.resin).toBe(160)
 
@@ -1127,24 +1130,26 @@ describe('delta storage', () => {
       const snapshot = byId.get(results[i]!.snapshotId)!
       const full = await encodeSnapshot(await prepareSnapshot(good), ids, MATERIALS)
       const expected = JSON.stringify(
-        decodeSnapshot(
-          {
-            format: good.format,
-            version: good.version,
-            source: good.source,
-            takenAt: times[i]!,
-            characters: full.characters.json,
-            weapons: full.weapons.json,
-            artifacts: full.artifacts.json,
-            materials: full.materials.json,
-            materialsKeyframe: null,
-            achievements: full.achievements?.json ?? null,
-            player: full.player?.json ?? null,
-            achievementTimes: full.achievementTimes?.json ?? null,
-            characterExtras: full.characterExtras?.json ?? null,
-          },
-          catalog,
-          MATERIALS,
+        asLeyline(
+          decodeSnapshot(
+            {
+              format: good.format,
+              version: good.version,
+              source: good.source,
+              takenAt: times[i]!,
+              characters: full.characters.json,
+              weapons: full.weapons.json,
+              artifacts: full.artifacts.json,
+              materials: full.materials.json,
+              materialsKeyframe: null,
+              achievements: full.achievements?.json ?? null,
+              player: full.player?.json ?? null,
+              achievementTimes: full.achievementTimes?.json ?? null,
+              characterExtras: full.characterExtras?.json ?? null,
+            },
+            catalog,
+            MATERIALS,
+          ),
         ),
       )
       expect(new TextDecoder().decode(files[names.get(snapshot.id)!]), `upload ${i}`).toBe(expected)
@@ -1153,7 +1158,7 @@ describe('delta storage', () => {
         `/api/accounts/${account.id}/snapshots/${snapshot.id}/good`,
       )
       expect(JSON.stringify(served)).toBe(expected)
-      expect(canonical(served)).toEqual(canonical({ ...good, timestamp: times[i]! }))
+      expect(canonical(served)).toEqual(canonical(asLeyline({ ...good, timestamp: times[i]! })))
     }
 
     // A bundle of just achievement times carries the bases the deltas need.

@@ -63,7 +63,7 @@
     "clear": "Limpar datas"
   },
   "row": {
-    "downloadGood": "Baixar GOOD",
+    "downloadGood": "Baixar Leyline",
     "download": "Baixar captura {id}",
     "delete": "Excluir captura",
     "deleteId": "Excluir captura {id}"
@@ -79,7 +79,7 @@
     "hidden": "· {n} ocultas",
     "cancel": "Cancelar",
     "blocked": "Outra exportação está em andamento",
-    "downloadTitle": "Baixar um zip de arquivos GOOD",
+    "downloadTitle": "Baixar um zip de arquivos Leyline",
     "download": "Baixar",
     "delete": "Excluir"
   },

@@ -46,7 +46,7 @@
     },
     "noAchievements": "Başarım bulunamadı",
     "notJson": "JSON dosyası değil",
-    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb veya Teyvat.me Capture: gi_achievements içeren bir GOOD dosyası.",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb veya Teyvat.me Capture: gi_achievements içeren bir Leyline/GOOD dosyası.",
     "drop": "Seelie, paimon.moe veya stardb dosyası",
     "account": "Hesap {n}",
     "fileAccount": "Dosyadaki hesap",

@@ -63,7 +63,7 @@
     "clear": "Сбросить даты"
   },
   "row": {
-    "downloadGood": "Скачать GOOD",
+    "downloadGood": "Скачать Leyline",
     "download": "Скачать снимок {id}",
     "delete": "Удалить снимок",
     "deleteId": "Удалить снимок {id}"
@@ -79,7 +79,7 @@
     "hidden": "· скрыто: {n}",
     "cancel": "Отмена",
     "blocked": "Уже идёт другой экспорт",
-    "downloadTitle": "Скачать zip с файлами GOOD",
+    "downloadTitle": "Скачать zip с файлами Leyline",
     "download": "Скачать",
     "delete": "Удалить"
   },

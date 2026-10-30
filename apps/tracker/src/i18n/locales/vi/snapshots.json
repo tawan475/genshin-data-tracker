@@ -63,7 +63,7 @@
     "clear": "Xóa ngày"
   },
   "row": {
-    "downloadGood": "Tải GOOD",
+    "downloadGood": "Tải Leyline",
     "download": "Tải bản chụp {id}",
     "delete": "Xóa bản chụp",
     "deleteId": "Xóa bản chụp {id}"
@@ -79,7 +79,7 @@
     "hidden": "· {n} đang ẩn",
     "cancel": "Hủy",
     "blocked": "Đang có một lần xuất khác",
-    "downloadTitle": "Tải tệp zip gồm các tệp GOOD",
+    "downloadTitle": "Tải tệp zip gồm các tệp Leyline",
     "download": "Tải xuống",
     "delete": "Xóa"
   },

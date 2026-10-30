@@ -50,7 +50,7 @@
   "capture": {
     "overline": "Ứng dụng ghi",
     "title": "Ứng dụng ghi",
-    "lead": "Đọc lưu lượng của game trên PC hoặc điện thoại. Lưu tài khoản của bạn thành GOOD JSON.",
+    "lead": "Đọc lưu lượng của game trên PC hoặc điện thoại. Lưu tài khoản của bạn thành Leyline JSON.",
     "noAccount": "Không cần tài khoản",
     "noAccountNote": "Kết nối teyvat.me là tùy chọn",
     "readOnly": "Chỉ đọc, không ghi",
@@ -78,7 +78,7 @@
     "firstBack": "Người đầu về {time}",
     "discountsLeft": "Còn lượt giảm giá",
     "abyssResets": "Đặt lại sau {n} ngày",
-    "save": "Lưu GOOD JSON…",
+    "save": "Lưu Leyline JSON…",
     "autoExport": "Tự động xuất",
     "savedFile": "Đã lưu {time} · {file}",
     "wishFirst": "Hãy mở lịch sử cầu nguyện trong game trước",
@@ -112,7 +112,7 @@
     "yours": "Của bạn",
     "yoursNote": "Riêng tư trừ khi bạn chia sẻ",
     "export": "Xuất bất cứ lúc nào",
-    "exportNote": "Định dạng GOOD · dùng được với Genshin Optimizer",
+    "exportNote": "Định dạng Leyline · dùng được với Genshin Optimizer",
     "delete": "Xóa bất cứ lúc nào",
     "deleteNote": "Tài khoản của bạn và dữ liệu của nó"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Vì sao cần quyền quản trị trên Windows?",
     "adminA": "Windows chỉ cho phép quản trị viên bắt gói tin mạng.",
     "needQ": "Có bắt buộc dùng ứng dụng không?",
-    "needA": "Không. Bạn có thể tự nhập tệp GOOD vào trình theo dõi.",
+    "needA": "Không. Bạn có thể tự nhập tệp Leyline/GOOD vào trình theo dõi.",
     "serversQ": "Những máy chủ nào?",
     "serversA": "Tất cả: Châu Mỹ, Châu Âu, Châu Á và TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Chân trang",
     "disclaimer": "Teyvat.me là dự án không chính thức của người hâm mộ, không liên kết và không được HoYoverse chứng thực. Genshin Impact là thương hiệu của HoYoverse.",
     "tracker": "Trình theo dõi",
-    "download": "Tải về"
+    "download": "Tải về",
+    "developers": "Nhà phát triển"
+  },
+  "dev": {
+    "lead": "Định dạng ghi chép Teyvat: GOOD, cùng mọi thứ khác trong tài khoản của bạn.",
+    "english": "Phần tham khảo bên dưới bằng tiếng Anh, giống tên các trường mà nó mô tả.",
+    "contents": "Mục lục"
   }
 }

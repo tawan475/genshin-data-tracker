@@ -36,7 +36,7 @@
     "lumine": "Люмин",
     "aether": "Итэр",
     "deleteAccount": "Удалить аккаунт",
-    "deleteTitle": "Экспортированные файлы GOOD не затрагиваются",
+    "deleteTitle": "Экспортированные файлы Leyline не затрагиваются",
     "confirmTitle": "Удалить {name}?",
     "deletes": "Будет удалено: {loss}. Его ключ Teyvat.me Capture перестанет работать.",
     "typeToConfirm": "Введите {word}",

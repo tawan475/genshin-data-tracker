@@ -63,7 +63,7 @@
     "clear": "Clear dates"
   },
   "row": {
-    "downloadGood": "Download GOOD",
+    "downloadGood": "Download Leyline",
     "download": "Download snapshot {id}",
     "delete": "Delete snapshot",
     "deleteId": "Delete snapshot {id}"
@@ -79,7 +79,7 @@
     "hidden": "· {n} hidden",
     "cancel": "Cancel",
     "blocked": "Another export is running",
-    "downloadTitle": "Download a zip of GOOD files",
+    "downloadTitle": "Download a zip of Leyline files",
     "download": "Download",
     "delete": "Delete"
   },

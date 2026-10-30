@@ -31,7 +31,7 @@
     "progress": "{done} von {total} hochgeladen"
   },
   "drop": {
-    "title": "GOOD-Dateien ablegen",
+    "title": "Leyline/GOOD-Dateien ablegen",
     "browse": "Durchsuchen",
     "hint": "Bis zu {files} Dateien, je {mb} MB. Ordner gehen auch."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} unverändert",
     "snapshots": "Snapshots",
     "notJson": "Kein gültiges JSON",
-    "notGood": "Keine GOOD-Datei"
+    "notGood": "Keine Leyline/GOOD-Datei"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Planer",
     "achievement": "Errungenschaft",
-    "copyAndOpen": "Neueste GOOD-Datei kopieren und {site} öffnen",
+    "copyAndOpen": "Neueste Leyline-Datei kopieren und {site} öffnen",
     "noSnapshots": "Noch keine Snapshots",
     "copied": "In die Zwischenablage kopiert!",
     "open": "{site} öffnen",

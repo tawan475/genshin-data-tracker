@@ -29,7 +29,7 @@ import { Cloud, FileBraces, Gamepad2, Power } from 'lucide-vue-next'
             <span class="num">3</span><FileBraces class="ic xl step-ic" aria-hidden="true" />
           </div>
           <h3 class="h3">{{ $t('landing.steps.exported') }}</h3>
-          <span class="muted step-note">GOOD JSON</span>
+          <span class="muted step-note">Leyline JSON</span>
         </li>
       </ol>
       <div class="glass opt">

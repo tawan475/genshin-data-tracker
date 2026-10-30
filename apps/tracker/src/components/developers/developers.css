@@ -1,0 +1,279 @@
+/*
+ * The developer page (views/DevelopersView.vue), on landing.css's ground:
+ * every rule under `.lp.dev`. Code blocks scroll sideways inside their box,
+ * never the page.
+ */
+
+.lp.dev .dv-hero {
+  padding: 72px 0 56px;
+}
+.lp.dev .dv-hero .sec-h {
+  margin-bottom: 0;
+}
+.lp.dev .dv-name {
+  font-size: 56px;
+  overflow-wrap: anywhere;
+}
+.lp.dev .dv-toc {
+  display: none;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.lp.dev .dv-toc .chip {
+  text-decoration: none;
+}
+.lp.dev [id] {
+  scroll-margin-top: 16px;
+}
+
+.lp.dev code {
+  font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+.lp.dev :not(pre) > code {
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--tx);
+}
+.lp.dev pre.code {
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #cbd5e1;
+  tab-size: 2;
+}
+.lp.dev pre.code code {
+  font-size: inherit;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+
+/* text column beside a code block; stacks when narrow */
+.lp.dev .dv-split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+}
+.lp.dev .dv-col {
+  flex: 999 1 440px;
+  min-width: 0;
+}
+.lp.dev .dv-col .sec-h {
+  margin-bottom: 24px;
+}
+.lp.dev .dv-list,
+.lp.dev .dv-steps {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--tx2);
+}
+.lp.dev .dv-list {
+  list-style: disc;
+}
+.lp.dev .dv-steps {
+  list-style: decimal;
+}
+.lp.dev .dv-list ::marker,
+.lp.dev .dv-steps ::marker {
+  color: var(--tx3);
+}
+.lp.dev .dv-list b {
+  color: var(--tx);
+  font-weight: 600;
+}
+.lp.dev .dv-steps {
+  margin-bottom: 32px;
+  max-width: 820px;
+}
+.lp.dev p {
+  margin: 0;
+}
+.lp.dev .h3 + .muted,
+.lp.dev .muted + p,
+.lp.dev p + p,
+.lp.dev p + pre {
+  margin-top: 10px;
+}
+
+.lp.dev .dv-rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+}
+.lp.dev .dv-rule {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--tx2);
+  font-size: 15px;
+}
+.lp.dev .dv-rule b {
+  color: var(--tx);
+}
+.lp.dev .dv-limits {
+  margin-top: 40px;
+}
+.lp.dev .dv-limits .h3 {
+  margin-bottom: 4px;
+}
+
+.lp.dev .dv-table {
+  margin-top: 14px;
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.lp.dev .dv-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+.lp.dev .dv-table th,
+.lp.dev .dv-table td {
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.lp.dev .dv-table tr:first-child > * {
+  border-top: 0;
+}
+.lp.dev .dv-table th {
+  font-weight: 500;
+  color: var(--tx);
+}
+.lp.dev .dv-table td {
+  color: var(--tx2);
+}
+.lp.dev .dv-table td.tab {
+  white-space: nowrap;
+}
+
+.lp.dev .dv-keys {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lp.dev .dv-key summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 16px 20px;
+}
+.lp.dev .dv-key summary::-webkit-details-marker {
+  display: none;
+}
+.lp.dev .dv-key-h {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-width: min(100%, 260px);
+}
+.lp.dev .dv-key-name {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--amber2);
+}
+.lp.dev .dv-anchor {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 6px;
+  color: var(--tx3);
+}
+.lp.dev .dv-anchor:hover {
+  color: var(--tx);
+  background: rgba(255, 255, 255, 0.06);
+}
+.lp.dev .dv-key-what {
+  flex: 1 1 280px;
+  min-width: 0;
+  color: var(--tx2);
+  font-size: 15px;
+}
+.lp.dev .dv-key summary .ic {
+  color: var(--tx3);
+  transition: transform 0.15s;
+}
+.lp.dev .dv-key[open] summary .ic {
+  transform: rotate(180deg);
+}
+.lp.dev .dv-key-b {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+.lp.dev .dv-key-b pre {
+  flex: 1 1 380px;
+}
+.lp.dev .dv-key-b p {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+.lp.dev .dv-ways {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+}
+.lp.dev .dv-way {
+  padding: 24px;
+  color: var(--tx2);
+  font-size: 15px;
+  min-width: 0;
+}
+.lp.dev .dv-way .h3 {
+  color: var(--tx);
+}
+.lp.dev .dv-answer {
+  margin-top: 40px;
+}
+.lp.dev .dv-answer .h3 {
+  margin-bottom: 10px;
+}
+.lp.dev .dv-answer p {
+  color: var(--tx2);
+}
+
+@media (max-width: 720px) {
+  .lp.dev .dv-hero {
+    padding: 48px 0 40px;
+  }
+  .lp.dev .dv-name {
+    font-size: 40px;
+  }
+  .lp.dev .dv-toc {
+    display: flex;
+  }
+  .lp.dev pre.code {
+    padding: 14px 16px;
+    font-size: 12.5px;
+  }
+  .lp.dev .dv-key summary {
+    padding: 14px 16px;
+  }
+  .lp.dev .dv-key-b {
+    padding: 0 16px 16px;
+  }
+}

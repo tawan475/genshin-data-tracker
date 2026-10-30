@@ -36,7 +36,7 @@
     "lumine": "荧",
     "aether": "空",
     "deleteAccount": "删除账号",
-    "deleteTitle": "已导出的 GOOD 文件不受影响",
+    "deleteTitle": "已导出的 Leyline 文件不受影响",
     "confirmTitle": "删除 {name}？",
     "deletes": "将删除 {loss}。它的 Teyvat.me Capture 密钥将失效。",
     "typeToConfirm": "输入 {word}",

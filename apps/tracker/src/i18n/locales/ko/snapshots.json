@@ -63,7 +63,7 @@
     "clear": "날짜 지우기"
   },
   "row": {
-    "downloadGood": "GOOD 다운로드",
+    "downloadGood": "Leyline 다운로드",
     "download": "스냅샷 {id} 다운로드",
     "delete": "스냅샷 삭제",
     "deleteId": "스냅샷 {id} 삭제"
@@ -79,7 +79,7 @@
     "hidden": "· {n}개 숨김",
     "cancel": "취소",
     "blocked": "다른 내보내기가 진행 중입니다",
-    "downloadTitle": "GOOD 파일 zip 다운로드",
+    "downloadTitle": "Leyline 파일 zip 다운로드",
     "download": "다운로드",
     "delete": "삭제"
   },

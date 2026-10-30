@@ -50,7 +50,7 @@
   "capture": {
     "overline": "App di cattura",
     "title": "L'app di cattura",
-    "lead": "Legge il traffico del gioco sul tuo PC o telefono. Salva il tuo account come GOOD JSON.",
+    "lead": "Legge il traffico del gioco sul tuo PC o telefono. Salva il tuo account come Leyline JSON.",
     "noAccount": "Nessun account",
     "noAccountNote": "Collegarsi a teyvat.me è facoltativo",
     "readOnly": "Legge, non scrive mai",
@@ -78,7 +78,7 @@
     "firstBack": "Primo rientro {time}",
     "discountsLeft": "Sconti rimasti",
     "abyssResets": "Si azzera tra {n} giorni",
-    "save": "Salva GOOD JSON…",
+    "save": "Salva Leyline JSON…",
     "autoExport": "Esportazione automatica",
     "savedFile": "Salvato {time} · {file}",
     "wishFirst": "Apri prima la cronologia desideri nel gioco",
@@ -112,7 +112,7 @@
     "yours": "Tuoi",
     "yoursNote": "Privati, a meno che tu non li condivida",
     "export": "Esporta quando vuoi",
-    "exportNote": "Formato GOOD · funziona con Genshin Optimizer",
+    "exportNote": "Formato Leyline · funziona con Genshin Optimizer",
     "delete": "Elimina quando vuoi",
     "deleteNote": "Il tuo account e i suoi dati"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Perché i permessi di amministratore su Windows?",
     "adminA": "Windows permette solo agli amministratori di catturare pacchetti di rete.",
     "needQ": "Mi serve l'app?",
-    "needA": "No. Puoi importare file GOOD nel tracker a mano.",
+    "needA": "No. Puoi importare file Leyline/GOOD nel tracker a mano.",
     "serversQ": "Quali server?",
     "serversA": "Tutti: America, Europa, Asia e TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Piè di pagina",
     "disclaimer": "Teyvat.me è un progetto di fan non ufficiale e non è affiliato né approvato da HoYoverse. Genshin Impact è un marchio di HoYoverse.",
     "tracker": "Tracker",
-    "download": "Scarica"
+    "download": "Scarica",
+    "developers": "Sviluppatori"
+  },
+  "dev": {
+    "lead": "Il formato di registro di Teyvat: GOOD, più tutto il resto del tuo account.",
+    "english": "Il riferimento qui sotto è in inglese, come i nomi dei campi che descrive.",
+    "contents": "Indice"
   }
 }

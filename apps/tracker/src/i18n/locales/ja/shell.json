@@ -82,7 +82,9 @@
     "import": "インポート",
     "accountSettings": "アカウント設定",
     "notFound": "見つかりません",
-    "inspect": "閲覧 · {page}"
+    "inspect": "閲覧 · {page}",
+    "developers": "開発者向け",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "ページが見つかりません",

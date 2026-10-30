@@ -63,7 +63,7 @@
     "clear": "Tarihleri temizle"
   },
   "row": {
-    "downloadGood": "GOOD indir",
+    "downloadGood": "Leyline indir",
     "download": "{id} numaralı anlık görüntüyü indir",
     "delete": "Anlık görüntüyü sil",
     "deleteId": "{id} numaralı anlık görüntüyü sil"
@@ -79,7 +79,7 @@
     "hidden": "· {n} gizli",
     "cancel": "İptal",
     "blocked": "Başka bir dışa aktarma çalışıyor",
-    "downloadTitle": "GOOD dosyalarını zip olarak indir",
+    "downloadTitle": "Leyline dosyalarını zip olarak indir",
     "download": "İndir",
     "delete": "Sil"
   },

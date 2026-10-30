@@ -296,7 +296,7 @@ function zipFileName(items: readonly SnapshotResponse[]): string {
   }
   const from = dayKey(oldest)
   const to = dayKey(newest)
-  return `GDT_export-${name}-${from === to ? from : `${from}_to_${to}`}.zip`
+  return `leyline-${name}-${from === to ? from : `${from}_to_${to}`}.zip`
 }
 
 /** Runs from a click: the save picker inside needs the gesture, so nothing awaits first. */

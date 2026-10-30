@@ -63,7 +63,7 @@
     "clear": "日付をクリア"
   },
   "row": {
-    "downloadGood": "GOOD をダウンロード",
+    "downloadGood": "Leyline をダウンロード",
     "download": "スナップショット {id} をダウンロード",
     "delete": "スナップショットを削除",
     "deleteId": "スナップショット {id} を削除"
@@ -79,7 +79,7 @@
     "hidden": "· {n}件非表示",
     "cancel": "キャンセル",
     "blocked": "別のエクスポートを実行中です",
-    "downloadTitle": "GOOD ファイルの zip をダウンロード",
+    "downloadTitle": "Leyline ファイルの zip をダウンロード",
     "download": "ダウンロード",
     "delete": "削除"
   },

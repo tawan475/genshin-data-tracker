@@ -36,7 +36,7 @@
     "lumine": "Lumine",
     "aether": "Aether",
     "deleteAccount": "ลบบัญชี",
-    "deleteTitle": "ไม่มีผลกับไฟล์ GOOD ที่ส่งออกไปแล้ว",
+    "deleteTitle": "ไม่มีผลกับไฟล์ Leyline ที่ส่งออกไปแล้ว",
     "confirmTitle": "ลบ {name} ใช่ไหม?",
     "deletes": "จะลบ {loss} และคีย์ Teyvat.me Capture ของบัญชีนี้จะใช้งานไม่ได้อีก",
     "typeToConfirm": "พิมพ์ {word}",

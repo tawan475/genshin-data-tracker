@@ -50,7 +50,7 @@
   "capture": {
     "overline": "Appli de capture",
     "title": "L'appli de capture",
-    "lead": "Lit le trafic du jeu sur votre PC ou téléphone. Enregistre votre compte en GOOD JSON.",
+    "lead": "Lit le trafic du jeu sur votre PC ou téléphone. Enregistre votre compte en Leyline JSON.",
     "noAccount": "Aucun compte requis",
     "noAccountNote": "Se connecter à teyvat.me est facultatif",
     "readOnly": "Lit, n'écrit jamais",
@@ -78,7 +78,7 @@
     "firstBack": "Premier retour {time}",
     "discountsLeft": "Réductions restantes",
     "abyssResets": "Réinitialisé dans {n} jours",
-    "save": "Enregistrer le GOOD JSON…",
+    "save": "Enregistrer le Leyline JSON…",
     "autoExport": "Export auto",
     "savedFile": "Enregistré {time} · {file}",
     "wishFirst": "Ouvrez d'abord l'historique des vœux en jeu",
@@ -112,7 +112,7 @@
     "yours": "À vous",
     "yoursNote": "Privées sauf si vous les partagez",
     "export": "Export à tout moment",
-    "exportNote": "Format GOOD · compatible Genshin Optimizer",
+    "exportNote": "Format Leyline · compatible Genshin Optimizer",
     "delete": "Suppression à tout moment",
     "deleteNote": "Votre compte et ses données"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Pourquoi des droits administrateur sous Windows ?",
     "adminA": "Windows ne permet qu'aux administrateurs de capturer des paquets réseau.",
     "needQ": "L'appli est-elle obligatoire ?",
-    "needA": "Non. Vous pouvez importer des fichiers GOOD dans le suivi à la main.",
+    "needA": "Non. Vous pouvez importer des fichiers Leyline/GOOD dans le suivi à la main.",
     "serversQ": "Quels serveurs ?",
     "serversA": "Tous : Amérique, Europe, Asie et TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Pied de page",
     "disclaimer": "Teyvat.me est un projet de fans non officiel, ni affilié à HoYoverse ni approuvé par HoYoverse. Genshin Impact est une marque de HoYoverse.",
     "tracker": "Suivi",
-    "download": "Télécharger"
+    "download": "Télécharger",
+    "developers": "Développeurs"
+  },
+  "dev": {
+    "lead": "Le format d’archive de Teyvat : GOOD, plus tout le reste de votre compte.",
+    "english": "La référence ci-dessous est en anglais, comme les noms de champs qu’elle décrit.",
+    "contents": "Sommaire"
   }
 }

@@ -50,7 +50,7 @@
   "capture": {
     "overline": "Aufzeichnungs-App",
     "title": "Die Aufzeichnungs-App",
-    "lead": "Liest den Netzwerkverkehr des Spiels auf deinem PC oder Handy. Speichert deinen Account als GOOD JSON.",
+    "lead": "Liest den Netzwerkverkehr des Spiels auf deinem PC oder Handy. Speichert deinen Account als Leyline JSON.",
     "noAccount": "Kein Konto nötig",
     "noAccountNote": "Die Verbindung mit teyvat.me ist freiwillig",
     "readOnly": "Liest, schreibt nie",
@@ -78,7 +78,7 @@
     "firstBack": "Erste zurück {time}",
     "discountsLeft": "Rabatte übrig",
     "abyssResets": "Zurückgesetzt in {n} Tagen",
-    "save": "GOOD JSON speichern…",
+    "save": "Leyline JSON speichern…",
     "autoExport": "Auto-Export",
     "savedFile": "Gespeichert {time} · {file}",
     "wishFirst": "Öffne zuerst den Gebetsverlauf im Spiel",
@@ -112,7 +112,7 @@
     "yours": "Deine",
     "yoursNote": "Privat, solange du sie nicht teilst",
     "export": "Jederzeit exportieren",
-    "exportNote": "GOOD-Format · funktioniert mit Genshin Optimizer",
+    "exportNote": "Leyline-Format · funktioniert mit Genshin Optimizer",
     "delete": "Jederzeit löschen",
     "deleteNote": "Dein Konto und seine Daten"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Warum Administratorrechte unter Windows?",
     "adminA": "Unter Windows dürfen nur Administratoren Netzwerkpakete aufzeichnen.",
     "needQ": "Brauche ich die App?",
-    "needA": "Nein. Du kannst GOOD-Dateien auch von Hand in den Tracker importieren.",
+    "needA": "Nein. Du kannst Leyline/GOOD-Dateien auch von Hand in den Tracker importieren.",
     "serversQ": "Welche Server?",
     "serversA": "Alle: Amerika, Europa, Asien und TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Fußzeile",
     "disclaimer": "Teyvat.me ist ein inoffizielles Fanprojekt und steht in keiner Verbindung zu HoYoverse und wird nicht von HoYoverse unterstützt. Genshin Impact ist eine Marke von HoYoverse.",
     "tracker": "Tracker",
-    "download": "Herunterladen"
+    "download": "Herunterladen",
+    "developers": "Entwickler"
+  },
+  "dev": {
+    "lead": "Das Teyvat-Datenformat: GOOD, plus alles andere, was dein Konto enthält.",
+    "english": "Die Referenz unten ist auf Englisch, wie die Feldnamen, die sie beschreibt.",
+    "contents": "Inhalt"
   }
 }

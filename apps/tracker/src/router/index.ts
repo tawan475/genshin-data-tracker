@@ -71,13 +71,23 @@ async function emailPage(to: RouteLocationNormalized) {
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  scrollBehavior: (to, from, saved) => saved ?? (to.path !== from.path ? { top: 0 } : undefined),
+  // Arriving on another page with a #hash (/developers#gi_tasks) goes to that element.
+  scrollBehavior: (to, from, saved) =>
+    saved ??
+    (to.path !== from.path ? (to.hash ? { el: to.hash, top: 16 } : { top: 0 }) : undefined),
   routes: [
     {
       path: '/',
       name: 'landing',
       component: () => import('@/views/LandingView.vue'),
       meta: { public: true },
+    },
+    // The export format and the upload API, for developers (public, dark).
+    {
+      path: '/developers',
+      name: 'developers',
+      component: () => import('@/views/DevelopersView.vue'),
+      meta: { public: true, title: 'leyline' },
     },
     {
       path: '/login',

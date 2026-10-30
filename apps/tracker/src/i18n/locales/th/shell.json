@@ -82,7 +82,9 @@
     "import": "นำเข้า",
     "accountSettings": "ตั้งค่าบัญชี",
     "notFound": "ไม่พบ",
-    "inspect": "ตรวจดู · {page}"
+    "inspect": "ตรวจดู · {page}",
+    "developers": "นักพัฒนา",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "ไม่พบหน้านี้",

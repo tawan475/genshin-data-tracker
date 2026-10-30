@@ -33,7 +33,7 @@
     "internal": "문제가 발생했습니다",
     "invalid_account": "내 계정이 아닙니다",
     "invalid_credentials": "사용자 이름, 이메일 또는 비밀번호가 올바르지 않습니다",
-    "invalid_good": "올바른 GOOD 파일이 아닙니다",
+    "invalid_good": "올바른 Leyline/GOOD 파일이 아닙니다",
     "invalid_grant": "로그아웃되었습니다. 다시 로그인하세요",
     "invalid_import_key": "알 수 없는 가져오기 키",
     "invalid_json": "올바른 JSON 파일이 아닙니다",

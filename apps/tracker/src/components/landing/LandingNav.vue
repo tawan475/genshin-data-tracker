@@ -6,7 +6,11 @@ import { locale } from '@/i18n/locale'
 import { useSession } from '@/stores/session'
 import { DOWNLOAD_URL } from './links'
 
-/** The landing page's top bar; the language button opens the appearance dialog (LandingView). */
+/**
+ * The landing page's top bar; the language button opens the appearance dialog
+ * (LandingView). Another public page passes its own in-page `links`.
+ */
+defineProps<{ links?: { href: string; label: string }[] }>()
 defineEmits<{ language: [] }>()
 const session = useSession()
 const languageName = computed(() => LANGUAGE_NAMES[locale.value])
@@ -19,7 +23,10 @@ const short = computed(() => locale.value.split('-')[0]!.toUpperCase())
       <RouterLink :to="{ name: 'landing' }" class="brand">
         <span class="spark" aria-hidden="true">✦</span>Teyvat.me
       </RouterLink>
-      <div class="navlinks">
+      <div v-if="links" class="navlinks" lang="en">
+        <a v-for="link in links" :key="link.href" :href="link.href">{{ link.label }}</a>
+      </div>
+      <div v-else class="navlinks">
         <a href="#capture">{{ $t('landing.nav.app') }}</a>
         <a href="#video">{{ $t('landing.nav.video') }}</a>
         <a href="#tracker">{{ $t('landing.nav.tracker') }}</a>

@@ -42,6 +42,9 @@ async function pickLanguage(event: Event) {
         <nav class="flinks" :aria-label="$t('landing.footer.label')">
           <RouterLink :to="{ name: 'home' }">{{ $t('landing.footer.tracker') }}</RouterLink>
           <a :href="DOWNLOAD_URL">{{ $t('landing.footer.download') }}</a>
+          <RouterLink :to="{ name: 'developers' }">{{
+            $t('landing.footer.developers')
+          }}</RouterLink>
           <a :href="GITHUB_URL">GitHub</a>
         </nav>
         <div class="sel">

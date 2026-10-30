@@ -33,7 +33,7 @@
     "internal": "Une erreur s'est produite",
     "invalid_account": "Ce compte n'est pas le vôtre",
     "invalid_credentials": "Nom d'utilisateur, e-mail ou mot de passe incorrect",
-    "invalid_good": "Fichier GOOD invalide",
+    "invalid_good": "Fichier Leyline/GOOD invalide",
     "invalid_grant": "Déconnecté, reconnectez-vous",
     "invalid_import_key": "Clé d'import inconnue",
     "invalid_json": "Le fichier n'est pas un JSON valide",

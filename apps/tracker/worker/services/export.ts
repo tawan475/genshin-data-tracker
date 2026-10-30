@@ -8,10 +8,12 @@ import {
   KIND_DELTA,
   SectionTexts,
   artifactRows,
+  asLeyline,
   decodeCatalogChunk,
   decodeSnapshot,
   deflateRaw,
   expandSubstats,
+  leylineFileStem,
   storedSnapshotOf,
   v1SnapshotOf,
   writeBundle,
@@ -426,7 +428,7 @@ export async function buildGood(
     ),
   ]
   const catalog = await loadCatalog(d1, accountId, artifactIds)
-  return { good: decodeSnapshot(stored, catalog, MATERIALS), takenAt: row.taken_at }
+  return { good: asLeyline(decodeSnapshot(stored, catalog, MATERIALS)), takenAt: row.taken_at }
 }
 
 // ------------------------------------------------------------------ catalog
@@ -503,10 +505,7 @@ export async function catalogJson(d1: D1Database, accountId: number): Promise<st
   return JSON.stringify(rows)
 }
 
-/** Gives a GOOD download a stable, sortable file name. */
+/** Gives a Leyline download a stable, sortable file name (`leyline-<time>.json`). */
 export function goodFileName(takenAt: number): string {
-  return `GDT_export-${new Date(takenAt)
-    .toISOString()
-    .replace(/:/g, '-')
-    .replace(/\.\d+Z$/, '')}.json`
+  return `${leylineFileStem(takenAt)}.json`
 }

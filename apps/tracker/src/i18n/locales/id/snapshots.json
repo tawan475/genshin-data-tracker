@@ -63,7 +63,7 @@
     "clear": "Hapus tanggal"
   },
   "row": {
-    "downloadGood": "Unduh GOOD",
+    "downloadGood": "Unduh Leyline",
     "download": "Unduh snapshot {id}",
     "delete": "Hapus snapshot",
     "deleteId": "Hapus snapshot {id}"
@@ -79,7 +79,7 @@
     "hidden": "· {n} tersembunyi",
     "cancel": "Batal",
     "blocked": "Ekspor lain sedang berjalan",
-    "downloadTitle": "Unduh zip berisi file GOOD",
+    "downloadTitle": "Unduh zip berisi file Leyline",
     "download": "Unduh",
     "delete": "Hapus"
   },

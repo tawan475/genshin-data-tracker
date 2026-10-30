@@ -24,7 +24,7 @@
 > [!NOTE]
 > **Unofficial fan project.** Teyvat.me is not affiliated with or endorsed by HoYoverse. Genshin Impact is a trademark of HoYoverse.
 
-Tracks Genshin Impact inventory snapshots (GOOD format) uploaded by
+Tracks Genshin Impact inventory snapshots ([Leyline](https://teyvat.me/developers), the GOOD-compatible format) uploaded by
 [Teyvat.me Capture](https://github.com/tawan475/teyvat.me-capture) or imported by hand. One
 Cloudflare Worker serves the Vue dashboard as static assets and the API under
 `/api`, backed by D1. Production: https://teyvat.me
@@ -40,7 +40,7 @@ Cloudflare Worker serves the Vue dashboard as static assets and the API under
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gi-cdn.475.dev/readme/trk-flow-dark.webp">
-  <img alt="Teyvat.me Capture sends captures by live sync, or you import a GOOD JSON, paimon.moe, UIGF or Seelie file; teyvat.me keeps snapshots, progression, planner, wishes and achievements." src="https://gi-cdn.475.dev/readme/trk-flow-light.webp" width="100%">
+  <img alt="Teyvat.me Capture sends captures by live sync, or you import a Leyline or GOOD JSON, paimon.moe, UIGF or Seelie file; teyvat.me keeps snapshots, progression, planner, wishes and achievements." src="https://gi-cdn.475.dev/readme/trk-flow-light.webp" width="100%">
 </picture>
 
 ## What it does
@@ -226,7 +226,7 @@ finished (`src/data/world-quests.ts`). Deck and team names are the
 player's text, stored as is; a part
 that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before
-they existed, and exports (GOOD rebuild, zip) write them back after
+they existed, and exports (Leyline rebuild, zip; `"leyline": 1` added) write them back after
 `timestamp`. The app uses them for the achievements' real completion times,
 friendship and obtained dates on Characters, the planner's AR/WL (when the
 settings are empty) and resin, the Anecdotes checklist (captured progress
@@ -282,7 +282,7 @@ sections, untouched, in the binary GDT2 format of
 gets GDT1, the v2 sections decoded into the v1 form for it) and
 `/api/accounts/:id/snapshots` (summaries). Each revalidates with an ETag on
 the account's `data_version`, so a reload costs one indexed read. Bulk export
-zips are built in the browser; the server only rebuilds single GOOD files.
+zips are built in the browser; the server only rebuilds single Leyline files (`leyline-<time>.json`).
 
 </details>
 
@@ -931,7 +931,7 @@ otherwise).
 <summary><b>Scripts</b></summary>
 
 ```bash
-# Replay a folder of GOOD files through the capture app's upload path (import old exports / load test)
+# Replay a folder of Leyline or GOOD files through the capture app's upload path (import old exports / load test)
 GDT_IMPORT_KEY=gdt_ik_... [GDT_DIAG_KEY=...] node apps/tracker/scripts/upload-goods.mjs <dir>   --url https://teyvat.me --gzip [--limit N]
 pnpm --filter @gdt/tracker icons     # regenerate PWA icons + manifest
 ```

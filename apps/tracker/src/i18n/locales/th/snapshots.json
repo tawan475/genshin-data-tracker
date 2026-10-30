@@ -63,7 +63,7 @@
     "clear": "ล้างวันที่"
   },
   "row": {
-    "downloadGood": "ดาวน์โหลด GOOD",
+    "downloadGood": "ดาวน์โหลด Leyline",
     "download": "ดาวน์โหลดสแนปช็อต {id}",
     "delete": "ลบสแนปช็อต",
     "deleteId": "ลบสแนปช็อต {id}"
@@ -79,7 +79,7 @@
     "hidden": "· ซ่อนอยู่ {n}",
     "cancel": "ยกเลิก",
     "blocked": "มีการส่งออกอื่นกำลังทำงานอยู่",
-    "downloadTitle": "ดาวน์โหลดไฟล์ GOOD เป็น zip",
+    "downloadTitle": "ดาวน์โหลดไฟล์ Leyline เป็น zip",
     "download": "ดาวน์โหลด",
     "delete": "ลบ"
   },

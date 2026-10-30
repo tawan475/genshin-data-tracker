@@ -31,7 +31,7 @@
     "progress": "{total} dosyadan {done} tanesi yüklendi"
   },
   "drop": {
-    "title": "GOOD dosyalarını bırak",
+    "title": "Leyline/GOOD dosyalarını bırak",
     "browse": "Gözat",
     "hint": "En fazla {files} dosya, her biri {mb} MB. Klasörler de olur."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} değişmedi",
     "snapshots": "Anlık görüntüler",
     "notJson": "Geçerli JSON değil",
-    "notGood": "GOOD dosyası değil"
+    "notGood": "Leyline/GOOD dosyası değil"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Planlayıcı",
     "achievement": "Başarım",
-    "copyAndOpen": "En son GOOD dosyasını kopyala ve {site} aç",
+    "copyAndOpen": "En son Leyline dosyasını kopyala ve {site} aç",
     "noSnapshots": "Henüz anlık görüntü yok",
     "copied": "Panoya kopyalandı!",
     "open": "{site} aç",

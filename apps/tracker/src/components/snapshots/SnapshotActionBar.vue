@@ -39,7 +39,7 @@ const progress = computed(() => {
     value: job.done,
     max: job.total,
     text: `${formatNumber(job.done)}/${formatNumber(job.total)} · ${formatBytes(job.zipBytes)}`,
-    title: `${formatNumber(job.done)} of ${formatNumber(job.total)} decoded; ${formatBytes(job.jsonBytes)} of GOOD JSON zipped to ${formatBytes(job.zipBytes)}`,
+    title: `${formatNumber(job.done)} of ${formatNumber(job.total)} decoded; ${formatBytes(job.jsonBytes)} of Leyline JSON zipped to ${formatBytes(job.zipBytes)}`,
   }
 })
 </script>

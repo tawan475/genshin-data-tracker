@@ -46,7 +46,7 @@
     },
     "noAchievements": "업적을 찾을 수 없습니다",
     "notJson": "JSON 파일이 아닙니다",
-    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb 또는 Teyvat.me Capture: gi_achievements가 포함된 GOOD 파일.",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb 또는 Teyvat.me Capture: gi_achievements가 포함된 Leyline/GOOD 파일.",
     "drop": "Seelie, paimon.moe 또는 stardb 파일",
     "account": "계정 {n}",
     "fileAccount": "파일의 계정",

@@ -82,7 +82,9 @@
     "import": "Impor",
     "accountSettings": "Pengaturan akun",
     "notFound": "Tidak ditemukan",
-    "inspect": "Periksa · {page}"
+    "inspect": "Periksa · {page}",
+    "developers": "Pengembang",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "Halaman tidak ditemukan",

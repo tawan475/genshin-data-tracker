@@ -82,7 +82,9 @@
     "import": "İçe aktar",
     "accountSettings": "Hesap ayarları",
     "notFound": "Bulunamadı",
-    "inspect": "İncele · {page}"
+    "inspect": "İncele · {page}",
+    "developers": "Geliştiriciler",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "Sayfa bulunamadı",

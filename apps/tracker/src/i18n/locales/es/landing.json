@@ -50,7 +50,7 @@
   "capture": {
     "overline": "App de captura",
     "title": "La app de captura",
-    "lead": "Lee el tráfico del juego en tu PC o móvil. Guarda tu cuenta como GOOD JSON.",
+    "lead": "Lee el tráfico del juego en tu PC o móvil. Guarda tu cuenta como Leyline JSON.",
     "noAccount": "Sin cuenta",
     "noAccountNote": "Conectar con teyvat.me es opcional",
     "readOnly": "Solo lee, nunca escribe",
@@ -78,7 +78,7 @@
     "firstBack": "Primera vuelta {time}",
     "discountsLeft": "Quedan descuentos",
     "abyssResets": "Se reinicia en {n} días",
-    "save": "Guardar GOOD JSON…",
+    "save": "Guardar Leyline JSON…",
     "autoExport": "Exportación automática",
     "savedFile": "Guardado {time} · {file}",
     "wishFirst": "Abre antes el historial de gachapones en el juego",
@@ -112,7 +112,7 @@
     "yours": "Tuyos",
     "yoursNote": "Privados salvo que los compartas",
     "export": "Exporta cuando quieras",
-    "exportNote": "Formato GOOD · funciona con Genshin Optimizer",
+    "exportNote": "Formato Leyline · funciona con Genshin Optimizer",
     "delete": "Borra cuando quieras",
     "deleteNote": "Tu cuenta y sus datos"
   },
@@ -128,7 +128,7 @@
     "adminQ": "¿Por qué permisos de administrador en Windows?",
     "adminA": "Windows solo permite a los administradores capturar paquetes de red.",
     "needQ": "¿Necesito la app?",
-    "needA": "No. Puedes importar archivos GOOD al tracker a mano.",
+    "needA": "No. Puedes importar archivos Leyline/GOOD al tracker a mano.",
     "serversQ": "¿Qué servidores?",
     "serversA": "Todos: América, Europa, Asia y TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Pie de página",
     "disclaimer": "Teyvat.me es un proyecto de fans no oficial y no está afiliado ni respaldado por HoYoverse. Genshin Impact es una marca registrada de HoYoverse.",
     "tracker": "Tracker",
-    "download": "Descargar"
+    "download": "Descargar",
+    "developers": "Desarrolladores"
+  },
+  "dev": {
+    "lead": "El formato de registro de Teyvat: GOOD, más todo lo demás que guarda tu cuenta.",
+    "english": "La referencia de abajo está en inglés, como los nombres de campo que describe.",
+    "contents": "Contenido"
   }
 }

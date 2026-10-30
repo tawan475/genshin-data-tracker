@@ -31,7 +31,7 @@
     "progress": "已上传 {done} / {total}"
   },
   "drop": {
-    "title": "拖入 GOOD 文件",
+    "title": "拖入 Leyline/GOOD 文件",
     "browse": "浏览",
     "hint": "最多 {files} 个文件，每个不超过 {mb} MB，也可以拖入文件夹。"
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} 个未变",
     "snapshots": "快照",
     "notJson": "不是有效的 JSON",
-    "notGood": "不是 GOOD 文件"
+    "notGood": "不是 Leyline/GOOD 文件"
   },
   "export": {
     "optimizer": "配装",
     "planner": "养成规划",
     "achievement": "成就",
-    "copyAndOpen": "复制最新的 GOOD 文件并打开 {site}",
+    "copyAndOpen": "复制最新的 Leyline 文件并打开 {site}",
     "noSnapshots": "暂无快照",
     "copied": "已复制到剪贴板！",
     "open": "打开 {site}",

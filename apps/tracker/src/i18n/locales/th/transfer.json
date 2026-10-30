@@ -31,7 +31,7 @@
     "progress": "อัปโหลดแล้ว {done} จาก {total}"
   },
   "drop": {
-    "title": "วางไฟล์ GOOD ที่นี่",
+    "title": "วางไฟล์ Leyline/GOOD ที่นี่",
     "browse": "เลือกไฟล์",
     "hint": "สูงสุด {files} ไฟล์ ไฟล์ละ {mb} MB ใช้โฟลเดอร์ได้ด้วย"
   },
@@ -120,13 +120,13 @@
     "unchangedN": "ไม่เปลี่ยนแปลง {n}",
     "snapshots": "สแนปช็อต",
     "notJson": "ไม่ใช่ JSON ที่ถูกต้อง",
-    "notGood": "ไม่ใช่ไฟล์ GOOD"
+    "notGood": "ไม่ใช่ไฟล์ Leyline/GOOD"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "แพลนเนอร์",
     "achievement": "ความสำเร็จ",
-    "copyAndOpen": "คัดลอกไฟล์ GOOD ล่าสุดแล้วเปิด {site}",
+    "copyAndOpen": "คัดลอกไฟล์ Leyline ล่าสุดแล้วเปิด {site}",
     "noSnapshots": "ยังไม่มีสแนปช็อต",
     "copied": "คัดลอกไปยังคลิปบอร์ดแล้ว!",
     "open": "เปิด {site}",

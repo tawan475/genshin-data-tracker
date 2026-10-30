@@ -63,7 +63,7 @@
     "clear": "Cancella date"
   },
   "row": {
-    "downloadGood": "Scarica GOOD",
+    "downloadGood": "Scarica Leyline",
     "download": "Scarica istantanea {id}",
     "delete": "Elimina istantanea",
     "deleteId": "Elimina istantanea {id}"
@@ -79,7 +79,7 @@
     "hidden": "· {n} nascoste",
     "cancel": "Annulla",
     "blocked": "È in corso un'altra esportazione",
-    "downloadTitle": "Scarica uno zip di file GOOD",
+    "downloadTitle": "Scarica uno zip di file Leyline",
     "download": "Scarica",
     "delete": "Elimina"
   },

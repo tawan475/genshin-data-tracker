@@ -33,7 +33,7 @@
     "internal": "Bir şeyler ters gitti",
     "invalid_account": "Bu hesap senin değil",
     "invalid_credentials": "Yanlış kullanıcı adı, e-posta veya şifre",
-    "invalid_good": "Geçerli bir GOOD dosyası değil",
+    "invalid_good": "Geçerli bir Leyline/GOOD dosyası değil",
     "invalid_grant": "Çıkış yapıldı, tekrar giriş yap",
     "invalid_import_key": "Bilinmeyen içe aktarma anahtarı",
     "invalid_json": "Dosya geçerli bir JSON değil",

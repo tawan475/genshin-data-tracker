@@ -63,7 +63,7 @@
     "clear": "Daten leeren"
   },
   "row": {
-    "downloadGood": "GOOD herunterladen",
+    "downloadGood": "Leyline herunterladen",
     "download": "Snapshot {id} herunterladen",
     "delete": "Snapshot löschen",
     "deleteId": "Snapshot {id} löschen"
@@ -79,7 +79,7 @@
     "hidden": "· {n} ausgeblendet",
     "cancel": "Abbrechen",
     "blocked": "Ein anderer Export läuft",
-    "downloadTitle": "ZIP mit GOOD-Dateien herunterladen",
+    "downloadTitle": "ZIP mit Leyline-Dateien herunterladen",
     "download": "Herunterladen",
     "delete": "Löschen"
   },

@@ -222,7 +222,7 @@
     "nothingStored": "没有存储数据",
     "quota": "配额",
     "raw": "原始",
-    "rawTitle": "上传时 GOOD 文件的大小",
+    "rawTitle": "上传时 Leyline/GOOD 文件的大小",
     "trash": "回收站",
     "flags": "标记",
     "newlyStored": "新存储 {size}",

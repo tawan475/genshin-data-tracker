@@ -46,7 +46,7 @@
     },
     "noAchievements": "ไม่พบความสำเร็จ",
     "notJson": "ไม่ใช่ไฟล์ JSON",
-    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb หรือ Teyvat.me Capture: ไฟล์ GOOD ที่มี gi_achievements",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb หรือ Teyvat.me Capture: ไฟล์ Leyline/GOOD ที่มี gi_achievements",
     "drop": "ไฟล์ Seelie, paimon.moe หรือ stardb",
     "account": "บัญชี {n}",
     "fileAccount": "บัญชีในไฟล์",

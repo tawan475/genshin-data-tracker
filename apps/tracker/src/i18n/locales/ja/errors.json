@@ -33,7 +33,7 @@
     "internal": "問題が発生しました",
     "invalid_account": "あなたのアカウントではありません",
     "invalid_credentials": "ユーザー名、メールアドレスまたはパスワードが違います",
-    "invalid_good": "有効なGOODファイルではありません",
+    "invalid_good": "有効なLeyline/GOODファイルではありません",
     "invalid_grant": "ログアウトされました。もう一度ログインしてください",
     "invalid_import_key": "不明なインポートキーです",
     "invalid_json": "ファイルが有効なJSONではありません",

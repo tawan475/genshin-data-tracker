@@ -46,7 +46,7 @@
     },
     "noAchievements": "Tidak ada achievement ditemukan",
     "notJson": "Bukan file JSON",
-    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb atau Teyvat.me Capture: file GOOD dengan gi_achievements.",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb atau Teyvat.me Capture: file Leyline/GOOD dengan gi_achievements.",
     "drop": "File Seelie, paimon.moe atau stardb",
     "account": "Akun {n}",
     "fileAccount": "Akun di file",

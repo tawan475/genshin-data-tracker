@@ -46,7 +46,7 @@
     },
     "noAchievements": "Nessun obiettivo trovato",
     "notJson": "Non è un file JSON",
-    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb o Teyvat.me Capture: un file GOOD con gi_achievements.",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb o Teyvat.me Capture: un file Leyline/GOOD con gi_achievements.",
     "drop": "File di Seelie, paimon.moe o stardb",
     "account": "Account {n}",
     "fileAccount": "Account nel file",

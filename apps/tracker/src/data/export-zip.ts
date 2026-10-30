@@ -1,15 +1,18 @@
 /**
- * Building a zip of GOOD files from a decoded bundle. Pure (no DOM, no fetch):
- * the export worker drives it, and it can be exercised from Node.
+ * Building a zip of Leyline files (GOOD + `gi_*`) from a decoded bundle. Pure
+ * (no DOM, no fetch): the export worker drives it, and it can be exercised
+ * from Node.
  *
  * Snapshots are decoded and deflated one at a time and the archive leaves as
- * a stream of chunks, so memory holds one GOOD file plus the compressed
- * output, never the ~1 MB-per-snapshot JSON of the whole selection.
+ * a stream of chunks, so memory holds one file plus the compressed output,
+ * never the ~1 MB-per-snapshot JSON of the whole selection.
  */
 
 import { Zip, ZipDeflate } from 'fflate'
 import {
+  asLeyline,
   decodeSnapshot,
+  leylineFileStem,
   storedSnapshotOf,
   type ArtifactIdentity,
   type BundleSnapshot,
@@ -17,12 +20,9 @@ import {
   type KeyDictionary,
 } from '@gdt/shared'
 
-/** "GDT_export-2026-06-20T14-05-43": the server's name for a GOOD download, minus `.json`. */
+/** "leyline-2026-06-20T14-05-43": the server's name for a download, minus `.json`. */
 export function goodFileStem(takenAt: number): string {
-  return `GDT_export-${new Date(takenAt)
-    .toISOString()
-    .replace(/:/g, '-')
-    .replace(/\.\d+Z$/, '')}`
+  return leylineFileStem(takenAt)
 }
 
 export function goodFileName(takenAt: number): string {
@@ -51,19 +51,19 @@ export function zipEntryNames(
   return names
 }
 
-/** Rebuilds one snapshot's GOOD file from decoded bundle sections. */
+/** Rebuilds one snapshot's Leyline file (`leyline` set) from decoded bundle sections. */
 export function decodeFromSections(
   snapshot: BundleSnapshot,
   texts: ReadonlyMap<string, string>,
   catalog: ReadonlyMap<number, ArtifactIdentity>,
   materials: KeyDictionary,
-): Good {
+): Good & { leyline: number } {
   const text = (hash: string) => {
     const value = texts.get(hash)
     if (value === undefined) throw new Error(`Snapshot ${snapshot.id} is missing section ${hash}`)
     return value
   }
-  return decodeSnapshot(storedSnapshotOf(snapshot, text), catalog, materials)
+  return asLeyline(decodeSnapshot(storedSnapshotOf(snapshot, text), catalog, materials))
 }
 
 export interface ZipProgress {

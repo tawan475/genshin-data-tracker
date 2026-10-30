@@ -46,7 +46,7 @@
     },
     "noAchievements": "未找到成就",
     "notJson": "不是 JSON 文件",
-    "dropTitle": "Seelie：设置 → 导出账号。paimon.moe：设置 → 导出。stardb 或 Teyvat.me Capture：含 gi_achievements 的 GOOD 文件。",
+    "dropTitle": "Seelie：设置 → 导出账号。paimon.moe：设置 → 导出。stardb 或 Teyvat.me Capture：含 gi_achievements 的 Leyline/GOOD 文件。",
     "drop": "Seelie、paimon.moe 或 stardb 文件",
     "account": "账号 {n}",
     "fileAccount": "文件中的账号",

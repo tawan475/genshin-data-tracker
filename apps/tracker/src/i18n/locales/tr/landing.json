@@ -50,7 +50,7 @@
   "capture": {
     "overline": "Yakalama uygulaması",
     "title": "Yakalama uygulaması",
-    "lead": "Oyunun trafiğini PC'nde veya telefonunda okur. Hesabını GOOD JSON olarak kaydeder.",
+    "lead": "Oyunun trafiğini PC'nde veya telefonunda okur. Hesabını Leyline JSON olarak kaydeder.",
     "noAccount": "Hesap gerekmez",
     "noAccountNote": "teyvat.me'ye bağlanmak isteğe bağlıdır",
     "readOnly": "Okur, asla yazmaz",
@@ -78,7 +78,7 @@
     "firstBack": "İlk dönüş {time}",
     "discountsLeft": "İndirim hakkı var",
     "abyssResets": "{n} gün sonra sıfırlanır",
-    "save": "GOOD JSON kaydet…",
+    "save": "Leyline JSON kaydet…",
     "autoExport": "Otomatik dışa aktar",
     "savedFile": "Kaydedildi {time} · {file}",
     "wishFirst": "Önce oyunda dilek geçmişini aç",
@@ -112,7 +112,7 @@
     "yours": "Senin",
     "yoursNote": "Paylaşmadıkça gizli",
     "export": "İstediğin zaman dışa aktar",
-    "exportNote": "GOOD biçimi · Genshin Optimizer ile çalışır",
+    "exportNote": "Leyline biçimi · Genshin Optimizer ile çalışır",
     "delete": "İstediğin zaman sil",
     "deleteNote": "Hesabın ve verileri"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Windows'ta neden yönetici yetkisi?",
     "adminA": "Windows ağ paketlerini yalnızca yöneticilerin yakalamasına izin verir.",
     "needQ": "Uygulama gerekli mi?",
-    "needA": "Hayır. GOOD dosyalarını takipçiye elle de aktarabilirsin.",
+    "needA": "Hayır. Leyline/GOOD dosyalarını takipçiye elle de aktarabilirsin.",
     "serversQ": "Hangi sunucular?",
     "serversA": "Hepsi: Amerika, Avrupa, Asya ve TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Alt bilgi",
     "disclaimer": "Teyvat.me resmî olmayan bir hayran projesidir; HoYoverse ile bağlantılı değildir ve HoYoverse tarafından onaylanmamıştır. Genshin Impact, HoYoverse'ün ticari markasıdır.",
     "tracker": "Takipçi",
-    "download": "İndir"
+    "download": "İndir",
+    "developers": "Geliştiriciler"
+  },
+  "dev": {
+    "lead": "Teyvat kayıt biçimi: GOOD ve hesabındaki diğer her şey.",
+    "english": "Aşağıdaki başvuru, açıkladığı alan adları gibi İngilizcedir.",
+    "contents": "İçindekiler"
   }
 }

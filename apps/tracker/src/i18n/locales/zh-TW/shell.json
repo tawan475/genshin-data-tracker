@@ -82,7 +82,9 @@
     "import": "匯入",
     "accountSettings": "帳號設定",
     "notFound": "找不到",
-    "inspect": "檢視 · {page}"
+    "inspect": "檢視 · {page}",
+    "developers": "開發者",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "找不到頁面",

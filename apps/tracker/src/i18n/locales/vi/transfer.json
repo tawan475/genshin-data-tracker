@@ -31,7 +31,7 @@
     "progress": "Đã tải lên {done} / {total}"
   },
   "drop": {
-    "title": "Thả tệp GOOD vào đây",
+    "title": "Thả tệp Leyline/GOOD vào đây",
     "browse": "Chọn tệp",
     "hint": "Tối đa {files} tệp, mỗi tệp {mb} MB. Có thể thả cả thư mục."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} không đổi",
     "snapshots": "Bản chụp",
     "notJson": "Không phải JSON hợp lệ",
-    "notGood": "Không phải tệp GOOD"
+    "notGood": "Không phải tệp Leyline/GOOD"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Kế hoạch",
     "achievement": "Thành Tựu",
-    "copyAndOpen": "Sao chép tệp GOOD mới nhất và mở {site}",
+    "copyAndOpen": "Sao chép tệp Leyline mới nhất và mở {site}",
     "noSnapshots": "Chưa có bản chụp",
     "copied": "Đã sao chép vào bộ nhớ tạm!",
     "open": "Mở {site}",

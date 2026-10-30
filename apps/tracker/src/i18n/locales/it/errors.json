@@ -33,7 +33,7 @@
     "internal": "Qualcosa è andato storto",
     "invalid_account": "Quell'account non è tuo",
     "invalid_credentials": "Nome utente, email o password errati",
-    "invalid_good": "Non è un file GOOD valido",
+    "invalid_good": "Non è un file Leyline/GOOD valido",
     "invalid_grant": "Disconnesso, accedi di nuovo",
     "invalid_import_key": "Chiave di importazione sconosciuta",
     "invalid_json": "Il file non è un JSON valido",

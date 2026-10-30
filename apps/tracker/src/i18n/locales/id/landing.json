@@ -50,7 +50,7 @@
   "capture": {
     "overline": "Aplikasi perekam",
     "title": "Aplikasi perekam",
-    "lead": "Membaca lalu lintas game di PC atau ponselmu. Menyimpan akunmu sebagai GOOD JSON.",
+    "lead": "Membaca lalu lintas game di PC atau ponselmu. Menyimpan akunmu sebagai Leyline JSON.",
     "noAccount": "Tanpa akun",
     "noAccountNote": "Terhubung ke teyvat.me itu opsional",
     "readOnly": "Hanya membaca",
@@ -78,7 +78,7 @@
     "firstBack": "Pertama kembali {time}",
     "discountsLeft": "Diskon masih ada",
     "abyssResets": "Reset dalam {n} hari",
-    "save": "Simpan GOOD JSON…",
+    "save": "Simpan Leyline JSON…",
     "autoExport": "Ekspor otomatis",
     "savedFile": "Disimpan {time} · {file}",
     "wishFirst": "Buka dulu riwayat permohonan di game",
@@ -112,7 +112,7 @@
     "yours": "Milikmu",
     "yoursNote": "Pribadi kecuali kamu bagikan",
     "export": "Ekspor kapan saja",
-    "exportNote": "Format GOOD · bisa dipakai di Genshin Optimizer",
+    "exportNote": "Format Leyline · bisa dipakai di Genshin Optimizer",
     "delete": "Hapus kapan saja",
     "deleteNote": "Akunmu dan datanya"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Kenapa perlu hak administrator di Windows?",
     "adminA": "Windows hanya mengizinkan administrator menangkap paket jaringan.",
     "needQ": "Apakah aplikasinya wajib?",
-    "needA": "Tidak. Kamu bisa mengimpor file GOOD ke pelacak secara manual.",
+    "needA": "Tidak. Kamu bisa mengimpor file Leyline/GOOD ke pelacak secara manual.",
     "serversQ": "Server mana saja?",
     "serversA": "Semuanya: Amerika, Eropa, Asia, dan TW/HK/MO."
   },
@@ -136,6 +136,12 @@
     "label": "Kaki halaman",
     "disclaimer": "Teyvat.me adalah proyek penggemar tidak resmi dan tidak berafiliasi dengan atau didukung oleh HoYoverse. Genshin Impact adalah merek dagang HoYoverse.",
     "tracker": "Pelacak",
-    "download": "Unduh"
+    "download": "Unduh",
+    "developers": "Pengembang"
+  },
+  "dev": {
+    "lead": "Format catatan Teyvat: GOOD, ditambah semua hal lain di akunmu.",
+    "english": "Referensi di bawah berbahasa Inggris, sama seperti nama kolom yang dijelaskannya.",
+    "contents": "Daftar isi"
   }
 }

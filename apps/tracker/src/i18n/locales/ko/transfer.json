@@ -31,7 +31,7 @@
     "progress": "{total}개 중 {done}개 업로드됨"
   },
   "drop": {
-    "title": "GOOD 파일 끌어다 놓기",
+    "title": "Leyline/GOOD 파일 끌어다 놓기",
     "browse": "찾아보기",
     "hint": "최대 {files}개 파일, 각 {mb}MB. 폴더도 가능합니다."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "변화 없음 {n}개",
     "snapshots": "스냅샷",
     "notJson": "올바른 JSON이 아님",
-    "notGood": "GOOD 파일이 아님"
+    "notGood": "Leyline/GOOD 파일이 아님"
   },
   "export": {
     "optimizer": "옵티마이저",
     "planner": "플래너",
     "achievement": "업적",
-    "copyAndOpen": "최신 GOOD 파일을 복사하고 {site} 열기",
+    "copyAndOpen": "최신 Leyline 파일을 복사하고 {site} 열기",
     "noSnapshots": "아직 스냅샷이 없습니다",
     "copied": "클립보드에 복사됨!",
     "open": "{site} 열기",

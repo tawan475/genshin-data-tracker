@@ -33,7 +33,7 @@
     "internal": "Что-то пошло не так",
     "invalid_account": "Это не ваш аккаунт",
     "invalid_credentials": "Неверное имя пользователя, почта или пароль",
-    "invalid_good": "Это не файл GOOD",
+    "invalid_good": "Это не файл Leyline/GOOD",
     "invalid_grant": "Вы вышли, войдите снова",
     "invalid_import_key": "Неизвестный ключ импорта",
     "invalid_json": "Файл не является корректным JSON",

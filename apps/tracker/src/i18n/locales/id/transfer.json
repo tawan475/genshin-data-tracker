@@ -31,7 +31,7 @@
     "progress": "{done} dari {total} diunggah"
   },
   "drop": {
-    "title": "Taruh file GOOD",
+    "title": "Taruh file Leyline/GOOD",
     "browse": "Telusuri",
     "hint": "Hingga {files} file, masing-masing {mb} MB. Folder juga bisa."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} tidak berubah",
     "snapshots": "Snapshot",
     "notJson": "Bukan JSON yang valid",
-    "notGood": "Bukan file GOOD"
+    "notGood": "Bukan file Leyline/GOOD"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Perencana",
     "achievement": "Achievement",
-    "copyAndOpen": "Salin file GOOD terbaru dan buka {site}",
+    "copyAndOpen": "Salin file Leyline terbaru dan buka {site}",
     "noSnapshots": "Belum ada snapshot",
     "copied": "Disalin ke papan klip!",
     "open": "Buka {site}",

@@ -39,7 +39,7 @@ const formatLabel = (format: ParsedAchievementImport['format']): string =>
     : format === 'paimon'
       ? 'paimon.moe'
       : format === 'good'
-        ? 'GOOD'
+        ? 'Leyline/GOOD'
         : t('achievements.import.formats.list')
 
 const input = ref<HTMLInputElement>()

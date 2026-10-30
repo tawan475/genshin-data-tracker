@@ -31,7 +31,7 @@
     "progress": "Загружено {done} из {total}"
   },
   "drop": {
-    "title": "Перетащите файлы GOOD",
+    "title": "Перетащите файлы Leyline/GOOD",
     "browse": "Обзор",
     "hint": "До {files} файлов, до {mb} МБ каждый. Папки тоже подходят."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "Без изменений: {n}",
     "snapshots": "Снимки",
     "notJson": "Некорректный JSON",
-    "notGood": "Это не файл GOOD"
+    "notGood": "Это не файл Leyline/GOOD"
   },
   "export": {
     "optimizer": "Оптимизатор",
     "planner": "Планировщик",
     "achievement": "Достижения",
-    "copyAndOpen": "Скопировать последний файл GOOD и открыть {site}",
+    "copyAndOpen": "Скопировать последний файл Leyline и открыть {site}",
     "noSnapshots": "Снимков пока нет",
     "copied": "Скопировано в буфер обмена!",
     "open": "Открыть {site}",

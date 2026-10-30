@@ -31,7 +31,7 @@
     "progress": "{total} 件中 {done} 件をアップロード"
   },
   "drop": {
-    "title": "GOOD ファイルをドロップ",
+    "title": "Leyline/GOOD ファイルをドロップ",
     "browse": "参照",
     "hint": "最大 {files} ファイル、各 {mb} MB まで。フォルダーも使えます。"
   },
@@ -120,13 +120,13 @@
     "unchangedN": "変更なし {n}",
     "snapshots": "スナップショット",
     "notJson": "有効な JSON ではありません",
-    "notGood": "GOOD ファイルではありません"
+    "notGood": "Leyline/GOOD ファイルではありません"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "プランナー",
     "achievement": "アチーブメント",
-    "copyAndOpen": "最新の GOOD ファイルをコピーして {site} を開く",
+    "copyAndOpen": "最新の Leyline ファイルをコピーして {site} を開く",
     "noSnapshots": "スナップショットはまだありません",
     "copied": "クリップボードにコピーしました！",
     "open": "{site} を開く",

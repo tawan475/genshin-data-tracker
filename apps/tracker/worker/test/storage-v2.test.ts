@@ -2,6 +2,7 @@ import { env, SELF } from 'cloudflare:test'
 import {
   catalogFromRows,
   decodeBundle,
+  asLeyline,
   decodeSnapshot,
   inflateBundle,
   readBundle,
@@ -97,11 +98,14 @@ async function exportsOf(client: Client, accountId: number) {
   const files1 = Object.fromEntries(
     gdt1.manifest.snapshots.map((s) => [
       s.id,
+      // As the browser's export writes them (export-zip: Leyline).
       JSON.stringify(
-        decodeSnapshot(
-          storedSnapshotOf(s, (key) => texts1.get(key)!),
-          catalog,
-          MATERIALS,
+        asLeyline(
+          decodeSnapshot(
+            storedSnapshotOf(s, (key) => texts1.get(key)!),
+            catalog,
+            MATERIALS,
+          ),
         ),
       ),
     ]),
@@ -113,10 +117,12 @@ async function exportsOf(client: Client, accountId: number) {
     gdt2.snapshots.map((s) => [
       s.id,
       JSON.stringify(
-        decodeSnapshot(
-          storedSnapshotOf(s, (key) => gdt2.texts.get(key)!),
-          catalog,
-          MATERIALS,
+        asLeyline(
+          decodeSnapshot(
+            storedSnapshotOf(s, (key) => gdt2.texts.get(key)!),
+            catalog,
+            MATERIALS,
+          ),
         ),
       ),
     ]),

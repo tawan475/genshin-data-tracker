@@ -46,7 +46,7 @@
     },
     "noAchievements": "Không tìm thấy thành tựu",
     "notJson": "Không phải tệp JSON",
-    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb hoặc Teyvat.me Capture: tệp GOOD có gi_achievements.",
+    "dropTitle": "Seelie: Settings → Export Account. paimon.moe: Settings → Export. stardb hoặc Teyvat.me Capture: tệp Leyline/GOOD có gi_achievements.",
     "drop": "Tệp Seelie, paimon.moe hoặc stardb",
     "account": "Tài khoản {n}",
     "fileAccount": "Tài khoản trong tệp",

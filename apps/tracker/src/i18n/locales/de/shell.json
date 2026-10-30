@@ -82,7 +82,9 @@
     "import": "Importieren",
     "accountSettings": "Kontoeinstellungen",
     "notFound": "Nicht gefunden",
-    "inspect": "Ansehen · {page}"
+    "inspect": "Ansehen · {page}",
+    "developers": "Entwickler",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "Seite nicht gefunden",

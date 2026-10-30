@@ -31,7 +31,7 @@
     "progress": "Uploaded {done} of {total}"
   },
   "drop": {
-    "title": "Drop GOOD files",
+    "title": "Drop Leyline/GOOD files",
     "browse": "Browse",
     "hint": "Up to {files} files, {mb} MB each. Folders work too."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} unchanged",
     "snapshots": "Snapshots",
     "notJson": "Not valid JSON",
-    "notGood": "Not a GOOD file"
+    "notGood": "Not a Leyline/GOOD file"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Planner",
     "achievement": "Achievement",
-    "copyAndOpen": "Copy the latest GOOD file and open {site}",
+    "copyAndOpen": "Copy the latest Leyline file and open {site}",
     "noSnapshots": "No snapshots yet",
     "copied": "Copied to clipboard!",
     "open": "Open {site}",

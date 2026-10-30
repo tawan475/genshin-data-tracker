@@ -46,7 +46,7 @@
     },
     "noAchievements": "找不到成就",
     "notJson": "不是 JSON 檔案",
-    "dropTitle": "Seelie：設定 → 匯出帳號。paimon.moe：設定 → 匯出。stardb 或 Teyvat.me Capture：含 gi_achievements 的 GOOD 檔案。",
+    "dropTitle": "Seelie：設定 → 匯出帳號。paimon.moe：設定 → 匯出。stardb 或 Teyvat.me Capture：含 gi_achievements 的 Leyline/GOOD 檔案。",
     "drop": "Seelie、paimon.moe 或 stardb 檔案",
     "account": "帳號 {n}",
     "fileAccount": "檔案中的帳號",

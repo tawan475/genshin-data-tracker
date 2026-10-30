@@ -32,7 +32,7 @@ import { DOWNLOAD_URL } from './links'
             <li>
               <FileBraces class="ic" aria-hidden="true" />
               <div>
-                <b>GOOD JSON</b
+                <b>Leyline JSON</b
                 ><span :title="$t('landing.capture.goodTip')">{{
                   $t('landing.capture.goodNote')
                 }}</span>

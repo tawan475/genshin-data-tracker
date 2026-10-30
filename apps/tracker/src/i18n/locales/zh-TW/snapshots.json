@@ -63,7 +63,7 @@
     "clear": "清除日期"
   },
   "row": {
-    "downloadGood": "下載 GOOD",
+    "downloadGood": "下載 Leyline",
     "download": "下載快照 {id}",
     "delete": "刪除快照",
     "deleteId": "刪除快照 {id}"
@@ -79,7 +79,7 @@
     "hidden": "· {n} 個已隱藏",
     "cancel": "取消",
     "blocked": "另一個匯出正在進行",
-    "downloadTitle": "下載 GOOD 檔案的 zip 壓縮檔",
+    "downloadTitle": "下載 Leyline 檔案的 zip 壓縮檔",
     "download": "下載",
     "delete": "刪除"
   },

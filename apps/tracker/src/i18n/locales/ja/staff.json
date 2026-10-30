@@ -222,7 +222,7 @@
     "nothingStored": "保存データなし",
     "quota": "上限",
     "raw": "元サイズ",
-    "rawTitle": "アップロードされたGOODファイルのサイズ",
+    "rawTitle": "アップロードされたLeyline/GOODファイルのサイズ",
     "trash": "ゴミ箱",
     "flags": "フラグ",
     "newlyStored": "新規保存 {size}",

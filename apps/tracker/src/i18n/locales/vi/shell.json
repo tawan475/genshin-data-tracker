@@ -82,7 +82,9 @@
     "import": "Nhập",
     "accountSettings": "Thiết lập tài khoản",
     "notFound": "Không tìm thấy",
-    "inspect": "Kiểm tra · {page}"
+    "inspect": "Kiểm tra · {page}",
+    "developers": "Nhà phát triển",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "Không tìm thấy trang",

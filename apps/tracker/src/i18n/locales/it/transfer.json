@@ -31,7 +31,7 @@
     "progress": "Caricati {done} su {total}"
   },
   "drop": {
-    "title": "Trascina qui i file GOOD",
+    "title": "Trascina qui i file Leyline/GOOD",
     "browse": "Sfoglia",
     "hint": "Fino a {files} file, {mb} MB ciascuno. Anche le cartelle."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} invariati",
     "snapshots": "Istantanee",
     "notJson": "JSON non valido",
-    "notGood": "Non è un file GOOD"
+    "notGood": "Non è un file Leyline/GOOD"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Pianificatore",
     "achievement": "Obiettivi",
-    "copyAndOpen": "Copia l'ultimo file GOOD e apri {site}",
+    "copyAndOpen": "Copia l'ultimo file Leyline e apri {site}",
     "noSnapshots": "Ancora nessuna istantanea",
     "copied": "Copiato negli appunti!",
     "open": "Apri {site}",

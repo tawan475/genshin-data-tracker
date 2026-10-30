@@ -50,7 +50,7 @@
   "capture": {
     "overline": "擷取應用程式",
     "title": "擷取應用程式",
-    "lead": "讀取電腦或手機上的遊戲流量，將帳號儲存為 GOOD JSON。",
+    "lead": "讀取電腦或手機上的遊戲流量，將帳號儲存為 Leyline JSON。",
     "noAccount": "不需要帳號",
     "noAccountNote": "連接 teyvat.me 為選用",
     "readOnly": "只讀不寫",
@@ -78,7 +78,7 @@
     "firstBack": "首個 {time} 返回",
     "discountsLeft": "仍有減半次數",
     "abyssResets": "{n} 天後重置",
-    "save": "儲存 GOOD JSON…",
+    "save": "儲存 Leyline JSON…",
     "autoExport": "自動匯出",
     "savedFile": "已儲存 {time} · {file}",
     "wishFirst": "請先在遊戲中開啟祈願紀錄",
@@ -112,7 +112,7 @@
     "yours": "歸你所有",
     "yoursNote": "除非你分享，否則僅自己可見",
     "export": "隨時匯出",
-    "exportNote": "GOOD 格式 · 相容 Genshin Optimizer",
+    "exportNote": "Leyline 格式 · 相容 Genshin Optimizer",
     "delete": "隨時刪除",
     "deleteNote": "你的帳號及其資料"
   },
@@ -128,7 +128,7 @@
     "adminQ": "為什麼在 Windows 上需要系統管理員權限？",
     "adminA": "Windows 只允許系統管理員擷取網路封包。",
     "needQ": "一定要用應用程式嗎？",
-    "needA": "不用。你也可以手動將 GOOD 檔案匯入追蹤器。",
+    "needA": "不用。你也可以手動將 Leyline/GOOD 檔案匯入追蹤器。",
     "serversQ": "支援哪些伺服器？",
     "serversA": "全部支援：美服、歐服、亞服與台港澳服。"
   },
@@ -136,6 +136,12 @@
     "label": "頁尾",
     "disclaimer": "Teyvat.me 是非官方的粉絲專案，與 HoYoverse 無關，也未獲其認可。原神是 HoYoverse 的商標。",
     "tracker": "追蹤器",
-    "download": "下載"
+    "download": "下載",
+    "developers": "開發者"
+  },
+  "dev": {
+    "lead": "提瓦特紀錄格式：GOOD，再加上你帳號裡的其他一切。",
+    "english": "以下參考內容為英文，與其中描述的欄位名稱一致。",
+    "contents": "目錄"
   }
 }

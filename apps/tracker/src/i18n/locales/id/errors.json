@@ -33,7 +33,7 @@
     "internal": "Terjadi kesalahan",
     "invalid_account": "Akun itu bukan milikmu",
     "invalid_credentials": "Nama pengguna, email atau kata sandi salah",
-    "invalid_good": "Bukan file GOOD yang valid",
+    "invalid_good": "Bukan file Leyline/GOOD yang valid",
     "invalid_grant": "Sudah keluar, masuk lagi",
     "invalid_import_key": "Kunci impor tidak dikenal",
     "invalid_json": "File bukan JSON yang valid",

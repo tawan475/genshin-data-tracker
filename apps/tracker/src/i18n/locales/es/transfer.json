@@ -31,7 +31,7 @@
     "progress": "Subidos {done} de {total}"
   },
   "drop": {
-    "title": "Suelta archivos GOOD",
+    "title": "Suelta archivos Leyline/GOOD",
     "browse": "Examinar",
     "hint": "Hasta {files} archivos, {mb} MB cada uno. También carpetas."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} sin cambios",
     "snapshots": "Capturas",
     "notJson": "JSON no válido",
-    "notGood": "No es un archivo GOOD"
+    "notGood": "No es un archivo Leyline/GOOD"
   },
   "export": {
     "optimizer": "Optimizador",
     "planner": "Planificador",
     "achievement": "Logros",
-    "copyAndOpen": "Copiar el último archivo GOOD y abrir {site}",
+    "copyAndOpen": "Copiar el último archivo Leyline y abrir {site}",
     "noSnapshots": "Aún no hay capturas",
     "copied": "¡Copiado al portapapeles!",
     "open": "Abrir {site}",

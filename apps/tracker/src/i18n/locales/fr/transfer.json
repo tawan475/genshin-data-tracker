@@ -31,7 +31,7 @@
     "progress": "{done} envoyés sur {total}"
   },
   "drop": {
-    "title": "Déposez des fichiers GOOD",
+    "title": "Déposez des fichiers Leyline/GOOD",
     "browse": "Parcourir",
     "hint": "Jusqu'à {files} fichiers, {mb} Mo chacun. Les dossiers fonctionnent aussi."
   },
@@ -120,13 +120,13 @@
     "unchangedN": "{n} inchangé(s)",
     "snapshots": "Instantanés",
     "notJson": "JSON invalide",
-    "notGood": "Pas un fichier GOOD"
+    "notGood": "Pas un fichier Leyline/GOOD"
   },
   "export": {
     "optimizer": "Optimizer",
     "planner": "Planificateur",
     "achievement": "Succès",
-    "copyAndOpen": "Copier le dernier fichier GOOD et ouvrir {site}",
+    "copyAndOpen": "Copier le dernier fichier Leyline et ouvrir {site}",
     "noSnapshots": "Aucun instantané",
     "copied": "Copié dans le presse-papiers !",
     "open": "Ouvrir {site}",

@@ -48,7 +48,7 @@ Requirements (the user's):
   `items: HashMap<(item_id, guid), Item>`, `characters: HashMap<u32, AvatarInfo>`,
   `properties`, `achievements`, `anecdotes`).
 - After **any** account-data message it waits 5 s of quiet (`AUTOMATION_DEBOUNCE`,
-  `monitor.rs`) and uploads the **whole** GOOD file (~1.5 MB JSON) to
+  `monitor.rs`) and uploads the **whole** Leyline file (~1.5 MB JSON) to
   `POST /api/irminsul/import` (or `/genshin-accounts-public/import-by-key`). A long
   session uploads dozens–hundreds of times; each is a full parse on the Worker.
 - **The game resends the whole account at every world change.** In a co-op Mora run
@@ -87,7 +87,7 @@ Requirements (the user's):
   batch asks irminsul for a snapshot; irminsul uploads its in-memory state as an
   ordinary snapshot (`gi_capture.reason = "collapse"`). At **logout** irminsul does
   the same once (`"logout"`), so every session ends on a snapshot. The server never
-  rebuilds a GOOD file (no Worker CPU for that).
+  rebuilds a Leyline file (no Worker CPU for that).
 
 ### 4.3 Sending is adaptive in time and in amount
 
@@ -141,7 +141,7 @@ a time). ~5,000 D1 bindings per Worker, set in `wrangler.jsonc` at deploy.
 
 ## 5. Formats
 
-### 5.1 GOOD-X file (a snapshot upload)
+### 5.1 Leyline file (a snapshot upload; called GOOD-X when this was planned)
 
 A valid GOOD v2 file, plus what irminsul already adds (`gi_player`,
 `gi_achievement_times`, `gi_characters`, `gi_anecdotes` top-level keys), plus:
@@ -170,7 +170,7 @@ A valid GOOD v2 file, plus what irminsul already adds (`gi_player`,
   snapshots have none) and does **not** let it change the content hash (the
   `legacyContentHash` pattern used for the earlier extras).
 
-### 5.2 GOOD-X delta (a batch)
+### 5.2 Leyline delta (a batch; wire format `"GOOD-X-delta"`)
 
 One JSON object per batch; NDJSON when several are stored or downloaded.
 
@@ -637,7 +637,7 @@ the state, so the journal before it is covered.
 
 ### 7.8 Transparency and control
 
-- **Download**: the export zip gains `live/journal.ndjson` (the open journal as GOOD-X
+- **Download**: the export zip gains `live/journal.ndjson` (the open journal as Leyline
   delta lines) and `live/points.csv` (time, figures). "Export as of now" = the newest
   snapshot with the journal applied, built in the browser's export worker.
 - **Delete**: `DELETE /api/accounts/:id/live` (the open journal), `DELETE
@@ -789,7 +789,7 @@ characters (material keys reach 90).
 Where this refines §5–§7 it is what both sides implement.
 
 **Snapshot upload** (`POST /api/irminsul/import`, `/genshin-accounts-public/import-by-key`):
-the GOOD file may carry `gi_capture` (§5.1; reasons, append only: `login`, `world`,
+the Leyline file may carry `gi_capture` (§5.1; reasons, append only: `login`, `world`,
 `manual`, `collapse`, `logout`, `resync`, `change` = a change uploaded whole because
 live sync is off) and `gi_guid` (decimal string) on every artifact and weapon. The
 answer (`ImportResponse`) gains, append only:
@@ -801,7 +801,7 @@ answer (`ImportResponse`) gains, append only:
   (today's 5 s debounce, `reason: "change"`) until an answer has it.
 
 **Batch** (`POST /api/irminsul/changes`; Bearer or `x-import-key`, routed by `uid`
-like an import): body = one GOOD-X delta (`packages/shared/src/live/delta.ts`, the path
+like an import): body = one Leyline delta (`packages/shared/src/live/delta.ts`, the path
 table there; contract fixture `good-x-delta.json` in both repos), ≤ 2,000 changes and
 512 KB. `sum` (optional) = the whole account's chart figures after the batch, counted
 like a snapshot's summary: `characters`, `weapons`, `artifacts` (counts), `materials`

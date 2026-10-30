@@ -82,7 +82,9 @@
     "import": "Импорт",
     "accountSettings": "Настройки аккаунта",
     "notFound": "Не найдено",
-    "inspect": "Просмотр · {page}"
+    "inspect": "Просмотр · {page}",
+    "developers": "Разработчикам",
+    "leyline": "Leyline"
   },
   "notFound": {
     "title": "Страница не найдена",

@@ -33,7 +33,7 @@
     "internal": "發生錯誤",
     "invalid_account": "此帳號不屬於你",
     "invalid_credentials": "使用者名稱、電子郵件或密碼錯誤",
-    "invalid_good": "不是有效的 GOOD 檔案",
+    "invalid_good": "不是有效的 Leyline/GOOD 檔案",
     "invalid_grant": "已登出，請重新登入",
     "invalid_import_key": "無效的匯入金鑰",
     "invalid_json": "不是有效的 JSON",

@@ -50,7 +50,7 @@
   "capture": {
     "overline": "キャプチャアプリ",
     "title": "キャプチャアプリ",
-    "lead": "PC やスマホでゲームの通信を読み取り、アカウントを GOOD JSON で保存します。",
+    "lead": "PC やスマホでゲームの通信を読み取り、アカウントを Leyline JSON で保存します。",
     "noAccount": "アカウント不要",
     "noAccountNote": "teyvat.me への接続は任意です",
     "readOnly": "読み取りのみ",
@@ -78,7 +78,7 @@
     "firstBack": "最初の帰還 {time}",
     "discountsLeft": "半減の残りあり",
     "abyssResets": "{n} 日後にリセット",
-    "save": "GOOD JSON を保存…",
+    "save": "Leyline JSON を保存…",
     "autoExport": "自動書き出し",
     "savedFile": "{time} に保存 · {file}",
     "wishFirst": "先にゲーム内で祈願履歴を開いてください",
@@ -112,7 +112,7 @@
     "yours": "あなただけのもの",
     "yoursNote": "共有しない限り非公開",
     "export": "いつでも書き出し",
-    "exportNote": "GOOD 形式 · Genshin Optimizer に対応",
+    "exportNote": "Leyline 形式 · Genshin Optimizer に対応",
     "delete": "いつでも削除",
     "deleteNote": "アカウントとそのデータ"
   },
@@ -128,7 +128,7 @@
     "adminQ": "Windows で管理者権限が必要なのはなぜ？",
     "adminA": "Windows では管理者しかネットワークパケットをキャプチャできないためです。",
     "needQ": "アプリは必須ですか？",
-    "needA": "いいえ。GOOD ファイルを手動でトラッカーに読み込むこともできます。",
+    "needA": "いいえ。Leyline/GOOD ファイルを手動でトラッカーに読み込むこともできます。",
     "serversQ": "対応サーバーは？",
     "serversA": "すべてです：アメリカ、ヨーロッパ、アジア、TW/HK/MO。"
   },
@@ -136,6 +136,12 @@
     "label": "フッター",
     "disclaimer": "Teyvat.me は非公式のファンプロジェクトであり、HoYoverse とは提携しておらず、承認も受けていません。原神は HoYoverse の商標です。",
     "tracker": "トラッカー",
-    "download": "ダウンロード"
+    "download": "ダウンロード",
+    "developers": "開発者向け"
+  },
+  "dev": {
+    "lead": "テイワットの記録フォーマット：GOOD に、アカウントのそれ以外のすべてを加えたもの。",
+    "english": "以下のリファレンスは、記載しているフィールド名と同じく英語です。",
+    "contents": "目次"
   }
 }

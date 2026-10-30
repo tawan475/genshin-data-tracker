@@ -33,7 +33,7 @@
     "internal": "Đã xảy ra lỗi",
     "invalid_account": "Tài khoản đó không phải của bạn",
     "invalid_credentials": "Sai tên đăng nhập, email hoặc mật khẩu",
-    "invalid_good": "Không phải tệp GOOD hợp lệ",
+    "invalid_good": "Không phải tệp Leyline/GOOD hợp lệ",
     "invalid_grant": "Đã đăng xuất, hãy đăng nhập lại",
     "invalid_import_key": "Khóa nhập không xác định",
     "invalid_json": "Tệp không phải JSON hợp lệ",
