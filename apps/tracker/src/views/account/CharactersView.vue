@@ -241,6 +241,19 @@ watch(
   { immediate: true },
 )
 const player = computed(() => inventory.data.value?.good.gi_player ?? null)
+// Teams edited or chosen in game since the snapshot (live sync, Capture 1.18.0).
+const liveTeams = computed(() => {
+  const now = inventory.data.value
+  const parts = now?.live?.wardrobe ?? []
+  if (!now || parts.length === 0) return null
+  const wardrobe = now.good.gi_wardrobe
+  return {
+    ...(parts.includes('teams') && wardrobe?.teams ? { teams: wardrobe.teams } : {}),
+    ...(parts.includes('currentTeam') && wardrobe?.currentTeam !== undefined
+      ? { currentTeam: wardrobe.currentTeam }
+      : {}),
+  }
+})
 
 /** The roster share card (the list as filtered and sorted); mounted from its first open. */
 const rosterOpen = ref(false)
@@ -382,7 +395,7 @@ watch(
     <template v-else-if="roster">
       <StatStrip class="mb-4" :items="strip" @toggle="toggleStrip" />
 
-      <SavedTeams class="mb-4" :roster="all" @share="shareTeam" />
+      <SavedTeams class="mb-4" :roster="all" :live="liveTeams" @share="shareTeam" />
 
       <CharacterToolbar
         v-model:filters="filters"

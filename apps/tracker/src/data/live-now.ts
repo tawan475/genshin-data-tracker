@@ -31,6 +31,8 @@ export interface LiveApplied {
   player: string[]
   /** `gi_tasks` parts the journal set (the resin clock, Capture 1.12.0). */
   tasks: string[]
+  /** `gi_wardrobe` parts the journal set (saved teams, Capture 1.18.0). */
+  wardrobe: string[]
 }
 
 /**
@@ -55,6 +57,13 @@ export function withJournal<T extends JournalTarget>(
     if (artifact.gi_guid) byGuid.set(artifact.gi_guid, { id, identity: identityOf(artifact) })
   })
   const now = applyDelta(bound, live.changes)
+  const parts = (section: string) => [
+    ...new Set(
+      live.changes!.flatMap(([, path]) =>
+        path[0] === section && path.length === 2 ? [String(path[1])] : [],
+      ),
+    ),
+  ]
   const artifactIds = now.artifacts.map((artifact) => {
     const same = idOf.get(artifact)
     if (same !== undefined) return same
@@ -83,13 +92,8 @@ export function withJournal<T extends JournalTarget>(
           ),
         ),
       ],
-      tasks: [
-        ...new Set(
-          live.changes.flatMap(([, path]) =>
-            path[0] === 'gi_tasks' && path.length === 2 ? [String(path[1])] : [],
-          ),
-        ),
-      ],
+      tasks: parts('gi_tasks'),
+      wardrobe: parts('gi_wardrobe'),
     },
   }
 }

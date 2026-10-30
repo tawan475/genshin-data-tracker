@@ -1081,6 +1081,17 @@ function toWardrobe(raw: unknown): GiWardrobe | null {
   return Object.keys(wardrobe).length > 0 ? wardrobe : null
 }
 
+/**
+ * One part of `gi_wardrobe` as live sync sends it (Capture 1.18.0: the saved
+ * teams whole, the team in use), or undefined when a snapshot's check would
+ * drop it.
+ */
+export function normalizeWardrobePart(part: string, value: unknown): unknown {
+  if (part === '__proto__' || part === 'constructor' || part === 'prototype') return undefined
+  const wardrobe = toWardrobe({ [part]: value })
+  return wardrobe ? (wardrobe as Record<string, unknown>)[part] : undefined
+}
+
 /** The game's config ids (cities, offerings, scenes, map points, areas). */
 const GAME_ID = [0, 99_999_999] as const
 /** A level (Statue, offering, reputation): the game's go to 50 at most. */

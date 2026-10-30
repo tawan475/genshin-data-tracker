@@ -9,6 +9,7 @@ import { useCapturedCollections } from '@/components/collections/use-captured'
 import { characterIcon } from '@/lib/assets'
 import { characterName } from '@/i18n/game-names'
 import type { CharacterView } from '@/data/characters'
+import type { GiWardrobe } from '@gdt/shared'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { teamMembers } from './team-card'
 
@@ -19,13 +20,27 @@ import { teamMembers } from './team-card'
  * hard to find, the user). Folded by default; its header opens it, remembered per device.
  * Nothing shows until a capture has them. Each team shares as a team card
  * (its members as the roster has them, its name on top); a team the roster
- * has nobody of can't.
+ * has nobody of can't. With live sync, a team edited or chosen in game since
+ * that capture comes from the journal (`live`, Capture 1.18.0).
  */
-const props = defineProps<{ roster: readonly CharacterView[] }>()
+const props = defineProps<{
+  roster: readonly CharacterView[]
+  /** The journal's teams and team in use, where it set them. */
+  live?: Pick<GiWardrobe, 'teams' | 'currentTeam'> | null
+}>()
 defineEmits<{ share: [team: { slot: number; name: string; members: CharacterView[] }] }>()
 
 const { captured } = useCapturedCollections()
-const wardrobe = computed(() => captured.value?.wardrobe?.value ?? null)
+const wardrobe = computed(() => {
+  const value = captured.value?.wardrobe?.value ?? null
+  const live = props.live
+  if (!live) return value
+  return {
+    ...value,
+    ...(live.teams ? { teams: live.teams } : {}),
+    ...(live.currentTeam !== undefined ? { currentTeam: live.currentTeam } : {}),
+  }
+})
 const teams = computed(() =>
   Object.entries(wardrobe.value?.teams ?? {})
     .map(([slot, team]) => ({

@@ -182,6 +182,45 @@ describe('GOOD-X delta contract', () => {
       applyDelta(bare, [['set', ['gi_tasks', 'realm'], { value: 300, limit: 2400 }]]).gi_tasks,
     ).toEqual({ realm: { value: 300, limit: 2400 } })
   })
+
+  it('sets the saved teams whole and the team in use (Capture 1.18.0)', () => {
+    const gliders = { owned: [140_001], worn: {} }
+    const withTeams: LiveGood = {
+      ...base,
+      gi_wardrobe: {
+        gliders,
+        teams: { '1': { name: 'Vape', characters: ['HuTao'] } },
+        currentTeam: 1,
+      },
+    }
+    const teams = {
+      '1': { name: 'Vape', characters: ['Xingqiu', 'HuTao'] },
+      '5': { name: '', characters: ['Furina'] },
+    }
+    const applied = applyDelta(withTeams, [
+      ['set', ['gi_wardrobe', 'teams'], teams],
+      ['set', ['gi_wardrobe', 'currentTeam'], 5],
+      ['set', ['gi_wardrobe', 'gliders'], { owned: [140_002], worn: {} }],
+      ['set', ['gi_wardrobe', 'teams', '1'], { name: 'x', characters: [] }],
+      ['set', ['gi_wardrobe', '__proto__'], 1],
+    ])
+    expect(applied.gi_wardrobe).toEqual({ gliders, teams, currentTeam: 5 })
+    expect(withTeams.gi_wardrobe!.currentTeam).toBe(1)
+    const bad = applyDelta(withTeams, [
+      ['set', ['gi_wardrobe', 'teams'], { '1': { name: 'x', characters: ['not a key!'] } }],
+      ['set', ['gi_wardrobe', 'currentTeam'], -1],
+    ])
+    expect(bad.gi_wardrobe).toEqual(withTeams.gi_wardrobe)
+    expect(applyDelta(withTeams, [['del', ['gi_wardrobe', 'currentTeam']]]).gi_wardrobe).toEqual({
+      gliders,
+      teams: withTeams.gi_wardrobe!.teams,
+    })
+    // A base without gi_wardrobe takes the parts all the same.
+    const bare: LiveGood = { ...base, gi_wardrobe: undefined }
+    expect(applyDelta(bare, [['set', ['gi_wardrobe', 'currentTeam'], 2]]).gi_wardrobe).toEqual({
+      currentTeam: 2,
+    })
+  })
 })
 
 describe('mergeChanges', () => {
