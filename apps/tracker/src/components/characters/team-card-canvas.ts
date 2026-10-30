@@ -126,12 +126,12 @@ const BAR_PITCH = 6
 const BAR_H = 20
 /** The city painting's filter, and the veil of the card's ground over it, per theme. */
 const CITY_FILTER = {
-  dark: { blur: 18, saturate: 1.05, brightness: 0.72 },
-  light: { blur: 18, saturate: 1.05, brightness: 1.05 },
+  dark: { blur: 3, saturate: 1.05, brightness: 0.8 },
+  light: { blur: 3, saturate: 1.05, brightness: 1.02 },
 } as const
-const CITY_VEIL = { dark: 0.42, light: 0.38 } as const
-/** How much of a row's namecard shows over the city painting. */
-const ROW_NAMECARD = 0.62
+const CITY_VEIL = { dark: 0.25, light: 0.18 } as const
+/** Where a row's middle falls on the painting (its share of the height): about the horizon. */
+const CITY_HORIZON = 0.55
 const WEAPON_TILE = 88
 const CONSTELLATION = 46
 const TALENT = 66
@@ -216,7 +216,14 @@ class TeamPainter extends CardPaint {
     super(p, input.theme, images, family)
   }
 
-  /** The card's ground: the city painting, blurred so it doesn't distract, under a veil of the theme's ground. */
+  /** The city painting, when it loaded (else each row keeps its namecard). */
+  private city: ImageBitmap | null = null
+
+  /**
+   * The card's ground: the city painting across the card's width, whole (a
+   * taller card continues with it mirrored, like a reflection), softened a
+   * little under a light veil of the theme's ground.
+   */
   ground(height: number, city: string) {
     const { p, ctx } = this
     const ground = this.v('--card-ground')
@@ -224,10 +231,19 @@ class TeamPainter extends CardPaint {
     ctx.fillRect(0, 0, TEAM_CARD_WIDTH, height)
     const painting = this.images.get(city)
     if (!painting) return
-    // Oversized so the blur has no edge.
-    p.filtered(CITY_FILTER[this.cardTheme], () =>
-      p.cover(painting, -60, -60, TEAM_CARD_WIDTH + 120, height + 120),
-    )
+    this.city = painting
+    // A little wider than the card, so the softening has no edge.
+    const w = TEAM_CARD_WIDTH + 16
+    const h = (w * painting.height) / painting.width
+    p.filtered(CITY_FILTER[this.cardTheme], () => {
+      for (let k = 0; k * h < height; k++) {
+        ctx.save()
+        ctx.translate(-8, k * h + (k % 2 ? h : 0))
+        if (k % 2) ctx.scale(1, -1)
+        ctx.drawImage(painting, 0, 0, w, h)
+        ctx.restore()
+      }
+    })
     ctx.fillStyle = withAlpha(ground, CITY_VEIL[this.cardTheme])
     ctx.fillRect(0, 0, TEAM_CARD_WIDTH, height)
   }
@@ -296,16 +312,25 @@ class TeamPainter extends CardPaint {
     this.backdropCopy = null
   }
 
-  /** The row's ground: its namecard blurred, the scrim, the element's glow, the splash. */
+  /**
+   * The row's ground: the city behind the card (else its namecard, blurred),
+   * the scrim, the element's glow, the splash: the character stands in the
+   * city, as in the game's Party Setup.
+   */
   private background(c: CharacterView, top: number) {
     const { p, ctx } = this
     const k = ROW_SPLASH_SCALE
     p.clipped(ROW_X, top, ROW_W, TEAM_ROW, 26, () => {
-      // The city shows through: the namecard over it, not over the plain ground.
-      const namecard = this.images.get(characterBanner(c.key))
+      // The city's horizon band across the row: the character stands in it.
+      if (this.city) {
+        const w = ROW_W + 16
+        const h = (w * this.city.height) / this.city.width
+        p.filtered(CITY_FILTER[this.cardTheme], () =>
+          ctx.drawImage(this.city!, ROW_X - 8, top + TEAM_ROW / 2 - CITY_HORIZON * h, w, h),
+        )
+      }
+      const namecard = this.city ? null : this.images.get(characterBanner(c.key))
       if (namecard) {
-        ctx.save()
-        ctx.globalAlpha = ROW_NAMECARD
         const filter = /blur\(([\d.]+)px\) saturate\(([\d.]+)\) brightness\(([\d.]+)\)/.exec(
           this.v('--card-namecard-filter'),
         )
@@ -317,7 +342,6 @@ class TeamPainter extends CardPaint {
           },
           () => p.cover(namecard, ROW_X - 40, top - 30, ROW_W + 80, TEAM_ROW + 60),
         )
-        ctx.restore()
       }
       this.gradients(this.v('--card-scrim'), top)
       if (c.element) this.glowAt(c, top)
@@ -353,7 +377,7 @@ class TeamPainter extends CardPaint {
           p.image(this.portraits!.get(characterIcon(c.key)), x, y, 120, 120)
         })
       }
-      this.gradients(this.v('--card-vignette'), top)
+      if (!this.city) this.gradients(this.v('--card-vignette'), top)
     })
     this.backdropCopy = p.snapshot()
   }
