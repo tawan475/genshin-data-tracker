@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { ChevronDown, Link2 } from 'lucide-vue-next'
+import { ChevronDown, FileCode, Link2 } from 'lucide-vue-next'
 import { FORMAT_NAME } from '@/components/developers/format-name'
 import {
   DELTA_ANSWERS,
@@ -50,9 +50,12 @@ const IMPORT_ANSWER = showJson({
   live: { base: '1a2b3c4d5e', watching: false },
 })
 
-/** Every field typed, in Capture's public repo: fetchable as plain text. */
-const TYPES_URL =
-  'https://raw.githubusercontent.com/tawan475/teyvat.me-capture/main/docs/teyvatme-export.ts'
+/**
+ * Every field typed (public/developers/leyline.d.ts, served as plain text;
+ * the same bytes as Capture's docs/leyline.d.ts).
+ */
+const TYPES_PATH = '/developers/leyline.d.ts'
+const TYPES_CURL = `curl -O https://teyvat.me${TYPES_PATH}`
 
 /** A key's anchor: `/developers#gi_tasks` opens that key (README links point here). */
 const anchorOf = (key: string) => key.split(', ')[0]!
@@ -84,6 +87,12 @@ const languageOpen = ref(false)
               <div class="ov">{{ $t('shell.page.developers') }}</div>
               <h1 id="dv-title" class="h1 dv-name">{{ FORMAT_NAME }}</h1>
               <p class="lead">{{ $t('landing.dev.lead') }}</p>
+              <div class="acts dv-acts">
+                <a class="btn btn-p" :href="TYPES_PATH" download>
+                  <FileCode class="ic" aria-hidden="true" />leyline.d.ts
+                </a>
+                <code class="dv-curl">{{ TYPES_CURL }}</code>
+              </div>
               <p class="muted">{{ $t('landing.dev.english') }}</p>
             </div>
             <nav class="dv-toc" :aria-label="$t('landing.dev.contents')" lang="en">
@@ -126,12 +135,16 @@ const languageOpen = ref(false)
                     <code>gi_*</code> keys are the game's own; as object keys they are decimal
                     strings.
                   </li>
-                  <li>
-                    <b>Every field typed:</b>
-                    <a :href="TYPES_URL"><code>teyvatme-export.ts</code></a
-                    >, in Teyvat.me Capture's repository.
-                  </li>
                 </ul>
+                <div class="tile-g dv-types">
+                  <a class="btn btn-sm btn-g" :href="TYPES_PATH" download>
+                    <FileCode class="ic" aria-hidden="true" />leyline.d.ts
+                  </a>
+                  <span>
+                    Every field, typed: the file, the {{ FORMAT_NAME }} delta and the wish sync.
+                    <code>{{ TYPES_CURL }}</code>
+                  </span>
+                </div>
               </div>
               <pre
                 class="code dv-col"

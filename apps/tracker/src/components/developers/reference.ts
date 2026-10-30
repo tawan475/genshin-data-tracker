@@ -4,8 +4,18 @@
  * `crates/core/src/good.rs` (what it writes) and `normalizeGood` in
  * `packages/shared/src/codec/normalize.ts` (what the tracker keeps): list
  * only what both do. English only, like the page's body (DevelopersView).
- * Examples are made up: placeholder UID and name, no real account.
+ * Examples are made up: placeholder UID and name, no real account. Each is
+ * typed against `public/developers/leyline.d.ts` (the types the page serves,
+ * the same bytes as Capture's `docs/leyline.d.ts`), so a type-check fails
+ * when the page and the types disagree.
  */
+
+import type {
+  GoodWeapon,
+  ItemExtras,
+  Leyline,
+  LeylineDelta,
+} from '../../../public/developers/leyline'
 
 export interface KeyDoc {
   key: string
@@ -54,27 +64,31 @@ export const KEY_DOCS: KeyDoc[] = [
       nameCard: 210001,
       profilePicture: { id: 1, frameId: 1 },
       birthday: { month: 1, day: 1 },
-    },
+    } satisfies NonNullable<Leyline['gi_player']>,
     note: 'An upload with an all-accounts key goes to the account whose UID is gi_player.uid.',
   },
   {
     key: 'gi_achievements',
     what: 'Achievement ids done.',
     shape: 'number[]',
-    example: [80000, 80001, 81219],
+    example: [80000, 80001, 81219] satisfies NonNullable<Leyline['gi_achievements']>,
     note: 'An older top-level "achievements" list is read when this key is absent.',
   },
   {
     key: 'gi_achievement_times',
     what: 'When each achievement was done, for those the game timed.',
     shape: 'Record<id, unixSeconds>',
-    example: { '80000': 1790000000, '81219': 1790500000 },
+    example: { '80000': 1790000000, '81219': 1790500000 } satisfies NonNullable<
+      Leyline['gi_achievement_times']
+    >,
   },
   {
     key: 'gi_achievement_progress',
     what: 'How far each unfinished achievement with a total is.',
     shape: 'Record<id, { progress: number; total: number }>',
-    example: { '84517': { progress: 3, total: 5 } },
+    example: { '84517': { progress: 3, total: 5 } } satisfies NonNullable<
+      Leyline['gi_achievement_progress']
+    >,
   },
   {
     key: 'gi_characters',
@@ -85,7 +99,9 @@ export const KEY_DOCS: KeyDoc[] = [
   obtainedAt?: number     // unix seconds
   exp?: number            // toward the next level
 }>`,
-    example: { Furina: { friendship: 10, obtainedAt: 1790000000, exp: 1200 } },
+    example: {
+      Furina: { friendship: 10, obtainedAt: 1790000000, exp: 1200 },
+    } satisfies NonNullable<Leyline['gi_characters']>,
   },
   {
     key: 'gi_anecdotes',
@@ -101,7 +117,7 @@ export const KEY_DOCS: KeyDoc[] = [
       unlockedAreas: [1, 2],
       reward: { index: 2, progress: 4, target: 10 },
       wish: { lastWishTime: 1790000000 },
-    },
+    } satisfies NonNullable<Leyline['gi_anecdotes']>,
     note: 'An anecdote absent from the book was never met; absent is not "not done".',
   },
   {
@@ -120,6 +136,13 @@ export const KEY_DOCS: KeyDoc[] = [
   arRewards?: number[]                            // ranks whose reward was claimed
   respawns?: Record<id, number[]>                 // Handbook boss or elite → respawn times
   signIns?: Record<id, { days: number; claimed: number[]; lastAt: number; start: number; end: number }>
+  bargains?: {                                    // Paimon's Bargains, when the shop was opened
+    at: number
+    bought: boolean                               // anything bought there this month
+    fates: { item: 'IntertwinedFate' | 'AcquaintFate';
+             currency: 'MasterlessStardust' | 'MasterlessStarglitter';
+             cost: number; bought: number; limit?: number }[]   // bought and limit: this month
+  }
 }`,
     example: {
       commissions: { finished: 4, total: 4, claimed: true },
@@ -130,7 +153,20 @@ export const KEY_DOCS: KeyDoc[] = [
       realm: { value: 1800, limit: 2400 },
       welkin: { days: 21 },
       resin: { value: 120, nextAt: 1792900480 },
-    },
+      bargains: {
+        at: 1792900000,
+        bought: true,
+        fates: [
+          {
+            item: 'IntertwinedFate',
+            currency: 'MasterlessStarglitter',
+            cost: 5,
+            bought: 2,
+            limit: 5,
+          },
+        ],
+      },
+    } satisfies NonNullable<Leyline['gi_tasks']>,
     note: 'All times in unix seconds. The tracker keeps a part only when all of it is in range.',
   },
   {
@@ -163,7 +199,7 @@ Progress = { progress: number; total: number; state: 'open' | 'complete' | 'clai
       archive: { books: [50000101, 50000102] },
       defeats: { '20010101': { defeated: 412 } },
       quests: { finished: [1001, 1002], active: [1003] },
-    },
+    } satisfies NonNullable<Leyline['gi_collections']>,
   },
   {
     key: 'gi_wardrobe',
@@ -181,7 +217,7 @@ Wardrobe = { owned: number[]; worn: Record<CharacterKey, number>; expires?: Reco
       gliders: { owned: [140001, 140002], worn: { Traveler: 140002 } },
       teams: { '1': { name: 'Team 1', characters: ['Furina', 'Bennett', 'Xiangling', 'Kazuha'] } },
       currentTeam: 1,
-    },
+    } satisfies NonNullable<Leyline['gi_wardrobe']>,
   },
   {
     key: 'gi_exploration',
@@ -199,7 +235,7 @@ Wardrobe = { owned: number[]; worn: Record<CharacterKey, number>; expires?: Reco
       statues: { '1': { level: 10, oculi: 0 } },
       reputation: { '1': 8 },
       scenes: { '3': { points: [10, 11, 12], areas: [1, 2] } },
-    },
+    } satisfies NonNullable<Leyline['gi_exploration']>,
   },
   {
     key: 'gi_events',
@@ -217,19 +253,23 @@ Wardrobe = { owned: number[]; worn: Record<CharacterKey, number>; expires?: Reco
         end: 1794600000,
         progress: { '1': { progress: 2, total: 5, claimed: false } },
       },
-    },
+    } satisfies NonNullable<Leyline['gi_events']>,
   },
   {
     key: 'gi_teapot',
     what: 'The Serenitea Pot: comfort by realm.',
     shape: '{ comfort?: Record<realmId, { mansion: number; blocks: number[] }> }',
-    example: { comfort: { '1': { mansion: 12000, blocks: [8000, 4500] } } },
+    example: { comfort: { '1': { mansion: 12000, blocks: [8000, 4500] } } } satisfies NonNullable<
+      Leyline['gi_teapot']
+    >,
   },
   {
     key: 'gi_miliastra',
     what: 'Miliastra Wonderland cosmetics owned, and when (0 when the game sent no time).',
     shape: '{ cosmetics?: Record<id, number> }',
-    example: { cosmetics: { '1000101': 1790000000, '1000102': 0 } },
+    example: { cosmetics: { '1000101': 1790000000, '1000102': 0 } } satisfies NonNullable<
+      Leyline['gi_miliastra']
+    >,
   },
   {
     key: 'gi_capture',
@@ -248,7 +288,7 @@ Wardrobe = { owned: number[]; worn: Record<CharacterKey, number>; expires?: Reco
       session: '01J9ZK5Q8W3E7R2T',
       world: 1,
       journal: { seq: 0 },
-    },
+    } satisfies NonNullable<Leyline['gi_capture']>,
     note: 'Read, never stored with the snapshot.',
   },
   {
@@ -256,7 +296,12 @@ Wardrobe = { owned: number[]; worn: Record<CharacterKey, number>; expires?: Reco
     uploadsOnly: true,
     what: 'On each weapon and artifact: the game’s item id (a decimal string) and EXP toward the next level.',
     shape: '{ gi_guid?: string; gi_exp?: number }   // beside GOOD’s own fields',
-    example: { key: 'MistsplitterReforged', level: 90, gi_guid: '3488998120056947072', gi_exp: 0 },
+    example: {
+      key: 'MistsplitterReforged',
+      level: 90,
+      gi_guid: '3488998120056947072',
+      gi_exp: 0,
+    } satisfies Partial<GoodWeapon> & ItemExtras,
     note: 'Live sync names items by gi_guid. gi_exp 0 is the same as absent.',
   },
 ]
@@ -318,7 +363,7 @@ export const DELTA_EXAMPLE = {
     ['set', ['artifacts', '3488998120056947072', 'level'], 20],
     ['set', ['gi_tasks', 'resin'], { value: 40, nextAt: 1792000540 }],
   ],
-}
+} satisfies LeylineDelta
 
 export const FILE_EXAMPLE = {
   format: 'GOOD',
@@ -340,7 +385,7 @@ export const FILE_EXAMPLE = {
   materials: { Mora: 48211930 },
   gi_player: { uid: 812345678, ar: 60, wl: 8 },
   gi_achievements: [80000, 80001],
-}
+} satisfies Leyline
 
 /** One line of JSON with a space after each comma and colon. */
 function oneLine(value: unknown): string {

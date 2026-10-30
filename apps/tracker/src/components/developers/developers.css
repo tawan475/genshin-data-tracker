@@ -277,3 +277,30 @@
     padding: 0 16px 16px;
   }
 }
+
+.lp.dev .dv-types {
+  margin-top: 24px;
+  padding: 14px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  color: var(--tx2);
+  font-size: 15px;
+}
+.lp.dev .dv-types > span {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.lp.dev .dv-types code {
+  display: inline-block;
+  margin-top: 4px;
+}
+.lp.dev .dv-acts {
+  margin: 12px 0 4px;
+}
+.lp.dev .dv-curl {
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--tx2);
+}
