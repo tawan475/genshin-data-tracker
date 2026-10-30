@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Compartilhar personagens",
+    "shareBuild": "Compartilhar build",
     "title": "Cartão de personagens"
+  },
+  "buildPicker": {
+    "label": "Personagens para compartilhar",
+    "full": "Até {n}",
+    "buildCard": "Cartão de build · {size}",
+    "teamCard": "Cartão de equipe · {size}",
+    "picked": "Escolhidos",
+    "remove": "Remover {name}"
+  },
+  "team": {
+    "title": "Cartão de equipe",
+    "share": "Compartilhar equipe",
+    "unnamed": "Equipe {n}"
   },
   "page": {
     "c6": "C6",

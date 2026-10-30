@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "キャラ一覧を共有",
+    "shareBuild": "ビルドを共有",
     "title": "キャラ一覧"
+  },
+  "buildPicker": {
+    "label": "共有するキャラ",
+    "full": "最大{n}人",
+    "buildCard": "ビルドカード · {size}",
+    "teamCard": "小隊カード · {size}",
+    "picked": "選択中",
+    "remove": "{name}を解除"
+  },
+  "team": {
+    "title": "小隊カード",
+    "share": "小隊を共有",
+    "unnamed": "小隊{n}"
   },
   "page": {
     "c6": "C6",

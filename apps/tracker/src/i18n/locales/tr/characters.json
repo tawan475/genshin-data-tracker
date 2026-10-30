@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Karakterleri paylaş",
+    "shareBuild": "Yapıyı paylaş",
     "title": "Karakter kartı"
+  },
+  "buildPicker": {
+    "label": "Paylaşılacak karakterler",
+    "full": "En fazla {n}",
+    "buildCard": "Yapı kartı · {size}",
+    "teamCard": "Takım kartı · {size}",
+    "picked": "Seçilenler",
+    "remove": "{name} kaldır"
+  },
+  "team": {
+    "title": "Takım kartı",
+    "share": "Takımı paylaş",
+    "unnamed": "Takım {n}"
   },
   "page": {
     "c6": "C6",

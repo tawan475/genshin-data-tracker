@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Bagikan karakter",
+    "shareBuild": "Bagikan build",
     "title": "Kartu karakter"
+  },
+  "buildPicker": {
+    "label": "Karakter untuk dibagikan",
+    "full": "Maksimal {n}",
+    "buildCard": "Kartu build · {size}",
+    "teamCard": "Kartu beregu · {size}",
+    "picked": "Dipilih",
+    "remove": "Lepas {name}"
+  },
+  "team": {
+    "title": "Kartu beregu",
+    "share": "Bagikan beregu",
+    "unnamed": "Beregu {n}"
   },
   "page": {
     "c6": "C6",

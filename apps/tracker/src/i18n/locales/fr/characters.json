@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Partager les personnages",
+    "shareBuild": "Partager le build",
     "title": "Carte des personnages"
+  },
+  "buildPicker": {
+    "label": "Personnages à partager",
+    "full": "{n} au maximum",
+    "buildCard": "Carte du build · {size}",
+    "teamCard": "Carte d'escouade · {size}",
+    "picked": "Choisis",
+    "remove": "Retirer {name}"
+  },
+  "team": {
+    "title": "Carte d'escouade",
+    "share": "Partager l'escouade",
+    "unnamed": "Escouade {n}"
   },
   "page": {
     "c6": "C6",

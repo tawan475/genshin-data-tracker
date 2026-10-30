@@ -8,10 +8,9 @@
  */
 
 import { bonusSets, buildRv, formatPanelValue, weaponLines } from '@/data/character-build'
-import type { BuildPanel, DamageKind, TalentLevel } from '@/data/character-build'
+import type { BuildPanel, TalentLevel } from '@/data/character-build'
 import { SLOT_LABELS, type CharacterView } from '@/data/characters'
 import type { Element } from '@/data/game-meta'
-import { ELEMENT_GLYPHS } from '@/components/ui/element-glyphs'
 import { t } from '@/i18n'
 import {
   artifactIcon,
@@ -27,12 +26,9 @@ import {
   CardImages,
   Painter,
   cardFonts,
-  iconPath,
   linearGradient,
   parseInsetRing,
   parseShadows,
-  themeTokens,
-  type Shadow,
 } from '@/lib/card-canvas'
 import { cvTier, rvTier } from '@/lib/crit-tiers'
 import { formatDate } from '@/lib/format'
@@ -40,6 +36,15 @@ import { levelCap } from '@/lib/level'
 import { formatStatShort, formatStatValue } from '@/utils/artifact-stats'
 import { LIGHT_ART } from './art-tone'
 import { CONSTELLATION_MAX_STYLE, isMaxConstellation, refinementStyle } from './max-badges'
+import {
+  BAND_SHADE,
+  CardPaint,
+  ROLL_TIER,
+  STAR_SHADOW,
+  goldChip,
+  parseFilterShadow,
+  withAlpha,
+} from './card-paint'
 import { artTone } from './measure-art'
 import {
   BAND_EMBLEM,
@@ -65,9 +70,8 @@ import {
   splashPlace,
   type CardOwner,
   type CardTheme,
-  type EmblemBox,
 } from './share-card'
-import { cardPieces, ownerParts, type BandTone } from './share-card-model'
+import { cardPieces, ownerParts } from './share-card-model'
 import { constellationIcons, talentIcons } from './talent-icons'
 
 export interface CardDrawing {
@@ -101,42 +105,6 @@ const BOTTOM = CARD_HEIGHT - CARD_PAD_Y
 const LEFT = { x: PAD_X, w: 700 }
 const MIDDLE = { x: PAD_X + 700 + 32, w: 528 }
 const RIGHT = { x: PAD_X + 700 + 32 + 528 + 32, w: 532 }
-/** CSS's `line-height: 1.5` (the card's inherited line height). */
-const LH = 1.5
-
-const STAR =
-  'M12 1.8l2.95 6.6 7.2.75-5.4 4.85 1.53 7.08L12 17.4l-6.28 3.68 1.53-7.08-5.4-4.85 7.2-.75z'
-const LOCK =
-  'M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2zM7 11V7a5 5 0 0 1 10 0v4'
-const STAR_SHADOW: Shadow = { x: 0, y: 1, blur: 2, color: 'rgba(80,50,0,0.5)' }
-const BAND_SHADE = 'rgba(30,16,4,0.5)'
-const ROLL_TIER: Record<number, number> = { 1: 0.7, 2: 0.8, 3: 0.9, 4: 1 }
-
-const TOKENS = [
-  'element-pyro',
-  'element-hydro',
-  'element-anemo',
-  'element-electro',
-  'element-dendro',
-  'element-cryo',
-  'element-geo',
-  'element-physical',
-  'talent-crown',
-  'talent-boost',
-  'game-star',
-  'game-star-edge',
-  'surface-raised',
-  'text-muted',
-  'accent-ink',
-  'cv-0',
-  'cv-1',
-  'cv-2',
-  'cv-3',
-  'cv-4',
-  'cv-5',
-  'cv-6',
-] as const
-type Tokens = Record<(typeof TOKENS)[number], string>
 
 // ------------------------------------------------------------------ drawing
 
@@ -201,84 +169,24 @@ export async function drawShareCard(input: CardDrawing, scale = 1): Promise<Draw
   }
 }
 
-class CardPainter {
-  private readonly ctx: CanvasRenderingContext2D
-  private readonly theme: Record<string, string>
-  private readonly tokens: Tokens
+class CardPainter extends CardPaint {
   private readonly c: CharacterView
-  /** The card painted up to its panels, for their backdrop blur. */
-  private backdropCopy: HTMLCanvasElement | null = null
   /** Where the left column's foot (talents) and the sets panel start, set by `layout`. */
   private footTop = 0
   private setsTop = 0
-  private readonly reducedMotion =
-    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
   constructor(
-    private readonly p: Painter,
+    p: Painter,
     private readonly input: CardDrawing,
-    private readonly images: CardImages,
-    private readonly family: string,
+    images: CardImages,
+    family: string,
     /** The header's region of the namecard is dark (art-tone): a light card writes it white. */
     private readonly darkHeader: boolean,
   ) {
-    this.ctx = p.ctx
+    super(p, input.theme, images, family)
     this.c = input.character
-    this.theme = { ...CARD_THEMES[input.theme] }
     const chip = chipBackground(this.c.key, input.theme)
     if (chip) this.theme['--card-chip'] = chip
-    this.tokens = themeTokens(input.theme, TOKENS)
-  }
-
-  private v(name: string): string {
-    return this.theme[name] ?? ''
-  }
-
-  private elementColor(element: Element | null): string {
-    return element ? this.tokens[`element-${element}`] : this.tokens['text-muted']
-  }
-
-  private damageColor(kind: DamageKind): string {
-    return this.tokens[`element-${kind}`]
-  }
-
-  /** Text in the card's tabular Outfit: `weight size`, the line box's top and height. */
-  private line(
-    text: string,
-    x: number,
-    top: number,
-    size: number,
-    weight: number,
-    color: string,
-    options: {
-      lineHeight?: number
-      align?: CanvasTextAlign
-      alpha?: number
-      shadows?: readonly Shadow[]
-      max?: number
-    } = {},
-  ): number {
-    this.p.font(weight, size, this.family)
-    const shown = options.max !== undefined ? this.p.ellipsize(text, options.max) : text
-    const y = this.p.baseline(top, options.lineHeight ?? size * LH)
-    return this.p.text(shown, x, y, color, options)
-  }
-
-  private textWidth(text: string, size: number, weight: number): number {
-    this.p.font(weight, size, this.family)
-    return this.p.measure(text)
-  }
-
-  /** The tier colour of a CV / RV, and the reduced-motion glow of the top tier (cv-glow). */
-  private tier(tier: number): { color: string; shadows?: Shadow[] } {
-    const color = this.tokens[`cv-${tier}` as keyof Tokens]
-    return tier === 6 && this.reducedMotion
-      ? { color, shadows: [{ x: 0, y: 0, blur: 2, color }] }
-      : { color }
-  }
-
-  private glow(tone: BandTone | null, color: string): Shadow[] | undefined {
-    return tone?.top && this.reducedMotion ? [{ x: 0, y: 0, blur: 2, color }] : undefined
   }
 
   // -------------------------------------------------- background
@@ -373,24 +281,6 @@ class CardPainter {
   }
 
   // -------------------------------------------------- glass
-
-  /** A panel: its shadow, the art blurred behind it, its fill and hairline. */
-  private glass(x: number, y: number, w: number, h: number, r: number, kind: 'panel' | 'chip') {
-    const p = this.p
-    const shadows = this.v(kind === 'panel' ? '--card-panel-shadow' : '--card-chip-ring')
-    for (const shadow of parseShadows(shadows)) p.boxShadow(x, y, w, h, r, shadow)
-    if (this.backdropCopy) {
-      p.backdrop(
-        this.backdropCopy,
-        { x, y, w, h, r },
-        kind === 'panel' ? 16 : 10,
-        kind === 'panel' ? 1.2 : 1,
-      )
-    }
-    p.fill(x, y, w, h, r, this.v(kind === 'panel' ? '--card-panel' : '--card-chip'))
-    const ring = parseInsetRing(shadows)
-    if (ring) p.insetRing(x, y, w, h, r, ring.width, ring.color)
-  }
 
   /** Sizes what the columns' feet hold: the talents and owner box, the sets panel. */
   layout() {
@@ -555,64 +445,8 @@ class CardPainter {
     icons.forEach((src, index) => {
       const x = LEFT.x + LEFT.w - 84
       const y = TOP + 150 + index * (84 + 16)
-      this.disc(x, y, 84, src, null, index >= this.c.constellation, `C${index + 1}`)
+      this.disc(x, y, 84, src, null, index >= this.c.constellation, `C${index + 1}`, this.c.element)
     })
-  }
-
-  /** ElementDisc: a glyph on the dark disc, the element's ring and glow; `locked` dims it. */
-  private disc(
-    x: number,
-    y: number,
-    d: number,
-    src: string,
-    glyph: number | null,
-    locked: boolean,
-    fallback: string,
-  ) {
-    const { p, ctx } = this
-    const color = this.elementColor(this.c.element)
-    const r = d / 2
-    if (!locked) {
-      const glow = this.theme['--disc-glow']
-      p.boxShadow(
-        x,
-        y,
-        d,
-        d,
-        r,
-        glow
-          ? parseShadows(glow)[0]!
-          : { x: 0, y: 0, blur: Math.round(d / 5), color: withAlpha(color, 0.3) },
-      )
-    }
-    p.fill(x, y, d, d, r, this.v('--disc-bg') || 'rgba(10, 14, 26, 0.78)')
-    if (locked) p.insetRing(x, y, d, d, r, 1, 'rgba(148, 163, 184, 0.45)')
-    else p.insetRing(x, y, d, d, r, d >= 64 ? 3 : 2, color)
-    const image = this.images.get(src)
-    if (src && image) {
-      const g = glyph ?? d * 0.88
-      ctx.save()
-      if (locked) ctx.globalAlpha = 0.35
-      p.image(image, x + (d - g) / 2, y + (d - g) / 2, g, g)
-      ctx.restore()
-    } else if (!src) {
-      p.font(600, 12, this.family)
-      this.line(fallback, x + d / 2, y + (d - 16) / 2, 12, 600, this.tokens['accent-ink'], {
-        lineHeight: 16,
-        align: 'center',
-        alpha: locked ? 0.5 : 1,
-      })
-    }
-    if (locked) {
-      const size = Math.max(14, Math.round(d * 0.3))
-      const bx = x + d + 2 - size
-      const by = y + d + 2 - size
-      p.fill(bx, by, size, size, size / 2, this.tokens['surface-raised'])
-      iconPath(ctx, LOCK, bx + 3, by + 3, size - 6, {
-        stroke: this.tokens['text-muted'],
-        lineWidth: 2,
-      })
-    }
   }
 
   foot(glyphs: { auto: string; skill: string; burst: string }) {
@@ -625,7 +459,7 @@ class CardPainter {
       const textW = this.textWidth(levelText, 26, 700)
       const pillW = 14 + (crown ? 30 : 0) + textW + 14
       const liW = Math.max(112, pillW)
-      this.disc(x + (liW - 112) / 2, top, 112, glyphs[talent.key], 90, false, '')
+      this.disc(x + (liW - 112) / 2, top, 112, glyphs[talent.key], 90, false, '', this.c.element)
       const px = x + (liW - pillW) / 2
       const py = top + 112 + 10
       p.fill(px, py, pillW, 40, 20, this.v('--card-pill'))
@@ -998,112 +832,4 @@ class CardPainter {
       this.ctx.restore()
     }
   }
-
-  // -------------------------------------------------- shared bits
-
-  /** The game's item header art in a box: the rarity's gradient, the emblem over it. */
-  private itemArt(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    r: number,
-    rarity: number | null,
-    emblem: EmblemBox,
-    emblemAlpha: number,
-  ) {
-    const { p, ctx } = this
-    p.clipped(x, y, w, h, r, () => {
-      const gradient = RARITY_GRADIENT[rarity ?? 0]
-      ctx.fillStyle =
-        (gradient && linearGradient(ctx, gradient, x, y, w, h)) || this.v('--card-cv-bg')
-      ctx.fillRect(x, y, w, h)
-      if (!qualityArt(rarity)) return
-      p.image(this.images.get(qualityArt(rarity)), x, y, w, h)
-      ctx.save()
-      ctx.globalAlpha = emblemAlpha
-      p.image(
-        this.images.get(EMBLEM_URL),
-        x + emblem.left,
-        y + emblem.top,
-        emblem.width,
-        emblem.height,
-      )
-      ctx.restore()
-    })
-  }
-
-  /** GameStars: gold stars with a darker edge, the row's drop shadow under them. */
-  private stars(count: number, x: number, y: number, size: number, gap: number, shadow: Shadow) {
-    // Each star an <svg>, which Chrome puts on whole pixels.
-    const boxes = Array.from({ length: count }, (_, i) =>
-      this.p.snap(x + i * (size + gap), y, size, size),
-    )
-    const w = count * size + (count - 1) * gap
-    this.p.layerShadow({ x, y, w, h: size }, shadow, (ctx) => {
-      for (const [sx, sy, side] of boxes) {
-        iconPath(ctx, STAR, sx, sy, side, {
-          fill: this.tokens['game-star'],
-          stroke: this.tokens['game-star-edge'],
-          lineWidth: 0.8,
-        })
-      }
-    })
-  }
-
-  /** ElementIcon's own glyph, in the element's colour (when the game's icon fails). */
-  private elementGlyph(element: Element, x: number, y: number, size: number) {
-    const glyph = ELEMENT_GLYPHS[element]
-    const color = this.elementColor(element)
-    const ctx = this.ctx
-    if (glyph.fill) {
-      ctx.save()
-      ctx.translate(x, y)
-      ctx.scale(size / 24, size / 24)
-      ctx.fillStyle = color
-      ctx.fill(new Path2D(glyph.fill), 'evenodd')
-      ctx.restore()
-    }
-    if (glyph.stroke) {
-      for (const angle of glyph.rotate ?? [0]) {
-        ctx.save()
-        ctx.translate(x + size / 2, y + size / 2)
-        ctx.rotate((angle * Math.PI) / 180)
-        ctx.translate(-size / 2, -size / 2)
-        iconPath(ctx, glyph.stroke, 0, 0, size, { stroke: color, lineWidth: 2 })
-        ctx.restore()
-      }
-    }
-  }
-}
-
-// ------------------------------------------------------------------ helpers
-
-/** `drop-shadow(0 18px 40px rgba(…))` as a shadow. */
-function parseFilterShadow(css: string): Shadow {
-  const inner = /drop-shadow\((.*)\)\s*$/.exec(css)?.[1] ?? ''
-  return parseShadows(inner)[0] ?? { x: 0, y: 0, blur: 0, color: 'transparent' }
-}
-
-/** CONSTELLATION_MAX_STYLE's background: the game's gold, top to bottom. */
-function goldChip(ctx: CanvasRenderingContext2D, y: number, h: number): CanvasGradient {
-  const g = ctx.createLinearGradient(0, y, 0, y + h)
-  g.addColorStop(0, '#fcde54')
-  g.addColorStop(1, '#f0cc4e')
-  return g
-}
-
-/** A colour (#rgb, #rrggbb, rgb(…)) at an alpha. */
-function withAlpha(color: string, alpha: number): string {
-  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim())?.[1]
-  if (hex) {
-    const full = hex.length === 3 ? [...hex].map((h) => h + h).join('') : hex
-    const n = parseInt(full, 16)
-    return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${alpha})`
-  }
-  const rgb = /rgba?\(([^)]*)\)/
-    .exec(color)?.[1]
-    ?.split(/[\s,/]+/)
-    .filter(Boolean)
-  return rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})` : color
 }

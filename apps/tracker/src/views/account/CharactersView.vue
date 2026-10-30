@@ -11,6 +11,7 @@ import { useProgressive } from '@/components/planner/use-progressive'
 import StatStrip, { type StripItem } from '@/components/characters/StatStrip.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import SavedTeams from '@/components/characters/SavedTeams.vue'
+import { teamMembers } from '@/components/characters/team-card'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiError from '@/components/ui/UiError.vue'
@@ -41,6 +42,10 @@ const CharacterModal = defineAsyncComponent(
 )
 const RosterShareModal = defineAsyncComponent(
   () => import('@/components/characters/RosterShareModal.vue'),
+)
+const BuildPicker = defineAsyncComponent(() => import('@/components/characters/BuildPicker.vue'))
+const TeamShareModal = defineAsyncComponent(
+  () => import('@/components/characters/TeamShareModal.vue'),
 )
 
 const account = useAccount()
@@ -183,7 +188,10 @@ const selectedKey = computed(() => (typeof route.query.c === 'string' ? route.qu
 const selected = computed(() => all.value.find((c) => c.key === selectedKey.value) ?? null)
 let pushed = false
 watch(selectedKey, (key) => {
-  if (key === null) pushed = false
+  if (key === null) {
+    pushed = false
+    fromPicker.value = false
+  }
 })
 
 function open(key: string) {
@@ -240,6 +248,60 @@ const rosterUsed = ref(false)
 function openRoster() {
   rosterUsed.value = true
   rosterOpen.value = true
+}
+
+// ------------------------------------------------------- share build / team
+// Share build picks 1 to 4 characters (in the page's sort): one opens its
+// details (the build card), more the team card. A saved team opens the team
+// card at once, its name on top; Back from either card returns to the picker
+// with the picks kept (and a team's name, while its members change).
+
+const picks = ref<string[]>([])
+const teamName = ref<string | null>(null)
+const pickerOpen = ref(false)
+const pickerUsed = ref(false)
+const teamOpen = ref(false)
+const teamUsed = ref(false)
+/** The details were opened by the picker: their Back returns to it. */
+const fromPicker = ref(false)
+const pickerList = computed(() =>
+  sortCharacters(all.value, sort.value, direction.value, favorites.value),
+)
+const pickedMembers = computed(() => teamMembers(picks.value, all.value))
+
+function showPicker() {
+  pickerUsed.value = true
+  pickerOpen.value = true
+}
+function openBuildPicker() {
+  teamName.value = null
+  showPicker()
+}
+function showMembers(members: readonly { key: string }[], viaPicker: boolean) {
+  if (members.length === 1) {
+    fromPicker.value = viaPicker
+    open(members[0]!.key)
+  } else if (members.length > 1) {
+    teamUsed.value = true
+    teamOpen.value = true
+  }
+}
+function pickerNext() {
+  pickerOpen.value = false
+  showMembers(pickedMembers.value, true)
+}
+function backToPicker() {
+  teamOpen.value = false
+  showPicker()
+}
+function characterBack() {
+  close()
+  showPicker()
+}
+function shareTeam(team: { slot: number; name: string; members: { key: string }[] }) {
+  picks.value = team.members.map((c) => c.key)
+  teamName.value = team.name.trim() || t('characters.team.unnamed', { n: team.slot })
+  showMembers(team.members, false)
 }
 
 // Fetch and decode the open character's card images first, then both
@@ -320,7 +382,7 @@ watch(
     <template v-else-if="roster">
       <StatStrip class="mb-4" :items="strip" @toggle="toggleStrip" />
 
-      <SavedTeams class="mb-4" />
+      <SavedTeams class="mb-4" :roster="all" @share="shareTeam" />
 
       <CharacterToolbar
         v-model:filters="filters"
@@ -337,6 +399,7 @@ watch(
         :filtered="filtered"
         @clear="clearFilters"
         @share="openRoster"
+        @share-build="openBuildPicker"
       />
 
       <UiPanel v-if="shown.length === 0" flush>
@@ -393,8 +456,10 @@ watch(
       :ar="player?.ar ?? null"
       :index="selectedIndex >= 0 ? selectedIndex : undefined"
       :total="stepList.length"
+      :back="fromPicker"
       @close="close"
       @step="step"
+      @back="characterBack"
     />
     <RosterShareModal
       v-if="rosterUsed"
@@ -404,6 +469,25 @@ watch(
       :player-uid="player?.uid ?? null"
       :ar="player?.ar ?? null"
       @close="rosterOpen = false"
+    />
+    <BuildPicker
+      v-if="pickerUsed"
+      v-model:picks="picks"
+      :open="pickerOpen"
+      :characters="pickerList"
+      @close="pickerOpen = false"
+      @next="pickerNext"
+    />
+    <TeamShareModal
+      v-if="teamUsed"
+      :open="teamOpen"
+      :members="pickedMembers"
+      :team-name="teamName"
+      :account="account"
+      :player-uid="player?.uid ?? null"
+      :ar="player?.ar ?? null"
+      @close="teamOpen = false"
+      @back="backToPicker"
     />
   </div>
 </template>

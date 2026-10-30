@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "分享角色一覽",
+    "shareBuild": "分享角色配置",
     "title": "角色一覽"
+  },
+  "buildPicker": {
+    "label": "要分享的角色",
+    "full": "最多{n}名",
+    "buildCard": "配置卡片 · {size}",
+    "teamCard": "小隊卡片 · {size}",
+    "picked": "已選",
+    "remove": "移除{name}"
+  },
+  "team": {
+    "title": "小隊卡片",
+    "share": "分享小隊",
+    "unnamed": "小隊{n}"
   },
   "page": {
     "c6": "6命",

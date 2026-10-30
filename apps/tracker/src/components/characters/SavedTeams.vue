@@ -1,25 +1,38 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { Share2 } from 'lucide-vue-next'
 import GameIcon from '@/components/ui/GameIcon.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import { useCapturedCollections } from '@/components/collections/use-captured'
 import { characterIcon } from '@/lib/assets'
 import { characterName } from '@/i18n/game-names'
+import type { CharacterView } from '@/data/characters'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { teamMembers } from './team-card'
 
 /**
  * The saved teams (Teyvat.me Capture's `gi_wardrobe.teams`) by the names the
  * player gave them, the one in use marked; moved here from Collections →
  * Wardrobe (the user's call), at the top of the roster (at its foot it was
  * hard to find, the user). Folded by default; its header opens it, remembered per device.
- * Nothing shows until a capture has them.
+ * Nothing shows until a capture has them. Each team shares as a team card
+ * (its members as the roster has them, its name on top); a team the roster
+ * has nobody of can't.
  */
+const props = defineProps<{ roster: readonly CharacterView[] }>()
+defineEmits<{ share: [team: { slot: number; name: string; members: CharacterView[] }] }>()
+
 const { captured } = useCapturedCollections()
 const wardrobe = computed(() => captured.value?.wardrobe?.value ?? null)
 const teams = computed(() =>
   Object.entries(wardrobe.value?.teams ?? {})
-    .map(([slot, team]) => ({ slot: Number(slot), ...team }))
+    .map(([slot, team]) => ({
+      slot: Number(slot),
+      ...team,
+      members: teamMembers(team.characters, props.roster),
+    }))
     .sort((a, b) => a.slot - b.slot),
 )
 // Folded by default (open it took too much room, the user); opened, it stays open on this device.
@@ -51,7 +64,7 @@ watch(open, (value) => writeStorage(OPEN_KEY, value ? '1' : null))
             $t('collections.wardrobe.inUse')
           }}</UiBadge>
         </div>
-        <div class="flex gap-1.5">
+        <div class="flex items-center gap-1.5">
           <GameIcon
             v-for="(key, i) in team.characters"
             :key="`${key}-${i}`"
@@ -60,6 +73,20 @@ watch(open, (value) => writeStorage(OPEN_KEY, value ? '1' : null))
             :title="characterName(key)"
             size="sm"
           />
+          <UiIconButton
+            v-if="team.members.length > 0"
+            class="-mr-2 ml-auto"
+            :label="$t('characters.team.share')"
+            @click="
+              $emit('share', {
+                slot: team.slot,
+                name: team.name,
+                members: team.members,
+              })
+            "
+          >
+            <Share2 class="size-5" aria-hidden="true" />
+          </UiIconButton>
         </div>
       </li>
     </ul>

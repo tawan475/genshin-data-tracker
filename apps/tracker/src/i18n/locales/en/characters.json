@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Share roster",
+    "shareBuild": "Share build",
     "title": "Roster card"
+  },
+  "buildPicker": {
+    "label": "Characters to share",
+    "full": "Up to {n}",
+    "buildCard": "Build card · {size}",
+    "teamCard": "Team card · {size}",
+    "picked": "Picked",
+    "remove": "Remove {name}"
+  },
+  "team": {
+    "title": "Team card",
+    "share": "Share team",
+    "unnamed": "Team {n}"
   },
   "page": {
     "c6": "C6",

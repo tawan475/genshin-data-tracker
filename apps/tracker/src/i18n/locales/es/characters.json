@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Compartir personajes",
+    "shareBuild": "Compartir build",
     "title": "Tarjeta de personajes"
+  },
+  "buildPicker": {
+    "label": "Personajes para compartir",
+    "full": "Hasta {n}",
+    "buildCard": "Tarjeta de build · {size}",
+    "teamCard": "Tarjeta de escuadrón · {size}",
+    "picked": "Elegidos",
+    "remove": "Quitar a {name}"
+  },
+  "team": {
+    "title": "Tarjeta de escuadrón",
+    "share": "Compartir escuadrón",
+    "unnamed": "Escuadrón {n}"
   },
   "page": {
     "c6": "C6",

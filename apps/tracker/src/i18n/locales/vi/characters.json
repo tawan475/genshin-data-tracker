@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Chia sẻ nhân vật",
+    "shareBuild": "Chia sẻ build",
     "title": "Thẻ nhân vật"
+  },
+  "buildPicker": {
+    "label": "Nhân vật để chia sẻ",
+    "full": "Tối đa {n}",
+    "buildCard": "Thẻ build · {size}",
+    "teamCard": "Thẻ đội nhóm · {size}",
+    "picked": "Đã chọn",
+    "remove": "Bỏ {name}"
+  },
+  "team": {
+    "title": "Thẻ đội nhóm",
+    "share": "Chia sẻ đội nhóm",
+    "unnamed": "Đội Nhóm {n}"
   },
   "page": {
     "c6": "C6",

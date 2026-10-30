@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { LayoutGrid, List, Search, Share2, Star } from 'lucide-vue-next'
+import { LayoutGrid, List, Search, Share2, Star, UserRound } from 'lucide-vue-next'
 import { t } from '@/i18n'
 import ElementIcon from '@/components/ui/ElementIcon.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
@@ -45,7 +45,7 @@ const filters = defineModel<CharacterFilters>('filters', { required: true })
 const sort = defineModel<CharacterSort>('sort', { required: true })
 const direction = defineModel<SortDirection>('direction', { required: true })
 const view = defineModel<'grid' | 'list'>('view', { required: true })
-defineEmits<{ clear: []; share: [] }>()
+defineEmits<{ clear: []; share: []; shareBuild: [] }>()
 
 const weaponOptions = computed(() => [
   { value: 'all' as const, label: t('characters.toolbar.weapon') },
@@ -95,10 +95,32 @@ function toggleRarity(r: 5 | 4) {
         :label="$t('characters.toolbar.view')"
         icon-only
       />
-      <UiButton class="basis-full sm:basis-auto sm:shrink-0" @click="$emit('share')">
-        <Share2 class="size-4" aria-hidden="true" />
-        {{ $t('characters.roster.share') }}
-      </UiButton>
+      <!-- Two shares in one control: the roster card, or picked characters' builds -->
+      <div
+        class="flex basis-full overflow-hidden rounded-lg border border-border-strong bg-surface-overlay shadow-sm sm:shrink-0 sm:basis-auto"
+        role="group"
+        :aria-label="$t('share.menu.label')"
+      >
+        <button
+          type="button"
+          class="inline-flex min-h-[2.375rem] min-w-0 flex-1 items-center sm:flex-none justify-center gap-1.5 px-4 text-sm font-medium whitespace-nowrap text-text-secondary transition-colors select-none hover:bg-surface-raised hover:text-text-primary focus-visible:-outline-offset-2"
+          :title="$t('characters.roster.share')"
+          @click="$emit('share')"
+        >
+          <Share2 class="size-4 shrink-0 max-[22.5rem]:hidden" aria-hidden="true" />
+          <span class="truncate">{{ $t('characters.roster.share') }}</span>
+        </button>
+        <span class="w-px shrink-0 bg-border-strong" aria-hidden="true" />
+        <button
+          type="button"
+          class="inline-flex min-h-[2.375rem] min-w-0 flex-1 items-center sm:flex-none justify-center gap-1.5 px-4 text-sm font-medium whitespace-nowrap text-text-secondary transition-colors select-none hover:bg-surface-raised hover:text-text-primary focus-visible:-outline-offset-2"
+          :title="$t('characters.roster.shareBuild')"
+          @click="$emit('shareBuild')"
+        >
+          <UserRound class="size-4 shrink-0 max-[22.5rem]:hidden" aria-hidden="true" />
+          <span class="truncate">{{ $t('characters.roster.shareBuild') }}</span>
+        </button>
+      </div>
     </div>
 
     <div

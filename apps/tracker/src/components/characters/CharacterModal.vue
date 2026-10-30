@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
+import { ChevronLeft } from 'lucide-vue-next'
 import type { AccountResponse } from '@gdt/shared'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import { buildPanel, shareUid, talentLevels } from '@/data/character-build'
 import { useFavoriteCharacters } from '@/data/favorite-characters'
@@ -41,8 +43,10 @@ const props = defineProps<{
   ar: number | null
   index?: number
   total: number
+  /** Opened from Share build's picker: a Back arrow returns to it. */
+  back?: boolean
 }>()
-const emit = defineEmits<{ close: []; step: [delta: -1 | 1] }>()
+const emit = defineEmits<{ close: []; step: [delta: -1 | 1]; back: [] }>()
 
 const showcase = useMediaQuery('(min-width: 1024px)')
 
@@ -137,6 +141,9 @@ const exporter = useCardExport({
   >
     <template #heading>
       <div class="mr-auto flex min-w-0 flex-1 items-center gap-1">
+        <UiIconButton v-if="back" :label="$t('common.back')" class="-ml-2" @click="emit('back')">
+          <ChevronLeft class="size-5" aria-hidden="true" />
+        </UiIconButton>
         <h2 class="min-w-0 truncate text-lg font-semibold">{{ character?.name ?? '' }}</h2>
         <FavoriteStar
           v-if="character"

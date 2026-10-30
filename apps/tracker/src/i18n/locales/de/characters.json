@@ -155,7 +155,21 @@
   },
   "roster": {
     "share": "Figuren teilen",
+    "shareBuild": "Build teilen",
     "title": "Figurenübersicht"
+  },
+  "buildPicker": {
+    "label": "Figuren zum Teilen",
+    "full": "Höchstens {n}",
+    "buildCard": "Build-Karte · {size}",
+    "teamCard": "Truppenkarte · {size}",
+    "picked": "Ausgewählt",
+    "remove": "{name} entfernen"
+  },
+  "team": {
+    "title": "Truppenkarte",
+    "share": "Truppe teilen",
+    "unnamed": "Truppe {n}"
   },
   "page": {
     "c6": "C6",
