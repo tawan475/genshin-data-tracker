@@ -128,6 +128,8 @@
     "fullAt": "เต็มเมื่อ {time}",
     "fullLabel": "เต็ม",
     "full": "เต็ม",
+    "spentToday": "ใช้ไปวันนี้",
+    "spentTodayTitle": "ใช้ Original Resin ไปวันนี้ {n} · {at}",
     "markTitle": "{amount} เมื่อ {time}",
     "in": "ในอีก",
     "now": "Original Resin ตอนนี้",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "จากการสแกนเมื่อ {time}",
       "commissions": "เสร็จ {n} จาก {total}",
+      "commissionsUnclaimed": "เสร็จ {n} จาก {total} · ยังไม่รับรางวัลจาก Katheryne",
       "abyss": "{stars} จาก {max} ดาว",
       "expeditions": "กลับมา {n} จาก {total}",
       "nobodyOut": "ไม่มีใครออกสำรวจ",

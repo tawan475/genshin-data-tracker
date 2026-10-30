@@ -30,6 +30,7 @@ import {
   nextReset,
   parseDay,
   parseServerClock,
+  resinSpentToday,
   serverClockText,
   serverOffset,
   snoozeChoices,
@@ -442,6 +443,33 @@ describe('ticked from a capture', () => {
     const old = capture({ commissions: { finished: 4, total: 4 } }, '2026-10-12T19:00:00Z')
     expect(rowOf('commissions', old)).toMatchObject({ due: true })
     expect(rowOf('commissions', old)!.capture).toBeUndefined()
+  })
+
+  it("waits for Katheryne's reward when the capture knows it (Capture 1.16.0)", () => {
+    const all = { finished: 4, total: 4 }
+    const unclaimed = rowOf('commissions', capture({ commissions: { ...all, claimed: false } }))!
+    expect(unclaimed).toMatchObject({ due: true, capture: { text: '4/4', rules: true } })
+    const claimed = rowOf('commissions', capture({ commissions: { ...all, claimed: true } }))!
+    expect(claimed).toMatchObject({ due: false, tone: 'rest' })
+  })
+
+  it('reads a part the live journal set as of its batch, the rest as of the login', () => {
+    // The login was yesterday; the journal set today's commissions.
+    const login = capture({ commissions: { finished: 3, total: 4 } }, '2026-10-12T19:00:00Z')
+    expect(rowOf('commissions', login)!.capture).toBeUndefined()
+    const live = { ...login, live: { parts: ['commissions'], at: at('2026-10-13T04:00:00Z') } }
+    expect(rowOf('commissions', live)).toMatchObject({ due: true, capture: { text: '3/4' } })
+    // A journal that set only the resin leaves yesterday's count yesterday's.
+    const resin = { ...login, live: { parts: ['resin'], at: at('2026-10-13T04:00:00Z') } }
+    expect(rowOf('commissions', resin)!.capture).toBeUndefined()
+  })
+
+  it('reads the resin spent today only on the day it was said (Capture 1.16.0)', () => {
+    const said = Math.floor(at('2026-10-13T02:00:00Z') / 1000)
+    const tasks = { resinSpent: { value: 160, day: 2, at: said } }
+    expect(resinSpentToday(tasks, now, 'ASIA')).toEqual({ value: 160, at: said * 1000 })
+    expect(resinSpentToday(tasks, at('2026-10-13T21:00:00Z'), 'ASIA')).toBeNull()
+    expect(resinSpentToday({}, now, 'ASIA')).toBeNull()
   })
 
   it('lets a hand tick or Undo made after the capture win until the next one', () => {

@@ -555,7 +555,12 @@ function toTasks(raw: unknown): GiTasks | null {
   const tasks: GiTasks = {}
   const c = raw.commissions
   if (isObject(c) && isIntIn(c.total, 1, 10) && isIntIn(c.finished, 0, c.total)) {
-    tasks.commissions = { finished: c.finished, total: c.total }
+    tasks.commissions = {
+      finished: c.finished,
+      total: c.total,
+      // Capture 1.16.0.
+      ...(typeof c.claimed === 'boolean' ? { claimed: c.claimed } : {}),
+    }
   }
   const a = raw.abyss
   if (
@@ -664,7 +669,28 @@ function toTasks(raw: unknown): GiTasks | null {
     }
     if (out.length === calendars.length) tasks.signIns = byId(out)
   }
+  // Capture 1.16.0.
+  const s = raw.resinSpent
+  if (
+    isObject(s) &&
+    isIntIn(s.value, 0, 2_000) &&
+    isIntIn(s.day, 1, 7) &&
+    isIntIn(s.at, ...TASK_TIME)
+  ) {
+    tasks.resinSpent = { value: s.value, day: s.day, at: s.at }
+  }
   return Object.keys(tasks).length > 0 ? tasks : null
+}
+
+/**
+ * One part of `gi_tasks` as the live journal sets it (`gi_tasks.<part>`,
+ * Capture 1.16.0), checked as a snapshot's would be; undefined when the part
+ * is unknown or out of range.
+ */
+export function normalizeTaskPart(part: string, value: unknown): unknown {
+  if (part === '__proto__' || part === 'constructor' || part === 'prototype') return undefined
+  const tasks = toTasks({ [part]: value })
+  return tasks ? (tasks as Record<string, unknown>)[part] : undefined
 }
 
 /** Item ids in `gi_collections`: the game's item ids have six digits. */

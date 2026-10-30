@@ -128,6 +128,8 @@
     "fullAt": "{time}に全回復",
     "fullLabel": "全回復",
     "full": "全回復",
+    "spentToday": "今日の消費",
+    "spentTodayTitle": "今日消費した天然樹脂 {n} · {at}",
     "markTitle": "{time}に{amount}",
     "in": "あと",
     "now": "現在の天然樹脂",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "{time}のキャプチャより",
       "commissions": "{n}/{total}完了",
+      "commissionsUnclaimed": "{n}/{total}完了 · キャサリンの報酬は未受取",
       "abyss": "スター {stars}/{max}",
       "expeditions": "{n}/{total}帰還",
       "nobodyOut": "派遣なし",

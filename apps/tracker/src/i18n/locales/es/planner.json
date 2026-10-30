@@ -128,6 +128,8 @@
     "fullAt": "Llena a las {time}",
     "fullLabel": "Llena",
     "full": "Llena",
+    "spentToday": "Gastada hoy",
+    "spentTodayTitle": "{n} de Resina original gastada hoy · {at}",
     "markTitle": "{amount} a las {time}",
     "in": "en",
     "now": "Resina original ahora",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "De la captura de {time}",
       "commissions": "{n} de {total} hechos",
+      "commissionsUnclaimed": "{n} de {total} hechos · recompensa de Katheryne sin reclamar",
       "abyss": "{stars} de {max} estrellas",
       "expeditions": "{n} de {total} de vuelta",
       "nobodyOut": "Nadie fuera",

@@ -128,6 +128,8 @@
     "fullAt": "Pleine à {time}",
     "fullLabel": "Pleine",
     "full": "Pleine",
+    "spentToday": "Dépensée aujourd'hui",
+    "spentTodayTitle": "{n} de Résine originelle dépensée aujourd'hui · {at}",
     "markTitle": "{amount} à {time}",
     "in": "dans",
     "now": "Résine originelle actuelle",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "D'après la capture de {time}",
       "commissions": "{n} sur {total} faites",
+      "commissionsUnclaimed": "{n} sur {total} faites · récompense de Catherine non récupérée",
       "abyss": "{stars} étoiles sur {max}",
       "expeditions": "{n} sur {total} revenus",
       "nobodyOut": "Personne en expédition",

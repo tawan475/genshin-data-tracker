@@ -128,6 +128,8 @@
     "fullAt": "Full at {time}",
     "fullLabel": "Full",
     "full": "Full",
+    "spentToday": "Spent today",
+    "spentTodayTitle": "{n} Original Resin spent today · {at}",
     "markTitle": "{amount} at {time}",
     "in": "in",
     "now": "Original Resin now",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "From the capture of {time}",
       "commissions": "{n} of {total} done",
+      "commissionsUnclaimed": "{n} of {total} done · Katheryne's reward not claimed",
       "abyss": "{stars} of {max} stars",
       "expeditions": "{n} of {total} back",
       "nobodyOut": "Nobody out",

@@ -605,6 +605,9 @@ export interface TasksSection {
   k?: number[]
   // Capture 1.9.0: sign-in calendars.
   i?: [id: number, days: number, claimed: number[], lastAt: number, start: number, end: number][]
+  // Capture 1.16.0: Katheryne's reward taken (1/0, beside `c`) and the resin spent today.
+  t?: number
+  s?: [value: number, day: number, at: number]
 }
 
 export function encodeTasks(tasks: GiTasks): TasksSection {
@@ -612,6 +615,7 @@ export function encodeTasks(tasks: GiTasks): TasksSection {
   const { commissions: c, abyss: a, expeditions: e, realm: r, welkin: w } = tasks
   const { wishPath: p, resin: n } = tasks
   if (c) section.c = [c.finished, c.total]
+  if (c?.claimed !== undefined) section.t = c.claimed ? 1 : 0
   if (a) section.a = [a.start, a.end, a.stars, a.maxStars]
   if (e) section.e = e.map((x) => [x.character ?? '', x.id, x.start, x.hours, x.doneAt])
   if (r) section.r = [r.value, r.limit]
@@ -634,12 +638,17 @@ export function encodeTasks(tasks: GiTasks): TasksSection {
       return [id, c.days, [...c.claimed], c.lastAt, c.start, c.end]
     })
   }
+  const s = tasks.resinSpent
+  if (s) section.s = [s.value, s.day, s.at]
   return section
 }
 
 export function decodeTasks(section: TasksSection): GiTasks {
   const tasks: GiTasks = {}
-  if (section.c) tasks.commissions = { finished: section.c[0], total: section.c[1] }
+  if (section.c) {
+    tasks.commissions = { finished: section.c[0], total: section.c[1] }
+    if (section.t !== undefined) tasks.commissions.claimed = section.t === 1
+  }
   if (section.a) {
     const [start, end, stars, maxStars] = section.a
     tasks.abyss = { start, end, stars, maxStars }
@@ -672,6 +681,10 @@ export function decodeTasks(section: TasksSection): GiTasks {
         { days, claimed: [...claimed], lastAt, start, end },
       ]),
     )
+  }
+  if (section.s) {
+    const [value, day, at] = section.s
+    tasks.resinSpent = { value, day, at }
   }
   return tasks
 }

@@ -128,6 +128,8 @@
     "fullAt": "Penuh pada {time}",
     "fullLabel": "Penuh",
     "full": "Penuh",
+    "spentToday": "Dipakai hari ini",
+    "spentTodayTitle": "{n} Original Resin dipakai hari ini · {at}",
     "markTitle": "{amount} pada {time}",
     "in": "dalam",
     "now": "Original Resin sekarang",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "Dari tangkapan {time}",
       "commissions": "{n} dari {total} selesai",
+      "commissionsUnclaimed": "{n} dari {total} selesai · hadiah Katheryne belum diklaim",
       "abyss": "{stars} dari {max} bintang",
       "expeditions": "{n} dari {total} kembali",
       "nobodyOut": "Tidak ada yang pergi",

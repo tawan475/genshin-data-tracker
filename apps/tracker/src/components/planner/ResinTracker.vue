@@ -45,6 +45,8 @@ const props = defineProps<{
   condensed: number
   condensedMax: number
   steps: readonly number[]
+  /** Original Resin spent today, per the capture, and when it said so (null: not known). */
+  spent: { value: number; at: number } | null
   now: number
   accountId: number
   accountName: string
@@ -237,6 +239,19 @@ watch(
       <span v-else-if="current !== null" class="font-medium text-warning-text">{{
         $t('planner.resin.full')
       }}</span>
+      <span
+        v-if="spent !== null"
+        class="inline-flex gap-1.5"
+        :title="
+          $t('planner.resin.spentTodayTitle', {
+            n: formatNumber(spent.value),
+            at: formatDateTime(spent.at),
+          })
+        "
+      >
+        <span class="text-text-muted">{{ $t('planner.resin.spentToday') }}</span>
+        <span class="font-mono text-text-primary">{{ formatNumber(spent.value) }}</span>
+      </span>
       <span
         v-if="mark && mark.amount < RESIN_MAX"
         class="inline-flex gap-1 font-mono"

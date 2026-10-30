@@ -128,6 +128,8 @@
     "fullAt": "Cheia às {time}",
     "fullLabel": "Cheia",
     "full": "Cheia",
+    "spentToday": "Gasta hoje",
+    "spentTodayTitle": "{n} de Resina Original gasta hoje · {at}",
     "markTitle": "{amount} às {time}",
     "in": "em",
     "now": "Resina Original agora",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "Da captura de {time}",
       "commissions": "{n} de {total} concluídas",
+      "commissionsUnclaimed": "{n} de {total} concluídas · recompensa da Katheryne não resgatada",
       "abyss": "{stars} de {max} estrelas",
       "expeditions": "{n} de {total} de volta",
       "nobodyOut": "Ninguém fora",

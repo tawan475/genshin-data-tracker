@@ -2085,6 +2085,28 @@ describe("Teyvat.me Capture 1.7.0's keys", () => {
       weeklyBosses: { ...boss, used: 1 },
     })
     expect(decodeTasks(encodeTasks({ weeklyBosses: boss }))).toEqual({ weeklyBosses: boss })
+    // Capture 1.16.0: Katheryne's reward beside the commissions, the resin spent today.
+    const claimed = { finished: 4, total: 4, claimed: true }
+    expect(t({ commissions: claimed }).commissions).toEqual(claimed)
+    expect(t({ commissions: { finished: 4, total: 4, claimed: 1 } }).commissions).toEqual({
+      finished: 4,
+      total: 4,
+    })
+    const spent = { value: 160, day: 3, at: 1_791_756_000 }
+    expect(t({ resinSpent: spent }).resinSpent).toEqual(spent)
+    expect('resinSpent' in t({ resinSpent: { ...spent, day: 8 } })).toBe(false)
+    expect('resinSpent' in t({ resinSpent: { ...spent, value: 2_010 } })).toBe(false)
+    for (const tasks of [
+      { commissions: claimed, resinSpent: spent },
+      { commissions: { ...claimed, claimed: false } },
+      { commissions: { finished: 2, total: 4 } },
+    ]) {
+      expect(decodeTasks(encodeTasks(tasks))).toEqual(tasks)
+      const section = JSON.parse(JSON.stringify(encodeTasks(tasks)))
+      const blob = encodeSectionBlob('tasks', section, false, null)
+      const back = decodeSectionBlob(kindCode('tasks', false), blob.data, null, null)
+      expect(decodeTasks(back.value as typeof section)).toEqual(tasks)
+    }
     expect('respawns' in t({ respawns: { '1001': [1] } })).toBe(false)
     expect('arRewards' in t({ arRewards: [2, 2] })).toBe(false)
     expect(t({ respawns: { '1001': [1_790_000_100, 1_790_000_000] } }).respawns).toEqual({

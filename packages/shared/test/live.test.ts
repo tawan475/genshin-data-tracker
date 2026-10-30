@@ -147,26 +147,40 @@ describe('GOOD-X delta contract', () => {
     expect(applied.gi_player!.resin).toBe(base.gi_player?.resin)
   })
 
-  it('sets the resin clock (Capture 1.12.0) and ignores the rest of gi_tasks', () => {
+  it('sets each part of gi_tasks whole, checked as a snapshot would be (Capture 1.16.0)', () => {
     const withTasks: LiveGood = {
       ...base,
-      gi_tasks: { welkin: { days: 3 }, resin: { value: 20, nextAt: 1 } },
+      gi_tasks: { welkin: { days: 3 }, resin: { value: 20, nextAt: 1_791_756_000 } },
     }
     const applied = applyDelta(withTasks, [
       ['set', ['gi_tasks', 'resin'], { value: 21, nextAt: 1_791_756_416 }],
       ['set', ['gi_tasks', 'welkin'], { days: 99 }],
+      ['set', ['gi_tasks', 'commissions'], { finished: 4, total: 4, claimed: true }],
+      ['set', ['gi_tasks', 'resinSpent'], { value: 160, day: 3, at: 1_791_756_000 }],
       ['set', ['gi_tasks', 'resin', 'value'], 5],
+      ['set', ['gi_tasks', 'unknownPart'], { any: 1 }],
+      ['set', ['gi_tasks', '__proto__'], { days: 1 }],
     ])
     expect(applied.gi_tasks).toEqual({
-      welkin: { days: 3 },
+      welkin: { days: 99 },
       resin: { value: 21, nextAt: 1_791_756_416 },
+      commissions: { finished: 4, total: 4, claimed: true },
+      resinSpent: { value: 160, day: 3, at: 1_791_756_000 },
     })
-    expect(withTasks.gi_tasks!.resin).toEqual({ value: 20, nextAt: 1 })
-    const bad = applyDelta(withTasks, [['set', ['gi_tasks', 'resin'], { value: -1, nextAt: 5 }]])
-    expect(bad.gi_tasks!.resin).toEqual({ value: 20, nextAt: 1 })
+    expect(withTasks.gi_tasks!.resin).toEqual({ value: 20, nextAt: 1_791_756_000 })
+    const bad = applyDelta(withTasks, [
+      ['set', ['gi_tasks', 'resin'], { value: -1, nextAt: 5 }],
+      ['set', ['gi_tasks', 'commissions'], { finished: 5, total: 4 }],
+    ])
+    expect(bad.gi_tasks).toEqual(withTasks.gi_tasks)
     expect(applyDelta(withTasks, [['del', ['gi_tasks', 'resin']]]).gi_tasks).toEqual({
       welkin: { days: 3 },
     })
+    // A base without gi_tasks takes a part all the same.
+    const bare: LiveGood = { ...base, gi_tasks: undefined }
+    expect(
+      applyDelta(bare, [['set', ['gi_tasks', 'realm'], { value: 300, limit: 2400 }]]).gi_tasks,
+    ).toEqual({ realm: { value: 300, limit: 2400 } })
   })
 })
 

@@ -128,6 +128,8 @@
     "fullAt": "{time} 回满",
     "fullLabel": "回满",
     "full": "已满",
+    "spentToday": "今日已消耗",
+    "spentTodayTitle": "今日已消耗原粹树脂 {n} · {at}",
     "markTitle": "{time} 达到 {amount}",
     "in": "还需",
     "now": "当前原粹树脂",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "来自抓取数据（{time}）",
       "commissions": "已完成 {n}/{total}",
+      "commissionsUnclaimed": "已完成 {n}/{total} · 凯瑟琳的奖励未领取",
       "abyss": "{stars}/{max} 星",
       "expeditions": "已返回 {n}/{total}",
       "nobodyOut": "无人派遣",

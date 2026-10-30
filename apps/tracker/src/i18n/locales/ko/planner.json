@@ -128,6 +128,8 @@
     "fullAt": "{time}에 가득 참",
     "fullLabel": "가득 참",
     "full": "가득 참",
+    "spentToday": "오늘 소모",
+    "spentTodayTitle": "오늘 소모한 퓨어 레진 {n} · {at}",
     "markTitle": "{time}에 {amount}",
     "in": "남은 시간",
     "now": "현재 퓨어 레진",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "{time} 캡처 기준",
       "commissions": "{total}개 중 {n}개 완료",
+      "commissionsUnclaimed": "{total}개 중 {n}개 완료 · 캐서린 보상 미수령",
       "abyss": "별 {stars}/{max}",
       "expeditions": "{total}명 중 {n}명 복귀",
       "nobodyOut": "파견 중인 캐릭터 없음",

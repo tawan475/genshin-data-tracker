@@ -128,6 +128,8 @@
     "fullAt": "Đầy lúc {time}",
     "fullLabel": "Đầy",
     "full": "Đầy",
+    "spentToday": "Đã dùng hôm nay",
+    "spentTodayTitle": "Đã dùng {n} Nhựa Nguyên Chất hôm nay · {at}",
     "markTitle": "{amount} lúc {time}",
     "in": "sau",
     "now": "Nhựa Nguyên Chất hiện tại",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "Theo bản ghi lúc {time}",
       "commissions": "Xong {n} / {total}",
+      "commissionsUnclaimed": "Xong {n} / {total} · chưa nhận thưởng của Katheryne",
       "abyss": "{stars} / {max} sao",
       "expeditions": "Đã về {n} / {total}",
       "nobodyOut": "Không ai đang đi",

@@ -130,6 +130,7 @@ import { capturedResin, resinAt, resinReading } from '@/components/planner/resin
 import type { SeelieWrites } from '@/components/planner/seelie-plan'
 import { farmsNoWeekly, partReadiness, type PartReady } from '@/components/planner/upgrade'
 import { upsertTask } from '@/components/planner/use-planner-tasks'
+import { resinSpentToday } from '@/components/planner/tasks'
 import { saveTraveler, travelerGender } from '@/data/traveler'
 import { ApiRequestError } from '@/api'
 import { useAccounts } from '@/stores/accounts'
@@ -1654,6 +1655,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         :condensed="condensed.count"
         :condensed-max="condensed.max"
         :steps="settings.planner.resinSteps ?? []"
+        :spent="resinSpentToday(capturedTasks?.tasks, now, account.server)"
         :now="now"
         :account-id="account.id"
         :account-name="accountLabel"

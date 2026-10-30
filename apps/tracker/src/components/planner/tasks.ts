@@ -377,6 +377,8 @@ export const customUndone = (task: Pick<CustomTask, 'every'>, due: number) => du
 export interface CapturedTasks {
   at: number
   tasks: GiTasks
+  /** Parts the live journal set since (Capture 1.16.0), with when its last batch came (ms). */
+  live?: { parts: readonly string[]; at: number }
   /** The capture's Adventure Rank (`gi_player.ar`), for the AR rewards row. */
   ar?: number
 }
@@ -387,6 +389,33 @@ export function unclaimedArRewards(claimed: readonly number[], ar: number): numb
   const out: number[] = []
   for (let rank = 2; rank <= Math.min(ar, 60); rank++) if (!held.has(rank)) out.push(rank)
   return out
+}
+
+/** The `gi_tasks` part each capture-read row is read from. */
+const TASK_PARTS: Record<string, keyof GiTasks> = {
+  commissions: 'commissions',
+  abyss: 'abyss',
+  expeditions: 'expeditions',
+  realm: 'realm',
+  'weekly-bosses': 'weeklyBosses',
+  'sign-ins': 'signIns',
+  'ar-rewards': 'arRewards',
+  welkin: 'welkin',
+}
+
+/**
+ * Original Resin spent today per the capture (`gi_tasks.resinSpent`,
+ * Capture 1.16.0) and when the game said so (ms), or null when it says
+ * nothing about today.
+ */
+export function resinSpentToday(
+  tasks: GiTasks | null | undefined,
+  now: number,
+  server: string | null | undefined,
+): { value: number; at: number } | null {
+  const spent = tasks?.resinSpent
+  if (!spent || spent.at * 1000 < lastReset({ kind: 'daily' }, now, server)!) return null
+  return { value: spent.value, at: spent.at * 1000 }
 }
 
 /** What a capture says about a built-in task now. */
@@ -428,18 +457,28 @@ export function captureRead(
   server: string | null | undefined,
 ): CaptureRead | null {
   if (!capture) return null
-  const { at, tasks } = capture
+  const { tasks } = capture
+  // A part the live journal set is as of its last batch, the rest as of the login.
+  const part = TASK_PARTS[id]
+  const at = part && capture.live?.parts.includes(part) ? capture.live.at : capture.at
   switch (id) {
     case 'commissions': {
       const c = tasks.commissions
       if (!c || at < lastReset({ kind: 'daily' }, now, server)!) return null
-      const done = c.finished >= c.total
+      // Katheryne's reward taken, when the capture knows (Capture 1.16.0).
+      const unclaimed = c.finished >= c.total && c.claimed === false
+      const done = c.finished >= c.total && !unclaimed
       return {
         at,
         done,
         back: done ? nextReset({ kind: 'daily' }, now, server) : null,
         text: `${c.finished}/${c.total}`,
-        title: t('planner.tasks.capture.commissions', { n: c.finished, total: c.total }),
+        title: t(
+          unclaimed
+            ? 'planner.tasks.capture.commissionsUnclaimed'
+            : 'planner.tasks.capture.commissions',
+          { n: c.finished, total: c.total },
+        ),
       }
     }
     case 'abyss': {

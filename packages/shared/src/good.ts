@@ -148,8 +148,8 @@ export interface GiExpedition {
  * are unix seconds; each part is absent when it was not captured.
  */
 export interface GiTasks {
-  /** Today's Daily Commissions. */
-  commissions?: { finished: number; total: number }
+  /** Today's Daily Commissions; `claimed`: Katheryne's reward taken (Capture 1.16.0, absent when not known). */
+  commissions?: { finished: number; total: number; claimed?: boolean }
   /** The Spiral Abyss period running: `end` is when the next one begins. */
   abyss?: { start: number; end: number; stars: number; maxStars: number }
   /** Who is out on an expedition (empty: nobody), sorted by `doneAt`. */
@@ -175,6 +175,12 @@ export interface GiTasks {
   arRewards?: number[]
   /** Login events' calendars by config id (Capture 1.9.0): days signed in, days claimed, last sign-in, open/close. */
   signIns?: Record<string, GiSignIn>
+  /**
+   * Original Resin spent on one game day (Capture 1.16.0): `day` 1 (Monday)
+   * to 7 of the game's week, `at` when the game first said it (unix s; the
+   * game day it falls in is the one it counts).
+   */
+  resinSpent?: { value: number; day: number; at: number }
 }
 
 export interface GiSignIn {

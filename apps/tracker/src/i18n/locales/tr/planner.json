@@ -128,6 +128,8 @@
     "fullAt": "{time} dolar",
     "fullLabel": "Dolu",
     "full": "Dolu",
+    "spentToday": "Bugün harcanan",
+    "spentTodayTitle": "Bugün harcanan Orijinal Reçine: {n} · {at}",
     "markTitle": "{time} anında {amount}",
     "in": "içinde",
     "now": "Şu anki Orijinal Reçine",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "{time} taramasından",
       "commissions": "{total} görevden {n} tamam",
+      "commissionsUnclaimed": "{total} görevden {n} tamam · Katheryne'in ödülü alınmadı",
       "abyss": "{max} yıldızdan {stars}",
       "expeditions": "{total} keşiften {n} döndü",
       "nobodyOut": "Kimse keşifte değil",

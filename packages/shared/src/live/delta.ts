@@ -23,6 +23,7 @@
  * | `anecdotes.<id>` | `{state, finishCount}`; `del` |
  * | `gi_anecdotes.unlockedAreas\|reward\|wish` | that value; `del` |
  * | `gi_tasks.resin` | `{value, nextAt}`: the resin clock (Capture 1.12.0); `del` |
+ * | `gi_tasks.<part>` | any other part of `gi_tasks`, whole, checked as a snapshot's (Capture 1.16.0); `del` |
  *
  * Items (weapons, artifacts) are named by the game's guid, `gi_guid` on the
  * item; an item without one never appears in a journal. Unknown paths are
@@ -32,6 +33,7 @@
 import { z } from 'zod'
 import type { GiAnecdotes, Good, GoodArtifact, GoodCharacter, GoodWeapon } from '../good'
 import type { SnapshotSummary } from '../codec/snapshot'
+import { normalizeTaskPart } from '../codec/normalize'
 
 export type DeltaPath = readonly (string | number)[]
 export type DeltaChange =
@@ -280,16 +282,19 @@ export function applyDelta(good: LiveGood, changes: readonly DeltaChange[]): Liv
         break
       }
       case 'gi_tasks': {
-        // Only the resin clock moves within a session (Capture 1.12.0).
-        if (parts.length !== 2 || name !== 'resin') break
+        // The resin clock since Capture 1.12.0, every part since 1.16.0: each
+        // whole, kept only when a snapshot's check would keep it.
+        if (parts.length !== 2) break
         if (op === 'del') {
-          if (next.gi_tasks?.resin) {
-            const tasks = own('gi_tasks', (t) => ({ ...t }))!
-            delete tasks.resin
+          if (next.gi_tasks && Object.hasOwn(next.gi_tasks, name)) {
+            const tasks = own('gi_tasks', (t) => ({ ...t }))! as Record<string, unknown>
+            delete tasks[name]
           }
-        } else if (op === 'set' && isResinClock(value)) {
-          const tasks = own('gi_tasks', (t) => ({ ...t }))!
-          tasks.resin = { value: value.value, nextAt: value.nextAt }
+        } else if (op === 'set') {
+          const part = normalizeTaskPart(name, value)
+          if (part === undefined) break
+          const tasks = own('gi_tasks', (t) => ({ ...t }))! as Record<string, unknown>
+          tasks[name] = part
         }
         break
       }
@@ -306,18 +311,6 @@ export function applyDelta(good: LiveGood, changes: readonly DeltaChange[]): Liv
     }
   }
   return next
-}
-
-function isResinClock(value: unknown): value is { value: number; nextAt: number } {
-  if (!value || typeof value !== 'object') return false
-  const v = value as Record<string, unknown>
-  return (
-    Number.isInteger(v.value) &&
-    (v.value as number) >= 0 &&
-    (v.value as number) <= 2_000 &&
-    Number.isInteger(v.nextAt) &&
-    (v.nextAt as number) > 0
-  )
 }
 
 function copyBook(book: GiAnecdotes | undefined): GiAnecdotes {

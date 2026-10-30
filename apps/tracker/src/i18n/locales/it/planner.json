@@ -128,6 +128,8 @@
     "fullAt": "Piena alle {time}",
     "fullLabel": "Piena",
     "full": "Piena",
+    "spentToday": "Spesa oggi",
+    "spentTodayTitle": "{n} di Resina primordiale spesa oggi · {at}",
     "markTitle": "{amount} alle {time}",
     "in": "tra",
     "now": "Resina primordiale ora",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "Dalla cattura di {time}",
       "commissions": "{n} su {total} fatti",
+      "commissionsUnclaimed": "{n} su {total} fatti · ricompensa di Katheryne non riscattata",
       "abyss": "{stars} su {max} stelle",
       "expeditions": "{n} su {total} rientrati",
       "nobodyOut": "Nessuno in spedizione",

@@ -99,8 +99,14 @@ export function usePlannerModel(
     const inventory = data.value?.inventory
     const tasks = inventory?.good.gi_tasks
     const ar = inventory?.good.gi_player?.ar
+    const live = inventory?.live
     return inventory && tasks
-      ? { at: inventory.snapshot.takenAt, tasks, ...(ar !== undefined ? { ar } : {}) }
+      ? {
+          at: inventory.snapshot.takenAt,
+          tasks,
+          ...(ar !== undefined ? { ar } : {}),
+          ...(live?.tasks.length ? { live: { parts: live.tasks, at: live.updatedAt } } : {}),
+        }
       : null
   })
 

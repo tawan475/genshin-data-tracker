@@ -128,6 +128,8 @@
     "fullAt": "Voll um {time}",
     "fullLabel": "Voll",
     "full": "Voll",
+    "spentToday": "Heute verbraucht",
+    "spentTodayTitle": "{n} Ursprüngliches Harz heute verbraucht · {at}",
     "markTitle": "{amount} um {time}",
     "in": "in",
     "now": "Ursprüngliches Harz jetzt",
@@ -553,6 +555,7 @@
     "capture": {
       "from": "Aus der Erfassung vom {time}",
       "commissions": "{n} von {total} erledigt",
+      "commissionsUnclaimed": "{n} von {total} erledigt · Katherynes Belohnung nicht abgeholt",
       "abyss": "{stars} von {max} Sternen",
       "expeditions": "{n} von {total} zurück",
       "nobodyOut": "Niemand unterwegs",
