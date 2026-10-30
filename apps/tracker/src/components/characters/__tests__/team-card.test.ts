@@ -12,6 +12,7 @@ import {
   teamCardHeight,
   teamFileName,
   teamMembers,
+  teamNameFit,
   teamRegion,
   teamRowTop,
   togglePick,
@@ -31,6 +32,18 @@ describe('teamCardHeight', () => {
 
   it('puts the last row above the bottom padding', () => {
     for (const n of [2, 3, 4]) expect(teamRowTop(n - 1) + TEAM_ROW + 40).toBe(teamCardHeight(n))
+  })
+})
+
+describe('teamNameFit', () => {
+  it('never cuts a name that fits, however close', () => {
+    // "daily driver" was cut to "daily driv…" with 1,300px to spare.
+    expect(teamNameFit(312.4, 1300)).toEqual({ width: 312.4 })
+    expect(teamNameFit(1300, 1300)).toEqual({ width: 1300 })
+  })
+
+  it('cuts a name wider than the room to the room', () => {
+    expect(teamNameFit(1600.2, 1300)).toEqual({ width: 1300, max: 1300 })
   })
 })
 

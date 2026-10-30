@@ -74,6 +74,7 @@ import {
   TEAM_ROW,
   regionBackground,
   teamCardHeight,
+  teamNameFit,
   teamRegion,
   teamRowTop,
 } from './team-card'
@@ -300,17 +301,17 @@ class TeamPainter extends CardPaint {
 
     const name = this.input.teamName?.trim()
     if (!name) return
-    const nameW = Math.min(
-      this.textWidth(name, 52, 700) - 0.5 * name.length,
-      right - TEAM_PAD_X - blockW - 24 - 2 * 28,
-    )
-    this.plate(TEAM_PAD_X, top, nameW + 2 * 28, TEAM_HEADER)
-    this.p.letterSpaced(-0.5, () =>
+    this.p.letterSpaced(-0.5, () => {
+      const fit = teamNameFit(
+        this.textWidth(name, 52, 700),
+        right - TEAM_PAD_X - blockW - 24 - 2 * 28,
+      )
+      this.plate(TEAM_PAD_X, top, fit.width + 2 * 28, TEAM_HEADER)
       this.line(name, TEAM_PAD_X + 28, top + (TEAM_HEADER - 64) / 2, 52, 700, text, {
         lineHeight: 64,
-        max: nameW,
-      }),
-    )
+        max: fit.max,
+      })
+    })
   }
 
   /** A header plate: the theme's chip colour, its hairline. */

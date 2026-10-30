@@ -49,6 +49,15 @@ export function teamRowTop(index: number): number {
 }
 
 /**
+ * The team name's width on its plate, and the width to cut it to: only a
+ * name wider than the room is cut (passing its own width as the limit cut
+ * names that fit, the measure and the drawing differing by a fraction of a px).
+ */
+export function teamNameFit(width: number, room: number): { width: number; max?: number } {
+  return width > room ? { width: room, max: room } : { width }
+}
+
+/**
  * Picks after tapping `key`: a picked one leaves (the ones after it move
  * up), a new one goes last while there is room; at `max` nothing changes.
  */
