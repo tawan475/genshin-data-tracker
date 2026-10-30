@@ -29,6 +29,7 @@ import {
   Painter,
   cardFonts,
   linearGradient,
+  parseInsetRing,
   parseShadows,
   roundCorners,
 } from '@/lib/card-canvas'
@@ -126,12 +127,18 @@ const BAR_PITCH = 6
 const BAR_H = 20
 /** The city painting's filter, and the veil of the card's ground over it, per theme. */
 const CITY_FILTER = {
-  dark: { blur: 3, saturate: 1.05, brightness: 0.8 },
-  light: { blur: 3, saturate: 1.05, brightness: 1.02 },
+  dark: { blur: 1.5, saturate: 1.05, brightness: 0.8 },
+  light: { blur: 1.5, saturate: 1.05, brightness: 1.02 },
 } as const
 const CITY_VEIL = { dark: 0.25, light: 0.18 } as const
 /** Where a row's middle falls on the painting (its share of the height): about the horizon. */
 const CITY_HORIZON = 0.55
+/**
+ * The plate under the header's text, in the theme's chip colour: opaque enough
+ * that the text reads over the painting's brightest sky (and darkest rock).
+ */
+const HEADER_PLATE = { dark: 'rgba(15,23,42,0.78)', light: 'rgba(255,255,255,0.88)' } as const
+const PLATE_X = 22
 const WEAPON_TILE = 88
 const CONSTELLATION = 46
 const TALENT = 66
@@ -250,17 +257,20 @@ class TeamPainter extends CardPaint {
 
   // -------------------------------------------------- header
 
-  /** The team's name at the left, the owner and the capture date at the right. */
+  /**
+   * The team's name at the left, the owner and the capture date at the right,
+   * each on a plate of the theme's chip colour so it reads over the city.
+   */
   header() {
     const top = TEAM_PAD_Y
     const right = TEAM_CARD_WIDTH - TEAM_PAD_X
     const text = this.v('--card-text')
-    const muted = this.v('--card-muted')
+    const secondary = this.v('--card-secondary')
     const owner = ownerParts(this.input.owner)
     const date = this.input.takenAt ? formatDate(this.input.takenAt) : null
     const dateText = [date, 'teyvat.me'].filter(Boolean).join('  ·  ')
 
-    // Right block: 36px owner line over a 24px date line (or the date alone, centred).
+    // Right plate: a 32px owner line over a 26px date line (or the date alone).
     const dot = '  ·  '
     const ownerW = owner.reduce(
       (sum, part, i) =>
@@ -270,30 +280,45 @@ class TeamPainter extends CardPaint {
       0,
     )
     const dateW = this.textWidth(dateText, 18, 400)
-    const blockW = Math.max(ownerW, dateW)
-    const blockTop = top + (TEAM_HEADER - (owner.length ? 36 + 27 : 27)) / 2
+    const blockW = Math.max(ownerW, dateW) + 2 * PLATE_X
+    this.plate(right - blockW, top, blockW, TEAM_HEADER)
+    const blockTop = top + (TEAM_HEADER - (owner.length ? 32 + 26 : 26)) / 2
+    const textRight = right - PLATE_X
     if (owner.length) {
-      let x = right - ownerW
+      let x = textRight - ownerW
       owner.forEach((part, i) => {
-        if (i) x += this.line(dot, x, blockTop, 24, 400, muted, { lineHeight: 36 })
+        if (i) x += this.line(dot, x, blockTop, 24, 400, secondary, { lineHeight: 32 })
         x += this.line(part, x, blockTop, 24, i === 0 && this.input.owner.name ? 600 : 400, text, {
-          lineHeight: 36,
+          lineHeight: 32,
         })
       })
     }
-    this.line(dateText, right, blockTop + (owner.length ? 36 : 0), 18, 400, muted, {
+    this.line(dateText, textRight, blockTop + (owner.length ? 32 : 0), 18, 400, secondary, {
       align: 'right',
-      lineHeight: 27,
+      lineHeight: 26,
     })
 
     const name = this.input.teamName?.trim()
     if (!name) return
+    const nameW = Math.min(
+      this.textWidth(name, 52, 700) - 0.5 * name.length,
+      right - TEAM_PAD_X - blockW - 24 - 2 * 28,
+    )
+    this.plate(TEAM_PAD_X, top, nameW + 2 * 28, TEAM_HEADER)
     this.p.letterSpaced(-0.5, () =>
-      this.line(name, TEAM_PAD_X, top + (TEAM_HEADER - 64) / 2, 52, 700, text, {
+      this.line(name, TEAM_PAD_X + 28, top + (TEAM_HEADER - 64) / 2, 52, 700, text, {
         lineHeight: 64,
-        max: right - TEAM_PAD_X - blockW - 48,
+        max: nameW,
       }),
     )
+  }
+
+  /** A header plate: the theme's chip colour, its hairline. */
+  private plate(x: number, y: number, w: number, h: number) {
+    const r = 20
+    this.p.fill(x, y, w, h, r, HEADER_PLATE[this.cardTheme])
+    const ring = parseInsetRing(this.v('--card-chip-ring'))
+    if (ring) this.p.insetRing(x, y, w, h, r, ring.width, ring.color)
   }
 
   // -------------------------------------------------- one row
