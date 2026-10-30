@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { ELEMENT_TEXT } from '@/components/characters/tokens'
 import { ELEMENT_LABELS } from '@/data/characters'
 import type { Element } from '@/data/game-meta'
-import { elementIcon } from '@/lib/assets'
+import { elementIcon, elementIconLight } from '@/lib/assets'
 import { ELEMENT_GLYPHS } from './element-glyphs'
 
 /**
@@ -13,15 +13,23 @@ import { ELEMENT_GLYPHS } from './element-glyphs'
  * default), lg (beside a card title). Named for screen readers and in a
  * tooltip, unless `decorative` (when the name is written next to it).
  * ElementBadge adds the name. A plain <img>, so the share card's PNG export
- * draws it.
+ * draws it. `list`: the game's character-list icon instead (lib/assets
+ * elementIconLight), which the share cards use.
  */
 const props = withDefaults(
-  defineProps<{ element: Element; decorative?: boolean; size?: 'sm' | 'md' | 'lg' }>(),
+  defineProps<{
+    element: Element
+    decorative?: boolean
+    size?: 'sm' | 'md' | 'lg'
+    list?: boolean
+  }>(),
   { size: 'md' },
 )
 const SIZE = { sm: 'size-3.5', md: 'size-4', lg: 'size-5' } as const
 
-const src = computed(() => elementIcon(props.element))
+const src = computed(() =>
+  props.list ? elementIconLight(props.element) : elementIcon(props.element),
+)
 const failed = ref(false)
 watch(src, () => (failed.value = false))
 

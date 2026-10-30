@@ -18,7 +18,7 @@ import {
   characterBanner,
   characterIcon,
   characterSplash,
-  elementIcon,
+  elementIconLight,
   giCdnArt,
   weaponIcon,
 } from '@/lib/assets'
@@ -119,7 +119,7 @@ export async function drawShareCard(input: CardDrawing, scale = 1): Promise<Draw
   const banner = characterBanner(c.key)
   const glyphs = talentIcons(c.key)
   const constellations = constellationIcons(c.key)
-  const element = c.element ? elementIcon(c.element) : ''
+  const element = c.element ? elementIconLight(c.element) : ''
   const urls = [
     banner,
     splashUrl,
@@ -138,7 +138,7 @@ export async function drawShareCard(input: CardDrawing, scale = 1): Promise<Draw
     ),
     ...bonusSets(c.sets).map(({ set }) => artifactSetIcon(set.setKey)),
     ...(input.panel?.rows.flatMap((row) =>
-      row.damage && row.damage !== 'physical' ? [elementIcon(row.damage)] : [],
+      row.damage && row.damage !== 'physical' ? [elementIconLight(row.damage)] : [],
     ) ?? []),
   ]
   const [images, fonts, tone] = await Promise.all([
@@ -308,14 +308,13 @@ class CardPainter extends CardPaint {
     const top = TOP
     let x = LEFT.x
 
-    // Element icon (the game's, else our glyph), with its shadow.
+    // Element icon: the game's list icon, flat (a drop shadow read as a dark
+    // halo), else our glyph.
     if (c.element) {
-      const icon = this.images.get(elementIcon(c.element))
+      const icon = this.images.get(elementIconLight(c.element))
       const iy = top + (rowH - 60) / 2
-      p.dropShadow({ x: 0, y: 2, blur: 6, color: 'rgba(0,0,0,0.45)' }, () => {
-        if (icon) p.contain(icon, x, iy, 60, 60)
-        else this.elementGlyph(c.element!, x, iy, 60)
-      })
+      if (icon) p.contain(icon, x, iy, 60, 60)
+      else this.elementGlyph(c.element, x, iy, 60)
       x += 60 + 18
     }
 
@@ -644,7 +643,7 @@ class CardPainter extends CardPaint {
       }
       let lx = left
       if (row.damage && row.damage !== 'physical') {
-        const icon = this.images.get(elementIcon(row.damage))
+        const icon = this.images.get(elementIconLight(row.damage))
         if (icon) p.contain(icon, lx, mid - 13, 26, 26)
         else this.elementGlyph(row.damage, lx, mid - 13, 26)
         lx += 26 + 10

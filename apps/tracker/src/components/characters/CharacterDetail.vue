@@ -178,7 +178,7 @@ watch(
           <div class="flex min-w-0 flex-col gap-4 p-4 sm:p-5 md:pl-3">
             <header class="flex min-w-0 flex-col gap-1.5">
               <p class="flex min-w-0 items-center gap-2">
-                <ElementIcon v-if="c.element" :element="c.element" size="lg" />
+                <ElementIcon v-if="c.element" :element="c.element" size="lg" list />
                 <span
                   class="min-w-0 truncate font-display text-2xl font-semibold sm:text-3xl"
                   :title="kind"

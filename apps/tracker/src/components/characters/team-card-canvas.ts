@@ -19,7 +19,6 @@ import {
   characterBanner,
   characterIcon,
   characterSplash,
-  elementIcon,
   elementIconLight,
   giCdnArt,
   weaponIcon,
@@ -176,7 +175,7 @@ function rowImages(member: TeamMember, crown: string): string[] {
     ),
     ...bonusSets(c.sets).map(({ set }) => artifactSetIcon(set.setKey)),
     ...(member.panel?.rows.flatMap((row) =>
-      row.damage && row.damage !== 'physical' ? [elementIcon(row.damage)] : [],
+      row.damage && row.damage !== 'physical' ? [elementIconLight(row.damage)] : [],
     ) ?? []),
   ]
 }
@@ -712,7 +711,7 @@ class TeamPainter extends CardPaint {
       let lx = left
       let labelMax = right - valueW - 10 - left
       if (row.damage && row.damage !== 'physical') {
-        const icon = this.images.get(elementIcon(row.damage))
+        const icon = this.images.get(elementIconLight(row.damage))
         if (icon) p.contain(icon, lx, mid - 11, 22, 22)
         else this.elementGlyph(row.damage, lx, mid - 11, 22)
         lx += 22 + 8

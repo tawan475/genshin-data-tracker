@@ -258,7 +258,8 @@ const ownerLine = computed(() => ownerParts(props.owner))
               v-if="c.element"
               :element="c.element"
               decorative
-              class="size-[60px]! [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.45))]"
+              list
+              class="size-[60px]!"
             />
             <!-- The padding (undone by the margin) gives accents and descenders room
                  inside truncate's clip (Xiangling's g was cut). -->
@@ -502,6 +503,7 @@ const ownerLine = computed(() => ownerParts(props.owner))
                   v-if="row.damage && row.damage !== 'physical'"
                   :element="row.damage"
                   decorative
+                  list
                   class="size-[26px]!"
                 />
                 {{ row.label }}

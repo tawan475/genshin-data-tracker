@@ -4,7 +4,7 @@ import {
   artifactSetIcon,
   characterBanner,
   characterSplash,
-  elementIcon,
+  elementIconLight,
   weaponIcon,
 } from '@/lib/assets'
 import { preloadImages } from '@/lib/image-preload'
@@ -27,7 +27,7 @@ export function cardImageUrls(c: CharacterView): string[] {
     talents.auto,
     talents.skill,
     talents.burst,
-    c.element ? elementIcon(c.element) : '',
+    c.element ? elementIconLight(c.element) : '',
     c.weapon ? weaponIcon(c.weapon.key, c.weapon.ascension) : '',
     ...c.artifacts.map((piece) => (piece ? artifactIcon(piece.setKey, piece.slotKey) : '')),
     ...c.sets.map((set) => artifactSetIcon(set.setKey)),

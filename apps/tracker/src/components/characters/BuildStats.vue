@@ -68,6 +68,7 @@ function title(row: StatRow): string {
             :element="row.damage"
             size="sm"
             decorative
+            list
             class="self-center"
           />
           {{ row.label }}
