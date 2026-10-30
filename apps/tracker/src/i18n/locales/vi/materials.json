@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "Lịch Sử",
+    "source": "Nguồn Gốc",
     "chartLabel": "{name} theo thời gian, {since}",
     "statTitle": "{value} {since}",
     "gained": "Nhận được",

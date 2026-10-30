@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "Cronologia",
+    "source": "Origine",
     "chartLabel": "{name} nel tempo, {since}",
     "statTitle": "{value} {since}",
     "gained": "Ottenuti",

@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "Geçmiş",
+    "source": "Kaynak",
     "chartLabel": "Zaman içinde {name}, {since}",
     "statTitle": "{value} {since}",
     "gained": "Kazanılan",

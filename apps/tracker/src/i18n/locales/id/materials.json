@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "Riwayat",
+    "source": "Sumber",
     "chartLabel": "{name} dari waktu ke waktu, {since}",
     "statTitle": "{value} {since}",
     "gained": "Didapat",

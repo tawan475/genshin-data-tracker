@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "История",
+    "source": "Как получить",
     "chartLabel": "{name} со временем, {since}",
     "statTitle": "{value} {since}",
     "gained": "Получено",

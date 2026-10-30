@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "Histórico",
+    "source": "Fonte",
     "chartLabel": "{name} ao longo do tempo, {since}",
     "statTitle": "{value} {since}",
     "gained": "Ganhos",

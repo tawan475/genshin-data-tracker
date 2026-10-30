@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "履歴",
+    "source": "入手方法",
     "chartLabel": "{name}の推移、{since}",
     "statTitle": "{value} {since}",
     "gained": "獲得",

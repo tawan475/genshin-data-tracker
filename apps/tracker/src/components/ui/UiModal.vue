@@ -13,6 +13,9 @@ import UiIconButton from './UiIconButton.vue'
  * - Stepping through a list: pass `index` and `total`; previous / next sit
  *   in the header with "12 / 97", the arrow keys step too (`step` event).
  *   `loop` wraps at the ends instead of stopping.
+ * - `bare`: no header bar and no body padding: the content draws its own
+ *   title and close button and reaches the dialog's edges (the material
+ *   dialog's game panel); `title` stays the dialog's accessible name.
  * Slots: default (body), `heading` (replaces the title), `footer`.
  * While open it holds live updates back (nothing changes under the user);
  * they land when it closes (the header has no Refresh: the user found it
@@ -26,6 +29,7 @@ const props = withDefaults(
     index?: number
     total?: number
     loop?: boolean
+    bare?: boolean
   }>(),
   { size: 'md', index: undefined, total: undefined },
 )
@@ -82,7 +86,11 @@ const detail = computed(() => props.size === 'detail')
     class="bg-surface-raised p-0 text-text-primary shadow-overlay backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     :class="
       detail
-        ? 'm-0 h-dvh max-h-dvh w-full max-w-none overflow-hidden sm:m-auto sm:h-auto sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:max-w-6xl sm:rounded-xl sm:border sm:border-border-default'
+        ? [
+            'm-0 h-dvh max-h-dvh w-full max-w-none overflow-hidden sm:m-auto sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:max-w-6xl sm:rounded-xl sm:border sm:border-border-default',
+            // A modal dialog stretches to its cap at height auto; fit-content is the browser's own default.
+            bare ? 'sm:h-fit' : 'sm:h-auto',
+          ]
         : [
             'm-auto w-[calc(100%-2rem)] rounded-xl border border-border-default',
             size === 'wide' ? 'max-w-3xl' : 'max-w-lg',
@@ -95,6 +103,7 @@ const detail = computed(() => props.size === 'detail')
   >
     <div class="flex flex-col" :class="detail ? 'h-full sm:max-h-[90dvh]' : ''">
       <div
+        v-if="!bare"
         class="flex shrink-0 items-center gap-1 border-b border-border-default py-2 pr-2 pl-5 sm:pr-3"
       >
         <slot name="heading">
@@ -132,7 +141,10 @@ const detail = computed(() => props.size === 'detail')
         :tabindex="stepping ? -1 : undefined"
         :autofocus="stepping || undefined"
         class="overflow-y-auto outline-none"
-        :class="detail ? 'min-h-0 flex-1 overscroll-contain p-4 sm:p-5' : 'max-h-[70dvh] px-5 py-4'"
+        :class="[
+          detail ? 'min-h-0 flex-1 overscroll-contain' : 'max-h-[70dvh]',
+          bare ? '' : detail ? 'p-4 sm:p-5' : 'px-5 py-4',
+        ]"
       >
         <slot />
       </div>

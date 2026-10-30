@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "기록",
+    "source": "획득 경로",
     "chartLabel": "{name} 추이, {since}",
     "statTitle": "{value} {since}",
     "gained": "획득",

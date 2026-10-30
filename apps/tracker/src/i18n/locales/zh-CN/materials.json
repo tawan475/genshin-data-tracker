@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "历史",
+    "source": "来源",
     "chartLabel": "{name} 随时间的变化，{since}",
     "statTitle": "{value}（{since}）",
     "gained": "获得",

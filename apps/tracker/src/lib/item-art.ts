@@ -90,15 +90,17 @@ export const emblemStyle = (box: EmblemBox): Record<string, string> => ({
 
 /**
  * The emblem on a band `height` px tall whose item icon, `size` px, sits
- * `right` px from the band's right edge, centred vertically: the knot on the
- * icon's centre, anchored from the right (for bands whose width varies).
+ * `right` px from the band's right edge, its centre `centreY` px from the
+ * top (centred vertically by default): the knot on the icon's centre,
+ * anchored from the right (for bands whose width varies).
  */
 export function emblemFromRight(
   height: number,
   right: number,
   size: number,
+  centreY = height / 2,
 ): Record<string, string> {
-  const box = emblemBox(height, 0)
+  const box = emblemBox(height, 0, centreY)
   return {
     right: `${right + size / 2 - (EMBLEM.width - EMBLEM.knotX) * box.scale}px`,
     top: `${box.top}px`,

@@ -4,6 +4,7 @@ import {
   type MaterialIndex,
   type MaterialNames,
 } from '@gdt/game-data'
+import type { MaterialDetail } from '@gdt/game-data/material-details'
 import { shallowRef } from 'vue'
 import { keyToName } from '@/lib/format'
 import { normalizeSearch } from '@/lib/search'
@@ -113,6 +114,22 @@ export function materialEnglishName(key: string): string {
 export function materialRarity(key: string, fallback?: number | null): number | null {
   if (!indexLoading) void preloadMaterialRarities()
   return resolveMaterialRarity(key, index.value, fallback)
+}
+
+/**
+ * What the game's item detail panel shows under a material's name (type
+ * line, description, sources) in `lang` (the language on screen by
+ * default): one small chunk of the game data per call's key, English where
+ * the language has none. Resolves undefined for a key the data doesn't know
+ * and when the chunk fails to load (offline); the next call tries again.
+ */
+export function loadMaterialDetail(
+  key: string,
+  lang: Locale = locale.value,
+): Promise<MaterialDetail | undefined> {
+  return import('@gdt/game-data/material-details')
+    .then((module) => module.loadMaterialDetail(key, lang))
+    .catch(() => undefined)
 }
 
 /**

@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "歷史",
+    "source": "來源",
     "chartLabel": "{name} 隨時間的變化，{since}",
     "statTitle": "{value}（{since}）",
     "gained": "獲得",

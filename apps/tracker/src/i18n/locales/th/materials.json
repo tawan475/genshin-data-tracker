@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "ประวัติ",
+    "source": "หาได้จาก",
     "chartLabel": "{name} ตามเวลา {since}",
     "statTitle": "{value} {since}",
     "gained": "ได้รับ",

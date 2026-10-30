@@ -80,6 +80,7 @@
   },
   "detail": {
     "history": "History",
+    "source": "Source",
     "chartLabel": "{name} over time, {since}",
     "statTitle": "{value} {since}",
     "gained": "Gained",
