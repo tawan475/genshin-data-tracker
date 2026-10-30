@@ -61,8 +61,13 @@
       "books": "書籍",
       "tutorials": "チュートリアル",
       "viewpoints": "視点",
-      "artifacts": "聖遺物"
-    }
+      "artifacts": "聖遺物",
+      "worldQuests": "世界任務"
+    },
+    "region": "地域",
+    "otherRegion": "その他",
+    "inProgress": "進行中",
+    "needCapture": "完了の記録には Teyvat.me Capture 1.16 以降が必要です"
   },
   "defeats": {
     "kinds": "項目",

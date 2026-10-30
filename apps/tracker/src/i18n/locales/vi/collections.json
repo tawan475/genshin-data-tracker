@@ -61,8 +61,13 @@
       "books": "Sách",
       "tutorials": "Giáo Trình",
       "viewpoints": "Điểm Nhìn",
-      "artifacts": "Thánh Di Vật"
-    }
+      "artifacts": "Thánh Di Vật",
+      "worldQuests": "Nhiệm Vụ Thế Giới"
+    },
+    "region": "Khu vực",
+    "otherRegion": "Khác",
+    "inProgress": "Đang Tiến Hành",
+    "needCapture": "Đánh dấu hoàn thành cần Teyvat.me Capture 1.16 trở lên"
   },
   "defeats": {
     "kinds": "Mục",

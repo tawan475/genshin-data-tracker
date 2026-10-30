@@ -61,8 +61,13 @@
       "books": "Libri",
       "tutorials": "Tutorial",
       "viewpoints": "Punti di osservazione",
-      "artifacts": "Manufatti"
-    }
+      "artifacts": "Manufatti",
+      "worldQuests": "Missioni avventura"
+    },
+    "region": "Regione",
+    "otherRegion": "Altro",
+    "inProgress": "In corso",
+    "needCapture": "I segni di completamento richiedono Teyvat.me Capture 1.16 o successivo"
   },
   "defeats": {
     "kinds": "Voci",

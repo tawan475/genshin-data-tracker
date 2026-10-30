@@ -768,7 +768,23 @@ function toCollections(raw: unknown): GiCollections | null {
     const ids = idList(raw[key], 0, 999_999_999, cap)
     if (ids) collections[key] = ids
   }
+  // Capture 1.16.
+  const quests = toQuests(raw.quests)
+  if (quests) collections.quests = quests
   return Object.keys(collections).length > 0 ? collections : null
+}
+
+/** Parent quests: both lists pass (MainQuest ids), or the part goes; a finished id is not active too. */
+function toQuests(raw: unknown): GiCollections['quests'] | null {
+  if (!isObject(raw)) return null
+  const finished = idList(raw.finished, 1, 999_999, GOOD_LIMITS.quests)
+  if (!finished) return null
+  if (raw.active === undefined) return { finished }
+  const active = idList(raw.active, 1, 999_999, GOOD_LIMITS.quests)
+  if (!active) return null
+  const done = new Set(finished)
+  const open = active.filter((id) => !done.has(id))
+  return open.length > 0 ? { finished, active: open } : { finished }
 }
 
 /** Each Archive tab's codex id block (the game numbers codex entries by tab). */

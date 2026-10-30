@@ -749,6 +749,9 @@ export interface CollectionsSection {
   e?: number[]
   o?: number[]
   n?: number[]
+  // Capture 1.16.
+  /** Parent quests: `f` finished, `a` accepted and not finished (MainQuest ids, ascending). */
+  q?: { f: number[]; a?: number[] }
 }
 
 export type IdListRow = [id: number, ids: number[]]
@@ -866,6 +869,9 @@ export function encodeCollections2(collections: GiCollections): CollectionsSecti
   if (furnishingSets) section.e = [...furnishingSets]
   if (companionRewards) section.o = [...companionRewards]
   if (npcsMet) section.n = [...npcsMet]
+  const { quests } = collections
+  if (quests)
+    section.q = { f: [...quests.finished], ...(quests.active ? { a: [...quests.active] } : {}) }
   return Object.keys(section).length > 0 ? section : null
 }
 
@@ -982,6 +988,11 @@ export function decodeCollections(section: CollectionsSection): GiCollections {
   if (section.e) collections.furnishingSets = [...section.e]
   if (section.o) collections.companionRewards = [...section.o]
   if (section.n) collections.npcsMet = [...section.n]
+  if (section.q)
+    collections.quests = {
+      finished: [...section.q.f],
+      ...(section.q.a ? { active: [...section.q.a] } : {}),
+    }
   return collections
 }
 

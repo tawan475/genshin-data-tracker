@@ -4,6 +4,7 @@ import { ARCHIVE_TABS, type ArchiveTab } from '@gdt/shared'
 import EntryGrid, { type GridEntry } from './EntryGrid.vue'
 import HaveFilter, { type HaveFilterValue } from './HaveFilter.vue'
 import NotCaptured from './NotCaptured.vue'
+import WorldQuestsList from './WorldQuestsList.vue'
 import FilterChip from '@/components/ui/FilterChip.vue'
 import UiEmpty from '@/components/ui/UiEmpty.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
@@ -22,11 +23,13 @@ import {
 } from '@/data/collection-names'
 import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { worldQuestList } from '@/data/world-quests'
 import { t } from '@/i18n'
 
 /**
  * The Archive: per tab (the game's own), what is unlocked of what the game
- * data lists, and the chosen tab's entries: All, Missing or Have.
+ * data lists, and the chosen tab's entries: All, Missing or Have. After the
+ * game's tabs, World Quests (not an Archive tab in game: WorldQuestsList).
  */
 const props = defineProps<{ captured: CapturedCollections; catalog: CollectionCatalog }>()
 
@@ -34,11 +37,11 @@ const archive = computed(() => props.captured.archive?.value ?? null)
 
 const TAB_KEY = 'collections:archive'
 const FILTER_KEY = 'collections:archive-filter'
+const WORLD_QUESTS = 'worldQuests'
+type Chosen = ArchiveTab | typeof WORLD_QUESTS
 const storedTab = readStorage(TAB_KEY)
-const chosen = ref<ArchiveTab>(
-  (ARCHIVE_TABS as readonly string[]).includes(storedTab ?? '')
-    ? (storedTab as ArchiveTab)
-    : 'quests',
+const chosen = ref<Chosen>(
+  [...ARCHIVE_TABS, WORLD_QUESTS].includes(storedTab as Chosen) ? (storedTab as Chosen) : 'quests',
 )
 watch(chosen, (value) => writeStorage(TAB_KEY, value === 'quests' ? null : value))
 const storedFilter = readStorage(FILTER_KEY) as HaveFilterValue | null
@@ -69,7 +72,12 @@ const tabs = computed(() =>
     }
   }),
 )
-const current = computed(() => tabs.value.find((tab) => tab.tab === chosen.value)!)
+const current = computed(() => tabs.value.find((tab) => tab.tab === chosen.value) ?? tabs.value[0]!)
+const quests = computed(() => props.captured.quests?.value ?? null)
+const worldQuests = computed(() => {
+  const list = worldQuestList(props.catalog, quests.value)
+  return { have: list.filter((q) => q.done).length, total: list.length }
+})
 const totals = computed(() => ({
   have: tabs.value.reduce((sum, tab) => sum + tab.have, 0),
   total: tabs.value.reduce((sum, tab) => sum + tab.total, 0),
@@ -102,9 +110,9 @@ const WIKI_PREFIX: Readonly<Partial<Record<ArchiveTab, string>>> = {
 const guide = (id: number) =>
   wikiGuide(
     props.catalog,
-    ARCHIVE_SECTIONS[chosen.value].section,
+    ARCHIVE_SECTIONS[current.value.tab].section,
     id,
-    WIKI_PREFIX[chosen.value] ?? '',
+    WIKI_PREFIX[current.value.tab] ?? '',
   )
 const shown = computed<GridEntry[]>(() =>
   current.value.entries
@@ -113,11 +121,11 @@ const shown = computed<GridEntry[]>(() =>
       id: entry.id,
       name: entry.name,
       ...(pictured.value ? { icon: entry.icon } : {}),
-      note: note(chosen.value, entry.id),
+      note: note(current.value.tab, entry.id),
       missing: !entry.have,
       title: [
         entry.name,
-        note(chosen.value, entry.id),
+        note(current.value.tab, entry.id),
         guide(entry.id) ? t('collections.guide') : '',
       ]
         .filter(Boolean)
@@ -176,9 +184,26 @@ const shown = computed<GridEntry[]>(() =>
               >{{ formatNumber(tab.have) }}/{{ formatNumber(tab.total) }}</span
             >
           </FilterChip>
+          <FilterChip radio :pressed="chosen === WORLD_QUESTS" @toggle="chosen = WORLD_QUESTS">
+            {{ $t('collections.archive.tabs.worldQuests') }}
+            <span
+              v-if="quests"
+              class="tabular font-mono"
+              :class="
+                worldQuests.have >= worldQuests.total ? 'text-success-text' : 'text-text-muted'
+              "
+              >{{ formatNumber(worldQuests.have) }}/{{ formatNumber(worldQuests.total) }}</span
+            >
+            <span v-else class="tabular font-mono text-text-muted">{{
+              formatNumber(worldQuests.total)
+            }}</span>
+          </FilterChip>
         </div>
       </template>
-      <div class="flex flex-col gap-3 p-3 sm:p-5">
+      <div v-if="chosen === WORLD_QUESTS" class="p-3 sm:p-5">
+        <WorldQuestsList v-model:filter="filter" :catalog="catalog" :quests="quests" />
+      </div>
+      <div v-else class="flex flex-col gap-3 p-3 sm:p-5">
         <HaveFilter
           v-model="filter"
           :have="current.have - current.unknown"

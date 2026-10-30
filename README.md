@@ -217,7 +217,12 @@ gi_exploration's `domainsCleared`/`tribalChapters` are exploration parts
 `d`/`t`, and the new top-level `gi_teapot` / `gi_miliastra` are the
 `extras` section (kind 32, the first code past the delta flag's range;
 migration 0034; later top-level keys append a part there).
-`pre18ContentHash` keeps re-uploads no-ops. Deck and team names are the
+`pre18ContentHash` keeps re-uploads no-ops. Capture 1.16: gi_collections'
+`quests` (every parent quest touched: MainQuest ids `finished` and `active`)
+is collections2 part `q`; `pre19ContentHash` keeps re-uploads no-ops. The
+Archive's World Quests chip lists `@gdt/game-data`'s `worldQuests` (the
+wiki's list by region, from v7.1.29), done when any of a quest's ids is
+finished (`src/data/world-quests.ts`). Deck and team names are the
 player's text, stored as is; a part
 that fails its checks is dropped, never the upload. A file
 without them stores and hashes exactly as before

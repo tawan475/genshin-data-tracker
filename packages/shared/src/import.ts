@@ -111,6 +111,8 @@ export const GOOD_LIMITS = {
   furnishingSets: 5_000,
   companionRewards: 5_000,
   npcsMet: 20_000,
+  /** Parent quests touched, per list (a player near 100% had ~2,400 of 4,000 at 7.1). */
+  quests: 20_000,
   domainsCleared: 5_000,
   tribalChapters: 1_000,
   /** UTF-16 units of a deck or team name the player typed. */

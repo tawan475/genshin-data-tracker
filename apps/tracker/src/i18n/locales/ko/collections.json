@@ -61,8 +61,13 @@
       "books": "서적",
       "tutorials": "튜토리얼",
       "viewpoints": "시점",
-      "artifacts": "성유물"
-    }
+      "artifacts": "성유물",
+      "worldQuests": "월드 임무"
+    },
+    "region": "지역",
+    "otherRegion": "기타",
+    "inProgress": "진행 중",
+    "needCapture": "완료 표시에는 Teyvat.me Capture 1.16 이상이 필요합니다"
   },
   "defeats": {
     "kinds": "항목",

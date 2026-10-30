@@ -61,8 +61,13 @@
       "books": "หนังสือ",
       "tutorials": "แนะนำการเล่น",
       "viewpoints": "มุมมอง",
-      "artifacts": "อาร์ติแฟกต์"
-    }
+      "artifacts": "อาร์ติแฟกต์",
+      "worldQuests": "เควสต์โลก"
+    },
+    "region": "ภูมิภาค",
+    "otherRegion": "อื่น ๆ",
+    "inProgress": "กำลังดำเนินการ",
+    "needCapture": "เครื่องหมายสำเร็จต้องใช้ Teyvat.me Capture 1.16 ขึ้นไป"
   },
   "defeats": {
     "kinds": "รายการ",

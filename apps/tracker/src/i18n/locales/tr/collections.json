@@ -61,8 +61,13 @@
       "books": "Kitaplar",
       "tutorials": "Eğitimler",
       "viewpoints": "Seyir Yerleri",
-      "artifacts": "Yadigarlar"
-    }
+      "artifacts": "Yadigarlar",
+      "worldQuests": "Dünya Görevleri"
+    },
+    "region": "Bölge",
+    "otherRegion": "Diğer",
+    "inProgress": "Devam Ediyor",
+    "needCapture": "Tamamlandı işaretleri için Teyvat.me Capture 1.16 veya üstü gerekir"
   },
   "defeats": {
     "kinds": "Girdiler",

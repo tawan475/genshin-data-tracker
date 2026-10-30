@@ -61,8 +61,13 @@
       "books": "Libros",
       "tutorials": "Tutorial",
       "viewpoints": "Puntos de vista",
-      "artifacts": "Artefactos"
-    }
+      "artifacts": "Artefactos",
+      "worldQuests": "Misiones de mundo"
+    },
+    "region": "Región",
+    "otherRegion": "Otros",
+    "inProgress": "En curso",
+    "needCapture": "Las marcas de completado requieren Teyvat.me Capture 1.16 o posterior"
   },
   "defeats": {
     "kinds": "Entradas",

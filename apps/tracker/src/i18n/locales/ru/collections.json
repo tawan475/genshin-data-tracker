@@ -61,8 +61,13 @@
       "books": "Книги",
       "tutorials": "Обучение",
       "viewpoints": "Точки обзора",
-      "artifacts": "Артефакты"
-    }
+      "artifacts": "Артефакты",
+      "worldQuests": "Задания мира"
+    },
+    "region": "Регион",
+    "otherRegion": "Другое",
+    "inProgress": "В процессе",
+    "needCapture": "Отметки о выполнении требуют Teyvat.me Capture 1.16 или новее"
   },
   "defeats": {
     "kinds": "Записи",

@@ -863,6 +863,7 @@ const COLLECTION2_PARTS: readonly (readonly [string, TaggedPart])[] = [
   ['e', ascendingPart],
   ['o', ascendingPart],
   ['n', ascendingPart],
+  ['q', flaggedLists(['f', 'a'], ['list', 'list'])],
 ]
 
 const collections2Layout = taggedLayout('collections2', COLLECTION2_PARTS)

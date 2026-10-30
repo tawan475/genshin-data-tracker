@@ -190,7 +190,8 @@ export const TAB_TOPICS: Readonly<Record<CollectionTab, readonly CollectionTopic
   world: ['world', 'domains', 'npcs', 'natlan'],
   spincrystals: [],
   anecdotes: [],
-  archive: ['archive'],
+  // `world`: the World Quests' region names.
+  archive: ['archive', 'world'],
   handbook: ['handbook'],
   'living-beings': ['archive'],
   tcg: ['tcg'],

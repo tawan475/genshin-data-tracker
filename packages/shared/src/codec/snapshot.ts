@@ -202,6 +202,11 @@ export interface EncodedSnapshot extends ExtraSections {
    */
   pre18ContentHash: string
   /**
+   * The content hash a tracker from before Capture 1.16's quests gave this
+   * file (gi_collections' quests left out), so re-uploading it stays a no-op.
+   */
+  pre19ContentHash: string
+  /**
    * The content hash with the recipes left out of collections2 (equal to
    * `contentHash` without recipes): what a tracker from before Capture
    * 1.5.0's recipes stored such a file as, so re-uploading it stays a no-op.
@@ -432,21 +437,29 @@ export async function completeSnapshot(
    * that era and later ones added are left out of the sections they grew, and
    * the sections they added are absent.
    */
-  const asOf = async (era: 17 | 18) => {
-    const taskKeys = era === 17 ? [...TASKS_17, ...TASKS_18] : TASKS_18
-    const collectionKeys = era === 17 ? [...COLLECTIONS_17, ...COLLECTIONS_18] : COLLECTIONS_18
+  const asOf = async (era: 17 | 18 | 19) => {
+    const taskKeys = era === 17 ? [...TASKS_17, ...TASKS_18] : era === 18 ? TASKS_18 : []
+    const collectionKeys =
+      era === 17
+        ? [...COLLECTIONS_17, ...COLLECTIONS_18, ...COLLECTIONS_19]
+        : era === 18
+          ? [...COLLECTIONS_18, ...COLLECTIONS_19]
+          : COLLECTIONS_19
+    const tcgKeys = era === 19 ? [] : TCG_18
+    const explorationKeys = era === 19 ? [] : EXPLORATION_18
     const grewTasks = !!tasks && taskKeys.some((key) => tasks[key] !== undefined)
     const grewCollections =
       !!collections &&
       (collectionKeys.some((key) => collections[key] !== undefined) ||
-        (!!collections.tcg && TCG_18.some((key) => collections.tcg![key] !== undefined)))
+        (!!collections.tcg && tcgKeys.some((key) => collections.tcg![key] !== undefined)))
     const grewExploration =
-      !!exploration && EXPLORATION_18.some((key) => exploration[key] !== undefined)
-    const added = era === 17 ? sections.progress || sections.extras : sections.extras
+      !!exploration && explorationKeys.some((key) => exploration[key] !== undefined)
+    const added =
+      era === 17 ? sections.progress || sections.extras : era === 18 ? sections.extras : null
     if (!grewTasks && !grewCollections && !grewExploration && !added) return contentHash
     const olderCollections = (c: GiCollections) => {
       const out = withoutKeys(c, collectionKeys)
-      return out.tcg ? { ...out, tcg: withoutKeys(out.tcg, TCG_18) } : out
+      return out.tcg ? { ...out, tcg: withoutKeys(out.tcg, tcgKeys) } : out
     }
     return (
       await chain(
@@ -462,16 +475,17 @@ export async function completeSnapshot(
         grewExploration
           ? await optionalSection(
               'exploration',
-              nonEmpty(encodeExploration(withoutKeys(exploration!, EXPLORATION_18))),
+              nonEmpty(encodeExploration(withoutKeys(exploration!, explorationKeys))),
             )
           : sections.exploration,
         era === 17 ? null : sections.progress,
-        null,
+        era === 19 ? sections.extras : null,
       )
     ).content
   }
   const pre17ContentHash = await asOf(17)
   const pre18ContentHash = await asOf(18)
+  const pre19ContentHash = await asOf(19)
   return {
     ...sections,
     artifacts,
@@ -489,6 +503,7 @@ export async function completeSnapshot(
     preRecipesContentHash,
     pre17ContentHash,
     pre18ContentHash,
+    pre19ContentHash,
   }
 }
 
@@ -513,6 +528,8 @@ const COLLECTIONS_18 = [
   'npcsMet',
 ] as const satisfies readonly (keyof GiCollections)[]
 const TCG_18 = ['levels', 'bosses', 'tavern'] as const
+/** Capture 1.16's part of gi_collections (see pre19ContentHash). */
+const COLLECTIONS_19 = ['quests'] as const satisfies readonly (keyof GiCollections)[]
 const EXPLORATION_18 = [
   'domainsCleared',
   'tribalChapters',

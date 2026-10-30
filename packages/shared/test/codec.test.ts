@@ -2217,6 +2217,46 @@ describe("Teyvat.me Capture 1.8.0-1.11.0's keys", () => {
     }
   })
 
+  describe("Capture 1.16's quests", () => {
+    // A long-played account's scale: ~2,400 parent quests finished, ~250 open.
+    const quests = {
+      finished: Array.from({ length: 2_400 }, (_, i) => 300 + i * 31),
+      active: Array.from({ length: 250 }, (_, i) => 80_000 + i * 97),
+    }
+    const withQuests = { ...input, gi_collections: { ...input.gi_collections, quests } }
+
+    it('round-trips, small, and hashes as before for the trackers that dropped it', async () => {
+      const catalog = new Catalog()
+      const without = await roundTrip(input, catalog)
+      const { encoded, decoded } = await roundTrip(withQuests, catalog)
+      expect(decoded.gi_collections!.quests).toEqual(quests)
+      expect(encoded.contentHash).not.toBe(without.encoded.contentHash)
+      expect(encoded.pre19ContentHash).toBe(without.encoded.contentHash)
+      expect(encoded.pre18ContentHash).toBe(without.encoded.pre18ContentHash)
+      expect(encoded.pre17ContentHash).toBe(without.encoded.pre17ContentHash)
+      expect(without.encoded.pre19ContentHash).toBe(without.encoded.contentHash)
+      const part = encodeSectionBlob(
+        'collections2',
+        { q: { f: quests.finished, a: quests.active } },
+        false,
+        null,
+      )
+      expect(part.data.length).toBeLessThan(800)
+    })
+
+    it('keeps both lists or neither; a finished id is not open too', () => {
+      const read = (q: unknown) =>
+        normalizeGood({ ...input, gi_collections: { ...input.gi_collections, quests: q } })
+          .collections!.quests
+      expect(read({ finished: [5, 3] })).toEqual({ finished: [3, 5] })
+      expect(read({ finished: [3, 5], active: [5, 7] })).toEqual({ finished: [3, 5], active: [7] })
+      expect(read({ finished: [3, 5], active: [5] })).toEqual({ finished: [3, 5] })
+      expect(read({ finished: [3, 3] })).toBeUndefined()
+      expect(read({ finished: [3], active: [0] })).toBeUndefined()
+      expect(read({ active: [3] })).toBeUndefined()
+    })
+  })
+
   it('drops a bad part and keeps the rest', () => {
     const read = (patch: object) => normalizeGood({ ...input, ...patch })
     const c = (more: object) =>

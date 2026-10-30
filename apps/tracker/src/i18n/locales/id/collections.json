@@ -61,8 +61,13 @@
       "books": "Buku-Buku",
       "tutorials": "Tutorial",
       "viewpoints": "Sudut Pandang",
-      "artifacts": "Artefak"
-    }
+      "artifacts": "Artefak",
+      "worldQuests": "Quest Dunia"
+    },
+    "region": "Wilayah",
+    "otherRegion": "Lainnya",
+    "inProgress": "Sedang Berlangsung",
+    "needCapture": "Tanda selesai butuh Teyvat.me Capture 1.16 atau lebih baru"
   },
   "defeats": {
     "kinds": "Entri",
