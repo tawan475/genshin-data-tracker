@@ -66,8 +66,7 @@
     },
     "region": "地區",
     "otherRegion": "其他",
-    "inProgress": "進行中",
-    "needCapture": "完成標記需要 Teyvat.me Capture 1.17 或更新版本"
+    "inProgress": "進行中"
   },
   "defeats": {
     "kinds": "條目",

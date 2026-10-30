@@ -66,8 +66,7 @@
     },
     "region": "Region",
     "otherRegion": "Anderes",
-    "inProgress": "Im Gange",
-    "needCapture": "Erledigt-Markierungen brauchen Teyvat.me Capture 1.17 oder neuer"
+    "inProgress": "Im Gange"
   },
   "defeats": {
     "kinds": "Einträge",

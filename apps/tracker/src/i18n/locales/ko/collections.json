@@ -66,8 +66,7 @@
     },
     "region": "지역",
     "otherRegion": "기타",
-    "inProgress": "진행 중",
-    "needCapture": "완료 표시에는 Teyvat.me Capture 1.17 이상이 필요합니다"
+    "inProgress": "진행 중"
   },
   "defeats": {
     "kinds": "항목",

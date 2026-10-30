@@ -66,8 +66,7 @@
     },
     "region": "Regione",
     "otherRegion": "Altro",
-    "inProgress": "In corso",
-    "needCapture": "I segni di completamento richiedono Teyvat.me Capture 1.17 o successivo"
+    "inProgress": "In corso"
   },
   "defeats": {
     "kinds": "Voci",

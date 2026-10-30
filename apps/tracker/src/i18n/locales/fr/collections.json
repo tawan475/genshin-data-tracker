@@ -66,8 +66,7 @@
     },
     "region": "Région",
     "otherRegion": "Autre",
-    "inProgress": "En cours",
-    "needCapture": "Les marques de fin nécessitent Teyvat.me Capture 1.17 ou plus récent"
+    "inProgress": "En cours"
   },
   "defeats": {
     "kinds": "Entrées",

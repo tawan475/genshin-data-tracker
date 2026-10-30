@@ -66,8 +66,7 @@
     },
     "region": "Bölge",
     "otherRegion": "Diğer",
-    "inProgress": "Devam Ediyor",
-    "needCapture": "Tamamlandı işaretleri için Teyvat.me Capture 1.17 veya üstü gerekir"
+    "inProgress": "Devam Ediyor"
   },
   "defeats": {
     "kinds": "Girdiler",

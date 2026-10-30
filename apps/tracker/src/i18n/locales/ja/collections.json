@@ -66,8 +66,7 @@
     },
     "region": "地域",
     "otherRegion": "その他",
-    "inProgress": "進行中",
-    "needCapture": "完了の記録には Teyvat.me Capture 1.17 以降が必要です"
+    "inProgress": "進行中"
   },
   "defeats": {
     "kinds": "項目",

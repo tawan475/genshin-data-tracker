@@ -66,8 +66,7 @@
     },
     "region": "Region",
     "otherRegion": "Other",
-    "inProgress": "In Progress",
-    "needCapture": "Done marks need Teyvat.me Capture 1.17 or later"
+    "inProgress": "In Progress"
   },
   "defeats": {
     "kinds": "Entries",

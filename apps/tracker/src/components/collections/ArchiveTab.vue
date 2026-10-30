@@ -187,16 +187,12 @@ const shown = computed<GridEntry[]>(() =>
           <FilterChip radio :pressed="chosen === WORLD_QUESTS" @toggle="chosen = WORLD_QUESTS">
             {{ $t('collections.archive.tabs.worldQuests') }}
             <span
-              v-if="quests"
               class="tabular font-mono"
               :class="
                 worldQuests.have >= worldQuests.total ? 'text-success-text' : 'text-text-muted'
               "
               >{{ formatNumber(worldQuests.have) }}/{{ formatNumber(worldQuests.total) }}</span
             >
-            <span v-else class="tabular font-mono text-text-muted">{{
-              formatNumber(worldQuests.total)
-            }}</span>
           </FilterChip>
         </div>
       </template>
