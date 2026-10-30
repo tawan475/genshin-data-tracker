@@ -31,7 +31,7 @@ export interface LiveApplied {
   player: string[]
   /** `gi_tasks` parts the journal set (the resin clock, Capture 1.12.0). */
   tasks: string[]
-  /** `gi_wardrobe` parts the journal set (saved teams, Capture 1.18.0). */
+  /** `gi_wardrobe` parts the journal set (saved teams, Capture 1.17.1). */
   wardrobe: string[]
 }
 

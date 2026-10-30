@@ -21,7 +21,7 @@ import { teamMembers } from './team-card'
  * Nothing shows until a capture has them. Each team shares as a team card
  * (its members as the roster has them, its name on top); a team the roster
  * has nobody of can't. With live sync, a team edited or chosen in game since
- * that capture comes from the journal (`live`, Capture 1.18.0).
+ * that capture comes from the journal (`live`, Capture 1.17.1).
  */
 const props = defineProps<{
   roster: readonly CharacterView[]

@@ -183,7 +183,7 @@ describe('GOOD-X delta contract', () => {
     ).toEqual({ realm: { value: 300, limit: 2400 } })
   })
 
-  it('sets the saved teams whole and the team in use (Capture 1.18.0)', () => {
+  it('sets the saved teams whole and the team in use (Capture 1.17.1)', () => {
     const gliders = { owned: [140_001], worn: {} }
     const withTeams: LiveGood = {
       ...base,

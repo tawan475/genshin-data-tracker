@@ -241,7 +241,7 @@ watch(
   { immediate: true },
 )
 const player = computed(() => inventory.data.value?.good.gi_player ?? null)
-// Teams edited or chosen in game since the snapshot (live sync, Capture 1.18.0).
+// Teams edited or chosen in game since the snapshot (live sync, Capture 1.17.1).
 const liveTeams = computed(() => {
   const now = inventory.data.value
   const parts = now?.live?.wardrobe ?? []

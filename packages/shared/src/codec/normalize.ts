@@ -1082,7 +1082,7 @@ function toWardrobe(raw: unknown): GiWardrobe | null {
 }
 
 /**
- * One part of `gi_wardrobe` as live sync sends it (Capture 1.18.0: the saved
+ * One part of `gi_wardrobe` as live sync sends it (Capture 1.17.1: the saved
  * teams whole, the team in use), or undefined when a snapshot's check would
  * drop it.
  */

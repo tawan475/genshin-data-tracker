@@ -24,7 +24,7 @@
  * | `gi_anecdotes.unlockedAreas\|reward\|wish` | that value; `del` |
  * | `gi_tasks.resin` | `{value, nextAt}`: the resin clock (Capture 1.12.0); `del` |
  * | `gi_tasks.<part>` | any other part of `gi_tasks`, whole, checked as a snapshot's (Capture 1.16.0); `del` |
- * | `gi_wardrobe.teams\|currentTeam` | the saved teams whole / the slot in use, checked as a snapshot's (Capture 1.18.0); `del` |
+ * | `gi_wardrobe.teams\|currentTeam` | the saved teams whole / the slot in use, checked as a snapshot's (Capture 1.17.1); `del` |
  *
  * Items (weapons, artifacts) are named by the game's guid, `gi_guid` on the
  * item; an item without one never appears in a journal. Unknown paths are
@@ -124,7 +124,7 @@ export interface LiveGood extends Omit<Good, 'artifacts' | 'weapons'> {
 const CHARACTER_FIELDS = new Set(['level', 'ascension', 'constellation'])
 const TALENTS = new Set(['auto', 'skill', 'burst'])
 const ANECDOTE_FIELDS = new Set(['unlockedAreas', 'reward', 'wish'])
-/** The parts of `gi_wardrobe` a journal may set (Capture 1.18.0). */
+/** The parts of `gi_wardrobe` a journal may set (Capture 1.17.1). */
 const WARDROBE_LIVE = new Set(['teams', 'currentTeam'])
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -302,7 +302,7 @@ export function applyDelta(good: LiveGood, changes: readonly DeltaChange[]): Liv
         break
       }
       case 'gi_wardrobe': {
-        // The parts that move within a session (Capture 1.18.0), each whole.
+        // The parts that move within a session (Capture 1.17.1), each whole.
         if (parts.length !== 2 || !WARDROBE_LIVE.has(name)) break
         if (op === 'del') {
           if (next.gi_wardrobe && Object.hasOwn(next.gi_wardrobe, name)) {
