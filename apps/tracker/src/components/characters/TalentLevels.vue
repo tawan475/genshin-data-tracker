@@ -12,7 +12,8 @@ import { useCrownIcon } from './use-boosts'
  * Attack, skill and burst as three tiles: the talent's icon and name, its
  * level as the game shows it and, raised by C3 / C5, the book level before
  * it ("10 → 13", Enka's way, in cyan). A crowned talent (base 10) is
- * gold with the game's Crown of Insight, whether raised or not.
+ * gold with the game's Crown of Insight, whether raised or not; base 9 has
+ * a silver border.
  */
 const props = defineProps<{
   characterKey: string
@@ -37,7 +38,13 @@ const tone = computed(() =>
       v-for="t in levels"
       :key="t.key"
       class="flex min-w-0 flex-col gap-1 rounded-xl border bg-surface-raised/85 px-2 py-1.5 sm:px-2.5 sm:py-2"
-      :class="t.crowned ? 'border-talent-crown/60' : 'border-border-default'"
+      :class="
+        t.crowned
+          ? 'border-talent-crown/60'
+          : t.silver
+            ? 'border-talent-silver'
+            : 'border-border-default'
+      "
       :title="talentTitle(t)"
     >
       <dt class="flex min-w-0 items-center gap-1.5 text-xs text-text-secondary">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import { BookOpen, Wrench } from 'lucide-vue-next'
 import ConstellationStars from '@/components/ui/ConstellationStars.vue'
@@ -12,8 +12,11 @@ import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
+import type { GiCapture } from '@gdt/shared'
 import type { AccountRef } from '@/data/account-data'
 import { buildPanel, buildRv, talentLevels } from '@/data/character-build'
+import type { BuildIndex } from '@/data/character-builds'
+import { gearDiff } from '@/data/character-gear'
 import { guidesFor } from '@/data/character-guides'
 import {
   ELEMENT_LABELS,
@@ -36,6 +39,7 @@ import GuidesDialog from './GuidesDialog.vue'
 import GuidesSection from './GuidesSection.vue'
 import GameStars from './GameStars.vue'
 import NamecardBackdrop from './NamecardBackdrop.vue'
+import PastBuildStrip from './PastBuildStrip.vue'
 import SetBonuses from './SetBonuses.vue'
 import ShareCard from './ShareCard.vue'
 import SplashArt from './SplashArt.vue'
@@ -53,15 +57,26 @@ import { useConstellationBoosts } from './use-boosts'
  * constellations, level, talents with C3/C5, weapon, the in-game stats,
  * sets, the five pieces). The export draws its own copy of the card
  * (CharacterModal, on a canvas: share-card-canvas), whatever this shows.
+ * History's View shows a past capture's build in place of now (`past`),
+ * with a strip on top to step through the history or come back.
  */
 const props = defineProps<{
+  /** The build on screen: now, or the past capture's while viewing one. */
   character: CharacterView
+  /** The build now (what a past one is compared with). */
+  now: CharacterView
   account: AccountRef
   showcase: boolean
   cardTheme: 'light' | 'dark'
   owner: CardOwner
   takenAt: number | null
+  /** Every capture's builds; null while loading. */
+  builds: BuildIndex | null
+  /** The past capture on screen, null for now. */
+  viewing: number | null
+  past: { at: number; capture: GiCapture | null } | null
 }>()
+const emit = defineEmits<{ view: [snapshotId: number | null] }>()
 
 const frame = useTemplateRef<HTMLElement>('frame')
 const { width: frameWidth } = useElementSize(frame)
@@ -94,6 +109,28 @@ const history = useResource(
   (account) => loadCharacterHistory(account),
 )
 const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
+const days = computed(() => props.builds?.days(c.value.key) ?? null)
+
+// Older / Newer step through every viewable entry of the History, oldest first.
+const points = computed(() => {
+  const at = new Map<number, number>()
+  for (const change of changes.value) at.set(change.snapshotId, change.at)
+  for (const day of days.value ?? []) for (const step of day.steps) at.set(step.snapshotId, step.at)
+  return [...at].sort((a, b) => a[1] - b[1]).map(([id]) => id)
+})
+const position = computed(() => (props.viewing === null ? -1 : points.value.indexOf(props.viewing)))
+const diff = computed(() => (props.past ? gearDiff(c.value, props.now) : []))
+
+const root = useTemplateRef<HTMLElement>('root')
+function view(snapshotId: number | null) {
+  emit('view', snapshotId)
+  // The build is at the top: bring it into view from the History below.
+  if (snapshotId !== null) void nextTick(() => root.value?.scrollIntoView({ block: 'start' }))
+}
+function step(delta: -1 | 1) {
+  const next = points.value[position.value + delta]
+  view(next ?? null)
+}
 
 // Guides: the footer button and the Videos chip open the dialog.
 const guides = computed(() => guidesFor(c.value.key))
@@ -105,7 +142,18 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-col gap-5">
+  <div ref="root" class="flex scroll-mt-4 flex-col gap-5">
+    <PastBuildStrip
+      v-if="past"
+      :at="past.at"
+      :capture="past.capture"
+      :diff="diff"
+      :older="position > 0"
+      :newer="position >= 0"
+      @older="step(-1)"
+      @newer="step(1)"
+      @now="view(null)"
+    />
     <template v-if="showcase">
       <div
         ref="frame"
@@ -123,6 +171,7 @@ watch(
             :theme="cardTheme"
             :owner="owner"
             :taken-at="takenAt"
+            :past="past !== null"
           />
         </div>
       </div>
@@ -292,7 +341,15 @@ watch(
       <p v-else-if="changes.length === 0" class="text-sm text-text-muted">
         {{ $t('characters.detail.none') }}
       </p>
-      <CharacterTimeline v-else :changes="changes" :reset-key="c.key" />
+      <CharacterTimeline
+        v-else
+        :changes="changes"
+        :days="days"
+        :reset-key="c.key"
+        :viewing="viewing"
+        :piece="builds ? builds.piece : null"
+        @view="view"
+      />
     </section>
 
     <GuidesDialog

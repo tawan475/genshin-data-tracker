@@ -80,6 +80,33 @@
     "less": "閉じる",
     "all": "すべて（{n}）"
   },
+  "builds": {
+    "filterLabel": "表示",
+    "filter": {
+      "all": "すべて",
+      "progression": "育成",
+      "gear": "装備"
+    },
+    "sameEnd": "一日の終わりに元へ戻った",
+    "count": "この日に記録された装備 {n} 件",
+    "view": "見る",
+    "viewTitle": "この記録時の装備を表示",
+    "viewing": "表示中",
+    "buildOf": "{date} の装備",
+    "differs": "現在と違う：",
+    "sameAsNow": "現在と同じ装備",
+    "older": "古い",
+    "newer": "新しい",
+    "backToNow": "現在に戻る",
+    "reason": {
+      "login": "ログイン",
+      "logout": "ログアウト",
+      "capture": "記録"
+    },
+    "added": "{slot}を装備",
+    "removed": "{slot}を外した",
+    "noWeapon": "武器なし"
+  },
   "talentShort": {
     "auto": "通常",
     "skill": "スキル",

@@ -80,6 +80,33 @@
     "less": "收起",
     "all": "全部 {n}"
   },
+  "builds": {
+    "filterLabel": "显示",
+    "filter": {
+      "all": "全部",
+      "progression": "养成",
+      "gear": "装备"
+    },
+    "sameEnd": "当天结束时与开始相同",
+    "count": "当天记录了 {n} 套配装",
+    "view": "查看",
+    "viewTitle": "查看这次记录时的配装",
+    "viewing": "正在查看",
+    "buildOf": "{date} 的配装",
+    "differs": "与现在不同：",
+    "sameAsNow": "装备与现在相同",
+    "older": "更早",
+    "newer": "更晚",
+    "backToNow": "回到现在",
+    "reason": {
+      "login": "登录",
+      "logout": "退出",
+      "capture": "记录"
+    },
+    "added": "已装备{slot}",
+    "removed": "已卸下{slot}",
+    "noWeapon": "无武器"
+  },
   "talentShort": {
     "auto": "普攻",
     "skill": "战技",

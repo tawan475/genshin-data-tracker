@@ -80,6 +80,33 @@
     "less": "접기",
     "all": "전체 {n}개"
   },
+  "builds": {
+    "filterLabel": "표시",
+    "filter": {
+      "all": "전체",
+      "progression": "육성",
+      "gear": "장비"
+    },
+    "sameEnd": "시작과 같은 상태로 끝남",
+    "count": "이날 기록된 빌드 {n}개",
+    "view": "보기",
+    "viewTitle": "이 기록 당시의 빌드 보기",
+    "viewing": "보는 중",
+    "buildOf": "{date}의 빌드",
+    "differs": "지금과 다름:",
+    "sameAsNow": "지금과 같은 장비",
+    "older": "이전",
+    "newer": "이후",
+    "backToNow": "지금으로 돌아가기",
+    "reason": {
+      "login": "로그인",
+      "logout": "로그아웃",
+      "capture": "기록"
+    },
+    "added": "{slot} 장착",
+    "removed": "{slot} 해제",
+    "noWeapon": "무기 없음"
+  },
   "talentShort": {
     "auto": "일반",
     "skill": "스킬",

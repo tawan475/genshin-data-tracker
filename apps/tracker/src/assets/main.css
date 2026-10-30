@@ -72,6 +72,8 @@
   /* Talent levels: raised by C3/C5 (Enka's cyan), crowned (gold). */
   --talent-boost: #0891b2;
   --talent-crown: #b45309;
+  /* Book level 9, one Crown short: the silver ring (3.3:1 on white). */
+  --talent-silver: #7d8898;
   --element-pyro: #ea580c;
   --element-hydro: #0284c7;
   --element-anemo: #0d9488;
@@ -146,6 +148,7 @@
   --rarity-1: #cbd5e1;
   --talent-boost: #67e8f9;
   --talent-crown: #ffd36b;
+  --talent-silver: #c5ccd7;
   --element-pyro: #fb923c;
   --element-hydro: #38bdf8;
   --element-anemo: #2dd4bf;
@@ -253,6 +256,7 @@
   --color-game-star-edge: var(--game-star-edge);
   --color-talent-boost: var(--talent-boost);
   --color-talent-crown: var(--talent-crown);
+  --color-talent-silver: var(--talent-silver);
   --color-pyro: var(--element-pyro);
   --color-hydro: var(--element-hydro);
   --color-anemo: var(--element-anemo);

@@ -80,6 +80,33 @@
     "less": "Thu gọn",
     "all": "Tất cả {n}"
   },
+  "builds": {
+    "filterLabel": "Hiển thị",
+    "filter": {
+      "all": "Tất cả",
+      "progression": "Bồi dưỡng",
+      "gear": "Trang bị"
+    },
+    "sameEnd": "Cuối ngày như lúc đầu",
+    "count": "{n} bộ trang bị được ghi trong ngày",
+    "view": "Xem",
+    "viewTitle": "Xem bộ trang bị lúc ghi lại này",
+    "viewing": "Đang xem",
+    "buildOf": "Bộ trang bị ngày {date}",
+    "differs": "Khác hiện tại:",
+    "sameAsNow": "Trang bị giống hiện tại",
+    "older": "Cũ hơn",
+    "newer": "Mới hơn",
+    "backToNow": "Về hiện tại",
+    "reason": {
+      "login": "Đăng nhập",
+      "logout": "Đăng xuất",
+      "capture": "Ghi lại"
+    },
+    "added": "Đã trang bị {slot}",
+    "removed": "Đã tháo {slot}",
+    "noWeapon": "Không có vũ khí"
+  },
   "talentShort": {
     "auto": "Tấn Công",
     "skill": "Kỹ Năng",

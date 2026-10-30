@@ -80,6 +80,33 @@
     "less": "Daha az",
     "all": "Tümü ({n})"
   },
+  "builds": {
+    "filterLabel": "Göster",
+    "filter": {
+      "all": "Tümü",
+      "progression": "Gelişim",
+      "gear": "Ekipman"
+    },
+    "sameEnd": "Başladığı gibi bitti",
+    "count": "Bu gün {n} yapı kaydedildi",
+    "view": "Görüntüle",
+    "viewTitle": "Bu kayıttaki yapıyı göster",
+    "viewing": "Görüntüleniyor",
+    "buildOf": "{date} yapısı",
+    "differs": "Şimdikinden farklı:",
+    "sameAsNow": "Şimdiki ile aynı ekipman",
+    "older": "Daha eski",
+    "newer": "Daha yeni",
+    "backToNow": "Şimdiye dön",
+    "reason": {
+      "login": "Giriş",
+      "logout": "Çıkış",
+      "capture": "Kayıt"
+    },
+    "added": "{slot} kuşanıldı",
+    "removed": "{slot} çıkarıldı",
+    "noWeapon": "Silah yok"
+  },
   "talentShort": {
     "auto": "Saldırı",
     "skill": "Beceri",

@@ -50,6 +50,7 @@ const TOKENS = [
   'element-geo',
   'element-physical',
   'talent-crown',
+  'talent-silver',
   'talent-boost',
   'game-star',
   'game-star-edge',

@@ -223,7 +223,9 @@ function findGaps(
 }
 
 /** Joins characters with what they wear. Run once per inventory. */
-export function buildRoster(good: Good): Roster {
+export function buildRoster(
+  good: Pick<Good, 'characters' | 'weapons' | 'artifacts' | 'gi_characters'>,
+): Roster {
   // EXP is stored only when above 0, so a snapshot with any knows the rest are 0.
   const knowsExp = Object.values(good.gi_characters ?? {}).some(
     (e) => (e.exp ?? 0) > 0 || (e.friendshipExp ?? 0) > 0,

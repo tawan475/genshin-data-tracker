@@ -62,6 +62,8 @@ const RARITY_TEXT: Record<CardTheme, Record<number, string>> = {
 }
 /** The C3/C5 talent boost on the tiles' dark chips (the dark theme's token). */
 const BOOST = '#67e8f9'
+/** A base-9 talent's silver ring on those chips (the dark theme's token). */
+const SILVER = '#c5ccd7'
 const GOLD = { from: '#fcde54', to: '#f0cc4e', text: '#8a4e24' }
 
 // ------------------------------------------------------------------ images
@@ -141,6 +143,8 @@ function chip(
     color: string
     font: string
     shadow?: [string, number, number]
+    /** An inner ring: colour and width. */
+    ring?: [string, number]
   },
 ): number {
   ctx.font = style.font
@@ -156,6 +160,13 @@ function chip(
   roundRect(ctx, x, box.y, w, box.h, box.r)
   ctx.fill()
   ctx.restore()
+  if (style.ring) {
+    const [color, width] = style.ring
+    ctx.strokeStyle = color
+    ctx.lineWidth = width
+    roundRect(ctx, x + width / 2, box.y + width / 2, w - width, box.h - width, box.r - width / 2)
+    ctx.stroke()
+  }
   ctx.fillStyle = style.color
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -532,6 +543,7 @@ function drawTile(
             color: t.from ? BOOST : '#ffffff',
             font: font(700, 12 * CQW, family),
             shadow: ['rgba(0,0,0,0.35)', 1.5 * CQW, 0.5 * CQW],
+            ...(t.silver ? { ring: [SILVER, 1.5 * CQW] as [string, number] } : {}),
           },
     )
     tx += widths[i]! + gap

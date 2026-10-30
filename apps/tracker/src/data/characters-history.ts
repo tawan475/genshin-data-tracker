@@ -20,6 +20,8 @@ export interface ChangeLine {
 export interface CharacterChange {
   /** takenAt of the snapshot that first showed this state. */
   at: number
+  /** That snapshot (History's View opens the build it had). */
+  snapshotId: number
   /** first: in the oldest snapshot; obtained: appeared later; changed: progressed. */
   kind: 'first' | 'obtained' | 'changed'
   /** "Lv 90 · A6 · C2 · 9 / 9 / 9" after this change. */
@@ -92,6 +94,7 @@ export function buildCharacterHistory(bundle: DecodedBundle): CharacterHistory {
       if (!before) {
         change = {
           at: snapshot.takenAt,
+          snapshotId: snapshot.id,
           kind: index === 0 ? 'first' : 'obtained',
           state: stateText(character),
           lines: [],
@@ -99,7 +102,13 @@ export function buildCharacterHistory(bundle: DecodedBundle): CharacterHistory {
       } else {
         const lines = describe(before, character)
         if (lines.length > 0) {
-          change = { at: snapshot.takenAt, kind: 'changed', state: stateText(character), lines }
+          change = {
+            at: snapshot.takenAt,
+            snapshotId: snapshot.id,
+            kind: 'changed',
+            state: stateText(character),
+            lines,
+          }
         }
       }
       if (!change) continue

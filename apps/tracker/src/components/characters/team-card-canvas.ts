@@ -579,6 +579,7 @@ class TeamPainter extends CardPaint {
       const py = top + TALENT + 6
       p.fill(px, py, pillW, 30, 15, this.v('--card-pill'))
       if (talent.crowned) p.insetRing(px, py, pillW, 30, 15, 2, this.tokens['talent-crown'])
+      else if (talent.silver) p.insetRing(px, py, pillW, 30, 15, 2, this.tokens['talent-silver'])
       let tx = px + 12
       if (crown) {
         p.image(crown, px + 7, py + 4, 22, 22)

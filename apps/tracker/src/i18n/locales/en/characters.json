@@ -80,6 +80,33 @@
     "less": "Less",
     "all": "All {n}"
   },
+  "builds": {
+    "filterLabel": "Show",
+    "filter": {
+      "all": "All",
+      "progression": "Progression",
+      "gear": "Gear"
+    },
+    "sameEnd": "Ended where it started",
+    "count": "{n} builds captured this day",
+    "view": "View",
+    "viewTitle": "Show the build this capture had",
+    "viewing": "Viewing",
+    "buildOf": "Build of {date}",
+    "differs": "Differs from now:",
+    "sameAsNow": "Same gear as now",
+    "older": "Older",
+    "newer": "Newer",
+    "backToNow": "Back to now",
+    "reason": {
+      "login": "Login",
+      "logout": "Logout",
+      "capture": "Capture"
+    },
+    "added": "{slot} equipped",
+    "removed": "{slot} removed",
+    "noWeapon": "No weapon"
+  },
   "talentShort": {
     "auto": "Attack",
     "skill": "Skill",

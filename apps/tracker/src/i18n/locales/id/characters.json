@@ -80,6 +80,33 @@
     "less": "Lebih sedikit",
     "all": "Semua {n}"
   },
+  "builds": {
+    "filterLabel": "Tampilkan",
+    "filter": {
+      "all": "Semua",
+      "progression": "Perkembangan",
+      "gear": "Perlengkapan"
+    },
+    "sameEnd": "Berakhir seperti awal",
+    "count": "{n} build tercatat hari ini",
+    "view": "Lihat",
+    "viewTitle": "Lihat build saat tangkapan ini",
+    "viewing": "Sedang dilihat",
+    "buildOf": "Build {date}",
+    "differs": "Berbeda dari sekarang:",
+    "sameAsNow": "Perlengkapan sama dengan sekarang",
+    "older": "Lebih lama",
+    "newer": "Lebih baru",
+    "backToNow": "Kembali ke sekarang",
+    "reason": {
+      "login": "Masuk",
+      "logout": "Keluar",
+      "capture": "Tangkapan"
+    },
+    "added": "{slot} dipasang",
+    "removed": "{slot} dilepas",
+    "noWeapon": "Tanpa senjata"
+  },
   "talentShort": {
     "auto": "Serangan",
     "skill": "Skill",

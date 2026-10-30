@@ -80,6 +80,33 @@
     "less": "Menos",
     "all": "Los {n}"
   },
+  "builds": {
+    "filterLabel": "Mostrar",
+    "filter": {
+      "all": "Todo",
+      "progression": "Progreso",
+      "gear": "Equipo"
+    },
+    "sameEnd": "Terminó como empezó",
+    "count": "{n} builds registradas este día",
+    "view": "Ver",
+    "viewTitle": "Ver la build de esta captura",
+    "viewing": "Viendo",
+    "buildOf": "Build del {date}",
+    "differs": "Distinto de ahora:",
+    "sameAsNow": "Mismo equipo que ahora",
+    "older": "Anterior",
+    "newer": "Posterior",
+    "backToNow": "Volver a ahora",
+    "reason": {
+      "login": "Inicio de sesión",
+      "logout": "Cierre de sesión",
+      "capture": "Captura"
+    },
+    "added": "{slot} equipado",
+    "removed": "{slot} quitado",
+    "noWeapon": "Sin arma"
+  },
   "talentShort": {
     "auto": "Ataque",
     "skill": "Habilidad",

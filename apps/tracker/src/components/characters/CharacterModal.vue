@@ -6,6 +6,8 @@ import type { AccountResponse } from '@gdt/shared'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiModal from '@/components/ui/UiModal.vue'
 import { buildPanel, shareUid, talentLevels } from '@/data/character-build'
+import { loadBuildIndex } from '@/data/character-builds'
+import { useResource } from '@/data/use-resource'
 import { useFavoriteCharacters } from '@/data/favorite-characters'
 import type { CharacterView } from '@/data/characters'
 import { canvasPng } from '@/lib/card-canvas'
@@ -33,7 +35,8 @@ import { useConstellationBoosts, useCrownIcon } from './use-boosts'
  * (share-card-canvas), the same at any window size, zoom or aspect ratio,
  * whatever the details show. Options are remembered on this device; the
  * UID is off until asked for (it's personal) and falls back to the newest
- * capture's when the account has none.
+ * capture's when the account has none. History's View swaps in a past
+ * capture's build (`viewing`) until Back to now or another character.
  */
 const props = defineProps<{
   character: CharacterView | null
@@ -66,14 +69,37 @@ watch([theme, showName, showUid], () =>
   writeJson('share-card', { theme: theme.value, name: showName.value, uid: showUid.value }),
 )
 
-const c = computed(() => props.character)
+// Time travel: the snapshot whose build is on screen (null: now).
+const viewing = ref<number | null>(null)
+watch(
+  () => props.character?.key,
+  () => (viewing.value = null),
+)
+const builds = useResource(
+  () => (props.character ? props.account : null),
+  (account) => (account ? loadBuildIndex(account) : Promise.resolve(null)),
+)
+const past = computed(() => {
+  const index = builds.data.value
+  const key = props.character?.key
+  if (viewing.value === null || !index || !key) return null
+  const character = index.character(viewing.value, key)
+  const capture = index.capture(viewing.value)
+  return character && capture ? { character, ...capture } : null
+})
+// A capture that went away (deleted, or a new data version without it): back to now.
+watch(past, (value) => {
+  if (!value && viewing.value !== null && builds.data.value) viewing.value = null
+})
+
+const c = computed(() => past.value?.character ?? props.character)
 const owner = computed<CardOwner>(() => ({
   name: showName.value ? props.account.name : null,
   uid: showUid.value ? shareUid(props.account.uid, props.playerUid) : null,
   // The AR belongs with the name: hidden when the name is.
   ar: showName.value ? props.ar : null,
 }))
-const takenAt = computed(() => props.account.latest?.takenAt ?? null)
+const takenAt = computed(() => past.value?.at ?? props.account.latest?.takenAt ?? null)
 const boosts = useConstellationBoosts(() => c.value?.key ?? '')
 const panel = computed(() => (c.value ? buildPanel(c.value) : null))
 const talents = computed(() =>
@@ -98,6 +124,7 @@ const exporter = useCardExport({
         theme: theme.value,
         owner: owner.value,
         takenAt: takenAt.value,
+        past: past.value !== null,
         crown: crown.value,
         levelBar: expShare(
           character.exp,
@@ -117,12 +144,21 @@ const exporter = useCardExport({
     c.value,
     theme.value,
     owner.value,
+    takenAt.value,
     boosts.value,
     locale.value,
     crown.value,
     expNeed.value,
   ],
-  filename: () => `${c.value?.key ?? 'character'}-teyvat-me.png`,
+  filename: () => {
+    const key = c.value?.key ?? 'character'
+    if (!past.value) return `${key}-teyvat-me.png`
+    const d = new Date(past.value.at)
+    const day = [d.getFullYear(), d.getMonth() + 1, d.getDate()]
+      .map((n) => String(n).padStart(2, '0'))
+      .join('-')
+    return `${key}-${day}-teyvat-me.png`
+  },
   title: () => c.value?.name ?? t('share.export.buildTitle'),
   pngLabel: () => t('share.export.downloadSized', { size: '1920 × 1080' }),
 })
@@ -171,13 +207,18 @@ const exporter = useCardExport({
     </template>
 
     <CharacterDetail
-      v-if="character"
-      :character="character"
+      v-if="character && c"
+      :character="c"
+      :now="character"
       :account="account"
       :showcase="showcase"
       :card-theme="theme"
       :owner="owner"
       :taken-at="takenAt"
+      :builds="builds.data.value ?? null"
+      :viewing="past ? viewing : null"
+      :past="past ? { at: past.at, capture: past.capture } : null"
+      @view="(id) => (viewing = id)"
     />
   </UiModal>
 </template>

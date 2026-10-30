@@ -85,6 +85,8 @@ export interface CardDrawing {
   owner: CardOwner
   /** When the capture was taken (epoch ms). */
   takenAt: number | null
+  /** A past capture's build (History's View): the date reads "Build of …". */
+  past?: boolean
   /** The Crown of Insight's icon ('' while the planner data loads). */
   crown: string
   /** The bars under the level and friendship (share-card-model expShare). */
@@ -466,6 +468,7 @@ class CardPainter extends CardPaint {
       const py = top + 112 + 10
       p.fill(px, py, pillW, 40, 20, this.v('--card-pill'))
       if (talent.crowned) p.insetRing(px, py, pillW, 40, 20, 2, this.tokens['talent-crown'])
+      else if (talent.silver) p.insetRing(px, py, pillW, 40, 20, 2, this.tokens['talent-silver'])
       let tx = px + 14
       if (crown) {
         p.image(crown, px + 8, py + 5, 30, 30)
@@ -482,7 +485,8 @@ class CardPainter extends CardPaint {
 
     // The owner, the capture date and the site.
     const owner = ownerParts(this.input.owner)
-    const date = this.input.takenAt ? formatDate(this.input.takenAt) : null
+    const taken = this.input.takenAt ? formatDate(this.input.takenAt) : null
+    const date = taken && this.input.past ? t('characters.builds.buildOf', { date: taken }) : taken
     const boxTop = top + 162 + 22
     const dotW = this.textWidth('·', 22, 400)
     const ownerW = owner.reduce(

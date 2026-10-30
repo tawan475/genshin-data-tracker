@@ -80,6 +80,33 @@
     "less": "ย่อ",
     "all": "ทั้งหมด {n}"
   },
+  "builds": {
+    "filterLabel": "แสดง",
+    "filter": {
+      "all": "ทั้งหมด",
+      "progression": "การพัฒนา",
+      "gear": "อุปกรณ์"
+    },
+    "sameEnd": "จบวันเหมือนตอนเริ่ม",
+    "count": "บันทึก {n} บิลด์ในวันนี้",
+    "view": "ดู",
+    "viewTitle": "ดูบิลด์ ณ การบันทึกนี้",
+    "viewing": "กำลังดู",
+    "buildOf": "บิลด์วันที่ {date}",
+    "differs": "ต่างจากตอนนี้:",
+    "sameAsNow": "อุปกรณ์เหมือนตอนนี้",
+    "older": "เก่ากว่า",
+    "newer": "ใหม่กว่า",
+    "backToNow": "กลับสู่ปัจจุบัน",
+    "reason": {
+      "login": "เข้าสู่ระบบ",
+      "logout": "ออกจากระบบ",
+      "capture": "บันทึก"
+    },
+    "added": "สวม{slot}",
+    "removed": "ถอด{slot}",
+    "noWeapon": "ไม่มีอาวุธ"
+  },
   "talentShort": {
     "auto": "โจมตี",
     "skill": "สกิล",

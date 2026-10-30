@@ -204,6 +204,8 @@ export interface TalentLevel {
   from: 3 | 5 | null
   /** A Crown of Insight spent: base level 10. */
   crowned: boolean
+  /** Base level 9, one Crown short: the silver ring (the base decides, like `crowned`). */
+  silver: boolean
 }
 
 /**
@@ -225,7 +227,14 @@ export function talentLevels(
         : boosts?.c5 === key && constellation >= 5
           ? 5
           : null
-    return { key, base, level: base + (from ? 3 : 0), from, crowned: base >= 10 }
+    return {
+      key,
+      base,
+      level: base + (from ? 3 : 0),
+      from,
+      crowned: base >= 10,
+      silver: base === 9,
+    }
   })
 }
 

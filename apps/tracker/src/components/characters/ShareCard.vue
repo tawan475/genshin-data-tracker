@@ -79,6 +79,8 @@ const props = defineProps<{
   owner: CardOwner
   /** When the capture was taken (epoch ms). */
   takenAt: number | null
+  /** A past capture's build (History's View): the date reads "Build of …". */
+  past?: boolean
 }>()
 
 /** Tailwind's rem-based spacing pinned to 4px, so stray utilities don't follow the page's root size. */
@@ -376,7 +378,13 @@ const ownerLine = computed(() => ownerParts(props.owner))
               <ElementDisc :src="glyphs[t.key]" :element="c.element" :px="112" :glyph="90" />
               <span
                 class="flex h-[40px] items-center gap-[6px] rounded-full bg-(--card-pill) px-[14px]"
-                :class="t.crowned ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]' : ''"
+                :class="
+                  t.crowned
+                    ? 'shadow-[inset_0_0_0_2px_var(--talent-crown)]'
+                    : t.silver
+                      ? 'shadow-[inset_0_0_0_2px_var(--talent-silver)]'
+                      : ''
+                "
               >
                 <FadeImage
                   v-if="t.crowned"
@@ -402,7 +410,11 @@ const ownerLine = computed(() => ownerParts(props.owner))
             </p>
             <p class="flex items-center gap-[10px] text-[16px] whitespace-nowrap opacity-80">
               <template v-if="takenAt">
-                <span>{{ formatDate(takenAt) }}</span>
+                <span>{{
+                  past
+                    ? $t('characters.builds.buildOf', { date: formatDate(takenAt) })
+                    : formatDate(takenAt)
+                }}</span>
                 <span class="opacity-60">·</span>
               </template>
               <span>teyvat.me</span>

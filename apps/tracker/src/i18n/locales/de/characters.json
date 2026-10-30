@@ -80,6 +80,33 @@
     "less": "Weniger",
     "all": "Alle {n}"
   },
+  "builds": {
+    "filterLabel": "Anzeigen",
+    "filter": {
+      "all": "Alle",
+      "progression": "Fortschritt",
+      "gear": "Ausrüstung"
+    },
+    "sameEnd": "Endete wie begonnen",
+    "count": "{n} Builds an diesem Tag erfasst",
+    "view": "Ansehen",
+    "viewTitle": "Build dieser Erfassung anzeigen",
+    "viewing": "Angezeigt",
+    "buildOf": "Build vom {date}",
+    "differs": "Anders als jetzt:",
+    "sameAsNow": "Gleiche Ausrüstung wie jetzt",
+    "older": "Älter",
+    "newer": "Neuer",
+    "backToNow": "Zurück zu jetzt",
+    "reason": {
+      "login": "Anmeldung",
+      "logout": "Abmeldung",
+      "capture": "Erfassung"
+    },
+    "added": "{slot} angelegt",
+    "removed": "{slot} abgelegt",
+    "noWeapon": "Keine Waffe"
+  },
   "talentShort": {
     "auto": "Angriff",
     "skill": "Fähigkeit",
