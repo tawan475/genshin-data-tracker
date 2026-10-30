@@ -565,7 +565,10 @@
       "arRewards": "Chưa nhận: Hạng Mạo Hiểm {ranks}",
       "arRewardsNone": "Đã nhận hết",
       "signIns": "Hôm nay còn {n} sự kiện đăng nhập",
-      "signInsNone": "Hôm nay đã đăng nhập hết"
+      "signInsNone": "Hôm nay đã đăng nhập hết",
+      "bargains": "Đã mua ở đây trong tháng này",
+      "bargainsNone": "Chưa mua gì ở đây trong tháng này",
+      "fateLeft": "{name} bằng {currency}: còn {n}"
     }
   },
   "view": {

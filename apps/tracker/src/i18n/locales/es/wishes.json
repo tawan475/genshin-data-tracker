@@ -267,5 +267,13 @@
     "featuredNext": "Siguiente destacado",
     "featuredNextTitle": "El último 4★ no era del gachapón: el siguiente es destacado",
     "toGuaranteed4": "{n} para el 4★ garantizado"
+  },
+  "bargains": {
+    "resets": "Se repone el {date}",
+    "stale": "Abre {shop} en el juego para ver lo que queda este mes",
+    "noLimit": "Sin límite",
+    "each": "{cost} cada uno",
+    "afford": "Puedes comprar {n}",
+    "hint": "Según la tienda que mostró el juego {time}"
   }
 }

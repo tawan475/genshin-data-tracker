@@ -267,5 +267,13 @@
     "featuredNext": "下個必 UP",
     "featuredNextTitle": "上一個 4★ 歪了：下一個必定是 UP",
     "toGuaranteed4": "距必出 4★ {n} 抽"
+  },
+  "bargains": {
+    "resets": "{date} 補貨",
+    "stale": "在遊戲中打開{shop}即可查看本月剩餘",
+    "noLimit": "無限制",
+    "each": "每個 {cost}",
+    "afford": "可購買 {n} 個",
+    "hint": "遊戲於 {time} 顯示的商店"
   }
 }

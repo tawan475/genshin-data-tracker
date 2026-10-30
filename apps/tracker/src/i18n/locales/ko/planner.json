@@ -565,7 +565,10 @@
       "arRewards": "미수령: 모험 등급 {ranks}",
       "arRewardsNone": "보상을 모두 받음",
       "signIns": "오늘 출석할 이벤트 {n}개",
-      "signInsNone": "오늘 모두 출석함"
+      "signInsNone": "오늘 모두 출석함",
+      "bargains": "이번 달 구매함",
+      "bargainsNone": "이번 달 아직 구매하지 않음",
+      "fateLeft": "{currency} {name}: {n}개 남음"
     }
   },
   "view": {

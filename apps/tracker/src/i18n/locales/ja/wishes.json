@@ -267,5 +267,13 @@
     "featuredNext": "次はピックアップ",
     "featuredNextTitle": "前回の★4はピックアップ外でした：次の★4はピックアップ確定",
     "toGuaranteed4": "★4 確定まであと {n}"
+  },
+  "bargains": {
+    "resets": "{date}に再入荷",
+    "stale": "ゲーム内で{shop}を開くと今月の残りが表示されます",
+    "noLimit": "制限なし",
+    "each": "1つ {cost}",
+    "afford": "{n}個購入できます",
+    "hint": "ゲームで{time}に表示されたショップ"
   }
 }

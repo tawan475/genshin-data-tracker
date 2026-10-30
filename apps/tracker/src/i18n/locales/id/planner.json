@@ -565,7 +565,10 @@
       "arRewards": "Belum diklaim: Adventure Rank {ranks}",
       "arRewardsNone": "Semua sudah diklaim",
       "signIns": "{n} event login hari ini",
-      "signInsNone": "Sudah login di semua hari ini"
+      "signInsNone": "Sudah login di semua hari ini",
+      "bargains": "Sudah membeli di sini bulan ini",
+      "bargainsNone": "Belum membeli apa pun di sini bulan ini",
+      "fateLeft": "{name} dengan {currency}: sisa {n}"
     }
   },
   "view": {

@@ -267,5 +267,13 @@
     "featuredNext": "Sıradaki öne çıkan",
     "featuredNextTitle": "Son 4★ afiş dışıydı: sonraki öne çıkan olacak",
     "toGuaranteed4": "Garantili 4★'a {n}"
+  },
+  "bargains": {
+    "resets": "{date} tarihinde yenilenir",
+    "stale": "Bu ay kalanı görmek için oyunda {shop} menüsünü aç",
+    "noLimit": "Sınırsız",
+    "each": "Tanesi {cost}",
+    "afford": "{n} tane alabilirsin",
+    "hint": "Oyunun {time} tarihinde gösterdiği mağazaya göre"
   }
 }

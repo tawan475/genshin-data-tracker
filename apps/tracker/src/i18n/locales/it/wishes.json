@@ -267,5 +267,13 @@
     "featuredNext": "Prossimo in evidenza",
     "featuredNextTitle": "L'ultimo 4★ non era in evidenza: il prossimo lo sarà",
     "toGuaranteed4": "{n} al 4★ garantito"
+  },
+  "bargains": {
+    "resets": "Rifornimento il {date}",
+    "stale": "Apri {shop} nel gioco per vedere cosa resta questo mese",
+    "noLimit": "Nessun limite",
+    "each": "{cost} l'uno",
+    "afford": "Puoi comprarne {n}",
+    "hint": "Secondo il negozio mostrato dal gioco {time}"
   }
 }

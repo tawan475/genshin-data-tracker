@@ -267,5 +267,13 @@
     "featuredNext": "Nächstes vom Banner",
     "featuredNextTitle": "Das letzte 4★ war nicht vom Banner: das nächste ist es",
     "toGuaranteed4": "{n} bis zum garantierten 4★"
+  },
+  "bargains": {
+    "resets": "Wieder vorrätig am {date}",
+    "stale": "Öffne {shop} im Spiel, um den Rest für diesen Monat zu sehen",
+    "noLimit": "Ohne Limit",
+    "each": "{cost} pro Stück",
+    "afford": "Du kannst {n} kaufen",
+    "hint": "Laut Shop im Spiel um {time}"
   }
 }

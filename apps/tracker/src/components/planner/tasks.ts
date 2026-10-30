@@ -21,7 +21,9 @@
  * commissions done today and the Abyss stars tick those two by themselves,
  * and three more rows appear once a capture has them: Expeditions (back
  * when the first one is done), Realm Currency (when the jar is full) and
- * the Welkin Moon (three days before it runs out). The capture decides a
+ * the Welkin Moon (three days before it runs out). Paimon's Bargains ticks
+ * once the capture shows anything bought there this month (Capture 1.17.2
+ * reads the shop when the player opens it). The capture decides a
  * row while it is newer than the row's hand state: a tick, Undo or snooze
  * after it wins until the next capture.
  * Domain events (Overflowing Abundance & co.) come from the tracker
@@ -442,6 +444,57 @@ export function welkinDays(
   return days - Math.max(0, gameDay(now, server) - gameDay(capturedAt, server))
 }
 
+/** Paimon's Bargains' stock comes back with the month. */
+const BARGAINS_MONTH = { kind: 'monthly', date: 1 } as const satisfies TaskRule
+
+/** One Fate in Paimon's Bargains this month; `limit`/`left` null when it has no limit. */
+export interface BargainFate {
+  item: string
+  currency: string
+  cost: number
+  bought: number
+  limit: number | null
+  left: number | null
+}
+
+/** Paimon's Bargains this month, per the capture (times in ms). */
+export interface BargainsMonth {
+  /** When the game last showed the shop. */
+  seenAt: number
+  /** Anything at all bought there this month. */
+  bought: boolean
+  fates: BargainFate[]
+  resetsAt: number
+}
+
+/**
+ * Paimon's Bargains this month from the capture's `gi_tasks.bargains`, or
+ * null when the shop was last seen before this month's reset (its counts
+ * are another month's) or never.
+ */
+export function bargainsThisMonth(
+  bargains: GiTasks['bargains'],
+  now: number,
+  server: string | null | undefined,
+): BargainsMonth | null {
+  if (!bargains) return null
+  const seenAt = bargains.at * 1000
+  if (seenAt < lastReset(BARGAINS_MONTH, now, server)!) return null
+  return {
+    seenAt,
+    bought: bargains.bought,
+    resetsAt: nextReset(BARGAINS_MONTH, now, server)!,
+    fates: bargains.fates.map((f) => ({
+      item: f.item,
+      currency: f.currency,
+      cost: f.cost,
+      bought: f.bought,
+      limit: f.limit ?? null,
+      left: f.limit === undefined ? null : Math.max(0, f.limit - f.bought),
+    })),
+  }
+}
+
 /** Welkin Moon rows come due this many days before it runs out. */
 export const WELKIN_SOON_DAYS = 3
 
@@ -580,6 +633,33 @@ export function captureRead(
           open.length === 0
             ? t('planner.tasks.capture.arRewardsNone')
             : t('planner.tasks.capture.arRewards', { ranks: open.join(', ') }),
+      }
+    }
+    case 'bargains': {
+      // When the shop was seen decides, not when the capture was sent.
+      const month = bargainsThisMonth(tasks.bargains, now, server)
+      if (!month) return null
+      const limited = month.fates.filter((f) => f.limit !== null)
+      const bought = limited.reduce((n, f) => n + f.bought, 0)
+      const limit = limited.reduce((n, f) => n + f.limit!, 0)
+      const left = limited
+        .map((f) =>
+          t('planner.tasks.capture.fateLeft', {
+            name: keyToName(f.item),
+            currency: keyToName(f.currency),
+            n: f.left!,
+          }),
+        )
+        .join(' · ')
+      const said = t(
+        month.bought ? 'planner.tasks.capture.bargains' : 'planner.tasks.capture.bargainsNone',
+      )
+      return {
+        at: month.seenAt,
+        done: month.bought,
+        back: month.bought ? month.resetsAt : null,
+        text: limit > 0 ? `${bought}/${limit}` : '',
+        title: left ? `${said} · ${left}` : said,
       }
     }
     case 'welkin': {

@@ -565,7 +565,10 @@
       "arRewards": "Non récupérées : rang d'aventure {ranks}",
       "arRewardsNone": "Toutes récupérées",
       "signIns": "{n} événements de connexion aujourd'hui",
-      "signInsNone": "Connecté partout aujourd'hui"
+      "signInsNone": "Connecté partout aujourd'hui",
+      "bargains": "Achat effectué ce mois-ci",
+      "bargainsNone": "Rien acheté ce mois-ci",
+      "fateLeft": "{name} contre {currency} : {n} restant(s)"
     }
   },
   "view": {

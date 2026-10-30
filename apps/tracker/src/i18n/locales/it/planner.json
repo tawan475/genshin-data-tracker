@@ -565,7 +565,10 @@
       "arRewards": "Da riscattare: grado avventura {ranks}",
       "arRewardsNone": "Tutte riscattate",
       "signIns": "{n} eventi di accesso oggi",
-      "signInsNone": "Accesso fatto ovunque oggi"
+      "signInsNone": "Accesso fatto ovunque oggi",
+      "bargains": "Già acquistato qui questo mese",
+      "bargainsNone": "Ancora niente acquistato qui questo mese",
+      "fateLeft": "{name} per {currency}: ne restano {n}"
     }
   },
   "view": {

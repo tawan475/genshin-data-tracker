@@ -267,5 +267,13 @@
     "featuredNext": "Featured next",
     "featuredNextTitle": "The last 4★ was off-banner: the next one is featured",
     "toGuaranteed4": "{n} to the guaranteed 4★"
+  },
+  "bargains": {
+    "resets": "Back in stock {date}",
+    "stale": "Open {shop} in the game to see what is left this month",
+    "noLimit": "No limit",
+    "each": "{cost} each",
+    "afford": "You can buy {n}",
+    "hint": "As the game showed the shop {time}"
   }
 }

@@ -565,7 +565,10 @@
       "arRewards": "未領取：冒險等階 {ranks}",
       "arRewardsNone": "獎勵已全部領取",
       "signIns": "今天還有{n}個簽到活動",
-      "signInsNone": "今天已全部簽到"
+      "signInsNone": "今天已全部簽到",
+      "bargains": "本月已在此購買",
+      "bargainsNone": "本月尚未在此購買",
+      "fateLeft": "{currency}兌換{name}：剩餘 {n}"
     }
   },
   "view": {

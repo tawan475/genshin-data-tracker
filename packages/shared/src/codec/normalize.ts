@@ -17,6 +17,7 @@ import type {
   GiHangout,
   GiMiliastra,
   GiSignIn,
+  GiFateStock,
   GiTeapot,
   GiTribalState,
   GiWardrobe,
@@ -679,8 +680,45 @@ function toTasks(raw: unknown): GiTasks | null {
   ) {
     tasks.resinSpent = { value: s.value, day: s.day, at: s.at }
   }
+  // Capture 1.17.2: one bad Fate and the part is not believed.
+  const g = raw.bargains
+  if (
+    isObject(g) &&
+    isIntIn(g.at, ...TASK_TIME) &&
+    typeof g.bought === 'boolean' &&
+    Array.isArray(g.fates) &&
+    g.fates.length <= BARGAIN_FATES
+  ) {
+    const fates: GiFateStock[] = []
+    for (const f of g.fates as unknown[]) {
+      if (
+        !isObject(f) ||
+        !FATES.has(f.item as string) ||
+        !FATE_CURRENCIES.has(f.currency as string) ||
+        !isIntIn(f.cost, 1, 10_000) ||
+        !isIntIn(f.bought, 0, 1_000) ||
+        (f.limit !== undefined && !isIntIn(f.limit, f.bought, 1_000))
+      ) {
+        break
+      }
+      fates.push({
+        item: f.item as string,
+        currency: f.currency as string,
+        cost: f.cost,
+        bought: f.bought,
+        ...(f.limit !== undefined ? { limit: f.limit } : {}),
+      })
+    }
+    if (fates.length === g.fates.length) tasks.bargains = { at: g.at, bought: g.bought, fates }
+  }
   return Object.keys(tasks).length > 0 ? tasks : null
 }
+
+/** What `gi_tasks.bargains` lists (Capture 1.17.2). */
+const FATES = new Set(['IntertwinedFate', 'AcquaintFate'])
+const FATE_CURRENCIES = new Set(['MasterlessStardust', 'MasterlessStarglitter'])
+/** Two Fates for two currencies, with room for the game to add some. */
+const BARGAIN_FATES = 16
 
 /**
  * One part of `gi_tasks` as the live journal sets it (`gi_tasks.<part>`,

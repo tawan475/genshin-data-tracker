@@ -565,7 +565,10 @@
       "arRewards": "Unclaimed: Adventure Rank {ranks}",
       "arRewardsNone": "Every reward claimed",
       "signIns": "{n} login events to sign in today",
-      "signInsNone": "Signed in everywhere today"
+      "signInsNone": "Signed in everywhere today",
+      "bargains": "Bought there this month",
+      "bargainsNone": "Nothing bought there yet this month",
+      "fateLeft": "{name} for {currency}: {n} left"
     }
   },
   "view": {

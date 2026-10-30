@@ -608,6 +608,8 @@ export interface TasksSection {
   // Capture 1.16.0: Katheryne's reward taken (1/0, beside `c`) and the resin spent today.
   t?: number
   s?: [value: number, day: number, at: number]
+  // Capture 1.17.2: Paimon's Bargains [at, bought (1/0), [[item, currency, cost, bought, limit (0: none)]]].
+  f?: [at: number, bought: number, fates: [string, string, number, number, number][]]
 }
 
 export function encodeTasks(tasks: GiTasks): TasksSection {
@@ -640,6 +642,14 @@ export function encodeTasks(tasks: GiTasks): TasksSection {
   }
   const s = tasks.resinSpent
   if (s) section.s = [s.value, s.day, s.at]
+  const g = tasks.bargains
+  if (g) {
+    section.f = [
+      g.at,
+      g.bought ? 1 : 0,
+      g.fates.map((f) => [f.item, f.currency, f.cost, f.bought, f.limit ?? 0]),
+    ]
+  }
   return section
 }
 
@@ -685,6 +695,20 @@ export function decodeTasks(section: TasksSection): GiTasks {
   if (section.s) {
     const [value, day, at] = section.s
     tasks.resinSpent = { value, day, at }
+  }
+  if (section.f) {
+    const [at, bought, fates] = section.f
+    tasks.bargains = {
+      at,
+      bought: bought === 1,
+      fates: fates.map(([item, currency, cost, count, limit]) => ({
+        item,
+        currency,
+        cost,
+        bought: count,
+        ...(limit > 0 ? { limit } : {}),
+      })),
+    }
   }
   return tasks
 }

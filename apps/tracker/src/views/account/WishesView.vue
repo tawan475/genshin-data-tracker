@@ -11,6 +11,7 @@ import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import WishBannerCard from '@/components/wishes/WishBannerCard.vue'
 import WishBannerSummary from '@/components/wishes/WishBannerSummary.vue'
+import WishBargains from '@/components/wishes/WishBargains.vue'
 import WishMonthChart from '@/components/wishes/WishMonthChart.vue'
 import WishSmallSummary from '@/components/wishes/WishSmallSummary.vue'
 import WishTransferDialog from '@/components/wishes/WishTransferDialog.vue'
@@ -41,6 +42,9 @@ const capture = useResource(
   (a) => (a.latest ? loadLatestInventory(a) : Promise.resolve(null)),
 )
 const wishPath = computed(() => capture.data.value?.good.gi_tasks?.wishPath ?? null)
+/** Paimon's Bargains, from the newest capture (Capture 1.17.2 reads it when the shop is opened). */
+const bargains = computed(() => capture.data.value?.good.gi_tasks?.bargains)
+const bag = computed(() => capture.data.value?.good.materials)
 const readOnly = useReadOnly()
 const wishes = useWishHistory(() => account.value.id)
 const history = computed(() => wishes.history.value)
@@ -139,6 +143,14 @@ const dialog = ref(false)
           </UiEmpty>
         </div>
       </UiPanel>
+      <WishBargains
+        v-if="history.total === 0 && capture.data.value"
+        class="mt-4"
+        :bargains="bargains"
+        :materials="bag"
+        :server="account.server"
+        :now="Date.now()"
+      />
 
       <div v-else class="flex flex-col gap-4">
         <!-- items-start: an open card's list hangs below it, never stretching its row. -->
@@ -187,6 +199,14 @@ const dialog = ref(false)
             </UiStat>
           </section>
         </div>
+
+        <WishBargains
+          v-if="capture.data.value"
+          :bargains="bargains"
+          :materials="bag"
+          :server="account.server"
+          :now="Date.now()"
+        />
 
         <WishBannerSummary
           v-for="b in rated"

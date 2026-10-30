@@ -565,7 +565,10 @@
       "arRewards": "Alınmadı: Macera Rütbesi {ranks}",
       "arRewardsNone": "Hepsi alındı",
       "signIns": "Bugün {n} giriş etkinliği",
-      "signInsNone": "Bugün hepsine giriş yapıldı"
+      "signInsNone": "Bugün hepsine giriş yapıldı",
+      "bargains": "Bu ay burada alışveriş yapıldı",
+      "bargainsNone": "Bu ay henüz bir şey alınmadı",
+      "fateLeft": "{currency} ile {name}: {n} kaldı"
     }
   },
   "view": {

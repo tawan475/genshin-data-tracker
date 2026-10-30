@@ -267,5 +267,13 @@
     "featuredNext": "다음은 픽업",
     "featuredNextTitle": "지난 4★가 픽업이 아니었으므로 다음 4★는 픽업입니다",
     "toGuaranteed4": "4★ 확정까지 {n}"
+  },
+  "bargains": {
+    "resets": "{date} 재입고",
+    "stale": "게임에서 {shop}을(를) 열면 이번 달 남은 수량이 표시됩니다",
+    "noLimit": "제한 없음",
+    "each": "개당 {cost}",
+    "afford": "{n}개 구매 가능",
+    "hint": "게임에서 {time}에 표시된 상점"
   }
 }

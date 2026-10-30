@@ -565,7 +565,10 @@
       "arRewards": "未受取：冒険ランク {ranks}",
       "arRewardsNone": "すべて受取済み",
       "signIns": "今日まだ{n}件のログインイベント",
-      "signInsNone": "今日はすべてログイン済み"
+      "signInsNone": "今日はすべてログイン済み",
+      "bargains": "今月ここで購入済み",
+      "bargainsNone": "今月はまだ何も購入していません",
+      "fateLeft": "{currency}の{name}：残り {n}"
     }
   },
   "view": {

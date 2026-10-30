@@ -16,6 +16,7 @@
 import type { DomainEventWindow, GameNotice, PlannerTask } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  bargainsThisMonth,
   BUILTIN_TASKS,
   builtinTask,
   customDone,
@@ -568,6 +569,33 @@ describe('ticked from a capture', () => {
     // Last week's count says nothing about this week (Monday Oct 12, 04:00 Asia).
     const old = capture({ weeklyBosses: used }, '2026-10-11T19:00:00Z')
     expect(rowOf('weekly-bosses', old)!.capture).toBeUndefined()
+  })
+
+  it("ticks Paimon's Bargains once something was bought there this month", () => {
+    const fates = [
+      { item: 'IntertwinedFate', currency: 'MasterlessStardust', cost: 75, bought: 2, limit: 5 },
+      { item: 'AcquaintFate', currency: 'MasterlessStardust', cost: 75, bought: 0, limit: 5 },
+      { item: 'IntertwinedFate', currency: 'MasterlessStarglitter', cost: 5, bought: 1 },
+    ]
+    const seen = (bought: boolean, when = '2026-10-13T10:00:00Z') => ({
+      bargains: { at: at(when) / 1000, bought, fates },
+    })
+    const done = rowOf('bargains', capture(seen(true)))!
+    expect(done).toMatchObject({ due: false, capture: { text: '2/10' } })
+    // Back on the 1st, 04:00 Asia (Oct 31 20:00 UTC).
+    expect(iso(done.back)).toBe('2026-10-31T20:00:00.000Z')
+    expect(done.capture!.title).toContain('3')
+    expect(rowOf('bargains', capture(seen(false)))).toMatchObject({ due: true })
+    // Seen last month: it says nothing about this one (Oct 1, 04:00 Asia).
+    const old = rowOf('bargains', capture(seen(true, '2026-09-30T19:00:00Z')))!
+    expect(old.capture).toBeUndefined()
+    expect(
+      bargainsThisMonth(seen(true).bargains, at('2026-10-13T12:00:00Z'), 'ASIA')!.fates,
+    ).toEqual([
+      { ...fates[0], left: 3 },
+      { ...fates[1], left: 5 },
+      { ...fates[2], limit: null, left: null },
+    ])
   })
 
   it('reads captures before Capture 1.14.0 the other way round: their `left` was the count used', () => {

@@ -267,5 +267,13 @@
     "featuredNext": "Berikutnya featured",
     "featuredNextTitle": "4★ terakhir di luar banner: berikutnya pasti featured",
     "toGuaranteed4": "{n} lagi ke 4★ yang dijamin"
+  },
+  "bargains": {
+    "resets": "Stok kembali {date}",
+    "stale": "Buka {shop} di game untuk melihat sisa bulan ini",
+    "noLimit": "Tanpa batas",
+    "each": "{cost} per buah",
+    "afford": "Bisa membeli {n}",
+    "hint": "Sesuai toko yang ditampilkan game pada {time}"
   }
 }

@@ -181,6 +181,34 @@ export interface GiTasks {
    * game day it falls in is the one it counts).
    */
   resinSpent?: { value: number; day: number; at: number }
+  /**
+   * Paimon's Bargains as the game last showed it (Capture 1.17.2): sent when
+   * the player opens the shop or buys there, so its counts are that month's
+   * as of `at` (unix s). `bought`: anything at all bought there that month.
+   */
+  bargains?: GiBargains
+}
+
+/** `gi_tasks.bargains`. */
+export interface GiBargains {
+  at: number
+  bought: boolean
+  /** The Fates for Masterless Stardust and Starglitter. */
+  fates: GiFateStock[]
+}
+
+/** One Fate on sale in Paimon's Bargains. */
+export interface GiFateStock {
+  /** `IntertwinedFate` or `AcquaintFate`. */
+  item: string
+  /** `MasterlessStardust` or `MasterlessStarglitter`. */
+  currency: string
+  /** Of the currency, per Fate. */
+  cost: number
+  /** Bought that month. */
+  bought: number
+  /** A month; absent when it has no limit. */
+  limit?: number
 }
 
 export interface GiSignIn {

@@ -565,7 +565,10 @@
       "arRewards": "Não resgatadas: Nível de Aventura {ranks}",
       "arRewardsNone": "Todas resgatadas",
       "signIns": "{n} eventos de login hoje",
-      "signInsNone": "Login feito em todos hoje"
+      "signInsNone": "Login feito em todos hoje",
+      "bargains": "Já comprou aqui este mês",
+      "bargainsNone": "Ainda não comprou nada aqui este mês",
+      "fateLeft": "{name} por {currency}: restam {n}"
     }
   },
   "view": {

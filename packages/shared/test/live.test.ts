@@ -148,6 +148,14 @@ describe('GOOD-X delta contract', () => {
   })
 
   it('sets each part of gi_tasks whole, checked as a snapshot would be (Capture 1.16.0)', () => {
+    // Capture 1.17.2: Paimon's Bargains, as opening the shop showed it.
+    const BARGAINS = {
+      at: 1_791_756_000,
+      bought: true,
+      fates: [
+        { item: 'IntertwinedFate', currency: 'MasterlessStardust', cost: 75, bought: 2, limit: 5 },
+      ],
+    }
     const withTasks: LiveGood = {
       ...base,
       gi_tasks: { welkin: { days: 3 }, resin: { value: 20, nextAt: 1_791_756_000 } },
@@ -157,6 +165,7 @@ describe('GOOD-X delta contract', () => {
       ['set', ['gi_tasks', 'welkin'], { days: 99 }],
       ['set', ['gi_tasks', 'commissions'], { finished: 4, total: 4, claimed: true }],
       ['set', ['gi_tasks', 'resinSpent'], { value: 160, day: 3, at: 1_791_756_000 }],
+      ['set', ['gi_tasks', 'bargains'], BARGAINS],
       ['set', ['gi_tasks', 'resin', 'value'], 5],
       ['set', ['gi_tasks', 'unknownPart'], { any: 1 }],
       ['set', ['gi_tasks', '__proto__'], { days: 1 }],
@@ -166,6 +175,7 @@ describe('GOOD-X delta contract', () => {
       resin: { value: 21, nextAt: 1_791_756_416 },
       commissions: { finished: 4, total: 4, claimed: true },
       resinSpent: { value: 160, day: 3, at: 1_791_756_000 },
+      bargains: BARGAINS,
     })
     expect(withTasks.gi_tasks!.resin).toEqual({ value: 20, nextAt: 1_791_756_000 })
     const bad = applyDelta(withTasks, [

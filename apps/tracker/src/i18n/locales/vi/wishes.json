@@ -267,5 +267,13 @@
     "featuredNext": "Lần sau là UP",
     "featuredNextTitle": "4★ trước đó lệch banner: 4★ tiếp theo chắc chắn là UP",
     "toGuaranteed4": "Còn {n} tới 4★ chắc chắn"
+  },
+  "bargains": {
+    "resets": "Nhập hàng lại {date}",
+    "stale": "Mở {shop} trong game để xem số còn lại tháng này",
+    "noLimit": "Không giới hạn",
+    "each": "{cost} mỗi cái",
+    "afford": "Có thể mua {n}",
+    "hint": "Theo cửa hàng game hiển thị lúc {time}"
   }
 }

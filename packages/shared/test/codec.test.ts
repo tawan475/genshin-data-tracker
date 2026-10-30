@@ -2107,6 +2107,32 @@ describe("Teyvat.me Capture 1.7.0's keys", () => {
       const back = decodeSectionBlob(kindCode('tasks', false), blob.data, null, null)
       expect(decodeTasks(back.value as typeof section)).toEqual(tasks)
     }
+    // Capture 1.17.2: Paimon's Bargains; one bad Fate and the part is left out.
+    const fate = { item: 'IntertwinedFate', currency: 'MasterlessStardust', cost: 75, bought: 2 }
+    const bargains = {
+      at: 1_791_756_000,
+      bought: true,
+      fates: [
+        { ...fate, limit: 5 },
+        { item: 'AcquaintFate', currency: 'MasterlessStarglitter', cost: 5, bought: 0 },
+      ],
+    }
+    expect(t({ bargains }).bargains).toEqual(bargains)
+    for (const bad of [
+      { ...fate, limit: 1 },
+      { ...fate, item: 'Primogem' },
+      { ...fate, cost: 0 },
+      { ...fate, bought: -1 },
+    ]) {
+      expect('bargains' in t({ bargains: { ...bargains, fates: [bad] } })).toBe(false)
+    }
+    expect('bargains' in t({ bargains: { ...bargains, bought: 1 } })).toBe(false)
+    for (const tasks of [{ bargains }, { bargains: { ...bargains, bought: false, fates: [] } }]) {
+      const section = JSON.parse(JSON.stringify(encodeTasks(tasks)))
+      const blob = encodeSectionBlob('tasks', section, false, null)
+      const back = decodeSectionBlob(kindCode('tasks', false), blob.data, null, null)
+      expect(decodeTasks(back.value as typeof section)).toEqual(tasks)
+    }
     expect('respawns' in t({ respawns: { '1001': [1] } })).toBe(false)
     expect('arRewards' in t({ arRewards: [2, 2] })).toBe(false)
     expect(t({ respawns: { '1001': [1_790_000_100, 1_790_000_000] } }).respawns).toEqual({
