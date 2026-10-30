@@ -2217,7 +2217,7 @@ describe("Teyvat.me Capture 1.8.0-1.11.0's keys", () => {
     }
   })
 
-  describe("Capture 1.16's quests", () => {
+  describe("Capture 1.17's quests", () => {
     // A long-played account's scale: ~2,400 parent quests finished, ~250 open.
     const quests = {
       finished: Array.from({ length: 2_400 }, (_, i) => 300 + i * 31),

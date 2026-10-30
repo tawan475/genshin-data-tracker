@@ -768,7 +768,7 @@ function toCollections(raw: unknown): GiCollections | null {
     const ids = idList(raw[key], 0, 999_999_999, cap)
     if (ids) collections[key] = ids
   }
-  // Capture 1.16.
+  // Capture 1.17.
   const quests = toQuests(raw.quests)
   if (quests) collections.quests = quests
   return Object.keys(collections).length > 0 ? collections : null

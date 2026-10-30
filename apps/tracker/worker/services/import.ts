@@ -322,7 +322,7 @@ async function importOnce(
   })
   // The same capture, also when it was stored before irminsul's extra keys
   // (or later its anecdotes, tasks, collections, Capture 1.4.0's keys, then
-  // its exploration, then Capture 1.7.0's, then 1.8.0's, then 1.16's parts) were kept
+  // its exploration, then Capture 1.7.0's, then 1.8.0's, then 1.17's parts) were kept
   // (its hash then left them out), in either storage format.
   const sameCapture = (row: SameTimeRow) =>
     row.content_key !== null

@@ -67,7 +67,7 @@
     "region": "Región",
     "otherRegion": "Otros",
     "inProgress": "En curso",
-    "needCapture": "Las marcas de completado requieren Teyvat.me Capture 1.16 o posterior"
+    "needCapture": "Las marcas de completado requieren Teyvat.me Capture 1.17 o posterior"
   },
   "defeats": {
     "kinds": "Entradas",

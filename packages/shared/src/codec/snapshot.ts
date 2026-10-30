@@ -202,7 +202,7 @@ export interface EncodedSnapshot extends ExtraSections {
    */
   pre18ContentHash: string
   /**
-   * The content hash a tracker from before Capture 1.16's quests gave this
+   * The content hash a tracker from before Capture 1.17's quests gave this
    * file (gi_collections' quests left out), so re-uploading it stays a no-op.
    */
   pre19ContentHash: string
@@ -528,7 +528,7 @@ const COLLECTIONS_18 = [
   'npcsMet',
 ] as const satisfies readonly (keyof GiCollections)[]
 const TCG_18 = ['levels', 'bosses', 'tavern'] as const
-/** Capture 1.16's part of gi_collections (see pre19ContentHash). */
+/** Capture 1.17's part of gi_collections (see pre19ContentHash). */
 const COLLECTIONS_19 = ['quests'] as const satisfies readonly (keyof GiCollections)[]
 const EXPLORATION_18 = [
   'domainsCleared',

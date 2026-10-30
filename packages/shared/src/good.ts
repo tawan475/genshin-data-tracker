@@ -246,7 +246,7 @@ export interface GiCollections {
   /** NPCs met (NpcFirstMet ids). */
   npcsMet?: number[]
   /**
-   * Every parent quest the player has touched (Capture 1.16, FinishedParentQuestNotify): MainQuest ids
+   * Every parent quest the player has touched (Capture 1.17, FinishedParentQuestNotify): MainQuest ids
    * finished, and those accepted but not finished, ascending. All kinds (Archon, Story, World, events…).
    */
   quests?: { finished: number[]; active?: number[] }

@@ -67,7 +67,7 @@
     "region": "Регион",
     "otherRegion": "Другое",
     "inProgress": "В процессе",
-    "needCapture": "Отметки о выполнении требуют Teyvat.me Capture 1.16 или новее"
+    "needCapture": "Отметки о выполнении требуют Teyvat.me Capture 1.17 или новее"
   },
   "defeats": {
     "kinds": "Записи",

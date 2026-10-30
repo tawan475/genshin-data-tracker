@@ -15,7 +15,7 @@ import { t } from '@/i18n'
 /**
  * World Quests by region, from the game data's list (the wiki's): done when
  * the capture's parent quests have any of the quest's MainQuest ids finished.
- * Without a capture that sends them (Capture 1.16) the list shows unmarked.
+ * Without a capture that sends them (Capture 1.17) the list shows unmarked.
  */
 const props = defineProps<{
   catalog: CollectionCatalog

@@ -749,7 +749,7 @@ export interface CollectionsSection {
   e?: number[]
   o?: number[]
   n?: number[]
-  // Capture 1.16.
+  // Capture 1.17.
   /** Parent quests: `f` finished, `a` accepted and not finished (MainQuest ids, ascending). */
   q?: { f: number[]; a?: number[] }
 }

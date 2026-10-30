@@ -67,7 +67,7 @@
     "region": "ภูมิภาค",
     "otherRegion": "อื่น ๆ",
     "inProgress": "กำลังดำเนินการ",
-    "needCapture": "เครื่องหมายสำเร็จต้องใช้ Teyvat.me Capture 1.16 ขึ้นไป"
+    "needCapture": "เครื่องหมายสำเร็จต้องใช้ Teyvat.me Capture 1.17 ขึ้นไป"
   },
   "defeats": {
     "kinds": "รายการ",
