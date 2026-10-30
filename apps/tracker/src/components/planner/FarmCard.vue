@@ -7,7 +7,8 @@ import { artifactSetIcon, materialIcon } from '@/lib/assets'
 import { t } from '@/i18n'
 import { formatCompact, formatNumber } from '@/lib/format'
 import { formatSetName } from '@/utils/artifact-stats'
-import { materialName } from '@/utils/materials'
+import { materialName, materialRarity } from '@/utils/materials'
+import type { MaterialLine } from '@gdt/game-data/planner-math'
 import type { FarmCard } from './farm-today'
 import { bracketText, daysText, statusTitle, weeksText } from './farm-format'
 import GoalAvatars from './GoalAvatars.vue'
@@ -18,14 +19,36 @@ import MaterialCell from './MaterialCell.vue'
  * region, a domain) with the other places underneath, the runs, resin,
  * Condensed Resin and days it takes ("at most" where the estimate is an
  * upper bound), the materials still missing (each opens the inventory
- * editor) or the artifact sets wanted, and who needs them on a row of
- * their own at the foot (a tap opens the goal, a long press pauses it). Up
- * to two items sit beside the text, more go under it. A card the account
- * can't farm yet is greyed with what it lacks.
+ * editor) or the artifact sets wanted, and who needs them (a tap opens
+ * the goal, a long press pauses it). Every card is laid out alike: the
+ * items in a grid at the left, one row per rarity with the rarest on top
+ * (at most three a row), and the name, figures and portraits beside it. A
+ * card the account can't farm yet is greyed with what it lacks.
  */
 const props = defineProps<{ card: FarmCard }>()
 
-const side = computed(() => props.card.lines.length + props.card.sets.length <= 2)
+type Item = { line: MaterialLine; set?: never } | { set: string; line?: never }
+/** Items a grid row holds before the next row starts. */
+const PER_ROW = 3
+const rows = computed(() => {
+  const byRarity = new Map<number, Item[]>()
+  const add = (rarity: number, item: Item) => {
+    const row = byRarity.get(rarity)
+    if (row) row.push(item)
+    else byRarity.set(rarity, [item])
+  }
+  for (const line of props.card.lines) {
+    add(materialRarity(line.material.key, line.material.rarity) ?? 0, { line })
+  }
+  for (const set of props.card.sets) add(5, { set })
+  const out: { key: string; items: Item[] }[] = []
+  for (const [rarity, items] of [...byRarity].sort((a, b) => b[0] - a[0])) {
+    for (let i = 0; i < items.length; i += PER_ROW) {
+      out.push({ key: `${rarity}:${i}`, items: items.slice(i, i + PER_ROW) })
+    }
+  }
+  return out
+})
 const run = computed(() => props.card.run)
 const locked = computed(() => props.card.lock !== null)
 
@@ -98,23 +121,27 @@ const meta = computed(
 
 <template>
   <article
-    class="flex min-w-0 gap-2 rounded-xl border border-border-default bg-surface-raised p-2 shadow-sm [contain-intrinsic-size:auto_6rem] [content-visibility:auto]"
-    :class="[side ? 'flex-row items-start' : 'flex-col', locked ? 'opacity-60' : '']"
+    class="flex min-w-0 items-start gap-2 rounded-xl border border-border-default bg-surface-raised p-2 shadow-sm [contain-intrinsic-size:auto_6rem] [content-visibility:auto]"
+    :class="locked ? 'opacity-60' : ''"
   >
-    <div v-if="side" class="flex shrink-0 gap-1">
-      <MaterialCell v-for="line in card.lines" :key="line.material.key" :line="line" size="xs" />
-      <GameIcon
-        v-for="set in card.sets"
-        :key="set"
-        :src="artifactSetIcon(set)"
-        :name="formatSetName(set)"
-        :title="formatSetName(set)"
-        :rarity="5"
-        size="sm"
-      />
+    <div v-if="rows.length" class="flex shrink-0 flex-col gap-1">
+      <div v-for="row in rows" :key="row.key" class="flex gap-1">
+        <template v-for="item in row.items" :key="item.line?.material.key ?? item.set">
+          <MaterialCell v-if="item.line" :line="item.line" size="xs" />
+          <span v-else class="flex w-10 justify-center">
+            <GameIcon
+              :src="artifactSetIcon(item.set)"
+              :name="formatSetName(item.set)"
+              :title="formatSetName(item.set)"
+              :rarity="5"
+              size="sm"
+            />
+          </span>
+        </template>
+      </div>
     </div>
 
-    <div class="flex min-w-0 flex-col gap-0.5" :class="side ? 'flex-1' : ''">
+    <div class="flex min-w-0 flex-1 flex-col gap-0.5">
       <h3 class="min-w-0 truncate text-sm leading-7 font-semibold" :title="title">
         {{ card.name }}
       </h3>
@@ -196,21 +223,7 @@ const meta = computed(
         </span>
       </p>
       <slot />
-      <GoalAvatars v-if="side && card.goals.length" class="mt-1" :goals="card.goals" :max="5" />
+      <GoalAvatars v-if="card.goals.length" class="mt-1" :goals="card.goals" :max="5" />
     </div>
-
-    <div v-if="!side" class="flex flex-wrap gap-1">
-      <MaterialCell v-for="line in card.lines" :key="line.material.key" :line="line" size="xs" />
-      <GameIcon
-        v-for="set in card.sets"
-        :key="set"
-        :src="artifactSetIcon(set)"
-        :name="formatSetName(set)"
-        :title="formatSetName(set)"
-        :rarity="5"
-        size="sm"
-      />
-    </div>
-    <GoalAvatars v-if="!side && card.goals.length" :goals="card.goals" :max="7" />
   </article>
 </template>

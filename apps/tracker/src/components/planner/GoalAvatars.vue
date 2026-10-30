@@ -12,10 +12,11 @@ import { characterName, weaponName } from './model'
  * `weapon:Key:Owner:<id>`, `item:Key`) as a row of round portraits on
  * their rarity's colour, 36 px and side by side so each face reads, one
  * per character (a weapon goal shows its holder, a spare weapon itself,
- * extra item needs one "+" disc; a custom character its initials), "+N"
- * past `max`, which shows them all (wrapping) when tapped. On the Planner
- * (goal-actions.ts) each is a button: a tap opens the goal, a long press
- * or right click pauses it; favourites get a gold ring.
+ * extra item needs one "+" disc; a custom character its initials),
+ * wrapping when the row runs out of room, "+N" past `max`, which shows
+ * them all when tapped. On the Planner (goal-actions.ts) each is a
+ * button: a tap opens the goal, a long press or right click pauses it;
+ * favourites get a gold ring.
  */
 const props = withDefaults(defineProps<{ goals: readonly string[]; max?: number }>(), { max: 6 })
 const actions = useGoalActions()
@@ -147,16 +148,11 @@ function open(id: string) {
 <template>
   <span
     v-if="people.length"
-    class="inline-flex min-w-0 items-center gap-1"
-    :class="all ? 'flex-wrap' : ''"
+    class="inline-flex min-w-0 flex-wrap items-center gap-1"
     :title="actions ? undefined : names"
   >
     <span v-if="!actions" class="sr-only">{{ names }}</span>
-    <span
-      class="flex gap-1"
-      :class="all ? 'flex-wrap' : ''"
-      :aria-hidden="actions ? undefined : 'true'"
-    >
+    <span class="flex min-w-0 flex-wrap gap-1" :aria-hidden="actions ? undefined : 'true'">
       <template v-for="p in shown" :key="p.id">
         <component
           :is="actions ? 'button' : 'span'"
