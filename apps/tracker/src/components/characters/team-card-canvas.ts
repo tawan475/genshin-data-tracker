@@ -20,6 +20,7 @@ import {
   characterIcon,
   characterSplash,
   elementIcon,
+  elementIconLight,
   giCdnArt,
   weaponIcon,
 } from '@/lib/assets'
@@ -49,6 +50,7 @@ import {
 } from './card-paint'
 import { CONSTELLATION_MAX_STYLE, isMaxConstellation, refinementStyle } from './max-badges'
 import {
+  CARD_THEMES,
   EMBLEM_URL,
   RARITY_GRADIENT,
   SPLASH_BOX_SCALE,
@@ -160,7 +162,7 @@ function rowImages(member: TeamMember, crown: string): string[] {
   return [
     characterBanner(c.key),
     splashUrl(c.key),
-    c.element ? elementIcon(c.element) : '',
+    c.element ? elementIconLight(c.element) : '',
     crown,
     ...constellationIcons(c.key),
     glyphs.auto,
@@ -449,17 +451,18 @@ class TeamPainter extends CardPaint {
     const rowH = Math.max(c.element ? 44 : 0, size * 1.1, 34)
     let x = x0
 
+    // The game's list icon, flat (a drop shadow read as a dark halo).
     if (c.element) {
-      const icon = this.images.get(elementIcon(c.element))
+      const icon = this.images.get(elementIconLight(c.element))
       const iy = top + (rowH - 44) / 2
-      p.dropShadow({ x: 0, y: 2, blur: 6, color: 'rgba(0,0,0,0.45)' }, () => {
-        if (icon) p.contain(icon, x, iy, 44, 44)
-        else this.elementGlyph(c.element!, x, iy, 44)
-      })
+      if (icon) p.contain(icon, x, iy, 44, 44)
+      else this.elementGlyph(c.element, x, iy, 44)
       x += 44 + 14
     }
 
     // The C chip's width first: the name gives way to it (and to the constellations).
+    // The name is the dark card's white with its shadow on either card: dark
+    // text with a white glow looked smudged over the city.
     const chipText = `C${c.constellation}`
     const chipW = this.textWidth(chipText, 19, 700) + 20
     let nameW = 0
@@ -468,8 +471,8 @@ class TeamPainter extends CardPaint {
       const nameMax = x0 + ROW_COLUMNS.who - CONSTELLATION - 16 - x - 12 - chipW
       const name = p.ellipsize(c.name, nameMax)
       nameW = p.measure(name)
-      p.text(name, x, p.baseline(top + (rowH - size) / 2, size), hero, {
-        shadows: parseShadows(this.v('--card-hero-shadow')),
+      p.text(name, x, p.baseline(top + (rowH - size) / 2, size), CARD_THEMES.dark['--card-hero']!, {
+        shadows: parseShadows(CARD_THEMES.dark['--card-hero-shadow']!),
       })
     })
     x += nameW + 12
