@@ -8,6 +8,7 @@ import UiPanel from '@/components/ui/UiPanel.vue'
 import { formatBytes, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { recentSnapshots } from '@/data/overview'
 import { t } from '@/i18n'
+import { useAccountRoute } from '@/views/account/context'
 import ChangeValue from './ChangeValue.vue'
 
 /** The newest five snapshots, each with what changed against the one before. */
@@ -41,6 +42,8 @@ const items = computed(() =>
     currencyMissing: s.currencyMissing,
   })),
 )
+
+const accountRoute = useAccountRoute()
 </script>
 
 <template>
@@ -49,7 +52,7 @@ const items = computed(() =>
       <UiButton
         size="sm"
         variant="ghost"
-        :to="{ name: 'account-snapshots', params: { accountId } }"
+        :to="{ name: accountRoute('account-snapshots'), params: { accountId } }"
         :title="$t('overview.recent.allTitle', { n: formatNumber(snapshots.length) })"
       >
         {{ $t('overview.recent.all') }}

@@ -23,7 +23,7 @@ import { t } from '@/i18n'
 import { formatNumber } from '@/lib/format'
 import { loadLatestInventory } from '@/data/account-data'
 import { useResource } from '@/data/use-resource'
-import { useAccount, useReadOnly } from './context'
+import { useAccount, useAccountRoute, useReadOnly } from './context'
 
 /**
  * Wish history overview: a card per banner (lifetime pulls, 5★ pity with
@@ -59,8 +59,9 @@ const shown = computed(() =>
 )
 const rated = computed(() => shown.value.filter((b) => b.info.rated && b.stats.total > 0))
 const plain = computed(() => shown.value.filter((b) => !b.info.rated && b.stats.total > 0))
+const accountRoute = useAccountRoute()
 const detail = (banner: UigfGachaType) => ({
-  name: 'account-wishes-banner',
+  name: accountRoute('account-wishes-banner'),
   params: { accountId: account.value.id, banner: bannerInfo(banner).slug },
 })
 

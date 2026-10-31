@@ -29,6 +29,11 @@ declare module 'vue-router' {
   }
 }
 
+/** Collections' tabs and the wish banners' pages, for the owner's routes and Inspect's alike. */
+const COLLECTION_TAB_PATTERN =
+  'achievements|world|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|music|aranara'
+const WISH_BANNER_PATTERN = 'character|weapon|standard|chronicled|beginners'
+
 const account = (path: string, name: string, title: PageKey, load: () => Promise<unknown>) => ({
   path,
   name,
@@ -45,9 +50,14 @@ const staffPage = (
 ) => ({ path, name, component: load, meta: { auth: true, staff: true, title, permission } })
 
 /** Someone's account page, read-only, under Inspect (the owner's views, reused). */
-const inspectPage = (view: InspectView, title: PageKey, load: () => Promise<unknown>) => ({
-  path: view,
-  name: `staff-inspect-${view}`,
+const inspectPage = (
+  view: InspectView,
+  title: PageKey,
+  load: () => Promise<unknown>,
+  { path = view as string, name = view as string } = {},
+) => ({
+  path,
+  name: `staff-inspect-${name}`,
   component: load,
   meta: {
     auth: true,
@@ -228,8 +238,14 @@ const router = createRouter({
               path: 'inspect/:accountId(\\d+)',
               component: () => import('@/views/staff/StaffInspectLayout.vue'),
               meta: { auth: true, staff: true, permission: 'data.inspect' },
+              // The owner's pages in the owner's order (nav.ts ACCOUNT_SECTIONS).
               children: [
-                { path: '', redirect: { name: 'staff-inspect-characters' } },
+                inspectPage(
+                  'overview',
+                  'overview',
+                  () => import('@/views/account/OverviewView.vue'),
+                  { path: '' },
+                ),
                 inspectPage(
                   'characters',
                   'characters',
@@ -245,6 +261,24 @@ const router = createRouter({
                   'materials',
                   'materials',
                   () => import('@/views/account/MaterialsView.vue'),
+                ),
+                inspectPage('planner', 'planner', () => import('@/views/account/PlannerView.vue')),
+                inspectPage(
+                  'collections',
+                  'collections',
+                  () => import('@/views/account/CollectionsView.vue'),
+                  { path: `collections/:tab(${COLLECTION_TAB_PATTERN})?` },
+                ),
+                inspectPage(
+                  'wishes',
+                  'wishHistory',
+                  () => import('@/views/account/WishesView.vue'),
+                ),
+                inspectPage(
+                  'wishes',
+                  'wishHistory',
+                  () => import('@/views/account/WishBannerView.vue'),
+                  { path: `wishes/:banner(${WISH_BANNER_PATTERN})`, name: 'wishes-banner' },
                 ),
                 inspectPage(
                   'snapshots',
@@ -320,7 +354,7 @@ const router = createRouter({
               redirect: (to) => ({ name: 'account-collections', params: to.params }),
             },
             account(
-              'collections/:tab(achievements|world|spincrystals|anecdotes|archive|handbook|living-beings|tcg|recipes|crafting|wardrobe|hangouts|blueprints|music|aranara)?',
+              `collections/:tab(${COLLECTION_TAB_PATTERN})?`,
               'account-collections',
               'collections',
               () => import('@/views/account/CollectionsView.vue'),
@@ -332,7 +366,7 @@ const router = createRouter({
               () => import('@/views/account/WishesView.vue'),
             ),
             account(
-              'wishes/:banner(character|weapon|standard|chronicled|beginners)',
+              `wishes/:banner(${WISH_BANNER_PATTERN})`,
               'account-wishes-banner',
               'wishHistory',
               () => import('@/views/account/WishBannerView.vue'),

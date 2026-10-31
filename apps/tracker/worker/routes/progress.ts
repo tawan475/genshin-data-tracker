@@ -152,14 +152,56 @@ function toTasks(rows: TaskRow[]): PlannerTask[] {
   })) as PlannerTask[]
 }
 
+/*
+ * The reads of each GET below, shared with staff Inspect (routes/staff.ts),
+ * which checks its own access first.
+ */
+
+export async function readAchievementMarks(
+  d1: D1Database,
+  id: number,
+): Promise<AchievementMarksResponse> {
+  const { results } = await d1.prepare(SELECT_MARKS).bind(id).all<{ id: number }>()
+  return { done: results.map((r) => r.id) }
+}
+
+export async function readAnecdoteMarks(
+  d1: D1Database,
+  id: number,
+): Promise<AnecdoteMarksResponse> {
+  const { results } = await d1.prepare(SELECT_ANECDOTE_MARKS).bind(id).all<{ id: number }>()
+  return { done: results.map((r) => r.id) }
+}
+
+export async function readPlannerTargets(
+  d1: D1Database,
+  id: number,
+): Promise<PlannerTargetsResponse> {
+  const { results } = await d1.prepare(SELECT_TARGETS).bind(id).all<TargetRow>()
+  return { targets: toTargets(results) }
+}
+
+export async function readPlannerState(d1: D1Database, id: number): Promise<PlannerStateResponse> {
+  const [captured, adjustments, overrides] = await d1.batch([
+    d1.prepare(`SELECT ${CAPTURED} AS captured`).bind(id),
+    d1.prepare(SELECT_ADJUSTMENTS).bind(id),
+    d1.prepare(SELECT_OVERRIDES).bind(id),
+  ])
+  return plannerState(captured, adjustments, overrides)
+}
+
+export async function readPlannerTasks(d1: D1Database, id: number): Promise<PlannerTasksResponse> {
+  const { results } = await d1.prepare(SELECT_TASKS).bind(id).all<TaskRow>()
+  return { tasks: toTasks(results) }
+}
+
 export const progress = new Hono<AppEnv>()
   .use(requireUser)
 
   .get('/:id/achievement-marks', async (c) => {
     const id = idParam(c, 'id')
     await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
-    const { results } = await c.env.DB.prepare(SELECT_MARKS).bind(id).all<{ id: number }>()
-    return c.json<AchievementMarksResponse>({ done: results.map((r) => r.id) })
+    return c.json<AchievementMarksResponse>(await readAchievementMarks(c.env.DB, id))
   })
 
   /** `done` is applied before `undone`, so an id in both ends up unmarked. */
@@ -199,8 +241,7 @@ export const progress = new Hono<AppEnv>()
   .get('/:id/anecdote-marks', async (c) => {
     const id = idParam(c, 'id')
     await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
-    const { results } = await c.env.DB.prepare(SELECT_ANECDOTE_MARKS).bind(id).all<{ id: number }>()
-    return c.json<AnecdoteMarksResponse>({ done: results.map((r) => r.id) })
+    return c.json<AnecdoteMarksResponse>(await readAnecdoteMarks(c.env.DB, id))
   })
 
   /** `done` is applied before `undone`, so an id in both ends up unmarked. */
@@ -250,8 +291,7 @@ export const progress = new Hono<AppEnv>()
   .get('/:id/planner-targets', async (c) => {
     const id = idParam(c, 'id')
     await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
-    const { results } = await c.env.DB.prepare(SELECT_TARGETS).bind(id).all<TargetRow>()
-    return c.json<PlannerTargetsResponse>({ targets: toTargets(results) })
+    return c.json<PlannerTargetsResponse>(await readPlannerTargets(c.env.DB, id))
   })
 
   /**
@@ -355,13 +395,7 @@ export const progress = new Hono<AppEnv>()
   .get('/:id/planner-state', async (c) => {
     const id = idParam(c, 'id')
     await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
-    const d1 = c.env.DB
-    const [captured, adjustments, overrides] = await d1.batch([
-      d1.prepare(`SELECT ${CAPTURED} AS captured`).bind(id),
-      d1.prepare(SELECT_ADJUSTMENTS).bind(id),
-      d1.prepare(SELECT_OVERRIDES).bind(id),
-    ])
-    return c.json<PlannerStateResponse>(plannerState(captured, adjustments, overrides))
+    return c.json<PlannerStateResponse>(await readPlannerState(c.env.DB, id))
   })
 
   /**
@@ -499,8 +533,7 @@ export const progress = new Hono<AppEnv>()
   .get('/:id/planner-tasks', async (c) => {
     const id = idParam(c, 'id')
     await assertAccount(getDb(c.env.DB), c.get('userId'), id, 'view')
-    const { results } = await c.env.DB.prepare(SELECT_TASKS).bind(id).all<TaskRow>()
-    return c.json<PlannerTasksResponse>({ tasks: toTasks(results) })
+    return c.json<PlannerTasksResponse>(await readPlannerTasks(c.env.DB, id))
   })
 
   /** `remove` is applied before `upsert`; a task is written whole. */

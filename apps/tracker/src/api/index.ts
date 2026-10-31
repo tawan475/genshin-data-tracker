@@ -43,6 +43,7 @@ import type {
   WishImportResponse,
   WishRecord,
 } from '@gdt/shared'
+import { accountRead, accountWrite } from './inspect'
 import { staffApi } from './staff'
 import type { plannerStatePatch, plannerTargetsPatch, plannerTasksPatch } from '@gdt/shared'
 import type { z } from 'zod'
@@ -257,45 +258,55 @@ export const api = {
   createAccount: (input: AccountInput) =>
     requestJson<AccountCreatedResponse>('/api/accounts', { method: 'POST', json: input }),
   updateAccount: (id: number, input: AccountInput) =>
-    requestJson<AccountResponse>(`/api/accounts/${id}`, { method: 'PATCH', json: input }),
+    accountWrite(id, () =>
+      requestJson<AccountResponse>(`/api/accounts/${id}`, { method: 'PATCH', json: input }),
+    ),
   deleteAccount: (id: number) => requestJson<void>(`/api/accounts/${id}`, { method: 'DELETE' }),
   rotateImportKey: (id: number) =>
     requestJson<ImportKeyResponse>(`/api/accounts/${id}/import-key`, { method: 'POST' }),
   accountSettings: (id: number) =>
-    requestJson<AccountSettingsResponse>(`/api/accounts/${id}/settings`),
+    requestJson<AccountSettingsResponse>(accountRead(id, 'settings')),
   updateAccountSettings: (id: number, patch: AccountSettingsPatch) =>
-    requestJson<AccountSettingsResponse>(`/api/accounts/${id}/settings`, {
-      method: 'PATCH',
-      json: patch,
-    }),
+    accountWrite(id, () =>
+      requestJson<AccountSettingsResponse>(`/api/accounts/${id}/settings`, {
+        method: 'PATCH',
+        json: patch,
+      }),
+    ),
 
   // -------------------------------------------------------------- progress
   /** Achievement ids marked done by hand (captured ones come from snapshots). */
   achievementMarks: (id: number) =>
-    requestJson<AchievementMarksResponse>(`/api/accounts/${id}/achievement-marks`),
+    requestJson<AchievementMarksResponse>(accountRead(id, 'achievement-marks')),
   /** `done` is applied before `undone`. Answers with the full list. */
   updateAchievementMarks: (id: number, body: { done?: number[]; undone?: number[] }) =>
-    requestJson<AchievementMarksResponse>(`/api/accounts/${id}/achievement-marks`, {
-      method: 'PATCH',
-      json: body,
-    }),
+    accountWrite(id, () =>
+      requestJson<AchievementMarksResponse>(`/api/accounts/${id}/achievement-marks`, {
+        method: 'PATCH',
+        json: body,
+      }),
+    ),
   /** Anecdote ids marked done by hand (captured ones come from snapshots). */
   anecdoteMarks: (id: number) =>
-    requestJson<AnecdoteMarksResponse>(`/api/accounts/${id}/anecdote-marks`),
+    requestJson<AnecdoteMarksResponse>(accountRead(id, 'anecdote-marks')),
   /** `done` is applied before `undone`. Answers with the full list. */
   updateAnecdoteMarks: (id: number, body: { done?: number[]; undone?: number[] }) =>
-    requestJson<AnecdoteMarksResponse>(`/api/accounts/${id}/anecdote-marks`, {
-      method: 'PATCH',
-      json: body,
-    }),
+    accountWrite(id, () =>
+      requestJson<AnecdoteMarksResponse>(`/api/accounts/${id}/anecdote-marks`, {
+        method: 'PATCH',
+        json: body,
+      }),
+    ),
   /** The stored wish history (chunks the page decodes); the browser revalidates it by ETag. */
-  wishHistory: (id: number) => requestJson<WishHistoryResponse>(`/api/accounts/${id}/wishes`),
+  wishHistory: (id: number) => requestJson<WishHistoryResponse>(accountRead(id, 'wishes')),
   /** Records converted from a UIGF or paimon.moe file, merged by id. */
   importWishes: (id: number, body: { uid?: string; timezone?: number; records: WishRecord[] }) =>
-    requestJson<WishImportResponse>(`/api/accounts/${id}/wishes/import`, {
-      method: 'POST',
-      json: body,
-    }),
+    accountWrite(id, () =>
+      requestJson<WishImportResponse>(`/api/accounts/${id}/wishes/import`, {
+        method: 'POST',
+        json: body,
+      }),
+    ),
   /** One page of the game's wish history API through the tracker's proxy (the wish link import). */
   fetchWishPage: (
     body: { url: string; gachaType: number; page: number; endId: string },
@@ -307,33 +318,39 @@ export const api = {
       data: { list: WishRecord[]; region?: string } | null
     }>('/api/wishes/fetch-page', { method: 'POST', json: body, signal }),
   deleteWishes: (id: number) =>
-    requestJson<{ deleted: number }>(`/api/accounts/${id}/wishes`, { method: 'DELETE' }),
+    accountWrite(id, () =>
+      requestJson<{ deleted: number }>(`/api/accounts/${id}/wishes`, { method: 'DELETE' }),
+    ),
   plannerTargets: (id: number) =>
-    requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`),
+    requestJson<PlannerTargetsResponse>(accountRead(id, 'planner-targets')),
   /** `remove` is applied before `upsert`. Answers with every goal. */
   updatePlannerTargets: (id: number, body: z.input<typeof plannerTargetsPatch>) =>
-    requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`, {
-      method: 'PATCH',
-      json: body,
-    }),
+    accountWrite(id, () =>
+      requestJson<PlannerTargetsResponse>(`/api/accounts/${id}/planner-targets`, {
+        method: 'PATCH',
+        json: body,
+      }),
+    ),
   /** Hand edits on top of the newest capture: material counts, goals' current state. */
-  plannerState: (id: number) =>
-    requestJson<PlannerStateResponse>(`/api/accounts/${id}/planner-state`),
+  plannerState: (id: number) => requestJson<PlannerStateResponse>(accountRead(id, 'planner-state')),
   /** All or nothing; a 409 `capture_changed` when `base` is no longer the newest capture. */
   updatePlannerState: (id: number, body: z.input<typeof plannerStatePatch>) =>
-    requestJson<PlannerStateResponse>(`/api/accounts/${id}/planner-state`, {
-      method: 'PATCH',
-      json: body,
-    }),
+    accountWrite(id, () =>
+      requestJson<PlannerStateResponse>(`/api/accounts/${id}/planner-state`, {
+        method: 'PATCH',
+        json: body,
+      }),
+    ),
   /** Built-in tasks' state and the player's own tasks. */
-  plannerTasks: (id: number) =>
-    requestJson<PlannerTasksResponse>(`/api/accounts/${id}/planner-tasks`),
+  plannerTasks: (id: number) => requestJson<PlannerTasksResponse>(accountRead(id, 'planner-tasks')),
   /** `remove` is applied before `upsert`; each task is written whole. Answers with every task. */
   updatePlannerTasks: (id: number, body: z.input<typeof plannerTasksPatch>) =>
-    requestJson<PlannerTasksResponse>(`/api/accounts/${id}/planner-tasks`, {
-      method: 'PATCH',
-      json: body,
-    }),
+    accountWrite(id, () =>
+      requestJson<PlannerTasksResponse>(`/api/accounts/${id}/planner-tasks`, {
+        method: 'PATCH',
+        json: body,
+      }),
+    ),
 
   // ------------------------------------------------------------- snapshots
   /** Uploads one GOOD file. `gzip` sends it compressed (the server inflates). */
@@ -375,7 +392,8 @@ export const api = {
   // ------------------------------------------------------------- live sync
   /** The open journal since the newest snapshot (ETag: a 304 costs no body). */
   live: (id: number) => requestJson<LiveJournalResponse>(`/api/accounts/${id}/live`),
-  deleteLive: (id: number) => requestJson<void>(`/api/accounts/${id}/live`, { method: 'DELETE' }),
+  deleteLive: (id: number) =>
+    accountWrite(id, () => requestJson<void>(`/api/accounts/${id}/live`, { method: 'DELETE' })),
   /** Chart points between two UTC days (YYYY-MM-DD; default: the last 400 days). */
   points: (id: number, range: { from?: string; to?: string } = {}) => {
     const query = new URLSearchParams()

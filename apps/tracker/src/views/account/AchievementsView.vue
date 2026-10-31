@@ -51,7 +51,7 @@ import { readJson, writeJson } from '@/lib/storage'
 import { t } from '@/i18n'
 import { locale } from '@/i18n/locale'
 import { useFeedback } from '@/stores/feedback'
-import { useAccount } from './context'
+import { useAccount, useReadOnly } from './context'
 
 /**
  * Achievements: done = the newest snapshot that has achievements (irminsul
@@ -336,11 +336,16 @@ function undoAction(done: number[], undone: number[]) {
   return { label: t('achievements.undo'), run: () => void marks.change(done, undone) }
 }
 
+/** Staff Inspect and viewers: the marks show, nothing is marked. */
+const readOnly = useReadOnly()
+
 function mark(ids: number[]) {
+  if (readOnly) return
   keep(ids)
   void marks.change(ids)
 }
 function unmark(ids: number[]) {
+  if (readOnly) return
   keep(ids)
   void marks.change([], ids)
 }
@@ -412,7 +417,7 @@ async function importIds(ids: number[]): Promise<boolean> {
           {{ $t('achievements.notCaptured') }}
         </p>
       </template>
-      <template #actions>
+      <template v-if="!readOnly" #actions>
         <UiButton
           :disabled="!ready"
           :title="$t('achievements.importTitle')"
@@ -464,8 +469,8 @@ async function importIds(ids: number[]): Promise<boolean> {
             :shown="shownCount"
             :total="summary.total"
             :filtered="filtered"
-            :to-mark="toMark.length"
-            :to-unmark="toUnmark.length"
+            :to-mark="readOnly ? 0 : toMark.length"
+            :to-unmark="readOnly ? 0 : toUnmark.length"
             @clear="clearFilters"
             @mark-all="markAll"
             @unmark-all="unmarkAll"

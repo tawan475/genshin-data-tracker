@@ -20,7 +20,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import UiError from '@/components/ui/UiError.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
-import { useAccount } from './context'
+import { useAccount, useAccountRoute } from './context'
 import { t } from '@/i18n'
 
 /**
@@ -33,6 +33,7 @@ import { t } from '@/i18n'
  */
 const route = useRoute()
 const account = useAccount()
+const accountRoute = useAccountRoute()
 
 const tab = computed(() => (isCollectionTab(route.params.tab) ? route.params.tab : null))
 const title = computed(() =>
@@ -77,7 +78,7 @@ const part = computed(() => {
       <div class="mb-4 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
         <UiIconButton
           :label="$t('collections.title')"
-          :to="{ name: 'account-collections', params: { accountId: account.id } }"
+          :to="{ name: accountRoute('account-collections'), params: { accountId: account.id } }"
         >
           <ArrowLeft class="size-5" aria-hidden="true" />
         </UiIconButton>

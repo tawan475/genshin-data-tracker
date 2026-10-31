@@ -39,8 +39,9 @@ import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
 import { travelerGender } from '@/data/traveler'
 import { gameIcon } from '@/lib/assets'
+import type { AccountRef } from '@/data/account-data'
 import { useAccounts } from '@/stores/accounts'
-import { useAccount } from './context'
+import { useAccount, useAccountRoute, useReadOnly } from './context'
 
 /**
  * The account dashboard: latest figures, history charts, monthly analysis
@@ -58,7 +59,8 @@ useIntervalFn(() => (nowMs.value = Date.now()), 60_000)
 watch(
   () => account.value.id,
   (id) => {
-    if (accounts.readWithin(30_000)) return
+    // Staff Inspect reads the account when a page opens (it is not in the list).
+    if ((account.value as AccountRef).source === 'staff' || accounts.readWithin(30_000)) return
     accounts.reload(id).catch(() => undefined)
   },
   { immediate: true },
@@ -298,6 +300,7 @@ const meta = computed<MetaItem[]>(() => {
   return items
 })
 
+const readOnly = useReadOnly()
 const importRoute = computed(() => ({
   name: 'account-import',
   params: { accountId: account.value.id },
@@ -319,7 +322,7 @@ const importRoute = computed(() => ({
   <UiPanel v-if="!account.latest" flush>
     <UiEmpty :title="$t('overview.noSnapshots')">
       <template #icon><History aria-hidden="true" /></template>
-      <UiButton variant="primary" :to="importRoute">
+      <UiButton v-if="!readOnly" variant="primary" :to="importRoute">
         <Upload class="size-4" aria-hidden="true" />
         {{ $t('overview.import') }}
       </UiButton>

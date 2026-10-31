@@ -248,10 +248,11 @@ export function loadLive(account: AccountRef): Promise<LiveJournalResponse | nul
 export function loadPoints(
   account: AccountRef,
 ): Promise<{ at: number; figures: SnapshotSummary }[]> {
-  if (!account.liveSync || account.source === 'staff') return Promise.resolve([])
+  if (!account.liveSync) return Promise.resolve([])
   return cached(account, `points:${liveVersion(account)}`, async () => {
     try {
-      return (await api.points(account.id)).points
+      const read = account.source === 'staff' ? api.staff.points : api.points
+      return (await read(account.id)).points
     } catch {
       // The charts still have every snapshot.
       return []

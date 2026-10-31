@@ -793,6 +793,47 @@ describe('inspect', () => {
     expect(await status(admin.client, `/api/staff/accounts/${theirs.account.id}/bundle`)).toBe(403)
   })
 
+  it("reads the owner's other pages as their own routes do", async () => {
+    const admin = await member('Admin')
+    const user = await member()
+    const { account, importKey } = await createAccount(user.client)
+    await importByKey(importKey, sampleGood(), 1_000)
+    const own = (path: string) => user.client.json(`/api/accounts/${account.id}/${path}`)
+    const staff = (path: string) => admin.client.json(`/api/staff/accounts/${account.id}/${path}`)
+    await user.client.json(`/api/accounts/${account.id}/achievement-marks`, {
+      method: 'PATCH',
+      json: { done: [80001] },
+    })
+    await user.client.json(`/api/accounts/${account.id}/settings`, {
+      method: 'PATCH',
+      json: { traveler: 'M' },
+    })
+    for (const path of [
+      'settings',
+      'achievement-marks',
+      'anecdote-marks',
+      'planner-targets',
+      'planner-state',
+      'planner-tasks',
+      'wishes',
+    ]) {
+      expect(await staff(path), path).toEqual(await own(path))
+    }
+    expect(await staff('points')).toEqual({ points: [] })
+    // Logged like the other data looks: one row for the window.
+    const views = (await auditRows(user.me.id)).map((r) => JSON.parse(r.detail).view)
+    expect(views).toEqual(['settings'])
+    // Without data.inspect, nothing.
+    const moderator = await member('Moderator')
+    expect(await status(moderator.client, `/api/staff/accounts/${account.id}/wishes`)).toBe(404)
+    // Inspect opens the new pages.
+    const opened = await admin.client.json<StaffInspectResponse>(
+      `/api/staff/accounts/${account.id}/inspect`,
+      { method: 'POST', json: { view: 'planner' } },
+    )
+    expect(opened.account.id).toBe(account.id)
+  })
+
   it('logs a direct data read too, once per window', async () => {
     const admin = await member('Admin')
     const user = await member()

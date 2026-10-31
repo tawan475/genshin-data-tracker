@@ -8,7 +8,7 @@ import { collectionFigures } from '@/data/collection-summary'
 import type { CapturedCollections } from '@/data/collections'
 import { loadSpincrystals } from '@/data/spincrystals'
 import { useResource } from '@/data/use-resource'
-import { useAccount } from '@/views/account/context'
+import { useAccount, useAccountRoute } from '@/views/account/context'
 import { t } from '@/i18n'
 
 /**
@@ -24,8 +24,9 @@ const props = defineProps<{
 }>()
 
 const account = useAccount()
+const accountRoute = useAccountRoute()
 const to = (name: string, tab?: string) => ({
-  name,
+  name: accountRoute(name),
   params: { accountId: account.value.id, ...(tab ? { tab } : {}) },
 })
 const spincrystals = useResource(

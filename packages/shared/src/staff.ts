@@ -113,6 +113,11 @@ export const INSPECT_VIEWS = [
   'artifacts',
   'materials',
   'snapshots',
+  // Appended 2026-10-31: Inspect shows every page the owner's app has.
+  'overview',
+  'planner',
+  'collections',
+  'wishes',
 ] as const
 export type InspectView = (typeof INSPECT_VIEWS)[number]
 export const inspectRequest = z.object({ view: z.enum(INSPECT_VIEWS) })

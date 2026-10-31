@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ACCOUNT_SETTINGS_DEFAULTS, type InspectView, type StaffInspectResponse } from '@gdt/shared'
-import { computed, shallowRef, watch } from 'vue'
+import type { InspectView, StaffInspectResponse } from '@gdt/shared'
+import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
 import UiBadge from '@/components/ui/UiBadge.vue'
@@ -9,18 +9,21 @@ import UiError from '@/components/ui/UiError.vue'
 import UiSegmented from '@/components/ui/UiSegmented.vue'
 import UiSkeleton from '@/components/ui/UiSkeleton.vue'
 import { api } from '@/api'
-import { travelerGender } from '@/data/traveler'
+import { endInspect, startInspect } from '@/api/inspect'
+import { ACCOUNT_SECTIONS } from '@/components/shell/nav'
+import { loadTraveler } from '@/data/traveler'
 import { t } from '@/i18n'
-import { loadGameIcons, setTravelerGender } from '@/lib/assets'
+import { loadGameIcons } from '@/lib/assets'
 import { formatDateTime, formatNumber, formatRelative } from '@/lib/format'
 import { useSession } from '@/stores/session'
 import { provideAccount } from '@/views/account/context'
 
 /**
- * Someone's account through staff eyes: the owner's own Characters,
- * Weapons, Artifacts, Materials and Snapshots pages, read-only (nothing is
- * saved, their settings are not read), with a banner saying whose it is.
- * Every page opened is written to the audit log (the server does it).
+ * Someone's account through staff eyes: every page of the owner's own app,
+ * in its order (Overview to Snapshots), read-only (nothing is saved: the
+ * account's writes are refused before they are sent, `api/inspect.ts`), with
+ * a banner saying whose it is. Their reads go to the staff routes; every
+ * page opened is written to the audit log (the server does it).
  */
 const route = useRoute()
 const router = useRouter()
@@ -41,12 +44,22 @@ async function open(id: number, page: InspectView) {
   }
 }
 
+// The pages' account calls go to the staff routes (before any page reads).
+watch(
+  accountId,
+  (id, before) => {
+    if (before !== undefined) endInspect(before)
+    startInspect(id)
+    // The owner's Traveler twin, from their settings.
+    void loadTraveler(id)
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => endInspect(accountId.value))
+
 // Logged on every page opened, as the plan asks (the data reads log too).
 watch([accountId, view], ([id, page]) => void open(id, page), { immediate: true })
 
-// Portraits: the default Traveler (the owner's choice is in their settings).
-travelerGender.value = ACCOUNT_SETTINGS_DEFAULTS.traveler
-setTravelerGender(ACCOUNT_SETTINGS_DEFAULTS.traveler)
 loadGameIcons().catch(() => {})
 
 const account = computed(() =>
@@ -70,9 +83,12 @@ provideAccount(
   },
 )
 
-const VIEWS: InspectView[] = ['characters', 'weapons', 'artifacts', 'materials', 'snapshots']
+/** The owner's sidebar, but Manage (their settings, keys and sharing). */
 const tabs = computed(() =>
-  VIEWS.map((value) => ({ value, label: t(`staff.inspect.tabs.${value}`) })),
+  ACCOUNT_SECTIONS.filter((s) => s.name !== 'account-settings').map((s) => ({
+    value: s.name.slice('account-'.length) as InspectView,
+    label: t(`shell.nav.${s.label}`),
+  })),
 )
 const tab = computed({
   get: () => view.value,

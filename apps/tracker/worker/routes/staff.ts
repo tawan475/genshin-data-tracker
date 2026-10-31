@@ -23,8 +23,10 @@ import {
   STAFF_USER_SORTS,
   STORAGE_SORTS,
   STORAGE_WINDOWS,
+  ACCOUNT_SETTINGS_DEFAULTS,
   AUDIT_KINDS,
   bulkUsersRequest,
+  deepMerge,
   deleteUserRequest,
   inspectRequest,
   purgeRequest,
@@ -38,7 +40,9 @@ import {
   suspendRequest,
   uploadsBlockRequest,
   userRoleRequest,
+  type AccountSettingsResponse,
   type AuditKind,
+  type LivePointsResponse,
   type StaffAuditResponse,
   type StaffInspectResponse,
   type StaffMeResponse,
@@ -58,6 +62,7 @@ import {
   deleteLiveData,
   endJournalOn,
   liveBytesByUser,
+  readPoints,
   liveDb,
   readJournal,
 } from '../services/live-sync'
@@ -123,7 +128,15 @@ import {
 } from '../services/staff-deps'
 import { lastEventsSync, syncGameEvents } from '../services/game-events'
 import { deleteUsers } from '../services/user-delete'
-import { UPLOAD_SETTING_KEYS } from '../services/upload-limits'
+import { UPLOAD_SETTING_KEYS, utcDay } from '../services/upload-limits'
+import { readWishHistory } from '../services/wishes'
+import {
+  readAchievementMarks,
+  readAnecdoteMarks,
+  readPlannerState,
+  readPlannerTargets,
+  readPlannerTasks,
+} from './progress'
 
 declare const __BUILD__:
   | { version: string; commit: string; dirty: boolean; builtAt: string }
@@ -835,6 +848,60 @@ export const staff = new Hono<AppEnv>()
     const live = liveDb(c.env)
     if (!live) return c.json<LiveJournalResponse>({ open: false })
     return c.json<LiveJournalResponse>((await readJournal(live, account.id)).response)
+  })
+
+  // The owner's other pages (Overview, Planner, Collections, Wishes), read
+  // the way their own routes read them; logged like the looks above.
+
+  .get('/accounts/:id/settings', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'settings')
+    const row = await c.env.DB.prepare('SELECT settings FROM genshin_accounts WHERE id = ?1')
+      .bind(account.id)
+      .first<{ settings: string | null }>()
+    const stored = row?.settings ? (JSON.parse(row.settings) as object) : {}
+    return c.json<AccountSettingsResponse>({
+      settings: deepMerge(ACCOUNT_SETTINGS_DEFAULTS, stored),
+    })
+  })
+
+  .get('/accounts/:id/points', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'points')
+    const live = liveDb(c.env)
+    const to = utcDay(Date.now())
+    const from = utcDay(Date.now() - 400 * 86_400_000)
+    return c.json<LivePointsResponse>({
+      points: live ? await readPoints(live, account.id, from, to) : [],
+    })
+  })
+
+  .get('/accounts/:id/achievement-marks', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'achievements')
+    return c.json(await readAchievementMarks(c.env.DB, account.id))
+  })
+
+  .get('/accounts/:id/anecdote-marks', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'anecdotes')
+    return c.json(await readAnecdoteMarks(c.env.DB, account.id))
+  })
+
+  .get('/accounts/:id/planner-targets', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'planner')
+    return c.json(await readPlannerTargets(c.env.DB, account.id))
+  })
+
+  .get('/accounts/:id/planner-state', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'planner')
+    return c.json(await readPlannerState(c.env.DB, account.id))
+  })
+
+  .get('/accounts/:id/planner-tasks', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'planner')
+    return c.json(await readPlannerTasks(c.env.DB, account.id))
+  })
+
+  .get('/accounts/:id/wishes', need('data.inspect'), async (c) => {
+    const { account } = await inspectGate(c, 'wishes')
+    return c.json(await readWishHistory(c.env.DB, account.id))
   })
 
   // ----------------------------------------------------------------- storage

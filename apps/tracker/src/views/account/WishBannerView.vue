@@ -20,7 +20,7 @@ import { useWishStats } from '@/components/wishes/use-wish-stats'
 import { WISH_BANNERS, bannerBySlug } from '@/components/wishes/wish-labels'
 import { HARD_PITY, PRIMOS_PER_PULL, SOFT_PITY } from '@/data/wish-history'
 import { formatNumber } from '@/lib/format'
-import { useAccount } from './context'
+import { useAccount, useAccountRoute } from './context'
 
 /**
  * One banner's wish history: three tiles (lifetime pulls; the 5★ pity with
@@ -42,11 +42,12 @@ const hard = computed(() => HARD_PITY[info.value.banner])
 const soft = computed(() => SOFT_PITY[info.value.banner])
 const left = computed(() => hard.value[0] - (stats.value?.pity5 ?? 0))
 
+const accountRoute = useAccountRoute()
 const banner = computed({
   get: () => info.value.slug,
   set: (slug: string) =>
     void router.replace({
-      name: 'account-wishes-banner',
+      name: accountRoute('account-wishes-banner'),
       params: { ...route.params, banner: slug },
     }),
 })
@@ -75,7 +76,7 @@ function retry() {
     <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-3">
       <UiIconButton
         :label="$t('wishes.title')"
-        :to="{ name: 'account-wishes', params: { accountId: account.id } }"
+        :to="{ name: accountRoute('account-wishes'), params: { accountId: account.id } }"
       >
         <ArrowLeft class="size-5" aria-hidden="true" />
       </UiIconButton>

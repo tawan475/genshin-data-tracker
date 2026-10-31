@@ -5,6 +5,7 @@
 
 import type {
   LiveJournalResponse,
+  LivePointsResponse,
   DomainEventWindow,
   AuditKind,
   CatalogRow,
@@ -118,6 +119,8 @@ export const staffApi = {
   catalog: (id: number) => requestJson<CatalogRow[]>(`${account(id)}/catalog`),
   /** The account's open live sync journal (logged like the other data looks). */
   live: (id: number) => requestJson<LiveJournalResponse>(`${account(id)}/live`),
+  /** Live sync's chart points of the last 400 days (logged like the other data looks). */
+  points: (id: number) => requestJson<LivePointsResponse>(`${account(id)}/points`),
   /** Always GDT2 (the app's layout). */
   bundle: async (id: number, options: { ids?: number[]; sections?: string[] } = {}) => {
     const qs = query({ ids: options.ids?.join(','), sections: options.sections?.join(',') })

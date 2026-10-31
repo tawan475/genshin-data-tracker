@@ -154,7 +154,7 @@ import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
 import { materialName } from '@/utils/materials'
-import { useAccount } from './context'
+import { useAccount, useAccountRoute, useReadOnly } from './context'
 
 /**
  * Planner: goals per character (level, ascension, talents) and weapon, extra
@@ -270,7 +270,11 @@ const condensed = computed(() => {
   return { count: c?.key ? Math.max(0, bag.value?.[c.key] ?? 0) : 0, max: c?.max ?? 0 }
 })
 const plannerUrl = computed(
-  () => router.resolve({ name: 'account-planner', params: { accountId: account.value.id } }).href,
+  () =>
+    router.resolve({
+      name: accountRoute('account-planner'),
+      params: { accountId: account.value.id },
+    }).href,
 )
 const accountLabel = computed(
   () => account.value.name ?? account.value.uid ?? t('planner.view.accountFallback'),
@@ -1547,6 +1551,9 @@ watch(accountId, () => {
 
 // ------------------------------------------------------------------ chrome
 
+const accountRoute = useAccountRoute()
+/** Staff Inspect and viewers: shown, nothing saved (a write is refused). */
+const readOnly = useReadOnly()
 const importTo = computed(() => ({
   name: 'account-import',
   params: { accountId: account.value.id },
@@ -1590,9 +1597,12 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
         <p v-if="!hasCapture || !account.latest" class="flex items-center gap-1.5">
           <Info class="size-4" aria-hidden="true" />
           {{ $t('planner.view.noCapture') }}
-          <RouterLink :to="importTo" class="font-medium text-accent-text hover:underline">{{
-            $t('planner.view.import')
-          }}</RouterLink>
+          <RouterLink
+            v-if="!readOnly"
+            :to="importTo"
+            class="font-medium text-accent-text hover:underline"
+            >{{ $t('planner.view.import') }}</RouterLink
+          >
         </p>
         <p v-if="replaced" class="flex items-center gap-1.5 text-accent-text">
           <Info class="size-4" aria-hidden="true" />
@@ -1684,7 +1694,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           <FileInput class="size-4" aria-hidden="true" />
           {{ $t('planner.view.importSeelie') }}
         </UiButton>
-        <UiButton v-if="!hasCapture" :to="importTo">
+        <UiButton v-if="!hasCapture && !readOnly" :to="importTo">
           <Upload class="size-4" aria-hidden="true" />
           {{ $t('planner.view.importCapture') }}
         </UiButton>
