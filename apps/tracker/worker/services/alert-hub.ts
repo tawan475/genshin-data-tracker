@@ -124,14 +124,16 @@ export async function reloadDevices(hub: HubContext, userId: number): Promise<De
   const rows = await pushRows(hub, userId)
   const devices = [...new Map(rows.map((r) => [r.sid, { sid: r.sid, alerts: r.alerts }])).values()]
   await hub.storage.put('devices', devices)
-  await hub.db
-    .prepare(
-      devices.length
-        ? 'UPDATE users SET alerts_on = ?2 WHERE id = ?1 AND alerts_on IS NULL'
-        : 'UPDATE users SET alerts_on = NULL WHERE id = ?1 AND alerts_on IS NOT NULL',
-    )
-    .bind(userId, hub.now())
-    .run()
+  // D1 refuses a value bound to no placeholder: each query binds what it uses.
+  await (
+    devices.length
+      ? hub.db
+          .prepare('UPDATE users SET alerts_on = ?2 WHERE id = ?1 AND alerts_on IS NULL')
+          .bind(userId, hub.now())
+      : hub.db
+          .prepare('UPDATE users SET alerts_on = NULL WHERE id = ?1 AND alerts_on IS NOT NULL')
+          .bind(userId)
+  ).run()
   return devices
 }
 

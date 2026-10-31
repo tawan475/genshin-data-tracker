@@ -34,7 +34,13 @@ import { keyOwner, sessionOwner, uploaderUserId } from '../lib/uploader'
 import { vapidKeys, type VapidVars } from '../lib/web-push'
 import { loadAccount, pickByUid, type UploadOwner } from '../services/accounts'
 import type { FactsUpdate } from '../services/alerts'
-import { liveHub, listenerOf, listenerStatement, tellAlertFacts } from '../services/live'
+import {
+  devicesChanged,
+  liveHub,
+  listenerOf,
+  listenerStatement,
+  tellAlertFacts,
+} from '../services/live'
 
 const vars = (c: Context<AppEnv>) => c.env as unknown as VapidVars
 
@@ -78,7 +84,7 @@ export const push = new Hono<AppEnv>()
         )
         .bind(sid, userId, JSON.stringify({ ...readDeviceAlerts(null), tz: body.tz ?? null })),
     ])
-    if (c.env.LIVE) await liveHub(c.env, userId).devicesChanged(userId)
+    await devicesChanged(c, userId)
     return c.body(null, 204)
   })
 
@@ -88,7 +94,7 @@ export const push = new Hono<AppEnv>()
     await c.env.DB.prepare('DELETE FROM push_subscriptions WHERE user_id = ?1 AND endpoint = ?2')
       .bind(userId, endpoint)
       .run()
-    if (c.env.LIVE) await liveHub(c.env, userId).devicesChanged(userId)
+    await devicesChanged(c, userId)
     return c.body(null, 204)
   })
 

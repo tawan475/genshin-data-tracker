@@ -51,7 +51,7 @@ import { auditStatement } from '../services/audit'
 import { closeResetLinks, mailVerification } from '../services/auth-tokens'
 import { editableBy } from '../services/accounts'
 import { listIdentities, unlinkIdentity } from '../services/identities'
-import { liveHub } from '../services/live'
+import { devicesChanged } from '../services/live'
 import { meFromResults, meStatements, type MeSource } from '../services/me'
 import { userPermissions } from '../services/roles'
 import { signupMode } from '../services/staff-deps'
@@ -372,7 +372,7 @@ export const auth = new Hono<AppEnv>()
           'UPDATE users SET alerts_on = ?2 WHERE id = ?1 AND alerts_on IS NULL',
         ).bind(userId, Date.now()),
       ])
-      if (c.env.LIVE) await liveHub(c.env, userId).devicesChanged(userId)
+      await devicesChanged(c, userId)
       answer.alerts = next
     }
     return c.json(answer)

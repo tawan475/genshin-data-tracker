@@ -201,6 +201,93 @@ describe('alerts on every device', () => {
     expect(await hub.alarmAt()).toBeNull()
   })
 
+  it('saves the alerts of a Capture device when no browser has push', async () => {
+    const { client, me } = await setup()
+    const now = Date.now()
+    const { results } = await env.DB.prepare(
+      `INSERT INTO user_sessions (user_id, method, device_name, created_at, last_seen_at, expires_at,
+         upload_mode) VALUES (?1, 'irminsul', 'PC-01', ?2, ?2, ?3, 'uid') RETURNING id`,
+    )
+      .bind(me.id, now, now + 86_400_000)
+      .all<{ id: number }>()
+    const saved = await client.fetch(`/api/auth/sessions/${results[0]!.id}`, {
+      method: 'PATCH',
+      json: { alerts: { resin: 190, resinFull: true } },
+    })
+    expect(saved.status).toBe(200)
+    // The hub itself read the devices (none with push) without an error.
+    await liveHub(env, me.id).devicesChanged(me.id)
+    const flag = await env.DB.prepare('SELECT alerts_on FROM users WHERE id = ?1')
+      .bind(me.id)
+      .first<{ alerts_on: number | null }>()
+    expect(flag!.alerts_on).toBeNull()
+  })
+
+  it('saves the alerts of a Capture device while the hub holds every kind of fact', async () => {
+    const { client, me, importKey } = await setup()
+    await subscribe(client)
+    // Alerts on this browser too, so the hub schedules over real facts.
+    const [here] = (await client.json<SessionResponse[]>('/api/auth/sessions')).filter(
+      (s) => s.current,
+    )
+    await client.json(`/api/auth/sessions/${here!.id}`, {
+      method: 'PATCH',
+      json: {
+        alerts: { resin: 160, expeditions: true, welkin: true, commissions: true, bargains: true },
+      },
+    })
+    const now = Date.now()
+    const nowS = Math.floor(now / 1000)
+    await call(`${ORIGIN}/api/genshin-accounts-public/import-by-key`, {
+      method: 'POST',
+      headers: { 'x-import-key': importKey },
+      body: irminsulForm(
+        sampleGood({
+          ...sampleExtras(),
+          gi_tasks: {
+            resin: { value: 109, nextAt: nowS + 200 },
+            commissions: { finished: 4, total: 4, claimed: true },
+            expeditions: [
+              {
+                character: 'Xiangling',
+                id: 202,
+                start: nowS - 3600,
+                hours: 20,
+                doneAt: nowS + 60_000,
+              },
+            ],
+            realm: { value: 2_040, limit: 2_400 },
+            welkin: { days: 40 },
+            weeklyBosses: { left: 3, limit: 3, cost: 30, fullCost: 60, used: 0 },
+            bargains: { at: nowS - 100, bought: false, fates: [] },
+          },
+        }),
+        now,
+      ),
+    })
+    const { results } = await env.DB.prepare(
+      `INSERT INTO user_sessions (user_id, method, device_name, created_at, last_seen_at, expires_at,
+         upload_mode) VALUES (?1, 'irminsul', 'PC-01', ?2, ?2, ?3, 'uid') RETURNING id`,
+    )
+      .bind(me.id, now, now + 86_400_000)
+      .all<{ id: number }>()
+    const capture = results[0]!.id
+    const saved = await client.fetch(`/api/auth/sessions/${capture}`, {
+      method: 'PATCH',
+      json: { alerts: { resin: 190 } },
+    })
+    expect(saved.status).toBe(200)
+    const full = await client.fetch(`/api/auth/sessions/${capture}`, {
+      method: 'PATCH',
+      json: { alerts: { resinFull: true } },
+    })
+    expect(full.status).toBe(200)
+    expect(((await full.json()) as { alerts: DeviceAlerts }).alerts).toMatchObject({
+      resin: 190,
+      resinFull: true,
+    })
+  })
+
   it('takes facts from the Planner only for users with alerts', async () => {
     const { client, account } = await setup()
     const before = await client.json<{ alerts: boolean }>(

@@ -513,6 +513,20 @@ export function notifyAccount(
 }
 
 /**
+ * A device's alerts or push subscription changed: the user's hub reads them
+ * again. Awaited, but never failing the request: the change is already in
+ * D1, and the hub reads it again at its next fact or alarm.
+ */
+export async function devicesChanged(c: Context<AppEnv>, userId: number): Promise<void> {
+  if (!c.env.LIVE) return
+  try {
+    await liveHub(c.env, userId).devicesChanged(userId)
+  } catch (error) {
+    console.error('alerts_hub_failed', String(error), (error as Error)?.stack ?? '')
+  }
+}
+
+/**
  * Tells the hubs of everyone who can see the account and has alerts on what
  * a write learnt about it (docs/plans/capture-link.md), after the response.
  * Nothing at all when nobody has alerts, or the update says nothing.
