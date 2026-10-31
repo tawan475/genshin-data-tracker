@@ -269,7 +269,7 @@
     "toGuaranteed4": "4★ 확정까지 {n}"
   },
   "bargains": {
-    "resets": "{date} 재입고",
+    "resets": "{date} 재입고 · {time}",
     "stale": "게임에서 {shop}을(를) 열면 이번 달 남은 수량이 표시됩니다",
     "noLimit": "제한 없음",
     "each": "개당 {cost}",

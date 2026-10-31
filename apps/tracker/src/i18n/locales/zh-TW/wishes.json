@@ -269,7 +269,7 @@
     "toGuaranteed4": "距必出 4★ {n} 抽"
   },
   "bargains": {
-    "resets": "{date} 補貨",
+    "resets": "{date} 補貨 · {time}",
     "stale": "在遊戲中打開{shop}即可查看本月剩餘",
     "noLimit": "無限制",
     "each": "每個 {cost}",

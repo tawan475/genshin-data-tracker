@@ -269,7 +269,7 @@
     "toGuaranteed4": "{n} to the guaranteed 4★"
   },
   "bargains": {
-    "resets": "Back in stock {date}",
+    "resets": "Back in stock {date} · {time}",
     "stale": "Open {shop} in the game to see what is left this month",
     "noLimit": "No limit",
     "each": "{cost} each",

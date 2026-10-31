@@ -269,7 +269,7 @@
     "toGuaranteed4": "{n} avant le 4★ garanti"
   },
   "bargains": {
-    "resets": "Réapprovisionné le {date}",
+    "resets": "Réapprovisionné le {date} · {time}",
     "stale": "Ouvrez {shop} dans le jeu pour voir ce qui reste ce mois-ci",
     "noLimit": "Sans limite",
     "each": "{cost} l'unité",

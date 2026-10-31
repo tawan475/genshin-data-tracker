@@ -269,7 +269,7 @@
     "toGuaranteed4": "Garantili 4★'a {n}"
   },
   "bargains": {
-    "resets": "{date} tarihinde yenilenir",
+    "resets": "{date} tarihinde yenilenir · {time}",
     "stale": "Bu ay kalanı görmek için oyunda {shop} menüsünü aç",
     "noLimit": "Sınırsız",
     "each": "Tanesi {cost}",

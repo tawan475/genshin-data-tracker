@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, shallowRef } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
 import type { GiTasks } from '@gdt/shared'
 import UiPanel from '@/components/ui/UiPanel.vue'
 import UiStat from '@/components/ui/UiStat.vue'
 import { useMaterialIcons } from '@/components/materials/use-material-icons'
-import { bargainsThisMonth, type BargainFate } from '@/components/planner/tasks'
+import { bargainsThisMonth, formatSpan, type BargainFate } from '@/components/planner/tasks'
 import { formatDate, formatDateTime, formatNumber } from '@/lib/format'
 import { materialName } from '@/utils/materials'
 
@@ -14,7 +15,8 @@ import { materialName } from '@/utils/materials'
  * player opens it): by currency (Stardust first, as the shop's tabs, with
  * how much of it is held), each Fate's count left of its monthly limit, its
  * price and how many the held currency still buys. Before the shop was seen
- * this month, a line asking to open it.
+ * this month, a line asking to open it. The restock line counts down to the
+ * reset, moving once a minute.
  */
 const props = defineProps<{
   bargains: GiTasks['bargains']
@@ -25,7 +27,10 @@ const props = defineProps<{
 }>()
 
 const icon = useMaterialIcons()
-const month = computed(() => bargainsThisMonth(props.bargains, props.now, props.server))
+const tick = shallowRef(Date.now())
+useIntervalFn(() => (tick.value = Date.now()), 60_000)
+const now = computed(() => Math.max(props.now, tick.value))
+const month = computed(() => bargainsThisMonth(props.bargains, now.value, props.server))
 const groups = computed(() => {
   const by = new Map<string, BargainFate[]>()
   for (const fate of month.value?.fates ?? []) {
@@ -47,7 +52,10 @@ function afford(fate: BargainFate, held: number): number {
     :title="$t('planner.task.builtin.bargains')"
     :description="
       month
-        ? $t('wishes.bargains.resets', { date: formatDate(month.resetsAt) })
+        ? $t('wishes.bargains.resets', {
+            date: formatDate(month.resetsAt),
+            time: formatSpan(month.resetsAt - now),
+          })
         : $t('wishes.bargains.stale', { shop: $t('planner.task.builtin.bargains') })
     "
   >

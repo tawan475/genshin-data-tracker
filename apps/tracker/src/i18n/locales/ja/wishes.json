@@ -269,7 +269,7 @@
     "toGuaranteed4": "★4 確定まであと {n}"
   },
   "bargains": {
-    "resets": "{date}に再入荷",
+    "resets": "{date}に再入荷 · {time}",
     "stale": "ゲーム内で{shop}を開くと今月の残りが表示されます",
     "noLimit": "制限なし",
     "each": "1つ {cost}",

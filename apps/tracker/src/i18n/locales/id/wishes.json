@@ -269,7 +269,7 @@
     "toGuaranteed4": "{n} lagi ke 4★ yang dijamin"
   },
   "bargains": {
-    "resets": "Stok kembali {date}",
+    "resets": "Stok kembali {date} · {time}",
     "stale": "Buka {shop} di game untuk melihat sisa bulan ini",
     "noLimit": "Tanpa batas",
     "each": "{cost} per buah",

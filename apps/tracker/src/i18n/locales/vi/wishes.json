@@ -269,7 +269,7 @@
     "toGuaranteed4": "Còn {n} tới 4★ chắc chắn"
   },
   "bargains": {
-    "resets": "Nhập hàng lại {date}",
+    "resets": "Nhập hàng lại {date} · {time}",
     "stale": "Mở {shop} trong game để xem số còn lại tháng này",
     "noLimit": "Không giới hạn",
     "each": "{cost} mỗi cái",
