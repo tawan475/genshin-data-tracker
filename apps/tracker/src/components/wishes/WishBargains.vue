@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
+import { computed, shallowRef, watch } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import type { GiTasks } from '@gdt/shared'
 import UiPanel from '@/components/ui/UiPanel.vue'
@@ -7,6 +7,7 @@ import UiStat from '@/components/ui/UiStat.vue'
 import { useMaterialIcons } from '@/components/materials/use-material-icons'
 import { bargainsThisMonth, formatSpan, type BargainFate } from '@/components/planner/tasks'
 import { formatDate, formatDateTime, formatNumber } from '@/lib/format'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { materialName } from '@/utils/materials'
 
 /**
@@ -27,6 +28,11 @@ const props = defineProps<{
 }>()
 
 const icon = useMaterialIcons()
+// Folded by default (the user's call): the header keeps the restock countdown;
+// opened, it stays open on this device.
+const OPEN_KEY = 'wishes:bargains-open'
+const open = shallowRef(readStorage(OPEN_KEY) === '1')
+watch(open, (value) => writeStorage(OPEN_KEY, value ? '1' : null))
 const tick = shallowRef(Date.now())
 useIntervalFn(() => (tick.value = Date.now()), 60_000)
 const now = computed(() => Math.max(props.now, tick.value))
@@ -49,6 +55,8 @@ function afford(fate: BargainFate, held: number): number {
 
 <template>
   <UiPanel
+    v-model:open="open"
+    collapsible
     :title="$t('planner.task.builtin.bargains')"
     :description="
       month
