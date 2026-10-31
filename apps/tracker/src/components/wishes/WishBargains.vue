@@ -89,7 +89,8 @@ function afford(fate: BargainFate, held: number): number {
                     / {{ formatNumber(fate.limit!) }}</span
                   ></span
                 >
-                <span v-else class="truncate text-sm font-medium text-text-secondary">{{
+                <!-- leading-7: the count's line height, so every tile is as tall -->
+                <span v-else class="truncate text-sm leading-7 font-medium text-text-secondary">{{
                   $t('wishes.bargains.noLimit')
                 }}</span>
               </template>
