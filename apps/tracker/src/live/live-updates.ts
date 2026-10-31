@@ -44,6 +44,7 @@ import { formatDateTime } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
+import { setPresence } from './presence'
 import { onTabMessage, postToTabs, tabsCanTalk, type TabMessage } from './channel'
 import { importingAccounts, onApplyPending, updatesHeld } from './holds'
 import { requestLeadership } from './leader'
@@ -220,6 +221,11 @@ export function useLiveUpdates(): void {
       // Live sync: the account's journal moved; its "now" views re-read it.
       liveSeenAt.set(event.accountId, Date.now())
       noteLiveChange(event.accountId)
+      return
+    }
+    if (event.type === 'presence') {
+      // Capture started, stopped or picked up a command: the pages showing it update.
+      setPresence(event.accountId, { presence: event.presence, pending: event.pending })
       return
     }
     if (event.type === 'wishes') {

@@ -142,7 +142,8 @@
     "blocked": "Engellendi: tarayıcı ayarlarından bu site için bildirimlere izin ver",
     "notifyAt": "Bildirim eşiği",
     "off": "Kapalı",
-    "whileOpen": "Site bu cihazda açıkken"
+    "whileOpen": "Site bu cihazda açıkken",
+    "alertPush": "Reçine uyarısı: bu cihaza push ile · Ayarlar → Cihazlar"
   },
   "artifacts": {
     "title": "Yadigarlar",

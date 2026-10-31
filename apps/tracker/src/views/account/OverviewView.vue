@@ -41,7 +41,8 @@ import { travelerGender } from '@/data/traveler'
 import { gameIcon } from '@/lib/assets'
 import type { AccountRef } from '@/data/account-data'
 import { useAccounts } from '@/stores/accounts'
-import { useAccount, useAccountRoute, useReadOnly } from './context'
+import CapturePresence from '@/components/live/CapturePresence.vue'
+import { useAccess, useAccount, useAccountRoute, useReadOnly } from './context'
 
 /**
  * The account dashboard: latest figures, history charts, monthly analysis
@@ -49,6 +50,7 @@ import { useAccount, useAccountRoute, useReadOnly } from './context'
  */
 const account = useAccount()
 const accounts = useAccounts()
+const access = useAccess()
 // Relative times ("3 hours ago") move on once a minute.
 const nowMs = shallowRef(Date.now())
 useIntervalFn(() => (nowMs.value = Date.now()), 60_000)
@@ -318,6 +320,13 @@ const importRoute = computed(() => ({
       </p>
     </template>
   </PageHeader>
+
+  <CapturePresence
+    class="mb-3"
+    :account-id="account.id"
+    :now="nowMs"
+    :can-act="!readOnly && access !== 'viewer'"
+  />
 
   <UiPanel v-if="!account.latest" flush>
     <UiEmpty :title="$t('overview.noSnapshots')">

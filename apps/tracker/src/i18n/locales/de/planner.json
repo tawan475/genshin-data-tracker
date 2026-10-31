@@ -142,7 +142,8 @@
     "blocked": "Blockiert: erlaube Benachrichtigungen für diese Seite in den Browser-Einstellungen",
     "notifyAt": "Melden bei",
     "off": "Aus",
-    "whileOpen": "Solange die Seite auf diesem Gerät offen ist"
+    "whileOpen": "Solange die Seite auf diesem Gerät offen ist",
+    "alertPush": "Harz-Hinweis: per Push auf dieses Gerät · Einstellungen → Geräte"
   },
   "artifacts": {
     "title": "Artefakte",

@@ -8,6 +8,7 @@ import { accounts } from './routes/accounts'
 import { admin } from './routes/admin'
 import { auth } from './routes/auth'
 import { bootstrap } from './routes/bootstrap'
+import { accountLink, captureLink, push } from './routes/capture-link'
 import { domainEvents, gameEvents } from './routes/domain-events'
 import { health } from './routes/health'
 import { irminsul } from './routes/irminsul'
@@ -65,6 +66,7 @@ app.route('/accounts', progress)
 app.route('/accounts', wishAccounts)
 app.route('/accounts', liveAccounts)
 app.route('/accounts', accountSharing)
+app.route('/accounts', accountLink)
 app.route('/invitations', invitations)
 app.route('/wishes', wishSync)
 app.route('/wishes', wishProxy)
@@ -72,8 +74,10 @@ app.route('/genshin-accounts-public', publicImport)
 app.route('/oauth', irminsulOAuth)
 // Before the Bearer-only irminsul router: batches also come with an import key.
 app.route('/irminsul', liveChanges)
+app.route('/irminsul', captureLink)
 app.route('/irminsul', irminsul)
 app.route('/live', live)
+app.route('/push', push)
 app.route('/admin', admin)
 app.route('/staff', staff)
 app.route('/domain-events', domainEvents)

@@ -142,7 +142,8 @@
     "blocked": "Bloccato: consenti le notifiche per questo sito nelle impostazioni del browser",
     "notifyAt": "Avvisa a",
     "off": "Disattivato",
-    "whileOpen": "Finché il sito è aperto su questo dispositivo"
+    "whileOpen": "Finché il sito è aperto su questo dispositivo",
+    "alertPush": "Avviso resina: via push su questo dispositivo · Impostazioni → Dispositivi"
   },
   "artifacts": {
     "title": "Manufatti",

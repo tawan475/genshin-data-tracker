@@ -183,7 +183,51 @@
     "browserOn": "{system}의 {browser}",
     "browserGeneric": "{system}의 브라우저",
     "unknownDevice": "알 수 없는 기기",
-    "all": "전체 {n}"
+    "all": "전체 {n}",
+    "alerts": {
+      "label": "알림",
+      "title": "이 기기가 받는 알림",
+      "off": "끔",
+      "none": "선택 안 함",
+      "resinShort": "레진 {n}",
+      "short": {
+        "resinFull": "레진 가득",
+        "expeditions": "탐사 파견",
+        "welkin": "공월 축복",
+        "commissions": "의뢰",
+        "bargains": "페이몬 상점"
+      },
+      "kind": {
+        "resinFull": "퓨어 레진 가득 참",
+        "expeditions": "탐사 파견 완료",
+        "welkin": "공월 축복: 3일 남음",
+        "commissions": "22:00까지 일일 의뢰 미완료",
+        "bargains": "더스트 라이트 교환: 월말 3일 전까지 구매 없음"
+      },
+      "notSaved": "알림을 저장하지 못했습니다",
+      "notOn": "알림을 켜지 못했습니다",
+      "result": {
+        "denied": "이 사이트의 알림이 차단되어 있습니다",
+        "unsupported": "이 브라우저는 알림을 받을 수 없습니다",
+        "off-server": "서버에 아직 알림이 설정되지 않았습니다"
+      },
+      "testTitle": "Teyvat.me 알림",
+      "testBody": "이 기기로 알림이 전달됩니다.",
+      "tested": "테스트를 보냈습니다",
+      "testFailed": "테스트를 보내지 못했습니다",
+      "unsupported": "이 브라우저는 알림을 받을 수 없습니다.",
+      "iosInstall": "iPhone·iPad: teyvat.me를 홈 화면에 추가하고(공유 → 홈 화면에 추가) 거기서 연 다음 알림을 켜세요.",
+      "blocked": "브라우저 설정에서 이 사이트의 알림이 차단되어 있습니다.",
+      "turnOn": "여기서 알림 켜기",
+      "turnOff": "여기서 끄기",
+      "fromThatDevice": "그 기기에서 알림을 켜세요.",
+      "captureNote": "그 기기의 Teyvat.me Capture 자체 알림입니다.",
+      "resinAt": "퓨어 레진",
+      "resinOff": "끔",
+      "quiet": "플레이 중에는 끄기",
+      "quietDetail": "Teyvat.me Capture가 게임 실행 중이라고 알리는 동안 알림을 건너뜁니다",
+      "test": "테스트 보내기"
+    }
   },
   "deleteUser": {
     "title": "사용자 삭제",

@@ -41,5 +41,20 @@
       "burst": "{name} взрыв {from}→{to}"
     }
   },
-  "staffBytes": "Live-синхронизация хранит ещё {size} (gdt-live)"
+  "staffBytes": "Live-синхронизация хранит ещё {size} (gdt-live)",
+  "presence": {
+    "seen": "Последний сигнал {time}",
+    "playing": "Играет сейчас на {device}",
+    "running": "Игра открыта на {device}",
+    "wishes": "Синхронизировать молитвы",
+    "wishesTitle": "Teyvat.me Capture сейчас синхронизирует историю молитв (сначала откройте в игре Молитва → История)",
+    "snapshot": "Отправить данные",
+    "snapshotTitle": "Teyvat.me Capture сейчас отправит свежие данные",
+    "waiting": "Ждём Capture…",
+    "sent": {
+      "wishes": "Capture попросили синхронизировать молитвы",
+      "snapshot": "Capture попросили отправить данные"
+    },
+    "notSent": "Не отправлено"
+  }
 }

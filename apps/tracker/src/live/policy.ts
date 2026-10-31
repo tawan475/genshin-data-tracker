@@ -132,6 +132,27 @@ function parseEventBody(event: Record<string, unknown>): LiveEvent | null {
       seq: Number.isSafeInteger(event.seq) ? (event.seq as number) : 0,
     }
   }
+  if (event.type === 'presence') {
+    if (!Number.isSafeInteger(event.accountId)) return null
+    const p = event.presence as Record<string, unknown> | null
+    const presence =
+      p && typeof p === 'object' && typeof p.at === 'number' && typeof p.device === 'string'
+        ? {
+            sid: Number.isSafeInteger(p.sid) ? (p.sid as number) : null,
+            device: p.device,
+            state: p.state === 'running' ? ('running' as const) : ('decoding' as const),
+            at: p.at,
+            platform: typeof p.platform === 'string' ? p.platform : null,
+            app: typeof p.app === 'string' ? p.app : null,
+          }
+        : null
+    const pending = Array.isArray(event.pending)
+      ? (event.pending as unknown[]).filter(
+          (k): k is 'wishes' | 'snapshot' => k === 'wishes' || k === 'snapshot',
+        )
+      : []
+    return { type: 'presence', accountId: event.accountId as number, presence, pending }
+  }
   if (event.type !== 'data' || !Number.isSafeInteger(event.accountId)) return null
   return {
     type: 'data',
@@ -175,7 +196,14 @@ export interface KnownAccounts {
  * re-reads the list.
  */
 export function eventNeedsFetch(event: LiveEvent, known: KnownAccounts): boolean {
-  if (event.type === 'planner' || event.type === 'wishes' || event.type === 'live') return false
+  if (
+    event.type === 'planner' ||
+    event.type === 'wishes' ||
+    event.type === 'live' ||
+    event.type === 'presence'
+  ) {
+    return false
+  }
   if (event.type === 'hello') return helloDiffers(event.accounts, known)
   if (event.type !== 'data' || event.dataVersion === null) return true
   const version = known.knownVersion(event.accountId)

@@ -183,7 +183,51 @@
     "browserOn": "{system} üzerinde {browser}",
     "browserGeneric": "{system} üzerinde tarayıcı",
     "unknownDevice": "Bilinmeyen cihaz",
-    "all": "Tümü ({n})"
+    "all": "Tümü ({n})",
+    "alerts": {
+      "label": "Uyarılar",
+      "title": "Bu cihaz neler için uyarılır",
+      "off": "kapalı",
+      "none": "seçilmedi",
+      "resinShort": "Reçine {n}",
+      "short": {
+        "resinFull": "reçine dolu",
+        "expeditions": "keşif seferleri",
+        "welkin": "Welkin",
+        "commissions": "görevler",
+        "bargains": "Paimon'un Pazarlığı"
+      },
+      "kind": {
+        "resinFull": "Orijinal Reçine dolu",
+        "expeditions": "Keşifler döndü",
+        "welkin": "Yeni Ayın Lütfu: 3 gün kaldı",
+        "commissions": "Günlük Özel Görevler 22:00'de bitmemiş",
+        "bargains": "Paimon'un Dükkanı: ay bitmeden 3 gün önce hiçbir şey alınmadı"
+      },
+      "notSaved": "Uyarılar kaydedilmedi",
+      "notOn": "Uyarılar açılamadı",
+      "result": {
+        "denied": "Bu sitenin bildirimleri engelli",
+        "unsupported": "Bu tarayıcı uyarı alamaz",
+        "off-server": "Sunucuda uyarılar henüz ayarlanmadı"
+      },
+      "testTitle": "Teyvat.me uyarısı",
+      "testBody": "Uyarılar bu cihaza ulaşıyor.",
+      "tested": "Deneme gönderildi",
+      "testFailed": "Deneme gönderilemedi",
+      "unsupported": "Bu tarayıcı uyarı alamaz.",
+      "iosInstall": "iPhone ve iPad'de: teyvat.me'yi Ana Ekrana ekleyin (Paylaş → Ana Ekrana Ekle), oradan açın, sonra uyarıları açın.",
+      "blocked": "Bu sitenin bildirimleri tarayıcı ayarlarında engelli.",
+      "turnOn": "Uyarıları burada aç",
+      "turnOff": "Burada kapat",
+      "fromThatDevice": "Uyarıları o cihazdan açın.",
+      "captureNote": "O cihazdaki Teyvat.me Capture'ın kendi bildirimi.",
+      "resinAt": "Orijinal Reçine",
+      "resinOff": "kapalı",
+      "quiet": "Oynarken değil",
+      "quietDetail": "Teyvat.me Capture oyunun açık olduğunu söylerken uyarıları atla",
+      "test": "Deneme gönder"
+    }
   },
   "deleteUser": {
     "title": "Kullanıcıyı sil",

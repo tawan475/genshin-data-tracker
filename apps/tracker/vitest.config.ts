@@ -26,6 +26,10 @@ export default defineConfig(async () => {
             // whatever .dev.vars says; its tests turn it on per request.
             TURNSTILE_SITE_KEY: '',
             TURNSTILE_SECRET_KEY: '',
+            // A throwaway VAPID pair: alerts on in tests (docs/plans/capture-link.md).
+            VAPID_PUBLIC_KEY:
+              'BPkVtt1GqmmrFtIV1eQhyn5k7HlnDScIkDMkPcTE6N4LJcfLyB2ziqduAlcrZjqGqyNz9wHEAUhB_EIvanrKhT0',
+            VAPID_PRIVATE_KEY: 'X6BjtZOdxUO89h7YnqdkocKiyK81WrKLe2QkZzlx8LA',
           },
         },
       }),

@@ -8,6 +8,7 @@
  * query with `parseLinkQuery` before it shows anything.
  */
 
+import { deviceAlertsPatch } from './alerts'
 import { z } from 'zod'
 import type { GenshinServer } from './index'
 
@@ -83,6 +84,14 @@ export interface OAuthAuthorizeResponse {
 
 /** `PATCH /api/auth/sessions/:id` (an irminsul session only): where its uploads go now. */
 export const sessionUploadRequest = z.object({ upload: uploadTargetSchema })
+
+/**
+ * `PATCH /api/auth/sessions/:id`: where an irminsul session's uploads go now
+ * and/or what the device is alerted about (any session).
+ */
+export const sessionPatchRequest = z
+  .object({ upload: uploadTargetSchema.optional(), alerts: deviceAlertsPatch.optional() })
+  .refine((body) => body.upload !== undefined || body.alerts !== undefined, 'Nothing to change')
 
 /** `GET /api/oauth/irminsul`: where irminsul finds everything (absolute URLs). */
 export interface IrminsulDiscovery {

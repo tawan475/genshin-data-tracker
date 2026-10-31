@@ -183,7 +183,51 @@
     "browserOn": "{browser} sur {system}",
     "browserGeneric": "Navigateur sur {system}",
     "unknownDevice": "Appareil inconnu",
-    "all": "Tous ({n})"
+    "all": "Tous ({n})",
+    "alerts": {
+      "label": "Alertes",
+      "title": "Ce dont cet appareil est averti",
+      "off": "non",
+      "none": "rien de choisi",
+      "resinShort": "Résine {n}",
+      "short": {
+        "resinFull": "résine pleine",
+        "expeditions": "expéditions",
+        "welkin": "Bénédiction",
+        "commissions": "commissions",
+        "bargains": "Bonnes affaires"
+      },
+      "kind": {
+        "resinFull": "Résine originelle pleine",
+        "expeditions": "Expéditions de retour",
+        "welkin": "Astre de la nuit : 3 jours restants",
+        "commissions": "Missions quotidiennes non faites à 22:00",
+        "bargains": "Échange astral : rien acheté 3 jours avant la fin du mois"
+      },
+      "notSaved": "Alertes non enregistrées",
+      "notOn": "Alertes non activées",
+      "result": {
+        "denied": "Les notifications de ce site sont bloquées",
+        "unsupported": "Ce navigateur ne peut pas recevoir d'alertes",
+        "off-server": "Les alertes ne sont pas encore configurées sur le serveur"
+      },
+      "testTitle": "Alerte Teyvat.me",
+      "testBody": "Les alertes arrivent sur cet appareil.",
+      "tested": "Test envoyé",
+      "testFailed": "Test non envoyé",
+      "unsupported": "Ce navigateur ne peut pas recevoir d'alertes.",
+      "iosInstall": "Sur iPhone et iPad : ajoutez teyvat.me à l'écran d'accueil (Partager → Sur l'écran d'accueil), ouvrez-le de là, puis activez les alertes.",
+      "blocked": "Les notifications de ce site sont bloquées dans les réglages du navigateur.",
+      "turnOn": "Activer les alertes ici",
+      "turnOff": "Désactiver ici",
+      "fromThatDevice": "Activez les alertes depuis cet appareil.",
+      "captureNote": "La notification propre à Teyvat.me Capture sur cet appareil.",
+      "resinAt": "Résine originelle à",
+      "resinOff": "non",
+      "quiet": "Pas pendant le jeu",
+      "quietDetail": "Ignore les alertes tant que Teyvat.me Capture indique que le jeu tourne",
+      "test": "Envoyer un test"
+    }
   },
   "deleteUser": {
     "title": "Supprimer l'utilisateur",

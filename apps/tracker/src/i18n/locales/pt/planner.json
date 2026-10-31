@@ -142,7 +142,8 @@
     "blocked": "Bloqueado: permita notificações para este site nos ajustes do navegador",
     "notifyAt": "Notificar em",
     "off": "Desligado",
-    "whileOpen": "Com o site aberto neste dispositivo"
+    "whileOpen": "Com o site aberto neste dispositivo",
+    "alertPush": "Alerta de resina: por push neste dispositivo · Configurações → Dispositivos"
   },
   "artifacts": {
     "title": "Artefatos",

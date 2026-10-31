@@ -16,7 +16,8 @@ import { ApiError } from '../lib/http'
 import { D1Meter } from '../lib/meter'
 import { accountForUid, takeAccountUid, type KeyAccount, type UploadOwner } from './accounts'
 import { importSnapshot, parseUpload, type Upload } from './import'
-import { anyListening, notifyAccount, notifyUser } from './live'
+import { snapshotFacts } from './alerts'
+import { anyListening, notifyAccount, notifyUser, tellAlertFacts } from './live'
 import { liveDb, liveUsage, openJournal } from './live-sync'
 
 export async function uploadAs(
@@ -109,6 +110,15 @@ export async function uploadAs(
       { type: 'data', accountId: account.id, dataVersion, takenAt: response.takenAt },
       userId,
     )
+  }
+  // Alerts: the newest capture's resin and tasks (only to hubs that want them).
+  if (result.newest) {
+    tellAlertFacts(c, listener, account.id, {
+      ...snapshotFacts(result.prepared.good, response.takenAt),
+      name: account.name,
+      uid: account.uid,
+      server: account.server,
+    })
   }
   return c.json<ImportResponse>(
     { ...response, account: { id: account.id, name: account.name, uid: account.uid, created } },

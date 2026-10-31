@@ -154,7 +154,10 @@ import { formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { useFeedback } from '@/stores/feedback'
 import { materialName } from '@/utils/materials'
-import { useAccount, useAccountRoute, useReadOnly } from './context'
+import CapturePresence from '@/components/live/CapturePresence.vue'
+import { alertFactsOf } from '@/components/planner/alert-facts'
+import { useAlertFacts } from '@/components/planner/alert-facts-send'
+import { useAccess, useAccount, useAccountRoute, useReadOnly } from './context'
 
 /**
  * Planner: goals per character (level, ascension, talents) and weapon, extra
@@ -217,6 +220,8 @@ const settingsOpen = ref(false)
 
 // A clock for today's domains, the reset countdown and the resin estimate.
 const now = ref(Date.now())
+const presenceAccess = useAccess()
+const presenceReadOnly = useReadOnly()
 const clock = setInterval(() => (now.value = Date.now()), 30_000)
 onBeforeUnmount(() => clearInterval(clock))
 /**
@@ -259,6 +264,21 @@ const resin = computed(() => {
 })
 /** The resin to count from: the capture's, or one set by hand after it. */
 const reading = computed(() => resinReading(resin.value, settings.value.resin))
+/** Alerts (docs/plans/capture-link.md): what this page knows, for the server's alarm. */
+const canWrite = computed(() => !presenceReadOnly && presenceAccess.value !== 'viewer')
+useAlertFacts(
+  computed(() => account.value.id),
+  computed(() =>
+    alertFactsOf({
+      capture: resin.value?.known ? { value: resin.value.atSnapshot, at: resin.value.at } : null,
+      manual: settings.value.resin,
+      captured: capturedTasks.value,
+      rows: tasks?.tasks.value,
+      now: now.value,
+    }),
+  ),
+  canWrite,
+)
 /** Original Resin now plus the bag's resin items (the farm headline's days). */
 const resinHeld = computed(() => {
   const r = reading.value
@@ -1660,6 +1680,11 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
       v-if="tasks?.tasks.value && (!hasGoals || tab === 'farm')"
       class="mb-3 flex flex-col gap-3"
     >
+      <CapturePresence
+        :account-id="account.id"
+        :now="now"
+        :can-act="!presenceReadOnly && presenceAccess !== 'viewer'"
+      />
       <ResinTracker
         :reading="reading"
         :condensed="condensed.count"
@@ -1725,6 +1750,7 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :no-weekly-count="facts.noWeekly.size"
           :plan-for="farmFor"
           :order="order"
+          :publish-to="canWrite ? account.id : null"
           @settings="settingsOpen = true"
           @crafted="crafted"
           @hide-crafting="hideCrafting"

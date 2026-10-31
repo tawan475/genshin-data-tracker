@@ -31,11 +31,34 @@
  * session and signs out if that fails.
  */
 
-import { LIVE_SESSION_ENDED_CLOSE, type LiveAccount, type LiveEvent } from '@gdt/shared'
+import {
+  LIVE_SESSION_ENDED_CLOSE,
+  type CaptureCommandKind,
+  type LiveAccount,
+  type LiveEvent,
+  type PresenceResponseForAccount,
+} from '@gdt/shared'
 import { DurableObject } from 'cloudflare:workers'
 import type { Context } from 'hono'
 import type { AppEnv } from '../env'
 import { readBookmark, requestBookmarks } from '../lib/d1-session'
+import type { PushResult, VapidVars } from '../lib/web-push'
+import {
+  addFacts,
+  fire,
+  heartbeat,
+  presenceFor,
+  queueCommand,
+  reloadDevices,
+  rememberUser,
+  schedule,
+  sendTest,
+  type Command,
+  type FireReport,
+  type Heartbeat,
+  type HubContext,
+} from './alert-hub'
+import type { FactsUpdate } from './alerts'
 
 /** Close code for a socket whose session was ended: reconnect only with a fresh one. */
 export const SESSION_ENDED_CLOSE = LIVE_SESSION_ENDED_CLOSE
@@ -56,6 +79,8 @@ export interface Listener {
   userId: number
   live: boolean
   tokenVersion: number
+  /** A device of theirs has alerts on (`users.alerts_on`): the hub wants the facts. */
+  alerts?: boolean
 }
 
 export class LiveHub extends DurableObject<Env> {
@@ -234,6 +259,106 @@ export class LiveHub extends DurableObject<Env> {
     return this.open().length
   }
 
+  // ---------------------------------------------------------------- alerts and presence
+  // (services/alert-hub.ts, docs/plans/capture-link.md)
+
+  /** Clock and fetch, swapped by tests. */
+  clock: () => number = () => Date.now()
+  fetcher: typeof fetch | undefined
+
+  private get hub(): HubContext {
+    return {
+      storage: this.ctx.storage,
+      db: this.env.DB,
+      vars: this.env as unknown as VapidVars,
+      now: this.clock,
+      fetcher: this.fetcher,
+    }
+  }
+
+  /** A write told the facts alerts are worked out from: keep them, move the alarm. */
+  async alertFacts(userId: number, accountId: number, update: FactsUpdate): Promise<void> {
+    await rememberUser(this.hub, userId)
+    await addFacts(this.hub, accountId, update)
+    await schedule(this.hub)
+  }
+
+  /** A device's alerts or push subscription changed: read them again, move the alarm. */
+  async devicesChanged(userId: number): Promise<void> {
+    await rememberUser(this.hub, userId)
+    await reloadDevices(this.hub, userId)
+    await schedule(this.hub)
+  }
+
+  /** The alarm: send what is due. */
+  override async alarm(): Promise<void> {
+    const report: FireReport = await fire(this.hub)
+    if (report.sent || report.gone || report.failed) console.log('alerts', JSON.stringify(report))
+  }
+
+  /** Runs the alarm now (tests). */
+  async fireNow(): Promise<FireReport> {
+    return fire(this.hub)
+  }
+
+  /** When the alarm is set (tests). */
+  async alarmAt(): Promise<number | null> {
+    return this.ctx.storage.getAlarm()
+  }
+
+  async testPush(
+    userId: number,
+    sid: number,
+    message: { title: string; body: string },
+  ): Promise<PushResult[]> {
+    return sendTest(this.hub, userId, sid, message)
+  }
+
+  /**
+   * A Capture's heartbeat: kept, and the commands waiting for it handed
+   * over. Pages showing an account whose presence changed are told.
+   * `next`: seconds to its next heartbeat (sooner while a page is open).
+   */
+  async presence(
+    userId: number,
+    beat: Heartbeat,
+  ): Promise<{ commands: Pick<Command, 'id' | 'kind'>[]; next: number }> {
+    const { commands, changed } = await heartbeat(this.hub, beat)
+    for (const accountId of changed) await this.tellPresence(userId, accountId)
+    return {
+      commands: commands.map(({ id, kind }) => ({ id, kind })),
+      next: this.open().length > 0 ? 15 : 60,
+    }
+  }
+
+  async presenceOf(accountId: number): Promise<PresenceResponseForAccount> {
+    return presenceFor(this.hub, accountId)
+  }
+
+  /** The website asks the Capture playing `accountId` to do something; null when none plays it. */
+  async command(
+    userId: number,
+    accountId: number,
+    kind: CaptureCommandKind,
+  ): Promise<PresenceResponseForAccount | null> {
+    const answer = await queueCommand(this.hub, accountId, kind)
+    if (answer) await this.tellPresence(userId, accountId, answer)
+    return answer
+  }
+
+  private async tellPresence(
+    userId: number,
+    accountId: number,
+    state?: PresenceResponseForAccount,
+  ): Promise<void> {
+    if (this.open().length === 0) return
+    await this.notify(userId, {
+      type: 'presence',
+      accountId,
+      ...(state ?? (await presenceFor(this.hub, accountId))),
+    })
+  }
+
   override async webSocketMessage(socket: WebSocket, message: string | ArrayBuffer) {
     // Only the keep-alive is expected, and the auto-response normally answers it.
     if (message === 'ping') socket.send('pong')
@@ -308,7 +433,7 @@ export function liveHub(env: Env, userId: number): DurableObjectStub<LiveHub> {
 export function listenerStatement(d1: D1Database, accountId: number): D1PreparedStatement {
   return d1
     .prepare(
-      `SELECT u.id AS user_id, u.live_since, u.token_version FROM users AS u
+      `SELECT u.id AS user_id, u.live_since, u.token_version, u.alerts_on FROM users AS u
        WHERE u.id IN (SELECT user_id FROM genshin_accounts WHERE id = ?1
                       UNION ALL
                       SELECT user_id FROM account_members WHERE account_id = ?1
@@ -323,6 +448,7 @@ export function listenerOf(result: D1Result | undefined): Listener[] | undefined
     user_id?: unknown
     live_since?: unknown
     token_version?: unknown
+    alerts_on?: unknown
   }[]
   const listeners = rows
     .filter((row) => typeof row.user_id === 'number' && typeof row.token_version === 'number')
@@ -330,6 +456,7 @@ export function listenerOf(result: D1Result | undefined): Listener[] | undefined
       userId: row.user_id as number,
       live: row.live_since !== null && row.live_since !== undefined,
       tokenVersion: row.token_version as number,
+      alerts: row.alerts_on !== null && row.alerts_on !== undefined,
     }))
   return listeners.length ? listeners : undefined
 }
@@ -383,6 +510,29 @@ export function notifyAccount(
     return
   }
   for (const listener of listeners) notifyUser(c, listener.userId, event, listener)
+}
+
+/**
+ * Tells the hubs of everyone who can see the account and has alerts on what
+ * a write learnt about it (docs/plans/capture-link.md), after the response.
+ * Nothing at all when nobody has alerts, or the update says nothing.
+ */
+export function tellAlertFacts(
+  c: Context<AppEnv>,
+  listeners: Listener[] | undefined,
+  accountId: number,
+  update: FactsUpdate,
+): void {
+  if (!c.env.LIVE || !listeners || Object.keys(update).length === 0) return
+  for (const listener of listeners) {
+    if (!listener.alerts) continue
+    afterResponse(
+      c,
+      liveHub(c.env, listener.userId)
+        .alertFacts(listener.userId, accountId, update)
+        .catch((error: unknown) => console.warn('alert_facts_failed', String(error))),
+    )
+  }
 }
 
 /**

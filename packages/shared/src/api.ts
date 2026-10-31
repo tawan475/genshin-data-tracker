@@ -3,6 +3,7 @@
  * these schemas and the browser builds requests against the same ones.
  */
 
+import type { DeviceAlerts, PresenceResponseForAccount } from './alerts'
 import { z } from 'zod'
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from './password'
 import { MAX_FAVORITE_CHARACTERS, SITE_LANGUAGES, TAB_BAR_MAX } from './settings'
@@ -702,6 +703,10 @@ export interface SessionResponse {
   deviceName?: string | null
   /** Where an irminsul session's uploads go (null for a browser). */
   upload?: SessionUpload | null
+  /** What the device is alerted about (null: never set; docs/plans/capture-link.md). */
+  alerts?: DeviceAlerts | null
+  /** A browser with a push subscription (it can get alerts). */
+  push?: boolean
 }
 
 /**
@@ -899,6 +904,7 @@ export type LiveEvent = (
   | { type: 'planner'; accountId: number; tab?: string }
   | { type: 'wishes'; accountId: number; tab?: string }
   | { type: 'live'; accountId: number; seq: number }
+  | ({ type: 'presence'; accountId: number } & PresenceResponseForAccount)
 ) & { d1?: string; d1l?: string }
 
 /** `POST /api/irminsul/changes` (live sync, docs/plans/live-sync.md §13). */

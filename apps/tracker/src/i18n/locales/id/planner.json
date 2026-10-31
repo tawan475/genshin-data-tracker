@@ -142,7 +142,8 @@
     "blocked": "Diblokir: izinkan notifikasi untuk situs ini di pengaturan browser",
     "notifyAt": "Beri tahu di",
     "off": "Mati",
-    "whileOpen": "Selama situs terbuka di perangkat ini"
+    "whileOpen": "Selama situs terbuka di perangkat ini",
+    "alertPush": "Peringatan resin: lewat push ke perangkat ini · Pengaturan → Perangkat"
   },
   "artifacts": {
     "title": "Artefak",

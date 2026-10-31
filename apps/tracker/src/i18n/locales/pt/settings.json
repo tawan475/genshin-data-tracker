@@ -183,7 +183,51 @@
     "browserOn": "{browser} em {system}",
     "browserGeneric": "Navegador em {system}",
     "unknownDevice": "Dispositivo desconhecido",
-    "all": "Todos ({n})"
+    "all": "Todos ({n})",
+    "alerts": {
+      "label": "Alertas",
+      "title": "Do que este dispositivo é avisado",
+      "off": "não",
+      "none": "nada escolhido",
+      "resinShort": "Resina {n}",
+      "short": {
+        "resinFull": "resina cheia",
+        "expeditions": "expedições",
+        "welkin": "Bênção",
+        "commissions": "missões",
+        "bargains": "Ofertas"
+      },
+      "kind": {
+        "resinFull": "Resina Original cheia",
+        "expeditions": "Expedições de volta",
+        "welkin": "Lua Nova: faltam 3 dias",
+        "commissions": "Missões Diárias não feitas às 22:00",
+        "bargains": "Barganhas da Paimon: nada comprado 3 dias antes do fim do mês"
+      },
+      "notSaved": "Alertas não salvos",
+      "notOn": "Alertas não ativados",
+      "result": {
+        "denied": "As notificações deste site estão bloqueadas",
+        "unsupported": "Este navegador não recebe alertas",
+        "off-server": "Os alertas ainda não estão configurados no servidor"
+      },
+      "testTitle": "Alerta do Teyvat.me",
+      "testBody": "Os alertas chegam a este dispositivo.",
+      "tested": "Teste enviado",
+      "testFailed": "Teste não enviado",
+      "unsupported": "Este navegador não recebe alertas.",
+      "iosInstall": "No iPhone e iPad: adicione teyvat.me à Tela de Início (Compartilhar → Adicionar à Tela de Início), abra por lá e ative os alertas.",
+      "blocked": "As notificações deste site estão bloqueadas nas configurações do navegador.",
+      "turnOn": "Ativar alertas aqui",
+      "turnOff": "Desativar aqui",
+      "fromThatDevice": "Ative os alertas naquele dispositivo.",
+      "captureNote": "A própria notificação do Teyvat.me Capture naquele dispositivo.",
+      "resinAt": "Resina Original em",
+      "resinOff": "não",
+      "quiet": "Não durante o jogo",
+      "quietDetail": "Ignora alertas enquanto o Teyvat.me Capture diz que o jogo está aberto",
+      "test": "Enviar teste"
+    }
   },
   "deleteUser": {
     "title": "Excluir usuário",

@@ -142,7 +142,8 @@
     "blocked": "Bị chặn: hãy cho phép thông báo của trang này trong thiết lập trình duyệt",
     "notifyAt": "Báo khi đạt",
     "off": "Tắt",
-    "whileOpen": "Khi trang đang mở trên thiết bị này"
+    "whileOpen": "Khi trang đang mở trên thiết bị này",
+    "alertPush": "Báo nhựa: gửi qua push đến thiết bị này · Cài đặt → Thiết bị"
   },
   "artifacts": {
     "title": "Thánh Di Vật",

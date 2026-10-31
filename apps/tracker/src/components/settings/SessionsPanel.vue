@@ -4,6 +4,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { LogOut } from 'lucide-vue-next'
 import ProviderMark from '@/components/oauth/ProviderMark.vue'
+import DeviceAlerts from '@/components/settings/DeviceAlerts.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiPanel from '@/components/ui/UiPanel.vue'
@@ -106,6 +107,12 @@ async function setTarget(row: SessionResponse, key: string) {
   } finally {
     saving.value = null
   }
+}
+
+/** A row's alerts or push subscription changed (DeviceAlerts). */
+function patchRow(id: number, patch: Partial<SessionResponse>) {
+  const held = sessions.value?.find((s) => s.id === id)
+  if (held) Object.assign(held, patch)
 }
 
 /** This device first, then the most recently seen. */
@@ -253,6 +260,7 @@ async function signOut() {
           :title="$t('settings.devices.uploadsTitle')"
           @update:model-value="(key) => setTarget(row, key)"
         />
+        <DeviceAlerts :row="row" @changed="(patch) => patchRow(row.id, patch)" />
         <UiButton
           v-if="!row.current"
           size="sm"

@@ -41,5 +41,20 @@
       "burst": "{name} tripudio {from}→{to}"
     }
   },
-  "staffBytes": "La sincronizzazione live salva altri {size} (gdt-live)"
+  "staffBytes": "La sincronizzazione live salva altri {size} (gdt-live)",
+  "presence": {
+    "seen": "Ultimo segnale {time}",
+    "playing": "In gioco ora su {device}",
+    "running": "Gioco aperto su {device}",
+    "wishes": "Sincronizza desideri",
+    "wishesTitle": "Teyvat.me Capture sincronizza ora la cronologia dei desideri (apri prima Desideri → Cronologia nel gioco)",
+    "snapshot": "Invia acquisizione",
+    "snapshotTitle": "Teyvat.me Capture invia ora una nuova acquisizione",
+    "waiting": "In attesa di Capture…",
+    "sent": {
+      "wishes": "Chiesto a Capture di sincronizzare i desideri",
+      "snapshot": "Chiesto a Capture di inviare un'acquisizione"
+    },
+    "notSent": "Non inviato"
+  }
 }

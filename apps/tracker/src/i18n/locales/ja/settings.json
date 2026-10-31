@@ -183,7 +183,51 @@
     "browserOn": "{system} の {browser}",
     "browserGeneric": "{system} のブラウザー",
     "unknownDevice": "不明なデバイス",
-    "all": "すべて {n}"
+    "all": "すべて {n}",
+    "alerts": {
+      "label": "通知",
+      "title": "このデバイスに届く通知",
+      "off": "オフ",
+      "none": "未選択",
+      "resinShort": "樹脂 {n}",
+      "short": {
+        "resinFull": "樹脂満タン",
+        "expeditions": "探索派遣",
+        "welkin": "空月の祝福",
+        "commissions": "依頼",
+        "bargains": "パイモンの交換"
+      },
+      "kind": {
+        "resinFull": "天然樹脂が満タン",
+        "expeditions": "派遣が完了",
+        "welkin": "空月の祝福：残り 3 日",
+        "commissions": "22:00 までにデイリー依頼が未完了",
+        "bargains": "スター交換：月末の 3 日前まで未購入"
+      },
+      "notSaved": "通知を保存できませんでした",
+      "notOn": "通知をオンにできませんでした",
+      "result": {
+        "denied": "このサイトの通知はブロックされています",
+        "unsupported": "このブラウザは通知を受け取れません",
+        "off-server": "サーバーで通知がまだ設定されていません"
+      },
+      "testTitle": "Teyvat.me の通知",
+      "testBody": "このデバイスに通知が届きます。",
+      "tested": "テストを送信しました",
+      "testFailed": "テストを送信できませんでした",
+      "unsupported": "このブラウザは通知を受け取れません。",
+      "iosInstall": "iPhone・iPad：teyvat.me をホーム画面に追加し（共有 → ホーム画面に追加）、そこから開いてから通知をオンにしてください。",
+      "blocked": "このサイトの通知はブラウザの設定でブロックされています。",
+      "turnOn": "ここで通知をオン",
+      "turnOff": "ここでオフ",
+      "fromThatDevice": "そのデバイスで通知をオンにしてください。",
+      "captureNote": "そのデバイスの Teyvat.me Capture 自身の通知です。",
+      "resinAt": "天然樹脂",
+      "resinOff": "オフ",
+      "quiet": "プレイ中は通知しない",
+      "quietDetail": "Teyvat.me Capture がゲーム起動中と伝えている間は通知しません",
+      "test": "テスト送信"
+    }
   },
   "deleteUser": {
     "title": "ユーザーを削除",

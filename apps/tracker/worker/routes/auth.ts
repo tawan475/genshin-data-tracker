@@ -5,16 +5,18 @@ import {
   deepMerge,
   deleteSelfRequest,
   loginRequest,
+  readDeviceAlerts,
   registerRequest,
-  sessionUploadRequest,
+  sessionPatchRequest,
   setPasswordRequest,
   updateProfileRequest,
+  type DeviceAlerts,
   type IdentitiesResponse,
   type MeResponse,
   type SessionResponse,
   type SessionUpload,
 } from '@gdt/shared'
-import { and, desc, eq, gt, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, gt, isNull, or, sql } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import type { z } from 'zod'
 import { getDb } from '../db/client'
@@ -49,6 +51,7 @@ import { auditStatement } from '../services/audit'
 import { closeResetLinks, mailVerification } from '../services/auth-tokens'
 import { editableBy } from '../services/accounts'
 import { listIdentities, unlinkIdentity } from '../services/identities'
+import { liveHub } from '../services/live'
 import { meFromResults, meStatements, type MeSource } from '../services/me'
 import { userPermissions } from '../services/roles'
 import { signupMode } from '../services/staff-deps'
@@ -64,6 +67,38 @@ function sessionUpload(
   if (mode === 'uid') return { mode: 'uid' }
   if (mode === 'account') return { mode: 'account', accountId }
   return null
+}
+
+/** Points an irminsul session's uploads at `upload` (404 for any other session). */
+async function setSessionUpload(
+  c: Context<AppEnv>,
+  userId: number,
+  id: number,
+  upload: z.infer<typeof sessionPatchRequest>['upload'] & object,
+): Promise<SessionUpload> {
+  const accountId = upload.mode === 'account' ? upload.account_id : null
+  const d1 = c.env.DB
+  const [updated, owned] = await d1.batch<{ id: number }>([
+    d1
+      .prepare(
+        `UPDATE user_sessions SET upload_mode = ?3, upload_account_id = ?4
+         WHERE id = ?1 AND user_id = ?2 AND method = 'irminsul' AND revoked_at IS NULL
+           AND expires_at > ?5
+           AND (?4 IS NULL OR ${editableBy('?4', '?2')})
+         RETURNING id`,
+      )
+      .bind(id, userId, upload.mode, accountId, Date.now()),
+    d1.prepare(`SELECT ?1 AS id WHERE ${editableBy('?1', '?2')}`).bind(accountId, userId),
+  ])
+  if (updated!.results.length === 0) {
+    if (accountId !== null && owned!.results.length === 0) {
+      throw new ApiError(400, 'invalid_account', 'That account is not yours', [
+        { path: 'upload.account_id', message: 'Not your account' },
+      ])
+    }
+    throw notFound('Session')
+  }
+  return sessionUpload(upload.mode, accountId)!
 }
 
 /** Argon2's secret input; see lib/password. */
@@ -280,6 +315,8 @@ export const auth = new Hono<AppEnv>()
         deviceName: userSessions.deviceName,
         uploadMode: userSessions.uploadMode,
         uploadAccountId: userSessions.uploadAccountId,
+        alerts: userSessions.alerts,
+        push: sql<number>`EXISTS (SELECT 1 FROM push_subscriptions AS p WHERE p.session_id = ${userSessions.id})`,
       })
       .from(userSessions)
       .where(
@@ -292,47 +329,53 @@ export const auth = new Hono<AppEnv>()
       .orderBy(desc(userSessions.lastSeenAt), desc(userSessions.id))
     return c.json(
       rows.map(
-        ({ uploadMode, uploadAccountId, ...row }): SessionResponse => ({
+        ({ uploadMode, uploadAccountId, alerts, push, ...row }): SessionResponse => ({
           ...row,
           current: row.id === current,
           upload: sessionUpload(uploadMode, uploadAccountId),
+          alerts: alerts ? readDeviceAlerts(alerts) : null,
+          push: Boolean(push),
         }),
       ),
     )
   })
 
   /**
-   * Where an irminsul session's uploads go from now on (its next upload; the
-   * app reads the target again from whoami). 404 for any other session.
+   * A device's settings: where an irminsul session's uploads go from now on
+   * (its next upload; the app reads the target again from whoami; 404 for a
+   * browser) and/or what the device is alerted about (any device;
+   * docs/plans/capture-link.md).
    */
   .patch('/sessions/:id', requireActiveSession, async (c) => {
     const userId = c.get('userId')
     const id = idParam(c, 'id')
     await rateLimit(c.env.AUTH_LIMITER, `sessions:${userId}`)
-    const { upload } = await parseJson(c, sessionUploadRequest)
-    const accountId = upload.mode === 'account' ? upload.account_id : null
-    const d1 = c.env.DB
-    const [updated, owned] = await d1.batch<{ id: number }>([
-      d1
-        .prepare(
-          `UPDATE user_sessions SET upload_mode = ?3, upload_account_id = ?4
-           WHERE id = ?1 AND user_id = ?2 AND method = 'irminsul' AND revoked_at IS NULL
-             AND expires_at > ?5
-             AND (?4 IS NULL OR ${editableBy('?4', '?2')})
-           RETURNING id`,
-        )
-        .bind(id, userId, upload.mode, accountId, Date.now()),
-      d1.prepare(`SELECT ?1 AS id WHERE ${editableBy('?1', '?2')}`).bind(accountId, userId),
-    ])
-    if (updated!.results.length === 0) {
-      if (accountId !== null && owned!.results.length === 0) {
-        throw new ApiError(400, 'invalid_account', 'That account is not yours', [
-          { path: 'upload.account_id', message: 'Not your account' },
-        ])
-      }
-      throw notFound('Session')
+    const { upload, alerts } = await parseJson(c, sessionPatchRequest)
+    const answer: { upload?: SessionUpload; alerts?: DeviceAlerts } = {}
+    if (upload) answer.upload = await setSessionUpload(c, userId, id, upload)
+    if (alerts) {
+      const row = await c.env.DB.prepare(
+        `SELECT alerts FROM user_sessions
+         WHERE id = ?1 AND user_id = ?2 AND revoked_at IS NULL AND expires_at > ?3`,
+      )
+        .bind(id, userId, Date.now())
+        .first<{ alerts: string | null }>()
+      if (!row) throw notFound('Session')
+      const next = { ...readDeviceAlerts(row.alerts ? JSON.parse(row.alerts) : null), ...alerts }
+      await c.env.DB.batch([
+        c.env.DB.prepare('UPDATE user_sessions SET alerts = ?2 WHERE id = ?1').bind(
+          id,
+          JSON.stringify(next),
+        ),
+        // Writes start telling the hub; it clears the flag when no device is left.
+        c.env.DB.prepare(
+          'UPDATE users SET alerts_on = ?2 WHERE id = ?1 AND alerts_on IS NULL',
+        ).bind(userId, Date.now()),
+      ])
+      if (c.env.LIVE) await liveHub(c.env, userId).devicesChanged(userId)
+      answer.alerts = next
     }
-    return c.json({ upload: sessionUpload(upload.mode, accountId) })
+    return c.json(answer)
   })
 
   /**

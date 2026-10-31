@@ -12,6 +12,7 @@ import { setClockPreference } from '@/lib/format'
 import { applyTheme } from '@/lib/theme'
 import { applyLocale, storedPreference } from '@/i18n/apply'
 import { bootCacheUser, clearBootCache, readBootCache, updateBootCache } from './boot-cache'
+import { setPushOnHere } from '@/lib/push-flag'
 import { bootstrapOnce, forgetBootstrap } from './bootstrap'
 
 type Status = 'unknown' | 'signed-in' | 'signed-out'
@@ -62,6 +63,8 @@ export const useSession = defineStore('session', () => {
   function forgetDevice() {
     clearBootCache()
     void clearCached()
+    // Its push subscription went with the session (alerts are per sign-in).
+    setPushOnHere(false)
   }
 
   onSignedOut(() => adopt(null))

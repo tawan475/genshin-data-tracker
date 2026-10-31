@@ -183,7 +183,51 @@
     "browserOn": "{browser} trên {system}",
     "browserGeneric": "Trình duyệt trên {system}",
     "unknownDevice": "Thiết bị không rõ",
-    "all": "Tất cả {n}"
+    "all": "Tất cả {n}",
+    "alerts": {
+      "label": "Thông báo",
+      "title": "Thiết bị này được báo những gì",
+      "off": "tắt",
+      "none": "chưa chọn",
+      "resinShort": "Nhựa {n}",
+      "short": {
+        "resinFull": "nhựa đầy",
+        "expeditions": "thám hiểm",
+        "welkin": "Welkin",
+        "commissions": "ủy thác",
+        "bargains": "Cửa hàng Paimon"
+      },
+      "kind": {
+        "resinFull": "Nhựa Nguyên Chất đầy",
+        "expeditions": "Phái Đi đã về",
+        "welkin": "Không Nguyệt Chúc Phúc: còn 3 ngày",
+        "commissions": "Ủy Thác Mỗi Ngày chưa xong lúc 22:00",
+        "bargains": "Đổi Bụi Ánh Sáng: chưa mua gì, còn 3 ngày hết tháng"
+      },
+      "notSaved": "Chưa lưu được thông báo",
+      "notOn": "Chưa bật được thông báo",
+      "result": {
+        "denied": "Thông báo của trang này đang bị chặn",
+        "unsupported": "Trình duyệt này không nhận được thông báo",
+        "off-server": "Máy chủ chưa thiết lập thông báo"
+      },
+      "testTitle": "Thông báo Teyvat.me",
+      "testBody": "Thông báo đến được thiết bị này.",
+      "tested": "Đã gửi thử",
+      "testFailed": "Chưa gửi được",
+      "unsupported": "Trình duyệt này không nhận được thông báo.",
+      "iosInstall": "Trên iPhone và iPad: thêm teyvat.me vào Màn hình chính (Chia sẻ → Thêm vào MH chính), mở từ đó rồi bật thông báo.",
+      "blocked": "Thông báo của trang này bị chặn trong cài đặt trình duyệt.",
+      "turnOn": "Bật thông báo ở đây",
+      "turnOff": "Tắt ở đây",
+      "fromThatDevice": "Hãy bật thông báo từ thiết bị đó.",
+      "captureNote": "Thông báo riêng của Teyvat.me Capture trên thiết bị đó.",
+      "resinAt": "Nhựa Nguyên Chất đạt",
+      "resinOff": "tắt",
+      "quiet": "Không báo khi đang chơi",
+      "quietDetail": "Bỏ qua thông báo khi Teyvat.me Capture báo game đang chạy",
+      "test": "Gửi thử"
+    }
   },
   "deleteUser": {
     "title": "Xóa người dùng",

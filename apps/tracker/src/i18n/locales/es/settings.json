@@ -183,7 +183,51 @@
     "browserOn": "{browser} en {system}",
     "browserGeneric": "Navegador en {system}",
     "unknownDevice": "Dispositivo desconocido",
-    "all": "Todos ({n})"
+    "all": "Todos ({n})",
+    "alerts": {
+      "label": "Avisos",
+      "title": "De qué avisa este dispositivo",
+      "off": "no",
+      "none": "nada elegido",
+      "resinShort": "Resina {n}",
+      "short": {
+        "resinFull": "resina llena",
+        "expeditions": "expediciones",
+        "welkin": "Bendición",
+        "commissions": "encargos",
+        "bargains": "Ofertas"
+      },
+      "kind": {
+        "resinFull": "Resina original llena",
+        "expeditions": "Expediciones de vuelta",
+        "welkin": "Bendición Lunar: quedan 3 días",
+        "commissions": "Encargos del día sin hacer a las 22:00",
+        "bargains": "Gangas de Paimon: nada comprado 3 días antes de fin de mes"
+      },
+      "notSaved": "Avisos no guardados",
+      "notOn": "No se activaron los avisos",
+      "result": {
+        "denied": "Las notificaciones de este sitio están bloqueadas",
+        "unsupported": "Este navegador no puede recibir avisos",
+        "off-server": "Los avisos aún no están configurados en el servidor"
+      },
+      "testTitle": "Aviso de Teyvat.me",
+      "testBody": "Los avisos llegan a este dispositivo.",
+      "tested": "Prueba enviada",
+      "testFailed": "Prueba no enviada",
+      "unsupported": "Este navegador no puede recibir avisos.",
+      "iosInstall": "En iPhone y iPad: añade teyvat.me a la pantalla de inicio (Compartir → Añadir a pantalla de inicio), ábrelo desde ahí y activa los avisos.",
+      "blocked": "Las notificaciones de este sitio están bloqueadas en los ajustes del navegador.",
+      "turnOn": "Activar avisos aquí",
+      "turnOff": "Desactivar aquí",
+      "fromThatDevice": "Activa los avisos desde ese dispositivo.",
+      "captureNote": "La propia notificación de Teyvat.me Capture en ese dispositivo.",
+      "resinAt": "Resina original a",
+      "resinOff": "no",
+      "quiet": "No mientras juego",
+      "quietDetail": "Omite avisos mientras Teyvat.me Capture dice que el juego está abierto",
+      "test": "Enviar prueba"
+    }
   },
   "deleteUser": {
     "title": "Borrar usuario",

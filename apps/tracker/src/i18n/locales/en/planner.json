@@ -142,7 +142,8 @@
     "blocked": "Blocked: allow notifications for this site in the browser's settings",
     "notifyAt": "Notify at",
     "off": "Off",
-    "whileOpen": "While the site is open on this device"
+    "whileOpen": "While the site is open on this device",
+    "alertPush": "Resin alert: by push on this device · Settings → Devices"
   },
   "artifacts": {
     "title": "Artifacts",

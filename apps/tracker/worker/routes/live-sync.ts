@@ -32,7 +32,9 @@ import {
   listenerStatement,
   notifyAccount,
   notifyAccountLater,
+  tellAlertFacts,
 } from '../services/live'
+import { deltaFacts } from '../services/alerts'
 import {
   deleteJournalStatements,
   liveDb,
@@ -104,6 +106,12 @@ export const liveChanges = new Hono<AppEnv>().post('/changes', async (c) => {
   }
   const listeners = listenerOf(listening)
   const watching = anyListening(listeners)
+  tellAlertFacts(c, listeners, account.id, {
+    ...deltaFacts(delta.changes, delta.at, undefined),
+    name: account.name,
+    uid: account.uid,
+    server: account.server,
+  })
   if (watching)
     notifyAccount(c, listeners, { type: 'live', accountId: account.id, seq: stored.seq })
   return c.json<LiveChangesResponse>({

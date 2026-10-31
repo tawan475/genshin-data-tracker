@@ -4,6 +4,7 @@ import type {
   CharacterTarget,
   CompactSubstat,
   CustomTarget,
+  DeviceAlerts,
   ItemTarget,
   UserSettingsPatch,
   WeaponCurrent,
@@ -101,6 +102,13 @@ export const users = sqliteTable(
     suspendedReason: text('suspended_reason'),
     /** Set by staff: uploads (key and website) are refused with 403 `uploads_blocked`. Added in 0020. */
     uploadsBlockedAt: integer('uploads_blocked_at'),
+    /**
+     * Set (epoch ms) while any of the user's devices has alerts on
+     * (`user_sessions.alerts`, docs/plans/capture-link.md); NULL: none, so
+     * writes skip telling the hub the facts alerts are worked out from. Kept
+     * by the routes that change a device's alerts. Added in 0035.
+     */
+    alertsOn: integer('alerts_on'),
   },
   (t) => [
     uniqueIndex('users_import_key_hash_unique')
@@ -574,6 +582,12 @@ export const userSessions = sqliteTable(
     refreshHash: text('refresh_hash'),
     /** The one before: presenting it again (a stolen copy) ends the session. */
     refreshPrevHash: text('refresh_prev_hash'),
+    /**
+     * What this device is alerted about (`DeviceAlerts` JSON, Settings →
+     * Devices; docs/plans/capture-link.md): a browser by Web Push, Capture by
+     * its own notification. NULL: never set. Added in 0035.
+     */
+    alerts: text('alerts', { mode: 'json' }).$type<DeviceAlerts>(),
   },
   (t) => [index('user_sessions_user_revoked_idx').on(t.userId, t.revokedAt)],
 )
@@ -771,3 +785,49 @@ export const gameNotices = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.server, t.source, t.annId] })],
 )
+
+/**
+ * A browser's Web Push subscription (migration 0035; worker/lib/web-push.ts,
+ * docs/plans/capture-link.md): one row per endpoint, tied to the session that
+ * made it, so signing that device out ends its alerts. `failures` counts sends
+ * in a row the push service refused for a reason other than gone (404/410
+ * delete the row at once).
+ */
+export const pushSubscriptions = sqliteTable(
+  'push_subscriptions',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    sessionId: integer('session_id')
+      .notNull()
+      .references(() => userSessions.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    /** The browser's keys (base64url): P-256 public key and auth secret. */
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    createdAt: timestamp('created_at'),
+    lastOkAt: integer('last_ok_at'),
+    failures: integer('failures').notNull().default(0),
+  },
+  (t) => [
+    uniqueIndex('push_subscriptions_endpoint_unique').on(t.endpoint),
+    index('push_subscriptions_user_idx').on(t.userId),
+    index('push_subscriptions_session_idx').on(t.sessionId),
+  ],
+)
+
+/**
+ * Today's farm plan as the Planner last published it for an account
+ * (migration 0035; docs/plans/capture-link.md): what Capture's Today screen
+ * shows. `data` is the `TodayDigest` JSON, its text in the publisher's
+ * language.
+ */
+export const accountToday = sqliteTable('account_today', {
+  accountId: integer('account_id')
+    .primaryKey()
+    .references(() => genshinAccounts.id, { onDelete: 'cascade' }),
+  at: integer('at').notNull(),
+  data: text('data').notNull(),
+})

@@ -183,7 +183,51 @@
     "browserOn": "{browser} on {system}",
     "browserGeneric": "Browser on {system}",
     "unknownDevice": "Unknown device",
-    "all": "All {n}"
+    "all": "All {n}",
+    "alerts": {
+      "label": "Alerts",
+      "title": "What this device is alerted about",
+      "off": "off",
+      "none": "nothing chosen",
+      "resinShort": "Resin {n}",
+      "short": {
+        "resinFull": "resin full",
+        "expeditions": "expeditions",
+        "welkin": "Welkin",
+        "commissions": "commissions",
+        "bargains": "Bargains"
+      },
+      "kind": {
+        "resinFull": "Original Resin full",
+        "expeditions": "Expeditions back",
+        "welkin": "Welkin Moon: 3 days left",
+        "commissions": "Daily Commissions not done by 22:00",
+        "bargains": "Paimon's Bargains: nothing bought 3 days before the month ends"
+      },
+      "notSaved": "Alerts not saved",
+      "notOn": "Alerts not turned on",
+      "result": {
+        "denied": "Notifications are blocked for this site",
+        "unsupported": "This browser can't get alerts",
+        "off-server": "Alerts aren't set up on the server yet"
+      },
+      "testTitle": "Teyvat.me alert",
+      "testBody": "Alerts reach this device.",
+      "tested": "Test sent",
+      "testFailed": "Test not sent",
+      "unsupported": "This browser can't get alerts.",
+      "iosInstall": "On iPhone and iPad: add teyvat.me to the Home Screen (Share → Add to Home Screen), open it from there, then turn alerts on.",
+      "blocked": "Notifications are blocked for this site in the browser's settings.",
+      "turnOn": "Turn on alerts here",
+      "turnOff": "Turn off here",
+      "fromThatDevice": "Turn alerts on from that device.",
+      "captureNote": "Teyvat.me Capture's own notification on that device.",
+      "resinAt": "Original Resin at",
+      "resinOff": "off",
+      "quiet": "Not while playing",
+      "quietDetail": "Skip alerts while Teyvat.me Capture says the game is running",
+      "test": "Send a test"
+    }
   },
   "deleteUser": {
     "title": "Delete user",

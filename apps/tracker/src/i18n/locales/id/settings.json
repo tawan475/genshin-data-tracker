@@ -183,7 +183,51 @@
     "browserOn": "{browser} di {system}",
     "browserGeneric": "Browser di {system}",
     "unknownDevice": "Perangkat tidak dikenal",
-    "all": "Semua {n}"
+    "all": "Semua {n}",
+    "alerts": {
+      "label": "Peringatan",
+      "title": "Peringatan yang diterima perangkat ini",
+      "off": "mati",
+      "none": "belum dipilih",
+      "resinShort": "Resin {n}",
+      "short": {
+        "resinFull": "resin penuh",
+        "expeditions": "ekspedisi",
+        "welkin": "Welkin",
+        "commissions": "komisi",
+        "bargains": "Toko Paimon"
+      },
+      "kind": {
+        "resinFull": "Original Resin penuh",
+        "expeditions": "Ekspedisi sudah kembali",
+        "welkin": "Welkin Moon: sisa 3 hari",
+        "commissions": "Misi Harian belum selesai pukul 22:00",
+        "bargains": "Penukaran Paimon: belum beli apa pun 3 hari sebelum akhir bulan"
+      },
+      "notSaved": "Peringatan tidak tersimpan",
+      "notOn": "Peringatan tidak dinyalakan",
+      "result": {
+        "denied": "Notifikasi situs ini diblokir",
+        "unsupported": "Browser ini tidak bisa menerima peringatan",
+        "off-server": "Peringatan belum disiapkan di server"
+      },
+      "testTitle": "Peringatan Teyvat.me",
+      "testBody": "Peringatan sampai ke perangkat ini.",
+      "tested": "Uji terkirim",
+      "testFailed": "Uji tidak terkirim",
+      "unsupported": "Browser ini tidak bisa menerima peringatan.",
+      "iosInstall": "Di iPhone dan iPad: tambahkan teyvat.me ke Layar Utama (Bagikan → Tambah ke Layar Utama), buka dari sana, lalu nyalakan peringatan.",
+      "blocked": "Notifikasi situs ini diblokir di pengaturan browser.",
+      "turnOn": "Nyalakan peringatan di sini",
+      "turnOff": "Matikan di sini",
+      "fromThatDevice": "Nyalakan peringatan dari perangkat itu.",
+      "captureNote": "Notifikasi milik Teyvat.me Capture sendiri di perangkat itu.",
+      "resinAt": "Original Resin pada",
+      "resinOff": "mati",
+      "quiet": "Jangan saat bermain",
+      "quietDetail": "Lewati peringatan selama Teyvat.me Capture menyatakan game sedang berjalan",
+      "test": "Kirim uji"
+    }
   },
   "deleteUser": {
     "title": "Hapus pengguna",

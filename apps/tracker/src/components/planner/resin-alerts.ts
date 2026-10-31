@@ -13,6 +13,7 @@
  */
 
 import { t } from '@/i18n'
+import { pushOnHere } from '@/lib/push-flag'
 
 // The Notification API by hand: this module is also compiled for the tests (no DOM types there).
 type Permission = 'default' | 'denied' | 'granted'
@@ -96,7 +97,8 @@ export function scheduleResinAlert(
   if (before && before.at === at && before.amount === amount) return
   if (before) clearTimeout(before.timer)
   scheduled.delete(accountId)
-  if (at === null || at <= now || alertSupport() !== 'granted') return
+  // Alerts by push on this browser (lib/push.ts): the server sends this one.
+  if (at === null || at <= now || alertSupport() !== 'granted' || pushOnHere()) return
   // setTimeout's limit is ~24.8 days; resin fills in under 27 hours.
   const delay = Math.min(at - now, 2_147_483_000)
   const timer = setTimeout(() => {

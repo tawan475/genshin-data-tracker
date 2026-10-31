@@ -39,7 +39,9 @@ import {
   notifyAccountLater,
   notifyUser,
   senderTab,
+  tellAlertFacts,
 } from '../services/live'
+import { snapshotFacts } from '../services/alerts'
 import { deleteLiveData, endJournalOn, liveDb } from '../services/live-sync'
 
 /** Work that must not hold the response (or fail it): logged when it fails. */
@@ -205,13 +207,21 @@ export const accounts = new Hono<AppEnv>()
     if (blocked) throw uploadsRefused(blocked)
     await rateLimit(c.env.IMPORT_LIMITER, `import:account:${id}`)
     const meter = new D1Meter()
-    const { response, dataVersion, listener } = await importSnapshot(
+    const { response, dataVersion, listener, prepared, newest } = await importSnapshot(
       c.env.DB,
       account,
       await readUpload(c),
       meter,
     )
     meter.report(c)
+    if (newest) {
+      tellAlertFacts(c, listener, id, {
+        ...snapshotFacts(prepared.good, response.takenAt),
+        name: account.name,
+        uid: account.uid,
+        server: account.server,
+      })
+    }
     if (dataVersion !== null && c.req.header('x-gdt-live') !== 'quiet') {
       notifyAccount(
         c,

@@ -232,6 +232,13 @@
       "when": 1793088893168,
       "tag": "0034_extras",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1793433292218,
+      "tag": "0035_capture_link",
+      "breakpoints": true
     }
   ]
 }

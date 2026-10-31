@@ -4,6 +4,12 @@
  */
 
 import type {
+  CaptureCommandKind,
+  DeviceAlerts,
+  DeviceAlertsPatch,
+  PresenceResponseForAccount,
+  PushConfigResponse,
+  TodayDigest,
   AchievementMarksResponse,
   AccountCreatedResponse,
   AccountMemberResponse,
@@ -183,6 +189,41 @@ export const api = {
     requestJson<{ upload: SessionUpload }>(`/api/auth/sessions/${id}`, {
       method: 'PATCH',
       json: { upload },
+    }),
+  /** What a device is alerted about (docs/plans/capture-link.md). */
+  setSessionAlerts: (id: number, alerts: DeviceAlertsPatch) =>
+    requestJson<{ alerts: DeviceAlerts }>(`/api/auth/sessions/${id}`, {
+      method: 'PATCH',
+      json: { alerts },
+    }),
+
+  // --------------------------------------------------------- alerts and Capture
+  pushConfig: () => requestJson<PushConfigResponse>('/api/push/config'),
+  /** This browser's push subscription (`PushSubscription.toJSON()` and its time zone). */
+  pushSubscribe: (body: {
+    endpoint: string
+    keys: { p256dh: string; auth: string }
+    tz?: string
+  }) => requestJson<void>('/api/push/subscription', { method: 'PUT', json: body }),
+  pushUnsubscribe: (endpoint: string) =>
+    requestJson<void>('/api/push/subscription', { method: 'DELETE', json: { endpoint } }),
+  pushTest: (message: { title: string; body: string }) =>
+    requestJson<{ sent: number }>('/api/push/test', { method: 'POST', json: message }),
+  capturePresence: (accountId: number) =>
+    requestJson<PresenceResponseForAccount>(`/api/accounts/${accountId}/presence`, {
+      cache: 'no-store',
+    }),
+  captureCommand: (accountId: number, kind: CaptureCommandKind) =>
+    requestJson<PresenceResponseForAccount>(`/api/accounts/${accountId}/capture-command`, {
+      method: 'POST',
+      json: { kind },
+    }),
+  publishToday: (accountId: number, digest: TodayDigest) =>
+    requestJson<void>(`/api/accounts/${accountId}/today`, { method: 'PUT', json: digest }),
+  alertFacts: (accountId: number, facts: Record<string, unknown>) =>
+    requestJson<{ ok: boolean; alerts: boolean }>(`/api/accounts/${accountId}/alert-facts`, {
+      method: 'POST',
+      json: facts,
     }),
 
   // --------------------------------------------------------- account sharing

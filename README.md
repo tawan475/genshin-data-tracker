@@ -808,6 +808,39 @@ maintenance). `genshin_accounts.user_id` stays the owner.
 </details>
 
 <details>
+<summary><b>Alerts, Capture presence and the plan in Capture</b></summary>
+
+Plan and contract: `docs/plans/capture-link.md`.
+
+- **Alerts on every device.** A browser turns alerts on in Settings → Devices
+  (permission + a Web Push subscription, `src/lib/push.ts`); each device row
+  picks what it gets (resin at an amount, resin full, expeditions back, Welkin
+  ending, commissions not done at 22:00, nothing bought at Paimon's Bargains 3
+  days before the month turns; quiet while playing). The user's `LiveHub`
+  keeps each account's facts (from imports, live batches and the Planner's
+  `POST /api/accounts/:id/alert-facts`) and one alarm at the earliest alert
+  (`worker/services/alerts.ts` when, `alert-hub.ts` storage and sending,
+  `worker/lib/web-push.ts` RFC 8291/8292 by hand). Texts come from the site's
+  own translations (`alert-text.json`, checked by a test). Off until the
+  Worker has **both** secrets `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`
+  (`GET /api/push/config`).
+- **Capture presence.** Teyvat.me Capture posts `POST /api/irminsul/presence`
+  while the game runs; Overview and the Planner show "Playing now on <PC>"
+  with Sync wishes / Send a capture (editors), delivered at its next
+  heartbeat. Live event `{type: "presence"}`.
+- **The plan in Capture.** The Farm view publishes today's cards
+  (`PUT /api/accounts/:id/today`, `today-digest.ts`); Capture reads
+  `GET /api/irminsul/today?uid=`.
+
+**Setup:** make a P-256 key pair once (base64url: the 65-byte public point,
+the 32-byte private scalar), then from `apps/tracker`:
+`pnpm exec wrangler secret put VAPID_PUBLIC_KEY` and
+`pnpm exec wrangler secret put VAPID_PRIVATE_KEY`. Changing the pair ends
+every browser's subscription (each turns alerts on again).
+
+</details>
+
+<details>
 <summary><b>Human check (Turnstile)</b></summary>
 
 Cloudflare Turnstile on sign-up (`/register`, action `register`), password

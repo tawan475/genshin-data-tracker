@@ -41,5 +41,20 @@
       "burst": "{name} burst {from}→{to}"
     }
   },
-  "staffBytes": "Sinkronisasi live menyimpan {size} lagi (gdt-live)"
+  "staffBytes": "Sinkronisasi live menyimpan {size} lagi (gdt-live)",
+  "presence": {
+    "seen": "Terakhir terdengar {time}",
+    "playing": "Sedang bermain di {device}",
+    "running": "Game terbuka di {device}",
+    "wishes": "Sinkronkan wish",
+    "wishesTitle": "Teyvat.me Capture menyinkronkan riwayat wish sekarang (buka Wish → Riwayat di game sekali dulu)",
+    "snapshot": "Kirim data",
+    "snapshotTitle": "Teyvat.me Capture mengirim data terbaru sekarang",
+    "waiting": "Menunggu Capture…",
+    "sent": {
+      "wishes": "Capture diminta menyinkronkan wish",
+      "snapshot": "Capture diminta mengirim data"
+    },
+    "notSent": "Tidak terkirim"
+  }
 }

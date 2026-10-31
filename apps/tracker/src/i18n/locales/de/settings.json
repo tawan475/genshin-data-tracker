@@ -183,7 +183,51 @@
     "browserOn": "{browser} auf {system}",
     "browserGeneric": "Browser auf {system}",
     "unknownDevice": "Unbekanntes Gerät",
-    "all": "Alle ({n})"
+    "all": "Alle ({n})",
+    "alerts": {
+      "label": "Hinweise",
+      "title": "Worauf dieses Gerät hingewiesen wird",
+      "off": "aus",
+      "none": "nichts gewählt",
+      "resinShort": "Harz {n}",
+      "short": {
+        "resinFull": "Harz voll",
+        "expeditions": "Expeditionen",
+        "welkin": "Segen",
+        "commissions": "Aufträge",
+        "bargains": "Paimons Angebote"
+      },
+      "kind": {
+        "resinFull": "Ursprüngliches Harz voll",
+        "expeditions": "Erkundungen zurück",
+        "welkin": "Mondsegen: noch 3 Tage",
+        "commissions": "Tägliche Missionen um 22:00 nicht erledigt",
+        "bargains": "Rares für Staub und Glanz: 3 Tage vor Monatsende nichts gekauft"
+      },
+      "notSaved": "Hinweise nicht gespeichert",
+      "notOn": "Hinweise nicht eingeschaltet",
+      "result": {
+        "denied": "Mitteilungen dieser Seite sind blockiert",
+        "unsupported": "Dieser Browser kann keine Hinweise empfangen",
+        "off-server": "Hinweise sind auf dem Server noch nicht eingerichtet"
+      },
+      "testTitle": "Teyvat.me-Hinweis",
+      "testBody": "Hinweise erreichen dieses Gerät.",
+      "tested": "Test gesendet",
+      "testFailed": "Test nicht gesendet",
+      "unsupported": "Dieser Browser kann keine Hinweise empfangen.",
+      "iosInstall": "Auf iPhone und iPad: teyvat.me zum Home-Bildschirm hinzufügen (Teilen → Zum Home-Bildschirm), dort öffnen und dann Hinweise einschalten.",
+      "blocked": "Mitteilungen dieser Seite sind in den Browser-Einstellungen blockiert.",
+      "turnOn": "Hinweise hier einschalten",
+      "turnOff": "Hier ausschalten",
+      "fromThatDevice": "Schalte Hinweise auf jenem Gerät ein.",
+      "captureNote": "Die eigene Mitteilung von Teyvat.me Capture auf jenem Gerät.",
+      "resinAt": "Ursprüngliches Harz bei",
+      "resinOff": "aus",
+      "quiet": "Nicht beim Spielen",
+      "quietDetail": "Hinweise auslassen, solange Teyvat.me Capture meldet, dass das Spiel läuft",
+      "test": "Test senden"
+    }
   },
   "deleteUser": {
     "title": "Benutzer löschen",

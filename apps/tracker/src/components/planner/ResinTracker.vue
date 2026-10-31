@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { pushOnHere } from '@/lib/push-flag'
 import type { ManualResin } from '@gdt/shared'
 import { computed, ref, shallowRef, watch } from 'vue'
 import { Bell, BellOff, BellRing, Pencil } from 'lucide-vue-next'
@@ -149,6 +150,8 @@ const alertWhen = computed(() =>
   alertOn.value ? alertAt(props.reading, amount.value!, props.now) : null,
 )
 const alertTitle = computed(() => {
+  // This browser gets alerts from the server (Settings → Devices): the timer here stands down.
+  if (pushOnHere()) return t('planner.resin.alertPush')
   if (support.value === 'unsupported') return t('planner.resin.alertUnsupported')
   if (!alertOn.value) return t('planner.resin.alertOff')
   const when = alertWhen.value

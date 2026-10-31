@@ -84,7 +84,29 @@ self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting()
 })
 
-/** A resin alert (the page shows it through here): focus an open tab of the site, else open its page. */
+/**
+ * An alert from the server (Web Push, docs/plans/capture-link.md): the
+ * message is `{title, body, tag, url}`. Always shown: browsers require it.
+ */
+self.addEventListener('push', (event) => {
+  let message = {}
+  try {
+    message = event.data?.json() ?? {}
+  } catch {
+    message = { body: event.data?.text() ?? '' }
+  }
+  event.waitUntil(
+    self.registration.showNotification(message.title || 'Teyvat.me', {
+      body: message.body ?? '',
+      tag: message.tag || 'alert',
+      renotify: true,
+      icon: '/icon-192.png',
+      data: { url: message.url || '/app' },
+    }),
+  )
+})
+
+/** An alert (pushed, or a page's resin timer): focus an open tab of the site on its page, else open it. */
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const path = event.notification.data?.url ?? '/'
@@ -92,7 +114,17 @@ self.addEventListener('notificationclick', (event) => {
     (async () => {
       const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       const open = windows.find((w) => new URL(w.url).origin === self.location.origin)
-      if (open) return open.focus()
+      if (open) {
+        await open.focus()
+        if (path !== '/' && 'navigate' in open) {
+          try {
+            await open.navigate(new URL(path, self.location.origin).href)
+          } catch {
+            // Not ours to navigate (opened before this worker): focused is enough.
+          }
+        }
+        return
+      }
       return self.clients.openWindow(new URL(path, self.location.origin).href)
     })(),
   )

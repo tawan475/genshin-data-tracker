@@ -28,6 +28,9 @@ import { formatCompact, formatNumber } from '@/lib/format'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { materialName } from '@/utils/materials'
 import CraftCard from './CraftCard.vue'
+import { todayDigest } from './today-digest'
+import { publishToday } from './today-publish'
+import { locale } from '@/i18n/locale'
 import type { CraftRow } from './crafting'
 import FarmCard from './FarmCard.vue'
 import FarmPeople from './FarmPeople.vue'
@@ -117,6 +120,8 @@ const props = defineProps<{
   planFor: readonly GoalEntry[] | null
   /** The goals in priority order (the strip of who the plan is for follows it). */
   order?: readonly GoalEntry[]
+  /** The account whose plan Teyvat.me Capture shows (publishes Today's); null: not ours to publish. */
+  publishTo?: number | null
 }>()
 const view = defineModel<'today' | 'schedule'>('view', { required: true })
 const forge = defineModel<boolean>('forge', { required: true })
@@ -157,6 +162,15 @@ const sections = computed(() => {
   return list
 })
 const schedule = computed(() => scheduleDays(input.value, domainDay.value))
+// Teyvat.me Capture's Today screen shows this plan (docs/plans/capture-link.md).
+watch(
+  sections,
+  (list) => {
+    if (props.publishTo)
+      publishToday(props.publishTo, todayDigest(list, weekday.value, locale.value))
+  },
+  { immediate: true },
+)
 const headline = computed(() =>
   farmHeadline(props.plan, input.value.refreshes, {
     planner: props.planner,

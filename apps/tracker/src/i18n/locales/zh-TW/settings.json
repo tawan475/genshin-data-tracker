@@ -183,7 +183,51 @@
     "browserOn": "{system} 上的 {browser}",
     "browserGeneric": "{system} 上的瀏覽器",
     "unknownDevice": "未知裝置",
-    "all": "全部 {n}"
+    "all": "全部 {n}",
+    "alerts": {
+      "label": "提醒",
+      "title": "此裝置接收哪些提醒",
+      "off": "關閉",
+      "none": "未選擇",
+      "resinShort": "樹脂 {n}",
+      "short": {
+        "resinFull": "樹脂已滿",
+        "expeditions": "探索派遣",
+        "welkin": "空月祝福",
+        "commissions": "委託",
+        "bargains": "派蒙的珍寶"
+      },
+      "kind": {
+        "resinFull": "原粹樹脂已滿",
+        "expeditions": "探索派遣已完成",
+        "welkin": "空月祝福：剩餘 3 天",
+        "commissions": "22:00 時每日委託未完成",
+        "bargains": "派蒙的小賣部：月底前 3 天仍未購買"
+      },
+      "notSaved": "提醒未儲存",
+      "notOn": "未能開啟提醒",
+      "result": {
+        "denied": "此網站的通知已被封鎖",
+        "unsupported": "此瀏覽器無法接收提醒",
+        "off-server": "伺服器尚未設定提醒"
+      },
+      "testTitle": "Teyvat.me 提醒",
+      "testBody": "提醒可以送達此裝置。",
+      "tested": "測試已傳送",
+      "testFailed": "測試未傳送",
+      "unsupported": "此瀏覽器無法接收提醒。",
+      "iosInstall": "iPhone 與 iPad：先將 teyvat.me 加入主畫面（分享 → 加入主畫面），從主畫面開啟，再開啟提醒。",
+      "blocked": "此網站的通知已在瀏覽器設定中被封鎖。",
+      "turnOn": "在此開啟提醒",
+      "turnOff": "在此關閉",
+      "fromThatDevice": "請在該裝置上開啟提醒。",
+      "captureNote": "該裝置上 Teyvat.me Capture 自己的通知。",
+      "resinAt": "原粹樹脂達到",
+      "resinOff": "關閉",
+      "quiet": "遊戲中不提醒",
+      "quietDetail": "Teyvat.me Capture 顯示遊戲執行中時略過提醒",
+      "test": "傳送測試"
+    }
   },
   "deleteUser": {
     "title": "刪除使用者",
