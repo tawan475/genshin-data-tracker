@@ -6,8 +6,6 @@ import {
   type PresenceResponseForAccount,
   type PushConfigResponse,
   type SessionResponse,
-  type TodayDigest,
-  type TodayResponse,
 } from '@gdt/shared'
 import { env, runInDurableObject } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
@@ -282,55 +280,5 @@ describe('Capture presence and commands', () => {
     const { importKey } = await setup()
     expect((await presence(importKey, { state: 'dancing' })).status).toBe(400)
     expect((await presence('gdt_import_nope', { state: 'running' })).status).toBe(401)
-  })
-})
-
-describe("the Planner's plan in Capture", () => {
-  const digest: TodayDigest = {
-    v: 1,
-    lang: 'en',
-    weekday: 6,
-    sections: [
-      {
-        key: 'domain',
-        resin: '20',
-        label: 'Domains',
-        cards: [
-          {
-            name: 'Cecilia Garden',
-            detail: 'Freedom',
-            runs: 6,
-            resin: 120,
-            upperBound: false,
-            items: [{ key: 'TeachingsOfFreedom', name: 'Teachings of Freedom', missing: 9 }],
-            who: ['Venti'],
-          },
-        ],
-      },
-    ],
-  }
-
-  it('is published by the website and read by Capture by UID', async () => {
-    const { client, account, importKey } = await setup()
-    const read = () =>
-      call(`${ORIGIN}/api/irminsul/today?uid=812345678`, { headers: { 'x-import-key': importKey } })
-    const none = await read()
-    expect(none.status).toBe(404)
-    expect(((await none.json()) as { error: { code: string } }).error.code).toBe('no_plan')
-
-    const put = await client.fetch(`/api/accounts/${account.id}/today`, {
-      method: 'PUT',
-      json: digest,
-    })
-    expect(put.status).toBe(204)
-    const plan = (await (await read()).json()) as TodayResponse
-    expect(plan).toMatchObject({ ...digest, account: { id: account.id, name: 'Main' } })
-    expect(plan.at).toBeGreaterThan(0)
-
-    const bad = await client.fetch(`/api/accounts/${account.id}/today`, {
-      method: 'PUT',
-      json: { ...digest, weekday: 9 },
-    })
-    expect(bad.status).toBe(400)
   })
 })

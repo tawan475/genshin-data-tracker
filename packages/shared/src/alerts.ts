@@ -1,7 +1,6 @@
 /**
  * Capture and the tracker, closer (docs/plans/capture-link.md): each device's
- * alert settings, Capture's presence heartbeat and the farm plan the Planner
- * publishes for Capture's Today screen. The presence and today shapes are a
+ * alert settings and Capture's presence heartbeat. The presence shapes are a
  * wire contract with Teyvat.me Capture: fields are only appended.
  */
 
@@ -176,53 +175,4 @@ export interface PresenceResponseForAccount {
   presence: CapturePresence | null
   /** Commands sent and not yet picked up. */
   pending: CaptureCommandKind[]
-}
-
-// ------------------------------------------------------------------ today
-
-const text = (max: number) => z.string().max(max)
-
-/** One card of the farm plan (`FarmCard`, flattened to text). */
-export const todayCardSchema = z.object({
-  name: text(200),
-  detail: text(400),
-  runs: z.number().int().min(0).max(100_000).nullable(),
-  resin: z.number().int().min(0).max(10_000_000),
-  upperBound: z.boolean(),
-  items: z
-    .array(
-      z.object({
-        key: text(120),
-        name: text(200),
-        missing: z.number().int().min(0).max(100_000_000),
-      }),
-    )
-    .max(40),
-  who: z.array(text(100)).max(40),
-})
-
-/** `PUT /api/accounts/:id/today` (the Planner) and what Capture reads. */
-export const todayDigestSchema = z.object({
-  v: z.literal(1),
-  lang: text(16),
-  /** The server's game day the plan is for (0 = Sunday). */
-  weekday: z.number().int().min(0).max(6),
-  sections: z
-    .array(
-      z.object({
-        key: text(16),
-        resin: text(16),
-        label: text(100),
-        cards: z.array(todayCardSchema).max(60),
-      }),
-    )
-    .max(8),
-})
-export type TodayDigest = z.infer<typeof todayDigestSchema>
-
-/** `GET /api/irminsul/today`. */
-export interface TodayResponse extends TodayDigest {
-  account: { id: number; name: string | null }
-  /** Unix ms it was published. */
-  at: number
 }

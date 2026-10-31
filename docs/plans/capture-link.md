@@ -8,8 +8,10 @@ Three parts, agreed with the user on 2026-10-31 ("do all"):
 2. **The tracker knows when Capture is live.** Capture reports its state; the
    website shows "Playing now on <PC>", phone alerts hold while the game runs,
    and two buttons act on the running Capture (sync wishes, send a capture).
-3. **The tracker's plan inside Capture.** The Planner publishes today's farm
-   plan; Capture's Today screen shows it.
+3. ~~**The tracker's plan inside Capture.**~~ Built and dropped the same day
+   (the user: it didn't look good; discarded). The Planner no longer
+   publishes it and `GET /api/irminsul/today` is gone (404, which Capture
+   1.17.4 reads as "off" and hides the card); `account_today` stays unused.
 
 ## Where things live
 
@@ -30,8 +32,6 @@ Three parts, agreed with the user on 2026-10-31 ("do all"):
   WebCrypto (`worker/lib/web-push.ts`). On only when both Worker secrets
   `VAPID_PUBLIC_KEY` (base64url, 65-byte uncompressed P-256 point) and
   `VAPID_PRIVATE_KEY` (base64url, 32-byte scalar) exist.
-- The farm digest: `account_today` (one row per account, the newest the
-  Planner published), migration 0035.
 
 ## Alerts
 
@@ -56,7 +56,7 @@ Transformer (no gadget timers yet).
 
 ## Contract with Capture (append only)
 
-All three routes take the Capture session's Bearer token or `x-import-key`,
+Its route takes the Capture session's Bearer token or `x-import-key`,
 like `/api/irminsul/changes`. 404/405 from an older tracker: the feature is off
 until Capture restarts.
 
@@ -94,46 +94,6 @@ every `next` seconds. Answer (200):
 
 The presence expires 3 minutes after the last heartbeat.
 
-### `GET /api/irminsul/today?uid=812345678`
-
-The farm plan the Planner last published for that account (by UID like an
-upload; a device set to one account reads that one). 404 `no_plan` when none
-was published. Answer:
-
-```json
-{
-  "v": 1,
-  "account": { "id": 1, "name": "Main" },
-  "at": 1760000000000,
-  "lang": "en",
-  "weekday": 5,
-  "sections": [
-    {
-      "key": "domain",
-      "resin": "20",
-      "label": "Domains",
-      "cards": [
-        {
-          "name": "Cecilia Garden",
-          "detail": "Freedom",
-          "runs": 6,
-          "resin": 120,
-          "upperBound": false,
-          "items": [{ "key": "TeachingsOfFreedom", "name": "Teachings of Freedom", "missing": 9 }],
-          "who": ["Venti", "Sucrose"]
-        }
-      ]
-    }
-  ]
-}
-```
-
-Text is already in the language the Planner was opened in (`lang`); `at` is
-when it was published (ms). `weekday` is the server's game day it was made for
-(0 = Sunday): Capture shows "from your plan of <day>" when that day is over.
-Capture reads it after sign-in, every 10 minutes while signed in, and when
-its Today screen opens (at most once a minute).
-
 ## Website
 
 - Settings → Devices: an Alerts row per device (amount, the kinds, quiet).
@@ -144,5 +104,3 @@ its Today screen opens (at most once a minute).
 - Presence: the live event `{type: "presence", accountId, …}`; the Overview's
   live strip and the resin tracker show "Playing now on <PC>" with Sync wishes
   and Send a capture (editors only).
-- The Planner's Farm view publishes the digest (debounced, only when it
-  changed, editors only).

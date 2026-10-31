@@ -3,15 +3,13 @@
  *
  * - `/api/push/*` (signed-in browser): the VAPID key, this browser's push
  *   subscription, a test notification.
- * - `/api/irminsul/presence`, `/api/irminsul/today` (Capture: Bearer or
- *   `x-import-key`, like `/irminsul/changes`): the heartbeat that says the
- *   game runs (and picks up the website's commands and this device's
- *   alerts), and the farm plan the Planner published.
- * - `/api/accounts/:id/presence|capture-command|today|alert-facts` (website):
- *   who plays the account now, asking that Capture to act, publishing the
- *   plan, and the facts alerts are worked out from as the Planner sees them
- *   (the resin set by hand, tasks ticked, and what was known before alerts
- *   were turned on).
+ * - `/api/irminsul/presence` (Capture: Bearer or `x-import-key`, like
+ *   `/irminsul/changes`): the heartbeat that says the game runs (and picks
+ *   up the website's commands and this device's alerts).
+ * - `/api/accounts/:id/presence|capture-command|alert-facts` (website): who
+ *   plays the account now, asking that Capture to act, and the facts alerts
+ *   are worked out from as the Planner sees them (the resin set by hand,
+ *   tasks ticked, and what was known before alerts were turned on).
  *
  * A device's alerts are set with `PATCH /api/auth/sessions/:id` (routes/auth).
  */
@@ -21,11 +19,9 @@ import {
   presenceRequest,
   pushSubscriptionRequest,
   readDeviceAlerts,
-  todayDigestSchema,
   type PresenceResponse,
   type PresenceResponseForAccount,
   type PushConfigResponse,
-  type TodayResponse,
 } from '@gdt/shared'
 import { Hono, type Context } from 'hono'
 import { z } from 'zod'
@@ -146,42 +142,24 @@ function accountOf(owner: UploadOwner, uid: string | null) {
   return uid ? pickByUid(owner.accounts, uid) : null
 }
 
-export const captureLink = new Hono<AppEnv>()
-  .post('/presence', async (c) => {
-    const { owner, sid, device, alerts } = await captureOf(c, c.env.LIVE_LIMITER, 'presence')
-    const body = await parseJson(c, presenceRequest)
-    const uid = body.uid ? String(body.uid) : null
-    const account = accountOf(owner, uid)
-    const userId = uploaderUserId(owner)
-    const { commands, next } = await liveHub(c.env, userId).presence(userId, {
-      sid,
-      device,
-      state: body.state,
-      accountId: account?.id ?? null,
-      uid,
-      platform: body.platform ?? null,
-      app: body.app ?? null,
-    })
-    c.header('Cache-Control', 'no-store')
-    return c.json<PresenceResponse>({ next, commands, alerts })
+export const captureLink = new Hono<AppEnv>().post('/presence', async (c) => {
+  const { owner, sid, device, alerts } = await captureOf(c, c.env.LIVE_LIMITER, 'presence')
+  const body = await parseJson(c, presenceRequest)
+  const uid = body.uid ? String(body.uid) : null
+  const account = accountOf(owner, uid)
+  const userId = uploaderUserId(owner)
+  const { commands, next } = await liveHub(c.env, userId).presence(userId, {
+    sid,
+    device,
+    state: body.state,
+    accountId: account?.id ?? null,
+    uid,
+    platform: body.platform ?? null,
+    app: body.app ?? null,
   })
-
-  .get('/today', async (c) => {
-    const { owner } = await captureOf(c, c.env.IMPORT_LIMITER, 'today')
-    const uid = c.req.query('uid')?.trim() || null
-    const account = accountOf(owner, uid)
-    if (!account) throw new ApiError(404, 'no_plan', 'No account for this UID')
-    const row = await c.env.DB.prepare('SELECT at, data FROM account_today WHERE account_id = ?1')
-      .bind(account.id)
-      .first<{ at: number; data: string }>()
-    if (!row) throw new ApiError(404, 'no_plan', 'The Planner has not published a plan yet')
-    c.header('Cache-Control', 'no-store')
-    return c.json<TodayResponse>({
-      ...JSON.parse(row.data),
-      account: { id: account.id, name: account.name },
-      at: row.at,
-    })
-  })
+  c.header('Cache-Control', 'no-store')
+  return c.json<PresenceResponse>({ next, commands, alerts })
+})
 
 // ------------------------------------------------------------------ the website, per account
 
@@ -232,22 +210,6 @@ export const accountLink = new Hono<AppEnv>()
     const answer = await liveHub(c.env, account.userId).command(account.userId, account.id, kind)
     if (!answer) throw new ApiError(409, 'not_playing', 'Capture is not playing this account')
     return c.json<PresenceResponseForAccount>(answer)
-  })
-
-  /** The Planner publishes today's farm plan (Capture's Today screen shows it). */
-  .put('/:id/today', async (c) => {
-    const account = await loadAccount(getDb(c.env.DB), c.get('userId'), idParam(c, 'id'), 'edit')
-    await rateLimit(c.env.IMPORT_LIMITER, `today:${account.id}`)
-    const digest = await parseJson(c, todayDigestSchema)
-    const data = JSON.stringify(digest)
-    if (data.length > 64 * 1024) throw new ApiError(413, 'too_large', 'The plan is too large')
-    await c.env.DB.prepare(
-      `INSERT INTO account_today (account_id, at, data) VALUES (?1, ?2, ?3)
-       ON CONFLICT (account_id) DO UPDATE SET at = ?2, data = ?3`,
-    )
-      .bind(account.id, Date.now(), data)
-      .run()
-    return c.body(null, 204)
   })
 
   /** What the Planner knows about the account, for alerts (only hubs that want it hear). */

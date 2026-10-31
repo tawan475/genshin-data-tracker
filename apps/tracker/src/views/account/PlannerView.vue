@@ -1750,7 +1750,6 @@ watch([editorShown, itemEditorShown, doneOpen], (now, before) => {
           :no-weekly-count="facts.noWeekly.size"
           :plan-for="farmFor"
           :order="order"
-          :publish-to="canWrite ? account.id : null"
           @settings="settingsOpen = true"
           @crafted="crafted"
           @hide-crafting="hideCrafting"

@@ -9,7 +9,6 @@ import type {
   DeviceAlertsPatch,
   PresenceResponseForAccount,
   PushConfigResponse,
-  TodayDigest,
   AchievementMarksResponse,
   AccountCreatedResponse,
   AccountMemberResponse,
@@ -218,8 +217,6 @@ export const api = {
       method: 'POST',
       json: { kind },
     }),
-  publishToday: (accountId: number, digest: TodayDigest) =>
-    requestJson<void>(`/api/accounts/${accountId}/today`, { method: 'PUT', json: digest }),
   alertFacts: (accountId: number, facts: Record<string, unknown>) =>
     requestJson<{ ok: boolean; alerts: boolean }>(`/api/accounts/${accountId}/alert-facts`, {
       method: 'POST',

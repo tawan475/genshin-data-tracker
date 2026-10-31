@@ -819,10 +819,9 @@ export const pushSubscriptions = sqliteTable(
 )
 
 /**
- * Today's farm plan as the Planner last published it for an account
- * (migration 0035; docs/plans/capture-link.md): what Capture's Today screen
- * shows. `data` is the `TodayDigest` JSON, its text in the publisher's
- * language.
+ * Unused since 2026-10-31: today's farm plan the Planner published for
+ * Capture's Today screen (migration 0035), a feature the user dropped the
+ * same day. Kept because migrations never drop tables (migrations.test.ts).
  */
 export const accountToday = sqliteTable('account_today', {
   accountId: integer('account_id')

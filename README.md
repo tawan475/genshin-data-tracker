@@ -808,7 +808,7 @@ maintenance). `genshin_accounts.user_id` stays the owner.
 </details>
 
 <details>
-<summary><b>Alerts, Capture presence and the plan in Capture</b></summary>
+<summary><b>Alerts and Capture presence</b></summary>
 
 Plan and contract: `docs/plans/capture-link.md`.
 
@@ -828,9 +828,6 @@ Plan and contract: `docs/plans/capture-link.md`.
   while the game runs; Overview and the Planner show "Playing now on <PC>"
   with Sync wishes / Send a capture (editors), delivered at its next
   heartbeat. Live event `{type: "presence"}`.
-- **The plan in Capture.** The Farm view publishes today's cards
-  (`PUT /api/accounts/:id/today`, `today-digest.ts`); Capture reads
-  `GET /api/irminsul/today?uid=`.
 
 **Setup:** make a P-256 key pair once (base64url: the 65-byte public point,
 the 32-byte private scalar), then from `apps/tracker`:
