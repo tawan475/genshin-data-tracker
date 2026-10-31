@@ -110,11 +110,18 @@ const history = useResource(
 )
 const changes = computed(() => history.data.value?.get(c.value.key) ?? [])
 const days = computed(() => props.builds?.days(c.value.key) ?? null)
+const canView = computed(() => {
+  const builds = props.builds
+  const key = c.value.key
+  return builds ? (snapshotId: number) => builds.viewable(snapshotId, key) : null
+})
 
 // Older / Newer step through every viewable entry of the History, oldest first.
 const points = computed(() => {
   const at = new Map<number, number>()
-  for (const change of changes.value) at.set(change.snapshotId, change.at)
+  for (const change of changes.value) {
+    if (canView.value?.(change.snapshotId)) at.set(change.snapshotId, change.at)
+  }
   for (const day of days.value ?? []) for (const step of day.steps) at.set(step.snapshotId, step.at)
   return [...at].sort((a, b) => a[1] - b[1]).map(([id]) => id)
 })
@@ -348,6 +355,7 @@ watch(
         :reset-key="c.key"
         :viewing="viewing"
         :piece="builds ? builds.piece : null"
+        :can-view="canView"
         @view="view"
       />
     </section>

@@ -20,7 +20,8 @@ export interface Capture {
   at: number
   /** Why Teyvat.me Capture took it (null for uploads without `gi_capture`). */
   capture: GiCapture | null
-  gear: Gear
+  /** Null when the capture holds no gear for the character (see `knownGear`). */
+  gear: Gear | null
 }
 
 export type PieceChange =
@@ -37,6 +38,7 @@ export interface WeaponChange {
 
 /** A capture whose gear differs from the one before it. */
 export interface BuildStep extends Capture {
+  gear: Gear
   pieces: PieceChange[]
   weapon: WeaponChange | null
   cv: number
@@ -74,6 +76,17 @@ export function captureLabel(capture: GiCapture | null): string | null {
 
 const weaponSig = (w: GoodWeapon | null) =>
   w ? `${w.key}:${w.level}:${w.ascension}:${w.refinement}` : ''
+
+/**
+ * The gear as a capture records it, or null when it records none: a
+ * character always holds a weapon, so one without is a capture whose
+ * equipment was not read (some world change and logout snapshots have every
+ * item unequipped). That covers a capture where nobody wears anything too.
+ * Such a capture is no gear change and no build to view.
+ */
+export function knownGear(gear: Gear): Gear | null {
+  return gear.weapon ? gear : null
+}
 
 export function sameGear(a: Gear, b: Gear): boolean {
   return (
@@ -164,7 +177,8 @@ export function localDay(at: number): string {
 
 /**
  * The character's gear changes as one row per day, newest day first. The
- * first capture is where the character was first seen, not a change.
+ * first capture is where the character was first seen, not a change; one
+ * without gear is skipped (the next is compared with the one before it).
  * `captures` are the character's, oldest first.
  */
 export function gearDays(
@@ -175,14 +189,17 @@ export function gearDays(
   const days: { key: string; start: Gear; steps: BuildStep[] }[] = []
   let previous: Gear | null = null
   for (const capture of captures) {
+    const { gear } = capture
+    if (!gear) continue
     const before = previous
-    previous = capture.gear
-    if (!before || sameGear(before, capture.gear)) continue
+    previous = gear
+    if (!before || sameGear(before, gear)) continue
     const step: BuildStep = {
       ...capture,
-      pieces: pieceChanges(before, capture.gear, catalog),
-      weapon: weaponChange(before.weapon, capture.gear.weapon),
-      ...gearFigures(capture.gear, catalog),
+      gear,
+      pieces: pieceChanges(before, gear, catalog),
+      weapon: weaponChange(before.weapon, gear.weapon),
+      ...gearFigures(gear, catalog),
     }
     const key = dayOf(capture.at)
     const last = days[days.length - 1]

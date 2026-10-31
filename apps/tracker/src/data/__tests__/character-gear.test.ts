@@ -1,6 +1,13 @@
 import type { CatalogEntry, GoodSubstat, GoodWeapon } from '@gdt/shared'
 import { describe, expect, it } from 'vitest'
-import { gearDays, gearDiff, isLevelled, type Capture, type Gear } from '@/data/character-gear'
+import {
+  gearDays,
+  gearDiff,
+  isLevelled,
+  knownGear,
+  type Capture,
+  type Gear,
+} from '@/data/character-gear'
 import { buildRoster } from '@/data/characters'
 
 const SLOTS = ['flower', 'plume', 'sands', 'goblet', 'circlet']
@@ -68,7 +75,7 @@ const gear = (
 })
 
 const at = (day: number, hour: number) => new Date(2026, 9, day, hour).getTime()
-const capture = (id: number, time: number, g: Gear): Capture => ({
+const capture = (id: number, time: number, g: Gear | null): Capture => ({
   snapshotId: id,
   at: time,
   capture: null,
@@ -134,6 +141,38 @@ describe('gearDays', () => {
     expect(days[0]!.steps[1]!.pieces).toEqual([{ slot: 'circlet', kind: 'removed' }])
     expect(days[0]!.steps[0]!.weapon?.kind).toBe('upgraded')
     expect(days[0]!.artifacts).toBe(true)
+  })
+
+  it('skips captures without gear: no change, and the next is compared across them', () => {
+    // What some world change and logout snapshots held: the character there,
+    // nothing equipped on it (or on anyone).
+    const none = knownGear(gear([null, null, null, null, null], null))
+    const list = [
+      capture(1, at(27, 9), gear(base)),
+      capture(2, at(27, 10), none),
+      capture(3, at(27, 11), none),
+      capture(4, at(27, 12), gear(base)),
+      capture(5, at(27, 13), none),
+      capture(6, at(28, 9), gear([1, 2, 13, 14, 5])),
+    ]
+    const days = gearDays(list, catalog)
+    expect(days).toHaveLength(1)
+    expect(days[0]!.steps.map((s) => s.snapshotId)).toEqual([6])
+    expect(days[0]!.steps[0]!.pieces).toEqual([{ slot: 'goblet', kind: 'swapped', ids: [4, 14] }])
+    expect(days[0]!.steps[0]!.weapon).toBeNull()
+    expect(gearDays([capture(1, at(1, 9), none), capture(2, at(1, 10), none)], catalog)).toEqual([])
+  })
+})
+
+describe('knownGear', () => {
+  it('reads a capture without a weapon as one that holds no gear', () => {
+    expect(knownGear(gear([1, 2, 13, 4, 5], null))).toBeNull()
+    expect(knownGear(gear([null, null, null, null, null], null))).toBeNull()
+  })
+
+  it('keeps a weapon with no pieces: those were taken off', () => {
+    const bare = gear([null, null, null, null, null])
+    expect(knownGear(bare)).toBe(bare)
   })
 })
 

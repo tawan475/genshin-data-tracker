@@ -20,8 +20,8 @@ import { formatSetName } from '@/utils/artifact-stats'
  * A character's history, newest first, as a dotted vertical timeline:
  * level, constellation and talent changes, and gear changes folded to one
  * row per day (however often the pieces were swapped) that opens into that
- * day's captured builds. Every entry can be viewed: the dialog then shows
- * the build that capture had.
+ * day's captured builds. Every entry whose capture holds the gear can be
+ * viewed: the dialog then shows the build that capture had.
  */
 const props = defineProps<{
   changes: CharacterChange[]
@@ -32,6 +32,8 @@ const props = defineProps<{
   viewing: number | null
   /** Catalog pieces, for the build rows' icons. */
   piece: ((id: number) => CatalogEntry | undefined) | null
+  /** Whether a capture has a build to view; null while loading. */
+  canView: ((snapshotId: number) => boolean) | null
 }>()
 const emit = defineEmits<{ view: [snapshotId: number] }>()
 
@@ -69,7 +71,6 @@ const items = computed<Item[]>(() => {
   return list.sort((a, b) => b.at - a.at)
 })
 const shown = computed(() => (showAll.value ? items.value : items.value.slice(0, PREVIEW)))
-const viewable = computed(() => props.days !== null)
 
 function toggle(day: GearDay) {
   if (open.has(day.at)) open.delete(day.at)
@@ -201,7 +202,7 @@ function setsText(step: BuildStep): string {
             $t('characters.builds.viewing')
           }}</UiBadge>
           <button
-            v-else-if="viewable"
+            v-else-if="canView?.(item.change.snapshotId)"
             type="button"
             class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-sm text-accent-text hover:bg-surface-overlay"
             :title="$t('characters.builds.viewTitle')"

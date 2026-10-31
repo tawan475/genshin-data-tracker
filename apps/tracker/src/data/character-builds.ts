@@ -26,7 +26,7 @@ import {
 } from '@gdt/shared'
 import { yieldToMain } from '@/lib/yield'
 import { loadBundle, loadCatalog, loadSnapshots, type AccountRef } from './account-data'
-import { gearDays, type Capture, type Gear, type GearDay } from './character-gear'
+import { gearDays, knownGear, type Capture, type Gear, type GearDay } from './character-gear'
 import { buildRoster, SLOT_ORDER, type CharacterView, type SlotKey } from './characters'
 
 interface Worn {
@@ -78,8 +78,13 @@ export interface BuildIndex {
   captures(key: string): Capture[]
   /** Its gear changes as History rows, newest day first. */
   days(key: string): GearDay[]
-  /** The character as a capture had it, drawn like the live one; null when absent. */
+  /**
+   * The character as a capture had it, drawn like the live one; null when
+   * absent or when the capture holds no gear for it (nothing to view).
+   */
   character(snapshotId: number, key: string): CharacterView | null
+  /** Whether `character` has a build to show for that capture. */
+  viewable(snapshotId: number, key: string): boolean
   /** A catalog piece (the History rows' icons and main stats). */
   piece(id: number): CatalogEntry | undefined
   /** When a snapshot was taken and why. */
@@ -102,10 +107,10 @@ function indexOf(
   const captureCache = new Map<string, Capture[]>()
   const dayCache = new Map<string, GearDay[]>()
 
-  function gearOf(s: Stored, key: string): Gear {
+  function gearOf(s: Stored, key: string): Gear | null {
     const weapon = s.weapons.get(wearerKey(key, (l) => s.weapons.has(l))) ?? null
     const worn = s.artifacts.get(wearerKey(key, (l) => s.artifacts.has(l)))
-    return { weapon, pieces: worn ? worn.ids : SLOT_ORDER.map(() => null) }
+    return knownGear({ weapon, pieces: worn ? worn.ids : SLOT_ORDER.map(() => null) })
   }
 
   const index: BuildIndex = {
@@ -129,6 +134,7 @@ function indexOf(
       const character = s?.characters.get(key)
       if (!s || !character) return null
       const gear = gearOf(s, key)
+      if (!gear) return null
       const worn = s.artifacts.get(wearerKey(key, (l) => s.artifacts.has(l)))
       const artifacts: GoodArtifact[] = []
       gear.pieces.forEach((id, i) => {
@@ -159,6 +165,10 @@ function indexOf(
           gi_characters: extra ? { [key]: extra } : undefined,
         }).characters[0] ?? null
       )
+    },
+    viewable(snapshotId, key) {
+      const s = byId.get(snapshotId)
+      return !!s && s.characters.has(key) && gearOf(s, key) !== null
     },
     piece: (id) => catalog.get(id),
     capture(snapshotId) {
