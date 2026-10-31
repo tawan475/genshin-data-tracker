@@ -26,6 +26,7 @@ import ReasonDialog from '@/components/staff/ReasonDialog.vue'
 import RenameDialog from '@/components/staff/RenameDialog.vue'
 import ResetLinkDialog from '@/components/staff/ResetLinkDialog.vue'
 import RoleBadge from '@/components/staff/RoleBadge.vue'
+import { deviceName, onPhone } from '@/components/settings/devices'
 import { auditPhrase, userStatus } from '@/components/staff/status'
 import { serverName } from '@/components/user/servers'
 import PageHeader from '@/components/ui/PageHeader.vue'
@@ -41,7 +42,6 @@ import { ApiRequestError, api, type PurgeBody } from '@/api'
 import { useResource } from '@/data/use-resource'
 import { t } from '@/i18n'
 import { formatBytes, formatDate, formatDateTime, formatNumber, formatRelative } from '@/lib/format'
-import { describeUserAgent } from '@/lib/user-agent'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
 import { useStaff } from '@/stores/staff'
@@ -350,8 +350,7 @@ const capHit = computed(
       usage.value.dayBytes >= usage.value.dailyBytes),
 )
 
-const isPhone = (userAgent: string | null) => /\b(?:iPhone|Android|Mobile)\b/.test(userAgent ?? '')
-/** How a session signed in (`irminsul` and the providers are names). */
+/** How a session signed in (the capture apps, stored as `irminsul`, and the providers are names). */
 const methodLabel = (method: string): string =>
   method === 'password' || method === 'reset' || method === 'legacy'
     ? t(`staff.methods.${method}`)
@@ -359,7 +358,9 @@ const methodLabel = (method: string): string =>
       ? 'Discord'
       : method === 'google'
         ? 'Google'
-        : method
+        : method === 'irminsul'
+          ? 'Teyvat.me'
+          : method
 
 const identities = computed(() =>
   OAUTH_PROVIDERS.map((provider) => ({
@@ -618,7 +619,7 @@ const identities = computed(() =>
                         variant="ghost"
                         size="sm"
                         :to="{
-                          name: 'staff-inspect-characters',
+                          name: 'staff-inspect-overview',
                           params: { accountId: account.id },
                         }"
                       >
@@ -675,12 +676,12 @@ const identities = computed(() =>
               class="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2.5"
             >
               <component
-                :is="isPhone(s.userAgent) ? Smartphone : Monitor"
+                :is="onPhone(s) ? Smartphone : Monitor"
                 class="size-5 shrink-0 text-text-secondary"
                 aria-hidden="true"
               />
               <span class="flex min-w-0 flex-1 flex-col">
-                <span class="font-medium">{{ describeUserAgent(s.userAgent) }}</span>
+                <span class="font-medium">{{ deviceName(s) }}</span>
                 <span class="text-[0.8125rem] text-text-muted">
                   <span class="font-code">{{ s.ip ?? '—' }}</span>
                   · {{ [s.city, s.country].filter(Boolean).join(', ') || '—' }} ·

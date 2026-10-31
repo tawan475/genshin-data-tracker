@@ -15,7 +15,7 @@ import { formatDateTime, formatRelative } from '@/lib/format'
 import { useAccounts } from '@/stores/accounts'
 import { useFeedback } from '@/stores/feedback'
 import { useSession } from '@/stores/session'
-import { METHOD_ICONS, byRecent, deviceName, devicePlace, methodTitle } from './devices'
+import { byRecent, deviceName, devicePlace, methodIcon, methodTitle } from './devices'
 
 /**
  * The devices signed in to this account (each sign-in is one): where each
@@ -219,7 +219,7 @@ async function signOut() {
               :provider="row.method"
               class="size-4"
             />
-            <component :is="METHOD_ICONS[row.method]" v-else class="size-4" aria-hidden="true" />
+            <component :is="methodIcon(row)" v-else class="size-4" aria-hidden="true" />
             <span class="sr-only">{{ methodTitle(row.method) }}</span>
           </span>
           <div class="min-w-0" :title="details(row)">
