@@ -162,6 +162,38 @@ describe('gearDays', () => {
     expect(days[0]!.steps[0]!.weapon).toBeNull()
     expect(gearDays([capture(1, at(1, 9), none), capture(2, at(1, 10), none)], catalog)).toEqual([])
   })
+
+  it('skips a capture whose artifacts were not read, though its weapon was', () => {
+    // A logout capture with the weapon worn and every artifact on the account
+    // off, between two captures with them on: no change that day.
+    const swapped = gear([1, 2, 13, 14, 5])
+    const unread = knownGear(gear([null, null, null, null, null]), false)
+    const list = [
+      capture(1, at(27, 9), gear(base)),
+      capture(2, at(27, 12), swapped),
+      capture(3, at(27, 17), unread),
+      capture(4, at(27, 18), swapped),
+    ]
+    const days = gearDays(list, catalog)
+    expect(days).toHaveLength(1)
+    expect(days[0]!.steps.map((s) => s.snapshotId)).toEqual([2])
+    expect(days[0]!.sameEnd).toBe(false)
+  })
+
+  it('still shows one character taking all five off and putting them back', () => {
+    const bare = knownGear(gear([null, null, null, null, null]))
+    const list = [
+      capture(1, at(27, 9), gear(base)),
+      capture(2, at(28, 10), bare),
+      capture(3, at(28, 11), gear(base)),
+    ]
+    const days = gearDays(list, catalog)
+    expect(days).toHaveLength(1)
+    expect(days[0]!.steps.map((s) => s.snapshotId)).toEqual([3, 2])
+    expect(days[0]!.steps[1]!.pieces.map((p) => p.kind)).toEqual(Array(5).fill('removed'))
+    expect(days[0]!.steps[1]!.cv).toBe(0)
+    expect(days[0]!.sameEnd).toBe(true)
+  })
 })
 
 describe('knownGear', () => {
@@ -173,6 +205,11 @@ describe('knownGear', () => {
   it('keeps a weapon with no pieces: those were taken off', () => {
     const bare = gear([null, null, null, null, null])
     expect(knownGear(bare)).toBe(bare)
+  })
+
+  it('reads a capture whose artifacts were not read as one that holds no gear', () => {
+    expect(knownGear(gear([null, null, null, null, null]), false)).toBeNull()
+    expect(knownGear(gear([1, 2, 13, 4, 5]), false)).toBeNull()
   })
 })
 

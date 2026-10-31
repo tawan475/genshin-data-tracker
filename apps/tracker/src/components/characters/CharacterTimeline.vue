@@ -272,11 +272,12 @@ function setsText(step: BuildStep): string {
                 }}</span>
               </span>
               <span class="flex shrink-0 gap-1">
+                <!-- A flex box the icon's own size and radius, so the ring sits on its edge -->
                 <span
                   v-for="s in slotsOf(step)"
                   :key="s.slot"
-                  class="rounded-md"
-                  :class="s.ring ? `ring-2 ${s.ring} ring-offset-1 ring-offset-surface-raised` : ''"
+                  class="flex rounded-lg"
+                  :class="s.ring ? `ring-2 ${s.ring}` : ''"
                   :title="SLOT_LABELS[s.slot]"
                 >
                   <GameIcon
@@ -288,7 +289,7 @@ function setsText(step: BuildStep): string {
                   />
                   <span
                     v-else
-                    class="block size-7 rounded-md border border-dashed border-border-default"
+                    class="block size-7 rounded-lg border border-dashed border-border-default"
                   />
                 </span>
               </span>

@@ -9,12 +9,9 @@
  */
 
 import {
-  artifactRows,
-  CHARACTERS,
   decodeCharacterExtras,
   decodeCharacters,
   decodeWeapons,
-  fromRef,
   type ArtifactsSection,
   type CatalogEntry,
   type GiCapture,
@@ -26,42 +23,16 @@ import {
 } from '@gdt/shared'
 import { yieldToMain } from '@/lib/yield'
 import { loadBundle, loadCatalog, loadSnapshots, type AccountRef } from './account-data'
-import { gearDays, knownGear, type Capture, type Gear, type GearDay } from './character-gear'
-import { buildRoster, SLOT_ORDER, type CharacterView, type SlotKey } from './characters'
-
-interface Worn {
-  ids: (number | null)[]
-  flags: number[]
-}
-
-/** Each wearer's pieces in one artifacts section (with its base). */
-function wearers(
-  section: ArtifactsSection,
-  base: ArtifactsSection | null,
-  catalog: ReadonlyMap<number, CatalogEntry>,
-): Map<string, Worn> {
-  const byRef = new Map<KeyRef, Worn>()
-  for (const [id, location, flags] of artifactRows(section, base)) {
-    if (location === 0 || location === '') continue
-    const slot = SLOT_ORDER.indexOf(catalog.get(id)?.slotKey as SlotKey)
-    if (slot < 0) continue
-    let worn = byRef.get(location)
-    if (!worn)
-      byRef.set(location, (worn = { ids: SLOT_ORDER.map(() => null), flags: [0, 0, 0, 0, 0] }))
-    if (worn.ids[slot] !== null) continue
-    worn.ids[slot] = id
-    worn.flags[slot] = flags
-  }
-  const out = new Map<string, Worn>()
-  for (const [ref, worn] of byRef) {
-    try {
-      out.set(fromRef(CHARACTERS, ref), worn)
-    } catch {
-      // A wearer newer than this build's dictionary: not one we can open.
-    }
-  }
-  return out
-}
+import {
+  gearDays,
+  knownGear,
+  wearers,
+  type Capture,
+  type Gear,
+  type GearDay,
+  type Worn,
+} from './character-gear'
+import { buildRoster, SLOT_ORDER, type CharacterView } from './characters'
 
 interface Stored {
   id: number
@@ -69,7 +40,8 @@ interface Stored {
   capture: GiCapture | null
   characters: Map<string, GoodCharacter>
   weapons: Map<string, GoodWeapon>
-  artifacts: Map<string, Worn>
+  /** Null when the capture's artifact wearers were not read (`wearers`). */
+  artifacts: Map<string, Worn> | null
   extras: Map<string, GiCharacter>
 }
 
@@ -109,8 +81,16 @@ function indexOf(
 
   function gearOf(s: Stored, key: string): Gear | null {
     const weapon = s.weapons.get(wearerKey(key, (l) => s.weapons.has(l))) ?? null
-    const worn = s.artifacts.get(wearerKey(key, (l) => s.artifacts.has(l)))
-    return knownGear({ weapon, pieces: worn ? worn.ids : SLOT_ORDER.map(() => null) })
+    const worn = wornBy(s, key)
+    return knownGear(
+      { weapon, pieces: worn ? worn.ids : SLOT_ORDER.map(() => null) },
+      s.artifacts !== null,
+    )
+  }
+
+  function wornBy(s: Stored, key: string): Worn | undefined {
+    const artifacts = s.artifacts
+    return artifacts?.get(wearerKey(key, (l) => artifacts.has(l)))
   }
 
   const index: BuildIndex = {
@@ -135,7 +115,7 @@ function indexOf(
       if (!s || !character) return null
       const gear = gearOf(s, key)
       if (!gear) return null
-      const worn = s.artifacts.get(wearerKey(key, (l) => s.artifacts.has(l)))
+      const worn = wornBy(s, key)
       const artifacts: GoodArtifact[] = []
       gear.pieces.forEach((id, i) => {
         const piece = id === null ? undefined : catalog.get(id)
@@ -198,7 +178,7 @@ async function buildIndex(account: AccountRef): Promise<BuildIndex> {
   }
   const rosters = new Map<string, Map<string, GoodCharacter>>()
   const weaponMaps = new Map<string, Map<string, GoodWeapon>>()
-  const artifactMaps = new Map<string, Map<string, Worn>>()
+  const artifactMaps = new Map<string, Map<string, Worn> | null>()
   const extraMaps = new Map<string, Map<string, GiCharacter>>()
   const empty = new Map()
 

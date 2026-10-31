@@ -5,7 +5,17 @@
  * day with the builds captured that day.
  */
 
-import type { ArtifactIdentity, CatalogEntry, GiCapture, GoodWeapon } from '@gdt/shared'
+import {
+  artifactRows,
+  CHARACTERS,
+  fromRef,
+  type ArtifactIdentity,
+  type ArtifactsSection,
+  type CatalogEntry,
+  type GiCapture,
+  type GoodWeapon,
+  type KeyRef,
+} from '@gdt/shared'
 import { t } from '@/i18n'
 import { SLOT_ORDER, type CharacterView, type SlotKey } from './characters'
 
@@ -13,6 +23,47 @@ import { SLOT_ORDER, type CharacterView, type SlotKey } from './characters'
 export interface Gear {
   weapon: GoodWeapon | null
   pieces: (number | null)[]
+}
+
+/** A wearer's pieces at one capture: catalog ids and lock/astral flags by slot. */
+export interface Worn {
+  ids: (number | null)[]
+  flags: number[]
+}
+
+/**
+ * Each wearer's pieces in one artifacts section (with its base); null when
+ * the account holds artifacts but nobody wears one (not read, see `knownGear`).
+ */
+export function wearers(
+  section: ArtifactsSection,
+  base: ArtifactsSection | null,
+  catalog: ReadonlyMap<number, CatalogEntry>,
+): Map<string, Worn> | null {
+  const byRef = new Map<KeyRef, Worn>()
+  let held = 0
+  for (const [id, location, flags] of artifactRows(section, base)) {
+    held++
+    if (location === 0 || location === '') continue
+    const slot = SLOT_ORDER.indexOf(catalog.get(id)?.slotKey as SlotKey)
+    if (slot < 0) continue
+    let worn = byRef.get(location)
+    if (!worn)
+      byRef.set(location, (worn = { ids: SLOT_ORDER.map(() => null), flags: [0, 0, 0, 0, 0] }))
+    if (worn.ids[slot] !== null) continue
+    worn.ids[slot] = id
+    worn.flags[slot] = flags
+  }
+  if (held > 0 && byRef.size === 0) return null
+  const out = new Map<string, Worn>()
+  for (const [ref, worn] of byRef) {
+    try {
+      out.set(fromRef(CHARACTERS, ref), worn)
+    } catch {
+      // A wearer newer than this build's dictionary: not one we can open.
+    }
+  }
+  return out
 }
 
 export interface Capture {
@@ -81,11 +132,13 @@ const weaponSig = (w: GoodWeapon | null) =>
  * The gear as a capture records it, or null when it records none: a
  * character always holds a weapon, so one without is a capture whose
  * equipment was not read (some world change and logout snapshots have every
- * item unequipped). That covers a capture where nobody wears anything too.
- * Such a capture is no gear change and no build to view.
+ * item unequipped). `artifactsRead` false is the same for the artifacts: the
+ * account holds some but nobody wears any (a logout capture had all of them
+ * off while the weapons were still worn). Such a capture is no gear change
+ * and no build to view; one character taking all five off still shows.
  */
-export function knownGear(gear: Gear): Gear | null {
-  return gear.weapon ? gear : null
+export function knownGear(gear: Gear, artifactsRead = true): Gear | null {
+  return gear.weapon && artifactsRead ? gear : null
 }
 
 export function sameGear(a: Gear, b: Gear): boolean {
